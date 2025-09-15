@@ -255,10 +255,10 @@ const McpServer = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* MCP Info */}
+            {/* MCP Server Info */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">MCP Server Info</CardTitle>
+                <CardTitle className="text-lg">MCP Server Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -266,6 +266,10 @@ const McpServer = () => {
                   <Badge variant="secondary" className={getCategoryColor(mcp.category)}>
                     {mcp.category}
                   </Badge>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Author</div>
+                  <div className="text-sm">{mcp.author}</div>
                 </div>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">Popularity</div>
@@ -287,6 +291,31 @@ const McpServer = () => {
                     </Button>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Supported Platforms */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Supported Platforms</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline">Claude Desktop</Badge>
+                  <Badge variant="outline">macOS</Badge>
+                  <Badge variant="outline">Windows</Badge>
+                  <Badge variant="outline">Linux</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Ad Placeholder */}
+            <Card className="border-dashed border-2">
+              <CardContent className="p-6 text-center">
+                <div className="text-sm text-muted-foreground mb-2">Advertisement</div>
+                <div className="bg-muted/30 rounded-lg p-8 flex items-center justify-center">
+                  <span className="text-xs text-muted-foreground">Ad space available</span>
+                </div>
               </CardContent>
             </Card>
           </div>

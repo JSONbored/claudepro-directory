@@ -310,6 +310,16 @@ const Command = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Ad Placeholder */}
+            <Card className="border-dashed border-2">
+              <CardContent className="p-6 text-center">
+                <div className="text-sm text-muted-foreground mb-2">Advertisement</div>
+                <div className="bg-muted/30 rounded-lg p-8 flex items-center justify-center">
+                  <span className="text-xs text-muted-foreground">Ad space available</span>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
