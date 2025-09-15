@@ -282,6 +282,166 @@ Perfect for TDD workflows and improving code coverage.`,
         description: 'Generate comprehensive tests with 95% coverage target'
       }
     ]
+  },
+  {
+    id: '4',
+    title: '/optimize-performance',
+    description: 'Analyzes and optimizes application performance with detailed recommendations and automated fixes.',
+    author: 'Performance Pro',
+    category: 'development',
+    tags: ['performance', 'optimization', 'monitoring', 'debugging'],
+    content: `The /optimize-performance command provides comprehensive performance analysis and optimization:
+
+**Performance Analysis:**
+- Memory usage patterns and leaks
+- CPU utilization and bottlenecks
+- Database query optimization
+- Network request optimization
+- Bundle size analysis
+
+**Optimization Strategies:**
+1. **Code Optimization** - Algorithmic improvements and refactoring
+2. **Asset Optimization** - Image compression, lazy loading, caching
+3. **Database Optimization** - Query optimization, indexing strategies
+4. **Network Optimization** - Request batching, CDN configuration
+
+**Automated Fixes:**
+- Remove unused dependencies
+- Optimize images automatically
+- Generate performance budgets
+- Configure caching strategies
+
+**Monitoring Setup:**
+- Set up performance monitoring
+- Configure alerts and thresholds
+- Track Core Web Vitals
+- Generate performance reports
+
+Perfect for maintaining fast, responsive applications at scale.`,
+    slug: 'optimize-performance',
+    popularity: 89,
+    createdAt: '2024-01-06',
+    updatedAt: '2024-01-11',
+    featured: true,
+    syntax: '/optimize-performance [target] [--options]',
+    parameters: [
+      {
+        name: 'target',
+        type: 'string',
+        required: true,
+        description: 'Application or component to optimize'
+      },
+      {
+        name: 'type',
+        type: 'string',
+        required: false,
+        description: 'Optimization type (frontend, backend, database, full-stack)',
+        default: 'full-stack'
+      },
+      {
+        name: 'budget',
+        type: 'number',
+        required: false,
+        description: 'Performance budget in milliseconds',
+        default: 3000
+      }
+    ],
+    examples: [
+      {
+        title: 'Frontend Optimization',
+        command: '/optimize-performance ./src --type=frontend --budget=2000',
+        description: 'Optimize frontend performance with 2s budget'
+      },
+      {
+        title: 'Database Optimization',
+        command: '/optimize-performance db/queries --type=database',
+        description: 'Optimize database queries and schemas'
+      }
+    ],
+    platforms: ['Web', 'Node.js', 'React', 'Vue', 'Angular']
+  },
+  {
+    id: '5',
+    title: '/deploy-app',
+    description: 'Automated application deployment with best practices, monitoring, and rollback capabilities.',
+    author: 'DevOps Master',
+    category: 'automation',
+    tags: ['deployment', 'devops', 'automation', 'monitoring'],
+    content: `The /deploy-app command provides enterprise-grade deployment automation:
+
+**Deployment Features:**
+- Zero-downtime deployments
+- Blue-green deployment strategies
+- Canary releases with monitoring
+- Automatic rollback on failures
+- Health checks and validation
+
+**Platform Support:**
+- AWS, Google Cloud, Azure
+- Kubernetes and Docker
+- Vercel, Netlify, Heroku
+- Traditional servers and VPS
+
+**Quality Gates:**
+- Pre-deployment testing
+- Security vulnerability scanning
+- Performance regression testing
+- Dependency audit checks
+
+**Monitoring & Observability:**
+- Real-time deployment tracking
+- Error monitoring and alerting
+- Performance metrics collection
+- User experience monitoring
+
+**Rollback Protection:**
+- Automatic failure detection
+- Instant rollback triggers
+- Database migration handling
+- Traffic switching mechanisms
+
+Ensures reliable, safe deployments with minimal manual intervention.`,
+    slug: 'deploy-app',
+    popularity: 85,
+    createdAt: '2024-01-04',
+    updatedAt: '2024-01-09',
+    featured: false,
+    syntax: '/deploy-app [environment] [--options]',
+    parameters: [
+      {
+        name: 'environment',
+        type: 'string',
+        required: true,
+        description: 'Target deployment environment (staging, production)'
+      },
+      {
+        name: 'strategy',
+        type: 'string',
+        required: false,
+        description: 'Deployment strategy (blue-green, rolling, canary)',
+        default: 'rolling'
+      },
+      {
+        name: 'auto-rollback',
+        type: 'boolean',
+        required: false,
+        description: 'Enable automatic rollback on failures',
+        default: true
+      }
+    ],
+    examples: [
+      {
+        title: 'Production Deployment',
+        command: '/deploy-app production --strategy=blue-green',
+        description: 'Deploy to production using blue-green strategy'
+      },
+      {
+        title: 'Canary Release',
+        command: '/deploy-app production --strategy=canary --auto-rollback=true',
+        description: 'Deploy with canary release and auto-rollback'
+      }
+    ],
+    platforms: ['AWS', 'GCP', 'Azure', 'Kubernetes', 'Docker']
   }
 ];
 

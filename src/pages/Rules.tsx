@@ -29,23 +29,37 @@ const Rules = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <section className="relative border-b border-border/50">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
-        <div className="relative container mx-auto px-4 py-16">
+      {/* Hero Section */}
+      <section className="relative border-b border-border/50 bg-card/30">
+        <div className="container mx-auto px-4 py-20">
           <div className="text-center max-w-3xl mx-auto">
-            <div className="flex items-center justify-center mb-4">
-              <BookOpen className="h-8 w-8 text-primary mr-3" />
-              <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent">
-                Claude Rules
-              </h1>
+            <div className="flex justify-center mb-6">
+              <div className="p-3 bg-primary/10 rounded-full">
+                <BookOpen className="h-8 w-8 text-primary" />
+              </div>
             </div>
-            <p className="text-xl text-muted-foreground mb-6 leading-relaxed">
-              Expert-crafted system prompts and configurations to enhance Claude's capabilities across different domains and use cases.
+            
+            <h1 className="text-4xl lg:text-6xl font-bold mb-6 text-foreground">
+              Claude Rules
+            </h1>
+            
+            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+              Expert-crafted system prompts and configurations to enhance Claude's capabilities 
+              across different domains and use cases.
             </p>
-            <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
-              {rules.length} configurations available
-            </Badge>
+
+            <div className="flex flex-wrap justify-center gap-2">
+              <Badge variant="secondary">
+                <BookOpen className="h-3 w-3 mr-1" />
+                {rules.length} Rules Available
+              </Badge>
+              <Badge variant="outline">
+                Expert Tested
+              </Badge>
+              <Badge variant="outline">
+                Copy & Paste Ready
+              </Badge>
+            </div>
           </div>
         </div>
       </section>

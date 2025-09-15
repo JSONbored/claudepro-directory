@@ -30,23 +30,37 @@ const McpServers = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <section className="relative border-b border-border/50">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
-        <div className="relative container mx-auto px-4 py-16">
+      {/* Hero Section */}
+      <section className="relative border-b border-border/50 bg-card/30">
+        <div className="container mx-auto px-4 py-20">
           <div className="text-center max-w-3xl mx-auto">
-            <div className="flex items-center justify-center mb-4">
-              <Server className="h-8 w-8 text-primary mr-3" />
-              <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent">
-                MCP Servers
-              </h1>
+            <div className="flex justify-center mb-6">
+              <div className="p-3 bg-primary/10 rounded-full">
+                <Server className="h-8 w-8 text-primary" />
+              </div>
             </div>
-            <p className="text-xl text-muted-foreground mb-6 leading-relaxed">
-              Model Context Protocol servers that extend Claude's capabilities with external tools, databases, and integrations.
+            
+            <h1 className="text-4xl lg:text-6xl font-bold mb-6 text-foreground">
+              MCP Servers
+            </h1>
+            
+            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+              Model Context Protocol servers that extend Claude's capabilities with external integrations, 
+              APIs, and specialized tools for enhanced functionality.
             </p>
-            <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
-              {mcpServers.length} servers available
-            </Badge>
+
+            <div className="flex flex-wrap justify-center gap-2">
+              <Badge variant="secondary">
+                <Server className="h-3 w-3 mr-1" />
+                {mcpServers.length} Servers Available
+              </Badge>
+              <Badge variant="outline">
+                Production Ready
+              </Badge>
+              <Badge variant="outline">
+                Easy Integration
+              </Badge>
+            </div>
           </div>
         </div>
       </section>

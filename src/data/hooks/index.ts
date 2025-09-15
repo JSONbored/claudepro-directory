@@ -352,6 +352,219 @@ Essential for maintaining high availability and performance in production enviro
       'Monitoring tools integration',
       'Alert routing configuration'
     ]
+  },
+  {
+    id: '4',
+    title: 'API Rate Limit Guardian',
+    description: 'Intelligent API rate limiting and traffic management with dynamic scaling and protection mechanisms.',
+    author: 'API Security',
+    category: 'monitoring',
+    tags: ['api', 'rate-limiting', 'security', 'traffic-management'],
+    content: `The API Rate Limit Guardian provides intelligent traffic management and protection:
+
+**Rate Limiting Features:**
+- Dynamic rate limiting based on user behavior
+- IP-based and user-based rate limiting
+- Burst capacity management
+- Geographic rate limiting
+- API endpoint-specific limits
+
+**Traffic Analysis:**
+- Real-time traffic pattern analysis
+- Anomaly detection and alerting
+- DDoS attack protection
+- Bot detection and mitigation
+- Usage analytics and reporting
+
+**Dynamic Scaling:**
+- Auto-scaling based on traffic patterns
+- Load balancing optimization
+- Circuit breaker pattern implementation
+- Graceful degradation strategies
+
+**Security Features:**
+- Suspicious activity detection
+- IP blocking and whitelisting
+- JWT token validation
+- Request signature verification
+
+Perfect for protecting APIs from abuse while maintaining optimal performance for legitimate users.`,
+    slug: 'api-rate-limit-guardian',
+    popularity: 88,
+    createdAt: '2024-01-08',
+    updatedAt: '2024-01-13',
+    featured: false,
+    triggerEvents: [
+      'api-request',
+      'rate-limit-exceeded',
+      'suspicious-activity',
+      'traffic-spike'
+    ],
+    actions: [
+      {
+        name: 'apply-rate-limit',
+        type: 'api-call',
+        description: 'Apply rate limiting rules',
+        parameters: {
+          strategy: 'sliding-window',
+          windowSize: '1m',
+          maxRequests: 100
+        }
+      },
+      {
+        name: 'block-suspicious-ip',
+        type: 'api-call',
+        description: 'Block suspicious IP addresses',
+        parameters: {
+          duration: '1h',
+          reason: 'rate-limit-exceeded'
+        }
+      },
+      {
+        name: 'alert-admin',
+        type: 'notification',
+        description: 'Alert administrators of security events',
+        parameters: {
+          channels: ['#security-alerts'],
+          severity: 'high'
+        }
+      }
+    ],
+    configuration: [
+      {
+        key: 'rate-limit-per-minute',
+        type: 'number',
+        required: true,
+        description: 'Maximum requests per minute per user'
+      },
+      {
+        key: 'burst-capacity',
+        type: 'number',
+        required: false,
+        description: 'Burst capacity for rate limiting',
+        default: 20
+      },
+      {
+        key: 'block-duration',
+        type: 'string',
+        required: false,
+        description: 'Duration to block suspicious IPs',
+        default: '1h'
+      }
+    ],
+    platforms: ['AWS API Gateway', 'Kong', 'Nginx', 'Cloudflare'],
+    requirements: [
+      'API gateway access',
+      'Traffic monitoring tools',
+      'Security incident response'
+    ]
+  },
+  {
+    id: '5',
+    title: 'Database Backup Orchestrator',
+    description: 'Automated database backup management with verification, encryption, and disaster recovery capabilities.',
+    author: 'Data Protection',
+    category: 'automation',
+    tags: ['database', 'backup', 'disaster-recovery', 'automation'],
+    content: `The Database Backup Orchestrator ensures comprehensive data protection:
+
+**Backup Features:**
+- Automated scheduled backups
+- Incremental and full backup strategies
+- Cross-region backup replication
+- Point-in-time recovery capabilities
+- Backup compression and encryption
+
+**Verification & Testing:**
+- Backup integrity verification
+- Automated restore testing
+- Data consistency checks
+- Recovery time testing
+- Backup file validation
+
+**Disaster Recovery:**
+- Multi-region failover setup
+- Automated disaster recovery procedures
+- RTO/RPO monitoring and reporting
+- Emergency backup procedures
+- Data center failover automation
+
+**Security & Compliance:**
+- Encryption at rest and in transit
+- Access control and auditing
+- Compliance reporting (SOC2, GDPR)
+- Retention policy management
+- Secure key management
+
+Essential for maintaining business continuity and data protection compliance.`,
+    slug: 'database-backup-orchestrator',
+    popularity: 91,
+    createdAt: '2024-01-05',
+    updatedAt: '2024-01-10',
+    featured: true,
+    triggerEvents: [
+      'scheduled-backup',
+      'database-failure',
+      'disaster-recovery-test',
+      'compliance-check'
+    ],
+    actions: [
+      {
+        name: 'create-backup',
+        type: 'api-call',
+        description: 'Create database backup',
+        parameters: {
+          type: 'incremental',
+          compression: true,
+          encryption: true
+        }
+      },
+      {
+        name: 'verify-backup',
+        type: 'api-call',
+        description: 'Verify backup integrity',
+        parameters: {
+          checksumValidation: true,
+          sampleRestore: true
+        }
+      },
+      {
+        name: 'notify-completion',
+        type: 'notification',
+        description: 'Notify team of backup completion',
+        parameters: {
+          channels: ['#devops', '#dba-team'],
+          includeMetrics: true
+        }
+      }
+    ],
+    configuration: [
+      {
+        key: 'backup-schedule',
+        type: 'string',
+        required: true,
+        description: 'Cron schedule for automated backups'
+      },
+      {
+        key: 'retention-days',
+        type: 'number',
+        required: false,
+        description: 'Backup retention period in days',
+        default: 30
+      },
+      {
+        key: 'encryption-key',
+        type: 'secret',
+        required: true,
+        description: 'Encryption key for backup security'
+      }
+    ],
+    platforms: ['PostgreSQL', 'MySQL', 'MongoDB', 'AWS RDS', 'Azure SQL'],
+    requirements: [
+      'Database access credentials',
+      'Storage infrastructure',
+      'Encryption key management'
+    ]
   }
 ];
 

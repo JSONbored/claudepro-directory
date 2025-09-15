@@ -29,7 +29,7 @@ const Agents = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-border/50 bg-gradient-to-b from-background to-muted/20">
+      <section className="relative overflow-hidden border-b border-border/50 bg-card/30">
         <div className="container mx-auto px-4 py-20">
           <div className="text-center max-w-3xl mx-auto">
             <div className="flex justify-center mb-6">

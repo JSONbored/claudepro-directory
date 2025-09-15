@@ -19,7 +19,8 @@ import { useSorting } from '@/hooks/useSorting';
 const Index = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchResults, setSearchResults] = useState<(Rule | MCPServer)[]>([]);
-  const [hasSearched, setHasSearched] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const { filters, updateFilter, resetFilters, applyFilters } = useFilters();
   const { sortBy, sortDirection, updateSort, sortItems } = useSorting();
   const featuredAuthors = getFeaturedAuthors();
@@ -40,15 +41,20 @@ const Index = () => {
   // Handle search results
   const handleSearchResults = (results: (Rule | MCPServer)[]) => {
     setSearchResults(results);
-    setHasSearched(results.length < allConfigs.length);
+  };
+
+  // Handle search query changes
+  const handleSearchQuery = (query: string) => {
+    setSearchQuery(query);
+    setIsSearching(query.trim().length > 0);
   };
 
   // Apply filters and sorting based on active tab
   const processedConfigs = useMemo(() => {
     let configs: (Rule | MCPServer)[] = [];
     
-    // Use search results if user has searched, otherwise use all configs
-    const baseConfigs = hasSearched ? searchResults : allConfigs;
+    // Use search results when searching, otherwise use all configs
+    const baseConfigs = isSearching ? searchResults : allConfigs;
     
     switch (activeTab) {
       case 'rules':
@@ -65,7 +71,7 @@ const Index = () => {
     
     const filtered = applyFilters(configs);
     return sortItems(filtered);
-  }, [activeTab, filters, sortBy, sortDirection, searchResults, hasSearched, allConfigs, applyFilters, sortItems]);
+  }, [activeTab, filters, sortBy, sortDirection, searchResults, isSearching, allConfigs, applyFilters, sortItems]);
 
   const getConfigType = (config: Rule | MCPServer): 'rule' | 'mcp' => {
     return 'content' in config ? 'rule' : 'mcp';
@@ -116,7 +122,7 @@ const Index = () => {
 
       <section className="container mx-auto px-4 py-16">
         {/* Search Results - Show immediately when user searches */}
-        {hasSearched && (
+        {isSearching && (
           <div className="mb-16">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold">
@@ -126,7 +132,8 @@ const Index = () => {
               <Button 
                 variant="outline" 
                 onClick={() => {
-                  setHasSearched(false);
+                  setIsSearching(false);
+                  setSearchQuery('');
                   setSearchResults([]);
                 }}
                 className="text-sm"
@@ -158,7 +165,7 @@ const Index = () => {
         )}
 
         {/* Featured Content - Only show when not searching */}
-        {!hasSearched && (
+        {!isSearching && (
           <div className="space-y-16 mb-16">
             {/* Featured Rules */}
             <div>
@@ -221,7 +228,7 @@ const Index = () => {
         )}
 
         {/* Advanced Tabs - Only show when not searching */}
-        {!hasSearched && (
+        {!isSearching && (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <TabsList className="grid w-full lg:w-auto grid-cols-4">
