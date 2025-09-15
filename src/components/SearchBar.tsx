@@ -93,14 +93,14 @@ export const SearchBar = ({ data, onFilteredResults, placeholder = "Search confi
           placeholder={placeholder}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 pr-20 h-12 text-base bg-background/80 backdrop-blur-sm border-border/50 focus:border-primary/50 transition-smooth"
+          className="pl-10 pr-20 h-12 text-base bg-card/50 backdrop-blur-sm border-border/50 focus:border-primary/50 focus:bg-card transition-smooth"
         />
         <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
-            className={`h-8 px-2 ${selectedCategories.length > 0 ? 'text-primary' : ''}`}
+            className={`h-8 px-2 transition-smooth hover:bg-primary/10 hover:text-primary ${selectedCategories.length > 0 ? 'text-primary bg-primary/10' : ''}`}
           >
             <Filter className="h-3 w-3 mr-1" />
             Filter
@@ -131,7 +131,11 @@ export const SearchBar = ({ data, onFilteredResults, placeholder = "Search confi
               <Badge
                 key={category}
                 variant={selectedCategories.includes(category) ? "default" : "outline"}
-                className="cursor-pointer transition-smooth hover:scale-105"
+                className={`cursor-pointer transition-smooth hover:scale-105 ${
+                  selectedCategories.includes(category) 
+                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground border-primary' 
+                    : 'border-border/50 hover:border-primary/30 hover:bg-primary/5 hover:text-primary'
+                }`}
                 onClick={() => handleCategoryToggle(category)}
               >
                 {category.replace('-', ' ')}

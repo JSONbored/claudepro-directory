@@ -23,31 +23,34 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="hero-gradient absolute inset-0 opacity-10" />
+      <section className="relative overflow-hidden border-b border-border/50">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
         <div className="relative container mx-auto px-4 py-16 lg:py-24">
           <div className="text-center max-w-4xl mx-auto">
             <div className="flex items-center justify-center mb-6">
-              <Sparkles className="h-8 w-8 text-primary mr-3" />
-              <h1 className="text-4xl lg:text-6xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              <div className="relative">
+                <Sparkles className="h-8 w-8 text-primary mr-3 animate-pulse" />
+                <div className="absolute inset-0 h-8 w-8 text-primary mr-3 animate-ping opacity-20" />
+              </div>
+              <h1 className="text-4xl lg:text-6xl font-bold bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text text-transparent">
                 Claude Pro Directory
               </h1>
             </div>
-            <p className="text-xl lg:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+            <p className="text-xl lg:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
               Discover and share the best Claude configurations. Enhance your AI workflow with expert rules and MCP servers.
             </p>
             
             <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
-              <Badge variant="secondary" className="text-sm px-3 py-1">
-                <BookOpen className="h-3 w-3 mr-1" />
+              <Badge variant="outline" className="text-sm px-4 py-2 border-primary/20 bg-primary/5 text-primary">
+                <BookOpen className="h-3 w-3 mr-2" />
                 {rules.length} Claude Rules
               </Badge>
-              <Badge variant="secondary" className="text-sm px-3 py-1">
-                <Server className="h-3 w-3 mr-1" />
+              <Badge variant="outline" className="text-sm px-4 py-2 border-primary/20 bg-primary/5 text-primary">
+                <Server className="h-3 w-3 mr-2" />
                 {mcpServers.length} MCP Servers
               </Badge>
-              <Badge variant="secondary" className="text-sm px-3 py-1">
-                <Sparkles className="h-3 w-3 mr-1" />
+              <Badge variant="outline" className="text-sm px-4 py-2 border-primary/20 bg-primary/5 text-primary">
+                <Sparkles className="h-3 w-3 mr-2" />
                 Community Driven
               </Badge>
             </div>
@@ -56,7 +59,7 @@ const Index = () => {
               <Button 
                 variant="default" 
                 size="lg" 
-                className="hero-gradient text-primary-foreground border-0"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-orange transition-all duration-300"
                 onClick={() => document.getElementById('configs')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 Explore Configs
@@ -64,6 +67,7 @@ const Index = () => {
               <Button 
                 variant="outline" 
                 size="lg"
+                className="border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all duration-300"
                 onClick={() => window.open('https://github.com/modelcontextprotocol/servers', '_blank')}
               >
                 <Github className="h-4 w-4 mr-2" />
@@ -72,6 +76,7 @@ const Index = () => {
               <Button 
                 variant="ghost" 
                 size="lg"
+                className="hover:bg-primary/5 hover:text-primary transition-all duration-300"
                 onClick={() => window.open('https://modelcontextprotocol.io', '_blank')}
               >
                 <ExternalLink className="h-4 w-4 mr-2" />
@@ -86,16 +91,16 @@ const Index = () => {
       <section id="configs" className="container mx-auto px-4 py-16">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
-            <TabsList className="grid w-full lg:w-auto grid-cols-3 lg:grid-cols-3">
-              <TabsTrigger value="all" className="flex items-center gap-2">
+            <TabsList className="grid w-full lg:w-auto grid-cols-3 lg:grid-cols-3 bg-card border border-border/50">
+              <TabsTrigger value="all" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <Sparkles className="h-4 w-4" />
                 All ({allConfigs.length})
               </TabsTrigger>
-              <TabsTrigger value="rules" className="flex items-center gap-2">
+              <TabsTrigger value="rules" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <BookOpen className="h-4 w-4" />
                 Rules ({rules.length})
               </TabsTrigger>
-              <TabsTrigger value="mcp" className="flex items-center gap-2">
+              <TabsTrigger value="mcp" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 <Server className="h-4 w-4" />
                 MCP ({mcpServers.length})
               </TabsTrigger>

@@ -2,51 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Claude Pro Directory Design System - Elegant purple theme inspired by Claude's branding */
+/* Claude Pro Directory Design System - Dark theme with Claude's orange accents */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 224 71% 4%;
+    /* Dark theme as default */
+    --background: 9 9% 3%;
+    --foreground: 24 10% 90%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
+    --card: 12 6% 6%;
+    --card-foreground: 24 10% 90%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
+    --popover: 12 6% 6%;
+    --popover-foreground: 24 10% 90%;
 
-    --primary: 262 83% 58%;
-    --primary-foreground: 0 0% 98%;
-    --primary-glow: 262 100% 75%;
+    --primary: 25 95% 53%;
+    --primary-foreground: 12 6% 6%;
+    --primary-glow: 32 98% 83%;
 
-    --secondary: 262 30% 97%;
-    --secondary-foreground: 262 83% 12%;
+    --secondary: 12 6% 15%;
+    --secondary-foreground: 24 10% 80%;
 
-    --muted: 262 15% 96%;
-    --muted-foreground: 262 10% 45%;
+    --muted: 12 6% 10%;
+    --muted-foreground: 24 5% 64%;
 
-    --accent: 262 83% 58%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 25 95% 53%;
+    --accent-foreground: 12 6% 6%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 262 20% 92%;
-    --input: 262 20% 95%;
-    --ring: 262 83% 58%;
+    --border: 12 6% 15%;
+    --input: 12 6% 10%;
+    --ring: 25 95% 53%;
 
     --radius: 0.75rem;
 
-    /* Gradients */
+    /* Gradients with Claude orange */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-    --gradient-hero: linear-gradient(135deg, hsl(262 83% 58%), hsl(280 100% 70%));
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(262 30% 98%));
+    --gradient-hero: linear-gradient(135deg, hsl(25 95% 53%), hsl(32 98% 83%));
+    --gradient-card: linear-gradient(145deg, hsl(12 6% 6%), hsl(12 6% 8%));
+    --gradient-border: linear-gradient(90deg, transparent, hsl(25 95% 53% / 0.2), transparent);
     
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(262 83% 58% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(262 83% 58% / 0.1), 0 2px 4px -1px hsl(262 83% 58% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(262 83% 58% / 0.1), 0 4px 6px -2px hsl(262 83% 58% / 0.05);
-    --shadow-glow: 0 0 0 1px hsl(262 83% 58% / 0.05), 0 1px 3px 0 hsl(262 83% 58% / 0.1), 0 1px 2px 0 hsl(262 83% 58% / 0.06);
+    /* Shadows with orange glow */
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.15);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.2), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.2), 0 4px 6px -2px hsl(0 0% 0% / 0.1);
+    --shadow-glow: 0 0 0 1px hsl(25 95% 53% / 0.1), 0 1px 3px 0 hsl(25 95% 53% / 0.15), 0 1px 2px 0 hsl(25 95% 53% / 0.1);
+    --shadow-orange: 0 0 20px hsl(25 95% 53% / 0.3);
 
     /* Animation */
     --transition-all: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -72,46 +75,46 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
-  .dark {
-    --background: 224 71% 4%;
-    --foreground: 262 30% 95%;
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 24 10% 10%;
 
-    --card: 224 71% 6%;
-    --card-foreground: 262 30% 95%;
+    --card: 0 0% 100%;
+    --card-foreground: 24 10% 10%;
 
-    --popover: 224 71% 6%;
-    --popover-foreground: 262 30% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 24 10% 10%;
 
-    --primary: 262 83% 65%;
-    --primary-foreground: 224 71% 4%;
-    --primary-glow: 262 100% 80%;
+    --primary: 25 95% 53%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 32 98% 83%;
 
-    --secondary: 262 30% 12%;
-    --secondary-foreground: 262 30% 85%;
+    --secondary: 24 6% 96%;
+    --secondary-foreground: 24 10% 10%;
 
-    --muted: 262 30% 12%;
-    --muted-foreground: 262 15% 65%;
+    --muted: 24 6% 96%;
+    --muted-foreground: 24 5% 45%;
 
-    --accent: 262 83% 65%;
-    --accent-foreground: 224 71% 4%;
+    --accent: 25 95% 53%;
+    --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 84% 65%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 262 30% 15%;
-    --input: 262 30% 12%;
-    --ring: 262 83% 65%;
+    --border: 24 6% 92%;
+    --input: 24 6% 95%;
+    --ring: 25 95% 53%;
 
-    /* Dark gradients */
+    /* Light gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-    --gradient-hero: linear-gradient(135deg, hsl(262 83% 65%), hsl(280 100% 75%));
-    --gradient-card: linear-gradient(145deg, hsl(224 71% 6%), hsl(262 30% 8%));
+    --gradient-hero: linear-gradient(135deg, hsl(25 95% 53%), hsl(32 98% 83%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(24 6% 98%));
     
-    /* Dark shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -2px hsl(0 0% 0% / 0.05);
-    --shadow-glow: 0 0 0 1px hsl(262 83% 65% / 0.1), 0 1px 3px 0 hsl(262 83% 65% / 0.15), 0 1px 2px 0 hsl(262 83% 65% / 0.1);
+    /* Light shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(25 95% 53% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(25 95% 53% / 0.1), 0 2px 4px -1px hsl(25 95% 53% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(25 95% 53% / 0.1), 0 4px 6px -2px hsl(25 95% 53% / 0.05);
+    --shadow-glow: 0 0 0 1px hsl(25 95% 53% / 0.1), 0 1px 3px 0 hsl(25 95% 53% / 0.15), 0 1px 2px 0 hsl(25 95% 53% / 0.1);
   }
 }
 
@@ -138,10 +141,30 @@
   
   .card-gradient {
     background: var(--gradient-card);
+    border: 1px solid hsl(var(--border));
   }
   
   .glow-effect {
     box-shadow: var(--shadow-glow);
+  }
+  
+  .orange-glow {
+    box-shadow: var(--shadow-orange);
+  }
+  
+  .gradient-border {
+    position: relative;
+  }
+  
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    background: var(--gradient-border);
+    border-radius: inherit;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: xor;
   }
   
   .animate-fade-in {
@@ -150,6 +173,15 @@
   
   .animate-slide-up {
     animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
   }
 }
 

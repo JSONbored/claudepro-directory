@@ -60,24 +60,24 @@ export const ConfigCard = ({
 
   const getCategoryColor = (cat: string) => {
     const colors = {
-      development: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-      writing: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-      analysis: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-      creative: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
-      business: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-      database: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
-      api: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200',
-      'file-system': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-      ai: 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200',
-      productivity: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
-      automation: 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200',
-      other: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
+      development: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+      writing: 'bg-green-500/10 text-green-400 border-green-500/20',
+      analysis: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+      creative: 'bg-pink-500/10 text-pink-400 border-pink-500/20',
+      business: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+      database: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+      api: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+      'file-system': 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+      ai: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
+      productivity: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+      automation: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+      other: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
     };
     return colors[cat as keyof typeof colors] || colors.other;
   };
 
   return (
-    <Card className="group hover:glow-effect transition-smooth cursor-pointer card-gradient border-border/50">
+    <Card className="group hover:glow-effect hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-primary/20">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -89,7 +89,7 @@ export const ConfigCard = ({
             </CardDescription>
           </div>
           <div className="flex items-center gap-1 ml-2">
-            <Badge variant="secondary" className={getCategoryColor(category)}>
+            <Badge variant="outline" className={`border ${getCategoryColor(category)}`}>
               {category}
             </Badge>
           </div>
@@ -99,12 +99,12 @@ export const ConfigCard = ({
       <CardContent className="pt-0">
         <div className="flex flex-wrap gap-1 mb-4">
           {tags.slice(0, 4).map((tag) => (
-            <Badge key={tag} variant="outline" className="text-xs">
+            <Badge key={tag} variant="outline" className="text-xs border-muted-foreground/20 text-muted-foreground hover:border-primary/30 hover:text-primary transition-colors-smooth">
               {tag}
             </Badge>
           ))}
           {tags.length > 4 && (
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-xs border-muted-foreground/20 text-muted-foreground">
               +{tags.length - 4}
             </Badge>
           )}
