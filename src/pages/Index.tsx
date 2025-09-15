@@ -1,14 +1,17 @@
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { ConfigCard } from '@/components/ConfigCard';
+import { AuthorCard } from '@/components/AuthorCard';
 import { FilterBar } from '@/components/FilterBar';
 import { SortDropdown } from '@/components/SortDropdown';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BookOpen, Server, Sparkles, Github, ExternalLink } from 'lucide-react';
+import { BookOpen, Server, Sparkles, Github, ExternalLink, Briefcase } from 'lucide-react';
 import { rules, Rule } from '@/data/rules';
 import { mcpServers, MCPServer } from '@/data/mcp';
+import { authors, getFeaturedAuthors } from '@/data/authors';
 import { useFilters } from '@/hooks/useFilters';
 import { useSorting } from '@/hooks/useSorting';
 
@@ -16,6 +19,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState('all');
   const { filters, updateFilter, resetFilters, applyFilters } = useFilters();
   const { sortBy, sortDirection, updateSort, sortItems } = useSorting();
+  const featuredAuthors = getFeaturedAuthors();
 
   const allConfigs = [...rules, ...mcpServers];
   
@@ -41,6 +45,8 @@ const Index = () => {
       case 'mcp':
         configs = mcpServers;
         break;
+      case 'community':
+        return []; // Community tab shows authors, not configs
       default:
         configs = allConfigs;
     }
@@ -72,18 +78,28 @@ const Index = () => {
             </h1>
             
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              Discover powerful Claude configurations and MCP servers to supercharge your AI workflows.
+              Discover powerful Claude configurations, MCP servers, and career opportunities to supercharge your AI workflows.
               From expert prompts to seamless integrations.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-              <Button size="lg" className="w-full sm:w-auto">
-                <BookOpen className="h-5 w-5 mr-2" />
-                Browse Claude Rules
+              <Button size="lg" asChild className="w-full sm:w-auto">
+                <Link to="/rules">
+                  <BookOpen className="h-5 w-5 mr-2" />
+                  Browse Claude Rules
+                </Link>
               </Button>
-              <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                <Server className="h-5 w-5 mr-2" />
-                Explore MCP Servers
+              <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
+                <Link to="/mcp">
+                  <Server className="h-5 w-5 mr-2" />
+                  Explore MCP Servers
+                </Link>
+              </Button>
+              <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
+                <Link to="/jobs">
+                  <Briefcase className="h-5 w-5 mr-2" />
+                  Find Jobs
+                </Link>
               </Button>
             </div>
 
@@ -124,10 +140,11 @@ const Index = () => {
       <section className="container mx-auto px-4 py-12">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <TabsList className="grid w-full lg:w-auto grid-cols-3">
+            <TabsList className="grid w-full lg:w-auto grid-cols-4">
               <TabsTrigger value="all" className="text-sm">All Configs</TabsTrigger>
-              <TabsTrigger value="rules" className="text-sm">Claude Rules</TabsTrigger>
-              <TabsTrigger value="mcp" className="text-sm">MCP Servers</TabsTrigger>
+              <TabsTrigger value="rules" className="text-sm">Rules</TabsTrigger>
+              <TabsTrigger value="mcp" className="text-sm">MCP</TabsTrigger>
+              <TabsTrigger value="community" className="text-sm">Community</TabsTrigger>
             </TabsList>
             
             <SortDropdown
@@ -148,7 +165,7 @@ const Index = () => {
           />
 
           {/* Results */}
-          <TabsContent value={activeTab} className="space-y-6">
+          <TabsContent value="all" className="space-y-6">
             {processedConfigs.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {processedConfigs.map((config) => (
@@ -165,6 +182,67 @@ const Index = () => {
                 <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters.</p>
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="rules" className="space-y-6">
+            {processedConfigs.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {processedConfigs.map((config) => (
+                  <ConfigCard
+                    key={config.id}
+                    {...config}
+                    type={getConfigType(config)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-lg text-muted-foreground">No Claude rules found</p>
+                <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters.</p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="mcp" className="space-y-6">
+            {processedConfigs.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {processedConfigs.map((config) => (
+                  <ConfigCard
+                    key={config.id}
+                    {...config}
+                    type={getConfigType(config)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-lg text-muted-foreground">No MCP servers found</p>
+                <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters.</p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="community" className="space-y-6">
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold mb-2">Featured Contributors</h3>
+              <p className="text-muted-foreground">
+                Meet the experts creating amazing Claude configurations
+              </p>
+            </div>
+            
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {featuredAuthors.map((author) => (
+                <AuthorCard key={author.id} author={author} />
+              ))}
+            </div>
+            
+            <div className="text-center pt-8">
+              <Button variant="outline" asChild>
+                <Link to="/community">
+                  View All Contributors
+                </Link>
+              </Button>
+            </div>
           </TabsContent>
         </Tabs>
       </section>

@@ -7,6 +7,8 @@ import { Navigation } from "@/components/Navigation";
 import Index from "./pages/Index";
 import Rules from "./pages/Rules";
 import McpServers from "./pages/McpServers";
+import Jobs from "./pages/Jobs";
+import Job from "./pages/Job";
 import Trending from "./pages/Trending";
 import Community from "./pages/Community";
 import Submit from "./pages/Submit";
@@ -27,6 +29,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/rules" element={<Rules />} />
           <Route path="/mcp" element={<McpServers />} />
+          <Route path="/jobs" element={<Jobs />} />
+          <Route path="/jobs/:slug" element={<Job />} />
           <Route path="/trending" element={<Trending />} />
           <Route path="/community" element={<Community />} />
           <Route path="/submit" element={<Submit />} />

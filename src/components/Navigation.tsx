@@ -23,7 +23,8 @@ import {
   Lightbulb,
   Menu,
   Github,
-  ExternalLink
+  ExternalLink,
+  Briefcase
 } from 'lucide-react';
 
 export const Navigation = () => {
@@ -89,6 +90,15 @@ export const Navigation = () => {
                   <div className="flex items-center gap-2">
                     <Server className="h-4 w-4" />
                     MCP Servers
+                  </div>
+                </NavLink>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavLink href="/jobs">
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="h-4 w-4" />
+                    Jobs
                   </div>
                 </NavLink>
               </NavigationMenuItem>
@@ -167,6 +177,11 @@ export const Navigation = () => {
                   <NavLink href="/mcp" className="flex items-center gap-3 text-base">
                     <Server className="h-5 w-5" />
                     MCP Servers
+                  </NavLink>
+
+                  <NavLink href="/jobs" className="flex items-center gap-3 text-base">
+                    <Briefcase className="h-5 w-5" />
+                    Jobs
                   </NavLink>
 
                   <NavLink href="/trending" className="flex items-center gap-3 text-base">
