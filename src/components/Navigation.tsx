@@ -57,13 +57,9 @@ export const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="relative">
-              <Sparkles className="h-6 w-6 text-primary" />
-              <div className="absolute inset-0 h-6 w-6 text-primary animate-ping opacity-20" />
-            </div>
-            <span className="text-lg font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent">
-              Claude Pro Directory
+          <Link to="/" className="flex items-center">
+            <span className="text-lg font-medium text-white">
+              claudepro.directory
             </span>
           </Link>
 
