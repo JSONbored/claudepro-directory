@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BookOpen, Server, Sparkles, Github, ExternalLink, Briefcase } from 'lucide-react';
+import { BookOpen, Server, Sparkles, Github, ExternalLink, Briefcase, Search } from 'lucide-react';
 import { rules, Rule } from '@/data/rules';
 import { mcpServers, MCPServer } from '@/data/mcp';
 import { authors, getFeaturedAuthors } from '@/data/authors';
@@ -63,81 +63,94 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="relative overflow-hidden border-b border-border/50">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
-        <div className="relative container mx-auto px-4 py-16 lg:py-24">
-          <div className="text-center max-w-4xl mx-auto">
-            <div className="flex items-center justify-center mb-6">
-              <div className="relative">
-                <Sparkles className="h-12 w-12 text-primary" />
-                <div className="absolute inset-0 h-12 w-12 text-primary animate-ping opacity-20" />
-              </div>
-            </div>
-            
-            <h1 className="text-4xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent">
+        <div className="relative container mx-auto px-4 py-20 lg:py-32">
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="text-5xl lg:text-7xl font-bold mb-6 text-foreground tracking-tight">
               Claude Pro Directory
             </h1>
             
-            <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              Discover powerful Claude configurations, MCP servers, and career opportunities to supercharge your AI workflows.
-              From expert prompts to seamless integrations.
+            <p className="text-lg text-muted-foreground mb-12 leading-relaxed max-w-2xl mx-auto">
+              The home for Claude enthusiasts where you can explore and generate rules, browse MCPs, 
+              post and follow the latest news on the board, learn, connect, and discover jobs all in one place.
             </p>
             
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-              <Button size="lg" asChild className="w-full sm:w-auto">
-                <Link to="/rules">
-                  <BookOpen className="h-5 w-5 mr-2" />
-                  Browse Claude Rules
-                </Link>
-              </Button>
-              <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
-                <Link to="/mcp">
-                  <Server className="h-5 w-5 mr-2" />
-                  Explore MCP Servers
-                </Link>
-              </Button>
-              <Button variant="outline" size="lg" asChild className="w-full sm:w-auto">
-                <Link to="/jobs">
-                  <Briefcase className="h-5 w-5 mr-2" />
-                  Find Jobs
-                </Link>
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
-              <Card 
-                className="p-4 text-center cursor-pointer transition-all duration-300 hover:scale-105 border-border/50 hover:border-primary/30 hover:bg-primary/5"
-                onClick={() => setActiveTab('all')}
-              >
-                <div className="text-2xl font-bold text-primary">{allConfigs.length}</div>
-                <div className="text-sm text-muted-foreground">Total Configs</div>
-              </Card>
-              <Card 
-                className="p-4 text-center cursor-pointer transition-all duration-300 hover:scale-105 border-border/50 hover:border-primary/30 hover:bg-primary/5"
-                onClick={() => setActiveTab('rules')}
-              >
-                <div className="text-2xl font-bold text-primary">{rules.length}</div>
-                <div className="text-sm text-muted-foreground">Claude Rules</div>
-              </Card>
-              <Card 
-                className="p-4 text-center cursor-pointer transition-all duration-300 hover:scale-105 border-border/50 hover:border-primary/30 hover:bg-primary/5"
-                onClick={() => setActiveTab('mcp')}
-              >
-                <div className="text-2xl font-bold text-primary">{mcpServers.length}</div>
-                <div className="text-sm text-muted-foreground">MCP Servers</div>
-              </Card>
-              <Card 
-                className="p-4 text-center cursor-pointer transition-all duration-300 hover:scale-105"
-                onClick={() => window.open('https://github.com/JSONbored/claudepro-directory', '_blank')}
-              >
-                <Github className="h-6 w-6 mx-auto mb-2 text-primary" />
-                <div className="text-sm text-muted-foreground">Open Source</div>
-              </Card>
+            {/* Search Bar */}
+            <div className="max-w-xl mx-auto mb-16">
+              <div className="relative">
+                <input 
+                  type="text" 
+                  placeholder="Search for a rule or MCP server..."
+                  className="w-full px-6 py-4 text-lg bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                />
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="container mx-auto px-4 py-12">
+      <section className="container mx-auto px-4 py-16">
+        {/* Featured Content Sections */}
+        <div className="space-y-16 mb-16">
+          {/* Featured Rules */}
+          <div>
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold">Featured Rules</h2>
+              <Link to="/rules" className="text-primary hover:underline flex items-center gap-2">
+                View all <ExternalLink className="h-4 w-4" />
+              </Link>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {rules.slice(0, 6).map((rule) => (
+                <ConfigCard
+                  key={rule.id}
+                  {...rule}
+                  type="rule"
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Featured MCPs */}
+          <div>
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold">Featured MCPs</h2>
+              <Link to="/mcp" className="text-primary hover:underline flex items-center gap-2">
+                View all <ExternalLink className="h-4 w-4" />
+              </Link>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {mcpServers.slice(0, 6).map((mcp) => (
+                <ConfigCard
+                  key={mcp.id}
+                  {...mcp}
+                  type="mcp"
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Featured Jobs */}
+          <div>
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold">Featured Jobs</h2>
+              <Link to="/jobs" className="text-primary hover:underline flex items-center gap-2">
+                View all <ExternalLink className="h-4 w-4" />
+              </Link>
+            </div>
+            <div className="text-center py-12 bg-card/50 rounded-xl border border-border/50">
+              <Briefcase className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+              <h3 className="text-lg font-semibold mb-2">Find Your Next AI Role</h3>
+              <p className="text-muted-foreground mb-6">
+                Discover opportunities with companies building the future of AI
+              </p>
+              <Button asChild>
+                <Link to="/jobs">Browse Job Opportunities</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Simplified Tabs for Advanced Users */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <TabsList className="grid w-full lg:w-auto grid-cols-4">
