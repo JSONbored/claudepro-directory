@@ -1,8 +1,8 @@
-import { ClaudeRule } from './index';
+import { Rule } from './index';
 
-export const writingRule: ClaudeRule = {
+export const writingRule: Rule = {
   id: 'writing',
-  title: 'Technical Writing Expert',
+  name: 'Technical Writing Expert',
   description: 'Clear, concise technical writing for documentation, blogs, and communication',
   tags: ['writing', 'documentation', 'communication', 'technical'],
   author: 'Claude Pro Community',

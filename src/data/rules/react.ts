@@ -1,8 +1,8 @@
-import { ClaudeRule } from './index';
+import { Rule } from './index';
 
-export const reactRule: ClaudeRule = {
+export const reactRule: Rule = {
   id: 'react',
-  title: 'React Expert',
+  name: 'React Expert',
   description: 'Modern React development with hooks, performance optimization, and best practices',
   tags: ['react', 'hooks', 'jsx', 'components'],
   author: 'Claude Pro Community',

@@ -3,7 +3,7 @@ import { ConfigCard } from '@/components/ConfigCard';
 import { SearchBar } from '@/components/SearchBar';
 import { Badge } from '@/components/ui/badge';
 import { BookOpen, Filter } from 'lucide-react';
-import { rules, ClaudeRule, getRulesByCategory } from '@/data/rules';
+import { rules, Rule, getRulesByCategory } from '@/data/rules';
 
 const categories = [
   { id: 'all', name: 'All Rules', count: rules.length },
@@ -15,7 +15,7 @@ const categories = [
 ];
 
 const Rules = () => {
-  const [filteredRules, setFilteredRules] = useState<ClaudeRule[]>(rules);
+  const [filteredRules, setFilteredRules] = useState<Rule[]>(rules);
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   const handleCategoryFilter = (categoryId: string) => {
@@ -80,7 +80,7 @@ const Rules = () => {
         <div className="mb-8">
           <SearchBar 
             data={selectedCategory === 'all' ? rules : getRulesByCategory(selectedCategory)}
-            onFilteredResults={(results) => setFilteredRules(results as ClaudeRule[])}
+            onFilteredResults={(results) => setFilteredRules(results as Rule[])}
             placeholder="Search Claude rules..."
           />
         </div>

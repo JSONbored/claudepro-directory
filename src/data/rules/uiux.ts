@@ -1,8 +1,8 @@
-import { ClaudeRule } from './index';
+import { Rule } from './index';
 
-export const uiuxRule: ClaudeRule = {
+export const uiuxRule: Rule = {
   id: 'uiux',
-  title: 'UI/UX Design Expert',
+  name: 'UI/UX Design Expert',
   description: 'User-centered design, interface patterns, and design system expertise',
   tags: ['ui', 'ux', 'design', 'user-experience'],
   author: 'Claude Pro Community',

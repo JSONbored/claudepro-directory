@@ -1,8 +1,8 @@
-import { ClaudeRule } from './index';
+import { Rule } from './index';
 
-export const apiRule: ClaudeRule = {
+export const apiRule: Rule = {
   id: 'api',
-  title: 'API Design Expert',
+  name: 'API Design Expert',
   description: 'RESTful API design, GraphQL, and modern API development patterns',
   tags: ['api', 'rest', 'graphql', 'backend'],
   author: 'Claude Pro Community',

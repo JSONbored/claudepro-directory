@@ -1,8 +1,8 @@
-import { ClaudeRule } from './index';
+import { Rule } from './index';
 
-export const typescriptRule: ClaudeRule = {
+export const typescriptRule: Rule = {
   id: 'typescript',
-  title: 'TypeScript Expert',
+  name: 'TypeScript Expert',
   description: 'Expert TypeScript development with best practices, type safety, and modern patterns',
   tags: ['typescript', 'javascript', 'types', 'development'],
   author: 'Claude Pro Community',

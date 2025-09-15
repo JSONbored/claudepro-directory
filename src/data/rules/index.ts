@@ -1,6 +1,6 @@
-export interface ClaudeRule {
+export interface Rule {
   id: string;
-  title: string;
+  name: string;
   description: string;
   tags: string[];
   author: string;
@@ -21,7 +21,7 @@ import { businessRule } from './business';
 import { uiuxRule } from './uiux';
 import { apiRule } from './api';
 
-export const rules: ClaudeRule[] = [
+export const rules: Rule[] = [
   typescriptRule,
   reactRule,
   nextjsRule,
@@ -32,14 +32,14 @@ export const rules: ClaudeRule[] = [
   apiRule,
 ];
 
-export const getRuleBySlug = (slug: string): ClaudeRule | undefined => {
+export const getRuleBySlug = (slug: string): Rule | undefined => {
   return rules.find(rule => rule.slug === slug);
 };
 
-export const getRulesByCategory = (category: string): ClaudeRule[] => {
+export const getRulesByCategory = (category: string): Rule[] => {
   return rules.filter(rule => rule.category === category);
 };
 
-export const getPopularRules = (): ClaudeRule[] => {
+export const getPopularRules = (): Rule[] => {
   return rules.sort((a, b) => b.popularity - a.popularity);
 };

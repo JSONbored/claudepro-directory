@@ -1,8 +1,8 @@
-import { ClaudeRule } from './index';
+import { Rule } from './index';
 
-export const nextjsRule: ClaudeRule = {
+export const nextjsRule: Rule = {
   id: 'nextjs',
-  title: 'Next.js Expert',
+  name: 'Next.js Expert',
   description: 'Full-stack Next.js development with App Router, Server Components, and modern patterns',
   tags: ['nextjs', 'react', 'ssr', 'app-router'],
   author: 'Claude Pro Community',

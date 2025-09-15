@@ -1,8 +1,8 @@
-import { ClaudeRule } from './index';
+import { Rule } from './index';
 
-export const pythonRule: ClaudeRule = {
+export const pythonRule: Rule = {
   id: 'python',
-  title: 'Python Expert',
+  name: 'Python Expert',
   description: 'Professional Python development with modern practices, type hints, and best patterns',
   tags: ['python', 'typing', 'pep8', 'development'],
   author: 'Claude Pro Community',

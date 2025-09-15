@@ -5,7 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Copy, Check, Calendar, User, TrendingUp, ExternalLink } from 'lucide-react';
-import { getRuleBySlug } from '@/data/rules';
+import { getRuleBySlug, rules } from '@/data/rules';
+import { mcpServers } from '@/data/mcp';
+import { CodeHighlight } from '@/components/CodeHighlight';
+import { RelatedConfigs } from '@/components/RelatedConfigs';
+import { getRelatedConfigs } from '@/lib/recommendations';
 import { toast } from '@/hooks/use-toast';
 
 const Rule = () => {
@@ -14,6 +18,7 @@ const Rule = () => {
   const [copied, setCopied] = useState(false);
 
   const rule = slug ? getRuleBySlug(slug) : null;
+  const relatedConfigs = rule ? getRelatedConfigs(rule, rules, mcpServers, 4) : [];
 
   if (!rule) {
     return (
@@ -99,7 +104,7 @@ const Rule = () => {
             </div>
 
             <h1 className="text-3xl lg:text-4xl font-bold text-foreground">
-              {rule.title}
+              {rule.name}
             </h1>
 
             <p className="text-lg text-muted-foreground">
@@ -153,7 +158,7 @@ const Rule = () => {
         </div>
 
         {/* Content */}
-        <Card className="card-gradient">
+        <Card className="card-gradient mb-8">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span>Rule Content</span>
@@ -171,13 +176,21 @@ const Rule = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="relative">
-              <pre className="whitespace-pre-wrap font-mono text-sm bg-muted/30 p-6 rounded-lg border overflow-x-auto">
-                <code>{rule.content}</code>
-              </pre>
-            </div>
+            <CodeHighlight
+              code={rule.content}
+              language="text"
+              title="Claude Rule Configuration"
+              showCopy={true}
+            />
           </CardContent>
         </Card>
+
+        {/* Related Configurations */}
+        {relatedConfigs.length > 0 && (
+          <div className="mb-8">
+            <RelatedConfigs configs={relatedConfigs} />
+          </div>
+        )}
 
         {/* Footer */}
         <div className="mt-8 pt-8 border-t border-border">

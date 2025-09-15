@@ -4,12 +4,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Search, X, Filter } from 'lucide-react';
 import Fuse from 'fuse.js';
-import { ClaudeRule } from '@/data/rules';
+import { Rule } from '@/data/rules';
 import { MCPServer } from '@/data/mcp';
 
 interface SearchBarProps {
-  data: (ClaudeRule | MCPServer)[];
-  onFilteredResults: (results: (ClaudeRule | MCPServer)[]) => void;
+  data: (Rule | MCPServer)[];
+  onFilteredResults: (results: (Rule | MCPServer)[]) => void;
   placeholder?: string;
 }
 

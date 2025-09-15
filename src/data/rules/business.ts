@@ -1,8 +1,8 @@
-import { ClaudeRule } from './index';
+import { Rule } from './index';
 
-export const businessRule: ClaudeRule = {
+export const businessRule: Rule = {
   id: 'business',
-  title: 'Business Analysis Expert',
+  name: 'Business Analysis Expert',
   description: 'Strategic business analysis, market research, and data-driven decision making',
   tags: ['business', 'strategy', 'analysis', 'market-research'],
   author: 'Claude Pro Community',
