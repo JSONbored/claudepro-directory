@@ -76,198 +76,260 @@ const Index = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden border-b border-border/50">
         <div className="relative container mx-auto px-4 py-20 lg:py-32">
-          <div className="text-center max-w-3xl mx-auto">
+          <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl lg:text-7xl font-bold mb-6 text-foreground tracking-tight">
-              Claude Pro Directory
+              The home for Claude enthusiasts
             </h1>
             
-            <p className="text-lg text-muted-foreground mb-12 leading-relaxed max-w-2xl mx-auto">
-              The home for Claude enthusiasts where you can explore and generate rules, browse MCPs, 
-              post and follow the latest news on the board, learn, connect, and discover jobs all in one place.
+            <p className="text-xl text-muted-foreground mb-12 leading-relaxed max-w-3xl mx-auto">
+              Discover and share the best Claude configurations. Explore expert rules, browse powerful MCP servers, 
+              find specialized agents and commands, discover automation hooks, and connect with the community building the future of AI.
             </p>
             
             {/* Search Bar */}
-            <div className="max-w-2xl mx-auto mb-16">
+            <div className="max-w-2xl mx-auto mb-8">
               <SearchBar
                 data={allConfigs}
                 onFilteredResults={handleSearchResults}
-                placeholder="Search for rules, MCP servers, and more..."
+                placeholder="Search for rules, MCP servers, agents, commands, and more..."
               />
+            </div>
+
+            {/* Quick Stats */}
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                {rules.length} Expert Rules
+              </div>
+              <div className="flex items-center gap-2">
+                <Server className="h-4 w-4" />
+                {mcpServers.length} MCP Servers
+              </div>
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                All Open Source
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       <section className="container mx-auto px-4 py-16">
-        {/* Featured Content Sections */}
-        <div className="space-y-16 mb-16">
-          {/* Featured Rules */}
-          <div>
+        {/* Search Results - Show immediately when user searches */}
+        {hasSearched && (
+          <div className="mb-16">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold">Featured Rules</h2>
-              <Link to="/rules" className="text-primary hover:underline flex items-center gap-2">
-                View all <ExternalLink className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {rules.slice(0, 6).map((rule) => (
-                <ConfigCard
-                  key={rule.id}
-                  {...rule}
-                  type="rule"
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Featured MCPs */}
-          <div>
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold">Featured MCPs</h2>
-              <Link to="/mcp" className="text-primary hover:underline flex items-center gap-2">
-                View all <ExternalLink className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {mcpServers.slice(0, 6).map((mcp) => (
-                <ConfigCard
-                  key={mcp.id}
-                  {...mcp}
-                  type="mcp"
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Featured Jobs */}
-          <div>
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold">Featured Jobs</h2>
-              <Link to="/jobs" className="text-primary hover:underline flex items-center gap-2">
-                View all <ExternalLink className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="text-center py-12 bg-card/50 rounded-xl border border-border/50">
-              <Briefcase className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-              <h3 className="text-lg font-semibold mb-2">Find Your Next AI Role</h3>
-              <p className="text-muted-foreground mb-6">
-                Discover opportunities with companies building the future of AI
-              </p>
-              <Button asChild>
-                <Link to="/jobs">Browse Job Opportunities</Link>
+              <h2 className="text-2xl font-bold">
+                Search Results 
+                <span className="text-muted-foreground ml-2">({searchResults.length} found)</span>
+              </h2>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setHasSearched(false);
+                  setSearchResults([]);
+                }}
+                className="text-sm"
+              >
+                Clear Search
               </Button>
             </div>
+            
+            {searchResults.length > 0 ? (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {searchResults.map((config) => (
+                  <ConfigCard
+                    key={config.id}
+                    {...config}
+                    type={getConfigType(config)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 bg-card/50 rounded-xl border border-border/50">
+                <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                <h3 className="text-lg font-semibold mb-2">No results found</h3>
+                <p className="text-muted-foreground">
+                  Try different keywords or browse our featured content below
+                </p>
+              </div>
+            )}
           </div>
-        </div>
+        )}
 
-        {/* Simplified Tabs for Advanced Users */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <TabsList className="grid w-full lg:w-auto grid-cols-4">
-              <TabsTrigger value="all" className="text-sm">All Configs</TabsTrigger>
-              <TabsTrigger value="rules" className="text-sm">Rules</TabsTrigger>
-              <TabsTrigger value="mcp" className="text-sm">MCP</TabsTrigger>
-              <TabsTrigger value="community" className="text-sm">Community</TabsTrigger>
-            </TabsList>
-            
-            <SortDropdown
-              sortBy={sortBy}
-              sortDirection={sortDirection}
-              onSortChange={updateSort}
-            />
-          </div>
-
-          {/* Filters */}
-          <FilterBar
-            filters={filters}
-            onFilterChange={updateFilter}
-            onResetFilters={resetFilters}
-            availableCategories={availableCategories}
-            availableTags={availableTags}
-            availableAuthors={availableAuthors}
-          />
-
-          {/* Results */}
-          <TabsContent value="all" className="space-y-6">
-            {processedConfigs.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {processedConfigs.map((config) => (
-                  <ConfigCard
-                    key={config.id}
-                    {...config}
-                    type={getConfigType(config)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-lg text-muted-foreground">No configurations found</p>
-                <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters.</p>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="rules" className="space-y-6">
-            {processedConfigs.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {processedConfigs.map((config) => (
-                  <ConfigCard
-                    key={config.id}
-                    {...config}
-                    type={getConfigType(config)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-lg text-muted-foreground">No Claude rules found</p>
-                <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters.</p>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="mcp" className="space-y-6">
-            {processedConfigs.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {processedConfigs.map((config) => (
-                  <ConfigCard
-                    key={config.id}
-                    {...config}
-                    type={getConfigType(config)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-lg text-muted-foreground">No MCP servers found</p>
-                <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters.</p>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="community" className="space-y-6">
-            <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold mb-2">Featured Contributors</h3>
-              <p className="text-muted-foreground">
-                Meet the experts creating amazing Claude configurations
-              </p>
-            </div>
-            
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {featuredAuthors.map((author) => (
-                <AuthorCard key={author.id} author={author} />
-              ))}
-            </div>
-            
-            <div className="text-center pt-8">
-              <Button variant="outline" asChild>
-                <Link to="/community">
-                  View All Contributors
+        {/* Featured Content - Only show when not searching */}
+        {!hasSearched && (
+          <div className="space-y-16 mb-16">
+            {/* Featured Rules */}
+            <div>
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-bold">Featured Rules</h2>
+                <Link to="/rules" className="text-primary hover:underline flex items-center gap-2">
+                  View all <ExternalLink className="h-4 w-4" />
                 </Link>
-              </Button>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {rules.slice(0, 6).map((rule) => (
+                  <ConfigCard
+                    key={rule.id}
+                    {...rule}
+                    type="rule"
+                  />
+                ))}
+              </div>
             </div>
-          </TabsContent>
-        </Tabs>
+
+            {/* Featured MCPs */}
+            <div>
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-bold">Featured MCPs</h2>
+                <Link to="/mcp" className="text-primary hover:underline flex items-center gap-2">
+                  View all <ExternalLink className="h-4 w-4" />
+                </Link>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {mcpServers.slice(0, 6).map((mcp) => (
+                  <ConfigCard
+                    key={mcp.id}
+                    {...mcp}
+                    type="mcp"
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Featured Jobs */}
+            <div>
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-bold">Featured Jobs</h2>
+                <Link to="/jobs" className="text-primary hover:underline flex items-center gap-2">
+                  View all <ExternalLink className="h-4 w-4" />
+                </Link>
+              </div>
+              <div className="text-center py-12 bg-card/50 rounded-xl border border-border/50">
+                <Briefcase className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                <h3 className="text-lg font-semibold mb-2">Find Your Next AI Role</h3>
+                <p className="text-muted-foreground mb-6">
+                  Discover opportunities with companies building the future of AI
+                </p>
+                <Button asChild>
+                  <Link to="/jobs">Browse Job Opportunities</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Advanced Tabs - Only show when not searching */}
+        {!hasSearched && (
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <TabsList className="grid w-full lg:w-auto grid-cols-4">
+                <TabsTrigger value="all" className="text-sm">All Configs</TabsTrigger>
+                <TabsTrigger value="rules" className="text-sm">Rules</TabsTrigger>
+                <TabsTrigger value="mcp" className="text-sm">MCP</TabsTrigger>
+                <TabsTrigger value="community" className="text-sm">Community</TabsTrigger>
+              </TabsList>
+              
+              <SortDropdown
+                sortBy={sortBy}
+                sortDirection={sortDirection}
+                onSortChange={updateSort}
+              />
+            </div>
+
+            {/* Filters */}
+            <FilterBar
+              filters={filters}
+              onFilterChange={updateFilter}
+              onResetFilters={resetFilters}
+              availableCategories={availableCategories}
+              availableTags={availableTags}
+              availableAuthors={availableAuthors}
+            />
+
+            {/* Results */}
+            <TabsContent value="all" className="space-y-6">
+              {processedConfigs.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {processedConfigs.map((config) => (
+                    <ConfigCard
+                      key={config.id}
+                      {...config}
+                      type={getConfigType(config)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-lg text-muted-foreground">No configurations found</p>
+                  <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters.</p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="rules" className="space-y-6">
+              {processedConfigs.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {processedConfigs.map((config) => (
+                    <ConfigCard
+                      key={config.id}
+                      {...config}
+                      type={getConfigType(config)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-lg text-muted-foreground">No Claude rules found</p>
+                  <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters.</p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="mcp" className="space-y-6">
+              {processedConfigs.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {processedConfigs.map((config) => (
+                    <ConfigCard
+                      key={config.id}
+                      {...config}
+                      type={getConfigType(config)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-lg text-muted-foreground">No MCP servers found</p>
+                  <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters.</p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="community" className="space-y-6">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold mb-2">Featured Contributors</h3>
+                <p className="text-muted-foreground">
+                  Meet the experts creating amazing Claude configurations
+                </p>
+              </div>
+              
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {featuredAuthors.map((author) => (
+                  <AuthorCard key={author.id} author={author} />
+                ))}
+              </div>
+              
+              <div className="text-center pt-8">
+                <Button variant="outline" asChild>
+                  <Link to="/community">
+                    View All Contributors
+                  </Link>
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
+        )}
       </section>
     </div>
   );
