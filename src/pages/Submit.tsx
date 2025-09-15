@@ -14,12 +14,20 @@ import {
   Github,
   ExternalLink,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Bot,
+  Terminal,
+  Webhook,
+  Star,
+  Briefcase,
+  TrendingUp,
+  DollarSign,
+  Users
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const Submit = () => {
-  const [configType, setConfigType] = useState<'rule' | 'mcp' | ''>('');
+  const [configType, setConfigType] = useState<'rule' | 'mcp' | 'agent' | 'command' | 'hook' | ''>('');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -27,7 +35,15 @@ const Submit = () => {
     tags: '',
     content: '',
     repository: '',
-    documentation: ''
+    documentation: '',
+    syntax: '',
+    useCases: '',
+    capabilities: '',
+    triggerEvents: '',
+    actions: '',
+    configuration: '',
+    platforms: '',
+    requirements: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -44,13 +60,35 @@ const Submit = () => {
       tags: '',
       content: '',
       repository: '',
-      documentation: ''
+      documentation: '',
+      syntax: '',
+      useCases: '',
+      capabilities: '',
+      triggerEvents: '',
+      actions: '',
+      configuration: '',
+      platforms: '',
+      requirements: ''
     });
     setConfigType('');
   };
 
   const ruleCategories = ['development', 'writing', 'creative', 'business', 'analysis', 'other'];
   const mcpCategories = ['database', 'api', 'file-system', 'ai', 'productivity', 'development', 'automation', 'other'];
+  const agentCategories = ['development', 'productivity', 'creative', 'research', 'analysis', 'customer-service', 'other'];
+  const commandCategories = ['development', 'productivity', 'analysis', 'automation', 'content', 'other'];
+  const hookCategories = ['automation', 'monitoring', 'development', 'deployment', 'analytics', 'other'];
+  
+  const getCategories = () => {
+    switch(configType) {
+      case 'rule': return ruleCategories;
+      case 'mcp': return mcpCategories;
+      case 'agent': return agentCategories;
+      case 'command': return commandCategories;
+      case 'hook': return hookCategories;
+      default: return [];
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -79,11 +117,68 @@ const Submit = () => {
       {/* Content */}
       <section className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
+          {/* Featured Job Posting Section */}
+          <div className="mb-12">
+            <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-primary/20 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent" />
+              <CardHeader className="relative">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Briefcase className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl flex items-center gap-2">
+                        <Star className="h-5 w-5 text-primary" />
+                        Featured Job Opportunity
+                      </CardTitle>
+                      <CardDescription className="text-base">
+                        Want to hire Claude experts or promote your services?
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <Badge className="bg-primary text-primary-foreground">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    Popular
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="relative">
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded">
+                      <Users className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <div className="font-medium">Reach Claude Experts</div>
+                      <div className="text-sm text-muted-foreground">Connect with skilled professionals</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded">
+                      <DollarSign className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <div className="font-medium">Promote Services</div>
+                      <div className="text-sm text-muted-foreground">Advertise your consulting</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Button className="w-full bg-primary hover:bg-primary/90">
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Post Job/Ad
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Configuration Type Selection */}
           {!configType && (
             <div className="mb-12">
               <h2 className="text-2xl font-bold text-center mb-8">What would you like to submit?</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <Card 
                   className="hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-primary/20"
                   onClick={() => setConfigType('rule')}
@@ -92,7 +187,7 @@ const Submit = () => {
                     <BookOpen className="h-12 w-12 text-primary mx-auto mb-4" />
                     <CardTitle className="text-xl">Claude Rule</CardTitle>
                     <CardDescription>
-                      System prompts, instructions, and configurations that enhance Claude's behavior for specific tasks or domains.
+                      System prompts, instructions, and configurations that enhance Claude's behavior for specific tasks.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -111,13 +206,70 @@ const Submit = () => {
                     <Server className="h-12 w-12 text-primary mx-auto mb-4" />
                     <CardTitle className="text-xl">MCP Server</CardTitle>
                     <CardDescription>
-                      Model Context Protocol servers that extend Claude with external tools, databases, and integrations.
+                      Model Context Protocol servers that extend Claude with external tools and integrations.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Button variant="outline" className="w-full hover:bg-primary/5 hover:border-primary/30">
                       <Server className="h-4 w-4 mr-2" />
                       Submit MCP Server
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card 
+                  className="hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-primary/20"
+                  onClick={() => setConfigType('agent')}
+                >
+                  <CardHeader className="text-center">
+                    <Bot className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <CardTitle className="text-xl">AI Agent</CardTitle>
+                    <CardDescription>
+                      Specialized AI agents with defined roles, capabilities, and workflows for specific domains.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button variant="outline" className="w-full hover:bg-primary/5 hover:border-primary/30">
+                      <Bot className="h-4 w-4 mr-2" />
+                      Submit Agent
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card 
+                  className="hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-primary/20"
+                  onClick={() => setConfigType('command')}
+                >
+                  <CardHeader className="text-center">
+                    <Terminal className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <CardTitle className="text-xl">Command</CardTitle>
+                    <CardDescription>
+                      Command-line style prompts and tools for specific tasks and operations.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button variant="outline" className="w-full hover:bg-primary/5 hover:border-primary/30">
+                      <Terminal className="h-4 w-4 mr-2" />
+                      Submit Command
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card 
+                  className="hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-primary/20"
+                  onClick={() => setConfigType('hook')}
+                >
+                  <CardHeader className="text-center">
+                    <Webhook className="h-12 w-12 text-primary mx-auto mb-4" />
+                    <CardTitle className="text-xl">Hook</CardTitle>
+                    <CardDescription>
+                      Automated workflows and triggers that respond to events and execute actions.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button variant="outline" className="w-full hover:bg-primary/5 hover:border-primary/30">
+                      <Webhook className="h-4 w-4 mr-2" />
+                      Submit Hook
                     </Button>
                   </CardContent>
                 </Card>
@@ -131,13 +283,19 @@ const Submit = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    {configType === 'rule' ? (
-                      <BookOpen className="h-6 w-6 text-primary" />
-                    ) : (
-                      <Server className="h-6 w-6 text-primary" />
-                    )}
+                    {configType === 'rule' && <BookOpen className="h-6 w-6 text-primary" />}
+                    {configType === 'mcp' && <Server className="h-6 w-6 text-primary" />}
+                    {configType === 'agent' && <Bot className="h-6 w-6 text-primary" />}
+                    {configType === 'command' && <Terminal className="h-6 w-6 text-primary" />}
+                    {configType === 'hook' && <Webhook className="h-6 w-6 text-primary" />}
                     <CardTitle className="text-2xl">
-                      Submit {configType === 'rule' ? 'Claude Rule' : 'MCP Server'}
+                      Submit {
+                        configType === 'rule' ? 'Claude Rule' :
+                        configType === 'mcp' ? 'MCP Server' :
+                        configType === 'agent' ? 'AI Agent' :
+                        configType === 'command' ? 'Command' :
+                        configType === 'hook' ? 'Hook' : ''
+                      }
                     </CardTitle>
                   </div>
                   <Button 
@@ -149,7 +307,13 @@ const Submit = () => {
                   </Button>
                 </div>
                 <CardDescription>
-                  Fill out the form below to submit your {configType === 'rule' ? 'Claude rule' : 'MCP server'} to the directory.
+                  Fill out the form below to submit your {
+                    configType === 'rule' ? 'Claude rule' :
+                    configType === 'mcp' ? 'MCP server' :
+                    configType === 'agent' ? 'AI agent' :
+                    configType === 'command' ? 'command' :
+                    configType === 'hook' ? 'hook' : 'configuration'
+                  } to the directory.
                 </CardDescription>
               </CardHeader>
 
@@ -159,13 +323,23 @@ const Submit = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="title">
-                        {configType === 'rule' ? 'Rule Title' : 'Server Name'} *
+                        {configType === 'rule' ? 'Rule Title' :
+                         configType === 'mcp' ? 'Server Name' :
+                         configType === 'agent' ? 'Agent Name' :
+                         configType === 'command' ? 'Command Name' :
+                         configType === 'hook' ? 'Hook Title' : 'Title'} *
                       </Label>
                       <Input
                         id="title"
                         value={formData.title}
                         onChange={(e) => setFormData({...formData, title: e.target.value})}
-                        placeholder={configType === 'rule' ? 'e.g., TypeScript Expert' : 'e.g., PostgreSQL MCP Server'}
+                        placeholder={
+                          configType === 'rule' ? 'e.g., TypeScript Expert' :
+                          configType === 'mcp' ? 'e.g., PostgreSQL MCP Server' :
+                          configType === 'agent' ? 'e.g., Code Review Assistant' :
+                          configType === 'command' ? 'e.g., /analyze-code' :
+                          configType === 'hook' ? 'e.g., Git Commit Analyzer' : 'Enter title'
+                        }
                         required
                         className="bg-card/50 border-border/50 focus:border-primary/50"
                       />
@@ -181,7 +355,7 @@ const Submit = () => {
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                         <SelectContent>
-                          {(configType === 'rule' ? ruleCategories : mcpCategories).map((category) => (
+                          {getCategories().map((category) => (
                             <SelectItem key={category} value={category}>
                               {category.replace('-', ' ')}
                             </SelectItem>
@@ -197,9 +371,13 @@ const Submit = () => {
                       id="description"
                       value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
-                      placeholder={configType === 'rule' 
-                        ? 'Describe what this rule does and how it helps...' 
-                        : 'Describe what this MCP server provides and its capabilities...'
+                      placeholder={
+                        configType === 'rule' ? 'Describe what this rule does and how it helps...' :
+                        configType === 'mcp' ? 'Describe what this MCP server provides and its capabilities...' :
+                        configType === 'agent' ? 'Describe the agent\'s role and capabilities...' :
+                        configType === 'command' ? 'Describe what this command does and its use cases...' :
+                        configType === 'hook' ? 'Describe what events trigger this hook and what it does...' :
+                        'Provide a detailed description...'
                       }
                       rows={3}
                       required
@@ -221,21 +399,118 @@ const Submit = () => {
                   {/* Content/Configuration */}
                   <div className="space-y-2">
                     <Label htmlFor="content">
-                      {configType === 'rule' ? 'Rule Content' : 'Configuration'} *
+                      {configType === 'rule' ? 'Rule Content' :
+                       configType === 'mcp' ? 'Configuration' :
+                       configType === 'agent' ? 'Agent Instructions' :
+                       configType === 'command' ? 'Command Implementation' :
+                       configType === 'hook' ? 'Hook Configuration' : 'Content'} *
                     </Label>
                     <Textarea
                       id="content"
                       value={formData.content}
                       onChange={(e) => setFormData({...formData, content: e.target.value})}
-                      placeholder={configType === 'rule' 
-                        ? 'Enter the complete system prompt or configuration...' 
-                        : 'Enter the MCP server configuration JSON...'
+                      placeholder={
+                        configType === 'rule' ? 'Enter the complete system prompt or configuration...' :
+                        configType === 'mcp' ? 'Enter the MCP server configuration JSON...' :
+                        configType === 'agent' ? 'Provide detailed instructions and capabilities for the agent...' :
+                        configType === 'command' ? 'Describe the command syntax, parameters, and implementation...' :
+                        configType === 'hook' ? 'Define trigger events, actions, and configuration options...' :
+                        'Enter the main content...'
                       }
                       rows={12}
                       required
                       className="font-mono text-sm bg-card/50 border-border/50 focus:border-primary/50"
                     />
                   </div>
+
+                  {/* Type-specific fields */}
+                  {(configType === 'command') && (
+                    <div className="space-y-2">
+                      <Label htmlFor="syntax">Command Syntax</Label>
+                      <Input
+                        id="syntax"
+                        value={formData.syntax}
+                        onChange={(e) => setFormData({...formData, syntax: e.target.value})}
+                        placeholder="e.g., /analyze-code [file] [--depth=quick|thorough]"
+                        className="font-mono text-sm bg-card/50 border-border/50 focus:border-primary/50"
+                      />
+                    </div>
+                  )}
+
+                  {(configType === 'agent') && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="useCases">Use Cases</Label>
+                        <Input
+                          id="useCases"
+                          value={formData.useCases}
+                          onChange={(e) => setFormData({...formData, useCases: e.target.value})}
+                          placeholder="code-review, mentorship, quality-assurance"
+                          className="bg-card/50 border-border/50 focus:border-primary/50"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="capabilities">Capabilities</Label>
+                        <Input
+                          id="capabilities"
+                          value={formData.capabilities}
+                          onChange={(e) => setFormData({...formData, capabilities: e.target.value})}
+                          placeholder="analysis, feedback, recommendations"
+                          className="bg-card/50 border-border/50 focus:border-primary/50"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {(configType === 'hook') && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="triggerEvents">Trigger Events</Label>
+                        <Input
+                          id="triggerEvents"
+                          value={formData.triggerEvents}
+                          onChange={(e) => setFormData({...formData, triggerEvents: e.target.value})}
+                          placeholder="git-push, deploy-complete, error-occurred"
+                          className="bg-card/50 border-border/50 focus:border-primary/50"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="actions">Actions</Label>
+                        <Input
+                          id="actions"
+                          value={formData.actions}
+                          onChange={(e) => setFormData({...formData, actions: e.target.value})}
+                          placeholder="send-notification, generate-report, update-status"
+                          className="bg-card/50 border-border/50 focus:border-primary/50"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {(configType === 'hook' || configType === 'mcp') && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="platforms">Platforms</Label>
+                        <Input
+                          id="platforms"
+                          value={formData.platforms}
+                          onChange={(e) => setFormData({...formData, platforms: e.target.value})}
+                          placeholder="Linux, Docker, AWS, Web"
+                          className="bg-card/50 border-border/50 focus:border-primary/50"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="requirements">Requirements</Label>
+                        <Input
+                          id="requirements"
+                          value={formData.requirements}
+                          onChange={(e) => setFormData({...formData, requirements: e.target.value})}
+                          placeholder="Node.js, API keys, network access"
+                          className="bg-card/50 border-border/50 focus:border-primary/50"
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   {/* Optional Links */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
