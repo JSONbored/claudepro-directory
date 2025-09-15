@@ -68,7 +68,7 @@ const Index = () => {
                 variant="outline" 
                 size="lg"
                 className="border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all duration-300"
-                onClick={() => window.open('https://github.com/modelcontextprotocol/servers', '_blank')}
+                onClick={() => window.open('https://github.com/JSONbored/claudepro-directory', '_blank')}
               >
                 <Github className="h-4 w-4 mr-2" />
                 View on GitHub

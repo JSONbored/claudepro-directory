@@ -38,7 +38,7 @@ const Community = () => {
     {
       title: 'GitHub Repository',
       description: 'Contribute to Claude Pro Directory',
-      url: 'https://github.com/modelcontextprotocol/servers',
+      url: 'https://github.com/JSONbored/claudepro-directory',
       icon: Github,
       badge: 'Open Source'
     },
@@ -56,7 +56,7 @@ const Community = () => {
     {
       title: 'GitHub Discussions',
       description: 'Technical discussions and feature requests',
-      url: 'https://github.com/modelcontextprotocol/servers/discussions',
+      url: 'https://github.com/JSONbored/claudepro-directory/discussions',
       icon: Github,
       members: '3,000+ discussions',
       color: 'bg-gray-500/10 text-gray-400 border-gray-500/20'
@@ -191,7 +191,7 @@ const Community = () => {
                 <Button 
                   variant="outline"
                   className="hover:bg-primary/5 hover:border-primary/30"
-                  onClick={() => window.open('https://github.com/modelcontextprotocol/servers', '_blank')}
+                  onClick={() => window.open('https://github.com/JSONbored/claudepro-directory', '_blank')}
                 >
                   <Github className="h-4 w-4 mr-2" />
                   View on GitHub

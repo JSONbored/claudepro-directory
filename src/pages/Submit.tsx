@@ -294,7 +294,7 @@ const Submit = () => {
                     <Button 
                       type="button" 
                       variant="outline"
-                      onClick={() => window.open('https://github.com/modelcontextprotocol/servers', '_blank')}
+                      onClick={() => window.open('https://github.com/JSONbored/claudepro-directory', '_blank')}
                       className="hover:bg-primary/5 hover:border-primary/30"
                     >
                       <Github className="h-4 w-4 mr-2" />
@@ -320,7 +320,7 @@ const Submit = () => {
                   <Button 
                     variant="outline"
                     className="justify-start h-auto p-4 hover:bg-primary/5 hover:border-primary/30"
-                    onClick={() => window.open('https://github.com/modelcontextprotocol/servers/issues/new', '_blank')}
+                    onClick={() => window.open('https://github.com/JSONbored/claudepro-directory/issues/new', '_blank')}
                   >
                     <Github className="h-5 w-5 mr-3" />
                     <div className="text-left">
@@ -332,7 +332,7 @@ const Submit = () => {
                   <Button 
                     variant="outline"
                     className="justify-start h-auto p-4 hover:bg-primary/5 hover:border-primary/30"
-                    onClick={() => window.open('https://github.com/modelcontextprotocol/servers/fork', '_blank')}
+                    onClick={() => window.open('https://github.com/JSONbored/claudepro-directory/fork', '_blank')}
                   >
                     <ExternalLink className="h-5 w-5 mr-3" />
                     <div className="text-left">

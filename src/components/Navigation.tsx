@@ -138,7 +138,7 @@ export const Navigation = () => {
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => window.open('https://github.com/modelcontextprotocol/servers', '_blank')}
+              onClick={() => window.open('https://github.com/JSONbored/claudepro-directory', '_blank')}
               className="hidden sm:flex hover:bg-primary/10 hover:text-primary"
             >
               <Github className="h-4 w-4 mr-2" />
@@ -190,7 +190,7 @@ export const Navigation = () => {
                     <Button 
                       variant="outline" 
                       className="w-full justify-start"
-                      onClick={() => window.open('https://github.com/modelcontextprotocol/servers', '_blank')}
+                      onClick={() => window.open('https://github.com/JSONbored/claudepro-directory', '_blank')}
                     >
                       <Github className="h-4 w-4 mr-2" />
                       View on GitHub
