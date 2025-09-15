@@ -114,7 +114,7 @@ export const Navigation = () => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
             </NavigationMenuList>
-          </NavigationMenu
+          </NavigationMenu>
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-3">

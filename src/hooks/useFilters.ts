@@ -1,6 +1,12 @@
 import { useState, useCallback } from 'react';
-import { Rule } from '@/data/rules';
-import { MCPServer } from '@/data/mcp';
+
+interface FilterableItem {
+  category: string;
+  tags: string[];
+  author: string;
+  popularity: number;
+  createdAt: string;
+}
 
 export type FilterOptions = {
   category: string;
@@ -36,7 +42,7 @@ export const useFilters = () => {
     });
   };
 
-  const applyFilters = useCallback((items: (Rule | MCPServer)[]) => {
+  const applyFilters = useCallback(<T extends FilterableItem>(items: T[]): T[] => {
     return items.filter(item => {
       // Category filter
       if (filters.category !== 'all' && item.category !== filters.category) {

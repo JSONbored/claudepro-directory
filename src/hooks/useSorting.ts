@@ -1,6 +1,12 @@
 import { useState, useCallback } from 'react';
-import { Rule } from '@/data/rules';
-import { MCPServer } from '@/data/mcp';
+
+interface SortableItem {
+  popularity: number;
+  createdAt: string;
+  author: string;
+  title?: string;
+  name?: string;
+}
 
 export type SortOption = 'popularity' | 'date' | 'name' | 'author';
 export type SortDirection = 'asc' | 'desc';
@@ -19,7 +25,7 @@ export const useSorting = () => {
     }
   };
 
-  const sortItems = useCallback((items: (Rule | MCPServer)[]) => {
+  const sortItems = useCallback(<T extends SortableItem>(items: T[]): T[] => {
     const sorted = [...items].sort((a, b) => {
       let aValue: any;
       let bValue: any;
@@ -34,8 +40,8 @@ export const useSorting = () => {
           bValue = new Date(b.createdAt).getTime();
           break;
         case 'name':
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
+          aValue = (a.title || a.name || '').toLowerCase();
+          bValue = (b.title || b.name || '').toLowerCase();
           break;
         case 'author':
           aValue = a.author.toLowerCase();
