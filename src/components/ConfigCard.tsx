@@ -38,10 +38,16 @@ export const ConfigCard = ({
   const [copied, setCopied] = useState(false);
   const displayTitle = title || name || 'Untitled';
 
+  // Map singular types to their routed base paths
+  const pathType = (t: ConfigCardProps['type']) => (
+    t === 'agent' ? 'agents' : t === 'command' ? 'commands' : t === 'hook' ? 'hooks' : t
+  );
+  const targetPath = `/${pathType(type)}/${slug}`;
+
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      await navigator.clipboard.writeText(`https://claudepro.directory/${type}/${slug}`);
+      await navigator.clipboard.writeText(`${window.location.origin}${targetPath}`);
       setCopied(true);
       toast({
         title: "Link copied!",
@@ -59,13 +65,12 @@ export const ConfigCard = ({
 
   const handleViewConfig = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/${type}/${slug}`);
+    navigate(targetPath);
   };
 
   const handleCardClick = () => {
-    navigate(`/${type}/${slug}`);
+    navigate(targetPath);
   };
-
   const getCategoryColor = (cat: string) => {
     const colors = {
       development: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
