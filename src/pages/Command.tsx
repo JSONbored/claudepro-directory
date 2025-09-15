@@ -284,9 +284,10 @@ const Command = () => {
           </Card>
         )}
 
-        {/* Related Configurations */}
+        {/* Related Commands */}
         {relatedCommands.length > 0 && (
-          <div className="mb-8">
+          <div className="mt-16">
+            <Separator className="mb-8" />
             <RelatedConfigs
               title="Related Commands"
               configs={relatedCommands}
