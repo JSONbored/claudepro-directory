@@ -4,6 +4,7 @@ import { ConfigCard } from '@/components/ConfigCard';
 import { AuthorCard } from '@/components/AuthorCard';
 import { FilterBar } from '@/components/FilterBar';
 import { SortDropdown } from '@/components/SortDropdown';
+import { SearchBar } from '@/components/SearchBar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -17,6 +18,8 @@ import { useSorting } from '@/hooks/useSorting';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('all');
+  const [searchResults, setSearchResults] = useState<(Rule | MCPServer)[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
   const { filters, updateFilter, resetFilters, applyFilters } = useFilters();
   const { sortBy, sortDirection, updateSort, sortItems } = useSorting();
   const featuredAuthors = getFeaturedAuthors();
@@ -34,26 +37,35 @@ const Index = () => {
     [...new Set(allConfigs.map(item => item.author))], [allConfigs]
   );
   
+  // Handle search results
+  const handleSearchResults = (results: (Rule | MCPServer)[]) => {
+    setSearchResults(results);
+    setHasSearched(results.length < allConfigs.length);
+  };
+
   // Apply filters and sorting based on active tab
   const processedConfigs = useMemo(() => {
     let configs: (Rule | MCPServer)[] = [];
     
+    // Use search results if user has searched, otherwise use all configs
+    const baseConfigs = hasSearched ? searchResults : allConfigs;
+    
     switch (activeTab) {
       case 'rules':
-        configs = rules;
+        configs = baseConfigs.filter(config => 'content' in config);
         break;
       case 'mcp':
-        configs = mcpServers;
+        configs = baseConfigs.filter(config => !('content' in config));
         break;
       case 'community':
         return []; // Community tab shows authors, not configs
       default:
-        configs = allConfigs;
+        configs = baseConfigs;
     }
     
     const filtered = applyFilters(configs);
     return sortItems(filtered);
-  }, [activeTab, filters, sortBy, sortDirection, rules, mcpServers, allConfigs, applyFilters, sortItems]);
+  }, [activeTab, filters, sortBy, sortDirection, searchResults, hasSearched, allConfigs, applyFilters, sortItems]);
 
   const getConfigType = (config: Rule | MCPServer): 'rule' | 'mcp' => {
     return 'content' in config ? 'rule' : 'mcp';
@@ -75,14 +87,12 @@ const Index = () => {
             </p>
             
             {/* Search Bar */}
-            <div className="max-w-xl mx-auto mb-16">
-              <div className="relative">
-                <input 
-                  type="text" 
-                  placeholder="Search for a rule or MCP server..."
-                  className="w-full px-6 py-4 text-lg bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
-                />
-              </div>
+            <div className="max-w-2xl mx-auto mb-16">
+              <SearchBar
+                data={allConfigs}
+                onFilteredResults={handleSearchResults}
+                placeholder="Search for rules, MCP servers, and more..."
+              />
             </div>
           </div>
         </div>
