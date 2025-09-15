@@ -83,7 +83,7 @@ const Rule = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <Button 
@@ -95,43 +95,40 @@ const Rule = () => {
             Back to Directory
           </Button>
 
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className={getCategoryColor(rule.category)}>
-                {rule.category}
-              </Badge>
-              <Badge variant="outline">Claude Rule</Badge>
+          <div className="flex items-start gap-4 mb-6">
+            <div className="p-3 bg-primary/10 rounded-lg">
+              <Copy className="h-8 w-8 text-primary" />
             </div>
-
-            <h1 className="text-3xl lg:text-4xl font-bold text-foreground">
-              {rule.name}
-            </h1>
-
-            <p className="text-lg text-muted-foreground">
-              {rule.description}
-            </p>
-
-            <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span>{rule.author}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>{new Date(rule.createdAt).toLocaleDateString()}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                <span>{rule.popularity}% popularity</span>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {rule.tags.map((tag) => (
-                <Badge key={tag} variant="outline" className="text-xs">
-                  {tag}
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold mb-2">{rule.name}</h1>
+              <p className="text-lg text-muted-foreground mb-4">{rule.description}</p>
+              
+              <div className="flex flex-wrap gap-2 mb-4">
+                <Badge variant="default" className={getCategoryColor(rule.category)}>
+                  {rule.category}
                 </Badge>
-              ))}
+                <Badge variant="outline">Claude Rule</Badge>
+                {rule.tags.map((tag) => (
+                  <Badge key={tag} variant="outline">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <User className="h-4 w-4" />
+                  {rule.author}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  {new Date(rule.createdAt).toLocaleDateString()}
+                </div>
+                <div className="flex items-center gap-1">
+                  <TrendingUp className="h-4 w-4" />
+                  Popularity: {rule.popularity}%
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -164,37 +161,69 @@ const Rule = () => {
           </Button>
         </div>
 
-        {/* Content */}
-        <Card className="card-gradient mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Rule Content</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCopyContent}
-                className="h-8 w-8 p-0"
-              >
-                <Copy className="h-3 w-3" />
-              </Button>
-            </CardTitle>
-            <CardDescription>
-              Copy this content to use as your Claude system prompt or .claudeconfig file
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <CodeHighlight
-              code={rule.content}
-              language="text"
-              title="Claude Rule Configuration"
-              showCopy={true}
-            />
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Content */}
+            <Card className="card-gradient">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Rule Content</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCopyContent}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Copy className="h-3 w-3" />
+                  </Button>
+                </CardTitle>
+                <CardDescription>
+                  Copy this content to use as your Claude system prompt or .claudeconfig file
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CodeHighlight
+                  code={rule.content}
+                  language="text"
+                  title="Claude Rule Configuration"
+                  showCopy={true}
+                />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Rule Info */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Rule Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Category</div>
+                  <Badge variant="secondary" className={getCategoryColor(rule.category)}>
+                    {rule.category}
+                  </Badge>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Popularity</div>
+                  <div className="text-sm">{rule.popularity}%</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Created</div>
+                  <div className="text-sm">{new Date(rule.createdAt).toLocaleDateString()}</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
 
         {/* Related Configurations */}
         {relatedConfigs.length > 0 && (
-          <div className="mb-8">
+          <div className="mt-16">
+            <Separator className="mb-8" />
             <RelatedConfigs configs={relatedConfigs} />
           </div>
         )}
