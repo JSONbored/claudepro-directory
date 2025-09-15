@@ -1,4 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,13 +17,19 @@ import {
   Settings,
   FileText,
   Play,
-  AlertTriangle
+  AlertTriangle,
+  Copy,
+  Check,
+  ExternalLink,
+  Github
 } from 'lucide-react';
 import { getHookBySlug, hooks } from '@/data/hooks';
+import { toast } from '@/hooks/use-toast';
 import NotFound from './NotFound';
 
 const Hook = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [copied, setCopied] = useState(false);
   
   if (!slug) {
     return <NotFound />;
@@ -37,6 +44,40 @@ const Hook = () => {
   const relatedHooks = hooks
     .filter(h => h.id !== hook.id && h.category === hook.category)
     .slice(0, 3);
+
+  const handleCopyContent = async () => {
+    try {
+      await navigator.clipboard.writeText(hook.content);
+      setCopied(true);
+      toast({
+        title: "Configuration copied!",
+        description: "The hook configuration has been copied to your clipboard.",
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy the configuration to clipboard.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Link copied!",
+        description: "The hook link has been copied to your clipboard.",
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy the link to clipboard.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -89,6 +130,34 @@ const Hook = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-wrap gap-3 mb-8">
+          <Button onClick={handleCopyContent} className="flex items-center gap-2">
+            {copied ? (
+              <>
+                <Check className="h-4 w-4" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <Copy className="h-4 w-4" />
+                Copy Configuration
+              </>
+            )}
+          </Button>
+          <Button variant="outline" onClick={handleCopyLink}>
+            <ExternalLink className="h-4 w-4 mr-2" />
+            Share Link
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => window.open(`https://github.com/JSONbored/claudepro-directory/blob/main/src/data/hooks/${hook.slug}.ts`, '_blank')}
+          >
+            <Github className="h-4 w-4 mr-2" />
+            Repository
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
