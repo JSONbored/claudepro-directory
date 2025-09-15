@@ -150,15 +150,13 @@ const Agent = () => {
             <ExternalLink className="h-4 w-4 mr-2" />
             Share Link
           </Button>
-          {agent.repository && (
-            <Button 
-              variant="outline" 
-              onClick={() => window.open(agent.repository!, '_blank')}
-            >
-              <Github className="h-4 w-4 mr-2" />
-              Repository
-            </Button>
-          )}
+          <Button 
+            variant="outline" 
+            onClick={() => window.open(`https://github.com/JSONbored/claudepro-directory/blob/main/src/data/agents/${agent.slug}.ts`, '_blank')}
+          >
+            <Github className="h-4 w-4 mr-2" />
+            Repository
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
