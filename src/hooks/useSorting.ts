@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { Rule } from '@/data/rules';
 import { MCPServer } from '@/data/mcp';
 
@@ -19,41 +19,39 @@ export const useSorting = () => {
     }
   };
 
-  const sortItems = (items: (Rule | MCPServer)[]) => {
-    return useMemo(() => {
-      const sorted = [...items].sort((a, b) => {
-        let aValue: any;
-        let bValue: any;
+  const sortItems = useCallback((items: (Rule | MCPServer)[]) => {
+    const sorted = [...items].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
 
-        switch (sortBy) {
-          case 'popularity':
-            aValue = a.popularity;
-            bValue = b.popularity;
-            break;
-          case 'date':
-            aValue = new Date(a.createdAt).getTime();
-            bValue = new Date(b.createdAt).getTime();
-            break;
-          case 'name':
-            aValue = a.name.toLowerCase();
-            bValue = b.name.toLowerCase();
-            break;
-          case 'author':
-            aValue = a.author.toLowerCase();
-            bValue = b.author.toLowerCase();
-            break;
-          default:
-            return 0;
-        }
+      switch (sortBy) {
+        case 'popularity':
+          aValue = a.popularity;
+          bValue = b.popularity;
+          break;
+        case 'date':
+          aValue = new Date(a.createdAt).getTime();
+          bValue = new Date(b.createdAt).getTime();
+          break;
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'author':
+          aValue = a.author.toLowerCase();
+          bValue = b.author.toLowerCase();
+          break;
+        default:
+          return 0;
+      }
 
-        if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-        if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
-        return 0;
-      });
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
 
-      return sorted;
-    }, [items, sortBy, sortDirection]);
-  };
+    return sorted;
+  }, [sortBy, sortDirection]);
 
   return {
     sortBy,

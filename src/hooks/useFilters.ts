@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { Rule } from '@/data/rules';
 import { MCPServer } from '@/data/mcp';
 
@@ -36,57 +36,55 @@ export const useFilters = () => {
     });
   };
 
-  const applyFilters = (items: (Rule | MCPServer)[]) => {
-    return useMemo(() => {
-      return items.filter(item => {
-        // Category filter
-        if (filters.category !== 'all' && item.category !== filters.category) {
-          return false;
+  const applyFilters = useCallback((items: (Rule | MCPServer)[]) => {
+    return items.filter(item => {
+      // Category filter
+      if (filters.category !== 'all' && item.category !== filters.category) {
+        return false;
+      }
+
+      // Tags filter
+      if (filters.tags.length > 0) {
+        const hasMatchingTag = filters.tags.some(tag => 
+          item.tags.includes(tag)
+        );
+        if (!hasMatchingTag) return false;
+      }
+
+      // Author filter
+      if (filters.author !== 'all' && item.author !== filters.author) {
+        return false;
+      }
+
+      // Popularity range filter
+      if (item.popularity < filters.popularityRange[0] || 
+          item.popularity > filters.popularityRange[1]) {
+        return false;
+      }
+
+      // Date range filter
+      if (filters.dateRange !== 'all') {
+        const itemDate = new Date(item.createdAt);
+        const now = new Date();
+        const diffTime = now.getTime() - itemDate.getTime();
+        const diffDays = diffTime / (1000 * 3600 * 24);
+
+        switch (filters.dateRange) {
+          case 'week':
+            if (diffDays > 7) return false;
+            break;
+          case 'month':
+            if (diffDays > 30) return false;
+            break;
+          case 'year':
+            if (diffDays > 365) return false;
+            break;
         }
+      }
 
-        // Tags filter
-        if (filters.tags.length > 0) {
-          const hasMatchingTag = filters.tags.some(tag => 
-            item.tags.includes(tag)
-          );
-          if (!hasMatchingTag) return false;
-        }
-
-        // Author filter
-        if (filters.author !== 'all' && item.author !== filters.author) {
-          return false;
-        }
-
-        // Popularity range filter
-        if (item.popularity < filters.popularityRange[0] || 
-            item.popularity > filters.popularityRange[1]) {
-          return false;
-        }
-
-        // Date range filter
-        if (filters.dateRange !== 'all') {
-          const itemDate = new Date(item.createdAt);
-          const now = new Date();
-          const diffTime = now.getTime() - itemDate.getTime();
-          const diffDays = diffTime / (1000 * 3600 * 24);
-
-          switch (filters.dateRange) {
-            case 'week':
-              if (diffDays > 7) return false;
-              break;
-            case 'month':
-              if (diffDays > 30) return false;
-              break;
-            case 'year':
-              if (diffDays > 365) return false;
-              break;
-          }
-        }
-
-        return true;
-      });
-    }, [items, filters]);
-  };
+      return true;
+    });
+  }, [filters]);
 
   return {
     filters,

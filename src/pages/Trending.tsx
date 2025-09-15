@@ -10,8 +10,8 @@ const Trending = () => {
   const trendingConfigs = allConfigs.slice(0, 12);
   
   // Most popular rules and MCPs
-  const topRules = rules.sort((a, b) => b.popularity - a.popularity).slice(0, 6);
-  const topMcps = mcpServers.sort((a, b) => b.popularity - a.popularity).slice(0, 6);
+  const topRules = [...rules].sort((a, b) => b.popularity - a.popularity).slice(0, 6);
+  const topMcps = [...mcpServers].sort((a, b) => b.popularity - a.popularity).slice(0, 6);
 
   const getConfigType = (config: any): 'rule' | 'mcp' => {
     return 'content' in config ? 'rule' : 'mcp';
