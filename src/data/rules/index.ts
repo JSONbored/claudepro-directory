@@ -11,7 +11,7 @@ export interface Rule {
   createdAt: string;
 }
 
-// Import all rule files
+// Import all rules - keeping existing structure for now
 import { typescriptRule } from './typescript';
 import { reactRule } from './react';
 import { nextjsRule } from './nextjs';
