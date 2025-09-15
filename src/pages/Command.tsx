@@ -46,17 +46,17 @@ const Command = () => {
 
   const handleCopyContent = async () => {
     try {
-      await navigator.clipboard.writeText(command.content);
+      await navigator.clipboard.writeText(command.syntax);
       setCopied(true);
       toast({
-        title: "Configuration copied!",
-        description: "The command configuration has been copied to your clipboard.",
+        title: "Copied!",
+        description: "Command syntax has been copied to your clipboard.",
       });
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       toast({
         title: "Failed to copy",
-        description: "Could not copy the configuration to clipboard.",
+        description: "Could not copy to clipboard.",
         variant: "destructive",
       });
     }
@@ -174,6 +174,7 @@ const Command = () => {
                 <CodeHighlight
                   code={command.syntax}
                   language="bash"
+                  showCopy={true}
                 />
               </CardContent>
             </Card>
@@ -286,48 +287,6 @@ const Command = () => {
               </Card>
             )}
 
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  className="w-full"
-                  onClick={() => navigator.clipboard.writeText(command.syntax)}
-                >
-                  Copy Command
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => navigator.clipboard.writeText(window.location.href)}
-                >
-                  Share Link
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => window.open(`https://github.com/JSONbored/claudepro-directory/blob/main/src/data/commands/${command.slug}.ts`, '_blank')}
-                >
-                  Repository
-                </Button>
-                {command.repository && (
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => window.open(command.repository, '_blank')}
-                  >
-                    Documentation
-                  </Button>
-                )}
-                <Button variant="outline" className="w-full" asChild>
-                  <Link to="/submit">
-                    Submit Improvement
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
           </div>
         </div>
 

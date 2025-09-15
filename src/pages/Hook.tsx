@@ -318,48 +318,6 @@ const Hook = () => {
               </Card>
             )}
 
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  className="w-full"
-                  onClick={() => navigator.clipboard.writeText(hook.content)}
-                >
-                  Copy Hook Configuration
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => navigator.clipboard.writeText(window.location.href)}
-                >
-                  Share Link
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => window.open(`https://github.com/JSONbored/claudepro-directory/blob/main/src/data/hooks/${hook.slug}.ts`, '_blank')}
-                >
-                  Repository
-                </Button>
-                {hook.repository && (
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => window.open(hook.repository, '_blank')}
-                  >
-                    Documentation
-                  </Button>
-                )}
-                <Button variant="outline" className="w-full" asChild>
-                  <Link to="/submit">
-                    Submit Improvement
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
           </div>
         </div>
 
