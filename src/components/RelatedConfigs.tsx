@@ -27,20 +27,22 @@ export const RelatedConfigs = <T extends { id: string } = any>({
         </Badge>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {configs.map((config: any) => (
-          <div key={config.id} className="relative min-w-0">
+          <div key={config.id} className="relative">
             {typeof config.similarity === 'number' && config.similarity > 0.7 && (
-              <div className="absolute -top-2 -right-2 z-10">
-                <Badge variant="default" className="bg-primary text-primary-foreground text-xs">
+              <div className="absolute -top-3 -right-3 z-20">
+                <Badge variant="default" className="bg-primary text-primary-foreground text-xs shadow-sm">
                   High Match
                 </Badge>
               </div>
             )}
-            <ConfigCard
-              {...config}
-              type={type ?? (config.type as any)}
-            />
+            <div className="h-full">
+              <ConfigCard
+                {...config}
+                type={type ?? (config.type as any)}
+              />
+            </div>
           </div>
         ))}
       </div>
