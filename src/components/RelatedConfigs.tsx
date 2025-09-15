@@ -1,17 +1,20 @@
 import { ConfigCard } from '@/components/ConfigCard';
 import { Badge } from '@/components/ui/badge';
 import { Lightbulb } from 'lucide-react';
-import { RecommendationItem } from '@/lib/recommendations';
 
-interface RelatedConfigsProps {
-  configs: RecommendationItem[];
+type RelatedType = 'rule' | 'mcp' | 'agent' | 'command' | 'hook';
+
+interface RelatedConfigsProps<T = any> {
+  configs: T[];
   title?: string;
+  type?: RelatedType;
 }
 
-export const RelatedConfigs = ({ 
+export const RelatedConfigs = <T extends { id: string } = any>({ 
   configs, 
-  title = "Related Configurations" 
-}: RelatedConfigsProps) => {
+  title = "Related Configurations",
+  type
+}: RelatedConfigsProps<T>) => {
   if (configs.length === 0) return null;
 
   return (
@@ -25,9 +28,9 @@ export const RelatedConfigs = ({
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {configs.map((config) => (
+        {configs.map((config: any) => (
           <div key={config.id} className="relative">
-            {config.similarity && config.similarity > 0.7 && (
+            {typeof config.similarity === 'number' && config.similarity > 0.7 && (
               <div className="absolute -top-2 -right-2 z-10">
                 <Badge variant="default" className="bg-primary text-primary-foreground text-xs">
                   High Match
@@ -36,7 +39,7 @@ export const RelatedConfigs = ({
             )}
             <ConfigCard
               {...config}
-              type={config.type}
+              type={type ?? (config.type as any)}
             />
           </div>
         ))}

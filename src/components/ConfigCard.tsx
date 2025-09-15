@@ -16,7 +16,7 @@ interface ConfigCardProps {
   slug: string;
   category: string;
   popularity: number;
-  type: 'rule' | 'mcp';
+  type: 'rule' | 'mcp' | 'agent' | 'command' | 'hook';
   repository?: string;
   documentation?: string;
 }

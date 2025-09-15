@@ -15,6 +15,12 @@ import Submit from "./pages/Submit";
 import Rule from "./pages/Rule";
 import McpServer from "./pages/McpServer";
 import NotFound from "./pages/NotFound";
+import Agents from "./pages/Agents";
+import Agent from "./pages/Agent";
+import Commands from "./pages/Commands";
+import Command from "./pages/Command";
+import Hooks from "./pages/Hooks";
+import Hook from "./pages/Hook";
 
 const queryClient = new QueryClient();
 
@@ -28,14 +34,20 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/rules" element={<Rules />} />
+          <Route path="/rule/:slug" element={<Rule />} />
           <Route path="/mcp" element={<McpServers />} />
+          <Route path="/mcp/:slug" element={<McpServer />} />
+          <Route path="/agents" element={<Agents />} />
+          <Route path="/agents/:slug" element={<Agent />} />
+          <Route path="/commands" element={<Commands />} />
+          <Route path="/commands/:slug" element={<Command />} />
+          <Route path="/hooks" element={<Hooks />} />
+          <Route path="/hooks/:slug" element={<Hook />} />
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/jobs/:slug" element={<Job />} />
           <Route path="/trending" element={<Trending />} />
           <Route path="/community" element={<Community />} />
           <Route path="/submit" element={<Submit />} />
-          <Route path="/rule/:slug" element={<Rule />} />
-          <Route path="/mcp/:slug" element={<McpServer />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

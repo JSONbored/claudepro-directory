@@ -15,16 +15,10 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { 
-  Sparkles, 
-  BookOpen, 
-  Server, 
-  TrendingUp, 
-  Users, 
-  Lightbulb,
+  Sparkles,
   Menu,
   Github,
-  ExternalLink,
-  Briefcase
+  ExternalLink
 } from 'lucide-react';
 
 export const Navigation = () => {
@@ -77,41 +71,26 @@ export const Navigation = () => {
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList className="space-x-6">
               <NavigationMenuItem>
-                <NavLink href="/rules">
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="h-4 w-4" />
-                    Rules
-                  </div>
-                </NavLink>
+                <NavLink href="/rules">Rules</NavLink>
               </NavigationMenuItem>
-              
               <NavigationMenuItem>
-                <NavLink href="/mcp">
-                  <div className="flex items-center gap-2">
-                    <Server className="h-4 w-4" />
-                    MCP Servers
-                  </div>
-                </NavLink>
+                <NavLink href="/mcp">MCP Servers</NavLink>
               </NavigationMenuItem>
-
               <NavigationMenuItem>
-                <NavLink href="/jobs">
-                  <div className="flex items-center gap-2">
-                    <Briefcase className="h-4 w-4" />
-                    Jobs
-                  </div>
-                </NavLink>
+                <NavLink href="/agents">Agents</NavLink>
               </NavigationMenuItem>
-
               <NavigationMenuItem>
-                <NavLink href="/trending">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4" />
-                    Trending
-                  </div>
-                </NavLink>
+                <NavLink href="/commands">Commands</NavLink>
               </NavigationMenuItem>
-
+              <NavigationMenuItem>
+                <NavLink href="/hooks">Hooks</NavLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavLink href="/jobs">Jobs</NavLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavLink href="/trending">Trending</NavLink>
+              </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="text-muted-foreground hover:text-primary">
                   More
@@ -119,20 +98,14 @@ export const Navigation = () => {
                 <NavigationMenuContent>
                   <div className="grid gap-3 p-4 w-48">
                     <NavLink href="/community" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        Community
-                      </div>
+                      <div>Community</div>
                       <div className="text-xs text-muted-foreground">
                         Join the Claude community
                       </div>
                     </NavLink>
                     
                     <NavLink href="/submit" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                      <div className="flex items-center gap-2">
-                        <Lightbulb className="h-4 w-4" />
-                        Submit Config
-                      </div>
+                      <div>Submit Config</div>
                       <div className="text-xs text-muted-foreground">
                         Share your configurations
                       </div>
@@ -141,7 +114,7 @@ export const Navigation = () => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
             </NavigationMenuList>
-          </NavigationMenu>
+          </NavigationMenu
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-3">
@@ -169,34 +142,40 @@ export const Navigation = () => {
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                 <div className="flex flex-col space-y-4 mt-6">
-                  <NavLink href="/rules" className="flex items-center gap-3 text-base">
-                    <BookOpen className="h-5 w-5" />
+                  <NavLink href="/rules" className="text-base">
                     Claude Rules
                   </NavLink>
                   
-                  <NavLink href="/mcp" className="flex items-center gap-3 text-base">
-                    <Server className="h-5 w-5" />
+                  <NavLink href="/mcp" className="text-base">
                     MCP Servers
                   </NavLink>
 
-                  <NavLink href="/jobs" className="flex items-center gap-3 text-base">
-                    <Briefcase className="h-5 w-5" />
+                  <NavLink href="/agents" className="text-base">
+                    Agents
+                  </NavLink>
+
+                  <NavLink href="/commands" className="text-base">
+                    Commands
+                  </NavLink>
+
+                  <NavLink href="/hooks" className="text-base">
+                    Hooks
+                  </NavLink>
+
+                  <NavLink href="/jobs" className="text-base">
                     Jobs
                   </NavLink>
 
-                  <NavLink href="/trending" className="flex items-center gap-3 text-base">
-                    <TrendingUp className="h-5 w-5" />
+                  <NavLink href="/trending" className="text-base">
                     Trending
                   </NavLink>
 
                   <div className="border-t border-border pt-4 space-y-4">
-                    <NavLink href="/community" className="flex items-center gap-3 text-base">
-                      <Users className="h-5 w-5" />
+                    <NavLink href="/community" className="text-base">
                       Community
                     </NavLink>
                     
-                    <NavLink href="/submit" className="flex items-center gap-3 text-base">
-                      <Lightbulb className="h-5 w-5" />
+                    <NavLink href="/submit" className="text-base">
                       Submit Config
                     </NavLink>
                   </div>

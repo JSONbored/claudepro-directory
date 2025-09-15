@@ -4,12 +4,18 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Search, X, Filter } from 'lucide-react';
 import Fuse from 'fuse.js';
-import { Rule } from '@/data/rules';
-import { MCPServer } from '@/data/mcp';
+interface SearchableItem {
+  title?: string;
+  name?: string;
+  description: string;
+  tags: string[];
+  category: string;
+  popularity: number;
+}
 
-interface SearchBarProps {
-  data: (Rule | MCPServer)[];
-  onFilteredResults: (results: (Rule | MCPServer)[]) => void;
+interface SearchBarProps<T extends SearchableItem = SearchableItem> {
+  data: T[];
+  onFilteredResults: (results: T[]) => void;
   placeholder?: string;
 }
 
@@ -31,15 +37,16 @@ const categories = [
 const fuseOptions = {
   keys: [
     { name: 'title', weight: 0.4 },
+    { name: 'name', weight: 0.4 },
     { name: 'description', weight: 0.3 },
     { name: 'tags', weight: 0.2 },
-    { name: 'category', weight: 0.1 }
+    { name: 'category', weight: 0.1 },
   ],
   threshold: 0.3,
   includeScore: true,
 };
 
-export const SearchBar = ({ data, onFilteredResults, placeholder = "Search configs..." }: SearchBarProps) => {
+export const SearchBar = <T extends SearchableItem = SearchableItem>({ data, onFilteredResults, placeholder = "Search..." }: SearchBarProps<T>) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
@@ -147,7 +154,7 @@ export const SearchBar = ({ data, onFilteredResults, placeholder = "Search confi
 
       {/* Results Count */}
       <div className="text-sm text-muted-foreground">
-        {filteredResults.length} config{filteredResults.length !== 1 ? 's' : ''} found
+        {filteredResults.length} result{filteredResults.length !== 1 ? 's' : ''} found
         {hasActiveFilters && (
           <span className="ml-2">
             • <button onClick={clearFilters} className="text-primary hover:underline">Clear filters</button>
