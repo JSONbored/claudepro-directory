@@ -4,6 +4,7 @@ import { FilterBar } from '@/components/FilterBar';
 import { SortDropdown } from '@/components/SortDropdown';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BookOpen, Server, Sparkles, Github, ExternalLink } from 'lucide-react';
 import { rules, Rule } from '@/data/rules';
