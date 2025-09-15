@@ -16,6 +16,7 @@ export interface Hook {
   configuration: HookConfig[];
   platforms?: string[];
   requirements?: string[];
+  repository?: string;
 }
 
 export interface HookAction {
@@ -144,7 +145,8 @@ Perfect for maintaining code quality and preventing issues before they reach the
       'Git repository access',
       'CI/CD pipeline integration',
       'Static analysis tools'
-    ]
+    ],
+    repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/hooks/git-commit-analyzer.md'
   },
   {
     id: '2',
@@ -248,7 +250,8 @@ Ideal for marketing teams, content creators, and agencies managing multiple bran
         description: 'Brand guidelines for content validation'
       }
     ],
-    platforms: ['Hootsuite', 'Buffer', 'Sprout Social', 'Native APIs']
+    platforms: ['Hootsuite', 'Buffer', 'Sprout Social', 'Native APIs'],
+    repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/hooks/content-publishing-pipeline.md'
   },
   {
     id: '3',
@@ -351,7 +354,8 @@ Essential for maintaining high availability and performance in production enviro
       'System access permissions',
       'Monitoring tools integration',
       'Alert routing configuration'
-    ]
+    ],
+    repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/hooks/system-health-monitor.md'
   },
   {
     id: '4',
@@ -457,7 +461,8 @@ Perfect for protecting APIs from abuse while maintaining optimal performance for
       'API gateway access',
       'Traffic monitoring tools',
       'Security incident response'
-    ]
+    ],
+    repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/hooks/api-rate-limit-guardian.md'
   },
   {
     id: '5',
@@ -564,7 +569,8 @@ Essential for maintaining business continuity and data protection compliance.`,
       'Database access credentials',
       'Storage infrastructure',
       'Encryption key management'
-    ]
+    ],
+    repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/hooks/database-backup-orchestrator.md'
   }
 ];
 

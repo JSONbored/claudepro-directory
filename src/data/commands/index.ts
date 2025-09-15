@@ -15,6 +15,7 @@ export interface Command {
   parameters: CommandParameter[];
   examples: CommandExample[];
   platforms?: string[];
+  repository?: string;
 }
 
 export interface CommandParameter {
@@ -115,7 +116,8 @@ Perfect for code reviews, technical debt assessment, and continuous improvement.
         description: 'Focus on security vulnerabilities with detailed scanning'
       }
     ],
-    platforms: ['VS Code', 'GitHub', 'GitLab', 'CLI']
+    platforms: ['VS Code', 'GitHub', 'GitLab', 'CLI'],
+    repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/commands/analyze-code.md'
   },
   {
     id: '2',
@@ -196,7 +198,8 @@ Ideal for research, meeting notes, long articles, and document review.`,
         command: '/summarize meeting-notes.txt --format=executive --length=detailed',
         description: 'Generate an executive summary from meeting notes'
       }
-    ]
+    ],
+    repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/commands/summarize.md'
   },
   {
     id: '3',
@@ -281,7 +284,8 @@ Perfect for TDD workflows and improving code coverage.`,
         command: '/generate-tests calculator.py --coverage-target=95 --include-edge-cases=true',
         description: 'Generate comprehensive tests with 95% coverage target'
       }
-    ]
+    ],
+    repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/commands/generate-tests.md'
   },
   {
     id: '4',
@@ -358,7 +362,8 @@ Perfect for maintaining fast, responsive applications at scale.`,
         description: 'Optimize database queries and schemas'
       }
     ],
-    platforms: ['Web', 'Node.js', 'React', 'Vue', 'Angular']
+    platforms: ['Web', 'Node.js', 'React', 'Vue', 'Angular'],
+    repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/commands/optimize-performance.md'
   },
   {
     id: '5',
@@ -441,7 +446,8 @@ Ensures reliable, safe deployments with minimal manual intervention.`,
         description: 'Deploy with canary release and auto-rollback'
       }
     ],
-    platforms: ['AWS', 'GCP', 'Azure', 'Kubernetes', 'Docker']
+    platforms: ['AWS', 'GCP', 'Azure', 'Kubernetes', 'Docker'],
+    repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/commands/deploy-app.md'
   }
 ];
 

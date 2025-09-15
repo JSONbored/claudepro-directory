@@ -10,7 +10,7 @@ export const filesystemMcp: MCPServer = {
   category: 'file-system',
   popularity: 91,
   createdAt: '2024-01-15',
-  repository: 'https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem',
+  repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/mcp/filesystem.md',
   documentation: 'https://modelcontextprotocol.io/servers/filesystem',
   config: `{
   "mcpServers": {

@@ -15,6 +15,7 @@ export interface Agent {
   useCases: string[];
   requirements?: string[];
   integrations?: string[];
+  repository?: string;
 }
 
 export const agents: Agent[] = [
@@ -78,7 +79,8 @@ Always be constructive and educational in your feedback.`,
       'Understanding of target programming language',
       'Knowledge of project context'
     ],
-    integrations: ['GitHub', 'GitLab', 'Bitbucket', 'IDE plugins']
+    integrations: ['GitHub', 'GitLab', 'Bitbucket', 'IDE plugins'],
+    repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/agents/code-review-assistant.md'
   },
   {
     id: '2',
@@ -138,7 +140,8 @@ Always maintain academic rigor and cite sources appropriately.`,
       'Clear research objectives',
       'Access to relevant databases',
       'Understanding of subject domain'
-    ]
+    ],
+    repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/agents/research-assistant.md'
   },
   {
     id: '3',
@@ -195,7 +198,8 @@ Always create content that is engaging, valuable, and authentic to the brand voi
       'Email marketing',
       'Product marketing',
       'Brand storytelling'
-    ]
+    ],
+    repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/agents/content-creator.md'
   },
   {
     id: '4',
@@ -259,7 +263,8 @@ Always prioritize clarity and usability for the target audience.`,
       'Internal developer tools',
       'Product documentation',
       'Training materials'
-    ]
+    ],
+    repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/agents/technical-documentation-writer.md'
   },
   {
     id: '5',
@@ -324,7 +329,8 @@ Always focus on practical business value and clear communication of findings.`,
       'Performance analysis',
       'Customer insights',
       'Financial analysis'
-    ]
+    ],
+    repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/agents/data-analysis-assistant.md'
   }
 ];
 

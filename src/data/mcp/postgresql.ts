@@ -10,7 +10,7 @@ export const postgresqlMcp: MCPServer = {
   category: 'database',
   popularity: 95,
   createdAt: '2024-01-15',
-  repository: 'https://github.com/modelcontextprotocol/servers/tree/main/src/postgresql',
+  repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/mcp/postgresql.md',
   documentation: 'https://modelcontextprotocol.io/servers/postgresql',
   config: `{
   "mcpServers": {
