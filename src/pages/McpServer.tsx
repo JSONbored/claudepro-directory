@@ -1,0 +1,269 @@
+import { useParams, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft, Copy, Check, Calendar, User, TrendingUp, ExternalLink, Github } from 'lucide-react';
+import { getMcpBySlug } from '@/data/mcp';
+import { toast } from '@/hooks/use-toast';
+
+const McpServer = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const [copied, setCopied] = useState(false);
+
+  const mcp = slug ? getMcpBySlug(slug) : null;
+
+  if (!mcp) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">MCP Server Not Found</h1>
+          <p className="text-muted-foreground mb-6">The requested MCP server could not be found.</p>
+          <Button onClick={() => navigate('/')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const handleCopyConfig = async () => {
+    try {
+      await navigator.clipboard.writeText(mcp.config);
+      setCopied(true);
+      toast({
+        title: "Configuration copied!",
+        description: "The MCP server configuration has been copied to your clipboard.",
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy the configuration to clipboard.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Link copied!",
+        description: "The MCP server link has been copied to your clipboard.",
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy the link to clipboard.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    const colors = {
+      database: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
+      api: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200',
+      'file-system': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+      ai: 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200',
+      productivity: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
+      development: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+      automation: 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200',
+      other: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
+    };
+    return colors[category as keyof typeof colors] || colors.other;
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Header */}
+        <div className="mb-8">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/')}
+            className="mb-6"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Directory
+          </Button>
+
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary" className={getCategoryColor(mcp.category)}>
+                {mcp.category}
+              </Badge>
+              <Badge variant="outline">MCP Server</Badge>
+            </div>
+
+            <h1 className="text-3xl lg:text-4xl font-bold text-foreground">
+              {mcp.name}
+            </h1>
+
+            <p className="text-lg text-muted-foreground">
+              {mcp.description}
+            </p>
+
+            <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span>{mcp.author}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <span>{new Date(mcp.createdAt).toLocaleDateString()}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                <span>{mcp.popularity}% popularity</span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {mcp.tags.map((tag) => (
+                <Badge key={tag} variant="outline" className="text-xs">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-wrap gap-3 mb-8">
+          <Button onClick={handleCopyConfig} className="flex items-center gap-2">
+            {copied ? (
+              <>
+                <Check className="h-4 w-4" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <Copy className="h-4 w-4" />
+                Copy Config
+              </>
+            )}
+          </Button>
+          <Button variant="outline" onClick={handleCopyLink}>
+            <ExternalLink className="h-4 w-4 mr-2" />
+            Share Link
+          </Button>
+          {mcp.repository && (
+            <Button 
+              variant="outline" 
+              onClick={() => window.open(mcp.repository, '_blank')}
+            >
+              <Github className="h-4 w-4 mr-2" />
+              Repository
+            </Button>
+          )}
+          {mcp.documentation && (
+            <Button 
+              variant="outline" 
+              onClick={() => window.open(mcp.documentation, '_blank')}
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Documentation
+            </Button>
+          )}
+        </div>
+
+        {/* Configuration */}
+        <Card className="card-gradient mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Configuration</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCopyConfig}
+                className="h-8 w-8 p-0"
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
+            </CardTitle>
+            <CardDescription>
+              Add this configuration to your Claude Desktop app's MCP settings
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="relative">
+              <pre className="whitespace-pre-wrap font-mono text-sm bg-muted/30 p-6 rounded-lg border overflow-x-auto">
+                <code>{mcp.config}</code>
+              </pre>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Installation Instructions */}
+        <Card className="card-gradient">
+          <CardHeader>
+            <CardTitle>Installation Instructions</CardTitle>
+            <CardDescription>
+              How to set up this MCP server with Claude Desktop
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <h4 className="font-semibold">1. Locate your Claude Desktop config file:</h4>
+              <div className="bg-muted/30 p-3 rounded text-sm font-mono">
+                <div><strong>macOS:</strong> ~/Library/Application Support/Claude/claude_desktop_config.json</div>
+                <div><strong>Windows:</strong> %APPDATA%\Claude\claude_desktop_config.json</div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="font-semibold">2. Add the configuration:</h4>
+              <p className="text-sm text-muted-foreground">
+                Copy the configuration above and merge it into your existing config file.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="font-semibold">3. Restart Claude Desktop:</h4>
+              <p className="text-sm text-muted-foreground">
+                Completely quit and restart Claude Desktop for the changes to take effect.
+              </p>
+            </div>
+
+            {mcp.documentation && (
+              <div className="space-y-2">
+                <h4 className="font-semibold">4. Additional Setup:</h4>
+                <p className="text-sm text-muted-foreground">
+                  Check the{' '}
+                  <button 
+                    onClick={() => window.open(mcp.documentation, '_blank')}
+                    className="text-primary hover:underline"
+                  >
+                    official documentation
+                  </button>
+                  {' '}for any additional configuration steps.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Footer */}
+        <div className="mt-8 pt-8 border-t border-border">
+          <div className="text-center text-sm text-muted-foreground">
+            <p>
+              Found this MCP server helpful?{' '}
+              <button 
+                onClick={handleCopyLink}
+                className="text-primary hover:underline"
+              >
+                Share it with others
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default McpServer;
