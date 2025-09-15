@@ -4,7 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Copy, Check, Calendar, User, TrendingUp, ExternalLink, Github } from 'lucide-react';
-import { getMcpBySlug } from '@/data/mcp';
+import { getMcpBySlug, mcpServers } from '@/data/mcp';
+import { rules } from '@/data/rules';
+import { RelatedConfigs } from '@/components/RelatedConfigs';
+import { getRelatedConfigs } from '@/lib/recommendations';
 import { toast } from '@/hooks/use-toast';
 
 const McpServer = () => {
@@ -13,6 +16,7 @@ const McpServer = () => {
   const [copied, setCopied] = useState(false);
 
   const mcp = slug ? getMcpBySlug(slug) : null;
+  const relatedConfigs = mcp ? getRelatedConfigs(mcp, rules, mcpServers, 4) : [];
 
   if (!mcp) {
     return (
@@ -246,6 +250,13 @@ const McpServer = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Related Configurations */}
+        {relatedConfigs.length > 0 && (
+          <div className="mb-8">
+            <RelatedConfigs configs={relatedConfigs} />
+          </div>
+        )}
 
         {/* Footer */}
         <div className="mt-8 pt-8 border-t border-border">

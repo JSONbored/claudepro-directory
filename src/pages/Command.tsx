@@ -80,7 +80,7 @@ const Command = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
         <div className="mb-8">
           <Button variant="ghost" asChild className="mb-4">
@@ -159,141 +159,134 @@ const Command = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Syntax */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Code className="h-5 w-5" />
-                  Command Syntax
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CodeHighlight
-                  code={command.syntax}
-                  language="bash"
-                  showCopy={true}
-                />
-              </CardContent>
-            </Card>
+        {/* Syntax */}
+        <Card className="card-gradient mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Code className="h-5 w-5" />
+              Command Syntax
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CodeHighlight
+              code={command.syntax}
+              language="bash"
+              showCopy={true}
+            />
+          </CardContent>
+        </Card>
 
-            {/* Description */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Description
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="prose prose-slate dark:prose-invert max-w-none">
-                  <div dangerouslySetInnerHTML={{ __html: command.content.replace(/\n/g, '<br>') }} />
-                </div>
-              </CardContent>
-            </Card>
+        {/* Description */}
+        <Card className="card-gradient mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Description
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="prose prose-slate dark:prose-invert max-w-none">
+              <div dangerouslySetInnerHTML={{ __html: command.content.replace(/\n/g, '<br>') }} />
+            </div>
+          </CardContent>
+        </Card>
 
-            {/* Parameters */}
-            {command.parameters && command.parameters.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5" />
-                    Parameters
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {command.parameters.map((param, index) => (
-                      <div key={index} className="border rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <code className="bg-muted px-2 py-1 rounded text-sm">
-                            {param.name}
-                          </code>
-                          <Badge variant={param.required ? 'destructive' : 'secondary'} className="text-xs">
-                            {param.required ? 'Required' : 'Optional'}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {param.type}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-2">{param.description}</p>
-                        {param.default !== undefined && (
-                          <p className="text-xs text-muted-foreground">
-                            Default: <code className="bg-muted px-1 rounded">{String(param.default)}</code>
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Examples */}
-            {command.examples && command.examples.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Play className="h-5 w-5" />
-                    Examples
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {command.examples.map((example, index) => (
-                      <div key={index} className="space-y-2">
-                        <h4 className="font-medium">{example.title}</h4>
-                        <p className="text-sm text-muted-foreground">{example.description}</p>
-                        <CodeHighlight
-                          code={example.command}
-                          language="bash"
-                        />
-                        {example.output && (
-                          <div>
-                            <p className="text-sm font-medium mb-1">Output:</p>
-                            <CodeHighlight
-                              code={example.output}
-                              language="text"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Platforms */}
-            {command.platforms && command.platforms.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Supported Platforms</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {command.platforms.map((platform) => (
-                      <Badge key={platform} variant="outline">
-                        {platform}
+        {/* Parameters */}
+        {command.parameters && command.parameters.length > 0 && (
+          <Card className="card-gradient mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Parameters
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {command.parameters.map((param, index) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <code className="bg-muted px-2 py-1 rounded text-sm">
+                        {param.name}
+                      </code>
+                      <Badge variant={param.required ? 'destructive' : 'secondary'} className="text-xs">
+                        {param.required ? 'Required' : 'Optional'}
                       </Badge>
-                    ))}
+                      <Badge variant="outline" className="text-xs">
+                        {param.type}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">{param.description}</p>
+                    {param.default !== undefined && (
+                      <p className="text-xs text-muted-foreground">
+                        Default: <code className="bg-muted px-1 rounded">{String(param.default)}</code>
+                      </p>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-          </div>
-        </div>
+        {/* Examples */}
+        {command.examples && command.examples.length > 0 && (
+          <Card className="card-gradient mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Play className="h-5 w-5" />
+                Examples
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {command.examples.map((example, index) => (
+                  <div key={index} className="space-y-2">
+                    <h4 className="font-medium">{example.title}</h4>
+                    <p className="text-sm text-muted-foreground">{example.description}</p>
+                    <CodeHighlight
+                      code={example.command}
+                      language="bash"
+                    />
+                    {example.output && (
+                      <div>
+                        <p className="text-sm font-medium mb-1">Output:</p>
+                        <CodeHighlight
+                          code={example.output}
+                          language="text"
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Related Commands */}
+        {/* Supported Platforms */}
+        {command.platforms && command.platforms.length > 0 && (
+          <Card className="card-gradient mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Supported Platforms
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {command.platforms.map((platform) => (
+                  <Badge key={platform} variant="outline">
+                    {platform}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Related Configurations */}
         {relatedCommands.length > 0 && (
-          <div className="mt-16">
-            <Separator className="mb-8" />
+          <div className="mb-8">
             <RelatedConfigs
               title="Related Commands"
               configs={relatedCommands}
