@@ -229,6 +229,35 @@ const Agent = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Agent Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Agent Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Category</div>
+                  <Badge variant="secondary">{agent.category}</Badge>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Author</div>
+                  <div className="text-sm">{agent.author}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Popularity</div>
+                  <div className="text-sm">{agent.popularity}%</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Created</div>
+                  <div className="text-sm">{new Date(agent.createdAt).toLocaleDateString()}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Last Updated</div>
+                  <div className="text-sm">{new Date(agent.updatedAt).toLocaleDateString()}</div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Requirements */}
             {agent.requirements && agent.requirements.length > 0 && (
               <Card>
@@ -262,6 +291,21 @@ const Agent = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Compatible Platforms */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Compatible Platforms</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline">Claude.ai</Badge>
+                  <Badge variant="outline">Claude Desktop</Badge>
+                  <Badge variant="outline">API</Badge>
+                  <Badge variant="outline">Custom Integrations</Badge>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Ad Placeholder */}
             <Card className="border-dashed border-2">
