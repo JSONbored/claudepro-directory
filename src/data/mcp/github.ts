@@ -10,7 +10,7 @@ export const githubMcp: MCPServer = {
   category: 'development',
   popularity: 92,
   createdAt: '2024-01-15',
-  repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/mcp/github.md',
+  repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/src/data/mcp/github.ts',
   documentation: 'https://modelcontextprotocol.io/servers/github',
   config: `{
   "mcpServers": {
