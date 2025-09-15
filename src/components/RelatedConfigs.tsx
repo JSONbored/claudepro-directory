@@ -27,9 +27,9 @@ export const RelatedConfigs = <T extends { id: string } = any>({
         </Badge>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
         {configs.map((config: any) => (
-          <div key={config.id} className="relative">
+          <div key={config.id} className="relative min-w-0">
             {typeof config.similarity === 'number' && config.similarity > 0.7 && (
               <div className="absolute -top-2 -right-2 z-10">
                 <Badge variant="default" className="bg-primary text-primary-foreground text-xs">

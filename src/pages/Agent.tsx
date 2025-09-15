@@ -199,8 +199,25 @@ const Agent = () => {
                 <CardTitle className="text-lg">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button className="w-full">
+                <Button 
+                  className="w-full"
+                  onClick={() => navigator.clipboard.writeText(agent.content)}
+                >
                   Copy Agent Configuration
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => navigator.clipboard.writeText(window.location.href)}
+                >
+                  Share Link
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => window.open(`https://github.com/JSONbored/claudepro-directory/blob/main/src/data/agents/${agent.slug}.ts`, '_blank')}
+                >
+                  Repository
                 </Button>
                 <Button variant="outline" className="w-full" asChild>
                   <Link to="/submit">

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Copy, Check, Calendar, User, TrendingUp, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Copy, Check, Calendar, User, TrendingUp, ExternalLink, Github } from 'lucide-react';
 import { getRuleBySlug, rules } from '@/data/rules';
 import { mcpServers } from '@/data/mcp';
 import { CodeHighlight } from '@/components/CodeHighlight';
@@ -154,6 +154,13 @@ const Rule = () => {
           <Button variant="outline" onClick={handleCopyLink}>
             <ExternalLink className="h-4 w-4 mr-2" />
             Share Link
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => window.open(`https://github.com/JSONbored/claudepro-directory/blob/main/src/data/rules/${rule.slug}.ts`, '_blank')}
+          >
+            <Github className="h-4 w-4 mr-2" />
+            Repository
           </Button>
         </div>
 

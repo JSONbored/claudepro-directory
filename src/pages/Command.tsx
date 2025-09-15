@@ -223,9 +223,35 @@ const Command = () => {
                 <CardTitle className="text-lg">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button className="w-full">
+                <Button 
+                  className="w-full"
+                  onClick={() => navigator.clipboard.writeText(command.syntax)}
+                >
                   Copy Command
                 </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => navigator.clipboard.writeText(window.location.href)}
+                >
+                  Share Link
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => window.open(`https://github.com/JSONbored/claudepro-directory/blob/main/src/data/commands/${command.slug}.ts`, '_blank')}
+                >
+                  Repository
+                </Button>
+                {command.repository && (
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => window.open(command.repository, '_blank')}
+                  >
+                    Documentation
+                  </Button>
+                )}
                 <Button variant="outline" className="w-full" asChild>
                   <Link to="/submit">
                     Submit Improvement
