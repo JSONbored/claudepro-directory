@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -33,10 +34,12 @@ export const ConfigCard = ({
   repository,
   documentation
 }: ConfigCardProps) => {
-  const displayTitle = title || name || 'Untitled';
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
+  const displayTitle = title || name || 'Untitled';
 
-  const handleCopy = async () => {
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     try {
       await navigator.clipboard.writeText(`https://claudepro.directory/${type}/${slug}`);
       setCopied(true);
@@ -54,8 +57,13 @@ export const ConfigCard = ({
     }
   };
 
-  const handleViewConfig = () => {
-    window.open(`/${type}/${slug}`, '_blank');
+  const handleViewConfig = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/${type}/${slug}`);
+  };
+
+  const handleCardClick = () => {
+    navigate(`/${type}/${slug}`);
   };
 
   const getCategoryColor = (cat: string) => {
@@ -77,7 +85,10 @@ export const ConfigCard = ({
   };
 
   return (
-    <Card className="group hover:glow-effect hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-primary/20">
+    <Card 
+      className="group hover:glow-effect hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-primary/20"
+      onClick={handleCardClick}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -122,7 +133,7 @@ export const ConfigCard = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 w-7 p-0"
+                className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary"
                 onClick={(e) => {
                   e.stopPropagation();
                   window.open(repository, '_blank');
@@ -136,7 +147,7 @@ export const ConfigCard = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 w-7 p-0"
+                className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary"
                 onClick={(e) => {
                   e.stopPropagation();
                   window.open(documentation, '_blank');
@@ -149,14 +160,11 @@ export const ConfigCard = ({
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 w-7 p-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleCopy();
-              }}
+              className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary"
+              onClick={handleCopy}
             >
               {copied ? (
-                <Check className="h-3 w-3 text-green-600" />
+                <Check className="h-3 w-3 text-green-500" />
               ) : (
                 <Copy className="h-3 w-3" />
               )}
@@ -165,11 +173,8 @@ export const ConfigCard = ({
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 px-2 text-xs"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleViewConfig();
-              }}
+              className="h-7 px-2 text-xs hover:bg-primary/10 hover:text-primary"
+              onClick={handleViewConfig}
             >
               View
             </Button>
