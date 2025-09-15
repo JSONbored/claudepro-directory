@@ -1,5 +1,6 @@
 import { ConfigCard } from '@/components/ConfigCard';
 import { Badge } from '@/components/ui/badge';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Lightbulb } from 'lucide-react';
 
 type RelatedType = 'rule' | 'mcp' | 'agent' | 'command' | 'hook';
@@ -27,25 +28,37 @@ export const RelatedConfigs = <T extends { id: string } = any>({
         </Badge>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {configs.map((config: any) => (
-          <div key={config.id} className="relative">
-            {typeof config.similarity === 'number' && config.similarity > 0.7 && (
-              <div className="absolute -top-3 -right-3 z-20">
-                <Badge variant="default" className="bg-primary text-primary-foreground text-xs shadow-sm">
-                  High Match
-                </Badge>
+      <Carousel
+        opts={{
+          align: "start",
+          loop: false,
+        }}
+        className="w-full max-w-full"
+      >
+        <CarouselContent className="-ml-2 md:-ml-4">
+          {configs.map((config: any) => (
+            <CarouselItem key={config.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+              <div className="relative">
+                {typeof config.similarity === 'number' && config.similarity > 0.7 && (
+                  <div className="absolute -top-3 -right-3 z-20">
+                    <Badge variant="default" className="bg-primary text-primary-foreground text-xs shadow-sm">
+                      High Match
+                    </Badge>
+                  </div>
+                )}
+                <div className="h-full">
+                  <ConfigCard
+                    {...config}
+                    type={type ?? (config.type as any)}
+                  />
+                </div>
               </div>
-            )}
-            <div className="h-full">
-              <ConfigCard
-                {...config}
-                type={type ?? (config.type as any)}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
     </section>
   );
 };
