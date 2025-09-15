@@ -5,11 +5,11 @@ export const githubMcp: MCPServer = {
   name: 'GitHub MCP Server',
   description: 'Integrate Claude with GitHub for repository management, issue tracking, and code analysis',
   tags: ['github', 'git', 'repository', 'code'],
-  author: 'Claude MCP Community',
+  author: '@JSONbored',
   slug: 'github',
   category: 'development',
   popularity: 92,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/src/data/mcp/github.ts',
   documentation: 'https://modelcontextprotocol.io/servers/github',
   config: `{

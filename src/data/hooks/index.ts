@@ -39,7 +39,7 @@ export const hooks: Hook[] = [
     id: '1',
     title: 'Git Commit Analyzer',
     description: 'Automatically analyzes git commits for code quality, security issues, and adherence to conventional commit standards.',
-    author: 'DevOps Pro',
+    author: '@JSONbored',
     category: 'development',
     tags: ['git', 'code-quality', 'automation', 'security', 'pre-commit'],
     content: `The Git Commit Analyzer hook provides comprehensive analysis of code changes before they're committed:
@@ -73,7 +73,7 @@ export const hooks: Hook[] = [
 Perfect for maintaining code quality and preventing issues before they reach the main branch.`,
     slug: 'git-commit-analyzer',
     popularity: 94,
-    createdAt: '2024-01-14',
+    createdAt: '2025-08-14',
     updatedAt: '2024-01-18',
     featured: true,
     triggerEvents: [
@@ -152,7 +152,7 @@ Perfect for maintaining code quality and preventing issues before they reach the
     id: '2',
     title: 'Content Publishing Pipeline',
     description: 'Automates content publishing across multiple platforms with approval workflows and performance tracking.',
-    author: 'Content Team',
+    author: '@JSONbored',
     category: 'automation',
     tags: ['content', 'publishing', 'social-media', 'workflow', 'automation'],
     content: `The Content Publishing Pipeline hook streamlines content distribution across multiple channels:
@@ -184,7 +184,7 @@ Perfect for maintaining code quality and preventing issues before they reach the
 Ideal for marketing teams, content creators, and agencies managing multiple brand accounts.`,
     slug: 'content-publishing-pipeline',
     popularity: 86,
-    createdAt: '2024-01-12',
+    createdAt: '2025-08-14',
     updatedAt: '2024-01-16',
     featured: true,
     triggerEvents: [
@@ -257,7 +257,7 @@ Ideal for marketing teams, content creators, and agencies managing multiple bran
     id: '3',
     title: 'System Health Monitor',
     description: 'Continuously monitors system health, performance metrics, and automatically responds to issues with predefined actions.',
-    author: 'SysOps Team',
+    author: '@JSONbored',
     category: 'monitoring',
     tags: ['monitoring', 'devops', 'alerting', 'automation', 'performance'],
     content: `The System Health Monitor hook provides comprehensive system monitoring and automated incident response:
@@ -289,7 +289,7 @@ Ideal for marketing teams, content creators, and agencies managing multiple bran
 Essential for maintaining high availability and performance in production environments.`,
     slug: 'system-health-monitor',
     popularity: 92,
-    createdAt: '2024-01-10',
+    createdAt: '2025-08-14',
     updatedAt: '2024-01-15',
     featured: false,
     triggerEvents: [
@@ -361,7 +361,7 @@ Essential for maintaining high availability and performance in production enviro
     id: '4',
     title: 'API Rate Limit Guardian',
     description: 'Intelligent API rate limiting and traffic management with dynamic scaling and protection mechanisms.',
-    author: 'API Security',
+    author: '@JSONbored',
     category: 'monitoring',
     tags: ['api', 'rate-limiting', 'security', 'traffic-management'],
     content: `The API Rate Limit Guardian provides intelligent traffic management and protection:
@@ -395,7 +395,7 @@ Essential for maintaining high availability and performance in production enviro
 Perfect for protecting APIs from abuse while maintaining optimal performance for legitimate users.`,
     slug: 'api-rate-limit-guardian',
     popularity: 88,
-    createdAt: '2024-01-08',
+    createdAt: '2025-08-14',
     updatedAt: '2024-01-13',
     featured: false,
     triggerEvents: [
@@ -468,7 +468,7 @@ Perfect for protecting APIs from abuse while maintaining optimal performance for
     id: '5',
     title: 'Database Backup Orchestrator',
     description: 'Automated database backup management with verification, encryption, and disaster recovery capabilities.',
-    author: 'Data Protection',
+    author: '@JSONbored',
     category: 'automation',
     tags: ['database', 'backup', 'disaster-recovery', 'automation'],
     content: `The Database Backup Orchestrator ensures comprehensive data protection:
@@ -504,7 +504,7 @@ Perfect for protecting APIs from abuse while maintaining optimal performance for
 Essential for maintaining business continuity and data protection compliance.`,
     slug: 'database-backup-orchestrator',
     popularity: 91,
-    createdAt: '2024-01-05',
+    createdAt: '2025-08-14',
     updatedAt: '2024-01-10',
     featured: true,
     triggerEvents: [

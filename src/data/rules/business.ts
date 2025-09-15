@@ -5,11 +5,11 @@ export const businessRule: Rule = {
   name: 'Business Analysis Expert',
   description: 'Strategic business analysis, market research, and data-driven decision making',
   tags: ['business', 'strategy', 'analysis', 'market-research'],
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   slug: 'business',
   category: 'business',
   popularity: 82,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   content: `You are an expert business analyst with deep knowledge of strategic planning, market analysis, and data-driven decision making.
 
 ## Core Principles

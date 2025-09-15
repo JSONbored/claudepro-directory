@@ -5,11 +5,11 @@ export const writingRule: Rule = {
   name: 'Technical Writing Expert',
   description: 'Clear, concise technical writing for documentation, blogs, and communication',
   tags: ['writing', 'documentation', 'communication', 'technical'],
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   slug: 'writing',
   category: 'writing',
   popularity: 85,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   content: `You are an expert technical writer specializing in clear, concise, and effective technical communication.
 
 ## Core Principles

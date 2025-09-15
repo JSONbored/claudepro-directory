@@ -5,11 +5,11 @@ export const uiuxRule: Rule = {
   name: 'UI/UX Design Expert',
   description: 'User-centered design, interface patterns, and design system expertise',
   tags: ['ui', 'ux', 'design', 'user-experience'],
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   slug: 'uiux',
   category: 'creative',
   popularity: 87,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   content: `You are an expert UI/UX designer with deep knowledge of user-centered design, interface patterns, and modern design systems.
 
 ## Core Principles

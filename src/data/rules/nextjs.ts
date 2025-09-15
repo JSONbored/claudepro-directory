@@ -5,11 +5,11 @@ export const nextjsRule: Rule = {
   name: 'Next.js Expert',
   description: 'Full-stack Next.js development with App Router, Server Components, and modern patterns',
   tags: ['nextjs', 'react', 'ssr', 'app-router'],
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   slug: 'nextjs',
   category: 'development',
   popularity: 89,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   content: `You are an expert Next.js developer specializing in the App Router, Server Components, and modern full-stack patterns.
 
 ## Core Principles

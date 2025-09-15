@@ -5,11 +5,11 @@ export const postgresqlMcp: MCPServer = {
   name: 'PostgreSQL MCP Server',
   description: 'Connect Claude to PostgreSQL databases for data analysis, queries, and schema management',
   tags: ['database', 'postgresql', 'sql', 'data'],
-  author: 'Claude MCP Community',
+  author: '@JSONbored',
   slug: 'postgresql',
   category: 'database',
   popularity: 95,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/src/data/mcp/postgresql.ts',
   documentation: 'https://modelcontextprotocol.io/servers/postgresql',
   config: `{

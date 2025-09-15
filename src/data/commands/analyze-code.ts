@@ -4,7 +4,7 @@ export const analyzeCodeCommand: Command = {
   id: 'analyze-code',
   title: '/analyze-code',
   description: 'Comprehensive code analysis for quality, security, performance, and best practices',
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   category: 'development',
   tags: ['analysis', 'code-quality', 'security', 'performance', 'best-practices'],
   content: `# /analyze-code Command
@@ -47,7 +47,7 @@ JavaScript, TypeScript, Python, Java, C#, Go, Rust, PHP, Ruby, and more.
 Perfect for code reviews, security audits, and continuous improvement processes.`,
   slug: 'analyze-code',
   popularity: 95,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   updatedAt: '2024-01-15',
   featured: true,
   syntax: '/analyze-code [file_path|directory] [--scope=full|security|performance|quality] [--format=detailed|summary|json]',

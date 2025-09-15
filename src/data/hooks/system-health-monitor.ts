@@ -4,7 +4,7 @@ export const systemHealthMonitor: Hook = {
   id: 'system-health-monitor',
   title: 'System Health Monitor',
   description: 'Comprehensive system monitoring with predictive analytics, automated alerting, and intelligent issue resolution',
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   category: 'monitoring',
   tags: ['monitoring', 'health-check', 'alerting', 'analytics', 'automation'],
   content: `# System Health Monitor Hook
@@ -90,7 +90,7 @@ Advanced system monitoring solution that combines real-time health checks with p
 Perfect for DevOps teams, site reliability engineers, and organizations requiring comprehensive system visibility and proactive issue management.`,
   slug: 'system-health-monitor',
   popularity: 95,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   updatedAt: '2024-01-15',
   featured: true,
   triggerEvents: ['metric-threshold-exceeded', 'health-check-failed', 'anomaly-detected', 'scheduled-check'],

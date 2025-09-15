@@ -4,7 +4,7 @@ export const optimizePerformanceCommand: Command = {
   id: 'optimize-performance',
   title: '/optimize-performance',
   description: 'Analyze and optimize application performance with automated bottleneck detection and improvement suggestions',
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   category: 'development',
   tags: ['performance', 'optimization', 'profiling', 'efficiency', 'speed'],
   content: `# /optimize-performance Command
@@ -81,7 +81,7 @@ Comprehensive performance analysis and optimization tool that identifies bottlen
 Perfect for optimizing application performance, reducing costs, and improving user experience.`,
   slug: 'optimize-performance',
   popularity: 87,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   updatedAt: '2024-01-15',
   featured: false,
   syntax: '/optimize-performance [target] [--area=code|frontend|backend|database|all] [--depth=quick|thorough] [--output=report|fixes]',

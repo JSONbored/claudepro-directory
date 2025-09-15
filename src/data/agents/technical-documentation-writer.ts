@@ -80,10 +80,10 @@ Perfect for software teams, product managers, and organizations needing professi
   ],
   tags: ['documentation', 'technical-writing', 'API', 'tutorials', 'guides'],
   useCases: ['API documentation', 'User guides', 'Technical tutorials', 'Process documentation'],
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   slug: 'technical-documentation-writer',
   popularity: 88,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   updatedAt: '2024-01-15',
   featured: false,
   repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/src/data/agents/technical-documentation-writer.ts'

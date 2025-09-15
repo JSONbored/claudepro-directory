@@ -5,11 +5,11 @@ export const browserMcp: MCPServer = {
   name: 'Browser Automation MCP',
   description: 'Enable Claude to control browsers for web scraping, testing, and automation tasks',
   tags: ['browser', 'automation', 'scraping', 'testing'],
-  author: 'Claude MCP Community',
+  author: '@JSONbored',
   slug: 'browser',
   category: 'automation',
   popularity: 88,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   repository: 'https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer',
   documentation: 'https://modelcontextprotocol.io/servers/puppeteer',
   config: `{

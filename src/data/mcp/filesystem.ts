@@ -5,11 +5,11 @@ export const filesystemMcp: MCPServer = {
   name: 'Filesystem MCP Server',
   description: 'Secure file system access for Claude to read, write, and manage files and directories',
   tags: ['filesystem', 'files', 'directories', 'storage'],
-  author: 'Claude MCP Community',
+  author: '@JSONbored',
   slug: 'filesystem',
   category: 'file-system',
   popularity: 91,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/src/data/mcp/filesystem.ts',
   documentation: 'https://modelcontextprotocol.io/servers/filesystem',
   config: `{

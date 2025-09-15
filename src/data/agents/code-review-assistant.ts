@@ -60,10 +60,10 @@ The assistant will analyze the code and provide detailed feedback on:
   ],
   tags: ['code-review', 'quality', 'security', 'testing', 'documentation'],
   useCases: ['Code reviews', 'Security audits', 'Quality assurance', 'Best practices validation'],
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   slug: 'code-review-assistant',
   popularity: 94,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   updatedAt: '2024-01-15',
   featured: true,
   repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/src/data/agents/code-review-assistant.ts'

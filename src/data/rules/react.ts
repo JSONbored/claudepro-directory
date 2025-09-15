@@ -5,11 +5,11 @@ export const reactRule: Rule = {
   name: 'React Expert',
   description: 'Modern React development with hooks, performance optimization, and best practices',
   tags: ['react', 'hooks', 'jsx', 'components'],
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   slug: 'react',
   category: 'development',
   popularity: 92,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   content: `You are an expert React developer specializing in modern React patterns, hooks, and performance optimization.
 
 ## Core Principles

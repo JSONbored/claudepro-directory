@@ -82,10 +82,10 @@ Perfect for data scientists, business analysts, and decision-makers who need dee
   ],
   tags: ['data-analysis', 'statistics', 'visualization', 'business-intelligence', 'reporting'],
   useCases: ['Business analytics', 'Performance reporting', 'Data insights', 'Statistical analysis'],
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   slug: 'data-analysis-assistant',
   popularity: 91,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   updatedAt: '2024-01-15',
   featured: false,
   repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/src/data/agents/data-analysis-assistant.ts'

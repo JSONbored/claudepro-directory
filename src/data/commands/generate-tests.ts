@@ -4,7 +4,7 @@ export const generateTestsCommand: Command = {
   id: 'generate-tests',
   title: '/generate-tests',
   description: 'Automatically generate comprehensive test suites with unit, integration, and end-to-end tests',
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   category: 'development',
   tags: ['testing', 'automation', 'quality-assurance', 'unit-tests', 'integration-tests'],
   content: `# /generate-tests Command
@@ -80,7 +80,7 @@ Automatically generate comprehensive test suites for your code with intelligent 
 Perfect for maintaining code quality, preventing regressions, and ensuring robust software delivery.`,
   slug: 'generate-tests',
   popularity: 89,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   updatedAt: '2024-01-15',
   featured: false,
   syntax: '/generate-tests [file|directory] [--type=unit|integration|e2e|all] [--framework=auto|jest|pytest|etc] [--coverage=basic|thorough]',

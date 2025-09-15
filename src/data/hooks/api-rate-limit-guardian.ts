@@ -4,7 +4,7 @@ export const apiRateLimitGuardian: Hook = {
   id: 'api-rate-limit-guardian',
   title: 'API Rate Limit Guardian',
   description: 'Intelligent API rate limiting and quota management with dynamic throttling and usage analytics',
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   category: 'automation',
   tags: ['rate-limiting', 'api-management', 'throttling', 'usage-analytics', 'protection'],
   content: `# API Rate Limit Guardian Hook
@@ -90,7 +90,7 @@ Advanced API rate limiting system that provides intelligent quota management, dy
 Perfect for API providers, SaaS platforms, and any service requiring robust protection against abuse while maintaining excellent user experience.`,
   slug: 'api-rate-limit-guardian',
   popularity: 90,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   updatedAt: '2024-01-15',
   featured: false,
   triggerEvents: ['api-request-received', 'rate-limit-exceeded', 'quota-warning', 'suspicious-activity'],

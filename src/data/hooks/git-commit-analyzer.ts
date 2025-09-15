@@ -4,7 +4,7 @@ export const gitCommitAnalyzer: Hook = {
   id: 'git-commit-analyzer',
   title: 'Git Commit Analyzer',
   description: 'Analyzes git commits for patterns, quality, and team collaboration insights with automated reporting',
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   category: 'development',
   tags: ['git', 'version-control', 'analytics', 'team-collaboration', 'code-quality'],
   content: `# Git Commit Analyzer Hook
@@ -71,7 +71,7 @@ Comprehensive analysis of git commit patterns, code quality trends, and team col
 Perfect for engineering managers, tech leads, and development teams focused on continuous improvement and data-driven development processes.`,
   slug: 'git-commit-analyzer',
   popularity: 88,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   updatedAt: '2024-01-15',
   featured: true,
   triggerEvents: ['git-push', 'commit-created', 'branch-merged', 'pull-request-closed'],

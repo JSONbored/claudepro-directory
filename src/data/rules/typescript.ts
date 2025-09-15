@@ -5,11 +5,11 @@ export const typescriptRule: Rule = {
   name: 'TypeScript Expert',
   description: 'Expert TypeScript development with best practices, type safety, and modern patterns',
   tags: ['typescript', 'javascript', 'types', 'development'],
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   slug: 'typescript',
   category: 'development',
   popularity: 95,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   content: `You are an expert TypeScript developer with deep knowledge of TypeScript's type system, best practices, and modern development patterns.
 
 ## Core Principles

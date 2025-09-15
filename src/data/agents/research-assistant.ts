@@ -60,10 +60,10 @@ Perfect for academic research, business intelligence, and investigative projects
   ],
   tags: ['research', 'analysis', 'data', 'investigation', 'reports'],
   useCases: ['Academic research', 'Market analysis', 'Competitive intelligence', 'Data gathering'],
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   slug: 'research-assistant',
   popularity: 89,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   updatedAt: '2024-01-15',
   featured: true,
   repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/src/data/agents/research-assistant.ts'

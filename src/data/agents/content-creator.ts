@@ -72,10 +72,10 @@ Perfect for businesses, marketers, and content teams looking to create compellin
   ],
   tags: ['content', 'writing', 'marketing', 'social-media', 'SEO'],
   useCases: ['Blog writing', 'Social media management', 'Marketing campaigns', 'Content strategy'],
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   slug: 'content-creator',
   popularity: 92,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   updatedAt: '2024-01-15',
   featured: true,
   repository: 'https://github.com/JSONbored/claudepro-directory/blob/main/src/data/agents/content-creator.ts'

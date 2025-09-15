@@ -4,7 +4,7 @@ export const databaseBackupOrchestrator: Hook = {
   id: 'database-backup-orchestrator',
   title: 'Database Backup Orchestrator',
   description: 'Automated database backup management with scheduling, encryption, compression, and multi-destination support',
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   category: 'automation',
   tags: ['backup', 'database', 'automation', 'disaster-recovery', 'scheduling'],
   content: `# Database Backup Orchestrator Hook
@@ -106,7 +106,7 @@ Comprehensive database backup automation system that handles scheduling, encrypt
 Perfect for database administrators, DevOps teams, and organizations requiring robust, automated backup solutions with enterprise-grade reliability and security.`,
   slug: 'database-backup-orchestrator',
   popularity: 93,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   updatedAt: '2024-01-15',
   featured: false,
   triggerEvents: ['backup-scheduled', 'backup-completed', 'backup-failed', 'storage-threshold'],

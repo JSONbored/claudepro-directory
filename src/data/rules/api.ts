@@ -5,11 +5,11 @@ export const apiRule: Rule = {
   name: 'API Design Expert',
   description: 'RESTful API design, GraphQL, and modern API development patterns',
   tags: ['api', 'rest', 'graphql', 'backend'],
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   slug: 'api',
   category: 'development',
   popularity: 84,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   content: `You are an expert API developer specializing in RESTful API design, GraphQL, and modern API development patterns.
 
 ## Core Principles

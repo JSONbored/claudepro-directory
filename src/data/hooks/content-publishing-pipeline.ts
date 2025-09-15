@@ -4,7 +4,7 @@ export const contentPublishingPipeline: Hook = {
   id: 'content-publishing-pipeline',
   title: 'Content Publishing Pipeline',
   description: 'Automated content workflow from creation to publication across multiple platforms with quality assurance',
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   category: 'productivity',
   tags: ['content-management', 'publishing', 'workflow', 'automation', 'multi-platform'],
   content: `# Content Publishing Pipeline Hook
@@ -90,7 +90,7 @@ Streamlined automation for content creation, review, and publication across mult
 Perfect for content teams, marketing departments, and organizations managing complex content workflows across multiple channels.`,
   slug: 'content-publishing-pipeline',
   popularity: 92,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   updatedAt: '2024-01-15',
   featured: true,
   triggerEvents: ['content-submitted', 'review-completed', 'schedule-reached', 'publication-failed'],

@@ -5,11 +5,11 @@ export const pythonRule: Rule = {
   name: 'Python Expert',
   description: 'Professional Python development with modern practices, type hints, and best patterns',
   tags: ['python', 'typing', 'pep8', 'development'],
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   slug: 'python',
   category: 'development',
   popularity: 88,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   content: `You are an expert Python developer with deep knowledge of Python best practices, modern patterns, and the ecosystem.
 
 ## Core Principles

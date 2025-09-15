@@ -4,7 +4,7 @@ export const deployAppCommand: Command = {
   id: 'deploy-app',
   title: '/deploy-app',
   description: 'Streamlined application deployment with multi-platform support and automated CI/CD pipeline setup',
-  author: 'Claude Pro Community',
+  author: '@JSONbored',
   category: 'development',
   tags: ['deployment', 'devops', 'ci-cd', 'automation', 'infrastructure'],
   content: `# /deploy-app Command
@@ -75,7 +75,7 @@ Automated deployment solution that handles application deployment across multipl
 Perfect for developers and teams looking to streamline their deployment process with best practices and automation.`,
   slug: 'deploy-app',
   popularity: 91,
-  createdAt: '2024-01-15',
+  createdAt: '2025-08-14',
   updatedAt: '2024-01-15',
   featured: false,
   syntax: '/deploy-app [platform] [--env=production|staging|development] [--auto-ci] [--monitoring]',
