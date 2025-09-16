@@ -8,24 +8,24 @@ import { Navigation } from "@/components/navigation";
 import { Analytics } from "@vercel/analytics/react";
 
 // Lazy load all route components for code splitting
-const Index = lazy(() => import("./pages/Index"));
-const Rules = lazy(() => import("./pages/Rules"));
-const McpServers = lazy(() => import("./pages/McpServers"));
-const Jobs = lazy(() => import("./pages/Jobs"));
-const Job = lazy(() => import("./pages/Job"));
-const Trending = lazy(() => import("./pages/Trending"));
-const Community = lazy(() => import("./pages/Community"));
-const Submit = lazy(() => import("./pages/Submit"));
-const Rule = lazy(() => import("./pages/Rule"));
-const McpServer = lazy(() => import("./pages/McpServer"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const Agents = lazy(() => import("./pages/Agents"));
-const Agent = lazy(() => import("./pages/Agent"));
-const Commands = lazy(() => import("./pages/Commands"));
-const Command = lazy(() => import("./pages/Command"));
-const Hooks = lazy(() => import("./pages/Hooks"));
-const Hook = lazy(() => import("./pages/Hook"));
-const Author = lazy(() => import("./pages/Author"));
+const Index = lazy(() => import("./pages/index"));
+const Rules = lazy(() => import("./pages/rules"));
+const Mcp = lazy(() => import("./pages/mcp"));
+const Jobs = lazy(() => import("./pages/jobs"));
+const Job = lazy(() => import("./pages/job"));
+const Trending = lazy(() => import("./pages/trending"));
+const Community = lazy(() => import("./pages/community"));
+const Submit = lazy(() => import("./pages/submit"));
+const Rule = lazy(() => import("./pages/rule"));
+const McpItem = lazy(() => import("./pages/mcp-item"));
+const NotFound = lazy(() => import("./pages/not-found"));
+const Agents = lazy(() => import("./pages/agents"));
+const Agent = lazy(() => import("./pages/agent"));
+const Commands = lazy(() => import("./pages/commands"));
+const Command = lazy(() => import("./pages/command"));
+const Hooks = lazy(() => import("./pages/hooks"));
+const Hook = lazy(() => import("./pages/hook"));
+const Author = lazy(() => import("./pages/author"));
 
 const queryClient = new QueryClient();
 
@@ -48,8 +48,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/rules" element={<Rules />} />
           <Route path="/rules/:slug" element={<Rule />} />
-          <Route path="/mcp" element={<McpServers />} />
-          <Route path="/mcp/:slug" element={<McpServer />} />
+          <Route path="/mcp" element={<Mcp />} />
+          <Route path="/mcp/:slug" element={<McpItem />} />
           <Route path="/agents" element={<Agents />} />
           <Route path="/agents/:slug" element={<Agent />} />
           <Route path="/commands" element={<Commands />} />

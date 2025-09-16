@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { User, Github, Globe, Calendar, Star } from 'lucide-react';
 import { rules, mcp } from '@/generated/content';
-import NotFound from './NotFound';
+import NotFound from './not-found';
 
 const Author = () => {
   const { authorSlug } = useParams();

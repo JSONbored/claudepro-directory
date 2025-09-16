@@ -16,6 +16,7 @@ interface SearchableItem {
 interface SearchBarProps<T extends SearchableItem = SearchableItem> {
   data: T[];
   onFilteredResults: (results: T[]) => void;
+  onSearchQueryChange?: (query: string) => void;
   placeholder?: string;
 }
 
@@ -46,7 +47,7 @@ const fuseOptions = {
   includeScore: true,
 };
 
-export const SearchBar = <T extends SearchableItem = SearchableItem>({ data, onFilteredResults, placeholder = "Search..." }: SearchBarProps<T>) => {
+export const SearchBar = <T extends SearchableItem = SearchableItem>({ data, onFilteredResults, onSearchQueryChange, placeholder = "Search..." }: SearchBarProps<T>) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
@@ -86,6 +87,7 @@ export const SearchBar = <T extends SearchableItem = SearchableItem>({ data, onF
     setSearchQuery('');
     setSelectedCategories([]);
     setShowFilters(false);
+    onSearchQueryChange?.('');
   };
 
   const hasActiveFilters = searchQuery.trim() || selectedCategories.length > 0;
@@ -99,7 +101,10 @@ export const SearchBar = <T extends SearchableItem = SearchableItem>({ data, onF
           type="text"
           placeholder={placeholder}
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            onSearchQueryChange?.(e.target.value);
+          }}
           className="pl-10 pr-20 h-12 text-base bg-card/50 backdrop-blur-sm border-border/50 focus:border-primary/50 focus:bg-card transition-smooth"
         />
         <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">

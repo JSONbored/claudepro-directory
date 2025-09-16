@@ -94,6 +94,21 @@ export const ConfigCard = ({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <Badge 
+                variant="default" 
+                className={`text-xs font-medium ${
+                  type === 'rule' ? 'bg-blue-500/20 text-blue-500 border-blue-500/30' :
+                  type === 'mcp' ? 'bg-purple-500/20 text-purple-500 border-purple-500/30' :
+                  type === 'agent' ? 'bg-green-500/20 text-green-500 border-green-500/30' :
+                  type === 'command' ? 'bg-orange-500/20 text-orange-500 border-orange-500/30' :
+                  type === 'hook' ? 'bg-pink-500/20 text-pink-500 border-pink-500/30' :
+                  'bg-gray-500/20 text-gray-500 border-gray-500/30'
+                }`}
+              >
+                {type === 'mcp' ? 'MCP' : type.charAt(0).toUpperCase() + type.slice(1)}
+              </Badge>
+            </div>
             <CardTitle className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors-smooth">
               {displayTitle}
             </CardTitle>
