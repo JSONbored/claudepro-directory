@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { RelatedConfigs } from '@/components/related-configs';
 import { toast } from '@/hooks/use-toast';
+import type { ContentItem, ContentCategory } from '@/types/content';
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
 const CodeHighlight = lazy(() => 
@@ -25,16 +26,16 @@ const CodeHighlight = lazy(() =>
   }))
 );
 
-interface ContentDetailPageProps<T extends Record<string, any>> {
+interface ContentDetailPageProps<T extends ContentItem> {
   item: T | null;
-  type: 'agent' | 'mcp' | 'rule' | 'command' | 'hook';
+  type: ContentCategory;
   icon: LucideIcon;
   typeName: string;
   relatedItems?: T[];
   customSections?: React.ReactNode;
 }
 
-export function ContentDetailPage<T extends Record<string, any>>({
+export function ContentDetailPage<T extends ContentItem>({
   item,
   type,
   icon: Icon,

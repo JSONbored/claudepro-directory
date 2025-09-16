@@ -1,10 +1,16 @@
 {
   "title": "Auto Code Formatter Hook",
   "description": "Automatically formats code files after Claude writes or edits them using Prettier, Black, or other formatters",
-  "category": "code-quality",
+  "category": "hooks",
   "author": "shadowbook",
   "dateAdded": "2025-09-15",
-  "tags": ["formatting", "prettier", "black", "code-quality", "automation"],
+  "tags": [
+    "formatting",
+    "prettier",
+    "black",
+    "code-quality",
+    "automation"
+  ],
   "content": "This hook automatically formats code files after Claude modifies them, ensuring consistent code style across your project.\n\n## Hook Configuration\n\n```json\n{\n  \"hooks\": {\n    \"PostToolUse\": [\n      {\n        \"matcher\": \"Write|Edit|MultiEdit\",\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"$CLAUDE_PROJECT_DIR/.claude/hooks/format-code.sh\"\n          }\n        ]\n      }\n    ]\n  }\n}\n```\n\n## Format Script (format-code.sh)\n\n```bash\n#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Get file extension\nEXT=\"${FILE_PATH##*.}\"\n\n# Format based on file type\ncase \"$EXT\" in\n  js|jsx|ts|tsx|json|md|mdx|css|scss|html|vue|yaml|yml)\n    # JavaScript/TypeScript/Web files - use Prettier\n    if command -v prettier &> /dev/null; then\n      prettier --write \"$FILE_PATH\" 2>/dev/null\n      echo \"✅ Formatted $FILE_PATH with Prettier\" >&2\n    fi\n    ;;\n  \n  py)\n    # Python files - use Black\n    if command -v black &> /dev/null; then\n      black \"$FILE_PATH\" 2>/dev/null\n      echo \"✅ Formatted $FILE_PATH with Black\" >&2\n    elif command -v ruff &> /dev/null; then\n      ruff format \"$FILE_PATH\" 2>/dev/null\n      echo \"✅ Formatted $FILE_PATH with Ruff\" >&2\n    fi\n    ;;\n  \n  go)\n    # Go files - use gofmt\n    if command -v gofmt &> /dev/null; then\n      gofmt -w \"$FILE_PATH\" 2>/dev/null\n      echo \"✅ Formatted $FILE_PATH with gofmt\" >&2\n    fi\n    ;;\n  \n  rs)\n    # Rust files - use rustfmt\n    if command -v rustfmt &> /dev/null; then\n      rustfmt \"$FILE_PATH\" 2>/dev/null\n      echo \"✅ Formatted $FILE_PATH with rustfmt\" >&2\n    fi\n    ;;\n  \n  java)\n    # Java files - use google-java-format\n    if command -v google-java-format &> /dev/null; then\n      google-java-format -i \"$FILE_PATH\" 2>/dev/null\n      echo \"✅ Formatted $FILE_PATH with google-java-format\" >&2\n    fi\n    ;;\n  \n  rb)\n    # Ruby files - use RuboCop\n    if command -v rubocop &> /dev/null; then\n      rubocop -a \"$FILE_PATH\" 2>/dev/null\n      echo \"✅ Formatted $FILE_PATH with RuboCop\" >&2\n    fi\n    ;;\nesac\n\nexit 0\n```\n\n## Installation\n\n1. Create the hooks directory:\n   ```bash\n   mkdir -p .claude/hooks\n   ```\n\n2. Create the format script:\n   ```bash\n   nano .claude/hooks/format-code.sh\n   ```\n\n3. Make it executable:\n   ```bash\n   chmod +x .claude/hooks/format-code.sh\n   ```\n\n4. Add to Claude settings:\n   ```bash\n   claude settings hooks.PostToolUse\n   ```\n\n## Required Tools\n\nInstall formatters for your languages:\n\n```bash\n# JavaScript/TypeScript\nnpm install -g prettier\n\n# Python\npip install black ruff\n\n# Go\ngo install golang.org/x/tools/cmd/goimports@latest\n\n# Rust\nrustup component add rustfmt\n\n# Ruby\ngem install rubocop\n```",
   "configuration": {
     "hookType": "PostToolUse",
@@ -12,5 +18,6 @@
     "timeout": 5000
   },
   "githubUrl": "https://github.com/prettier/prettier",
-  "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code/hooks"
+  "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code/hooks",
+  "source": "community"
 }

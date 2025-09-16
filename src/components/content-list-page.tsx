@@ -9,13 +9,14 @@ import { Badge } from '@/components/ui/badge';
 import { ExternalLink, Sparkles, LucideIcon } from 'lucide-react';
 import { useFilters } from '@/hooks/useFilters';
 import { useSorting } from '@/hooks/useSorting';
+import type { ContentMetadata, ContentCategory } from '@/types/content';
 
-interface ContentListPageProps<T extends Record<string, any>> {
+interface ContentListPageProps<T extends ContentMetadata> {
   title: string;
   description: string;
   icon: LucideIcon;
   items: T[];
-  type: 'agent' | 'mcp' | 'rule' | 'command' | 'hook';
+  type: ContentCategory;
   searchPlaceholder?: string;
   badges?: Array<{
     icon?: LucideIcon;
@@ -23,7 +24,7 @@ interface ContentListPageProps<T extends Record<string, any>> {
   }>;
 }
 
-export function ContentListPage<T extends Record<string, any>>({
+export function ContentListPage<T extends ContentMetadata>({
   title,
   description,
   icon: Icon,

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,20 +15,22 @@ interface ConfigCardProps {
   author: string;
   slug: string;
   category: string;
+  source: string;
   popularity: number;
   type: 'rule' | 'mcp' | 'agent' | 'command' | 'hook';
   repository?: string;
   documentation?: string;
 }
 
-export const ConfigCard = ({ 
+export const ConfigCard = memo(({ 
   title,
   name,
   description, 
   tags, 
   author, 
   slug, 
-  category, 
+  category,
+  source, 
   popularity,
   type,
   repository,
@@ -68,22 +70,16 @@ export const ConfigCard = ({
   const handleCardClick = () => {
     navigate(targetPath);
   };
-  const getCategoryColor = (cat: string) => {
+  const getSourceColor = (src: string) => {
     const colors = {
-      development: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-      writing: 'bg-green-500/10 text-green-400 border-green-500/20',
-      analysis: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-      creative: 'bg-pink-500/10 text-pink-400 border-pink-500/20',
-      business: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-      database: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
-      api: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-      'file-system': 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-      ai: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
-      productivity: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-      automation: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+      official: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+      partner: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+      community: 'bg-green-500/10 text-green-400 border-green-500/20',
+      verified: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+      experimental: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
       other: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
     };
-    return colors[cat as keyof typeof colors] || colors.other;
+    return colors[src as keyof typeof colors] || colors.other;
   };
 
   return (
@@ -117,8 +113,8 @@ export const ConfigCard = ({
             </CardDescription>
           </div>
           <div className="flex items-center gap-1 ml-2">
-            <Badge variant="outline" className={`border ${getCategoryColor(category)}`}>
-              {category}
+            <Badge variant="outline" className={`border ${getSourceColor(source)}`}>
+              {source}
             </Badge>
           </div>
         </div>
@@ -200,4 +196,6 @@ export const ConfigCard = ({
       </CardContent>
     </Card>
   );
-};
+});
+
+ConfigCard.displayName = 'ConfigCard';

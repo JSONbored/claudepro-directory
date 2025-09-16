@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { ConfigCard } from '@/components/config-card';
 import { Badge } from '@/components/ui/badge';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -11,7 +12,7 @@ interface RelatedConfigsProps<T = any> {
   type?: RelatedType;
 }
 
-export const RelatedConfigs = <T extends { id: string } = any>({ 
+const RelatedConfigsComponent = <T extends { id: string } = any>({ 
   configs, 
   title = "Related Configurations",
   type
@@ -62,3 +63,6 @@ export const RelatedConfigs = <T extends { id: string } = any>({
     </section>
   );
 };
+
+export const RelatedConfigs = memo(RelatedConfigsComponent) as typeof RelatedConfigsComponent;
+RelatedConfigs.displayName = 'RelatedConfigs';

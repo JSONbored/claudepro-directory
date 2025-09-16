@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import slugify from 'slugify';
+import type { Agent, MCPServer, Rule, Command, Hook, ContentCategory, ContentMetadata } from '../src/types/content';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.join(__dirname, '..');
@@ -10,7 +11,9 @@ const CONTENT_DIR = path.join(ROOT_DIR, 'content');
 const GENERATED_DIR = path.join(ROOT_DIR, 'src', 'generated');
 
 // Content types to process
-const CONTENT_TYPES = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
+const CONTENT_TYPES: ContentCategory[] = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
+
+type ContentItem = Agent | MCPServer | Rule | Command | Hook;
 
 interface BaseContent {
   id: string;
@@ -109,11 +112,15 @@ async function generateTypeScript() {
     const metadataContent = `// Auto-generated metadata file - DO NOT EDIT
 // Generated at: ${new Date().toISOString()}
 
-export const ${varName}Metadata = ${JSON.stringify(metadata, null, 2)} as const;
+import type { ${capitalizedSingular === 'Mcp' ? 'MCPServer' : capitalizedSingular}, ContentMetadata } from '../types/content';
+
+type ${capitalizedSingular}Metadata = Omit<${capitalizedSingular === 'Mcp' ? 'MCPServer' : capitalizedSingular}, 'content'>;
+
+export const ${varName}Metadata: ${capitalizedSingular}Metadata[] = ${JSON.stringify(metadata, null, 2)};
 
 export const ${varName}MetadataBySlug = new Map(${varName}Metadata.map(item => [item.slug, item]));
 
-export function get${capitalizedSingular}MetadataBySlug(slug: string) {
+export function get${capitalizedSingular}MetadataBySlug(slug: string): ${capitalizedSingular}Metadata | null {
   return ${varName}MetadataBySlug.get(slug) || null;
 }`;
     
@@ -127,11 +134,13 @@ export function get${capitalizedSingular}MetadataBySlug(slug: string) {
     const fullContent = `// Auto-generated full content file - DO NOT EDIT
 // Generated at: ${new Date().toISOString()}
 
-export const ${varName}Full = ${JSON.stringify(allContent[type], null, 2)} as const;
+import type { ${capitalizedSingular === 'Mcp' ? 'MCPServer' : capitalizedSingular} } from '../types/content';
+
+export const ${varName}Full: ${capitalizedSingular === 'Mcp' ? 'MCPServer' : capitalizedSingular}[] = ${JSON.stringify(allContent[type], null, 2)};
 
 export const ${varName}FullBySlug = new Map(${varName}Full.map(item => [item.slug, item]));
 
-export function get${capitalizedSingular}FullBySlug(slug: string) {
+export function get${capitalizedSingular}FullBySlug(slug: string): ${capitalizedSingular === 'Mcp' ? 'MCPServer' : capitalizedSingular} | null {
   return ${varName}FullBySlug.get(slug) || null;
 }`;
     
@@ -172,7 +181,9 @@ ${CONTENT_TYPES.map(type => {
 }).join('\n\n')}
 
 // Export counts for stats
-export const contentStats = {
+import type { ContentStats } from '../types/content';
+
+export const contentStats: ContentStats = {
 ${CONTENT_TYPES.map(type => {
   const varName = type.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
   return `  ${varName}: ${allContent[type].length}`;
