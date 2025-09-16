@@ -93,25 +93,83 @@ async function generateTypeScript() {
     console.log(`Loaded ${items.length} ${type}`);
   }
   
-  // Generate TypeScript file
-  const tsContent = `// Auto-generated file - DO NOT EDIT
+  // Generate separate files for each content type with metadata only
+  for (const type of CONTENT_TYPES) {
+    const varName = type.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+    const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
+    const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
+    
+    // Create metadata version (without content/config fields for listing pages)
+    const metadata = allContent[type].map(item => {
+      const { content, config, ...meta } = item;
+      return meta;
+    });
+    
+    // Generate metadata file
+    const metadataContent = `// Auto-generated metadata file - DO NOT EDIT
 // Generated at: ${new Date().toISOString()}
 
+export const ${varName}Metadata = ${JSON.stringify(metadata, null, 2)} as const;
+
+export const ${varName}MetadataBySlug = new Map(${varName}Metadata.map(item => [item.slug, item]));
+
+export function get${capitalizedSingular}MetadataBySlug(slug: string) {
+  return ${varName}MetadataBySlug.get(slug) || null;
+}`;
+    
+    await fs.writeFile(
+      path.join(GENERATED_DIR, `${type}-metadata.ts`),
+      metadataContent,
+      'utf-8'
+    );
+    
+    // Generate full content file (loaded lazily when needed)
+    const fullContent = `// Auto-generated full content file - DO NOT EDIT
+// Generated at: ${new Date().toISOString()}
+
+export const ${varName}Full = ${JSON.stringify(allContent[type], null, 2)} as const;
+
+export const ${varName}FullBySlug = new Map(${varName}Full.map(item => [item.slug, item]));
+
+export function get${capitalizedSingular}FullBySlug(slug: string) {
+  return ${varName}FullBySlug.get(slug) || null;
+}`;
+    
+    await fs.writeFile(
+      path.join(GENERATED_DIR, `${type}-full.ts`),
+      fullContent,
+      'utf-8'
+    );
+  }
+  
+  // Generate main index file that exports metadata by default
+  const indexContent = `// Auto-generated index file - DO NOT EDIT
+// Generated at: ${new Date().toISOString()}
+
+// Export metadata by default for list views
 ${CONTENT_TYPES.map(type => {
-  // Convert kebab-case to camelCase for variable names
   const varName = type.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
   const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
   const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
   
-  return `export const ${varName} = ${JSON.stringify(allContent[type], null, 2)} as const;
-
-export const ${varName}BySlug = new Map(${varName}.map(item => [item.slug, item]));
-
-export function get${capitalizedSingular}BySlug(slug: string) {
-  return ${varName}BySlug.get(slug) || null;
-}
-`;
+  return `export { 
+  ${varName}Metadata as ${varName}, 
+  ${varName}MetadataBySlug as ${varName}BySlug, 
+  get${capitalizedSingular}MetadataBySlug as get${capitalizedSingular}BySlug 
+} from './${type}-metadata';`;
 }).join('\n')}
+
+// Export lazy loaders for full content (used in detail pages)
+${CONTENT_TYPES.map(type => {
+  const varName = type.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+  const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
+  const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
+  
+  return `export async function get${capitalizedSingular}FullContent(slug: string) {
+  const module = await import('./${type}-full');
+  return module.get${capitalizedSingular}FullBySlug(slug);
+}`;
+}).join('\n\n')}
 
 // Export counts for stats
 export const contentStats = {
@@ -119,11 +177,10 @@ ${CONTENT_TYPES.map(type => {
   const varName = type.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
   return `  ${varName}: ${allContent[type].length}`;
 }).join(',\n')}
-};
-`;
+};`;
 
-  await fs.writeFile(path.join(GENERATED_DIR, 'content.ts'), tsContent);
-  console.log('✅ Generated content.ts');
+  await fs.writeFile(path.join(GENERATED_DIR, 'content.ts'), indexContent);
+  console.log('✅ Generated content metadata and full content files');
 }
 
 // Run the build

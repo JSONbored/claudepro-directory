@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ConfigCard } from '@/components/config-card';
-import { AuthorCard } from '@/components/author-card';
 import { FilterBar } from '@/components/filter-bar';
 import { SortDropdown } from '@/components/sort-dropdown';
 import { SearchBar } from '@/components/search-bar';
@@ -11,7 +10,6 @@ import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BookOpen, Server, Sparkles, Github, ExternalLink, Briefcase, Search } from 'lucide-react';
 import { rules, mcp, agents, commands, hooks } from '@/generated/content';
-import { authors, getFeaturedAuthors } from '@/data/authors';
 import { useFilters } from '@/hooks/useFilters';
 import { useSorting } from '@/hooks/useSorting';
 
@@ -22,7 +20,6 @@ const Index = () => {
   const [isSearching, setIsSearching] = useState(false);
   const { filters, updateFilter, resetFilters, applyFilters } = useFilters();
   const { sortBy, sortDirection, updateSort, sortItems } = useSorting();
-  const featuredAuthors = getFeaturedAuthors();
 
   const allConfigs = [...rules, ...mcp, ...agents, ...commands, ...hooks];
   
@@ -463,10 +460,10 @@ const Index = () => {
                 </p>
               </div>
               
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {featuredAuthors.map((author) => (
-                  <AuthorCard key={author.id} author={author} />
-                ))}
+              <div className="text-center">
+                <p className="text-lg text-muted-foreground mb-6">
+                  Coming soon! Featured contributors who create amazing Claude configurations.
+                </p>
               </div>
               
               <div className="text-center pt-8">

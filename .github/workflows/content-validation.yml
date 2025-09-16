@@ -1,0 +1,89 @@
+name: Validate Content
+
+on:
+  pull_request:
+    paths:
+      - 'content/**/*.json'
+      - 'scripts/validate-content.js'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js 20
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Get changed content files
+      id: changed-files
+      uses: tj-actions/changed-files@v39
+      with:
+        files: |
+          content/**/*.json
+
+    - name: Validate content schema
+      if: steps.changed-files.outputs.any_changed == 'true'
+      run: |
+        echo "Validating changed content files..."
+        node scripts/validate-content.js ${{ steps.changed-files.outputs.all_changed_files }}
+
+    - name: Check content metadata
+      if: steps.changed-files.outputs.any_changed == 'true'
+      run: |
+        for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+          echo "Checking $file..."
+          
+          # Check required fields
+          if ! jq -e '.title' "$file" > /dev/null; then
+            echo "ERROR: Missing title in $file"
+            exit 1
+          fi
+          
+          if ! jq -e '.description' "$file" > /dev/null; then
+            echo "ERROR: Missing description in $file"
+            exit 1
+          fi
+          
+          if ! jq -e '.category' "$file" > /dev/null; then
+            echo "ERROR: Missing category in $file"
+            exit 1
+          fi
+          
+          if ! jq -e '.author' "$file" > /dev/null; then
+            echo "ERROR: Missing author in $file"
+            exit 1
+          fi
+          
+          if ! jq -e '.dateAdded' "$file" > /dev/null; then
+            echo "ERROR: Missing dateAdded in $file"
+            exit 1
+          fi
+          
+          # Check date format (YYYY-MM-DD)
+          date=$(jq -r '.dateAdded' "$file")
+          if ! echo "$date" | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' > /dev/null; then
+            echo "ERROR: Invalid date format in $file (should be YYYY-MM-DD)"
+            exit 1
+          fi
+          
+          # Check category is valid
+          category=$(jq -r '.category' "$file")
+          if [[ ! "$category" =~ ^(agents|mcp|rules|commands|hooks)$ ]]; then
+            echo "ERROR: Invalid category '$category' in $file"
+            exit 1
+          fi
+          
+          echo "✓ $file passed validation"
+        done
+
+    - name: Build content to verify generation
+      if: steps.changed-files.outputs.any_changed == 'true'
+      run: npm run build:content

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,9 +15,15 @@ import {
   Github,
   LucideIcon
 } from 'lucide-react';
-import { CodeHighlight } from '@/components/code-highlight';
 import { RelatedConfigs } from '@/components/related-configs';
 import { toast } from '@/hooks/use-toast';
+
+// Lazy load CodeHighlight to split syntax-highlighter into its own chunk
+const CodeHighlight = lazy(() => 
+  import('@/components/code-highlight').then(module => ({ 
+    default: module.CodeHighlight 
+  }))
+);
 
 interface ContentDetailPageProps<T extends Record<string, any>> {
   item: T | null;
@@ -185,10 +191,14 @@ export function ContentDetailPage<T extends Record<string, any>>({
                 </div>
               </CardHeader>
               <CardContent>
-                <CodeHighlight 
-                  code={item.content || item.config || ''} 
-                  language={type === 'command' ? 'bash' : type === 'mcp' ? 'json' : 'markdown'}
-                />
+                <Suspense fallback={
+                  <div className="animate-pulse bg-muted h-32 rounded-md" />
+                }>
+                  <CodeHighlight 
+                    code={item.content || item.config || ''} 
+                    language={type === 'command' ? 'bash' : type === 'mcp' ? 'json' : 'markdown'}
+                  />
+                </Suspense>
               </CardContent>
             </Card>
 
