@@ -18,16 +18,16 @@ if (!fs.existsSync(apiDir)) {
 // Function to read all JSON files from a directory
 function readContentFromDir(dirName: string) {
   const dirPath = path.join(contentDir, dirName);
-  const files = fs.readdirSync(dirPath).filter(file => file.endsWith('.json'));
-  
-  return files.map(file => {
+  const files = fs.readdirSync(dirPath).filter((file) => file.endsWith('.json'));
+
+  return files.map((file) => {
     const content = JSON.parse(fs.readFileSync(path.join(dirPath, file), 'utf-8'));
     const slug = file.replace('.json', '');
     return {
       ...content,
       slug,
       type: dirName.replace(/s$/, ''), // Remove 's' from plural
-      url: `https://claudepro.directory/${dirName}/${slug}`
+      url: `https://claudepro.directory/${dirName}/${slug}`,
     };
   });
 }
@@ -57,7 +57,11 @@ fs.writeFileSync(
 
 fs.writeFileSync(
   path.join(apiDir, 'commands.json'),
-  JSON.stringify({ commands, count: commands.length, lastUpdated: new Date().toISOString() }, null, 2)
+  JSON.stringify(
+    { commands, count: commands.length, lastUpdated: new Date().toISOString() },
+    null,
+    2
+  )
 );
 
 fs.writeFileSync(
@@ -67,34 +71,34 @@ fs.writeFileSync(
 
 // Create combined endpoint for AI crawlers
 const allConfigurations = {
-  "@context": "https://schema.org",
-  "@type": "Dataset",
-  "name": "Claude Pro Directory - All Configurations",
-  "description": "Complete database of Claude AI configurations",
-  "license": "MIT",
-  "lastUpdated": new Date().toISOString(),
-  "statistics": {
-    "totalConfigurations": agents.length + mcp.length + rules.length + commands.length + hooks.length,
-    "agents": agents.length,
-    "mcp": mcp.length,
-    "rules": rules.length,
-    "commands": commands.length,
-    "hooks": hooks.length
+  '@context': 'https://schema.org',
+  '@type': 'Dataset',
+  name: 'Claude Pro Directory - All Configurations',
+  description: 'Complete database of Claude AI configurations',
+  license: 'MIT',
+  lastUpdated: new Date().toISOString(),
+  statistics: {
+    totalConfigurations: agents.length + mcp.length + rules.length + commands.length + hooks.length,
+    agents: agents.length,
+    mcp: mcp.length,
+    rules: rules.length,
+    commands: commands.length,
+    hooks: hooks.length,
   },
-  "data": {
+  data: {
     agents,
     mcp,
     rules,
     commands,
-    hooks
+    hooks,
   },
-  "endpoints": {
-    "agents": "https://claudepro.directory/api/agents.json",
-    "mcp": "https://claudepro.directory/api/mcp.json",
-    "rules": "https://claudepro.directory/api/rules.json",
-    "commands": "https://claudepro.directory/api/commands.json",
-    "hooks": "https://claudepro.directory/api/hooks.json"
-  }
+  endpoints: {
+    agents: 'https://claudepro.directory/api/agents.json',
+    mcp: 'https://claudepro.directory/api/mcp.json',
+    rules: 'https://claudepro.directory/api/rules.json',
+    commands: 'https://claudepro.directory/api/commands.json',
+    hooks: 'https://claudepro.directory/api/hooks.json',
+  },
 };
 
 fs.writeFileSync(
@@ -113,11 +117,11 @@ const textSitemap = [
   'https://claudepro.directory/trending',
   'https://claudepro.directory/community',
   'https://claudepro.directory/jobs',
-  ...agents.map(a => `https://claudepro.directory/agents/${a.slug}`),
-  ...mcp.map(m => `https://claudepro.directory/mcp/${m.slug}`),
-  ...rules.map(r => `https://claudepro.directory/rules/${r.slug}`),
-  ...commands.map(c => `https://claudepro.directory/commands/${c.slug}`),
-  ...hooks.map(h => `https://claudepro.directory/hooks/${h.slug}`)
+  ...agents.map((a) => `https://claudepro.directory/agents/${a.slug}`),
+  ...mcp.map((m) => `https://claudepro.directory/mcp/${m.slug}`),
+  ...rules.map((r) => `https://claudepro.directory/rules/${r.slug}`),
+  ...commands.map((c) => `https://claudepro.directory/commands/${c.slug}`),
+  ...hooks.map((h) => `https://claudepro.directory/hooks/${h.slug}`),
 ].join('\n');
 
 fs.writeFileSync(path.join(publicDir, 'sitemap.txt'), textSitemap);

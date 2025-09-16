@@ -50,7 +50,7 @@ function generateSitemap(): string {
     ...agents.map((item) => ({ ...item, category: 'agents' })),
     ...commands.map((item) => ({ ...item, category: 'commands' })),
     ...hooks.map((item) => ({ ...item, category: 'hooks' })),
-  ];
+  ] as Array<{ slug: string; category: string; lastModified?: string; dateAdded: string }>;
 
   allContent.forEach((item) => {
     urls.push({
