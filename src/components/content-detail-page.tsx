@@ -44,6 +44,9 @@ export function ContentDetailPage<T extends ContentItem>({
 }: ContentDetailPageProps<T>) {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
+  
+  // Generate category path for URLs
+  const categoryPath = type === 'mcp' ? 'mcp' : `${type}s`;
 
   if (!item) {
     return (

@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { visualizer } from "rollup-plugin-visualizer";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -12,6 +13,12 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === 'development' && componentTagger(),
+    mode === 'production' && visualizer({
+      filename: 'dist/stats.html',
+      open: false,
+      gzipSize: true,
+      brotliSize: true,
+    }),
   ].filter(Boolean),
   resolve: {
     alias: {
@@ -20,6 +27,10 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    target: 'es2020',
+    minify: 'terser',
+    cssMinify: true,
+    reportCompressedSize: false, // Speed up build
     rollupOptions: {
       output: {
         manualChunks: (id) => {
@@ -38,11 +49,11 @@ export default defineConfig(({ mode }) => ({
             if (id.includes('@radix-ui') || id.includes('cmdk') || id.includes('vaul')) {
               return 'ui-vendor';
             }
-            // Date/time libraries
-            if (id.includes('date-fns')) {
-              return 'date-vendor';
+            // Analytics
+            if (id.includes('@vercel/analytics')) {
+              return 'analytics-vendor';
             }
-            // Other utilities
+            // Search and utilities
             if (id.includes('fuse.js') || id.includes('slugify')) {
               return 'utils-vendor';
             }
@@ -63,7 +74,25 @@ export default defineConfig(({ mode }) => ({
             }
           }
         },
+        // Optimize chunk naming for better caching
+        chunkFileNames: (chunkInfo) => {
+          if (chunkInfo.name?.includes('vendor')) {
+            return 'assets/[name]-[hash].js';
+          }
+          return 'assets/[name]-[hash].js';
+        },
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
+  },
+  esbuild: {
+    drop: mode === 'production' ? ['console', 'debugger'] : [],
   },
 }));

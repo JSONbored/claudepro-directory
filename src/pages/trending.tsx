@@ -1,19 +1,33 @@
 import { Clock, Star, TrendingUp } from 'lucide-react';
 import { ConfigCard } from '@/components/config-card';
 import { Badge } from '@/components/ui/badge';
-import { mcp, rules } from '@/generated/content';
+import { agents, commands, hooks, mcp, rules } from '@/generated/content';
+import type { ContentMetadata } from '@/types/content';
 
 const Trending = () => {
-  // Combine and sort by popularity
-  const allConfigs = [...rules, ...mcp].sort((a, b) => b.popularity - a.popularity);
+  // Combine all content types and sort by popularity
+  const allConfigs: ContentMetadata[] = [
+    ...agents.map(item => ({ ...item, type: 'agent' as const })),
+    ...commands.map(item => ({ ...item, type: 'command' as const })),
+    ...hooks.map(item => ({ ...item, type: 'hook' as const })),
+    ...mcp.map(item => ({ ...item, type: 'mcp' as const })),
+    ...rules.map(item => ({ ...item, type: 'rule' as const }))
+  ].sort((a, b) => b.popularity - a.popularity);
+  
   const trendingConfigs = allConfigs.slice(0, 12);
 
-  // Most popular rules and MCPs
+  // Most popular by category
+  const topAgents = [...agents].sort((a, b) => b.popularity - a.popularity).slice(0, 6);
+  const topCommands = [...commands].sort((a, b) => b.popularity - a.popularity).slice(0, 6);
+  const topHooks = [...hooks].sort((a, b) => b.popularity - a.popularity).slice(0, 6);
   const topRules = [...rules].sort((a, b) => b.popularity - a.popularity).slice(0, 6);
   const topMcps = [...mcp].sort((a, b) => b.popularity - a.popularity).slice(0, 6);
 
-  const getConfigType = (config: any): 'rule' | 'mcp' => {
-    return 'content' in config ? 'rule' : 'mcp';
+  const getConfigType = (config: ContentMetadata & { type?: string }) => {
+    if (config.type) return config.type;
+    // Fallback detection for backward compatibility
+    if ('content' in config) return 'rule';
+    return 'mcp';
   };
 
   return (
@@ -30,7 +44,7 @@ const Trending = () => {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground mb-6 leading-relaxed">
-              Discover the most popular Claude configurations and MCP servers chosen by the
+              Discover the most popular AI agents, commands, hooks, rules, and MCP servers chosen by the
               community.
             </p>
             <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
@@ -65,6 +79,54 @@ const Trending = () => {
                 )}
                 <ConfigCard {...config} type={getConfigType(config)} />
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Top Agents */}
+        <div>
+          <div className="flex items-center gap-3 mb-8">
+            <Star className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl font-bold text-foreground">Top AI Agents</h2>
+            <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
+              Most productive agents
+            </Badge>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {topAgents.map((agent) => (
+              <ConfigCard key={agent.id} {...agent} type="agent" />
+            ))}
+          </div>
+        </div>
+
+        {/* Top Commands */}
+        <div>
+          <div className="flex items-center gap-3 mb-8">
+            <Star className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl font-bold text-foreground">Top Commands</h2>
+            <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
+              Most useful commands
+            </Badge>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {topCommands.map((command) => (
+              <ConfigCard key={command.id} {...command} type="command" />
+            ))}
+          </div>
+        </div>
+
+        {/* Top Hooks */}
+        <div>
+          <div className="flex items-center gap-3 mb-8">
+            <Star className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl font-bold text-foreground">Top Hooks</h2>
+            <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
+              Most effective automation
+            </Badge>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {topHooks.map((hook) => (
+              <ConfigCard key={hook.id} {...hook} type="hook" />
             ))}
           </div>
         </div>
