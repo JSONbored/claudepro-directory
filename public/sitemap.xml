@@ -1,361 +1,361 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://claudepro-directory.vercel.app</loc>
+    <loc>https://dev.claudepro.directory</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>1</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/agents</loc>
+    <loc>https://dev.claudepro.directory/agents</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/mcp</loc>
+    <loc>https://dev.claudepro.directory/mcp</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/rules</loc>
+    <loc>https://dev.claudepro.directory/rules</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/commands</loc>
+    <loc>https://dev.claudepro.directory/commands</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/hooks</loc>
+    <loc>https://dev.claudepro.directory/hooks</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/jobs</loc>
+    <loc>https://dev.claudepro.directory/jobs</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/community</loc>
+    <loc>https://dev.claudepro.directory/community</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/trending</loc>
+    <loc>https://dev.claudepro.directory/trending</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/submit</loc>
+    <loc>https://dev.claudepro.directory/submit</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/rules/api-design-expert</loc>
+    <loc>https://dev.claudepro.directory/rules/api-design-expert</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/rules/aws-cloud-architect</loc>
+    <loc>https://dev.claudepro.directory/rules/aws-cloud-architect</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/rules/code-review-expert</loc>
+    <loc>https://dev.claudepro.directory/rules/code-review-expert</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/rules/database-expert</loc>
+    <loc>https://dev.claudepro.directory/rules/database-expert</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/rules/devops-and-sre-expert</loc>
+    <loc>https://dev.claudepro.directory/rules/devops-and-sre-expert</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/rules/go-golang-expert</loc>
+    <loc>https://dev.claudepro.directory/rules/go-golang-expert</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/rules/mobile-app-development-expert</loc>
+    <loc>https://dev.claudepro.directory/rules/mobile-app-development-expert</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/rules/python-data-science-expert</loc>
+    <loc>https://dev.claudepro.directory/rules/python-data-science-expert</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/rules/react-and-nextjs-expert</loc>
+    <loc>https://dev.claudepro.directory/rules/react-and-nextjs-expert</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/rules/security-auditor-and-penetration-tester</loc>
+    <loc>https://dev.claudepro.directory/rules/security-auditor-and-penetration-tester</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/mcp/aws-services-mcp</loc>
+    <loc>https://dev.claudepro.directory/mcp/aws-services-mcp</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/mcp/discord-integration-mcp</loc>
+    <loc>https://dev.claudepro.directory/mcp/discord-integration-mcp</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/mcp/docker-mcp-server</loc>
+    <loc>https://dev.claudepro.directory/mcp/docker-mcp-server</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/mcp/filesystem-mcp-server</loc>
+    <loc>https://dev.claudepro.directory/mcp/filesystem-mcp-server</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/mcp/github-integration-mcp</loc>
+    <loc>https://dev.claudepro.directory/mcp/github-integration-mcp</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/mcp/jira-integration-mcp</loc>
+    <loc>https://dev.claudepro.directory/mcp/jira-integration-mcp</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/mcp/kubernetes-management-mcp</loc>
+    <loc>https://dev.claudepro.directory/mcp/kubernetes-management-mcp</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/mcp/postgresql-mcp-server</loc>
+    <loc>https://dev.claudepro.directory/mcp/postgresql-mcp-server</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/mcp/redis-database-mcp</loc>
+    <loc>https://dev.claudepro.directory/mcp/redis-database-mcp</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/mcp/slack-integration-mcp</loc>
+    <loc>https://dev.claudepro.directory/mcp/slack-integration-mcp</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/agents/api-builder-agent</loc>
+    <loc>https://dev.claudepro.directory/agents/api-builder-agent</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/agents/backend-architect</loc>
+    <loc>https://dev.claudepro.directory/agents/backend-architect</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/agents/code-review-specialist</loc>
+    <loc>https://dev.claudepro.directory/agents/code-review-specialist</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/agents/database-specialist</loc>
+    <loc>https://dev.claudepro.directory/agents/database-specialist</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/agents/debugging-assistant-agent</loc>
+    <loc>https://dev.claudepro.directory/agents/debugging-assistant-agent</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/agents/frontend-specialist</loc>
+    <loc>https://dev.claudepro.directory/agents/frontend-specialist</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/agents/performance-optimizer</loc>
+    <loc>https://dev.claudepro.directory/agents/performance-optimizer</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/agents/technical-documentation-writer</loc>
+    <loc>https://dev.claudepro.directory/agents/technical-documentation-writer</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/agents/test-automation-engineer</loc>
+    <loc>https://dev.claudepro.directory/agents/test-automation-engineer</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/agents/uiux-design-expert</loc>
+    <loc>https://dev.claudepro.directory/agents/uiux-design-expert</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/commands/debug</loc>
+    <loc>https://dev.claudepro.directory/commands/debug</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/commands/docs</loc>
+    <loc>https://dev.claudepro.directory/commands/docs</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/commands/explain</loc>
+    <loc>https://dev.claudepro.directory/commands/explain</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/commands/test-gen</loc>
+    <loc>https://dev.claudepro.directory/commands/test-gen</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/commands/commit-smart-git-commit</loc>
+    <loc>https://dev.claudepro.directory/commands/commit-smart-git-commit</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/commands/optimize</loc>
+    <loc>https://dev.claudepro.directory/commands/optimize</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/commands/refactor</loc>
+    <loc>https://dev.claudepro.directory/commands/refactor</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/commands/review</loc>
+    <loc>https://dev.claudepro.directory/commands/review</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/commands/security</loc>
+    <loc>https://dev.claudepro.directory/commands/security</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/commands/test</loc>
+    <loc>https://dev.claudepro.directory/commands/test</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/hooks/accessibility-checker</loc>
+    <loc>https://dev.claudepro.directory/hooks/accessibility-checker</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/hooks/auto-code-formatter-hook</loc>
+    <loc>https://dev.claudepro.directory/hooks/auto-code-formatter-hook</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/hooks/database-migration-runner</loc>
+    <loc>https://dev.claudepro.directory/hooks/database-migration-runner</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/hooks/dependency-update-checker</loc>
+    <loc>https://dev.claudepro.directory/hooks/dependency-update-checker</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/hooks/documentation-generator</loc>
+    <loc>https://dev.claudepro.directory/hooks/documentation-generator</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/hooks/environment-variable-validator</loc>
+    <loc>https://dev.claudepro.directory/hooks/environment-variable-validator</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/hooks/git-pre-commit-validator</loc>
+    <loc>https://dev.claudepro.directory/hooks/git-pre-commit-validator</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/hooks/performance-monitor</loc>
+    <loc>https://dev.claudepro.directory/hooks/performance-monitor</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/hooks/security-scanner-hook</loc>
+    <loc>https://dev.claudepro.directory/hooks/security-scanner-hook</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro-directory.vercel.app/hooks/automated-test-runner-hook</loc>
+    <loc>https://dev.claudepro.directory/hooks/automated-test-runner-hook</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

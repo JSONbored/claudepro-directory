@@ -1,7 +1,11 @@
 import { writeFileSync } from 'fs';
-import { agents, commands, hooks, mcp, rules } from '../src/generated/content.js';
 
-const baseUrl = 'https://claudepro-directory.vercel.app';
+const baseUrl =
+  process.env.VERCEL_ENV === 'production'
+    ? 'https://claudepro.directory'
+    : process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'https://dev.claudepro.directory';
 
 interface SitemapUrl {
   loc: string;
@@ -10,7 +14,10 @@ interface SitemapUrl {
   priority: number;
 }
 
-function generateSitemap(): string {
+async function generateSitemap(): Promise<string> {
+  // Dynamic import to work in both environments
+  const { agents, commands, hooks, mcp, rules } = await import('../src/generated/content');
+
   const urls: SitemapUrl[] = [];
 
   // Homepage
@@ -79,9 +86,9 @@ ${urls
   return xml;
 }
 
-function main() {
+async function main() {
   try {
-    const sitemap = generateSitemap();
+    const sitemap = await generateSitemap();
     writeFileSync('public/sitemap.xml', sitemap, 'utf-8');
     console.log('✅ Generated sitemap.xml with', sitemap.split('<url>').length - 1, 'URLs');
   } catch (error) {
