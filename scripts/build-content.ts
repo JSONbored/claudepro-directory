@@ -10,7 +10,7 @@ const CONTENT_DIR = path.join(ROOT_DIR, 'content');
 const GENERATED_DIR = path.join(ROOT_DIR, 'src', 'generated');
 
 // Content types to process
-const CONTENT_TYPES = ['agents', 'mcp-servers', 'rules', 'commands', 'hooks'];
+const CONTENT_TYPES = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
 
 interface BaseContent {
   id: string;
@@ -98,17 +98,25 @@ async function generateTypeScript() {
 // Generated at: ${new Date().toISOString()}
 
 ${CONTENT_TYPES.map(type => {
-  const varName = type.replace('-', '_');
+  // Convert kebab-case to camelCase for variable names
+  const varName = type.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+  const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
+  const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
+  
   return `export const ${varName} = ${JSON.stringify(allContent[type], null, 2)} as const;
 
 export const ${varName}BySlug = new Map(${varName}.map(item => [item.slug, item]));
+
+export function get${capitalizedSingular}BySlug(slug: string) {
+  return ${varName}BySlug.get(slug) || null;
+}
 `;
 }).join('\n')}
 
 // Export counts for stats
 export const contentStats = {
 ${CONTENT_TYPES.map(type => {
-  const varName = type.replace('-', '_');
+  const varName = type.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
   return `  ${varName}: ${allContent[type].length}`;
 }).join(',\n')}
 };

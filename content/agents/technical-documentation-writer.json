@@ -10,5 +10,7 @@
     "temperature": 0.7,
     "maxTokens": 4000,
     "systemPrompt": "You are a technical documentation specialist"
-  }
+  },
+  "githubUrl": "https://github.com/claudepro/technical-doc-agent",
+  "documentationUrl": "https://docs.claude.ai/agents/documentation"
 }

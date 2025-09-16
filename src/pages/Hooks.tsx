@@ -1,6 +1,6 @@
 import { Webhook } from 'lucide-react';
-import { ContentListPage } from '@/components/ContentListPage';
-import { hooks } from '@/data/hooks';
+import { ContentListPage } from '@/components/content-list-page';
+import { hooks } from '@/generated/content';
 
 const Hooks = () => {
   return (

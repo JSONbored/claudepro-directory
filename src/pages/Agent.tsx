@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { Bot } from 'lucide-react';
-import { ContentDetailPage } from '@/components/ContentDetailPage';
-import { getAgentBySlug, agents } from '@/data/agents';
+import { ContentDetailPage } from '@/components/content-detail-page';
+import { getAgentBySlug, agents } from '@/generated/content';
 
 const Agent = () => {
   const { slug } = useParams<{ slug: string }>();

@@ -3,7 +3,15 @@
   "description": "Brief description of what this content does",
   "category": "development|productivity|automation|etc",
   "author": "your-github-username",
+  "dateAdded": "2025-09-15",
   "tags": ["tag1", "tag2", "tag3"],
   "content": "The main content/prompt/configuration goes here.\n\nYou can use markdown formatting.",
-  "_comment": "NOTE: The 'slug' and 'id' fields are auto-generated from the title. For example, 'UI/UX Design Expert' becomes 'uiux-design-expert'"
+  "githubUrl": "https://github.com/yourusername/yourrepo",
+  "documentationUrl": "https://docs.example.com/guide",
+  "configuration": {
+    "temperature": 0.7,
+    "maxTokens": 4000,
+    "systemPrompt": "Optional system prompt override"
+  },
+  "_comment": "NOTE: The 'slug' and 'id' fields are auto-generated from the title. For example, 'UI/UX Design Expert' becomes 'uiux-design-expert'. The githubUrl and documentationUrl fields are optional but recommended."
 }

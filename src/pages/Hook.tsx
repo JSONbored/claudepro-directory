@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { Webhook } from 'lucide-react';
-import { ContentDetailPage } from '@/components/ContentDetailPage';
-import { getHookBySlug, hooks } from '@/data/hooks';
+import { ContentDetailPage } from '@/components/content-detail-page';
+import { getHookBySlug, hooks } from '@/generated/content';
 
 const Hook = () => {
   const { slug } = useParams<{ slug: string }>();

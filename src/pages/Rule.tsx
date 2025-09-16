@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
-import { ContentDetailPage } from '@/components/ContentDetailPage';
-import { getRuleBySlug, rules } from '@/data/rules';
+import { ContentDetailPage } from '@/components/content-detail-page';
+import { getRuleBySlug, rules } from '@/generated/content';
 
 const Rule = () => {
   const { slug } = useParams<{ slug: string }>();

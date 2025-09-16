@@ -1,6 +1,6 @@
 import { BookOpen } from 'lucide-react';
-import { ContentListPage } from '@/components/ContentListPage';
-import { rules } from '@/data/rules';
+import { ContentListPage } from '@/components/content-list-page';
+import { rules } from '@/generated/content';
 
 const Rules = () => {
   return (

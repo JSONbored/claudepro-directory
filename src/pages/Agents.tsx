@@ -1,6 +1,6 @@
 import { Bot } from 'lucide-react';
-import { ContentListPage } from '@/components/ContentListPage';
-import { agents } from '@/data/agents';
+import { ContentListPage } from '@/components/content-list-page';
+import { agents } from '@/generated/content';
 
 const Agents = () => {
   return (

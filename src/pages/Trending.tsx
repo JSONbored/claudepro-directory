@@ -1,17 +1,16 @@
-import { ConfigCard } from '@/components/ConfigCard';
+import { ConfigCard } from '@/components/config-card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, Clock, Star } from 'lucide-react';
-import { rules } from '@/data/rules';
-import { mcpServers } from '@/data/mcp';
+import { rules, mcp } from '@/generated/content';
 
 const Trending = () => {
   // Combine and sort by popularity
-  const allConfigs = [...rules, ...mcpServers].sort((a, b) => b.popularity - a.popularity);
+  const allConfigs = [...rules, ...mcp].sort((a, b) => b.popularity - a.popularity);
   const trendingConfigs = allConfigs.slice(0, 12);
   
   // Most popular rules and MCPs
   const topRules = [...rules].sort((a, b) => b.popularity - a.popularity).slice(0, 6);
-  const topMcps = [...mcpServers].sort((a, b) => b.popularity - a.popularity).slice(0, 6);
+  const topMcps = [...mcp].sort((a, b) => b.popularity - a.popularity).slice(0, 6);
 
   const getConfigType = (config: any): 'rule' | 'mcp' => {
     return 'content' in config ? 'rule' : 'mcp';
@@ -102,10 +101,10 @@ const Trending = () => {
             </Badge>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {topMcps.map((mcp) => (
+            {topMcps.map((mcpItem) => (
               <ConfigCard
-                key={mcp.id}
-                {...mcp}
+                key={mcpItem.id}
+                {...mcpItem}
                 type="mcp"
               />
             ))}

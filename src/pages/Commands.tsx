@@ -1,6 +1,6 @@
 import { Terminal } from 'lucide-react';
-import { ContentListPage } from '@/components/ContentListPage';
-import { commands } from '@/data/commands';
+import { ContentListPage } from '@/components/content-list-page';
+import { commands } from '@/generated/content';
 
 const Commands = () => {
   return (

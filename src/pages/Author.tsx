@@ -1,11 +1,10 @@
 import { useParams } from 'react-router-dom';
-import { ConfigCard } from '@/components/ConfigCard';
+import { ConfigCard } from '@/components/config-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { User, Github, Globe, Calendar, Star } from 'lucide-react';
-import { rules } from '@/data/rules';
-import { mcpServers } from '@/data/mcp';
+import { rules, mcp } from '@/generated/content';
 import NotFound from './NotFound';
 
 const Author = () => {
@@ -17,7 +16,7 @@ const Author = () => {
 
   // Find all configs by this author
   const authorRules = rules.filter(rule => rule.author === authorSlug);
-  const authorMcps = mcpServers.filter(mcp => mcp.author === authorSlug);
+  const authorMcps = mcp.filter(mcpItem => mcpItem.author === authorSlug);
   const allConfigs = [...authorRules, ...authorMcps];
 
   if (allConfigs.length === 0) {
@@ -136,10 +135,10 @@ const Author = () => {
           <div>
             <h2 className="text-2xl font-bold text-foreground mb-6">MCP Servers ({authorMcps.length})</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {authorMcps.map((mcp) => (
+              {authorMcps.map((mcpItem) => (
                 <ConfigCard
-                  key={mcp.id}
-                  {...mcp}
+                  key={mcpItem.id}
+                  {...mcpItem}
                   type="mcp"
                 />
               ))}

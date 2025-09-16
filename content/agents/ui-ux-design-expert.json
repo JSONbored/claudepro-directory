@@ -9,5 +9,7 @@
   "configuration": {
     "temperature": 0.8,
     "maxTokens": 4000
-  }
+  },
+  "githubUrl": "https://github.com/claudepro/ui-ux-design-agent",
+  "documentationUrl": "https://docs.claude.ai/agents/design"
 }

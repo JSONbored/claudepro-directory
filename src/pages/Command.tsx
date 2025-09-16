@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { Terminal } from 'lucide-react';
-import { ContentDetailPage } from '@/components/ContentDetailPage';
-import { getCommandBySlug, commands } from '@/data/commands';
+import { ContentDetailPage } from '@/components/content-detail-page';
+import { getCommandBySlug, commands } from '@/generated/content';
 
 const Command = () => {
   const { slug } = useParams<{ slug: string }>();

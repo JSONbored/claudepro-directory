@@ -1,31 +1,30 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ConfigCard } from '@/components/ConfigCard';
-import { AuthorCard } from '@/components/AuthorCard';
-import { FilterBar } from '@/components/FilterBar';
-import { SortDropdown } from '@/components/SortDropdown';
-import { SearchBar } from '@/components/SearchBar';
+import { ConfigCard } from '@/components/config-card';
+import { AuthorCard } from '@/components/author-card';
+import { FilterBar } from '@/components/filter-bar';
+import { SortDropdown } from '@/components/sort-dropdown';
+import { SearchBar } from '@/components/search-bar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BookOpen, Server, Sparkles, Github, ExternalLink, Briefcase, Search } from 'lucide-react';
-import { rules, Rule } from '@/data/rules';
-import { mcpServers, MCPServer } from '@/data/mcp';
+import { rules, mcp } from '@/generated/content';
 import { authors, getFeaturedAuthors } from '@/data/authors';
 import { useFilters } from '@/hooks/useFilters';
 import { useSorting } from '@/hooks/useSorting';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('all');
-  const [searchResults, setSearchResults] = useState<(Rule | MCPServer)[]>([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const { filters, updateFilter, resetFilters, applyFilters } = useFilters();
   const { sortBy, sortDirection, updateSort, sortItems } = useSorting();
   const featuredAuthors = getFeaturedAuthors();
 
-  const allConfigs = [...rules, ...mcpServers];
+  const allConfigs = [...rules, ...mcp];
   
   // Get unique values for filter options
   const availableCategories = useMemo(() => 
@@ -39,7 +38,7 @@ const Index = () => {
   );
   
   // Handle search results
-  const handleSearchResults = (results: (Rule | MCPServer)[]) => {
+  const handleSearchResults = (results: any[]) => {
     setSearchResults(results);
   };
 
@@ -51,7 +50,7 @@ const Index = () => {
 
   // Apply filters and sorting based on active tab
   const processedConfigs = useMemo(() => {
-    let configs: (Rule | MCPServer)[] = [];
+    let configs: any[] = [];
     
     // Use search results when searching, otherwise use all configs
     const baseConfigs = isSearching ? searchResults : allConfigs;
@@ -73,7 +72,7 @@ const Index = () => {
     return sortItems(filtered);
   }, [activeTab, filters, sortBy, sortDirection, searchResults, isSearching, allConfigs, applyFilters, sortItems]);
 
-  const getConfigType = (config: Rule | MCPServer): 'rule' | 'mcp' => {
+  const getConfigType = (config: any): 'rule' | 'mcp' => {
     return 'content' in config ? 'rule' : 'mcp';
   };
 
@@ -109,7 +108,7 @@ const Index = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Server className="h-4 w-4" />
-                {mcpServers.length} MCP Servers
+                {mcp.length} MCP Servers
               </div>
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4" />
@@ -195,10 +194,10 @@ const Index = () => {
                 </Link>
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {mcpServers.slice(0, 6).map((mcp) => (
+                {mcp.slice(0, 6).map((mcpItem) => (
                   <ConfigCard
-                    key={mcp.id}
-                    {...mcp}
+                    key={mcpItem.id}
+                    {...mcpItem}
                     type="mcp"
                   />
                 ))}
