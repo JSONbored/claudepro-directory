@@ -25,6 +25,13 @@ const CodeHighlight = lazy(() =>
   }))
 );
 
+// Lazy load ContentViewer for large content
+const ContentViewer = lazy(() =>
+  import('@/components/content-viewer').then((module) => ({
+    default: module.ContentViewer,
+  }))
+);
+
 interface ContentDetailPageProps<T extends ContentItem> {
   item: T | null;
   type: ContentCategory;
@@ -129,7 +136,7 @@ export function ContentDetailPage<T extends ContentItem>({
 
           <div className="max-w-4xl">
             <div className="flex items-start gap-4 mb-6">
-              <div className="p-3 bg-primary/10 rounded-lg">
+              <div className="p-3 bg-accent/10 rounded-lg">
                 <Icon className="h-6 w-6 text-primary" />
               </div>
               <div className="flex-1">
@@ -207,10 +214,18 @@ export function ContentDetailPage<T extends ContentItem>({
               </CardHeader>
               <CardContent>
                 <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}>
-                  <CodeHighlight
-                    code={item.content || item.config || ''}
-                    language={type === 'command' ? 'bash' : type === 'mcp' ? 'json' : 'markdown'}
-                  />
+                  {(item.content || item.config || '').length > 3000 ? (
+                    <ContentViewer
+                      content={item.content || item.config || ''}
+                      language={type === 'command' ? 'bash' : type === 'mcp' ? 'json' : 'markdown'}
+                      maxHeight={600}
+                    />
+                  ) : (
+                    <CodeHighlight
+                      code={item.content || item.config || ''}
+                      language={type === 'command' ? 'bash' : type === 'mcp' ? 'json' : 'markdown'}
+                    />
+                  )}
                 </Suspense>
               </CardContent>
             </Card>

@@ -1,27 +1,6 @@
-import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
-import css from 'react-syntax-highlighter/dist/esm/languages/prism/css';
-import js from 'react-syntax-highlighter/dist/esm/languages/prism/javascript';
-import json from 'react-syntax-highlighter/dist/esm/languages/prism/json';
-import jsx from 'react-syntax-highlighter/dist/esm/languages/prism/jsx';
-import python from 'react-syntax-highlighter/dist/esm/languages/prism/python';
-import tsx from 'react-syntax-highlighter/dist/esm/languages/prism/tsx';
-import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typescript';
-import yaml from 'react-syntax-highlighter/dist/esm/languages/prism/yaml';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-
-SyntaxHighlighter.registerLanguage('javascript', js);
-SyntaxHighlighter.registerLanguage('jsx', jsx);
-SyntaxHighlighter.registerLanguage('tsx', tsx);
-SyntaxHighlighter.registerLanguage('typescript', typescript);
-SyntaxHighlighter.registerLanguage('json', json);
-SyntaxHighlighter.registerLanguage('bash', bash);
-SyntaxHighlighter.registerLanguage('css', css);
-SyntaxHighlighter.registerLanguage('python', python);
-SyntaxHighlighter.registerLanguage('yaml', yaml);
-
 import { Check, Copy } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { codeToHtml } from 'shiki';
 import { Button } from '@/components/ui/button';
 
 interface CodeHighlightProps {
@@ -38,6 +17,99 @@ export const CodeHighlight = ({
   showCopy = true,
 }: CodeHighlightProps) => {
   const [copied, setCopied] = useState(false);
+  const [highlightedCode, setHighlightedCode] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const highlightCode = async () => {
+      setIsLoading(true);
+      try {
+        const html = await codeToHtml(code, {
+          lang: language,
+          theme: 'one-dark-pro',
+          transformers: [
+            {
+              pre(node) {
+                // Custom styling for the pre element
+                node.properties.style = `
+                  background-color: var(--color-card);
+                  border: 1px solid var(--color-border);
+                  border-radius: 0.5rem;
+                  margin: 0;
+                  padding: 1rem;
+                  overflow-x: auto;
+                  font-size: 0.875rem;
+                  line-height: 1.5;
+                  max-width: 100%;
+                  word-wrap: break-word;
+                  ${title ? 'border-top-left-radius: 0; border-top-right-radius: 0;' : ''}
+                `;
+              },
+              code(node) {
+                // Custom styling for the code element
+                node.properties.style = `
+                  background: transparent;
+                  color: var(--color-foreground);
+                  display: block;
+                  overflow-wrap: break-word;
+                  white-space: pre-wrap;
+                `;
+              },
+              span(node) {
+                // Enhance token colors to match our theme
+                if (node.properties.style) {
+                  let style = node.properties.style as string;
+
+                  // Claude orange for strings
+                  if (style.includes('color:#CE9178')) {
+                    style = style.replace('color:#CE9178', 'color:var(--color-primary)');
+                  }
+                  // Keywords
+                  if (style.includes('color:#569CD6')) {
+                    style = style.replace('color:#569CD6', 'color:#ff8c00'); // Claude orange
+                  }
+                  // Comments
+                  if (style.includes('color:#6A9955')) {
+                    style = style.replace('color:#6A9955', 'color:var(--color-muted-foreground)');
+                  }
+                  // Functions
+                  if (style.includes('color:#DCDCAA')) {
+                    style = style.replace('color:#DCDCAA', 'color:#00bcd4');
+                  }
+                  // Numbers
+                  if (style.includes('color:#B5CEA8')) {
+                    style = style.replace('color:#B5CEA8', 'color:#4caf50');
+                  }
+
+                  node.properties.style = style;
+                }
+              },
+            },
+          ],
+        });
+        setHighlightedCode(html);
+      } catch (error) {
+        console.error('Failed to highlight code:', error);
+        // Fallback to plain text with basic styling
+        setHighlightedCode(`<pre style="
+          background-color: var(--color-card);
+          border: 1px solid var(--color-border);
+          border-radius: 0.5rem;
+          margin: 0;
+          padding: 1rem;
+          overflow-x: auto;
+          font-size: 0.875rem;
+          line-height: 1.5;
+          color: var(--color-foreground);
+          ${title ? 'border-top-left-radius: 0; border-top-right-radius: 0;' : ''}
+        "><code>${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    highlightCode();
+  }, [code, language, title]);
 
   const copyToClipboard = async () => {
     try {
@@ -47,37 +119,6 @@ export const CodeHighlight = ({
     } catch (err) {
       console.error('Failed to copy code:', err);
     }
-  };
-
-  const customStyle = {
-    ...oneDark,
-    'code[class*="language-"]': {
-      ...oneDark['code[class*="language-"]'],
-      background: 'hsl(var(--card))',
-      color: 'hsl(var(--foreground))',
-    },
-    'pre[class*="language-"]': {
-      ...oneDark['pre[class*="language-"]'],
-      background: 'hsl(var(--card))',
-      border: '1px solid hsl(var(--border))',
-      borderRadius: '0.5rem',
-      margin: 0,
-    },
-    '.token.comment': {
-      color: 'hsl(var(--muted-foreground))',
-    },
-    '.token.string': {
-      color: 'hsl(var(--primary))',
-    },
-    '.token.keyword': {
-      color: '#ff8c00', // Claude orange
-    },
-    '.token.function': {
-      color: '#00bcd4',
-    },
-    '.token.number': {
-      color: '#4caf50',
-    },
   };
 
   return (
@@ -91,6 +132,7 @@ export const CodeHighlight = ({
               size="sm"
               onClick={copyToClipboard}
               className="opacity-0 group-hover:opacity-100 transition-opacity"
+              disabled={isLoading}
             >
               {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
             </Button>
@@ -99,21 +141,24 @@ export const CodeHighlight = ({
       )}
 
       <div className="relative">
-        <SyntaxHighlighter
-          language={language}
-          style={customStyle}
-          customStyle={{
-            borderTopLeftRadius: title ? 0 : '0.5rem',
-            borderTopRightRadius: title ? 0 : '0.5rem',
-            fontSize: '0.875rem',
-            lineHeight: '1.5',
-          }}
-          showLineNumbers
-        >
-          {code}
-        </SyntaxHighlighter>
+        {isLoading ? (
+          <div
+            className="animate-pulse bg-card border border-border rounded-lg p-4"
+            style={{
+              borderTopLeftRadius: title ? 0 : '0.5rem',
+              borderTopRightRadius: title ? 0 : '0.5rem',
+              minHeight: '4rem',
+            }}
+          >
+            <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+            <div className="h-4 bg-muted rounded w-1/2"></div>
+          </div>
+        ) : (
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: Shiki generates trusted HTML
+          <div className="shiki-container" dangerouslySetInnerHTML={{ __html: highlightedCode }} />
+        )}
 
-        {showCopy && !title && (
+        {showCopy && !title && !isLoading && (
           <Button
             variant="ghost"
             size="sm"

@@ -38,7 +38,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
     <Card className="card-gradient hover-lift transition-smooth group relative">
       {job.featured && (
         <div className="absolute -top-2 -right-2 z-10">
-          <Badge className="bg-primary text-primary-foreground">
+          <Badge className="bg-accent text-accent-foreground">
             <Star className="h-3 w-3 mr-1" />
             Featured
           </Badge>
@@ -57,7 +57,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
                 />
               )}
               <div>
-                <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                <CardTitle className="text-xl group-hover:text-accent transition-colors">
                   <Link to={`/jobs/${job.slug}`}>{job.title}</Link>
                 </CardTitle>
                 <div className="flex items-center gap-2 text-muted-foreground">

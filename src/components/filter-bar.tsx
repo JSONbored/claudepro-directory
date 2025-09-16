@@ -176,8 +176,8 @@ export const FilterBar = ({
                 variant={filters.tags.includes(tag) ? 'default' : 'outline'}
                 className={`cursor-pointer transition-all duration-200 ${
                   filters.tags.includes(tag)
-                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
-                    : 'hover:bg-primary/10 hover:border-primary/30'
+                    ? 'bg-accent text-accent-foreground shadow-lg shadow-primary/25'
+                    : 'hover:bg-accent/10 hover:border-accent/30'
                 }`}
                 onClick={() => toggleTag(tag)}
               >
@@ -195,11 +195,11 @@ export const FilterBar = ({
               <Badge
                 key={`active-${tag}`}
                 variant="default"
-                className="bg-primary text-primary-foreground"
+                className="bg-accent text-accent-foreground"
               >
                 {tag}
                 <X
-                  className="h-3 w-3 ml-1 cursor-pointer hover:text-primary-foreground/80"
+                  className="h-3 w-3 ml-1 cursor-pointer hover:text-accent-foreground/80"
                   onClick={() => removeTag(tag)}
                 />
               </Badge>

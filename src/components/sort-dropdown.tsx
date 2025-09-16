@@ -43,7 +43,7 @@ export const SortDropdown = ({ sortBy, sortDirection, onSortChange }: SortDropdo
         variant="ghost"
         size="sm"
         onClick={() => onSortChange(sortBy)}
-        className="p-2 hover:bg-primary/10"
+        className="p-2 hover:bg-accent/10"
       >
         {sortDirection === 'asc' ? (
           <ArrowUp className="h-4 w-4" />

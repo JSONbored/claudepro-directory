@@ -30,7 +30,7 @@ const RelatedConfigsComponent = <T extends { id: string } = any>({
       <div className="flex items-center gap-3">
         <Lightbulb className="h-6 w-6 text-primary" />
         <h2 className="text-2xl font-bold text-foreground">{title}</h2>
-        <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
+        <Badge variant="outline" className="border-accent/20 bg-accent/5 text-accent">
           AI Recommended
         </Badge>
       </div>
@@ -50,7 +50,7 @@ const RelatedConfigsComponent = <T extends { id: string } = any>({
                   <div className="absolute -top-3 -right-3 z-20">
                     <Badge
                       variant="default"
-                      className="bg-primary text-primary-foreground text-xs shadow-sm"
+                      className="bg-accent text-accent-foreground text-xs shadow-sm"
                     >
                       High Match
                     </Badge>

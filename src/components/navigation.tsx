@@ -23,7 +23,7 @@ interface NavLinkProps {
 const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkProps) => (
   <Link
     to={href}
-    className={`text-sm font-medium transition-colors hover:text-primary ${
+    className={`text-sm font-medium transition-colors hover:text-accent ${
       isActive(href) ? 'text-primary' : 'text-muted-foreground'
     } ${className}`}
     onClick={onClick}
@@ -88,7 +88,7 @@ export const Navigation = () => {
                 </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="text-muted-foreground hover:text-primary">
+                <NavigationMenuTrigger className="text-muted-foreground hover:text-accent">
                   More
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -126,7 +126,7 @@ export const Navigation = () => {
               onClick={() =>
                 window.open('https://github.com/JSONbored/claudepro-directory', '_blank')
               }
-              className="hidden sm:flex hover:bg-primary/10 hover:text-primary"
+              className="hidden sm:flex hover:bg-accent/10 hover:text-accent"
             >
               <Github className="h-4 w-4 mr-2" />
               GitHub
@@ -134,9 +134,9 @@ export const Navigation = () => {
 
             <Badge
               variant="outline"
-              className="hidden lg:flex border-primary/20 bg-primary/5 text-primary"
+              className="hidden lg:flex border-accent/20 bg-accent/5 text-accent"
             >
-              <ExternalLink className="h-3 w-3 mr-1" />
+              <ExternalLink className="h-3 w-3 mr-1 text-accent" />
               Free & Open Source
             </Badge>
 

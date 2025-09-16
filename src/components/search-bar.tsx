@@ -125,7 +125,7 @@ export const SearchBar = <T extends SearchableItem = SearchableItem>({
             variant="ghost"
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
-            className={`h-8 px-2 transition-smooth hover:bg-primary/10 hover:text-primary ${selectedCategories.length > 0 ? 'text-primary bg-primary/10' : ''}`}
+            className={`h-8 px-2 transition-smooth hover:bg-accent/10 hover:text-accent ${selectedCategories.length > 0 ? 'text-primary bg-accent/10' : ''}`}
             aria-label={`${showFilters ? 'Hide' : 'Show'} category filters`}
             aria-expanded={showFilters}
             aria-controls="category-filters"
@@ -170,8 +170,8 @@ export const SearchBar = <T extends SearchableItem = SearchableItem>({
                 variant={selectedCategories.includes(category) ? 'default' : 'outline'}
                 className={`cursor-pointer transition-smooth hover:scale-105 ${
                   selectedCategories.includes(category)
-                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground border-primary'
-                    : 'border-border/50 hover:border-primary/30 hover:bg-primary/5 hover:text-primary'
+                    ? 'bg-primary hover:bg-accent/90 text-primary-foreground border-primary'
+                    : 'border-border/50 hover:border-accent/30 hover:bg-accent/5 hover:text-accent'
                 }`}
                 onClick={() => handleCategoryToggle(category)}
                 role="button"
@@ -201,7 +201,7 @@ export const SearchBar = <T extends SearchableItem = SearchableItem>({
             <button
               type="button"
               onClick={clearFilters}
-              className="text-primary hover:underline"
+              className="text-accent hover:underline"
               aria-label="Clear all active filters"
             >
               Clear filters

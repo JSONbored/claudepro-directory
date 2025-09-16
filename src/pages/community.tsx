@@ -88,8 +88,8 @@ const Community = () => {
               Join the Claude Pro community and connect with developers, researchers, and AI
               enthusiasts sharing knowledge and configurations.
             </p>
-            <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
-              <Heart className="h-3 w-3 mr-1" />
+            <Badge variant="outline" className="border-accent/20 bg-accent/5 text-accent">
+              <Heart className="h-3 w-3 mr-1 text-accent" />
               Built by the community, for the community
             </Badge>
           </div>
@@ -120,7 +120,7 @@ const Community = () => {
             {communityChannels.map((channel, index) => (
               <Card
                 key={channel.title || `channel-${index}`}
-                className="hover-lift transition-smooth card-gradient border-border/50 hover:border-primary/20"
+                className="hover-lift transition-smooth card-gradient border-border/50 hover:border-accent/20"
               >
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -135,7 +135,7 @@ const Community = () => {
                 <CardContent>
                   <Button
                     variant="outline"
-                    className="w-full hover:bg-primary/5 hover:border-primary/30"
+                    className="w-full hover:bg-accent/5 hover:border-accent/30"
                     onClick={() => window.open(channel.url, '_blank')}
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
@@ -154,14 +154,14 @@ const Community = () => {
             {resources.map((resource, index) => (
               <Card
                 key={resource.title || `resource-${index}`}
-                className="hover-lift transition-smooth card-gradient border-border/50 hover:border-primary/20"
+                className="hover-lift transition-smooth card-gradient border-border/50 hover:border-accent/20"
               >
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <resource.icon className="h-8 w-8 text-primary" />
                     <Badge
                       variant="outline"
-                      className="border-primary/20 bg-primary/5 text-primary"
+                      className="border-accent/20 bg-accent/5 text-accent"
                     >
                       {resource.badge}
                     </Badge>
@@ -172,7 +172,7 @@ const Community = () => {
                 <CardContent>
                   <Button
                     variant="outline"
-                    className="w-full hover:bg-primary/5 hover:border-primary/30"
+                    className="w-full hover:bg-accent/5 hover:border-accent/30"
                     onClick={() => window.open(resource.url, '_blank')}
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
@@ -196,7 +196,7 @@ const Community = () => {
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button
                   variant="default"
-                  className="bg-primary hover:bg-primary/90"
+                  className="bg-accent hover:bg-accent/90"
                   onClick={() => {
                     window.location.href = '/submit';
                   }}
@@ -206,7 +206,7 @@ const Community = () => {
                 </Button>
                 <Button
                   variant="outline"
-                  className="hover:bg-primary/5 hover:border-primary/30"
+                  className="hover:bg-accent/5 hover:border-accent/30"
                   onClick={() =>
                     window.open('https://github.com/JSONbored/claudepro-directory', '_blank')
                   }

@@ -168,8 +168,8 @@ const Submit = () => {
               Share your Claude configurations with the community. Help others discover new ways to
               enhance their AI workflows.
             </p>
-            <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
-              <CheckCircle className="h-3 w-3 mr-1" />
+            <Badge variant="outline" className="border-accent/20 bg-accent/5 text-accent">
+              <CheckCircle className="h-3 w-3 mr-1 text-accent" />
               Free and open source
             </Badge>
           </div>
@@ -181,12 +181,12 @@ const Submit = () => {
         <div className="max-w-4xl mx-auto">
           {/* Featured Job Posting Section */}
           <div className="mb-12">
-            <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-primary/20 relative overflow-hidden">
+            <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-accent/20 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent" />
               <CardHeader className="relative">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
+                    <div className="p-2 bg-accent/10 rounded-lg">
                       <Briefcase className="h-6 w-6 text-primary" />
                     </div>
                     <div>
@@ -199,7 +199,7 @@ const Submit = () => {
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge className="bg-primary text-primary-foreground">
+                  <Badge className="bg-accent text-accent-foreground">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     Popular
                   </Badge>
@@ -208,7 +208,7 @@ const Submit = () => {
               <CardContent className="relative">
                 <div className="grid md:grid-cols-3 gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded">
+                    <div className="p-2 bg-accent/10 rounded">
                       <Users className="h-4 w-4 text-primary" />
                     </div>
                     <div>
@@ -219,7 +219,7 @@ const Submit = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded">
+                    <div className="p-2 bg-accent/10 rounded">
                       <DollarSign className="h-4 w-4 text-primary" />
                     </div>
                     <div>
@@ -228,7 +228,7 @@ const Submit = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Button className="w-full bg-primary hover:bg-primary/90">
+                    <Button className="w-full bg-primary hover:bg-accent/90">
                       <ExternalLink className="h-4 w-4 mr-2" />
                       Post Job/Ad
                     </Button>
@@ -246,7 +246,7 @@ const Submit = () => {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <Card
-                  className="hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-primary/20"
+                  className="hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-accent/20"
                   onClick={() => setConfigType('rule')}
                 >
                   <CardHeader className="text-center">
@@ -260,7 +260,7 @@ const Submit = () => {
                   <CardContent>
                     <Button
                       variant="outline"
-                      className="w-full hover:bg-primary/5 hover:border-primary/30"
+                      className="w-full hover:bg-accent/5 hover:border-accent/30"
                     >
                       <BookOpen className="h-4 w-4 mr-2" />
                       Submit Rule
@@ -269,7 +269,7 @@ const Submit = () => {
                 </Card>
 
                 <Card
-                  className="hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-primary/20"
+                  className="hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-accent/20"
                   onClick={() => setConfigType('mcp')}
                 >
                   <CardHeader className="text-center">
@@ -283,7 +283,7 @@ const Submit = () => {
                   <CardContent>
                     <Button
                       variant="outline"
-                      className="w-full hover:bg-primary/5 hover:border-primary/30"
+                      className="w-full hover:bg-accent/5 hover:border-accent/30"
                     >
                       <Server className="h-4 w-4 mr-2" />
                       Submit MCP Server
@@ -292,7 +292,7 @@ const Submit = () => {
                 </Card>
 
                 <Card
-                  className="hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-primary/20"
+                  className="hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-accent/20"
                   onClick={() => setConfigType('agent')}
                 >
                   <CardHeader className="text-center">
@@ -306,7 +306,7 @@ const Submit = () => {
                   <CardContent>
                     <Button
                       variant="outline"
-                      className="w-full hover:bg-primary/5 hover:border-primary/30"
+                      className="w-full hover:bg-accent/5 hover:border-accent/30"
                     >
                       <Bot className="h-4 w-4 mr-2" />
                       Submit Agent
@@ -315,7 +315,7 @@ const Submit = () => {
                 </Card>
 
                 <Card
-                  className="hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-primary/20"
+                  className="hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-accent/20"
                   onClick={() => setConfigType('command')}
                 >
                   <CardHeader className="text-center">
@@ -328,7 +328,7 @@ const Submit = () => {
                   <CardContent>
                     <Button
                       variant="outline"
-                      className="w-full hover:bg-primary/5 hover:border-primary/30"
+                      className="w-full hover:bg-accent/5 hover:border-accent/30"
                     >
                       <Terminal className="h-4 w-4 mr-2" />
                       Submit Command
@@ -337,7 +337,7 @@ const Submit = () => {
                 </Card>
 
                 <Card
-                  className="hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-primary/20"
+                  className="hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-accent/20"
                   onClick={() => setConfigType('hook')}
                 >
                   <CardHeader className="text-center">
@@ -350,7 +350,7 @@ const Submit = () => {
                   <CardContent>
                     <Button
                       variant="outline"
-                      className="w-full hover:bg-primary/5 hover:border-primary/30"
+                      className="w-full hover:bg-accent/5 hover:border-accent/30"
                     >
                       <Webhook className="h-4 w-4 mr-2" />
                       Submit Hook
@@ -390,7 +390,7 @@ const Submit = () => {
                   <Button
                     variant="ghost"
                     onClick={() => setConfigType('')}
-                    className="hover:bg-primary/10"
+                    className="hover:bg-accent/10"
                   >
                     Change Type
                   </Button>
@@ -673,7 +673,7 @@ const Submit = () => {
                   </div>
 
                   {/* Submission Guidelines */}
-                  <Card className="bg-primary/5 border-primary/20">
+                  <Card className="bg-accent/5 border-accent/20">
                     <CardContent className="pt-6">
                       <div className="flex items-start gap-3">
                         <AlertCircle className="h-5 w-5 text-primary mt-0.5" />
@@ -694,7 +694,7 @@ const Submit = () => {
 
                   {/* Submit Button */}
                   <div className="flex gap-3 pt-6">
-                    <Button type="submit" className="bg-primary hover:bg-primary/90 flex-1">
+                    <Button type="submit" className="bg-accent hover:bg-accent/90 flex-1">
                       <Send className="h-4 w-4 mr-2" />
                       Submit Configuration
                     </Button>
@@ -704,7 +704,7 @@ const Submit = () => {
                       onClick={() =>
                         window.open('https://github.com/JSONbored/claudepro-directory', '_blank')
                       }
-                      className="hover:bg-primary/5 hover:border-primary/30"
+                      className="hover:bg-accent/5 hover:border-accent/30"
                     >
                       <Github className="h-4 w-4 mr-2" />
                       View on GitHub
@@ -728,7 +728,7 @@ const Submit = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Button
                     variant="outline"
-                    className="justify-start h-auto p-4 hover:bg-primary/5 hover:border-primary/30"
+                    className="justify-start h-auto p-4 hover:bg-accent/5 hover:border-accent/30"
                     onClick={() =>
                       window.open(
                         'https://github.com/JSONbored/claudepro-directory/issues/new',
@@ -747,7 +747,7 @@ const Submit = () => {
 
                   <Button
                     variant="outline"
-                    className="justify-start h-auto p-4 hover:bg-primary/5 hover:border-primary/30"
+                    className="justify-start h-auto p-4 hover:bg-accent/5 hover:border-accent/30"
                     onClick={() =>
                       window.open('https://github.com/JSONbored/claudepro-directory/fork', '_blank')
                     }

@@ -42,8 +42,8 @@ export default function Jobs() {
         <div className="absolute inset-0 hero-gradient opacity-10" />
         <div className="container mx-auto text-center relative z-10">
           <div className="max-w-3xl mx-auto">
-            <Badge variant="outline" className="mb-6 border-primary/20 bg-primary/5 text-primary">
-              <Briefcase className="h-3 w-3 mr-1" />
+            <Badge variant="outline" className="mb-6 border-accent/20 bg-accent/5 text-accent">
+              <Briefcase className="h-3 w-3 mr-1 text-accent" />
               Jobs Board
             </Badge>
 

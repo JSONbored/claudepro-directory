@@ -34,13 +34,12 @@ export default defineConfig(({ mode }) => ({
         manualChunks: (id) => {
           // Split vendor chunks
           if (id.includes('node_modules')) {
-            // React ecosystem (excluding react-syntax-highlighter)
-            if ((id.includes('react') || id.includes('react-dom') || id.includes('react-router')) 
-                && !id.includes('react-syntax-highlighter')) {
+            // React ecosystem
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
               return 'react-vendor';
             }
-            // Syntax highlighter (large library) - force into its own chunk
-            if (id.includes('react-syntax-highlighter') || id.includes('refractor') || id.includes('prismjs')) {
+            // Shiki syntax highlighter - force into its own chunk
+            if (id.includes('shiki')) {
               return 'syntax-highlighter';
             }
             // UI libraries

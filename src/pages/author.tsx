@@ -68,14 +68,14 @@ const Author = () => {
                   <div className="flex flex-wrap gap-4">
                     <Badge
                       variant="outline"
-                      className="border-primary/20 bg-primary/5 text-primary"
+                      className="border-accent/20 bg-accent/5 text-accent"
                     >
                       <Calendar className="h-3 w-3 mr-1" />
                       Joined {new Date(authorData.joinDate).toLocaleDateString()}
                     </Badge>
                     <Badge
                       variant="outline"
-                      className="border-primary/20 bg-primary/5 text-primary"
+                      className="border-accent/20 bg-accent/5 text-accent"
                     >
                       <Star className="h-3 w-3 mr-1" />
                       {authorData.avgPopularity}% avg popularity

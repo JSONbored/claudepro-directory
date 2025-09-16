@@ -212,7 +212,7 @@ const Index = () => {
             <div>
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-bold">Featured Rules</h2>
-                <Link to="/rules" className="text-primary hover:underline flex items-center gap-2">
+                <Link to="/rules" className="text-accent hover:underline flex items-center gap-2">
                   View all <ExternalLink className="h-4 w-4" />
                 </Link>
               </div>
@@ -227,7 +227,7 @@ const Index = () => {
             <div>
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-bold">Featured MCPs</h2>
-                <Link to="/mcp" className="text-primary hover:underline flex items-center gap-2">
+                <Link to="/mcp" className="text-accent hover:underline flex items-center gap-2">
                   View all <ExternalLink className="h-4 w-4" />
                 </Link>
               </div>
@@ -242,7 +242,7 @@ const Index = () => {
             <div>
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-bold">Featured Agents</h2>
-                <Link to="/agents" className="text-primary hover:underline flex items-center gap-2">
+                <Link to="/agents" className="text-accent hover:underline flex items-center gap-2">
                   View all <ExternalLink className="h-4 w-4" />
                 </Link>
               </div>
@@ -259,7 +259,7 @@ const Index = () => {
                 <h2 className="text-2xl font-bold">Featured Commands</h2>
                 <Link
                   to="/commands"
-                  className="text-primary hover:underline flex items-center gap-2"
+                  className="text-accent hover:underline flex items-center gap-2"
                 >
                   View all <ExternalLink className="h-4 w-4" />
                 </Link>
@@ -275,7 +275,7 @@ const Index = () => {
             <div>
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-bold">Featured Hooks</h2>
-                <Link to="/hooks" className="text-primary hover:underline flex items-center gap-2">
+                <Link to="/hooks" className="text-accent hover:underline flex items-center gap-2">
                   View all <ExternalLink className="h-4 w-4" />
                 </Link>
               </div>
@@ -290,7 +290,7 @@ const Index = () => {
             <div>
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-bold">Featured Jobs</h2>
-                <Link to="/jobs" className="text-primary hover:underline flex items-center gap-2">
+                <Link to="/jobs" className="text-accent hover:underline flex items-center gap-2">
                   View all <ExternalLink className="h-4 w-4" />
                 </Link>
               </div>

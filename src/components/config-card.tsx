@@ -85,7 +85,7 @@ export const ConfigCard = memo(
 
     return (
       <Card
-        className="group hover:glow-effect hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-primary/20"
+        className="group hover:glow-effect hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-accent/20"
         onClick={handleCardClick}
         role="article"
         aria-label={`${displayTitle} - ${type} by ${author}`}
@@ -120,7 +120,7 @@ export const ConfigCard = memo(
                   {type === 'mcp' ? 'MCP' : type.charAt(0).toUpperCase() + type.slice(1)}
                 </Badge>
               </div>
-              <CardTitle className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors-smooth">
+              <CardTitle className="text-lg font-semibold text-foreground group-hover:text-accent transition-colors-smooth">
                 {displayTitle}
               </CardTitle>
               <CardDescription className="text-sm text-muted-foreground mt-1 line-clamp-2">
@@ -141,7 +141,7 @@ export const ConfigCard = memo(
               <Badge
                 key={tag}
                 variant="outline"
-                className="text-xs border-muted-foreground/20 text-muted-foreground hover:border-primary/30 hover:text-primary transition-colors-smooth"
+                className="text-xs border-muted-foreground/20 text-muted-foreground hover:border-accent/30 hover:text-accent transition-colors-smooth"
               >
                 {tag}
               </Badge>
@@ -168,7 +168,7 @@ export const ConfigCard = memo(
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary"
+                  className="h-7 w-7 p-0 hover:bg-accent/10 hover:text-accent"
                   onClick={(e) => {
                     e.stopPropagation();
                     window.open(repository, '_blank');
@@ -183,7 +183,7 @@ export const ConfigCard = memo(
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary"
+                  className="h-7 w-7 p-0 hover:bg-accent/10 hover:text-accent"
                   onClick={(e) => {
                     e.stopPropagation();
                     window.open(documentation, '_blank');
@@ -197,7 +197,7 @@ export const ConfigCard = memo(
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary"
+                className="h-7 w-7 p-0 hover:bg-accent/10 hover:text-accent"
                 onClick={handleCopy}
                 aria-label={copied ? 'Link copied to clipboard' : `Copy link to ${displayTitle}`}
               >
@@ -211,7 +211,7 @@ export const ConfigCard = memo(
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 px-2 text-xs hover:bg-primary/10 hover:text-primary"
+                className="h-7 px-2 text-xs hover:bg-accent/10 hover:text-accent"
                 onClick={handleViewConfig}
                 aria-label={`View details for ${displayTitle}`}
               >

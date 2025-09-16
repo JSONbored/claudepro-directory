@@ -116,7 +116,7 @@ export default function Job() {
                   </Badge>
                   {job.remote && <Badge variant="secondary">Remote</Badge>}
                   {job.featured && (
-                    <Badge className="bg-primary text-primary-foreground">Featured</Badge>
+                    <Badge className="bg-accent text-accent-foreground">Featured</Badge>
                   )}
                 </div>
               </div>
@@ -250,7 +250,7 @@ export default function Job() {
               </Card>
 
               {/* Apply Card */}
-              <Card className="border-primary/20 bg-primary/5">
+              <Card className="border-accent/20 bg-accent/5">
                 <CardContent className="p-6 text-center">
                   <h3 className="font-semibold mb-3">Ready to apply?</h3>
                   <p className="text-sm text-muted-foreground mb-4">

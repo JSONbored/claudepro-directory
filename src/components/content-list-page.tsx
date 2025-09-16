@@ -80,7 +80,7 @@ export function ContentListPage<T extends ContentMetadata>({
         <div className="container mx-auto px-4 py-20">
           <div className="text-center max-w-3xl mx-auto">
             <div className="flex justify-center mb-6">
-              <div className="p-3 bg-primary/10 rounded-full">
+              <div className="p-3 bg-accent/10 rounded-full">
                 <Icon className="h-8 w-8 text-primary" />
               </div>
             </div>

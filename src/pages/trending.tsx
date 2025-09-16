@@ -47,8 +47,8 @@ const Trending = () => {
               Discover the most popular AI agents, commands, hooks, rules, and MCP servers chosen by
               the community.
             </p>
-            <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
-              <Star className="h-3 w-3 mr-1" />
+            <Badge variant="outline" className="border-accent/20 bg-accent/5 text-accent">
+              <Star className="h-3 w-3 mr-1 text-accent" />
               Top configurations by popularity
             </Badge>
           </div>
@@ -62,7 +62,7 @@ const Trending = () => {
           <div className="flex items-center gap-3 mb-8">
             <TrendingUp className="h-6 w-6 text-primary" />
             <h2 className="text-2xl font-bold text-foreground">Top Trending</h2>
-            <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
+            <Badge variant="outline" className="border-accent/20 bg-accent/5 text-accent">
               <Clock className="h-3 w-3 mr-1" />
               Most popular this week
             </Badge>
@@ -72,7 +72,7 @@ const Trending = () => {
               <div key={config.id} className="relative">
                 {index < 3 && (
                   <div className="absolute -top-2 -right-2 z-10">
-                    <Badge variant="default" className="bg-primary text-primary-foreground">
+                    <Badge variant="default" className="bg-accent text-accent-foreground">
                       #{index + 1}
                     </Badge>
                   </div>
@@ -88,7 +88,7 @@ const Trending = () => {
           <div className="flex items-center gap-3 mb-8">
             <Star className="h-6 w-6 text-primary" />
             <h2 className="text-2xl font-bold text-foreground">Top AI Agents</h2>
-            <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
+            <Badge variant="outline" className="border-accent/20 bg-accent/5 text-accent">
               Most productive agents
             </Badge>
           </div>
@@ -104,7 +104,7 @@ const Trending = () => {
           <div className="flex items-center gap-3 mb-8">
             <Star className="h-6 w-6 text-primary" />
             <h2 className="text-2xl font-bold text-foreground">Top Commands</h2>
-            <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
+            <Badge variant="outline" className="border-accent/20 bg-accent/5 text-accent">
               Most useful commands
             </Badge>
           </div>
@@ -120,7 +120,7 @@ const Trending = () => {
           <div className="flex items-center gap-3 mb-8">
             <Star className="h-6 w-6 text-primary" />
             <h2 className="text-2xl font-bold text-foreground">Top Hooks</h2>
-            <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
+            <Badge variant="outline" className="border-accent/20 bg-accent/5 text-accent">
               Most effective automation
             </Badge>
           </div>
@@ -136,7 +136,7 @@ const Trending = () => {
           <div className="flex items-center gap-3 mb-8">
             <Star className="h-6 w-6 text-primary" />
             <h2 className="text-2xl font-bold text-foreground">Top Claude Rules</h2>
-            <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
+            <Badge variant="outline" className="border-accent/20 bg-accent/5 text-accent">
               Most effective configurations
             </Badge>
           </div>
@@ -152,7 +152,7 @@ const Trending = () => {
           <div className="flex items-center gap-3 mb-8">
             <Star className="h-6 w-6 text-primary" />
             <h2 className="text-2xl font-bold text-foreground">Top MCP Servers</h2>
-            <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
+            <Badge variant="outline" className="border-accent/20 bg-accent/5 text-accent">
               Most useful integrations
             </Badge>
           </div>
