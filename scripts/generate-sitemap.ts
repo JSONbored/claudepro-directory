@@ -1,5 +1,5 @@
 import { writeFileSync } from 'fs';
-import { agents, commands, hooks, mcp, rules } from '../src/generated/content';
+import { agents, commands, hooks, mcp, rules } from '../src/generated/content.js';
 
 const baseUrl = 'https://claudepro-directory.vercel.app';
 
