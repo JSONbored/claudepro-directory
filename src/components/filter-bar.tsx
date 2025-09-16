@@ -35,7 +35,7 @@ export const FilterBar = ({
   const dateRangeId = useId();
   const popularityId = useId();
   const tagsId = useId();
-  
+
   const hasActiveFilters =
     filters.category !== 'all' ||
     filters.tags.length > 0 ||
@@ -81,7 +81,9 @@ export const FilterBar = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Category Filter */}
         <div className="space-y-2">
-          <label htmlFor={categoryId} className="text-sm font-medium text-foreground">Category</label>
+          <label htmlFor={categoryId} className="text-sm font-medium text-foreground">
+            Category
+          </label>
           <Select
             value={filters.category}
             onValueChange={(value) => onFilterChange('category', value)}
@@ -102,7 +104,9 @@ export const FilterBar = ({
 
         {/* Author Filter */}
         <div className="space-y-2">
-          <label htmlFor={authorId} className="text-sm font-medium text-foreground">Author</label>
+          <label htmlFor={authorId} className="text-sm font-medium text-foreground">
+            Author
+          </label>
           <Select value={filters.author} onValueChange={(value) => onFilterChange('author', value)}>
             <SelectTrigger id={authorId} className="bg-background/50 border-border/50">
               <SelectValue />
@@ -120,7 +124,9 @@ export const FilterBar = ({
 
         {/* Date Range Filter */}
         <div className="space-y-2">
-          <label htmlFor={dateRangeId} className="text-sm font-medium text-foreground">Date Range</label>
+          <label htmlFor={dateRangeId} className="text-sm font-medium text-foreground">
+            Date Range
+          </label>
           <Select
             value={filters.dateRange}
             onValueChange={(value) => onFilterChange('dateRange', value)}
@@ -160,7 +166,9 @@ export const FilterBar = ({
       <div className="space-y-3">
         <Separator />
         <div>
-          <label htmlFor={tagsId} className="text-sm font-medium text-foreground mb-3 block">Tags</label>
+          <label htmlFor={tagsId} className="text-sm font-medium text-foreground mb-3 block">
+            Tags
+          </label>
           <div id={tagsId} className="flex flex-wrap gap-2">
             {availableTags.map((tag) => (
               <Badge

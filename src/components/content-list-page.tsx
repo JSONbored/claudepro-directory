@@ -91,7 +91,10 @@ export function ContentListPage<T extends ContentMetadata>({
 
             <div className="flex flex-wrap justify-center gap-2 mb-8">
               {displayBadges.map((badge, idx) => (
-                <Badge key={idx} variant={idx === 0 ? 'secondary' : 'outline'}>
+                <Badge
+                  key={badge.text || `badge-${idx}`}
+                  variant={idx === 0 ? 'secondary' : 'outline'}
+                >
                   {badge.icon && <badge.icon className="h-3 w-3 mr-1" />}
                   {badge.text}
                 </Badge>

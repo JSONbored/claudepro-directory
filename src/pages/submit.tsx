@@ -16,7 +16,7 @@ import {
   Users,
   Webhook,
 } from 'lucide-react';
-import { useState, useId } from 'react';
+import { useId, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,7 +35,7 @@ import { toast } from '@/hooks/use-toast';
 const Submit = () => {
   const titleId = useId();
   const descriptionId = useId();
-  const categoryId = useId();
+  const _categoryId = useId();
   const repositoryId = useId();
   const documentationId = useId();
   const tagsId = useId();
@@ -47,7 +47,7 @@ const Submit = () => {
   const actionsId = useId();
   const platformsId = useId();
   const requirementsId = useId();
-  
+
   const [configType, setConfigType] = useState<'rule' | 'mcp' | 'agent' | 'command' | 'hook' | ''>(
     ''
   );

@@ -1,6 +1,6 @@
 import Fuse from 'fuse.js';
 import { Filter, Search, X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,6 +54,9 @@ export const SearchBar = <T extends SearchableItem = SearchableItem>({
   onSearchQueryChange,
   placeholder = 'Search...',
 }: SearchBarProps<T>) => {
+  const _categoryFiltersId = useId();
+  const _searchResultsCountId = useId();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
@@ -155,12 +158,11 @@ export const SearchBar = <T extends SearchableItem = SearchableItem>({
 
       {/* Category Filters */}
       {showFilters && (
-        <div
-          id="category-filters"
+        <fieldset
+          id={_categoryFiltersId}
           className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg p-4 animate-slide-up"
-          role="group"
-          aria-label="Category filters"
         >
+          <legend className="sr-only">Category filters</legend>
           <div className="flex flex-wrap gap-2">
             {categories.map((category) => (
               <Badge
@@ -187,16 +189,17 @@ export const SearchBar = <T extends SearchableItem = SearchableItem>({
               </Badge>
             ))}
           </div>
-        </div>
+        </fieldset>
       )}
 
       {/* Results Count */}
-      <div id="search-results-count" className="text-sm text-muted-foreground" aria-live="polite">
+      <div id={_searchResultsCountId} className="text-sm text-muted-foreground" aria-live="polite">
         {filteredResults.length} result{filteredResults.length !== 1 ? 's' : ''} found
         {hasActiveFilters && (
           <span className="ml-2">
             •{' '}
             <button
+              type="button"
               onClick={clearFilters}
               className="text-primary hover:underline"
               aria-label="Clear all active filters"

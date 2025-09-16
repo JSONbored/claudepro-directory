@@ -100,7 +100,10 @@ const Community = () => {
       <section className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
           {stats.map((stat, index) => (
-            <Card key={index} className="text-center card-gradient border-border/50">
+            <Card
+              key={stat.label || `stat-${index}`}
+              className="text-center card-gradient border-border/50"
+            >
               <CardContent className="pt-6">
                 <stat.icon className="h-8 w-8 text-primary mx-auto mb-2" />
                 <div className="text-2xl font-bold text-foreground mb-1">{stat.value}</div>
@@ -116,7 +119,7 @@ const Community = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {communityChannels.map((channel, index) => (
               <Card
-                key={index}
+                key={channel.title || `channel-${index}`}
                 className="hover-lift transition-smooth card-gradient border-border/50 hover:border-primary/20"
               >
                 <CardHeader>
@@ -150,7 +153,7 @@ const Community = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {resources.map((resource, index) => (
               <Card
-                key={index}
+                key={resource.title || `resource-${index}`}
                 className="hover-lift transition-smooth card-gradient border-border/50 hover:border-primary/20"
               >
                 <CardHeader>
@@ -194,7 +197,9 @@ const Community = () => {
                 <Button
                   variant="default"
                   className="bg-primary hover:bg-primary/90"
-                  onClick={() => (window.location.href = '/submit')}
+                  onClick={() => {
+                    window.location.href = '/submit';
+                  }}
                 >
                   <Heart className="h-4 w-4 mr-2" />
                   Submit Configuration

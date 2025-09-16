@@ -26,6 +26,11 @@
       "attributePosition": "auto"
     }
   },
+  "css": {
+    "linter": {
+      "enabled": false
+    }
+  },
   "linter": {
     "enabled": true,
     "rules": {

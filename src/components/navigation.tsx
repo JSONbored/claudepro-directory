@@ -53,25 +53,39 @@ export const Navigation = () => {
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList className="space-x-6">
               <NavigationMenuItem>
-                <NavLink href="/rules" isActive={isActive} onClick={() => setIsOpen(false)}>Rules</NavLink>
+                <NavLink href="/rules" isActive={isActive} onClick={() => setIsOpen(false)}>
+                  Rules
+                </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink href="/mcp" isActive={isActive} onClick={() => setIsOpen(false)}>MCP</NavLink>
+                <NavLink href="/mcp" isActive={isActive} onClick={() => setIsOpen(false)}>
+                  MCP
+                </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink href="/agents" isActive={isActive} onClick={() => setIsOpen(false)}>Agents</NavLink>
+                <NavLink href="/agents" isActive={isActive} onClick={() => setIsOpen(false)}>
+                  Agents
+                </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink href="/commands" isActive={isActive} onClick={() => setIsOpen(false)}>Commands</NavLink>
+                <NavLink href="/commands" isActive={isActive} onClick={() => setIsOpen(false)}>
+                  Commands
+                </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink href="/hooks" isActive={isActive} onClick={() => setIsOpen(false)}>Hooks</NavLink>
+                <NavLink href="/hooks" isActive={isActive} onClick={() => setIsOpen(false)}>
+                  Hooks
+                </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink href="/jobs" isActive={isActive} onClick={() => setIsOpen(false)}>Jobs</NavLink>
+                <NavLink href="/jobs" isActive={isActive} onClick={() => setIsOpen(false)}>
+                  Jobs
+                </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink href="/trending" isActive={isActive} onClick={() => setIsOpen(false)}>Trending</NavLink>
+                <NavLink href="/trending" isActive={isActive} onClick={() => setIsOpen(false)}>
+                  Trending
+                </NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="text-muted-foreground hover:text-primary">
@@ -135,40 +149,85 @@ export const Navigation = () => {
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                 <div className="flex flex-col space-y-4 mt-6">
-                  <NavLink href="/rules" isActive={isActive} onClick={() => setIsOpen(false)} className="text-base">
+                  <NavLink
+                    href="/rules"
+                    isActive={isActive}
+                    onClick={() => setIsOpen(false)}
+                    className="text-base"
+                  >
                     Claude Rules
                   </NavLink>
 
-                  <NavLink href="/mcp" isActive={isActive} onClick={() => setIsOpen(false)} className="text-base">
+                  <NavLink
+                    href="/mcp"
+                    isActive={isActive}
+                    onClick={() => setIsOpen(false)}
+                    className="text-base"
+                  >
                     MCP
                   </NavLink>
 
-                  <NavLink href="/agents" isActive={isActive} onClick={() => setIsOpen(false)} className="text-base">
+                  <NavLink
+                    href="/agents"
+                    isActive={isActive}
+                    onClick={() => setIsOpen(false)}
+                    className="text-base"
+                  >
                     Agents
                   </NavLink>
 
-                  <NavLink href="/commands" isActive={isActive} onClick={() => setIsOpen(false)} className="text-base">
+                  <NavLink
+                    href="/commands"
+                    isActive={isActive}
+                    onClick={() => setIsOpen(false)}
+                    className="text-base"
+                  >
                     Commands
                   </NavLink>
 
-                  <NavLink href="/hooks" isActive={isActive} onClick={() => setIsOpen(false)} className="text-base">
+                  <NavLink
+                    href="/hooks"
+                    isActive={isActive}
+                    onClick={() => setIsOpen(false)}
+                    className="text-base"
+                  >
                     Hooks
                   </NavLink>
 
-                  <NavLink href="/jobs" isActive={isActive} onClick={() => setIsOpen(false)} className="text-base">
+                  <NavLink
+                    href="/jobs"
+                    isActive={isActive}
+                    onClick={() => setIsOpen(false)}
+                    className="text-base"
+                  >
                     Jobs
                   </NavLink>
 
-                  <NavLink href="/trending" isActive={isActive} onClick={() => setIsOpen(false)} className="text-base">
+                  <NavLink
+                    href="/trending"
+                    isActive={isActive}
+                    onClick={() => setIsOpen(false)}
+                    className="text-base"
+                  >
                     Trending
                   </NavLink>
 
                   <div className="border-t border-border pt-4 space-y-4">
-                    <NavLink href="/community" isActive={isActive} onClick={() => setIsOpen(false)} className="text-base">
+                    <NavLink
+                      href="/community"
+                      isActive={isActive}
+                      onClick={() => setIsOpen(false)}
+                      className="text-base"
+                    >
                       Community
                     </NavLink>
 
-                    <NavLink href="/submit" isActive={isActive} onClick={() => setIsOpen(false)} className="text-base">
+                    <NavLink
+                      href="/submit"
+                      isActive={isActive}
+                      onClick={() => setIsOpen(false)}
+                      className="text-base"
+                    >
                       Submit Config
                     </NavLink>
                   </div>

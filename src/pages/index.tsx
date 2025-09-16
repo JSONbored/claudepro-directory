@@ -20,7 +20,7 @@ const Index = () => {
   const { filters, updateFilter, resetFilters, applyFilters } = useFilters();
   const { sortBy, sortDirection, updateSort, sortItems } = useSorting();
 
-  const allConfigs = [...rules, ...mcp, ...agents, ...commands, ...hooks];
+  const allConfigs = useMemo(() => [...rules, ...mcp, ...agents, ...commands, ...hooks], []);
 
   // Get unique values for filter options
   const availableCategories = useMemo(

@@ -157,7 +157,10 @@ export default function Job() {
                 <CardContent>
                   <ul className="space-y-3">
                     {job.requirements.map((requirement, index) => (
-                      <li key={index} className="flex items-start gap-3">
+                      <li
+                        key={requirement || `requirement-${index}`}
+                        className="flex items-start gap-3"
+                      >
                         <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                         <span className="text-muted-foreground">{requirement}</span>
                       </li>
