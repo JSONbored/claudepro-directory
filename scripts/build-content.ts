@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import slugify from 'slugify';
 import { fileURLToPath } from 'url';
-import type { Agent, Command, ContentCategory, Hook, MCPServer, Rule } from '../src/types/content';
+import type { ContentCategory } from '../src/types/content';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.join(__dirname, '..');
@@ -12,8 +12,6 @@ const GENERATED_DIR = path.join(ROOT_DIR, 'src', 'generated');
 
 // Content types to process
 const CONTENT_TYPES: ContentCategory[] = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
-
-type ContentItem = Agent | MCPServer | Rule | Command | Hook;
 
 interface BaseContent {
   id: string;
@@ -104,7 +102,7 @@ async function generateTypeScript() {
 
     // Create metadata version (without content/config fields for listing pages)
     const metadata = allContent[type].map((item) => {
-      const { content, config, ...meta } = item;
+      const { content: _content, config: _config, ...meta } = item;
       return meta;
     });
 

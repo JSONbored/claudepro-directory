@@ -30,7 +30,7 @@ export const ConfigCard = memo(
     tags,
     author,
     slug,
-    category,
+    category: _category,
     source,
     popularity,
     type,

@@ -7,13 +7,13 @@ import type { ContentMetadata } from '@/types/content';
 const Trending = () => {
   // Combine all content types and sort by popularity
   const allConfigs: ContentMetadata[] = [
-    ...agents.map(item => ({ ...item, type: 'agent' as const })),
-    ...commands.map(item => ({ ...item, type: 'command' as const })),
-    ...hooks.map(item => ({ ...item, type: 'hook' as const })),
-    ...mcp.map(item => ({ ...item, type: 'mcp' as const })),
-    ...rules.map(item => ({ ...item, type: 'rule' as const }))
+    ...agents.map((item) => ({ ...item, type: 'agent' as const })),
+    ...commands.map((item) => ({ ...item, type: 'command' as const })),
+    ...hooks.map((item) => ({ ...item, type: 'hook' as const })),
+    ...mcp.map((item) => ({ ...item, type: 'mcp' as const })),
+    ...rules.map((item) => ({ ...item, type: 'rule' as const })),
   ].sort((a, b) => b.popularity - a.popularity);
-  
+
   const trendingConfigs = allConfigs.slice(0, 12);
 
   // Most popular by category
@@ -44,8 +44,8 @@ const Trending = () => {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground mb-6 leading-relaxed">
-              Discover the most popular AI agents, commands, hooks, rules, and MCP servers chosen by the
-              community.
+              Discover the most popular AI agents, commands, hooks, rules, and MCP servers chosen by
+              the community.
             </p>
             <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
               <Star className="h-3 w-3 mr-1" />
