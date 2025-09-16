@@ -1,0 +1,9 @@
+{
+  "title": "Your Content Title Here",
+  "description": "Brief description of what this content does",
+  "category": "development|productivity|automation|etc",
+  "author": "your-github-username",
+  "tags": ["tag1", "tag2", "tag3"],
+  "content": "The main content/prompt/configuration goes here.\n\nYou can use markdown formatting.",
+  "_comment": "NOTE: The 'slug' and 'id' fields are auto-generated from the title. For example, 'UI/UX Design Expert' becomes 'uiux-design-expert'"
+}

@@ -34,7 +34,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/rules" element={<Rules />} />
-          <Route path="/rule/:slug" element={<Rule />} />
+          <Route path="/rules/:slug" element={<Rule />} />
           <Route path="/mcp" element={<McpServers />} />
           <Route path="/mcp/:slug" element={<McpServer />} />
           <Route path="/agents" element={<Agents />} />

@@ -70,7 +70,7 @@ export const Navigation = () => {
                 <NavLink href="/rules">Rules</NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavLink href="/mcp">MCP Servers</NavLink>
+                <NavLink href="/mcp">MCP</NavLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavLink href="/agents">Agents</NavLink>
@@ -143,7 +143,7 @@ export const Navigation = () => {
                   </NavLink>
                   
                   <NavLink href="/mcp" className="text-base">
-                    MCP Servers
+                    MCP
                   </NavLink>
 
                   <NavLink href="/agents" className="text-base">

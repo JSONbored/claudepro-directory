@@ -38,11 +38,8 @@ export const ConfigCard = ({
   const [copied, setCopied] = useState(false);
   const displayTitle = title || name || 'Untitled';
 
-  // Map singular types to their routed base paths
-  const pathType = (t: ConfigCardProps['type']) => (
-    t === 'agent' ? 'agents' : t === 'command' ? 'commands' : t === 'hook' ? 'hooks' : t
-  );
-  const targetPath = `/${pathType(type)}/${slug}`;
+  // Map types to their actual route paths (all plural except mcp)
+  const targetPath = `/${type === 'mcp' ? 'mcp' : type + 's'}/${slug}`;
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
