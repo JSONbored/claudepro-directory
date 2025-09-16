@@ -1,7 +1,8 @@
 {
   "title": "Your Content Title Here",
   "description": "Brief description of what this content does",
-  "category": "development|productivity|automation|etc",
+  "category": "agents",
+  "source": "community",
   "author": "your-github-username",
   "dateAdded": "2025-09-15",
   "tags": ["tag1", "tag2", "tag3"],
@@ -13,5 +14,5 @@
     "maxTokens": 4000,
     "systemPrompt": "Optional system prompt override"
   },
-  "_comment": "NOTE: The 'slug' and 'id' fields are auto-generated from the title. For example, 'UI/UX Design Expert' becomes 'uiux-design-expert'. The githubUrl and documentationUrl fields are optional but recommended."
+  "_comment": "NOTE: Valid categories are: agents, mcp, rules, commands, hooks. Valid source values are: official, partner, community, verified, experimental. The 'slug' and 'id' fields are auto-generated from the title."
 }

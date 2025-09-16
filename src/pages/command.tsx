@@ -1,32 +1,36 @@
-import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 import { Terminal } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { ContentDetailPage } from '@/components/content-detail-page';
-import { getCommandBySlug, commands, getCommandFullContent } from '@/generated/content';
+import { commands, getCommandBySlug, getCommandFullContent } from '@/generated/content';
 
 const Command = () => {
   const { slug } = useParams<{ slug: string }>();
   const [fullCommand, setFullCommand] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
+
   const commandMeta = slug ? getCommandBySlug(slug) : null;
-  
+
   useEffect(() => {
     if (slug) {
-      getCommandFullContent(slug).then(content => {
-        setFullCommand(content);
-        setLoading(false);
-      }).catch(() => {
-        setLoading(false);
-      });
+      getCommandFullContent(slug)
+        .then((content) => {
+          setFullCommand(content);
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
     } else {
       setLoading(false);
     }
   }, [slug]);
-  
-  const relatedCommands = commandMeta ? commands
-    .filter(c => c.id !== commandMeta.id && c.category === commandMeta.category)
-    .slice(0, 3) : [];
+
+  const relatedCommands = commandMeta
+    ? commands
+        .filter((c) => c.id !== commandMeta.id && c.category === commandMeta.category)
+        .slice(0, 3)
+    : [];
 
   if (loading) {
     return (

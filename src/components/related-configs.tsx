@@ -1,8 +1,14 @@
+import { Lightbulb } from 'lucide-react';
 import { memo } from 'react';
 import { ConfigCard } from '@/components/config-card';
 import { Badge } from '@/components/ui/badge';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { Lightbulb } from 'lucide-react';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
 
 type RelatedType = 'rule' | 'mcp' | 'agent' | 'command' | 'hook';
 
@@ -12,10 +18,10 @@ interface RelatedConfigsProps<T = any> {
   type?: RelatedType;
 }
 
-const RelatedConfigsComponent = <T extends { id: string } = any>({ 
-  configs, 
-  title = "Related Configurations",
-  type
+const RelatedConfigsComponent = <T extends { id: string } = any>({
+  configs,
+  title = 'Related Configurations',
+  type,
 }: RelatedConfigsProps<T>) => {
   if (configs.length === 0) return null;
 
@@ -28,10 +34,10 @@ const RelatedConfigsComponent = <T extends { id: string } = any>({
           AI Recommended
         </Badge>
       </div>
-      
+
       <Carousel
         opts={{
-          align: "start",
+          align: 'start',
           loop: false,
         }}
         className="w-full max-w-full"
@@ -42,16 +48,16 @@ const RelatedConfigsComponent = <T extends { id: string } = any>({
               <div className="relative">
                 {typeof config.similarity === 'number' && config.similarity > 0.7 && (
                   <div className="absolute -top-3 -right-3 z-20">
-                    <Badge variant="default" className="bg-primary text-primary-foreground text-xs shadow-sm">
+                    <Badge
+                      variant="default"
+                      className="bg-primary text-primary-foreground text-xs shadow-sm"
+                    >
                       High Match
                     </Badge>
                   </div>
                 )}
                 <div className="h-full">
-                  <ConfigCard
-                    {...config}
-                    type={type ?? (config.type as any)}
-                  />
+                  <ConfigCard {...config} type={type ?? (config.type as any)} />
                 </div>
               </div>
             </CarouselItem>

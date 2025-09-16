@@ -14,7 +14,7 @@ const Hooks = () => {
       badges={[
         { icon: Webhook, text: `${hooks.length} Hooks Available` },
         { text: 'Event-Driven' },
-        { text: 'Multi-Platform' }
+        { text: 'Multi-Platform' },
       ]}
     />
   );

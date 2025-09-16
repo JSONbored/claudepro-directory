@@ -1,20 +1,8 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
   "files": {
-    "ignore": [
-      "dist/**",
-      "build/**",
-      "node_modules/**",
-      "src/generated/**",
-      "*.min.js",
-      "*.min.css",
-      "coverage/**",
-      ".git/**",
-      "**/.DS_Store",
-      "**/Thumbs.db",
-      "**/*.log",
-      "package-lock.json"
-    ]
+    "includes": ["src/**/*", "scripts/**/*"],
+    "ignoreUnknown": false
   },
   "formatter": {
     "enabled": true,
@@ -63,8 +51,13 @@
       }
     }
   },
-  "organizeImports": {
-    "enabled": true
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
   },
   "vcs": {
     "enabled": true,

@@ -1,32 +1,34 @@
-import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 import { BookOpen } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { ContentDetailPage } from '@/components/content-detail-page';
-import { getRuleBySlug, rules, getRuleFullContent } from '@/generated/content';
+import { getRuleBySlug, getRuleFullContent, rules } from '@/generated/content';
 
 const Rule = () => {
   const { slug } = useParams<{ slug: string }>();
   const [fullRule, setFullRule] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
+
   const ruleMeta = slug ? getRuleBySlug(slug) : null;
-  
+
   useEffect(() => {
     if (slug) {
-      getRuleFullContent(slug).then(content => {
-        setFullRule(content);
-        setLoading(false);
-      }).catch(() => {
-        setLoading(false);
-      });
+      getRuleFullContent(slug)
+        .then((content) => {
+          setFullRule(content);
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
     } else {
       setLoading(false);
     }
   }, [slug]);
-  
-  const relatedRules = ruleMeta ? rules
-    .filter(r => r.id !== ruleMeta.id && r.category === ruleMeta.category)
-    .slice(0, 3) : [];
+
+  const relatedRules = ruleMeta
+    ? rules.filter((r) => r.id !== ruleMeta.id && r.category === ruleMeta.category).slice(0, 3)
+    : [];
 
   if (loading) {
     return (

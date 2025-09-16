@@ -14,7 +14,7 @@ const Commands = () => {
       badges={[
         { icon: Terminal, text: `${commands.length} Commands Available` },
         { text: 'Multiple Platforms' },
-        { text: 'Powerful Automation' }
+        { text: 'Powerful Automation' },
       ]}
     />
   );

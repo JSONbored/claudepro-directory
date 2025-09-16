@@ -14,7 +14,7 @@ const Agents = () => {
       badges={[
         { icon: Bot, text: `${agents.length} Agents Available` },
         { text: 'Multiple Categories' },
-        { text: 'Ready to Use' }
+        { text: 'Ready to Use' },
       ]}
     />
   );

@@ -2,7 +2,7 @@
   "title": "/commit - Smart Git Commit",
   "description": "Intelligently analyzes changes and creates well-formatted git commits with conventional commit messages",
   "category": "commands",
-  "author": "shadowbook",
+  "author": "JSONbored",
   "dateAdded": "2025-09-15",
   "tags": [
     "git",

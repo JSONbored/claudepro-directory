@@ -1,16 +1,16 @@
+import {
+  BookOpen,
+  ExternalLink,
+  Github,
+  Heart,
+  MessageCircle,
+  Star,
+  Twitter,
+  Users,
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Users, 
-  MessageCircle, 
-  Github, 
-  ExternalLink,
-  Twitter,
-  BookOpen,
-  Star,
-  Heart
-} from 'lucide-react';
 
 const Community = () => {
   const stats = [
@@ -26,21 +26,21 @@ const Community = () => {
       description: 'Official Anthropic documentation for Claude AI',
       url: 'https://docs.anthropic.com',
       icon: BookOpen,
-      badge: 'Official'
+      badge: 'Official',
     },
     {
       title: 'MCP Protocol Docs',
       description: 'Learn about the Model Context Protocol',
       url: 'https://modelcontextprotocol.io',
       icon: ExternalLink,
-      badge: 'Documentation'
+      badge: 'Documentation',
     },
     {
       title: 'GitHub Repository',
       description: 'Contribute to Claude Pro Directory',
       url: 'https://github.com/JSONbored/claudepro-directory',
       icon: Github,
-      badge: 'Open Source'
+      badge: 'Open Source',
     },
   ];
 
@@ -51,7 +51,7 @@ const Community = () => {
       url: 'https://discord.gg/claude',
       icon: MessageCircle,
       members: '15,000+ members',
-      color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+      color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
     },
     {
       title: 'GitHub Discussions',
@@ -59,7 +59,7 @@ const Community = () => {
       url: 'https://github.com/JSONbored/claudepro-directory/discussions',
       icon: Github,
       members: '3,000+ discussions',
-      color: 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+      color: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
     },
     {
       title: 'Twitter Community',
@@ -67,7 +67,7 @@ const Community = () => {
       url: 'https://twitter.com/anthropicai',
       icon: Twitter,
       members: '50,000+ followers',
-      color: 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+      color: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
     },
   ];
 
@@ -85,7 +85,8 @@ const Community = () => {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground mb-6 leading-relaxed">
-              Join the Claude Pro community and connect with developers, researchers, and AI enthusiasts sharing knowledge and configurations.
+              Join the Claude Pro community and connect with developers, researchers, and AI
+              enthusiasts sharing knowledge and configurations.
             </p>
             <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
               <Heart className="h-3 w-3 mr-1" />
@@ -114,7 +115,10 @@ const Community = () => {
           <h2 className="text-3xl font-bold text-center mb-8">Join the Conversation</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {communityChannels.map((channel, index) => (
-              <Card key={index} className="hover-lift transition-smooth card-gradient border-border/50 hover:border-primary/20">
+              <Card
+                key={index}
+                className="hover-lift transition-smooth card-gradient border-border/50 hover:border-primary/20"
+              >
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <channel.icon className="h-8 w-8 text-primary" />
@@ -126,8 +130,8 @@ const Community = () => {
                   <CardDescription>{channel.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full hover:bg-primary/5 hover:border-primary/30"
                     onClick={() => window.open(channel.url, '_blank')}
                   >
@@ -145,11 +149,17 @@ const Community = () => {
           <h2 className="text-3xl font-bold text-center mb-8">Helpful Resources</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {resources.map((resource, index) => (
-              <Card key={index} className="hover-lift transition-smooth card-gradient border-border/50 hover:border-primary/20">
+              <Card
+                key={index}
+                className="hover-lift transition-smooth card-gradient border-border/50 hover:border-primary/20"
+              >
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <resource.icon className="h-8 w-8 text-primary" />
-                    <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
+                    <Badge
+                      variant="outline"
+                      className="border-primary/20 bg-primary/5 text-primary"
+                    >
                       {resource.badge}
                     </Badge>
                   </div>
@@ -157,8 +167,8 @@ const Community = () => {
                   <CardDescription>{resource.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full hover:bg-primary/5 hover:border-primary/30"
                     onClick={() => window.open(resource.url, '_blank')}
                   >
@@ -177,21 +187,24 @@ const Community = () => {
             <div className="max-w-md">
               <h3 className="text-2xl font-bold mb-4">Ready to Contribute?</h3>
               <p className="text-muted-foreground mb-6">
-                Share your Claude configurations and help the community grow. Every contribution makes a difference.
+                Share your Claude configurations and help the community grow. Every contribution
+                makes a difference.
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button 
+                <Button
                   variant="default"
                   className="bg-primary hover:bg-primary/90"
-                  onClick={() => window.location.href = '/submit'}
+                  onClick={() => (window.location.href = '/submit')}
                 >
                   <Heart className="h-4 w-4 mr-2" />
                   Submit Configuration
                 </Button>
-                <Button 
+                <Button
                   variant="outline"
                   className="hover:bg-primary/5 hover:border-primary/30"
-                  onClick={() => window.open('https://github.com/JSONbored/claudepro-directory', '_blank')}
+                  onClick={() =>
+                    window.open('https://github.com/JSONbored/claudepro-directory', '_blank')
+                  }
                 >
                   <Github className="h-4 w-4 mr-2" />
                   View on GitHub

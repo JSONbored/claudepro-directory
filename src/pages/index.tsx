@@ -1,39 +1,41 @@
-import { useState, useMemo } from 'react';
+import { BookOpen, Briefcase, ExternalLink, Search, Server, Sparkles } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ConfigCard } from '@/components/config-card';
 import { FilterBar } from '@/components/filter-bar';
-import { SortDropdown } from '@/components/sort-dropdown';
 import { SearchBar } from '@/components/search-bar';
+import { generateWebsiteStructuredData, SEO } from '@/components/seo';
+import { SortDropdown } from '@/components/sort-dropdown';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BookOpen, Server, Sparkles, Github, ExternalLink, Briefcase, Search } from 'lucide-react';
-import { rules, mcp, agents, commands, hooks } from '@/generated/content';
-import { useFilters } from '@/hooks/useFilters';
-import { useSorting } from '@/hooks/useSorting';
+import { agents, commands, hooks, mcp, rules } from '@/generated/content';
+import { useFilters } from '@/hooks/use-filters';
+import { useSorting } from '@/hooks/use-sorting';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [_searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const { filters, updateFilter, resetFilters, applyFilters } = useFilters();
   const { sortBy, sortDirection, updateSort, sortItems } = useSorting();
 
   const allConfigs = [...rules, ...mcp, ...agents, ...commands, ...hooks];
-  
+
   // Get unique values for filter options
-  const availableCategories = useMemo(() => 
-    [...new Set(allConfigs.map(item => item.category))], [allConfigs]
+  const availableCategories = useMemo(
+    () => [...new Set(allConfigs.map((item) => item.category))],
+    [allConfigs]
   );
-  const availableTags = useMemo(() => 
-    [...new Set(allConfigs.flatMap(item => item.tags))], [allConfigs]
+  const availableTags = useMemo(
+    () => [...new Set(allConfigs.flatMap((item) => item.tags))],
+    [allConfigs]
   );
-  const availableAuthors = useMemo(() => 
-    [...new Set(allConfigs.map(item => item.author))], [allConfigs]
+  const availableAuthors = useMemo(
+    () => [...new Set(allConfigs.map((item) => item.author))],
+    [allConfigs]
   );
-  
+
   // Handle search results
   const handleSearchResults = (results: any[]) => {
     setSearchResults(results);
@@ -48,63 +50,84 @@ const Index = () => {
   // Apply filters and sorting based on active tab
   const processedConfigs = useMemo(() => {
     let configs: any[] = [];
-    
+
     // Use search results when searching, otherwise use all configs
     const baseConfigs = isSearching ? searchResults : allConfigs;
-    
+
     switch (activeTab) {
       case 'rules':
-        configs = baseConfigs.filter(config => rules.some(r => r.id === config.id));
+        configs = baseConfigs.filter((config) => rules.some((r) => r.id === config.id));
         break;
       case 'mcp':
-        configs = baseConfigs.filter(config => mcp.some(m => m.id === config.id));
+        configs = baseConfigs.filter((config) => mcp.some((m) => m.id === config.id));
         break;
       case 'agents':
-        configs = baseConfigs.filter(config => agents.some(a => a.id === config.id));
+        configs = baseConfigs.filter((config) => agents.some((a) => a.id === config.id));
         break;
       case 'commands':
-        configs = baseConfigs.filter(config => commands.some(c => c.id === config.id));
+        configs = baseConfigs.filter((config) => commands.some((c) => c.id === config.id));
         break;
       case 'hooks':
-        configs = baseConfigs.filter(config => hooks.some(h => h.id === config.id));
+        configs = baseConfigs.filter((config) => hooks.some((h) => h.id === config.id));
         break;
       case 'community':
         return []; // Community tab shows authors, not configs
       default:
         configs = baseConfigs;
     }
-    
+
     const filtered = applyFilters(configs);
     return sortItems(filtered);
-  }, [activeTab, filters, sortBy, sortDirection, searchResults, isSearching, allConfigs, applyFilters, sortItems]);
+  }, [activeTab, searchResults, isSearching, allConfigs, applyFilters, sortItems]);
 
   const getConfigType = (config: any): 'rule' | 'mcp' | 'agent' | 'command' | 'hook' => {
     // Determine type based on which array the config came from
-    if (agents.some(a => a.id === config.id)) return 'agent';
-    if (commands.some(c => c.id === config.id)) return 'command';
-    if (hooks.some(h => h.id === config.id)) return 'hook';
-    if (mcp.some(m => m.id === config.id)) return 'mcp';
-    if (rules.some(r => r.id === config.id)) return 'rule';
-    
+    if (agents.some((a) => a.id === config.id)) return 'agent';
+    if (commands.some((c) => c.id === config.id)) return 'command';
+    if (hooks.some((h) => h.id === config.id)) return 'hook';
+    if (mcp.some((m) => m.id === config.id)) return 'mcp';
+    if (rules.some((r) => r.id === config.id)) return 'rule';
+
     // Fallback: check for content field
     return 'content' in config ? 'rule' : 'mcp';
   };
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Home"
+        structuredData={generateWebsiteStructuredData()}
+        keywords={[
+          'Claude',
+          'AI',
+          'configurations',
+          'MCP',
+          'agents',
+          'automation',
+          'rules',
+          'commands',
+          'hooks',
+          'directory',
+          'community',
+        ]}
+      />
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-border/50">
+      <section
+        className="relative overflow-hidden border-b border-border/50"
+        aria-label="Homepage hero"
+      >
         <div className="relative container mx-auto px-4 py-20 lg:py-32">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl lg:text-7xl font-bold mb-6 text-foreground tracking-tight">
               The home for Claude enthusiasts
             </h1>
-            
+
             <p className="text-xl text-muted-foreground mb-12 leading-relaxed max-w-3xl mx-auto">
-              Discover and share the best Claude configurations. Explore expert rules, browse powerful MCP servers, 
-              find specialized agents and commands, discover automation hooks, and connect with the community building the future of AI.
+              Discover and share the best Claude configurations. Explore expert rules, browse
+              powerful MCP servers, find specialized agents and commands, discover automation hooks,
+              and connect with the community building the future of AI.
             </p>
-            
+
             {/* Search Bar */}
             <div className="max-w-2xl mx-auto mb-8">
               <SearchBar
@@ -148,11 +171,11 @@ const Index = () => {
           <div className="mb-16">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold">
-                Search Results 
+                Search Results
                 <span className="text-muted-foreground ml-2">({searchResults.length} found)</span>
               </h2>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => {
                   setIsSearching(false);
                   setSearchQuery('');
@@ -163,15 +186,11 @@ const Index = () => {
                 Clear Search
               </Button>
             </div>
-            
+
             {searchResults.length > 0 ? (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {searchResults.map((config) => (
-                  <ConfigCard
-                    key={config.id}
-                    {...config}
-                    type={getConfigType(config)}
-                  />
+                  <ConfigCard key={config.id} {...config} type={getConfigType(config)} />
                 ))}
               </div>
             ) : (
@@ -199,11 +218,7 @@ const Index = () => {
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {rules.slice(0, 6).map((rule) => (
-                  <ConfigCard
-                    key={rule.id}
-                    {...rule}
-                    type="rule"
-                  />
+                  <ConfigCard key={rule.id} {...rule} type="rule" />
                 ))}
               </div>
             </div>
@@ -218,11 +233,7 @@ const Index = () => {
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {mcp.slice(0, 6).map((mcpItem) => (
-                  <ConfigCard
-                    key={mcpItem.id}
-                    {...mcpItem}
-                    type="mcp"
-                  />
+                  <ConfigCard key={mcpItem.id} {...mcpItem} type="mcp" />
                 ))}
               </div>
             </div>
@@ -237,11 +248,7 @@ const Index = () => {
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {agents.slice(0, 6).map((agent) => (
-                  <ConfigCard
-                    key={agent.id}
-                    {...agent}
-                    type="agent"
-                  />
+                  <ConfigCard key={agent.id} {...agent} type="agent" />
                 ))}
               </div>
             </div>
@@ -250,17 +257,16 @@ const Index = () => {
             <div>
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-bold">Featured Commands</h2>
-                <Link to="/commands" className="text-primary hover:underline flex items-center gap-2">
+                <Link
+                  to="/commands"
+                  className="text-primary hover:underline flex items-center gap-2"
+                >
                   View all <ExternalLink className="h-4 w-4" />
                 </Link>
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {commands.slice(0, 6).map((command) => (
-                  <ConfigCard
-                    key={command.id}
-                    {...command}
-                    type="command"
-                  />
+                  <ConfigCard key={command.id} {...command} type="command" />
                 ))}
               </div>
             </div>
@@ -275,11 +281,7 @@ const Index = () => {
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {hooks.slice(0, 6).map((hook) => (
-                  <ConfigCard
-                    key={hook.id}
-                    {...hook}
-                    type="hook"
-                  />
+                  <ConfigCard key={hook.id} {...hook} type="hook" />
                 ))}
               </div>
             </div>
@@ -311,15 +313,29 @@ const Index = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <TabsList className="grid w-full lg:w-auto grid-cols-7">
-                <TabsTrigger value="all" className="text-sm">All</TabsTrigger>
-                <TabsTrigger value="rules" className="text-sm">Rules</TabsTrigger>
-                <TabsTrigger value="mcp" className="text-sm">MCP</TabsTrigger>
-                <TabsTrigger value="agents" className="text-sm">Agents</TabsTrigger>
-                <TabsTrigger value="commands" className="text-sm">Commands</TabsTrigger>
-                <TabsTrigger value="hooks" className="text-sm">Hooks</TabsTrigger>
-                <TabsTrigger value="community" className="text-sm">Community</TabsTrigger>
+                <TabsTrigger value="all" className="text-sm">
+                  All
+                </TabsTrigger>
+                <TabsTrigger value="rules" className="text-sm">
+                  Rules
+                </TabsTrigger>
+                <TabsTrigger value="mcp" className="text-sm">
+                  MCP
+                </TabsTrigger>
+                <TabsTrigger value="agents" className="text-sm">
+                  Agents
+                </TabsTrigger>
+                <TabsTrigger value="commands" className="text-sm">
+                  Commands
+                </TabsTrigger>
+                <TabsTrigger value="hooks" className="text-sm">
+                  Hooks
+                </TabsTrigger>
+                <TabsTrigger value="community" className="text-sm">
+                  Community
+                </TabsTrigger>
               </TabsList>
-              
+
               <SortDropdown
                 sortBy={sortBy}
                 sortDirection={sortDirection}
@@ -342,11 +358,7 @@ const Index = () => {
               {processedConfigs.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {processedConfigs.map((config) => (
-                    <ConfigCard
-                      key={config.id}
-                      {...config}
-                      type={getConfigType(config)}
-                    />
+                    <ConfigCard key={config.id} {...config} type={getConfigType(config)} />
                   ))}
                 </div>
               ) : (
@@ -361,11 +373,7 @@ const Index = () => {
               {processedConfigs.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {processedConfigs.map((config) => (
-                    <ConfigCard
-                      key={config.id}
-                      {...config}
-                      type={getConfigType(config)}
-                    />
+                    <ConfigCard key={config.id} {...config} type={getConfigType(config)} />
                   ))}
                 </div>
               ) : (
@@ -380,11 +388,7 @@ const Index = () => {
               {processedConfigs.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {processedConfigs.map((config) => (
-                    <ConfigCard
-                      key={config.id}
-                      {...config}
-                      type={getConfigType(config)}
-                    />
+                    <ConfigCard key={config.id} {...config} type={getConfigType(config)} />
                   ))}
                 </div>
               ) : (
@@ -399,11 +403,7 @@ const Index = () => {
               {processedConfigs.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {processedConfigs.map((config) => (
-                    <ConfigCard
-                      key={config.id}
-                      {...config}
-                      type={getConfigType(config)}
-                    />
+                    <ConfigCard key={config.id} {...config} type={getConfigType(config)} />
                   ))}
                 </div>
               ) : (
@@ -418,11 +418,7 @@ const Index = () => {
               {processedConfigs.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {processedConfigs.map((config) => (
-                    <ConfigCard
-                      key={config.id}
-                      {...config}
-                      type={getConfigType(config)}
-                    />
+                    <ConfigCard key={config.id} {...config} type={getConfigType(config)} />
                   ))}
                 </div>
               ) : (
@@ -437,11 +433,7 @@ const Index = () => {
               {processedConfigs.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {processedConfigs.map((config) => (
-                    <ConfigCard
-                      key={config.id}
-                      {...config}
-                      type={getConfigType(config)}
-                    />
+                    <ConfigCard key={config.id} {...config} type={getConfigType(config)} />
                   ))}
                 </div>
               ) : (
@@ -459,18 +451,16 @@ const Index = () => {
                   Meet the experts creating amazing Claude configurations
                 </p>
               </div>
-              
+
               <div className="text-center">
                 <p className="text-lg text-muted-foreground mb-6">
                   Coming soon! Featured contributors who create amazing Claude configurations.
                 </p>
               </div>
-              
+
               <div className="text-center pt-8">
                 <Button variant="outline" asChild>
-                  <Link to="/community">
-                    View All Contributors
-                  </Link>
+                  <Link to="/community">View All Contributors</Link>
                 </Button>
               </div>
             </TabsContent>

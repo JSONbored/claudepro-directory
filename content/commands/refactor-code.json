@@ -2,7 +2,7 @@
   "title": "/refactor",
   "description": "Intelligent code refactoring command that analyzes code structure and applies best practices for improved maintainability and performance",
   "category": "commands",
-  "author": "shadowbook",
+  "author": "JSONbored",
   "dateAdded": "2025-09-16",
   "tags": [
     "refactoring",

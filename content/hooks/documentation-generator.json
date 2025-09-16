@@ -2,7 +2,7 @@
   "title": "Documentation Generator",
   "description": "Automatically generates and updates project documentation from code comments, README files, and API definitions",
   "category": "hooks",
-  "author": "claudepro-directory",
+  "author": "JSONbored",
   "dateAdded": "2025-09-16",
   "tags": [
     "documentation",

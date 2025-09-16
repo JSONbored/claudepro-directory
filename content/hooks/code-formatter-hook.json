@@ -2,7 +2,7 @@
   "title": "Auto Code Formatter Hook",
   "description": "Automatically formats code files after Claude writes or edits them using Prettier, Black, or other formatters",
   "category": "hooks",
-  "author": "shadowbook",
+  "author": "JSONbored",
   "dateAdded": "2025-09-15",
   "tags": [
     "formatting",

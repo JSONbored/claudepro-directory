@@ -2,7 +2,7 @@
   "title": "Git Pre-commit Validator",
   "description": "Comprehensive pre-commit hook that validates code quality, runs tests, and enforces standards",
   "category": "hooks",
-  "author": "claudepro-directory",
+  "author": "JSONbored",
   "dateAdded": "2025-09-16",
   "tags": [
     "git",

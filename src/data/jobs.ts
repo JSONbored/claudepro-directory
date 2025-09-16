@@ -41,7 +41,7 @@ This is a unique opportunity to work at the forefront of AI technology, directly
       'Experience building and deploying MCP servers',
       'Strong Python and TypeScript skills',
       'Experience with vector databases and embeddings',
-      'Excellent problem-solving and communication skills'
+      'Excellent problem-solving and communication skills',
     ],
     benefits: [
       'Competitive salary and equity',
@@ -49,13 +49,13 @@ This is a unique opportunity to work at the forefront of AI technology, directly
       'Unlimited PTO',
       'Health, dental, and vision insurance',
       '$5,000 annual learning budget',
-      'Latest AI tools and resources'
+      'Latest AI tools and resources',
     ],
     tags: ['claude', 'mcp', 'ai', 'python', 'typescript', 'remote'],
     postedAt: '2025-09-10',
     featured: true,
     applyUrl: 'https://example.com/careers/claude-engineer',
-    contactEmail: 'careers@techcorpai.com'
+    contactEmail: 'careers@techcorpai.com',
   },
   {
     id: 'mcp-developer-startup',
@@ -76,7 +76,7 @@ As one of our first engineers, you'll have significant ownership and impact on o
       'Strong Node.js/TypeScript skills',
       'Understanding of API design and microservices',
       'Experience with PostgreSQL and Redis',
-      'Startup experience preferred'
+      'Startup experience preferred',
     ],
     benefits: [
       'Competitive salary with equity',
@@ -84,13 +84,13 @@ As one of our first engineers, you'll have significant ownership and impact on o
       'Flexible hours',
       'Health benefits',
       'Equipment stipend',
-      'Conference attendance budget'
+      'Conference attendance budget',
     ],
     tags: ['mcp', 'nodejs', 'typescript', 'startup', 'remote'],
     postedAt: '2025-09-12',
     featured: true,
     applyUrl: 'https://example.com/join-cloudmind',
-    contactEmail: 'jobs@cloudmind.ai'
+    contactEmail: 'jobs@cloudmind.ai',
   },
   {
     id: 'ai-prompt-engineer',
@@ -111,27 +111,27 @@ You'll work with various clients to understand their needs, design custom Claude
       'Strong writing and documentation skills',
       'Experience with prompt engineering best practices',
       'Ability to explain technical concepts to non-technical stakeholders',
-      'Self-motivated and able to work independently'
+      'Self-motivated and able to work independently',
     ],
     tags: ['claude', 'prompt-engineering', 'ai', 'contract', 'remote'],
     postedAt: '2025-09-14',
     featured: false,
     applyUrl: 'https://example.com/prompt-engineer-contract',
-    contactEmail: 'contracts@promptmasters.ai'
-  }
+    contactEmail: 'contracts@promptmasters.ai',
+  },
 ];
 
 // Helper function to get a job by slug
 export function getJobBySlug(slug: string): Job | undefined {
-  return jobs.find(job => job.slug === slug);
+  return jobs.find((job) => job.slug === slug);
 }
 
 // Helper function to get featured jobs
 export function getFeaturedJobs(): Job[] {
-  return jobs.filter(job => job.featured);
+  return jobs.filter((job) => job.featured);
 }
 
 // Helper function to get jobs by category
 export function getJobsByCategory(category: string): Job[] {
-  return jobs.filter(job => job.category === category);
+  return jobs.filter((job) => job.category === category);
 }

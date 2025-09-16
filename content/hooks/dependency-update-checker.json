@@ -2,7 +2,7 @@
   "title": "Dependency Update Checker",
   "description": "Automatically checks for outdated dependencies and suggests updates with security analysis",
   "category": "hooks",
-  "author": "claudepro-directory",
+  "author": "JSONbored",
   "dateAdded": "2025-09-16",
   "tags": [
     "dependencies",

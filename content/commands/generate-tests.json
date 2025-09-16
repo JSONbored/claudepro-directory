@@ -2,7 +2,7 @@
   "title": "/test-gen",
   "description": "Automatically generate comprehensive test suites including unit tests, integration tests, and edge cases with multiple testing framework support",
   "category": "commands",
-  "author": "shadowbook",
+  "author": "JSONbored",
   "dateAdded": "2025-09-16",
   "tags": [
     "testing",

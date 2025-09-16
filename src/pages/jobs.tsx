@@ -1,19 +1,18 @@
-import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Briefcase, Clock, Filter, MapPin, Search } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { JobCard } from '@/components/job-card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { JobCard } from '@/components/job-card';
-import { jobs, Job } from '@/data/jobs';
-import { 
-  MapPin, 
-  Clock, 
-  Search,
-  Filter,
-  Briefcase
-} from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { jobs } from '@/data/jobs';
 
 export default function Jobs() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -22,19 +21,19 @@ export default function Jobs() {
   const [showRemoteOnly, setShowRemoteOnly] = useState(false);
 
   const filteredJobs = useMemo(() => {
-    return jobs.filter(job => {
-      const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           job.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-      
+    return jobs.filter((job) => {
+      const matchesSearch =
+        job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+
       const matchesCategory = selectedCategory === 'all' || job.category === selectedCategory;
       const matchesType = selectedType === 'all' || job.type === selectedType;
       const matchesRemote = !showRemoteOnly || job.remote;
-      
+
       return matchesSearch && matchesCategory && matchesType && matchesRemote;
     });
   }, [searchQuery, selectedCategory, selectedType, showRemoteOnly]);
-
 
   return (
     <div className="min-h-screen bg-background">
@@ -47,13 +46,13 @@ export default function Jobs() {
               <Briefcase className="h-3 w-3 mr-1" />
               Jobs Board
             </Badge>
-            
+
             <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text text-transparent">
               Find Your Dream Job in AI
             </h1>
-            
+
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              Discover opportunities with companies building the future of artificial intelligence. 
+              Discover opportunities with companies building the future of artificial intelligence.
               From startups to industry giants, find your perfect role.
             </p>
           </div>
@@ -75,7 +74,7 @@ export default function Jobs() {
                     className="pl-10"
                   />
                 </div>
-                
+
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                   <SelectTrigger>
                     <Filter className="h-4 w-4 mr-2" />
@@ -91,7 +90,7 @@ export default function Jobs() {
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
-                
+
                 <Select value={selectedType} onValueChange={setSelectedType}>
                   <SelectTrigger>
                     <Clock className="h-4 w-4 mr-2" />
@@ -105,9 +104,9 @@ export default function Jobs() {
                     <SelectItem value="freelance">Freelance</SelectItem>
                   </SelectContent>
                 </Select>
-                
+
                 <Button
-                  variant={showRemoteOnly ? "default" : "outline"}
+                  variant={showRemoteOnly ? 'default' : 'outline'}
                   onClick={() => setShowRemoteOnly(!showRemoteOnly)}
                   className="w-full"
                 >
@@ -140,12 +139,15 @@ export default function Jobs() {
                 <p className="text-muted-foreground mb-6">
                   Try adjusting your search criteria or check back later for new opportunities.
                 </p>
-                <Button variant="outline" onClick={() => {
-                  setSearchQuery('');
-                  setSelectedCategory('all');
-                  setSelectedType('all');
-                  setShowRemoteOnly(false);
-                }}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedCategory('all');
+                    setSelectedType('all');
+                    setShowRemoteOnly(false);
+                  }}
+                >
                   Clear Filters
                 </Button>
               </CardContent>

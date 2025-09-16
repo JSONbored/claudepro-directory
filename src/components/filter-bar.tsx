@@ -1,10 +1,16 @@
+import { Filter, RotateCcw, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { X, Filter, RotateCcw } from 'lucide-react';
-import { FilterOptions } from '@/hooks/useFilters';
+import { Slider } from '@/components/ui/slider';
+import type { FilterOptions } from '@/hooks/use-filters';
 
 interface FilterBarProps {
   filters: FilterOptions;
@@ -21,9 +27,9 @@ export const FilterBar = ({
   onResetFilters,
   availableCategories,
   availableTags,
-  availableAuthors
+  availableAuthors,
 }: FilterBarProps) => {
-  const hasActiveFilters = 
+  const hasActiveFilters =
     filters.category !== 'all' ||
     filters.tags.length > 0 ||
     filters.author !== 'all' ||
@@ -33,13 +39,16 @@ export const FilterBar = ({
 
   const toggleTag = (tag: string) => {
     const newTags = filters.tags.includes(tag)
-      ? filters.tags.filter(t => t !== tag)
+      ? filters.tags.filter((t) => t !== tag)
       : [...filters.tags, tag];
     onFilterChange('tags', newTags);
   };
 
   const removeTag = (tag: string) => {
-    onFilterChange('tags', filters.tags.filter(t => t !== tag));
+    onFilterChange(
+      'tags',
+      filters.tags.filter((t) => t !== tag)
+    );
   };
 
   return (
@@ -66,13 +75,16 @@ export const FilterBar = ({
         {/* Category Filter */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">Category</label>
-          <Select value={filters.category} onValueChange={(value) => onFilterChange('category', value)}>
+          <Select
+            value={filters.category}
+            onValueChange={(value) => onFilterChange('category', value)}
+          >
             <SelectTrigger className="bg-background/50 border-border/50">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              {availableCategories.map(category => (
+              {availableCategories.map((category) => (
                 <SelectItem key={category} value={category}>
                   {category.charAt(0).toUpperCase() + category.slice(1)}
                 </SelectItem>
@@ -90,7 +102,7 @@ export const FilterBar = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Authors</SelectItem>
-              {availableAuthors.map(author => (
+              {availableAuthors.map((author) => (
                 <SelectItem key={author} value={author}>
                   {author.charAt(0).toUpperCase() + author.slice(1)}
                 </SelectItem>
@@ -102,7 +114,10 @@ export const FilterBar = ({
         {/* Date Range Filter */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">Date Range</label>
-          <Select value={filters.dateRange} onValueChange={(value) => onFilterChange('dateRange', value)}>
+          <Select
+            value={filters.dateRange}
+            onValueChange={(value) => onFilterChange('dateRange', value)}
+          >
             <SelectTrigger className="bg-background/50 border-border/50">
               <SelectValue />
             </SelectTrigger>
@@ -139,13 +154,13 @@ export const FilterBar = ({
         <div>
           <label className="text-sm font-medium text-foreground mb-3 block">Tags</label>
           <div className="flex flex-wrap gap-2">
-            {availableTags.map(tag => (
+            {availableTags.map((tag) => (
               <Badge
                 key={tag}
-                variant={filters.tags.includes(tag) ? "default" : "outline"}
+                variant={filters.tags.includes(tag) ? 'default' : 'outline'}
                 className={`cursor-pointer transition-all duration-200 ${
-                  filters.tags.includes(tag) 
-                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' 
+                  filters.tags.includes(tag)
+                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
                     : 'hover:bg-primary/10 hover:border-primary/30'
                 }`}
                 onClick={() => toggleTag(tag)}
@@ -160,7 +175,7 @@ export const FilterBar = ({
         {filters.tags.length > 0 && (
           <div className="flex flex-wrap gap-2">
             <span className="text-sm text-muted-foreground">Active:</span>
-            {filters.tags.map(tag => (
+            {filters.tags.map((tag) => (
               <Badge
                 key={`active-${tag}`}
                 variant="default"

@@ -1,32 +1,34 @@
-import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 import { Server } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { ContentDetailPage } from '@/components/content-detail-page';
-import { getMcpBySlug, mcp, getMcpFullContent } from '@/generated/content';
+import { getMcpBySlug, getMcpFullContent, mcp } from '@/generated/content';
 
 const McpServer = () => {
   const { slug } = useParams<{ slug: string }>();
   const [fullServer, setFullServer] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
+
   const serverMeta = slug ? getMcpBySlug(slug) : null;
-  
+
   useEffect(() => {
     if (slug) {
-      getMcpFullContent(slug).then(content => {
-        setFullServer(content);
-        setLoading(false);
-      }).catch(() => {
-        setLoading(false);
-      });
+      getMcpFullContent(slug)
+        .then((content) => {
+          setFullServer(content);
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
     } else {
       setLoading(false);
     }
   }, [slug]);
-  
-  const relatedServers = serverMeta ? mcp
-    .filter(s => s.id !== serverMeta.id && s.category === serverMeta.category)
-    .slice(0, 3) : [];
+
+  const relatedServers = serverMeta
+    ? mcp.filter((s) => s.id !== serverMeta.id && s.category === serverMeta.category).slice(0, 3)
+    : [];
 
   if (loading) {
     return (

@@ -1,25 +1,16 @@
+import { ExternalLink, Github, Menu } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
+import { Button } from '@/components/ui/button';
+import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuList,
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
-import { 
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import { 
-  Sparkles,
-  Menu,
-  Github,
-  ExternalLink
-} from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,9 +20,17 @@ export const Navigation = () => {
     return location.pathname === path || location.pathname.startsWith(path);
   };
 
-  const NavLink = ({ href, children, className = "" }: { href: string; children: React.ReactNode; className?: string }) => (
-    <Link 
-      to={href} 
+  const NavLink = ({
+    href,
+    children,
+    className = '',
+  }: {
+    href: string;
+    children: React.ReactNode;
+    className?: string;
+  }) => (
+    <Link
+      to={href}
       className={`text-sm font-medium transition-colors hover:text-primary ${
         isActive(href) ? 'text-primary' : 'text-muted-foreground'
       } ${className}`}
@@ -41,8 +40,8 @@ export const Navigation = () => {
     </Link>
   );
 
-  const ExternalNavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-    <a 
+  const _ExternalNavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
+    <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
@@ -58,9 +57,7 @@ export const Navigation = () => {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <span className="text-lg font-medium text-white">
-              claudepro.directory
-            </span>
+            <span className="text-lg font-medium text-white">claudepro.directory</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -93,18 +90,20 @@ export const Navigation = () => {
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <div className="grid gap-3 p-4 w-48">
-                    <NavLink href="/community" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                    <NavLink
+                      href="/community"
+                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                    >
                       <div>Community</div>
-                      <div className="text-xs text-muted-foreground">
-                        Join the Claude community
-                      </div>
+                      <div className="text-xs text-muted-foreground">Join the Claude community</div>
                     </NavLink>
-                    
-                    <NavLink href="/submit" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+
+                    <NavLink
+                      href="/submit"
+                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                    >
                       <div>Submit Config</div>
-                      <div className="text-xs text-muted-foreground">
-                        Share your configurations
-                      </div>
+                      <div className="text-xs text-muted-foreground">Share your configurations</div>
                     </NavLink>
                   </div>
                 </NavigationMenuContent>
@@ -114,17 +113,22 @@ export const Navigation = () => {
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-3">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
-              onClick={() => window.open('https://github.com/JSONbored/claudepro-directory', '_blank')}
+              onClick={() =>
+                window.open('https://github.com/JSONbored/claudepro-directory', '_blank')
+              }
               className="hidden sm:flex hover:bg-primary/10 hover:text-primary"
             >
               <Github className="h-4 w-4 mr-2" />
               GitHub
             </Button>
-            
-            <Badge variant="outline" className="hidden lg:flex border-primary/20 bg-primary/5 text-primary">
+
+            <Badge
+              variant="outline"
+              className="hidden lg:flex border-primary/20 bg-primary/5 text-primary"
+            >
               <ExternalLink className="h-3 w-3 mr-1" />
               Free & Open Source
             </Badge>
@@ -141,7 +145,7 @@ export const Navigation = () => {
                   <NavLink href="/rules" className="text-base">
                     Claude Rules
                   </NavLink>
-                  
+
                   <NavLink href="/mcp" className="text-base">
                     MCP
                   </NavLink>
@@ -170,17 +174,19 @@ export const Navigation = () => {
                     <NavLink href="/community" className="text-base">
                       Community
                     </NavLink>
-                    
+
                     <NavLink href="/submit" className="text-base">
                       Submit Config
                     </NavLink>
                   </div>
 
                   <div className="border-t border-border pt-4">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full justify-start"
-                      onClick={() => window.open('https://github.com/JSONbored/claudepro-directory', '_blank')}
+                      onClick={() =>
+                        window.open('https://github.com/JSONbored/claudepro-directory', '_blank')
+                      }
                     >
                       <Github className="h-4 w-4 mr-2" />
                       View on GitHub

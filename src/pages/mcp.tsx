@@ -14,7 +14,7 @@ const McpServers = () => {
       badges={[
         { icon: Server, text: `${mcp.length} Servers Available` },
         { text: 'Production Ready' },
-        { text: 'Easy Integration' }
+        { text: 'Easy Integration' },
       ]}
     />
   );

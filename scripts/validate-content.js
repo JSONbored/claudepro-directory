@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import fs from 'fs';
-import path from 'path';
 
 // Get file paths from command line arguments
 const files = process.argv.slice(2);
@@ -23,20 +22,20 @@ const validCategories = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
 function isValidDate(dateStr) {
   const regex = /^\d{4}-\d{2}-\d{2}$/;
   if (!regex.test(dateStr)) return false;
-  
+
   const date = new Date(dateStr);
-  return date instanceof Date && !isNaN(date);
+  return date instanceof Date && !Number.isNaN(date);
 }
 
 // Validate each file
-files.forEach(filePath => {
+files.forEach((filePath) => {
   console.log(`Checking ${filePath}...`);
-  
+
   try {
     // Read and parse JSON file
     const content = fs.readFileSync(filePath, 'utf8');
     let data;
-    
+
     try {
       data = JSON.parse(content);
     } catch (e) {
@@ -45,7 +44,7 @@ files.forEach(filePath => {
       hasErrors = true;
       return;
     }
-    
+
     // Check required fields
     for (const field of requiredFields) {
       if (!data[field]) {
@@ -53,32 +52,32 @@ files.forEach(filePath => {
         hasErrors = true;
       }
     }
-    
+
     // Validate date format
     if (data.dateAdded && !isValidDate(data.dateAdded)) {
       console.error(`ERROR: Invalid date format in ${filePath} (should be YYYY-MM-DD)`);
       hasErrors = true;
     }
-    
+
     // Validate category
     if (data.category && !validCategories.includes(data.category)) {
       console.error(`ERROR: Invalid category '${data.category}' in ${filePath}`);
       console.error(`Valid categories are: ${validCategories.join(', ')}`);
       hasErrors = true;
     }
-    
+
     // Check for required content field
     if (!data.content) {
       console.error(`ERROR: Missing 'content' field in ${filePath}`);
       hasErrors = true;
     }
-    
+
     // Validate tags is an array
     if (data.tags && !Array.isArray(data.tags)) {
       console.error(`ERROR: 'tags' field must be an array in ${filePath}`);
       hasErrors = true;
     }
-    
+
     // Category-specific validation
     switch (data.category) {
       case 'mcp':
@@ -97,11 +96,10 @@ files.forEach(filePath => {
         }
         break;
     }
-    
+
     if (!hasErrors) {
       console.log(`✓ ${filePath} passed validation`);
     }
-    
   } catch (error) {
     console.error(`ERROR: Failed to process ${filePath}`);
     console.error(error.message);

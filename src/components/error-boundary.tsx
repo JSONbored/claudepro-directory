@@ -1,7 +1,7 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
+import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface Props {
   children: ReactNode;
@@ -22,10 +22,10 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   public static getDerivedStateFromError(error: Error): State {
-    return { 
-      hasError: true, 
+    return {
+      hasError: true,
       error,
-      errorInfo: null 
+      errorInfo: null,
     };
   }
 
@@ -38,19 +38,19 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleReset = () => {
-    this.setState({ 
-      hasError: false, 
+    this.setState({
+      hasError: false,
       error: null,
-      errorInfo: null 
+      errorInfo: null,
     });
     window.location.reload();
   };
 
   private handleGoHome = () => {
-    this.setState({ 
-      hasError: false, 
+    this.setState({
+      hasError: false,
       error: null,
-      errorInfo: null 
+      errorInfo: null,
     });
     window.location.href = '/';
   };
@@ -77,9 +77,7 @@ export class ErrorBoundary extends Component<Props, State> {
               {process.env.NODE_ENV === 'development' && this.state.error && (
                 <div className="rounded-lg bg-muted p-4 space-y-2">
                   <p className="font-semibold text-sm">Error Details:</p>
-                  <pre className="text-xs overflow-auto">
-                    {this.state.error.toString()}
-                  </pre>
+                  <pre className="text-xs overflow-auto">{this.state.error.toString()}</pre>
                   {this.state.errorInfo && (
                     <details className="text-xs">
                       <summary className="cursor-pointer font-semibold">Component Stack</summary>
@@ -90,7 +88,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   )}
                 </div>
               )}
-              
+
               <div className="flex gap-3">
                 <Button onClick={this.handleReset} variant="default">
                   <RefreshCw className="h-4 w-4 mr-2" />

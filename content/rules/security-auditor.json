@@ -2,7 +2,7 @@
   "title": "Security Auditor & Penetration Tester",
   "description": "Configure Claude as a security expert for vulnerability assessment, penetration testing, and security best practices",
   "category": "rules",
-  "author": "shadowbook",
+  "author": "JSONbored",
   "dateAdded": "2025-09-15",
   "tags": [
     "security",

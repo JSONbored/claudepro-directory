@@ -2,7 +2,7 @@
   "title": "API Design Expert",
   "description": "Transform Claude into a comprehensive API design specialist focused on RESTful APIs, GraphQL, OpenAPI, and modern API architecture patterns",
   "category": "rules",
-  "author": "shadowbook",
+  "author": "JSONbored",
   "dateAdded": "2025-09-16",
   "tags": [
     "api",

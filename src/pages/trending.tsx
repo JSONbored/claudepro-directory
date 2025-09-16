@@ -1,13 +1,13 @@
+import { Clock, Star, TrendingUp } from 'lucide-react';
 import { ConfigCard } from '@/components/config-card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Clock, Star } from 'lucide-react';
-import { rules, mcp } from '@/generated/content';
+import { mcp, rules } from '@/generated/content';
 
 const Trending = () => {
   // Combine and sort by popularity
   const allConfigs = [...rules, ...mcp].sort((a, b) => b.popularity - a.popularity);
   const trendingConfigs = allConfigs.slice(0, 12);
-  
+
   // Most popular rules and MCPs
   const topRules = [...rules].sort((a, b) => b.popularity - a.popularity).slice(0, 6);
   const topMcps = [...mcp].sort((a, b) => b.popularity - a.popularity).slice(0, 6);
@@ -30,7 +30,8 @@ const Trending = () => {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground mb-6 leading-relaxed">
-              Discover the most popular Claude configurations and MCP servers chosen by the community.
+              Discover the most popular Claude configurations and MCP servers chosen by the
+              community.
             </p>
             <Badge variant="outline" className="border-primary/20 bg-primary/5 text-primary">
               <Star className="h-3 w-3 mr-1" />
@@ -62,10 +63,7 @@ const Trending = () => {
                     </Badge>
                   </div>
                 )}
-                <ConfigCard
-                  {...config}
-                  type={getConfigType(config)}
-                />
+                <ConfigCard {...config} type={getConfigType(config)} />
               </div>
             ))}
           </div>
@@ -82,11 +80,7 @@ const Trending = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {topRules.map((rule) => (
-              <ConfigCard
-                key={rule.id}
-                {...rule}
-                type="rule"
-              />
+              <ConfigCard key={rule.id} {...rule} type="rule" />
             ))}
           </div>
         </div>
@@ -102,11 +96,7 @@ const Trending = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {topMcps.map((mcpItem) => (
-              <ConfigCard
-                key={mcpItem.id}
-                {...mcpItem}
-                type="mcp"
-              />
+              <ConfigCard key={mcpItem.id} {...mcpItem} type="mcp" />
             ))}
           </div>
         </div>

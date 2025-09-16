@@ -1,7 +1,13 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import { SortOption, SortDirection } from '@/hooks/useSorting';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import type { SortDirection, SortOption } from '@/hooks/use-sorting';
 
 interface SortDropdownProps {
   sortBy: SortOption;
@@ -14,7 +20,7 @@ export const SortDropdown = ({ sortBy, sortDirection, onSortChange }: SortDropdo
     { value: 'popularity', label: 'Popularity' },
     { value: 'date', label: 'Date Created' },
     { value: 'name', label: 'Name' },
-    { value: 'author', label: 'Author' }
+    { value: 'author', label: 'Author' },
   ];
 
   return (
@@ -25,14 +31,14 @@ export const SortDropdown = ({ sortBy, sortDirection, onSortChange }: SortDropdo
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {sortOptions.map(option => (
+          {sortOptions.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      
+
       <Button
         variant="ghost"
         size="sm"

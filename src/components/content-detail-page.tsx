@@ -1,28 +1,27 @@
-import { useNavigate } from 'react-router-dom';
-import { useState, lazy, Suspense } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { 
-  ArrowLeft, 
-  Calendar, 
-  User, 
-  Tag, 
-  Copy,
+import {
+  ArrowLeft,
+  Calendar,
   Check,
+  Copy,
   ExternalLink,
   Github,
-  LucideIcon
+  type LucideIcon,
+  Tag,
+  User,
 } from 'lucide-react';
-import { RelatedConfigs } from '@/components/related-configs';
+import { lazy, Suspense, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { generateContentStructuredData, SEO } from '@/components/seo';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import type { ContentItem, ContentCategory } from '@/types/content';
+import type { ContentCategory, ContentItem } from '@/types/content';
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
-const CodeHighlight = lazy(() => 
-  import('@/components/code-highlight').then(module => ({ 
-    default: module.CodeHighlight 
+const CodeHighlight = lazy(() =>
+  import('@/components/code-highlight').then((module) => ({
+    default: module.CodeHighlight,
   }))
 );
 
@@ -41,7 +40,7 @@ export function ContentDetailPage<T extends ContentItem>({
   icon: Icon,
   typeName,
   relatedItems = [],
-  customSections
+  customSections,
 }: ContentDetailPageProps<T>) {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
@@ -51,7 +50,9 @@ export function ContentDetailPage<T extends ContentItem>({
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">{typeName} Not Found</h1>
-          <p className="text-muted-foreground mb-6">The requested {typeName.toLowerCase()} could not be found.</p>
+          <p className="text-muted-foreground mb-6">
+            The requested {typeName.toLowerCase()} could not be found.
+          </p>
           <Button onClick={() => navigate('/')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
@@ -67,15 +68,15 @@ export function ContentDetailPage<T extends ContentItem>({
       await navigator.clipboard.writeText(contentToCopy);
       setCopied(true);
       toast({
-        title: "Content copied!",
+        title: 'Content copied!',
         description: `The ${typeName.toLowerCase()} ${item.config ? 'configuration' : 'content'} has been copied to your clipboard.`,
       });
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
+    } catch (_err) {
       toast({
-        title: "Failed to copy",
-        description: "Could not copy the content to clipboard.",
-        variant: "destructive",
+        title: 'Failed to copy',
+        description: 'Could not copy the content to clipboard.',
+        variant: 'destructive',
       });
     }
   };
@@ -86,7 +87,7 @@ export function ContentDetailPage<T extends ContentItem>({
       return new Date(dateStr).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
       });
     } catch {
       return dateStr;
@@ -95,12 +96,28 @@ export function ContentDetailPage<T extends ContentItem>({
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title={item.title}
+        description={item.description}
+        keywords={item.tags}
+        author={item.author}
+        ogType="article"
+        structuredData={generateContentStructuredData({
+          title: item.title,
+          description: item.description,
+          author: item.author,
+          dateAdded: item.dateAdded,
+          category: item.category,
+          tags: item.tags,
+          url: `${window.location.origin}/${categoryPath}/${item.slug}`,
+        })}
+      />
       {/* Header */}
       <div className="border-b border-border/50 bg-card/30">
         <div className="container mx-auto px-4 py-8">
           <Button
             variant="ghost"
-            onClick={() => navigate(`/${type === 'mcp' ? 'mcp' : type + 's'}`)}
+            onClick={() => navigate(`/${type === 'mcp' ? 'mcp' : `${type}s`}`)}
             className="mb-6"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -142,9 +159,7 @@ export function ContentDetailPage<T extends ContentItem>({
                   <span>{formatDate(item.dateAdded || item.createdAt)}</span>
                 </div>
               )}
-              {item.category && (
-                <Badge variant="secondary">{item.category}</Badge>
-              )}
+              {item.category && <Badge variant="secondary">{item.category}</Badge>}
             </div>
 
             {/* Tags */}
@@ -172,11 +187,7 @@ export function ContentDetailPage<T extends ContentItem>({
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>{type === 'mcp' ? 'Configuration' : 'Content'}</CardTitle>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleCopyContent}
-                  >
+                  <Button size="sm" variant="outline" onClick={handleCopyContent}>
                     {copied ? (
                       <>
                         <Check className="h-4 w-4 mr-2" />
@@ -192,11 +203,9 @@ export function ContentDetailPage<T extends ContentItem>({
                 </div>
               </CardHeader>
               <CardContent>
-                <Suspense fallback={
-                  <div className="animate-pulse bg-muted h-32 rounded-md" />
-                }>
-                  <CodeHighlight 
-                    code={item.content || item.config || ''} 
+                <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}>
+                  <CodeHighlight
+                    code={item.content || item.config || ''}
                     language={type === 'command' ? 'bash' : type === 'mcp' ? 'json' : 'markdown'}
                   />
                 </Suspense>
@@ -216,8 +225,8 @@ export function ContentDetailPage<T extends ContentItem>({
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <CodeHighlight 
-                    code={JSON.stringify(item.configuration, null, 2)} 
+                  <CodeHighlight
+                    code={JSON.stringify(item.configuration, null, 2)}
                     language="json"
                   />
                 </CardContent>
@@ -239,9 +248,7 @@ export function ContentDetailPage<T extends ContentItem>({
                       <h4 className="font-medium mb-2">{example.title}</h4>
                       <CodeHighlight code={example.code} language="bash" />
                       {example.description && (
-                        <p className="text-sm text-muted-foreground mt-2">
-                          {example.description}
-                        </p>
+                        <p className="text-sm text-muted-foreground mt-2">{example.description}</p>
                       )}
                     </div>
                   ))}
@@ -258,32 +265,29 @@ export function ContentDetailPage<T extends ContentItem>({
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button 
-                  className="w-full" 
-                  onClick={handleCopyContent}
-                >
+                <Button className="w-full" onClick={handleCopyContent}>
                   <Copy className="h-4 w-4 mr-2" />
                   Copy Content
                 </Button>
                 {(item.githubUrl || item.repository) && (
-                  <Button 
-                    className="w-full" 
-                    variant="outline"
-                    asChild
-                  >
-                    <a href={item.githubUrl || item.repository} target="_blank" rel="noopener noreferrer">
+                  <Button className="w-full" variant="outline" asChild>
+                    <a
+                      href={item.githubUrl || item.repository}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <Github className="h-4 w-4 mr-2" />
                       View on GitHub
                     </a>
                   </Button>
                 )}
                 {(item.documentationUrl || item.documentation) && (
-                  <Button 
-                    className="w-full" 
-                    variant="outline"
-                    asChild
-                  >
-                    <a href={item.documentationUrl || item.documentation} target="_blank" rel="noopener noreferrer">
+                  <Button className="w-full" variant="outline" asChild>
+                    <a
+                      href={item.documentationUrl || item.documentation}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <ExternalLink className="h-4 w-4 mr-2" />
                       Documentation
                     </a>
@@ -322,7 +326,6 @@ export function ContentDetailPage<T extends ContentItem>({
                 </CardContent>
               </Card>
             )}
-
           </div>
         </div>
 
@@ -338,10 +341,12 @@ export function ContentDetailPage<T extends ContentItem>({
                     <CardDescription>{item.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full"
-                      onClick={() => navigate(`/${type === 'mcp' ? 'mcp' : type + 's'}/${item.slug}`)}
+                      onClick={() =>
+                        navigate(`/${type === 'mcp' ? 'mcp' : `${type}s`}/${item.slug}`)
+                      }
                     >
                       View {typeName}
                     </Button>

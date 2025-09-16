@@ -1,19 +1,18 @@
-import { useParams, Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { getJobBySlug } from '@/data/jobs';
-import { 
-  MapPin, 
-  Clock, 
-  DollarSign, 
-  ExternalLink, 
+import {
   ArrowLeft,
   Building,
   Calendar,
-  CheckCircle
+  CheckCircle,
+  DollarSign,
+  ExternalLink,
+  MapPin,
 } from 'lucide-react';
+import { Link, useParams } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { getJobBySlug } from '@/data/jobs';
 
 export default function Job() {
   const { slug } = useParams<{ slug: string }>();
@@ -44,7 +43,7 @@ export default function Job() {
     return new Date(dateStr).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
@@ -52,9 +51,9 @@ export default function Job() {
     const colors = {
       'full-time': 'bg-green-500/10 text-green-400 border-green-500/20',
       'part-time': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-      'contract': 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-      'freelance': 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-      'remote': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+      contract: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+      freelance: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+      remote: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     };
     return colors[type as keyof typeof colors] || 'bg-muted text-muted-foreground';
   };
@@ -78,8 +77,8 @@ export default function Job() {
                 <div className="flex-1">
                   <div className="flex items-center gap-4 mb-4">
                     {job.companyLogo && (
-                      <img 
-                        src={job.companyLogo} 
+                      <img
+                        src={job.companyLogo}
                         alt={`${job.company} logo`}
                         className="h-16 w-16 rounded-xl object-cover"
                       />
@@ -92,7 +91,7 @@ export default function Job() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex flex-wrap gap-4 text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
@@ -110,21 +109,19 @@ export default function Job() {
                     )}
                   </div>
                 </div>
-                
+
                 <div className="flex flex-col items-end gap-3">
                   <Badge className={`${getTypeColor(job.type)} text-sm`}>
                     {job.type.replace('-', ' ')}
                   </Badge>
-                  {job.remote && (
-                    <Badge variant="secondary">Remote</Badge>
-                  )}
+                  {job.remote && <Badge variant="secondary">Remote</Badge>}
                   {job.featured && (
                     <Badge className="bg-primary text-primary-foreground">Featured</Badge>
                   )}
                 </div>
               </div>
             </CardHeader>
-            
+
             <CardContent className="pt-0">
               <div className="flex gap-4">
                 <Button size="lg" asChild className="flex-1 sm:flex-initial">
@@ -194,25 +191,23 @@ export default function Job() {
                 <CardContent className="space-y-4">
                   <div>
                     <h4 className="font-medium mb-1">Job Type</h4>
-                    <Badge className={getTypeColor(job.type)}>
-                      {job.type.replace('-', ' ')}
-                    </Badge>
+                    <Badge className={getTypeColor(job.type)}>{job.type.replace('-', ' ')}</Badge>
                   </div>
-                  
+
                   <Separator />
-                  
+
                   <div>
                     <h4 className="font-medium mb-1">Category</h4>
                     <p className="text-muted-foreground capitalize">{job.category}</p>
                   </div>
-                  
+
                   <Separator />
-                  
+
                   <div>
                     <h4 className="font-medium mb-1">Location</h4>
                     <p className="text-muted-foreground">{job.location}</p>
                   </div>
-                  
+
                   {job.salary && (
                     <>
                       <Separator />
@@ -222,7 +217,7 @@ export default function Job() {
                       </div>
                     </>
                   )}
-                  
+
                   {job.expiresAt && (
                     <>
                       <Separator />

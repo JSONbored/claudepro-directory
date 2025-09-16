@@ -1,17 +1,10 @@
+import { Building, Clock, DollarSign, ExternalLink, MapPin, Star } from 'lucide-react';
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Job } from '@/data/jobs';
-import { 
-  MapPin, 
-  Clock, 
-  DollarSign, 
-  ExternalLink, 
-  Star,
-  Building
-} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { Job } from '@/data/jobs';
 
 interface JobCardProps {
   job: Job;
@@ -22,7 +15,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
     const date = new Date(dateStr);
     const now = new Date();
     const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     if (diffInDays === 0) return 'Today';
     if (diffInDays === 1) return 'Yesterday';
     if (diffInDays < 7) return `${diffInDays} days ago`;
@@ -34,9 +27,9 @@ export const JobCard = memo(({ job }: JobCardProps) => {
     const colors = {
       'full-time': 'bg-green-500/10 text-green-400 border-green-500/20',
       'part-time': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-      'contract': 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-      'freelance': 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-      'remote': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+      contract: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+      freelance: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+      remote: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     };
     return colors[type as keyof typeof colors] || 'bg-muted text-muted-foreground';
   };
@@ -51,23 +44,21 @@ export const JobCard = memo(({ job }: JobCardProps) => {
           </Badge>
         </div>
       )}
-      
+
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               {job.companyLogo && (
-                <img 
-                  src={job.companyLogo} 
+                <img
+                  src={job.companyLogo}
                   alt={`${job.company} logo`}
                   className="h-12 w-12 rounded-lg object-cover"
                 />
               )}
               <div>
                 <CardTitle className="text-xl group-hover:text-primary transition-colors">
-                  <Link to={`/jobs/${job.slug}`}>
-                    {job.title}
-                  </Link>
+                  <Link to={`/jobs/${job.slug}`}>{job.title}</Link>
                 </CardTitle>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Building className="h-4 w-4" />
@@ -75,7 +66,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <MapPin className="h-4 w-4" />
@@ -93,23 +84,17 @@ export const JobCard = memo(({ job }: JobCardProps) => {
               )}
             </div>
           </div>
-          
+
           <div className="flex flex-col items-end gap-2">
-            <Badge className={getTypeColor(job.type)}>
-              {job.type.replace('-', ' ')}
-            </Badge>
-            {job.remote && (
-              <Badge variant="secondary">Remote</Badge>
-            )}
+            <Badge className={getTypeColor(job.type)}>{job.type.replace('-', ' ')}</Badge>
+            {job.remote && <Badge variant="secondary">Remote</Badge>}
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="pt-0">
-        <p className="text-muted-foreground mb-4 line-clamp-2">
-          {job.description}
-        </p>
-        
+        <p className="text-muted-foreground mb-4 line-clamp-2">{job.description}</p>
+
         <div className="mb-4">
           <div className="flex flex-wrap gap-2">
             {job.tags.slice(0, 4).map((tag) => (
@@ -124,7 +109,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
             )}
           </div>
         </div>
-        
+
         <div className="flex gap-3">
           <Button asChild className="flex-1">
             <a href={job.applyUrl} target="_blank" rel="noopener noreferrer">
@@ -133,9 +118,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
             </a>
           </Button>
           <Button variant="outline" asChild>
-            <Link to={`/jobs/${job.slug}`}>
-              View Details
-            </Link>
+            <Link to={`/jobs/${job.slug}`}>View Details</Link>
           </Button>
         </div>
       </CardContent>

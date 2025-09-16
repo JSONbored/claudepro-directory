@@ -14,7 +14,7 @@ const Rules = () => {
       badges={[
         { icon: BookOpen, text: `${rules.length} Rules Available` },
         { text: 'Expert Tested' },
-        { text: 'Copy & Paste Ready' }
+        { text: 'Copy & Paste Ready' },
       ]}
     />
   );
