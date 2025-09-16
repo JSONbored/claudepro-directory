@@ -85,97 +85,97 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/rules/devops-and-sre-expert</loc>
+    <loc>https://dev.claudepro.directory/rules/devops-sre-expert</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/rules/go-golang-expert</loc>
+    <loc>https://dev.claudepro.directory/rules/golang-expert</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/rules/mobile-app-development-expert</loc>
+    <loc>https://dev.claudepro.directory/rules/mobile-app-developer</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/rules/python-data-science-expert</loc>
+    <loc>https://dev.claudepro.directory/rules/python-data-science</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/rules/react-and-nextjs-expert</loc>
+    <loc>https://dev.claudepro.directory/rules/react-expert</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/rules/security-auditor-and-penetration-tester</loc>
+    <loc>https://dev.claudepro.directory/rules/security-auditor</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/mcp/aws-services-mcp</loc>
+    <loc>https://dev.claudepro.directory/mcp/aws-services</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/mcp/discord-integration-mcp</loc>
+    <loc>https://dev.claudepro.directory/mcp/discord-integration</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/mcp/docker-mcp-server</loc>
+    <loc>https://dev.claudepro.directory/mcp/docker-mcp</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/mcp/filesystem-mcp-server</loc>
+    <loc>https://dev.claudepro.directory/mcp/filesystem-mcp</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/mcp/github-integration-mcp</loc>
+    <loc>https://dev.claudepro.directory/mcp/github-integration</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/mcp/jira-integration-mcp</loc>
+    <loc>https://dev.claudepro.directory/mcp/jira-integration</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/mcp/kubernetes-management-mcp</loc>
+    <loc>https://dev.claudepro.directory/mcp/kubernetes-management</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/mcp/postgresql-mcp-server</loc>
+    <loc>https://dev.claudepro.directory/mcp/postgresql-mcp</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/mcp/redis-database-mcp</loc>
+    <loc>https://dev.claudepro.directory/mcp/redis-database</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/mcp/slack-integration-mcp</loc>
+    <loc>https://dev.claudepro.directory/mcp/slack-integration</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -193,7 +193,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/agents/code-review-specialist</loc>
+    <loc>https://dev.claudepro.directory/agents/code-reviewer-agent</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -205,7 +205,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/agents/debugging-assistant-agent</loc>
+    <loc>https://dev.claudepro.directory/agents/debugging-assistant</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -235,7 +235,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/agents/uiux-design-expert</loc>
+    <loc>https://dev.claudepro.directory/agents/ui-ux-design-expert</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -259,13 +259,13 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/commands/test-gen</loc>
+    <loc>https://dev.claudepro.directory/commands/generate-tests</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/commands/commit-smart-git-commit</loc>
+    <loc>https://dev.claudepro.directory/commands/git-smart-commit</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -277,7 +277,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/commands/refactor</loc>
+    <loc>https://dev.claudepro.directory/commands/refactor-code</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -295,7 +295,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/commands/test</loc>
+    <loc>https://dev.claudepro.directory/commands/test-advanced</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -307,7 +307,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/hooks/auto-code-formatter-hook</loc>
+    <loc>https://dev.claudepro.directory/hooks/code-formatter-hook</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -355,7 +355,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://dev.claudepro.directory/hooks/automated-test-runner-hook</loc>
+    <loc>https://dev.claudepro.directory/hooks/test-runner-hook</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
