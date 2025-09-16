@@ -16,7 +16,7 @@ import {
   Users,
   Webhook,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,6 +33,21 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 
 const Submit = () => {
+  const titleId = useId();
+  const descriptionId = useId();
+  const categoryId = useId();
+  const repositoryId = useId();
+  const documentationId = useId();
+  const tagsId = useId();
+  const contentId = useId();
+  const syntaxId = useId();
+  const useCasesId = useId();
+  const capabilitiesId = useId();
+  const triggerEventsId = useId();
+  const actionsId = useId();
+  const platformsId = useId();
+  const requirementsId = useId();
+  
   const [configType, setConfigType] = useState<'rule' | 'mcp' | 'agent' | 'command' | 'hook' | ''>(
     ''
   );
@@ -417,7 +432,7 @@ const Submit = () => {
                         *
                       </Label>
                       <Input
-                        id="title"
+                        id={titleId}
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         placeholder={
@@ -461,7 +476,7 @@ const Submit = () => {
                   <div className="space-y-2">
                     <Label htmlFor="description">Description *</Label>
                     <Textarea
-                      id="description"
+                      id={descriptionId}
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder={
@@ -486,7 +501,7 @@ const Submit = () => {
                   <div className="space-y-2">
                     <Label htmlFor="tags">Tags</Label>
                     <Input
-                      id="tags"
+                      id={tagsId}
                       value={formData.tags}
                       onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                       placeholder="typescript, development, best-practices (comma separated)"
@@ -511,7 +526,7 @@ const Submit = () => {
                       *
                     </Label>
                     <Textarea
-                      id="content"
+                      id={contentId}
                       value={formData.content}
                       onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                       placeholder={
@@ -538,7 +553,7 @@ const Submit = () => {
                     <div className="space-y-2">
                       <Label htmlFor="syntax">Command Syntax</Label>
                       <Input
-                        id="syntax"
+                        id={syntaxId}
                         value={formData.syntax}
                         onChange={(e) => setFormData({ ...formData, syntax: e.target.value })}
                         placeholder="e.g., /analyze-code [file] [--depth=quick|thorough]"
@@ -552,7 +567,7 @@ const Submit = () => {
                       <div className="space-y-2">
                         <Label htmlFor="useCases">Use Cases</Label>
                         <Input
-                          id="useCases"
+                          id={useCasesId}
                           value={formData.useCases}
                           onChange={(e) => setFormData({ ...formData, useCases: e.target.value })}
                           placeholder="code-review, mentorship, quality-assurance"
@@ -562,7 +577,7 @@ const Submit = () => {
                       <div className="space-y-2">
                         <Label htmlFor="capabilities">Capabilities</Label>
                         <Input
-                          id="capabilities"
+                          id={capabilitiesId}
                           value={formData.capabilities}
                           onChange={(e) =>
                             setFormData({ ...formData, capabilities: e.target.value })
@@ -579,7 +594,7 @@ const Submit = () => {
                       <div className="space-y-2">
                         <Label htmlFor="triggerEvents">Trigger Events</Label>
                         <Input
-                          id="triggerEvents"
+                          id={triggerEventsId}
                           value={formData.triggerEvents}
                           onChange={(e) =>
                             setFormData({ ...formData, triggerEvents: e.target.value })
@@ -591,7 +606,7 @@ const Submit = () => {
                       <div className="space-y-2">
                         <Label htmlFor="actions">Actions</Label>
                         <Input
-                          id="actions"
+                          id={actionsId}
                           value={formData.actions}
                           onChange={(e) => setFormData({ ...formData, actions: e.target.value })}
                           placeholder="send-notification, generate-report, update-status"
@@ -606,7 +621,7 @@ const Submit = () => {
                       <div className="space-y-2">
                         <Label htmlFor="platforms">Platforms</Label>
                         <Input
-                          id="platforms"
+                          id={platformsId}
                           value={formData.platforms}
                           onChange={(e) => setFormData({ ...formData, platforms: e.target.value })}
                           placeholder="Linux, Docker, AWS, Web"
@@ -616,7 +631,7 @@ const Submit = () => {
                       <div className="space-y-2">
                         <Label htmlFor="requirements">Requirements</Label>
                         <Input
-                          id="requirements"
+                          id={requirementsId}
                           value={formData.requirements}
                           onChange={(e) =>
                             setFormData({ ...formData, requirements: e.target.value })
@@ -633,7 +648,7 @@ const Submit = () => {
                     <div className="space-y-2">
                       <Label htmlFor="repository">Repository URL</Label>
                       <Input
-                        id="repository"
+                        id={repositoryId}
                         type="url"
                         value={formData.repository}
                         onChange={(e) => setFormData({ ...formData, repository: e.target.value })}
@@ -645,7 +660,7 @@ const Submit = () => {
                     <div className="space-y-2">
                       <Label htmlFor="documentation">Documentation URL</Label>
                       <Input
-                        id="documentation"
+                        id={documentationId}
                         type="url"
                         value={formData.documentation}
                         onChange={(e) =>

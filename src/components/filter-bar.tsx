@@ -1,4 +1,5 @@
 import { Filter, RotateCcw, X } from 'lucide-react';
+import { useId } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,6 +30,12 @@ export const FilterBar = ({
   availableTags,
   availableAuthors,
 }: FilterBarProps) => {
+  const categoryId = useId();
+  const authorId = useId();
+  const dateRangeId = useId();
+  const popularityId = useId();
+  const tagsId = useId();
+  
   const hasActiveFilters =
     filters.category !== 'all' ||
     filters.tags.length > 0 ||
@@ -74,12 +81,12 @@ export const FilterBar = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Category Filter */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground">Category</label>
+          <label htmlFor={categoryId} className="text-sm font-medium text-foreground">Category</label>
           <Select
             value={filters.category}
             onValueChange={(value) => onFilterChange('category', value)}
           >
-            <SelectTrigger className="bg-background/50 border-border/50">
+            <SelectTrigger id={categoryId} className="bg-background/50 border-border/50">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -95,9 +102,9 @@ export const FilterBar = ({
 
         {/* Author Filter */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground">Author</label>
+          <label htmlFor={authorId} className="text-sm font-medium text-foreground">Author</label>
           <Select value={filters.author} onValueChange={(value) => onFilterChange('author', value)}>
-            <SelectTrigger className="bg-background/50 border-border/50">
+            <SelectTrigger id={authorId} className="bg-background/50 border-border/50">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -113,12 +120,12 @@ export const FilterBar = ({
 
         {/* Date Range Filter */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground">Date Range</label>
+          <label htmlFor={dateRangeId} className="text-sm font-medium text-foreground">Date Range</label>
           <Select
             value={filters.dateRange}
             onValueChange={(value) => onFilterChange('dateRange', value)}
           >
-            <SelectTrigger className="bg-background/50 border-border/50">
+            <SelectTrigger id={dateRangeId} className="bg-background/50 border-border/50">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -132,11 +139,12 @@ export const FilterBar = ({
 
         {/* Popularity Range */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground">
+          <label htmlFor={popularityId} className="text-sm font-medium text-foreground">
             Popularity ({filters.popularityRange[0]} - {filters.popularityRange[1]})
           </label>
           <div className="px-2 py-4">
             <Slider
+              id={popularityId}
               value={filters.popularityRange}
               onValueChange={(value) => onFilterChange('popularityRange', value)}
               min={0}
@@ -152,8 +160,8 @@ export const FilterBar = ({
       <div className="space-y-3">
         <Separator />
         <div>
-          <label className="text-sm font-medium text-foreground mb-3 block">Tags</label>
-          <div className="flex flex-wrap gap-2">
+          <label htmlFor={tagsId} className="text-sm font-medium text-foreground mb-3 block">Tags</label>
+          <div id={tagsId} className="flex flex-wrap gap-2">
             {availableTags.map((tag) => (
               <Badge
                 key={tag}

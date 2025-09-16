@@ -247,7 +247,7 @@ export function ContentDetailPage<T extends ContentItem>({
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {item.examples.map((example: any, idx: number) => (
-                    <div key={idx}>
+                    <div key={example.title || `example-${idx}`}>
                       <h4 className="font-medium mb-2">{example.title}</h4>
                       <CodeHighlight code={example.code} language="bash" />
                       {example.description && (
