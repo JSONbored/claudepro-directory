@@ -10,7 +10,7 @@
 
 **The Ultimate Community-Driven Collection of Claude AI Configurations**
 
-[🌐 Live Site](https://claudepro.directory) | [📖 Documentation](#documentation) | [🤝 Contributing](#contributing) | [💬 Community](#community)
+[🌐 Live Site](https://claudepro.directory) | [📖 Documentation](#-documentation) | [🤝 Contributing](https://github.com/JSONbored/claudepro-directory/blob/main/.github/CONTRIBUTING.md) | [💬 Discussions](https://github.com/JSONbored/claudepro-directory/discussions)
 
 </div>
 
@@ -149,27 +149,18 @@ For detailed contribution guidelines, please see our [Contributing Guide](.githu
 
 ## 📖 Documentation
 
-### API Routes
+*Comprehensive documentation coming soon!*
 
-The application uses client-side routing with React Router:
+### Available Routes
 
-#### ✅ Fully Functional
-- `/` - Home page with search
-- `/agents` - AI Agents directory
-- `/mcp` - MCP Servers directory
-- `/rules` - Claude Rules collection
-- `/commands` - Commands library
-- `/hooks` - Hooks repository
-
-#### 🚧 Under Construction
-- `/jobs` - Jobs board (demo listings shown, but actively accepting paid job postings - [contact us](mailto:partners@claudepro.directory))
-- `/trending` - Trending configurations (using static popularity data, not real-time metrics)
-- `/community` - Community hub (placeholder stats and links)
-- `/submit` - Submit new configurations (UI only, backend integration pending)
-
-### Content Schema
-
-Each content type has a specific schema. See the [Content Schema Documentation](docs/CONTENT_SCHEMA.md) for detailed information.
+- **[`/agents`](https://claudepro.directory/agents)** - Browse AI Agents
+- **[`/mcp`](https://claudepro.directory/mcp)** - MCP Server configurations
+- **[`/rules`](https://claudepro.directory/rules)** - Claude Rules collection
+- **[`/commands`](https://claudepro.directory/commands)** - Custom commands
+- **[`/hooks`](https://claudepro.directory/hooks)** - Hook configurations
+- **[`/jobs`](https://claudepro.directory/jobs)** - AI job opportunities
+- **[`/trending`](https://claudepro.directory/trending)** - Popular configurations
+- **[`/submit`](https://claudepro.directory/submit)** - Submit new content
 
 ## 🔒 Security
 
