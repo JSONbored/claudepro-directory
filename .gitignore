@@ -36,6 +36,7 @@ lerna-debug.log*
 .claude/
 src/generated/
 generated/
+assets/
 
 # Cache files
 .eslintcache

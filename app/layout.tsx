@@ -23,13 +23,13 @@ export const metadata: Metadata = {
     siteName: 'Claude Pro Directory',
     title: 'Claude Pro Directory - Community Configurations for Claude AI',
     description:
-      'Explore 1000+ Claude configurations including agents, MCP servers, rules, commands, and hooks. Free and open source.',
+      'Explore 50+ Claude configurations including agents, MCP servers, rules, commands, and hooks. Free and open source.',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Claude Pro Directory - Community Configurations for Claude AI',
     description:
-      'Explore 1000+ Claude configurations including agents, MCP servers, rules, commands, and hooks. Free and open source.',
+      'Explore 50+ Claude configurations including agents, MCP servers, rules, commands, and hooks. Free and open source.',
     creator: '@JSONbored',
   },
   robots: {
