@@ -1,0 +1,703 @@
+@import "tailwindcss";
+
+/* Tailwind v4 Dark Mode Theme - OKLCH Color Space */
+@theme {
+  /* ========================================
+     DARK MODE COLORS - Claude Desktop Dark Theme
+     ======================================== */
+
+  /* Backgrounds - Warm Charcoal Tones */
+  --color-bg-primary: oklch(26.8% 0.012 48); /* #2D2B28 - Main background */
+  --color-bg-secondary: oklch(31.4% 0.011 52); /* #3A3733 - Cards/elevated surfaces */
+  --color-bg-tertiary: oklch(35.2% 0.013 46); /* #454039 - Hover states */
+  --color-bg-quaternary: oklch(38.9% 0.014 44); /* #514B43 - Active/pressed states */
+  --color-bg-selected: oklch(42.1% 0.015 42); /* #5A544A - Selected items */
+  --color-bg-code: oklch(22.3% 0.008 50); /* #1E1D1B - Code block background */
+  --color-bg-overlay: oklch(18% 0.005 0 / 0.8); /* Overlay/modal backdrop */
+
+  /* Text Colors - Warm Cream Tones */
+  --color-text-primary: oklch(95.8% 0.012 72); /* #F5F2ED - Primary text */
+  --color-text-secondary: oklch(81.2% 0.018 65); /* #C5BFBA - Secondary text */
+  --color-text-tertiary: oklch(65.4% 0.021 58); /* #918B84 - Muted text */
+  --color-text-disabled: oklch(50.3% 0.019 52); /* #6B6560 - Disabled text */
+  --color-text-inverse: oklch(23.5% 0.016 56); /* #1F1917 - Text on light backgrounds */
+
+  /* Claude Brand Colors - Warm Orange */
+  --color-accent: oklch(60.5% 0.162 41); /* #DC6F44 - Primary Claude orange */
+  --color-accent-hover: oklch(65.8% 0.148 43); /* #E58559 - Hover state */
+  --color-accent-active: oklch(55.2% 0.168 39); /* #C85A35 - Active/pressed */
+  --color-accent-light: oklch(70.3% 0.135 45); /* #F09770 - Light variant */
+  --color-accent-muted: oklch(48.9% 0.142 37); /* #A85A3C - Muted variant */
+  --color-accent-subtle: oklch(33.6% 0.045 35); /* #3A2B24 - Very subtle background */
+
+  /* Borders - Subtle Definition */
+  --color-border-default: oklch(31.4% 0.011 52); /* #3A3733 - Default borders */
+  --color-border-light: oklch(28.7% 0.009 54); /* #33312E - Light borders */
+  --color-border-medium: oklch(35.2% 0.013 46); /* #454039 - Medium borders */
+  --color-border-strong: oklch(60.5% 0.162 41); /* #DC6F44 - Active/focus borders */
+
+  /* Semantic Colors */
+  --color-success: oklch(64.5% 0.19 145); /* #46C271 - Success green */
+  --color-success-bg: oklch(35% 0.08 145 / 0.15); /* Success background */
+  --color-success-border: oklch(64.5% 0.19 145 / 0.3);
+
+  --color-warning: oklch(68.2% 0.155 65); /* #E5A756 - Warning amber */
+  --color-warning-bg: oklch(45% 0.08 65 / 0.15); /* Warning background */
+  --color-warning-border: oklch(68.2% 0.155 65 / 0.3);
+
+  --color-error: oklch(62.8% 0.195 25); /* #E57373 - Error red */
+  --color-error-bg: oklch(40% 0.08 25 / 0.15); /* Error background */
+  --color-error-border: oklch(62.8% 0.195 25 / 0.3);
+
+  --color-info: oklch(65.4% 0.168 250); /* #5B9FE5 - Info blue */
+  --color-info-bg: oklch(40% 0.08 250 / 0.15); /* Info background */
+  --color-info-border: oklch(65.4% 0.168 250 / 0.3);
+
+  /* Legacy Tailwind color mappings for compatibility */
+  --color-background: oklch(26.8% 0.012 48); /* Maps to bg-primary */
+  --color-foreground: oklch(95.8% 0.012 72); /* Maps to text-primary */
+  --color-card: oklch(31.4% 0.011 52); /* Maps to bg-secondary */
+  --color-card-foreground: oklch(95.8% 0.012 72); /* Maps to text-primary */
+  --color-popover: oklch(31.4% 0.011 52); /* Maps to bg-secondary */
+  --color-popover-foreground: oklch(95.8% 0.012 72); /* Maps to text-primary */
+  --color-primary: oklch(60.5% 0.162 41); /* Claude orange - primary brand color */
+  --color-primary-foreground: oklch(95.8% 0.012 72); /* Text on primary */
+  --color-secondary: oklch(35.2% 0.013 46); /* Maps to bg-tertiary */
+  --color-secondary-foreground: oklch(81.2% 0.018 65); /* Maps to text-secondary */
+  --color-accent: oklch(60.5% 0.162 41); /* Claude orange for accent states */
+  --color-accent-foreground: oklch(95.8% 0.012 72); /* Text on accent backgrounds */
+  --color-muted: oklch(35.2% 0.013 46); /* Muted background */
+  --color-muted-foreground: oklch(65.4% 0.021 58); /* Maps to text-tertiary */
+  --color-border: oklch(31.4% 0.011 52); /* Maps to border-default */
+  --color-input: oklch(31.4% 0.011 52); /* Maps to bg-secondary */
+  --color-ring: oklch(60.5% 0.162 41); /* Focus ring color */
+  --color-destructive: oklch(62.8% 0.195 25); /* Maps to error */
+  --color-destructive-foreground: oklch(95.8% 0.012 72); /* Maps to text-primary */
+
+  /* Shadows - Pure Black Base */
+  --shadow-color: 0 0 0;
+  --shadow-xs: 0 1px 2px oklch(0% 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.12), 0 1px 2px oklch(0% 0 0 / 0.08);
+  --shadow-md: 0 4px 6px oklch(0% 0 0 / 0.15), 0 2px 4px oklch(0% 0 0 / 0.08);
+  --shadow-lg: 0 10px 15px oklch(0% 0 0 / 0.2), 0 4px 6px oklch(0% 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px oklch(0% 0 0 / 0.25), 0 10px 10px oklch(0% 0 0 / 0.12);
+  --shadow-2xl: 0 25px 50px oklch(0% 0 0 / 0.35);
+
+  /* Focus Rings */
+  --ring-accent: 0 0 0 3px oklch(60.5% 0.162 41 / 0.3);
+  --ring-error: 0 0 0 3px oklch(62.8% 0.195 25 / 0.3);
+  --ring-success: 0 0 0 3px oklch(64.5% 0.19 145 / 0.3);
+
+  /* Typography */
+  --font-family-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-family-mono: "JetBrains Mono", "SF Mono", Consolas, "Monaco", monospace;
+
+  /* Font Sizes */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-lg: 1.125rem; /* 18px */
+  --font-size-xl: 1.25rem; /* 20px */
+  --font-size-2xl: 1.5rem; /* 24px */
+  --font-size-3xl: 1.875rem; /* 30px */
+  --font-size-4xl: 2.25rem; /* 36px */
+  --font-size-5xl: 3rem; /* 48px */
+
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line Heights */
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  /* Letter Spacing */
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  /* Border Radius */
+  --radius: 0.375rem; /* 6px - Claude default */
+  --radius-none: 0;
+  --radius-xs: 0.125rem; /* 2px */
+  --radius-sm: 0.25rem; /* 4px */
+  --radius-md: 0.375rem; /* 6px - Claude default */
+  --radius-lg: 0.5rem; /* 8px */
+  --radius-xl: 0.75rem; /* 12px */
+  --radius-2xl: 1rem; /* 16px */
+  --radius-3xl: 1.5rem; /* 24px */
+  --radius-full: 9999px;
+
+  /* Spacing */
+  --spacing-0: 0;
+  --spacing-px: 1px;
+  --spacing-0_5: 0.125rem; /* 2px */
+  --spacing-1: 0.25rem; /* 4px */
+  --spacing-1_5: 0.375rem; /* 6px */
+  --spacing-2: 0.5rem; /* 8px */
+  --spacing-2_5: 0.625rem; /* 10px */
+  --spacing-3: 0.75rem; /* 12px */
+  --spacing-3_5: 0.875rem; /* 14px */
+  --spacing-4: 1rem; /* 16px */
+  --spacing-5: 1.25rem; /* 20px */
+  --spacing-6: 1.5rem; /* 24px */
+  --spacing-7: 1.75rem; /* 28px */
+  --spacing-8: 2rem; /* 32px */
+  --spacing-9: 2.25rem; /* 36px */
+  --spacing-10: 2.5rem; /* 40px */
+  --spacing-11: 2.75rem; /* 44px */
+  --spacing-12: 3rem; /* 48px */
+  --spacing-14: 3.5rem; /* 56px */
+  --spacing-16: 4rem; /* 64px */
+  --spacing-20: 5rem; /* 80px */
+  --spacing-24: 6rem; /* 96px */
+  --spacing-28: 7rem; /* 112px */
+  --spacing-32: 8rem; /* 128px */
+
+  /* Animation Durations */
+  --duration-75: 75ms;
+  --duration-100: 100ms;
+  --duration-150: 150ms;
+  --duration-200: 200ms;
+  --duration-300: 300ms;
+  --duration-500: 500ms;
+  --duration-700: 700ms;
+  --duration-1000: 1000ms;
+
+  /* Animation Easings */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@layer base {
+  :root {
+    /* Custom CSS Variables for Gradients and Legacy Support */
+    --gradient-primary: linear-gradient(135deg, oklch(60.5% 0.162 41), oklch(65.8% 0.148 43));
+    --gradient-hero: linear-gradient(135deg, oklch(26.8% 0.012 48), oklch(31.4% 0.011 52));
+    --gradient-card: linear-gradient(145deg, oklch(31.4% 0.011 52), oklch(35.2% 0.013 46));
+    --gradient-border: linear-gradient(
+      90deg,
+      transparent,
+      oklch(60.5% 0.162 41 / 0.2),
+      transparent
+    );
+
+    /* Legacy Shadow Variables */
+    --shadow-glow: 0 0 20px oklch(60.5% 0.162 41 / 0.1);
+    --shadow-orange: 0 0 20px oklch(60.5% 0.162 41 / 0.3);
+
+    /* Legacy Animation Variables */
+    --transition-fast: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Legacy Font Variables */
+    --font-mono: "JetBrains Mono", "SF Mono", Consolas, "Monaco", monospace;
+  }
+
+  /* Base Dark Mode Styles */
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
+    font-family: "Inter", system-ui, sans-serif;
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  code {
+    @apply text-sm;
+    font-family: var(--font-mono);
+    background: var(--color-bg-code);
+    color: var(--color-text-secondary);
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+  }
+}
+
+/* Utility Classes */
+@layer utilities {
+  /* Background Utilities */
+  .bg-primary {
+    background-color: var(--color-bg-primary);
+  }
+  .bg-secondary {
+    background-color: var(--color-bg-secondary);
+  }
+  .bg-tertiary {
+    background-color: var(--color-bg-tertiary);
+  }
+  .bg-quaternary {
+    background-color: var(--color-bg-quaternary);
+  }
+  .bg-selected {
+    background-color: var(--color-bg-selected);
+  }
+  .bg-code {
+    background-color: var(--color-bg-code);
+  }
+
+  /* Text Color Utilities */
+  .text-primary {
+    color: var(--color-text-primary);
+  }
+  .text-secondary {
+    color: var(--color-text-secondary);
+  }
+  .text-tertiary {
+    color: var(--color-text-tertiary);
+  }
+  .text-disabled {
+    color: var(--color-text-disabled);
+  }
+  .text-inverse {
+    color: var(--color-text-inverse);
+  }
+
+  /* Accent Color Utilities */
+  .text-accent {
+    color: var(--color-accent);
+  }
+  .text-accent-hover {
+    color: var(--color-accent-hover);
+  }
+  .text-accent-light {
+    color: var(--color-accent-light);
+  }
+  .bg-accent {
+    background-color: var(--color-accent);
+  }
+  .bg-accent-hover {
+    background-color: var(--color-accent-hover);
+  }
+  .bg-accent-subtle {
+    background-color: var(--color-accent-subtle);
+  }
+
+  /* Border Utilities */
+  .border-default {
+    border-color: var(--color-border-default);
+  }
+  .border-light {
+    border-color: var(--color-border-light);
+  }
+  .border-medium {
+    border-color: var(--color-border-medium);
+  }
+  .border-strong {
+    border-color: var(--color-border-strong);
+  }
+
+  /* Semantic Color Utilities */
+  .text-success {
+    color: var(--color-success);
+  }
+  .text-warning {
+    color: var(--color-warning);
+  }
+  .text-error {
+    color: var(--color-error);
+  }
+  .text-info {
+    color: var(--color-info);
+  }
+
+  .bg-success {
+    background-color: var(--color-success-bg);
+  }
+  .bg-warning {
+    background-color: var(--color-warning-bg);
+  }
+  .bg-error {
+    background-color: var(--color-error-bg);
+  }
+  .bg-info {
+    background-color: var(--color-info-bg);
+  }
+
+  .border-success {
+    border-color: var(--color-success-border);
+  }
+  .border-warning {
+    border-color: var(--color-warning-border);
+  }
+  .border-error {
+    border-color: var(--color-error-border);
+  }
+  .border-info {
+    border-color: var(--color-info-border);
+  }
+
+  /* Transition Utilities */
+  .transition-smooth {
+    transition: var(--transition-normal);
+  }
+
+  .transition-fast {
+    transition: var(--transition-fast);
+  }
+
+  .transition-slow {
+    transition: var(--transition-slow);
+  }
+}
+
+/* Component Classes */
+@layer components {
+  /* Hero Section with Claude Orange Gradient */
+  .hero-gradient {
+    background: var(--gradient-hero);
+  }
+
+  /* Card styling with warm charcoal background */
+  .card-gradient {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    transition: var(--transition-normal);
+  }
+
+  .card-gradient:hover {
+    background: var(--color-bg-tertiary);
+    border-color: color-mix(in oklch, var(--color-primary), transparent 70%);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Claude orange glow effects */
+  .glow-effect {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .orange-glow {
+    box-shadow: var(--shadow-orange);
+  }
+
+  /* Claude Card */
+  .claude-card {
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--duration-200) var(--ease-in-out);
+  }
+
+  .claude-card:hover {
+    background-color: var(--color-bg-tertiary);
+    border-color: var(--color-border-medium);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  /* Claude Buttons */
+  .claude-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-2) var(--spacing-4);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-md);
+    transition: all var(--duration-150) var(--ease-in-out);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .claude-btn-primary {
+    background-color: var(--color-accent);
+    color: white;
+    border: 1px solid var(--color-accent);
+  }
+
+  .claude-btn-primary:hover {
+    background-color: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  .claude-btn-primary:active {
+    background-color: var(--color-accent-active);
+    transform: translateY(0);
+  }
+
+  .claude-btn-primary:focus-visible {
+    outline: none;
+    box-shadow: var(--ring-accent);
+  }
+
+  .claude-btn-secondary {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border-default);
+  }
+
+  .claude-btn-secondary:hover {
+    background-color: var(--color-bg-quaternary);
+    border-color: var(--color-border-medium);
+  }
+
+  .claude-btn-ghost {
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    border: 1px solid transparent;
+  }
+
+  .claude-btn-ghost:hover {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+  }
+
+  /* Claude Input */
+  .claude-input {
+    width: 100%;
+    padding: var(--spacing-2) var(--spacing-3);
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    transition: all var(--duration-150) var(--ease-in-out);
+  }
+
+  .claude-input:hover {
+    border-color: var(--color-border-medium);
+  }
+
+  .claude-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: var(--ring-accent);
+  }
+
+  .claude-input::placeholder {
+    color: var(--color-text-tertiary);
+  }
+
+  .claude-input:disabled {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-disabled);
+    cursor: not-allowed;
+  }
+
+  /* Claude Badge */
+  .claude-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-0_5) var(--spacing-2);
+    background-color: var(--color-accent-subtle);
+    color: var(--color-accent-light);
+    border: 1px solid var(--color-accent-muted);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  /* Claude Link */
+  .claude-link {
+    color: var(--color-accent);
+    text-decoration: none;
+    transition: all var(--duration-150) var(--ease-in-out);
+    text-underline-offset: 2px;
+  }
+
+  .claude-link:hover {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+  }
+
+  .claude-link:active {
+    color: var(--color-accent-active);
+  }
+
+  /* Claude Code Block */
+  .claude-code {
+    display: block;
+    padding: var(--spacing-4);
+    background-color: var(--color-bg-code);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    line-height: var(--leading-relaxed);
+    overflow-x: auto;
+    color: var(--color-text-secondary);
+  }
+
+  .claude-code-inline {
+    padding: var(--spacing-0_5) var(--spacing-1);
+    background-color: var(--color-bg-code);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-xs);
+    font-family: var(--font-family-mono);
+    font-size: 0.875em;
+    color: var(--color-accent-light);
+  }
+
+  /* Claude Navigation */
+  .claude-nav-item {
+    padding: var(--spacing-2) var(--spacing-3);
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-md);
+    transition: all var(--duration-150) var(--ease-in-out);
+    cursor: pointer;
+  }
+
+  .claude-nav-item:hover {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+  }
+
+  .claude-nav-item.active {
+    background-color: var(--color-accent-subtle);
+    color: var(--color-accent);
+    font-weight: var(--font-weight-medium);
+  }
+
+  /* Claude Divider */
+  .claude-divider {
+    height: 1px;
+    background-color: var(--color-border-default);
+    margin: var(--spacing-4) 0;
+  }
+
+  /* Claude List Item */
+  .claude-list-item {
+    padding: var(--spacing-3) var(--spacing-4);
+    border-bottom: 1px solid var(--color-border-light);
+    transition: background-color var(--duration-150) var(--ease-in-out);
+  }
+
+  .claude-list-item:hover {
+    background-color: var(--color-bg-tertiary);
+  }
+
+  .claude-list-item:last-child {
+    border-bottom: none;
+  }
+
+  .claude-list-item.selected {
+    background-color: var(--color-bg-selected);
+    border-left: 2px solid var(--color-accent);
+    padding-left: calc(var(--spacing-4) - 2px);
+  }
+
+  /* Animations */
+  .animate-fade-in {
+    animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hover-lift {
+    transition: var(--transition-normal);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Navigation styling */
+  .nav-backdrop {
+    background: color-mix(in oklch, var(--color-background), transparent 5%);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .nav-link {
+    color: var(--color-secondary-foreground);
+    transition: var(--transition-normal);
+  }
+
+  .nav-link:hover {
+    color: var(--color-foreground);
+  }
+
+  .nav-link.active {
+    color: var(--color-primary);
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-accent {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Animation Utilities */
+.animate-fade-in {
+  animation: fadeIn var(--duration-200) var(--ease-out) both;
+}
+
+.animate-slide-up {
+  animation: slideUp var(--duration-300) var(--ease-out) both;
+}
+
+.animate-scale-in {
+  animation: scale-in var(--duration-200) var(--ease-out) both;
+}
+
+.animate-pulse {
+  animation: pulse-accent var(--duration-1000) var(--ease-in-out) infinite;
+}

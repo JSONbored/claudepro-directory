@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js 20
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Generate content files
+      run: npm run build:content
+
+    - name: Run type check
+      run: npm run type-check
+
+    - name: Build project
+      run: npm run build
+
+    - name: Check bundle size
+      run: |
+        echo "Checking bundle sizes..."
+        for file in dist/assets/*.js; do
+          size=$(du -h "$file" | cut -f1)
+          echo "$file: $size"
+          # Fail if any chunk is over 500KB
+          if [ $(du -k "$file" | cut -f1) -gt 500 ]; then
+            echo "ERROR: $file exceeds 500KB limit"
+            exit 1
+          fi
+        done

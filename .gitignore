@@ -1,3 +1,12 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+dist-ssr
+.next
+out
+
 # Logs
 logs
 *.log
@@ -7,18 +16,45 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# OS files
+.DS_Store
+
+# Deployment
+.vercel
+
+# Project specific
+.claude/
+src/generated/
+generated/
+
+# Cache files
+.eslintcache
+*.tsbuildinfo
+coverage/
+.parcel-cache/
+.turbo/
+.temp/
+
+# Environment files
+.env*
+!.env.example
+
+# Backup files
+*.orig
+*.bak
+
+# Build analysis
+stats.html
+
+# System files
+Thumbs.db

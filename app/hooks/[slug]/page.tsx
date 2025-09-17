@@ -1,0 +1,63 @@
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { ContentDetailPage } from '@/components/content-detail-page';
+import { getHookBySlug, getHookFullContent, hooks } from '@/generated/content';
+
+interface HookPageProps {
+  params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: HookPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const hook = getHookBySlug(slug);
+
+  if (!hook) {
+    return {
+      title: 'Hook Not Found',
+      description: 'The requested automation hook could not be found.',
+    };
+  }
+
+  return {
+    title: `${hook.title || hook.name} - Automation Hook | Claude Pro Directory`,
+    description: hook.description,
+    keywords: hook.tags?.join(', '),
+    openGraph: {
+      title: hook.title || hook.name || 'Automation Hook',
+      description: hook.description,
+      type: 'article',
+    },
+  };
+}
+
+export async function generateStaticParams() {
+  return hooks.map((hook) => ({
+    slug: hook.slug,
+  }));
+}
+
+export default async function HookPage({ params }: HookPageProps) {
+  const { slug } = await params;
+  const hookMeta = getHookBySlug(slug);
+
+  if (!hookMeta) {
+    notFound();
+  }
+
+  // Load full content
+  const fullHook = await getHookFullContent(slug);
+
+  const relatedHooks = hooks
+    .filter((h) => h.id !== hookMeta.id && h.category === hookMeta.category)
+    .slice(0, 3);
+
+  return (
+    <ContentDetailPage
+      item={fullHook || hookMeta}
+      type="hooks"
+      icon="webhook"
+      typeName="Hook"
+      relatedItems={relatedHooks}
+    />
+  );
+}
