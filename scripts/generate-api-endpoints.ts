@@ -125,11 +125,3 @@ const textSitemap = [
 ].join('\n');
 
 fs.writeFileSync(path.join(publicDir, 'sitemap.txt'), textSitemap);
-
-console.log('✅ Generated API endpoints for AI crawlers');
-console.log(`   - ${agents.length} agents`);
-console.log(`   - ${mcp.length} MCP servers`);
-console.log(`   - ${rules.length} rules`);
-console.log(`   - ${commands.length} commands`);
-console.log(`   - ${hooks.length} hooks`);
-console.log('✅ Created text sitemap for AI agents');

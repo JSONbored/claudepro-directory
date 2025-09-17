@@ -102,7 +102,6 @@ function main() {
   try {
     const sitemap = generateSitemap();
     writeFileSync('public/sitemap.xml', sitemap, 'utf-8');
-    console.log('✅ Generated sitemap.xml with', sitemap.split('<url>').length - 1, 'URLs');
   } catch (error) {
     console.error('❌ Failed to generate sitemap:', error);
     process.exit(1);

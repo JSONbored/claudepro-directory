@@ -12,7 +12,7 @@ export default function Icon() {
   return new ImageResponse(
     <div
       style={{
-        background: '#CC785C',  // Exact Claude icon color
+        background: '#CC785C', // Exact Claude icon color
         width: '100%',
         height: '100%',
         display: 'flex',
@@ -22,13 +22,7 @@ export default function Icon() {
       }}
     >
       {/* Asterisk-like star shape similar to Claude */}
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        style={{ display: 'block' }}
-      >
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ display: 'block' }}>
         {/* 8-pointed star/asterisk shape */}
         <path
           d="M12 2 L12 8 M12 16 L12 22 M4 12 L8 12 M16 12 L20 12 M6.5 6.5 L9 9 M15 15 L17.5 17.5 M17.5 6.5 L15 9 M9 15 L6.5 17.5"
