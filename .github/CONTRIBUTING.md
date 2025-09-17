@@ -4,10 +4,43 @@ Thank you for your interest in contributing to ClaudePro Directory! This guide w
 
 ## 📋 Quick Start
 
-1. **Fork & Clone** the repository
-2. **Add your content** as a JSON file
-3. **Test locally** with `npm run dev`
-4. **Submit a PR** with your addition
+1. **Fork** the repository to your GitHub account
+2. **Clone** your fork locally
+3. **Create a feature branch** from `dev` branch
+4. **Add your content** as a JSON file
+5. **Test locally** with `npm run dev`
+6. **Submit a PR** targeting our `dev` branch
+
+## 🔄 Development Workflow
+
+### Branch Structure
+- `main` - Production branch (stable releases)
+- `dev` - Development branch (integration branch for new features)
+- Feature branches - Your contributions
+
+### Contribution Process
+1. Fork the repository
+2. Clone your fork:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/claudepro-directory.git
+   cd claudepro-directory
+   ```
+3. Create a feature branch from `dev`:
+   ```bash
+   git checkout dev
+   git pull upstream dev  # If you've set up upstream
+   git checkout -b feature/your-feature-name
+   ```
+4. Make your changes
+5. Commit with clear messages:
+   ```bash
+   git commit -m "Add [Type]: Brief description"
+   ```
+6. Push to your fork:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+7. Open a Pull Request targeting our `dev` branch (not `main`!)
 
 ## 🎯 Content Types We Accept
 
