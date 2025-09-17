@@ -1,0 +1,27 @@
+{
+  "title": "Filesystem MCP Server",
+  "description": "Provides secure file system operations allowing Claude to read, write, and manage files with proper permissions",
+  "category": "mcp",
+  "author": "anthropic",
+  "dateAdded": "2025-09-15",
+  "tags": [
+    "filesystem",
+    "files",
+    "directories",
+    "io",
+    "storage"
+  ],
+  "content": "The Filesystem MCP Server enables Claude to interact with your local file system securely.\n\n## Features\n\n### File Operations\n- **Read Files**: Read text and binary files\n- **Write Files**: Create and update files\n- **Delete Files**: Remove files safely\n- **Move/Rename**: Relocate or rename files\n- **Copy Files**: Duplicate files and directories\n\n### Directory Management\n- **List Contents**: Browse directory structures\n- **Create Directories**: Make new folders\n- **Remove Directories**: Delete empty or full directories\n- **Tree View**: Hierarchical directory listing\n\n### Advanced Features\n- **Glob Patterns**: Search files using wildcards\n- **File Metadata**: Get size, permissions, timestamps\n- **Symlinks**: Create and manage symbolic links\n- **Watch Files**: Monitor file changes in real-time\n\n## Installation\n\n```bash\n# Using npm\nnpm install -g @modelcontextprotocol/server-filesystem\n\n# Add to Claude Code\nclaude mcp add filesystem npx -y @modelcontextprotocol/server-filesystem /path/to/allowed/directory\n```\n\n## Configuration\n\n```json\n{\n  \"mcpServers\": {\n    \"filesystem\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@modelcontextprotocol/server-filesystem\", \"/home/user/projects\"],\n      \"env\": {\n        \"FILESYSTEM_READ_ONLY\": \"false\",\n        \"FILESYSTEM_HIDDEN_FILES\": \"true\"\n      }\n    }\n  }\n}\n```\n\n## Security Considerations\n\n- Restrict access to specific directories\n- Consider read-only mode for sensitive areas\n- Use permission rules to control operations\n- Audit file operations with hooks\n\n## Usage Examples\n\n```\n# List files\n> \"Show me all Python files in the src directory\"\n\n# Read file\n> \"Read the contents of config.json\"\n\n# Create file\n> \"Create a new README.md with project documentation\"\n\n# Search files\n> \"Find all files containing 'TODO' comments\"\n```",
+  "configuration": {
+    "requiresAuth": false,
+    "permissions": [
+      "read",
+      "write",
+      "delete"
+    ],
+    "defaultPath": "~/projects"
+  },
+  "githubUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
+  "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code/mcp",
+  "source": "community"
+}
