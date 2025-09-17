@@ -3,16 +3,14 @@
 import * as Icons from 'lucide-react';
 import { ExternalLink, type LucideIcon, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ConfigCard } from '@/components/config-card';
 import { FilterBar } from '@/components/filter-bar';
 import { SearchBar } from '@/components/search-bar';
 import { SortDropdown } from '@/components/sort-dropdown';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { VirtualGrid } from '@/components/virtual-grid';
 import { useFilters } from '@/hooks/use-filters';
-import { useContainerWidth, useResponsiveGrid } from '@/hooks/use-responsive-grid';
 import { useSorting } from '@/hooks/use-sorting';
 import type { ContentCategory, ContentMetadata } from '@/types/content';
 
@@ -50,25 +48,27 @@ export function ContentListPage<T extends ContentMetadata>({
   badges = [],
 }: ContentListPageProps<T>) {
   const [searchResults, setSearchResults] = useState<T[]>(items);
+  const [displayCount, setDisplayCount] = useState(12);
   const { filters, updateFilter, resetFilters, applyFilters } = useFilters();
   const { sortBy, sortDirection, updateSort, sortItems } = useSorting();
 
-  const containerRef = useRef<HTMLDivElement>(null!);
-  const containerWidth = useContainerWidth(containerRef);
-
   const handleSearchResults = (results: T[]) => {
     setSearchResults(results);
+    setDisplayCount(12); // Reset display count on new search
   };
 
   const processedItems = sortItems(applyFilters(searchResults));
-  const useVirtualScrolling = processedItems.length > 20;
+  const displayedItems = processedItems.slice(0, displayCount);
+  const hasMore = displayCount < processedItems.length;
+  const remainingCount = processedItems.length - displayCount;
 
-  const { itemsPerRow, containerHeight } = useResponsiveGrid(processedItems.length, {
-    containerWidth,
-    minItemWidth: 320,
-    maxItemWidth: 450,
-    itemHeight: 280,
-  });
+  const loadMore = useCallback(() => {
+    setDisplayCount((prev) => Math.min(prev + 12, processedItems.length));
+  }, [processedItems.length]);
+
+  const loadAll = useCallback(() => {
+    setDisplayCount(processedItems.length);
+  }, [processedItems.length]);
 
   // Extract unique values for filters
   const categories = [...new Set(items.map((item) => item.category))].filter(Boolean);
@@ -166,24 +166,36 @@ export function ContentListPage<T extends ContentMetadata>({
 
           {/* Results */}
           {processedItems.length > 0 ? (
-            <div ref={containerRef}>
-              {useVirtualScrolling ? (
-                <VirtualGrid
-                  items={processedItems}
-                  width={containerWidth}
-                  height={Math.min(containerHeight, 800)}
-                  itemsPerRow={itemsPerRow}
-                  itemHeight={280}
-                  type={type}
-                />
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {processedItems.map((item) => (
-                    <ConfigCard key={item.id} {...item} type={type} />
-                  ))}
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {displayedItems.map((item) => (
+                  <ConfigCard key={item.id} {...item} type={type} />
+                ))}
+              </div>
+
+              {hasMore && (
+                <div className="flex flex-col items-center gap-4 pt-8">
+                  <div className="text-sm text-muted-foreground">
+                    Showing {displayCount} of {processedItems.length} items
+                  </div>
+                  <div className="flex gap-4">
+                    <Button
+                      onClick={loadMore}
+                      variant="outline"
+                      size="lg"
+                      className="min-w-[200px]"
+                    >
+                      Load {Math.min(12, remainingCount)} More
+                    </Button>
+                    {remainingCount > 12 && (
+                      <Button onClick={loadAll} variant="ghost" size="lg">
+                        Show All ({remainingCount})
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
-            </div>
+            </>
           ) : (
             <div className="text-center py-12">
               {(() => {

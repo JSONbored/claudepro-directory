@@ -61,3 +61,5 @@ export default async function MCPPage({ params }: MCPPageProps) {
     />
   );
 }
+// Enable ISR - revalidate every hour
+export const revalidate = 3600;

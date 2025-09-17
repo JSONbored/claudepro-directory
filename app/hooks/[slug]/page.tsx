@@ -61,3 +61,5 @@ export default async function HookPage({ params }: HookPageProps) {
     />
   );
 }
+// Enable ISR - revalidate every hour
+export const revalidate = 3600;

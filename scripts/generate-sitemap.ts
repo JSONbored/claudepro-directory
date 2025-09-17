@@ -1,11 +1,7 @@
 import { readFileSync, writeFileSync } from 'fs';
 
-const baseUrl =
-  process.env.VERCEL_ENV === 'production'
-    ? 'https://claudepro.directory'
-    : process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'https://dev.claudepro.directory';
+// Always use production URL for sitemap
+const baseUrl = 'https://claudepro.directory';
 
 interface SitemapUrl {
   loc: string;
@@ -102,7 +98,6 @@ function main() {
   try {
     const sitemap = generateSitemap();
     writeFileSync('public/sitemap.xml', sitemap, 'utf-8');
-    console.log('✅ Generated sitemap.xml with', sitemap.split('<url>').length - 1, 'URLs');
   } catch (error) {
     console.error('❌ Failed to generate sitemap:', error);
     process.exit(1);

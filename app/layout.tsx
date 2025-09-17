@@ -4,7 +4,9 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { Toaster } from 'sonner';
+import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Navigation } from '@/components/navigation';
+import { StructuredData } from '@/components/structured-data';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -56,10 +58,19 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
+        <StructuredData type="website" />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md"
+          >
+            Skip to main content
+          </a>
           <div className="min-h-screen bg-background">
             <Navigation />
-            <main>{children}</main>
+            <Breadcrumbs />
+            {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
+            <main id="main-content">{children}</main>
           </div>
           <Toaster />
         </ThemeProvider>
