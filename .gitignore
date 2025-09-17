@@ -4,6 +4,8 @@ node_modules
 # Build outputs
 dist
 dist-ssr
+.next
+out
 
 # Logs
 logs
@@ -32,3 +34,27 @@ lerna-debug.log*
 
 # Project specific
 .claude/
+src/generated/
+generated/
+
+# Cache files
+.eslintcache
+*.tsbuildinfo
+coverage/
+.parcel-cache/
+.turbo/
+.temp/
+
+# Environment files
+.env*
+!.env.example
+
+# Backup files
+*.orig
+*.bak
+
+# Build analysis
+stats.html
+
+# System files
+Thumbs.db

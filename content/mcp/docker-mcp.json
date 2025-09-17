@@ -1,0 +1,28 @@
+{
+  "title": "Docker MCP Server",
+  "description": "Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration",
+  "category": "mcp",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-16",
+  "tags": [
+    "docker",
+    "containers",
+    "devops",
+    "orchestration",
+    "deployment"
+  ],
+  "content": "The Docker MCP Server provides Claude with complete Docker management capabilities. Features include:\n\n## Core Capabilities\n\n### Container Management\n- List, start, stop, and restart containers\n- Create containers from images with custom configurations\n- Execute commands inside running containers\n- Stream container logs in real-time\n- Monitor container resource usage (CPU, memory, network)\n- Manage container networks and volumes\n\n### Image Operations\n- Pull, build, and push Docker images\n- List and inspect image details\n- Tag and remove images\n- Build images from Dockerfiles\n- Multi-stage build support\n- Image layer analysis and optimization\n\n### Docker Compose Integration\n- Manage multi-container applications\n- Start, stop, and restart compose services\n- Scale services up or down\n- View service logs and status\n- Update service configurations\n- Handle environment-specific overrides\n\n### Volume & Network Management\n- Create, list, and remove volumes\n- Mount volumes to containers\n- Backup and restore volume data\n- Create custom networks\n- Connect containers to networks\n- Inspect network configurations\n\n### Registry Operations\n- Push and pull from Docker registries\n- Manage registry authentication\n- Search for images in registries\n- Handle private registry operations\n- Image vulnerability scanning\n\n## Installation\n\n```bash\nnpm install @docker/mcp-server\n```\n\n## Configuration\n\n```json\n{\n  \"mcpServers\": {\n    \"docker\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@docker/mcp-server\"],\n      \"env\": {\n        \"DOCKER_HOST\": \"unix:///var/run/docker.sock\",\n        \"DOCKER_API_VERSION\": \"1.43\"\n      }\n    }\n  }\n}\n```\n\n## Environment Variables\n\n```bash\n# Docker daemon connection\nDOCKER_HOST=unix:///var/run/docker.sock\n# For remote Docker\nDOCKER_HOST=tcp://remote-docker:2376\nDOCKER_TLS_VERIFY=1\nDOCKER_CERT_PATH=/path/to/certs\n\n# API version\nDOCKER_API_VERSION=1.43\n\n# Registry credentials\nDOCKER_REGISTRY_USER=myuser\nDOCKER_REGISTRY_PASSWORD=mypass\n```\n\n## Security Features\n- Secure Docker daemon communication\n- TLS certificate validation\n- Registry authentication management\n- Container security scanning\n- Resource limit enforcement\n- Network isolation controls\n\n## Usage Examples\n\n### Container Operations\n```bash\n# Run a new container\ndocker run -d --name web-server -p 8080:80 nginx:latest\n\n# Execute command in container\ndocker exec -it web-server bash\n\n# View container logs\ndocker logs -f web-server\n```\n\n### Image Building\n```dockerfile\n# Multi-stage Dockerfile example\nFROM node:18-alpine AS builder\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci --only=production\n\nFROM node:18-alpine AS runtime\nWORKDIR /app\nCOPY --from=builder /app/node_modules ./node_modules\nCOPY . .\nEXPOSE 3000\nCMD [\"npm\", \"start\"]\n```\n\n### Docker Compose\n```yaml\nversion: '3.8'\nservices:\n  web:\n    build: .\n    ports:\n      - \"3000:3000\"\n    environment:\n      - NODE_ENV=production\n    depends_on:\n      - db\n  \n  db:\n    image: postgres:15\n    environment:\n      - POSTGRES_DB=myapp\n      - POSTGRES_USER=user\n      - POSTGRES_PASSWORD=pass\n    volumes:\n      - postgres_data:/var/lib/postgresql/data\n\nvolumes:\n  postgres_data:\n```\n\n## Monitoring & Debugging\n- Real-time container metrics\n- Log aggregation and analysis\n- Health check monitoring\n- Performance profiling\n- Resource usage alerts\n- Container lifecycle events\n\n## Advanced Features\n- Docker Swarm service management\n- Multi-architecture image building\n- BuildKit advanced features\n- Container scanning and compliance\n- Automated cleanup and optimization\n- Integration with CI/CD pipelines",
+  "configuration": {
+    "requiresAuth": false,
+    "permissions": [
+      "containers",
+      "images",
+      "volumes",
+      "networks"
+    ],
+    "dockerVersion": ">=20.10.0"
+  },
+  "githubUrl": "https://github.com/docker/docker-mcp",
+  "documentationUrl": "https://docs.docker.com/engine/api/",
+  "source": "community"
+}
