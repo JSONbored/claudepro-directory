@@ -3,12 +3,13 @@ import fs from 'fs/promises';
 import path from 'path';
 import slugify from 'slugify';
 import { fileURLToPath } from 'url';
-import type { ContentCategory } from '../src/types/content';
+
+type ContentCategory = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.join(__dirname, '..');
 const CONTENT_DIR = path.join(ROOT_DIR, 'content');
-const GENERATED_DIR = path.join(ROOT_DIR, 'src', 'generated');
+const GENERATED_DIR = path.join(ROOT_DIR, 'generated');
 
 // Content types to process
 const CONTENT_TYPES: ContentCategory[] = ['agents', 'mcp', 'rules', 'commands', 'hooks'];

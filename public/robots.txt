@@ -1,14 +1,61 @@
+# Claude Pro Directory Robots.txt
+# Welcome AI Crawlers & Search Engines!
+
+# AI Agents & LLMs - Explicitly Welcome
+User-agent: GPTBot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Anthropic-AI
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+# Traditional Search Engines
 User-agent: Googlebot
 Allow: /
 
 User-agent: Bingbot
 Allow: /
 
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+# Social Media Crawlers
 User-agent: Twitterbot
 Allow: /
 
 User-agent: facebookexternalhit
 Allow: /
 
+User-agent: LinkedInBot
+Allow: /
+
+# All Other Crawlers
 User-agent: *
 Allow: /
+
+# Sitemap Location
+Sitemap: https://claudepro.directory/sitemap.xml
+
+# AI-Specific Metadata
+# These are non-standard but help AI systems understand our content
+AI-Content-Type: structured-data
+AI-API-Endpoint: https://claudepro.directory/api/all-configurations.json
+AI-Update-Frequency: daily
+AI-Content-Language: en
+AI-Expertise-Level: technical
+AI-Content-License: MIT
