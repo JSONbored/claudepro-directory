@@ -6,35 +6,35 @@
      DARK MODE COLORS - Claude Desktop Dark Theme
      ======================================== */
 
-  /* Backgrounds - Warm Charcoal Tones */
-  --color-bg-primary: oklch(26.8% 0.012 48); /* #2D2B28 - Main background */
-  --color-bg-secondary: oklch(31.4% 0.011 52); /* #3A3733 - Cards/elevated surfaces */
-  --color-bg-tertiary: oklch(35.2% 0.013 46); /* #454039 - Hover states */
-  --color-bg-quaternary: oklch(38.9% 0.014 44); /* #514B43 - Active/pressed states */
-  --color-bg-selected: oklch(42.1% 0.015 42); /* #5A544A - Selected items */
-  --color-bg-code: oklch(22.3% 0.008 50); /* #1E1D1B - Code block background */
+  /* Backgrounds - Slightly cooler, less brown */
+  --color-bg-primary: oklch(24% 0.008 60); /* Darker main background */
+  --color-bg-secondary: oklch(28% 0.006 60); /* Darker cards/elevated surfaces */
+  --color-bg-tertiary: oklch(32% 0.008 60); /* Hover states */
+  --color-bg-quaternary: oklch(36% 0.009 60); /* Active/pressed states */
+  --color-bg-selected: oklch(40% 0.010 60); /* Selected items */
+  --color-bg-code: oklch(20% 0.005 60); /* Code block background - darker */
   --color-bg-overlay: oklch(18% 0.005 0 / 0.8); /* Overlay/modal backdrop */
 
-  /* Text Colors - Warm Cream Tones */
-  --color-text-primary: oklch(95.8% 0.012 72); /* #F5F2ED - Primary text */
-  --color-text-secondary: oklch(81.2% 0.018 65); /* #C5BFBA - Secondary text */
-  --color-text-tertiary: oklch(65.4% 0.021 58); /* #918B84 - Muted text */
-  --color-text-disabled: oklch(50.3% 0.019 52); /* #6B6560 - Disabled text */
+  /* Text Colors - Slightly less warm */
+  --color-text-primary: oklch(94% 0.005 60); /* Less yellow primary text */
+  --color-text-secondary: oklch(78% 0.008 60); /* Cooler gray secondary text */
+  --color-text-tertiary: oklch(62% 0.010 60); /* Muted text */
+  --color-text-disabled: oklch(48% 0.012 60); /* Disabled text */
   --color-text-inverse: oklch(23.5% 0.016 56); /* #1F1917 - Text on light backgrounds */
 
   /* Claude Brand Colors - Warm Orange */
-  --color-accent: oklch(60.5% 0.162 41); /* #DC6F44 - Primary Claude orange */
-  --color-accent-hover: oklch(65.8% 0.148 43); /* #E58559 - Hover state */
-  --color-accent-active: oklch(55.2% 0.168 39); /* #C85A35 - Active/pressed */
+  --color-accent: oklch(62% 0.155 42); /* Slightly lighter Claude orange */
+  --color-accent-hover: oklch(66% 0.145 42); /* Hover state */
+  --color-accent-active: oklch(57% 0.160 42); /* Active/pressed */
   --color-accent-light: oklch(70.3% 0.135 45); /* #F09770 - Light variant */
   --color-accent-muted: oklch(48.9% 0.142 37); /* #A85A3C - Muted variant */
   --color-accent-subtle: oklch(33.6% 0.045 35); /* #3A2B24 - Very subtle background */
 
-  /* Borders - Subtle Definition */
-  --color-border-default: oklch(31.4% 0.011 52); /* #3A3733 - Default borders */
-  --color-border-light: oklch(28.7% 0.009 54); /* #33312E - Light borders */
-  --color-border-medium: oklch(35.2% 0.013 46); /* #454039 - Medium borders */
-  --color-border-strong: oklch(60.5% 0.162 41); /* #DC6F44 - Active/focus borders */
+  /* Borders - More subtle */
+  --color-border-default: oklch(30% 0.005 60 / 0.5); /* Default borders with transparency */
+  --color-border-light: oklch(28% 0.005 60 / 0.3); /* Light borders - more subtle */
+  --color-border-medium: oklch(34% 0.008 60 / 0.6); /* Medium borders */
+  --color-border-strong: oklch(62% 0.155 42); /* Active/focus borders */
 
   /* Semantic Colors */
   --color-success: oklch(64.5% 0.19 145); /* #46C271 - Success green */
@@ -54,39 +54,39 @@
   --color-info-border: oklch(65.4% 0.168 250 / 0.3);
 
   /* Legacy Tailwind color mappings for compatibility */
-  --color-background: oklch(26.8% 0.012 48); /* Maps to bg-primary */
-  --color-foreground: oklch(95.8% 0.012 72); /* Maps to text-primary */
-  --color-card: oklch(31.4% 0.011 52); /* Maps to bg-secondary */
-  --color-card-foreground: oklch(95.8% 0.012 72); /* Maps to text-primary */
-  --color-popover: oklch(31.4% 0.011 52); /* Maps to bg-secondary */
-  --color-popover-foreground: oklch(95.8% 0.012 72); /* Maps to text-primary */
-  --color-primary: oklch(60.5% 0.162 41); /* Claude orange - primary brand color */
-  --color-primary-foreground: oklch(95.8% 0.012 72); /* Text on primary */
-  --color-secondary: oklch(35.2% 0.013 46); /* Maps to bg-tertiary */
-  --color-secondary-foreground: oklch(81.2% 0.018 65); /* Maps to text-secondary */
-  --color-accent: oklch(60.5% 0.162 41); /* Claude orange for accent states */
-  --color-accent-foreground: oklch(95.8% 0.012 72); /* Text on accent backgrounds */
-  --color-muted: oklch(35.2% 0.013 46); /* Muted background */
-  --color-muted-foreground: oklch(65.4% 0.021 58); /* Maps to text-tertiary */
-  --color-border: oklch(31.4% 0.011 52); /* Maps to border-default */
-  --color-input: oklch(31.4% 0.011 52); /* Maps to bg-secondary */
-  --color-ring: oklch(60.5% 0.162 41); /* Focus ring color */
+  --color-background: oklch(24% 0.008 60); /* Maps to bg-primary */
+  --color-foreground: oklch(94% 0.005 60); /* Maps to text-primary */
+  --color-card: oklch(28% 0.006 60); /* Maps to bg-secondary */
+  --color-card-foreground: oklch(94% 0.005 60); /* Maps to text-primary */
+  --color-popover: oklch(28% 0.006 60); /* Maps to bg-secondary */
+  --color-popover-foreground: oklch(94% 0.005 60); /* Maps to text-primary */
+  --color-primary: oklch(62% 0.155 42); /* Claude orange - primary brand color */
+  --color-primary-foreground: oklch(94% 0.005 60); /* Text on primary */
+  --color-secondary: oklch(32% 0.008 60); /* Maps to bg-tertiary */
+  --color-secondary-foreground: oklch(78% 0.008 60); /* Maps to text-secondary */
+  --color-accent: oklch(62% 0.155 42); /* Claude orange for accent states */
+  --color-accent-foreground: oklch(94% 0.005 60); /* Text on accent backgrounds */
+  --color-muted: oklch(32% 0.008 60); /* Muted background */
+  --color-muted-foreground: oklch(62% 0.010 60); /* Maps to text-tertiary */
+  --color-border: oklch(30% 0.005 60 / 0.5); /* Maps to border-default */
+  --color-input: oklch(28% 0.006 60); /* Maps to bg-secondary */
+  --color-ring: oklch(62% 0.155 42); /* Focus ring color */
   --color-destructive: oklch(62.8% 0.195 25); /* Maps to error */
-  --color-destructive-foreground: oklch(95.8% 0.012 72); /* Maps to text-primary */
+  --color-destructive-foreground: oklch(94% 0.005 60); /* Maps to text-primary */
 
-  /* Shadows - Pure Black Base */
+  /* Shadows - Very Subtle (Claude-style) */
   --shadow-color: 0 0 0;
-  --shadow-xs: 0 1px 2px oklch(0% 0 0 / 0.05);
-  --shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.12), 0 1px 2px oklch(0% 0 0 / 0.08);
-  --shadow-md: 0 4px 6px oklch(0% 0 0 / 0.15), 0 2px 4px oklch(0% 0 0 / 0.08);
-  --shadow-lg: 0 10px 15px oklch(0% 0 0 / 0.2), 0 4px 6px oklch(0% 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px oklch(0% 0 0 / 0.25), 0 10px 10px oklch(0% 0 0 / 0.12);
-  --shadow-2xl: 0 25px 50px oklch(0% 0 0 / 0.35);
+  --shadow-xs: 0 1px 2px oklch(0% 0 0 / 0.02);
+  --shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.04);
+  --shadow-md: 0 2px 4px oklch(0% 0 0 / 0.06), 0 1px 2px oklch(0% 0 0 / 0.04);
+  --shadow-lg: 0 4px 6px oklch(0% 0 0 / 0.08), 0 2px 4px oklch(0% 0 0 / 0.05);
+  --shadow-xl: 0 8px 10px oklch(0% 0 0 / 0.10), 0 4px 6px oklch(0% 0 0 / 0.06);
+  --shadow-2xl: 0 12px 20px oklch(0% 0 0 / 0.15);
 
-  /* Focus Rings */
-  --ring-accent: 0 0 0 3px oklch(60.5% 0.162 41 / 0.3);
-  --ring-error: 0 0 0 3px oklch(62.8% 0.195 25 / 0.3);
-  --ring-success: 0 0 0 3px oklch(64.5% 0.19 145 / 0.3);
+  /* Focus Rings - Tighter */
+  --ring-accent: 0 0 0 2px oklch(62% 0.155 42 / 0.5);
+  --ring-error: 0 0 0 2px oklch(62.8% 0.195 25 / 0.5);
+  --ring-success: 0 0 0 2px oklch(64.5% 0.19 145 / 0.5);
 
   /* Typography */
   --font-family-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -184,19 +184,19 @@
 @layer base {
   :root {
     /* Custom CSS Variables for Gradients and Legacy Support */
-    --gradient-primary: linear-gradient(135deg, oklch(60.5% 0.162 41), oklch(65.8% 0.148 43));
-    --gradient-hero: linear-gradient(135deg, oklch(26.8% 0.012 48), oklch(31.4% 0.011 52));
-    --gradient-card: linear-gradient(145deg, oklch(31.4% 0.011 52), oklch(35.2% 0.013 46));
+    --gradient-primary: linear-gradient(135deg, oklch(62% 0.155 42), oklch(67% 0.140 44));
+    --gradient-hero: linear-gradient(135deg, oklch(24% 0.008 60), oklch(28% 0.006 60));
+    --gradient-card: linear-gradient(145deg, oklch(28% 0.006 60), oklch(32% 0.008 60));
     --gradient-border: linear-gradient(
       90deg,
       transparent,
-      oklch(60.5% 0.162 41 / 0.2),
+      oklch(62% 0.155 42 / 0.2),
       transparent
     );
 
     /* Legacy Shadow Variables */
-    --shadow-glow: 0 0 20px oklch(60.5% 0.162 41 / 0.1);
-    --shadow-orange: 0 0 20px oklch(60.5% 0.162 41 / 0.3);
+    --shadow-glow: 0 0 20px oklch(62% 0.155 42 / 0.1);
+    --shadow-orange: 0 0 20px oklch(62% 0.155 42 / 0.3);
 
     /* Legacy Animation Variables */
     --transition-fast: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -379,8 +379,8 @@
   .card-gradient:hover {
     background: var(--color-bg-tertiary);
     border-color: color-mix(in oklch, var(--color-primary), transparent 70%);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-sm); /* Keep shadow subtle */
+    /* No transform - Claude doesn't lift elements */
   }
 
   /* Claude orange glow effects */
@@ -404,8 +404,8 @@
   .claude-card:hover {
     background-color: var(--color-bg-tertiary);
     border-color: var(--color-border-medium);
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm); /* Keep shadow subtle */
+    /* No transform - Claude doesn't lift elements */
   }
 
   /* Claude Buttons */
@@ -431,13 +431,11 @@
   .claude-btn-primary:hover {
     background-color: var(--color-accent-hover);
     border-color: var(--color-accent-hover);
-    box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
+    box-shadow: 0 0 0 1px oklch(62% 0.155 42 / 0.2); /* Subtle glow instead of lift */
   }
 
   .claude-btn-primary:active {
     background-color: var(--color-accent-active);
-    transform: translateY(0);
   }
 
   .claude-btn-primary:focus-visible {
@@ -616,8 +614,7 @@
   }
 
   .hover-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-md); /* Subtle shadow only, no lift */
   }
 
   /* Navigation styling */
