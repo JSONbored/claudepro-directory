@@ -6,7 +6,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.3-61dafb)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-7.1-646cff)](https://vitejs.dev/)
-[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](.github/CONTRIBUTING.md)
 
 **The Ultimate Community-Driven Collection of Claude AI Configurations**
 
@@ -121,7 +121,14 @@ claudepro-directory/
 
 ## 🤝 Contributing
 
-We welcome contributions from the community! Here's how you can help:
+We welcome contributions from the community! This project follows a structured development workflow to ensure quality and stability.
+
+### Quick Contribution Steps
+
+1. **Fork** the repository
+2. **Create a feature branch** from the `dev` branch
+3. **Make your changes** and test locally
+4. **Submit a PR** targeting the `dev` branch (not `main`)
 
 ### Ways to Contribute
 
@@ -131,15 +138,14 @@ We welcome contributions from the community! Here's how you can help:
 - **Improve Documentation**: Help us improve our docs
 - **Code Contributions**: Submit pull requests with improvements
 
-### Contribution Guidelines
+### Important Notes
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+- All PRs must target the `dev` branch
+- The `main` branch is protected and only receives stable releases from `dev`
+- Content additions go in the `content/` directory
+- Run `npm run build:content` after adding new content
 
-Please ensure your code follows our style guidelines and passes all tests.
+For detailed contribution guidelines, please see our [Contributing Guide](.github/CONTRIBUTING.md).
 
 ## 📖 Documentation
 
