@@ -69,8 +69,7 @@ jobs:
           
           # Check date format (YYYY-MM-DD)
           date=$(jq -r '.dateAdded' "$file")
-          if ! echo "$date" | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}
- > /dev/null; then
+          if ! echo "$date" | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' > /dev/null; then
             echo "ERROR: Invalid date format in $file (should be YYYY-MM-DD)"
             exit 1
           fi
