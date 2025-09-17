@@ -1,18 +1,18 @@
 'use client';
 
-import { ExternalLink, Github, Menu } from 'lucide-react';
+import { ChevronDown, ExternalLink, Github, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from '@/components/ui/navigation-menu';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 interface NavLinkProps {
@@ -53,76 +53,69 @@ export const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <NavigationMenu className="hidden md:flex">
-            <NavigationMenuList className="space-x-6">
-              <NavigationMenuItem>
-                <NavLink href="/rules" isActive={isActive} onClick={() => setIsOpen(false)}>
-                  Rules
-                </NavLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavLink href="/mcp" isActive={isActive} onClick={() => setIsOpen(false)}>
-                  MCP
-                </NavLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavLink href="/agents" isActive={isActive} onClick={() => setIsOpen(false)}>
-                  Agents
-                </NavLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavLink href="/commands" isActive={isActive} onClick={() => setIsOpen(false)}>
-                  Commands
-                </NavLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavLink href="/hooks" isActive={isActive} onClick={() => setIsOpen(false)}>
-                  Hooks
-                </NavLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavLink href="/jobs" isActive={isActive} onClick={() => setIsOpen(false)}>
-                  Jobs
-                </NavLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavLink href="/trending" isActive={isActive} onClick={() => setIsOpen(false)}>
-                  Trending
-                </NavLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <NavigationMenuTrigger className="text-muted-foreground hover:text-accent">
-                  More
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <div className="grid gap-3 p-4 w-48">
-                    <NavLink
-                      href="/community"
-                      isActive={isActive}
-                      onClick={() => setIsOpen(false)}
-                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                    >
-                      <div>Community</div>
-                      <div className="text-xs text-muted-foreground">Join the Claude community</div>
-                    </NavLink>
+          <nav className="hidden md:flex items-center space-x-6">
+            <NavLink href="/rules" isActive={isActive} onClick={() => setIsOpen(false)}>
+              Rules
+            </NavLink>
+            <NavLink href="/mcp" isActive={isActive} onClick={() => setIsOpen(false)}>
+              MCP
+            </NavLink>
+            <NavLink href="/agents" isActive={isActive} onClick={() => setIsOpen(false)}>
+              Agents
+            </NavLink>
+            <NavLink href="/commands" isActive={isActive} onClick={() => setIsOpen(false)}>
+              Commands
+            </NavLink>
+            <NavLink href="/hooks" isActive={isActive} onClick={() => setIsOpen(false)}>
+              Hooks
+            </NavLink>
+            <NavLink href="/jobs" isActive={isActive} onClick={() => setIsOpen(false)}>
+              Jobs
+            </NavLink>
+            <NavLink href="/trending" isActive={isActive} onClick={() => setIsOpen(false)}>
+              Trending
+            </NavLink>
 
-                    <NavLink
-                      href="/submit"
-                      isActive={isActive}
-                      onClick={() => setIsOpen(false)}
-                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                    >
-                      <div>Submit Config</div>
-                      <div className="text-xs text-muted-foreground">Share your configurations</div>
-                    </NavLink>
-                  </div>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-accent"
+                >
+                  More
+                  <ChevronDown className="ml-1 h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link href="/community" className="flex flex-col items-start space-y-1 px-3 py-3">
+                    <div>Community</div>
+                    <div className="text-xs text-muted-foreground">Join the Claude community</div>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link href="/submit" className="flex flex-col items-start space-y-1 px-3 py-3">
+                    <div>Submit Config</div>
+                    <div className="text-xs text-muted-foreground">Share your configurations</div>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link href="/partner" className="flex flex-col items-start space-y-1 px-3 py-3">
+                    <div>Partner</div>
+                    <div className="text-xs text-muted-foreground">Post job listings & more</div>
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </nav>
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-3">
+            <ThemeToggle />
+
             <Button
               variant="ghost"
               size="sm"
@@ -232,6 +225,15 @@ export const Navigation = () => {
                       className="text-base"
                     >
                       Submit Config
+                    </NavLink>
+
+                    <NavLink
+                      href="/partner"
+                      isActive={isActive}
+                      onClick={() => setIsOpen(false)}
+                      className="text-base"
+                    >
+                      Partner
                     </NavLink>
                   </div>
 

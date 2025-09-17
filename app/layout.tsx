@@ -9,6 +9,7 @@ import { Navigation } from '@/components/navigation';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://claudepro.directory'),
   title: 'Claude Pro Directory - Community Configurations for Claude AI',
   description:
     'Discover and share the best Claude AI configurations, MCP servers, agents, rules, commands, and hooks. The ultimate community-driven directory for Claude Pro users.',
@@ -23,21 +24,12 @@ export const metadata: Metadata = {
     title: 'Claude Pro Directory - Community Configurations for Claude AI',
     description:
       'Explore 1000+ Claude configurations including agents, MCP servers, rules, commands, and hooks. Free and open source.',
-    images: [
-      {
-        url: 'https://claudepro.directory/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Claude Pro Directory',
-      },
-    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Claude Pro Directory - Community Configurations for Claude AI',
     description:
       'Explore 1000+ Claude configurations including agents, MCP servers, rules, commands, and hooks. Free and open source.',
-    images: ['https://claudepro.directory/og-image.png'],
     creator: '@JSONbored',
   },
   robots: {
