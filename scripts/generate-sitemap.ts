@@ -1,11 +1,7 @@
 import { readFileSync, writeFileSync } from 'fs';
 
-const baseUrl =
-  process.env.VERCEL_ENV === 'production'
-    ? 'https://claudepro.directory'
-    : process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'https://dev.claudepro.directory';
+// Always use production URL for sitemap
+const baseUrl = 'https://claudepro.directory';
 
 interface SitemapUrl {
   loc: string;
