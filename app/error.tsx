@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-export default function Error({
+export default function ErrorBoundary({
   error,
   reset,
 }: {
@@ -24,6 +24,7 @@ export default function Error({
           An unexpected error occurred. We've been notified and are working on a fix.
         </p>
         <button
+          type="button"
           onClick={reset}
           className="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 transition-colors"
         >

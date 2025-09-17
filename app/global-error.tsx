@@ -1,14 +1,14 @@
 'use client';
 
 export default function GlobalError({
-  error,
+  error: _error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
   return (
-    <html>
+    <html lang="en">
       <body>
         <div
           style={{
@@ -45,6 +45,7 @@ export default function GlobalError({
               A critical error occurred. Please refresh the page or try again later.
             </p>
             <button
+              type="button"
               onClick={reset}
               style={{
                 padding: '0.5rem 1rem',

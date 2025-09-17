@@ -1,0 +1,12 @@
+{
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./content/",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "functions": {
+    "app/api/*": {
+      "maxDuration": 30
+    }
+  }
+}
