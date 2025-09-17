@@ -4,6 +4,8 @@ node_modules
 # Build outputs
 dist
 dist-ssr
+.next
+out
 
 # Logs
 logs
@@ -33,6 +35,7 @@ lerna-debug.log*
 # Project specific
 .claude/
 src/generated/
+generated/
 
 # Cache files
 .eslintcache
