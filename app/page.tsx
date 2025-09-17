@@ -10,7 +10,7 @@ import { SortDropdown } from '@/components/sort-dropdown';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
-import { useFilters } from '@/hooks/use-filters';
+import { type FilterOptions, useFilters } from '@/hooks/use-filters';
 import { useSorting } from '@/hooks/use-sorting';
 import type { ContentItem } from '@/types/content';
 
@@ -375,7 +375,12 @@ export default function HomePage() {
             {/* Filters */}
             <FilterBar
               filters={filters}
-              onFilterChange={updateFilter}
+              onFilterChange={
+                updateFilter as <K extends keyof FilterOptions>(
+                  key: K,
+                  value: FilterOptions[K]
+                ) => void
+              }
               onResetFilters={resetFilters}
               availableCategories={availableCategories}
               availableTags={availableTags}
