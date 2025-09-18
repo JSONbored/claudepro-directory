@@ -38,7 +38,7 @@ export async function generateStaticParams() {
 }
 
 // Enable ISR - revalidate every hour
-export const revalidate = 3600;
+export const revalidate = 14400;
 
 export default async function AgentPage({ params }: AgentPageProps) {
   const { slug } = await params;

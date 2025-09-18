@@ -1,0 +1,73 @@
+# Development tools and configs (safe to exclude)
+.vscode/
+.idea/
+*.log
+.DS_Store
+.env.local
+.env.development
+
+# Documentation files (safe to exclude)
+README.md
+CONTRIBUTING.md
+CHANGELOG.md
+docs/
+
+# GitHub files (safe to exclude - not needed for build)
+.github/
+.gitignore
+
+# Test files (safe to exclude)
+__tests__/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+coverage/
+.nyc_output/
+
+# Build artifacts (Vercel generates these)
+.next/
+.turbo/
+out/
+dist/
+
+# Package manager files (Vercel uses package-lock.json)
+pnpm-lock.yaml
+yarn.lock
+.pnp
+.pnp.js
+
+# Temporary files (safe to exclude)
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Editor backup files (safe to exclude)
+*~
+*.swp
+*.swo
+*.bak
+
+# OS files (safe to exclude)
+Thumbs.db
+desktop.ini
+
+# DO NOT EXCLUDE - Required for build:
+# .git/ - needed for git diff command in build
+# content/ - needed by build-content.ts script
+# scripts/ - contains build scripts
+# assets/ - may contain images used in the app
+# generated/ - created during build
+# public/ - needed for static files
+# app/ - the actual application
+# components/ - React components
+# lib/ - utility functions
+# types/ - TypeScript types
+# styles/ - CSS files
+# package.json - build configuration
+# package-lock.json - dependency lock file
+# tsconfig.json - TypeScript config
+# next.config.js - Next.js config
+# tailwind.config.ts - Tailwind config
+# postcss.config.js - PostCSS config
