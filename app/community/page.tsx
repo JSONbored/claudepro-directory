@@ -27,9 +27,8 @@ export default function CommunityPage() {
             <h1 className="text-4xl md:text-6xl font-bold mb-6">Join the Claude Community</h1>
 
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              Connect with thousands of developers and AI enthusiasts building the future with
-              Claude. Share your configurations, learn from experts, and collaborate on exciting
-              projects.
+              Connect with developers and AI enthusiasts building with Claude. Share your
+              configurations, learn from the community, and contribute to our open-source directory.
             </p>
 
             <div className="flex flex-wrap gap-4 justify-center">
@@ -44,15 +43,14 @@ export default function CommunityPage() {
                 </a>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <a href="https://discord.gg/claude" target="_blank" rel="noopener noreferrer">
+                <a href="https://discord.gg/Ax3Py4YDrq" target="_blank" rel="noopener noreferrer">
                   <MessageSquare className="h-5 w-5 mr-2" />
                   Discord
                 </a>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <a href="https://twitter.com/anthropicai" target="_blank" rel="noopener noreferrer">
-                  <Twitter className="h-5 w-5 mr-2" />
-                  Twitter
+                <a href="https://x.com/JSONbored" target="_blank" rel="noopener noreferrer">
+                  <Twitter className="h-5 w-5 mr-2" />X (Twitter)
                 </a>
               </Button>
             </div>
@@ -64,19 +62,6 @@ export default function CommunityPage() {
       <section className="px-4 py-16">
         <div className="container mx-auto">
           <div className="grid gap-6 md:grid-cols-3">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  Active Members
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">10,000+</div>
-                <p className="text-muted-foreground">Developers and enthusiasts</p>
-              </CardContent>
-            </Card>
-
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -94,12 +79,25 @@ export default function CommunityPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MessageCircle className="h-5 w-5 text-primary" />
-                  Contributions
+                  Configurations
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">500+</div>
-                <p className="text-muted-foreground">Community submissions</p>
+                <div className="text-3xl font-bold">50+</div>
+                <p className="text-muted-foreground">Curated configurations</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  Community Driven
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">Growing</div>
+                <p className="text-muted-foreground">Join us on GitHub</p>
               </CardContent>
             </Card>
           </div>

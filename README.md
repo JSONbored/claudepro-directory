@@ -120,9 +120,9 @@ Report vulnerabilities to **security@claudepro.directory**
 
 Join our growing community:
 
-- **Discord**: Coming shortly
+- **Discord**: [Join our server](https://discord.gg/Ax3Py4YDrq)
 - **GitHub Discussions**: [Join the conversation](https://github.com/JSONbored/claudepro-directory/discussions/new/choose)
-- **Twitter/X**: [@JSONbored](https://twitter.com/JSONbored)
+- **Twitter/X**: [@JSONbored](https://x.com/JSONbored)
 
 ## 🚧 Roadmap
 
@@ -169,7 +169,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ by [JSONbored](https://github.com/JSONbored)**
 
-[GitHub](https://github.com/JSONbored) | [Twitter/X](https://twitter.com/JSONbored)
+[GitHub](https://github.com/JSONbored) | [Twitter/X](https://x.com/JSONbored)
 
 [⬆ Back to Top](#claude-pro-directory-)
 

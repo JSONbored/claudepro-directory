@@ -75,6 +75,9 @@ export const Navigation = () => {
             <NavLink href="/trending" isActive={isActive} onClick={() => setIsOpen(false)}>
               Trending
             </NavLink>
+            <NavLink href="/guides" isActive={isActive} onClick={() => setIsOpen(false)}>
+              Guides
+            </NavLink>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -206,6 +209,15 @@ export const Navigation = () => {
                     className="text-base"
                   >
                     Trending
+                  </NavLink>
+
+                  <NavLink
+                    href="/guides"
+                    isActive={isActive}
+                    onClick={() => setIsOpen(false)}
+                    className="text-base"
+                  >
+                    Guides
                   </NavLink>
 
                   <div className="border-t border-border pt-4 space-y-4">
