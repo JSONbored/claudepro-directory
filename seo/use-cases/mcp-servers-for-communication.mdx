@@ -9,55 +9,68 @@ dateUpdated: "2025-09-18"
 
 *Last updated: September 18, 2025*
 
-Looking to enhance Claude with integrating Claude with Slack, Discord, and other communication tools? MCP (Model Context Protocol) servers extend Claude's capabilities to interact with external systems. Here are the best options available today.
+Looking to integrate Claude with Slack, Discord, and other communication tools? MCP (Model Context Protocol) servers extend Claude's capabilities to interact with external systems. Here are the best options available today.
 
 ## Quick Recommendations
-
 
 ### 🏆 [Discord Integration MCP](/mcp/discord-integration)
 Complete Discord bot integration for community management, moderation, and interactive features
 
-**Perfect for:** discord, bot, community
-**Setup difficulty:** Easy
+**Perfect for:** Discord communities, bot automation, real-time messaging  
+**Setup difficulty:** Easy  
 [View Configuration →](/mcp/discord-integration)
 
 ### 🏆 [Slack Integration MCP](/mcp/slack-integration)
 Connect Claude to Slack for team communication, channel management, and workflow automation
 
-**Perfect for:** slack, communication, collaboration
-**Setup difficulty:** Easy
+**Perfect for:** Team collaboration, workflow automation, enterprise communication  
+**Setup difficulty:** Easy  
 [View Configuration →](/mcp/slack-integration)
-
 
 ## Detailed Comparison
 
 | MCP Server | Use Case | Key Features | Setup Time |
 |------------|----------|--------------|------------|
-| [Discord Integration](/mcp/discord-integration) | discord | bot, community | ~5 mins |
-| [Slack Integration](/mcp/slack-integration) | slack | communication, collaboration | ~5 mins |
+| [Discord Integration](/mcp/discord-integration) | Discord communities | Bot automation, moderation tools | ~5 mins |
+| [Slack Integration](/mcp/slack-integration) | Team collaboration | Channel management, workflow automation | ~5 mins |
 
 ## Implementation Guide
 
 ### Step 1: Choose Your MCP Server
 
-Based on your specific needs for team communication, we recommend starting with **Discord Integration MCP**.
+Based on your specific needs for team communication, we recommend starting with [Discord Integration MCP](/mcp/discord-integration) for community management or [Slack Integration MCP](/mcp/slack-integration) for enterprise teams.
 
 ### Step 2: Installation
 
-```bash
-# Add to your Claude configuration
-# Location: ~/Library/Application Support/Claude/claude_desktop_config.json
-```
+Add your chosen MCP server to your Claude configuration file:
+
+**Configuration file location:**  
+`~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)  
+`%APPDATA%/Claude/claude_desktop_config.json` (Windows)
 
 ### Step 3: Configuration
 
-Each MCP server requires specific configuration. Here's a template:
+Add the appropriate configuration to your `claude_desktop_config.json` file:
 
+**For Discord Integration:**
 ```json
 {
   "mcpServers": {
     "discord-integration": {
-      // Add your configuration here
+      "command": "npx",
+      "args": ["@discord/mcp-server"]
+    }
+  }
+}
+```
+
+**For Slack Integration:**
+```json
+{
+  "mcpServers": {
+    "slack-integration": {
+      "command": "npx",
+      "args": ["@slack/mcp-server"]
     }
   }
 }

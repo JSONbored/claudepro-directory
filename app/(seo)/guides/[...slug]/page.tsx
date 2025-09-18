@@ -22,6 +22,14 @@ interface SEOPageData {
   content: string;
 }
 
+interface SEOMetadata {
+  title?: string;
+  description?: string;
+  keywords?: string | string[];
+  dateUpdated?: string;
+  [key: string]: string | string[] | undefined;
+}
+
 interface RelatedGuide {
   title: string;
   slug: string;
@@ -55,7 +63,7 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
     const content = frontmatterMatch[2];
 
     // Parse metadata
-    const metadata: any = {};
+    const metadata: SEOMetadata = {};
     frontmatter.split('\n').forEach((line) => {
       const [key, ...valueParts] = line.split(':');
       if (key && valueParts.length) {
@@ -68,11 +76,11 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
     });
 
     // Parse keywords array
-    if (metadata.keywords) {
+    if (typeof metadata.keywords === 'string') {
       metadata.keywords = metadata.keywords
         .replace(/^\[|\]$/g, '')
         .split(',')
-        .map((k: string) => k.trim().replace(/^["']|["']$/g, ''));
+        .map((k) => k.trim().replace(/^["']|["']$/g, ''));
     }
 
     return {
@@ -195,7 +203,7 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
     workflows: 'Workflow',
   };
 
-  const categoryIcons: Record<string, any> = {
+  const categoryIcons: Record<string, typeof Zap> = {
     'use-cases': Zap,
     tutorials: BookOpen,
     collections: Users,
@@ -296,12 +304,12 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
                 <CardTitle className="text-sm font-medium">On this page</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {data.content.match(/^##\s+(.+)$/gm)?.map((heading, index) => {
+                {data.content.match(/^##\s+(.+)$/gm)?.map((heading) => {
                   const title = heading.replace('## ', '');
                   const id = title.toLowerCase().replace(/\s+/g, '-');
                   return (
                     <a
-                      key={index}
+                      key={id}
                       href={`#${id}`}
                       className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
