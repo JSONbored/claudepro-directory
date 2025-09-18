@@ -1,10 +1,11 @@
-import { MetadataRoute } from 'next';
+import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Claude Pro Directory',
     short_name: 'ClaudeDir',
-    description: 'Community configurations for Claude AI - MCP servers, agents, rules, commands, and hooks',
+    description:
+      'Community configurations for Claude AI - MCP servers, agents, rules, commands, and hooks',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',
@@ -19,19 +20,13 @@ export default function manifest(): MetadataRoute.Manifest {
         src: '/icon-192.png',
         sizes: '192x192',
         type: 'image/png',
-        purpose: 'any maskable',
+        purpose: 'maskable',
       },
       {
         src: '/icon-512.png',
         sizes: '512x512',
         type: 'image/png',
-        purpose: 'any maskable',
-      },
-      {
-        src: '/apple-touch-icon.png',
-        sizes: '180x180',
-        type: 'image/png',
-        purpose: 'apple-touch-icon',
+        purpose: 'maskable',
       },
     ],
   };
