@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ContentDetailPage } from '@/components/content-detail-page';
+import { ViewTracker } from '@/components/view-tracker';
 import { commands, getCommandBySlug, getCommandFullContent } from '@/generated/content';
 
 interface CommandPageProps {
@@ -52,12 +53,17 @@ export default async function CommandPage({ params }: CommandPageProps) {
     .slice(0, 3);
 
   return (
-    <ContentDetailPage
-      item={fullCommand || commandMeta}
-      type="commands"
-      icon="terminal"
-      typeName="Command"
-      relatedItems={relatedCommands}
-    />
+    <>
+      <ViewTracker category="commands" slug={slug} />
+      <ContentDetailPage
+        item={fullCommand || commandMeta}
+        type="commands"
+        icon="terminal"
+        typeName="Command"
+        relatedItems={relatedCommands}
+      />
+    </>
   );
 }
+// Enable ISR - revalidate every hour
+export const revalidate = 3600;

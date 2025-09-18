@@ -6,7 +6,6 @@ import fs from 'fs';
 const files = process.argv.slice(2);
 
 if (files.length === 0) {
-  console.log('No files to validate');
   process.exit(0);
 }
 
@@ -29,8 +28,6 @@ function isValidDate(dateStr) {
 
 // Validate each file
 files.forEach((filePath) => {
-  console.log(`Checking ${filePath}...`);
-
   try {
     // Read and parse JSON file
     const content = fs.readFileSync(filePath, 'utf8');
@@ -98,7 +95,6 @@ files.forEach((filePath) => {
     }
 
     if (!hasErrors) {
-      console.log(`✓ ${filePath} passed validation`);
     }
   } catch (error) {
     console.error(`ERROR: Failed to process ${filePath}`);
@@ -112,6 +108,5 @@ if (hasErrors) {
   console.error('\n❌ Content validation failed');
   process.exit(1);
 } else {
-  console.log('\n✅ All content files passed validation');
   process.exit(0);
 }

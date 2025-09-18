@@ -25,7 +25,7 @@ export const useFilters = () => {
     dateRange: 'all',
   });
 
-  const updateFilter = (key: keyof FilterOptions, value: any) => {
+  const updateFilter = <K extends keyof FilterOptions>(key: K, value: FilterOptions[K]) => {
     setFilters((prev) => ({
       ...prev,
       [key]: value,

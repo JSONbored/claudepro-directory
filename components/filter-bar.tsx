@@ -17,7 +17,7 @@ import type { FilterOptions } from '@/hooks/use-filters';
 
 interface FilterBarProps {
   filters: FilterOptions;
-  onFilterChange: (key: keyof FilterOptions, value: string | string[] | number[] | null) => void;
+  onFilterChange: <K extends keyof FilterOptions>(key: K, value: FilterOptions[K]) => void;
   onResetFilters: () => void;
   availableCategories: string[];
   availableTags: string[];
@@ -131,7 +131,9 @@ export const FilterBar = ({
           </label>
           <Select
             value={filters.dateRange}
-            onValueChange={(value) => onFilterChange('dateRange', value)}
+            onValueChange={(value) =>
+              onFilterChange('dateRange', value as 'all' | 'week' | 'month' | 'year')
+            }
           >
             <SelectTrigger id={dateRangeId} className="bg-background/50 border-border/50">
               <SelectValue />
@@ -154,7 +156,9 @@ export const FilterBar = ({
             <Slider
               id={popularityId}
               value={filters.popularityRange}
-              onValueChange={(value) => onFilterChange('popularityRange', value)}
+              onValueChange={(value) =>
+                onFilterChange('popularityRange', value as [number, number])
+              }
               min={0}
               max={100}
               step={5}
