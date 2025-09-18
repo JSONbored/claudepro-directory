@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-// Use Edge Runtime for better performance
-export const runtime = 'edge';
+// Use Node.js runtime for cost optimization (Edge Runtime is ~2x more expensive)
+export const runtime = 'nodejs';
 
 interface SubmissionData {
   type: string;

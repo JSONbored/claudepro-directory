@@ -4,6 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
 import { statsRedis } from '@/lib/redis';
 
+// Force dynamic rendering since we're fetching from Redis
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 async function getTrendingData() {
   // Helper function to get mixed content from categories
   const getMixedContent = (
