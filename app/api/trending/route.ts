@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { statsRedis } from '@/lib/redis';
 
-// Use Edge Runtime for faster response
-export const runtime = 'edge';
+// Use Node.js runtime for cost optimization
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;

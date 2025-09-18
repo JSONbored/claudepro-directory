@@ -1,0 +1,50 @@
+# Development files
+.vscode
+.idea
+*.log
+.DS_Store
+
+# Documentation
+README.md
+docs/
+*.md
+!CODE_OF_CONDUCT.md
+!LICENSE.md
+
+# Source content files (already compiled)
+content/
+
+# Scripts (not needed in production)
+scripts/
+
+# Test files
+__tests__
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Git files
+.git
+.gitignore
+.github
+
+# Development config
+.env.local
+.env.development
+
+# Build artifacts that Vercel generates
+.next/
+.turbo/
+out/
+
+# Package manager files
+pnpm-lock.yaml
+yarn.lock
+
+# Assets source files (if we have compiled versions)
+assets/
+
+# Temporary files
+tmp/
+temp/
