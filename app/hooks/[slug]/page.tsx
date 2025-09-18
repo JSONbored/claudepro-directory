@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ContentDetailPage } from '@/components/content-detail-page';
+import { ViewTracker } from '@/components/view-tracker';
 import { getHookBySlug, getHookFullContent, hooks } from '@/generated/content';
 
 interface HookPageProps {
@@ -52,13 +53,16 @@ export default async function HookPage({ params }: HookPageProps) {
     .slice(0, 3);
 
   return (
-    <ContentDetailPage
-      item={fullHook || hookMeta}
-      type="hooks"
-      icon="webhook"
-      typeName="Hook"
-      relatedItems={relatedHooks}
-    />
+    <>
+      <ViewTracker category="hooks" slug={slug} />
+      <ContentDetailPage
+        item={fullHook || hookMeta}
+        type="hooks"
+        icon="webhook"
+        typeName="Hook"
+        relatedItems={relatedHooks}
+      />
+    </>
   );
 }
 // Enable ISR - revalidate every hour

@@ -7,6 +7,7 @@ import { Toaster } from 'sonner';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Navigation } from '@/components/navigation';
 import { StructuredData } from '@/components/structured-data';
+import { WebVitals } from './components/web-vitals';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -75,6 +76,7 @@ export default function RootLayout({
           <Toaster />
         </ThemeProvider>
         <Analytics />
+        <WebVitals />
       </body>
     </html>
   );
