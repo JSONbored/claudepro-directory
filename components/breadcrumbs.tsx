@@ -13,8 +13,9 @@ interface BreadcrumbItem {
 export function Breadcrumbs() {
   const pathname = usePathname();
 
-  // Don't show breadcrumbs on homepage
-  if (pathname === '/') {
+  // Only show breadcrumbs on detail pages (paths with 3 segments like /agents/some-agent)
+  const pathSegments = pathname.split('/').filter(Boolean);
+  if (pathSegments.length < 2) {
     return null;
   }
 
@@ -70,7 +71,7 @@ export function Breadcrumbs() {
   return (
     <nav
       aria-label="Breadcrumb"
-      className="flex items-center space-x-1 text-sm text-muted-foreground mb-4 px-4 md:px-6 lg:px-8"
+      className="flex items-center space-x-1 text-sm text-muted-foreground"
     >
       <ol
         className="flex items-center space-x-1"
