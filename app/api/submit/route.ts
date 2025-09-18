@@ -19,8 +19,51 @@ const GITHUB_OWNER = 'JSONbored';
 const GITHUB_REPO = 'claudepro-directory';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN; // Optional - for higher rate limits
 
+// Simple in-memory rate limiting (resets on deploy/restart)
+const submissionAttempts = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 5; // 5 submissions per hour per IP
+const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour in milliseconds
+
+function checkRateLimit(clientId: string): boolean {
+  const now = Date.now();
+  const clientData = submissionAttempts.get(clientId);
+
+  if (!clientData || now > clientData.resetTime) {
+    // First attempt or window expired
+    submissionAttempts.set(clientId, {
+      count: 1,
+      resetTime: now + RATE_LIMIT_WINDOW,
+    });
+    return true;
+  }
+
+  if (clientData.count >= RATE_LIMIT) {
+    return false; // Rate limit exceeded
+  }
+
+  // Increment count
+  clientData.count++;
+  submissionAttempts.set(clientId, clientData);
+  return true;
+}
+
 export async function POST(request: NextRequest) {
   try {
+    // Get client identifier (IP or X-Forwarded-For header)
+    const clientId =
+      request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+
+    // Check rate limit
+    if (!checkRateLimit(clientId)) {
+      return NextResponse.json(
+        {
+          error: 'Too many submissions. Please wait an hour before submitting again.',
+          fallback: true,
+        },
+        { status: 429 }
+      );
+    }
+
     const data: SubmissionData = await request.json();
 
     // Validate required fields
