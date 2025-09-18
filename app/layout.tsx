@@ -4,9 +4,9 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { Toaster } from 'sonner';
-import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Navigation } from '@/components/navigation';
 import { StructuredData } from '@/components/structured-data';
+import { WebVitals } from './components/web-vitals';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -68,13 +68,13 @@ export default function RootLayout({
           </a>
           <div className="min-h-screen bg-background">
             <Navigation />
-            <Breadcrumbs />
             {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
             <main id="main-content">{children}</main>
           </div>
           <Toaster />
         </ThemeProvider>
         <Analytics />
+        <WebVitals />
       </body>
     </html>
   );

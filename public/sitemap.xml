@@ -2,61 +2,61 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://claudepro.directory</loc>
-    <lastmod>2025-09-17</lastmod>
+    <lastmod>2025-09-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>1</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/agents</loc>
-    <lastmod>2025-09-17</lastmod>
+    <lastmod>2025-09-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/mcp</loc>
-    <lastmod>2025-09-17</lastmod>
+    <lastmod>2025-09-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/rules</loc>
-    <lastmod>2025-09-17</lastmod>
+    <lastmod>2025-09-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/commands</loc>
-    <lastmod>2025-09-17</lastmod>
+    <lastmod>2025-09-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/hooks</loc>
-    <lastmod>2025-09-17</lastmod>
+    <lastmod>2025-09-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/jobs</loc>
-    <lastmod>2025-09-17</lastmod>
+    <lastmod>2025-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/community</loc>
-    <lastmod>2025-09-17</lastmod>
+    <lastmod>2025-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/trending</loc>
-    <lastmod>2025-09-17</lastmod>
+    <lastmod>2025-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/submit</loc>
-    <lastmod>2025-09-17</lastmod>
+    <lastmod>2025-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>

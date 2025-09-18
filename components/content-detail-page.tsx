@@ -119,10 +119,18 @@ export function ContentDetailPage<T extends ContentItem>({
       {/* Header */}
       <div className="border-b border-border/50 bg-card/30">
         <div className="container mx-auto px-4 py-8">
-          <Button variant="ghost" onClick={() => router.push(`/${type}`)} className="mb-6">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to {typeName}
-          </Button>
+          {/* Modern back navigation */}
+          <div className="mb-6">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push(`/${type}`)}
+              className="-ml-2 text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              {typeName}s
+            </Button>
+          </div>
 
           <div className="max-w-4xl">
             <div className="flex items-start gap-4 mb-6">
