@@ -24,8 +24,8 @@ __tests__
 *.spec.ts
 *.spec.tsx
 
-# Git files
-.git
+# Git files (keep .git for build scripts)
+# .git is needed for git diff commands in build
 .gitignore
 .github
 
