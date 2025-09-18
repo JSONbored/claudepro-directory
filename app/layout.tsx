@@ -26,12 +26,21 @@ export const metadata: Metadata = {
     title: 'Claude Pro Directory - Community Configurations for Claude AI',
     description:
       'Explore 50+ Claude configurations including agents, MCP servers, rules, commands, and hooks. Free and open source.',
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'Claude Pro Directory - Community Configurations',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Claude Pro Directory - Community Configurations for Claude AI',
     description:
       'Explore 50+ Claude configurations including agents, MCP servers, rules, commands, and hooks. Free and open source.',
+    images: ['/twitter-image'],
     creator: '@JSONbored',
   },
   robots: {
@@ -47,6 +56,11 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: 'https://claudepro.directory/',
+  },
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
 };
 

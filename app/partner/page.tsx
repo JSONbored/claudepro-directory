@@ -108,9 +108,44 @@ export default function PartnerPage() {
               <p className="text-sm text-muted-foreground mb-4">
                 Perfect for companies building with Claude and AI tools
               </p>
-              <Button className="w-full" size="lg">
-                Post a Job
-                <ArrowRight className="h-4 w-4 ml-2" />
+              <Button className="w-full" size="lg" asChild>
+                <a
+                  href={`mailto:partner@claudepro.directory?subject=${encodeURIComponent(
+                    'Job Listing Inquiry - Claude Pro Directory'
+                  )}&body=${encodeURIComponent(
+                    `Hi Claude Pro Directory Team,
+
+I'm interested in posting a job listing on your platform.
+
+Company Name: [Your Company]
+Position Title: [Position Title]
+Location: [Location/Remote]
+Type: [Full-time/Part-time/Contract]
+
+Job Description:
+[Brief description of the role]
+
+Requirements:
+- [Key requirement 1]
+- [Key requirement 2]
+- [Key requirement 3]
+
+Why this role is perfect for Claude AI professionals:
+[Explain how this role involves Claude/AI]
+
+Budget Range: [Salary/Rate Range]
+
+Please let me know the next steps and pricing details.
+
+Best regards,
+[Your Name]
+[Your Email]
+[Your Phone]`
+                  )}`}
+                >
+                  Post a Job
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </a>
               </Button>
             </div>
           </CardContent>
@@ -163,9 +198,55 @@ export default function PartnerPage() {
               <p className="text-sm text-muted-foreground mb-4">
                 Available for all categories: Agents, MCP, Rules, Commands, Hooks
               </p>
-              <Button className="w-full" size="lg" variant="default">
-                Get Featured
-                <ArrowRight className="h-4 w-4 ml-2" />
+              <Button className="w-full" size="lg" variant="default" asChild>
+                <a
+                  href={`mailto:partner@claudepro.directory?subject=${encodeURIComponent(
+                    'Sponsored Placement Inquiry - Claude Pro Directory'
+                  )}&body=${encodeURIComponent(
+                    `Hi Claude Pro Directory Team,
+
+I'm interested in sponsoring a configuration on your platform.
+
+Configuration Type: [Agent/MCP Server/Rule/Command/Hook]
+Configuration Name: [Your Configuration Name]
+Current URL (if already listed): [URL or N/A]
+
+What we offer:
+[Brief description of your tool/service/configuration]
+
+Target Audience:
+[Who would benefit from this configuration]
+
+Sponsorship Goals:
+- [ ] Increase visibility
+- [ ] Drive adoption
+- [ ] Generate leads
+- [ ] Other: [Specify]
+
+Preferred Sponsorship Duration: [1 month/3 months/6 months]
+
+Additional Services Interested In:
+- [ ] Featured badge
+- [ ] Top placement in category
+- [ ] Homepage feature
+- [ ] Analytics dashboard
+
+Please send me information about:
+- Pricing options
+- Available placements
+- Performance metrics
+- Early partner discount eligibility
+
+Best regards,
+[Your Name]
+[Your Company]
+[Your Email]
+[Your Phone]`
+                  )}`}
+                >
+                  Get Featured
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </a>
               </Button>
             </div>
           </CardContent>
