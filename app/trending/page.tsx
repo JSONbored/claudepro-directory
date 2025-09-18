@@ -28,15 +28,11 @@ async function getTrendingData() {
       ]);
 
     // Map Redis IDs back to actual content items
-    const mapToContent = (
-      items: { id: string; views: number }[],
-      contentArray: any[],
-      type: string
-    ) =>
+    const mapToContent = (items: string[], contentArray: any[], type: string) =>
       items
-        .map((item) => {
-          const content = contentArray.find((c) => c.slug === item.id);
-          return content ? { ...content, redisViews: item.views, type } : null;
+        .map((slug) => {
+          const content = contentArray.find((c) => c.slug === slug);
+          return content ? { ...content, type } : null;
         })
         .filter(Boolean);
 
