@@ -1,4 +1,5 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
+import { join } from 'path';
 
 // Always use production URL for sitemap
 const baseUrl = 'https://claudepro.directory';
@@ -48,7 +49,7 @@ function generateSitemap(): string {
   });
 
   // Static pages
-  const staticPages = ['jobs', 'community', 'trending', 'submit'];
+  const staticPages = ['jobs', 'community', 'trending', 'submit', 'guides'];
   staticPages.forEach((page) => {
     urls.push({
       loc: `${baseUrl}/${page}`,
@@ -56,6 +57,28 @@ function generateSitemap(): string {
       changefreq: 'weekly',
       priority: 0.6,
     });
+  });
+
+  // SEO Guide pages from seo/ directory
+  const seoCategories = ['use-cases', 'tutorials', 'collections', 'categories', 'workflows'];
+  seoCategories.forEach((category) => {
+    const seoDir = join('seo', category);
+    if (existsSync(seoDir)) {
+      try {
+        const files = readdirSync(seoDir).filter((f) => f.endsWith('.mdx'));
+        files.forEach((file) => {
+          const slug = file.replace('.mdx', '');
+          urls.push({
+            loc: `${baseUrl}/guides/${category}/${slug}`,
+            lastmod: new Date().toISOString().split('T')[0],
+            changefreq: 'monthly',
+            priority: 0.65,
+          });
+        });
+      } catch {
+        // Directory doesn't exist yet
+      }
+    }
   });
 
   // Individual content pages

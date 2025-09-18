@@ -8,7 +8,11 @@ import { Navigation } from '@/components/navigation';
 import { StructuredData } from '@/components/structured-data';
 import { WebVitals } from './components/web-vitals';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://claudepro.directory'),
@@ -70,8 +74,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+    <html lang="en" suppressHydrationWarning className={inter.variable}>
+      <body className="font-sans">
         <StructuredData type="website" />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <a
