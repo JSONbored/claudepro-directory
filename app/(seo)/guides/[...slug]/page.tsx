@@ -84,8 +84,8 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
     }
 
     return {
-      title: metadata.title,
-      description: metadata.description,
+      title: metadata.title || '',
+      description: metadata.description || '',
       keywords: metadata.keywords,
       dateUpdated: metadata.dateUpdated,
       content,

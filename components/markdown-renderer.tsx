@@ -31,7 +31,10 @@ function parseMarkdown(markdown: string): string {
 
   // Bold and italic (handle ** before * to avoid conflicts)
   html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong class="font-bold italic">$1</strong>');
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-foreground">$1</strong>');
+  html = html.replace(
+    /\*\*(.*?)\*\*/g,
+    '<strong class="font-semibold text-foreground">$1</strong>'
+  );
   html = html.replace(/(?<!\*)\*(?!\*)(.*?)\*(?!\*)/g, '<em class="italic">$1</em>');
 
   // Links - handle internal vs external links
@@ -49,16 +52,10 @@ function parseMarkdown(markdown: string): string {
   });
 
   // Code blocks with language support
-  html = html.replace(
-    /```([a-z]*)?\n([\s\S]*?)```/g,
-    (match, lang, code) => {
-      const escapedCode = code
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .trim();
-      return `<pre class="bg-zinc-900 border border-zinc-800 rounded-lg p-4 overflow-x-auto my-6"><code class="text-sm font-mono text-zinc-300 block">${escapedCode}</code></pre>`;
-    }
-  );
+  html = html.replace(/```([a-z]*)?\n([\s\S]*?)```/g, (_match, _lang, code) => {
+    const escapedCode = code.replace(/</g, '&lt;').replace(/>/g, '&gt;').trim();
+    return `<pre class="bg-zinc-900 border border-zinc-800 rounded-lg p-4 overflow-x-auto my-6"><code class="text-sm font-mono text-zinc-300 block">${escapedCode}</code></pre>`;
+  });
 
   // Inline code
   html = html.replace(
@@ -66,37 +63,56 @@ function parseMarkdown(markdown: string): string {
     '<code class="bg-zinc-800 px-2 py-0.5 rounded text-sm font-mono text-zinc-300">$1</code>'
   );
 
-  // Lists - handle nested structure properly
-  const _listPattern = /^(\s*)[-*] (.+)$/gm;
+  // Process lists - handle both ordered and unordered
   const lines = html.split('\n');
-  let inList = false;
   const processedLines = [];
+  let currentListType = null; // 'ul' or 'ol'
+  const _lastIndent = 0;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const listMatch = line.match(/^(\s*)[-*] (.+)$/);
+    const unorderedMatch = line.match(/^(\s*)[-*] (.+)$/);
+    const orderedMatch = line.match(/^(\s*)(\d+)\.\s+(.+)$/);
 
-    if (listMatch) {
-      if (!inList) {
+    if (unorderedMatch) {
+      const indent = unorderedMatch[1].length;
+      const content = unorderedMatch[2];
+
+      if (currentListType !== 'ul') {
+        if (currentListType === 'ol') processedLines.push('</ol>');
         processedLines.push('<ul class="list-disc list-inside space-y-2 my-4 ml-4">');
-        inList = true;
+        currentListType = 'ul';
       }
-      const indent = listMatch[1].length;
-      const content = listMatch[2];
+
+      processedLines.push(
+        `<li class="text-muted-foreground leading-relaxed" style="margin-left: ${indent * 20}px">${content}</li>`
+      );
+    } else if (orderedMatch) {
+      const indent = orderedMatch[1].length;
+      const content = orderedMatch[3];
+
+      if (currentListType !== 'ol') {
+        if (currentListType === 'ul') processedLines.push('</ul>');
+        processedLines.push('<ol class="list-decimal list-inside space-y-2 my-4 ml-4">');
+        currentListType = 'ol';
+      }
+
       processedLines.push(
         `<li class="text-muted-foreground leading-relaxed" style="margin-left: ${indent * 20}px">${content}</li>`
       );
     } else {
-      if (inList && line.trim() === '') {
-        processedLines.push('</ul>');
-        inList = false;
+      // Close list if we hit an empty line or non-list content
+      if (currentListType && (line.trim() === '' || !line.match(/^\s/))) {
+        processedLines.push(currentListType === 'ul' ? '</ul>' : '</ol>');
+        currentListType = null;
       }
       processedLines.push(line);
     }
   }
 
-  if (inList) {
-    processedLines.push('</ul>');
+  // Close any open list at the end
+  if (currentListType) {
+    processedLines.push(currentListType === 'ul' ? '</ul>' : '</ol>');
   }
 
   html = processedLines.join('\n');
