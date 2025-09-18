@@ -5,15 +5,76 @@ import { agents, commands, hooks, mcp, rules } from '@/generated/content';
 import { statsRedis } from '@/lib/redis';
 
 async function getTrendingData() {
+  // Helper function to get mixed content from categories
+  const getMixedContent = (
+    categories: { items: any[]; type: string; count: number }[],
+    totalCount: number
+  ) => {
+    const result: any[] = [];
+    let currentIndex = 0;
+
+    // Round-robin through categories to ensure variety
+    while (result.length < totalCount) {
+      for (const category of categories) {
+        if (category.items.length > currentIndex && result.length < totalCount) {
+          const item = { ...category.items[currentIndex], type: category.type };
+          result.push(item);
+        }
+      }
+      currentIndex++;
+      // Break if we've exhausted all categories
+      if (categories.every((cat) => cat.items.length <= currentIndex)) break;
+    }
+
+    return result;
+  };
+
   if (!statsRedis.isEnabled()) {
     // Fallback to static data if Redis is not available
-    const allContent = [...rules, ...mcp, ...agents, ...commands, ...hooks];
-    const sorted = allContent.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-    return {
-      trending: sorted.slice(0, 12),
-      popular: sorted.slice(0, 9),
-      recent: [...allContent].reverse().slice(0, 9),
-    };
+    // Sort each category by popularity
+    const sortedRules = [...rules].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    const sortedMcp = [...mcp].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    const sortedAgents = [...agents].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    const sortedCommands = [...commands].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    const sortedHooks = [...hooks].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+
+    // Mix categories for trending (12 items total, ~2-3 per category)
+    const trending = getMixedContent(
+      [
+        { items: sortedRules, type: 'rules', count: 3 },
+        { items: sortedMcp, type: 'mcp', count: 3 },
+        { items: sortedAgents, type: 'agents', count: 2 },
+        { items: sortedCommands, type: 'commands', count: 2 },
+        { items: sortedHooks, type: 'hooks', count: 2 },
+      ],
+      12
+    );
+
+    // Popular shows top items from each category (9 items)
+    const popular = getMixedContent(
+      [
+        { items: sortedRules, type: 'rules', count: 2 },
+        { items: sortedMcp, type: 'mcp', count: 2 },
+        { items: sortedAgents, type: 'agents', count: 2 },
+        { items: sortedCommands, type: 'commands', count: 2 },
+        { items: sortedHooks, type: 'hooks', count: 1 },
+      ],
+      9
+    );
+
+    // Recent shows newest from each category (simulate by reversing arrays)
+    const recent = getMixedContent(
+      [
+        { items: [...rules].reverse(), type: 'rules', count: 2 },
+        { items: [...mcp].reverse(), type: 'mcp', count: 2 },
+        { items: [...agents].reverse(), type: 'agents', count: 2 },
+        { items: [...commands].reverse(), type: 'commands', count: 2 },
+        { items: [...hooks].reverse(), type: 'hooks', count: 1 },
+      ],
+      9
+    );
+
+    return { trending, popular, recent };
   }
 
   try {
@@ -27,15 +88,32 @@ async function getTrendingData() {
         statsRedis.getTrending('hooks', 3),
       ]);
 
+    // Fetch popular data from Redis (all-time views)
+    const [popularAgents, popularMcp, popularRules, popularCommands, popularHooks] =
+      await Promise.all([
+        statsRedis.getPopular('agents', 2),
+        statsRedis.getPopular('mcp', 2),
+        statsRedis.getPopular('rules', 2),
+        statsRedis.getPopular('commands', 2),
+        statsRedis.getPopular('hooks', 1),
+      ]);
+
     // Map Redis IDs back to actual content items
-    const mapToContent = (items: string[], contentArray: any[], type: string) =>
+    const mapToContent = (
+      items: string[] | { slug: string; views?: number }[],
+      contentArray: any[],
+      type: string
+    ) =>
       items
-        .map((slug) => {
+        .map((item) => {
+          const slug = typeof item === 'string' ? item : item.slug;
+          const views = typeof item === 'object' ? item.views : undefined;
           const content = contentArray.find((c) => c.slug === slug);
-          return content ? { ...content, type } : null;
+          return content ? { ...content, type, viewCount: views } : null;
         })
         .filter(Boolean);
 
+    // Trending - mix from all categories (last 7 days)
     const trending = [
       ...mapToContent(trendingAgents, agents, 'agents'),
       ...mapToContent(trendingMcp, mcp, 'mcp'),
@@ -44,22 +122,75 @@ async function getTrendingData() {
       ...mapToContent(trendingHooks, hooks, 'hooks'),
     ].slice(0, 12);
 
-    // Fallback for popular and recent (until we have more Redis data)
-    const allContent = [...rules, ...mcp, ...agents, ...commands, ...hooks];
-    const popular = trending.length > 0 ? trending.slice(0, 9) : allContent.slice(0, 9);
-    const recent = [...allContent].reverse().slice(0, 9);
+    // Popular - all-time most viewed
+    const popular = [
+      ...mapToContent(popularAgents, agents, 'agents'),
+      ...mapToContent(popularMcp, mcp, 'mcp'),
+      ...mapToContent(popularRules, rules, 'rules'),
+      ...mapToContent(popularCommands, commands, 'commands'),
+      ...mapToContent(popularHooks, hooks, 'hooks'),
+    ].slice(0, 9);
 
-    return { trending, popular, recent };
+    // Recent - if we don't have enough data, use fallback mixing
+    const recentFallback = getMixedContent(
+      [
+        { items: [...rules].reverse(), type: 'rules', count: 2 },
+        { items: [...mcp].reverse(), type: 'mcp', count: 2 },
+        { items: [...agents].reverse(), type: 'agents', count: 2 },
+        { items: [...commands].reverse(), type: 'commands', count: 2 },
+        { items: [...hooks].reverse(), type: 'hooks', count: 1 },
+      ],
+      9
+    );
+
+    return {
+      trending: trending.length > 0 ? trending : recentFallback,
+      popular: popular.length > 0 ? popular : recentFallback,
+      recent: recentFallback,
+    };
   } catch (error) {
     console.error('Error fetching trending data:', error);
-    // Fallback to static data
-    const allContent = [...rules, ...mcp, ...agents, ...commands, ...hooks];
-    const sorted = allContent.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-    return {
-      trending: sorted.slice(0, 12),
-      popular: sorted.slice(0, 9),
-      recent: [...allContent].reverse().slice(0, 9),
-    };
+    // Use same fallback as non-Redis case
+    const sortedRules = [...rules].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    const sortedMcp = [...mcp].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    const sortedAgents = [...agents].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    const sortedCommands = [...commands].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    const sortedHooks = [...hooks].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+
+    const trending = getMixedContent(
+      [
+        { items: sortedRules, type: 'rules', count: 3 },
+        { items: sortedMcp, type: 'mcp', count: 3 },
+        { items: sortedAgents, type: 'agents', count: 2 },
+        { items: sortedCommands, type: 'commands', count: 2 },
+        { items: sortedHooks, type: 'hooks', count: 2 },
+      ],
+      12
+    );
+
+    const popular = getMixedContent(
+      [
+        { items: sortedRules, type: 'rules', count: 2 },
+        { items: sortedMcp, type: 'mcp', count: 2 },
+        { items: sortedAgents, type: 'agents', count: 2 },
+        { items: sortedCommands, type: 'commands', count: 2 },
+        { items: sortedHooks, type: 'hooks', count: 1 },
+      ],
+      9
+    );
+
+    const recent = getMixedContent(
+      [
+        { items: [...rules].reverse(), type: 'rules', count: 2 },
+        { items: [...mcp].reverse(), type: 'mcp', count: 2 },
+        { items: [...agents].reverse(), type: 'agents', count: 2 },
+        { items: [...commands].reverse(), type: 'commands', count: 2 },
+        { items: [...hooks].reverse(), type: 'hooks', count: 1 },
+      ],
+      9
+    );
+
+    return { trending, popular, recent };
   }
 }
 
