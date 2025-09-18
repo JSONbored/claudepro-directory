@@ -28,8 +28,8 @@ export const useSorting = () => {
   const sortItems = useCallback(
     <T extends SortableItem>(items: T[]): T[] => {
       const sorted = [...items].sort((a, b) => {
-        let aValue: any;
-        let bValue: any;
+        let aValue: string | number;
+        let bValue: string | number;
 
         switch (sortBy) {
           case 'popularity':

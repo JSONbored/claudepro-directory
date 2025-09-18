@@ -2,7 +2,7 @@
 
 import { BookOpen, Briefcase, ExternalLink, Search, Server, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ConfigCard } from '@/components/config-card';
 import { FilterBar } from '@/components/filter-bar';
 import { SearchBar } from '@/components/search-bar';
@@ -10,7 +10,7 @@ import { SortDropdown } from '@/components/sort-dropdown';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
-import { useFilters } from '@/hooks/use-filters';
+import { type FilterOptions, useFilters } from '@/hooks/use-filters';
 import { useSorting } from '@/hooks/use-sorting';
 import type { ContentItem } from '@/types/content';
 
@@ -19,6 +19,7 @@ export default function HomePage() {
   const [searchResults, setSearchResults] = useState<ContentItem[]>([]);
   const [, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [searchDisplayCount, setSearchDisplayCount] = useState(12);
   const { filters, updateFilter, resetFilters, applyFilters } = useFilters();
   const { sortBy, sortDirection, updateSort, sortItems } = useSorting();
 
@@ -41,13 +42,22 @@ export default function HomePage() {
   // Handle search results
   const handleSearchResults = (results: ContentItem[]) => {
     setSearchResults(results);
+    setSearchDisplayCount(12); // Reset display count when new search
   };
 
   // Handle search query changes
   const handleSearchQuery = (query: string) => {
     setSearchQuery(query);
     setIsSearching(query.trim().length > 0);
+    if (query.trim().length === 0) {
+      setSearchDisplayCount(12); // Reset when clearing search
+    }
   };
+
+  // Load more search results
+  const loadMoreSearchResults = useCallback(() => {
+    setSearchDisplayCount((prev) => Math.min(prev + 12, searchResults.length));
+  }, [searchResults.length]);
 
   // Apply filters and sorting based on active tab
   const processedConfigs = useMemo(() => {
@@ -175,11 +185,40 @@ export default function HomePage() {
             </div>
 
             {searchResults.length > 0 ? (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {searchResults.map((config) => (
-                  <ConfigCard key={config.id} {...config} type={getConfigType(config)} />
-                ))}
-              </div>
+              <>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {searchResults.slice(0, searchDisplayCount).map((config) => (
+                    <ConfigCard key={config.id} {...config} type={getConfigType(config)} />
+                  ))}
+                </div>
+
+                {searchDisplayCount < searchResults.length && (
+                  <div className="flex flex-col items-center gap-4 pt-8">
+                    <div className="text-sm text-muted-foreground">
+                      Showing {searchDisplayCount} of {searchResults.length} results
+                    </div>
+                    <div className="flex gap-4">
+                      <Button
+                        onClick={loadMoreSearchResults}
+                        variant="outline"
+                        size="lg"
+                        className="min-w-[200px]"
+                      >
+                        Load {Math.min(12, searchResults.length - searchDisplayCount)} More
+                      </Button>
+                      {searchResults.length - searchDisplayCount > 12 && (
+                        <Button
+                          onClick={() => setSearchDisplayCount(searchResults.length)}
+                          variant="ghost"
+                          size="lg"
+                        >
+                          Show All ({searchResults.length - searchDisplayCount})
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="text-center py-12 bg-card/50 rounded-xl border border-border/50">
                 <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
@@ -336,7 +375,12 @@ export default function HomePage() {
             {/* Filters */}
             <FilterBar
               filters={filters}
-              onFilterChange={updateFilter}
+              onFilterChange={
+                updateFilter as <K extends keyof FilterOptions>(
+                  key: K,
+                  value: FilterOptions[K]
+                ) => void
+              }
               onResetFilters={resetFilters}
               availableCategories={availableCategories}
               availableTags={availableTags}

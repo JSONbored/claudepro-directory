@@ -45,7 +45,7 @@ async function ensureDir(dir: string) {
   }
 }
 
-async function loadJsonFiles(type: string): Promise<any[]> {
+async function loadJsonFiles(type: string): Promise<BaseContent[]> {
   const dir = path.join(CONTENT_DIR, type);
 
   try {
@@ -78,7 +78,6 @@ async function loadJsonFiles(type: string): Promise<any[]> {
 
     return items.filter(Boolean);
   } catch (_error) {
-    console.log(`No content found for ${type}`);
     return [];
   }
 }
@@ -86,13 +85,12 @@ async function loadJsonFiles(type: string): Promise<any[]> {
 async function generateTypeScript() {
   await ensureDir(GENERATED_DIR);
 
-  const allContent: Record<string, any[]> = {};
+  const allContent: Record<string, BaseContent[]> = {};
 
   // Load all content
   for (const type of CONTENT_TYPES) {
     const items = await loadJsonFiles(type);
     allContent[type] = items;
-    console.log(`Loaded ${items.length} ${type}`);
   }
 
   // Generate separate files for each content type with metadata only
@@ -182,7 +180,6 @@ ${CONTENT_TYPES.map((type) => {
 };`;
 
   await fs.writeFile(path.join(GENERATED_DIR, 'content.ts'), indexContent);
-  console.log('✅ Generated content metadata and full content files');
 }
 
 // Run the build

@@ -26,3 +26,6 @@ export default function RulesPage() {
     />
   );
 }
+
+// Enable ISR - revalidate every hour
+export const revalidate = 3600;

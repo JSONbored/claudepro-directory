@@ -25,3 +25,6 @@ export default function HooksPage() {
     />
   );
 }
+
+// Enable ISR - revalidate every hour
+export const revalidate = 3600;

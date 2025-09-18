@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ContentDetailPage } from '@/components/content-detail-page';
+import { ViewTracker } from '@/components/view-tracker';
 import { agents, getAgentBySlug, getAgentFullContent } from '@/generated/content';
 
 interface AgentPageProps {
@@ -36,6 +37,9 @@ export async function generateStaticParams() {
   }));
 }
 
+// Enable ISR - revalidate every hour
+export const revalidate = 3600;
+
 export default async function AgentPage({ params }: AgentPageProps) {
   const { slug } = await params;
   const agentMeta = getAgentBySlug(slug);
@@ -52,12 +56,15 @@ export default async function AgentPage({ params }: AgentPageProps) {
     .slice(0, 3);
 
   return (
-    <ContentDetailPage
-      item={fullAgent || agentMeta}
-      type="agents"
-      icon="sparkles"
-      typeName="Agent"
-      relatedItems={relatedAgents}
-    />
+    <>
+      <ViewTracker category="agents" slug={slug} />
+      <ContentDetailPage
+        item={fullAgent || agentMeta}
+        type="agents"
+        icon="sparkles"
+        typeName="Agent"
+        relatedItems={relatedAgents}
+      />
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ContentDetailPage } from '@/components/content-detail-page';
+import { ViewTracker } from '@/components/view-tracker';
 import { getRuleBySlug, getRuleFullContent, rules } from '@/generated/content';
 
 interface RulePageProps {
@@ -52,12 +53,17 @@ export default async function RulePage({ params }: RulePageProps) {
     .slice(0, 3);
 
   return (
-    <ContentDetailPage
-      item={fullRule || ruleMeta}
-      type="rules"
-      icon="book-open"
-      typeName="Rule"
-      relatedItems={relatedRules}
-    />
+    <>
+      <ViewTracker category="rules" slug={slug} />
+      <ContentDetailPage
+        item={fullRule || ruleMeta}
+        type="rules"
+        icon="book-open"
+        typeName="Rule"
+        relatedItems={relatedRules}
+      />
+    </>
   );
 }
+// Enable ISR - revalidate every hour
+export const revalidate = 3600;

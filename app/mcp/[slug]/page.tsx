@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ContentDetailPage } from '@/components/content-detail-page';
+import { ViewTracker } from '@/components/view-tracker';
 import { getMcpBySlug, getMcpFullContent, mcp } from '@/generated/content';
 
 interface MCPPageProps {
@@ -52,12 +53,17 @@ export default async function MCPPage({ params }: MCPPageProps) {
     .slice(0, 3);
 
   return (
-    <ContentDetailPage
-      item={fullMCP || mcpMeta}
-      type="mcp"
-      icon="server"
-      typeName="MCP Server"
-      relatedItems={relatedMCPs}
-    />
+    <>
+      <ViewTracker category="mcp" slug={slug} />
+      <ContentDetailPage
+        item={fullMCP || mcpMeta}
+        type="mcp"
+        icon="server"
+        typeName="MCP Server"
+        relatedItems={relatedMCPs}
+      />
+    </>
   );
 }
+// Enable ISR - revalidate every hour
+export const revalidate = 3600;

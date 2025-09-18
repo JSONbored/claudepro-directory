@@ -1,5 +1,23 @@
 export type ContentCategory = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks';
 
+// Configuration type for content items  
+export interface ContentConfiguration {
+  enabled?: boolean;
+  apiKey?: string;
+  endpoint?: string;
+  timeout?: number;
+  maxRetries?: number;
+  temperature?: number;
+  maxTokens?: number;
+  systemPrompt?: string;
+  permissions?: string[];
+  requiresAuth?: boolean;
+  authType?: string;
+  features?: string[];
+  options?: Record<string, string | number | boolean>;
+  [key: string]: string | number | boolean | string[] | Record<string, string | number | boolean> | undefined;
+}
+
 // Base interface for all content items
 export interface ContentMetadata {
   id: string;
@@ -29,7 +47,7 @@ export interface ContentItem extends ContentMetadata {
     code: string;
     description?: string;
   }>;
-  configuration?: any;
+  configuration?: ContentConfiguration;
   similarity?: number;
   type?: string;
   stars?: number;

@@ -107,7 +107,7 @@ export default async function Image() {
             />
             Free & Open Source
           </div>
-          <div>1000+ Configurations</div>
+          <div>50+ Configurations</div>
         </div>
       </div>
     </div>,
