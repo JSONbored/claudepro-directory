@@ -4,93 +4,152 @@ import { BookOpen, Briefcase, ExternalLink, Search, Server, Sparkles } from 'luc
 import Link from 'next/link';
 import { useCallback, useMemo, useState } from 'react';
 import { ConfigCard } from '@/components/config-card';
-import { FilterBar } from '@/components/filter-bar';
-import { SearchBar } from '@/components/search-bar';
-import { SortDropdown } from '@/components/sort-dropdown';
+import { InfiniteScrollContainer } from '@/components/infinite-scroll-container';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { type FilterState, UnifiedSearch } from '@/components/unified-search';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
-import { type FilterOptions, useFilters } from '@/hooks/use-filters';
-import { useSorting } from '@/hooks/use-sorting';
 import type { ContentItem } from '@/types/content';
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState('all');
-  const [searchResults, setSearchResults] = useState<ContentItem[]>([]);
-  const [, setSearchQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchDisplayCount, setSearchDisplayCount] = useState(12);
-  const { filters, updateFilter, resetFilters, applyFilters } = useFilters();
-  const { sortBy, sortDirection, updateSort, sortItems } = useSorting();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<FilterState>({ sort: 'trending' });
+  const [filteredItems, setFilteredItems] = useState<ContentItem[]>([]);
+  const [displayedItems, setDisplayedItems] = useState<ContentItem[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 20;
 
   const allConfigs = useMemo(() => [...rules, ...mcp, ...agents, ...commands, ...hooks], []);
 
   // Get unique values for filter options
   const availableCategories = useMemo(
-    () => [...new Set(allConfigs.map((item) => item.category))],
+    () => [...new Set(allConfigs.map((item) => item.category))].filter(Boolean) as string[],
     [allConfigs]
   );
   const availableTags = useMemo(
-    () => [...new Set(allConfigs.flatMap((item) => item.tags))],
+    () => [...new Set(allConfigs.flatMap((item) => item.tags || []))].filter(Boolean),
     [allConfigs]
   );
   const availableAuthors = useMemo(
-    () => [...new Set(allConfigs.map((item) => item.author))],
+    () => [...new Set(allConfigs.map((item) => item.author))].filter(Boolean) as string[],
     [allConfigs]
   );
 
-  // Handle search results
-  const handleSearchResults = (results: ContentItem[]) => {
-    setSearchResults(results);
-    setSearchDisplayCount(12); // Reset display count when new search
-  };
+  // Handle search
+  const handleSearch = useCallback(
+    (query: string) => {
+      setSearchQuery(query);
+      const searchLower = query.toLowerCase();
 
-  // Handle search query changes
-  const handleSearchQuery = (query: string) => {
-    setSearchQuery(query);
-    setIsSearching(query.trim().length > 0);
-    if (query.trim().length === 0) {
-      setSearchDisplayCount(12); // Reset when clearing search
-    }
-  };
+      if (!query.trim()) {
+        setFilteredItems([]);
+        setDisplayedItems([]);
+        setCurrentPage(1);
+        return;
+      }
 
-  // Load more search results
-  const loadMoreSearchResults = useCallback(() => {
-    setSearchDisplayCount((prev) => Math.min(prev + 12, searchResults.length));
-  }, [searchResults.length]);
+      const filtered = allConfigs.filter(
+        (item) =>
+          item.name?.toLowerCase().includes(searchLower) ||
+          item.description?.toLowerCase().includes(searchLower) ||
+          item.tags?.some((tag) => tag.toLowerCase().includes(searchLower)) ||
+          item.category?.toLowerCase().includes(searchLower) ||
+          item.author?.toLowerCase().includes(searchLower)
+      );
 
-  // Apply filters and sorting based on active tab
-  const processedConfigs = useMemo(() => {
-    let configs: ContentItem[] = [];
+      setFilteredItems(filtered);
+      setDisplayedItems(filtered.slice(0, pageSize));
+      setCurrentPage(1);
+    },
+    [allConfigs]
+  );
 
-    // Use search results when searching, otherwise use all configs
-    const baseConfigs = isSearching ? searchResults : allConfigs;
+  // Handle filters change
+  const handleFiltersChange = useCallback(
+    (newFilters: FilterState) => {
+      setFilters(newFilters);
 
-    switch (activeTab) {
-      case 'rules':
-        configs = baseConfigs.filter((config) => rules.some((r) => r.id === config.id));
-        break;
-      case 'mcp':
-        configs = baseConfigs.filter((config) => mcp.some((m) => m.id === config.id));
-        break;
-      case 'agents':
-        configs = baseConfigs.filter((config) => agents.some((a) => a.id === config.id));
-        break;
-      case 'commands':
-        configs = baseConfigs.filter((config) => commands.some((c) => c.id === config.id));
-        break;
-      case 'hooks':
-        configs = baseConfigs.filter((config) => hooks.some((h) => h.id === config.id));
-        break;
-      case 'community':
-        return []; // Community tab shows authors, not configs
-      default:
-        configs = baseConfigs;
-    }
+      let baseItems = searchQuery.trim() ? filteredItems : allConfigs;
 
-    const filtered = applyFilters(configs);
-    return sortItems(filtered);
-  }, [activeTab, searchResults, isSearching, allConfigs, applyFilters, sortItems]);
+      // Apply tab filter
+      if (activeTab !== 'all' && activeTab !== 'community') {
+        switch (activeTab) {
+          case 'rules':
+            baseItems = baseItems.filter((item) => rules.some((r) => r.id === item.id));
+            break;
+          case 'mcp':
+            baseItems = baseItems.filter((item) => mcp.some((m) => m.id === item.id));
+            break;
+          case 'agents':
+            baseItems = baseItems.filter((item) => agents.some((a) => a.id === item.id));
+            break;
+          case 'commands':
+            baseItems = baseItems.filter((item) => commands.some((c) => c.id === item.id));
+            break;
+          case 'hooks':
+            baseItems = baseItems.filter((item) => hooks.some((h) => h.id === item.id));
+            break;
+        }
+      }
+
+      let processed = [...baseItems];
+
+      // Apply category filter
+      if (newFilters.category) {
+        processed = processed.filter((item) => item.category === newFilters.category);
+      }
+
+      // Apply author filter
+      if (newFilters.author) {
+        processed = processed.filter((item) => item.author === newFilters.author);
+      }
+
+      // Apply tags filter
+      if (newFilters.tags && newFilters.tags.length > 0) {
+        processed = processed.filter((item) =>
+          newFilters.tags?.some((tag) => item.tags?.includes(tag))
+        );
+      }
+
+      // Apply sorting
+      switch (newFilters.sort) {
+        case 'alphabetical':
+          processed.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+          break;
+        case 'newest':
+          // Most items don't have dates, so keep original order
+          break;
+        default:
+          // Keep original order which should be trending
+          break;
+      }
+
+      setFilteredItems(processed);
+      setDisplayedItems(processed.slice(0, pageSize));
+      setCurrentPage(1);
+    },
+    [searchQuery, filteredItems, allConfigs, activeTab]
+  );
+
+  // Load more function for infinite scroll
+  const loadMore = useCallback(async () => {
+    const nextPage = currentPage + 1;
+    const startIndex = (nextPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const nextItems = filteredItems.slice(startIndex, endIndex);
+
+    // Simulate async load with small delay
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    setDisplayedItems((prev) => [...prev, ...nextItems]);
+    setCurrentPage(nextPage);
+
+    return nextItems;
+  }, [currentPage, filteredItems]);
+
+  const hasMore = displayedItems.length < filteredItems.length;
+  const isSearching = searchQuery.trim().length > 0;
 
   const getConfigType = (
     config: ContentItem
@@ -106,6 +165,16 @@ export default function HomePage() {
     return 'content' in config ? 'rules' : 'mcp';
   };
 
+  // Handle tab change
+  const handleTabChange = useCallback(
+    (value: string) => {
+      setActiveTab(value);
+      // Re-apply filters when tab changes
+      handleFiltersChange(filters);
+    },
+    [filters, handleFiltersChange]
+  );
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -119,19 +188,23 @@ export default function HomePage() {
               The home for Claude enthusiasts
             </h1>
 
-            <p className="text-xl text-muted-foreground mb-12 leading-relaxed max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground mb-8 leading-relaxed max-w-3xl mx-auto">
               Discover and share the best Claude configurations. Explore expert rules, browse
               powerful MCP servers, find specialized agents and commands, discover automation hooks,
               and connect with the community building the future of AI.
             </p>
 
             {/* Search Bar */}
-            <div className="max-w-2xl mx-auto mb-8">
-              <SearchBar
-                data={allConfigs}
-                onFilteredResults={handleSearchResults}
-                onSearchQueryChange={handleSearchQuery}
+            <div className="max-w-4xl mx-auto mb-8">
+              <UnifiedSearch
                 placeholder="Search for rules, MCP servers, agents, commands, and more..."
+                onSearch={handleSearch}
+                onFiltersChange={handleFiltersChange}
+                filters={filters}
+                availableTags={availableTags}
+                availableAuthors={availableAuthors}
+                availableCategories={availableCategories}
+                resultCount={filteredItems.length}
               />
             </div>
 
@@ -163,20 +236,20 @@ export default function HomePage() {
       </section>
 
       <section className="container mx-auto px-4 py-16">
-        {/* Search Results - Show immediately when user searches */}
+        {/* Search Results - Show when user searches */}
         {isSearching && (
           <div className="mb-16">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold">
                 Search Results
-                <span className="text-muted-foreground ml-2">({searchResults.length} found)</span>
+                <span className="text-muted-foreground ml-2">({filteredItems.length} found)</span>
               </h2>
               <Button
                 variant="outline"
                 onClick={() => {
-                  setIsSearching(false);
                   setSearchQuery('');
-                  setSearchResults([]);
+                  setFilteredItems([]);
+                  setDisplayedItems([]);
                 }}
                 className="text-sm"
               >
@@ -184,41 +257,19 @@ export default function HomePage() {
               </Button>
             </div>
 
-            {searchResults.length > 0 ? (
-              <>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {searchResults.slice(0, searchDisplayCount).map((config) => (
-                    <ConfigCard key={config.id} {...config} type={getConfigType(config)} />
-                  ))}
-                </div>
-
-                {searchDisplayCount < searchResults.length && (
-                  <div className="flex flex-col items-center gap-4 pt-8">
-                    <div className="text-sm text-muted-foreground">
-                      Showing {searchDisplayCount} of {searchResults.length} results
-                    </div>
-                    <div className="flex gap-4">
-                      <Button
-                        onClick={loadMoreSearchResults}
-                        variant="outline"
-                        size="lg"
-                        className="min-w-[200px]"
-                      >
-                        Load {Math.min(12, searchResults.length - searchDisplayCount)} More
-                      </Button>
-                      {searchResults.length - searchDisplayCount > 12 && (
-                        <Button
-                          onClick={() => setSearchDisplayCount(searchResults.length)}
-                          variant="ghost"
-                          size="lg"
-                        >
-                          Show All ({searchResults.length - searchDisplayCount})
-                        </Button>
-                      )}
-                    </div>
-                  </div>
+            {filteredItems.length > 0 ? (
+              <InfiniteScrollContainer
+                items={displayedItems}
+                renderItem={(item) => (
+                  <ConfigCard key={item.id} {...item} type={getConfigType(item)} />
                 )}
-              </>
+                loadMore={loadMore}
+                hasMore={hasMore}
+                pageSize={20}
+                gridClassName="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                emptyMessage="No results found"
+                keyExtractor={(item) => item.id}
+              />
             ) : (
               <div className="text-center py-12 bg-card/50 rounded-xl border border-border/50">
                 <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
@@ -337,146 +388,61 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Advanced Tabs - Only show when not searching */}
+        {/* Advanced Tabs with Infinite Scroll - Only show when not searching */}
         {!isSearching && (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-              <TabsList className="grid w-full lg:w-auto grid-cols-7">
-                <TabsTrigger value="all" className="text-sm">
-                  All
-                </TabsTrigger>
-                <TabsTrigger value="rules" className="text-sm">
-                  Rules
-                </TabsTrigger>
-                <TabsTrigger value="mcp" className="text-sm">
-                  MCP
-                </TabsTrigger>
-                <TabsTrigger value="agents" className="text-sm">
-                  Agents
-                </TabsTrigger>
-                <TabsTrigger value="commands" className="text-sm">
-                  Commands
-                </TabsTrigger>
-                <TabsTrigger value="hooks" className="text-sm">
-                  Hooks
-                </TabsTrigger>
-                <TabsTrigger value="community" className="text-sm">
-                  Community
-                </TabsTrigger>
-              </TabsList>
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
+            <TabsList className="grid w-full lg:w-auto grid-cols-7">
+              <TabsTrigger value="all" className="text-sm">
+                All
+              </TabsTrigger>
+              <TabsTrigger value="rules" className="text-sm">
+                Rules
+              </TabsTrigger>
+              <TabsTrigger value="mcp" className="text-sm">
+                MCP
+              </TabsTrigger>
+              <TabsTrigger value="agents" className="text-sm">
+                Agents
+              </TabsTrigger>
+              <TabsTrigger value="commands" className="text-sm">
+                Commands
+              </TabsTrigger>
+              <TabsTrigger value="hooks" className="text-sm">
+                Hooks
+              </TabsTrigger>
+              <TabsTrigger value="community" className="text-sm">
+                Community
+              </TabsTrigger>
+            </TabsList>
 
-              <SortDropdown
-                sortBy={sortBy}
-                sortDirection={sortDirection}
-                onSortChange={updateSort}
-              />
-            </div>
-
-            {/* Filters */}
-            <FilterBar
-              filters={filters}
-              onFilterChange={
-                updateFilter as <K extends keyof FilterOptions>(
-                  key: K,
-                  value: FilterOptions[K]
-                ) => void
-              }
-              onResetFilters={resetFilters}
-              availableCategories={availableCategories}
-              availableTags={availableTags}
-              availableAuthors={availableAuthors}
-            />
-
-            {/* Results */}
-            <TabsContent value="all" className="space-y-6">
-              {processedConfigs.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {processedConfigs.map((config) => (
-                    <ConfigCard key={config.id} {...config} type={getConfigType(config)} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-lg text-muted-foreground">No configurations found</p>
-                  <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters.</p>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="rules" className="space-y-6">
-              {processedConfigs.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {processedConfigs.map((config) => (
-                    <ConfigCard key={config.id} {...config} type={getConfigType(config)} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-lg text-muted-foreground">No Claude rules found</p>
-                  <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters.</p>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="mcp" className="space-y-6">
-              {processedConfigs.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {processedConfigs.map((config) => (
-                    <ConfigCard key={config.id} {...config} type={getConfigType(config)} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-lg text-muted-foreground">No MCP servers found</p>
-                  <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters.</p>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="agents" className="space-y-6">
-              {processedConfigs.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {processedConfigs.map((config) => (
-                    <ConfigCard key={config.id} {...config} type={getConfigType(config)} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-lg text-muted-foreground">No AI agents found</p>
-                  <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters.</p>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="commands" className="space-y-6">
-              {processedConfigs.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {processedConfigs.map((config) => (
-                    <ConfigCard key={config.id} {...config} type={getConfigType(config)} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-lg text-muted-foreground">No commands found</p>
-                  <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters.</p>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="hooks" className="space-y-6">
-              {processedConfigs.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {processedConfigs.map((config) => (
-                    <ConfigCard key={config.id} {...config} type={getConfigType(config)} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-lg text-muted-foreground">No automation hooks found</p>
-                  <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters.</p>
-                </div>
-              )}
-            </TabsContent>
+            {/* Tab content for all tabs except community */}
+            {['all', 'rules', 'mcp', 'agents', 'commands', 'hooks'].map((tab) => (
+              <TabsContent key={tab} value={tab} className="space-y-6">
+                {filteredItems.length > 0 ? (
+                  <InfiniteScrollContainer
+                    items={displayedItems}
+                    renderItem={(item) => (
+                      <ConfigCard key={item.id} {...item} type={getConfigType(item)} />
+                    )}
+                    loadMore={loadMore}
+                    hasMore={hasMore}
+                    pageSize={20}
+                    gridClassName="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                    emptyMessage={`No ${tab === 'all' ? 'configurations' : tab} found`}
+                    keyExtractor={(item) => item.id}
+                  />
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-lg text-muted-foreground">
+                      No {tab === 'all' ? 'configurations' : tab} found
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Try adjusting your filters.
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
+            ))}
 
             <TabsContent value="community" className="space-y-6">
               <div className="text-center mb-8">

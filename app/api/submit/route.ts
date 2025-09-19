@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 // Use Node.js runtime for cost optimization (Edge Runtime is ~2x more expensive)
 export const runtime = 'nodejs';
@@ -123,7 +124,11 @@ ${data.content}
 
     if (!githubResponse.ok) {
       const errorData = await githubResponse.text();
-      console.error('GitHub API error:', errorData);
+      const requestLogger = logger.forRequest(request);
+      requestLogger.error('GitHub API submission failed', new Error(errorData), {
+        status: githubResponse.status,
+        statusText: githubResponse.statusText,
+      });
 
       // If GitHub submission fails, we could fallback to other methods
       // For now, return a helpful error message
@@ -153,7 +158,11 @@ ${data.content}
       issueNumber: issue.number,
     });
   } catch (error) {
-    console.error('Submission error:', error);
+    const requestLogger = logger.forRequest(request);
+    requestLogger.error(
+      'Submission processing failed',
+      error instanceof Error ? error : new Error(String(error))
+    );
     return NextResponse.json(
       { error: 'An error occurred while processing your submission' },
       { status: 500 }

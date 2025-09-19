@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 interface FormData {
   type: string;
@@ -148,7 +149,13 @@ export default function SubmitPage() {
         });
       }
     } catch (error) {
-      console.error('Submission error:', error);
+      logger.error(
+        'Client submission form error',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          component: 'SubmitPage',
+        }
+      );
       toast({
         title: 'Network Error',
         description: 'Failed to submit. Please check your connection and try again.',

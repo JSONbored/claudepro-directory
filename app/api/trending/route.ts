@@ -1,13 +1,21 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 import { statsRedis } from '@/lib/redis';
 
 // Use Node.js runtime for cost optimization
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
+  const requestLogger = logger.forRequest(request);
+
   const searchParams = request.nextUrl.searchParams;
   const category = searchParams.get('category');
   const limit = parseInt(searchParams.get('limit') || '10', 10);
+
+  requestLogger.info('Trending API request received', {
+    category,
+    limit,
+  });
 
   if (!statsRedis.isEnabled()) {
     return NextResponse.json({ error: 'Stats tracking not enabled' }, { status: 503 });
@@ -38,7 +46,15 @@ export async function GET(request: NextRequest) {
       }
     );
   } catch (error) {
-    console.error('Error fetching trending:', error);
+    requestLogger.error(
+      'API request failed to fetch trending items',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        category,
+        limit,
+        validCategories,
+      }
+    );
     return NextResponse.json({ error: 'Failed to fetch trending items' }, { status: 500 });
   }
 }
