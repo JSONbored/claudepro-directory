@@ -2,133 +2,133 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://claudepro.directory</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>1</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/agents</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/mcp</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/rules</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/commands</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/hooks</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/jobs</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/community</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/trending</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/submit</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/use-cases/mcp-servers-for-communication</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/use-cases/mcp-servers-for-database</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/collections/claude-agents-for-backend</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/collections/claude-agents-for-frontend</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/collections/claude-agents-for-review</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/categories/mcp-servers-for-data</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/categories/mcp-servers-for-development</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/categories/mcp-servers-for-integration</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/categories/mcp-servers-for-productivity</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/workflows/fullstack-workflow-guide</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/workflows/migration-workflow-guide</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2025-09-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>

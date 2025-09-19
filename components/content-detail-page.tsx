@@ -1,35 +1,14 @@
 'use client';
 
-import * as Icons from 'lucide-react';
-import {
-  ArrowLeft,
-  Calendar,
-  Check,
-  Copy,
-  ExternalLink,
-  Github,
-  type LucideIcon,
-  Tag,
-  User,
-} from 'lucide-react';
+import { ArrowLeft, Calendar, Check, Copy, ExternalLink, Github, Tag, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { lazy, Suspense, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
+import { getIconByName } from '@/lib/icons';
 import type { ContentCategory, ContentItem } from '@/types/content';
-
-// Helper function to get icon component by name
-function getIconByName(iconName: string): LucideIcon {
-  const formattedName =
-    iconName.charAt(0).toUpperCase() +
-    iconName.slice(1).replace(/-([a-z])/g, (g) => g[1].toUpperCase());
-
-  // Type assertion through unknown for safe type conversion
-  const icon = (Icons as unknown as Record<string, LucideIcon>)[formattedName];
-  return icon || Icons.HelpCircle;
-}
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
 const CodeHighlight = lazy(() =>

@@ -2,7 +2,9 @@ import { Clock, Star, TrendingUp, Users } from 'lucide-react';
 import { TrendingContent } from '@/components/trending-content';
 import { Badge } from '@/components/ui/badge';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
+import { logger } from '@/lib/logger';
 import { statsRedis } from '@/lib/redis';
+import { sortByPopularity } from '@/lib/sorting';
 
 // Force dynamic rendering since we're fetching from Redis
 export const dynamic = 'force-dynamic';
@@ -36,11 +38,11 @@ async function getTrendingData() {
   if (!statsRedis.isEnabled()) {
     // Fallback to static data if Redis is not available
     // Sort each category by popularity
-    const sortedRules = [...rules].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-    const sortedMcp = [...mcp].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-    const sortedAgents = [...agents].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-    const sortedCommands = [...commands].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-    const sortedHooks = [...hooks].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    const sortedRules = sortByPopularity(rules);
+    const sortedMcp = sortByPopularity(mcp);
+    const sortedAgents = sortByPopularity(agents);
+    const sortedCommands = sortByPopularity(commands);
+    const sortedHooks = sortByPopularity(hooks);
 
     // Mix categories for trending (12 items total, ~2-3 per category)
     const trending = getMixedContent(
@@ -153,13 +155,19 @@ async function getTrendingData() {
       recent: recentFallback,
     };
   } catch (error) {
-    console.error('Error fetching trending data:', error);
+    logger.error(
+      'Failed to fetch trending data on trending page',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        component: 'TrendingPage',
+      }
+    );
     // Use same fallback as non-Redis case
-    const sortedRules = [...rules].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-    const sortedMcp = [...mcp].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-    const sortedAgents = [...agents].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-    const sortedCommands = [...commands].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-    const sortedHooks = [...hooks].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    const sortedRules = sortByPopularity(rules);
+    const sortedMcp = sortByPopularity(mcp);
+    const sortedAgents = sortByPopularity(agents);
+    const sortedCommands = sortByPopularity(commands);
+    const sortedHooks = sortByPopularity(hooks);
 
     const trending = getMixedContent(
       [
@@ -202,44 +210,58 @@ export default async function TrendingPage() {
   const { trending, popular, recent } = await getTrendingData();
   const totalCount = rules.length + mcp.length + agents.length + commands.length + hooks.length;
 
+  // This is a server component, so we'll use a static ID
+  const pageTitleId = 'trending-page-title';
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative py-24 px-4 overflow-hidden">
+      <section className="relative py-24 px-4 overflow-hidden" aria-labelledby={pageTitleId}>
         <div className="container mx-auto text-center">
           <div className="max-w-3xl mx-auto">
             <Badge variant="outline" className="mb-6 border-accent/20 bg-accent/5 text-accent">
-              <TrendingUp className="h-3 w-3 mr-1 text-accent" />
+              <TrendingUp className="h-3 w-3 mr-1 text-accent" aria-hidden="true" />
               Trending
             </Badge>
 
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">Trending Configurations</h1>
+            <h1 id={pageTitleId} className="text-4xl md:text-6xl font-bold mb-6">
+              Trending Configurations
+            </h1>
 
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
               Discover the most popular and trending Claude configurations in our community. Stay up
               to date with what developers are using and loving.
             </p>
 
-            <div className="flex flex-wrap gap-2 justify-center">
-              <Badge variant="secondary">
-                <Clock className="h-3 w-3 mr-1" />
-                Updated hourly
-              </Badge>
-              <Badge variant="secondary">
-                <Star className="h-3 w-3 mr-1" />
-                Community curated
-              </Badge>
-              <Badge variant="secondary">
-                <Users className="h-3 w-3 mr-1" />
-                {totalCount} total configs
-              </Badge>
-            </div>
+            <ul className="flex flex-wrap gap-2 justify-center list-none">
+              <li>
+                <Badge variant="secondary">
+                  <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
+                  Updated hourly
+                </Badge>
+              </li>
+              <li>
+                <Badge variant="secondary">
+                  <Star className="h-3 w-3 mr-1" aria-hidden="true" />
+                  Community curated
+                </Badge>
+              </li>
+              <li>
+                <Badge variant="secondary">
+                  <Users className="h-3 w-3 mr-1" aria-hidden="true" />
+                  {totalCount} total configs
+                </Badge>
+              </li>
+            </ul>
           </div>
         </div>
       </section>
 
       {/* Trending Content */}
-      <section className="container mx-auto px-4 py-16">
+      <section
+        className="container mx-auto px-4 py-16"
+        aria-label="Trending configurations content"
+      >
         <TrendingContent trending={trending} popular={popular} recent={recent} />
       </section>
     </div>

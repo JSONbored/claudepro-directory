@@ -2,6 +2,7 @@ import { Check, Copy } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { codeToHtml } from 'shiki';
 import { Button } from '@/components/ui/button';
+import { logger } from '@/lib/logger';
 
 interface CodeHighlightProps {
   code: string;
@@ -89,7 +90,14 @@ export const CodeHighlight = ({
         });
         setHighlightedCode(html);
       } catch (error) {
-        console.error('Failed to highlight code:', error);
+        logger.error(
+          'Failed to highlight code syntax',
+          error instanceof Error ? error : new Error(String(error)),
+          {
+            component: 'CodeHighlight',
+            language: language,
+          }
+        );
         // Fallback to plain text with basic styling
         setHighlightedCode(`<pre style="
           background-color: var(--color-card);
@@ -117,7 +125,13 @@ export const CodeHighlight = ({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy code:', err);
+      logger.error(
+        'Failed to copy code to clipboard',
+        err instanceof Error ? err : new Error(String(err)),
+        {
+          component: 'CodeHighlight',
+        }
+      );
     }
   };
 

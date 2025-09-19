@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { logger } from '@/lib/logger';
 
 export default function ErrorBoundary({
   error,
@@ -10,10 +11,13 @@ export default function ErrorBoundary({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log to Vercel's error tracking
-    if (window?.console) {
-      console.error('Application error:', error);
-    }
+    // Log error with structured logging for better Vercel observability
+    logger.error('Application error boundary triggered', error, {
+      errorDigest: error.digest,
+      userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent : undefined,
+      url: typeof window !== 'undefined' ? window.location?.href : undefined,
+      timestamp: new Date().toISOString(),
+    });
   }, [error]);
 
   return (
