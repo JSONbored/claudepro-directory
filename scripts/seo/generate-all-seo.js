@@ -40,8 +40,7 @@ async function generateAllSEO() {
   // Step 1: Build content metadata (needed for SEO generators)
   await runCommand('npm run build:content', 'Building content metadata');
 
-  // Step 2: Generate API endpoints (needed for sitemap)
-  await runCommand('npm run generate:api', 'Generating API endpoints');
+  // Step 2: API endpoints now handled by ISR - no longer needed
 
   // Step 3: Generate MCP SEO content
   await runCommand(

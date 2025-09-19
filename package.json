@@ -20,7 +20,7 @@
   "type": "module",
   "scripts": {
     "dev": "npm run build:content && next dev --turbopack",
-    "build": "npm run build:content && npm run generate:api && npm run generate:seo && npm run generate:sitemap && next build --turbopack",
+    "build": "npm run build:content && npm run generate:seo && npm run generate:sitemap && next build --turbopack",
     "build:analyze": "ANALYZE=true npm run build",
     "build:content": "tsx scripts/build-content.ts",
     "generate:api": "tsx scripts/generate-api-endpoints.ts",
@@ -63,7 +63,6 @@
     "critters": "^0.0.23",
     "embla-carousel-react": "^8.6.0",
     "fuse.js": "^7.1.0",
-    "glob": "^11.0.3",
     "lucide-react": "^0.544.0",
     "next": "^15.5.3",
     "next-themes": "^0.4.6",
