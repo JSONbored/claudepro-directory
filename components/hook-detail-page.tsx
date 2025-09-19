@@ -329,20 +329,20 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
   // Dynamic script path replacement for display
   const getDisplayConfig = () => {
     if (!item.configuration?.hookConfig) return item.configuration;
-    
+
     const config = JSON.parse(JSON.stringify(item.configuration)); // Deep clone
     const fileExtension = 'sh';
     const dynamicScriptPath = `./.claude/hooks/${item.slug}.${fileExtension}`;
-    
+
     // Replace script paths in hookConfig
     if (config.hookConfig?.hooks) {
-      Object.keys(config.hookConfig.hooks).forEach(hookType => {
+      Object.keys(config.hookConfig.hooks).forEach((hookType) => {
         if (config.hookConfig.hooks[hookType]?.script) {
           config.hookConfig.hooks[hookType].script = dynamicScriptPath;
         }
       });
     }
-    
+
     return config;
   };
 
