@@ -1,0 +1,37 @@
+{
+  "slug": "aws-cloudformation-validator",
+  "description": "Validates AWS CloudFormation templates for syntax errors and best practices",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["aws", "cloudformation", "infrastructure", "validation", "cloud"],
+  "hookType": "PostToolUse",
+  "features": [
+    "Advanced CloudFormation template validation with cfn-lint",
+    "Syntax error detection and reporting",
+    "AWS best practices compliance checking",
+    "Type mismatch validation",
+    "Fallback to AWS CLI validation when cfn-lint unavailable",
+    "Support for JSON and YAML template formats"
+  ],
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "postToolUse": {
+          "script": "./.claude/hooks/aws-cloudformation-validator.sh",
+          "matchers": ["write", "edit"]
+        }
+      }
+    },
+    "scriptContent": "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if it's a CloudFormation template\nif [[ \"$FILE_PATH\" == *.cf.json ]] || [[ \"$FILE_PATH\" == *.cf.yaml ]] || [[ \"$FILE_PATH\" == *cloudformation*.yaml ]] || [[ \"$FILE_PATH\" == *cloudformation*.json ]]; then\n  echo \"☁️ Validating CloudFormation template $FILE_PATH...\" >&2\n  \n  # Try cfn-lint first (preferred)\n  if command -v cfn-lint &> /dev/null; then\n    echo \"Running cfn-lint validation...\" >&2\n    if cfn-lint \"$FILE_PATH\" 2>&1; then\n      echo \"✅ CloudFormation template validation passed\" >&2\n    else\n      echo \"❌ CloudFormation template validation failed\" >&2\n    fi\n  elif command -v aws &> /dev/null; then\n    echo \"⚠️ cfn-lint not installed, using AWS CLI validation...\" >&2\n    if aws cloudformation validate-template --template-body \"file://$FILE_PATH\" 2>/dev/null; then\n      echo \"✅ Basic CloudFormation validation passed\" >&2\n    else\n      echo \"❌ CloudFormation template validation failed\" >&2\n    fi\n  else\n    echo \"⚠️ Neither cfn-lint nor AWS CLI available for validation\" >&2\n  fi\nelse\n  echo \"File $FILE_PATH is not a CloudFormation template, skipping validation\" >&2\nfi\n\nexit 0"
+  },
+  "useCases": [
+    "Pre-deployment CloudFormation template validation",
+    "Infrastructure as Code quality assurance",
+    "CI/CD pipeline integration for AWS deployments",
+    "Development workflow validation for cloud resources",
+    "Compliance checking against AWS best practices"
+  ],
+  "documentationUrl": "https://aws.amazon.com/cloudformation/",
+  "source": "community"
+}

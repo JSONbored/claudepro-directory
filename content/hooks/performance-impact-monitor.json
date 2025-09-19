@@ -1,0 +1,16 @@
+{
+  "title": "Performance Impact Monitor",
+  "description": "Monitors and alerts on performance-impacting changes in real-time",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["performance", "monitoring", "notification", "profiling", "alerts"],
+  "content": "Tracks changes that might impact application performance and provides real-time alerts. Monitors for large file additions, complex functions, and performance anti-patterns.\n\n```json\n{\n  \"Notification\": [\n    {\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_NAME\\\" == 'Edit' ]] || [[ \\\"$CLAUDE_TOOL_NAME\\\" == 'Write' ]]; then FILE_SIZE=$(stat -f%z \\\"$CLAUDE_TOOL_FILE_PATH\\\" 2>/dev/null || stat -c%s \\\"$CLAUDE_TOOL_FILE_PATH\\\" 2>/dev/null || echo '0'); if [ \\\"$FILE_SIZE\\\" -gt 50000 ]; then echo '⚠️ PERFORMANCE: Large file detected ('$FILE_SIZE' bytes)'; fi; if grep -E '(setTimeout|setInterval).*[0-9]{4,}' \\\"$CLAUDE_TOOL_FILE_PATH\\\" 2>/dev/null; then echo '⚠️ PERFORMANCE: Long timer detected'; fi; if grep -E 'for.*for.*for' \\\"$CLAUDE_TOOL_FILE_PATH\\\" 2>/dev/null; then echo '⚠️ PERFORMANCE: Triple nested loop detected'; fi; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "Notification",
+    "matcher": "Edit|Write",
+    "timeout": 2000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

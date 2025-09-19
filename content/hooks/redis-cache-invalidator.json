@@ -1,0 +1,16 @@
+{
+  "title": "Redis Cache Invalidator",
+  "description": "Automatically clears relevant Redis cache keys when data model files are modified",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["redis", "cache", "performance", "data-models", "invalidation"],
+  "content": "Intelligently invalidates Redis cache entries when model or data files are modified. Helps maintain cache consistency by clearing relevant keys based on the modified file patterns.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *models/*.js ]] || [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *models/*.py ]]; then MODEL_NAME=$(basename \\\"${CLAUDE_TOOL_FILE_PATH%.*}\\\"); echo \\\"🔄 Invalidating Redis cache for model: $MODEL_NAME\\\" && redis-cli --scan --pattern \\\"*${MODEL_NAME}*\\\" | xargs -L 1 redis-cli DEL 2>/dev/null && redis-cli FLUSHDB ASYNC 2>/dev/null && echo '✅ Cache invalidated'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "PostToolUse",
+    "matcher": "Edit|Write",
+    "timeout": 3000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

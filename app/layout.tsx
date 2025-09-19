@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { Toaster } from 'sonner';
@@ -112,6 +113,12 @@ export default function RootLayout({
         </ThemeProvider>
         <Analytics />
         <WebVitals />
+        {/* Umami Analytics - Privacy-focused analytics */}
+        <Script
+          src="https://umami.claudepro.directory/script.js"
+          data-website-id="b734c138-2949-4527-9160-7fe5d0e81121"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

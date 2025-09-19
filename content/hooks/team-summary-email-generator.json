@@ -1,0 +1,16 @@
+{
+  "title": "Team Summary Email Generator",
+  "description": "Generates and sends a comprehensive summary email to the team when session ends",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["email", "team", "stop-hook", "summary", "communication"],
+  "content": "Creates a detailed summary of all work done during the Claude session and sends it to the team via email. Includes changed files, test results, and key accomplishments.\n\n```json\n{\n  \"Stop\": [\n    {\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ -n \\\"$TEAM_EMAIL\\\" ]] || [[ -n \\\"$SENDGRID_API_KEY\\\" ]]; then SUBJECT='Claude Code Session Summary - '$(date +\\\"%Y-%m-%d %H:%M\\\"); BODY='<h2>Session Summary</h2><p><b>Duration:</b> Active session completed at '$(date)'</p><h3>Files Modified:</h3><pre>'$(git diff --name-only 2>/dev/null | head -10 || echo 'No git changes')'</pre><h3>Statistics:</h3><ul><li>Files changed: '$(git diff --name-only 2>/dev/null | wc -l)'</li><li>Insertions: '$(git diff --stat 2>/dev/null | tail -1 | grep -oE '[0-9]+ insertion' || echo '0')'</li><li>Deletions: '$(git diff --stat 2>/dev/null | tail -1 | grep -oE '[0-9]+ deletion' || echo '0')'</li></ul><h3>Test Results:</h3><pre>'$(npm test -- --silent 2>/dev/null | tail -5 || echo 'No test results')'</pre>'; if command -v mail >/dev/null 2>&1; then echo \\\"$BODY\\\" | mail -s \\\"$SUBJECT\\\" \\\"$TEAM_EMAIL\\\"; elif [[ -n \\\"$SENDGRID_API_KEY\\\" ]]; then curl -X POST https://api.sendgrid.com/v3/mail/send -H \\\"Authorization: Bearer $SENDGRID_API_KEY\\\" -H \\\"Content-Type: application/json\\\" -d '{\\\"personalizations\\\":[{\\\"to\\\":[{\\\"email\\\":\\\"'\\\"$TEAM_EMAIL\\\"'\\\"}]}],\\\"from\\\":{\\\"email\\\":\\\"claude@yourdomain.com\\\"},\\\"subject\\\":\\\"'\\\"$SUBJECT\\\"'\\\",\\\"content\\\":[{\\\"type\\\":\\\"text/html\\\",\\\"value\\\":\\\"'\\\"$BODY\\\"'\\\"}]}' 2>/dev/null; fi && echo '✉️ Summary sent to team'; else echo 'ℹ️ Configure TEAM_EMAIL or SENDGRID_API_KEY to enable email summaries'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "Stop",
+    "matcher": "*",
+    "timeout": 10000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

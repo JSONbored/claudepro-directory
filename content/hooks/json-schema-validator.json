@@ -1,0 +1,16 @@
+{
+  "title": "JSON Schema Validator",
+  "description": "Validates JSON files against their schemas when modified to ensure data integrity",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["json", "schema", "validation", "data-integrity", "api"],
+  "content": "Automatically validates JSON files against their corresponding schema definitions. Looks for schema files with matching names or uses a central schema directory to ensure JSON data conforms to expected structures.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.json ]] && [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" != *.schema.json ]]; then echo '📋 Validating JSON schema...' && JSON_NAME=$(basename \\\"${CLAUDE_TOOL_FILE_PATH%.json}\\\"); SCHEMA_FILE=\\\"$(dirname \\\"$CLAUDE_TOOL_FILE_PATH\\\")/${JSON_NAME}.schema.json\\\"; if [ ! -f \\\"$SCHEMA_FILE\\\" ]; then SCHEMA_FILE=\\\"./schemas/${JSON_NAME}.schema.json\\\"; fi; if [ -f \\\"$SCHEMA_FILE\\\" ]; then npx ajv validate -s \\\"$SCHEMA_FILE\\\" -d \\\"$CLAUDE_TOOL_FILE_PATH\\\" && echo '✅ JSON validation passed' || echo '❌ JSON validation failed'; else echo 'ℹ️ No schema found for validation' && jq . \\\"$CLAUDE_TOOL_FILE_PATH\\\" > /dev/null && echo '✅ JSON syntax valid' || echo '❌ Invalid JSON syntax'; fi; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "PostToolUse",
+    "matcher": "Edit|Write",
+    "timeout": 3000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

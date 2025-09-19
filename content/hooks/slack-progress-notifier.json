@@ -1,0 +1,17 @@
+{
+  "title": "Slack Progress Notifier",
+  "description": "Sends progress updates to Slack channel for team visibility on Claude's activities",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["slack", "notifications", "team", "collaboration", "monitoring"],
+  "content": "Sends real-time notifications to a Slack channel about significant actions taken by Claude Code. Keeps the team informed about automated changes and progress.\n\n```json\n{\n  \"Notification\": [\n    {\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ -n \\\"$SLACK_WEBHOOK_URL\\\" ]]; then EMOJI='📝'; [[ \\\"$CLAUDE_TOOL_NAME\\\" == *'test'* ]] && EMOJI='🧪'; [[ \\\"$CLAUDE_TOOL_NAME\\\" == *'build'* ]] && EMOJI='🏗️'; curl -X POST -H 'Content-type: application/json' --data '{\\\"text\\\":\\\"'$EMOJI' Claude Code: '${CLAUDE_TOOL_NAME}' on '$(basename \\\"$CLAUDE_TOOL_FILE_PATH\\\")'\\\"}' \\\"$SLACK_WEBHOOK_URL\\\" 2>/dev/null || true; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "Notification",
+    "matcher": "Edit|Write|MultiEdit",
+    "timeout": 2000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "documentationUrl": "https://api.slack.com/messaging/webhooks",
+  "source": "community"
+}

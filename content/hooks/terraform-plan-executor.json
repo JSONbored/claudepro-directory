@@ -1,0 +1,17 @@
+{
+  "title": "Terraform Plan Executor",
+  "description": "Automatically runs terraform plan when .tf files are modified to preview infrastructure changes",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["terraform", "infrastructure", "iac", "devops", "cloud"],
+  "content": "Executes terraform plan automatically when Terraform configuration files are modified. Shows what changes will be applied to infrastructure before running terraform apply.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.tf ]]; then echo '🏗️ Running Terraform plan...' && cd $(dirname \\\"$CLAUDE_TOOL_FILE_PATH\\\") && terraform fmt -check \\\"$(basename \\\"$CLAUDE_TOOL_FILE_PATH\\\")\\\" && terraform validate && terraform plan -compact-warnings && echo '✅ Terraform plan complete'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "PostToolUse",
+    "matcher": "Edit|Write",
+    "timeout": 20000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "documentationUrl": "https://www.terraform.io/docs",
+  "source": "community"
+}

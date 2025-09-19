@@ -1,0 +1,16 @@
+{
+  "title": "Performance Benchmark Report",
+  "description": "Runs performance benchmarks and generates comparison report when session ends",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["performance", "benchmarking", "stop-hook", "testing", "metrics"],
+  "content": "Executes performance benchmarks at the end of the session and compares results with previous runs. Helps track performance regressions and improvements over time.\n\n```json\n{\n  \"Stop\": [\n    {\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"echo '⚡ PERFORMANCE BENCHMARK REPORT' && echo '==============================' && if [ -f 'package.json' ] && grep -q 'benchmark' package.json 2>/dev/null; then npm run benchmark 2>/dev/null | tail -20 || echo 'Benchmark script not configured'; elif [ -f 'benchmark.js' ]; then node benchmark.js 2>/dev/null || echo 'Benchmark failed'; fi && if command -v hyperfine >/dev/null 2>&1; then echo '🏃 Running hyperfine benchmarks:' && hyperfine --warmup 2 'npm test' 'npm run build' 2>/dev/null | head -10 || echo 'Hyperfine benchmarks skipped'; fi && if [ -f 'pytest.ini' ] || [ -f 'setup.cfg' ]; then pytest --benchmark-only 2>/dev/null | tail -15 || echo 'Python benchmarks not configured'; fi && echo '📊 Lighthouse scores:' && if command -v lighthouse >/dev/null 2>&1; then lighthouse http://localhost:3000 --output json --quiet --chrome-flags='--headless' 2>/dev/null | jq '.categories | to_entries[] | \\\"\\\\(.key): \\\\(.value.score * 100)\\\"' || echo 'Lighthouse not available'; fi && echo '=============================='\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "Stop",
+    "matcher": "*",
+    "timeout": 60000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

@@ -1,0 +1,72 @@
+{
+  "title": "Cloudflare MCP Server",
+  "description": "Build applications, analyze traffic, and manage security settings through Cloudflare",
+  "category": "mcp",
+  "author": "Cloudflare",
+  "dateAdded": "2025-09-18",
+  "tags": ["cloudflare", "cdn", "security", "dns", "infrastructure"],
+  "content": "Manage Cloudflare services and configurations through Claude for comprehensive infrastructure control.",
+  "features": [
+    "Configure DNS settings and records",
+    "Manage security rules and WAF",
+    "Analyze traffic patterns and metrics",
+    "Control caching behavior and purging",
+    "Deploy Workers and Pages"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Check Cloudflare documentation for specific service endpoints",
+        "Choose the appropriate MCP server for your needs",
+        "Configure based on the specific service requirements",
+        "Authenticate with appropriate credentials"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "See Cloudflare documentation for specific server URLs - multiple services available"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "cloudflare": {
+          "transport": "varies",
+          "url": "Service-specific URL required"
+        }
+      }
+    }
+  },
+  "useCases": [
+    "Deploy edge functions globally",
+    "Configure WAF rules for security",
+    "Manage DNS records programmatically",
+    "Analyze attack patterns and threats",
+    "Optimize site performance with caching"
+  ],
+  "security": [
+    "Use API tokens with minimal scope",
+    "Enable 2FA on Cloudflare account",
+    "Regular security audits recommended",
+    "Monitor API usage and rate limits"
+  ],
+  "troubleshooting": [
+    "Verify API token permissions",
+    "Check zone access rights",
+    "Monitor API quota usage"
+  ],
+  "examples": [
+    "Add DNS record for subdomain",
+    "Deploy Worker script",
+    "Show traffic analytics",
+    "Configure firewall rule"
+  ],
+  "package": null,
+  "requiresAuth": true,
+  "permissions": ["read", "write", "deploy"],
+  "configLocation": "varies_by_service",
+  "githubUrl": null,
+  "documentationUrl": "https://developers.cloudflare.com/agents/model-context-protocol/mcp-servers-for-cloudflare/",
+  "source": "official"
+}

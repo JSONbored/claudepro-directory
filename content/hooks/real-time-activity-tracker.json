@@ -1,0 +1,16 @@
+{
+  "title": "Real-time Activity Tracker",
+  "description": "Tracks all Claude Code activities in real-time and logs them for monitoring and debugging",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["monitoring", "logging", "notification", "real-time", "debugging"],
+  "content": "Logs every tool action and file operation to a structured activity log. Perfect for debugging, auditing, and understanding Claude's decision-making process.\n\n```json\n{\n  \"Notification\": [\n    {\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"ACTIVITY_LOG='.claude/activity-'$(date +%Y%m%d)'.log' && mkdir -p .claude && echo '[\"'$(date --iso-8601=seconds)'\"] Tool: '$CLAUDE_TOOL_NAME' | File: '$CLAUDE_TOOL_FILE_PATH' | Action: '$CLAUDE_TOOL_ACTION >> \"$ACTIVITY_LOG\" && tail -n 100 \"$ACTIVITY_LOG\" > \"$ACTIVITY_LOG.tmp\" && mv \"$ACTIVITY_LOG.tmp\" \"$ACTIVITY_LOG\"\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "Notification",
+    "matcher": "*",
+    "timeout": 1000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

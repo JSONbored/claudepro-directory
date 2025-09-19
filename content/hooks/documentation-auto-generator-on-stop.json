@@ -1,0 +1,35 @@
+{
+  "slug": "documentation-auto-generator-on-stop",
+  "description": "Automatically generates or updates project documentation when session ends",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["documentation", "stop-hook", "automation", "markdown", "jsdoc"],
+  "hookType": "Stop",
+  "features": [
+    "Automatic API documentation generation for multiple languages",
+    "Changelog updates with session summaries",
+    "Support for JSDoc, TypeDoc, Sphinx, and other doc generators",
+    "Project structure analysis and documentation",
+    "README file updates and maintenance",
+    "Multi-format output (HTML, Markdown, PDF)"
+  ],
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "stop": {
+          "script": "./.claude/hooks/documentation-auto-generator-on-stop.sh"
+        }
+      }
+    },
+    "scriptContent": "#!/usr/bin/env bash\n\necho \"📚 Starting documentation generation...\" >&2\n\n# Create docs directory if it doesn't exist\nmkdir -p ./docs\n\n# Generate timestamp for session\nSESSION_DATE=$(date +\"%Y-%m-%d\")\nSESSION_TIME=$(date +\"%H:%M:%S\")\nTIMESTAMP=\"$SESSION_DATE $SESSION_TIME\"\n\n# Count modified files if in git repo\nMODIFIED_COUNT=0\nif command -v git &> /dev/null && git rev-parse --git-dir > /dev/null 2>&1; then\n  MODIFIED_COUNT=$(git diff --name-only 2>/dev/null | wc -l | xargs)\nfi\n\necho \"📊 Session summary: $MODIFIED_COUNT files modified\" >&2\n\n# JavaScript/TypeScript projects\nif [ -f \"package.json\" ]; then\n  echo \"🟡 JavaScript/TypeScript project detected\" >&2\n  \n  # Try TypeDoc first for TypeScript projects\n  if ls *.ts src/**/*.ts 2>/dev/null | head -1 > /dev/null; then\n    if command -v npx &> /dev/null && npx typedoc --version &> /dev/null 2>&1; then\n      echo \"📝 Generating TypeDoc documentation...\" >&2\n      npx typedoc --out ./docs/api src 2>/dev/null && echo \"✅ TypeDoc documentation generated\" >&2\n    else\n      echo \"💡 Install TypeDoc for better TypeScript docs: npm install -g typedoc\" >&2\n    fi\n  fi\n  \n  # Try JSDoc for JavaScript projects\n  if [ -f \"jsdoc.json\" ] || [ -f \"jsdoc.conf.json\" ]; then\n    if command -v npx &> /dev/null && npx jsdoc --version &> /dev/null 2>&1; then\n      echo \"📝 Generating JSDoc documentation...\" >&2\n      npx jsdoc -c jsdoc.json 2>/dev/null || npx jsdoc -c jsdoc.conf.json 2>/dev/null\n      [ $? -eq 0 ] && echo \"✅ JSDoc documentation generated\" >&2\n    fi\n  fi\n  \n  # Try documentation.js as fallback\n  if command -v npx &> /dev/null; then\n    if npx documentation --version &> /dev/null 2>&1; then\n      echo \"📝 Generating documentation.js docs...\" >&2\n      npx documentation build './src/**/*.js' -f md -o ./docs/api.md 2>/dev/null\n      [ $? -eq 0 ] && echo \"✅ Documentation.js docs generated\" >&2\n    fi\n  fi\nfi\n\n# Python projects\nif [ -f \"setup.py\" ] || [ -f \"pyproject.toml\" ] || [ -f \"requirements.txt\" ]; then\n  echo \"🐍 Python project detected\" >&2\n  \n  # Try pdoc for simple API docs\n  if command -v pdoc &> /dev/null; then\n    echo \"📝 Generating pdoc documentation...\" >&2\n    pdoc --html --output-dir ./docs . 2>/dev/null && echo \"✅ pdoc documentation generated\" >&2\n  elif command -v python &> /dev/null; then\n    if python -c \"import pdoc\" 2>/dev/null; then\n      echo \"📝 Generating pdoc documentation...\" >&2\n      python -m pdoc --html --output-dir ./docs . 2>/dev/null && echo \"✅ pdoc documentation generated\" >&2\n    fi\n  fi\n  \n  # Try Sphinx for comprehensive docs\n  if [ -f \"docs/conf.py\" ]; then\n    if command -v sphinx-build &> /dev/null; then\n      echo \"📝 Building Sphinx documentation...\" >&2\n      sphinx-build -b html docs ./docs/_build 2>/dev/null && echo \"✅ Sphinx documentation built\" >&2\n    fi\n  elif command -v sphinx-quickstart &> /dev/null; then\n    echo \"📝 Setting up Sphinx documentation...\" >&2\n    PROJECT_NAME=$(basename \"$(pwd)\")\n    sphinx-quickstart -q -p \"$PROJECT_NAME\" -a \"Claude\" --ext-autodoc --makefile docs 2>/dev/null\n    [ $? -eq 0 ] && echo \"✅ Sphinx project initialized in docs/\" >&2\n  fi\nfi\n\n# Go projects\nif [ -f \"go.mod\" ]; then\n  echo \"🐹 Go project detected\" >&2\n  \n  if command -v go &> /dev/null; then\n    echo \"📝 Generating Go documentation...\" >&2\n    go doc -all > ./docs/api.txt 2>/dev/null && echo \"✅ Go documentation generated\" >&2\n    \n    # Try godoc if available\n    if command -v godoc &> /dev/null; then\n      echo \"💡 Run 'godoc -http=:6060' to serve documentation locally\" >&2\n    fi\n  fi\nfi\n\n# Rust projects\nif [ -f \"Cargo.toml\" ]; then\n  echo \"🦀 Rust project detected\" >&2\n  \n  if command -v cargo &> /dev/null; then\n    echo \"📝 Generating Rust documentation...\" >&2\n    cargo doc --no-deps --target-dir ./docs/rust 2>/dev/null && echo \"✅ Rust documentation generated\" >&2\n  fi\nfi\n\n# Update CHANGELOG.md\necho \"📝 Updating changelog...\" >&2\nCHANGELOG_ENTRY=\"## Session $SESSION_DATE at $SESSION_TIME\\n\\n- Files modified: $MODIFIED_COUNT\\n- Documentation updated automatically\\n- Session completed\\n\\n\"\n\nif [ -f \"CHANGELOG.md\" ]; then\n  # Prepend to existing changelog\n  echo -e \"$CHANGELOG_ENTRY$(cat CHANGELOG.md)\" > CHANGELOG.md.tmp && mv CHANGELOG.md.tmp CHANGELOG.md\nelse\n  # Create new changelog\n  echo -e \"# Changelog\\n\\n$CHANGELOG_ENTRY\" > CHANGELOG.md\nfi\n\necho \"✅ Changelog updated\" >&2\n\n# Generate or update README.md if it doesn't exist\nif [ ! -f \"README.md\" ]; then\n  echo \"📝 Creating basic README.md...\" >&2\n  PROJECT_NAME=$(basename \"$(pwd)\")\n  cat > README.md << EOF\n# $PROJECT_NAME\n\nProject documentation generated automatically.\n\n## Documentation\n\nAPI documentation can be found in the \\`docs/\\` directory.\n\n## Last Updated\n\n$TIMESTAMP\nEOF\n  echo \"✅ README.md created\" >&2\nfi\n\n# Create documentation index\necho \"📋 Creating documentation index...\" >&2\ncat > ./docs/index.md << EOF\n# Project Documentation\n\nGenerated on: $TIMESTAMP\n\n## Available Documentation\n\nEOF\n\n# List available documentation files\nfind ./docs -name \"*.md\" -o -name \"*.html\" -o -name \"index.html\" 2>/dev/null | while read -r file; do\n  echo \"- [$(basename \"$file\")]($(basename \"$file\"))\" >> ./docs/index.md\ndone\n\necho \"\" >&2\necho \"📚 Documentation generation completed!\" >&2\necho \"📁 Check the ./docs/ directory for generated documentation\" >&2\necho \"📋 Documentation index available at ./docs/index.md\" >&2\n\nexit 0"
+  },
+  "useCases": [
+    "Automated API documentation maintenance",
+    "End-of-session project documentation updates",
+    "Multi-language documentation generation",
+    "Changelog automation and project tracking",
+    "Development workflow documentation integration"
+  ],
+  "source": "community"
+}

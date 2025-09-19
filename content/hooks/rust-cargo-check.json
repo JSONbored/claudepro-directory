@@ -1,0 +1,16 @@
+{
+  "title": "Rust Cargo Check",
+  "description": "Automatically runs cargo check and clippy when Rust files are modified",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["rust", "cargo", "clippy", "linting", "compilation"],
+  "content": "Runs cargo check for fast compilation checks and cargo clippy for linting when Rust files are modified. Helps catch errors and improve code quality with Rust's built-in tools.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.rs ]] || [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *Cargo.toml ]]; then echo '🦀 Running cargo check...' && cargo check && echo '📋 Running clippy...' && cargo clippy -- -W clippy::pedantic && echo '✅ Rust checks complete' || echo '⚠️ Rust checks found issues'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "PostToolUse",
+    "matcher": "Edit|Write",
+    "timeout": 15000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

@@ -1,0 +1,73 @@
+{
+  "title": "Plaid MCP Server",
+  "description": "Analyze, troubleshoot, and optimize Plaid integrations for banking data and financial account linking",
+  "category": "mcp",
+  "author": "Plaid",
+  "dateAdded": "2025-09-18",
+  "tags": ["banking", "plaid", "fintech", "financial-data", "account-linking"],
+  "content": "Connect Claude to Plaid for banking data integration and financial services troubleshooting.",
+  "features": [
+    "Link financial accounts securely",
+    "Access transaction data and history",
+    "Verify account ownership",
+    "Retrieve balance information",
+    "Troubleshoot integration issues"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open Claude Desktop configuration file",
+        "Add the Plaid server configuration with SSE transport",
+        "Restart Claude Desktop",
+        "Authenticate with Plaid Dashboard"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport sse plaid https://api.dashboard.plaid.com/mcp/sse"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "plaid": {
+          "transport": "sse",
+          "url": "https://api.dashboard.plaid.com/mcp/sse"
+        }
+      }
+    }
+  },
+  "useCases": [
+    "Debug account linking issues",
+    "Analyze transaction categorization",
+    "Verify webhook configurations",
+    "Test API integrations",
+    "Monitor API usage patterns"
+  ],
+  "security": [
+    "OAuth authentication required",
+    "Use development environment for testing",
+    "Protect sensitive financial data",
+    "Follow compliance requirements"
+  ],
+  "troubleshooting": [
+    "Check Plaid Dashboard access",
+    "Verify environment (development/production)",
+    "Monitor webhook status",
+    "Review error logs"
+  ],
+  "examples": [
+    "Debug why account linking is failing",
+    "Show recent API errors",
+    "Verify webhook configuration",
+    "Check transaction categorization accuracy"
+  ],
+  "package": null,
+  "requiresAuth": true,
+  "permissions": ["read", "debug", "test"],
+  "configLocation": "claude_desktop_config.json",
+  "githubUrl": null,
+  "documentationUrl": "https://plaid.com/blog/plaid-mcp-ai-assistant-claude/",
+  "source": "official"
+}

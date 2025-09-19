@@ -1,0 +1,16 @@
+{
+  "title": "Session Metrics Collector",
+  "description": "Collects and reports detailed metrics about the coding session when Claude stops",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["metrics", "analytics", "stop-hook", "performance", "statistics"],
+  "content": "Gathers comprehensive metrics about the coding session including duration, files touched, languages used, and productivity statistics when the workflow stops.\n\n```json\n{\n  \"Stop\": [\n    {\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"echo '📊 SESSION METRICS' && echo '⏱️ Session ended: '$(date) && echo '📁 Files modified:' && git diff --name-only 2>/dev/null | wc -l || find . -mmin -60 -type f 2>/dev/null | wc -l && echo '📝 Lines changed:' && git diff --shortstat 2>/dev/null || echo 'N/A' && echo '🔤 Languages used:' && git diff --name-only 2>/dev/null | sed 's/.*\\.//' | sort -u | tr '\\n' ' ' || echo 'Multiple' && echo '💾 Saving metrics to: .metrics/session-'$(date +%Y%m%d_%H%M%S)'.json'\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "Stop",
+    "matcher": "*",
+    "timeout": 5000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

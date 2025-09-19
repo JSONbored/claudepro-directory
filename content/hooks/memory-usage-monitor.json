@@ -1,0 +1,16 @@
+{
+  "title": "Memory Usage Monitor",
+  "description": "Monitors memory usage and alerts when thresholds are exceeded",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["memory", "performance", "monitoring", "notification", "resources"],
+  "content": "Tracks memory consumption during development activities and alerts when memory usage is high. Helps prevent out-of-memory issues and identify memory leaks.\n\n```json\n{\n  \"Notification\": [\n    {\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"MEM_USAGE=$(ps aux | grep -E 'node|python|java|ruby' | awk '{sum+=$4} END {print sum}' 2>/dev/null || echo '0'); if (( $(echo \\\"$MEM_USAGE > 50\\\" | bc -l 2>/dev/null || echo 0) )); then echo '⚠️ MEMORY: High memory usage detected ('$MEM_USAGE'%)'; fi; SWAP=$(free | grep Swap | awk '{print ($3/$2)*100}' 2>/dev/null || sysctl vm.swapusage 2>/dev/null | grep -oE '[0-9]+%' || echo '0'); if [[ \\\"${SWAP%\\\\%}\\\" -gt 50 ]]; then echo '⚠️ MEMORY: High swap usage ('$SWAP')'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "Notification",
+    "matcher": "*",
+    "timeout": 2000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

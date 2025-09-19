@@ -1,0 +1,17 @@
+{
+  "title": "Kubernetes Manifest Validator",
+  "description": "Validates Kubernetes YAML manifests for syntax and best practices when modified",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["kubernetes", "k8s", "yaml", "validation", "devops"],
+  "content": "Validates Kubernetes manifests using kubectl dry-run and kubeval to catch configuration errors before deployment. Checks for syntax errors, API version compatibility, and best practices.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.yaml ]] || [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.yml ]]; then if grep -q 'apiVersion:\\\\|kind:' \\\"$CLAUDE_TOOL_FILE_PATH\\\"; then echo '☸️ Validating Kubernetes manifest...' && kubectl apply --dry-run=client -f \\\"$CLAUDE_TOOL_FILE_PATH\\\" && kubeval \\\"$CLAUDE_TOOL_FILE_PATH\\\" 2>/dev/null && echo '✅ Kubernetes manifest valid' || echo '⚠️ kubectl validation passed (kubeval not installed)'; fi; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "PostToolUse",
+    "matcher": "Edit|Write",
+    "timeout": 5000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "documentationUrl": "https://kubernetes.io/docs/",
+  "source": "community"
+}

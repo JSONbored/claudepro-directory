@@ -1,0 +1,72 @@
+{
+  "title": "Sentry MCP Server",
+  "description": "Monitor errors, debug production issues, and track application health",
+  "category": "mcp",
+  "author": "Sentry",
+  "dateAdded": "2025-09-18",
+  "tags": ["monitoring", "sentry", "debugging", "errors", "devops"],
+  "content": "Connect Claude to Sentry for comprehensive error monitoring, debugging, and application health tracking.",
+  "features": [
+    "View and analyze error reports in real-time",
+    "Access detailed stack traces and error context",
+    "Track error trends and patterns over time",
+    "Monitor release health and regression detection",
+    "Analyze performance metrics and bottlenecks"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open Claude Desktop configuration file",
+        "Add the Sentry server configuration with HTTP transport",
+        "Restart Claude Desktop",
+        "Authenticate with your Sentry account"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport http sentry https://mcp.sentry.dev/mcp"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "sentry": {
+          "transport": "http",
+          "url": "https://mcp.sentry.dev/mcp"
+        }
+      }
+    }
+  },
+  "useCases": [
+    "Debug production errors with full context",
+    "Identify error patterns and root causes",
+    "Track deployment impact on error rates",
+    "Monitor application performance metrics",
+    "Generate error reports for stakeholders"
+  ],
+  "security": [
+    "OAuth authentication required for access",
+    "Respect data sensitivity and PII concerns",
+    "Filter by environment (production/staging)",
+    "Use read-only access when appropriate"
+  ],
+  "troubleshooting": [
+    "Verify Sentry project access permissions",
+    "Check OAuth token validity with /mcp",
+    "Ensure proper project selection in queries"
+  ],
+  "examples": [
+    "What are the most common errors in the last 24 hours?",
+    "Show me the stack trace for error ID abc123",
+    "Which deployment introduced these new errors?",
+    "Find all errors affecting the checkout flow"
+  ],
+  "package": null,
+  "requiresAuth": true,
+  "permissions": ["read", "write"],
+  "configLocation": "claude_desktop_config.json",
+  "githubUrl": null,
+  "documentationUrl": "https://docs.sentry.io/product/sentry-mcp/",
+  "source": "official"
+}

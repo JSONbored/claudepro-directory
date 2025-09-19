@@ -1,0 +1,16 @@
+{
+  "title": "Jest Snapshot Auto-Updater",
+  "description": "Automatically updates Jest snapshots when component files are modified significantly",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["jest", "testing", "snapshots", "react", "automation"],
+  "content": "Detects when React components are modified and prompts to update Jest snapshots. Runs tests for the modified component and updates snapshots if tests pass.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.jsx ]] || [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.tsx ]]; then COMPONENT_NAME=$(basename \\\"${CLAUDE_TOOL_FILE_PATH%.*}\\\"); echo '📸 Checking Jest snapshots...' && npm test -- --testNamePattern=\\\"$COMPONENT_NAME\\\" --updateSnapshot --coverage=false --watchAll=false 2>/dev/null && echo '✅ Snapshots updated' || echo 'ℹ️ No snapshot tests found for this component'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "PostToolUse",
+    "matcher": "Edit|Write",
+    "timeout": 10000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

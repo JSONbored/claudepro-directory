@@ -1,0 +1,16 @@
+{
+  "title": "Test Coverage Final Report",
+  "description": "Generates a comprehensive test coverage report when the coding session ends",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["testing", "coverage", "stop-hook", "reporting", "quality"],
+  "content": "Runs test coverage analysis and generates a detailed report at the end of the session. Shows which parts of the code are well-tested and which need more coverage.\n\n```json\n{\n  \"Stop\": [\n    {\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"echo '🧪 TEST COVERAGE REPORT' && echo '========================' && if [ -f 'package.json' ] && grep -q 'jest\\\\|mocha\\\\|vitest' package.json 2>/dev/null; then npm test -- --coverage --silent 2>/dev/null || npm run test:coverage 2>/dev/null || echo 'Coverage command not configured'; if [ -d 'coverage' ]; then echo '📊 Coverage Summary:' && cat coverage/coverage-summary.json 2>/dev/null | grep -E '\\\"(lines|branches|functions|statements)\\\"' | head -8 || echo 'Summary not available'; echo '📈 Coverage report: file://$(pwd)/coverage/index.html'; fi; elif [ -f 'requirements.txt' ] || [ -f 'setup.py' ]; then pytest --cov=. --cov-report=term-missing 2>/dev/null || python -m coverage report 2>/dev/null || echo 'Python coverage not configured'; fi && echo '========================'\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "Stop",
+    "matcher": "*",
+    "timeout": 30000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

@@ -27,7 +27,15 @@ interface BaseContent {
   config?: string;
 }
 
-// Generate SEO-friendly slug from title or name
+// Generate title from slug
+function slugToTitle(slug: string): string {
+  return slug
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+// Generate SEO-friendly slug from title or name (fallback for legacy content)
 function generateSlug(item: BaseContent): string {
   const source = item.title || item.name || item.id;
   return slugify(source, {
@@ -58,14 +66,26 @@ async function loadJsonFiles(type: string): Promise<BaseContent[]> {
         try {
           const item = JSON.parse(content);
 
-          // Auto-generate slug if not provided
-          if (!item.slug) {
-            item.slug = generateSlug(item);
-          }
+          // For hooks and MCP servers, prioritize slug as source of truth
+          if (type === 'hooks' || type === 'mcp') {
+            // Auto-generate slug from filename if not provided
+            if (!item.slug) {
+              item.slug = path.basename(file, '.json');
+            }
 
-          // Ensure id matches slug for consistency
-          if (!item.id) {
+            // Auto-generate title and id from slug
             item.id = item.slug;
+            if (!item.title && !item.name) {
+              item.title = slugToTitle(item.slug);
+            }
+          } else {
+            // Legacy behavior for other content types
+            if (!item.slug) {
+              item.slug = generateSlug(item);
+            }
+            if (!item.id) {
+              item.id = item.slug;
+            }
           }
 
           return item;

@@ -1,0 +1,16 @@
+{
+  "title": "Markdown Link Checker",
+  "description": "Validates all links in markdown files to detect broken links and references",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["markdown", "documentation", "links", "validation", "broken-links"],
+  "content": "Automatically checks all links in markdown files including internal references, external URLs, and image links. Helps maintain documentation quality by identifying broken links early.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.md ]] || [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.mdx ]]; then echo '🔗 Checking markdown links...' && npx markdown-link-check \\\"$CLAUDE_TOOL_FILE_PATH\\\" --config .markdown-link-check.json 2>/dev/null || (echo '⚠️ Checking for broken internal links...' && grep -o '\\\\]([^)]*' \\\"$CLAUDE_TOOL_FILE_PATH\\\" | sed 's/](//' | while read -r link; do if [[ \\\"$link\\\" == /* ]] || [[ \\\"$link\\\" == ./* ]]; then [ -f \\\"$link\\\" ] || echo \\\"❌ Broken link: $link\\\"; fi; done) && echo '✅ Link check complete'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "PostToolUse",
+    "matcher": "Edit|Write",
+    "timeout": 10000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

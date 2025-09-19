@@ -1,0 +1,16 @@
+{
+  "title": "Webpack Bundle Analyzer",
+  "description": "Analyzes webpack bundle size when webpack config or entry files are modified",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["webpack", "bundle", "performance", "optimization", "analysis"],
+  "content": "Automatically runs webpack bundle analyzer when configuration or main entry files change. Generates an interactive treemap visualization of bundle contents to identify optimization opportunities.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *webpack.config.js ]] || [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *src/index.js ]] || [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *src/main.js ]]; then echo '📊 Analyzing webpack bundle...' && npx webpack-bundle-analyzer ./dist/stats.json ./dist --mode static --report bundle-report.html --no-open 2>/dev/null && echo '✅ Bundle analysis saved to bundle-report.html' || (npx webpack --profile --json > ./dist/stats.json && echo '📈 Stats generated in dist/stats.json'); fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "PostToolUse",
+    "matcher": "Edit|Write",
+    "timeout": 15000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

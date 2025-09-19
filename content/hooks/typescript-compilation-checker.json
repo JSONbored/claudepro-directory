@@ -1,0 +1,16 @@
+{
+  "title": "TypeScript Compilation Checker",
+  "description": "Automatically runs TypeScript compiler checks after editing .ts or .tsx files to catch type errors early",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["typescript", "validation", "type-safety", "compilation"],
+  "content": "Runs TypeScript compiler in no-emit mode after editing TypeScript files to immediately catch type errors and compilation issues. Shows clear error messages and prevents bad code from being committed.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.ts ]] || [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.tsx ]]; then npx tsc --noEmit \\\"$CLAUDE_TOOL_FILE_PATH\\\" && echo '✅ TypeScript compilation successful' || echo '❌ TypeScript compilation failed'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "PostToolUse",
+    "matcher": "Edit|Write",
+    "timeout": 10000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

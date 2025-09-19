@@ -1,0 +1,16 @@
+{
+  "title": "Python Linter Integration",
+  "description": "Automatically runs pylint on Python files after editing to enforce code quality standards",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["python", "linting", "code-quality", "pylint"],
+  "content": "Integrates pylint to automatically check Python code quality after edits. Helps maintain consistent coding standards, catch potential bugs, and improve code maintainability.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.py ]]; then echo '🔍 Running pylint...' && pylint --score=no \\\"$CLAUDE_TOOL_FILE_PATH\\\" || echo '⚠️ Pylint found issues (non-blocking)'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "PostToolUse",
+    "matcher": "Edit|Write",
+    "timeout": 8000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

@@ -1,0 +1,35 @@
+{
+  "slug": "code-complexity-alert-monitor",
+  "description": "Alerts when code complexity exceeds thresholds in real-time",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["complexity", "code-quality", "notification", "monitoring", "maintainability"],
+  "hookType": "Notification",
+  "features": [
+    "Real-time complexity monitoring for JavaScript, TypeScript, and Python",
+    "Configurable line count thresholds (default: 500 lines)",
+    "Function count analysis and alerting",
+    "Nesting level detection for code structure",
+    "Instant feedback on code maintainability issues",
+    "Multi-language support with pattern matching"
+  ],
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "notification": {
+          "script": "./.claude/hooks/code-complexity-alert-monitor.sh"
+        }
+      }
+    },
+    "scriptContent": "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if it's a supported file type\nif [[ \"$FILE_PATH\" == *.js ]] || [[ \"$FILE_PATH\" == *.jsx ]] || [[ \"$FILE_PATH\" == *.ts ]] || [[ \"$FILE_PATH\" == *.tsx ]] || [[ \"$FILE_PATH\" == *.py ]]; then\n  echo \"🔍 Analyzing code complexity for $FILE_PATH...\" >&2\n  \n  # Check file exists\n  if [ ! -f \"$FILE_PATH\" ]; then\n    echo \"📁 File does not exist yet, skipping complexity analysis\" >&2\n    exit 0\n  fi\n  \n  # Line count analysis\n  LINES=$(wc -l < \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n  if [ \"$LINES\" -gt 500 ]; then\n    echo \"⚠️ COMPLEXITY: File exceeds 500 lines ($LINES lines) - consider splitting into smaller modules\" >&2\n  elif [ \"$LINES\" -gt 300 ]; then\n    echo \"📊 INFO: File is getting large ($LINES lines) - monitor for complexity\" >&2\n  fi\n  \n  # Function/method count analysis\n  FUNCTION_COUNT=$(grep -E '(function|def |const.*=>|class |async |export function)' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  if [ \"$FUNCTION_COUNT\" -gt 20 ]; then\n    echo \"⚠️ COMPLEXITY: Too many functions/methods ($FUNCTION_COUNT) - consider modularization\" >&2\n  elif [ \"$FUNCTION_COUNT\" -gt 15 ]; then\n    echo \"📊 INFO: High function count ($FUNCTION_COUNT) - good candidate for refactoring\" >&2\n  fi\n  \n  # Nesting level analysis (rough estimate)\n  OPEN_BRACES=$(grep -o '{' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  CLOSE_BRACES=$(grep -o '}' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  \n  if [ \"$OPEN_BRACES\" -gt 50 ]; then\n    echo \"⚠️ COMPLEXITY: High nesting detected ($OPEN_BRACES braces) - consider flattening logic\" >&2\n  fi\n  \n  # Python-specific checks\n  if [[ \"$FILE_PATH\" == *.py ]]; then\n    INDENT_DEPTH=$(grep -E '^[ ]{12,}' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n    if [ \"$INDENT_DEPTH\" -gt 5 ]; then\n      echo \"⚠️ COMPLEXITY: Deep indentation detected in Python code - consider function extraction\" >&2\n    fi\n  fi\n  \n  echo \"✅ Complexity analysis completed for $FILE_PATH\" >&2\nelse\n  echo \"File $FILE_PATH is not a supported type for complexity analysis\" >&2\nfi\n\nexit 0"
+  },
+  "useCases": [
+    "Real-time code quality monitoring during development",
+    "Automated complexity alerts in CI/CD pipelines",
+    "Code review assistance and maintainability checks",
+    "Technical debt prevention and early detection",
+    "Team coding standards enforcement"
+  ],
+  "source": "community"
+}

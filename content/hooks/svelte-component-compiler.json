@@ -1,0 +1,17 @@
+{
+  "title": "Svelte Component Compiler",
+  "description": "Automatically compiles and validates Svelte components when they are modified",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["svelte", "components", "compilation", "validation", "frontend"],
+  "content": "Validates Svelte component syntax and compiles components to check for errors. Ensures components are production-ready and follows Svelte best practices.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.svelte ]]; then echo '🔥 Compiling Svelte component...' && npx svelte-check --output human \\\"$CLAUDE_TOOL_FILE_PATH\\\" && echo '✅ Svelte component valid' || echo '⚠️ Svelte compilation issues detected'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "PostToolUse",
+    "matcher": "Edit|Write",
+    "timeout": 8000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "documentationUrl": "https://svelte.dev/docs",
+  "source": "community"
+}

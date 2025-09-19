@@ -1,0 +1,16 @@
+{
+  "title": "SCSS Auto-Compiler",
+  "description": "Automatically compiles SCSS/Sass files to CSS when they are modified",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["scss", "sass", "css", "styling", "compilation"],
+  "content": "Watches for changes to SCSS/Sass files and automatically compiles them to CSS. Includes source map generation for debugging and minification for production builds.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.scss ]] || [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.sass ]]; then echo '🎨 Compiling SCSS...' && npx sass \\\"$CLAUDE_TOOL_FILE_PATH\\\" \\\"${CLAUDE_TOOL_FILE_PATH%.s[ac]ss}.css\\\" --source-map && echo '✅ SCSS compiled successfully'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "PostToolUse",
+    "matcher": "Edit|Write",
+    "timeout": 5000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

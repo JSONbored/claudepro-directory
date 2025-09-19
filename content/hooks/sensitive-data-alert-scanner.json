@@ -1,0 +1,16 @@
+{
+  "title": "Sensitive Data Alert Scanner",
+  "description": "Scans for potential sensitive data exposure and alerts immediately",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["security", "sensitive-data", "notification", "scanning", "privacy"],
+  "content": "Monitors file changes for potential sensitive data like API keys, passwords, or personal information. Provides immediate alerts to prevent accidental commits of secrets.\n\n```json\n{\n  \"Notification\": [\n    {\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_NAME\\\" == 'Write' ]] || [[ \\\"$CLAUDE_TOOL_NAME\\\" == 'Edit' ]]; then if grep -E '(api[_-]?key|secret|password|token|private[_-]?key)\\\\s*[:=]\\\\s*[\\\"\\'][^\\\"\\']+[\\\"\\']' \\\"$CLAUDE_TOOL_FILE_PATH\\\" 2>/dev/null | grep -v '\\\\*\\\\*\\\\*\\\\|example\\\\|placeholder\\\\|your[_-]'; then echo '🚨 SECURITY ALERT: Potential exposed secret in '$(basename \\\"$CLAUDE_TOOL_FILE_PATH\\\")' - Review immediately!'; fi; if grep -E '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\\\.[A-Z|a-z]{2,}' \\\"$CLAUDE_TOOL_FILE_PATH\\\" 2>/dev/null | head -1; then echo '⚠️ Email address detected - ensure this is intentional'; fi; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "Notification",
+    "matcher": "Edit|Write",
+    "timeout": 3000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

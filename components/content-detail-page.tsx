@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { getIconByName } from '@/lib/icons';
+import { slugToTitle } from '@/lib/utils';
 import type { ContentCategory, ContentItem } from '@/types/content';
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
@@ -120,7 +121,9 @@ export function ContentDetailPage<T extends ContentItem>({
                 })()}
               </div>
               <div className="flex-1">
-                <h1 className="text-3xl font-bold mb-2">{item.title || item.name}</h1>
+                <h1 className="text-3xl font-bold mb-2">
+                  {item.title || item.name || slugToTitle(item.slug)}
+                </h1>
                 <p className="text-lg text-muted-foreground">{item.description}</p>
               </div>
             </div>
@@ -263,7 +266,7 @@ export function ContentDetailPage<T extends ContentItem>({
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-6 sticky top-20 self-start">
             {/* Quick Actions */}
             <Card>
               <CardHeader>
@@ -274,18 +277,17 @@ export function ContentDetailPage<T extends ContentItem>({
                   <Copy className="h-4 w-4 mr-2" />
                   Copy Content
                 </Button>
-                {(item.githubUrl || item.repository) && (
-                  <Button className="w-full" variant="outline" asChild>
-                    <a
-                      href={item.githubUrl || item.repository}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Github className="h-4 w-4 mr-2" />
-                      View on GitHub
-                    </a>
-                  </Button>
-                )}
+                {/* Always show GitHub link to the content file in our repo */}
+                <Button className="w-full" variant="outline" asChild>
+                  <a
+                    href={`https://github.com/JSONbored/claudepro-directory/blob/main/content/${type}/${item.slug}.json`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Github className="h-4 w-4 mr-2" />
+                    View on GitHub
+                  </a>
+                </Button>
                 {(item.documentationUrl || item.documentation) && (
                   <Button className="w-full" variant="outline" asChild>
                     <a
@@ -342,7 +344,9 @@ export function ContentDetailPage<T extends ContentItem>({
               {relatedItems.map((item) => (
                 <Card key={item.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
-                    <CardTitle className="text-lg">{item.title || item.name}</CardTitle>
+                    <CardTitle className="text-lg">
+                      {item.title || item.name || slugToTitle(item.slug)}
+                    </CardTitle>
                     <CardDescription>{item.description}</CardDescription>
                   </CardHeader>
                   <CardContent>

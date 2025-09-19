@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { ContentDetailPage } from '@/components/content-detail-page';
+import { HookDetailPage } from '@/components/hook-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { getHookBySlug, getHookFullContent, hooks } from '@/generated/content';
 
@@ -55,13 +55,7 @@ export default async function HookPage({ params }: HookPageProps) {
   return (
     <>
       <ViewTracker category="hooks" slug={slug} />
-      <ContentDetailPage
-        item={fullHook || hookMeta}
-        type="hooks"
-        icon="webhook"
-        typeName="Hook"
-        relatedItems={relatedHooks}
-      />
+      <HookDetailPage item={fullHook || hookMeta} relatedItems={relatedHooks} />
     </>
   );
 }

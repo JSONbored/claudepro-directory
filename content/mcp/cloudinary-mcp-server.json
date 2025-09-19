@@ -1,0 +1,73 @@
+{
+  "title": "Cloudinary MCP Server",
+  "description": "Upload, manage, transform, and analyze media assets in the cloud",
+  "category": "mcp",
+  "author": "Cloudinary",
+  "dateAdded": "2025-09-18",
+  "tags": ["media", "cloudinary", "images", "video", "asset-management"],
+  "content": "Manage and transform media assets through Cloudinary's comprehensive cloud-based media platform.",
+  "features": [
+    "Upload and store media assets securely",
+    "Apply real-time image and video transformations",
+    "Optimize media for web delivery",
+    "Manage asset metadata and tags",
+    "Generate responsive image variations"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Check Cloudinary documentation for service-specific endpoints",
+        "Choose the appropriate MCP service for your needs",
+        "Configure authentication based on service requirements",
+        "Add configuration to Claude Desktop"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "Refer to Cloudinary documentation for specific server URLs and authentication methods"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "cloudinary": {
+          "transport": "varies",
+          "url": "Service-specific URL required"
+        }
+      }
+    }
+  },
+  "useCases": [
+    "Batch optimize images for web",
+    "Dynamic image resizing and cropping",
+    "Video transcoding and optimization",
+    "Asset organization and tagging",
+    "Content moderation and analysis"
+  ],
+  "security": [
+    "OAuth authentication for secure access",
+    "Secure upload presets configuration",
+    "Monitor bandwidth usage",
+    "Set transformation limits"
+  ],
+  "troubleshooting": [
+    "Check account storage limits",
+    "Verify transformation quotas",
+    "Monitor bandwidth usage",
+    "Test URL signing configuration"
+  ],
+  "examples": [
+    "Resize all product images to 800x600",
+    "Apply watermark to videos",
+    "Generate responsive image sets",
+    "Optimize images for web delivery"
+  ],
+  "package": null,
+  "requiresAuth": true,
+  "permissions": ["read", "write", "transform", "delete"],
+  "configLocation": "varies_by_service",
+  "githubUrl": null,
+  "documentationUrl": "https://cloudinary.com/documentation/cloudinary_llm_mcp#mcp_servers",
+  "source": "official"
+}

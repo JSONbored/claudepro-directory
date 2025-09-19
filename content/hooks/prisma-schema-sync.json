@@ -1,0 +1,17 @@
+{
+  "title": "Prisma Schema Sync",
+  "description": "Automatically generates Prisma client and creates migrations when schema.prisma is modified",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["prisma", "database", "orm", "schema", "migrations"],
+  "content": "Keeps Prisma client in sync with schema changes and automatically creates database migrations. Validates schema syntax and generates TypeScript types for type-safe database access.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *schema.prisma ]]; then echo '🔄 Syncing Prisma schema...' && npx prisma validate && npx prisma format && echo '📝 Generating Prisma client...' && npx prisma generate && echo '🗄️ Creating migration...' && npx prisma migrate dev --name auto_migration --create-only && echo '✅ Prisma sync complete - Review migration before applying' || echo '⚠️ Prisma sync failed - check schema for errors'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "PostToolUse",
+    "matcher": "Edit|Write",
+    "timeout": 15000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "documentationUrl": "https://www.prisma.io/docs",
+  "source": "community"
+}

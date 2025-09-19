@@ -1,0 +1,73 @@
+{
+    "title": "Jam MCP Server",
+    "description": "Debug faster with AI agents that access video recordings, console logs, and network requests",
+    "category": "mcp",
+    "author": "Jam",
+    "dateAdded": "2025-09-18",
+    "tags": ["debugging", "jam", "testing", "bug-tracking", "developer-tools"],
+    "content": "Access Jam bug recordings and debug information to troubleshoot issues more efficiently.",
+    "features": [
+      "Access bug video recordings",
+      "View console logs and errors",
+      "Analyze network requests and responses",
+      "Review error messages and stack traces",
+      "Track user interaction sequences"
+    ],
+    "installation": {
+      "claudeDesktop": {
+        "steps": [
+          "Open Claude Desktop configuration file",
+          "Add the Jam server configuration with HTTP transport",
+          "Restart Claude Desktop",
+          "Authenticate with your Jam account"
+        ],
+        "configPath": {
+          "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+        }
+      },
+      "claudeCode": "claude mcp add --transport http jam https://mcp.jam.dev/mcp"
+    },
+    "configuration": {
+      "claudeDesktop": {
+        "mcpServers": {
+          "jam": {
+            "transport": "http",
+            "url": "https://mcp.jam.dev/mcp"
+          }
+        }
+      }
+    },
+    "useCases": [
+      "Debug production issues with full context",
+      "Analyze error patterns across recordings",
+      "Review bug reproduction steps",
+      "Inspect network failures and timeouts",
+      "Generate detailed bug reports"
+    ],
+    "security": [
+      "OAuth authentication for access",
+      "Sanitize sensitive data in recordings",
+      "Control recording access permissions",
+      "Regular cleanup of old recordings"
+    ],
+    "troubleshooting": [
+      "Verify workspace access rights",
+      "Check recording permissions",
+      "Monitor storage usage",
+      "Test playback functionality"
+    ],
+    "examples": [
+      "Show the console errors from bug JAM-123",
+      "Analyze the network requests in the checkout issue",
+      "Get reproduction steps for the login bug",
+      "Find all JavaScript errors from today"
+    ],
+    "package": null,
+    "requiresAuth": true,
+    "permissions": ["read", "analyze"],
+    "configLocation": "claude_desktop_config.json",
+    "githubUrl": null,
+    "documentationUrl": "https://jam.dev/docs/debug-a-jam/mcp",
+    "source": "official"
+  }

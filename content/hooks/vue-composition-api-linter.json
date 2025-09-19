@@ -1,0 +1,17 @@
+{
+  "title": "Vue Composition API Linter",
+  "description": "Lints Vue 3 components for Composition API best practices and common issues",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["vue", "vue3", "composition-api", "linting", "best-practices"],
+  "content": "Ensures Vue 3 components follow Composition API best practices, checks for proper ref/reactive usage, and validates component structure. Helps maintain clean and performant Vue applications.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.vue ]]; then echo '✨ Linting Vue component...' && npx eslint \\\"$CLAUDE_TOOL_FILE_PATH\\\" --ext .vue --config .eslintrc.vue.js 2>/dev/null || npx eslint \\\"$CLAUDE_TOOL_FILE_PATH\\\" --ext .vue; if grep -q '<script setup>' \\\"$CLAUDE_TOOL_FILE_PATH\\\"; then echo '🔍 Checking Composition API usage...' && grep -E '(ref|reactive|computed|watch|onMounted)' \\\"$CLAUDE_TOOL_FILE_PATH\\\" | head -5 && echo '✅ Composition API patterns detected'; fi && npx vue-tsc --noEmit \\\"$CLAUDE_TOOL_FILE_PATH\\\" 2>/dev/null && echo '✅ Vue component type-check passed' || echo 'ℹ️ vue-tsc not available'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "PostToolUse",
+    "matcher": "Edit|Write",
+    "timeout": 8000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "documentationUrl": "https://vuejs.org/guide/extras/composition-api-faq.html",
+  "source": "community"
+}

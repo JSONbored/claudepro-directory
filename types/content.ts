@@ -20,11 +20,8 @@ export interface ContentConfiguration {
 
 // Base interface for all content items
 export interface ContentMetadata {
-  id: string;
-  name?: string;
-  title?: string;
-  description: string;
   slug: string;
+  description: string;
   category: string;
   author: string;
   dateAdded: string;
@@ -33,6 +30,10 @@ export interface ContentMetadata {
   tags: string[];
   popularity?: number;
   views?: number;
+  // Legacy fields for backward compatibility (auto-generated from slug)
+  id?: string;
+  name?: string;
+  title?: string;
 }
 
 export interface ContentItem extends ContentMetadata {

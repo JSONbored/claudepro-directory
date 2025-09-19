@@ -1,0 +1,16 @@
+{
+  "title": "Workflow Completion Report",
+  "description": "Generates a comprehensive report when Claude Code workflow stops, including files modified, tests run, and git status",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["reporting", "workflow", "analytics", "summary", "stop-hook"],
+  "content": "Creates a detailed summary report when Claude Code completes its work session. Includes statistics on files modified, lines changed, test results, and pending git changes.\n\n```json\n{\n  \"Stop\": [\n    {\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"echo '📊 === WORKFLOW COMPLETION REPORT ===' && echo '📅 Completed at: '$(date) && echo '📝 Files modified in session:' && git status --short 2>/dev/null | wc -l && echo '✅ Git changes:' && git diff --stat 2>/dev/null || echo 'Not in a git repository' && echo '🧪 Test summary:' && (npm test -- --listTests 2>/dev/null | wc -l | xargs echo 'Test files available:') || echo 'No test framework detected' && echo '📦 Dependencies status:' && (npm outdated 2>/dev/null | head -5 || echo 'Dependencies up to date') && echo '💾 Session data saved to: .claude-session-'$(date +%Y%m%d_%H%M%S)'.log' && echo '================================'\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "Stop",
+    "matcher": "*",
+    "timeout": 10000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

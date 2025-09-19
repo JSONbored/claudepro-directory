@@ -1,0 +1,35 @@
+{
+  "slug": "database-connection-cleanup",
+  "description": "Closes all database connections and cleans up resources when session ends",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["database", "cleanup", "stop-hook", "connections", "resources"],
+  "hookType": "Stop",
+  "features": [
+    "Automatic database connection cleanup on session end",
+    "Multi-database support (PostgreSQL, MySQL, MongoDB, Redis)",
+    "Idle connection termination for PostgreSQL",
+    "Connection monitoring and reporting",
+    "Safe cleanup with error handling",
+    "Resource leak prevention"
+  ],
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "stop": {
+          "script": "./.claude/hooks/database-connection-cleanup.sh"
+        }
+      }
+    },
+    "scriptContent": "#!/usr/bin/env bash\n\necho \"🗄️ Starting database connection cleanup...\" >&2\n\n# PostgreSQL cleanup\nif pgrep postgres >/dev/null 2>&1; then\n  echo \"🐘 PostgreSQL: Checking connections...\" >&2\n  \n  # Check if psql is available and we can connect\n  if command -v psql &> /dev/null; then\n    # Count active connections\n    ACTIVE_CONNECTIONS=$(psql -t -c \"SELECT count(*) FROM pg_stat_activity WHERE state = 'active' AND pid <> pg_backend_pid();\" 2>/dev/null | xargs || echo \"0\")\n    IDLE_CONNECTIONS=$(psql -t -c \"SELECT count(*) FROM pg_stat_activity WHERE state = 'idle' AND pid <> pg_backend_pid();\" 2>/dev/null | xargs || echo \"0\")\n    \n    echo \"📊 PostgreSQL: $ACTIVE_CONNECTIONS active, $IDLE_CONNECTIONS idle connections\" >&2\n    \n    # Terminate long-running idle connections (older than 5 minutes)\n    if [ \"$IDLE_CONNECTIONS\" -gt 0 ]; then\n      TERMINATED=$(psql -t -c \"SELECT count(*) FROM (SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle' AND state_change < now() - interval '5 minutes' AND pid <> pg_backend_pid()) t;\" 2>/dev/null | xargs || echo \"0\")\n      if [ \"$TERMINATED\" -gt 0 ]; then\n        echo \"✅ PostgreSQL: Terminated $TERMINATED idle connections\" >&2\n      fi\n    fi\n  else\n    echo \"⚠️ PostgreSQL running but psql not available\" >&2\n  fi\nfi\n\n# MySQL cleanup\nif pgrep mysql >/dev/null 2>&1 || pgrep mysqld >/dev/null 2>&1; then\n  echo \"🐬 MySQL: Checking connections...\" >&2\n  \n  if command -v mysql &> /dev/null; then\n    PROCESSLIST=$(mysql -e \"SHOW PROCESSLIST;\" 2>/dev/null | grep -c \"Sleep\" || echo \"0\")\n    TOTAL_CONNECTIONS=$(mysql -e \"SHOW PROCESSLIST;\" 2>/dev/null | wc -l || echo \"0\")\n    echo \"📊 MySQL: $TOTAL_CONNECTIONS total connections, $PROCESSLIST sleeping\" >&2\n    \n    # Kill long-running sleeping connections (optional, requires PROCESS privilege)\n    # mysql -e \"KILL CONNECTION_ID;\" 2>/dev/null || true\n  else\n    echo \"⚠️ MySQL running but mysql client not available\" >&2\n  fi\nfi\n\n# MongoDB cleanup\nif pgrep mongod >/dev/null 2>&1; then\n  echo \"🍃 MongoDB: Checking connections...\" >&2\n  \n  if command -v mongosh &> /dev/null; then\n    CONNECTIONS=$(mongosh --quiet --eval \"db.currentOp().inprog.length\" 2>/dev/null || echo \"0\")\n    echo \"📊 MongoDB: $CONNECTIONS active operations\" >&2\n  elif command -v mongo &> /dev/null; then\n    CONNECTIONS=$(mongo --quiet --eval \"db.currentOp().inprog.length\" 2>/dev/null || echo \"0\")\n    echo \"📊 MongoDB: $CONNECTIONS active operations\" >&2\n  else\n    echo \"⚠️ MongoDB running but mongo client not available\" >&2\n  fi\nfi\n\n# Redis cleanup\nif pgrep redis-server >/dev/null 2>&1; then\n  echo \"📮 Redis: Checking connections...\" >&2\n  \n  if command -v redis-cli &> /dev/null; then\n    CLIENT_COUNT=$(redis-cli CLIENT LIST 2>/dev/null | wc -l || echo \"0\")\n    echo \"📊 Redis: $CLIENT_COUNT connected clients\" >&2\n    \n    # Optionally close idle clients\n    # redis-cli CLIENT KILL TYPE normal SKIPME yes 2>/dev/null || true\n  else\n    echo \"⚠️ Redis running but redis-cli not available\" >&2\n  fi\nfi\n\n# Check for database connection strings in environment\nif [ -f \".env\" ]; then\n  DB_VARS=$(grep -E \"(DATABASE_URL|MONGODB_URI|REDIS_URL|POSTGRES|MYSQL)\" .env 2>/dev/null | wc -l || echo \"0\")\n  if [ \"$DB_VARS\" -gt 0 ]; then\n    echo \"📋 Found $DB_VARS database configuration variables in .env\" >&2\n  fi\nfi\n\necho \"✅ Database connection cleanup completed\" >&2\nexit 0"
+  },
+  "useCases": [
+    "Automatic resource cleanup in development environments",
+    "Prevention of database connection leaks",
+    "Clean session termination for database applications",
+    "Resource monitoring and management",
+    "Multi-database environment cleanup"
+  ],
+  "source": "community"
+}

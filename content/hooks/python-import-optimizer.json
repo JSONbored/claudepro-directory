@@ -1,0 +1,16 @@
+{
+  "title": "Python Import Optimizer",
+  "description": "Automatically sorts and optimizes Python imports using isort when Python files are modified",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["python", "imports", "formatting", "optimization", "isort"],
+  "content": "Automatically organizes Python imports according to PEP 8 standards using isort. Groups imports by type (standard library, third-party, local) and removes unused imports.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.py ]]; then echo '🐍 Optimizing Python imports...' && isort \\\"$CLAUDE_TOOL_FILE_PATH\\\" --profile black --line-length 88 && autoflake --in-place --remove-unused-variables --remove-all-unused-imports \\\"$CLAUDE_TOOL_FILE_PATH\\\" 2>/dev/null && echo '✅ Imports optimized' || echo '✅ Imports sorted (autoflake not installed)'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "PostToolUse",
+    "matcher": "Edit|Write",
+    "timeout": 3000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

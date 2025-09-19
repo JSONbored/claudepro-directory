@@ -1,0 +1,16 @@
+{
+  "title": "React Component Test Generator",
+  "description": "Automatically creates or updates test files when React components are modified",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["react", "testing", "jest", "components", "automation"],
+  "content": "Generates or updates corresponding test files when React components are created or modified. Creates basic test structure with render tests and placeholder for component-specific tests.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.jsx ]] || [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.tsx ]] && [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" != *.test.* ]] && [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" != *.spec.* ]]; then TEST_FILE=\\\"${CLAUDE_TOOL_FILE_PATH%.{jsx,tsx}}.test.${CLAUDE_TOOL_FILE_PATH##*.}\\\"; if [ ! -f \\\"$TEST_FILE\\\" ]; then echo '🧪 Generating test file...' && echo \\\"import { render, screen } from '@testing-library/react';\\\\nimport $(basename \\\"${CLAUDE_TOOL_FILE_PATH%.*}\\\") from './$(basename \\\"$CLAUDE_TOOL_FILE_PATH\\\")';\\\\n\\\\ndescribe('$(basename \\\"${CLAUDE_TOOL_FILE_PATH%.*}\\\")', () => {\\\\n  it('renders without crashing', () => {\\\\n    render(<$(basename \\\"${CLAUDE_TOOL_FILE_PATH%.*}\\\") />);\\\\n  });\\\\n});\\\" > \\\"$TEST_FILE\\\" && echo '✅ Test file created'; fi; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "PostToolUse",
+    "matcher": "Edit|Write",
+    "timeout": 3000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "source": "community"
+}

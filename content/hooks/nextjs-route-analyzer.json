@@ -1,0 +1,17 @@
+{
+  "title": "Next.js Route Analyzer",
+  "description": "Analyzes Next.js page routes and generates a route map when pages are added or modified",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["nextjs", "routing", "pages", "analysis", "documentation"],
+  "content": "Automatically analyzes and documents Next.js routes when page files are created or modified. Generates a route map showing all available routes, dynamic segments, and API endpoints.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *pages/*.js ]] || [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *pages/*.tsx ]] || [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *app/*page.tsx ]]; then echo '🗺️ Analyzing Next.js routes...' && find ./pages ./app -name '*.js' -o -name '*.tsx' 2>/dev/null | grep -E '(page|route)\\\\.(jsx?|tsx?)$' | sed 's|^\\\\./pages||;s|^\\\\./app||;s|/page\\\\.(jsx?|tsx?)$||;s|/route\\\\.(jsx?|tsx?)$||;s|\\\\[|:|g;s|\\\\]||g;s|index$|/|' | sort | uniq > routes.txt && echo '📄 Route map updated in routes.txt' && echo '✅ Found '$(wc -l < routes.txt)' routes'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "configuration": {
+    "hookType": "PostToolUse",
+    "matcher": "Edit|Write",
+    "timeout": 3000
+  },
+  "githubUrl": "https://github.com/claude-directory/hooks",
+  "documentationUrl": "https://nextjs.org/docs/routing",
+  "source": "community"
+}

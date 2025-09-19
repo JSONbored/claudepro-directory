@@ -1,0 +1,36 @@
+{
+  "slug": "auto-save-backup",
+  "description": "Automatically creates timestamped backups of files before modification to prevent data loss",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": ["backup", "safety", "file-management", "data-protection"],
+  "hookType": "PreToolUse",
+  "features": [
+    "Automatic timestamped backups before file modification",
+    "Organized backup storage in .backups directory",
+    "Filename format: filename_YYYYMMDD_HHMMSS.ext",
+    "Support for all file editing operations",
+    "Version history maintenance",
+    "Silent failure handling to prevent workflow interruption"
+  ],
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "preToolUse": {
+          "script": "./.claude/hooks/auto-save-backup.sh",
+          "matchers": ["edit", "write", "multiedit"]
+        }
+      }
+    },
+    "scriptContent": "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if file exists before backing up\nif [ -f \"$FILE_PATH\" ]; then\n  echo \"💾 Creating backup for $FILE_PATH...\" >&2\n  \n  # Create backups directory\n  mkdir -p .backups\n  \n  # Generate timestamped backup filename\n  BASENAME=$(basename \"$FILE_PATH\")\n  TIMESTAMP=$(date +%Y%m%d_%H%M%S)\n  BACKUP_NAME=\"${BASENAME%.*}_${TIMESTAMP}.${BASENAME##*.}\"\n  \n  # Create backup\n  cp \"$FILE_PATH\" \".backups/$BACKUP_NAME\" 2>/dev/null || true\n  \n  if [ $? -eq 0 ]; then\n    echo \"✅ Backup created: .backups/$BACKUP_NAME\" >&2\n  else\n    echo \"⚠️ Backup failed for $FILE_PATH\" >&2\n  fi\nelse\n  echo \"📝 Creating new file $FILE_PATH (no backup needed)\" >&2\nfi\n\nexit 0"
+  },
+  "useCases": [
+    "Automatic version control for critical configuration files",
+    "Safety net during development and debugging sessions",
+    "Recovery from accidental file modifications",
+    "Maintaining edit history without git commits",
+    "Protection during bulk file operations"
+  ],
+  "source": "community"
+}
