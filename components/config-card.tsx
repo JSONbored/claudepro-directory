@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
+import { formatTitle } from '@/lib/utils';
 
 interface ConfigCardProps {
   id: string;
@@ -131,7 +132,7 @@ export const ConfigCard = memo(
                 </Badge>
               </div>
               <CardTitle className="text-lg font-semibold text-foreground group-hover:text-accent transition-colors-smooth">
-                {displayTitle}
+                {formatTitle(displayTitle)}
               </CardTitle>
               <CardDescription className="text-sm text-muted-foreground mt-1 line-clamp-2">
                 {description}

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { getIconByName } from '@/lib/icons';
-import { slugToTitle } from '@/lib/utils';
+import { formatTitle, slugToTitle } from '@/lib/utils';
 import type { ContentCategory, ContentItem } from '@/types/content';
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
@@ -122,7 +122,7 @@ export function ContentDetailPage<T extends ContentItem>({
               </div>
               <div className="flex-1">
                 <h1 className="text-3xl font-bold mb-2">
-                  {item.title || item.name || slugToTitle(item.slug)}
+                  {formatTitle(item.title || item.name || slugToTitle(item.slug))}
                 </h1>
                 <p className="text-lg text-muted-foreground">{item.description}</p>
               </div>
@@ -353,7 +353,7 @@ export function ContentDetailPage<T extends ContentItem>({
                 <Card key={item.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <CardTitle className="text-lg">
-                      {item.title || item.name || slugToTitle(item.slug)}
+                      {formatTitle(item.title || item.name || slugToTitle(item.slug))}
                     </CardTitle>
                     <CardDescription>{item.description}</CardDescription>
                   </CardHeader>
