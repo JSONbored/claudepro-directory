@@ -1,0 +1,72 @@
+{
+  "title": "Notion MCP Server",
+  "description": "Read docs, update pages, and manage tasks in Notion workspaces",
+  "category": "mcp",
+  "author": "Notion",
+  "dateAdded": "2025-09-18",
+  "tags": ["documentation", "notion", "wiki", "notes", "knowledge-base"],
+  "content": "Access and manage your Notion workspace directly from Claude for documentation and knowledge management.",
+  "features": [
+    "Read and update Notion pages with rich content",
+    "Create new pages and databases programmatically",
+    "Query database content with filters and sorts",
+    "Manage tasks and project workflows",
+    "Search across entire workspace content"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open Claude Desktop configuration file",
+        "Add the Notion server configuration with HTTP transport",
+        "Restart Claude Desktop",
+        "Authenticate via OAuth when prompted"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport http notion https://mcp.notion.com/mcp"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "notion": {
+          "transport": "http",
+          "url": "https://mcp.notion.com/mcp"
+        }
+      }
+    }
+  },
+  "useCases": [
+    "Create meeting notes automatically from discussions",
+    "Update project documentation with latest information",
+    "Generate reports from database content",
+    "Sync tasks across different systems",
+    "Build knowledge base entries from research"
+  ],
+  "security": [
+    "OAuth tokens are securely managed by Notion",
+    "Respect workspace permissions and sharing settings",
+    "Be cautious with bulk update operations",
+    "Regular backups recommended for critical data"
+  ],
+  "troubleshooting": [
+    "Ensure pages are shared with the integration",
+    "Check workspace permissions for the connection",
+    "Verify OAuth connection status with /mcp command"
+  ],
+  "examples": [
+    "Create a new page for today's meeting notes",
+    "Update the project status in Notion",
+    "Find all tasks due this week",
+    "Add this conversation summary to Notion"
+  ],
+  "package": null,
+  "requiresAuth": true,
+  "permissions": ["read", "write", "create"],
+  "configLocation": "claude_desktop_config.json",
+  "githubUrl": null,
+  "documentationUrl": "https://developers.notion.com/docs/mcp",
+  "source": "official"
+}

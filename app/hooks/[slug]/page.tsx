@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { ContentDetailPage } from '@/components/content-detail-page';
+import { HookDetailPage } from '@/components/hook-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { getHookBySlug, getHookFullContent, hooks } from '@/generated/content';
+import { getDisplayTitle } from '@/lib/utils';
 
 interface HookPageProps {
   params: Promise<{ slug: string }>;
@@ -20,11 +21,11 @@ export async function generateMetadata({ params }: HookPageProps): Promise<Metad
   }
 
   return {
-    title: `${hook.title || hook.name} - Automation Hook | Claude Pro Directory`,
+    title: `${getDisplayTitle(hook)} - Automation Hook | Claude Pro Directory`,
     description: hook.description,
     keywords: hook.tags?.join(', '),
     openGraph: {
-      title: hook.title || hook.name || 'Automation Hook',
+      title: getDisplayTitle(hook),
       description: hook.description,
       type: 'article',
     },
@@ -55,13 +56,7 @@ export default async function HookPage({ params }: HookPageProps) {
   return (
     <>
       <ViewTracker category="hooks" slug={slug} />
-      <ContentDetailPage
-        item={fullHook || hookMeta}
-        type="hooks"
-        icon="webhook"
-        typeName="Hook"
-        relatedItems={relatedHooks}
-      />
+      <HookDetailPage item={fullHook || hookMeta} relatedItems={relatedHooks} />
     </>
   );
 }

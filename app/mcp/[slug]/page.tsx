@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { ContentDetailPage } from '@/components/content-detail-page';
+import { MCPDetailPage } from '@/components/mcp-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { getMcpBySlug, getMcpFullContent, mcp } from '@/generated/content';
 
@@ -55,13 +55,7 @@ export default async function MCPPage({ params }: MCPPageProps) {
   return (
     <>
       <ViewTracker category="mcp" slug={slug} />
-      <ContentDetailPage
-        item={fullMCP || mcpMeta}
-        type="mcp"
-        icon="server"
-        typeName="MCP Server"
-        relatedItems={relatedMCPs}
-      />
+      <MCPDetailPage item={fullMCP || mcpMeta} relatedItems={relatedMCPs} />
     </>
   );
 }

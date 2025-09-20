@@ -1,0 +1,72 @@
+{
+  "title": "Netlify MCP Server",
+  "description": "Create, deploy, and manage websites on Netlify platform",
+  "category": "mcp",
+  "author": "Netlify",
+  "dateAdded": "2025-09-18",
+  "tags": ["deployment", "netlify", "hosting", "static-sites", "serverless"],
+  "content": "Control Netlify sites and deployments through Claude for comprehensive site management.",
+  "features": [
+    "Create and deploy sites automatically",
+    "Manage environment secrets and variables",
+    "Configure access controls and permissions",
+    "Handle form submissions and data",
+    "Control site settings and domains"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open Claude Desktop configuration file",
+        "Add the Netlify server configuration with HTTP transport",
+        "Restart Claude Desktop",
+        "Authenticate with your Netlify account"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport http netlify https://netlify-mcp.netlify.app/mcp"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "netlify": {
+          "transport": "http",
+          "url": "https://netlify-mcp.netlify.app/mcp"
+        }
+      }
+    }
+  },
+  "useCases": [
+    "Deploy static sites with zero configuration",
+    "Manage environment variables securely",
+    "Configure custom domains and SSL",
+    "Process form submissions automatically",
+    "Set up redirects and rewrites"
+  ],
+  "security": [
+    "OAuth authentication for access control",
+    "Secure secret management system",
+    "Access control configuration options",
+    "Build hook security measures"
+  ],
+  "troubleshooting": [
+    "Check Netlify account status and limits",
+    "Verify site permissions",
+    "Monitor build minutes usage"
+  ],
+  "examples": [
+    "Deploy my site to production",
+    "Update the API_KEY environment variable",
+    "Show recent form submissions",
+    "Configure domain redirect"
+  ],
+  "package": null,
+  "requiresAuth": true,
+  "permissions": ["read", "write", "deploy"],
+  "configLocation": "claude_desktop_config.json",
+  "githubUrl": null,
+  "documentationUrl": "https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/",
+  "source": "official"
+}

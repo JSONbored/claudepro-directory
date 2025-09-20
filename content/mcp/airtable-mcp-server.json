@@ -1,0 +1,75 @@
+{
+  "title": "Airtable MCP Server",
+  "description": "Read and write records, manage bases and tables in Airtable directly from Claude",
+  "category": "mcp",
+  "author": "domdomegg",
+  "dateAdded": "2025-09-18",
+  "tags": ["database", "airtable", "data-management", "crud", "tables"],
+  "content": "Connect Claude to Airtable databases for seamless data management and automation of your bases and tables.",
+  "features": [
+    "Read and write records in Airtable bases",
+    "Create and manage tables with full schema control",
+    "Query and filter data with complex conditions",
+    "Update multiple records in batch operations",
+    "Access metadata and schema information"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Get your Airtable API key from https://airtable.com/account",
+        "Open Claude Desktop configuration file",
+        "Add the Airtable server configuration with your API key",
+        "Restart Claude Desktop"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY -- npx -y airtable-mcp-server"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "airtable": {
+          "command": "npx",
+          "args": ["-y", "airtable-mcp-server"],
+          "env": {
+            "AIRTABLE_API_KEY": "your_api_key_here"
+          }
+        }
+      }
+    }
+  },
+  "useCases": [
+    "Automate data entry and updates across multiple bases",
+    "Generate reports from Airtable data with AI analysis",
+    "Sync data between Airtable and other systems",
+    "Bulk operations on records for data cleaning",
+    "Create dynamic dashboards from Airtable content"
+  ],
+  "security": [
+    "Use read-only API keys when write access isn't needed",
+    "Limit access to specific bases when possible",
+    "Regularly rotate API keys for security",
+    "Monitor API usage through Airtable dashboard"
+  ],
+  "troubleshooting": [
+    "Ensure API key has necessary permissions for your operations",
+    "Check rate limits (5 requests/second) if experiencing throttling",
+    "Verify base and table IDs are correct in your requests"
+  ],
+  "examples": [
+    "Read all records from the Projects table",
+    "Add a new contact with these details to Airtable",
+    "Update the status field for all overdue tasks",
+    "Filter records where status='active' AND priority='high'"
+  ],
+  "package": "airtable-mcp-server",
+  "requiresAuth": true,
+  "permissions": ["read", "write", "schema"],
+  "configLocation": "claude_desktop_config.json",
+  "githubUrl": "https://github.com/domdomegg/airtable-mcp-server",
+  "documentationUrl": "https://github.com/domdomegg/airtable-mcp-server",
+  "source": "community"
+}

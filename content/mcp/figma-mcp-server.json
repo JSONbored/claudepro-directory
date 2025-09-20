@@ -1,0 +1,72 @@
+{
+  "title": "Figma MCP Server",
+  "description": "Access designs, export assets, and interact with Figma files through Claude",
+  "category": "mcp",
+  "author": "Figma",
+  "dateAdded": "2025-09-18",
+  "tags": ["design", "figma", "ui-ux", "assets", "graphics"],
+  "content": "Connect Claude to Figma Desktop for design operations, asset extraction, and design system management.",
+  "features": [
+    "Access and browse Figma designs in real-time",
+    "Export assets in various formats (PNG, SVG, PDF)",
+    "Read design specifications and properties",
+    "Navigate through pages and frames programmatically",
+    "Extract text content and style information"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Ensure Figma Desktop is running with Dev Mode MCP Server enabled",
+        "Open Claude Desktop configuration file",
+        "Add the Figma server configuration pointing to local port",
+        "Restart Claude Desktop"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport http figma-dev-mode-mcp-server http://127.0.0.1:3845/mcp"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "figma": {
+          "transport": "http",
+          "url": "http://127.0.0.1:3845/mcp"
+        }
+      }
+    }
+  },
+  "useCases": [
+    "Export design assets for development implementation",
+    "Extract design tokens and specifications",
+    "Generate code from design components",
+    "Analyze design systems for consistency",
+    "Create design documentation automatically"
+  ],
+  "security": [
+    "Only works with local Figma Desktop instance",
+    "Requires appropriate file permissions in Figma",
+    "No external API keys or authentication needed"
+  ],
+  "troubleshooting": [
+    "Verify Figma Desktop is running before connecting",
+    "Check that Dev Mode is enabled in Figma",
+    "Ensure port 3845 is not blocked by firewall",
+    "Delete old SSE endpoints at port 3845 if they exist"
+  ],
+  "examples": [
+    "Export all icons from the design system as SVG",
+    "Get the color palette from this Figma file",
+    "Extract component specifications for developers",
+    "List all text styles used in the design"
+  ],
+  "package": null,
+  "requiresAuth": false,
+  "permissions": ["read", "export"],
+  "configLocation": "claude_desktop_config.json",
+  "githubUrl": null,
+  "documentationUrl": "https://help.figma.com/hc/en-us/articles/32132100833559",
+  "source": "official"
+}

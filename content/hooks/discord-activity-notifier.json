@@ -1,0 +1,42 @@
+{
+  "slug": "discord-activity-notifier",
+  "description": "Sends development activity updates to Discord channel for team collaboration",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": [
+    "discord",
+    "notification",
+    "collaboration",
+    "webhooks",
+    "team"
+  ],
+  "hookType": "Notification",
+  "features": [
+    "Real-time Discord notifications for Claude Code activities",
+    "Rich embed messages with file information and timestamps",
+    "Dynamic color coding based on action types (success, error, info)",
+    "Team collaboration and activity visibility",
+    "Configurable webhook integration",
+    "Silent operation with fallback error handling"
+  ],
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "notification": {
+          "script": "./.claude/hooks/discord-activity-notifier.sh"
+        }
+      }
+    },
+    "scriptContent": "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\n# Check if Discord webhook URL is configured\nif [ -z \"$DISCORD_WEBHOOK_URL\" ]; then\n  echo \"💡 Set DISCORD_WEBHOOK_URL environment variable to enable Discord notifications\" >&2\n  exit 0\nfi\n\necho \"📤 Sending Discord notification for tool: $TOOL_NAME\" >&2\n\n# Determine color based on tool name or file type\nCOLOR=\"3447003\"  # Default blue\n\n# Success indicators\nif [[ \"$TOOL_NAME\" == *\"Success\"* ]] || [[ \"$TOOL_NAME\" == *\"Complete\"* ]]; then\n  COLOR=\"3066993\"  # Green\n# Error indicators\nelif [[ \"$TOOL_NAME\" == *\"Error\"* ]] || [[ \"$TOOL_NAME\" == *\"Fail\"* ]]; then\n  COLOR=\"15158332\"  # Red\n# Warning indicators\nelif [[ \"$TOOL_NAME\" == *\"Warning\"* ]] || [[ \"$TOOL_NAME\" == *\"Alert\"* ]]; then\n  COLOR=\"16776960\"  # Yellow\n# Edit/Write operations\nelif [[ \"$TOOL_NAME\" == \"Edit\" ]] || [[ \"$TOOL_NAME\" == \"Write\" ]] || [[ \"$TOOL_NAME\" == \"MultiEdit\" ]]; then\n  COLOR=\"5793266\"  # Purple\nfi\n\n# Get file information\nif [ -n \"$FILE_PATH\" ]; then\n  FILENAME=$(basename \"$FILE_PATH\" 2>/dev/null || echo \"Unknown file\")\n  FILE_EXT=\"${FILENAME##*.}\"\n  \n  # Add file type icon based on extension\n  case \"$FILE_EXT\" in\n    js|jsx|ts|tsx) FILE_ICON=\"⚛️\" ;;\n    py) FILE_ICON=\"🐍\" ;;\n    rb) FILE_ICON=\"💎\" ;;\n    go) FILE_ICON=\"🐹\" ;;\n    rs) FILE_ICON=\"🦀\" ;;\n    java) FILE_ICON=\"☕\" ;;\n    cpp|c|cc) FILE_ICON=\"⚙️\" ;;\n    html) FILE_ICON=\"🌐\" ;;\n    css|scss) FILE_ICON=\"🎨\" ;;\n    json) FILE_ICON=\"📋\" ;;\n    md) FILE_ICON=\"📝\" ;;\n    *) FILE_ICON=\"📄\" ;;\n  esac\n  \n  FILE_DISPLAY=\"$FILE_ICON $FILENAME\"\nelse\n  FILE_DISPLAY=\"📂 General activity\"\nfi\n\n# Get current timestamp\nTIMESTAMP=$(date +\"%H:%M:%S\")\nDATE_TIME=$(date +\"%Y-%m-%d %H:%M:%S\")\n\n# Get Git information if available\nGIT_BRANCH=\"\"\nGIT_COMMIT=\"\"\nif command -v git &> /dev/null && git rev-parse --git-dir > /dev/null 2>&1; then\n  GIT_BRANCH=$(git branch --show-current 2>/dev/null || echo \"\")\n  GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo \"\")\nfi\n\n# Build the Discord embed JSON\nEMBED_DESCRIPTION=\"**Tool:** \\`$TOOL_NAME\\`\"\nif [ -n \"$GIT_BRANCH\" ]; then\n  EMBED_DESCRIPTION=\"$EMBED_DESCRIPTION\\n**Branch:** \\`$GIT_BRANCH\\`\"\nfi\n\n# Create fields array\nFIELDS='['\nFIELDS=\"$FIELDS{\\\"name\\\": \\\"File\\\", \\\"value\\\": \\\"$FILE_DISPLAY\\\", \\\"inline\\\": true}\"\nFIELDS=\"$FIELDS,{\\\"name\\\": \\\"Time\\\", \\\"value\\\": \\\"$TIMESTAMP\\\", \\\"inline\\\": true}\"\n\nif [ -n \"$GIT_COMMIT\" ]; then\n  FIELDS=\"$FIELDS,{\\\"name\\\": \\\"Commit\\\", \\\"value\\\": \\\"\\`$GIT_COMMIT\\`\\\", \\\"inline\\\": true}\"\nfi\n\nFIELDS=\"$FIELDS]\"\n\n# Create the complete webhook payload\nPAYLOAD=$(cat <<EOF\n{\n  \"embeds\": [{\n    \"title\": \"🤖 Claude Code Activity\",\n    \"description\": \"$EMBED_DESCRIPTION\",\n    \"color\": $COLOR,\n    \"fields\": $FIELDS,\n    \"footer\": {\n      \"text\": \"Claude Code • $DATE_TIME\",\n      \"icon_url\": \"https://claude.ai/favicon.ico\"\n    },\n    \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\"\n  }]\n}\nEOF\n)\n\n# Send the webhook\nif command -v curl &> /dev/null; then\n  RESPONSE=$(curl -s -w \"%{http_code}\" -H \"Content-Type: application/json\" -X POST -d \"$PAYLOAD\" \"$DISCORD_WEBHOOK_URL\" 2>/dev/null)\n  HTTP_CODE=\"${RESPONSE: -3}\"\n  \n  if [ \"$HTTP_CODE\" = \"204\" ]; then\n    echo \"✅ Discord notification sent successfully\" >&2\n  else\n    echo \"⚠️ Discord notification failed with HTTP code: $HTTP_CODE\" >&2\n  fi\nelse\n  echo \"⚠️ curl not available - cannot send Discord notification\" >&2\nfi\n\nexit 0"
+  },
+  "useCases": [
+    "Real-time team collaboration and activity sharing",
+    "Development workflow transparency and communication",
+    "Remote team coordination and progress tracking",
+    "Automated project activity logging",
+    "Integration with team chat workflows"
+  ],
+  "documentationUrl": "https://discord.com/developers/docs/resources/webhook",
+  "source": "community"
+}

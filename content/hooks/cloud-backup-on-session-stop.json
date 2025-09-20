@@ -1,0 +1,41 @@
+{
+  "slug": "cloud-backup-on-session-stop",
+  "description": "Automatically backs up changed files to cloud storage when session ends",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": [
+    "backup",
+    "cloud",
+    "stop-hook",
+    "aws",
+    "safety"
+  ],
+  "hookType": "Stop",
+  "features": [
+    "Automatic cloud backup when Claude session ends",
+    "Support for multiple cloud providers (AWS S3, Google Cloud, Dropbox)",
+    "Intelligent file selection using git diff",
+    "Timestamped backup archives",
+    "Fallback to rclone for universal cloud support",
+    "Environment variable configuration for security"
+  ],
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "stop": {
+          "script": "./.claude/hooks/cloud-backup-on-session-stop.sh"
+        }
+      }
+    },
+    "scriptContent": "#!/usr/bin/env bash\n\necho \"☁️ Starting cloud backup process...\" >&2\n\n# Generate timestamped backup directory name\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\n\n# Get list of modified files\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null)\n\nif [ -z \"$MODIFIED_FILES\" ]; then\n  echo \"📂 No modified files to backup\" >&2\n  exit 0\nfi\n\necho \"📦 Found modified files to backup\" >&2\n\n# Try AWS S3 first\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  echo \"📦 Backing up to AWS S3...\" >&2\n  if echo \"$MODIFIED_FILES\" | tar -czf - -T - | aws s3 cp - \"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\"; then\n    echo \"✅ Successfully backed up to S3: $AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\" >&2\n    exit 0\n  else\n    echo \"❌ AWS S3 backup failed\" >&2\n  fi\nfi\n\n# Try Google Cloud Storage\nif command -v gcloud >/dev/null 2>&1 && [[ -n \"$GCS_BACKUP_BUCKET\" ]]; then\n  echo \"📦 Backing up to Google Cloud Storage...\" >&2\n  if echo \"$MODIFIED_FILES\" | tar -czf - -T - | gsutil cp - \"gs://$GCS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\"; then\n    echo \"✅ Successfully backed up to GCS: $GCS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\" >&2\n    exit 0\n  else\n    echo \"❌ Google Cloud backup failed\" >&2\n  fi\nfi\n\n# Try rclone as universal fallback\nif command -v rclone >/dev/null 2>&1; then\n  echo \"📦 Backing up using rclone...\" >&2\n  TEMP_BACKUP=\"/tmp/$BACKUP_DIR.tar.gz\"\n  if echo \"$MODIFIED_FILES\" | tar -czf \"$TEMP_BACKUP\" -T - && rclone copy \"$TEMP_BACKUP\" remote:backups/; then\n    echo \"✅ Successfully backed up using rclone\" >&2\n    rm -f \"$TEMP_BACKUP\"\n    exit 0\n  else\n    echo \"❌ rclone backup failed\" >&2\n    rm -f \"$TEMP_BACKUP\"\n  fi\nfi\n\necho \"⚠️ No cloud storage provider configured or available\" >&2\necho \"💡 Configure AWS_BACKUP_BUCKET, GCS_BACKUP_BUCKET, or rclone to enable cloud backup\" >&2\nexit 1"
+  },
+  "useCases": [
+    "Automatic session-end backup for critical projects",
+    "Data loss prevention in cloud-first workflows",
+    "Multi-cloud backup strategy implementation",
+    "CI/CD integration for development artifacts",
+    "Remote work safety net for unsaved changes"
+  ],
+  "source": "community"
+}

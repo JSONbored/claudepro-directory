@@ -1,0 +1,72 @@
+{
+  "title": "Monday MCP Server",
+  "description": "Manage monday.com boards, items, and CRM activities",
+  "category": "mcp",
+  "author": "Monday.com",
+  "dateAdded": "2025-09-18",
+  "tags": ["monday", "project-management", "crm", "workflow", "team-management"],
+  "content": "Control monday.com boards and workflows through Claude for visual project management.",
+  "features": [
+    "Create and update board items",
+    "Manage board columns and structure",
+    "Assign owners and team members",
+    "Set timelines and deadlines",
+    "Add CRM activities and track deals"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open Claude Desktop configuration file",
+        "Add the Monday server configuration with SSE transport",
+        "Restart Claude Desktop",
+        "Authenticate with monday.com"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport sse monday https://mcp.monday.com/sse"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "monday": {
+          "transport": "sse",
+          "url": "https://mcp.monday.com/sse"
+        }
+      }
+    }
+  },
+  "useCases": [
+    "Create project items from requirements",
+    "Update task status across boards",
+    "Assign team members to tasks",
+    "Track project timelines visually",
+    "Manage CRM pipeline and activities"
+  ],
+  "security": [
+    "OAuth authentication for secure access",
+    "Board-level permissions respected",
+    "Audit log tracking for all changes",
+    "Regular permission reviews recommended"
+  ],
+  "troubleshooting": [
+    "Verify workspace access rights",
+    "Check board permissions",
+    "Monitor API rate limits"
+  ],
+  "examples": [
+    "Create a new item in the Projects board",
+    "Update status to Done for item 12345",
+    "Assign this task to the design team",
+    "Add CRM activity for client meeting"
+  ],
+  "package": null,
+  "requiresAuth": true,
+  "permissions": ["read", "write", "create"],
+  "configLocation": "claude_desktop_config.json",
+  "githubUrl": null,
+  "documentationUrl": "https://developer.monday.com/apps/docs/mondaycom-mcp-integration",
+  "source": "official"
+}

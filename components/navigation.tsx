@@ -1,9 +1,51 @@
 'use client';
 
 import { ChevronDown, ExternalLink, Github, Menu } from 'lucide-react';
+
+const DiscordIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    role="img"
+    aria-label="Discord"
+  >
+    <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.0189 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z" />
+  </svg>
+);
+
+const LogoIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    role="img"
+    aria-label="Claude Pro Directory Logo"
+  >
+    {/* Background circle in theme background */}
+    <circle
+      cx="12"
+      cy="12"
+      r="11"
+      fill="hsl(var(--background))"
+      stroke="hsl(var(--accent))"
+      strokeWidth="2"
+    />
+    {/* 8-pointed star/asterisk rays in Claude orange */}
+    <path
+      d="M12 2 L12 8 M12 16 L12 22 M4 12 L8 12 M16 12 L20 12 M6.5 6.5 L9 9 M15 15 L17.5 17.5 M17.5 6.5 L15 9 M9 15 L6.5 17.5"
+      stroke="hsl(var(--accent))"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    {/* Center dot in Claude orange */}
+    <circle cx="12" cy="12" r="1" fill="hsl(var(--accent))" />
+  </svg>
+);
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -37,19 +79,46 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const isActive = (path: string) => {
     return pathname === path || pathname.startsWith(path);
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header
+      className={`sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300 ${
+        isScrolled ? 'shadow-sm' : ''
+      }`}
+    >
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
+        <div
+          className={`flex items-center justify-between transition-all duration-300 ${
+            isScrolled ? 'h-12' : 'h-16'
+          }`}
+        >
           {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <span className="text-lg font-medium text-white">claudepro.directory</span>
+          <Link href="/" className="flex items-center gap-2">
+            <LogoIcon
+              className={`transition-all duration-300 ${isScrolled ? 'h-6 w-6' : 'h-8 w-8'}`}
+            />
+            <span
+              className={`font-medium text-accent transition-all duration-300 ${
+                isScrolled ? 'text-base' : 'text-lg'
+              }`}
+            >
+              claudepro.directory
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -118,6 +187,16 @@ export const Navigation = () => {
           {/* Right Side Actions */}
           <div className="flex items-center space-x-3">
             <ThemeToggle />
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
+              className="hidden sm:flex hover:bg-accent/10 hover:text-accent"
+            >
+              <DiscordIcon className="h-4 w-4 mr-2" />
+              Discord
+            </Button>
 
             <Button
               variant="ghost"
@@ -249,7 +328,15 @@ export const Navigation = () => {
                     </NavLink>
                   </div>
 
-                  <div className="border-t border-border pt-4">
+                  <div className="border-t border-border pt-4 space-y-3">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
+                    >
+                      <DiscordIcon className="h-4 w-4 mr-2" />
+                      Join Discord
+                    </Button>
                     <Button
                       variant="outline"
                       className="w-full justify-start"

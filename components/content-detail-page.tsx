@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { getIconByName } from '@/lib/icons';
+import { getDisplayTitle } from '@/lib/utils';
 import type { ContentCategory, ContentItem } from '@/types/content';
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
@@ -120,7 +121,7 @@ export function ContentDetailPage<T extends ContentItem>({
                 })()}
               </div>
               <div className="flex-1">
-                <h1 className="text-3xl font-bold mb-2">{item.title || item.name}</h1>
+                <h1 className="text-3xl font-bold mb-2">{getDisplayTitle(item)}</h1>
                 <p className="text-lg text-muted-foreground">{item.description}</p>
               </div>
             </div>
@@ -241,21 +242,32 @@ export function ContentDetailPage<T extends ContentItem>({
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {item.examples.map(
+                  {(Array.isArray(item.examples) ? item.examples : []).map(
                     (
-                      example: { title?: string; code: string; description?: string },
+                      example: string | { title?: string; code: string; description?: string },
                       idx: number
-                    ) => (
-                      <div key={example.title || `example-${idx}`}>
-                        <h4 className="font-medium mb-2">{example.title}</h4>
-                        <CodeHighlight code={example.code} language="bash" />
-                        {example.description && (
-                          <p className="text-sm text-muted-foreground mt-2">
-                            {example.description}
-                          </p>
-                        )}
-                      </div>
-                    )
+                    ) => {
+                      // Handle both string[] and object[] formats
+                      if (typeof example === 'string') {
+                        return (
+                          <div key={`example-string-${example.slice(0, 50)}`}>
+                            <CodeHighlight code={example} language="bash" />
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div key={example.title || `example-${idx}`}>
+                          <h4 className="font-medium mb-2">{example.title}</h4>
+                          <CodeHighlight code={example.code} language="bash" />
+                          {example.description && (
+                            <p className="text-sm text-muted-foreground mt-2">
+                              {example.description}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    }
                   )}
                 </CardContent>
               </Card>
@@ -263,7 +275,7 @@ export function ContentDetailPage<T extends ContentItem>({
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-6 sticky top-20 self-start">
             {/* Quick Actions */}
             <Card>
               <CardHeader>
@@ -274,18 +286,17 @@ export function ContentDetailPage<T extends ContentItem>({
                   <Copy className="h-4 w-4 mr-2" />
                   Copy Content
                 </Button>
-                {(item.githubUrl || item.repository) && (
-                  <Button className="w-full" variant="outline" asChild>
-                    <a
-                      href={item.githubUrl || item.repository}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Github className="h-4 w-4 mr-2" />
-                      View on GitHub
-                    </a>
-                  </Button>
-                )}
+                {/* Always show GitHub link to the content file in our repo */}
+                <Button className="w-full" variant="outline" asChild>
+                  <a
+                    href={`https://github.com/JSONbored/claudepro-directory/blob/main/content/${type}/${item.slug}.json`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Github className="h-4 w-4 mr-2" />
+                    View on GitHub
+                  </a>
+                </Button>
                 {(item.documentationUrl || item.documentation) && (
                   <Button className="w-full" variant="outline" asChild>
                     <a
@@ -342,7 +353,7 @@ export function ContentDetailPage<T extends ContentItem>({
               {relatedItems.map((item) => (
                 <Card key={item.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
-                    <CardTitle className="text-lg">{item.title || item.name}</CardTitle>
+                    <CardTitle className="text-lg">{getDisplayTitle(item)}</CardTitle>
                     <CardDescription>{item.description}</CardDescription>
                   </CardHeader>
                   <CardContent>

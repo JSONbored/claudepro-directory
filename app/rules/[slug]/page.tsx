@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { ContentDetailPage } from '@/components/content-detail-page';
+import { RuleDetailPage } from '@/components/rule-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { getRuleBySlug, getRuleFullContent, rules } from '@/generated/content';
+import { getDisplayTitle } from '@/lib/utils';
 
 interface RulePageProps {
   params: Promise<{ slug: string }>;
@@ -20,11 +21,11 @@ export async function generateMetadata({ params }: RulePageProps): Promise<Metad
   }
 
   return {
-    title: `${rule.title || rule.name} - Claude Rule | Claude Pro Directory`,
+    title: `${getDisplayTitle(rule)} - Claude Rule | Claude Pro Directory`,
     description: rule.description,
     keywords: rule.tags?.join(', '),
     openGraph: {
-      title: rule.title || rule.name || 'Claude Rule',
+      title: getDisplayTitle(rule),
       description: rule.description,
       type: 'article',
     },
@@ -55,13 +56,7 @@ export default async function RulePage({ params }: RulePageProps) {
   return (
     <>
       <ViewTracker category="rules" slug={slug} />
-      <ContentDetailPage
-        item={fullRule || ruleMeta}
-        type="rules"
-        icon="book-open"
-        typeName="Rule"
-        relatedItems={relatedRules}
-      />
+      <RuleDetailPage item={fullRule || ruleMeta} relatedItems={relatedRules} />
     </>
   );
 }

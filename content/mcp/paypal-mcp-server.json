@@ -1,0 +1,73 @@
+{
+  "title": "PayPal MCP Server",
+  "description": "Integrate PayPal commerce capabilities, payment processing, and transaction management",
+  "category": "mcp",
+  "author": "PayPal",
+  "dateAdded": "2025-09-18",
+  "tags": ["payments", "paypal", "commerce", "transactions", "financial"],
+  "content": "Connect Claude to PayPal for comprehensive payment processing and financial operations.",
+  "features": [
+    "Process payments and refunds",
+    "Manage transactions and disputes",
+    "Handle chargebacks and resolutions",
+    "View account balances and history",
+    "Generate financial reports and analytics"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open Claude Desktop configuration file",
+        "Add the PayPal server configuration with SSE or HTTP transport",
+        "Restart Claude Desktop",
+        "Authenticate with your PayPal account"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport sse paypal https://mcp.paypal.com/sse"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "paypal": {
+          "transport": "sse",
+          "url": "https://mcp.paypal.com/sse"
+        }
+      }
+    }
+  },
+  "useCases": [
+    "Process customer refunds quickly",
+    "Review transaction history",
+    "Handle payment disputes efficiently",
+    "Generate financial reports",
+    "Monitor account activity"
+  ],
+  "security": [
+    "OAuth authentication required",
+    "Use sandbox for testing",
+    "Monitor transaction logs",
+    "Follow PCI compliance guidelines"
+  ],
+  "troubleshooting": [
+    "Verify account type (business/personal)",
+    "Check API permissions",
+    "Monitor rate limits",
+    "Test in sandbox environment first"
+  ],
+  "examples": [
+    "Process a refund for transaction ID ABC123",
+    "Show today's payment activity",
+    "Generate monthly transaction report",
+    "Check account balance"
+  ],
+  "package": null,
+  "requiresAuth": true,
+  "permissions": ["read", "write", "refund"],
+  "configLocation": "claude_desktop_config.json",
+  "githubUrl": null,
+  "documentationUrl": "https://www.paypal.ai/",
+  "source": "official"
+}

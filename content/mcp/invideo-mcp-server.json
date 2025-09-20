@@ -1,0 +1,73 @@
+{
+  "title": "invideo MCP Server",
+  "description": "Build video creation capabilities into your applications",
+  "category": "mcp",
+  "author": "invideo",
+  "dateAdded": "2025-09-18",
+  "tags": ["video", "invideo", "media", "content-creation", "ai-video"],
+  "content": "Create and edit videos through Claude using invideo's AI-powered video creation platform.",
+  "features": [
+    "Generate videos from text prompts",
+    "Edit existing videos programmatically",
+    "Add voiceovers and background music",
+    "Create video templates for reuse",
+    "Export videos in multiple formats"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open Claude Desktop configuration file",
+        "Add the invideo server configuration with SSE transport",
+        "Restart Claude Desktop",
+        "Authenticate with your invideo account"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport sse invideo https://mcp.invideo.io/sse"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "invideo": {
+          "transport": "sse",
+          "url": "https://mcp.invideo.io/sse"
+        }
+      }
+    }
+  },
+  "useCases": [
+    "Generate marketing videos at scale",
+    "Create social media content automatically",
+    "Produce educational video content",
+    "Edit video presentations",
+    "Batch produce video variations"
+  ],
+  "security": [
+    "OAuth authentication for account access",
+    "Respect copyright for media assets",
+    "Monitor storage usage limits",
+    "Check export quota restrictions"
+  ],
+  "troubleshooting": [
+    "Verify account tier limits",
+    "Check available storage space",
+    "Monitor rendering queue status",
+    "Ensure media format compatibility"
+  ],
+  "examples": [
+    "Create a 30-second product video",
+    "Add subtitles to my video",
+    "Generate a video from this blog post",
+    "Export video in 1080p MP4"
+  ],
+  "package": null,
+  "requiresAuth": true,
+  "permissions": ["read", "write", "create", "export"],
+  "configLocation": "claude_desktop_config.json",
+  "githubUrl": null,
+  "documentationUrl": "https://invideo.io/ai/mcp",
+  "source": "official"
+}

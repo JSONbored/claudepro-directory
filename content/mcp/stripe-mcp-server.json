@@ -1,0 +1,72 @@
+{
+  "title": "Stripe MCP Server",
+  "description": "Payment processing, subscription management, and financial transaction handling",
+  "category": "mcp",
+  "author": "Stripe",
+  "dateAdded": "2025-09-18",
+  "tags": ["payments", "stripe", "billing", "subscriptions", "commerce"],
+  "content": "Integrate Stripe payment capabilities directly into Claude for payment processing and financial operations.",
+  "features": [
+    "Process payments and refunds programmatically",
+    "Manage customer subscriptions and billing cycles",
+    "View transaction history and payment analytics",
+    "Handle billing operations and invoice generation",
+    "Monitor payment metrics and revenue data"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open Claude Desktop configuration file",
+        "Add the Stripe server configuration with HTTP transport",
+        "Restart Claude Desktop",
+        "Authenticate with your Stripe account"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport http stripe https://mcp.stripe.com"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "stripe": {
+          "transport": "http",
+          "url": "https://mcp.stripe.com"
+        }
+      }
+    }
+  },
+  "useCases": [
+    "Process customer refunds quickly",
+    "Update subscription plans for customers",
+    "Generate billing reports and analytics",
+    "Analyze payment trends and patterns",
+    "Handle failed payments and retry logic"
+  ],
+  "security": [
+    "OAuth ensures secure access to Stripe data",
+    "Test in Stripe test mode before production",
+    "Log all payment operations for audit trail",
+    "Follow PCI compliance guidelines"
+  ],
+  "troubleshooting": [
+    "Verify Stripe account permissions",
+    "Check test vs live mode configuration",
+    "Ensure webhook endpoints are configured correctly"
+  ],
+  "examples": [
+    "Refund order ord_abc123",
+    "Show revenue for last month",
+    "List all active subscriptions",
+    "Create an invoice for customer cus_xyz"
+  ],
+  "package": null,
+  "requiresAuth": true,
+  "permissions": ["read", "write", "refund"],
+  "configLocation": "claude_desktop_config.json",
+  "githubUrl": null,
+  "documentationUrl": "https://docs.stripe.com/mcp",
+  "source": "official"
+}

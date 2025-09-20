@@ -66,8 +66,33 @@ content/
 
 ### 2. Create Your JSON File
 
-Copy the template and fill in your content:
+Copy the appropriate template and fill in your content:
 
+### For Hooks (Slug-Only Approach)
+```json
+{
+  "slug": "your-hook-name",
+  "description": "Brief description of what this hook does",
+  "category": "hooks",
+  "author": "your-github-username",
+  "dateAdded": "2025-01-20",
+  "tags": ["automation", "relevant", "tags"],
+  "hookType": "PostToolUse",
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "postToolUse": {
+          "script": "./.claude/hooks/your-hook-name.sh",
+          "matchers": ["write", "edit"]
+        }
+      }
+    },
+    "scriptContent": "#!/usr/bin/env bash\n\n# Your script content here"
+  }
+}
+```
+
+### For Other Content Types
 ```json
 {
   "title": "Your Content Title",
@@ -80,9 +105,10 @@ Copy the template and fill in your content:
 ```
 
 **Important Notes:**
-- The `slug` and `id` are auto-generated from your title
+- **For hooks**: Use `slug` field only - titles are auto-generated with smart capitalization
+- **For other content**: Use `title` or `name` field - slugs are auto-generated  
+- "aws-api-validator" → "AWS API Validator" (auto-capitalized)
 - "UI/UX Expert" → URL: `/agents/uiux-expert`
-- "TypeScript Rules" → URL: `/rules/typescript-rules`
 
 ### 3. Categories
 
@@ -213,6 +239,30 @@ tag1, tag2, tag3
   "author": "JSONbored",
   "tags": ["react", "code-review", "javascript", "frontend"],
   "content": "You are a React code review expert focused on...\n\n## Review Criteria\n- Component structure\n- Hook usage\n- Performance optimizations\n- Accessibility standards"
+}
+```
+
+### Good Hook Example
+```json
+{
+  "slug": "accessibility-checker",
+  "description": "Automated accessibility testing and compliance checking for web applications following WCAG guidelines",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-01-20",
+  "tags": ["accessibility", "a11y", "wcag", "testing"],
+  "hookType": "PostToolUse",
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "postToolUse": {
+          "script": "./.claude/hooks/accessibility-checker.sh",
+          "matchers": ["write", "edit"]
+        }
+      }
+    },
+    "scriptContent": "#!/usr/bin/env bash\n\n# Accessibility checking script\necho 'Running accessibility checks...'"
+  }
 }
 ```
 

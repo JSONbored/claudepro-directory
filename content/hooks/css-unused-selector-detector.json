@@ -1,0 +1,45 @@
+{
+  "slug": "css-unused-selector-detector",
+  "description": "Detects unused CSS selectors when stylesheets are modified to keep CSS lean",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": [
+    "css",
+    "optimization",
+    "cleanup",
+    "performance",
+    "purge"
+  ],
+  "hookType": "PostToolUse",
+  "features": [
+    "Automatic unused CSS selector detection with PurgeCSS",
+    "Support for CSS, SCSS, and modern CSS frameworks",
+    "Content analysis across HTML, JS, JSX, TS, and TSX files",
+    "Before/after comparison with line count reduction",
+    "Optimized CSS output generation",
+    "Integration with modern build workflows"
+  ],
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "postToolUse": {
+          "script": "./.claude/hooks/css-unused-selector-detector.sh",
+          "matchers": [
+            "write",
+            "edit"
+          ]
+        }
+      }
+    },
+    "scriptContent": "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if it's a CSS/SCSS file\nif [[ \"$FILE_PATH\" == *.css ]] || [[ \"$FILE_PATH\" == *.scss ]] || [[ \"$FILE_PATH\" == *.sass ]]; then\n  echo \"🔍 Analyzing CSS file for unused selectors: $FILE_PATH\" >&2\n  \n  # Check if file exists\n  if [ ! -f \"$FILE_PATH\" ]; then\n    echo \"📁 CSS file does not exist yet, skipping analysis\" >&2\n    exit 0\n  fi\n  \n  # Get original file size\n  ORIGINAL_LINES=$(wc -l < \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n  ORIGINAL_SIZE=$(wc -c < \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n  \n  echo \"📊 Original CSS: $ORIGINAL_LINES lines, $ORIGINAL_SIZE bytes\" >&2\n  \n  # Try PurgeCSS if available\n  if command -v npx &> /dev/null && npx purgecss --version &> /dev/null; then\n    echo \"🧹 Running PurgeCSS analysis...\" >&2\n    \n    # Create analysis directory\n    mkdir -p css-analysis\n    \n    # Run PurgeCSS with multiple content patterns\n    if npx purgecss --css \"$FILE_PATH\" \\\n      --content './src/**/*.{html,js,jsx,ts,tsx,vue,svelte}' \\\n      --content './**/*.{html,js,jsx,ts,tsx,vue,svelte}' \\\n      --output ./css-analysis/ 2>/dev/null; then\n      \n      # Analyze results\n      PURGED_FILE=\"./css-analysis/$(basename \"$FILE_PATH\")\"\n      if [ -f \"$PURGED_FILE\" ]; then\n        PURGED_LINES=$(wc -l < \"$PURGED_FILE\" 2>/dev/null || echo \"0\")\n        PURGED_SIZE=$(wc -c < \"$PURGED_FILE\" 2>/dev/null || echo \"0\")\n        \n        SAVED_LINES=$((ORIGINAL_LINES - PURGED_LINES))\n        SAVED_SIZE=$((ORIGINAL_SIZE - PURGED_SIZE))\n        REDUCTION_PERCENT=$((SAVED_SIZE * 100 / ORIGINAL_SIZE))\n        \n        echo \"📉 Optimized CSS: $PURGED_LINES lines, $PURGED_SIZE bytes\" >&2\n        echo \"✅ Potential savings: $SAVED_LINES lines, $SAVED_SIZE bytes ($REDUCTION_PERCENT% reduction)\" >&2\n        echo \"📁 Check css-analysis/$(basename \"$FILE_PATH\") for optimized version\" >&2\n      else\n        echo \"⚠️ PurgeCSS analysis completed but no output generated\" >&2\n      fi\n    else\n      echo \"❌ PurgeCSS analysis failed - check content paths\" >&2\n    fi\n  else\n    echo \"💡 Install PurgeCSS (npm install -g purgecss) for CSS optimization analysis\" >&2\n    \n    # Basic analysis without PurgeCSS\n    SELECTOR_COUNT=$(grep -o '[.#][a-zA-Z][-a-zA-Z0-9_]*' \"$FILE_PATH\" 2>/dev/null | sort -u | wc -l || echo \"0\")\n    echo \"📊 Found $SELECTOR_COUNT unique CSS selectors in file\" >&2\n  fi\n  \n  echo \"✅ CSS analysis completed for $FILE_PATH\" >&2\nelse\n  echo \"File $FILE_PATH is not a CSS/SCSS file, skipping analysis\" >&2\nfi\n\nexit 0"
+  },
+  "useCases": [
+    "Automatic CSS optimization during stylesheet development",
+    "Dead code elimination in large CSS codebases",
+    "Performance optimization for web applications",
+    "CSS bundle size reduction in production builds",
+    "Maintenance of clean, lean stylesheets"
+  ],
+  "source": "community"
+}

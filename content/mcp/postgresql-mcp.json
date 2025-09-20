@@ -1,28 +1,86 @@
 {
   "title": "PostgreSQL MCP Server",
-  "description": "Connect Claude to PostgreSQL databases for direct query execution, schema management, and database operations",
+  "description": "Official MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities",
   "category": "mcp",
-  "author": "JSONbored",
+  "author": "Anthropic",
   "dateAdded": "2025-09-16",
   "tags": [
     "postgresql",
     "database",
     "sql",
-    "data",
-    "query"
+    "official",
+    "anthropic"
   ],
-  "content": "The PostgreSQL MCP Server enables Claude to interact directly with PostgreSQL databases. Features include:\n\n## Core Capabilities\n\n### Database Connection\n- Connect to local and remote PostgreSQL instances\n- Support for connection pooling and SSL\n- Multiple database connections simultaneously\n- Connection string and environment variable configuration\n\n### Query Execution\n- Execute SELECT, INSERT, UPDATE, DELETE queries\n- Run complex queries with JOINs and subqueries\n- Support for prepared statements and parameters\n- Transaction management (BEGIN, COMMIT, ROLLBACK)\n- Query result formatting and export\n\n### Schema Management\n- View database schemas and table structures\n- Create, alter, and drop tables\n- Manage indexes, constraints, and foreign keys\n- Handle database migrations and versioning\n- Generate ERD (Entity Relationship Diagrams)\n\n### Data Analysis\n- Generate data insights and statistics\n- Create aggregation queries and reports\n- Identify data quality issues\n- Performance analysis and query optimization\n- Data export in various formats (CSV, JSON, XML)\n\n### Advanced Features\n- Support for PostgreSQL-specific features (JSONB, arrays, CTEs)\n- Full-text search capabilities\n- Spatial data operations with PostGIS\n- Time-series data analysis\n- Custom function and procedure execution\n\n## Installation\n\n```bash\nnpm install @modelcontextprotocol/server-postgres\n```\n\n## Configuration\n\n```json\n{\n  \"mcpServers\": {\n    \"postgres\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@modelcontextprotocol/server-postgres\"],\n      \"env\": {\n        \"POSTGRES_CONNECTION_STRING\": \"postgresql://username:password@localhost:5432/database\"\n      }\n    }\n  }\n}\n```\n\n## Environment Variables\n\n```bash\n# Connection string format\nPOSTGRES_CONNECTION_STRING=postgresql://user:pass@host:port/db\n\n# Or individual components\nPOSTGRES_HOST=localhost\nPOSTGRES_PORT=5432\nPOSTGRES_DATABASE=mydb\nPOSTGRES_USER=myuser\nPOSTGRES_PASSWORD=mypass\nPOSTGRES_SSL=require\n```\n\n## Security Features\n- SSL/TLS encryption support\n- Read-only mode for safe data exploration\n- Query whitelisting and blacklisting\n- Connection timeout and rate limiting\n- Audit logging for all database operations\n\n## Usage Examples\n\n### Data Analysis\n```sql\n-- Analyze customer behavior\nSELECT \n  date_trunc('month', created_at) as month,\n  COUNT(*) as new_customers,\n  AVG(order_value) as avg_order_value\nFROM customers \nWHERE created_at >= '2024-01-01'\nGROUP BY month\nORDER BY month;\n```\n\n### Schema Exploration\n```sql\n-- Get table information\nSELECT \n  table_name,\n  column_name,\n  data_type,\n  is_nullable\nFROM information_schema.columns \nWHERE table_schema = 'public'\nORDER BY table_name, ordinal_position;\n```",
-  "configuration": {
-    "requiresAuth": true,
-    "authType": "connection_string",
-    "permissions": [
-      "read",
-      "write",
-      "schema"
-    ],
-    "safeMode": true
+  "content": "The official PostgreSQL MCP Server from Anthropic provides read-only access to PostgreSQL databases, enabling Claude to inspect schemas and execute safe queries.",
+  "features": [
+    "Read-only access for safe database exploration",
+    "Automatic discovery of table structures and columns",
+    "Execute SELECT queries within read-only transactions",
+    "Access detailed database metadata and structure",
+    "Perform data analysis without altering database state",
+    "Support for SSL connections and authentication"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open your Claude Desktop configuration file",
+        "Add the PostgreSQL MCP server configuration with connection string",
+        "Restart Claude Desktop",
+        "Ask Claude to list tables to verify connection"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "Create a .mcp.json file with PostgreSQL server configuration and connection string"
   },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "postgres": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost/mydb"]
+        }
+      }
+    }
+  },
+  "useCases": [
+    "Understand database schema and relationships",
+    "Generate reports from existing data",
+    "Analyze data patterns and distributions",
+    "Create documentation from database structure",
+    "Write and test SELECT queries",
+    "Explore unfamiliar database schemas"
+  ],
+  "security": [
+    "All queries execute in read-only transactions",
+    "INSERT, UPDATE, DELETE operations are prevented",
+    "Supports SSL/TLS encryption for connections",
+    "Respects existing database user permissions",
+    "Safe exploration without data modification risks"
+  ],
+  "troubleshooting": [
+    "Verify connection string format and database accessibility",
+    "Check username/password in connection string",
+    "Add SSL mode if required by your database",
+    "Ensure database user has SELECT permissions",
+    "Test connection from command line first"
+  ],
+  "examples": [
+    "What tables exist in my database?",
+    "Describe the structure of the users table",
+    "How many records are in each table?",
+    "Write a query to find active users from last month",
+    "Generate documentation for my database schema"
+  ],
+  "package": "@modelcontextprotocol/server-postgres",
+  "requiresAuth": true,
+  "authType": "connection_string",
+  "permissions": ["read"],
+  "readOnly": true,
+  "configLocation": "claude_desktop_config.json",
   "githubUrl": "https://github.com/modelcontextprotocol/servers",
-  "documentationUrl": "https://modelcontextprotocol.io/servers/postgres",
-  "source": "community"
+  "documentationUrl": "https://modelcontextprotocol.io/examples",
+  "source": "official"
 }

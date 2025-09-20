@@ -1,0 +1,47 @@
+{
+  "slug": "session-metrics-collector",
+  "description": "Collects and reports detailed metrics about the coding session when Claude stops",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": [
+    "metrics",
+    "analytics",
+    "stop-hook",
+    "performance",
+    "statistics"
+  ],
+  "hookType": "Stop",
+  "features": [
+    "Comprehensive session analytics",
+    "File modification tracking",
+    "Language usage statistics",
+    "Productivity metrics collection",
+    "Session duration measurement",
+    "Git integration for change tracking"
+  ],
+  "useCases": [
+    "Track coding session productivity",
+    "Analyze development patterns",
+    "Measure session effectiveness",
+    "Generate development reports",
+    "Monitor coding habits over time",
+    "Collect team productivity metrics",
+    "Analyze language usage trends",
+    "Create development insights"
+  ],
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "stop": {
+          "script": "./.claude/hooks/session-metrics-collector.sh",
+          "matchers": [
+            "*"
+          ]
+        }
+      }
+    },
+    "scriptContent": "#!/bin/bash\n\necho \"📊 Session Metrics Collector - Gathering session analytics...\"\necho \"⏱️ Session ended: $(date)\"\n\n# Create metrics directory\nmkdir -p .metrics\n\n# Session metadata\nSESSION_ID=\"$(date +%Y%m%d_%H%M%S)\"\nMETRICS_FILE=\".metrics/session-${SESSION_ID}.json\"\nEND_TIME=$(date)\nEND_TIMESTAMP=$(date +%s)\n\necho \"💾 Collecting session metrics...\"\n\n# Get session start time (approximate from oldest .claude file or fallback)\nif [ -d \".claude\" ] && [ \"$(find .claude -type f 2>/dev/null | wc -l)\" -gt 0 ]; then\n    START_TIMESTAMP=$(stat -f %B .claude/*.log 2>/dev/null | head -1 || echo $((END_TIMESTAMP - 3600)))\nelse\n    # Fallback: assume 1 hour session\n    START_TIMESTAMP=$((END_TIMESTAMP - 3600))\nfi\n\nSESSION_DURATION=$((END_TIMESTAMP - START_TIMESTAMP))\nSESSION_HOURS=$((SESSION_DURATION / 3600))\nSESSION_MINUTES=$(((SESSION_DURATION % 3600) / 60))\n\necho \"⏱️ Session Duration: ${SESSION_HOURS}h ${SESSION_MINUTES}m\"\n\n# File statistics\necho \"📁 Analyzing file changes...\"\n\n# Git-based analysis (preferred)\nif git rev-parse --git-dir >/dev/null 2>&1; then\n    FILES_MODIFIED=$(git diff --name-only 2>/dev/null | wc -l | tr -d ' ')\n    FILES_ADDED=$(git diff --name-status 2>/dev/null | grep '^A' | wc -l | tr -d ' ')\n    FILES_DELETED=$(git diff --name-status 2>/dev/null | grep '^D' | wc -l | tr -d ' ')\n    \n    # Line statistics\n    LINE_STATS=$(git diff --shortstat 2>/dev/null || echo \"0 files changed\")\n    LINES_ADDED=$(echo \"$LINE_STATS\" | grep -o '[0-9]\\+ insertion' | grep -o '[0-9]\\+' || echo 0)\n    LINES_DELETED=$(echo \"$LINE_STATS\" | grep -o '[0-9]\\+ deletion' | grep -o '[0-9]\\+' || echo 0)\n    \n    # Languages used\n    LANGUAGES=$(git diff --name-only 2>/dev/null | sed 's/.*\\.//' | sort | uniq -c | sort -nr | head -5)\nelse\n    # Fallback: recent file changes\n    FILES_MODIFIED=$(find . -type f -newer .metrics 2>/dev/null | wc -l | tr -d ' ' || echo \"0\")\n    FILES_ADDED=\"unknown\"\n    FILES_DELETED=\"unknown\"\n    LINES_ADDED=\"unknown\"\n    LINES_DELETED=\"unknown\"\n    LANGUAGES=\"unknown\"\nfi\n\necho \"📊 File Statistics:\"\necho \"  • Files Modified: $FILES_MODIFIED\"\necho \"  • Files Added: $FILES_ADDED\"\necho \"  • Files Deleted: $FILES_DELETED\"\necho \"  • Lines Added: $LINES_ADDED\"\necho \"  • Lines Deleted: $LINES_DELETED\"\n\n# Repository analysis\nif git rev-parse --git-dir >/dev/null 2>&1; then\n    REPO_NAME=$(basename \"$(git rev-parse --show-toplevel)\" 2>/dev/null || echo \"unknown\")\n    CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo \"unknown\")\n    COMMIT_COUNT=$(git rev-list --count HEAD 2>/dev/null || echo \"unknown\")\n    \n    echo \"📂 Repository Info:\"\n    echo \"  • Repository: $REPO_NAME\"\n    echo \"  • Branch: $CURRENT_BRANCH\"\n    echo \"  • Total Commits: $COMMIT_COUNT\"\nfi\n\n# System information\nCWD=$(pwd)\nUSER=$(whoami 2>/dev/null || echo \"unknown\")\nHOST=$(hostname 2>/dev/null || echo \"unknown\")\n\necho \"🖥️ Environment:\"\necho \"  • User: $USER\"\necho \"  • Host: $HOST\"\necho \"  • Directory: $(basename \"$CWD\")\"\n\n# Activity analysis from .claude logs\nif [ -d \".claude\" ]; then\n    ACTIVITY_COUNT=$(find .claude -name \"*.log\" -exec cat {} \\; 2>/dev/null | wc -l | tr -d ' ')\n    echo \"📈 Activity: $ACTIVITY_COUNT logged actions\"\nfi\n\n# Generate JSON metrics\necho \"💾 Saving detailed metrics to: $METRICS_FILE\"\n\ncat > \"$METRICS_FILE\" << EOF\n{\n  \"session\": {\n    \"id\": \"$SESSION_ID\",\n    \"start_time\": \"$(date -r $START_TIMESTAMP 2>/dev/null || echo 'unknown')\",\n    \"end_time\": \"$END_TIME\",\n    \"duration_seconds\": $SESSION_DURATION,\n    \"duration_formatted\": \"${SESSION_HOURS}h ${SESSION_MINUTES}m\"\n  },\n  \"files\": {\n    \"modified\": $FILES_MODIFIED,\n    \"added\": $FILES_ADDED,\n    \"deleted\": $FILES_DELETED\n  },\n  \"lines\": {\n    \"added\": $LINES_ADDED,\n    \"deleted\": $LINES_DELETED\n  },\n  \"repository\": {\n    \"name\": \"$REPO_NAME\",\n    \"branch\": \"$CURRENT_BRANCH\",\n    \"total_commits\": $COMMIT_COUNT\n  },\n  \"environment\": {\n    \"user\": \"$USER\",\n    \"host\": \"$HOST\",\n    \"working_directory\": \"$CWD\"\n  },\n  \"productivity\": {\n    \"files_per_hour\": $(echo \"scale=2; $FILES_MODIFIED * 3600 / $SESSION_DURATION\" | bc -l 2>/dev/null || echo 0),\n    \"lines_per_hour\": $(echo \"scale=2; ($LINES_ADDED + $LINES_DELETED) * 3600 / $SESSION_DURATION\" | bc -l 2>/dev/null || echo 0)\n  }\n}\nEOF\n\n# Summary statistics\necho \"\"\necho \"📊 Session Summary:\"\necho \"  • Duration: ${SESSION_HOURS}h ${SESSION_MINUTES}m\"\necho \"  • Productivity: $(echo \"scale=1; $FILES_MODIFIED * 3600 / $SESSION_DURATION\" | bc -l 2>/dev/null || echo '0') files/hour\"\necho \"  • Total Changes: $((LINES_ADDED + LINES_DELETED)) lines\"\n\n# Historical comparison\nif [ \"$(find .metrics -name 'session-*.json' 2>/dev/null | wc -l)\" -gt 1 ]; then\n    PREV_SESSION=$(find .metrics -name 'session-*.json' | sort | tail -2 | head -1)\n    if [ -f \"$PREV_SESSION\" ]; then\n        echo \"📈 Compared to last session:\"\n        echo \"  • Previous session available for comparison\"\n    fi\nfi\n\n# Cleanup old metrics (keep last 30 sessions)\nfind .metrics -name 'session-*.json' | sort | head -n -30 | xargs rm -f 2>/dev/null\n\necho \"\"\necho \"💡 Productivity Tips:\"\necho \"  • Review metrics regularly to identify patterns\"\necho \"  • Set productivity goals for future sessions\"\necho \"  • Use metrics to optimize development workflow\"\necho \"  • Compare sessions to track improvement\"\n\necho \"\"\necho \"🎯 Session metrics collection complete!\"\necho \"📄 Full report saved to: $METRICS_FILE\"\n\nexit 0"
+  },
+  "source": "community"
+}

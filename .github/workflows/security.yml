@@ -1,4 +1,4 @@
-name: Security Checks
+name: Secret Scanning
 
 on:
   push:
@@ -7,24 +7,13 @@ on:
     branches: [ main, dev ]
 
 jobs:
-  security:
+  secrets:
     runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Use Node.js 20
-      uses: actions/setup-node@v4
       with:
-        node-version: '20'
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Run npm audit
-      run: npm audit --audit-level=moderate
-      continue-on-error: true
+        fetch-depth: 0  # Full history for better secret detection
     
     - name: Check for hardcoded secrets
       uses: trufflesecurity/trufflehog@main

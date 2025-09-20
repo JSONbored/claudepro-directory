@@ -1,0 +1,72 @@
+{
+  "title": "Square MCP Server",
+  "description": "Build on Square APIs for payments, inventory, and order management",
+  "category": "mcp",
+  "author": "Square",
+  "dateAdded": "2025-09-18",
+  "tags": ["payments", "square", "pos", "inventory", "commerce"],
+  "content": "Integrate Square's commerce platform with Claude for payment processing and business management.",
+  "features": [
+    "Process payments and refunds",
+    "Manage inventory levels and catalogs",
+    "Handle orders and fulfillment",
+    "Track customer profiles and history",
+    "Manage multiple business locations"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open Claude Desktop configuration file",
+        "Add the Square server configuration with SSE transport",
+        "Restart Claude Desktop",
+        "Authenticate with your Square account"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport sse square https://mcp.squareup.com/sse"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "square": {
+          "transport": "sse",
+          "url": "https://mcp.squareup.com/sse"
+        }
+      }
+    }
+  },
+  "useCases": [
+    "Process customer payments efficiently",
+    "Update inventory levels in real-time",
+    "Create customer profiles for marketing",
+    "Generate sales reports and analytics",
+    "Track order fulfillment status"
+  ],
+  "security": [
+    "OAuth authentication for secure access",
+    "PCI compliance for payment processing",
+    "Test in sandbox environment first",
+    "Monitor transaction logs"
+  ],
+  "troubleshooting": [
+    "Check merchant account status",
+    "Verify location permissions",
+    "Test in sandbox mode before production"
+  ],
+  "examples": [
+    "Process a $50 payment",
+    "Check inventory for SKU-123",
+    "Create order for customer",
+    "Generate today's sales report"
+  ],
+  "package": null,
+  "requiresAuth": true,
+  "permissions": ["read", "write", "payments"],
+  "configLocation": "claude_desktop_config.json",
+  "githubUrl": null,
+  "documentationUrl": "https://developer.squareup.com/docs/mcp",
+  "source": "official"
+}

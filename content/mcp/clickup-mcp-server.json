@@ -1,0 +1,78 @@
+{
+  "title": "ClickUp MCP Server",
+  "description": "Task management and project tracking with ClickUp integration",
+  "category": "mcp",
+  "author": "hauptsacheNet",
+  "dateAdded": "2025-09-18",
+  "tags": ["project-management", "clickup", "tasks", "productivity", "team-collaboration"],
+  "content": "Manage ClickUp tasks and projects directly through Claude for comprehensive project management.",
+  "features": [
+    "Create and update tasks with custom fields",
+    "Manage project spaces and folders",
+    "Track time entries and productivity",
+    "Update task statuses and priorities",
+    "Assign team members and set due dates"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Get your ClickUp API key from https://app.clickup.com/settings/apps",
+        "Find your Team ID in ClickUp settings",
+        "Open Claude Desktop configuration file",
+        "Add the ClickUp server configuration with your credentials",
+        "Restart Claude Desktop"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add clickup --env CLICKUP_API_KEY=YOUR_KEY --env CLICKUP_TEAM_ID=YOUR_TEAM_ID -- npx -y @hauptsache.net/clickup-mcp"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "clickup": {
+          "command": "npx",
+          "args": ["-y", "@hauptsache.net/clickup-mcp"],
+          "env": {
+            "CLICKUP_API_KEY": "your_api_key",
+            "CLICKUP_TEAM_ID": "your_team_id"
+          }
+        }
+      }
+    }
+  },
+  "useCases": [
+    "Create tasks from requirements documents",
+    "Update project progress in bulk",
+    "Generate status reports for stakeholders",
+    "Perform bulk task operations",
+    "Automate time tracking entries"
+  ],
+  "security": [
+    "Use personal API tokens for authentication",
+    "Limit permissions to necessary spaces only",
+    "Rotate API keys regularly",
+    "Monitor API usage for anomalies"
+  ],
+  "troubleshooting": [
+    "Verify API key permissions in ClickUp",
+    "Check Team ID accuracy in configuration",
+    "Ensure user has space access permissions",
+    "Monitor rate limits for API calls"
+  ],
+  "examples": [
+    "Create a new task in the Development space",
+    "Update task CL-123 to completed",
+    "List all my assigned tasks",
+    "Add time entry to current task"
+  ],
+  "package": "@hauptsache.net/clickup-mcp",
+  "requiresAuth": true,
+  "permissions": ["read", "write", "delete"],
+  "configLocation": "claude_desktop_config.json",
+  "githubUrl": "https://github.com/hauptsacheNet/clickup-mcp",
+  "documentationUrl": "https://github.com/hauptsacheNet/clickup-mcp",
+  "source": "community"
+}

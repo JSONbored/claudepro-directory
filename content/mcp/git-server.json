@@ -1,0 +1,83 @@
+{
+  "title": "Git MCP Server",
+  "description": "Official MCP server providing Git repository tools for reading, searching, and manipulating Git repositories",
+  "category": "mcp",
+  "author": "Anthropic",
+  "dateAdded": "2025-09-16",
+  "tags": [
+    "git",
+    "version-control",
+    "repositories",
+    "official",
+    "anthropic"
+  ],
+  "content": "The official Git MCP Server from Anthropic provides comprehensive tools to read, search, and manipulate Git repositories through Claude.",
+  "features": [
+    "Access commit history, branch information, and repository status",
+    "Read files from any commit, branch, or tag",
+    "Search through commit messages, file contents, and repository structure",
+    "Compare changes between commits, branches, and files",
+    "Work with different branches and track changes",
+    "Safe exploration without making changes"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open your Claude Desktop configuration file",
+        "Add the Git MCP server configuration",
+        "Restart Claude Desktop",
+        "Ask Claude about recent commit history to verify connection"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "Create a .mcp.json file in your project root with the Git server configuration"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "git": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-git"]
+        }
+      }
+    }
+  },
+  "useCases": [
+    "Analyze commit patterns and development history",
+    "Understand code evolution over time",
+    "Examine specific commits and their changes",
+    "Compare different versions of files",
+    "Search for commits mentioning specific topics",
+    "Generate repository documentation"
+  ],
+  "security": [
+    "Read-only access to repositories",
+    "Works with local Git repositories only",
+    "No remote operations performed",
+    "Safe exploration without making changes",
+    "Respects existing file permissions"
+  ],
+  "troubleshooting": [
+    "Ensure you're in a Git repository directory",
+    "Check that Claude has read access to repository files",
+    "Verify Git is installed and accessible from command line",
+    "Restart Claude Desktop after configuration changes"
+  ],
+  "examples": [
+    "Show me the recent commit history",
+    "What branches exist in this repository?",
+    "Find commits mentioning bug fix",
+    "What changed in the last 5 commits?",
+    "Compare this file between two commits"
+  ],
+  "package": "@modelcontextprotocol/server-git",
+  "requiresAuth": false,
+  "permissions": ["git", "filesystem"],
+  "configLocation": "claude_desktop_config.json",
+  "githubUrl": "https://github.com/modelcontextprotocol/servers",
+  "documentationUrl": "https://modelcontextprotocol.io/examples",
+  "source": "official"
+}
