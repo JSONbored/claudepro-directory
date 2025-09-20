@@ -92,7 +92,8 @@ export const statsRedis = {
         error instanceof Error ? error : new Error(String(error)),
         {
           itemCount: items.length,
-          keys: items.map((item) => `views:${item.category}:${item.slug}`),
+          keysCount: items.length,
+          sampleKey: items.length > 0 ? `views:${items[0]?.category}:${items[0]?.slug}` : '',
         }
       );
       return {};
@@ -236,7 +237,8 @@ export const statsRedis = {
         'Failed to cleanup old trending data in Redis',
         error instanceof Error ? error : new Error(String(error)),
         {
-          categories: ['agents', 'mcp', 'rules', 'commands', 'hooks'],
+          categoriesCount: 5,
+          sampleCategory: 'agents',
           cutoffTime: Date.now() - 7 * 24 * 60 * 60 * 1000,
         }
       );

@@ -56,6 +56,14 @@ interface TutorialData {
   }>;
 }
 
+// Helper function to generate title from slug
+function slugToTitle(slug: string): string {
+  return slug
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 async function loadRules(): Promise<Rule[]> {
   const files = await fs.readdir(CONTENT_DIR);
   const rules: Rule[] = [];
@@ -64,9 +72,15 @@ async function loadRules(): Promise<Rule[]> {
     if (file.endsWith('.json')) {
       const content = await fs.readFile(path.join(CONTENT_DIR, file), 'utf-8');
       const item = JSON.parse(content);
+
+      // Generate slug from filename if not present
+      const slug = item.slug || file.replace('.json', '');
+
       rules.push({
         ...item,
         id: item.slug || file.replace('.json', ''),
+        slug,
+        title: item.title || item.name || slugToTitle(slug),
       });
     }
   }
@@ -121,7 +135,7 @@ ${relevantRules
   .slice(0, 5)
   .map(
     (rule: Rule) =>
-      `| ${rule.title} | ${rule.tags?.[0] || 'General'} | ${rule.tags?.slice(1, 3).join(', ') || 'Various'} | ${rule.tags?.length > 5 ? 'Advanced' : 'Simple'} |`
+      `| ${rule.title} | ${rule.tags?.[0] || 'General'} | ${rule.tags?.slice(1, 3).join(', ') || 'Various'} | ${(rule.tags?.length || 0) > 5 ? 'Advanced' : 'Simple'} |`
   )
   .join('\n')}
 
@@ -480,7 +494,7 @@ ${categoryRules
   .slice(0, 10)
   .map(
     (rule: Rule) =>
-      `| ${rule.title} | ${rule.tags?.[0] || 'General'} | ${rule.tags?.length > 5 ? '⭐⭐⭐ Advanced' : rule.tags?.length > 3 ? '⭐⭐ Intermediate' : '⭐ Beginner'} | ${rule.tags?.[1] || 'General use'} |`
+      `| ${rule.title} | ${rule.tags?.[0] || 'General'} | ${(rule.tags?.length || 0) > 5 ? '⭐⭐⭐ Advanced' : (rule.tags?.length || 0) > 3 ? '⭐⭐ Intermediate' : '⭐ Beginner'} | ${rule.tags?.[1] || 'General use'} |`
   )
   .join('\n')}
 

@@ -1,5 +1,4 @@
 {
-  "title": "/commit - Smart Git Commit",
   "description": "Intelligently analyzes changes and creates well-formatted git commits with conventional commit messages",
   "category": "commands",
   "author": "JSONbored",
@@ -17,5 +16,6 @@
   },
   "githubUrl": "https://github.com/conventional-commits/conventionalcommits.org",
   "documentationUrl": "https://www.conventionalcommits.org/",
-  "source": "community"
+  "source": "community",
+  "slug": "git-smart-commit"
 }

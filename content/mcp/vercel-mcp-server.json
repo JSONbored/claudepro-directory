@@ -1,10 +1,16 @@
 {
-  "title": "Vercel MCP Server",
+  "slug": "vercel-mcp-server",
   "description": "Manage deployments, analyze logs, and control Vercel projects",
   "category": "mcp",
   "author": "Vercel",
   "dateAdded": "2025-09-18",
-  "tags": ["deployment", "vercel", "hosting", "devops", "infrastructure"],
+  "tags": [
+    "deployment",
+    "vercel",
+    "hosting",
+    "devops",
+    "infrastructure"
+  ],
   "content": "Control Vercel deployments and infrastructure through Claude for seamless deployment management.",
   "features": [
     "Search and navigate Vercel documentation",
@@ -36,8 +42,18 @@
           "url": "https://mcp.vercel.com/"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "vercel": {
+          "transport": "http",
+          "url": "https://mcp.vercel.com/"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Deploy new versions to production",
     "Debug build failures and errors",
@@ -63,11 +79,12 @@
     "Update the API_KEY environment variable",
     "List all recent deployments"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "write", "deploy"],
+  "permissions": [
+    "read",
+    "write",
+    "deploy"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": null,
-  "documentationUrl": "https://vercel.com/docs/mcp/vercel-mcp",
-  "source": "official"
+  "documentationUrl": "https://vercel.com/docs/mcp/vercel-mcp"
 }

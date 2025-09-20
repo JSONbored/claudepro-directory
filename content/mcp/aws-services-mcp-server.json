@@ -1,8 +1,8 @@
 {
-  "title": "AWS Services MCP",
+  "slug": "aws-services-mcp-server",
   "description": "Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring",
   "category": "mcp",
-  "author": "claudepro",
+  "author": "AWS Labs",
   "dateAdded": "2025-09-16",
   "tags": [
     "aws",
@@ -27,7 +27,7 @@
   "installation": {
     "claudeDesktop": {
       "steps": [
-        "Install the AWS MCP package: npm install @claudepro/mcp-aws",
+        "Install the AWS MCP server: uvx awslabs.core-mcp-server@latest",
         "Open your Claude Desktop configuration file",
         "Add the AWS MCP server configuration with your credentials",
         "Configure AWS authentication (IAM keys, profile, or roles)",
@@ -38,24 +38,42 @@
         "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
       }
     },
-    "claudeCode": "claude mcp add aws --env AWS_ACCESS_KEY_ID=xxx AWS_SECRET_ACCESS_KEY=xxx -- npx @claudepro/mcp-aws"
+    "claudeCode": "uvx awslabs.core-mcp-server@latest"
   },
   "configuration": {
     "claudeDesktop": {
       "mcpServers": {
         "aws": {
-          "command": "npx",
-          "args": ["@claudepro/mcp-aws"],
+          "command": "uvx",
+          "args": [
+            "awslabs.core-mcp-server@latest"
+          ],
           "env": {
-            "AWS_ACCESS_KEY_ID": "your-access-key",
-            "AWS_SECRET_ACCESS_KEY": "your-secret-key",
-            "AWS_DEFAULT_REGION": "us-east-1",
-            "AWS_SESSION_TOKEN": "optional-session-token"
+            "AWS_PROFILE": "your-aws-profile",
+            "AWS_REGION": "us-east-1",
+            "FASTMCP_LOG_LEVEL": "ERROR"
+          }
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "aws": {
+          "command": "uvx",
+          "args": [
+            "awslabs.core-mcp-server@latest"
+          ],
+          "env": {
+            "AWS_PROFILE": "${AWS_PROFILE}",
+            "AWS_REGION": "${AWS_REGION:-us-east-1}",
+            "FASTMCP_LOG_LEVEL": "${FASTMCP_LOG_LEVEL:-ERROR}"
           }
         }
       }
     }
   },
+  "package": "awslabs.core-mcp-server",
+  "source": "official",
   "useCases": [
     "Deploy and manage EC2 instances for web applications",
     "Automate S3 bucket creation and file operations",
@@ -92,11 +110,14 @@
     "Create an RDS instance with automated backups",
     "Deploy a complete web application stack via CloudFormation"
   ],
-  "package": "@claudepro/mcp-aws",
   "requiresAuth": true,
-  "permissions": ["ec2:*", "s3:*", "lambda:*", "rds:*", "cloudwatch:*"],
+  "permissions": [
+    "ec2:*",
+    "s3:*",
+    "lambda:*",
+    "rds:*",
+    "cloudwatch:*"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": "https://github.com/claudepro/mcp-aws",
-  "documentationUrl": "https://docs.claude.ai/mcp/aws",
-  "source": "community"
+  "documentationUrl": "https://github.com/awslabs/mcp"
 }

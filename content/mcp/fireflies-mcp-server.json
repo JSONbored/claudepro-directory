@@ -1,10 +1,16 @@
 {
-  "title": "Fireflies MCP Server",
+  "slug": "fireflies-mcp-server",
   "description": "Extract valuable insights from meeting transcripts and summaries",
   "category": "mcp",
   "author": "Fireflies",
   "dateAdded": "2025-09-18",
-  "tags": ["meetings", "fireflies", "transcription", "notes", "ai-assistant"],
+  "tags": [
+    "meetings",
+    "fireflies",
+    "transcription",
+    "notes",
+    "ai-assistant"
+  ],
   "content": "Access and analyze meeting transcripts and insights through Fireflies.ai's meeting intelligence platform.",
   "features": [
     "Access meeting transcripts and recordings",
@@ -36,8 +42,18 @@
           "url": "https://api.fireflies.ai/mcp"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "fireflies": {
+          "transport": "http",
+          "url": "https://api.fireflies.ai/mcp"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Review meeting outcomes and decisions",
     "Extract action items for follow-up",
@@ -63,11 +79,11 @@
     "Generate summary of customer call",
     "Find all mentions of budget in recent meetings"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "search"],
+  "permissions": [
+    "read",
+    "search"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": null,
-  "documentationUrl": "https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol",
-  "source": "official"
+  "documentationUrl": "https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol"
 }

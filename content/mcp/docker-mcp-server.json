@@ -1,0 +1,104 @@
+{
+  "slug": "docker-mcp-server",
+  "description": "Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration",
+  "category": "mcp",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-16",
+  "tags": [
+    "docker",
+    "containers",
+    "devops",
+    "orchestration",
+    "deployment"
+  ],
+  "content": "Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration.",
+  "features": [
+    "Container lifecycle management (start, stop, restart)",
+    "Image operations (pull, build, push, tag)",
+    "Docker Compose service management",
+    "Volume and network administration",
+    "Real-time container logs and monitoring",
+    "Registry operations and authentication"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Ensure Docker is installed and running on your system",
+        "Open Claude Desktop configuration file",
+        "Add the Docker MCP server configuration",
+        "Restart Claude Desktop",
+        "Verify Docker socket access permissions"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add docker -- npx -y @docker/mcp-server"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "docker": {
+          "command": "npx",
+          "args": ["-y", "@docker/mcp-server"],
+          "env": {
+            "DOCKER_HOST": "unix:///var/run/docker.sock",
+            "DOCKER_API_VERSION": "1.43"
+          }
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "docker": {
+          "command": "npx",
+          "args": ["-y", "@docker/mcp-server"],
+          "env": {
+            "DOCKER_HOST": "${DOCKER_HOST:-unix:///var/run/docker.sock}",
+            "DOCKER_API_VERSION": "${DOCKER_API_VERSION:-1.43}"
+          }
+        }
+      }
+    }
+  },
+  "package": "@docker/mcp-server",
+  "source": "community",
+  "useCases": [
+    "Deploy and manage containerized applications",
+    "Build and optimize Docker images",
+    "Monitor container performance and logs",
+    "Orchestrate multi-container applications with Compose",
+    "Manage Docker registry operations"
+  ],
+  "security": [
+    "Secure Docker daemon socket access",
+    "TLS certificate validation for remote connections",
+    "Registry authentication management",
+    "Container resource limits and isolation",
+    "Network security controls"
+  ],
+  "troubleshooting": [
+    "Verify Docker daemon is running and accessible",
+    "Check Docker socket permissions (/var/run/docker.sock)",
+    "Ensure Docker API version compatibility",
+    "Validate registry credentials and network access",
+    "Monitor container resource usage and limits"
+  ],
+  "examples": [
+    "List all running containers and their status",
+    "Build a Docker image from a Dockerfile",
+    "Start a new container with custom configuration",
+    "View real-time logs from a specific container",
+    "Deploy a multi-service application using Docker Compose"
+  ],
+  "requiresAuth": false,
+  "permissions": [
+    "containers",
+    "images",
+    "volumes",
+    "networks"
+  ],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://docs.docker.com/engine/api/"
+}

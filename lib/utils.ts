@@ -166,12 +166,25 @@ export function formatTitle(title: string): string {
  * Universal function to get display title from any content item
  * This ensures consistent title display across the entire application
  */
-export function getDisplayTitle(item: { title?: string; name?: string; slug: string }): string {
+export function getDisplayTitle(item: {
+  title?: string;
+  name?: string;
+  slug: string;
+  category?: string;
+}): string {
   // For hooks (no title/name), use enhanced slugToTitle directly
   // For other content (has title/name), use formatTitle for consistency
   const titleOrName = item.title || item.name;
   if (titleOrName) {
     return formatTitle(titleOrName);
   }
-  return slugToTitle(item.slug);
+
+  const baseTitle = slugToTitle(item.slug);
+
+  // Commands should display with "/" prefix using the original slug
+  if (item.category === 'commands') {
+    return `/${item.slug}`;
+  }
+
+  return baseTitle;
 }

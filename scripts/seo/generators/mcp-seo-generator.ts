@@ -55,6 +55,14 @@ interface TutorialData {
   }>;
 }
 
+// Helper function to generate title from slug
+function slugToTitle(slug: string): string {
+  return slug
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 async function loadMCPServers(): Promise<MCPServer[]> {
   const files = await fs.readdir(CONTENT_DIR);
   const servers: MCPServer[] = [];
@@ -63,9 +71,16 @@ async function loadMCPServers(): Promise<MCPServer[]> {
     if (file.endsWith('.json')) {
       const content = await fs.readFile(path.join(CONTENT_DIR, file), 'utf-8');
       const item = JSON.parse(content);
+
+      // Generate slug from filename if not present
+      const slug = item.slug || file.replace('.json', '');
+
       servers.push({
         ...item,
         id: file.replace('.json', ''),
+        slug,
+        title: item.title || item.name || slugToTitle(slug),
+        name: item.name || item.title || slugToTitle(slug),
       });
     }
   }

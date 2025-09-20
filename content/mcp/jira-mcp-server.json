@@ -1,10 +1,16 @@
 {
-  "title": "Atlassian MCP Server",
+  "slug": "jira-mcp-server",
   "description": "Manage Jira tickets and Confluence documentation",
   "category": "mcp",
   "author": "Atlassian",
   "dateAdded": "2025-09-18",
-  "tags": ["jira", "confluence", "atlassian", "project-management", "documentation"],
+  "tags": [
+    "jira",
+    "confluence",
+    "atlassian",
+    "project-management",
+    "documentation"
+  ],
   "content": "Access Jira and Confluence through a unified Atlassian MCP interface for project and documentation management.",
   "features": [
     "Create and update Jira issues with custom fields",
@@ -36,8 +42,18 @@
           "url": "https://mcp.atlassian.com/v1/sse"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "atlassian": {
+          "transport": "sse",
+          "url": "https://mcp.atlassian.com/v1/sse"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Create Jira tickets from requirements",
     "Update Confluence documentation automatically",
@@ -62,11 +78,12 @@
     "Find all issues assigned to me",
     "Generate a sprint report"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "write", "admin"],
+  "permissions": [
+    "read",
+    "write",
+    "admin"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": null,
-  "documentationUrl": "https://www.atlassian.com/platform/remote-mcp-server",
-  "source": "official"
+  "documentationUrl": "https://www.atlassian.com/platform/remote-mcp-server"
 }

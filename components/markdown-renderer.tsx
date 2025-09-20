@@ -67,14 +67,17 @@ function parseMarkdown(markdown: string): string {
   const lines = html.split('\n');
   const processedLines = [];
   let currentListType = null; // 'ul' or 'ol'
-  const _lastIndent = 0;
-
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    if (!line) {
+      processedLines.push(line);
+      continue;
+    }
+
     const unorderedMatch = line.match(/^(\s*)[-*] (.+)$/);
     const orderedMatch = line.match(/^(\s*)(\d+)\.\s+(.+)$/);
 
-    if (unorderedMatch) {
+    if (unorderedMatch?.[1] && unorderedMatch?.[2]) {
       const indent = unorderedMatch[1].length;
       const content = unorderedMatch[2];
 
@@ -87,7 +90,7 @@ function parseMarkdown(markdown: string): string {
       processedLines.push(
         `<li class="text-muted-foreground leading-relaxed" style="margin-left: ${indent * 20}px">${content}</li>`
       );
-    } else if (orderedMatch) {
+    } else if (orderedMatch?.[1] && orderedMatch?.[3]) {
       const indent = orderedMatch[1].length;
       const content = orderedMatch[3];
 

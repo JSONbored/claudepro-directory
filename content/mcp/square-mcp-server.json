@@ -1,10 +1,16 @@
 {
-  "title": "Square MCP Server",
+  "slug": "square-mcp-server",
   "description": "Build on Square APIs for payments, inventory, and order management",
   "category": "mcp",
   "author": "Square",
   "dateAdded": "2025-09-18",
-  "tags": ["payments", "square", "pos", "inventory", "commerce"],
+  "tags": [
+    "payments",
+    "square",
+    "pos",
+    "inventory",
+    "commerce"
+  ],
   "content": "Integrate Square's commerce platform with Claude for payment processing and business management.",
   "features": [
     "Process payments and refunds",
@@ -36,8 +42,18 @@
           "url": "https://mcp.squareup.com/sse"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "square": {
+          "transport": "sse",
+          "url": "https://mcp.squareup.com/sse"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Process customer payments efficiently",
     "Update inventory levels in real-time",
@@ -62,11 +78,12 @@
     "Create order for customer",
     "Generate today's sales report"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "write", "payments"],
+  "permissions": [
+    "read",
+    "write",
+    "payments"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": null,
-  "documentationUrl": "https://developer.squareup.com/docs/mcp",
-  "source": "official"
+  "documentationUrl": "https://developer.squareup.com/docs/mcp"
 }

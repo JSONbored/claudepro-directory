@@ -1,10 +1,16 @@
 {
-  "title": "Stripe MCP Server",
+  "slug": "stripe-mcp-server",
   "description": "Payment processing, subscription management, and financial transaction handling",
   "category": "mcp",
   "author": "Stripe",
   "dateAdded": "2025-09-18",
-  "tags": ["payments", "stripe", "billing", "subscriptions", "commerce"],
+  "tags": [
+    "payments",
+    "stripe",
+    "billing",
+    "subscriptions",
+    "commerce"
+  ],
   "content": "Integrate Stripe payment capabilities directly into Claude for payment processing and financial operations.",
   "features": [
     "Process payments and refunds programmatically",
@@ -36,8 +42,18 @@
           "url": "https://mcp.stripe.com"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "stripe": {
+          "transport": "http",
+          "url": "https://mcp.stripe.com"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Process customer refunds quickly",
     "Update subscription plans for customers",
@@ -62,11 +78,12 @@
     "List all active subscriptions",
     "Create an invoice for customer cus_xyz"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "write", "refund"],
+  "permissions": [
+    "read",
+    "write",
+    "refund"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": null,
-  "documentationUrl": "https://docs.stripe.com/mcp",
-  "source": "official"
+  "documentationUrl": "https://docs.stripe.com/mcp"
 }

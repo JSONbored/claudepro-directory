@@ -1,10 +1,16 @@
 {
-  "title": "Workato MCP Server",
+  "slug": "workato-mcp-server",
   "description": "Access any application, workflows, or data via Workato's integration platform",
   "category": "mcp",
   "author": "Workato",
   "dateAdded": "2025-09-18",
-  "tags": ["automation", "workato", "integration", "workflow", "iPaaS"],
+  "tags": [
+    "automation",
+    "workato",
+    "integration",
+    "workflow",
+    "iPaaS"
+  ],
   "content": "Connect to hundreds of applications through Workato's enterprise automation and integration platform.",
   "features": [
     "Execute recipes (workflows) on demand",
@@ -36,8 +42,18 @@
           "url": "YOUR_GENERATED_WORKATO_URL"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "workato": {
+          "transport": "http",
+          "url": "YOUR_GENERATED_WORKATO_URL"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Trigger complex multi-system workflows",
     "Integrate data across enterprise applications",
@@ -63,11 +79,12 @@
     "Check status of overnight data sync",
     "Trigger customer onboarding recipe"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "write", "execute"],
+  "permissions": [
+    "read",
+    "write",
+    "execute"
+  ],
   "configLocation": "custom_generated",
-  "githubUrl": null,
-  "documentationUrl": "https://docs.workato.com/mcp.html",
-  "source": "official"
+  "documentationUrl": "https://docs.workato.com/mcp.html"
 }

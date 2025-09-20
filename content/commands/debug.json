@@ -1,5 +1,4 @@
 {
-  "title": "/debug",
   "description": "Advanced debugging assistant with root cause analysis, step-by-step troubleshooting, and automated fix suggestions",
   "category": "commands",
   "author": "claudepro",
@@ -19,5 +18,6 @@
   },
   "githubUrl": "https://github.com/claudepro/code-reviewer",
   "documentationUrl": "https://docs.claude.ai/commands/debug",
-  "source": "community"
+  "source": "community",
+  "slug": "debug"
 }

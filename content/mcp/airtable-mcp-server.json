@@ -1,5 +1,5 @@
 {
-  "title": "Airtable MCP Server",
+  "slug": "airtable-mcp-server",
   "description": "Read and write records, manage bases and tables in Airtable directly from Claude",
   "category": "mcp",
   "author": "domdomegg",
@@ -39,8 +39,21 @@
           }
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "airtable": {
+          "command": "npx",
+          "args": ["-y", "airtable-mcp-server"],
+          "env": {
+            "AIRTABLE_API_KEY": "${AIRTABLE_API_KEY}"
+          }
+        }
+      }
     }
   },
+  "package": "airtable-mcp-server",
+  "source": "community",
   "useCases": [
     "Automate data entry and updates across multiple bases",
     "Generate reports from Airtable data with AI analysis",
@@ -65,11 +78,8 @@
     "Update the status field for all overdue tasks",
     "Filter records where status='active' AND priority='high'"
   ],
-  "package": "airtable-mcp-server",
   "requiresAuth": true,
   "permissions": ["read", "write", "schema"],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": "https://github.com/domdomegg/airtable-mcp-server",
-  "documentationUrl": "https://github.com/domdomegg/airtable-mcp-server",
-  "source": "community"
+  "documentationUrl": "https://github.com/domdomegg/airtable-mcp-server"
 }

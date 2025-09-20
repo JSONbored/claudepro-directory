@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ContentListPage } from '@/components/content-list-page';
+import { ContentListServer } from '@/components/content-list-server';
 import { commands } from '@/generated/content';
 
 export const metadata: Metadata = {
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function CommandsPage() {
   return (
-    <ContentListPage
+    <ContentListServer
       title="Commands"
       description="Explore custom commands and shortcuts to enhance your Claude experience with powerful functionality."
       icon="terminal"
