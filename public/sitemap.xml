@@ -67,6 +67,24 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/guides/use-cases/claude-rules-for-cloud</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/use-cases/claude-rules-for-data</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/use-cases/claude-rules-for-development</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/guides/use-cases/mcp-servers-for-communication</loc>
     <lastmod>2025-09-20</lastmod>
     <changefreq>monthly</changefreq>
@@ -85,7 +103,25 @@
     <priority>0.65</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/guides/tutorials/api-design-expert-tutorial</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/tutorials/aws-cloud-architect-tutorial</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/guides/tutorials/github-mcp-server-tutorial</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/tutorials/python-data-science-expert-tutorial</loc>
     <lastmod>2025-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
@@ -104,6 +140,30 @@
   </url>
   <url>
     <loc>https://claudepro.directory/guides/collections/claude-agents-for-review</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/categories/claude-rules-for-architecture</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/categories/claude-rules-for-data</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/categories/claude-rules-for-development</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/categories/claude-rules-for-security</loc>
     <lastmod>2025-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
@@ -169,7 +229,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/rules/devops-and-sre-expert</loc>
+    <loc>https://claudepro.directory/rules/devops-sre-expert</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -193,13 +253,13 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/rules/react-and-nextjs-expert</loc>
+    <loc>https://claudepro.directory/rules/react-next-js-expert</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/rules/security-auditor-and-penetration-tester</loc>
+    <loc>https://claudepro.directory/rules/security-auditor-penetration-tester</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

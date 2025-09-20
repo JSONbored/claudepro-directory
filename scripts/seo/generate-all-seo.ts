@@ -34,9 +34,10 @@ async function generateAllSEO(): Promise<void> {
   console.log('This will automatically:');
   console.log('1. Generate SEO content for MCP servers');
   console.log('2. Generate SEO content for Agents');
-  console.log('3. Update sitemap with all pages');
-  console.log('4. Generate API endpoints');
-  console.log('5. Build content metadata\n');
+  console.log('3. Generate SEO content for Rules');
+  console.log('4. Update sitemap with all pages');
+  console.log('5. Generate API endpoints');
+  console.log('6. Build content metadata\n');
 
   const startTime = Date.now();
 
@@ -54,7 +55,13 @@ async function generateAllSEO(): Promise<void> {
     'Generating Agents SEO content'
   );
 
-  // Step 5: Generate sitemap with all content
+  // Step 5: Generate Rules SEO content
+  await runCommand(
+    'tsx scripts/seo/generators/rules-seo-generator.ts',
+    'Generating Rules SEO content'
+  );
+
+  // Step 6: Generate sitemap with all content
   await runCommand('npm run generate:sitemap', 'Generating sitemap');
 
   // Step 6: Count generated files
