@@ -1,10 +1,16 @@
 {
-  "title": "Sentry MCP Server",
+  "slug": "sentry-mcp-server",
   "description": "Monitor errors, debug production issues, and track application health",
   "category": "mcp",
   "author": "Sentry",
   "dateAdded": "2025-09-18",
-  "tags": ["monitoring", "sentry", "debugging", "errors", "devops"],
+  "tags": [
+    "monitoring",
+    "sentry",
+    "debugging",
+    "errors",
+    "devops"
+  ],
   "content": "Connect Claude to Sentry for comprehensive error monitoring, debugging, and application health tracking.",
   "features": [
     "View and analyze error reports in real-time",
@@ -36,8 +42,18 @@
           "url": "https://mcp.sentry.dev/mcp"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "sentry": {
+          "transport": "http",
+          "url": "https://mcp.sentry.dev/mcp"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Debug production errors with full context",
     "Identify error patterns and root causes",
@@ -62,11 +78,11 @@
     "Which deployment introduced these new errors?",
     "Find all errors affecting the checkout flow"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "write"],
+  "permissions": [
+    "read",
+    "write"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": null,
-  "documentationUrl": "https://docs.sentry.io/product/sentry-mcp/",
-  "source": "official"
+  "documentationUrl": "https://docs.sentry.io/product/sentry-mcp/"
 }

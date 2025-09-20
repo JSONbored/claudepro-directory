@@ -1,10 +1,16 @@
 {
-  "title": "PayPal MCP Server",
+  "slug": "paypal-mcp-server",
   "description": "Integrate PayPal commerce capabilities, payment processing, and transaction management",
   "category": "mcp",
   "author": "PayPal",
   "dateAdded": "2025-09-18",
-  "tags": ["payments", "paypal", "commerce", "transactions", "financial"],
+  "tags": [
+    "payments",
+    "paypal",
+    "commerce",
+    "transactions",
+    "financial"
+  ],
   "content": "Connect Claude to PayPal for comprehensive payment processing and financial operations.",
   "features": [
     "Process payments and refunds",
@@ -36,8 +42,18 @@
           "url": "https://mcp.paypal.com/sse"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "paypal": {
+          "transport": "sse",
+          "url": "https://mcp.paypal.com/sse"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Process customer refunds quickly",
     "Review transaction history",
@@ -63,11 +79,12 @@
     "Generate monthly transaction report",
     "Check account balance"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "write", "refund"],
+  "permissions": [
+    "read",
+    "write",
+    "refund"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": null,
-  "documentationUrl": "https://www.paypal.ai/",
-  "source": "official"
+  "documentationUrl": "https://www.paypal.ai/"
 }

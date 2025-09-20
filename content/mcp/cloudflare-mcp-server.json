@@ -1,10 +1,16 @@
 {
-  "title": "Cloudflare MCP Server",
+  "slug": "cloudflare-mcp-server",
   "description": "Build applications, analyze traffic, and manage security settings through Cloudflare",
   "category": "mcp",
   "author": "Cloudflare",
   "dateAdded": "2025-09-18",
-  "tags": ["cloudflare", "cdn", "security", "dns", "infrastructure"],
+  "tags": [
+    "cloudflare",
+    "cdn",
+    "security",
+    "dns",
+    "infrastructure"
+  ],
   "content": "Manage Cloudflare services and configurations through Claude for comprehensive infrastructure control.",
   "features": [
     "Configure DNS settings and records",
@@ -16,28 +22,47 @@
   "installation": {
     "claudeDesktop": {
       "steps": [
-        "Check Cloudflare documentation for specific service endpoints",
-        "Choose the appropriate MCP server for your needs",
-        "Configure based on the specific service requirements",
-        "Authenticate with appropriate credentials"
+        "Get your Cloudflare API Token from https://dash.cloudflare.com/profile/api-tokens",
+        "Find your Account ID in the Cloudflare dashboard",
+        "Open Claude Desktop configuration file",
+        "Add the Cloudflare MCP server configuration with your credentials",
+        "Restart Claude Desktop"
       ],
       "configPath": {
         "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
         "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
       }
     },
-    "claudeCode": "See Cloudflare documentation for specific server URLs - multiple services available"
+    "claudeCode": "claude mcp add cloudflare --env CLOUDFLARE_API_TOKEN=YOUR_TOKEN --env CLOUDFLARE_ACCOUNT_ID=YOUR_ACCOUNT_ID"
   },
   "configuration": {
     "claudeDesktop": {
       "mcpServers": {
         "cloudflare": {
-          "transport": "varies",
-          "url": "Service-specific URL required"
+          "command": "npx",
+          "args": ["-y", "@cloudflare/mcp-server-cloudflare"],
+          "env": {
+            "CLOUDFLARE_API_TOKEN": "your_api_token",
+            "CLOUDFLARE_ACCOUNT_ID": "your_account_id"
+          }
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "cloudflare": {
+          "command": "npx",
+          "args": ["-y", "@cloudflare/mcp-server-cloudflare"],
+          "env": {
+            "CLOUDFLARE_API_TOKEN": "${CLOUDFLARE_API_TOKEN}",
+            "CLOUDFLARE_ACCOUNT_ID": "${CLOUDFLARE_ACCOUNT_ID}"
+          }
         }
       }
     }
   },
+  "package": "@cloudflare/mcp-server-cloudflare",
+  "source": "official",
   "useCases": [
     "Deploy edge functions globally",
     "Configure WAF rules for security",
@@ -62,11 +87,12 @@
     "Show traffic analytics",
     "Configure firewall rule"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "write", "deploy"],
-  "configLocation": "varies_by_service",
-  "githubUrl": null,
-  "documentationUrl": "https://developers.cloudflare.com/agents/model-context-protocol/mcp-servers-for-cloudflare/",
-  "source": "official"
+  "permissions": [
+    "read",
+    "write",
+    "deploy"
+  ],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://developers.cloudflare.com/agents/model-context-protocol/mcp-servers-for-cloudflare/"
 }

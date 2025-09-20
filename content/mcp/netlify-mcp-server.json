@@ -1,10 +1,16 @@
 {
-  "title": "Netlify MCP Server",
+  "slug": "netlify-mcp-server",
   "description": "Create, deploy, and manage websites on Netlify platform",
   "category": "mcp",
   "author": "Netlify",
   "dateAdded": "2025-09-18",
-  "tags": ["deployment", "netlify", "hosting", "static-sites", "serverless"],
+  "tags": [
+    "deployment",
+    "netlify",
+    "hosting",
+    "static-sites",
+    "serverless"
+  ],
   "content": "Control Netlify sites and deployments through Claude for comprehensive site management.",
   "features": [
     "Create and deploy sites automatically",
@@ -36,8 +42,18 @@
           "url": "https://netlify-mcp.netlify.app/mcp"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "netlify": {
+          "transport": "http",
+          "url": "https://netlify-mcp.netlify.app/mcp"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Deploy static sites with zero configuration",
     "Manage environment variables securely",
@@ -62,11 +78,12 @@
     "Show recent form submissions",
     "Configure domain redirect"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "write", "deploy"],
+  "permissions": [
+    "read",
+    "write",
+    "deploy"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": null,
-  "documentationUrl": "https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/",
-  "source": "official"
+  "documentationUrl": "https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/"
 }

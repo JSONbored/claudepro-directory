@@ -1,10 +1,16 @@
 {
-  "title": "Figma MCP Server",
+  "slug": "figma-mcp-server",
   "description": "Access designs, export assets, and interact with Figma files through Claude",
   "category": "mcp",
   "author": "Figma",
   "dateAdded": "2025-09-18",
-  "tags": ["design", "figma", "ui-ux", "assets", "graphics"],
+  "tags": [
+    "design",
+    "figma",
+    "ui-ux",
+    "assets",
+    "graphics"
+  ],
   "content": "Connect Claude to Figma Desktop for design operations, asset extraction, and design system management.",
   "features": [
     "Access and browse Figma designs in real-time",
@@ -36,8 +42,18 @@
           "url": "http://127.0.0.1:3845/mcp"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "figma": {
+          "transport": "http",
+          "url": "http://127.0.0.1:3845/mcp"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Export design assets for development implementation",
     "Extract design tokens and specifications",
@@ -62,11 +78,11 @@
     "Extract component specifications for developers",
     "List all text styles used in the design"
   ],
-  "package": null,
   "requiresAuth": false,
-  "permissions": ["read", "export"],
+  "permissions": [
+    "read",
+    "export"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": null,
-  "documentationUrl": "https://help.figma.com/hc/en-us/articles/32132100833559",
-  "source": "official"
+  "documentationUrl": "https://help.figma.com/hc/en-us/articles/32132100833559"
 }

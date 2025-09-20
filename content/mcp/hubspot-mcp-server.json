@@ -1,10 +1,16 @@
 {
-  "title": "HubSpot MCP Server",
+  "slug": "hubspot-mcp-server",
   "description": "Access and manage HubSpot CRM data including contacts, companies, and deals",
   "category": "mcp",
   "author": "HubSpot",
   "dateAdded": "2025-09-18",
-  "tags": ["crm", "hubspot", "sales", "marketing", "customer-data"],
+  "tags": [
+    "crm",
+    "hubspot",
+    "sales",
+    "marketing",
+    "customer-data"
+  ],
   "content": "Integrate HubSpot CRM capabilities directly into Claude for customer relationship management.",
   "features": [
     "Fetch and update contact records",
@@ -36,8 +42,18 @@
           "url": "https://mcp.hubspot.com/anthropic"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "hubspot": {
+          "transport": "http",
+          "url": "https://mcp.hubspot.com/anthropic"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Update contact information in bulk",
     "Create new deals in the pipeline",
@@ -62,11 +78,12 @@
     "Find all contacts from Microsoft",
     "Generate pipeline report"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "write", "create"],
+  "permissions": [
+    "read",
+    "write",
+    "create"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": null,
-  "documentationUrl": "https://developers.hubspot.com/mcp",
-  "source": "official"
+  "documentationUrl": "https://developers.hubspot.com/mcp"
 }

@@ -1,10 +1,16 @@
 {
-  "title": "Linear MCP Server",
+  "slug": "linear-mcp-server",
   "description": "Integrate with Linear's issue tracking and project management system",
   "category": "mcp",
   "author": "Linear",
   "dateAdded": "2025-09-18",
-  "tags": ["project-management", "linear", "issues", "tasks", "agile"],
+  "tags": [
+    "project-management",
+    "linear",
+    "issues",
+    "tasks",
+    "agile"
+  ],
   "content": "Connect Claude to Linear for comprehensive project management, issue tracking, and team collaboration.",
   "features": [
     "Create and update issues with full metadata",
@@ -36,8 +42,18 @@
           "url": "https://mcp.linear.app/sse"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "linear": {
+          "transport": "sse",
+          "url": "https://mcp.linear.app/sse"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Create issues from bug reports or feature requests",
     "Update issue status in bulk operations",
@@ -62,11 +78,12 @@
     "Update issue LIN-123 to 'In Progress'",
     "List all issues in the current sprint"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "write", "admin"],
+  "permissions": [
+    "read",
+    "write",
+    "admin"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": null,
-  "documentationUrl": "https://linear.app/docs/mcp",
-  "source": "official"
+  "documentationUrl": "https://linear.app/docs/mcp"
 }

@@ -1,0 +1,103 @@
+{
+  "slug": "kubernetes-mcp-server",
+  "description": "Kubernetes cluster management and container orchestration through MCP integration",
+  "category": "mcp",
+  "author": "feiskyer",
+  "dateAdded": "2025-09-20",
+  "tags": [
+    "kubernetes",
+    "k8s",
+    "container",
+    "orchestration",
+    "devops"
+  ],
+  "content": "A Model Context Protocol server that enables AI assistants to interact with Kubernetes clusters, translating natural language requests into Kubernetes operations.",
+  "features": [
+    "Cluster resource management",
+    "Pod and deployment operations",
+    "Service and ingress configuration",
+    "Namespace management",
+    "ConfigMap and Secret handling",
+    "Real-time cluster monitoring"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Install via uvx: uvx mcp-kubernetes-server",
+        "Configure your kubeconfig file",
+        "Set KUBECONFIG environment variable",
+        "Add server configuration to Claude Desktop",
+        "Restart Claude Desktop"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add kubernetes --env KUBECONFIG=/path/to/your/kubeconfig -- uvx mcp-kubernetes-server"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "kubernetes": {
+          "command": "uvx",
+          "args": [
+            "mcp-kubernetes-server"
+          ],
+          "env": {
+            "KUBECONFIG": "/path/to/your/kubeconfig"
+          }
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "kubernetes": {
+          "command": "uvx",
+          "args": [
+            "mcp-kubernetes-server"
+          ],
+          "env": {
+            "KUBECONFIG": "${KUBECONFIG:-~/.kube/config}"
+          }
+        }
+      }
+    }
+  },
+  "package": "mcp-kubernetes-server",
+  "source": "community",
+  "useCases": [
+    "Deploy and manage containerized applications",
+    "Monitor cluster health and resource usage",
+    "Scale workloads based on demand",
+    "Manage secrets and configuration data",
+    "Troubleshoot deployment issues",
+    "Automate cluster operations"
+  ],
+  "security": [
+    "Uses kubeconfig for authentication",
+    "Respects existing RBAC permissions",
+    "Secure kubectl API integration",
+    "Cluster-scoped access controls"
+  ],
+  "troubleshooting": [
+    "Verify kubeconfig file is valid and accessible",
+    "Check kubectl connectivity to cluster",
+    "Ensure proper RBAC permissions",
+    "Confirm cluster is running and reachable"
+  ],
+  "examples": [
+    "List all pods in the default namespace",
+    "Create a new deployment with specified image",
+    "Scale a deployment to 5 replicas",
+    "Get cluster node information and status"
+  ],
+  "requiresAuth": true,
+  "permissions": [
+    "cluster-admin",
+    "view",
+    "edit"
+  ],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://github.com/feiskyer/mcp-kubernetes-server"
+}

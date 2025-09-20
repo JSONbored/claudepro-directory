@@ -1,10 +1,16 @@
 {
-  "title": "Hugging Face MCP Server",
+  "slug": "hugging-face-mcp-server",
   "description": "Access Hugging Face Hub and Gradio AI applications",
   "category": "mcp",
   "author": "Hugging Face",
   "dateAdded": "2025-09-18",
-  "tags": ["ai", "hugging-face", "machine-learning", "models", "datasets"],
+  "tags": [
+    "ai",
+    "hugging-face",
+    "machine-learning",
+    "models",
+    "datasets"
+  ],
   "content": "Connect to Hugging Face Hub for AI models, datasets, and Gradio application access.",
   "features": [
     "Access model information and metrics",
@@ -36,8 +42,18 @@
           "url": "https://huggingface.co/mcp"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "huggingface": {
+          "transport": "http",
+          "url": "https://huggingface.co/mcp"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Find suitable AI models for tasks",
     "Access dataset information for training",
@@ -62,11 +78,11 @@
     "Run the stable diffusion demo",
     "Compare BERT model variants"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "run"],
+  "permissions": [
+    "read",
+    "run"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": null,
-  "documentationUrl": "https://huggingface.co/settings/mcp",
-  "source": "official"
+  "documentationUrl": "https://huggingface.co/settings/mcp"
 }

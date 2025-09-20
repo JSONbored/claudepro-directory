@@ -96,10 +96,10 @@ export interface ContentMetadata {
   tags: string[];
   popularity?: number;
   views?: number;
-  // Legacy fields for backward compatibility (auto-generated from slug)
+  // Auto-generated fields (generated from slug during build)
   id: string; // Auto-generated from slug during build
-  name?: string;
-  title?: string;
+  name?: string; // For backward compatibility
+  title?: string; // Auto-generated from slug if not provided
 }
 
 export interface ContentItem extends ContentMetadata {

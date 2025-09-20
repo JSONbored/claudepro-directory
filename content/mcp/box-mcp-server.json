@@ -1,5 +1,5 @@
 {
-  "title": "Box MCP Server",
+  "slug": "box-mcp-server",
   "description": "Access enterprise content, analyze unstructured data, and automate workflows",
   "category": "mcp",
   "author": "Box",
@@ -43,8 +43,18 @@
           "url": "https://mcp.box.com/"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "box": {
+          "transport": "http",
+          "url": "https://mcp.box.com/"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Search enterprise documents by content or metadata",
     "Extract and analyze data from invoices and contracts",
@@ -71,11 +81,12 @@
     "Extract key data from invoice documents",
     "Organize project files by client and date"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "write", "delete"],
+  "permissions": [
+    "read",
+    "write",
+    "delete"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": null,
-  "documentationUrl": "https://box.dev/guides/box-mcp/remote/",
-  "source": "official"
+  "documentationUrl": "https://box.dev/guides/box-mcp/remote/"
 }
