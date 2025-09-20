@@ -29,6 +29,12 @@ function isValidDate(dateStr) {
 // Validate each file
 files.forEach((filePath) => {
   try {
+    // Skip template files
+    if (filePath.includes('template.json')) {
+      console.log(`SKIP: Template file ${filePath}`);
+      return;
+    }
+
     // Read and parse JSON file
     const content = fs.readFileSync(filePath, 'utf8');
     let data;
@@ -50,8 +56,8 @@ files.forEach((filePath) => {
       }
     }
 
-    // Validate date format
-    if (data.dateAdded && !isValidDate(data.dateAdded)) {
+    // Validate date format (skip placeholder dates)
+    if (data.dateAdded && data.dateAdded !== 'YYYY-MM-DD' && !isValidDate(data.dateAdded)) {
       console.error(`ERROR: Invalid date format in ${filePath} (should be YYYY-MM-DD)`);
       hasErrors = true;
     }
@@ -72,8 +78,19 @@ files.forEach((filePath) => {
     // Category-specific validation
     switch (data.category) {
       case 'mcp':
-        if (!data.protocol && !data.github) {
-          console.warn(`WARNING: MCP server in ${filePath} has no protocol or github URL`);
+        // MCP servers should have either configuration or package field
+        if (!data.configuration && !data.package) {
+          console.warn(`WARNING: MCP server in ${filePath} has no configuration or package field`);
+        }
+        // Check for basic transport configuration
+        if (
+          data.configuration &&
+          !data.configuration.claudeDesktop &&
+          !data.configuration.claudeCode
+        ) {
+          console.warn(
+            `WARNING: MCP server in ${filePath} missing configuration for Claude Desktop or Claude Code`
+          );
         }
         break;
       case 'commands':

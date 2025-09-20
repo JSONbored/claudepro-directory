@@ -56,6 +56,14 @@ interface TutorialData {
   }>;
 }
 
+// Helper function to generate title from slug
+function slugToTitle(slug: string): string {
+  return slug
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 async function loadRules(): Promise<Rule[]> {
   const files = await fs.readdir(CONTENT_DIR);
   const rules: Rule[] = [];
@@ -64,9 +72,15 @@ async function loadRules(): Promise<Rule[]> {
     if (file.endsWith('.json')) {
       const content = await fs.readFile(path.join(CONTENT_DIR, file), 'utf-8');
       const item = JSON.parse(content);
+
+      // Generate slug from filename if not present
+      const slug = item.slug || file.replace('.json', '');
+
       rules.push({
         ...item,
         id: item.slug || file.replace('.json', ''),
+        slug,
+        title: item.title || item.name || slugToTitle(slug),
       });
     }
   }

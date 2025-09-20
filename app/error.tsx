@@ -13,9 +13,9 @@ export default function ErrorBoundary({
   useEffect(() => {
     // Log error with structured logging for better Vercel observability
     logger.error('Application error boundary triggered', error, {
-      errorDigest: error.digest,
-      userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent : undefined,
-      url: typeof window !== 'undefined' ? window.location?.href : undefined,
+      errorDigest: error.digest || '',
+      userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent || '' : '',
+      url: typeof window !== 'undefined' ? window.location?.href || '' : '',
       timestamp: new Date().toISOString(),
     });
   }, [error]);

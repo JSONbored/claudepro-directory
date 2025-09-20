@@ -32,10 +32,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     logger.error('React Error Boundary caught uncaught error', error, {
-      componentStack: errorInfo.componentStack,
+      componentStack: errorInfo.componentStack || '',
       errorBoundary: true,
-      userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent : undefined,
-      url: typeof window !== 'undefined' ? window.location?.href : undefined,
+      userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent || '' : '',
+      url: typeof window !== 'undefined' ? window.location?.href || '' : '',
     });
 
     this.setState({

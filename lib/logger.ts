@@ -12,7 +12,7 @@ export interface LogContext {
   method?: string;
   timestamp?: string;
   requestId?: string;
-  [key: string]: unknown;
+  [key: string]: string | number | boolean;
 }
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
@@ -22,7 +22,7 @@ export interface LogEntry {
   message: string;
   context?: LogContext;
   error?: Error | string;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, string | number | boolean>;
 }
 
 class Logger {
@@ -116,24 +116,45 @@ class Logger {
   /**
    * Debug level logging
    */
-  debug(message: string, context?: LogContext, metadata?: Record<string, unknown>): void {
+  debug(
+    message: string,
+    context?: LogContext,
+    metadata?: Record<string, string | number | boolean>
+  ): void {
     if (this.isDevelopment) {
-      this.output({ level: 'debug', message, context, metadata });
+      const entry: LogEntry = { level: 'debug', message };
+      if (context) entry.context = context;
+      if (metadata) entry.metadata = metadata;
+      this.output(entry);
     }
   }
 
   /**
    * Info level logging
    */
-  info(message: string, context?: LogContext, metadata?: Record<string, unknown>): void {
-    this.output({ level: 'info', message, context, metadata });
+  info(
+    message: string,
+    context?: LogContext,
+    metadata?: Record<string, string | number | boolean>
+  ): void {
+    const entry: LogEntry = { level: 'info', message };
+    if (context) entry.context = context;
+    if (metadata) entry.metadata = metadata;
+    this.output(entry);
   }
 
   /**
    * Warning level logging
    */
-  warn(message: string, context?: LogContext, metadata?: Record<string, unknown>): void {
-    this.output({ level: 'warn', message, context, metadata });
+  warn(
+    message: string,
+    context?: LogContext,
+    metadata?: Record<string, string | number | boolean>
+  ): void {
+    const entry: LogEntry = { level: 'warn', message };
+    if (context) entry.context = context;
+    if (metadata) entry.metadata = metadata;
+    this.output(entry);
   }
 
   /**
@@ -143,9 +164,13 @@ class Logger {
     message: string,
     error?: Error | string,
     context?: LogContext,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, string | number | boolean>
   ): void {
-    this.output({ level: 'error', message, error, context, metadata });
+    const entry: LogEntry = { level: 'error', message };
+    if (error) entry.error = error;
+    if (context) entry.context = context;
+    if (metadata) entry.metadata = metadata;
+    this.output(entry);
   }
 
   /**
@@ -155,9 +180,13 @@ class Logger {
     message: string,
     error?: Error | string,
     context?: LogContext,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, string | number | boolean>
   ): void {
-    this.output({ level: 'fatal', message, error, context, metadata });
+    const entry: LogEntry = { level: 'fatal', message };
+    if (error) entry.error = error;
+    if (context) entry.context = context;
+    if (metadata) entry.metadata = metadata;
+    this.output(entry);
   }
 
   /**
@@ -170,7 +199,7 @@ class Logger {
     contextualLogger.debug = (
       message: string,
       context?: LogContext,
-      metadata?: Record<string, unknown>
+      metadata?: Record<string, string | number | boolean>
     ) => {
       const finalContext = { ...baseContext, ...context };
       this.debug(message, finalContext, metadata);
@@ -180,7 +209,7 @@ class Logger {
     contextualLogger.info = (
       message: string,
       context?: LogContext,
-      metadata?: Record<string, unknown>
+      metadata?: Record<string, string | number | boolean>
     ) => {
       const finalContext = { ...baseContext, ...context };
       this.info(message, finalContext, metadata);
@@ -190,7 +219,7 @@ class Logger {
     contextualLogger.warn = (
       message: string,
       context?: LogContext,
-      metadata?: Record<string, unknown>
+      metadata?: Record<string, string | number | boolean>
     ) => {
       const finalContext = { ...baseContext, ...context };
       this.warn(message, finalContext, metadata);
@@ -201,7 +230,7 @@ class Logger {
       message: string,
       error?: Error | string,
       context?: LogContext,
-      metadata?: Record<string, unknown>
+      metadata?: Record<string, string | number | boolean>
     ) => {
       const finalContext = { ...baseContext, ...context };
       this.error(message, error, finalContext, metadata);
@@ -212,7 +241,7 @@ class Logger {
       message: string,
       error?: Error | string,
       context?: LogContext,
-      metadata?: Record<string, unknown>
+      metadata?: Record<string, string | number | boolean>
     ) => {
       const finalContext = { ...baseContext, ...context };
       this.fatal(message, error, finalContext, metadata);
@@ -229,8 +258,8 @@ class Logger {
     const context: LogContext = {
       method: request.method,
       url: url.pathname + url.search,
-      userAgent: request.headers.get('user-agent') || undefined,
-      requestId: request.headers.get('x-request-id') || undefined,
+      userAgent: request.headers.get('user-agent') || '',
+      requestId: request.headers.get('x-request-id') || '',
       timestamp: new Date().toISOString(),
     };
 
@@ -295,27 +324,36 @@ export const logger = new Logger();
 
 // Export convenience functions for backward compatibility
 export const log = {
-  debug: (message: string, context?: LogContext, metadata?: Record<string, unknown>) =>
-    logger.debug(message, context, metadata),
+  debug: (
+    message: string,
+    context?: LogContext,
+    metadata?: Record<string, string | number | boolean>
+  ) => logger.debug(message, context, metadata),
 
-  info: (message: string, context?: LogContext, metadata?: Record<string, unknown>) =>
-    logger.info(message, context, metadata),
+  info: (
+    message: string,
+    context?: LogContext,
+    metadata?: Record<string, string | number | boolean>
+  ) => logger.info(message, context, metadata),
 
-  warn: (message: string, context?: LogContext, metadata?: Record<string, unknown>) =>
-    logger.warn(message, context, metadata),
+  warn: (
+    message: string,
+    context?: LogContext,
+    metadata?: Record<string, string | number | boolean>
+  ) => logger.warn(message, context, metadata),
 
   error: (
     message: string,
     error?: Error | string,
     context?: LogContext,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, string | number | boolean>
   ) => logger.error(message, error, context, metadata),
 
   fatal: (
     message: string,
     error?: Error | string,
     context?: LogContext,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, string | number | boolean>
   ) => logger.fatal(message, error, context, metadata),
 };
 
