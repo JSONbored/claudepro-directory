@@ -1,0 +1,118 @@
+---
+title: "Session Management Hooks - Claude Code Hooks"
+description: "Handle session lifecycle events like start, end, and state transitions."
+keywords: "claude hooks, session, session-start, session-end, lifecycle"
+---
+
+# Session Management Hooks
+
+Handle session lifecycle events like start, end, and state transitions.
+
+## Key Use Cases
+
+- Session initialization and setup
+- User authentication and onboarding
+- Cleanup and resource management
+- State persistence and recovery
+
+## Capabilities
+
+- Initialize session state and context
+- Set up user preferences and settings
+- Clean up resources on session end
+- Persist important state data
+
+## Common Scenarios
+
+### User Onboarding
+Set up user preferences and context when starting a new session
+
+### Resource Cleanup
+Clean up temporary files and connections when sessions end
+
+
+## Available Session Management Hooks
+
+### [cloud-backup-on-session-stop](/hooks/cloud-backup-on-session-stop)
+Automatically backs up changed files to cloud storage when session ends
+
+**Hook Type:** Stop
+**Tags:** backup, cloud, stop-hook, aws, safety
+
+### [database-connection-cleanup](/hooks/database-connection-cleanup)
+Closes all database connections and cleans up resources when session ends
+
+**Hook Type:** Stop
+**Tags:** database, cleanup, stop-hook, connections, resources
+
+### [dependency-security-audit-on-stop](/hooks/dependency-security-audit-on-stop)
+Performs a comprehensive security audit of all dependencies when session ends
+
+**Hook Type:** Stop
+**Tags:** security, dependencies, audit, stop-hook, vulnerabilities
+
+### [documentation-auto-generator-on-stop](/hooks/documentation-auto-generator-on-stop)
+Automatically generates or updates project documentation when session ends
+
+**Hook Type:** Stop
+**Tags:** documentation, stop-hook, automation, markdown, jsdoc
+
+### [environment-cleanup-handler](/hooks/environment-cleanup-handler)
+Cleans up temporary files, caches, and resources when Claude session ends
+
+**Hook Type:** Stop
+**Tags:** cleanup, stop-hook, maintenance, resources, optimization
+
+### [final-bundle-size-reporter](/hooks/final-bundle-size-reporter)
+Analyzes and reports final bundle sizes when the development session ends
+
+**Hook Type:** Stop
+**Tags:** bundle-size, performance, stop-hook, optimization, reporting
+
+### [git-auto-commit-on-stop](/hooks/git-auto-commit-on-stop)
+Automatically commits all changes with a summary when Claude Code session ends
+
+**Hook Type:** Stop
+**Tags:** git, version-control, stop-hook, automation, commit
+
+### [performance-benchmark-report](/hooks/performance-benchmark-report)
+Runs performance benchmarks and generates comparison report when session ends
+
+**Hook Type:** Stop
+**Tags:** performance, benchmarking, stop-hook, testing, metrics
+
+### [session-metrics-collector](/hooks/session-metrics-collector)
+Collects and reports detailed metrics about the coding session when Claude stops
+
+**Hook Type:** Stop
+**Tags:** metrics, analytics, stop-hook, performance, statistics
+
+### [team-summary-email-generator](/hooks/team-summary-email-generator)
+Generates and sends a comprehensive summary email to the team when session ends
+
+**Hook Type:** Stop
+**Tags:** email, team, stop-hook, summary, communication
+
+### [test-coverage-final-report](/hooks/test-coverage-final-report)
+Generates a comprehensive test coverage report when the coding session ends
+
+**Hook Type:** Stop
+**Tags:** testing, coverage, stop-hook, reporting, quality
+
+
+## Getting Started
+
+1. **Choose Your Hook Type**: SessionStart
+2. **Install Hook**: Follow the installation guide for your chosen hook
+3. **Configure Settings**: Customize the hook configuration for your specific use case
+4. **Test Integration**: Verify the hook works correctly in your environment
+
+## Best Practices
+
+- Always test hooks in a development environment first
+- Use clear, descriptive hook names and configurations
+- Implement proper error handling and logging
+- Monitor hook performance and resource usage
+- Keep hook logic focused and efficient
+
+*Have a better session management hooks hook? [Submit it here](/submit)*

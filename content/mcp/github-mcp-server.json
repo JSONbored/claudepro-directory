@@ -1,0 +1,108 @@
+{
+  "slug": "github-mcp-server",
+  "description": "Official GitHub MCP server providing comprehensive GitHub API access for repository management, file operations, and search functionality",
+  "category": "mcp",
+  "author": "GitHub",
+  "dateAdded": "2025-09-18",
+  "tags": [
+    "github",
+    "git",
+    "repositories",
+    "api",
+    "official"
+  ],
+  "content": "Access the GitHub API through Claude for comprehensive repository management, file operations, and search functionality.",
+  "features": [
+    "Create, read, update, and delete files across repositories",
+    "Access repository information, branches, and metadata",
+    "Search code, issues, pull requests, and users",
+    "Automatic branch creation and Git history preservation",
+    "Batch operations support for multi-file changes",
+    "Repository insights and contributor statistics"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Generate a GitHub Personal Access Token with repo permissions",
+        "Open Claude Desktop configuration file",
+        "Add the GitHub MCP server configuration with your token",
+        "Restart Claude Desktop",
+        "Verify connection by asking Claude to show your repositories"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add github --env GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_TOKEN -- npx -y @modelcontextprotocol/server-github"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "github": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "@modelcontextprotocol/server-github"
+          ],
+          "env": {
+            "GITHUB_PERSONAL_ACCESS_TOKEN": "your_github_token_here"
+          }
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "github": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "@modelcontextprotocol/server-github"
+          ],
+          "env": {
+            "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+          }
+        }
+      }
+    }
+  },
+  "package": "@modelcontextprotocol/server-github",
+  "source": "official",
+  "useCases": [
+    "Browse and manage repository files and folders",
+    "Search code across multiple repositories",
+    "Access repository information and commit history",
+    "Create and update files with proper Git history",
+    "Find issues, pull requests, and collaborators",
+    "Analyze codebase structure and development patterns"
+  ],
+  "security": [
+    "Use Personal Access Tokens with minimal required scopes",
+    "Store tokens securely and rotate regularly",
+    "Respect GitHub API rate limits",
+    "All operations maintain proper Git history",
+    "Built-in error handling for API issues"
+  ],
+  "troubleshooting": [
+    "Verify GitHub token has appropriate repository permissions",
+    "Check token validity and expiration date",
+    "Ensure repository access and correct spelling",
+    "Monitor API rate limits and usage",
+    "Restart Claude Desktop after configuration changes"
+  ],
+  "examples": [
+    "Show me the README from my main project repository",
+    "List all repositories in my organization",
+    "Search for functions that use authentication",
+    "Create a new component file in src/components",
+    "Find all open issues with the bug label"
+  ],
+  "requiresAuth": true,
+  "permissions": [
+    "repo",
+    "public_repo",
+    "read:user"
+  ],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://www.npmjs.com/package/@modelcontextprotocol/server-github"
+}

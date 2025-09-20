@@ -1,0 +1,333 @@
+---
+title: "Real-time Monitoring Setup - Claude Code Hook Workflow"
+description: "Implement comprehensive monitoring and alerting for Claude interactions"
+keywords: "claude hooks workflow, monitoring setup, PostToolUse, Notification, Stop"
+---
+
+# Real-time Monitoring Setup
+
+Implement comprehensive monitoring and alerting for Claude interactions
+
+**Goal:** Monitor Claude usage and performance with real-time alerts
+
+## Workflow Steps
+
+### Monitoring Configuration
+
+- Set up PostToolUse hooks for metrics collection
+- Configure performance tracking and logging
+- Implement error detection and categorization
+- Set up data aggregation and storage
+
+### Alerting Setup
+
+- Configure Notification hooks for alerts
+- Set up thresholds and trigger conditions
+- Implement escalation policies
+- Test notification delivery and reliability
+
+
+## Required Hooks
+
+### [accessibility-checker](/hooks/accessibility-checker)
+Automated accessibility testing and compliance checking for web applications following WCAG guidelines
+
+**Hook Type:** PostToolUse
+
+### [api-endpoint-documentation-generator](/hooks/api-endpoint-documentation-generator)
+Automatically generates or updates API documentation when endpoint files are modified
+
+**Hook Type:** PostToolUse
+
+### [auto-code-formatter-hook](/hooks/auto-code-formatter-hook)
+Automatically formats code files after Claude writes or edits them using Prettier, Black, or other formatters
+
+**Hook Type:** PostToolUse
+
+### [aws-cloudformation-validator](/hooks/aws-cloudformation-validator)
+Validates AWS CloudFormation templates for syntax errors and best practices
+
+**Hook Type:** PostToolUse
+
+### [cloud-backup-on-session-stop](/hooks/cloud-backup-on-session-stop)
+Automatically backs up changed files to cloud storage when session ends
+
+**Hook Type:** Stop
+
+### [code-complexity-alert-monitor](/hooks/code-complexity-alert-monitor)
+Alerts when code complexity exceeds thresholds in real-time
+
+**Hook Type:** Notification
+
+### [css-unused-selector-detector](/hooks/css-unused-selector-detector)
+Detects unused CSS selectors when stylesheets are modified to keep CSS lean
+
+**Hook Type:** PostToolUse
+
+### [database-connection-cleanup](/hooks/database-connection-cleanup)
+Closes all database connections and cleans up resources when session ends
+
+**Hook Type:** Stop
+
+### [database-migration-runner](/hooks/database-migration-runner)
+Automated database migration management with rollback capabilities, validation, and multi-environment support
+
+**Hook Type:** PostToolUse
+
+### [dependency-security-audit-on-stop](/hooks/dependency-security-audit-on-stop)
+Performs a comprehensive security audit of all dependencies when session ends
+
+**Hook Type:** Stop
+
+### [dependency-update-checker](/hooks/dependency-update-checker)
+Automatically checks for outdated dependencies and suggests updates with security analysis
+
+**Hook Type:** PostToolUse
+
+### [discord-activity-notifier](/hooks/discord-activity-notifier)
+Sends development activity updates to Discord channel for team collaboration
+
+**Hook Type:** Notification
+
+### [docker-container-auto-rebuild](/hooks/docker-container-auto-rebuild)
+Automatically rebuilds Docker containers when Dockerfile or docker-compose.yml files are modified
+
+**Hook Type:** PostToolUse
+
+### [documentation-auto-generator-on-stop](/hooks/documentation-auto-generator-on-stop)
+Automatically generates or updates project documentation when session ends
+
+**Hook Type:** Stop
+
+### [documentation-generator](/hooks/documentation-generator)
+Automatically generates and updates project documentation from code comments, README files, and API definitions
+
+**Hook Type:** PostToolUse
+
+### [environment-cleanup-handler](/hooks/environment-cleanup-handler)
+Cleans up temporary files, caches, and resources when Claude session ends
+
+**Hook Type:** Stop
+
+### [environment-variable-validator](/hooks/environment-variable-validator)
+Validates environment variables, checks for required vars, and ensures proper configuration across environments
+
+**Hook Type:** PostToolUse
+
+### [error-rate-monitor](/hooks/error-rate-monitor)
+Tracks error patterns and alerts when error rates spike
+
+**Hook Type:** Notification
+
+### [file-size-warning-monitor](/hooks/file-size-warning-monitor)
+Alerts when files exceed size thresholds that could impact performance
+
+**Hook Type:** PostToolUse
+
+### [final-bundle-size-reporter](/hooks/final-bundle-size-reporter)
+Analyzes and reports final bundle sizes when the development session ends
+
+**Hook Type:** Stop
+
+### [git-auto-commit-on-stop](/hooks/git-auto-commit-on-stop)
+Automatically commits all changes with a summary when Claude Code session ends
+
+**Hook Type:** Stop
+
+### [github-actions-workflow-validator](/hooks/github-actions-workflow-validator)
+Validates GitHub Actions workflow files for syntax errors and best practices
+
+**Hook Type:** PostToolUse
+
+### [go-module-tidy](/hooks/go-module-tidy)
+Automatically runs go mod tidy when Go files or go.mod are modified to keep dependencies clean
+
+**Hook Type:** PostToolUse
+
+### [graphql-schema-validator](/hooks/graphql-schema-validator)
+Validates GraphQL schema files and checks for breaking changes when modified
+
+**Hook Type:** PostToolUse
+
+### [i18n-translation-validator](/hooks/i18n-translation-validator)
+Validates translation files for missing keys and ensures consistency across different language files
+
+**Hook Type:** PostToolUse
+
+### [jest-snapshot-auto-updater](/hooks/jest-snapshot-auto-updater)
+Automatically updates Jest snapshots when component files are modified significantly
+
+**Hook Type:** PostToolUse
+
+### [json-schema-validator](/hooks/json-schema-validator)
+Validates JSON files against their schemas when modified to ensure data integrity
+
+**Hook Type:** PostToolUse
+
+### [kubernetes-manifest-validator](/hooks/kubernetes-manifest-validator)
+Validates Kubernetes YAML manifests for syntax and best practices when modified
+
+**Hook Type:** PostToolUse
+
+### [markdown-link-checker](/hooks/markdown-link-checker)
+Validates all links in markdown files to detect broken links and references
+
+**Hook Type:** PostToolUse
+
+### [memory-usage-monitor](/hooks/memory-usage-monitor)
+Monitors memory usage and alerts when thresholds are exceeded
+
+**Hook Type:** Notification
+
+### [nextjs-route-analyzer](/hooks/nextjs-route-analyzer)
+Analyzes Next.js page routes and generates a route map when pages are added or modified
+
+**Hook Type:** PostToolUse
+
+### [package-vulnerability-scanner](/hooks/package-vulnerability-scanner)
+Scans for security vulnerabilities when package.json or requirements.txt files are modified
+
+**Hook Type:** PostToolUse
+
+### [performance-benchmark-report](/hooks/performance-benchmark-report)
+Runs performance benchmarks and generates comparison report when session ends
+
+**Hook Type:** Stop
+
+### [performance-impact-monitor](/hooks/performance-impact-monitor)
+Monitors and alerts on performance-impacting changes in real-time
+
+**Hook Type:** Notification
+
+### [performance-monitor](/hooks/performance-monitor)
+Monitors application performance metrics, identifies bottlenecks, and provides optimization recommendations
+
+**Hook Type:** Stop
+
+### [playwright-test-runner](/hooks/playwright-test-runner)
+Automatically runs Playwright E2E tests when test files or page components are modified
+
+**Hook Type:** PostToolUse
+
+### [prisma-schema-sync](/hooks/prisma-schema-sync)
+Automatically generates Prisma client and creates migrations when schema.prisma is modified
+
+**Hook Type:** PostToolUse
+
+### [python-import-optimizer](/hooks/python-import-optimizer)
+Automatically sorts and optimizes Python imports using isort when Python files are modified
+
+**Hook Type:** PostToolUse
+
+### [python-linter-integration](/hooks/python-linter-integration)
+Automatically runs pylint on Python files after editing to enforce code quality standards
+
+**Hook Type:** PostToolUse
+
+### [react-component-test-generator](/hooks/react-component-test-generator)
+Automatically creates or updates test files when React components are modified
+
+**Hook Type:** PostToolUse
+
+### [real-time-activity-tracker](/hooks/real-time-activity-tracker)
+Tracks all Claude Code activities in real-time and logs them for monitoring and debugging
+
+**Hook Type:** Notification
+
+### [redis-cache-invalidator](/hooks/redis-cache-invalidator)
+Automatically clears relevant Redis cache keys when data model files are modified
+
+**Hook Type:** PostToolUse
+
+### [rust-cargo-check](/hooks/rust-cargo-check)
+Automatically runs cargo check and clippy when Rust files are modified
+
+**Hook Type:** PostToolUse
+
+### [scss-auto-compiler](/hooks/scss-auto-compiler)
+Automatically compiles SCSS/Sass files to CSS when they are modified
+
+**Hook Type:** PostToolUse
+
+### [security-scanner-hook](/hooks/security-scanner-hook)
+Automated security vulnerability scanning that integrates with development workflow to detect and prevent security issues before deployment
+
+**Hook Type:** PostToolUse
+
+### [sensitive-data-alert-scanner](/hooks/sensitive-data-alert-scanner)
+Scans for potential sensitive data exposure and alerts immediately
+
+**Hook Type:** Notification
+
+### [session-metrics-collector](/hooks/session-metrics-collector)
+Collects and reports detailed metrics about the coding session when Claude stops
+
+**Hook Type:** Stop
+
+### [slack-progress-notifier](/hooks/slack-progress-notifier)
+Sends progress updates to Slack channel for team visibility on Claude's activities
+
+**Hook Type:** Notification
+
+### [svelte-component-compiler](/hooks/svelte-component-compiler)
+Automatically compiles and validates Svelte components when they are modified
+
+**Hook Type:** PostToolUse
+
+### [team-summary-email-generator](/hooks/team-summary-email-generator)
+Generates and sends a comprehensive summary email to the team when session ends
+
+**Hook Type:** Stop
+
+### [terraform-plan-executor](/hooks/terraform-plan-executor)
+Automatically runs terraform plan when .tf files are modified to preview infrastructure changes
+
+**Hook Type:** PostToolUse
+
+### [test-coverage-final-report](/hooks/test-coverage-final-report)
+Generates a comprehensive test coverage report when the coding session ends
+
+**Hook Type:** Stop
+
+### [code-test-runner-hook](/hooks/code-test-runner-hook)
+Automatically run relevant tests when code changes are detected, with intelligent test selection and parallel execution
+
+**Hook Type:** PostToolUse
+
+### [typescript-compilation-checker](/hooks/typescript-compilation-checker)
+Automatically runs TypeScript compiler checks after editing .ts or .tsx files to catch type errors early
+
+**Hook Type:** PostToolUse
+
+### [vue-composition-api-linter](/hooks/vue-composition-api-linter)
+Lints Vue 3 components for Composition API best practices and common issues
+
+**Hook Type:** PostToolUse
+
+### [webpack-bundle-analyzer](/hooks/webpack-bundle-analyzer)
+Analyzes webpack bundle size when webpack config or entry files are modified
+
+**Hook Type:** PostToolUse
+
+### [workflow-completion-report](/hooks/workflow-completion-report)
+Generates a comprehensive report when Claude Code workflow stops, including files modified, tests run, and git status
+
+**Hook Type:** Stop
+
+
+## Implementation Guide
+
+1. **Plan Your Workflow**: Review the phases and understand the complete flow
+2. **Install Required Hooks**: Set up all hooks needed for this workflow
+3. **Configure Integration**: Connect hooks to work together seamlessly
+4. **Test Each Phase**: Verify each phase works correctly before proceeding
+5. **Monitor Performance**: Track workflow execution and optimize as needed
+
+## Troubleshooting
+
+- **Hook Conflicts**: Ensure hooks don't interfere with each other
+- **Performance Issues**: Monitor resource usage and optimize hook logic
+- **Error Handling**: Implement proper error recovery mechanisms
+- **Logging**: Set up comprehensive logging for debugging
+
+*Questions? [Join our community](/community) for help with real-time monitoring setup*

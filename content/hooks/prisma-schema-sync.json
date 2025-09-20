@@ -1,0 +1,49 @@
+{
+  "slug": "prisma-schema-sync",
+  "description": "Automatically generates Prisma client and creates migrations when schema.prisma is modified",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": [
+    "prisma",
+    "database",
+    "orm",
+    "schema",
+    "migrations"
+  ],
+  "hookType": "PostToolUse",
+  "features": [
+    "Automatic Prisma client generation",
+    "Database migration creation",
+    "Schema validation and formatting",
+    "TypeScript type generation",
+    "Database synchronization",
+    "Migration safety checks"
+  ],
+  "useCases": [
+    "Keep Prisma client in sync with schema changes",
+    "Automatically create database migrations",
+    "Validate Prisma schema syntax on changes",
+    "Generate TypeScript types for database models",
+    "Format Prisma schema files consistently",
+    "Ensure database schema consistency",
+    "Streamline database development workflow",
+    "Catch schema errors early in development"
+  ],
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "postToolUse": {
+          "script": "./.claude/hooks/prisma-schema-sync.sh",
+          "matchers": [
+            "write",
+            "edit"
+          ]
+        }
+      }
+    },
+    "scriptContent": "#!/bin/bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if this is a Prisma schema file\nif [[ \"$FILE_PATH\" == *schema.prisma ]]; then\n    echo \"🔄 Prisma Schema Sync - Processing schema changes...\"\n    echo \"📄 Schema file: $FILE_PATH\"\n    \n    # Check if Prisma is available\n    if ! command -v npx >/dev/null 2>&1; then\n        echo \"⚠️ npx not found. Please install Node.js and npm\"\n        exit 1\n    fi\n    \n    # Step 1: Validate schema\n    echo \"🔍 Validating Prisma schema...\"\n    if npx prisma validate; then\n        echo \"✅ Schema validation passed\"\n    else\n        echo \"❌ Schema validation failed - Please fix errors before proceeding\"\n        exit 1\n    fi\n    \n    # Step 2: Format schema\n    echo \"📝 Formatting Prisma schema...\"\n    if npx prisma format; then\n        echo \"✅ Schema formatted successfully\"\n    else\n        echo \"⚠️ Schema formatting failed\"\n    fi\n    \n    # Step 3: Generate Prisma client\n    echo \"🏗️ Generating Prisma client...\"\n    if npx prisma generate; then\n        echo \"✅ Prisma client generated successfully\"\n    else\n        echo \"❌ Prisma client generation failed\"\n        exit 1\n    fi\n    \n    # Step 4: Create migration (dev mode only)\n    if [ \"$NODE_ENV\" != \"production\" ]; then\n        echo \"🗄️ Creating database migration...\"\n        MIGRATION_NAME=\"auto_migration_$(date +%Y%m%d_%H%M%S)\"\n        \n        if npx prisma migrate dev --name \"$MIGRATION_NAME\" --create-only; then\n            echo \"✅ Migration created: $MIGRATION_NAME\"\n            echo \"⚠️ Please review the migration before applying it to your database\"\n            echo \"💡 Apply with: npx prisma migrate dev\"\n        else\n            echo \"⚠️ Migration creation skipped or failed\"\n        fi\n    else\n        echo \"ℹ️ Production environment - skipping migration creation\"\n    fi\n    \n    echo \"\"\n    echo \"💡 Prisma Sync Tips:\"\n    echo \"  • Review generated migrations before applying\"\n    echo \"  • Use 'npx prisma studio' to explore your database\"\n    echo \"  • Run 'npx prisma db push' for prototyping\"\n    echo \"  • Use 'npx prisma migrate reset' to reset development database\"\n    \n    echo \"\"\n    echo \"🎯 Prisma schema sync complete!\"\n    \nelse\n    echo \"ℹ️ File is not a Prisma schema file: $FILE_PATH\"\nfi\n\nexit 0"
+  },
+  "documentationUrl": "https://www.prisma.io/docs",
+  "source": "community"
+}

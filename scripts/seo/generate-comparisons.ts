@@ -30,8 +30,8 @@ async function loadAllContent(): Promise<ContentItem[]> {
       const jsonPath = path.join(GENERATED_DIR, `${category}-metadata.json`);
       try {
         const content = await fs.readFile(jsonPath, 'utf-8');
-        const items = JSON.parse(content);
-        allContent.push(...items.map((item: any) => ({ ...item, category })));
+        const items = JSON.parse(content) as ContentItem[];
+        allContent.push(...items.map((item) => ({ ...item, category })));
         continue;
       } catch {
         // Fall through to TypeScript file
@@ -43,15 +43,15 @@ async function loadAllContent(): Promise<ContentItem[]> {
 
       // Simple extraction - find the array content between brackets
       const match = content.match(/export const \w+ = (\[[\s\S]*?\]);/);
-      if (match) {
+      if (match?.[1]) {
         // Parse the TypeScript array (safe eval since it's our generated content)
         const arrayStr = match[1]
           .replace(/(\w+):/g, '"$1":') // Convert keys to quoted strings
           .replace(/'/g, '"') // Convert single quotes to double
           .replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
 
-        const items = JSON.parse(arrayStr);
-        allContent.push(...items.map((item: any) => ({ ...item, category })));
+        const items = JSON.parse(arrayStr) as ContentItem[];
+        allContent.push(...items.map((item) => ({ ...item, category })));
       }
     } catch (error) {
       console.log(`Skipping ${category}: ${error}`);
@@ -211,6 +211,9 @@ async function generateComparisons() {
       const item1 = topItems[i];
       const item2 = topItems[j];
 
+      // Ensure both items are valid before proceeding
+      if (!item1 || !item2 || !item1.id || !item2.id) continue;
+
       // Generate filename
       const filename = `${item1.id}-vs-${item2.id}.mdx`;
       const filepath = path.join(SEO_DIR, filename);
@@ -224,11 +227,11 @@ async function generateComparisons() {
 
       comparisons.push({
         slug: `${item1.id}-vs-${item2.id}`,
-        title: `${item1.title || item1.name} vs ${item2.title || item2.name}`,
+        title: `${item1.title || item1.name || item1.id} vs ${item2.title || item2.name || item2.id}`,
         item1: item1.id,
         item2: item2.id,
-        category1: item1.category,
-        category2: item2.category,
+        category1: item1.category || '',
+        category2: item2.category || '',
         path: `/compare/${item1.id}-vs-${item2.id}`,
       });
 

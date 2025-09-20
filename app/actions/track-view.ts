@@ -1,5 +1,6 @@
 'use server';
 
+import { logger } from '@/lib/logger';
 import { statsRedis } from '@/lib/redis';
 
 export async function trackView(category: string, slug: string) {
@@ -11,7 +12,15 @@ export async function trackView(category: string, slug: string) {
     const viewCount = await statsRedis.incrementView(category, slug);
     return { success: true, viewCount };
   } catch (error) {
-    console.error('Failed to track view:', error);
+    logger.error(
+      'Server action failed to track view',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        category,
+        slug,
+        action: 'trackView',
+      }
+    );
     return { success: false, message: 'Failed to track view' };
   }
 }
@@ -25,7 +34,15 @@ export async function trackCopy(category: string, slug: string) {
     await statsRedis.trackCopy(category, slug);
     return { success: true };
   } catch (error) {
-    console.error('Failed to track copy:', error);
+    logger.error(
+      'Server action failed to track copy',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        category,
+        slug,
+        action: 'trackCopy',
+      }
+    );
     return { success: false, message: 'Failed to track copy' };
   }
 }

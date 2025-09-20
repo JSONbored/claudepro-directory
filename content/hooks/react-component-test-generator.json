@@ -1,0 +1,48 @@
+{
+  "slug": "react-component-test-generator",
+  "description": "Automatically creates or updates test files when React components are modified",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": [
+    "react",
+    "testing",
+    "jest",
+    "components",
+    "automation"
+  ],
+  "hookType": "PostToolUse",
+  "features": [
+    "Automatic test file generation for React components",
+    "Support for both TypeScript and JavaScript",
+    "Jest and React Testing Library integration",
+    "Basic render test scaffolding",
+    "Component-specific test structure",
+    "Test file naming conventions"
+  ],
+  "useCases": [
+    "Generate test files when creating new React components",
+    "Ensure every component has corresponding tests",
+    "Scaffold basic test structure automatically",
+    "Maintain testing consistency across projects",
+    "Speed up test-driven development workflow",
+    "Create render tests for component validation",
+    "Set up testing infrastructure for new components",
+    "Encourage testing best practices"
+  ],
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "postToolUse": {
+          "script": "./.claude/hooks/react-component-test-generator.sh",
+          "matchers": [
+            "write",
+            "edit"
+          ]
+        }
+      }
+    },
+    "scriptContent": "#!/bin/bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if this is a React component file (but not a test file)\nif [[ \"$FILE_PATH\" == *.jsx ]] || [[ \"$FILE_PATH\" == *.tsx ]]; then\n    # Skip if this is already a test file\n    if [[ \"$FILE_PATH\" == *.test.* ]] || [[ \"$FILE_PATH\" == *.spec.* ]]; then\n        exit 0\n    fi\n    \n    echo \"⚛️ React Component Test Generator - Processing component...\"\n    echo \"📄 Component: $FILE_PATH\"\n    \n    # Extract component info\n    COMPONENT_DIR=$(dirname \"$FILE_PATH\")\n    COMPONENT_BASENAME=$(basename \"$FILE_PATH\")\n    COMPONENT_NAME=$(basename \"${FILE_PATH%.*}\")\n    COMPONENT_EXT=\"${FILE_PATH##*.}\"\n    \n    # Determine test file path\n    if [[ \"$COMPONENT_EXT\" == \"tsx\" ]]; then\n        TEST_FILE=\"${COMPONENT_DIR}/${COMPONENT_NAME}.test.tsx\"\n    else\n        TEST_FILE=\"${COMPONENT_DIR}/${COMPONENT_NAME}.test.jsx\"\n    fi\n    \n    # Check if test file already exists\n    if [ -f \"$TEST_FILE\" ]; then\n        echo \"ℹ️ Test file already exists: $TEST_FILE\"\n        echo \"💡 Consider updating tests to match component changes\"\n    else\n        echo \"🧪 Generating test file: $TEST_FILE\"\n        \n        # Create test file content\n        cat > \"$TEST_FILE\" << EOF\nimport { render, screen } from '@testing-library/react';\nimport userEvent from '@testing-library/user-event';\nimport $COMPONENT_NAME from './$COMPONENT_BASENAME';\n\ndescribe('$COMPONENT_NAME', () => {\n  it('renders without crashing', () => {\n    render(<$COMPONENT_NAME />);\n  });\n\n  it('displays expected content', () => {\n    render(<$COMPONENT_NAME />);\n    // Add assertions here\n    // expect(screen.getByText('expected text')).toBeInTheDocument();\n  });\n\n  // Add more component-specific tests here\n  // Example: testing props, user interactions, etc.\n  // \n  // it('handles user interactions', async () => {\n  //   const user = userEvent.setup();\n  //   render(<$COMPONENT_NAME />);\n  //   // await user.click(screen.getByRole('button'));\n  //   // expect(...);\n  // });\n});\nEOF\n        \n        if [ $? -eq 0 ]; then\n            echo \"✅ Test file created successfully!\"\n            echo \"📝 Test file: $TEST_FILE\"\n        else\n            echo \"❌ Failed to create test file\"\n        fi\n    fi\n    \n    # Additional suggestions based on component analysis\n    echo \"\"\n    echo \"🔍 Component Analysis:\"\n    \n    if [ -f \"$FILE_PATH\" ]; then\n        # Check for props interface/type\n        if grep -q \"interface.*Props\\|type.*Props\" \"$FILE_PATH\"; then\n            echo \"  • 💡 Props interface detected - consider testing different prop combinations\"\n        fi\n        \n        # Check for hooks usage\n        if grep -q \"useState\\|useEffect\\|useContext\" \"$FILE_PATH\"; then\n            echo \"  • 💡 React hooks detected - consider testing state changes and side effects\"\n        fi\n        \n        # Check for event handlers\n        if grep -q \"onClick\\|onChange\\|onSubmit\" \"$FILE_PATH\"; then\n            echo \"  • 💡 Event handlers detected - consider testing user interactions\"\n        fi\n        \n        # Check for conditional rendering\n        if grep -q \"&&\\|?.*:\" \"$FILE_PATH\"; then\n            echo \"  • 💡 Conditional rendering detected - test different rendering scenarios\"\n        fi\n    fi\n    \n    echo \"\"\n    echo \"💡 Testing Best Practices:\"\n    echo \"  • Test component behavior, not implementation details\"\n    echo \"  • Use accessible queries (getByRole, getByLabelText)\"\n    echo \"  • Test user interactions with userEvent\"\n    echo \"  • Mock external dependencies and API calls\"\n    echo \"  • Test edge cases and error states\"\n    \n    echo \"\"\n    echo \"🎯 Test generation complete!\"\n    \nelse\n    echo \"ℹ️ File is not a React component: $FILE_PATH\"\nfi\n\nexit 0"
+  },
+  "source": "community"
+}

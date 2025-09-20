@@ -1,0 +1,92 @@
+{
+  "slug": "box-mcp-server",
+  "description": "Access enterprise content, analyze unstructured data, and automate workflows",
+  "category": "mcp",
+  "author": "Box",
+  "dateAdded": "2025-09-18",
+  "tags": [
+    "storage",
+    "box",
+    "enterprise",
+    "document-management",
+    "collaboration"
+  ],
+  "content": "Connect Claude to Box for enterprise content management and document automation.",
+  "features": [
+    "Access and search files across your Box enterprise",
+    "Analyze document content and extract insights",
+    "Automate content workflows and file organization",
+    "Manage folder structures and permissions",
+    "Generate summaries from enterprise documents",
+    "Enterprise-grade security and audit trails"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open your Claude Desktop configuration file",
+        "Add the Box MCP server configuration",
+        "Restart Claude Desktop",
+        "Authenticate with your Box account"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport http box https://mcp.box.com/"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "box": {
+          "transport": "http",
+          "url": "https://mcp.box.com/"
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "box": {
+          "transport": "http",
+          "url": "https://mcp.box.com/"
+        }
+      }
+    }
+  },
+  "package": null,
+  "source": "official",
+  "useCases": [
+    "Search enterprise documents by content or metadata",
+    "Extract and analyze data from invoices and contracts",
+    "Generate summaries of quarterly reports and documents",
+    "Automate file organization and folder management",
+    "Analyze document patterns across your organization",
+    "Create workflow automations for content processes"
+  ],
+  "security": [
+    "Enterprise authentication and SSO support",
+    "Respects existing file and folder permissions",
+    "Maintains complete audit trail of all operations",
+    "Compliant with data governance requirements"
+  ],
+  "troubleshooting": [
+    "Verify Box enterprise access and permissions",
+    "Check folder permissions for specific directories",
+    "Monitor API quotas and rate limits",
+    "Ensure proper authentication token status"
+  ],
+  "examples": [
+    "Find all contracts from 2024",
+    "Summarize the quarterly reports in the finance folder",
+    "Extract key data from invoice documents",
+    "Organize project files by client and date"
+  ],
+  "requiresAuth": true,
+  "permissions": [
+    "read",
+    "write",
+    "delete"
+  ],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://box.dev/guides/box-mcp/remote/"
+}

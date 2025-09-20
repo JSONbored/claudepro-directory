@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import fs from 'fs/promises';
 import path from 'path';
-import slugify from 'slugify';
 import { fileURLToPath } from 'url';
 
 type ContentCategory = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks';
@@ -25,16 +24,18 @@ interface BaseContent {
   tags: string[];
   content?: string;
   config?: string;
+  configuration?: Record<
+    string,
+    string | number | boolean | Record<string, string | number | boolean>
+  >;
 }
 
-// Generate SEO-friendly slug from title or name
-function generateSlug(item: BaseContent): string {
-  const source = item.title || item.name || item.id;
-  return slugify(source, {
-    lower: true,
-    strict: true,
-    remove: /[*+~.()'"!:@]/g,
-  });
+// Generate title from slug
+function _slugToTitle(slug: string): string {
+  return slug
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 }
 
 async function ensureDir(dir: string) {
@@ -58,14 +59,16 @@ async function loadJsonFiles(type: string): Promise<BaseContent[]> {
         try {
           const item = JSON.parse(content);
 
-          // Auto-generate slug if not provided
+          // All content types now use slug-based schema
+          // Auto-generate slug from filename if not provided
           if (!item.slug) {
-            item.slug = generateSlug(item);
+            item.slug = path.basename(file, '.json');
           }
 
-          // Ensure id matches slug for consistency
-          if (!item.id) {
-            item.id = item.slug;
+          // Auto-generate id and title from slug for all content types
+          item.id = item.slug;
+          if (!item.title) {
+            item.title = _slugToTitle(item.slug);
           }
 
           return item;
@@ -99,9 +102,12 @@ async function generateTypeScript() {
     const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
     const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
 
-    // Create metadata version (without content/config fields for listing pages)
-    const metadata = allContent[type].map((item) => {
-      const { content: _content, config: _config, ...meta } = item;
+    // Create metadata version (without heavy content fields for listing pages)
+    const contentData = allContent[type];
+    if (!contentData) continue;
+
+    const metadata = contentData.map((item) => {
+      const { content: _content, config: _config, configuration: _configuration, ...meta } = item;
       return meta;
     });
 
@@ -111,7 +117,7 @@ async function generateTypeScript() {
 
 import type { ${capitalizedSingular === 'Mcp' ? 'MCPServer' : capitalizedSingular}, ContentMetadata } from '../types/content';
 
-type ${capitalizedSingular}Metadata = Omit<${capitalizedSingular === 'Mcp' ? 'MCPServer' : capitalizedSingular}, 'content'>;
+type ${capitalizedSingular}Metadata = Omit<${capitalizedSingular === 'Mcp' ? 'MCPServer' : capitalizedSingular}, 'content'> & ContentMetadata;
 
 export const ${varName}Metadata: ${capitalizedSingular}Metadata[] = ${JSON.stringify(metadata, null, 2)};
 
@@ -175,7 +181,8 @@ import type { ContentStats } from '../types/content';
 export const contentStats: ContentStats = {
 ${CONTENT_TYPES.map((type) => {
   const varName = type.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-  return `  ${varName}: ${allContent[type].length}`;
+  const typeData = allContent[type];
+  return `  ${varName}: ${typeData ? typeData.length : 0}`;
 }).join(',\n')}
 };`;
 

@@ -1,0 +1,89 @@
+{
+  "slug": "intercom-mcp-server",
+  "description": "Access customer conversations, tickets, and user data in real-time",
+  "category": "mcp",
+  "author": "Intercom",
+  "dateAdded": "2025-09-18",
+  "tags": [
+    "customer-support",
+    "intercom",
+    "chat",
+    "helpdesk",
+    "crm"
+  ],
+  "content": "Connect Claude to Intercom for customer support operations and conversation management.",
+  "features": [
+    "Access customer conversations in real-time",
+    "Manage support tickets and queues",
+    "Query user data and profiles",
+    "Update customer information",
+    "Track conversation metrics and analytics"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open Claude Desktop configuration file",
+        "Add the Intercom server configuration with SSE or HTTP transport",
+        "Restart Claude Desktop",
+        "Authenticate with your Intercom workspace"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport sse intercom https://mcp.intercom.com/sse"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "intercom": {
+          "transport": "sse",
+          "url": "https://mcp.intercom.com/sse"
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "intercom": {
+          "transport": "sse",
+          "url": "https://mcp.intercom.com/sse"
+        }
+      }
+    }
+  },
+  "package": null,
+  "source": "official",
+  "useCases": [
+    "Respond to customer queries efficiently",
+    "Analyze support trends and patterns",
+    "Update customer information in bulk",
+    "Generate support metrics reports",
+    "Manage ticket queues and priorities"
+  ],
+  "security": [
+    "OAuth authentication for workspace access",
+    "Respect customer privacy regulations",
+    "Monitor response quality",
+    "Regular training updates recommended"
+  ],
+  "troubleshooting": [
+    "Check workspace access permissions",
+    "Verify team member permissions",
+    "Monitor API rate limits"
+  ],
+  "examples": [
+    "Show open conversations from today",
+    "Find customer by email",
+    "Update ticket status to resolved",
+    "Generate weekly support metrics"
+  ],
+  "requiresAuth": true,
+  "permissions": [
+    "read",
+    "write",
+    "respond"
+  ],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://developers.intercom.com/docs/guides/mcp"
+}

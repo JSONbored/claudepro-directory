@@ -1,0 +1,90 @@
+{
+  "slug": "workato-mcp-server",
+  "description": "Access any application, workflows, or data via Workato's integration platform",
+  "category": "mcp",
+  "author": "Workato",
+  "dateAdded": "2025-09-18",
+  "tags": [
+    "automation",
+    "workato",
+    "integration",
+    "workflow",
+    "iPaaS"
+  ],
+  "content": "Connect to hundreds of applications through Workato's enterprise automation and integration platform.",
+  "features": [
+    "Execute recipes (workflows) on demand",
+    "Access connected application data",
+    "Retrieve and update cross-system data",
+    "Monitor job execution status",
+    "Trigger complex automation workflows"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Access your Workato workspace",
+        "Navigate to MCP configuration section",
+        "Generate your custom MCP endpoint",
+        "Add the generated URL to Claude Desktop configuration"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport http workato YOUR_WORKATO_MCP_URL"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "workato": {
+          "transport": "http",
+          "url": "YOUR_GENERATED_WORKATO_URL"
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "workato": {
+          "transport": "http",
+          "url": "YOUR_GENERATED_WORKATO_URL"
+        }
+      }
+    }
+  },
+  "package": null,
+  "source": "official",
+  "useCases": [
+    "Trigger complex multi-system workflows",
+    "Integrate data across enterprise applications",
+    "Access any connected system through one interface",
+    "Automate business processes end-to-end",
+    "Execute custom recipes on demand"
+  ],
+  "security": [
+    "OAuth or API key authentication",
+    "Role-based access control",
+    "Audit trail for all operations",
+    "Test recipes in sandbox environment"
+  ],
+  "troubleshooting": [
+    "Verify workspace permissions",
+    "Check recipe activation status",
+    "Monitor connection health",
+    "Review execution logs"
+  ],
+  "examples": [
+    "Sync Salesforce contacts to HubSpot",
+    "Execute the invoice processing workflow",
+    "Check status of overnight data sync",
+    "Trigger customer onboarding recipe"
+  ],
+  "requiresAuth": true,
+  "permissions": [
+    "read",
+    "write",
+    "execute"
+  ],
+  "configLocation": "custom_generated",
+  "documentationUrl": "https://docs.workato.com/mcp.html"
+}

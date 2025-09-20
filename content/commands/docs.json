@@ -1,5 +1,4 @@
 {
-  "title": "/docs",
   "description": "Intelligent documentation generator with API specs, code examples, tutorials, and interactive guides",
   "category": "commands",
   "author": "claudepro",
@@ -19,5 +18,6 @@
   },
   "githubUrl": "https://github.com/claudepro/documentation-generator",
   "documentationUrl": "https://docs.claude.ai/commands/docs",
-  "source": "community"
+  "source": "community",
+  "slug": "docs"
 }

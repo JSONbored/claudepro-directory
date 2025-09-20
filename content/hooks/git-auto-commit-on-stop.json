@@ -1,0 +1,43 @@
+{
+  "slug": "git-auto-commit-on-stop",
+  "description": "Automatically commits all changes with a summary when Claude Code session ends",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": [
+    "git",
+    "version-control",
+    "stop-hook",
+    "automation",
+    "commit"
+  ],
+  "hookType": "Stop",
+  "features": [
+    "Automatic git commit creation when session ends",
+    "Detailed commit statistics (files changed, insertions, deletions)",
+    "Smart commit message generation with timestamps",
+    "Pre-commit validation and safety checks",
+    "Branch and repository state verification",
+    "Customizable commit message templates",
+    "Untracked file handling and gitignore respect",
+    "Error handling with informative feedback"
+  ],
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "stop": {
+          "script": "./.claude/hooks/git-auto-commit-on-stop.sh"
+        }
+      }
+    },
+    "scriptContent": "#!/usr/bin/env bash\n\necho \"💾 Checking for changes to auto-commit...\" >&2\n\n# Check if we're in a git repository\nif ! git rev-parse --git-dir > /dev/null 2>&1; then\n  echo \"⚠️ Not in a git repository - skipping auto-commit\" >&2\n  exit 0\nfi\n\n# Check if git is configured\nif ! git config user.email > /dev/null 2>&1 || ! git config user.name > /dev/null 2>&1; then\n  echo \"⚠️ Git user not configured - skipping auto-commit\" >&2\n  echo \"💡 Run: git config --global user.email 'your@email.com'\" >&2\n  echo \"💡 Run: git config --global user.name 'Your Name'\" >&2\n  exit 0\nfi\n\n# Get current timestamp\nTIMESTAMP=$(date +\"%Y-%m-%d %H:%M:%S\")\nISO_TIMESTAMP=$(date -u +\"%Y-%m-%dT%H:%M:%SZ\" 2>/dev/null || date +\"%Y-%m-%d %H:%M:%S UTC\")\n\n# Get current branch\nCURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo \"unknown\")\n\n# Check for uncommitted changes\nif [ -z \"$(git status --porcelain 2>/dev/null)\" ]; then\n  echo \"✨ No changes to commit - repository is clean\" >&2\n  exit 0\nfi\n\necho \"📊 Analyzing changes for auto-commit...\" >&2\n\n# Get status information\nUNTRACKED_FILES=$(git status --porcelain 2>/dev/null | grep '^??' | wc -l | xargs)\nMODIFIED_FILES=$(git status --porcelain 2>/dev/null | grep '^.M' | wc -l | xargs)\nADDED_FILES=$(git status --porcelain 2>/dev/null | grep '^A' | wc -l | xargs)\nDELETED_FILES=$(git status --porcelain 2>/dev/null | grep '^.D' | wc -l | xargs)\nRENAMED_FILES=$(git status --porcelain 2>/dev/null | grep '^R' | wc -l | xargs)\n\necho \"📋 Change summary:\" >&2\necho \"   Branch: $CURRENT_BRANCH\" >&2\necho \"   Untracked: $UNTRACKED_FILES files\" >&2\necho \"   Modified: $MODIFIED_FILES files\" >&2\necho \"   Added: $ADDED_FILES files\" >&2\necho \"   Deleted: $DELETED_FILES files\" >&2\necho \"   Renamed: $RENAMED_FILES files\" >&2\n\n# Check for sensitive files before committing\necho \"🔒 Checking for sensitive files...\" >&2\nSENSITIVE_PATTERNS=(\n  \"\\.env\"\n  \"\\.env\\.*\"\n  \"*secret*\"\n  \"*password*\"\n  \"*key*\"\n  \"id_rsa\"\n  \"id_ed25519\"\n  \"*.pem\"\n  \"*.p12\"\n  \"*.pfx\"\n)\n\nSENSITIVE_FOUND=false\nfor pattern in \"${SENSITIVE_PATTERNS[@]}\"; do\n  if git status --porcelain 2>/dev/null | grep -q \"$pattern\"; then\n    SENSITIVE_FOUND=true\n    echo \"⚠️ Potentially sensitive file detected: $pattern\" >&2\n  fi\ndone\n\n# Check if .gitignore exists and is respected\nif [ ! -f \".gitignore\" ]; then\n  echo \"💡 Consider creating a .gitignore file to exclude unwanted files\" >&2\nfi\n\n# Option to skip auto-commit if environment variable is set\nif [ \"$SKIP_AUTO_COMMIT\" = \"true\" ]; then\n  echo \"⏭️ Auto-commit skipped (SKIP_AUTO_COMMIT=true)\" >&2\n  exit 0\nfi\n\n# Warn about sensitive files but don't block (user choice)\nif [ \"$SENSITIVE_FOUND\" = true ]; then\n  echo \"⚠️ Sensitive files detected - proceeding with caution\" >&2\n  echo \"💡 Set SKIP_AUTO_COMMIT=true to disable auto-commits\" >&2\nfi\n\n# Add all changes (respecting .gitignore)\necho \"📥 Staging changes for commit...\" >&2\ngit add -A\n\n# Double-check that we have staged changes\nif [ -z \"$(git diff --cached --name-only)\" ]; then\n  echo \"ℹ️ No changes staged after git add - nothing to commit\" >&2\n  exit 0\nfi\n\n# Calculate detailed statistics\necho \"📊 Calculating commit statistics...\" >&2\n\nFILES_CHANGED=$(git diff --cached --numstat | wc -l | xargs)\nINSERTIONS=0\nDELETIONS=0\n\n# Calculate insertions and deletions more reliably\nif command -v awk &> /dev/null; then\n  STATS=$(git diff --cached --numstat | awk '{insertions+=$1; deletions+=$2} END {print insertions \" \" deletions}')\n  read -r INSERTIONS DELETIONS <<< \"$STATS\"\nelse\n  # Fallback method\n  INSERTIONS=$(git diff --cached --stat | grep -oE '[0-9]+ insertion' | grep -oE '[0-9]+' | paste -sd+ | bc 2>/dev/null || echo '0')\n  DELETIONS=$(git diff --cached --stat | grep -oE '[0-9]+ deletion' | grep -oE '[0-9]+' | paste -sd+ | bc 2>/dev/null || echo '0')\nfi\n\n# Generate commit message\nCOMMIT_MSG=\"🤖 Claude Code auto-commit: Session ended\"\n\n# Add detailed commit body\nCOMMIT_BODY=$(cat <<EOF\n\nSession Summary:\n- Branch: $CURRENT_BRANCH\n- Files changed: $FILES_CHANGED\n- Insertions: +$INSERTIONS\n- Deletions: -$DELETIONS\n- Timestamp: $TIMESTAMP\n\nChanges by type:\n- Modified files: $MODIFIED_FILES\n- New files: $UNTRACKED_FILES\n- Deleted files: $DELETED_FILES\n- Renamed files: $RENAMED_FILES\n\n🤖 Generated with Claude Code\nEOF\n)\n\n# Show what will be committed\necho \"📝 Files to be committed:\" >&2\ngit diff --cached --name-status | head -10 | while read status file; do\n  case $status in\n    A) echo \"   ✅ Added: $file\" >&2 ;;\n    M) echo \"   ✏️  Modified: $file\" >&2 ;;\n    D) echo \"   ❌ Deleted: $file\" >&2 ;;\n    R*) echo \"   🔄 Renamed: $file\" >&2 ;;\n    *) echo \"   📄 $status: $file\" >&2 ;;\n  esac\ndone\n\nif [ \"$FILES_CHANGED\" -gt 10 ]; then\n  echo \"   ... and $((FILES_CHANGED - 10)) more files\" >&2\nfi\n\necho \"\" >&2\necho \"💾 Creating auto-commit...\" >&2\n\n# Create the commit\nif echo \"$COMMIT_BODY\" | git commit -F -; then\n  echo \"✅ Auto-commit successful!\" >&2\n  \n  # Show commit info\n  COMMIT_HASH=$(git rev-parse --short HEAD)\n  echo \"📝 Commit: $COMMIT_HASH\" >&2\n  echo \"🌿 Branch: $CURRENT_BRANCH\" >&2\n  \n  # Check if we should push (optional)\n  if [ \"$AUTO_PUSH\" = \"true\" ]; then\n    echo \"📤 Auto-pushing to remote...\" >&2\n    if git push 2>/dev/null; then\n      echo \"✅ Pushed to remote successfully\" >&2\n    else\n      echo \"⚠️ Push failed - commit created locally\" >&2\n      echo \"💡 Run 'git push' manually when ready\" >&2\n    fi\n  else\n    echo \"💡 Set AUTO_PUSH=true to automatically push commits\" >&2\n  fi\n  \nelse\n  echo \"❌ Auto-commit failed\" >&2\n  echo \"💡 You may need to resolve conflicts or check git status\" >&2\n  exit 1\nfi\n\necho \"\" >&2\necho \"📋 Auto-Commit Summary:\" >&2\necho \"   ✅ $FILES_CHANGED files committed\" >&2\necho \"   📈 +$INSERTIONS insertions, -$DELETIONS deletions\" >&2\necho \"   ⏰ $TIMESTAMP\" >&2\necho \"\" >&2\necho \"💡 Git Auto-Commit Tips:\" >&2\necho \"   • Set SKIP_AUTO_COMMIT=true to disable\" >&2\necho \"   • Set AUTO_PUSH=true to auto-push commits\" >&2\necho \"   • Review commits with 'git log --oneline'\" >&2\necho \"   • Use .gitignore to exclude sensitive files\" >&2\n\nexit 0"
+  },
+  "useCases": [
+    "Automatic version control for development sessions",
+    "Backup and history preservation of work progress",
+    "Collaborative development with session tracking",
+    "CI/CD integration with automated commits",
+    "Project milestone and progress documentation"
+  ],
+  "source": "community"
+}

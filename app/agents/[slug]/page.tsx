@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { ContentDetailPage } from '@/components/content-detail-page';
+import { AgentDetailPage } from '@/components/agent-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { agents, getAgentBySlug, getAgentFullContent } from '@/generated/content';
+import { getDisplayTitle } from '@/lib/utils';
 
 interface AgentPageProps {
   params: Promise<{ slug: string }>;
@@ -19,12 +20,14 @@ export async function generateMetadata({ params }: AgentPageProps): Promise<Meta
     };
   }
 
+  const displayTitle = getDisplayTitle(agent);
+
   return {
-    title: `${agent.title || agent.name} - AI Agent | Claude Pro Directory`,
+    title: `${displayTitle} - AI Agent | Claude Pro Directory`,
     description: agent.description,
     keywords: agent.tags?.join(', '),
     openGraph: {
-      title: agent.title || agent.name || 'AI Agent',
+      title: displayTitle,
       description: agent.description,
       type: 'article',
     },
@@ -58,13 +61,7 @@ export default async function AgentPage({ params }: AgentPageProps) {
   return (
     <>
       <ViewTracker category="agents" slug={slug} />
-      <ContentDetailPage
-        item={fullAgent || agentMeta}
-        type="agents"
-        icon="sparkles"
-        typeName="Agent"
-        relatedItems={relatedAgents}
-      />
+      <AgentDetailPage item={fullAgent || agentMeta} relatedItems={relatedAgents} />
     </>
   );
 }

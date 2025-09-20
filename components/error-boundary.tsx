@@ -2,6 +2,7 @@ import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { logger } from '@/lib/logger';
 
 interface Props {
   children: ReactNode;
@@ -30,7 +31,13 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+    logger.error('React Error Boundary caught uncaught error', error, {
+      componentStack: errorInfo.componentStack || '',
+      errorBoundary: true,
+      userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent || '' : '',
+      url: typeof window !== 'undefined' ? window.location?.href || '' : '',
+    });
+
     this.setState({
       error,
       errorInfo,

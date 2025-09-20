@@ -1,10 +1,12 @@
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { Toaster } from 'sonner';
 import { Navigation } from '@/components/navigation';
+import { PerformanceOptimizer } from '@/components/performance-optimizer';
 import { StructuredData } from '@/components/structured-data';
 import { WebVitals } from './components/web-vitals';
 
@@ -62,10 +64,29 @@ export const metadata: Metadata = {
     canonical: 'https://claudepro.directory/',
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
     shortcut: '/favicon.ico',
     apple: '/apple-touch-icon.png',
+    other: [
+      {
+        rel: 'icon',
+        type: 'image/png',
+        sizes: '192x192',
+        url: '/android-chrome-192x192.png',
+      },
+      {
+        rel: 'icon',
+        type: 'image/png',
+        sizes: '512x512',
+        url: '/android-chrome-512x512.png',
+      },
+    ],
   },
+  manifest: '/site.webmanifest',
 };
 
 export default function RootLayout({
@@ -91,8 +112,15 @@ export default function RootLayout({
           </div>
           <Toaster />
         </ThemeProvider>
+        <PerformanceOptimizer />
         <Analytics />
         <WebVitals />
+        {/* Umami Analytics - Privacy-focused analytics */}
+        <Script
+          src="https://umami.claudepro.directory/script.js"
+          data-website-id="b734c138-2949-4527-9160-7fe5d0e81121"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

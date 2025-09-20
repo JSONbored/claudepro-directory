@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
+import { getDisplayTitle } from '@/lib/utils';
 
 interface ConfigCardProps {
   id: string;
@@ -41,7 +42,12 @@ export const ConfigCard = memo(
   }: ConfigCardProps) => {
     const router = useRouter();
     const [copied, setCopied] = useState(false);
-    const displayTitle = title || name || 'Untitled';
+    const displayTitle = getDisplayTitle({
+      title: title || '',
+      name: name || '',
+      slug,
+      category: type,
+    });
 
     // Map types to their actual route paths - fixed routing
     const targetPath = `/${type}/${slug}`;

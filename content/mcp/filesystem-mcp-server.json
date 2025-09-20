@@ -1,0 +1,90 @@
+{
+  "slug": "filesystem-mcp-server",
+  "description": "Official MCP server providing secure file system operations for Claude Desktop and Claude Code",
+  "category": "mcp",
+  "author": "Anthropic",
+  "dateAdded": "2025-09-15",
+  "tags": [
+    "filesystem",
+    "files",
+    "directories",
+    "official",
+    "anthropic"
+  ],
+  "content": "The official Filesystem MCP Server from Anthropic enables Claude to interact with your local file system securely with configurable access controls.",
+  "features": [
+    "Secure file operations with proper permissions",
+    "Directory management and browsing",
+    "Configurable access controls to specific directories",
+    "Built-in protections against unauthorized access",
+    "Read, write, and manage files safely",
+    "Create and manage directory structures"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open your Claude Desktop configuration file",
+        "Add the Filesystem MCP server configuration",
+        "Restart Claude Desktop",
+        "Verify the connection by asking Claude to list files"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "Create a .mcp.json file in your project root with the Filesystem server configuration"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "filesystem": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/directory"]
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "filesystem": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/directory"]
+        }
+      }
+    }
+  },
+  "package": "@modelcontextprotocol/server-filesystem",
+  "source": "official",
+  "useCases": [
+    "Read file contents and analyze code",
+    "Create and modify files in your project",
+    "Browse directory structures and file organization",
+    "Search for files containing specific content",
+    "Manage project files and folders",
+    "Backup and organize important files"
+  ],
+  "security": [
+    "Limit directory access to only necessary paths",
+    "Use absolute paths to prevent directory traversal",
+    "Monitor file operations in Claude Desktop logs",
+    "Backup important files before allowing write operations",
+    "Built-in protections against unauthorized access"
+  ],
+  "troubleshooting": [
+    "Verify Node.js is installed and accessible",
+    "Check Claude has read/write access to specified directories",
+    "Ensure directory paths exist and are correctly specified",
+    "Restart Claude Desktop after configuration changes"
+  ],
+  "examples": [
+    "Read the contents of package.json",
+    "Create a new file called README.md",
+    "Show me all JavaScript files in the src folder",
+    "List all directories in my project",
+    "Find all files containing the word TODO"
+  ],
+  "requiresAuth": false,
+  "permissions": ["filesystem"],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://modelcontextprotocol.io/examples"
+}

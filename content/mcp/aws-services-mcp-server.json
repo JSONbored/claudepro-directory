@@ -1,0 +1,123 @@
+{
+  "slug": "aws-services-mcp-server",
+  "description": "Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring",
+  "category": "mcp",
+  "author": "AWS Labs",
+  "dateAdded": "2025-09-16",
+  "tags": [
+    "aws",
+    "cloud",
+    "infrastructure",
+    "deployment",
+    "monitoring"
+  ],
+  "content": "Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring.",
+  "features": [
+    "EC2 instance management and monitoring",
+    "S3 bucket and object operations",
+    "Lambda function deployment and invocation",
+    "RDS database management",
+    "CloudWatch metrics and alarms",
+    "VPC and networking configuration",
+    "IAM user and role management",
+    "CloudFormation stack deployment",
+    "Auto Scaling group management",
+    "Load balancer configuration"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Install the AWS MCP server: uvx awslabs.core-mcp-server@latest",
+        "Open your Claude Desktop configuration file",
+        "Add the AWS MCP server configuration with your credentials",
+        "Configure AWS authentication (IAM keys, profile, or roles)",
+        "Restart Claude Desktop"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "uvx awslabs.core-mcp-server@latest"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "aws": {
+          "command": "uvx",
+          "args": [
+            "awslabs.core-mcp-server@latest"
+          ],
+          "env": {
+            "AWS_PROFILE": "your-aws-profile",
+            "AWS_REGION": "us-east-1",
+            "FASTMCP_LOG_LEVEL": "ERROR"
+          }
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "aws": {
+          "command": "uvx",
+          "args": [
+            "awslabs.core-mcp-server@latest"
+          ],
+          "env": {
+            "AWS_PROFILE": "${AWS_PROFILE}",
+            "AWS_REGION": "${AWS_REGION:-us-east-1}",
+            "FASTMCP_LOG_LEVEL": "${FASTMCP_LOG_LEVEL:-ERROR}"
+          }
+        }
+      }
+    }
+  },
+  "package": "awslabs.core-mcp-server",
+  "source": "official",
+  "useCases": [
+    "Deploy and manage EC2 instances for web applications",
+    "Automate S3 bucket creation and file operations",
+    "Deploy Lambda functions for serverless computing",
+    "Monitor application performance with CloudWatch",
+    "Manage RDS databases and create read replicas",
+    "Configure VPC networking and security groups",
+    "Deploy infrastructure using CloudFormation templates",
+    "Set up auto-scaling for high availability",
+    "Implement cost optimization strategies",
+    "Manage IAM roles and policies for security"
+  ],
+  "security": [
+    "Support for IAM user credentials and roles",
+    "AWS Profile-based authentication",
+    "Least privilege access with specific permissions",
+    "CloudTrail integration for audit logging",
+    "Secrets Manager for credential management",
+    "VPC security groups and network ACLs"
+  ],
+  "troubleshooting": [
+    "Verify AWS credentials are properly configured",
+    "Check IAM permissions for required AWS services",
+    "Ensure AWS region is correctly set",
+    "Monitor AWS API rate limits and quotas",
+    "Validate CloudFormation template syntax",
+    "Check VPC and subnet configurations"
+  ],
+  "examples": [
+    "Launch a new EC2 instance with custom tags",
+    "Create an S3 bucket with versioning enabled",
+    "Deploy a Lambda function with environment variables",
+    "Set up CloudWatch alarms for application monitoring",
+    "Create an RDS instance with automated backups",
+    "Deploy a complete web application stack via CloudFormation"
+  ],
+  "requiresAuth": true,
+  "permissions": [
+    "ec2:*",
+    "s3:*",
+    "lambda:*",
+    "rds:*",
+    "cloudwatch:*"
+  ],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://github.com/awslabs/mcp"
+}

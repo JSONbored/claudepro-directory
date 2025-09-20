@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/claudepro/claudepro-directory"
+    "url": "https://github.com/JSONbored/claudepro-directory"
   },
   "keywords": [
     "claude",
@@ -20,26 +20,29 @@
   "type": "module",
   "scripts": {
     "dev": "npm run build:content && next dev --turbopack",
-    "build": "npm run build:content && npm run generate:api && npm run generate:seo && npm run generate:sitemap && next build --turbopack",
+    "build": "npm run build:content && npm run generate:seo && npm run generate:sitemap && next build --turbopack",
     "build:analyze": "ANALYZE=true npm run build",
     "build:content": "tsx scripts/build-content.ts",
-    "generate:api": "tsx scripts/generate-api-endpoints.ts",
     "generate:sitemap": "tsx scripts/generate-sitemap.ts",
-    "generate:seo": "node scripts/seo/generate-all-seo.js",
-    "generate:seo:mcp": "node scripts/seo/generators/mcp-seo-generator.js",
-    "generate:seo:agents": "node scripts/seo/generators/agents-seo-generator.js",
+    "generate:seo": "tsx scripts/seo/generate-all-seo.ts",
+    "generate:seo:mcp": "tsx scripts/seo/generators/mcp-seo-generator.ts",
+    "generate:seo:agents": "tsx scripts/seo/generators/agents-seo-generator.ts",
     "start": "next start",
     "type-check": "tsc --noEmit",
     "lint": "ultracite check",
     "format": "ultracite fix",
-    "test": "echo \"No tests configured yet\" && exit 0",
-    "validate:content": "node scripts/validate-content.js"
+    "test": "vitest",
+    "test:run": "vitest run",
+    "validate:content": "node scripts/validate-content.js",
+    "prepare": "command -v lefthook >/dev/null 2>&1 && lefthook install || echo 'Skipping lefthook install (not available)'"
   },
   "dependencies": {
+    "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-navigation-menu": "^1.2.14",
+    "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slider": "^1.3.6",
@@ -52,7 +55,7 @@
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@types/react-window": "^1.8.8",
-    "@upstash/redis": "^1.35.3",
+    "@upstash/redis": "^1.35.4",
     "@vercel/analytics": "^1.5.0",
     "autoprefixer": "^10.4.21",
     "class-variance-authority": "^0.7.1",
@@ -60,7 +63,6 @@
     "critters": "^0.0.23",
     "embla-carousel-react": "^8.6.0",
     "fuse.js": "^7.1.0",
-    "glob": "^11.0.3",
     "lucide-react": "^0.544.0",
     "next": "^15.5.3",
     "next-themes": "^0.4.6",
@@ -69,17 +71,24 @@
     "react-dom": "^19.1.1",
     "react-window": "^2.1.0",
     "sharp": "^0.34.4",
-    "shiki": "^3.12.2",
+    "shiki": "^3.13.0",
     "slugify": "^1.6.6",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "tsx": "^4.20.5",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "web-vitals": "^5.1.0"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^15.5.3",
+    "@testing-library/jest-dom": "^6.8.0",
+    "babel-plugin-react-compiler": "^19.1.0-rc.3",
+    "jsdom": "^27.0.0",
+    "lefthook": "^1.13.1",
+    "puppeteer": "^24.22.0",
     "tailwindcss": "^4.1.13",
-    "ultracite": "^5.3.4"
+    "ultracite": "^5.3.10",
+    "vitest": "^3.2.4"
   }
 }

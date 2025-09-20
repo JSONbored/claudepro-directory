@@ -9,36 +9,45 @@ dateUpdated: "2025-09-18"
 
 *Last updated: September 18, 2025*
 
-Looking to connect Claude to databases like PostgreSQL, MySQL, and Redis? MCP (Model Context Protocol) servers extend Claude's capabilities to interact with external database systems. Here are the best options available today.
+Looking to enhance Claude with connecting Claude to databases like PostgreSQL, MySQL, and Redis? MCP (Model Context Protocol) servers extend Claude's capabilities to interact with external systems. Here are the best options available today.
 
 ## Quick Recommendations
 
-### 🏆 [PostgreSQL MCP Server](/mcp/postgresql-mcp)
-Connect Claude to PostgreSQL databases for direct query execution, schema management, and database operations
 
-**Perfect for:** SQL databases, data analytics, enterprise applications  
-**Setup difficulty:** Easy  
-[View Configuration →](/mcp/postgresql-mcp)
+### 🏆 Airtable Mcp Server
+Read and write records, manage bases and tables in Airtable directly from Claude
 
-### 🏆 [Redis Database MCP](/mcp/redis-database)
-High-performance Redis integration for caching, session management, pub/sub messaging, and real-time data operations
+**Perfect for:** database, airtable, data-management
+**Setup difficulty:** Easy
 
-**Perfect for:** Caching, real-time data, session management  
-**Setup difficulty:** Easy  
-[View Configuration →](/mcp/redis-database)
+
+### 🏆 Postgresql Mcp Server
+Official MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities
+
+**Perfect for:** postgresql, database, sql
+**Setup difficulty:** Easy
+
+
+### 🏆 Redis Mcp Server
+Official Redis MCP server providing natural language interface for Redis data management and operations
+
+**Perfect for:** redis, cache, database
+**Setup difficulty:** Easy
+
 
 ## Detailed Comparison
 
 | MCP Server | Use Case | Key Features | Setup Time |
 |------------|----------|--------------|------------|
-| [PostgreSQL MCP](/mcp/postgresql-mcp) | SQL databases | Query execution, schema management | ~5 mins |
-| [Redis Database](/mcp/redis-database) | Caching & real-time | Pub/sub, session management | ~5 mins |
+| Airtable Mcp Server | database | airtable, data-management | ~5 mins |
+| Postgresql Mcp Server | postgresql | database, sql | ~5 mins |
+| Redis Mcp Server | redis | cache, database | ~5 mins |
 
 ## Implementation Guide
 
 ### Step 1: Choose Your MCP Server
 
-Based on your specific needs for database integration, we recommend starting with [PostgreSQL MCP Server](/mcp/postgresql-mcp).
+Based on your specific needs for database integration, we recommend starting with **Airtable Mcp Server**.
 
 ### Step 2: Installation
 
@@ -54,7 +63,7 @@ Each MCP server requires specific configuration. Here's a template:
 ```json
 {
   "mcpServers": {
-    "postgresql-mcp": {
+    "airtable-mcp-server": {
       // Add your configuration here
     }
   }
@@ -76,8 +85,8 @@ Each MCP server requires specific configuration. Here's a template:
 ## Related Resources
 
 - [Browse all MCP servers](/mcp)
-- [MCP installation guide](/mcp)
-- [Claude configuration tips](/guides)
+- [MCP installation guide](/tutorials/mcp-setup)
+- [Claude configuration tips](/tutorials/claude-config)
 
 ## Community Insights
 

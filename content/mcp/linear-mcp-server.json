@@ -1,0 +1,89 @@
+{
+  "slug": "linear-mcp-server",
+  "description": "Integrate with Linear's issue tracking and project management system",
+  "category": "mcp",
+  "author": "Linear",
+  "dateAdded": "2025-09-18",
+  "tags": [
+    "project-management",
+    "linear",
+    "issues",
+    "tasks",
+    "agile"
+  ],
+  "content": "Connect Claude to Linear for comprehensive project management, issue tracking, and team collaboration.",
+  "features": [
+    "Create and update issues with full metadata",
+    "Manage projects and cycles programmatically",
+    "Track team velocity and progress metrics",
+    "Query and filter issues with advanced search",
+    "Update issue status and assignments in bulk"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open Claude Desktop configuration file",
+        "Add the Linear server configuration with SSE transport",
+        "Restart Claude Desktop",
+        "Authenticate through OAuth when prompted"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport sse linear https://mcp.linear.app/sse"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "linear": {
+          "transport": "sse",
+          "url": "https://mcp.linear.app/sse"
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "linear": {
+          "transport": "sse",
+          "url": "https://mcp.linear.app/sse"
+        }
+      }
+    }
+  },
+  "package": null,
+  "source": "official",
+  "useCases": [
+    "Create issues from bug reports or feature requests",
+    "Update issue status in bulk operations",
+    "Generate sprint reports and velocity metrics",
+    "Track project progress across teams",
+    "Automate issue triage and assignment"
+  ],
+  "security": [
+    "OAuth tokens are managed securely by Linear",
+    "Permissions follow Linear workspace settings",
+    "Tokens auto-refresh as needed",
+    "All actions are audited in Linear"
+  ],
+  "troubleshooting": [
+    "Use /mcp command to re-authenticate if needed",
+    "Check Linear workspace permissions for your account",
+    "Verify network connectivity to Linear servers"
+  ],
+  "examples": [
+    "Create a new bug issue for the login problem",
+    "Show me all issues assigned to me",
+    "Update issue LIN-123 to 'In Progress'",
+    "List all issues in the current sprint"
+  ],
+  "requiresAuth": true,
+  "permissions": [
+    "read",
+    "write",
+    "admin"
+  ],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://linear.app/docs/mcp"
+}

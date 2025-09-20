@@ -18,12 +18,15 @@ docs/
 
 # Test files (safe to exclude)
 __tests__/
+test/
 *.test.ts
 *.test.tsx
 *.spec.ts
 *.spec.tsx
 coverage/
 .nyc_output/
+vitest.config.ts
+jest.config.js
 
 # Build artifacts (Vercel generates these)
 .next/

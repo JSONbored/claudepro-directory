@@ -17,17 +17,9 @@ export const dynamicParams = true;
 interface SEOPageData {
   title: string;
   description: string;
-  keywords?: string[];
-  dateUpdated?: string;
+  keywords: string[];
+  dateUpdated: string;
   content: string;
-}
-
-interface SEOMetadata {
-  title?: string;
-  description?: string;
-  keywords?: string | string[];
-  dateUpdated?: string;
-  [key: string]: string | string[] | undefined;
 }
 
 interface RelatedGuide {
@@ -49,7 +41,7 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
   const [category, ...restSlug] = slug;
   const filename = `${restSlug.join('-')}.mdx`;
 
-  if (!pathMap[category]) return null;
+  if (!category || !pathMap[category]) return null;
 
   try {
     const filePath = path.join(process.cwd(), 'seo', pathMap[category], filename);
@@ -57,13 +49,13 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
 
     // Parse frontmatter
     const frontmatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-    if (!frontmatterMatch) return null;
+    if (!frontmatterMatch?.[1] || !frontmatterMatch?.[2]) return null;
 
     const frontmatter = frontmatterMatch[1];
     const content = frontmatterMatch[2];
 
     // Parse metadata
-    const metadata: SEOMetadata = {};
+    const metadata: Record<string, string> = {};
     frontmatter.split('\n').forEach((line) => {
       const [key, ...valueParts] = line.split(':');
       if (key && valueParts.length) {
@@ -76,8 +68,9 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
     });
 
     // Parse keywords array
-    if (typeof metadata.keywords === 'string') {
-      metadata.keywords = metadata.keywords
+    let keywords: string[] | undefined;
+    if (metadata.keywords) {
+      keywords = metadata.keywords
         .replace(/^\[|\]$/g, '')
         .split(',')
         .map((k) => k.trim().replace(/^["']|["']$/g, ''));
@@ -86,8 +79,8 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
     return {
       title: metadata.title || '',
       description: metadata.description || '',
-      keywords: metadata.keywords,
-      dateUpdated: metadata.dateUpdated,
+      keywords: keywords || [],
+      dateUpdated: metadata.dateUpdated || '',
       content,
     };
   } catch (_error) {
@@ -97,6 +90,8 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
 
 async function getRelatedGuides(currentSlug: string[], limit = 3): Promise<RelatedGuide[]> {
   const [currentCategory] = currentSlug;
+  if (!currentCategory) return [];
+
   const currentFilename = currentSlug.slice(1).join('-');
   const relatedGuides: RelatedGuide[] = [];
 
@@ -109,7 +104,7 @@ async function getRelatedGuides(currentSlug: string[], limit = 3): Promise<Relat
         const content = await fs.readFile(path.join(dir, file), 'utf-8');
         const titleMatch = content.match(/title:\s*["']([^"']+)["']/);
 
-        if (titleMatch) {
+        if (titleMatch?.[1]) {
           relatedGuides.push({
             title: titleMatch[1],
             slug: `/guides/${currentCategory}/${file.replace('.mdx', '')}`,
@@ -211,7 +206,7 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
     workflows: Zap,
   };
 
-  const Icon = categoryIcons[category] || BookOpen;
+  const Icon = (category && categoryIcons[category]) || BookOpen;
   const relatedGuides = await getRelatedGuides(slug);
 
   // Format date if available
@@ -260,7 +255,9 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
 
             {/* Metadata */}
             <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-              <Badge variant="secondary">{categoryLabels[category]}</Badge>
+              <Badge variant="secondary">
+                {category ? categoryLabels[category] || category : 'Guide'}
+              </Badge>
               {data.dateUpdated && (
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
@@ -325,7 +322,9 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
               <Card>
                 <CardHeader>
                   <CardTitle className="text-sm font-medium">Related Guides</CardTitle>
-                  <CardDescription>More {categoryLabels[category]} guides</CardDescription>
+                  <CardDescription>
+                    More {category ? categoryLabels[category] || category : 'related'} guides
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {relatedGuides.map((guide) => (

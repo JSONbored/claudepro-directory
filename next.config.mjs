@@ -1,6 +1,6 @@
 // Only import bundle analyzer when needed
 const withBundleAnalyzer = process.env.ANALYZE === 'true' 
-  ? require('@next/bundle-analyzer')({ enabled: true })
+  ? (await import('@next/bundle-analyzer')).default({ enabled: true })
   : (config) => config;
 
 /** @type {import('next').NextConfig} */
@@ -55,8 +55,76 @@ const nextConfig = {
   experimental: {
     // Optimize CSS
     optimizeCss: true,
+    // Enable React Compiler for automatic optimization
+    reactCompiler: true,
+    // Enable aggressive optimization for better Core Web Vitals
+    webVitalsAttribution: ['CLS', 'FCP', 'FID', 'INP', 'LCP', 'TTFB'],
+    // Better memory management
+    gzipSize: true,
+    // Optimize package imports for better tree shaking
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'fuse.js'],
+    // Scroll restoration
+    scrollRestoration: true,
   },
   
+  // Advanced webpack optimizations for better Core Web Vitals
+  webpack: (config, { dev, isServer }) => {
+    // Optimize bundle splitting for better LCP
+    if (!dev && !isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              priority: 10,
+              chunks: 'all',
+              maxSize: 244000, // Keep chunks under 244KB for optimal loading
+            },
+            common: {
+              name: 'common',
+              minChunks: 2,
+              priority: 5,
+              chunks: 'all',
+              reuseExistingChunk: true,
+              maxSize: 244000,
+            },
+            lucide: {
+              test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
+              name: 'lucide',
+              priority: 15,
+              chunks: 'all',
+            },
+            content: {
+              test: /[\\/]generated[\\/]/,
+              name: 'content',
+              priority: 8,
+              chunks: 'all',
+              maxSize: 200000, // Keep content chunks smaller
+            },
+          },
+        },
+      };
+
+      // Tree shaking optimizations
+      config.optimization.usedExports = true;
+      config.optimization.sideEffects = false;
+
+      // Minimize main thread blocking
+      config.optimization.runtimeChunk = 'single';
+    }
+
+    // Preload critical resources
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': require('path').resolve(__dirname, './'),
+    };
+
+    return config;
+  },
+
   // Headers for security and caching
   async headers() {
     return [
@@ -87,6 +155,20 @@ const nextConfig = {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin'
           },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://umami.claudepro.directory https://va.vercel-scripts.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' https://fonts.gstatic.com",
+              "img-src 'self' https: data:",
+              "connect-src 'self' https://umami.claudepro.directory https://vitals.vercel-insights.com",
+              "frame-ancestors 'none'",
+              "base-uri 'self'",
+              "form-action 'self'"
+            ].join('; ')
+          },
         ],
       },
       {
@@ -94,7 +176,29 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=3600, stale-while-revalidate=59'
+            value: 'public, max-age=14400, stale-while-revalidate=86400' // 4 hours cache, 24 hours stale
+          },
+        ],
+      },
+      {
+        source: '/(.*)\\.(js|css|png|jpg|jpeg|gif|ico|svg|webp|avif|woff2?)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable' // 1 year cache for static assets
+          },
+          {
+            key: 'Vary',
+            value: 'Accept-Encoding'
+          },
+        ],
+      },
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable' // 1 year cache for Next.js static files
           },
         ],
       },
