@@ -1,5 +1,5 @@
 {
-  "title": "Git MCP Server",
+  "slug": "git-mcp-server",
   "description": "Official MCP server providing Git repository tools for reading, searching, and manipulating Git repositories",
   "category": "mcp",
   "author": "Anthropic",
@@ -40,11 +40,27 @@
       "mcpServers": {
         "git": {
           "command": "npx",
-          "args": ["-y", "@modelcontextprotocol/server-git"]
+          "args": [
+            "-y",
+            "@modelcontextprotocol/server-git"
+          ]
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "git": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "@modelcontextprotocol/server-git"
+          ]
         }
       }
     }
   },
+  "package": "@modelcontextprotocol/server-git",
+  "source": "official",
   "useCases": [
     "Analyze commit patterns and development history",
     "Understand code evolution over time",
@@ -73,11 +89,11 @@
     "What changed in the last 5 commits?",
     "Compare this file between two commits"
   ],
-  "package": "@modelcontextprotocol/server-git",
   "requiresAuth": false,
-  "permissions": ["git", "filesystem"],
+  "permissions": [
+    "git",
+    "filesystem"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": "https://github.com/modelcontextprotocol/servers",
-  "documentationUrl": "https://modelcontextprotocol.io/examples",
-  "source": "official"
+  "documentationUrl": "https://modelcontextprotocol.io/examples"
 }

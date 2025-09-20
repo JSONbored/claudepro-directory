@@ -4,9 +4,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   Calendar,
-  Check,
   Copy,
-  Download,
   ExternalLink,
   Github,
   Lightbulb,
@@ -23,7 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import { slugToTitle } from '@/lib/utils';
+import { getDisplayTitle } from '@/lib/utils';
 import type { ContentItem, MCPServer } from '@/types/content';
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
@@ -42,18 +40,6 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
 
-  // Type guard for installation structure
-  const isValidInstallation = (
-    inst: unknown
-  ): inst is {
-    claudeDesktop?: {
-      steps?: string[];
-      configPath?: Record<string, string>;
-    };
-  } => {
-    return typeof inst === 'object' && inst !== null;
-  };
-
   if (!item) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -62,49 +48,47 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
           <p className="text-muted-foreground mb-6">The requested MCP server could not be found.</p>
           <Button onClick={() => router.push('/')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
+            Go Home
           </Button>
         </div>
       </div>
     );
   }
 
-  const handleCopyConfiguration = async () => {
+  const formatDate = (dateString: string) => {
     try {
-      const configToCopy = JSON.stringify(item.configuration, null, 2);
-      await navigator.clipboard.writeText(configToCopy);
-      setCopied(true);
-      toast({
-        title: 'Configuration copied!',
-        description: 'The MCP server configuration has been copied to your clipboard.',
-      });
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast({
-        title: 'Failed to copy',
-        description: 'Could not copy the configuration to clipboard.',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  // Format date if available
-  const formatDate = (dateStr: string) => {
-    try {
-      return new Date(dateStr).toLocaleDateString('en-US', {
+      return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
       });
     } catch {
-      return dateStr;
+      return dateString;
+    }
+  };
+
+  const handleCopyConfiguration = async () => {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(item.configuration, null, 2));
+      setCopied(true);
+      toast({
+        title: 'Copied!',
+        description: 'MCP server configuration has been copied to your clipboard.',
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch (_error) {
+      toast({
+        title: 'Copy failed',
+        description: 'Unable to copy configuration to clipboard.',
+        variant: 'destructive',
+      });
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b border-border/50 bg-card/30">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-b from-muted/50 to-background border-b">
         <div className="container mx-auto px-4 py-8">
           {/* Modern back navigation */}
           <div className="mb-6">
@@ -125,9 +109,7 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
                 <Server className="h-6 w-6 text-primary" />
               </div>
               <div className="flex-1">
-                <h1 className="text-3xl font-bold mb-2">
-                  {item.title || item.name || slugToTitle(item.slug)}
-                </h1>
+                <h1 className="text-3xl font-bold mb-2">{getDisplayTitle(item)}</h1>
                 <p className="text-lg text-muted-foreground">{item.description}</p>
               </div>
             </div>
@@ -180,33 +162,22 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Overview */}
-            {item.content && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Overview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{item.content}</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Features */}
+            {/* Features Section */}
             {item.features && item.features.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Lightbulb className="h-5 w-5" />
-                    Key Features
+                    Features
                   </CardTitle>
+                  <CardDescription>Key capabilities and functionality</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
                     {item.features.map((feature: string) => (
-                      <li key={feature} className="flex items-start gap-2">
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
-                        <span>{feature}</span>
+                      <li key={feature.slice(0, 50)} className="flex items-start gap-3">
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                        <span className="text-sm leading-relaxed">{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -214,79 +185,23 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
               </Card>
             )}
 
-            {/* Installation */}
-            {item.installation && (
+            {/* Overview Section */}
+            {item.content && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Download className="h-5 w-5" />
-                    Installation
+                    <Server className="h-5 w-5" />
+                    Overview
                   </CardTitle>
+                  <CardDescription>About this MCP server</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  {isValidInstallation(item.installation) && item.installation.claudeDesktop && (
-                    <div>
-                      <h4 className="font-semibold mb-3">For Claude Desktop</h4>
-                      {item.installation.claudeDesktop?.steps && (
-                        <div className="mb-4">
-                          <h5 className="text-sm font-medium mb-2">Steps:</h5>
-                          <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-                            {item.installation.claudeDesktop.steps.map((step: string) => (
-                              <li key={step}>{step}</li>
-                            ))}
-                          </ol>
-                        </div>
-                      )}
-                      {item.installation.claudeDesktop?.configPath && (
-                        <div>
-                          <h5 className="text-sm font-medium mb-2">
-                            Configuration File Locations:
-                          </h5>
-                          <div className="text-sm space-y-1">
-                            {item.installation.claudeDesktop?.configPath?.macOS && (
-                              <div>
-                                <strong>macOS:</strong>{' '}
-                                <code className="bg-muted px-1 rounded">
-                                  {item.installation.claudeDesktop.configPath.macOS}
-                                </code>
-                              </div>
-                            )}
-                            {item.installation.claudeDesktop?.configPath?.windows && (
-                              <div>
-                                <strong>Windows:</strong>{' '}
-                                <code className="bg-muted px-1 rounded">
-                                  {item.installation.claudeDesktop.configPath.windows}
-                                </code>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {item.installation.claudeCode !== undefined &&
-                    item.installation.claudeCode !== null && (
-                      <div>
-                        <h4 className="font-semibold mb-2">For Claude Code</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {(() => {
-                            const claudeCode = item.installation.claudeCode;
-                            if (typeof claudeCode === 'string') {
-                              return claudeCode;
-                            }
-                            if (claudeCode !== null && claudeCode !== undefined) {
-                              return JSON.stringify(claudeCode, null, 2);
-                            }
-                            return '';
-                          })()}
-                        </p>
-                      </div>
-                    )}
+                <CardContent>
+                  <p className="text-sm leading-relaxed">{item.content}</p>
                 </CardContent>
               </Card>
             )}
 
-            {/* Configuration */}
+            {/* Configuration Section */}
             {item.configuration && (
               <Card>
                 <CardHeader>
@@ -296,17 +211,8 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
                       Configuration
                     </CardTitle>
                     <Button size="sm" variant="outline" onClick={handleCopyConfiguration}>
-                      {copied ? (
-                        <>
-                          <Check className="h-4 w-4 mr-2" />
-                          Copied!
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="h-4 w-4 mr-2" />
-                          Copy Config
-                        </>
-                      )}
+                      <Copy className="h-4 w-4 mr-2" />
+                      {copied ? 'Copied!' : 'Copy'}
                     </Button>
                   </div>
                   <CardDescription>
@@ -314,17 +220,99 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}>
-                    <CodeHighlight
-                      code={JSON.stringify(item.configuration, null, 2)}
-                      language="json"
-                    />
-                  </Suspense>
+                  <div className="max-h-[600px] overflow-y-auto rounded-md border">
+                    <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}>
+                      <CodeHighlight
+                        code={JSON.stringify(item.configuration, null, 2)}
+                        language="json"
+                      />
+                    </Suspense>
+                  </div>
                 </CardContent>
               </Card>
             )}
 
-            {/* Use Cases */}
+            {/* Installation Section */}
+            {item.installation && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings className="h-5 w-5" />
+                      Installation
+                    </CardTitle>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        const installText = JSON.stringify(item.installation, null, 2);
+                        navigator.clipboard.writeText(installText);
+                        toast({
+                          title: 'Installation steps copied!',
+                          description:
+                            'Installation instructions have been copied to your clipboard.',
+                        });
+                      }}
+                    >
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy Steps
+                    </Button>
+                  </div>
+                  <CardDescription>Setup instructions and requirements</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {item.installation.claudeDesktop && (
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-medium mb-2">Claude Desktop Setup</h4>
+                        {item.installation.claudeDesktop.steps && (
+                          <ol className="list-decimal list-inside space-y-1 text-sm">
+                            {item.installation.claudeDesktop.steps.map((step: string) => (
+                              <li key={step.slice(0, 50)} className="leading-relaxed">
+                                {step}
+                              </li>
+                            ))}
+                          </ol>
+                        )}
+                      </div>
+                      {item.installation.claudeDesktop.configPath && (
+                        <div>
+                          <h4 className="font-medium mb-2">Configuration Paths</h4>
+                          <div className="space-y-1 text-sm">
+                            {Object.entries(item.installation.claudeDesktop.configPath).map(
+                              ([type, path]) => (
+                                <div key={type} className="flex gap-2">
+                                  <Badge variant="outline" className="capitalize">
+                                    {type}
+                                  </Badge>
+                                  <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                                    {String(path)}
+                                  </code>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {item.installation.claudeCode && (
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-medium mb-2">Claude Code Setup</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {typeof item.installation.claudeCode === 'string'
+                            ? item.installation.claudeCode
+                            : JSON.stringify(item.installation.claudeCode, null, 2)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Use Cases Section */}
             {item.useCases && item.useCases.length > 0 && (
               <Card>
                 <CardHeader>
@@ -332,13 +320,14 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
                     <PlayCircle className="h-5 w-5" />
                     Use Cases
                   </CardTitle>
+                  <CardDescription>Common scenarios and applications</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
                     {item.useCases.map((useCase: string) => (
-                      <li key={useCase} className="flex items-start gap-2">
-                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0" />
-                        <span>{useCase}</span>
+                      <li key={useCase.slice(0, 50)} className="flex items-start gap-3">
+                        <div className="h-1.5 w-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
+                        <span className="text-sm leading-relaxed">{useCase}</span>
                       </li>
                     ))}
                   </ul>
@@ -346,21 +335,22 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
               </Card>
             )}
 
-            {/* Security */}
+            {/* Security Section */}
             {item.security && item.security.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Shield className="h-5 w-5" />
-                    Security & Safety
+                    Security
                   </CardTitle>
+                  <CardDescription>Security considerations and requirements</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
                     {item.security.map((securityItem: string) => (
-                      <li key={securityItem} className="flex items-start gap-2">
-                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
-                        <span>{securityItem}</span>
+                      <li key={securityItem.slice(0, 50)} className="flex items-start gap-3">
+                        <div className="h-1.5 w-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
+                        <span className="text-sm leading-relaxed">{securityItem}</span>
                       </li>
                     ))}
                   </ul>
@@ -368,26 +358,41 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
               </Card>
             )}
 
-            {/* Examples */}
-            {item.examples && item.examples.length > 0 && (
+            {/* Troubleshooting Section */}
+            {item.troubleshooting && item.troubleshooting.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Usage Examples</CardTitle>
-                  <CardDescription>Common ways to interact with this MCP server</CardDescription>
+                  <CardTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5" />
+                    Troubleshooting
+                  </CardTitle>
+                  <CardDescription>Common issues and solutions</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-2">
-                    {item.examples.map(
-                      (
-                        example: string | { title?: string; code: string; description?: string },
-                        idx: number
-                      ) => {
-                        const key = typeof example === 'string' ? example : `example-${idx}`;
-                        const content = typeof example === 'string' ? example : example.code;
+                  <ul className="space-y-4">
+                    {item.troubleshooting.map(
+                      (trouble: string | { issue: string; solution: string }) => {
+                        const key =
+                          typeof trouble === 'string'
+                            ? trouble.slice(0, 50)
+                            : `${trouble.issue}-${trouble.solution}`.slice(0, 50);
                         return (
-                          <li key={key} className="flex items-start gap-2">
-                            <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0" />
-                            <code className="text-sm bg-muted px-1 rounded">{content}</code>
+                          <li key={key} className="space-y-2">
+                            <div className="flex items-start gap-3">
+                              <div className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                              <div className="text-sm leading-relaxed">
+                                {typeof trouble === 'string' ? (
+                                  trouble
+                                ) : (
+                                  <div className="space-y-1">
+                                    <div className="font-medium text-red-600">
+                                      Issue: {trouble.issue}
+                                    </div>
+                                    <div>Solution: {trouble.solution}</div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           </li>
                         );
                       }
@@ -397,26 +402,48 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
               </Card>
             )}
 
-            {/* Troubleshooting */}
-            {item.troubleshooting && item.troubleshooting.length > 0 && (
+            {/* Examples Section */}
+            {item.examples && item.examples.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5" />
-                    Troubleshooting
+                    <PlayCircle className="h-5 w-5" />
+                    Examples
                   </CardTitle>
+                  <CardDescription>Common usage examples</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
-                    {item.troubleshooting.map(
-                      (tip: string | { issue: string; solution: string }, idx: number) => {
-                        const key = typeof tip === 'string' ? tip : `tip-${idx}`;
-                        const content =
-                          typeof tip === 'string' ? tip : `${tip.issue}: ${tip.solution}`;
+                    {item.examples.map(
+                      (
+                        example: string | { title?: string; code: string; description?: string }
+                      ) => {
+                        const key =
+                          typeof example === 'string'
+                            ? example.slice(0, 50)
+                            : `${example.title || ''}-${example.code}`.slice(0, 50);
                         return (
-                          <li key={key} className="flex items-start gap-2">
-                            <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
-                            <span>{content}</span>
+                          <li key={key} className="flex items-start gap-3">
+                            <div className="h-1.5 w-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
+                            <div className="text-sm leading-relaxed">
+                              {typeof example === 'string' ? (
+                                <code className="bg-muted px-1 py-0.5 rounded">{example}</code>
+                              ) : (
+                                <div className="space-y-1">
+                                  {example.title && (
+                                    <div className="font-medium">{example.title}</div>
+                                  )}
+                                  <code className="block bg-muted px-2 py-1 rounded text-xs overflow-x-auto">
+                                    {example.code}
+                                  </code>
+                                  {example.description && (
+                                    <div className="text-muted-foreground text-xs">
+                                      {example.description}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </li>
                         );
                       }
@@ -429,18 +456,14 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
 
           {/* Sidebar */}
           <div className="space-y-6 sticky top-20 self-start">
-            {/* Quick Actions */}
+            {/* Resources */}
             <Card>
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
+                <CardTitle>Resources</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <Button className="w-full" onClick={handleCopyConfiguration}>
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy Configuration
-                </Button>
+              <CardContent className="space-y-3">
                 {/* Always show GitHub link to the MCP file in our repo */}
-                <Button className="w-full" variant="outline" asChild>
+                <Button variant="outline" className="w-full justify-start" asChild>
                   <a
                     href={`https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/${item.slug}.json`}
                     target="_blank"
@@ -450,13 +473,9 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
                     View on GitHub
                   </a>
                 </Button>
-                {(item.documentationUrl || item.documentation) && (
-                  <Button className="w-full" variant="outline" asChild>
-                    <a
-                      href={item.documentationUrl || item.documentation}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                {item.documentationUrl && (
+                  <Button variant="outline" className="w-full justify-start" asChild>
+                    <a href={item.documentationUrl} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="h-4 w-4 mr-2" />
                       Documentation
                     </a>
@@ -465,91 +484,111 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
               </CardContent>
             </Card>
 
-            {/* Package Info */}
-            {item.package && (
+            {/* MCP Server Details */}
+            <Card>
+              <CardHeader>
+                <CardTitle>MCP Server Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Category */}
+                {item.category && (
+                  <div>
+                    <h4 className="font-medium mb-1">Category</h4>
+                    <Badge
+                      variant="default"
+                      className="text-xs font-medium bg-green-500/20 text-green-500 border-green-500/30"
+                    >
+                      {item.category === 'mcp' ? 'MCP Server' : item.category}
+                    </Badge>
+                  </div>
+                )}
+
+                {item.source && (
+                  <div>
+                    <h4 className="font-medium mb-1">Source</h4>
+                    <Badge variant="outline">{item.source}</Badge>
+                  </div>
+                )}
+
+                {item.package && (
+                  <div>
+                    <h4 className="font-medium mb-1">Package</h4>
+                    <Badge variant="outline" className="font-mono">
+                      {typeof item.package === 'string'
+                        ? item.package
+                        : JSON.stringify(item.package)}
+                    </Badge>
+                  </div>
+                )}
+
+                {item.requiresAuth !== undefined && (
+                  <div>
+                    <h4 className="font-medium mb-1">Authentication</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {item.requiresAuth ? 'Required' : 'Not required'}
+                    </p>
+                  </div>
+                )}
+
+                {item.permissions && item.permissions.length > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-1">Permissions</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {item.permissions.map((perm: string) => (
+                        <Badge key={perm} variant="outline" className="text-xs">
+                          {perm}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {item.dateAdded && (
+                  <div>
+                    <h4 className="font-medium mb-1">Date Added</h4>
+                    <p className="text-sm text-muted-foreground">{formatDate(item.dateAdded)}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Related MCP Servers */}
+            {relatedItems.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Package Details</CardTitle>
+                  <CardTitle>Related MCP Servers</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Package</span>
-                      <code className="text-xs bg-muted px-1 rounded">
-                        {typeof item.package === 'string'
-                          ? item.package
-                          : JSON.stringify(item.package)}
-                      </code>
-                    </div>
-                    {item.requiresAuth !== undefined && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Requires Auth</span>
-                        <span className="font-medium">{item.requiresAuth ? 'Yes' : 'No'}</span>
-                      </div>
-                    )}
-                    {item.permissions && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Permissions</span>
-                        <div className="flex flex-wrap gap-1">
-                          {item.permissions.map((perm: string) => (
-                            <Badge key={perm} variant="outline" className="text-xs">
-                              {perm}
+                <CardContent className="space-y-3">
+                  {relatedItems.slice(0, 3).map((relatedItem) => (
+                    <Button
+                      key={relatedItem.id}
+                      variant="ghost"
+                      className="w-full justify-start h-auto p-3 text-left"
+                      onClick={() => router.push(`/mcp/${relatedItem.slug}`)}
+                    >
+                      <div className="text-left w-full min-w-0">
+                        <div className="font-medium text-sm leading-tight mb-1">
+                          {getDisplayTitle(relatedItem)}
+                        </div>
+                        <div className="flex flex-wrap gap-1 mb-1">
+                          {/* Show primary tags */}
+                          {relatedItem.tags?.slice(0, 2).map((tag: string) => (
+                            <Badge key={tag} variant="secondary" className="text-xs px-1 py-0">
+                              {tag}
                             </Badge>
                           ))}
                         </div>
+                        <div className="text-xs text-muted-foreground line-clamp-2">
+                          {relatedItem.description}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Stats */}
-            {item.views && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Stats</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Views</span>
-                      <span className="font-medium">{item.views.toLocaleString()}</span>
-                    </div>
-                  </div>
+                    </Button>
+                  ))}
                 </CardContent>
               </Card>
             )}
           </div>
         </div>
-
-        {/* Related Items - Below main content */}
-        {relatedItems.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold mb-6">Related MCP Servers</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {relatedItems.map((item) => (
-                <Card key={item.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="text-lg">
-                      {item.title || item.name || slugToTitle(item.slug)}
-                    </CardTitle>
-                    <CardDescription>{item.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => router.push(`/mcp/${item.slug}`)}
-                    >
-                      View MCP Server
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

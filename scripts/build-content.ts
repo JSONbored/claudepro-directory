@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import fs from 'fs/promises';
 import path from 'path';
-import slugify from 'slugify';
 import { fileURLToPath } from 'url';
 
 type ContentCategory = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks';
@@ -39,16 +38,6 @@ function _slugToTitle(slug: string): string {
     .join(' ');
 }
 
-// Generate SEO-friendly slug from title or name (fallback for legacy content)
-function generateSlug(item: BaseContent): string {
-  const source = item.title || item.name || item.id;
-  return slugify(source, {
-    lower: true,
-    strict: true,
-    remove: /[*+~.()'"!:@]/g,
-  });
-}
-
 async function ensureDir(dir: string) {
   try {
     await fs.mkdir(dir, { recursive: true });
@@ -70,27 +59,16 @@ async function loadJsonFiles(type: string): Promise<BaseContent[]> {
         try {
           const item = JSON.parse(content);
 
-          // For hooks, rules, agents, and MCP servers, prioritize slug as source of truth
-          if (type === 'hooks' || type === 'rules' || type === 'mcp' || type === 'agents') {
-            // Auto-generate slug from filename if not provided
-            if (!item.slug) {
-              item.slug = path.basename(file, '.json');
-            }
+          // All content types now use slug-based schema
+          // Auto-generate slug from filename if not provided
+          if (!item.slug) {
+            item.slug = path.basename(file, '.json');
+          }
 
-            // TODO - update remaining categories (mcp) to use new slug-only approach
-            // Auto-generate id and title from slug for slug-based content types
-            item.id = item.slug;
-            if (!item.title) {
-              item.title = _slugToTitle(item.slug);
-            }
-          } else {
-            // Legacy behavior for other content types
-            if (!item.slug) {
-              item.slug = generateSlug(item);
-            }
-            if (!item.id) {
-              item.id = item.slug;
-            }
+          // Auto-generate id and title from slug for all content types
+          item.id = item.slug;
+          if (!item.title) {
+            item.title = _slugToTitle(item.slug);
           }
 
           return item;
