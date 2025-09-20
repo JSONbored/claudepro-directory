@@ -35,7 +35,9 @@
       "hooks": {
         "stop": {
           "script": "./.claude/hooks/test-coverage-final-report.sh",
-          "matchers": ["*"]
+          "matchers": [
+            "*"
+          ]
         }
       }
     },

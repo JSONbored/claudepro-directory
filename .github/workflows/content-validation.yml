@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Use Node.js 20
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'npm'
@@ -42,9 +42,20 @@ jobs:
           echo "Checking $file..."
           
           # Check required fields
-          if ! jq -e '.title' "$file" > /dev/null; then
-            echo "ERROR: Missing title in $file"
-            exit 1
+          category=$(jq -r '.category' "$file" 2>/dev/null || echo "")
+          
+          # For hooks, check slug instead of title (slug-only approach)
+          if [[ "$category" == "hooks" ]]; then
+            if ! jq -e '.slug' "$file" > /dev/null; then
+              echo "ERROR: Missing slug in hook file $file"
+              exit 1
+            fi
+          else
+            # For other content types, check title OR name
+            if ! jq -e '.title // .name' "$file" > /dev/null; then
+              echo "ERROR: Missing title or name in $file"
+              exit 1
+            fi
           fi
           
           if ! jq -e '.description' "$file" > /dev/null; then

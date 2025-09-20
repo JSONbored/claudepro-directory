@@ -4,7 +4,13 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": ["memory", "performance", "monitoring", "notification", "resources"],
+  "tags": [
+    "memory",
+    "performance",
+    "monitoring",
+    "notification",
+    "resources"
+  ],
   "hookType": "Notification",
   "features": [
     "Real-time memory usage monitoring across multiple programming languages",

@@ -26,7 +26,11 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/code-test-runner-hook.sh",
-          "matchers": ["write", "edit", "multiedit"]
+          "matchers": [
+            "write",
+            "edit",
+            "multiedit"
+          ]
         }
       }
     },
@@ -34,7 +38,7 @@
   },
   "useCases": [
     "Automated testing in CI/CD pipelines",
-    "Real-time test feedback during development", 
+    "Real-time test feedback during development",
     "Intelligent test selection for large codebases",
     "Parallel test execution for faster builds",
     "Pre-commit test validation"

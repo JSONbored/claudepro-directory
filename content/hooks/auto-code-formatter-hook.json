@@ -25,7 +25,11 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/auto-code-formatter-hook.sh",
-          "matchers": ["write", "edit", "multiedit"]
+          "matchers": [
+            "write",
+            "edit",
+            "multiedit"
+          ]
         }
       }
     },

@@ -4,7 +4,13 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": ["cleanup", "stop-hook", "maintenance", "resources", "optimization"],
+  "tags": [
+    "cleanup",
+    "stop-hook",
+    "maintenance",
+    "resources",
+    "optimization"
+  ],
   "hookType": "Stop",
   "features": [
     "Automatic temporary file cleanup (*.tmp, *.log, .DS_Store, Thumbs.db)",

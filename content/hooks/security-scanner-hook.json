@@ -27,14 +27,18 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/security-scanner-hook.sh",
-          "matchers": ["write", "edit", "multiedit"]
+          "matchers": [
+            "write",
+            "edit",
+            "multiedit"
+          ]
         }
       }
     },
     "scriptContent": "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\necho \"🔒 Running security scans on $FILE_PATH...\"\n\n# Secrets detection\necho \"Scanning for secrets...\"\nif command -v truffleHog &> /dev/null; then\n  truffleHog --regex --entropy=False \"$FILE_PATH\" 2>/dev/null\n  if [ $? -ne 0 ]; then\n    echo \"⚠️ Potential secrets detected in $FILE_PATH\" >&2\n  fi\nfi\n\n# Static analysis with Semgrep\nif command -v semgrep &> /dev/null; then\n  echo \"Running static security analysis...\"\n  semgrep --config=auto \"$FILE_PATH\" 2>/dev/null\n  if [ $? -eq 0 ]; then\n    echo \"✅ No security issues found with Semgrep\" >&2\n  else\n    echo \"⚠️ Security issues detected with Semgrep\" >&2\n  fi\nfi\n\n# Language-specific security checks\nEXT=\"${FILE_PATH##*.}\"\ncase \"$EXT\" in\n  js|jsx|ts|tsx)\n    # Node.js security audit\n    if [ -f \"package.json\" ] && command -v npm &> /dev/null; then\n      echo \"Running npm audit...\"\n      npm audit --audit-level=moderate 2>/dev/null || echo \"⚠️ Vulnerabilities found in dependencies\" >&2\n    fi\n    ;;\n  py)\n    # Python security checks\n    if command -v bandit &> /dev/null; then\n      echo \"Running Bandit security scan...\"\n      bandit \"$FILE_PATH\" 2>/dev/null || echo \"⚠️ Security issues detected with Bandit\" >&2\n    fi\n    ;;\n  go)\n    # Go security checks\n    if command -v gosec &> /dev/null; then\n      echo \"Running gosec security scan...\"\n      gosec \"$FILE_PATH\" 2>/dev/null || echo \"⚠️ Security issues detected with gosec\" >&2\n    fi\n    ;;\nesac\n\necho \"✅ Security scan completed for $FILE_PATH\" >&2\nexit 0"
   },
   "useCases": [
-    "Automated security testing in CI/CD pipelines", 
+    "Automated security testing in CI/CD pipelines",
     "Pre-commit security validation",
     "Continuous security monitoring during development",
     "OWASP compliance checking",

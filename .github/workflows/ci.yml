@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Use Node.js 20
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'npm'
@@ -28,18 +28,55 @@ jobs:
     - name: Run type check
       run: npm run type-check
 
+    - name: Run security audit
+      run: npm audit --audit-level=moderate
+      continue-on-error: true
+
     - name: Build project
       run: npm run build
 
     - name: Check bundle size
       run: |
-        echo "Checking bundle sizes..."
-        for file in dist/assets/*.js; do
-          size=$(du -h "$file" | cut -f1)
-          echo "$file: $size"
-          # Fail if any chunk is over 500KB
-          if [ $(du -k "$file" | cut -f1) -gt 500 ]; then
-            echo "ERROR: $file exceeds 500KB limit"
-            exit 1
-          fi
-        done
+        echo "Checking Next.js bundle sizes..."
+        
+        # Check if .next directory exists
+        if [ ! -d ".next" ]; then
+          echo "ERROR: .next directory not found"
+          exit 1
+        fi
+        
+        # Check main JavaScript chunks
+        if [ -d ".next/static/chunks" ]; then
+          for file in .next/static/chunks/*.js; do
+            if [ -f "$file" ]; then
+              size_kb=$(du -k "$file" | cut -f1)
+              size_h=$(du -h "$file" | cut -f1)
+              echo "$file: $size_h"
+              
+              # Fail if any chunk is over 1MB (reasonable for Next.js)
+              if [ $size_kb -gt 1024 ]; then
+                echo "ERROR: $file exceeds 1MB limit"
+                exit 1
+              fi
+            fi
+          done
+        fi
+        
+        # Check pages directory for large pages
+        if [ -d ".next/static/chunks/pages" ]; then
+          for file in .next/static/chunks/pages/*.js; do
+            if [ -f "$file" ]; then
+              size_kb=$(du -k "$file" | cut -f1)
+              size_h=$(du -h "$file" | cut -f1)
+              echo "Page $file: $size_h"
+              
+              # Fail if any page chunk is over 500KB
+              if [ $size_kb -gt 500 ]; then
+                echo "ERROR: Page $file exceeds 500KB limit"
+                exit 1
+              fi
+            fi
+          done
+        fi
+        
+        echo "✅ Bundle size check completed"

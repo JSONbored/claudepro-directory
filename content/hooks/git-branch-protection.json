@@ -4,7 +4,12 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": ["git", "branch-protection", "workflow", "safety"],
+  "tags": [
+    "git",
+    "branch-protection",
+    "workflow",
+    "safety"
+  ],
   "hookType": "PreToolUse",
   "features": [
     "Protection of critical branches (main, master, production, release)",
@@ -21,7 +26,11 @@
       "hooks": {
         "preToolUse": {
           "script": "./.claude/hooks/git-branch-protection.sh",
-          "matchers": ["edit", "write", "multiEdit"]
+          "matchers": [
+            "edit",
+            "write",
+            "multiEdit"
+          ]
         }
       }
     },

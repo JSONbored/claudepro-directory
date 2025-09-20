@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { getIconByName } from '@/lib/icons';
-import { formatTitle, slugToTitle } from '@/lib/utils';
+import { getDisplayTitle } from '@/lib/utils';
 import type { ContentCategory, ContentItem } from '@/types/content';
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
@@ -121,9 +121,7 @@ export function ContentDetailPage<T extends ContentItem>({
                 })()}
               </div>
               <div className="flex-1">
-                <h1 className="text-3xl font-bold mb-2">
-                  {formatTitle(item.title || item.name || slugToTitle(item.slug))}
-                </h1>
+                <h1 className="text-3xl font-bold mb-2">{getDisplayTitle(item)}</h1>
                 <p className="text-lg text-muted-foreground">{item.description}</p>
               </div>
             </div>
@@ -245,7 +243,10 @@ export function ContentDetailPage<T extends ContentItem>({
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {(Array.isArray(item.examples) ? item.examples : []).map(
-                    (example: any, idx: number) => {
+                    (
+                      example: string | { title?: string; code: string; description?: string },
+                      idx: number
+                    ) => {
                       // Handle both string[] and object[] formats
                       if (typeof example === 'string') {
                         return (
@@ -352,9 +353,7 @@ export function ContentDetailPage<T extends ContentItem>({
               {relatedItems.map((item) => (
                 <Card key={item.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
-                    <CardTitle className="text-lg">
-                      {formatTitle(item.title || item.name || slugToTitle(item.slug))}
-                    </CardTitle>
+                    <CardTitle className="text-lg">{getDisplayTitle(item)}</CardTitle>
                     <CardDescription>{item.description}</CardDescription>
                   </CardHeader>
                   <CardContent>

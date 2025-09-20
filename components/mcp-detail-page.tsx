@@ -24,7 +24,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { slugToTitle } from '@/lib/utils';
-import type { ContentItem } from '@/types/content';
+import type { ContentItem, MCPServer } from '@/types/content';
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
 const CodeHighlight = lazy(() =>
@@ -34,13 +34,25 @@ const CodeHighlight = lazy(() =>
 );
 
 interface MCPDetailPageProps {
-  item: any; // Extended MCP item with structured fields
+  item: MCPServer;
   relatedItems?: ContentItem[];
 }
 
 export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
+
+  // Type guard for installation structure
+  const isValidInstallation = (
+    inst: unknown
+  ): inst is {
+    claudeDesktop?: {
+      steps?: string[];
+      configPath?: Record<string, string>;
+    };
+  } => {
+    return typeof inst === 'object' && inst !== null;
+  };
 
   if (!item) {
     return (
@@ -212,10 +224,10 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {item.installation.claudeDesktop && (
+                  {isValidInstallation(item.installation) && item.installation.claudeDesktop && (
                     <div>
                       <h4 className="font-semibold mb-3">For Claude Desktop</h4>
-                      {item.installation.claudeDesktop.steps && (
+                      {item.installation.claudeDesktop?.steps && (
                         <div className="mb-4">
                           <h5 className="text-sm font-medium mb-2">Steps:</h5>
                           <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
@@ -225,13 +237,13 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
                           </ol>
                         </div>
                       )}
-                      {item.installation.claudeDesktop.configPath && (
+                      {item.installation.claudeDesktop?.configPath && (
                         <div>
                           <h5 className="text-sm font-medium mb-2">
                             Configuration File Locations:
                           </h5>
                           <div className="text-sm space-y-1">
-                            {item.installation.claudeDesktop.configPath.macOS && (
+                            {item.installation.claudeDesktop?.configPath?.macOS && (
                               <div>
                                 <strong>macOS:</strong>{' '}
                                 <code className="bg-muted px-1 rounded">
@@ -239,7 +251,7 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
                                 </code>
                               </div>
                             )}
-                            {item.installation.claudeDesktop.configPath.windows && (
+                            {item.installation.claudeDesktop?.configPath?.windows && (
                               <div>
                                 <strong>Windows:</strong>{' '}
                                 <code className="bg-muted px-1 rounded">
@@ -252,14 +264,24 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
                       )}
                     </div>
                   )}
-                  {item.installation.claudeCode && (
-                    <div>
-                      <h4 className="font-semibold mb-2">For Claude Code</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {item.installation.claudeCode}
-                      </p>
-                    </div>
-                  )}
+                  {item.installation.claudeCode !== undefined &&
+                    item.installation.claudeCode !== null && (
+                      <div>
+                        <h4 className="font-semibold mb-2">For Claude Code</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {(() => {
+                            const claudeCode = item.installation.claudeCode;
+                            if (typeof claudeCode === 'string') {
+                              return claudeCode;
+                            }
+                            if (claudeCode !== null && claudeCode !== undefined) {
+                              return JSON.stringify(claudeCode, null, 2);
+                            }
+                            return '';
+                          })()}
+                        </p>
+                      </div>
+                    )}
                 </CardContent>
               </Card>
             )}
@@ -355,12 +377,21 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
-                    {item.examples.map((example: string) => (
-                      <li key={example} className="flex items-start gap-2">
-                        <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0" />
-                        <code className="text-sm bg-muted px-1 rounded">{example}</code>
-                      </li>
-                    ))}
+                    {item.examples.map(
+                      (
+                        example: string | { title?: string; code: string; description?: string },
+                        idx: number
+                      ) => {
+                        const key = typeof example === 'string' ? example : `example-${idx}`;
+                        const content = typeof example === 'string' ? example : example.code;
+                        return (
+                          <li key={key} className="flex items-start gap-2">
+                            <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 flex-shrink-0" />
+                            <code className="text-sm bg-muted px-1 rounded">{content}</code>
+                          </li>
+                        );
+                      }
+                    )}
                   </ul>
                 </CardContent>
               </Card>
@@ -377,12 +408,19 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
-                    {item.troubleshooting.map((tip: string) => (
-                      <li key={tip} className="flex items-start gap-2">
-                        <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
-                        <span>{tip}</span>
-                      </li>
-                    ))}
+                    {item.troubleshooting.map(
+                      (tip: string | { issue: string; solution: string }, idx: number) => {
+                        const key = typeof tip === 'string' ? tip : `tip-${idx}`;
+                        const content =
+                          typeof tip === 'string' ? tip : `${tip.issue}: ${tip.solution}`;
+                        return (
+                          <li key={key} className="flex items-start gap-2">
+                            <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
+                            <span>{content}</span>
+                          </li>
+                        );
+                      }
+                    )}
                   </ul>
                 </CardContent>
               </Card>
@@ -437,7 +475,11 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Package</span>
-                      <code className="text-xs bg-muted px-1 rounded">{item.package}</code>
+                      <code className="text-xs bg-muted px-1 rounded">
+                        {typeof item.package === 'string'
+                          ? item.package
+                          : JSON.stringify(item.package)}
+                      </code>
                     </div>
                     {item.requiresAuth !== undefined && (
                       <div className="flex justify-between">

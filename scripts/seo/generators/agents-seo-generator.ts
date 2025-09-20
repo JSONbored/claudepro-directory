@@ -10,9 +10,53 @@ const ROOT_DIR = path.join(__dirname, '../../..');
 const CONTENT_DIR = path.join(ROOT_DIR, 'content', 'agents');
 const SEO_DIR = path.join(ROOT_DIR, 'seo');
 
-async function loadAgents() {
+interface Agent {
+  id: string;
+  title: string;
+  description: string;
+  name: string;
+  category?: string;
+  tags?: string[];
+  content?: string;
+  stars?: string | number;
+  configuration?: Record<string, string | number | boolean>;
+}
+
+interface CollectionData {
+  title: string;
+  description: string;
+  role?: string;
+  keyword: string;
+  tags: string[];
+  useCases: string[];
+  capabilities: string[];
+  scenarios: Array<{
+    title: string;
+    description: string;
+  }>;
+}
+
+interface WorkflowData {
+  title: string;
+  description: string;
+  goal: string;
+  keyword?: string;
+  steps?: string[];
+  agents?: string[];
+  agentTypes: string[];
+  roles: string[];
+  phases: Array<{
+    name: string;
+    steps: string[];
+  }>;
+  examplePrompts?: string[];
+  bestPractices?: string[];
+  pitfalls?: string[];
+}
+
+async function loadAgents(): Promise<Agent[]> {
   const files = await fs.readdir(CONTENT_DIR);
-  const agents = [];
+  const agents: Agent[] = [];
 
   for (const file of files) {
     if (file.endsWith('.json')) {
@@ -29,10 +73,10 @@ async function loadAgents() {
 }
 
 // Generate role-specific collection pages
-function generateRolePage(role, agents) {
+function generateRolePage(role: CollectionData, agents: Agent[]): string | null {
   const relevantAgents = agents.filter(
-    (a) =>
-      a.tags?.some((tag) => role.tags.includes(tag.toLowerCase())) ||
+    (a: Agent) =>
+      a.tags?.some((tag: string) => role.tags.includes(tag.toLowerCase())) ||
       a.description?.toLowerCase().includes(role.keyword) ||
       a.title?.toLowerCase().includes(role.keyword)
   );
@@ -57,7 +101,7 @@ ${role.description} Here are the most effective Claude agent configurations avai
 ${relevantAgents
   .slice(0, 5)
   .map(
-    (agent, index) => `
+    (agent: Agent, index: number) => `
 ### ${index + 1}. ${agent.title || agent.name}
 
 ${agent.description}
@@ -65,7 +109,7 @@ ${agent.description}
 **Strengths:**
 ${agent.tags
   ?.slice(0, 4)
-  .map((tag) => `- ${tag.charAt(0).toUpperCase() + tag.slice(1)}`)
+  .map((tag: string) => `- ${tag.charAt(0).toUpperCase() + tag.slice(1)}`)
   .join('\n')}
 
 **Best for:** ${role.useCases[index] || `General ${role.keyword} tasks`}
@@ -82,8 +126,8 @@ ${agent.tags
 ${relevantAgents
   .slice(0, 7)
   .map(
-    (agent) =>
-      `| **${agent.title || agent.name}** | ${agent.tags?.[0] || 'General'} | ${agent.content?.length > 1000 ? '⭐⭐⭐ Advanced' : '⭐⭐ Moderate'} | ${agent.tags?.[1] || 'Various'} |`
+    (agent: Agent) =>
+      `| **${agent.title || agent.name}** | ${agent.tags?.[0] || 'General'} | ${(agent.content?.length || 0) > 1000 ? '⭐⭐⭐ Advanced' : '⭐⭐ Moderate'} | ${agent.tags?.[1] || 'Various'} |`
   )
   .join('\n')}
 
@@ -103,7 +147,7 @@ ${relevantAgents
 ## ${role.title} Agent Features
 
 These agents excel at:
-${role.capabilities.map((cap) => `- ${cap}`).join('\n')}
+${role.capabilities.map((cap: string) => `- ${cap}`).join('\n')}
 
 ## Real-World Applications
 
@@ -143,11 +187,11 @@ ${role.scenarios[1]?.description || 'Integrate the agent into your regular devel
 }
 
 // Generate workflow-specific guides
-function generateWorkflowGuide(workflow, agents) {
-  const relevantAgents = agents.filter((a) =>
+function generateWorkflowGuide(workflow: WorkflowData, agents: Agent[]): string | null {
+  const relevantAgents = agents.filter((a: Agent) =>
     workflow.agentTypes.some(
-      (type) =>
-        a.tags?.some((tag) => tag.toLowerCase().includes(type)) ||
+      (type: string) =>
+        a.tags?.some((tag: string) => tag.toLowerCase().includes(type)) ||
         a.title?.toLowerCase().includes(type)
     )
   );
@@ -174,7 +218,7 @@ This workflow combines multiple Claude agents to ${workflow.goal}. Updated for t
 ## Required Agents
 
 ${workflow.agentTypes
-  .map((type, index) => {
+  .map((type: string, index: number) => {
     const agent = relevantAgents[index];
     return agent
       ? `
@@ -190,13 +234,13 @@ Role: ${workflow.roles[index] || `Handles ${type} tasks`}
 ## Step-by-Step Implementation
 
 ### Phase 1: ${workflow.phases[0]?.name || 'Setup'}
-${workflow.phases[0]?.steps?.map((step, i) => `${i + 1}. ${step}`).join('\n') || '1. Configure initial agent\n2. Set project parameters\n3. Test basic functionality'}
+${workflow.phases[0]?.steps?.map((step: string, i: number) => `${i + 1}. ${step}`).join('\n') || '1. Configure initial agent\n2. Set project parameters\n3. Test basic functionality'}
 
 ### Phase 2: ${workflow.phases[1]?.name || 'Execution'}
-${workflow.phases[1]?.steps?.map((step, i) => `${i + 1}. ${step}`).join('\n') || '1. Run primary workflow\n2. Monitor outputs\n3. Adjust as needed'}
+${workflow.phases[1]?.steps?.map((step: string, i: number) => `${i + 1}. ${step}`).join('\n') || '1. Run primary workflow\n2. Monitor outputs\n3. Adjust as needed'}
 
 ### Phase 3: ${workflow.phases[2]?.name || 'Optimization'}
-${workflow.phases[2]?.steps?.map((step, i) => `${i + 1}. ${step}`).join('\n') || '1. Review results\n2. Fine-tune agents\n3. Document improvements'}
+${workflow.phases[2]?.steps?.map((step: string, i: number) => `${i + 1}. ${step}`).join('\n') || '1. Review results\n2. Fine-tune agents\n3. Document improvements'}
 
 ## Example Prompts
 
@@ -218,7 +262,7 @@ ${workflow.examplePrompts?.[2] || 'Review and validate the output for...'}
 ## Best Practices
 
 ${
-  workflow.bestPractices?.map((practice) => `- ${practice}`).join('\n') ||
+  workflow.bestPractices?.map((practice: string) => `- ${practice}`).join('\n') ||
   `- Start with clear objectives
 - Use specific, detailed prompts
 - Iterate based on results
@@ -228,7 +272,7 @@ ${
 ## Common Pitfalls
 
 ${
-  workflow.pitfalls?.map((pitfall) => `- **Avoid:** ${pitfall}`).join('\n') ||
+  workflow.pitfalls?.map((pitfall: string) => `- **Avoid:** ${pitfall}`).join('\n') ||
   `- **Avoid:** Vague instructions
 - **Avoid:** Skipping validation steps
 - **Avoid:** Over-complicating the workflow`

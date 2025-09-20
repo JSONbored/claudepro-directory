@@ -1,6 +1,7 @@
 {
   "// REQUIRED FIELDS": "All hooks must include these fields",
   "slug": "your-hook-name",
+  "// NOTE": "Title is auto-generated from slug with smart acronym capitalization (e.g., 'aws-api-validator' → 'AWS API Validator')",
   "description": "Brief description of what this hook does and its purpose",
   "category": "hooks",
   "author": "Your Name or GitHub Username",
@@ -70,6 +71,7 @@
   },
 
   "// AUTO-GENERATED SECTIONS": "These are automatically generated if optional fields are missing",
+  "// title": "Auto-generated from slug with smart acronym capitalization (AWS, API, CSS, JSON, etc.)",
   "// installation": "Generated from slug + hookType + standard Claude paths",
   "// requirements": "Auto-detected from scriptContent (jq, prettier, black, etc.) + 'Claude Desktop or Claude Code'",
   "// troubleshooting": "Generated from tools detected in scriptContent + common permission/installation issues", 

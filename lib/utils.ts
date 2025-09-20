@@ -128,7 +128,30 @@ function capitalizeAcronyms(title: string): string {
 export function slugToTitle(slug: string): string {
   return slug
     .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => {
+      // Check if this word is an acronym that should be all caps
+      const acronym = ACRONYMS.find((a) => a.toLowerCase() === word.toLowerCase());
+      if (acronym) {
+        return acronym;
+      }
+
+      // Handle special cases like "Next.js", "Vue.js"
+      if (word.toLowerCase().endsWith('js') && word.length > 2) {
+        const baseWord = word.slice(0, -2);
+        const baseAcronym = ACRONYMS.find((a) => a.toLowerCase() === baseWord.toLowerCase());
+        if (baseAcronym) {
+          return `${baseAcronym}.js`;
+        }
+      }
+
+      // Handle CloudFormation as special case
+      if (word.toLowerCase() === 'cloudformation') {
+        return 'CloudFormation';
+      }
+
+      // Default: Title Case
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
     .join(' ');
 }
 
@@ -137,4 +160,18 @@ export function slugToTitle(slug: string): string {
  */
 export function formatTitle(title: string): string {
   return capitalizeAcronyms(title);
+}
+
+/**
+ * Universal function to get display title from any content item
+ * This ensures consistent title display across the entire application
+ */
+export function getDisplayTitle(item: { title?: string; name?: string; slug: string }): string {
+  // For hooks (no title/name), use enhanced slugToTitle directly
+  // For other content (has title/name), use formatTitle for consistency
+  const titleOrName = item.title || item.name;
+  if (titleOrName) {
+    return formatTitle(titleOrName);
+  }
+  return slugToTitle(item.slug);
 }

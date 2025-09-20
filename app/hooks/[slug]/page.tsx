@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { HookDetailPage } from '@/components/hook-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { getHookBySlug, getHookFullContent, hooks } from '@/generated/content';
+import { getDisplayTitle } from '@/lib/utils';
 
 interface HookPageProps {
   params: Promise<{ slug: string }>;
@@ -20,11 +21,11 @@ export async function generateMetadata({ params }: HookPageProps): Promise<Metad
   }
 
   return {
-    title: `${hook.title || hook.name} - Automation Hook | Claude Pro Directory`,
+    title: `${getDisplayTitle(hook)} - Automation Hook | Claude Pro Directory`,
     description: hook.description,
     keywords: hook.tags?.join(', '),
     openGraph: {
-      title: hook.title || hook.name || 'Automation Hook',
+      title: getDisplayTitle(hook),
       description: hook.description,
       type: 'article',
     },

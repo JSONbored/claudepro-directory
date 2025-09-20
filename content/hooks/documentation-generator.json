@@ -25,7 +25,10 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/documentation-generator.sh",
-          "matchers": ["write", "edit"]
+          "matchers": [
+            "write",
+            "edit"
+          ]
         }
       }
     },

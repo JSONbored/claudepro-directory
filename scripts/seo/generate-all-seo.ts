@@ -14,19 +14,22 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.join(__dirname, '../..');
 
-async function runCommand(command, description) {
+async function runCommand(command: string, description: string): Promise<boolean> {
   console.log(`\n📝 ${description}...`);
   try {
     execSync(command, { stdio: 'inherit', cwd: ROOT_DIR });
     console.log(`✅ ${description} completed`);
     return true;
   } catch (error) {
-    console.error(`❌ ${description} failed:`, error.message);
+    console.error(
+      `❌ ${description} failed:`,
+      error instanceof Error ? error.message : String(error)
+    );
     return false;
   }
 }
 
-async function generateAllSEO() {
+async function generateAllSEO(): Promise<void> {
   console.log('🚀 Starting complete SEO generation pipeline...\n');
   console.log('This will automatically:');
   console.log('1. Generate SEO content for MCP servers');
@@ -43,14 +46,11 @@ async function generateAllSEO() {
   // Step 2: API endpoints now handled by ISR - no longer needed
 
   // Step 3: Generate MCP SEO content
-  await runCommand(
-    'node scripts/seo/generators/mcp-seo-generator.js',
-    'Generating MCP SEO content'
-  );
+  await runCommand('tsx scripts/seo/generators/mcp-seo-generator.ts', 'Generating MCP SEO content');
 
   // Step 4: Generate Agents SEO content
   await runCommand(
-    'node scripts/seo/generators/agents-seo-generator.js',
+    'tsx scripts/seo/generators/agents-seo-generator.ts',
     'Generating Agents SEO content'
   );
 

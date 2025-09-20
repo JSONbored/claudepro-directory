@@ -4,7 +4,13 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": ["graphql", "api", "schema", "validation", "breaking-changes"],
+  "tags": [
+    "graphql",
+    "api",
+    "schema",
+    "validation",
+    "breaking-changes"
+  ],
   "hookType": "PostToolUse",
   "features": [
     "Comprehensive GraphQL schema syntax validation",
@@ -21,7 +27,10 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/graphql-schema-validator.sh",
-          "matchers": ["write", "edit"]
+          "matchers": [
+            "write",
+            "edit"
+          ]
         }
       }
     },

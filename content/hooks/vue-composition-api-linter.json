@@ -35,7 +35,10 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/vue-composition-api-linter.sh",
-          "matchers": ["write", "edit"]
+          "matchers": [
+            "write",
+            "edit"
+          ]
         }
       }
     },

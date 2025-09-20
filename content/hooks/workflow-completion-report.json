@@ -4,7 +4,13 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": ["reporting", "workflow", "analytics", "summary", "stop-hook"],
+  "tags": [
+    "reporting",
+    "workflow",
+    "analytics",
+    "summary",
+    "stop-hook"
+  ],
   "hookType": "Stop",
   "features": [
     "Comprehensive workflow completion summary",
@@ -29,7 +35,9 @@
       "hooks": {
         "stop": {
           "script": "./.claude/hooks/workflow-completion-report.sh",
-          "matchers": ["*"]
+          "matchers": [
+            "*"
+          ]
         }
       }
     },

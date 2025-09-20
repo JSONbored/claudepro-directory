@@ -4,7 +4,13 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": ["performance", "monitoring", "notification", "profiling", "alerts"],
+  "tags": [
+    "performance",
+    "monitoring",
+    "notification",
+    "profiling",
+    "alerts"
+  ],
   "hookType": "Notification",
   "features": [
     "Real-time performance anti-pattern detection and alerting",

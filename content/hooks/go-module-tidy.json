@@ -4,11 +4,17 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": ["go", "golang", "modules", "dependencies", "cleanup"],
+  "tags": [
+    "go",
+    "golang",
+    "modules",
+    "dependencies",
+    "cleanup"
+  ],
   "hookType": "PostToolUse",
   "features": [
     "Automatic go mod tidy execution for Go file and go.mod changes",
-    "Go vet integration for static analysis and error detection", 
+    "Go vet integration for static analysis and error detection",
     "Module dependency validation and inconsistency detection",
     "Unused dependency cleanup and missing import resolution",
     "Go workspace and multi-module project support",
@@ -21,7 +27,10 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/go-module-tidy.sh",
-          "matchers": ["write", "edit"]
+          "matchers": [
+            "write",
+            "edit"
+          ]
         }
       }
     },
@@ -29,7 +38,7 @@
   },
   "useCases": [
     "Automated Go dependency management in development workflows",
-    "Go module cleanup and optimization in CI/CD pipelines", 
+    "Go module cleanup and optimization in CI/CD pipelines",
     "Multi-module workspace maintenance and synchronization",
     "Go codebase quality assurance with integrated static analysis",
     "Dependency security and vulnerability management"

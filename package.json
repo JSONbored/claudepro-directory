@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/claudepro/claudepro-directory"
+    "url": "https://github.com/JSONbored/claudepro-directory"
   },
   "keywords": [
     "claude",
@@ -23,11 +23,10 @@
     "build": "npm run build:content && npm run generate:seo && npm run generate:sitemap && next build --turbopack",
     "build:analyze": "ANALYZE=true npm run build",
     "build:content": "tsx scripts/build-content.ts",
-    "generate:api": "tsx scripts/generate-api-endpoints.ts",
     "generate:sitemap": "tsx scripts/generate-sitemap.ts",
-    "generate:seo": "node scripts/seo/generate-all-seo.js",
-    "generate:seo:mcp": "node scripts/seo/generators/mcp-seo-generator.js",
-    "generate:seo:agents": "node scripts/seo/generators/agents-seo-generator.js",
+    "generate:seo": "tsx scripts/seo/generate-all-seo.ts",
+    "generate:seo:mcp": "tsx scripts/seo/generators/mcp-seo-generator.ts",
+    "generate:seo:agents": "tsx scripts/seo/generators/agents-seo-generator.ts",
     "start": "next start",
     "type-check": "tsc --noEmit",
     "lint": "ultracite check",
@@ -55,7 +54,7 @@
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@types/react-window": "^1.8.8",
-    "@upstash/redis": "^1.35.3",
+    "@upstash/redis": "^1.35.4",
     "@vercel/analytics": "^1.5.0",
     "autoprefixer": "^10.4.21",
     "class-variance-authority": "^0.7.1",
@@ -64,14 +63,14 @@
     "embla-carousel-react": "^8.6.0",
     "fuse.js": "^7.1.0",
     "lucide-react": "^0.544.0",
-    "next": "^15.6.0-canary.19",
+    "next": "^15.5.3",
     "next-themes": "^0.4.6",
     "postcss": "^8.5.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-window": "^2.1.0",
     "sharp": "^0.34.4",
-    "shiki": "^3.12.2",
+    "shiki": "^3.13.0",
     "slugify": "^1.6.6",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
@@ -82,10 +81,10 @@
   "devDependencies": {
     "@next/bundle-analyzer": "^15.5.3",
     "@testing-library/jest-dom": "^6.8.0",
-    "@testing-library/react": "^16.3.0",
     "jsdom": "^27.0.0",
+    "puppeteer": "^24.22.0",
     "tailwindcss": "^4.1.13",
-    "ultracite": "^5.3.4",
+    "ultracite": "^5.3.10",
     "vitest": "^3.2.4"
   }
 }

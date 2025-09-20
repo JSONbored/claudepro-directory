@@ -10,9 +10,54 @@ const ROOT_DIR = path.join(__dirname, '../../..');
 const CONTENT_DIR = path.join(ROOT_DIR, 'content', 'mcp');
 const SEO_DIR = path.join(ROOT_DIR, 'seo');
 
-async function loadMCPServers() {
+interface MCPServer {
+  id: string;
+  title: string;
+  description: string;
+  name: string;
+  category?: string;
+  tags?: string[];
+  features?: string[];
+  stars?: string | number;
+  configuration?: Record<string, string | number | boolean>;
+}
+
+interface UseCaseData {
+  title: string;
+  description: string;
+  keyword: string;
+  tags: string[];
+  examples?: Array<{
+    title: string;
+    description: string;
+    code?: string;
+  }>;
+}
+
+interface TutorialData {
+  title: string;
+  description: string;
+  server?: string;
+  serverId: string;
+  difficulty?: string;
+  requirements?: string[];
+  command?: string;
+  env?: string[] | { [key: string]: string };
+  detailedSteps?: Array<{
+    title: string;
+    description: string;
+    code?: string;
+  }>;
+  examples?: Array<{
+    title: string;
+    description: string;
+    prompt?: string;
+  }>;
+}
+
+async function loadMCPServers(): Promise<MCPServer[]> {
   const files = await fs.readdir(CONTENT_DIR);
-  const servers = [];
+  const servers: MCPServer[] = [];
 
   for (const file of files) {
     if (file.endsWith('.json')) {
@@ -29,10 +74,10 @@ async function loadMCPServers() {
 }
 
 // Generate use-case pages based on actual MCP server purposes
-function generateUseCasePage(useCase, servers) {
+function generateUseCasePage(useCase: UseCaseData, servers: MCPServer[]): string | null {
   const relevantServers = servers.filter(
-    (s) =>
-      s.tags?.some((tag) => useCase.tags.includes(tag)) ||
+    (s: MCPServer) =>
+      s.tags?.some((tag: string) => useCase.tags.includes(tag)) ||
       s.description?.toLowerCase().includes(useCase.keyword)
   );
 
@@ -56,7 +101,7 @@ Looking to enhance Claude with ${useCase.description}? MCP (Model Context Protoc
 ${relevantServers
   .slice(0, 3)
   .map(
-    (server) => `
+    (server: MCPServer) => `
 ### 🏆 ${server.name || server.title}
 ${server.description}
 
@@ -73,7 +118,7 @@ ${server.description}
 ${relevantServers
   .slice(0, 5)
   .map(
-    (server) =>
+    (server: MCPServer) =>
       `| ${server.name || server.title} | ${server.tags?.[0] || 'General'} | ${server.tags?.slice(1, 3).join(', ') || 'Various'} | ~5 mins |`
   )
   .join('\n')}
@@ -107,7 +152,7 @@ Each MCP server requires specific configuration. Here's a template:
 
 ## Common Use Cases
 
-${useCase.examples.map((example) => `- ${example}`).join('\n')}
+${useCase.examples?.map((example: { title: string; description: string; code?: string }) => `- ${example.title}`).join('\n') || '- Database operations\n- File management\n- API integrations'}
 
 ## Troubleshooting Tips
 
@@ -132,8 +177,8 @@ ${useCase.examples.map((example) => `- ${example}`).join('\n')}
 }
 
 // Generate tutorial pages for common setups
-function generateTutorialPage(tutorial, servers) {
-  const server = servers.find((s) => s.id === tutorial.serverId);
+function generateTutorialPage(tutorial: TutorialData, servers: MCPServer[]): string | null {
+  const server = servers.find((s: MCPServer) => s.id === tutorial.serverId);
   if (!server) return null;
 
   return `---
@@ -152,7 +197,7 @@ ${tutorial.description} This tutorial will walk you through setting up **${serve
 ## Prerequisites
 
 - Claude Desktop (latest version as of September 2025)
-- ${tutorial.requirements.join('\n- ')}
+- ${tutorial.requirements?.join('\n- ') || 'Basic setup'}
 
 ## Quick Setup (5 minutes)
 
@@ -208,18 +253,20 @@ ${tutorial.detailedSteps?.join('\n\n') || ''}
 
 ## Example Use Cases
 
-${tutorial.examples
-  ?.map(
-    (ex) => `
+${
+  tutorial.examples
+    ?.map(
+      (ex: { title: string; description: string; prompt?: string }) => `
 ### ${ex.title}
 ${ex.description}
 
 \`\`\`
-${ex.prompt}
+${ex.prompt || 'Example prompt'}
 \`\`\`
 `
-  )
-  .join('\n')}
+    )
+    .join('\n') || ''
+}
 
 ## Advanced Configuration
 
@@ -241,26 +288,26 @@ For power users, you can extend this setup with:
 }
 
 // Generate category overview pages
-function generateCategoryPage(servers) {
+function generateCategoryPage(servers: MCPServer[]) {
   // Group servers by primary use case
   const categories = {
-    development: servers.filter((s) =>
-      s.tags?.some((t) =>
+    development: servers.filter((s: MCPServer) =>
+      s.tags?.some((t: string) =>
         ['git', 'github', 'code', 'development', 'api', 'database'].includes(t.toLowerCase())
       )
     ),
-    productivity: servers.filter((s) =>
-      s.tags?.some((t) =>
+    productivity: servers.filter((s: MCPServer) =>
+      s.tags?.some((t: string) =>
         ['slack', 'notion', 'jira', 'email', 'calendar'].includes(t.toLowerCase())
       )
     ),
-    data: servers.filter((s) =>
-      s.tags?.some((t) =>
+    data: servers.filter((s: MCPServer) =>
+      s.tags?.some((t: string) =>
         ['database', 'sql', 'postgres', 'mysql', 'redis', 'analytics'].includes(t.toLowerCase())
       )
     ),
-    integration: servers.filter((s) =>
-      s.tags?.some((t) =>
+    integration: servers.filter((s: MCPServer) =>
+      s.tags?.some((t: string) =>
         ['discord', 'slack', 'api', 'webhook', 'integration'].includes(t.toLowerCase())
       )
     ),
@@ -292,7 +339,7 @@ MCP (Model Context Protocol) servers extend Claude's capabilities for ${category
 ${categoryServers
   .slice(0, 5)
   .map(
-    (server, index) => `
+    (server: MCPServer, index: number) => `
 ### ${index + 1}. ${server.name || server.title}
 
 ${server.description}
@@ -300,7 +347,7 @@ ${server.description}
 **Key Features:**
 ${server.tags
   ?.slice(0, 4)
-  .map((tag) => `- ${tag}`)
+  .map((tag: string) => `- ${tag}`)
   .join('\n')}
 
 **Setup:** [View tutorial](/tutorials/setup-${server.id})
@@ -316,7 +363,7 @@ ${server.tags
 ${categoryServers
   .slice(0, 10)
   .map(
-    (server) =>
+    (server: MCPServer) =>
       `| ${server.name || server.title} | ${server.tags?.[0] || 'General'} | ${server.configuration ? '⭐ Easy' : '⭐⭐ Moderate'} | ✅ Active |`
   )
   .join('\n')}
@@ -335,7 +382,7 @@ Based on September 2025 usage data, these are the most popular ${category} MCP s
 ${categoryServers
   .slice(0, 3)
   .map(
-    (server, index) =>
+    (server: MCPServer, index: number) =>
       `${index + 1}. **${server.name || server.title}** - ${server.stars || 'Growing'} community members`
   )
   .join('\n')}
@@ -369,9 +416,18 @@ async function generateSEOContent() {
       description: 'connecting Claude to databases like PostgreSQL, MySQL, and Redis',
       tags: ['database', 'sql', 'postgres', 'mysql', 'redis'],
       examples: [
-        'Query databases directly from Claude',
-        'Generate SQL queries with context awareness',
-        'Analyze database schemas and performance',
+        {
+          title: 'Query databases directly from Claude',
+          description: 'Direct database access through Claude',
+        },
+        {
+          title: 'Generate SQL queries with context awareness',
+          description: 'AI-powered query generation',
+        },
+        {
+          title: 'Analyze database schemas and performance',
+          description: 'Database analysis and optimization',
+        },
       ],
     },
     {
@@ -380,9 +436,15 @@ async function generateSEOContent() {
       description: 'enhancing your development workflow with Git, GitHub, and code tools',
       tags: ['git', 'github', 'development', 'code', 'api'],
       examples: [
-        'Manage Git repositories through Claude',
-        'Create and review pull requests',
-        'Access repository information',
+        {
+          title: 'Manage Git repositories through Claude',
+          description: 'Repository management via Claude',
+        },
+        {
+          title: 'Create and review pull requests',
+          description: 'PR creation and review workflow',
+        },
+        { title: 'Access repository information', description: 'Repository data access' },
       ],
     },
     {
@@ -391,9 +453,9 @@ async function generateSEOContent() {
       description: 'integrating Claude with Slack, Discord, and other communication tools',
       tags: ['slack', 'discord', 'communication', 'chat'],
       examples: [
-        'Send messages to team channels',
-        'Fetch conversation history',
-        'Automate notifications',
+        { title: 'Send messages to team channels', description: 'Team communication via Claude' },
+        { title: 'Fetch conversation history', description: 'Chat history retrieval' },
+        { title: 'Automate notifications', description: 'Automated notification system' },
       ],
     },
   ];
@@ -404,6 +466,8 @@ async function generateSEOContent() {
       serverId: 'github-mcp-server',
       title: 'How to Connect Claude to GitHub',
       description: 'Step-by-step guide to integrate Claude with your GitHub repositories.',
+      server: 'GitHub MCP Server',
+      difficulty: 'Beginner',
       requirements: ['GitHub account', 'Personal access token'],
       command: 'npx',
       examples: [
@@ -423,6 +487,8 @@ async function generateSEOContent() {
       serverId: 'postgres-mcp-server',
       title: 'Connect Claude to PostgreSQL Database',
       description: 'Enable Claude to query and analyze your PostgreSQL databases.',
+      server: 'PostgreSQL MCP Server',
+      difficulty: 'Intermediate',
       requirements: ['PostgreSQL database', 'Connection credentials'],
       env: { DATABASE_URL: 'your-connection-string' },
       examples: [
@@ -472,9 +538,11 @@ async function generateSEOContent() {
 
   const categoryPages = generateCategoryPage(servers);
   for (const page of categoryPages) {
-    await fs.writeFile(path.join(SEO_DIR, 'categories', page.filename), page.content);
-    console.log(`✅ Generated category: ${page.filename}`);
-    generatedCount++;
+    if (page) {
+      await fs.writeFile(path.join(SEO_DIR, 'categories', page.filename), page.content);
+      console.log(`✅ Generated category: ${page.filename}`);
+      generatedCount++;
+    }
   }
 
   console.log(`\n🎉 Generated ${generatedCount} high-quality SEO pages for MCP servers!`);

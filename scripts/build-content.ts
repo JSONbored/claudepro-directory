@@ -25,10 +25,11 @@ interface BaseContent {
   tags: string[];
   content?: string;
   config?: string;
+  configuration?: unknown;
 }
 
 // Generate title from slug
-function slugToTitle(slug: string): string {
+function _slugToTitle(slug: string): string {
   return slug
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -73,11 +74,9 @@ async function loadJsonFiles(type: string): Promise<BaseContent[]> {
               item.slug = path.basename(file, '.json');
             }
 
-            // Auto-generate title and id from slug
+            // TODO - update ALL categories to use new slug-only approach
+            // Auto-generate id from slug (but NOT title - hooks use slug-only approach)
             item.id = item.slug;
-            if (!item.title && !item.name) {
-              item.title = slugToTitle(item.slug);
-            }
           } else {
             // Legacy behavior for other content types
             if (!item.slug) {
@@ -119,9 +118,9 @@ async function generateTypeScript() {
     const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
     const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
 
-    // Create metadata version (without content/config fields for listing pages)
+    // Create metadata version (without heavy content fields for listing pages)
     const metadata = allContent[type].map((item) => {
-      const { content: _content, config: _config, ...meta } = item;
+      const { content: _content, config: _config, configuration: _configuration, ...meta } = item;
       return meta;
     });
 

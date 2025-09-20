@@ -25,7 +25,10 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/accessibility-checker.sh",
-          "matchers": ["write", "edit"]
+          "matchers": [
+            "write",
+            "edit"
+          ]
         }
       }
     },

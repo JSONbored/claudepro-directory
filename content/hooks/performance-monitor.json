@@ -42,7 +42,9 @@
       "hooks": {
         "Stop": [
           {
-            "matchers": ["*"],
+            "matchers": [
+              "*"
+            ],
             "description": "Monitor performance metrics and provide optimization insights"
           }
         ]

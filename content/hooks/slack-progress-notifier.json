@@ -4,7 +4,13 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": ["slack", "notifications", "team", "collaboration", "monitoring"],
+  "tags": [
+    "slack",
+    "notifications",
+    "team",
+    "collaboration",
+    "monitoring"
+  ],
   "hookType": "Notification",
   "features": [
     "Real-time Slack notifications for Claude activities",
@@ -29,7 +35,9 @@
       "hooks": {
         "notification": {
           "script": "./.claude/hooks/slack-progress-notifier.sh",
-          "matchers": ["*"]
+          "matchers": [
+            "*"
+          ]
         }
       }
     },

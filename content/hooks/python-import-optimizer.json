@@ -4,7 +4,13 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": ["python", "imports", "formatting", "optimization", "isort"],
+  "tags": [
+    "python",
+    "imports",
+    "formatting",
+    "optimization",
+    "isort"
+  ],
   "hookType": "PostToolUse",
   "features": [
     "Automatic import sorting with isort",
@@ -29,7 +35,10 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/python-import-optimizer.sh",
-          "matchers": ["write", "edit"]
+          "matchers": [
+            "write",
+            "edit"
+          ]
         }
       }
     },

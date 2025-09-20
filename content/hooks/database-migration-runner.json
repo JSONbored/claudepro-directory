@@ -25,7 +25,10 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/database-migration-runner.sh",
-          "matchers": ["write", "edit"]
+          "matchers": [
+            "write",
+            "edit"
+          ]
         }
       }
     },

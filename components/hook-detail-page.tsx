@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { slugToTitle } from '@/lib/utils';
-import type { ContentItem } from '@/types/content';
+import type { ContentItem, Hook } from '@/types/content';
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
 const CodeHighlight = lazy(() =>
@@ -31,7 +31,7 @@ const CodeHighlight = lazy(() =>
 );
 
 interface HookDetailPageProps {
-  item: any; // Extended Hook item with structured fields
+  item: Hook;
   relatedItems?: ContentItem[];
 }
 
@@ -42,7 +42,8 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
   // Auto-generate requirements based on script content analysis
   const generateRequirements = () => {
     const baseRequirements = ['Claude Desktop or Claude Code'];
-    const scriptContent = item.configuration?.scriptContent || '';
+    const scriptContent =
+      typeof item.configuration?.scriptContent === 'string' ? item.configuration.scriptContent : '';
     const detectedRequirements: string[] = [];
 
     // Detect common tools and dependencies from script content
@@ -88,7 +89,8 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
 
   // Auto-generate troubleshooting entries based on script content analysis
   const generateTroubleshooting = () => {
-    const scriptContent = item.configuration?.scriptContent || '';
+    const scriptContent =
+      typeof item.configuration?.scriptContent === 'string' ? item.configuration.scriptContent : '';
     const generatedTroubleshooting: Array<{ issue: string; solution: string }> = [];
 
     // Common troubleshooting patterns based on detected tools
@@ -174,14 +176,16 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
     });
 
     // Add manual troubleshooting entries if they exist, avoiding duplicates
-    const manualTroubleshooting = (item.troubleshooting || []).filter((tip: any) => {
-      const tipIssue = typeof tip === 'string' ? tip : tip.issue;
-      return !generatedTroubleshooting.some(
-        (generated) =>
-          generated.issue.toLowerCase().includes(tipIssue.toLowerCase()) ||
-          tipIssue.toLowerCase().includes(generated.issue.toLowerCase())
-      );
-    });
+    const manualTroubleshooting = (item.troubleshooting || []).filter(
+      (tip: string | { issue: string; solution: string }) => {
+        const tipIssue = typeof tip === 'string' ? tip : tip.issue;
+        return !generatedTroubleshooting.some(
+          (generated) =>
+            generated.issue.toLowerCase().includes(tipIssue.toLowerCase()) ||
+            tipIssue.toLowerCase().includes(generated.issue.toLowerCase())
+        );
+      }
+    );
 
     return [...generatedTroubleshooting, ...manualTroubleshooting];
   };
@@ -269,6 +273,19 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
 
   // Use manual installation if provided, otherwise auto-generate
   const installation = item.installation || generateInstallationSteps();
+
+  // Type guard for installation structure
+  const isValidInstallation = (
+    inst: unknown
+  ): inst is {
+    claudeDesktop?: {
+      steps?: string[];
+      configPath?: Record<string, string>;
+    };
+    requirements?: string[];
+  } => {
+    return typeof inst === 'object' && inst !== null;
+  };
 
   // Use manual troubleshooting if provided, otherwise auto-generate
   const troubleshooting =
@@ -502,7 +519,14 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
                       <Suspense
                         fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}
                       >
-                        <CodeHighlight code={item.configuration.scriptContent} language="bash" />
+                        <CodeHighlight
+                          code={
+                            typeof item.configuration?.scriptContent === 'string'
+                              ? item.configuration.scriptContent
+                              : ''
+                          }
+                          language="bash"
+                        />
                       </Suspense>
                     </div>
                   )}
@@ -538,7 +562,7 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
                 <CardDescription>Setup instructions and requirements</CardDescription>
               </CardHeader>
               <CardContent>
-                {installation.claudeDesktop && (
+                {isValidInstallation(installation) && installation.claudeDesktop && (
                   <div className="space-y-4">
                     <div>
                       <h4 className="font-medium mb-2">Claude Desktop Setup</h4>
@@ -598,27 +622,29 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
             )}
 
             {/* Requirements Section */}
-            {installation.requirements && installation.requirements.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5" />
-                    Requirements
-                  </CardTitle>
-                  <CardDescription>Prerequisites and dependencies</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {installation.requirements.map((requirement: string, _index: number) => (
-                      <li key={requirement.slice(0, 50)} className="flex items-start gap-3">
-                        <div className="h-1.5 w-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
-                        <span className="text-sm leading-relaxed">{requirement}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
+            {isValidInstallation(installation) &&
+              installation.requirements &&
+              installation.requirements.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5" />
+                      Requirements
+                    </CardTitle>
+                    <CardDescription>Prerequisites and dependencies</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {installation.requirements.map((requirement: string, _index: number) => (
+                        <li key={requirement.slice(0, 50)} className="flex items-start gap-3">
+                          <div className="h-1.5 w-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
+                          <span className="text-sm leading-relaxed">{requirement}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
 
             {/* Troubleshooting Section */}
             {troubleshooting && troubleshooting.length > 0 && (
@@ -632,35 +658,37 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-4">
-                    {troubleshooting.map((tip: any, index: number) => (
-                      <li
-                        key={
-                          typeof tip === 'string'
-                            ? tip.slice(0, 50)
-                            : tip.issue?.slice(0, 50) || `troubleshooting-${index}`
-                        }
-                        className="space-y-2"
-                      >
-                        {typeof tip === 'string' ? (
-                          <div className="flex items-start gap-3">
-                            <div className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
-                            <span className="text-sm leading-relaxed">{tip}</span>
-                          </div>
-                        ) : (
-                          <div className="space-y-2">
+                    {troubleshooting.map(
+                      (tip: { issue: string; solution: string } | string, index: number) => (
+                        <li
+                          key={
+                            typeof tip === 'string'
+                              ? tip.slice(0, 50)
+                              : tip.issue?.slice(0, 50) || `troubleshooting-${index}`
+                          }
+                          className="space-y-2"
+                        >
+                          {typeof tip === 'string' ? (
                             <div className="flex items-start gap-3">
-                              <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-                              <div className="space-y-1">
-                                <p className="text-sm font-medium text-red-700 dark:text-red-400">
-                                  {tip.issue}
-                                </p>
-                                <p className="text-sm text-muted-foreground">{tip.solution}</p>
+                              <div className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                              <span className="text-sm leading-relaxed">{tip}</span>
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <div className="flex items-start gap-3">
+                                <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+                                <div className="space-y-1">
+                                  <p className="text-sm font-medium text-red-700 dark:text-red-400">
+                                    {tip.issue}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">{tip.solution}</p>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        )}
-                      </li>
-                    ))}
+                          )}
+                        </li>
+                      )
+                    )}
                   </ul>
                 </CardContent>
               </Card>
@@ -737,11 +765,28 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
 
                 {/* Tool Matchers - third */}
                 {(() => {
-                  const matchers =
-                    item.matchers ||
-                    item.configuration?.hookConfig?.hooks?.[item.hookType?.toLowerCase()]
-                      ?.matchers ||
-                    [];
+                  const hookTypeKey = item.hookType?.toLowerCase();
+                  const matchers = (() => {
+                    if (item.matchers) return item.matchers;
+                    if (hookTypeKey && item.configuration?.hookConfig?.hooks) {
+                      const hooks = item.configuration?.hookConfig?.hooks;
+                      const hookConfig =
+                        typeof hooks === 'object' && !Array.isArray(hooks)
+                          ? (hooks as Record<string, unknown>)[hookTypeKey]
+                          : undefined;
+                      if (
+                        hookConfig &&
+                        typeof hookConfig === 'object' &&
+                        !Array.isArray(hookConfig)
+                      ) {
+                        const config = hookConfig as Record<string, unknown>;
+                        if (Array.isArray(config.matchers)) {
+                          return config.matchers;
+                        }
+                      }
+                    }
+                    return [];
+                  })();
                   return (
                     matchers.length > 0 && (
                       <div>
@@ -814,33 +859,43 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {/* Show matcher info if available */}
-                          {relatedItem.configuration?.hookConfig?.hooks &&
-                            Object.values(relatedItem.configuration.hookConfig.hooks)
-                              .flat()
-                              .find(
-                                (h: any) =>
-                                  h &&
-                                  typeof h === 'object' &&
-                                  h.matchers &&
-                                  Array.isArray(h.matchers)
-                              ) && (
-                              <span className="font-mono">
-                                {(() => {
-                                  const matcher = Object.values(
-                                    relatedItem.configuration.hookConfig.hooks
-                                  )
-                                    .flat()
-                                    .find(
-                                      (h: any) =>
-                                        h &&
-                                        typeof h === 'object' &&
-                                        h.matchers &&
-                                        Array.isArray(h.matchers)
-                                    ) as any;
-                                  return matcher?.matchers?.[0];
-                                })()}
-                              </span>
-                            )}
+                          {(() => {
+                            if (!relatedItem.configuration?.hookConfig?.hooks) return null;
+
+                            const hookValues = Object.values(
+                              relatedItem.configuration.hookConfig.hooks
+                            );
+                            for (const hookValue of hookValues) {
+                              if (Array.isArray(hookValue)) {
+                                for (const h of hookValue) {
+                                  if (h && typeof h === 'object' && !Array.isArray(h)) {
+                                    const hookObj = h as Record<string, unknown>;
+                                    if (
+                                      Array.isArray(hookObj.matchers) &&
+                                      hookObj.matchers.length > 0
+                                    ) {
+                                      return (
+                                        <span className="font-mono">
+                                          {String(hookObj.matchers[0])}
+                                        </span>
+                                      );
+                                    }
+                                  }
+                                }
+                              } else if (hookValue && typeof hookValue === 'object') {
+                                const hookObj = hookValue as Record<string, unknown>;
+                                if (
+                                  Array.isArray(hookObj.matchers) &&
+                                  hookObj.matchers.length > 0
+                                ) {
+                                  return (
+                                    <span className="font-mono">{String(hookObj.matchers[0])}</span>
+                                  );
+                                }
+                              }
+                            }
+                            return null;
+                          })()}
                         </div>
                       </div>
                     </Button>

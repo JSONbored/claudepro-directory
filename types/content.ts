@@ -14,11 +14,11 @@ export interface ContentConfiguration {
   requiresAuth?: boolean;
   authType?: string;
   features?: string[];
-  options?: Record<string, any>;
-  hooks?: Record<string, any>;
-  hookConfig?: Record<string, any>;
-  mcpServers?: Record<string, any>;
-  [key: string]: any;
+  options?: Record<string, string | number | boolean>;
+  hooks?: Record<string, string | string[] | Record<string, unknown>>;
+  hookConfig?: Record<string, string | string[] | Record<string, unknown>>;
+  mcpServers?: Record<string, string | string[] | Record<string, unknown>>;
+  [key: string]: string | string[] | number | boolean | Record<string, unknown> | undefined;
 }
 
 // Base interface for all content items
@@ -70,21 +70,35 @@ export interface ContentStats {
 
 // Type aliases for specific content types
 export interface Agent extends ContentItem {}
+// Maintain safety while allowing dynamic properties
 export interface MCPServer extends ContentItem {
   features?: string[];
-  installation?: Record<string, any>;
+  installation?: Record<string, unknown>;
   useCases?: string[];
   security?: string[];
-  troubleshooting?: string[];
-  package?: Record<string, any> | string | null;
+  troubleshooting?: Array<{ issue: string; solution: string }> | string[];
+  package?: Record<string, unknown> | string | null;
   requiresAuth?: boolean;
-  [key: string]: any; // Allow additional dynamic fields
+  permissions?: string[];
+  authType?: string;
+  [key: string]: unknown; // Safe fallback for dynamic fields
 }
-export interface Rule extends ContentItem {}
-export interface Command extends ContentItem {}
+
+export interface Rule extends ContentItem {
+  [key: string]: unknown;
+}
+
+export interface Command extends ContentItem {
+  [key: string]: unknown;
+}
+
 export interface Hook extends ContentItem {
-  hookType?: string;
+  hookType?: 'PostToolUse' | 'PreToolUse' | 'SessionStart' | 'SessionEnd' | 'UserPromptSubmit' | 'Notification' | 'PreCompact' | 'Stop' | 'SubagentStop';
   features?: string[];
   useCases?: string[];
-  [key: string]: any; // Allow additional dynamic fields
+  troubleshooting?: Array<{ issue: string; solution: string }> | string[];
+  installation?: Record<string, unknown>;
+  requirements?: string[];
+  matchers?: string[];
+  [key: string]: unknown; // Safe fallback for dynamic fields
 }

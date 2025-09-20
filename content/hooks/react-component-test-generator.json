@@ -4,7 +4,13 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": ["react", "testing", "jest", "components", "automation"],
+  "tags": [
+    "react",
+    "testing",
+    "jest",
+    "components",
+    "automation"
+  ],
   "hookType": "PostToolUse",
   "features": [
     "Automatic test file generation for React components",
@@ -29,7 +35,10 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/react-component-test-generator.sh",
-          "matchers": ["write", "edit"]
+          "matchers": [
+            "write",
+            "edit"
+          ]
         }
       }
     },
