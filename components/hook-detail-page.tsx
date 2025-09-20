@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { slugToTitle } from '@/lib/utils';
-import type { ContentItem, Hook } from '@/types/content';
+import type { ContentItem, Hook, HookConfig } from '@/types/content';
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
 const CodeHighlight = lazy(() =>
@@ -883,7 +883,7 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
                                   }
                                 }
                               } else if (hookValue && typeof hookValue === 'object') {
-                                const hookObj = hookValue as Record<string, unknown>;
+                                const hookObj = hookValue as HookConfig;
                                 if (
                                   Array.isArray(hookObj.matchers) &&
                                   hookObj.matchers.length > 0

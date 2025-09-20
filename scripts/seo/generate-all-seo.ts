@@ -35,9 +35,11 @@ async function generateAllSEO(): Promise<void> {
   console.log('1. Generate SEO content for MCP servers');
   console.log('2. Generate SEO content for Agents');
   console.log('3. Generate SEO content for Rules');
-  console.log('4. Update sitemap with all pages');
-  console.log('5. Generate API endpoints');
-  console.log('6. Build content metadata\n');
+  console.log('4. Generate SEO content for Hooks');
+  console.log('5. Generate SEO content for Commands');
+  console.log('6. Update sitemap with all pages');
+  console.log('7. Generate API endpoints');
+  console.log('8. Build content metadata\n');
 
   const startTime = Date.now();
 
@@ -61,10 +63,22 @@ async function generateAllSEO(): Promise<void> {
     'Generating Rules SEO content'
   );
 
-  // Step 6: Generate sitemap with all content
+  // Step 6: Generate Hooks SEO content
+  await runCommand(
+    'tsx scripts/seo/generators/hooks-seo-generator.ts',
+    'Generating Hooks SEO content'
+  );
+
+  // Step 7: Generate Commands SEO content
+  await runCommand(
+    'tsx scripts/seo/generators/commands-seo-generator.ts',
+    'Generating Commands SEO content'
+  );
+
+  // Step 8: Generate sitemap with all content
   await runCommand('npm run generate:sitemap', 'Generating sitemap');
 
-  // Step 6: Count generated files
+  // Step 9: Count generated files
   const seoDir = path.join(ROOT_DIR, 'seo');
   const categories = ['use-cases', 'tutorials', 'collections', 'categories', 'workflows'];
   let totalPages = 0;

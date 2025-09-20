@@ -25,7 +25,10 @@ interface BaseContent {
   tags: string[];
   content?: string;
   config?: string;
-  configuration?: unknown;
+  configuration?: Record<
+    string,
+    string | number | boolean | Record<string, string | number | boolean>
+  >;
 }
 
 // Generate title from slug
@@ -74,7 +77,7 @@ async function loadJsonFiles(type: string): Promise<BaseContent[]> {
               item.slug = path.basename(file, '.json');
             }
 
-            // TODO - update remaining categories (commands) to use new slug-only approach
+            // TODO - update remaining categories (mcp) to use new slug-only approach
             // Auto-generate id and title from slug for slug-based content types
             item.id = item.slug;
             if (!item.title) {

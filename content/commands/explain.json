@@ -1,5 +1,4 @@
 {
-  "title": "/explain",
   "description": "Intelligent code explanation with visual diagrams, step-by-step breakdowns, and interactive examples",
   "category": "commands",
   "author": "claudepro",
@@ -19,5 +18,6 @@
   },
   "githubUrl": "https://github.com/claudepro/code-explainer",
   "documentationUrl": "https://docs.claude.ai/commands/explain",
-  "source": "community"
+  "source": "community",
+  "slug": "explain"
 }

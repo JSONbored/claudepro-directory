@@ -145,6 +145,60 @@
     <priority>0.65</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/guides/collections/commands-code-review</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/collections/commands-debugging</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/collections/commands-documentation</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/collections/commands-refactoring</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/collections/commands-testing</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/collections/hooks-notification</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/collections/hooks-post-tool</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/collections/hooks-pre-tool</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/collections/hooks-session</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/guides/categories/claude-rules-for-architecture</loc>
     <lastmod>2025-09-20</lastmod>
     <changefreq>monthly</changefreq>
@@ -193,7 +247,37 @@
     <priority>0.65</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/guides/workflows/commands-complete-code-quality-pipeline</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/workflows/commands-debugging-and-problem-resolution-workflow</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/workflows/commands-development-workflow-automation</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/guides/workflows/fullstack-workflow-guide</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/workflows/hooks-complete-tool-validation-pipeline</loc>
+    <lastmod>2025-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/workflows/hooks-real-time-monitoring-setup</loc>
     <lastmod>2025-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
@@ -583,13 +667,13 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/commands/test-gen</loc>
+    <loc>https://claudepro.directory/commands/generate-tests</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/commands/commit-smart-git-commit</loc>
+    <loc>https://claudepro.directory/commands/git-smart-commit</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -619,7 +703,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/commands/test</loc>
+    <loc>https://claudepro.directory/commands/test-advanced</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

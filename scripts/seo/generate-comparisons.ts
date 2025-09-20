@@ -30,8 +30,8 @@ async function loadAllContent(): Promise<ContentItem[]> {
       const jsonPath = path.join(GENERATED_DIR, `${category}-metadata.json`);
       try {
         const content = await fs.readFile(jsonPath, 'utf-8');
-        const items = JSON.parse(content) as unknown[];
-        allContent.push(...items.map((item: unknown) => ({ ...(item as ContentItem), category })));
+        const items = JSON.parse(content) as ContentItem[];
+        allContent.push(...items.map((item) => ({ ...item, category })));
         continue;
       } catch {
         // Fall through to TypeScript file
@@ -50,8 +50,8 @@ async function loadAllContent(): Promise<ContentItem[]> {
           .replace(/'/g, '"') // Convert single quotes to double
           .replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
 
-        const items = JSON.parse(arrayStr) as unknown[];
-        allContent.push(...items.map((item: unknown) => ({ ...(item as ContentItem), category })));
+        const items = JSON.parse(arrayStr) as ContentItem[];
+        allContent.push(...items.map((item) => ({ ...item, category })));
       }
     } catch (error) {
       console.log(`Skipping ${category}: ${error}`);

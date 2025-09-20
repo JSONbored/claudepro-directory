@@ -42,7 +42,7 @@ export const ConfigCard = memo(
   }: ConfigCardProps) => {
     const router = useRouter();
     const [copied, setCopied] = useState(false);
-    const displayTitle = getDisplayTitle({ title, name, slug });
+    const displayTitle = getDisplayTitle({ title, name, slug, category: type });
 
     // Map types to their actual route paths - fixed routing
     const targetPath = `/${type}/${slug}`;
