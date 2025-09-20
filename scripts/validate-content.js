@@ -11,12 +11,8 @@ if (files.length === 0) {
 
 let hasErrors = false;
 
-// Required fields for different schema types
-const legacyRequiredFields = ['title', 'description', 'category', 'author', 'dateAdded'];
-const slugBasedRequiredFields = ['slug', 'description', 'category', 'author', 'dateAdded'];
-
-// Content types using slug-based schema (rules and hooks are converted, MCP still transitioning)
-const slugBasedCategories = ['hooks', 'rules'];
+// All content types now use slug-based schema
+const requiredFields = ['slug', 'description', 'category', 'author', 'dateAdded'];
 
 // Valid categories
 const validCategories = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
@@ -33,6 +29,12 @@ function isValidDate(dateStr) {
 // Validate each file
 files.forEach((filePath) => {
   try {
+    // Skip template files
+    if (filePath.includes('template.json')) {
+      console.log(`SKIP: Template file ${filePath}`);
+      return;
+    }
+
     // Read and parse JSON file
     const content = fs.readFileSync(filePath, 'utf8');
     let data;
@@ -46,11 +48,7 @@ files.forEach((filePath) => {
       return;
     }
 
-    // Determine which schema to use based on category
-    const isSlugBased = slugBasedCategories.includes(data.category);
-    const requiredFields = isSlugBased ? slugBasedRequiredFields : legacyRequiredFields;
-
-    // Check required fields
+    // Check required fields (all content types now use slug-based schema)
     for (const field of requiredFields) {
       if (!data[field]) {
         console.error(`ERROR: Missing required field '${field}' in ${filePath}`);
@@ -58,8 +56,8 @@ files.forEach((filePath) => {
       }
     }
 
-    // Validate date format
-    if (data.dateAdded && !isValidDate(data.dateAdded)) {
+    // Validate date format (skip placeholder dates)
+    if (data.dateAdded && data.dateAdded !== 'YYYY-MM-DD' && !isValidDate(data.dateAdded)) {
       console.error(`ERROR: Invalid date format in ${filePath} (should be YYYY-MM-DD)`);
       hasErrors = true;
     }
@@ -68,12 +66,6 @@ files.forEach((filePath) => {
     if (data.category && !validCategories.includes(data.category)) {
       console.error(`ERROR: Invalid category '${data.category}' in ${filePath}`);
       console.error(`Valid categories are: ${validCategories.join(', ')}`);
-      hasErrors = true;
-    }
-
-    // Check for required content field (only for legacy schema)
-    if (!isSlugBased && !data.content) {
-      console.error(`ERROR: Missing 'content' field in ${filePath}`);
       hasErrors = true;
     }
 
@@ -86,8 +78,19 @@ files.forEach((filePath) => {
     // Category-specific validation
     switch (data.category) {
       case 'mcp':
-        if (!data.protocol && !data.github) {
-          console.warn(`WARNING: MCP server in ${filePath} has no protocol or github URL`);
+        // MCP servers should have either configuration or package field
+        if (!data.configuration && !data.package) {
+          console.warn(`WARNING: MCP server in ${filePath} has no configuration or package field`);
+        }
+        // Check for basic transport configuration
+        if (
+          data.configuration &&
+          !data.configuration.claudeDesktop &&
+          !data.configuration.claudeCode
+        ) {
+          console.warn(
+            `WARNING: MCP server in ${filePath} missing configuration for Claude Desktop or Claude Code`
+          );
         }
         break;
       case 'commands':

@@ -1,10 +1,16 @@
 {
-  "title": "Intercom MCP Server",
+  "slug": "intercom-mcp-server",
   "description": "Access customer conversations, tickets, and user data in real-time",
   "category": "mcp",
   "author": "Intercom",
   "dateAdded": "2025-09-18",
-  "tags": ["customer-support", "intercom", "chat", "helpdesk", "crm"],
+  "tags": [
+    "customer-support",
+    "intercom",
+    "chat",
+    "helpdesk",
+    "crm"
+  ],
   "content": "Connect Claude to Intercom for customer support operations and conversation management.",
   "features": [
     "Access customer conversations in real-time",
@@ -36,8 +42,18 @@
           "url": "https://mcp.intercom.com/sse"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "intercom": {
+          "transport": "sse",
+          "url": "https://mcp.intercom.com/sse"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Respond to customer queries efficiently",
     "Analyze support trends and patterns",
@@ -62,11 +78,12 @@
     "Update ticket status to resolved",
     "Generate weekly support metrics"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "write", "respond"],
+  "permissions": [
+    "read",
+    "write",
+    "respond"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": null,
-  "documentationUrl": "https://developers.intercom.com/docs/guides/mcp",
-  "source": "official"
+  "documentationUrl": "https://developers.intercom.com/docs/guides/mcp"
 }

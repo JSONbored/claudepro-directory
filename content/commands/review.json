@@ -1,5 +1,5 @@
 {
-  "title": "/review",
+  "slug": "review",
   "description": "Comprehensive code review with security analysis, performance optimization, and best practices validation",
   "category": "commands",
   "author": "claudepro",

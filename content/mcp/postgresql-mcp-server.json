@@ -1,5 +1,5 @@
 {
-  "title": "PostgreSQL MCP Server",
+  "slug": "postgresql-mcp-server",
   "description": "Official MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities",
   "category": "mcp",
   "author": "Anthropic",
@@ -43,8 +43,18 @@
           "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost/mydb"]
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "postgres": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost/mydb"]
+        }
+      }
     }
   },
+  "package": "@modelcontextprotocol/server-postgres",
+  "source": "official",
   "useCases": [
     "Understand database schema and relationships",
     "Generate reports from existing data",
@@ -74,13 +84,10 @@
     "Write a query to find active users from last month",
     "Generate documentation for my database schema"
   ],
-  "package": "@modelcontextprotocol/server-postgres",
   "requiresAuth": true,
   "authType": "connection_string",
   "permissions": ["read"],
   "readOnly": true,
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": "https://github.com/modelcontextprotocol/servers",
-  "documentationUrl": "https://modelcontextprotocol.io/examples",
-  "source": "official"
+  "documentationUrl": "https://modelcontextprotocol.io/examples"
 }

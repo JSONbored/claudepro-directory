@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import fs from 'fs/promises';
 import path from 'path';
-import slugify from 'slugify';
 import { fileURLToPath } from 'url';
 
 type ContentCategory = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks';
@@ -25,7 +24,10 @@ interface BaseContent {
   tags: string[];
   content?: string;
   config?: string;
-  configuration?: unknown;
+  configuration?: Record<
+    string,
+    string | number | boolean | Record<string, string | number | boolean>
+  >;
 }
 
 // Generate title from slug
@@ -34,16 +36,6 @@ function _slugToTitle(slug: string): string {
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
-}
-
-// Generate SEO-friendly slug from title or name (fallback for legacy content)
-function generateSlug(item: BaseContent): string {
-  const source = item.title || item.name || item.id;
-  return slugify(source, {
-    lower: true,
-    strict: true,
-    remove: /[*+~.()'"!:@]/g,
-  });
 }
 
 async function ensureDir(dir: string) {
@@ -67,27 +59,16 @@ async function loadJsonFiles(type: string): Promise<BaseContent[]> {
         try {
           const item = JSON.parse(content);
 
-          // For hooks, rules, agents, and MCP servers, prioritize slug as source of truth
-          if (type === 'hooks' || type === 'rules' || type === 'mcp' || type === 'agents') {
-            // Auto-generate slug from filename if not provided
-            if (!item.slug) {
-              item.slug = path.basename(file, '.json');
-            }
+          // All content types now use slug-based schema
+          // Auto-generate slug from filename if not provided
+          if (!item.slug) {
+            item.slug = path.basename(file, '.json');
+          }
 
-            // TODO - update remaining categories (commands) to use new slug-only approach
-            // Auto-generate id and title from slug for slug-based content types
-            item.id = item.slug;
-            if (!item.title) {
-              item.title = _slugToTitle(item.slug);
-            }
-          } else {
-            // Legacy behavior for other content types
-            if (!item.slug) {
-              item.slug = generateSlug(item);
-            }
-            if (!item.id) {
-              item.id = item.slug;
-            }
+          // Auto-generate id and title from slug for all content types
+          item.id = item.slug;
+          if (!item.title) {
+            item.title = _slugToTitle(item.slug);
           }
 
           return item;
@@ -122,7 +103,10 @@ async function generateTypeScript() {
     const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
 
     // Create metadata version (without heavy content fields for listing pages)
-    const metadata = allContent[type].map((item) => {
+    const contentData = allContent[type];
+    if (!contentData) continue;
+
+    const metadata = contentData.map((item) => {
       const { content: _content, config: _config, configuration: _configuration, ...meta } = item;
       return meta;
     });
@@ -197,7 +181,8 @@ import type { ContentStats } from '../types/content';
 export const contentStats: ContentStats = {
 ${CONTENT_TYPES.map((type) => {
   const varName = type.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-  return `  ${varName}: ${allContent[type].length}`;
+  const typeData = allContent[type];
+  return `  ${varName}: ${typeData ? typeData.length : 0}`;
 }).join(',\n')}
 };`;
 

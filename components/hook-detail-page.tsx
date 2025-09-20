@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { slugToTitle } from '@/lib/utils';
-import type { ContentItem, Hook } from '@/types/content';
+import type { ContentItem, Hook, HookConfig } from '@/types/content';
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
 const CodeHighlight = lazy(() =>
@@ -37,7 +37,7 @@ interface HookDetailPageProps {
 
 export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps) {
   const router = useRouter();
-  const [_copied, setCopied] = useState(false);
+  const [_copied, _setCopied] = useState(false);
 
   // Auto-generate requirements based on script content analysis
   const generateRequirements = () => {
@@ -322,24 +322,6 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
       });
     } catch {
       return dateString;
-    }
-  };
-
-  const _handleCopyContent = async () => {
-    try {
-      await navigator.clipboard.writeText(item.content || '');
-      setCopied(true);
-      toast({
-        title: 'Copied!',
-        description: 'Hook content has been copied to your clipboard.',
-      });
-      setTimeout(() => setCopied(false), 2000);
-    } catch (_error) {
-      toast({
-        title: 'Copy failed',
-        description: 'Unable to copy content to clipboard.',
-        variant: 'destructive',
-      });
     }
   };
 
@@ -883,7 +865,7 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
                                   }
                                 }
                               } else if (hookValue && typeof hookValue === 'object') {
-                                const hookObj = hookValue as Record<string, unknown>;
+                                const hookObj = hookValue as HookConfig;
                                 if (
                                   Array.isArray(hookObj.matchers) &&
                                   hookObj.matchers.length > 0

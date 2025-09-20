@@ -1,10 +1,16 @@
 {
-  "title": "Socket MCP Server",
+  "slug": "socket-mcp-server",
   "description": "Security analysis and vulnerability scanning for dependencies",
   "category": "mcp",
   "author": "Socket",
   "dateAdded": "2025-09-18",
-  "tags": ["security", "dependencies", "vulnerability-scanning", "npm", "supply-chain"],
+  "tags": [
+    "security",
+    "dependencies",
+    "vulnerability-scanning",
+    "npm",
+    "supply-chain"
+  ],
   "content": "Analyze dependency security and supply chain risks with Socket's comprehensive vulnerability detection.",
   "features": [
     "Scan dependencies for known vulnerabilities",
@@ -36,8 +42,18 @@
           "url": "https://mcp.socket.dev/"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "socket": {
+          "transport": "http",
+          "url": "https://mcp.socket.dev/"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Audit project dependencies for vulnerabilities",
     "Check security before adding new packages",
@@ -62,11 +78,11 @@
     "Find risky dependencies in my project",
     "Generate a security report"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "scan"],
+  "permissions": [
+    "read",
+    "scan"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": "https://github.com/SocketDev/socket-mcp",
-  "documentationUrl": "https://github.com/SocketDev/socket-mcp",
-  "source": "official"
+  "documentationUrl": "https://github.com/SocketDev/socket-mcp"
 }

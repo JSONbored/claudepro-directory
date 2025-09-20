@@ -25,6 +25,14 @@ jobs:
     - name: Generate content files
       run: npm run build:content
 
+    - name: Run linting
+      run: npm run lint
+
+    - name: Check formatting
+      run: |
+        npm run format
+        git diff --exit-code
+
     - name: Run type check
       run: npm run type-check
 

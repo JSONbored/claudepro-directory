@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ContentListPage } from '@/components/content-list-page';
+import { ContentListServer } from '@/components/content-list-server';
 import { mcp } from '@/generated/content';
 
 export const metadata: Metadata = {
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function MCPPage() {
   return (
-    <ContentListPage
+    <ContentListServer
       title="MCP Servers"
       description="Discover powerful MCP servers to extend Claude's capabilities with external tools, data sources, and integrations."
       icon="server"

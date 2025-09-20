@@ -1,10 +1,16 @@
 {
-  "title": "invideo MCP Server",
+  "slug": "invideo-mcp-server",
   "description": "Build video creation capabilities into your applications",
   "category": "mcp",
   "author": "invideo",
   "dateAdded": "2025-09-18",
-  "tags": ["video", "invideo", "media", "content-creation", "ai-video"],
+  "tags": [
+    "video",
+    "invideo",
+    "media",
+    "content-creation",
+    "ai-video"
+  ],
   "content": "Create and edit videos through Claude using invideo's AI-powered video creation platform.",
   "features": [
     "Generate videos from text prompts",
@@ -36,8 +42,18 @@
           "url": "https://mcp.invideo.io/sse"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "invideo": {
+          "transport": "sse",
+          "url": "https://mcp.invideo.io/sse"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Generate marketing videos at scale",
     "Create social media content automatically",
@@ -63,11 +79,13 @@
     "Generate a video from this blog post",
     "Export video in 1080p MP4"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "write", "create", "export"],
+  "permissions": [
+    "read",
+    "write",
+    "create",
+    "export"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": null,
-  "documentationUrl": "https://invideo.io/ai/mcp",
-  "source": "official"
+  "documentationUrl": "https://invideo.io/ai/mcp"
 }

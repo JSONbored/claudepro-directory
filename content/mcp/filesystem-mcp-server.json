@@ -1,5 +1,5 @@
 {
-  "title": "Filesystem MCP Server",
+  "slug": "filesystem-mcp-server",
   "description": "Official MCP server providing secure file system operations for Claude Desktop and Claude Code",
   "category": "mcp",
   "author": "Anthropic",
@@ -43,8 +43,18 @@
           "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/directory"]
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "filesystem": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/directory"]
+        }
+      }
     }
   },
+  "package": "@modelcontextprotocol/server-filesystem",
+  "source": "official",
   "useCases": [
     "Read file contents and analyze code",
     "Create and modify files in your project",
@@ -73,11 +83,8 @@
     "List all directories in my project",
     "Find all files containing the word TODO"
   ],
-  "package": "@modelcontextprotocol/server-filesystem",
   "requiresAuth": false,
   "permissions": ["filesystem"],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": "https://github.com/modelcontextprotocol/servers",
-  "documentationUrl": "https://modelcontextprotocol.io/examples",
-  "source": "official"
+  "documentationUrl": "https://modelcontextprotocol.io/examples"
 }
