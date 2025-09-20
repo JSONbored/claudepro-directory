@@ -1,10 +1,16 @@
 {
-  "title": "Monday MCP Server",
+  "slug": "monday-mcp-server",
   "description": "Manage monday.com boards, items, and CRM activities",
   "category": "mcp",
   "author": "Monday.com",
   "dateAdded": "2025-09-18",
-  "tags": ["monday", "project-management", "crm", "workflow", "team-management"],
+  "tags": [
+    "monday",
+    "project-management",
+    "crm",
+    "workflow",
+    "team-management"
+  ],
   "content": "Control monday.com boards and workflows through Claude for visual project management.",
   "features": [
     "Create and update board items",
@@ -36,8 +42,18 @@
           "url": "https://mcp.monday.com/sse"
         }
       }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "monday": {
+          "transport": "sse",
+          "url": "https://mcp.monday.com/sse"
+        }
+      }
     }
   },
+  "package": null,
+  "source": "official",
   "useCases": [
     "Create project items from requirements",
     "Update task status across boards",
@@ -62,11 +78,12 @@
     "Assign this task to the design team",
     "Add CRM activity for client meeting"
   ],
-  "package": null,
   "requiresAuth": true,
-  "permissions": ["read", "write", "create"],
+  "permissions": [
+    "read",
+    "write",
+    "create"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "githubUrl": null,
-  "documentationUrl": "https://developer.monday.com/apps/docs/mondaycom-mcp-integration",
-  "source": "official"
+  "documentationUrl": "https://developer.monday.com/apps/docs/mondaycom-mcp-integration"
 }

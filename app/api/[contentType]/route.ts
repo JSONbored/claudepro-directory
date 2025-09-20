@@ -1,5 +1,7 @@
-import { NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
+import { logger } from '@/lib/logger';
+import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
 
 export const runtime = 'nodejs';
 export const revalidate = 14400; // 4 hours
@@ -13,15 +15,24 @@ const contentMap = {
   'rules.json': { data: rules, type: 'rule' },
 } as const;
 
-export async function GET(
-  _request: Request,
+async function handleGET(
+  request: NextRequest,
   { params }: { params: Promise<{ contentType: string }> }
 ) {
+  const requestLogger = logger.forRequest(request);
+
   try {
     const { contentType } = await params;
+    requestLogger.info('Content type API request started', { contentType });
 
     // Check if the content type is valid
     if (!(contentType in contentMap)) {
+      requestLogger.warn('Invalid content type requested', {
+        contentType,
+        availableTypesCount: Object.keys(contentMap).length,
+        sampleType: Object.keys(contentMap)[0] || '',
+      });
+
       return NextResponse.json(
         {
           error: 'Content type not found',
@@ -45,13 +56,23 @@ export async function GET(
       lastUpdated: new Date().toISOString(),
     };
 
+    requestLogger.info('Content type API request completed successfully', {
+      contentType,
+      count: data.length,
+    });
+
     return NextResponse.json(responseData, {
       headers: {
         'Cache-Control': 'public, s-maxage=14400, stale-while-revalidate=86400',
       },
     });
   } catch (error) {
-    console.error('API Error in [contentType] route:', error);
+    const { contentType: errorContentType } = await params;
+    requestLogger.error(
+      'API Error in [contentType] route',
+      error instanceof Error ? error : new Error(String(error)),
+      { contentType: errorContentType }
+    );
 
     return NextResponse.json(
       {
@@ -62,4 +83,12 @@ export async function GET(
       { status: 500 }
     );
   }
+}
+
+// Apply rate limiting to the GET handler
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ contentType: string }> }
+) {
+  return withRateLimit(request, rateLimiters.api, handleGET, request, context);
 }

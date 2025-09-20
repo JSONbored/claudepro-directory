@@ -361,7 +361,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/mcp/aws-services</loc>
+    <loc>https://claudepro.directory/mcp/aws-services-mcp-server</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -403,13 +403,13 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/mcp/discord-integration</loc>
-    <lastmod>2025-09-16</lastmod>
+    <loc>https://claudepro.directory/mcp/discord-mcp-server</loc>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/mcp/docker-mcp</loc>
+    <loc>https://claudepro.directory/mcp/docker-mcp-server</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -421,7 +421,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/mcp/filesystem-mcp</loc>
+    <loc>https://claudepro.directory/mcp/filesystem-mcp-server</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -433,7 +433,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/mcp/git-server</loc>
+    <loc>https://claudepro.directory/mcp/git-mcp-server</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -475,14 +475,14 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/mcp/jira-integration</loc>
+    <loc>https://claudepro.directory/mcp/jira-mcp-server</loc>
     <lastmod>2025-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/mcp/kubernetes-management</loc>
-    <lastmod>2025-09-16</lastmod>
+    <loc>https://claudepro.directory/mcp/kubernetes-mcp-server</loc>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -523,26 +523,20 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/mcp/postgresql-mcp</loc>
+    <loc>https://claudepro.directory/mcp/postgresql-mcp-server</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/mcp/redis-database</loc>
-    <lastmod>2025-09-16</lastmod>
+    <loc>https://claudepro.directory/mcp/redis-mcp-server</loc>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/mcp/sentry-mcp-server</loc>
     <lastmod>2025-09-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/mcp/slack-integration</loc>
-    <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

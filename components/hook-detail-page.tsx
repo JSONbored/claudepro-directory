@@ -37,7 +37,7 @@ interface HookDetailPageProps {
 
 export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps) {
   const router = useRouter();
-  const [_copied, setCopied] = useState(false);
+  const [_copied, _setCopied] = useState(false);
 
   // Auto-generate requirements based on script content analysis
   const generateRequirements = () => {
@@ -322,24 +322,6 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
       });
     } catch {
       return dateString;
-    }
-  };
-
-  const _handleCopyContent = async () => {
-    try {
-      await navigator.clipboard.writeText(item.content || '');
-      setCopied(true);
-      toast({
-        title: 'Copied!',
-        description: 'Hook content has been copied to your clipboard.',
-      });
-      setTimeout(() => setCopied(false), 2000);
-    } catch (_error) {
-      toast({
-        title: 'Copy failed',
-        description: 'Unable to copy content to clipboard.',
-        variant: 'destructive',
-      });
     }
   };
 

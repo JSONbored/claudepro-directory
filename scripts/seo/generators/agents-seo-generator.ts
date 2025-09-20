@@ -54,6 +54,14 @@ interface WorkflowData {
   pitfalls?: string[];
 }
 
+// Helper function to generate title from slug
+function slugToTitle(slug: string): string {
+  return slug
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 async function loadAgents(): Promise<Agent[]> {
   const files = await fs.readdir(CONTENT_DIR);
   const agents: Agent[] = [];
@@ -62,9 +70,16 @@ async function loadAgents(): Promise<Agent[]> {
     if (file.endsWith('.json')) {
       const content = await fs.readFile(path.join(CONTENT_DIR, file), 'utf-8');
       const item = JSON.parse(content);
+
+      // Generate slug from filename if not present
+      const slug = item.slug || file.replace('.json', '');
+
       agents.push({
         ...item,
         id: file.replace('.json', ''),
+        slug,
+        title: item.title || item.name || slugToTitle(slug),
+        name: item.name || item.title || slugToTitle(slug),
       });
     }
   }
@@ -170,9 +185,9 @@ ${role.scenarios[1]?.description || 'Integrate the agent into your regular devel
 ## Community Insights
 
 *Based on September 2025 usage data:*
-- Most popular: **${relevantAgents[0]?.title || relevantAgents[0]?.name}**
-- Fastest growing: **${relevantAgents[1]?.title || relevantAgents[1]?.name}**
-- Hidden gem: **${relevantAgents[2]?.title || relevantAgents[2]?.name}**
+- Most popular: **${relevantAgents[0]?.title || relevantAgents[0]?.name || 'Code Reviewer Agent'}**
+- Fastest growing: **${relevantAgents[1]?.title || relevantAgents[1]?.name || 'API Builder Agent'}**
+- Hidden gem: **${relevantAgents[2]?.title || relevantAgents[2]?.name || 'Frontend React Agent'}**
 
 ## Related Resources
 
