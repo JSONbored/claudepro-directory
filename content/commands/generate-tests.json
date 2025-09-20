@@ -1,5 +1,4 @@
 {
-  "title": "/test-gen",
   "description": "Automatically generate comprehensive test suites including unit tests, integration tests, and edge cases with multiple testing framework support",
   "category": "commands",
   "author": "JSONbored",
@@ -19,5 +18,6 @@
   },
   "githubUrl": "https://github.com/claudepro/test-generator",
   "documentationUrl": "https://docs.claude.ai/commands/test-gen",
-  "source": "community"
+  "source": "community",
+  "slug": "generate-tests"
 }

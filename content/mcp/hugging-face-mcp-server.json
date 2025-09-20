@@ -1,0 +1,88 @@
+{
+  "slug": "hugging-face-mcp-server",
+  "description": "Access Hugging Face Hub and Gradio AI applications",
+  "category": "mcp",
+  "author": "Hugging Face",
+  "dateAdded": "2025-09-18",
+  "tags": [
+    "ai",
+    "hugging-face",
+    "machine-learning",
+    "models",
+    "datasets"
+  ],
+  "content": "Connect to Hugging Face Hub for AI models, datasets, and Gradio application access.",
+  "features": [
+    "Access model information and metrics",
+    "Browse and search datasets",
+    "Run Gradio AI applications",
+    "Query model performance data",
+    "Access Spaces and demos"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open Claude Desktop configuration file",
+        "Add the Hugging Face server configuration with HTTP transport",
+        "Restart Claude Desktop",
+        "Authenticate with your Hugging Face account"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport http huggingface https://huggingface.co/mcp"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "huggingface": {
+          "transport": "http",
+          "url": "https://huggingface.co/mcp"
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "huggingface": {
+          "transport": "http",
+          "url": "https://huggingface.co/mcp"
+        }
+      }
+    }
+  },
+  "package": null,
+  "source": "official",
+  "useCases": [
+    "Find suitable AI models for tasks",
+    "Access dataset information for training",
+    "Run model inference through Gradio",
+    "Compare model performance metrics",
+    "Search research papers and documentation"
+  ],
+  "security": [
+    "OAuth authentication for access",
+    "Monitor API usage limits",
+    "Respect model licenses",
+    "Check compute resource limits"
+  ],
+  "troubleshooting": [
+    "Verify account access level",
+    "Check API token validity",
+    "Monitor rate limits"
+  ],
+  "examples": [
+    "Find the best text generation model",
+    "Access the IMDB dataset",
+    "Run the stable diffusion demo",
+    "Compare BERT model variants"
+  ],
+  "requiresAuth": true,
+  "permissions": [
+    "read",
+    "run"
+  ],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://huggingface.co/settings/mcp"
+}

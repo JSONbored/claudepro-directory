@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ContentListPage } from '@/components/content-list-page';
+import { ContentListServer } from '@/components/content-list-server';
 import { hooks } from '@/generated/content';
 
 export const metadata: Metadata = {
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function HooksPage() {
   return (
-    <ContentListPage
+    <ContentListServer
       title="Automation Hooks"
       description="Discover automation hooks to trigger actions and workflows based on Claude events."
       icon="webhook"

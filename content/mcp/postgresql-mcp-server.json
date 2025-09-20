@@ -1,0 +1,93 @@
+{
+  "slug": "postgresql-mcp-server",
+  "description": "Official MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities",
+  "category": "mcp",
+  "author": "Anthropic",
+  "dateAdded": "2025-09-16",
+  "tags": [
+    "postgresql",
+    "database",
+    "sql",
+    "official",
+    "anthropic"
+  ],
+  "content": "The official PostgreSQL MCP Server from Anthropic provides read-only access to PostgreSQL databases, enabling Claude to inspect schemas and execute safe queries.",
+  "features": [
+    "Read-only access for safe database exploration",
+    "Automatic discovery of table structures and columns",
+    "Execute SELECT queries within read-only transactions",
+    "Access detailed database metadata and structure",
+    "Perform data analysis without altering database state",
+    "Support for SSL connections and authentication"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open your Claude Desktop configuration file",
+        "Add the PostgreSQL MCP server configuration with connection string",
+        "Restart Claude Desktop",
+        "Ask Claude to list tables to verify connection"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "Create a .mcp.json file with PostgreSQL server configuration and connection string"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "postgres": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost/mydb"]
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "postgres": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost/mydb"]
+        }
+      }
+    }
+  },
+  "package": "@modelcontextprotocol/server-postgres",
+  "source": "official",
+  "useCases": [
+    "Understand database schema and relationships",
+    "Generate reports from existing data",
+    "Analyze data patterns and distributions",
+    "Create documentation from database structure",
+    "Write and test SELECT queries",
+    "Explore unfamiliar database schemas"
+  ],
+  "security": [
+    "All queries execute in read-only transactions",
+    "INSERT, UPDATE, DELETE operations are prevented",
+    "Supports SSL/TLS encryption for connections",
+    "Respects existing database user permissions",
+    "Safe exploration without data modification risks"
+  ],
+  "troubleshooting": [
+    "Verify connection string format and database accessibility",
+    "Check username/password in connection string",
+    "Add SSL mode if required by your database",
+    "Ensure database user has SELECT permissions",
+    "Test connection from command line first"
+  ],
+  "examples": [
+    "What tables exist in my database?",
+    "Describe the structure of the users table",
+    "How many records are in each table?",
+    "Write a query to find active users from last month",
+    "Generate documentation for my database schema"
+  ],
+  "requiresAuth": true,
+  "authType": "connection_string",
+  "permissions": ["read"],
+  "readOnly": true,
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://modelcontextprotocol.io/examples"
+}

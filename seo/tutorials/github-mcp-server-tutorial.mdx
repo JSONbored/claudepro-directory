@@ -1,0 +1,106 @@
+---
+title: "How to Connect Claude to GitHub - Claude MCP Tutorial (2025)"
+description: "Step-by-step guide to integrate Claude with your GitHub repositories."
+keywords: ["claude mcp tutorial", "Github Mcp Server", "september 2025", "step by step"]
+dateUpdated: "2025-09-18"
+---
+
+# How to Connect Claude to GitHub
+
+*Complete guide updated for September 2025*
+
+Step-by-step guide to integrate Claude with your GitHub repositories. This tutorial will walk you through setting up **Github Mcp Server** with Claude Desktop.
+
+## Prerequisites
+
+- Claude Desktop (latest version as of September 2025)
+- GitHub account
+- Personal access token
+
+## Quick Setup (5 minutes)
+
+### 1. Locate Your Configuration File
+
+**macOS:**
+```bash
+~/Library/Application Support/Claude/claude_desktop_config.json
+```
+
+**Windows:**
+```bash
+%APPDATA%\Claude\claude_desktop_config.json
+```
+
+### 2. Add MCP Server Configuration
+
+```json
+{
+  "mcpServers": {
+    "github-mcp-server": {
+      "command": "npx",
+      "args": ["github-mcp-server"],
+      
+    }
+  }
+}
+```
+
+### 3. Restart Claude Desktop
+
+After saving the configuration, completely restart Claude Desktop for changes to take effect.
+
+### 4. Verify Installation
+
+Type this in Claude to verify:
+> "Can you access Github Mcp Server?"
+
+## Detailed Configuration
+
+
+
+## Common Issues & Solutions
+
+### Issue: "MCP server not found"
+**Solution:** Ensure you've restarted Claude Desktop completely, not just closed the window.
+
+### Issue: "Permission denied"
+**Solution:** The MCP server may need additional permissions. Check your system settings.
+
+### Issue: "Configuration error"
+**Solution:** Validate your JSON syntax using a JSON validator.
+
+## Example Use Cases
+
+
+### List repositories
+Get a list of all your repos
+
+```
+Show me all my GitHub repositories
+```
+
+
+### Create issue
+Create GitHub issues from Claude
+
+```
+Create a new issue in my project
+```
+
+
+## Advanced Configuration
+
+For power users, you can extend this setup with:
+- Multiple MCP servers working together
+- Custom environment variables
+- API key management
+
+## Next Steps
+
+- [Explore more MCP servers](/mcp)
+- [Learn about github](/use-cases/github)
+- [Share your setup](/submit)
+
+---
+
+*Last verified: September 18, 2025 | [Report an issue](https://github.com/JSONbored/claudepro-directory/issues)*

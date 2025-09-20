@@ -1,0 +1,102 @@
+{
+  "slug": "cloudinary-mcp-server",
+  "description": "Upload, manage, transform, and analyze media assets in the cloud",
+  "category": "mcp",
+  "author": "Cloudinary",
+  "dateAdded": "2025-09-18",
+  "tags": [
+    "media",
+    "cloudinary",
+    "images",
+    "video",
+    "asset-management"
+  ],
+  "content": "Manage and transform media assets through Cloudinary's comprehensive cloud-based media platform.",
+  "features": [
+    "Upload and store media assets securely",
+    "Apply real-time image and video transformations",
+    "Optimize media for web delivery",
+    "Manage asset metadata and tags",
+    "Generate responsive image variations"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Get your Cloudinary credentials from https://console.cloudinary.com/",
+        "Note your Cloud Name, API Key, and API Secret",
+        "Open Claude Desktop configuration file",
+        "Add the Cloudinary MCP server configuration with your credentials",
+        "Restart Claude Desktop"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add cloudinary --env CLOUDINARY_CLOUD_NAME=YOUR_CLOUD_NAME --env CLOUDINARY_API_KEY=YOUR_KEY --env CLOUDINARY_API_SECRET=YOUR_SECRET"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "cloudinary": {
+          "transport": "http",
+          "url": "https://mcp.cloudinary.com/",
+          "env": {
+            "CLOUDINARY_CLOUD_NAME": "your_cloud_name",
+            "CLOUDINARY_API_KEY": "your_api_key",
+            "CLOUDINARY_API_SECRET": "your_api_secret"
+          }
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "cloudinary": {
+          "transport": "http",
+          "url": "https://mcp.cloudinary.com/",
+          "env": {
+            "CLOUDINARY_CLOUD_NAME": "${CLOUDINARY_CLOUD_NAME}",
+            "CLOUDINARY_API_KEY": "${CLOUDINARY_API_KEY}",
+            "CLOUDINARY_API_SECRET": "${CLOUDINARY_API_SECRET}"
+          }
+        }
+      }
+    }
+  },
+  "package": null,
+  "source": "official",
+  "useCases": [
+    "Batch optimize images for web",
+    "Dynamic image resizing and cropping",
+    "Video transcoding and optimization",
+    "Asset organization and tagging",
+    "Content moderation and analysis"
+  ],
+  "security": [
+    "OAuth authentication for secure access",
+    "Secure upload presets configuration",
+    "Monitor bandwidth usage",
+    "Set transformation limits"
+  ],
+  "troubleshooting": [
+    "Check account storage limits",
+    "Verify transformation quotas",
+    "Monitor bandwidth usage",
+    "Test URL signing configuration"
+  ],
+  "examples": [
+    "Resize all product images to 800x600",
+    "Apply watermark to videos",
+    "Generate responsive image sets",
+    "Optimize images for web delivery"
+  ],
+  "requiresAuth": true,
+  "permissions": [
+    "read",
+    "write",
+    "transform",
+    "delete"
+  ],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://cloudinary.com/documentation/cloudinary_llm_mcp#mcp_servers"
+}

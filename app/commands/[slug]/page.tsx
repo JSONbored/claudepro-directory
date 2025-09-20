@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { ContentDetailPage } from '@/components/content-detail-page';
+import { CommandDetailPage } from '@/components/command-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { commands, getCommandBySlug, getCommandFullContent } from '@/generated/content';
+import { getDisplayTitle } from '@/lib/utils';
 
 interface CommandPageProps {
   params: Promise<{ slug: string }>;
@@ -19,12 +20,14 @@ export async function generateMetadata({ params }: CommandPageProps): Promise<Me
     };
   }
 
+  const displayTitle = getDisplayTitle(command);
+
   return {
-    title: `${command.title || command.name} - Claude Command | Claude Pro Directory`,
+    title: `${displayTitle} - Claude Commands | Claude Pro Directory`,
     description: command.description,
     keywords: command.tags?.join(', '),
     openGraph: {
-      title: command.title || command.name || 'Claude Command',
+      title: displayTitle || 'Claude Commands',
       description: command.description,
       type: 'article',
     },
@@ -55,13 +58,7 @@ export default async function CommandPage({ params }: CommandPageProps) {
   return (
     <>
       <ViewTracker category="commands" slug={slug} />
-      <ContentDetailPage
-        item={fullCommand || commandMeta}
-        type="commands"
-        icon="terminal"
-        typeName="Command"
-        relatedItems={relatedCommands}
-      />
+      <CommandDetailPage item={fullCommand || commandMeta} relatedItems={relatedCommands} />
     </>
   );
 }

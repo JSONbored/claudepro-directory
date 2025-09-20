@@ -1,10 +1,12 @@
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { Toaster } from 'sonner';
 import { Navigation } from '@/components/navigation';
+import { PerformanceOptimizer } from '@/components/performance-optimizer';
 import { StructuredData } from '@/components/structured-data';
 import { WebVitals } from './components/web-vitals';
 
@@ -110,8 +112,15 @@ export default function RootLayout({
           </div>
           <Toaster />
         </ThemeProvider>
+        <PerformanceOptimizer />
         <Analytics />
         <WebVitals />
+        {/* Umami Analytics - Privacy-focused analytics */}
+        <Script
+          src="https://umami.claudepro.directory/script.js"
+          data-website-id="b734c138-2949-4527-9160-7fe5d0e81121"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

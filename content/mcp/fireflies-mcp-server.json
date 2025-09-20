@@ -1,0 +1,89 @@
+{
+  "slug": "fireflies-mcp-server",
+  "description": "Extract valuable insights from meeting transcripts and summaries",
+  "category": "mcp",
+  "author": "Fireflies",
+  "dateAdded": "2025-09-18",
+  "tags": [
+    "meetings",
+    "fireflies",
+    "transcription",
+    "notes",
+    "ai-assistant"
+  ],
+  "content": "Access and analyze meeting transcripts and insights through Fireflies.ai's meeting intelligence platform.",
+  "features": [
+    "Access meeting transcripts and recordings",
+    "Retrieve automated meeting summaries",
+    "Search conversation content",
+    "Extract action items and decisions",
+    "Analyze speaker analytics and participation"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open Claude Desktop configuration file",
+        "Add the Fireflies server configuration with HTTP transport",
+        "Restart Claude Desktop",
+        "Authenticate with your Fireflies account"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport http fireflies https://api.fireflies.ai/mcp"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "fireflies": {
+          "transport": "http",
+          "url": "https://api.fireflies.ai/mcp"
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "fireflies": {
+          "transport": "http",
+          "url": "https://api.fireflies.ai/mcp"
+        }
+      }
+    }
+  },
+  "package": null,
+  "source": "official",
+  "useCases": [
+    "Review meeting outcomes and decisions",
+    "Extract action items for follow-up",
+    "Search past discussions by topic",
+    "Generate meeting reports for stakeholders",
+    "Track speaker participation metrics"
+  ],
+  "security": [
+    "OAuth authentication for workspace access",
+    "Respect meeting privacy settings",
+    "Control transcript access permissions",
+    "Regular data audits recommended"
+  ],
+  "troubleshooting": [
+    "Check workspace permissions",
+    "Verify meeting access rights",
+    "Monitor storage limits",
+    "Test transcript quality"
+  ],
+  "examples": [
+    "Get action items from today's standup",
+    "Search for discussions about Q4 planning",
+    "Generate summary of customer call",
+    "Find all mentions of budget in recent meetings"
+  ],
+  "requiresAuth": true,
+  "permissions": [
+    "read",
+    "search"
+  ],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol"
+}

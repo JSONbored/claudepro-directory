@@ -2,142 +2,109 @@
 
 import { BookOpen, Briefcase, ExternalLink, Search, Server, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import { ConfigCard } from '@/components/config-card';
 import { InfiniteScrollContainer } from '@/components/infinite-scroll-container';
+import {
+  LazyConfigCard,
+  LazyInfiniteScrollContainer,
+  lazyContentLoaders,
+} from '@/components/lazy-components';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { type FilterState, UnifiedSearch } from '@/components/unified-search';
-import { agents, commands, hooks, mcp, rules } from '@/generated/content';
+import { UnifiedSearch } from '@/components/unified-search';
+import { useSearch } from '@/hooks/use-search';
 import type { ContentItem } from '@/types/content';
+
+// Generate stable keys for skeleton items (prevents unnecessary re-renders)
+const SKELETON_KEYS = Array.from({ length: 6 }, () => crypto.randomUUID());
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState<FilterState>({ sort: 'trending' });
-  const [filteredItems, setFilteredItems] = useState<ContentItem[]>([]);
   const [displayedItems, setDisplayedItems] = useState<ContentItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [contentLoaded, setContentLoaded] = useState(false);
+  const [allConfigs, setAllConfigs] = useState<ContentItem[]>([]);
+  const [rules, setRules] = useState<ContentItem[]>([]);
+  const [mcp, setMcp] = useState<ContentItem[]>([]);
+  const [agents, setAgents] = useState<ContentItem[]>([]);
+  const [commands, setCommands] = useState<ContentItem[]>([]);
+  const [hooks, setHooks] = useState<ContentItem[]>([]);
   const pageSize = 20;
 
-  const allConfigs = useMemo(() => [...rules, ...mcp, ...agents, ...commands, ...hooks], []);
+  // Load content lazily on component mount
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const [rulesData, mcpData, agentsData, commandsData, hooksData] = await Promise.all([
+          lazyContentLoaders.rules(),
+          lazyContentLoaders.mcp(),
+          lazyContentLoaders.agents(),
+          lazyContentLoaders.commands(),
+          lazyContentLoaders.hooks(),
+        ]);
 
-  // Get unique values for filter options
-  const availableCategories = useMemo(
-    () => [...new Set(allConfigs.map((item) => item.category))].filter(Boolean) as string[],
-    [allConfigs]
-  );
-  const availableTags = useMemo(
-    () => [...new Set(allConfigs.flatMap((item) => item.tags || []))].filter(Boolean),
-    [allConfigs]
-  );
-  const availableAuthors = useMemo(
-    () => [...new Set(allConfigs.map((item) => item.author))].filter(Boolean) as string[],
-    [allConfigs]
-  );
-
-  // Handle search
-  const handleSearch = useCallback(
-    (query: string) => {
-      setSearchQuery(query);
-      const searchLower = query.toLowerCase();
-
-      if (!query.trim()) {
-        setFilteredItems([]);
-        setDisplayedItems([]);
-        setCurrentPage(1);
-        return;
+        setRules(rulesData);
+        setMcp(mcpData);
+        setAgents(agentsData);
+        setCommands(commandsData);
+        setHooks(hooksData);
+        setAllConfigs([...rulesData, ...mcpData, ...agentsData, ...commandsData, ...hooksData]);
+        setContentLoaded(true);
+      } catch (error) {
+        console.error('Failed to load content:', error);
+        setContentLoaded(true); // Still set to true to show fallback UI
       }
+    };
 
-      const filtered = allConfigs.filter(
-        (item) =>
-          item.name?.toLowerCase().includes(searchLower) ||
-          item.description?.toLowerCase().includes(searchLower) ||
-          item.tags?.some((tag) => tag.toLowerCase().includes(searchLower)) ||
-          item.category?.toLowerCase().includes(searchLower) ||
-          item.author?.toLowerCase().includes(searchLower)
-      );
+    loadContent();
+  }, []);
 
-      setFilteredItems(filtered);
-      setDisplayedItems(filtered.slice(0, pageSize));
-      setCurrentPage(1);
-    },
-    [allConfigs]
-  );
+  // Use React 19 optimized search hook
+  const { filters, searchResults, filterOptions, handleSearch, handleFiltersChange, isSearching } =
+    useSearch({
+      data: allConfigs,
+      searchOptions: {
+        threshold: 0.3,
+        minMatchCharLength: 2,
+      },
+    });
 
-  // Handle filters change
-  const handleFiltersChange = useCallback(
-    (newFilters: FilterState) => {
-      setFilters(newFilters);
+  // Filter search results by active tab
+  const filteredResults = useMemo(() => {
+    if (activeTab === 'all' || activeTab === 'community') {
+      return searchResults;
+    }
 
-      let baseItems = searchQuery.trim() ? filteredItems : allConfigs;
+    switch (activeTab) {
+      case 'rules':
+        return searchResults.filter((item) => rules.some((r) => r.id === item.id));
+      case 'mcp':
+        return searchResults.filter((item) => mcp.some((m) => m.id === item.id));
+      case 'agents':
+        return searchResults.filter((item) => agents.some((a) => a.id === item.id));
+      case 'commands':
+        return searchResults.filter((item) => commands.some((c) => c.id === item.id));
+      case 'hooks':
+        return searchResults.filter((item) => hooks.some((h) => h.id === item.id));
+      default:
+        return searchResults;
+    }
+  }, [searchResults, activeTab, agents.some, commands.some, hooks.some, mcp.some, rules.some]);
 
-      // Apply tab filter
-      if (activeTab !== 'all' && activeTab !== 'community') {
-        switch (activeTab) {
-          case 'rules':
-            baseItems = baseItems.filter((item) => rules.some((r) => r.id === item.id));
-            break;
-          case 'mcp':
-            baseItems = baseItems.filter((item) => mcp.some((m) => m.id === item.id));
-            break;
-          case 'agents':
-            baseItems = baseItems.filter((item) => agents.some((a) => a.id === item.id));
-            break;
-          case 'commands':
-            baseItems = baseItems.filter((item) => commands.some((c) => c.id === item.id));
-            break;
-          case 'hooks':
-            baseItems = baseItems.filter((item) => hooks.some((h) => h.id === item.id));
-            break;
-        }
-      }
-
-      let processed = [...baseItems];
-
-      // Apply category filter
-      if (newFilters.category) {
-        processed = processed.filter((item) => item.category === newFilters.category);
-      }
-
-      // Apply author filter
-      if (newFilters.author) {
-        processed = processed.filter((item) => item.author === newFilters.author);
-      }
-
-      // Apply tags filter
-      if (newFilters.tags && newFilters.tags.length > 0) {
-        processed = processed.filter((item) =>
-          newFilters.tags?.some((tag) => item.tags?.includes(tag))
-        );
-      }
-
-      // Apply sorting
-      switch (newFilters.sort) {
-        case 'alphabetical':
-          processed.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-          break;
-        case 'newest':
-          // Most items don't have dates, so keep original order
-          break;
-        default:
-          // Keep original order which should be trending
-          break;
-      }
-
-      setFilteredItems(processed);
-      setDisplayedItems(processed.slice(0, pageSize));
-      setCurrentPage(1);
-    },
-    [searchQuery, filteredItems, allConfigs, activeTab]
-  );
+  // Update displayed items when filtered results change
+  useEffect(() => {
+    setDisplayedItems(filteredResults.slice(0, pageSize));
+    setCurrentPage(1);
+  }, [filteredResults]);
 
   // Load more function for infinite scroll
   const loadMore = useCallback(async () => {
     const nextPage = currentPage + 1;
     const startIndex = (nextPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    const nextItems = filteredItems.slice(startIndex, endIndex);
+    const nextItems = filteredResults.slice(startIndex, endIndex);
 
     // Simulate async load with small delay
     await new Promise((resolve) => setTimeout(resolve, 200));
@@ -146,10 +113,9 @@ export default function HomePage() {
     setCurrentPage(nextPage);
 
     return nextItems;
-  }, [currentPage, filteredItems]);
+  }, [currentPage, filteredResults]);
 
-  const hasMore = displayedItems.length < filteredItems.length;
-  const isSearching = searchQuery.trim().length > 0;
+  const hasMore = displayedItems.length < filteredResults.length;
 
   const getConfigType = (
     config: ContentItem
@@ -166,14 +132,9 @@ export default function HomePage() {
   };
 
   // Handle tab change
-  const handleTabChange = useCallback(
-    (value: string) => {
-      setActiveTab(value);
-      // Re-apply filters when tab changes
-      handleFiltersChange(filters);
-    },
-    [filters, handleFiltersChange]
-  );
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab(value);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -196,16 +157,20 @@ export default function HomePage() {
 
             {/* Search Bar */}
             <div className="max-w-4xl mx-auto mb-8">
-              <UnifiedSearch
-                placeholder="Search for rules, MCP servers, agents, commands, and more..."
-                onSearch={handleSearch}
-                onFiltersChange={handleFiltersChange}
-                filters={filters}
-                availableTags={availableTags}
-                availableAuthors={availableAuthors}
-                availableCategories={availableCategories}
-                resultCount={filteredItems.length}
-              />
+              {contentLoaded ? (
+                <UnifiedSearch
+                  placeholder="Search for rules, MCP servers, agents, commands, and more..."
+                  onSearch={handleSearch}
+                  onFiltersChange={handleFiltersChange}
+                  filters={filters}
+                  availableTags={filterOptions.tags}
+                  availableAuthors={filterOptions.authors}
+                  availableCategories={filterOptions.categories}
+                  resultCount={filteredResults.length}
+                />
+              ) : (
+                <div className="w-full h-12 bg-card/50 rounded-lg animate-pulse" />
+              )}
             </div>
 
             {/* Quick Stats */}
@@ -242,13 +207,12 @@ export default function HomePage() {
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold">
                 Search Results
-                <span className="text-muted-foreground ml-2">({filteredItems.length} found)</span>
+                <span className="text-muted-foreground ml-2">({filteredResults.length} found)</span>
               </h2>
               <Button
                 variant="outline"
                 onClick={() => {
-                  setSearchQuery('');
-                  setFilteredItems([]);
+                  handleSearch('');
                   setDisplayedItems([]);
                 }}
                 className="text-sm"
@@ -257,7 +221,7 @@ export default function HomePage() {
               </Button>
             </div>
 
-            {filteredItems.length > 0 ? (
+            {filteredResults.length > 0 ? (
               <InfiniteScrollContainer
                 items={displayedItems}
                 renderItem={(item) => (
@@ -294,9 +258,17 @@ export default function HomePage() {
                 </Link>
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {rules.slice(0, 6).map((rule) => (
-                  <ConfigCard key={rule.id} {...rule} type="rules" />
-                ))}
+                {contentLoaded
+                  ? rules
+                      .slice(0, 6)
+                      .map((rule) => <LazyConfigCard key={rule.id} {...rule} type="rules" />)
+                  : SKELETON_KEYS.map((key) => (
+                      <div key={key} className="animate-pulse bg-card/50 rounded-lg p-6 space-y-4">
+                        <div className="h-6 bg-card/70 rounded w-3/4" />
+                        <div className="h-4 bg-card/70 rounded w-full" />
+                        <div className="h-4 bg-card/70 rounded w-2/3" />
+                      </div>
+                    ))}
               </div>
             </div>
 
@@ -309,9 +281,17 @@ export default function HomePage() {
                 </Link>
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {mcp.slice(0, 6).map((mcpItem) => (
-                  <ConfigCard key={mcpItem.id} {...mcpItem} type="mcp" />
-                ))}
+                {contentLoaded
+                  ? mcp
+                      .slice(0, 6)
+                      .map((mcpItem) => <LazyConfigCard key={mcpItem.id} {...mcpItem} type="mcp" />)
+                  : SKELETON_KEYS.map((key) => (
+                      <div key={key} className="animate-pulse bg-card/50 rounded-lg p-6 space-y-4">
+                        <div className="h-6 bg-card/70 rounded w-3/4" />
+                        <div className="h-4 bg-card/70 rounded w-full" />
+                        <div className="h-4 bg-card/70 rounded w-2/3" />
+                      </div>
+                    ))}
               </div>
             </div>
 
@@ -327,9 +307,17 @@ export default function HomePage() {
                 </Link>
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {agents.slice(0, 6).map((agent) => (
-                  <ConfigCard key={agent.id} {...agent} type="agents" />
-                ))}
+                {contentLoaded
+                  ? agents
+                      .slice(0, 6)
+                      .map((agent) => <LazyConfigCard key={agent.id} {...agent} type="agents" />)
+                  : SKELETON_KEYS.map((key) => (
+                      <div key={key} className="animate-pulse bg-card/50 rounded-lg p-6 space-y-4">
+                        <div className="h-6 bg-card/70 rounded w-3/4" />
+                        <div className="h-4 bg-card/70 rounded w-full" />
+                        <div className="h-4 bg-card/70 rounded w-2/3" />
+                      </div>
+                    ))}
               </div>
             </div>
 
@@ -345,9 +333,19 @@ export default function HomePage() {
                 </Link>
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {commands.slice(0, 6).map((command) => (
-                  <ConfigCard key={command.id} {...command} type="commands" />
-                ))}
+                {contentLoaded
+                  ? commands
+                      .slice(0, 6)
+                      .map((command) => (
+                        <LazyConfigCard key={command.id} {...command} type="commands" />
+                      ))
+                  : SKELETON_KEYS.map((key) => (
+                      <div key={key} className="animate-pulse bg-card/50 rounded-lg p-6 space-y-4">
+                        <div className="h-6 bg-card/70 rounded w-3/4" />
+                        <div className="h-4 bg-card/70 rounded w-full" />
+                        <div className="h-4 bg-card/70 rounded w-2/3" />
+                      </div>
+                    ))}
               </div>
             </div>
 
@@ -360,9 +358,17 @@ export default function HomePage() {
                 </Link>
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {hooks.slice(0, 6).map((hook) => (
-                  <ConfigCard key={hook.id} {...hook} type="hooks" />
-                ))}
+                {contentLoaded
+                  ? hooks
+                      .slice(0, 6)
+                      .map((hook) => <LazyConfigCard key={hook.id} {...hook} type="hooks" />)
+                  : SKELETON_KEYS.map((key) => (
+                      <div key={key} className="animate-pulse bg-card/50 rounded-lg p-6 space-y-4">
+                        <div className="h-6 bg-card/70 rounded w-3/4" />
+                        <div className="h-4 bg-card/70 rounded w-full" />
+                        <div className="h-4 bg-card/70 rounded w-2/3" />
+                      </div>
+                    ))}
               </div>
             </div>
 
@@ -418,18 +424,22 @@ export default function HomePage() {
             {/* Tab content for all tabs except community */}
             {['all', 'rules', 'mcp', 'agents', 'commands', 'hooks'].map((tab) => (
               <TabsContent key={tab} value={tab} className="space-y-6">
-                {filteredItems.length > 0 ? (
-                  <InfiniteScrollContainer
+                {filteredResults.length > 0 ? (
+                  <LazyInfiniteScrollContainer
                     items={displayedItems}
-                    renderItem={(item) => (
-                      <ConfigCard key={item.id} {...item} type={getConfigType(item)} />
+                    renderItem={(item: any, _index: number) => (
+                      <LazyConfigCard
+                        key={(item as ContentItem).id}
+                        {...(item as ContentItem)}
+                        type={getConfigType(item as ContentItem)}
+                      />
                     )}
                     loadMore={loadMore}
                     hasMore={hasMore}
                     pageSize={20}
                     gridClassName="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
                     emptyMessage={`No ${tab === 'all' ? 'configurations' : tab} found`}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item: any, _index: number) => (item as ContentItem).id}
                   />
                 ) : (
                   <div className="text-center py-12">
