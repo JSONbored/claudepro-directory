@@ -67,13 +67,16 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
     }
   };
 
-  const handleCopyConfiguration = async () => {
+  const handleCopyConfiguration = async (configType: 'claudeDesktop' | 'claudeCode') => {
     try {
-      await navigator.clipboard.writeText(JSON.stringify(item.configuration, null, 2));
+      const config = item.configuration?.[configType];
+      if (!config) return;
+
+      await navigator.clipboard.writeText(JSON.stringify(config, null, 2));
       setCopied(true);
       toast({
         title: 'Copied!',
-        description: 'MCP server configuration has been copied to your clipboard.',
+        description: `${configType} configuration has been copied to your clipboard.`,
       });
       setTimeout(() => setCopied(false), 2000);
     } catch (_error) {
@@ -205,29 +208,68 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
             {item.configuration && (
               <Card>
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                      <Settings className="h-5 w-5" />
-                      Configuration
-                    </CardTitle>
-                    <Button size="sm" variant="outline" onClick={handleCopyConfiguration}>
-                      <Copy className="h-4 w-4 mr-2" />
-                      {copied ? 'Copied!' : 'Copy'}
-                    </Button>
-                  </div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5" />
+                    Configuration
+                  </CardTitle>
                   <CardDescription>
-                    Add this configuration to your Claude Desktop or Claude Code setup
+                    Add these configurations to your Claude Desktop or Claude Code setup
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="max-h-[600px] overflow-y-auto rounded-md border">
-                    <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}>
-                      <CodeHighlight
-                        code={JSON.stringify(item.configuration, null, 2)}
-                        language="json"
-                      />
-                    </Suspense>
-                  </div>
+                <CardContent className="space-y-6">
+                  {/* Claude Desktop Configuration */}
+                  {item.configuration.claudeDesktop && (
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium">Claude Desktop</h4>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCopyConfiguration('claudeDesktop')}
+                        >
+                          <Copy className="h-4 w-4 mr-2" />
+                          {copied ? 'Copied!' : 'Copy'}
+                        </Button>
+                      </div>
+                      <div className="max-h-[400px] overflow-y-auto rounded-md border">
+                        <Suspense
+                          fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}
+                        >
+                          <CodeHighlight
+                            code={JSON.stringify(item.configuration.claudeDesktop, null, 2)}
+                            language="json"
+                          />
+                        </Suspense>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Claude Code Configuration */}
+                  {item.configuration.claudeCode && (
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium">Claude Code</h4>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCopyConfiguration('claudeCode')}
+                        >
+                          <Copy className="h-4 w-4 mr-2" />
+                          {copied ? 'Copied!' : 'Copy'}
+                        </Button>
+                      </div>
+                      <div className="max-h-[400px] overflow-y-auto rounded-md border">
+                        <Suspense
+                          fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}
+                        >
+                          <CodeHighlight
+                            code={JSON.stringify(item.configuration.claudeCode, null, 2)}
+                            language="json"
+                          />
+                        </Suspense>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}

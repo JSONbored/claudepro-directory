@@ -65,24 +65,27 @@ interface NavLinkProps {
   onClick: () => void;
 }
 
-const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkProps) => (
-  <Link
-    href={href}
-    className={`text-sm font-medium transition-colors hover:text-accent ${
-      isActive(href) ? 'text-primary' : 'text-muted-foreground'
-    } ${className}`}
-    onClick={onClick}
-  >
-    {children}
-  </Link>
-);
+const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkProps) => {
+  const active = isActive(href);
+  return (
+    <Link
+      href={href}
+      className={`${active ? 'ring-2 ring-accent/30 bg-accent/10 border-accent/50 text-primary' : ''} ${className}`}
+      onClick={onClick}
+    >
+      {children}
+    </Link>
+  );
+};
 
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
+    setMounted(true);
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
@@ -98,23 +101,25 @@ export const Navigation = () => {
   return (
     <header
       className={`sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300 ${
-        isScrolled ? 'shadow-sm' : ''
+        mounted && isScrolled ? 'shadow-sm' : ''
       }`}
     >
       <div className="container mx-auto px-4">
         <div
           className={`flex items-center justify-between transition-all duration-300 ${
-            isScrolled ? 'h-12' : 'h-16'
+            mounted && isScrolled ? 'h-12' : 'h-16'
           }`}
         >
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 min-w-0 flex-shrink">
             <LogoIcon
-              className={`transition-all duration-300 ${isScrolled ? 'h-6 w-6' : 'h-8 w-8'}`}
+              className={`transition-all duration-300 flex-shrink-0 hidden xl:block ${
+                mounted && isScrolled ? 'h-6 w-6' : 'h-8 w-8'
+              }`}
             />
             <span
-              className={`font-medium text-accent transition-all duration-300 ${
-                isScrolled ? 'text-base' : 'text-lg'
+              className={`font-medium text-foreground transition-all duration-300 hidden xl:inline ${
+                mounted && isScrolled ? 'text-base' : 'text-lg'
               }`}
             >
               claudepro.directory
@@ -186,16 +191,14 @@ export const Navigation = () => {
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-3">
-            <ThemeToggle />
-
             <Button
               variant="ghost"
               size="sm"
               onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
               className="hidden sm:flex hover:bg-accent/10 hover:text-accent"
             >
-              <DiscordIcon className="h-4 w-4 mr-2" />
-              Discord
+              <DiscordIcon className="h-4 w-4 xl:mr-2" />
+              <span className="hidden xl:inline">Discord</span>
             </Button>
 
             <Button
@@ -206,16 +209,18 @@ export const Navigation = () => {
               }
               className="hidden sm:flex hover:bg-accent/10 hover:text-accent"
             >
-              <Github className="h-4 w-4 mr-2" />
-              GitHub
+              <Github className="h-4 w-4 xl:mr-2" />
+              <span className="hidden xl:inline">GitHub</span>
             </Button>
+
+            <ThemeToggle />
 
             <Badge
               variant="outline"
-              className="hidden lg:flex border-accent/20 bg-accent/5 text-accent"
+              className="hidden 2xl:flex border-accent/20 bg-accent/5 text-accent"
             >
               <ExternalLink className="h-3 w-3 mr-1 text-accent" />
-              Free & Open Source
+              Open Source
             </Badge>
 
             {/* Mobile Menu */}
@@ -225,128 +230,157 @@ export const Navigation = () => {
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-                <div className="flex flex-col space-y-4 mt-6">
-                  <NavLink
-                    href="/rules"
-                    isActive={isActive}
-                    onClick={() => setIsOpen(false)}
-                    className="text-base"
-                  >
-                    Claude Rules
-                  </NavLink>
-
-                  <NavLink
-                    href="/mcp"
-                    isActive={isActive}
-                    onClick={() => setIsOpen(false)}
-                    className="text-base"
-                  >
-                    MCP
-                  </NavLink>
-
-                  <NavLink
-                    href="/agents"
-                    isActive={isActive}
-                    onClick={() => setIsOpen(false)}
-                    className="text-base"
-                  >
-                    Agents
-                  </NavLink>
-
-                  <NavLink
-                    href="/commands"
-                    isActive={isActive}
-                    onClick={() => setIsOpen(false)}
-                    className="text-base"
-                  >
-                    Commands
-                  </NavLink>
-
-                  <NavLink
-                    href="/hooks"
-                    isActive={isActive}
-                    onClick={() => setIsOpen(false)}
-                    className="text-base"
-                  >
-                    Hooks
-                  </NavLink>
-
-                  <NavLink
-                    href="/jobs"
-                    isActive={isActive}
-                    onClick={() => setIsOpen(false)}
-                    className="text-base"
-                  >
-                    Jobs
-                  </NavLink>
-
-                  <NavLink
-                    href="/trending"
-                    isActive={isActive}
-                    onClick={() => setIsOpen(false)}
-                    className="text-base"
-                  >
-                    Trending
-                  </NavLink>
-
-                  <NavLink
-                    href="/guides"
-                    isActive={isActive}
-                    onClick={() => setIsOpen(false)}
-                    className="text-base"
-                  >
-                    Guides
-                  </NavLink>
-
-                  <div className="border-t border-border pt-4 space-y-4">
-                    <NavLink
-                      href="/community"
-                      isActive={isActive}
-                      onClick={() => setIsOpen(false)}
-                      className="text-base"
-                    >
-                      Community
-                    </NavLink>
-
-                    <NavLink
-                      href="/submit"
-                      isActive={isActive}
-                      onClick={() => setIsOpen(false)}
-                      className="text-base"
-                    >
-                      Submit Config
-                    </NavLink>
-
-                    <NavLink
-                      href="/partner"
-                      isActive={isActive}
-                      onClick={() => setIsOpen(false)}
-                      className="text-base"
-                    >
-                      Partner
-                    </NavLink>
+              <SheetContent
+                side="right"
+                className="w-[300px] sm:w-[380px] border-l border-border/50"
+              >
+                <div className="flex flex-col h-full">
+                  {/* Header */}
+                  <div className="flex items-center gap-3 pt-6 pb-8 px-1">
+                    <LogoIcon className="h-8 w-8 flex-shrink-0" />
+                    <span className="font-semibold text-lg text-foreground">
+                      claudepro.directory
+                    </span>
                   </div>
 
-                  <div className="border-t border-border pt-4 space-y-3">
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start"
-                      onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
-                    >
-                      <DiscordIcon className="h-4 w-4 mr-2" />
-                      Join Discord
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start"
-                      onClick={() =>
-                        window.open('https://github.com/JSONbored/claudepro-directory', '_blank')
-                      }
-                    >
-                      <Github className="h-4 w-4 mr-2" />
-                      View on GitHub
-                    </Button>
+                  {/* Main Navigation */}
+                  <div className="flex-1 overflow-y-auto">
+                    <nav className="space-y-4 px-3">
+                      <div className="space-y-3">
+                        <NavLink
+                          href="/rules"
+                          isActive={isActive}
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center w-full px-6 py-6 text-lg font-semibold rounded-2xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                        >
+                          Rules
+                        </NavLink>
+
+                        <NavLink
+                          href="/mcp"
+                          isActive={isActive}
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center w-full px-6 py-6 text-lg font-semibold rounded-2xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                        >
+                          MCP
+                        </NavLink>
+
+                        <NavLink
+                          href="/agents"
+                          isActive={isActive}
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center w-full px-6 py-6 text-lg font-semibold rounded-2xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                        >
+                          Agents
+                        </NavLink>
+
+                        <NavLink
+                          href="/commands"
+                          isActive={isActive}
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center w-full px-6 py-6 text-lg font-semibold rounded-2xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                        >
+                          Commands
+                        </NavLink>
+
+                        <NavLink
+                          href="/hooks"
+                          isActive={isActive}
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center w-full px-6 py-6 text-lg font-semibold rounded-2xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                        >
+                          Hooks
+                        </NavLink>
+
+                        <NavLink
+                          href="/jobs"
+                          isActive={isActive}
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center w-full px-6 py-6 text-lg font-semibold rounded-2xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                        >
+                          Jobs
+                        </NavLink>
+
+                        <NavLink
+                          href="/trending"
+                          isActive={isActive}
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center w-full px-6 py-6 text-lg font-semibold rounded-2xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                        >
+                          Trending
+                        </NavLink>
+
+                        <NavLink
+                          href="/guides"
+                          isActive={isActive}
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center w-full px-6 py-6 text-lg font-semibold rounded-2xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                        >
+                          Guides
+                        </NavLink>
+                      </div>
+
+                      {/* Secondary Navigation */}
+                      <div className="pt-6 mt-4 border-t border-border/30">
+                        <div className="space-y-3">
+                          <NavLink
+                            href="/community"
+                            isActive={isActive}
+                            onClick={() => setIsOpen(false)}
+                            className="flex items-center w-full px-6 py-5 text-base font-medium text-muted-foreground rounded-xl bg-card/50 border border-border/40 hover:bg-accent/5 hover:text-foreground hover:border-accent/30 transition-all duration-200 active:scale-[0.98]"
+                          >
+                            Community
+                          </NavLink>
+
+                          <NavLink
+                            href="/submit"
+                            isActive={isActive}
+                            onClick={() => setIsOpen(false)}
+                            className="flex items-center w-full px-6 py-5 text-base font-medium text-muted-foreground rounded-xl bg-card/50 border border-border/40 hover:bg-accent/5 hover:text-foreground hover:border-accent/30 transition-all duration-200 active:scale-[0.98]"
+                          >
+                            Submit Config
+                          </NavLink>
+
+                          <NavLink
+                            href="/partner"
+                            isActive={isActive}
+                            onClick={() => setIsOpen(false)}
+                            className="flex items-center w-full px-6 py-5 text-base font-medium text-muted-foreground rounded-xl bg-card/50 border border-border/40 hover:bg-accent/5 hover:text-foreground hover:border-accent/30 transition-all duration-200 active:scale-[0.98]"
+                          >
+                            Partner
+                          </NavLink>
+                        </div>
+                      </div>
+                    </nav>
+                  </div>
+
+                  {/* Footer Actions */}
+                  <div className="border-t border-border/30 pt-6 pb-6 px-6">
+                    <div className="flex items-center justify-center gap-6">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="w-16 h-16 rounded-2xl border-border/40 bg-card hover:bg-[#5865F2]/10 hover:border-[#5865F2]/30 transition-all duration-200 active:scale-[0.95]"
+                        onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
+                      >
+                        <DiscordIcon className="h-7 w-7 text-[#5865F2]" />
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="w-16 h-16 rounded-2xl border-border/40 bg-card hover:bg-accent/10 hover:border-accent/30 transition-all duration-200 active:scale-[0.95]"
+                        onClick={() =>
+                          window.open('https://github.com/JSONbored/claudepro-directory', '_blank')
+                        }
+                      >
+                        <Github className="h-7 w-7" />
+                      </Button>
+
+                      <div className="w-16 h-16 flex items-center justify-center rounded-2xl border border-border/40 bg-card">
+                        <ThemeToggle />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </SheetContent>

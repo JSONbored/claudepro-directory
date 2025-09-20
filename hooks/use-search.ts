@@ -1,7 +1,7 @@
 'use client';
 
 import Fuse from 'fuse.js';
-import { use, useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FilterState } from '@/components/unified-search';
 import type { ContentItem } from '@/types/content';
 
@@ -17,49 +17,43 @@ interface UseSearchProps {
   searchOptions?: SearchOptions;
 }
 
-// Create a promise-based search function that can be used with React 19's use() hook
-function createSearchPromise(
+// Optimized synchronous search function for better performance and React 19 compatibility
+function performSearch(
   data: ContentItem[],
   query: string,
   filters: FilterState,
   options: SearchOptions = {}
-): Promise<ContentItem[]> {
-  return new Promise((resolve) => {
-    // Use setTimeout to make search async and allow for React 19 optimizations
-    setTimeout(() => {
-      if (!query.trim() && !hasActiveFilters(filters)) {
-        resolve(data);
-        return;
-      }
+): ContentItem[] {
+  if (!query.trim() && !hasActiveFilters(filters)) {
+    return data;
+  }
 
-      let result = data;
+  let result = data;
 
-      // Apply text search if query exists
-      if (query.trim()) {
-        const fuse = new Fuse(data, {
-          keys: [
-            { name: 'name', weight: 2 },
-            { name: 'description', weight: 1.5 },
-            { name: 'category', weight: 1 },
-            { name: 'author', weight: 0.8 },
-            { name: 'tags', weight: 0.6 },
-          ],
-          threshold: options.threshold || 0.3,
-          includeScore: options.includeScore || false,
-          includeMatches: options.includeMatches || false,
-          minMatchCharLength: options.minMatchCharLength || 2,
-        });
+  // Apply text search if query exists
+  if (query.trim()) {
+    const fuse = new Fuse(data, {
+      keys: [
+        { name: 'name', weight: 2 },
+        { name: 'description', weight: 1.5 },
+        { name: 'category', weight: 1 },
+        { name: 'author', weight: 0.8 },
+        { name: 'tags', weight: 0.6 },
+      ],
+      threshold: options.threshold || 0.3,
+      includeScore: options.includeScore || false,
+      includeMatches: options.includeMatches || false,
+      minMatchCharLength: options.minMatchCharLength || 2,
+    });
 
-        const searchResults = fuse.search(query);
-        result = searchResults.map((item) => item.item);
-      }
+    const searchResults = fuse.search(query);
+    result = searchResults.map((item) => item.item);
+  }
 
-      // Apply filters
-      result = applyFilters(result, filters);
+  // Apply filters
+  result = applyFilters(result, filters);
 
-      resolve(result);
-    }, 0);
-  });
+  return result;
 }
 
 function hasActiveFilters(filters: FilterState): boolean {
@@ -154,7 +148,10 @@ function getDateThreshold(now: Date, dateRange: string): Date {
 export function useSearch({ data, searchOptions }: UseSearchProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<FilterState>({ sort: 'trending' });
-  const [searchPromise, setSearchPromise] = useState<Promise<ContentItem[]> | null>(null);
+  const [searchResults, setSearchResults] = useState<ContentItem[]>(data);
+
+  // Memoize search options to prevent unnecessary re-renders
+  const memoizedSearchOptions = useMemo(() => searchOptions || {}, [searchOptions]);
 
   // Memoize filter options
   const filterOptions = useMemo(() => {
@@ -165,30 +162,29 @@ export function useSearch({ data, searchOptions }: UseSearchProps) {
     return { categories, tags, authors };
   }, [data]);
 
-  // Create search promise when query or filters change
-  const handleSearch = useCallback(
-    (query: string, newFilters?: FilterState) => {
-      const currentFilters = newFilters || filters;
-      const promise = createSearchPromise(data, query, currentFilters, searchOptions);
-      setSearchPromise(promise);
-      setSearchQuery(query);
-      if (newFilters) {
-        setFilters(newFilters);
-      }
-    },
-    [data, filters, searchOptions]
-  );
+  // Update search results when data, query, or filters change
+  useEffect(() => {
+    const updateResults = () => {
+      const results = performSearch(data, searchQuery, filters, memoizedSearchOptions);
+      setSearchResults(results);
+    };
 
-  const handleFiltersChange = useCallback(
-    (newFilters: FilterState) => {
+    // Debounce search for better UX
+    const timeoutId = setTimeout(updateResults, searchQuery ? 150 : 0);
+    return () => clearTimeout(timeoutId);
+  }, [data, searchQuery, filters, memoizedSearchOptions]);
+
+  // Stable callbacks that don't cause re-renders
+  const handleSearch = useCallback((query: string, newFilters?: FilterState) => {
+    setSearchQuery(query);
+    if (newFilters) {
       setFilters(newFilters);
-      handleSearch(searchQuery, newFilters);
-    },
-    [searchQuery, handleSearch]
-  );
+    }
+  }, []);
 
-  // Use React 19's use() hook to get search results
-  const searchResults = searchPromise ? use(searchPromise) : data;
+  const handleFiltersChange = useCallback((newFilters: FilterState) => {
+    setFilters(newFilters);
+  }, []);
 
   return {
     searchQuery,
