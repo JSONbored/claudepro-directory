@@ -1,0 +1,40 @@
+# Lefthook configuration for Claude Pro Directory
+# Ensures code quality and prevents broken commits
+
+pre-commit:
+  parallel: true
+  commands:
+    lint:
+      glob: "*.{ts,tsx,js,jsx,mjs}"
+      run: npm run lint
+      stage_fixed: true
+      fail_text: "❌ Linting failed. Run 'npm run format' to auto-fix."
+    
+    type-check:
+      glob: "*.{ts,tsx}"
+      run: npm run type-check
+      fail_text: "❌ TypeScript errors found. Fix them before committing."
+    
+    content-validation:
+      glob: "content/**/*.json"
+      run: npm run validate:content
+      fail_text: "❌ Content validation failed. Check your JSON files."
+
+pre-push:
+  parallel: false
+  commands:
+    build:
+      run: npm run build
+      fail_text: "❌ Build failed. Fix errors before pushing."
+    
+    security-audit:
+      run: npm audit --audit-level=moderate
+      fail_text: "❌ Security vulnerabilities found. Run 'npm audit fix'."
+
+# Skip hooks for specific scenarios
+skip_output:
+  - meta
+  - summary
+
+# Colors for output
+colors: true

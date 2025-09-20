@@ -1,32 +1,14 @@
 'use client';
 
 import { CheckCircle, ExternalLink, FileJson, Github, Loader2, Send } from 'lucide-react';
-import { useId, useState } from 'react';
+import { useActionState, useId, useState } from 'react';
+import { submitConfiguration } from '@/app/actions/submit-config';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
-import { logger } from '@/lib/logger';
-
-interface FormData {
-  type: string;
-  name: string;
-  description: string;
-  category: string;
-  author: string;
-  github: string;
-  content: string;
-  tags: string;
-}
 
 export default function SubmitPage() {
   // Generate unique IDs for form elements
@@ -39,9 +21,11 @@ export default function SubmitPage() {
   const contentId = useId();
   const tagsId = useId();
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submittedIssueUrl, setSubmittedIssueUrl] = useState<string | null>(null);
-  const [formData, setFormData] = useState<FormData>({
+  // React 19 useActionState for Server Actions
+  const [state, formAction, isPending] = useActionState(submitConfiguration, null);
+
+  // Local form state for validation and UX
+  const [formData, setFormData] = useState({
     type: '',
     name: '',
     description: '',
@@ -52,134 +36,62 @@ export default function SubmitPage() {
     tags: '',
   });
 
-  const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const validateForm = (): boolean => {
-    const newErrors: Partial<FormData> = {};
-
-    if (!formData.type) newErrors.type = 'Please select a configuration type';
-    if (!formData.name) newErrors.name = 'Name is required';
-    if (!formData.description) newErrors.description = 'Description is required';
-    if (!formData.category) newErrors.category = 'Please select a category';
-    if (!formData.author) newErrors.author = 'Author name is required';
-    if (!formData.content) newErrors.content = 'Configuration content is required';
-
-    // Validate JSON if content is provided
-    if (formData.content) {
-      try {
-        JSON.parse(formData.content);
-      } catch {
-        newErrors.content = 'Invalid JSON format';
-      }
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
+  // Show toast notifications based on server action state
+  if (state?.success && !isPending) {
+    toast({
+      title: 'Configuration Submitted!',
+      description: 'Your configuration has been submitted for review.',
+    });
+  } else if (state?.error && !isPending) {
+    if (state.fallback) {
       toast({
-        title: 'Validation Error',
-        description: 'Please fix the errors in the form',
+        title: 'Please use GitHub',
+        description: state.error,
+        action: (
+          <Button variant="outline" size="sm" asChild>
+            <a
+              href="https://github.com/JSONbored/claudepro-directory/issues/new"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open GitHub
+            </a>
+          </Button>
+        ),
+      });
+    } else {
+      toast({
+        title: 'Submission Failed',
+        description: state.error,
         variant: 'destructive',
       });
-      return;
     }
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch('/api/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        toast({
-          title: 'Configuration Submitted!',
-          description: 'Your configuration has been submitted for review.',
-        });
-
-        if (result.issueUrl) {
-          setSubmittedIssueUrl(result.issueUrl);
-        }
-
-        // Reset form
-        setFormData({
-          type: '',
-          name: '',
-          description: '',
-          category: '',
-          author: '',
-          github: '',
-          content: '',
-          tags: '',
-        });
-        setErrors({});
-      } else if (result.fallback) {
-        // Rate limited - show GitHub fallback
-        toast({
-          title: 'Please use GitHub',
-          description: result.error,
-          action: (
-            <Button variant="outline" size="sm" asChild>
-              <a
-                href="https://github.com/JSONbored/claudepro-directory/issues/new"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Open GitHub
-              </a>
-            </Button>
-          ),
-        });
-      } else {
-        toast({
-          title: 'Submission Failed',
-          description: result.error || 'Something went wrong. Please try again.',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
-      logger.error(
-        'Client submission form error',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          component: 'SubmitPage',
-        }
-      );
-      toast({
-        title: 'Network Error',
-        description: 'Failed to submit. Please check your connection and try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     // Clear error for this field when user starts typing
-    if (errors[name as keyof FormData]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
     }
   };
 
-  const handleSelectChange = (name: keyof FormData, value: string) => {
+  const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
     // Clear error for this field
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
     }
   };
 
@@ -194,7 +106,7 @@ export default function SubmitPage() {
       </div>
 
       {/* Success Message */}
-      {submittedIssueUrl && (
+      {state?.success && state.issueUrl && (
         <Card className="max-w-2xl mx-auto mb-8 border-green-500/20 bg-green-500/5">
           <CardContent className="pt-6">
             <div className="flex items-start gap-3">
@@ -205,7 +117,7 @@ export default function SubmitPage() {
                   Your configuration has been submitted for review.
                 </p>
                 <Button variant="link" size="sm" asChild className="mt-2 p-0 h-auto">
-                  <a href={submittedIssueUrl} target="_blank" rel="noopener noreferrer">
+                  <a href={state.issueUrl} target="_blank" rel="noopener noreferrer">
                     View submission on GitHub
                     <ExternalLink className="h-3 w-3 ml-1" />
                   </a>
@@ -227,29 +139,28 @@ export default function SubmitPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form action={formAction} className="space-y-6">
               {/* Type and Category Row */}
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor={typeId}>
                     Configuration Type <span className="text-red-500">*</span>
                   </Label>
-                  <Select
+                  <select
+                    name="type"
+                    id={typeId}
                     value={formData.type}
-                    onValueChange={(value) => handleSelectChange('type', value)}
-                    disabled={isSubmitting}
+                    onChange={(e) => handleSelectChange('type', e.target.value)}
+                    disabled={isPending}
+                    className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.type ? 'border-red-500' : ''}`}
                   >
-                    <SelectTrigger id={typeId} className={errors.type ? 'border-red-500' : ''}>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="agent">AI Agent</SelectItem>
-                      <SelectItem value="mcp">MCP Server</SelectItem>
-                      <SelectItem value="rule">Rule</SelectItem>
-                      <SelectItem value="command">Command</SelectItem>
-                      <SelectItem value="hook">Hook</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <option value="">Select type</option>
+                    <option value="agent">AI Agent</option>
+                    <option value="mcp">MCP Server</option>
+                    <option value="rule">Rule</option>
+                    <option value="command">Command</option>
+                    <option value="hook">Hook</option>
+                  </select>
                   {errors.type && <p className="text-sm text-red-500">{errors.type}</p>}
                 </div>
 
@@ -257,27 +168,23 @@ export default function SubmitPage() {
                   <Label htmlFor={categoryId}>
                     Category <span className="text-red-500">*</span>
                   </Label>
-                  <Select
+                  <select
+                    name="category"
+                    id={categoryId}
                     value={formData.category}
-                    onValueChange={(value) => handleSelectChange('category', value)}
-                    disabled={isSubmitting}
+                    onChange={(e) => handleSelectChange('category', e.target.value)}
+                    disabled={isPending}
+                    className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.category ? 'border-red-500' : ''}`}
                   >
-                    <SelectTrigger
-                      id={categoryId}
-                      className={errors.category ? 'border-red-500' : ''}
-                    >
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="development">Development</SelectItem>
-                      <SelectItem value="writing">Writing</SelectItem>
-                      <SelectItem value="analysis">Analysis</SelectItem>
-                      <SelectItem value="creative">Creative</SelectItem>
-                      <SelectItem value="business">Business</SelectItem>
-                      <SelectItem value="productivity">Productivity</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <option value="">Select category</option>
+                    <option value="development">Development</option>
+                    <option value="writing">Writing</option>
+                    <option value="analysis">Analysis</option>
+                    <option value="creative">Creative</option>
+                    <option value="business">Business</option>
+                    <option value="productivity">Productivity</option>
+                    <option value="other">Other</option>
+                  </select>
                   {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
                 </div>
               </div>
@@ -293,7 +200,7 @@ export default function SubmitPage() {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="e.g., Code Review Assistant"
-                  disabled={isSubmitting}
+                  disabled={isPending}
                   className={errors.name ? 'border-red-500' : ''}
                 />
                 {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
@@ -311,7 +218,7 @@ export default function SubmitPage() {
                   onChange={handleInputChange}
                   placeholder="Describe what your configuration does and how it helps users..."
                   rows={3}
-                  disabled={isSubmitting}
+                  disabled={isPending}
                   className={errors.description ? 'border-red-500' : ''}
                 />
                 {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
@@ -329,7 +236,7 @@ export default function SubmitPage() {
                     value={formData.author}
                     onChange={handleInputChange}
                     placeholder="John Doe"
-                    disabled={isSubmitting}
+                    disabled={isPending}
                     className={errors.author ? 'border-red-500' : ''}
                   />
                   {errors.author && <p className="text-sm text-red-500">{errors.author}</p>}
@@ -343,7 +250,7 @@ export default function SubmitPage() {
                     value={formData.github}
                     onChange={handleInputChange}
                     placeholder="johndoe"
-                    disabled={isSubmitting}
+                    disabled={isPending}
                   />
                   <p className="text-xs text-muted-foreground">Optional</p>
                 </div>
@@ -362,7 +269,7 @@ export default function SubmitPage() {
                   placeholder={'{\n  "name": "Your Config",\n  "description": "...",\n  ...\n}'}
                   rows={8}
                   className={`font-mono text-sm ${errors.content ? 'border-red-500' : ''}`}
-                  disabled={isSubmitting}
+                  disabled={isPending}
                 />
                 {errors.content && <p className="text-sm text-red-500">{errors.content}</p>}
               </div>
@@ -376,7 +283,7 @@ export default function SubmitPage() {
                   value={formData.tags}
                   onChange={handleInputChange}
                   placeholder="productivity, automation, coding (comma-separated)"
-                  disabled={isSubmitting}
+                  disabled={isPending}
                 />
                 <p className="text-xs text-muted-foreground">
                   Optional - Help others find your configuration
@@ -384,8 +291,8 @@ export default function SubmitPage() {
               </div>
 
               {/* Submit Button */}
-              <Button type="submit" className="w-full" disabled={isSubmitting} size="lg">
-                {isSubmitting ? (
+              <Button type="submit" className="w-full" disabled={isPending} size="lg">
+                {isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Submitting...

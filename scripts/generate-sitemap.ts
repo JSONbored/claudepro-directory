@@ -25,8 +25,8 @@ function generateSitemap(): string {
 
   // Homepage
   urls.push({
-    loc: baseUrl,
-    lastmod: new Date().toISOString().split('T')[0],
+    loc: baseUrl || '',
+    lastmod: new Date().toISOString().split('T')[0] || '',
     changefreq: 'daily',
     priority: 1.0,
   });
@@ -35,8 +35,8 @@ function generateSitemap(): string {
   const categories = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
   categories.forEach((category) => {
     urls.push({
-      loc: `${baseUrl}/${category}`,
-      lastmod: new Date().toISOString().split('T')[0],
+      loc: `${baseUrl || ''}/${category}`,
+      lastmod: new Date().toISOString().split('T')[0] || '',
       changefreq: 'daily',
       priority: 0.8,
     });
@@ -46,8 +46,8 @@ function generateSitemap(): string {
   const staticPages = ['jobs', 'community', 'trending', 'submit', 'guides'];
   staticPages.forEach((page) => {
     urls.push({
-      loc: `${baseUrl}/${page}`,
-      lastmod: new Date().toISOString().split('T')[0],
+      loc: `${baseUrl || ''}/${page}`,
+      lastmod: new Date().toISOString().split('T')[0] || '',
       changefreq: 'weekly',
       priority: 0.6,
     });
@@ -63,8 +63,8 @@ function generateSitemap(): string {
         files.forEach((file) => {
           const slug = file.replace('.mdx', '');
           urls.push({
-            loc: `${baseUrl}/guides/${category}/${slug}`,
-            lastmod: new Date().toISOString().split('T')[0],
+            loc: `${baseUrl || ''}/guides/${category}/${slug}`,
+            lastmod: new Date().toISOString().split('T')[0] || '',
             changefreq: 'monthly',
             priority: 0.65,
           });

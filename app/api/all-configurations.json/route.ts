@@ -1,5 +1,7 @@
-import { NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
+import { logger } from '@/lib/logger';
+import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
 
 export const runtime = 'nodejs';
 export const revalidate = 14400; // 4 hours
@@ -17,8 +19,11 @@ function transformContent<T extends { slug: string }>(
   }));
 }
 
-export async function GET() {
+async function handleGET(request: NextRequest) {
+  const requestLogger = logger.forRequest(request);
+
   try {
+    requestLogger.info('All configurations API request started');
     const transformedAgents = transformContent(agents, 'agent', 'agents');
     const transformedMcp = transformContent(mcp, 'mcp', 'mcp');
     const transformedRules = transformContent(rules, 'rule', 'rules');
@@ -61,13 +66,20 @@ export async function GET() {
       },
     };
 
+    requestLogger.info('All configurations API request completed successfully', {
+      totalConfigurations: allConfigurations.statistics.totalConfigurations,
+    });
+
     return NextResponse.json(allConfigurations, {
       headers: {
         'Cache-Control': 'public, s-maxage=14400, stale-while-revalidate=86400',
       },
     });
   } catch (error) {
-    console.error('API Error in all-configurations route:', error);
+    requestLogger.error(
+      'API Error in all-configurations route',
+      error instanceof Error ? error : new Error(String(error))
+    );
 
     return NextResponse.json(
       {
@@ -78,4 +90,9 @@ export async function GET() {
       { status: 500 }
     );
   }
+}
+
+// Apply rate limiting to the GET handler
+export async function GET(request: NextRequest) {
+  return withRateLimit(request, rateLimiters.api, handleGET, request);
 }

@@ -115,14 +115,14 @@ export function UnifiedSearch({
       const newTags = currentTags.includes(tag)
         ? currentTags.filter((t) => t !== tag)
         : [...currentTags, tag];
-      return { ...prev, tags: newTags.length > 0 ? newTags : undefined };
+      return { ...prev, tags: newTags.length > 0 ? newTags : [] };
     });
   }, []);
 
   // Handle sort change directly
   const handleSortChange = useCallback(
     (value: FilterState['sort']) => {
-      const newFilters = { ...localFilters, sort: value };
+      const newFilters = { ...localFilters, sort: value || 'trending' };
       setLocalFilters(newFilters);
       onFiltersChange(newFilters);
     },

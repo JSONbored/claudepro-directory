@@ -103,7 +103,10 @@ async function generateTypeScript() {
     const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
 
     // Create metadata version (without heavy content fields for listing pages)
-    const metadata = allContent[type].map((item) => {
+    const contentData = allContent[type];
+    if (!contentData) continue;
+
+    const metadata = contentData.map((item) => {
       const { content: _content, config: _config, configuration: _configuration, ...meta } = item;
       return meta;
     });
@@ -178,7 +181,8 @@ import type { ContentStats } from '../types/content';
 export const contentStats: ContentStats = {
 ${CONTENT_TYPES.map((type) => {
   const varName = type.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-  return `  ${varName}: ${allContent[type].length}`;
+  const typeData = allContent[type];
+  return `  ${varName}: ${typeData ? typeData.length : 0}`;
 }).join(',\n')}
 };`;
 

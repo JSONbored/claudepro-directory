@@ -31,13 +31,13 @@ async function getComparisonData(slug: string): Promise<ComparisonData | null> {
 
     // Parse frontmatter
     const frontmatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-    if (!frontmatterMatch) return null;
+    if (!frontmatterMatch?.[1] || !frontmatterMatch?.[2]) return null;
 
     const frontmatter = frontmatterMatch[1];
     const content = frontmatterMatch[2];
 
     // Parse YAML-like frontmatter (simple parsing)
-    const metadata: any = {};
+    const metadata: Record<string, string> = {};
     frontmatter.split('\n').forEach((line) => {
       const [key, ...valueParts] = line.split(':');
       if (key && valueParts.length) {
@@ -50,14 +50,14 @@ async function getComparisonData(slug: string): Promise<ComparisonData | null> {
     });
 
     return {
-      title: metadata.title,
-      description: metadata.description,
+      title: metadata.title || '',
+      description: metadata.description || '',
       content,
-      item1Id: metadata.item1Id,
-      item2Id: metadata.item2Id,
-      category1: metadata.category1,
-      category2: metadata.category2,
-      lastUpdated: metadata.lastUpdated,
+      item1Id: metadata.item1Id || '',
+      item2Id: metadata.item2Id || '',
+      category1: metadata.category1 || '',
+      category2: metadata.category2 || '',
+      lastUpdated: metadata.lastUpdated || '',
     };
   } catch (_error) {
     return null;

@@ -35,8 +35,8 @@ async function getGuides(): Promise<Record<string, GuideItem[]>> {
           const content = await fs.readFile(path.join(dir, file), 'utf-8');
           const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
 
-          if (frontmatterMatch) {
-            const metadata: any = {};
+          if (frontmatterMatch?.[1]) {
+            const metadata: Record<string, string> = {};
             frontmatterMatch[1].split('\n').forEach((line) => {
               const [key, ...valueParts] = line.split(':');
               if (key && valueParts.length) {
@@ -53,7 +53,7 @@ async function getGuides(): Promise<Record<string, GuideItem[]>> {
               description: metadata.description || '',
               slug: `/guides/${category}/${file.replace('.mdx', '')}`,
               category,
-              dateUpdated: metadata.dateUpdated,
+              dateUpdated: metadata.dateUpdated || '',
             });
           }
         }
