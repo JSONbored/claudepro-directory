@@ -1,0 +1,110 @@
+{
+  "slug": "redis-mcp-server",
+  "description": "Official Redis MCP server providing natural language interface for Redis data management and operations",
+  "category": "mcp",
+  "author": "Redis",
+  "dateAdded": "2025-09-20",
+  "tags": [
+    "redis",
+    "cache",
+    "database",
+    "nosql",
+    "official"
+  ],
+  "content": "The official Redis MCP Server provides a natural language interface for AI agents to manage and search data in Redis, supporting various data structures and integrations.",
+  "features": [
+    "String operations with TTL support",
+    "Hash, list, set, and sorted set management",
+    "Pub/Sub messaging",
+    "Stream operations",
+    "JSON data handling",
+    "Vector search capabilities",
+    "Server management and monitoring"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Install via Smithery CLI: npx -y @smithery/cli install @redis/mcp-redis --client claude",
+        "Or install via uvx: uvx --from git+https://github.com/redis/mcp-redis.git redis-mcp-server",
+        "Configure Redis connection URL",
+        "Add server configuration to Claude Desktop",
+        "Restart Claude Desktop"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "uvx --from git+https://github.com/redis/mcp-redis.git redis-mcp-server --url redis://localhost:6379/0"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "redis": {
+          "command": "uvx",
+          "args": [
+            "--from",
+            "git+https://github.com/redis/mcp-redis.git",
+            "redis-mcp-server",
+            "--url",
+            "redis://localhost:6379/0"
+          ]
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "redis": {
+          "command": "uvx",
+          "args": [
+            "--from",
+            "git+https://github.com/redis/mcp-redis.git",
+            "redis-mcp-server",
+            "--url",
+            "redis://localhost:6379/0"
+          ]
+        }
+      }
+    }
+  },
+  "package": "@redis/mcp-redis",
+  "source": "official",
+  "useCases": [
+    "High-performance caching solutions",
+    "Session management and storage",
+    "Real-time messaging with pub/sub",
+    "Leaderboards and ranking systems",
+    "Stream processing and event sourcing",
+    "Vector similarity search",
+    "Rate limiting and counters"
+  ],
+  "security": [
+    "Redis ACL user management",
+    "SSL/TLS encryption support",
+    "Password authentication",
+    "Read-only user configurations",
+    "Network security controls"
+  ],
+  "troubleshooting": [
+    "Verify Redis server is running and accessible",
+    "Check Redis connection URL format",
+    "Ensure proper Redis ACL permissions",
+    "Confirm network connectivity to Redis instance",
+    "Validate SSL certificates if using TLS"
+  ],
+  "examples": [
+    "Store and retrieve cached data with expiration",
+    "Manage user sessions and preferences",
+    "Implement real-time chat with pub/sub",
+    "Create leaderboards with sorted sets",
+    "Process events using Redis streams"
+  ],
+  "requiresAuth": true,
+  "permissions": [
+    "read",
+    "write",
+    "admin"
+  ],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://github.com/redis/mcp-redis"
+}

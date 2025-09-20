@@ -1,0 +1,48 @@
+{
+  "slug": "webpack-bundle-analyzer",
+  "description": "Analyzes webpack bundle size when webpack config or entry files are modified",
+  "category": "hooks",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-19",
+  "tags": [
+    "webpack",
+    "bundle",
+    "performance",
+    "optimization",
+    "analysis"
+  ],
+  "hookType": "PostToolUse",
+  "features": [
+    "Interactive bundle size visualization and analysis",
+    "Automatic bundle analysis on configuration changes",
+    "Support for multiple build tools (Webpack, Vite, Rollup)",
+    "Performance optimization recommendations",
+    "Dependency size tracking and optimization",
+    "Tree-shaking effectiveness analysis"
+  ],
+  "useCases": [
+    "Analyze bundle size after webpack configuration changes",
+    "Identify large dependencies impacting bundle size",
+    "Optimize bundle splitting and code splitting strategies",
+    "Track bundle size over time for performance monitoring",
+    "Identify unused code and dependencies",
+    "Optimize tree-shaking and dead code elimination",
+    "Compare before/after bundle sizes for optimization",
+    "Generate reports for performance review"
+  ],
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "postToolUse": {
+          "script": "./.claude/hooks/webpack-bundle-analyzer.sh",
+          "matchers": [
+            "write",
+            "edit"
+          ]
+        }
+      }
+    },
+    "scriptContent": "#!/bin/bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\necho \"📊 Webpack Bundle Analyzer - Analyzing bundle performance...\"\necho \"📄 File: $FILE_PATH\"\n\n# Check if this is a relevant file for bundle analysis\nRELEVANT_FILE=false\n\nif [[ \"$FILE_PATH\" == *webpack.config.js ]] || \\\n   [[ \"$FILE_PATH\" == *webpack.config.ts ]] || \\\n   [[ \"$FILE_PATH\" == *vite.config.js ]] || \\\n   [[ \"$FILE_PATH\" == *vite.config.ts ]] || \\\n   [[ \"$FILE_PATH\" == *rollup.config.js ]] || \\\n   [[ \"$FILE_PATH\" == *src/index.js ]] || \\\n   [[ \"$FILE_PATH\" == *src/index.ts ]] || \\\n   [[ \"$FILE_PATH\" == *src/main.js ]] || \\\n   [[ \"$FILE_PATH\" == *src/main.ts ]] || \\\n   [[ \"$FILE_PATH\" == *package.json ]]; then\n    RELEVANT_FILE=true\nfi\n\nif [ \"$RELEVANT_FILE\" = false ]; then\n    echo \"ℹ️ File does not require bundle analysis: $FILE_PATH\"\n    exit 0\nfi\n\necho \"🔍 Detecting build system and configuration...\"\n\n# Detect build system\nBUILD_SYSTEM=\"unknown\"\nif [ -f \"webpack.config.js\" ] || [ -f \"webpack.config.ts\" ]; then\n    BUILD_SYSTEM=\"webpack\"\n    echo \"📦 Webpack configuration detected\"\nelif [ -f \"vite.config.js\" ] || [ -f \"vite.config.ts\" ]; then\n    BUILD_SYSTEM=\"vite\"\n    echo \"⚡ Vite configuration detected\"\nelif [ -f \"rollup.config.js\" ] || [ -f \"rollup.config.ts\" ]; then\n    BUILD_SYSTEM=\"rollup\"\n    echo \"🎯 Rollup configuration detected\"\nelif [ -f \"package.json\" ] && grep -q '\"react-scripts\"' package.json 2>/dev/null; then\n    BUILD_SYSTEM=\"cra\"\n    echo \"⚛️ Create React App detected\"\nelif [ -f \"next.config.js\" ] || [ -f \"next.config.ts\" ]; then\n    BUILD_SYSTEM=\"next\"\n    echo \"🔺 Next.js configuration detected\"\nelse\n    echo \"❓ No recognized build system found\"\nfi\n\n# Check for bundle analyzer availability\nANALYZER_AVAILABLE=false\nif command -v npx >/dev/null 2>&1; then\n    if npx webpack-bundle-analyzer --version >/dev/null 2>&1; then\n        ANALYZER_AVAILABLE=true\n        echo \"✅ webpack-bundle-analyzer available\"\n    else\n        echo \"⚠️ webpack-bundle-analyzer not available - install with: npm install --save-dev webpack-bundle-analyzer\"\n    fi\nelse\n    echo \"⚠️ npx not available - please install Node.js\"\nfi\n\n# Perform bundle analysis based on build system\ncase \"$BUILD_SYSTEM\" in\n    \"webpack\")\n        echo \"📊 Analyzing Webpack bundle...\"\n        \n        # Check if dist directory exists\n        if [ ! -d \"dist\" ] && [ ! -d \"build\" ]; then\n            echo \"🏗️ Building project to generate bundle...\"\n            if npm run build 2>/dev/null; then\n                echo \"✅ Build completed successfully\"\n            else\n                echo \"❌ Build failed - cannot analyze bundle\"\n                exit 1\n            fi\n        fi\n        \n        # Find stats file or generate one\n        STATS_FILE=\"\"\n        if [ -f \"dist/stats.json\" ]; then\n            STATS_FILE=\"dist/stats.json\"\n        elif [ -f \"build/stats.json\" ]; then\n            STATS_FILE=\"build/stats.json\"\n        else\n            echo \"📈 Generating webpack stats...\"\n            if npx webpack --profile --json > webpack-stats.json 2>/dev/null; then\n                STATS_FILE=\"webpack-stats.json\"\n                echo \"✅ Stats file generated: $STATS_FILE\"\n            else\n                echo \"❌ Failed to generate webpack stats\"\n                exit 1\n            fi\n        fi\n        \n        # Run bundle analyzer\n        if [ \"$ANALYZER_AVAILABLE\" = true ] && [ -n \"$STATS_FILE\" ]; then\n            echo \"🔍 Running bundle analysis...\"\n            if npx webpack-bundle-analyzer \"$STATS_FILE\" --mode static --report bundle-report.html --no-open 2>/dev/null; then\n                echo \"✅ Bundle analysis completed\"\n                echo \"📊 Report saved to: bundle-report.html\"\n                echo \"🌐 View report: file://$(pwd)/bundle-report.html\"\n            else\n                echo \"⚠️ Bundle analysis failed\"\n            fi\n        fi\n        ;;\n    \"vite\")\n        echo \"⚡ Analyzing Vite bundle...\"\n        \n        # Check if Vite has bundle analysis plugin\n        if grep -q 'vite-bundle-analyzer\\|rollup-plugin-analyzer' package.json 2>/dev/null; then\n            echo \"📊 Running Vite bundle analysis...\"\n            if npm run build -- --analyze 2>/dev/null; then\n                echo \"✅ Vite bundle analysis completed\"\n            else\n                echo \"⚠️ Vite bundle analysis failed\"\n            fi\n        else\n            echo \"💡 Install vite-bundle-analyzer for detailed analysis:\"\n            echo \"    npm install --save-dev vite-bundle-analyzer\"\n            \n            # Basic build size analysis\n            echo \"📏 Running basic build analysis...\"\n            if npm run build 2>/dev/null; then\n                if [ -d \"dist\" ]; then\n                    echo \"📊 Build output analysis:\"\n                    find dist -name \"*.js\" -exec du -h {} \\; | sort -hr | head -10\n                fi\n            fi\n        fi\n        ;;\n    \"next\")\n        echo \"🔺 Analyzing Next.js bundle...\"\n        \n        if grep -q '@next/bundle-analyzer' package.json 2>/dev/null; then\n            echo \"📊 Running Next.js bundle analysis...\"\n            if ANALYZE=true npm run build 2>/dev/null; then\n                echo \"✅ Next.js bundle analysis completed\"\n            else\n                echo \"⚠️ Next.js bundle analysis failed\"\n            fi\n        else\n            echo \"💡 Install @next/bundle-analyzer for detailed analysis:\"\n            echo \"    npm install --save-dev @next/bundle-analyzer\"\n        fi\n        ;;\n    \"cra\")\n        echo \"⚛️ Analyzing Create React App bundle...\"\n        \n        if npm list --depth=0 | grep -q 'source-map-explorer' 2>/dev/null; then\n            echo \"📊 Running source-map-explorer...\"\n            if npm run build && npx source-map-explorer 'build/static/js/*.js' 2>/dev/null; then\n                echo \"✅ CRA bundle analysis completed\"\n            else\n                echo \"⚠️ CRA bundle analysis failed\"\n            fi\n        else\n            echo \"💡 Install source-map-explorer for detailed analysis:\"\n            echo \"    npm install --save-dev source-map-explorer\"\n        fi\n        ;;\n    *)\n        echo \"❓ Unknown build system - attempting generic analysis\"\n        \n        # Try to analyze any existing build output\n        for dir in dist build public; do\n            if [ -d \"$dir\" ]; then\n                echo \"📊 Analyzing $dir directory:\"\n                find \"$dir\" -name \"*.js\" -o -name \"*.css\" | head -10 | while read -r file; do\n                    size=$(du -h \"$file\" 2>/dev/null | cut -f1)\n                    echo \"  • $file: $size\"\n                done\n            fi\n        done\n        ;;\nesac\n\n# General optimization suggestions\necho \"\"\necho \"💡 Bundle Optimization Tips:\"\necho \"  • Enable tree-shaking to remove unused code\"\necho \"  • Use dynamic imports for code splitting\"\necho \"  • Optimize images and static assets\"\necho \"  • Use compression (gzip/brotli) for production\"\necho \"  • Analyze and remove large unnecessary dependencies\"\necho \"  • Use webpack-bundle-analyzer for detailed insights\"\necho \"  • Consider lazy loading for non-critical components\"\necho \"  • Review and optimize polyfills\"\n\necho \"\"\necho \"📊 Bundle Analysis Tools:\"\necho \"  • Webpack: webpack-bundle-analyzer\"\necho \"  • Vite: vite-bundle-analyzer\"\necho \"  • Next.js: @next/bundle-analyzer\"\necho \"  • CRA: source-map-explorer\"\necho \"  • General: bundlephobia.com for dependency analysis\"\n\necho \"\"\necho \"🎯 Bundle analysis complete!\"\n\nexit 0"
+  },
+  "source": "community"
+}

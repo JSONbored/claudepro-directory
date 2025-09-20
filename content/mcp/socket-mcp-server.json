@@ -1,0 +1,88 @@
+{
+  "slug": "socket-mcp-server",
+  "description": "Security analysis and vulnerability scanning for dependencies",
+  "category": "mcp",
+  "author": "Socket",
+  "dateAdded": "2025-09-18",
+  "tags": [
+    "security",
+    "dependencies",
+    "vulnerability-scanning",
+    "npm",
+    "supply-chain"
+  ],
+  "content": "Analyze dependency security and supply chain risks with Socket's comprehensive vulnerability detection.",
+  "features": [
+    "Scan dependencies for known vulnerabilities",
+    "Analyze security scores for packages",
+    "Detect supply chain attacks and risks",
+    "Monitor package health metrics",
+    "Generate detailed security reports"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open Claude Desktop configuration file",
+        "Add the Socket server configuration with HTTP transport",
+        "Restart Claude Desktop",
+        "Authenticate with your Socket account"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport http socket https://mcp.socket.dev/"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "socket": {
+          "transport": "http",
+          "url": "https://mcp.socket.dev/"
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "socket": {
+          "transport": "http",
+          "url": "https://mcp.socket.dev/"
+        }
+      }
+    }
+  },
+  "package": null,
+  "source": "official",
+  "useCases": [
+    "Audit project dependencies for vulnerabilities",
+    "Check security before adding new packages",
+    "Monitor supply chain security risks",
+    "Validate package updates are safe",
+    "Generate security compliance reports"
+  ],
+  "security": [
+    "OAuth authentication required for access",
+    "Regular security scans recommended",
+    "Monitor critical security alerts",
+    "Review and apply suggested fixes"
+  ],
+  "troubleshooting": [
+    "Verify Socket account access",
+    "Check package manager support",
+    "Review scan permissions and scope"
+  ],
+  "examples": [
+    "Scan my package.json for vulnerabilities",
+    "Check the security score of lodash",
+    "Find risky dependencies in my project",
+    "Generate a security report"
+  ],
+  "requiresAuth": true,
+  "permissions": [
+    "read",
+    "scan"
+  ],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://github.com/SocketDev/socket-mcp"
+}

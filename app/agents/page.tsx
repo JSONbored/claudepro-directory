@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ContentListPage } from '@/components/content-list-page';
+import { ContentListServer } from '@/components/content-list-server';
 import { agents } from '@/generated/content';
 
 export const metadata: Metadata = {
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function AgentsPage() {
   return (
-    <ContentListPage
+    <ContentListServer
       title="AI Agents"
       description="Browse specialized AI agents designed for specific tasks and workflows using Claude's capabilities."
       icon="sparkles"

@@ -1,0 +1,107 @@
+{
+  "slug": "discord-mcp-server",
+  "description": "Discord bot integration for community management, moderation, and server automation",
+  "category": "mcp",
+  "author": "saseq",
+  "dateAdded": "2025-09-20",
+  "tags": [
+    "discord",
+    "bot",
+    "community",
+    "moderation",
+    "social"
+  ],
+  "content": "Enable your AI assistants to seamlessly interact with Discord servers through comprehensive bot functionality and automation capabilities.",
+  "features": [
+    "Server information retrieval",
+    "Channel management and creation",
+    "Category organization",
+    "Message operations",
+    "Member management",
+    "Role administration"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Install via Smithery CLI: npx -y @smithery/cli@latest install @SaseQ/discord-mcp --client claude",
+        "Create a Discord bot application",
+        "Get your Discord bot token",
+        "Configure the MCP server with your bot token",
+        "Restart Claude Desktop"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "npx -y @smithery/cli@latest install @SaseQ/discord-mcp --client claude"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "discord-mcp": {
+          "command": "java",
+          "args": [
+            "-jar",
+            "/absolute/path/to/discord-mcp-0.0.1-SNAPSHOT.jar"
+          ],
+          "env": {
+            "DISCORD_TOKEN": "YOUR_DISCORD_BOT_TOKEN",
+            "DISCORD_GUILD_ID": "OPTIONAL_DEFAULT_SERVER_ID"
+          }
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "discord-mcp": {
+          "command": "java",
+          "args": [
+            "-jar",
+            "/absolute/path/to/discord-mcp-0.0.1-SNAPSHOT.jar"
+          ],
+          "env": {
+            "DISCORD_TOKEN": "${DISCORD_TOKEN}",
+            "DISCORD_GUILD_ID": "${DISCORD_GUILD_ID}"
+          }
+        }
+      }
+    }
+  },
+  "package": "@SaseQ/discord-mcp",
+  "source": "community",
+  "useCases": [
+    "Automated server moderation and management",
+    "Community engagement and member onboarding", 
+    "Channel organization and content management",
+    "Bot-driven notifications and alerts",
+    "Member role management and permissions"
+  ],
+  "security": [
+    "Bot token authentication required",
+    "Guild-specific permissions",
+    "Configurable access controls",
+    "Secure Discord API integration"
+  ],
+  "troubleshooting": [
+    "Verify Discord bot token is valid and active",
+    "Check bot permissions in Discord server",
+    "Ensure Java runtime is available",
+    "Confirm Discord guild ID is correct"
+  ],
+  "examples": [
+    "Get server information and member count",
+    "Create new text channels and categories",
+    "Manage member roles and permissions",
+    "Retrieve channel lists and configurations"
+  ],
+  "requiresAuth": true,
+  "permissions": [
+    "bot",
+    "send_messages",
+    "manage_channels",
+    "manage_roles"
+  ],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://github.com/saseq/discord-mcp"
+}

@@ -48,14 +48,16 @@ export function Breadcrumbs() {
         trending: 'Trending',
       };
 
-      if (labelMap[path.toLowerCase()]) {
-        label = labelMap[path.toLowerCase()];
+      const mappedLabel = labelMap[path.toLowerCase()];
+      if (mappedLabel) {
+        label = mappedLabel;
       }
 
-      breadcrumbs.push({
-        label,
-        href: isLast ? undefined : currentPath,
-      });
+      if (isLast) {
+        breadcrumbs.push({ label });
+      } else {
+        breadcrumbs.push({ label, href: currentPath });
+      }
     });
 
     return breadcrumbs;
@@ -79,7 +81,6 @@ export function Breadcrumbs() {
         itemType="https://schema.org/BreadcrumbList"
       >
         {breadcrumbs.map((item, index) => {
-          const _isLast = index === breadcrumbs.length - 1;
           const isFirst = index === 0;
 
           return (

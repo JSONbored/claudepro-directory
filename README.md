@@ -3,9 +3,9 @@
 <div align="center">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-15.5-black)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.0-61dafb)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-blue)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.6-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.1-61dafb)](https://react.dev/)
 [![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](.github/CONTRIBUTING.md)
 
 **The Ultimate Community-Driven Collection of Claude AI Configurations**
@@ -33,7 +33,7 @@ Claude Pro Directory is an open-source platform serving as the comprehensive hub
 
 ### Prerequisites
 
-- Node.js 18+ and npm
+- Node.js 20+ and npm
 - Git
 
 ### Installation
@@ -57,14 +57,40 @@ npm run dev
 
 The application will be available at `http://localhost:3000`.
 
+### Available Scripts
+
+```bash
+# Development
+npm run dev              # Start dev server with Turbopack
+npm run build:content    # Generate content files from JSON
+
+# Building
+npm run build           # Full production build
+npm run build:analyze   # Build with bundle analyzer
+
+# Code Quality
+npm run type-check      # TypeScript type checking
+npm run lint           # Code linting with Ultracite
+npm run format         # Code formatting
+
+# Generation
+npm run generate:api    # Generate API endpoints
+npm run generate:sitemap # Generate sitemap
+npm run generate:seo    # Generate SEO metadata
+
+# Testing
+npm run test           # Run tests
+npm run test:run       # Run tests once
+```
+
 ### Build for Production
 
 ```bash
 # Build the application
 npm run build
 
-# Preview production build
-npm run preview
+# Start production server
+npm run start
 ```
 
 ## 📁 Project Structure
@@ -76,23 +102,27 @@ claudepro-directory/
 ├── content/           # Configuration content (JSON)
 │   ├── agents/
 │   ├── commands/
-│   ├── hooks/
-│   ├── mcp/
+│   ├── hooks/         # Event-driven automation hooks
+│   ├── mcp/          # MCP server configurations
 │   └── rules/
 ├── generated/         # Auto-generated content files
+├── lib/              # Shared utilities and functions
 ├── scripts/          # Build and generation scripts
-└── public/          # Static assets
+├── types/           # TypeScript type definitions
+└── public/         # Static assets
 ```
 
 ## 🛠️ Technology Stack
 
-- **Framework**: Next.js 15.5 with App Router
-- **Language**: TypeScript 5.0+
-- **UI Library**: React 19.0
+- **Framework**: Next.js 15.6 with App Router & Turbopack
+- **Language**: TypeScript 5.9+
+- **UI Library**: React 19.1
 - **Styling**: Tailwind CSS with shadcn/ui
 - **Deployment**: Vercel
-- **Code Quality**: Biome, ESLint
-- **Security**: CodeQL, Dependabot
+- **Code Quality**: Ultracite, ESLint
+- **Build Tool**: Turbopack
+- **Security**: CodeQL, Dependabot, TruffleHog
+- **Analytics**: Vercel Web Analytics, Umami (privacy-focused)
 
 ## 🤝 Contributing
 
@@ -116,13 +146,42 @@ We take security seriously. Please review our [Security Policy](.github/SECURITY
 
 Report vulnerabilities to **security@claudepro.directory**
 
+## 📊 Privacy & Analytics
+
+We use privacy-focused analytics to improve our platform:
+
+### Analytics Services
+- **[Vercel Web Analytics](https://vercel.com/analytics)** - Basic page views and performance metrics
+- **[Umami Analytics](https://umami.is/)** - Privacy-focused, self-hosted on Railway
+
+### What We Track
+- Page views and popular content
+- Geographic regions (country-level only)
+- Referral sources and search terms
+- Performance metrics (page load times)
+
+### What We DON'T Track
+- Personal identification information (PII)
+- Individual user behavior across sessions
+- IP addresses or precise locations
+- Cookies for tracking purposes
+
+### Your Privacy
+- All analytics are **GDPR compliant**
+- **No personal data** is collected or stored
+- **No tracking cookies** are used
+- Data is **aggregated and anonymized**
+- You can **opt-out** using browser settings or ad blockers
+
+For questions about our privacy practices, contact **hi@claudepro.directory**
+
 ## 💬 Community
 
 Join our growing community:
 
-- **Discord**: Coming shortly
+- **Discord**: [Join our server](https://discord.gg/Ax3Py4YDrq)
 - **GitHub Discussions**: [Join the conversation](https://github.com/JSONbored/claudepro-directory/discussions/new/choose)
-- **Twitter/X**: [@JSONbored](https://twitter.com/JSONbored)
+- **Twitter/X**: [@JSONbored](https://x.com/JSONbored)
 
 ## 🚧 Roadmap
 
@@ -169,7 +228,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ by [JSONbored](https://github.com/JSONbored)**
 
-[GitHub](https://github.com/JSONbored) | [Twitter/X](https://twitter.com/JSONbored)
+[GitHub](https://github.com/JSONbored) | [Twitter/X](https://x.com/JSONbored)
 
 [⬆ Back to Top](#claude-pro-directory-)
 

@@ -1,5 +1,4 @@
 {
-  "title": "/refactor",
   "description": "Intelligent code refactoring command that analyzes code structure and applies best practices for improved maintainability and performance",
   "category": "commands",
   "author": "JSONbored",
@@ -19,5 +18,6 @@
   },
   "githubUrl": "https://github.com/claudepro/refactor-command",
   "documentationUrl": "https://docs.claude.ai/commands/refactor",
-  "source": "community"
+  "source": "community",
+  "slug": "refactor"
 }

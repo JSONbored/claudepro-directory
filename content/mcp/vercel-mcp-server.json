@@ -1,0 +1,90 @@
+{
+  "slug": "vercel-mcp-server",
+  "description": "Manage deployments, analyze logs, and control Vercel projects",
+  "category": "mcp",
+  "author": "Vercel",
+  "dateAdded": "2025-09-18",
+  "tags": [
+    "deployment",
+    "vercel",
+    "hosting",
+    "devops",
+    "infrastructure"
+  ],
+  "content": "Control Vercel deployments and infrastructure through Claude for seamless deployment management.",
+  "features": [
+    "Search and navigate Vercel documentation",
+    "Manage projects and deployment configurations",
+    "Analyze deployment logs and build outputs",
+    "Monitor build status and performance",
+    "Configure environment variables and domains"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open Claude Desktop configuration file",
+        "Add the Vercel server configuration with HTTP transport",
+        "Restart Claude Desktop",
+        "Authenticate with your Vercel account"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport http vercel https://mcp.vercel.com/"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "vercel": {
+          "transport": "http",
+          "url": "https://mcp.vercel.com/"
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "vercel": {
+          "transport": "http",
+          "url": "https://mcp.vercel.com/"
+        }
+      }
+    }
+  },
+  "package": null,
+  "source": "official",
+  "useCases": [
+    "Deploy new versions to production",
+    "Debug build failures and errors",
+    "Analyze deployment logs for issues",
+    "Manage environment variables across projects",
+    "Configure custom domains and redirects"
+  ],
+  "security": [
+    "OAuth authentication required for access",
+    "Use team tokens for shared projects",
+    "Monitor deployment permissions carefully",
+    "Review changes before production deploys"
+  ],
+  "troubleshooting": [
+    "Check Vercel account permissions",
+    "Verify project access rights",
+    "Monitor build quota usage",
+    "Check domain verification status"
+  ],
+  "examples": [
+    "Deploy the latest commit to production",
+    "Show me the build logs for the failed deployment",
+    "Update the API_KEY environment variable",
+    "List all recent deployments"
+  ],
+  "requiresAuth": true,
+  "permissions": [
+    "read",
+    "write",
+    "deploy"
+  ],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://vercel.com/docs/mcp/vercel-mcp"
+}

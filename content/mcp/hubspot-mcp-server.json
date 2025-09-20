@@ -1,0 +1,89 @@
+{
+  "slug": "hubspot-mcp-server",
+  "description": "Access and manage HubSpot CRM data including contacts, companies, and deals",
+  "category": "mcp",
+  "author": "HubSpot",
+  "dateAdded": "2025-09-18",
+  "tags": [
+    "crm",
+    "hubspot",
+    "sales",
+    "marketing",
+    "customer-data"
+  ],
+  "content": "Integrate HubSpot CRM capabilities directly into Claude for customer relationship management.",
+  "features": [
+    "Fetch and update contact records",
+    "Manage companies and deals pipeline",
+    "Create and update CRM records",
+    "Search CRM data with filters",
+    "Generate sales and marketing reports"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open Claude Desktop configuration file",
+        "Add the HubSpot server configuration with HTTP transport",
+        "Restart Claude Desktop",
+        "Authenticate with your HubSpot account"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport http hubspot https://mcp.hubspot.com/anthropic"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "hubspot": {
+          "transport": "http",
+          "url": "https://mcp.hubspot.com/anthropic"
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "hubspot": {
+          "transport": "http",
+          "url": "https://mcp.hubspot.com/anthropic"
+        }
+      }
+    }
+  },
+  "package": null,
+  "source": "official",
+  "useCases": [
+    "Update contact information in bulk",
+    "Create new deals in the pipeline",
+    "Track sales pipeline progress",
+    "Generate customer reports and insights",
+    "Manage marketing lists and segments"
+  ],
+  "security": [
+    "OAuth authentication for secure access",
+    "Respect data privacy regulations",
+    "Monitor API usage and limits",
+    "Regular data audits recommended"
+  ],
+  "troubleshooting": [
+    "Check HubSpot account permissions",
+    "Verify OAuth connection status",
+    "Monitor API rate limits"
+  ],
+  "examples": [
+    "Create a new contact for John Doe",
+    "Update deal stage to closed-won",
+    "Find all contacts from Microsoft",
+    "Generate pipeline report"
+  ],
+  "requiresAuth": true,
+  "permissions": [
+    "read",
+    "write",
+    "create"
+  ],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://developers.hubspot.com/mcp"
+}

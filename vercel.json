@@ -8,7 +8,10 @@
     "app/api/*": {
       "maxDuration": 5
     },
-    "app/**/*.tsx": {
+    "app/(agents|commands|hooks|mcp|rules|trending|submit|partner|community|jobs)/**.tsx": {
+      "maxDuration": 5
+    },
+    "app/page.tsx": {
       "maxDuration": 5
     }
   }

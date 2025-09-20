@@ -1,5 +1,4 @@
 {
-  "title": "/test",
   "description": "Advanced test suite generator with property-based testing, mutation testing, and intelligent test case discovery",
   "category": "commands",
   "author": "claudepro",
@@ -19,5 +18,6 @@
   },
   "githubUrl": "https://github.com/claudepro/advanced-test-generator",
   "documentationUrl": "https://docs.claude.ai/commands/test",
-  "source": "community"
+  "source": "community",
+  "slug": "test-advanced"
 }
