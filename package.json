@@ -34,7 +34,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "validate:content": "node scripts/validate-content.js",
-    "prepare": "lefthook install"
+    "prepare": "command -v lefthook >/dev/null 2>&1 && lefthook install || echo 'Skipping lefthook install (not available)'"
   },
   "dependencies": {
     "@radix-ui/react-collapsible": "^1.1.12",
