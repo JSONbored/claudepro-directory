@@ -1,4 +1,5 @@
 import { Redis } from '@upstash/redis';
+import { logger } from './logger';
 
 // Initialize Redis client
 // Uses KV_REST_API_URL and KV_REST_API_TOKEN from Upstash Vercel integration
@@ -33,7 +34,15 @@ export const statsRedis = {
 
       return count;
     } catch (error) {
-      console.error('Redis increment view error:', error);
+      logger.error(
+        'Failed to increment view count in Redis',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          category,
+          slug,
+          key: `views:${category}:${slug}`,
+        }
+      );
       return null;
     }
   },
@@ -47,7 +56,15 @@ export const statsRedis = {
       const count = await redis.get<number>(key);
       return count || 0;
     } catch (error) {
-      console.error('Redis get view error:', error);
+      logger.error(
+        'Failed to get view count from Redis',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          category,
+          slug,
+          key: `views:${category}:${slug}`,
+        }
+      );
       return 0;
     }
   },
@@ -70,7 +87,15 @@ export const statsRedis = {
 
       return result;
     } catch (error) {
-      console.error('Redis mget error:', error);
+      logger.error(
+        'Failed to get multiple view counts from Redis',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          itemCount: items.length,
+          keysCount: items.length,
+          sampleKey: items.length > 0 ? `views:${items[0]?.category}:${items[0]?.slug}` : '',
+        }
+      );
       return {};
     }
   },
@@ -95,7 +120,15 @@ export const statsRedis = {
 
       return items as string[];
     } catch (error) {
-      console.error('Redis trending error:', error);
+      logger.error(
+        'Failed to get trending items from Redis',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          category,
+          limit,
+          key: `trending:${category}:weekly`,
+        }
+      );
       return [];
     }
   },
@@ -124,7 +157,15 @@ export const statsRedis = {
 
       return result;
     } catch (error) {
-      console.error('Redis popular error:', error);
+      logger.error(
+        'Failed to get popular items from Redis',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          category,
+          limit,
+          key: `popular:${category}:all`,
+        }
+      );
       return [];
     }
   },
@@ -140,7 +181,16 @@ export const statsRedis = {
       // Update copy leaderboard
       await redis.zincrby(`copied:${category}:all`, 1, slug);
     } catch (error) {
-      console.error('Redis track copy error:', error);
+      logger.error(
+        'Failed to track copy action in Redis',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          category,
+          slug,
+          copyKey: `copies:${category}:${slug}`,
+          leaderboardKey: `copied:${category}:all`,
+        }
+      );
     }
   },
 
@@ -163,7 +213,10 @@ export const statsRedis = {
         topCategories: [],
       };
     } catch (error) {
-      console.error('Redis stats error:', error);
+      logger.error(
+        'Failed to get overall stats from Redis',
+        error instanceof Error ? error : new Error(String(error))
+      );
       return { totalViews: 0, totalCopies: 0, topCategories: [] };
     }
   },
@@ -180,7 +233,15 @@ export const statsRedis = {
         await redis.zremrangebyscore(`trending:${category}:weekly`, 0, oneWeekAgo);
       }
     } catch (error) {
-      console.error('Redis cleanup error:', error);
+      logger.error(
+        'Failed to cleanup old trending data in Redis',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          categoriesCount: 5,
+          sampleCategory: 'agents',
+          cutoffTime: Date.now() - 7 * 24 * 60 * 60 * 1000,
+        }
+      );
     }
   },
 };

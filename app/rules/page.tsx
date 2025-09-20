@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ContentListPage } from '@/components/content-list-page';
+import { ContentListServer } from '@/components/content-list-server';
 import { rules } from '@/generated/content';
 
 export const metadata: Metadata = {
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function RulesPage() {
   return (
-    <ContentListPage
+    <ContentListServer
       title="Claude Rules"
       description="Expert-crafted system prompts and configurations to enhance Claude's capabilities across different domains and use cases."
       icon="book-open"

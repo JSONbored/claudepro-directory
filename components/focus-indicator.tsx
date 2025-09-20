@@ -95,6 +95,10 @@ export function FocusIndicator() {
         }
       };
     }
+
+    return () => {
+      // Cleanup function for when showIndicators is false
+    };
   }, [showIndicators]);
 
   return null;

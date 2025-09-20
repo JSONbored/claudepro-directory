@@ -1,0 +1,64 @@
+---
+title: "Post-Tool Use Hooks - Claude Code Hooks"
+description: "Process tool outputs, format responses, log results, or trigger follow-up actions."
+keywords: "claude hooks, post-tool, post-tool-use, processing, formatting"
+---
+
+# Post-Tool Use Hooks
+
+Process tool outputs, format responses, log results, or trigger follow-up actions.
+
+## Key Use Cases
+
+- Result formatting and transformation
+- Error handling and recovery
+- Response logging and analytics
+- Follow-up action triggering
+
+## Capabilities
+
+- Transform tool outputs for better presentation
+- Handle errors and provide fallbacks
+- Log results for monitoring and analytics
+- Trigger subsequent tools based on results
+
+## Common Scenarios
+
+### Response Formatting
+Format API responses into user-friendly formats
+
+### Error Recovery
+Handle tool failures and provide alternative solutions
+
+
+## Available Post-Tool Use Hooks
+
+### [auto-code-formatter-hook](/hooks/auto-code-formatter-hook)
+Automatically formats code files after Claude writes or edits them using Prettier, Black, or other formatters
+
+**Hook Type:** PostToolUse
+**Tags:** formatting, prettier, black, code-quality, automation
+
+### [python-import-optimizer](/hooks/python-import-optimizer)
+Automatically sorts and optimizes Python imports using isort when Python files are modified
+
+**Hook Type:** PostToolUse
+**Tags:** python, imports, formatting, optimization, isort
+
+
+## Getting Started
+
+1. **Choose Your Hook Type**: PostToolUse
+2. **Install Hook**: Follow the installation guide for your chosen hook
+3. **Configure Settings**: Customize the hook configuration for your specific use case
+4. **Test Integration**: Verify the hook works correctly in your environment
+
+## Best Practices
+
+- Always test hooks in a development environment first
+- Use clear, descriptive hook names and configurations
+- Implement proper error handling and logging
+- Monitor hook performance and resource usage
+- Keep hook logic focused and efficient
+
+*Have a better post-tool use hooks hook? [Submit it here](/submit)*

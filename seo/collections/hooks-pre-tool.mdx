@@ -1,0 +1,118 @@
+---
+title: "Pre-Tool Use Hooks - Claude Code Hooks"
+description: "Execute custom logic before Claude uses tools to validate inputs, check permissions, or add context."
+keywords: "claude hooks, pre-tool, pre-tool-use, validation, preprocessing"
+---
+
+# Pre-Tool Use Hooks
+
+Execute custom logic before Claude uses tools to validate inputs, check permissions, or add context.
+
+## Key Use Cases
+
+- Input validation and sanitization
+- Permission checks and authorization
+- Context enhancement and data enrichment
+- Request logging and monitoring
+
+## Capabilities
+
+- Validate tool inputs before execution
+- Check user permissions and access rights
+- Add context or modify requests
+- Log tool usage for auditing
+
+## Common Scenarios
+
+### API Input Validation
+Validate API requests before they are sent to external services
+
+### Permission Gating
+Check if users have permission to execute specific tools
+
+
+## Available Pre-Tool Use Hooks
+
+### [aws-cloudformation-validator](/hooks/aws-cloudformation-validator)
+Validates AWS CloudFormation templates for syntax errors and best practices
+
+**Hook Type:** PostToolUse
+**Tags:** aws, cloudformation, infrastructure, validation, cloud
+
+### [environment-variable-validator](/hooks/environment-variable-validator)
+Validates environment variables, checks for required vars, and ensures proper configuration across environments
+
+**Hook Type:** PostToolUse
+**Tags:** environment, configuration, validation, deployment, security
+
+### [git-pre-commit-validator](/hooks/git-pre-commit-validator)
+Comprehensive pre-commit hook that validates code quality, runs tests, and enforces standards
+
+**Hook Type:** PreToolUse
+**Tags:** git, validation, code-quality, testing, automation
+
+### [github-actions-workflow-validator](/hooks/github-actions-workflow-validator)
+Validates GitHub Actions workflow files for syntax errors and best practices
+
+**Hook Type:** PostToolUse
+**Tags:** github-actions, ci-cd, workflows, validation, yaml
+
+### [graphql-schema-validator](/hooks/graphql-schema-validator)
+Validates GraphQL schema files and checks for breaking changes when modified
+
+**Hook Type:** PostToolUse
+**Tags:** graphql, api, schema, validation, breaking-changes
+
+### [i18n-translation-validator](/hooks/i18n-translation-validator)
+Validates translation files for missing keys and ensures consistency across different language files
+
+**Hook Type:** PostToolUse
+**Tags:** i18n, internationalization, translation, localization, validation
+
+### [json-schema-validator](/hooks/json-schema-validator)
+Validates JSON files against their schemas when modified to ensure data integrity
+
+**Hook Type:** PostToolUse
+**Tags:** json, schema, validation, data-integrity, api
+
+### [kubernetes-manifest-validator](/hooks/kubernetes-manifest-validator)
+Validates Kubernetes YAML manifests for syntax and best practices when modified
+
+**Hook Type:** PostToolUse
+**Tags:** kubernetes, k8s, yaml, validation, devops
+
+### [markdown-link-checker](/hooks/markdown-link-checker)
+Validates all links in markdown files to detect broken links and references
+
+**Hook Type:** PostToolUse
+**Tags:** markdown, documentation, links, validation, broken-links
+
+### [svelte-component-compiler](/hooks/svelte-component-compiler)
+Automatically compiles and validates Svelte components when they are modified
+
+**Hook Type:** PostToolUse
+**Tags:** svelte, components, compilation, validation, frontend
+
+### [typescript-compilation-checker](/hooks/typescript-compilation-checker)
+Automatically runs TypeScript compiler checks after editing .ts or .tsx files to catch type errors early
+
+**Hook Type:** PostToolUse
+**Tags:** typescript, validation, type-safety, compilation
+
+
+## Getting Started
+
+1. **Choose Your Hook Type**: PreToolUse
+2. **Install Hook**: Follow the installation guide for your chosen hook
+3. **Configure Settings**: Customize the hook configuration for your specific use case
+4. **Test Integration**: Verify the hook works correctly in your environment
+
+## Best Practices
+
+- Always test hooks in a development environment first
+- Use clear, descriptive hook names and configurations
+- Implement proper error handling and logging
+- Monitor hook performance and resource usage
+- Keep hook logic focused and efficient
+
+*Have a better pre-tool use hooks hook? [Submit it here](/submit)*

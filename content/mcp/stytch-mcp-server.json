@@ -1,0 +1,90 @@
+{
+  "slug": "stytch-mcp-server",
+  "description": "Configure and manage Stytch authentication services and workspace settings",
+  "category": "mcp",
+  "author": "Stytch",
+  "dateAdded": "2025-09-18",
+  "tags": [
+    "authentication",
+    "stytch",
+    "identity",
+    "security",
+    "auth"
+  ],
+  "content": "Manage Stytch authentication configurations and workspace settings for identity management.",
+  "features": [
+    "Configure authentication methods and flows",
+    "Manage redirect URLs and callbacks",
+    "Customize email templates and branding",
+    "Update workspace security settings",
+    "Monitor authentication events and metrics"
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Open Claude Desktop configuration file",
+        "Add the Stytch server configuration with HTTP transport",
+        "Restart Claude Desktop",
+        "Authenticate with your Stytch account"
+      ],
+      "configPath": {
+        "macOS": "~/Library/Application Support/Claude/claude_desktop_config.json",
+        "windows": "%APPDATA%\\Claude\\claude_desktop_config.json"
+      }
+    },
+    "claudeCode": "claude mcp add --transport http stytch http://mcp.stytch.dev/mcp"
+  },
+  "configuration": {
+    "claudeDesktop": {
+      "mcpServers": {
+        "stytch": {
+          "transport": "http",
+          "url": "http://mcp.stytch.dev/mcp"
+        }
+      }
+    },
+    "claudeCode": {
+      "mcpServers": {
+        "stytch": {
+          "transport": "http",
+          "url": "http://mcp.stytch.dev/mcp"
+        }
+      }
+    }
+  },
+  "package": null,
+  "source": "official",
+  "useCases": [
+    "Configure authentication flows",
+    "Update email templates for notifications",
+    "Manage redirect URLs for OAuth",
+    "Set security policies and rules",
+    "Test authentication methods"
+  ],
+  "security": [
+    "OAuth authentication for access",
+    "Test in sandbox environment first",
+    "Regular security audits",
+    "Monitor failed authentication attempts"
+  ],
+  "troubleshooting": [
+    "Verify project access permissions",
+    "Check environment (test/live) configuration",
+    "Review redirect URL configuration",
+    "Monitor API rate limits"
+  ],
+  "examples": [
+    "Add new redirect URL for production",
+    "Update password reset email template",
+    "Configure MFA settings",
+    "Show authentication metrics for this week"
+  ],
+  "requiresAuth": true,
+  "permissions": [
+    "read",
+    "write",
+    "configure"
+  ],
+  "configLocation": "claude_desktop_config.json",
+  "documentationUrl": "https://stytch.com/docs/workspace-management/stytch-mcp"
+}
