@@ -67,14 +67,14 @@ async function loadJsonFiles(type: string): Promise<BaseContent[]> {
         try {
           const item = JSON.parse(content);
 
-          // For hooks, rules, and MCP servers, prioritize slug as source of truth
-          if (type === 'hooks' || type === 'rules' || type === 'mcp') {
+          // For hooks, rules, agents, and MCP servers, prioritize slug as source of truth
+          if (type === 'hooks' || type === 'rules' || type === 'mcp' || type === 'agents') {
             // Auto-generate slug from filename if not provided
             if (!item.slug) {
               item.slug = path.basename(file, '.json');
             }
 
-            // TODO - update remaining categories (agents, commands) to use new slug-only approach
+            // TODO - update remaining categories (commands) to use new slug-only approach
             // Auto-generate id and title from slug for slug-based content types
             item.id = item.slug;
             if (!item.title) {

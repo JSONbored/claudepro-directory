@@ -69,7 +69,33 @@ export interface ContentStats {
 }
 
 // Type aliases for specific content types
-export interface Agent extends ContentItem {}
+export interface Agent extends ContentItem {
+  features?: string[];
+  useCases?: string[];
+  installation?: {
+    claudeCode?: {
+      steps: string[];
+      configFormat: string;
+      configPath: {
+        project: string;
+        user: string;
+      };
+    };
+    claudeDesktop?: {
+      steps: string[];
+      configPath: {
+        macOS: string;
+        windows: string;
+        linux: string;
+      };
+      note: string;
+    };
+    sdk?: {
+      steps: string[];
+    };
+    requirements?: string[];
+  };
+}
 // Maintain safety while allowing dynamic properties
 export interface MCPServer extends ContentItem {
   features?: string[];
