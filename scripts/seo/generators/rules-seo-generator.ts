@@ -121,7 +121,7 @@ ${relevantRules
   .slice(0, 5)
   .map(
     (rule: Rule) =>
-      `| ${rule.title} | ${rule.tags?.[0] || 'General'} | ${rule.tags?.slice(1, 3).join(', ') || 'Various'} | ${rule.tags?.length > 5 ? 'Advanced' : 'Simple'} |`
+      `| ${rule.title} | ${rule.tags?.[0] || 'General'} | ${rule.tags?.slice(1, 3).join(', ') || 'Various'} | ${(rule.tags?.length || 0) > 5 ? 'Advanced' : 'Simple'} |`
   )
   .join('\n')}
 
@@ -480,7 +480,7 @@ ${categoryRules
   .slice(0, 10)
   .map(
     (rule: Rule) =>
-      `| ${rule.title} | ${rule.tags?.[0] || 'General'} | ${rule.tags?.length > 5 ? '⭐⭐⭐ Advanced' : rule.tags?.length > 3 ? '⭐⭐ Intermediate' : '⭐ Beginner'} | ${rule.tags?.[1] || 'General use'} |`
+      `| ${rule.title} | ${rule.tags?.[0] || 'General'} | ${(rule.tags?.length || 0) > 5 ? '⭐⭐⭐ Advanced' : (rule.tags?.length || 0) > 3 ? '⭐⭐ Intermediate' : '⭐ Beginner'} | ${rule.tags?.[1] || 'General use'} |`
   )
   .join('\n')}
 

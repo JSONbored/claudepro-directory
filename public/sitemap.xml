@@ -511,19 +511,19 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/agents/backend-architect</loc>
+    <loc>https://claudepro.directory/agents/backend-architect-agent</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/agents/code-review-specialist</loc>
+    <loc>https://claudepro.directory/agents/code-reviewer-agent</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/agents/database-specialist</loc>
+    <loc>https://claudepro.directory/agents/database-specialist-agent</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -535,31 +535,31 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/agents/frontend-specialist</loc>
+    <loc>https://claudepro.directory/agents/frontend-specialist-agent</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/agents/performance-optimizer</loc>
+    <loc>https://claudepro.directory/agents/performance-optimizer-agent</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/agents/technical-documentation-writer</loc>
+    <loc>https://claudepro.directory/agents/technical-documentation-writer-agent</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/agents/test-automation-engineer</loc>
+    <loc>https://claudepro.directory/agents/test-automation-engineer-agent</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/agents/uiux-design-expert</loc>
+    <loc>https://claudepro.directory/agents/ui-ux-design-expert-agent</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
