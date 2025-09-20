@@ -11,8 +11,12 @@ if (files.length === 0) {
 
 let hasErrors = false;
 
-// Required fields for all content types
-const requiredFields = ['title', 'description', 'category', 'author', 'dateAdded'];
+// Required fields for different schema types
+const legacyRequiredFields = ['title', 'description', 'category', 'author', 'dateAdded'];
+const slugBasedRequiredFields = ['slug', 'description', 'category', 'author', 'dateAdded'];
+
+// Content types using slug-based schema (rules and hooks are converted, MCP still transitioning)
+const slugBasedCategories = ['hooks', 'rules'];
 
 // Valid categories
 const validCategories = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
@@ -42,6 +46,10 @@ files.forEach((filePath) => {
       return;
     }
 
+    // Determine which schema to use based on category
+    const isSlugBased = slugBasedCategories.includes(data.category);
+    const requiredFields = isSlugBased ? slugBasedRequiredFields : legacyRequiredFields;
+
     // Check required fields
     for (const field of requiredFields) {
       if (!data[field]) {
@@ -63,8 +71,8 @@ files.forEach((filePath) => {
       hasErrors = true;
     }
 
-    // Check for required content field
-    if (!data.content) {
+    // Check for required content field (only for legacy schema)
+    if (!isSlugBased && !data.content) {
       console.error(`ERROR: Missing 'content' field in ${filePath}`);
       hasErrors = true;
     }
