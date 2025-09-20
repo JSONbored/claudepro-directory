@@ -53,13 +53,13 @@ export default function HomePage() {
         (item) =>
           item.name?.toLowerCase().includes(searchLower) ||
           item.description?.toLowerCase().includes(searchLower) ||
-          item.tags?.some((tag) => tag.toLowerCase().includes(searchLower)) ||
+          item.tags?.some((tag: string) => tag.toLowerCase().includes(searchLower)) ||
           item.category?.toLowerCase().includes(searchLower) ||
           item.author?.toLowerCase().includes(searchLower)
       );
 
-      setFilteredItems(filtered);
-      setDisplayedItems(filtered.slice(0, pageSize));
+      setFilteredItems(filtered as ContentItem[]);
+      setDisplayedItems(filtered.slice(0, pageSize) as ContentItem[]);
       setCurrentPage(1);
     },
     [allConfigs]
@@ -125,8 +125,8 @@ export default function HomePage() {
           break;
       }
 
-      setFilteredItems(processed);
-      setDisplayedItems(processed.slice(0, pageSize));
+      setFilteredItems(processed as ContentItem[]);
+      setDisplayedItems(processed.slice(0, pageSize) as ContentItem[]);
       setCurrentPage(1);
     },
     [searchQuery, filteredItems, allConfigs, activeTab]

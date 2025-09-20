@@ -244,21 +244,29 @@ export function ContentDetailPage<T extends ContentItem>({
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {item.examples.map(
-                    (
-                      example: { title?: string; code: string; description?: string },
-                      idx: number
-                    ) => (
-                      <div key={example.title || `example-${idx}`}>
-                        <h4 className="font-medium mb-2">{example.title}</h4>
-                        <CodeHighlight code={example.code} language="bash" />
-                        {example.description && (
-                          <p className="text-sm text-muted-foreground mt-2">
-                            {example.description}
-                          </p>
-                        )}
-                      </div>
-                    )
+                  {(Array.isArray(item.examples) ? item.examples : []).map(
+                    (example: any, idx: number) => {
+                      // Handle both string[] and object[] formats
+                      if (typeof example === 'string') {
+                        return (
+                          <div key={`example-string-${example.slice(0, 50)}`}>
+                            <CodeHighlight code={example} language="bash" />
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div key={example.title || `example-${idx}`}>
+                          <h4 className="font-medium mb-2">{example.title}</h4>
+                          <CodeHighlight code={example.code} language="bash" />
+                          {example.description && (
+                            <p className="text-sm text-muted-foreground mt-2">
+                              {example.description}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    }
                   )}
                 </CardContent>
               </Card>

@@ -1,16 +1,41 @@
 {
-  "title": "SCSS Auto-Compiler",
+  "slug": "scss-auto-compiler",
   "description": "Automatically compiles SCSS/Sass files to CSS when they are modified",
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
   "tags": ["scss", "sass", "css", "styling", "compilation"],
-  "content": "Watches for changes to SCSS/Sass files and automatically compiles them to CSS. Includes source map generation for debugging and minification for production builds.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.scss ]] || [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.sass ]]; then echo '🎨 Compiling SCSS...' && npx sass \\\"$CLAUDE_TOOL_FILE_PATH\\\" \\\"${CLAUDE_TOOL_FILE_PATH%.s[ac]ss}.css\\\" --source-map && echo '✅ SCSS compiled successfully'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "hookType": "PostToolUse",
+  "features": [
+    "Automatic SCSS/Sass compilation to CSS",
+    "Source map generation for debugging",
+    "Support for both SCSS and Sass syntax",
+    "Customizable output formatting",
+    "Error reporting and validation",
+    "Watch mode compatibility"
+  ],
+  "useCases": [
+    "Compile SCSS files to CSS automatically",
+    "Generate source maps for easier debugging",
+    "Maintain CSS output in sync with SCSS changes",
+    "Streamline SCSS development workflow",
+    "Validate SCSS syntax and catch errors",
+    "Support both indented and SCSS syntax",
+    "Integrate SCSS compilation into development process",
+    "Automate CSS generation for web projects"
+  ],
   "configuration": {
-    "hookType": "PostToolUse",
-    "matcher": "Edit|Write",
-    "timeout": 5000
+    "hookConfig": {
+      "scriptContent": "#!/bin/bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if this is a SCSS or Sass file\nif [[ \"$FILE_PATH\" == *.scss ]] || [[ \"$FILE_PATH\" == *.sass ]]; then\n    echo \"🎨 SCSS Auto-Compiler - Processing stylesheet...\"\n    echo \"📄 File: $FILE_PATH\"\n    \n    # Check if file exists\n    if [ ! -f \"$FILE_PATH\" ]; then\n        echo \"⚠️ File not found: $FILE_PATH\"\n        exit 1\n    fi\n    \n    # Determine output CSS file path\n    if [[ \"$FILE_PATH\" == *.scss ]]; then\n        CSS_OUTPUT=\"${FILE_PATH%.scss}.css\"\n        MAP_OUTPUT=\"${FILE_PATH%.scss}.css.map\"\n    else  # .sass file\n        CSS_OUTPUT=\"${FILE_PATH%.sass}.css\"\n        MAP_OUTPUT=\"${FILE_PATH%.sass}.css.map\"\n    fi\n    \n    echo \"📁 Output: $CSS_OUTPUT\"\n    \n    # Check if Sass compiler is available\n    if command -v sass >/dev/null 2>&1; then\n        SASS_CMD=\"sass\"\n    elif command -v npx >/dev/null 2>&1 && npx sass --version >/dev/null 2>&1; then\n        SASS_CMD=\"npx sass\"\n    elif command -v node-sass >/dev/null 2>&1; then\n        SASS_CMD=\"node-sass\"\n        echo \"ℹ️ Using node-sass (consider upgrading to Dart Sass)\"\n    else\n        echo \"⚠️ No Sass compiler found\"\n        echo \"💡 Install options:\"\n        echo \"  • npm install -g sass (Dart Sass - recommended)\"\n        echo \"  • npm install sass (project-local)\"\n        echo \"  • brew install sass/sass/sass (macOS)\"\n        exit 1\n    fi\n    \n    echo \"🔧 Compiling with $SASS_CMD...\"\n    \n    # Compile SCSS/Sass to CSS with source maps\n    if [[ \"$SASS_CMD\" == \"node-sass\" ]]; then\n        # node-sass syntax\n        if node-sass \"$FILE_PATH\" \"$CSS_OUTPUT\" --source-map true --source-map-contents; then\n            echo \"✅ SCSS compiled successfully with node-sass\"\n        else\n            echo \"❌ SCSS compilation failed\"\n            exit 1\n        fi\n    else\n        # Dart Sass syntax\n        if $SASS_CMD \"$FILE_PATH\" \"$CSS_OUTPUT\" --source-map; then\n            echo \"✅ SCSS compiled successfully\"\n        else\n            echo \"❌ SCSS compilation failed\"\n            exit 1\n        fi\n    fi\n    \n    # Check output file size\n    if [ -f \"$CSS_OUTPUT\" ]; then\n        CSS_SIZE=$(stat -f%z \"$CSS_OUTPUT\" 2>/dev/null || stat -c%s \"$CSS_OUTPUT\" 2>/dev/null || echo \"unknown\")\n        echo \"📊 Generated CSS: ${CSS_SIZE} bytes\"\n        \n        # Check for source map\n        if [ -f \"$MAP_OUTPUT\" ]; then\n            echo \"🗺️ Source map: $MAP_OUTPUT\"\n        fi\n    fi\n    \n    # Additional analysis\n    echo \"\"\n    echo \"🔍 SCSS Analysis:\"\n    \n    # Count SCSS features used\n    if grep -q '@import\\|@use' \"$FILE_PATH\" 2>/dev/null; then\n        IMPORT_COUNT=$(grep -c '@import\\|@use' \"$FILE_PATH\" 2>/dev/null || echo 0)\n        echo \"  • Imports/Uses: $IMPORT_COUNT\"\n    fi\n    \n    if grep -q '@mixin' \"$FILE_PATH\" 2>/dev/null; then\n        MIXIN_COUNT=$(grep -c '@mixin' \"$FILE_PATH\" 2>/dev/null || echo 0)\n        echo \"  • Mixins defined: $MIXIN_COUNT\"\n    fi\n    \n    if grep -q '@include' \"$FILE_PATH\" 2>/dev/null; then\n        INCLUDE_COUNT=$(grep -c '@include' \"$FILE_PATH\" 2>/dev/null || echo 0)\n        echo \"  • Mixin includes: $INCLUDE_COUNT\"\n    fi\n    \n    if grep -q '\\$[a-zA-Z]' \"$FILE_PATH\" 2>/dev/null; then\n        echo \"  • 💡 Variables detected - using SCSS features\"\n    fi\n    \n    if grep -q '&' \"$FILE_PATH\" 2>/dev/null; then\n        echo \"  • 💡 Nested selectors detected\"\n    fi\n    \n    # Check for common issues\n    echo \"\"\n    echo \"🔍 Code Quality Check:\"\n    \n    if grep -q '!important' \"$FILE_PATH\" 2>/dev/null; then\n        IMPORTANT_COUNT=$(grep -c '!important' \"$FILE_PATH\" 2>/dev/null || echo 0)\n        echo \"  • ⚠️ !important usage: $IMPORTANT_COUNT (consider refactoring)\"\n    fi\n    \n    if grep -q 'color: #[0-9a-fA-F]\\{3,6\\}' \"$FILE_PATH\" 2>/dev/null; then\n        echo \"  • 💡 Consider using CSS custom properties for colors\"\n    fi\n    \n    echo \"\"\n    echo \"💡 SCSS Development Tips:\"\n    echo \"  • Use @use instead of @import for better performance\"\n    echo \"  • Organize styles with partials (_filename.scss)\"\n    echo \"  • Use mixins for reusable style patterns\"\n    echo \"  • Leverage SCSS variables for consistent theming\"\n    echo \"  • Use nested selectors sparingly (max 3-4 levels)\"\n    \n    echo \"\"\n    echo \"🎯 SCSS compilation complete!\"\n    \nelse\n    echo \"ℹ️ File is not a SCSS/Sass file: $FILE_PATH\"\nfi\n\nexit 0",
+      "hooks": {
+        "PostToolUse": [
+          {
+            "matchers": ["write", "edit"],
+            "description": "Compile SCSS/Sass files to CSS when modified"
+          }
+        ]
+      }
+    }
   },
-  "githubUrl": "https://github.com/claude-directory/hooks",
   "source": "community"
 }

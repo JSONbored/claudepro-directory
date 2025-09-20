@@ -1,16 +1,41 @@
 {
-  "title": "Python Linter Integration",
+  "slug": "python-linter-integration",
   "description": "Automatically runs pylint on Python files after editing to enforce code quality standards",
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
   "tags": ["python", "linting", "code-quality", "pylint"],
-  "content": "Integrates pylint to automatically check Python code quality after edits. Helps maintain consistent coding standards, catch potential bugs, and improve code maintainability.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.py ]]; then echo '🔍 Running pylint...' && pylint --score=no \\\"$CLAUDE_TOOL_FILE_PATH\\\" || echo '⚠️ Pylint found issues (non-blocking)'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "hookType": "PostToolUse",
+  "features": [
+    "Automatic pylint execution on Python file changes",
+    "Code quality assessment and scoring",
+    "PEP 8 compliance checking",
+    "Error and warning detection",
+    "Code complexity analysis",
+    "Configurable linting rules"
+  ],
+  "useCases": [
+    "Enforce Python coding standards automatically",
+    "Catch potential bugs and code issues early",
+    "Maintain consistent code quality across projects",
+    "Provide immediate feedback on code changes",
+    "Integrate linting into development workflow",
+    "Monitor code complexity and maintainability",
+    "Ensure PEP 8 compliance",
+    "Run quality checks before commits"
+  ],
   "configuration": {
-    "hookType": "PostToolUse",
-    "matcher": "Edit|Write",
-    "timeout": 8000
+    "hookConfig": {
+      "scriptContent": "#!/bin/bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if this is a Python file\nif [[ \"$FILE_PATH\" == *.py ]]; then\n    echo \"🔍 Python Linter Integration - Analyzing code quality...\"\n    echo \"📄 File: $FILE_PATH\"\n    \n    # Check if file exists\n    if [ ! -f \"$FILE_PATH\" ]; then\n        echo \"⚠️ File not found: $FILE_PATH\"\n        exit 1\n    fi\n    \n    # Check if pylint is available\n    if command -v pylint >/dev/null 2>&1; then\n        echo \"🔍 Running pylint analysis...\"\n        \n        # Run pylint with custom formatting\n        PYLINT_OUTPUT=$(pylint \"$FILE_PATH\" --score=yes --reports=no --msg-template=\"{line:3d},{column:2d}: {category}: {msg} ({symbol})\" 2>/dev/null)\n        PYLINT_EXIT_CODE=$?\n        \n        if [ $PYLINT_EXIT_CODE -eq 0 ]; then\n            echo \"✅ Pylint analysis passed - No issues found\"\n        else\n            echo \"📋 Pylint Analysis Results:\"\n            echo \"$PYLINT_OUTPUT\" | head -20  # Limit output to first 20 lines\n            \n            # Show summary if there are many issues\n            ISSUE_COUNT=$(echo \"$PYLINT_OUTPUT\" | wc -l)\n            if [ \"$ISSUE_COUNT\" -gt 20 ]; then\n                echo \"... and $((ISSUE_COUNT - 20)) more issues\"\n            fi\n            \n            # Extract score if available\n            SCORE=$(echo \"$PYLINT_OUTPUT\" | grep \"Your code has been rated\" | grep -o '[0-9]\\+\\.[0-9]\\+' | head -1)\n            if [ -n \"$SCORE\" ]; then\n                echo \"📊 Code Quality Score: $SCORE/10\"\n            fi\n        fi\n        \n    elif command -v flake8 >/dev/null 2>&1; then\n        echo \"🔍 Running flake8 analysis (fallback)...\"\n        \n        if flake8 \"$FILE_PATH\" --max-line-length=88; then\n            echo \"✅ Flake8 analysis passed - No style issues found\"\n        else\n            echo \"⚠️ Flake8 found style issues (non-blocking)\"\n        fi\n        \n    elif command -v pycodestyle >/dev/null 2>&1; then\n        echo \"🔍 Running pycodestyle analysis (fallback)...\"\n        \n        if pycodestyle \"$FILE_PATH\" --max-line-length=88; then\n            echo \"✅ Pycodestyle analysis passed - No style issues found\"\n        else\n            echo \"⚠️ Pycodestyle found style issues (non-blocking)\"\n        fi\n        \n    else\n        echo \"⚠️ No Python linters found\"\n        echo \"💡 Install options:\"\n        echo \"  • pip install pylint (recommended)\"\n        echo \"  • pip install flake8 (lightweight)\"\n        echo \"  • pip install pycodestyle (basic)\"\n    fi\n    \n    # Additional code quality checks\n    echo \"\"\n    echo \"📊 Quick Code Analysis:\"\n    \n    # Count lines of code (excluding comments and empty lines)\n    LOC=$(grep -v '^[[:space:]]*#' \"$FILE_PATH\" | grep -v '^[[:space:]]*$' | wc -l)\n    echo \"  • Lines of Code: $LOC\"\n    \n    # Check for potential issues\n    if grep -q \"print(\" \"$FILE_PATH\"; then\n        echo \"  • 💡 Consider using logging instead of print statements\"\n    fi\n    \n    if grep -q \"TODO\\|FIXME\\|XXX\" \"$FILE_PATH\"; then\n        echo \"  • 📝 TODOs/FIXMEs found - consider addressing them\"\n    fi\n    \n    # Check function complexity (rough estimate)\n    FUNCTION_COUNT=$(grep -c \"^def \" \"$FILE_PATH\")\n    if [ \"$FUNCTION_COUNT\" -gt 0 ]; then\n        AVG_LINES_PER_FUNC=$((LOC / FUNCTION_COUNT))\n        echo \"  • Functions: $FUNCTION_COUNT (avg ~$AVG_LINES_PER_FUNC lines each)\"\n        \n        if [ \"$AVG_LINES_PER_FUNC\" -gt 20 ]; then\n            echo \"  • 💡 Consider breaking down large functions\"\n        fi\n    fi\n    \n    echo \"\"\n    echo \"💡 Python Code Quality Tips:\"\n    echo \"  • Follow PEP 8 style guidelines\"\n    echo \"  • Use meaningful variable and function names\"\n    echo \"  • Add docstrings to functions and classes\"\n    echo \"  • Keep functions small and focused\"\n    echo \"  • Use type hints for better code clarity\"\n    \n    echo \"\"\n    echo \"🎯 Code quality analysis complete!\"\n    \nelse\n    echo \"ℹ️ File is not a Python file: $FILE_PATH\"\nfi\n\nexit 0",
+      "hooks": {
+        "PostToolUse": [
+          {
+            "matchers": ["write", "edit"],
+            "description": "Run Python linting tools when Python files are modified"
+          }
+        ]
+      }
+    }
   },
-  "githubUrl": "https://github.com/claude-directory/hooks",
   "source": "community"
 }

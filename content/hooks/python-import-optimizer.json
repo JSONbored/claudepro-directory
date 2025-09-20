@@ -1,16 +1,41 @@
 {
-  "title": "Python Import Optimizer",
+  "slug": "python-import-optimizer",
   "description": "Automatically sorts and optimizes Python imports using isort when Python files are modified",
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
   "tags": ["python", "imports", "formatting", "optimization", "isort"],
-  "content": "Automatically organizes Python imports according to PEP 8 standards using isort. Groups imports by type (standard library, third-party, local) and removes unused imports.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.py ]]; then echo '🐍 Optimizing Python imports...' && isort \\\"$CLAUDE_TOOL_FILE_PATH\\\" --profile black --line-length 88 && autoflake --in-place --remove-unused-variables --remove-all-unused-imports \\\"$CLAUDE_TOOL_FILE_PATH\\\" 2>/dev/null && echo '✅ Imports optimized' || echo '✅ Imports sorted (autoflake not installed)'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "hookType": "PostToolUse",
+  "features": [
+    "Automatic import sorting with isort",
+    "PEP 8 compliant import organization",
+    "Unused import removal",
+    "Black profile compatibility",
+    "Import grouping by type",
+    "Code formatting integration"
+  ],
+  "useCases": [
+    "Organize Python imports according to PEP 8 standards",
+    "Remove unused imports automatically",
+    "Group imports by type (standard library, third-party, local)",
+    "Maintain consistent import formatting across projects",
+    "Integrate with Black code formatter",
+    "Clean up import statements in Python files",
+    "Ensure import consistency in team projects",
+    "Optimize Python file organization"
+  ],
   "configuration": {
-    "hookType": "PostToolUse",
-    "matcher": "Edit|Write",
-    "timeout": 3000
+    "hookConfig": {
+      "scriptContent": "#!/bin/bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if this is a Python file\nif [[ \"$FILE_PATH\" == *.py ]]; then\n    echo \"🐍 Python Import Optimizer - Processing Python file...\"\n    echo \"📄 File: $FILE_PATH\"\n    \n    # Check if file exists\n    if [ ! -f \"$FILE_PATH\" ]; then\n        echo \"⚠️ File not found: $FILE_PATH\"\n        exit 1\n    fi\n    \n    # Step 1: Sort imports with isort\n    echo \"📋 Sorting imports with isort...\"\n    if command -v isort >/dev/null 2>&1; then\n        if isort \"$FILE_PATH\" --profile black --line-length 88 --check-only --diff; then\n            echo \"✅ Imports are already sorted\"\n        else\n            echo \"🔄 Sorting imports...\"\n            isort \"$FILE_PATH\" --profile black --line-length 88\n            echo \"✅ Imports sorted successfully\"\n        fi\n    else\n        echo \"⚠️ isort not found. Install with: pip install isort\"\n    fi\n    \n    # Step 2: Remove unused imports with autoflake (optional)\n    echo \"🧹 Removing unused imports...\"\n    if command -v autoflake >/dev/null 2>&1; then\n        # Check for unused imports first\n        if autoflake --check \"$FILE_PATH\" --remove-unused-variables --remove-all-unused-imports; then\n            echo \"✅ No unused imports found\"\n        else\n            echo \"🔄 Removing unused imports...\"\n            autoflake --in-place \"$FILE_PATH\" --remove-unused-variables --remove-all-unused-imports\n            echo \"✅ Unused imports removed\"\n        fi\n    else\n        echo \"ℹ️ autoflake not found (optional). Install with: pip install autoflake\"\n    fi\n    \n    # Step 3: Additional import analysis\n    echo \"🔍 Analyzing import structure...\"\n    \n    # Count different types of imports\n    STDLIB_IMPORTS=$(grep -c \"^import \\(os\\|sys\\|re\\|json\\|datetime\\|collections\\|itertools\\|functools\\|pathlib\\)\" \"$FILE_PATH\" 2>/dev/null || echo 0)\n    THIRD_PARTY_IMPORTS=$(grep -c \"^\\(import\\|from\\) \\(numpy\\|pandas\\|requests\\|flask\\|django\\|fastapi\\)\" \"$FILE_PATH\" 2>/dev/null || echo 0)\n    RELATIVE_IMPORTS=$(grep -c \"^from \\.[.]*\" \"$FILE_PATH\" 2>/dev/null || echo 0)\n    \n    echo \"📊 Import Summary:\"\n    echo \"  • Standard Library: $STDLIB_IMPORTS\"\n    echo \"  • Third Party: $THIRD_PARTY_IMPORTS\"\n    echo \"  • Relative: $RELATIVE_IMPORTS\"\n    \n    # Check for potential issues\n    if grep -q \"^import \\*\" \"$FILE_PATH\" 2>/dev/null; then\n        echo \"⚠️ Warning: Star imports detected (import *) - consider specific imports\"\n    fi\n    \n    if [ \"$(grep -c '^import\\|^from' \"$FILE_PATH\" 2>/dev/null || echo 0)\" -gt 20 ]; then\n        echo \"💡 Tip: Consider grouping related imports or using a package structure\"\n    fi\n    \n    echo \"\"\n    echo \"💡 Python Import Tips:\"\n    echo \"  • Use absolute imports when possible\"\n    echo \"  • Group imports: stdlib, third-party, local\"\n    echo \"  • Avoid star imports (import *)\"\n    echo \"  • Use 'from module import specific_function' for clarity\"\n    \n    echo \"\"\n    echo \"🎯 Python import optimization complete!\"\n    \nelse\n    echo \"ℹ️ File is not a Python file: $FILE_PATH\"\nfi\n\nexit 0",
+      "hooks": {
+        "PostToolUse": [
+          {
+            "matchers": ["write", "edit"],
+            "description": "Sort and optimize Python imports when Python files are modified"
+          }
+        ]
+      }
+    }
   },
-  "githubUrl": "https://github.com/claude-directory/hooks",
   "source": "community"
 }

@@ -131,7 +131,7 @@ async function generateTypeScript() {
 
 import type { ${capitalizedSingular === 'Mcp' ? 'MCPServer' : capitalizedSingular}, ContentMetadata } from '../types/content';
 
-type ${capitalizedSingular}Metadata = Omit<${capitalizedSingular === 'Mcp' ? 'MCPServer' : capitalizedSingular}, 'content'>;
+type ${capitalizedSingular}Metadata = Omit<${capitalizedSingular === 'Mcp' ? 'MCPServer' : capitalizedSingular}, 'content'> & ContentMetadata;
 
 export const ${varName}Metadata: ${capitalizedSingular}Metadata[] = ${JSON.stringify(metadata, null, 2)};
 

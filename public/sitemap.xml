@@ -157,37 +157,37 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/rules/devops-sre-expert</loc>
+    <loc>https://claudepro.directory/rules/devops-and-sre-expert</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/rules/golang-expert</loc>
+    <loc>https://claudepro.directory/rules/go-golang-expert</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/rules/mobile-app-developer</loc>
+    <loc>https://claudepro.directory/rules/mobile-app-development-expert</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/rules/python-data-science</loc>
+    <loc>https://claudepro.directory/rules/python-data-science-expert</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/rules/react-expert</loc>
+    <loc>https://claudepro.directory/rules/react-and-nextjs-expert</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/rules/security-auditor</loc>
+    <loc>https://claudepro.directory/rules/security-auditor-and-penetration-tester</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -445,7 +445,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/agents/code-reviewer-agent</loc>
+    <loc>https://claudepro.directory/agents/code-review-specialist</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -457,7 +457,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/agents/debugging-assistant</loc>
+    <loc>https://claudepro.directory/agents/debugging-assistant-agent</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -487,7 +487,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/agents/ui-ux-design-expert</loc>
+    <loc>https://claudepro.directory/agents/uiux-design-expert</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -511,13 +511,13 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/commands/generate-tests</loc>
+    <loc>https://claudepro.directory/commands/test-gen</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/commands/git-smart-commit</loc>
+    <loc>https://claudepro.directory/commands/commit-smart-git-commit</loc>
     <lastmod>2025-09-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -529,7 +529,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/commands/refactor-code</loc>
+    <loc>https://claudepro.directory/commands/refactor</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -547,7 +547,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/commands/test-advanced</loc>
+    <loc>https://claudepro.directory/commands/test</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -883,7 +883,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/hooks/test-runner-hook</loc>
+    <loc>https://claudepro.directory/hooks/code-test-runner-hook</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

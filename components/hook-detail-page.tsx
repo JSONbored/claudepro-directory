@@ -817,13 +817,28 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
                           {relatedItem.configuration?.hookConfig?.hooks &&
                             Object.values(relatedItem.configuration.hookConfig.hooks)
                               .flat()
-                              .find((h: any) => h.matcher) && (
+                              .find(
+                                (h: any) =>
+                                  h &&
+                                  typeof h === 'object' &&
+                                  h.matchers &&
+                                  Array.isArray(h.matchers)
+                              ) && (
                               <span className="font-mono">
-                                {
-                                  Object.values(relatedItem.configuration.hookConfig.hooks)
+                                {(() => {
+                                  const matcher = Object.values(
+                                    relatedItem.configuration.hookConfig.hooks
+                                  )
                                     .flat()
-                                    .find((h: any) => h.matcher)?.matcher
-                                }
+                                    .find(
+                                      (h: any) =>
+                                        h &&
+                                        typeof h === 'object' &&
+                                        h.matchers &&
+                                        Array.isArray(h.matchers)
+                                    ) as any;
+                                  return matcher?.matchers?.[0];
+                                })()}
                               </span>
                             )}
                         </div>

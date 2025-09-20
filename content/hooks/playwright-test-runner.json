@@ -1,17 +1,42 @@
 {
-  "title": "Playwright Test Runner",
+  "slug": "playwright-test-runner",
   "description": "Automatically runs Playwright E2E tests when test files or page components are modified",
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
   "tags": ["playwright", "e2e", "testing", "automation", "browser-testing"],
-  "content": "Runs relevant Playwright end-to-end tests when test files or application pages are modified. Helps catch UI regressions early in the development process.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.spec.ts ]] || [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.spec.js ]] || [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *e2e*.ts ]]; then echo '🎭 Running Playwright tests...' && npx playwright test \\\"$CLAUDE_TOOL_FILE_PATH\\\" --reporter=list && echo '✅ E2E tests passed' || echo '❌ E2E tests failed'; elif [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *pages/*.tsx ]] || [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *app/*.tsx ]]; then PAGE_NAME=$(basename \\\"${CLAUDE_TOOL_FILE_PATH%.*}\\\"); echo '🎭 Running related E2E tests...' && npx playwright test --grep \\\"$PAGE_NAME\\\" --reporter=list 2>/dev/null || echo 'ℹ️ No specific tests found for this page'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "hookType": "PostToolUse",
+  "features": [
+    "Automatic test execution on file changes",
+    "Smart test detection for pages and components",
+    "E2E regression testing",
+    "Playwright integration",
+    "Test result reporting",
+    "Cross-browser testing support"
+  ],
+  "useCases": [
+    "Run E2E tests when test files are modified",
+    "Execute related tests when page components change",
+    "Catch UI regressions early in development",
+    "Automate browser testing workflows",
+    "Validate page functionality after changes",
+    "Test component interactions across browsers",
+    "Ensure application quality before commits",
+    "Monitor UI consistency during development"
+  ],
   "configuration": {
-    "hookType": "PostToolUse",
-    "matcher": "Edit|Write",
-    "timeout": 30000
+    "hookConfig": {
+      "scriptContent": "#!/bin/bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\necho \"🎭 Playwright Test Runner - Analyzing file changes...\"\n\n# Check if this is a test file\nif [[ \"$FILE_PATH\" == *.spec.ts ]] || [[ \"$FILE_PATH\" == *.spec.js ]] || [[ \"$FILE_PATH\" == *e2e*.ts ]]; then\n    echo \"📝 Test file detected: $FILE_PATH\"\n    echo \"🎭 Running specific Playwright test...\"\n    \n    if command -v npx >/dev/null 2>&1; then\n        npx playwright test \"$FILE_PATH\" --reporter=list\n        if [ $? -eq 0 ]; then\n            echo \"✅ E2E tests passed for $FILE_PATH\"\n        else\n            echo \"❌ E2E tests failed for $FILE_PATH\"\n        fi\n    else\n        echo \"⚠️ Playwright not found. Install with: npm install -D @playwright/test\"\n    fi\n    \nelif [[ \"$FILE_PATH\" == *pages/*.tsx ]] || [[ \"$FILE_PATH\" == *app/*.tsx ]] || [[ \"$FILE_PATH\" == *components/*.tsx ]]; then\n    PAGE_NAME=$(basename \"${FILE_PATH%.*}\")\n    echo \"🧩 Component/page detected: $PAGE_NAME\"\n    echo \"🎭 Running related E2E tests...\"\n    \n    if command -v npx >/dev/null 2>&1; then\n        # Try to find and run tests related to this component\n        npx playwright test --grep \"$PAGE_NAME\" --reporter=list 2>/dev/null\n        if [ $? -eq 0 ]; then\n            echo \"✅ Related E2E tests passed for $PAGE_NAME\"\n        else\n            echo \"ℹ️ No specific tests found for $PAGE_NAME or tests failed\"\n            # Run a basic smoke test if available\n            npx playwright test --grep \"smoke\" --reporter=list 2>/dev/null || echo \"ℹ️ No smoke tests available\"\n        fi\n    else\n        echo \"⚠️ Playwright not found. Install with: npm install -D @playwright/test\"\n    fi\nelse\n    echo \"ℹ️ File type not relevant for E2E testing: $FILE_PATH\"\nfi\n\necho \"\"\necho \"💡 Playwright Testing Tips:\"\necho \"  • Test files should end with .spec.ts, .spec.js, or contain 'e2e'\"\necho \"  • Use page-specific test names to enable smart test detection\"\necho \"  • Consider running full test suite before major releases\"\necho \"  • Check Playwright configuration for browser settings\"\n\necho \"\"\necho \"🎯 Test analysis complete!\"\n\nexit 0",
+      "hooks": {
+        "PostToolUse": [
+          {
+            "matchers": ["write", "edit"],
+            "description": "Run Playwright E2E tests when test files or components are modified"
+          }
+        ]
+      }
+    }
   },
-  "githubUrl": "https://github.com/claude-directory/hooks",
   "documentationUrl": "https://playwright.dev",
   "source": "community"
 }

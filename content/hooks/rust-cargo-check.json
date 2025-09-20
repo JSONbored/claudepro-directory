@@ -1,16 +1,41 @@
 {
-  "title": "Rust Cargo Check",
+  "slug": "rust-cargo-check",
   "description": "Automatically runs cargo check and clippy when Rust files are modified",
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
   "tags": ["rust", "cargo", "clippy", "linting", "compilation"],
-  "content": "Runs cargo check for fast compilation checks and cargo clippy for linting when Rust files are modified. Helps catch errors and improve code quality with Rust's built-in tools.\n\n```json\n{\n  \"PostToolUse\": [\n    {\n      \"matcher\": \"Edit|Write\",\n      \"hooks\": [\n        {\n          \"type\": \"command\",\n          \"command\": \"if [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *.rs ]] || [[ \\\"$CLAUDE_TOOL_FILE_PATH\\\" == *Cargo.toml ]]; then echo '🦀 Running cargo check...' && cargo check && echo '📋 Running clippy...' && cargo clippy -- -W clippy::pedantic && echo '✅ Rust checks complete' || echo '⚠️ Rust checks found issues'; fi\"\n        }\n      ]\n    }\n  ]\n}\n```",
+  "hookType": "PostToolUse",
+  "features": [
+    "Fast compilation checking with cargo check",
+    "Code linting with clippy",
+    "Rust best practices enforcement",
+    "Dependency validation",
+    "Performance optimization suggestions",
+    "Security vulnerability detection"
+  ],
+  "useCases": [
+    "Validate Rust code compilation before commits",
+    "Catch common Rust programming errors early",
+    "Enforce Rust coding standards with clippy",
+    "Check dependency compatibility",
+    "Identify performance improvement opportunities",
+    "Ensure code follows Rust best practices",
+    "Run security analysis on Rust code",
+    "Validate Cargo.toml configuration changes"
+  ],
   "configuration": {
-    "hookType": "PostToolUse",
-    "matcher": "Edit|Write",
-    "timeout": 15000
+    "hookConfig": {
+      "scriptContent": "#!/bin/bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if this is a Rust file or Cargo configuration\nif [[ \"$FILE_PATH\" == *.rs ]] || [[ \"$FILE_PATH\" == *Cargo.toml ]] || [[ \"$FILE_PATH\" == *Cargo.lock ]]; then\n    echo \"🦀 Rust Cargo Check - Analyzing Rust code...\"\n    echo \"📄 File: $FILE_PATH\"\n    \n    # Check if cargo is available\n    if ! command -v cargo >/dev/null 2>&1; then\n        echo \"⚠️ Cargo not found - please install Rust toolchain\"\n        echo \"💡 Install from: https://rustup.rs/\"\n        exit 1\n    fi\n    \n    # Check if we're in a Rust project\n    if [ ! -f \"Cargo.toml\" ]; then\n        echo \"⚠️ No Cargo.toml found - not a Rust project\"\n        exit 0\n    fi\n    \n    echo \"🔍 Running Rust toolchain checks...\"\n    \n    # Step 1: Run cargo check for fast compilation validation\n    echo \"⚡ Running cargo check (fast compilation check)...\"\n    if cargo check --message-format=short; then\n        echo \"✅ Cargo check passed - code compiles successfully\"\n    else\n        echo \"❌ Cargo check failed - compilation errors found\"\n        echo \"💡 Fix compilation errors before proceeding\"\n        exit 1\n    fi\n    \n    # Step 2: Run clippy for linting (if available)\n    echo \"\"\n    echo \"📋 Running clippy (Rust linter)...\"\n    if command -v cargo-clippy >/dev/null 2>&1 || cargo clippy --version >/dev/null 2>&1; then\n        if cargo clippy --message-format=short -- -W clippy::pedantic -W clippy::nursery; then\n            echo \"✅ Clippy analysis passed - no linting issues\"\n        else\n            echo \"⚠️ Clippy found linting issues (non-blocking)\"\n        fi\n    else\n        echo \"ℹ️ Clippy not available - install with: rustup component add clippy\"\n    fi\n    \n    # Step 3: Check formatting (if rustfmt is available)\n    echo \"\"\n    echo \"🎨 Checking code formatting...\"\n    if command -v rustfmt >/dev/null 2>&1; then\n        if cargo fmt -- --check; then\n            echo \"✅ Code formatting is correct\"\n        else\n            echo \"⚠️ Code formatting issues found\"\n            echo \"💡 Run 'cargo fmt' to fix formatting\"\n        fi\n    else\n        echo \"ℹ️ rustfmt not available - install with: rustup component add rustfmt\"\n    fi\n    \n    # Step 4: Security audit (if cargo-audit is available)\n    echo \"\"\n    echo \"🔒 Running security audit...\"\n    if command -v cargo-audit >/dev/null 2>&1; then\n        if cargo audit; then\n            echo \"✅ No known security vulnerabilities found\"\n        else\n            echo \"⚠️ Security vulnerabilities detected - review dependencies\"\n        fi\n    else\n        echo \"ℹ️ cargo-audit not available - install with: cargo install cargo-audit\"\n    fi\n    \n    # Step 5: Project analysis\n    echo \"\"\n    echo \"📊 Project Analysis:\"\n    \n    # Count Rust files\n    RUST_FILES=$(find . -name \"*.rs\" -not -path \"./target/*\" | wc -l)\n    echo \"  • Rust files: $RUST_FILES\"\n    \n    # Check for tests\n    TEST_FILES=$(find . -name \"*.rs\" -not -path \"./target/*\" -exec grep -l \"#\\[test\\]\\|#\\[cfg(test)\\]\" {} \\; | wc -l)\n    echo \"  • Files with tests: $TEST_FILES\"\n    \n    # Check dependencies\n    DEPENDENCIES=$(grep -c '^[a-zA-Z].*=' Cargo.toml 2>/dev/null || echo 0)\n    echo \"  • Dependencies: $DEPENDENCIES\"\n    \n    # Check for unsafe blocks\n    if find . -name \"*.rs\" -not -path \"./target/*\" -exec grep -l \"unsafe\" {} \\; | head -1 >/dev/null 2>&1; then\n        UNSAFE_COUNT=$(find . -name \"*.rs\" -not -path \"./target/*\" -exec grep -c \"unsafe\" {} \\; | awk '{sum+=$1} END {print sum}')\n        echo \"  • ⚠️ Unsafe blocks found: $UNSAFE_COUNT\"\n    fi\n    \n    echo \"\"\n    echo \"💡 Rust Development Tips:\"\n    echo \"  • Use 'cargo test' to run all tests\"\n    echo \"  • Use 'cargo build --release' for optimized builds\"\n    echo \"  • Use 'cargo doc --open' to generate and view documentation\"\n    echo \"  • Use 'cargo bench' for benchmarking (if available)\"\n    echo \"  • Consider using 'cargo watch' for continuous testing\"\n    \n    echo \"\"\n    echo \"🎯 Rust code analysis complete!\"\n    \nelse\n    echo \"ℹ️ File is not a Rust file: $FILE_PATH\"\nfi\n\nexit 0",
+      "hooks": {
+        "PostToolUse": [
+          {
+            "matchers": ["write", "edit"],
+            "description": "Run cargo check and clippy when Rust files are modified"
+          }
+        ]
+      }
+    }
   },
-  "githubUrl": "https://github.com/claude-directory/hooks",
   "source": "community"
 }
