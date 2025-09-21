@@ -3,7 +3,7 @@
     "@tailwindcss/postcss",
     "autoprefixer", 
     "postcss",
-    "critters"
+    "beasties"
   ],
   "ignore-patterns": [
     "dist",

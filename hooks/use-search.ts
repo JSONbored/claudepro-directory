@@ -17,6 +17,58 @@ interface UseSearchProps {
   searchOptions?: SearchOptions;
 }
 
+// Cache for Fuse instances to improve performance
+const fuseCache = new Map<string, Fuse<ContentItem>>();
+
+// Generate cache key from data and options
+function generateCacheKey(data: ContentItem[], options: SearchOptions): string {
+  // Create a more robust data fingerprint
+  const dataFingerprint =
+    data.length > 0
+      ? `${data.length}-${data[0]?.id || 'no-id'}-${data[data.length - 1]?.id || 'no-id'}`
+      : 'empty';
+
+  // Sort options keys to ensure consistent cache keys
+  const optionsEntries = Object.entries(options).sort(([a], [b]) => a.localeCompare(b));
+  const optionsKey = JSON.stringify(Object.fromEntries(optionsEntries));
+  return `${dataFingerprint}-${optionsKey}`;
+}
+
+// Get or create Fuse instance with caching
+function getFuseInstance(data: ContentItem[], options: SearchOptions): Fuse<ContentItem> {
+  const cacheKey = generateCacheKey(data, options);
+
+  const cachedFuse = fuseCache.get(cacheKey);
+  if (cachedFuse) {
+    return cachedFuse;
+  }
+
+  const fuse = new Fuse(data, {
+    keys: [
+      { name: 'name', weight: 2 },
+      { name: 'description', weight: 1.5 },
+      { name: 'category', weight: 1 },
+      { name: 'author', weight: 0.8 },
+      { name: 'tags', weight: 0.6 },
+    ],
+    threshold: options.threshold || 0.3,
+    includeScore: options.includeScore || false,
+    includeMatches: options.includeMatches || false,
+    minMatchCharLength: options.minMatchCharLength || 2,
+  });
+
+  // Prevent cache from growing too large (LRU-like behavior)
+  if (fuseCache.size >= 10) {
+    const firstKey = fuseCache.keys().next().value as string;
+    if (firstKey) {
+      fuseCache.delete(firstKey);
+    }
+  }
+
+  fuseCache.set(cacheKey, fuse);
+  return fuse;
+}
+
 // Optimized synchronous search function for better performance and React 19 compatibility
 function performSearch(
   data: ContentItem[],
@@ -32,20 +84,7 @@ function performSearch(
 
   // Apply text search if query exists
   if (query.trim()) {
-    const fuse = new Fuse(data, {
-      keys: [
-        { name: 'name', weight: 2 },
-        { name: 'description', weight: 1.5 },
-        { name: 'category', weight: 1 },
-        { name: 'author', weight: 0.8 },
-        { name: 'tags', weight: 0.6 },
-      ],
-      threshold: options.threshold || 0.3,
-      includeScore: options.includeScore || false,
-      includeMatches: options.includeMatches || false,
-      minMatchCharLength: options.minMatchCharLength || 2,
-    });
-
+    const fuse = getFuseInstance(data, options);
     const searchResults = fuse.search(query);
     result = searchResults.map((item) => item.item);
   }

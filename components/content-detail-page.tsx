@@ -1,14 +1,11 @@
 'use client';
 
-import { ArrowLeft, Calendar, Check, Copy, ExternalLink, Github, Tag, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Check, Copy, ExternalLink, Github } from 'lucide-react';
 import { lazy, Suspense, useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { BaseDetailPage } from '@/components/base-detail-page';
+import { CardDescription } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import { getIconByName } from '@/lib/icons';
-import { getDisplayTitle } from '@/lib/utils';
+import { copyToClipboard } from '@/lib/clipboard-utils';
 import type { ContentCategory, ContentItem } from '@/types/content';
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
@@ -28,7 +25,6 @@ const ContentViewer = lazy(() =>
 interface ContentDetailPageProps<T extends ContentItem> {
   item: T | null;
   type: ContentCategory;
-  icon: string;
   typeName: string;
   relatedItems?: T[];
   customSections?: React.ReactNode;
@@ -37,340 +33,180 @@ interface ContentDetailPageProps<T extends ContentItem> {
 export function ContentDetailPage<T extends ContentItem>({
   item,
   type,
-  icon,
   typeName,
   relatedItems = [],
   customSections,
 }: ContentDetailPageProps<T>) {
-  const router = useRouter();
   const [copied, setCopied] = useState(false);
 
   if (!item) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">{typeName} Not Found</h1>
-          <p className="text-muted-foreground mb-6">
-            The requested {typeName.toLowerCase()} could not be found.
-          </p>
-          <Button onClick={() => router.push('/')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
-          </Button>
-        </div>
-      </div>
-    );
+    return null; // Let BaseDetailPage handle the not found case
   }
 
   const handleCopyContent = async () => {
-    try {
-      const contentToCopy = item.content || item.config || '';
-      await navigator.clipboard.writeText(contentToCopy);
-      setCopied(true);
+    const contentToCopy = item.content || item.config || '';
+
+    const success = await copyToClipboard(contentToCopy, {
+      component: 'content-detail-page',
+      action: 'copy-content',
+    });
+
+    setCopied(true);
+    if (success) {
       toast({
         title: 'Content copied!',
         description: `The ${typeName.toLowerCase()} ${item.config ? 'configuration' : 'content'} has been copied to your clipboard.`,
       });
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
+    } else {
       toast({
         title: 'Failed to copy',
         description: 'Could not copy the content to clipboard.',
         variant: 'destructive',
       });
     }
+
+    // Reset copied state after 2 seconds
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  // Format date if available
-  const formatDate = (dateStr: string) => {
-    try {
-      return new Date(dateStr).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-    } catch {
-      return dateStr;
-    }
+  // Get the appropriate language for syntax highlighting
+  const getLanguage = () => {
+    if (type === 'commands') return 'bash';
+    if (type === 'mcp') return 'json';
+    return 'markdown';
   };
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b border-border/50 bg-card/30">
-        <div className="container mx-auto px-4 py-8">
-          {/* Modern back navigation */}
-          <div className="mb-6">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push(`/${type}`)}
-              className="-ml-2 text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              {typeName}s
-            </Button>
-          </div>
+  // Build custom sections
+  const contentCustomSections = [];
 
-          <div className="max-w-4xl">
-            <div className="flex items-start gap-4 mb-6">
-              <div className="p-3 bg-accent/10 rounded-lg">
-                {(() => {
-                  const IconComponent = getIconByName(icon);
-                  return <IconComponent className="h-6 w-6 text-primary" />;
-                })()}
-              </div>
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold mb-2">{getDisplayTitle(item)}</h1>
-                <p className="text-lg text-muted-foreground">{item.description}</p>
-              </div>
-            </div>
+  // Configuration section (if applicable)
+  if (item.configuration) {
+    contentCustomSections.push({
+      title: 'Configuration',
+      icon: <Copy className="h-5 w-5" />,
+      content: (
+        <>
+          <CardDescription className="mb-4">
+            Recommended settings for this {typeName.toLowerCase()}
+          </CardDescription>
+          <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}>
+            <CodeHighlight code={JSON.stringify(item.configuration, null, 2)} language="json" />
+          </Suspense>
+        </>
+      ),
+    });
+  }
 
-            {/* Metadata */}
-            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-              {item.author && (
-                <div className="flex items-center gap-1">
-                  <User className="h-4 w-4" />
-                  <span>{item.author}</span>
-                  {item.githubUsername && (
-                    <a
-                      href={`https://github.com/${item.githubUsername}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-1"
-                    >
-                      <Github className="h-3 w-3" />
-                    </a>
-                  )}
-                </div>
-              )}
-              {(item.dateAdded || item.createdAt) && (
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>{formatDate(item.dateAdded || item.createdAt || '')}</span>
-                </div>
-              )}
-              {item.category && <Badge variant="secondary">{item.category}</Badge>}
-            </div>
+  // Examples section (for commands)
+  if (item.examples && item.examples.length > 0) {
+    contentCustomSections.push({
+      title: 'Examples',
+      icon: <Copy className="h-5 w-5" />,
+      content: (
+        <>
+          <CardDescription className="mb-4">
+            Usage examples for this {typeName.toLowerCase()}
+          </CardDescription>
+          <div className="space-y-4">
+            {(Array.isArray(item.examples) ? item.examples : []).map(
+              (
+                example: string | { title?: string; code: string; description?: string },
+                idx: number
+              ) => {
+                // Handle both string[] and object[] formats
+                if (typeof example === 'string') {
+                  return (
+                    <div key={`example-string-${example.slice(0, 50)}`}>
+                      <Suspense
+                        fallback={<div className="animate-pulse bg-muted h-16 rounded-md" />}
+                      >
+                        <CodeHighlight code={example} language="bash" />
+                      </Suspense>
+                    </div>
+                  );
+                }
 
-            {/* Tags */}
-            {item.tags && item.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-4">
-                {item.tags.map((tag: string) => (
-                  <Badge key={tag} variant="outline">
-                    <Tag className="h-3 w-3 mr-1" />
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Content Card */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>{type === 'mcp' ? 'Configuration' : 'Content'}</CardTitle>
-                  <Button size="sm" variant="outline" onClick={handleCopyContent}>
-                    {copied ? (
-                      <>
-                        <Check className="h-4 w-4 mr-2" />
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-4 w-4 mr-2" />
-                        Copy
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}>
-                  {(item.content || item.config || '').length > 3000 ? (
-                    <ContentViewer
-                      content={item.content || item.config || ''}
-                      language={type === 'commands' ? 'bash' : type === 'mcp' ? 'json' : 'markdown'}
-                      maxHeight={600}
-                    />
-                  ) : (
-                    <CodeHighlight
-                      code={item.content || item.config || ''}
-                      language={type === 'commands' ? 'bash' : type === 'mcp' ? 'json' : 'markdown'}
-                    />
-                  )}
-                </Suspense>
-              </CardContent>
-            </Card>
-
-            {/* Custom Sections */}
-            {customSections}
-
-            {/* Configuration Section (if applicable) */}
-            {item.configuration && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Configuration</CardTitle>
-                  <CardDescription>
-                    Recommended settings for this {typeName.toLowerCase()}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <CodeHighlight
-                    code={JSON.stringify(item.configuration, null, 2)}
-                    language="json"
-                  />
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Examples Section (for commands) */}
-            {item.examples && item.examples.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Examples</CardTitle>
-                  <CardDescription>
-                    Usage examples for this {typeName.toLowerCase()}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {(Array.isArray(item.examples) ? item.examples : []).map(
-                    (
-                      example: string | { title?: string; code: string; description?: string },
-                      idx: number
-                    ) => {
-                      // Handle both string[] and object[] formats
-                      if (typeof example === 'string') {
-                        return (
-                          <div key={`example-string-${example.slice(0, 50)}`}>
-                            <CodeHighlight code={example} language="bash" />
-                          </div>
-                        );
-                      }
-
-                      return (
-                        <div key={example.title || `example-${idx}`}>
-                          <h4 className="font-medium mb-2">{example.title}</h4>
-                          <CodeHighlight code={example.code} language="bash" />
-                          {example.description && (
-                            <p className="text-sm text-muted-foreground mt-2">
-                              {example.description}
-                            </p>
-                          )}
-                        </div>
-                      );
-                    }
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6 sticky top-20 self-start">
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button className="w-full" onClick={handleCopyContent}>
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy Content
-                </Button>
-                {/* Always show GitHub link to the content file in our repo */}
-                <Button className="w-full" variant="outline" asChild>
-                  <a
-                    href={`https://github.com/JSONbored/claudepro-directory/blob/main/content/${type}/${item.slug}.json`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Github className="h-4 w-4 mr-2" />
-                    View on GitHub
-                  </a>
-                </Button>
-                {(item.documentationUrl || item.documentation) && (
-                  <Button className="w-full" variant="outline" asChild>
-                    <a
-                      href={item.documentationUrl || item.documentation}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Documentation
-                    </a>
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Stats */}
-            {(item.views || item.stars || item.forks) && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Stats</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-sm">
-                    {item.views && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Views</span>
-                        <span className="font-medium">{item.views.toLocaleString()}</span>
-                      </div>
-                    )}
-                    {item.stars && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Stars</span>
-                        <span className="font-medium">{item.stars.toLocaleString()}</span>
-                      </div>
-                    )}
-                    {item.forks && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Forks</span>
-                        <span className="font-medium">{item.forks.toLocaleString()}</span>
-                      </div>
+                return (
+                  <div key={example.title || `example-${idx}`}>
+                    <h4 className="font-medium mb-2">{example.title}</h4>
+                    <Suspense fallback={<div className="animate-pulse bg-muted h-16 rounded-md" />}>
+                      <CodeHighlight code={example.code} language="bash" />
+                    </Suspense>
+                    {example.description && (
+                      <p className="text-sm text-muted-foreground mt-2">{example.description}</p>
                     )}
                   </div>
-                </CardContent>
-              </Card>
+                );
+              }
             )}
           </div>
-        </div>
+        </>
+      ),
+    });
+  }
 
-        {/* Related Items - Below main content */}
-        {relatedItems.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold mb-6">Related {typeName}s</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {relatedItems.map((item) => (
-                <Card key={item.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{getDisplayTitle(item)}</CardTitle>
-                    <CardDescription>{item.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => router.push(`/${type}/${item.slug}`)}
-                    >
-                      View {typeName}
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+  // Add any custom sections passed from parent
+  if (customSections) {
+    contentCustomSections.push({
+      title: 'Additional Information',
+      icon: <Copy className="h-5 w-5" />,
+      content: customSections,
+    });
+  }
+
+  // Build secondary actions
+  const secondaryActions = [];
+
+  // Always show GitHub link to the content file in our repo
+  secondaryActions.push({
+    label: 'View on GitHub',
+    icon: <Github className="h-4 w-4 mr-2" />,
+    onClick: () =>
+      window.open(
+        `https://github.com/JSONbored/claudepro-directory/blob/main/content/${type}/${item.slug}.json`,
+        '_blank'
+      ),
+  });
+
+  // Documentation link if available
+  if (item.documentationUrl || item.documentation) {
+    secondaryActions.push({
+      label: 'Documentation',
+      icon: <ExternalLink className="h-4 w-4 mr-2" />,
+      onClick: () => window.open(item.documentationUrl || item.documentation, '_blank'),
+    });
+  }
+
+  // Custom content display for BaseDetailPage
+  const contentDisplay = (
+    <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}>
+      {(item.content || item.config || '').length > 3000 ? (
+        <ContentViewer
+          content={item.content || item.config || ''}
+          language={getLanguage()}
+          maxHeight={600}
+        />
+      ) : (
+        <CodeHighlight code={item.content || item.config || ''} language={getLanguage()} />
+      )}
+    </Suspense>
+  );
+
+  return (
+    <BaseDetailPage
+      item={item}
+      relatedItems={relatedItems}
+      typeName={typeName}
+      primaryAction={{
+        label: copied ? 'Copied!' : 'Copy Content',
+        icon: copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />,
+        onClick: handleCopyContent,
+      }}
+      secondaryActions={secondaryActions}
+      customSections={contentCustomSections}
+      // Override the default content display with our custom content viewer
+      configurationContent={contentDisplay}
+      showConfiguration={true}
+    />
   );
 }
