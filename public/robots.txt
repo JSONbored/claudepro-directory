@@ -51,11 +51,11 @@ Allow: /
 # Sitemap Location
 Sitemap: https://claudepro.directory/sitemap.xml
 
-# AI-Specific Metadata
-# These are non-standard but help AI systems understand our content
-AI-Content-Type: structured-data
-AI-API-Endpoint: https://claudepro.directory/api/all-configurations.json
-AI-Update-Frequency: daily
-AI-Content-Language: en
-AI-Expertise-Level: technical
-AI-Content-License: MIT
+# RSL (Really Simple Licensing) for AI Content Usage
+License: https://claudepro.directory/rsl-license.txt
+
+# Additional Resources for AI Crawlers
+# API endpoint for structured data: https://claudepro.directory/api/all-configurations.json
+# Content updated daily with technical AI configurations
+# Licensed under MIT - https://github.com/JSONbored/claude-pro-directory
+# llms.txt available at: https://claudepro.directory/llms.txt

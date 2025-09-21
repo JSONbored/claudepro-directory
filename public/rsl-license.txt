@@ -1,0 +1,51 @@
+# RSL License - Claude Pro Directory
+
+## Basic Information
+- **Publisher**: Claude Pro Directory
+- **Website**: https://claudepro.directory
+- **Contact**: hi@claudepro.directory
+- **Security Contact**: security@claudepro.directory
+- **Creator**: JSONbored (@JSONbored)
+- **License Type**: Open Access with Attribution
+
+## Usage Terms
+- **Crawling**: Allowed
+- **Training**: Allowed
+- **Attribution**: Requested (not required)
+- **Commercial Use**: Allowed
+- **Modification**: Allowed
+
+## Compensation Model
+- **Type**: Free
+- **Attribution**: "Source: Claude Pro Directory (https://claudepro.directory)"
+
+## Content Description
+The Ultimate Community-Driven Collection of Claude AI Configurations. Features expert rules, MCP servers, AI agents, commands, automation hooks, and job opportunities. All content is open source under MIT license and maintained by the community.
+
+## Data Access
+- **API Endpoint**: https://claudepro.directory/api/all-configurations.json
+- **Update Frequency**: Daily
+- **Format**: JSON, Markdown
+- **Language**: English
+- **Technical Level**: Expert/Technical
+
+## Technology Information
+- **Framework**: Next.js 15.6 with App Router & Turbopack
+- **Language**: TypeScript 5.9+
+- **UI Library**: React 19.1
+- **Styling**: Tailwind CSS with shadcn/ui
+- **Deployment**: Vercel
+
+## Additional Resources
+- **Structured Content**: /llms.txt
+- **Sitemap**: /sitemap.xml
+- **Repository**: https://github.com/JSONbored/claudepro-directory
+
+## Community
+- **Discord**: [Join our server](https://discord.gg/Ax3Py4YDrq)
+- **GitHub Discussions**: [Join the conversation](https://github.com/JSONbored/claudepro-directory/discussions/new/choose)
+- **Social**: [@JSONbored](https://x.com/JSONbored)
+
+---
+This license follows the RSL (Really Simple Licensing) standard specification.
+Generated: 2025-09-20
