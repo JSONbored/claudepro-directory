@@ -2,6 +2,7 @@ import { Check, Copy } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { codeToHtml } from 'shiki';
 import { Button } from '@/components/ui/button';
+import { copyToClipboard } from '@/lib/clipboard-utils';
 import { logger } from '@/lib/logger';
 
 interface CodeHighlightProps {
@@ -119,19 +120,15 @@ export const CodeHighlight = ({
     highlightCode();
   }, [code, language, title]);
 
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(code);
+  const handleCopyCode = async () => {
+    const success = await copyToClipboard(code, {
+      component: 'CodeHighlight',
+      action: 'copy-code',
+    });
+
+    if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      logger.error(
-        'Failed to copy code to clipboard',
-        err instanceof Error ? err : new Error(String(err)),
-        {
-          component: 'CodeHighlight',
-        }
-      );
     }
   };
 
@@ -144,7 +141,7 @@ export const CodeHighlight = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={copyToClipboard}
+              onClick={handleCopyCode}
               className="opacity-0 group-hover:opacity-100 transition-opacity"
               disabled={isLoading}
             >
@@ -176,7 +173,7 @@ export const CodeHighlight = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={copyToClipboard}
+            onClick={handleCopyCode}
             className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
           >
             {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}

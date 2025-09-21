@@ -8,24 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Job } from '@/data/jobs';
+import { formatRelativeDate } from '@/lib/date-utils';
 
 interface JobCardProps {
   job: Job;
 }
 
 export const JobCard = memo(({ job }: JobCardProps) => {
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (diffInDays === 0) return 'Today';
-    if (diffInDays === 1) return 'Yesterday';
-    if (diffInDays < 7) return `${diffInDays} days ago`;
-    if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
-    return `${Math.floor(diffInDays / 30)} months ago`;
-  };
-
   const getTypeColor = (type: string) => {
     const colors = {
       'full-time': 'bg-green-500/10 text-green-400 border-green-500/20',
@@ -82,7 +71,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
               </div>
               <div className="flex items-center gap-1">
                 <Clock className="h-4 w-4" />
-                {formatDate(job.postedAt)}
+                {formatRelativeDate(job.postedAt)}
               </div>
               {job.salary && (
                 <div className="flex items-center gap-1">
