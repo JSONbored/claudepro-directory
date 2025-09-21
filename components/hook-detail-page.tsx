@@ -1,10 +1,12 @@
 'use client';
 
-import { AlertTriangle, Copy, Lightbulb, Webhook } from 'lucide-react';
+import { AlertTriangle, Copy, ExternalLink, Github, Lightbulb, Webhook } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { lazy, type ReactNode, Suspense } from 'react';
 import { BaseDetailPage } from '@/components/base-detail-page';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import type { ContentItem, Hook } from '@/types/content';
@@ -316,7 +318,182 @@ const handleCopyInstallation = async (installation: unknown) => {
   }
 };
 
+// Helper function to render Hook sidebar with resources and details
+const renderHookSidebar = (item: Hook, relatedItems: ContentItem[], router: any): ReactNode => (
+  <div className="space-y-6 sticky top-20 self-start">
+    {/* Resources */}
+    <Card>
+      <CardHeader>
+        <CardTitle>Resources</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {/* Always show GitHub link to the Hook file in our repo */}
+        <Button variant="outline" className="w-full justify-start" asChild>
+          <a
+            href={`https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/${item.slug}.json`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Github className="h-4 w-4 mr-2" />
+            View on GitHub
+          </a>
+        </Button>
+        {item.documentationUrl && (
+          <Button variant="outline" className="w-full justify-start" asChild>
+            <a href={item.documentationUrl} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Documentation
+            </a>
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+
+    {/* Hook Details */}
+    <Card>
+      <CardHeader>
+        <CardTitle>Hook Details</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Category */}
+        {item.category && (
+          <div>
+            <h4 className="font-medium mb-1">Category</h4>
+            <Badge
+              variant="default"
+              className="text-xs font-medium bg-pink-500/20 text-pink-500 border-pink-500/30"
+            >
+              {item.category === 'hooks' ? 'Hook' : item.category}
+            </Badge>
+          </div>
+        )}
+
+        {/* Hook Type */}
+        {item.hookType && (
+          <div>
+            <h4 className="font-medium mb-1">Hook Type</h4>
+            <Badge
+              variant="default"
+              className={`text-xs font-medium ${
+                item.hookType === 'PreToolUse'
+                  ? 'bg-blue-500/20 text-blue-500 border-blue-500/30'
+                  : 'bg-green-500/20 text-green-500 border-green-500/30'
+              }`}
+            >
+              {item.hookType}
+            </Badge>
+          </div>
+        )}
+
+        {/* Trigger Events */}
+        {(() => {
+          const hookTypeKey = item.hookType?.toLowerCase();
+          const matchers = (() => {
+            if (item.matchers) return item.matchers;
+            if (hookTypeKey && item.configuration?.hookConfig?.hooks) {
+              const hooks = item.configuration?.hookConfig?.hooks;
+              const hookConfig =
+                typeof hooks === 'object' && !Array.isArray(hooks)
+                  ? (hooks as Record<string, unknown>)[hookTypeKey]
+                  : undefined;
+              if (hookConfig && typeof hookConfig === 'object' && !Array.isArray(hookConfig)) {
+                const config = hookConfig as Record<string, unknown>;
+                if (Array.isArray(config.matchers)) {
+                  return config.matchers;
+                }
+              }
+            }
+            return [];
+          })();
+          return (
+            matchers.length > 0 && (
+              <div>
+                <h4 className="font-medium mb-1">Trigger Events</h4>
+                <div className="flex flex-wrap gap-1">
+                  {matchers.map((matcher: string) => (
+                    <Badge key={matcher} variant="outline" className="font-mono text-xs">
+                      {matcher}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )
+          );
+        })()}
+
+        {/* Execution Context */}
+        {item.configuration && (
+          <div>
+            <h4 className="font-medium mb-1">Execution Context</h4>
+            <Badge variant="outline" className="text-xs">
+              {item.configuration.hookConfig ? 'Claude Desktop' : 'Script-based'}
+            </Badge>
+          </div>
+        )}
+
+        {item.source && (
+          <div>
+            <h4 className="font-medium mb-1">Source</h4>
+            <Badge variant="outline">{item.source}</Badge>
+          </div>
+        )}
+
+        {/* Tags */}
+        {item.tags && item.tags.length > 0 && (
+          <div>
+            <h4 className="font-medium mb-1">Tags</h4>
+            <div className="flex flex-wrap gap-1">
+              {item.tags.map((tag: string) => (
+                <Badge key={tag} variant="outline" className="text-xs">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+
+    {/* Related Hooks */}
+    {relatedItems.length > 0 && (
+      <Card>
+        <CardHeader>
+          <CardTitle>Related Hooks</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {relatedItems.slice(0, 3).map((relatedItem) => (
+            <Button
+              key={relatedItem.id}
+              variant="ghost"
+              className="w-full justify-start h-auto p-3 text-left"
+              onClick={() => router.push(`/hooks/${relatedItem.slug}`)}
+            >
+              <div className="text-left w-full min-w-0">
+                <div className="font-medium text-sm leading-tight mb-1">
+                  {relatedItem.name || relatedItem.title || relatedItem.slug}
+                </div>
+                <div className="flex flex-wrap gap-1 mb-1">
+                  {/* Show primary tags */}
+                  {relatedItem.tags?.slice(0, 2).map((tag: string) => (
+                    <Badge key={tag} variant="secondary" className="text-xs px-1 py-0">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+                <div className="text-xs text-muted-foreground line-clamp-2">
+                  {relatedItem.description}
+                </div>
+              </div>
+            </Button>
+          ))}
+        </CardContent>
+      </Card>
+    )}
+  </div>
+);
+
 export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps) {
+  const router = useRouter();
   // Generate all hook-specific data
   const installation = item.installation || generateInstallationSteps(item);
   const troubleshooting =
@@ -634,6 +811,7 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
       configurationContent={createConfigurationContent()}
       installationContent={createInstallationContent()}
       useCasesContent={useCases && useCases.length > 0 ? createUseCasesContent() : undefined}
+      customSidebar={renderHookSidebar(item, relatedItems, router)}
     />
   );
 }
