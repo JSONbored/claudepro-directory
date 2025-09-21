@@ -1,9 +1,30 @@
 #!/usr/bin/env node
 
 // Rules-specific SEO content generator - September 2025
+// Now using shared SEO utilities for consistency and scalability
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import {
+  generateCodeExamplesSection,
+  generateFAQSection,
+  generateInternalResourcesSection,
+  generateIntroSection,
+  generateResourcesSection,
+  generateSetupGuideSection,
+  generateTroubleshootingSection,
+} from '../shared/content-templates.js';
+// Import shared SEO utilities
+import {
+  createArticleSchema,
+  createFAQSchema,
+  createHowToSchema,
+  generateLongTailKeywords,
+  generateStandardFAQs,
+  type HowToStep,
+  type PageData,
+  type SEOConfig,
+} from '../shared/seo-utils.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.join(__dirname, '../../..');
@@ -88,7 +109,7 @@ async function loadRules(): Promise<Rule[]> {
   return rules;
 }
 
-// Generate use-case pages based on actual rule purposes
+// Generate use-case pages using shared utilities for consistency
 function generateUseCasePage(useCase: UseCaseData, rules: Rule[]): string | null {
   const relevantRules = rules.filter(
     (r: Rule) =>
@@ -98,20 +119,85 @@ function generateUseCasePage(useCase: UseCaseData, rules: Rule[]): string | null
 
   if (relevantRules.length < 2) return null;
 
+  // Create SEO configuration for shared utilities
+  const seoConfig: SEOConfig = {
+    category: 'rules',
+    title: useCase.title,
+    description: useCase.description,
+    keyword: useCase.keyword,
+    tags: useCase.tags,
+    relatedCategories: ['agents', 'commands', 'hooks', 'mcp'],
+    baseUrl: `https://claudepro.directory/guides/use-cases/claude-rules-for-${useCase.keyword}`,
+    examples: useCase.examples || [],
+  };
+
+  // Generate all SEO elements using shared utilities
+  const longTailKeywords = generateLongTailKeywords(seoConfig);
+  const pageData: PageData = {
+    title: `Best Claude Rules for ${useCase.title}: Complete 2025 Setup Guide`,
+    description: `Master ${useCase.description} with expert Claude system prompts. Step-by-step configuration, real examples, and pro tips for ${useCase.keyword} professionals.`,
+    url: seoConfig.baseUrl,
+    category: 'rules',
+    keyword: useCase.keyword,
+    wordCount: 3000,
+  };
+
+  // Create comprehensive schema markup
+  const articleSchema = createArticleSchema(pageData, longTailKeywords);
+  const faqSchema = createFAQSchema(generateStandardFAQs(seoConfig));
+
+  // HowTo schema for setup instructions
+  const howToSteps: HowToStep[] = [
+    {
+      name: 'Choose Your Rule',
+      text: `Select the most appropriate rule from our ${useCase.keyword} collection based on your specific needs.`,
+      url: `/rules?category=${useCase.keyword}`,
+    },
+    {
+      name: 'Copy Configuration',
+      text: 'Copy the complete rule content from the rule detail page.',
+    },
+    {
+      name: 'Configure Claude',
+      text: 'Add the rule to Claude Desktop configuration file or start your web conversation with the system prompt.',
+    },
+    {
+      name: 'Test Setup',
+      text: 'Verify the configuration works by asking Claude about its new expertise areas.',
+    },
+  ];
+
+  const howToSchema = createHowToSchema(
+    `How to Setup Claude Rules for ${useCase.title}`,
+    `Step-by-step guide to configure Claude with specialized ${useCase.keyword} expertise.`,
+    howToSteps
+  );
+
+  const combinedSchema = [articleSchema, faqSchema, howToSchema];
+
+  // Generate all content sections using shared templates
+  const introSection = generateIntroSection(seoConfig);
+  const troubleshootingSection = generateTroubleshootingSection(seoConfig);
+  const faqSection = generateFAQSection(seoConfig);
+  const setupGuideSection = generateSetupGuideSection(seoConfig);
+  const resourcesSection = generateInternalResourcesSection(seoConfig);
+  const codeExamplesSection = generateCodeExamplesSection(seoConfig);
+  const additionalResourcesSection = generateResourcesSection(seoConfig);
+
   return `---
-title: "Best Claude Rules for ${useCase.title} (September 2025)"
-description: "Discover expert Claude system prompts and rules for ${useCase.description}. Complete configuration guides and real-world examples."
-keywords: ["claude rules", "${useCase.keyword}", "claude ai prompts", "system prompts", "september 2025"]
-dateUpdated: "2025-09-20"
+title: "${pageData.title}"
+description: "${pageData.description}"
+keywords: ${JSON.stringify(longTailKeywords)}
+dateUpdated: "${new Date().toISOString().split('T')[0]}"
+schema: ${JSON.stringify(combinedSchema)}
+canonical: "${seoConfig.baseUrl}"
 ---
 
 # Best Claude Rules for ${useCase.title}
 
-*Last updated: September 20, 2025*
+*Last updated: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}*
 
-Need Claude to excel at ${useCase.description}? These expert-crafted system prompts and rules transform Claude into a specialized ${useCase.title.toLowerCase()} expert. Configure once, benefit forever.
-
-## Quick Recommendations
+${introSection}
 
 ${relevantRules
   .slice(0, 3)
@@ -216,17 +302,23 @@ ${
     .join('\n') || '- Browse all available rules'
 }
 
-## Community Insights
+${codeExamplesSection}
 
-*Based on usage data from September 2025, these rules have the highest success rates for ${useCase.title.toLowerCase()} tasks.*
+${troubleshootingSection}
 
-**Success Rate:** 94%+ accuracy improvement with specialized rules  
-**Setup Time:** Under 2 minutes  
-**Maintenance:** Zero - rules work automatically
+${faqSection}
+
+${setupGuideSection}
+
+${resourcesSection}
+
+${additionalResourcesSection}
 
 ---
 
-**Need help?** [Submit your rule](/submit) or [join our community](/community) for support.
+**Ready to transform your Claude experience?** Start with our [most popular ${useCase.keyword} rule](/rules/${relevantRules[0]?.slug || 'featured'}) or [browse all ${useCase.title.toLowerCase()} configurations](/rules?category=${useCase.keyword}).
+
+**Contributing:** Found a better approach? [Submit your rule](/submit) and help the community grow.
 `;
 }
 

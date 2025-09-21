@@ -7,7 +7,8 @@ import path from 'path';
 import { MarkdownRenderer } from '@/components/markdown-renderer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import { UnifiedSidebar } from '@/components/unified-sidebar';
 
 // ISR Configuration - Revalidate weekly for SEO pages
 export const revalidate = 604800; // 7 days
@@ -294,104 +295,20 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Table of Contents */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">On this page</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {data.content.match(/^##\s+(.+)$/gm)?.map((heading) => {
-                  const title = heading.replace('## ', '');
-                  const id = title.toLowerCase().replace(/\s+/g, '-');
-                  return (
-                    <a
-                      key={id}
-                      href={`#${id}`}
-                      className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {title}
-                    </a>
-                  );
-                })}
-              </CardContent>
-            </Card>
-
-            {/* Related Guides */}
-            {relatedGuides.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">Related Guides</CardTitle>
-                  <CardDescription>
-                    More {category ? categoryLabels[category] || category : 'related'} guides
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {relatedGuides.map((guide) => (
-                    <Link key={guide.slug} href={guide.slug} className="block group">
-                      <div className="text-sm font-medium group-hover:text-primary transition-colors">
-                        {guide.title}
-                      </div>
-                    </Link>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Link href="/guides" className="block">
-                  <Button variant="outline" size="sm" className="w-full">
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    Browse All Guides
-                  </Button>
-                </Link>
-                <Link href="/submit" className="block">
-                  <Button variant="outline" size="sm" className="w-full">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Submit Content
-                  </Button>
-                </Link>
-                <Link href="/" className="block">
-                  <Button size="sm" className="w-full">
-                    Explore Directory
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            {/* Help Card */}
-            <Card className="bg-accent/5 border-accent/20">
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">Need Help?</CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                <p className="mb-3">Join our community for support and discussions.</p>
-                <div className="space-y-2">
-                  <a
-                    href="https://discord.gg/Ax3Py4YDrq"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline block"
-                  >
-                    Discord Community →
-                  </a>
-                  <a
-                    href="https://github.com/JSONbored/claudepro-directory"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline block"
-                  >
-                    GitHub Repository →
-                  </a>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <UnifiedSidebar
+            mode="content"
+            currentCategory={category || ''}
+            contentData={{
+              title: data.title,
+              description: data.description,
+              keywords: data.keywords,
+              dateUpdated: data.dateUpdated,
+              category: category || '',
+              content: data.content,
+            }}
+            relatedGuides={relatedGuides}
+            showSearch={true}
+          />
         </div>
       </div>
     </div>

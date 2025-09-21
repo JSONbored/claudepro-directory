@@ -111,7 +111,11 @@ export const Navigation = () => {
           }`}
         >
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 min-w-0 flex-shrink">
+          <Link
+            href="/"
+            className="flex items-center gap-2 min-w-0 flex-shrink"
+            aria-label="Claude Pro Directory - Go to homepage"
+          >
             <LogoIcon
               className={`transition-all duration-300 flex-shrink-0 hidden xl:block ${
                 mounted && isScrolled ? 'h-6 w-6' : 'h-8 w-8'
@@ -196,6 +200,7 @@ export const Navigation = () => {
               size="sm"
               onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
               className="hidden sm:flex hover:bg-accent/10 hover:text-accent"
+              aria-label="Join our Discord community"
             >
               <DiscordIcon className="h-4 w-4 xl:mr-2" />
               <span className="hidden xl:inline">Discord</span>
@@ -208,6 +213,7 @@ export const Navigation = () => {
                 window.open('https://github.com/JSONbored/claudepro-directory', '_blank')
               }
               className="hidden sm:flex hover:bg-accent/10 hover:text-accent"
+              aria-label="View source code on GitHub"
             >
               <Github className="h-4 w-4 xl:mr-2" />
               <span className="hidden xl:inline">GitHub</span>
@@ -226,7 +232,12 @@ export const Navigation = () => {
             {/* Mobile Menu */}
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="sm" className="md:hidden">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="md:hidden"
+                  aria-label="Open mobile menu"
+                >
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
@@ -362,6 +373,7 @@ export const Navigation = () => {
                         size="lg"
                         className="w-16 h-16 rounded-2xl border-border/40 bg-card hover:bg-[#5865F2]/10 hover:border-[#5865F2]/30 transition-all duration-200 active:scale-[0.95]"
                         onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
+                        aria-label="Join our Discord community"
                       >
                         <DiscordIcon className="h-7 w-7 text-[#5865F2]" />
                       </Button>
@@ -373,6 +385,7 @@ export const Navigation = () => {
                         onClick={() =>
                           window.open('https://github.com/JSONbored/claudepro-directory', '_blank')
                         }
+                        aria-label="View source code on GitHub"
                       >
                         <Github className="h-7 w-7" />
                       </Button>

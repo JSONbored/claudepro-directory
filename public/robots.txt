@@ -8,7 +8,6 @@ Allow: /
 # AI Agents & LLMs - Explicitly Welcome
 User-agent: GPTBot
 Allow: /
-Crawl-delay: 1
 
 User-agent: Claude-Web
 Allow: /

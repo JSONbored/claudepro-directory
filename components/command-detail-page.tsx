@@ -1,8 +1,19 @@
 'use client';
 
-import { AlertTriangle, Copy, Lightbulb, PlayCircle, Settings, Terminal } from 'lucide-react';
+import {
+  AlertTriangle,
+  Copy,
+  ExternalLink,
+  Github,
+  Lightbulb,
+  PlayCircle,
+  Settings,
+  Terminal,
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import { getDisplayTitle } from '@/lib/utils';
@@ -276,7 +287,172 @@ const generateTroubleshooting = (item: Command): Array<{ issue: string; solution
   return generatedTroubleshooting.slice(0, 5); // Limit to 5 troubleshooting entries
 };
 
+// Helper function to render Command sidebar with resources and details
+const renderCommandSidebar = (
+  item: Command,
+  relatedItems: ContentItem[],
+  router: any
+): React.ReactNode => (
+  <div className="space-y-6 sticky top-20 self-start">
+    {/* Resources */}
+    <Card>
+      <CardHeader>
+        <CardTitle>Resources</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {/* Always show GitHub link to the Command file in our repo */}
+        <Button variant="outline" className="w-full justify-start" asChild>
+          <a
+            href={`https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/${item.slug}.json`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Github className="h-4 w-4 mr-2" />
+            View on GitHub
+          </a>
+        </Button>
+        {item.documentationUrl && (
+          <Button variant="outline" className="w-full justify-start" asChild>
+            <a href={item.documentationUrl} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Documentation
+            </a>
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+
+    {/* Command Details */}
+    <Card>
+      <CardHeader>
+        <CardTitle>Command Details</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Category */}
+        {item.category && (
+          <div>
+            <h4 className="font-medium mb-1">Category</h4>
+            <Badge
+              variant="default"
+              className="text-xs font-medium bg-orange-500/20 text-orange-500 border-orange-500/30"
+            >
+              {item.category === 'commands' ? 'Command' : item.category}
+            </Badge>
+          </div>
+        )}
+
+        {/* Command Type */}
+        {item.tags && item.tags.length > 0 && (
+          <div>
+            <h4 className="font-medium mb-1">Command Type</h4>
+            <div className="flex flex-wrap gap-1">
+              {item.tags.slice(0, 3).map((tag: string) => (
+                <Badge key={tag} variant="outline" className="text-xs capitalize">
+                  {tag}
+                </Badge>
+              ))}
+              {item.tags.length > 3 && (
+                <Badge variant="outline" className="text-xs">
+                  +{item.tags.length - 3} more
+                </Badge>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Dependencies */}
+        {(() => {
+          const requirements = generateRequirements(item);
+          const dependencies = requirements.filter(
+            (req) => !req.includes('Claude Code') && !req.includes('Active development')
+          );
+          return (
+            dependencies.length > 0 && (
+              <div>
+                <h4 className="font-medium mb-1">Dependencies</h4>
+                <div className="flex flex-wrap gap-1">
+                  {dependencies.slice(0, 2).map((dep: string) => (
+                    <Badge key={dep} variant="outline" className="text-xs">
+                      {dep.replace(' installed and configured', '').replace(' system', '')}
+                    </Badge>
+                  ))}
+                  {dependencies.length > 2 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{dependencies.length - 2} more
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )
+          );
+        })()}
+
+        {/* Platforms */}
+        {(() => {
+          const platforms = ['Claude Code CLI'];
+          return (
+            <div>
+              <h4 className="font-medium mb-1">Platforms</h4>
+              <div className="flex flex-wrap gap-1">
+                {platforms.map((platform: string) => (
+                  <Badge key={platform} variant="outline" className="text-xs">
+                    {platform}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
+        {item.source && (
+          <div>
+            <h4 className="font-medium mb-1">Source</h4>
+            <Badge variant="outline">{item.source}</Badge>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+
+    {/* Related Commands */}
+    {relatedItems.length > 0 && (
+      <Card>
+        <CardHeader>
+          <CardTitle>Related Commands</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {relatedItems.slice(0, 3).map((relatedItem) => (
+            <Button
+              key={relatedItem.id}
+              variant="ghost"
+              className="w-full justify-start h-auto p-3 text-left"
+              onClick={() => router.push(`/commands/${relatedItem.slug}`)}
+            >
+              <div className="text-left w-full min-w-0">
+                <div className="font-medium text-sm leading-tight mb-1">
+                  {relatedItem.name || relatedItem.title || relatedItem.slug}
+                </div>
+                <div className="flex flex-wrap gap-1 mb-1">
+                  {/* Show primary tags */}
+                  {relatedItem.tags?.slice(0, 2).map((tag: string) => (
+                    <Badge key={tag} variant="secondary" className="text-xs px-1 py-0">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+                <div className="text-xs text-muted-foreground line-clamp-2">
+                  {relatedItem.description}
+                </div>
+              </div>
+            </Button>
+          ))}
+        </CardContent>
+      </Card>
+    )}
+  </div>
+);
+
 export function CommandDetailPage({ item, relatedItems = [] }: CommandDetailPageProps) {
+  const router = useRouter();
   // Use manual installation if provided, otherwise auto-generate
   const installation = item.installation || generateInstallationSteps(item);
 
@@ -491,6 +667,7 @@ export function CommandDetailPage({ item, relatedItems = [] }: CommandDetailPage
       typeName="Command"
       customSections={customSections}
       secondaryActions={secondaryActions}
+      customSidebar={renderCommandSidebar(item, relatedItems, router)}
     />
   );
 }
