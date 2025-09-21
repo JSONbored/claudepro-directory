@@ -1,9 +1,12 @@
 'use client';
 
 import { Check, Copy, ExternalLink, Github } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { lazy, Suspense, useState } from 'react';
 import { BaseDetailPage } from '@/components/base-detail-page';
-import { CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import type { ContentCategory, ContentItem } from '@/types/content';
@@ -30,6 +33,185 @@ interface ContentDetailPageProps<T extends ContentItem> {
   customSections?: React.ReactNode;
 }
 
+// Helper function to render Content sidebar with resources and details
+const renderContentSidebar = <T extends ContentItem>(
+  item: T,
+  relatedItems: T[],
+  router: any,
+  type: ContentCategory,
+  typeName: string
+): React.ReactNode => (
+  <div className="space-y-6 sticky top-20 self-start">
+    {/* Resources */}
+    <Card>
+      <CardHeader>
+        <CardTitle>Resources</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {/* Always show GitHub link to the Content file in our repo */}
+        <Button variant="outline" className="w-full justify-start" asChild>
+          <a
+            href={`https://github.com/JSONbored/claudepro-directory/blob/main/content/${type}/${item.slug}.json`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Github className="h-4 w-4 mr-2" />
+            View on GitHub
+          </a>
+        </Button>
+        {(item.documentationUrl || item.documentation) && (
+          <Button variant="outline" className="w-full justify-start" asChild>
+            <a
+              href={item.documentationUrl || item.documentation}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Documentation
+            </a>
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+
+    {/* Content Details */}
+    <Card>
+      <CardHeader>
+        <CardTitle>Content Details</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Category */}
+        {item.category && (
+          <div>
+            <h4 className="font-medium mb-1">Category</h4>
+            <Badge
+              variant="default"
+              className="text-xs font-medium bg-purple-500/20 text-purple-500 border-purple-500/30"
+            >
+              {item.category === type ? typeName : item.category}
+            </Badge>
+          </div>
+        )}
+
+        {/* Content Type */}
+        {(() => {
+          const contentType = (() => {
+            if (type === 'commands') return 'Command Script';
+            if (type === 'mcp') return 'MCP Configuration';
+            if (type === 'hooks') return 'Hook Script';
+            if (type === 'rules') return 'System Rule';
+            if (type === 'agents') return 'Agent Definition';
+            return 'Content';
+          })();
+          return (
+            <div>
+              <h4 className="font-medium mb-1">Content Type</h4>
+              <Badge variant="outline" className="text-xs">
+                {contentType}
+              </Badge>
+            </div>
+          );
+        })()}
+
+        {/* Format */}
+        {(() => {
+          const format = (() => {
+            if (item.config) return 'JSON Configuration';
+            if (item.content) {
+              if (type === 'commands') return 'Bash Script';
+              if (type === 'mcp') return 'JSON Configuration';
+              return 'Markdown Content';
+            }
+            return 'Text';
+          })();
+          return (
+            <div>
+              <h4 className="font-medium mb-1">Format</h4>
+              <Badge variant="outline" className="text-xs font-mono">
+                {format}
+              </Badge>
+            </div>
+          );
+        })()}
+
+        {/* Language */}
+        {(() => {
+          const language = (() => {
+            if (type === 'commands') return 'bash';
+            if (type === 'mcp') return 'json';
+            return 'markdown';
+          })();
+          return (
+            <div>
+              <h4 className="font-medium mb-1">Language</h4>
+              <Badge variant="outline" className="text-xs font-mono">
+                {language}
+              </Badge>
+            </div>
+          );
+        })()}
+
+        {item.source && (
+          <div>
+            <h4 className="font-medium mb-1">Source</h4>
+            <Badge variant="outline">{item.source}</Badge>
+          </div>
+        )}
+
+        {/* Tags */}
+        {item.tags && item.tags.length > 0 && (
+          <div>
+            <h4 className="font-medium mb-1">Tags</h4>
+            <div className="flex flex-wrap gap-1">
+              {item.tags.map((tag: string) => (
+                <Badge key={tag} variant="outline" className="text-xs">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+
+    {/* Related Content */}
+    {relatedItems.length > 0 && (
+      <Card>
+        <CardHeader>
+          <CardTitle>Related {typeName}s</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {relatedItems.slice(0, 3).map((relatedItem) => (
+            <Button
+              key={relatedItem.id}
+              variant="ghost"
+              className="w-full justify-start h-auto p-3 text-left"
+              onClick={() => router.push(`/${type}/${relatedItem.slug}`)}
+            >
+              <div className="text-left w-full min-w-0">
+                <div className="font-medium text-sm leading-tight mb-1">
+                  {relatedItem.name || relatedItem.title || relatedItem.slug}
+                </div>
+                <div className="flex flex-wrap gap-1 mb-1">
+                  {/* Show primary tags */}
+                  {relatedItem.tags?.slice(0, 2).map((tag: string) => (
+                    <Badge key={tag} variant="secondary" className="text-xs px-1 py-0">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+                <div className="text-xs text-muted-foreground line-clamp-2">
+                  {relatedItem.description}
+                </div>
+              </div>
+            </Button>
+          ))}
+        </CardContent>
+      </Card>
+    )}
+  </div>
+);
+
 export function ContentDetailPage<T extends ContentItem>({
   item,
   type,
@@ -37,6 +219,7 @@ export function ContentDetailPage<T extends ContentItem>({
   relatedItems = [],
   customSections,
 }: ContentDetailPageProps<T>) {
+  const router = useRouter();
   const [copied, setCopied] = useState(false);
 
   if (!item) {
@@ -207,6 +390,7 @@ export function ContentDetailPage<T extends ContentItem>({
       // Override the default content display with our custom content viewer
       configurationContent={contentDisplay}
       showConfiguration={true}
+      customSidebar={renderContentSidebar(item, relatedItems, router, type, typeName)}
     />
   );
 }

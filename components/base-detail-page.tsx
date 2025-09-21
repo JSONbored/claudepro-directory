@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Calendar, Copy, ExternalLink, Github, Tag, User } from 'lucide-react';
+import { ArrowLeft, Calendar, Copy, ExternalLink, Tag, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { lazy, type ReactNode, Suspense, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -217,19 +217,6 @@ export function BaseDetailPage({
                   {action.label}
                 </Button>
               ))}
-
-              {(item.repository || item.githubUrl) && (
-                <Button variant="outline" asChild>
-                  <a
-                    href={item.repository || item.githubUrl || ''}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Github className="h-4 w-4 mr-2" />
-                    GitHub
-                  </a>
-                </Button>
-              )}
 
               {item.documentation && (
                 <Button variant="outline" asChild>
