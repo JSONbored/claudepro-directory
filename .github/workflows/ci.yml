@@ -19,6 +19,51 @@ jobs:
         node-version: '20'
         cache: 'npm'
 
+    # Cache npm dependencies with improved key strategy
+    - name: Cache npm dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    # Cache Next.js build output for faster subsequent builds
+    - name: Cache Next.js build
+      uses: actions/cache@v4
+      with:
+        path: |
+          .next/cache
+          .next/standalone
+          .next/static
+        key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.{js,jsx,ts,tsx,json,css,scss,sass}', '!node_modules/**') }}
+        restore-keys: |
+          ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+          ${{ runner.os }}-nextjs-
+
+    # Cache TypeScript compilation output
+    - name: Cache TypeScript
+      uses: actions/cache@v4
+      with:
+        path: |
+          .tsbuildinfo
+          tsconfig.tsbuildinfo
+          **/*.tsbuildinfo
+        key: ${{ runner.os }}-tsc-${{ hashFiles('**/tsconfig.json', '**/package-lock.json') }}-${{ hashFiles('**/*.{ts,tsx}', '!node_modules/**') }}
+        restore-keys: |
+          ${{ runner.os }}-tsc-${{ hashFiles('**/tsconfig.json', '**/package-lock.json') }}-
+          ${{ runner.os }}-tsc-
+
+    # Cache ESLint results for faster linting
+    - name: Cache ESLint
+      uses: actions/cache@v4
+      with:
+        path: .eslintcache
+        key: ${{ runner.os }}-eslint-${{ hashFiles('**/.eslintrc*', '**/package-lock.json') }}-${{ hashFiles('**/*.{js,jsx,ts,tsx}', '!node_modules/**') }}
+        restore-keys: |
+          ${{ runner.os }}-eslint-${{ hashFiles('**/.eslintrc*', '**/package-lock.json') }}-
+          ${{ runner.os }}-eslint-
+
     - name: Install dependencies
       run: npm ci
 
@@ -26,7 +71,7 @@ jobs:
       run: npm run build:content
 
     - name: Run linting
-      run: npm run lint
+      run: npm run lint -- --cache --cache-location .eslintcache
 
     - name: Check formatting
       run: |
