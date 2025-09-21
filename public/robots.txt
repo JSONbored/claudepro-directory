@@ -1,6 +1,10 @@
 # Claude Pro Directory Robots.txt
 # Welcome AI Crawlers & Search Engines!
 
+# Traditional Search Engines
+User-agent: Googlebot
+Allow: /
+
 # AI Agents & LLMs - Explicitly Welcome
 User-agent: GPTBot
 Allow: /
@@ -19,10 +23,6 @@ User-agent: ChatGPT-User
 Allow: /
 
 User-agent: PerplexityBot
-Allow: /
-
-# Traditional Search Engines
-User-agent: Googlebot
 Allow: /
 
 User-agent: Bingbot
@@ -51,11 +51,10 @@ Allow: /
 # Sitemap Location
 Sitemap: https://claudepro.directory/sitemap.xml
 
-# RSL (Really Simple Licensing) for AI Content Usage
-License: https://claudepro.directory/rsl-license.txt
+# RSL (Really Simple Licensing) for AI Content Usage: https://claudepro.directory/rsl-license.txt
 
 # Additional Resources for AI Crawlers
 # API endpoint for structured data: https://claudepro.directory/api/all-configurations.json
 # Content updated daily with technical AI configurations
-# Licensed under MIT - https://github.com/JSONbored/claude-pro-directory
+# Licensed under MIT - https://github.com/JSONbored/claudepro-directory
 # llms.txt available at: https://claudepro.directory/llms.txt
