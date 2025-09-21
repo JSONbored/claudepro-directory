@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
+import { copyToClipboard } from '@/lib/clipboard-utils';
 import { getDisplayTitle } from '@/lib/utils';
 
 interface ConfigCardProps {
@@ -54,21 +55,26 @@ export const ConfigCard = memo(
 
     const handleCopy = async (e: React.MouseEvent) => {
       e.stopPropagation();
-      try {
-        await navigator.clipboard.writeText(`${window.location.origin}${targetPath}`);
-        setCopied(true);
+
+      const success = await copyToClipboard(`${window.location.origin}${targetPath}`, {
+        component: 'config-card',
+        action: 'copy-link',
+      });
+
+      setCopied(true);
+      if (success) {
         toast({
           title: 'Link copied!',
           description: 'The config link has been copied to your clipboard.',
         });
-        setTimeout(() => setCopied(false), 2000);
-      } catch {
+      } else {
         toast({
           title: 'Failed to copy',
           description: 'Could not copy the link to clipboard.',
           variant: 'destructive',
         });
       }
+      setTimeout(() => setCopied(false), 2000);
     };
 
     const handleViewConfig = (e: React.MouseEvent) => {
