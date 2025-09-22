@@ -25,11 +25,23 @@ const nextConfig = {
   images: {
     // Image formats
     formats: ['image/avif', 'image/webp'],
-    // Allow all HTTPS images
+    // Allow images from trusted domains only
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**',
+        hostname: 'github.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.githubusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'claudepro.directory',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.claudepro.directory',
       },
     ],
     // Device sizes for responsive images
@@ -157,20 +169,23 @@ const nextConfig = {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin'
           },
-          {
+          // Temporarily disable CSP in development to isolate homepage issue
+          ...(process.env.NODE_ENV !== 'development' ? [{
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://umami.claudepro.directory https://va.vercel-scripts.com https://vercel.live",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "script-src 'self' https://umami.claudepro.directory https://va.vercel-scripts.com https://vercel.live",
+              "style-src 'self' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' https: data:",
+              "img-src 'self' https://github.com https://*.githubusercontent.com https://claudepro.directory https://www.claudepro.directory data:",
               "connect-src 'self' https://umami.claudepro.directory https://vitals.vercel-insights.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
-              "form-action 'self'"
+              "form-action 'self'",
+              "object-src 'none'",
+              "media-src 'self'"
             ].join('; ')
-          },
+          }] : []),
         ],
       },
       {

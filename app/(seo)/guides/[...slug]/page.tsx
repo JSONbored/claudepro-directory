@@ -4,11 +4,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import path from 'path';
-import { MarkdownRenderer } from '@/components/markdown-renderer';
+import { MDXRenderer } from '@/components/mdx-renderer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { UnifiedSidebar } from '@/components/unified-sidebar';
+import { parseMDXFrontmatter } from '@/lib/mdx-config';
 
 // ISR Configuration - Revalidate weekly for SEO pages
 export const revalidate = 604800; // 7 days
@@ -37,6 +38,8 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
     collections: 'collections',
     categories: 'categories',
     workflows: 'workflows',
+    comparisons: 'comparisons',
+    troubleshooting: 'troubleshooting',
   };
 
   const [category, ...restSlug] = slug;
@@ -48,40 +51,14 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
     const filePath = path.join(process.cwd(), 'seo', pathMap[category], filename);
     const fileContent = await fs.readFile(filePath, 'utf-8');
 
-    // Parse frontmatter
-    const frontmatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-    if (!frontmatterMatch?.[1] || !frontmatterMatch?.[2]) return null;
-
-    const frontmatter = frontmatterMatch[1];
-    const content = frontmatterMatch[2];
-
-    // Parse metadata
-    const metadata: Record<string, string> = {};
-    frontmatter.split('\n').forEach((line) => {
-      const [key, ...valueParts] = line.split(':');
-      if (key && valueParts.length) {
-        const value = valueParts
-          .join(':')
-          .trim()
-          .replace(/^["']|["']$/g, '');
-        metadata[key.trim()] = value;
-      }
-    });
-
-    // Parse keywords array
-    let keywords: string[] | undefined;
-    if (metadata.keywords) {
-      keywords = metadata.keywords
-        .replace(/^\[|\]$/g, '')
-        .split(',')
-        .map((k) => k.trim().replace(/^["']|["']$/g, ''));
-    }
+    // Parse frontmatter using our MDX parser
+    const { frontmatter, content } = parseMDXFrontmatter(fileContent);
 
     return {
-      title: metadata.title || '',
-      description: metadata.description || '',
-      keywords: keywords || [],
-      dateUpdated: metadata.dateUpdated || '',
+      title: frontmatter.title || '',
+      description: frontmatter.description || '',
+      keywords: Array.isArray(frontmatter.keywords) ? frontmatter.keywords : [],
+      dateUpdated: frontmatter.dateUpdated || '',
       content,
     };
   } catch (_error) {
@@ -125,7 +102,15 @@ async function getRelatedGuides(currentSlug: string[], limit = 3): Promise<Relat
 
 export async function generateStaticParams() {
   // Generate paths for all SEO pages
-  const categories = ['use-cases', 'tutorials', 'collections', 'categories', 'workflows'];
+  const categories = [
+    'use-cases',
+    'tutorials',
+    'collections',
+    'categories',
+    'workflows',
+    'comparisons',
+    'troubleshooting',
+  ];
   const paths = [];
 
   for (const category of categories) {
@@ -197,6 +182,8 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
     collections: 'Collection',
     categories: 'Category Guide',
     workflows: 'Workflow',
+    comparisons: 'Comparison',
+    troubleshooting: 'Troubleshooting',
   };
 
   const categoryIcons: Record<string, typeof Zap> = {
@@ -205,6 +192,8 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
     collections: Users,
     categories: FileText,
     workflows: Zap,
+    comparisons: FileText,
+    troubleshooting: Zap,
   };
 
   const Icon = (category && categoryIcons[category]) || BookOpen;
@@ -289,7 +278,7 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
           <div className="lg:col-span-2 space-y-8">
             <Card>
               <CardContent className="pt-6">
-                <MarkdownRenderer content={data.content} />
+                <MDXRenderer source={data.content} />
               </CardContent>
             </Card>
           </div>

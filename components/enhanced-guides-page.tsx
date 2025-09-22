@@ -1,6 +1,15 @@
 'use client';
 
-import { BookOpen, FileText, Search, Users, Workflow, Zap } from 'lucide-react';
+import {
+  AlertTriangle,
+  BookOpen,
+  FileText,
+  GitCompare,
+  Search,
+  Users,
+  Workflow,
+  Zap,
+} from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -49,6 +58,18 @@ const categoryInfo = {
     description: 'Complete workflow guides and strategies',
     color: 'text-pink-500',
   },
+  comparisons: {
+    label: 'Comparisons',
+    icon: GitCompare,
+    description: 'Compare Claude with other development tools',
+    color: 'text-red-500',
+  },
+  troubleshooting: {
+    label: 'Troubleshooting',
+    icon: AlertTriangle,
+    description: 'Solutions for common Claude AI issues',
+    color: 'text-yellow-500',
+  },
 };
 
 export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
@@ -73,7 +94,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
           {/* Main Content - Takes 2/3 width */}
           <div className="lg:col-span-2 space-y-8">
             {/* Quick Stats */}
-            <div className="grid gap-4 md:grid-cols-5">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {Object.entries(categoryInfo).map(([key, info]) => {
                 const Icon = info.icon;
                 const count = guides[key]?.length || 0;

@@ -8,7 +8,6 @@ export const LazyUnifiedSearch = dynamic(
   () => import('./unified-search').then((mod) => ({ default: mod.UnifiedSearch })),
   {
     loading: () => <div className="w-full h-12 bg-card/50 rounded-lg animate-pulse" />,
-    ssr: false,
   }
 );
 

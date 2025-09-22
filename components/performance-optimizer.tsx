@@ -5,26 +5,6 @@ import { useEffect } from 'react';
 // Critical resource preloader for perfect Core Web Vitals
 export function PerformanceOptimizer() {
   useEffect(() => {
-    // Preload critical fonts for faster text rendering
-    const preloadFont = (href: string) => {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.href = href;
-      link.as = 'font';
-      link.type = 'font/woff2';
-      link.crossOrigin = 'anonymous';
-      document.head.appendChild(link);
-    };
-
-    // Preload critical images for faster LCP
-    const preloadImage = (src: string) => {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.href = src;
-      link.as = 'image';
-      document.head.appendChild(link);
-    };
-
     // Prefetch critical API routes
     const prefetchAPI = (url: string) => {
       const link = document.createElement('link');
@@ -32,9 +12,6 @@ export function PerformanceOptimizer() {
       link.href = url;
       document.head.appendChild(link);
     };
-
-    // Note: Font loading optimized via Next.js Google Fonts
-    // Note: No hero image currently used in site design
 
     // Optimize LCP by preloading hero content
     const observer = new IntersectionObserver((entries) => {
