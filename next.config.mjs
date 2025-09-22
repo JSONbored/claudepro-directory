@@ -53,7 +53,7 @@ const nextConfig = {
   },
   
   experimental: {
-    // Optimize CSS
+    // Optimize CSS - enables critical CSS extraction and better chunking
     optimizeCss: true,
     // Enable React Compiler for automatic optimization
     reactCompiler: true,
@@ -65,6 +65,8 @@ const nextConfig = {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'fuse.js'],
     // Scroll restoration
     scrollRestoration: true,
+    // Enable CSS layer optimization for better chunking
+    cssChunking: 'strict',
   },
   
   // Advanced webpack optimizations for better Core Web Vitals
@@ -190,6 +192,15 @@ const nextConfig = {
           {
             key: 'Vary',
             value: 'Accept-Encoding'
+          },
+        ],
+      },
+      {
+        source: '/script.js',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=604800, stale-while-revalidate=86400' // 1 week cache for analytics script
           },
         ],
       },

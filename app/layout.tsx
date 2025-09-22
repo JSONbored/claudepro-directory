@@ -96,6 +96,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
+      <head>
+        {/* Preconnect to external domains for faster loading */}
+        <link rel="preconnect" href="https://umami.claudepro.directory" />
+        <link rel="dns-prefetch" href="https://umami.claudepro.directory" />
+        <link rel="preconnect" href="https://vitals.vercel-insights.com" />
+        <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
+        <link rel="preconnect" href="https://va.vercel-scripts.com" />
+        <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
+      </head>
       <body className="font-sans">
         <StructuredData type="website" />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
@@ -115,12 +124,14 @@ export default function RootLayout({
         <PerformanceOptimizer />
         <Analytics />
         <WebVitals />
-        {/* Umami Analytics - Privacy-focused analytics */}
-        <Script
-          src="https://umami.claudepro.directory/script.js"
-          data-website-id="b734c138-2949-4527-9160-7fe5d0e81121"
-          strategy="afterInteractive"
-        />
+        {/* Umami Analytics - Privacy-focused analytics (production only) */}
+        {process.env.NODE_ENV === 'production' && (
+          <Script
+            src="https://umami.claudepro.directory/script.js"
+            data-website-id="b734c138-2949-4527-9160-7fe5d0e81121"
+            strategy="lazyOnload"
+          />
+        )}
       </body>
     </html>
   );
