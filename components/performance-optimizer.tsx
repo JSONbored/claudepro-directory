@@ -33,11 +33,8 @@ export function PerformanceOptimizer() {
       document.head.appendChild(link);
     };
 
-    // Preload critical fonts used across the site
-    preloadFont('/fonts/inter-var.woff2');
-
-    // Preload critical hero images
-    preloadImage('/hero-image.webp');
+    // Note: Font loading optimized via Next.js Google Fonts
+    // Note: No hero image currently used in site design
 
     // Optimize LCP by preloading hero content
     const observer = new IntersectionObserver((entries) => {
