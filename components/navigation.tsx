@@ -163,6 +163,7 @@ export const Navigation = () => {
                   variant="ghost"
                   size="sm"
                   className="text-muted-foreground hover:text-accent"
+                  aria-label="Open additional navigation menu"
                 >
                   More
                   <ChevronDown className="ml-1 h-3 w-3" />

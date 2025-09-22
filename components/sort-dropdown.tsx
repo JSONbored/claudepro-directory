@@ -29,7 +29,7 @@ export const SortDropdown = ({ sortBy, sortDirection, onSortChange }: SortDropdo
     <div className="flex items-center gap-2">
       <span className="text-sm text-muted-foreground">Sort by:</span>
       <Select value={sortBy} onValueChange={(value) => onSortChange(value as SortOption)}>
-        <SelectTrigger className="w-40 bg-background/50 border-border/50">
+        <SelectTrigger className="w-40 bg-background/50 border-border/50" aria-label="Sort configurations">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

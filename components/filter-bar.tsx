@@ -90,7 +90,7 @@ export const FilterBar = ({
             value={filters.category}
             onValueChange={(value) => onFilterChange('category', value)}
           >
-            <SelectTrigger id={categoryId} className="bg-background/50 border-border/50">
+            <SelectTrigger id={categoryId} className="bg-background/50 border-border/50" aria-label="Filter by category">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -110,7 +110,7 @@ export const FilterBar = ({
             Author
           </label>
           <Select value={filters.author} onValueChange={(value) => onFilterChange('author', value)}>
-            <SelectTrigger id={authorId} className="bg-background/50 border-border/50">
+            <SelectTrigger id={authorId} className="bg-background/50 border-border/50" aria-label="Filter by author">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -135,7 +135,7 @@ export const FilterBar = ({
               onFilterChange('dateRange', value as 'all' | 'week' | 'month' | 'year')
             }
           >
-            <SelectTrigger id={dateRangeId} className="bg-background/50 border-border/50">
+            <SelectTrigger id={dateRangeId} className="bg-background/50 border-border/50" aria-label="Filter by date range">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
