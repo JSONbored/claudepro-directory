@@ -74,21 +74,7 @@ export function PerformanceOptimizer() {
   return null; // This component doesn't render anything
 }
 
-// Service Worker registration for caching and offline support
-export function registerServiceWorker() {
-  if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker
-        .register('/sw.js', { scope: '/' })
-        .then((registration) => {
-          console.log('SW registered: ', registration);
-        })
-        .catch((registrationError) => {
-          console.log('SW registration failed: ', registrationError);
-        });
-    });
-  }
-}
+// Service Worker registration removed - handled in app/layout.tsx
 
 // Prefetch critical routes for instant navigation
 export function prefetchCriticalRoutes() {
