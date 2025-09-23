@@ -1,6 +1,15 @@
 'use client';
 
-import { BookOpen, FileText, Search, Users, Workflow, Zap } from 'lucide-react';
+import {
+  AlertTriangle,
+  BookOpen,
+  FileText,
+  GitCompare,
+  Search,
+  Users,
+  Workflow,
+  Zap,
+} from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -42,6 +51,18 @@ const categoryInfo = {
     icon: Workflow,
     description: 'Complete workflow guides and strategies',
     color: 'text-pink-500',
+  },
+  comparisons: {
+    label: 'Comparisons',
+    icon: GitCompare,
+    description: 'Compare Claude with other development tools',
+    color: 'text-red-500',
+  },
+  troubleshooting: {
+    label: 'Troubleshooting',
+    icon: AlertTriangle,
+    description: 'Solutions for common Claude AI issues',
+    color: 'text-yellow-500',
   },
 };
 

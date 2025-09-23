@@ -1,6 +1,7 @@
 import { forwardRef, memo } from 'react';
 import { type CellComponentProps, Grid } from 'react-window';
 import { ConfigCard } from '@/components/config-card';
+import { ErrorBoundary } from '@/components/error-boundary';
 import type { ContentMetadata } from '@/types/content';
 
 interface VirtualGridProps {
@@ -31,7 +32,11 @@ const GridCell = memo(function GridCellComponent(props: CellComponentProps<GridC
 
   return (
     <div style={style} className="p-3">
-      <ConfigCard key={item.id} {...item} type={type} />
+      <ErrorBoundary
+        fallback={<div className="p-4 text-center text-muted-foreground">Error loading item</div>}
+      >
+        <ConfigCard key={item.id} {...item} type={type} />
+      </ErrorBoundary>
     </div>
   );
 });
@@ -60,21 +65,29 @@ export const VirtualGrid = memo(
 
       return (
         <div ref={ref}>
-          <Grid
-            cellComponent={GridCell}
-            cellProps={{
-              items,
-              itemsPerRow,
-              type,
-            }}
-            columnCount={itemsPerRow}
-            columnWidth={columnWidth}
-            defaultHeight={height}
-            defaultWidth={width}
-            rowCount={rowCount}
-            rowHeight={rowHeight}
-            overscanCount={2}
-          />
+          <ErrorBoundary
+            fallback={
+              <div className="flex items-center justify-center h-64 text-muted-foreground">
+                Error loading virtual grid
+              </div>
+            }
+          >
+            <Grid
+              cellComponent={GridCell}
+              cellProps={{
+                items,
+                itemsPerRow,
+                type,
+              }}
+              columnCount={itemsPerRow}
+              columnWidth={columnWidth}
+              defaultHeight={height}
+              defaultWidth={width}
+              rowCount={rowCount}
+              rowHeight={rowHeight}
+              overscanCount={2}
+            />
+          </ErrorBoundary>
         </div>
       );
     }

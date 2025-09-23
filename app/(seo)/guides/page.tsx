@@ -17,7 +17,15 @@ interface GuideItem {
 }
 
 async function getGuides(): Promise<Record<string, GuideItem[]>> {
-  const categories = ['use-cases', 'tutorials', 'collections', 'categories', 'workflows'];
+  const categories = [
+    'use-cases',
+    'tutorials',
+    'collections',
+    'categories',
+    'workflows',
+    'comparisons',
+    'troubleshooting',
+  ];
   const guides: Record<string, GuideItem[]> = {};
 
   for (const category of categories) {

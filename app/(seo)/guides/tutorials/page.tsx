@@ -2,9 +2,9 @@ import fs from 'fs/promises';
 import { BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import path from 'path';
-import { GuidesSidebar } from '@/components/guides-sidebar';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { UnifiedSidebar } from '@/components/unified-sidebar';
 
 export const metadata = {
   title: 'Claude Tutorials - Step-by-Step Guides | Claude Pro Directory',
@@ -163,10 +163,7 @@ export default async function TutorialsPage() {
           </div>
 
           {/* Sidebar - Takes 1/3 width */}
-          <GuidesSidebar
-            currentCategory="tutorials"
-            guideCounts={{ tutorials: tutorials.length }}
-          />
+          <UnifiedSidebar mode="category" currentCategory="tutorials" />
         </div>
       </div>
     </div>

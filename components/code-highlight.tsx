@@ -1,6 +1,7 @@
 import { Check, Copy } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { codeToHtml } from 'shiki';
+import { ErrorBoundary } from '@/components/error-boundary';
 import { Button } from '@/components/ui/button';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import { logger } from '@/lib/logger';
@@ -133,53 +134,68 @@ export const CodeHighlight = ({
   };
 
   return (
-    <div className="relative group">
-      {title && (
-        <div className="flex items-center justify-between bg-card/50 border-x border-t border-border rounded-t-lg px-4 py-2">
-          <span className="text-sm font-medium text-muted-foreground">{title}</span>
-          {showCopy && (
+    <ErrorBoundary
+      fallback={
+        <div className="p-4 bg-card border border-border rounded-lg text-center text-muted-foreground">
+          Error highlighting code
+        </div>
+      }
+    >
+      <div className="relative group">
+        {title && (
+          <div className="flex items-center justify-between bg-card/50 border-x border-t border-border rounded-t-lg px-4 py-2">
+            <span className="text-sm font-medium text-muted-foreground">{title}</span>
+            {showCopy && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCopyCode}
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                disabled={isLoading}
+              >
+                {copied ? (
+                  <Check className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </Button>
+            )}
+          </div>
+        )}
+
+        <div className="relative">
+          {isLoading ? (
+            <div
+              className="animate-pulse bg-card border border-border rounded-lg p-4"
+              style={{
+                borderTopLeftRadius: title ? 0 : '0.5rem',
+                borderTopRightRadius: title ? 0 : '0.5rem',
+                minHeight: '4rem',
+              }}
+            >
+              <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-muted rounded w-1/2"></div>
+            </div>
+          ) : (
+            <div
+              className="shiki-container"
+              // biome-ignore lint/security/noDangerouslySetInnerHtml: Shiki generates trusted HTML after sanitization
+              dangerouslySetInnerHTML={{ __html: highlightedCode }}
+            />
+          )}
+
+          {showCopy && !title && !isLoading && (
             <Button
               variant="ghost"
               size="sm"
               onClick={handleCopyCode}
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-              disabled={isLoading}
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
             >
               {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
             </Button>
           )}
         </div>
-      )}
-
-      <div className="relative">
-        {isLoading ? (
-          <div
-            className="animate-pulse bg-card border border-border rounded-lg p-4"
-            style={{
-              borderTopLeftRadius: title ? 0 : '0.5rem',
-              borderTopRightRadius: title ? 0 : '0.5rem',
-              minHeight: '4rem',
-            }}
-          >
-            <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-            <div className="h-4 bg-muted rounded w-1/2"></div>
-          </div>
-        ) : (
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: Shiki generates trusted HTML
-          <div className="shiki-container" dangerouslySetInnerHTML={{ __html: highlightedCode }} />
-        )}
-
-        {showCopy && !title && !isLoading && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCopyCode}
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
-          >
-            {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-          </Button>
-        )}
       </div>
-    </div>
+    </ErrorBoundary>
   );
 };

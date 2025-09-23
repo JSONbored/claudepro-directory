@@ -78,7 +78,7 @@ export function useResponsiveGrid(
   return gridData;
 }
 
-// Hook for measuring container width
+// Hook for measuring container width - optimized to prevent forced reflows
 export function useContainerWidth(containerRef: React.RefObject<HTMLElement>) {
   const [width, setWidth] = useState(1200);
 
@@ -87,18 +87,38 @@ export function useContainerWidth(containerRef: React.RefObject<HTMLElement>) {
 
     const updateWidth = () => {
       if (containerRef.current) {
-        setWidth(containerRef.current.offsetWidth);
+        // Use requestAnimationFrame to batch DOM measurements and prevent forced reflows
+        requestAnimationFrame(() => {
+          if (containerRef.current) {
+            setWidth(containerRef.current.offsetWidth);
+          }
+        });
       }
     };
 
-    // Initial measurement
+    // Initial measurement with RAF
     updateWidth();
 
-    // Set up resize observer
-    const resizeObserver = new ResizeObserver(updateWidth);
+    // Set up resize observer with debounced updates
+    let rafId: number;
+    const debouncedUpdate = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+      rafId = requestAnimationFrame(() => {
+        if (containerRef.current) {
+          setWidth(containerRef.current.offsetWidth);
+        }
+      });
+    };
+
+    const resizeObserver = new ResizeObserver(debouncedUpdate);
     resizeObserver.observe(containerRef.current);
 
     return () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
       resizeObserver.disconnect();
     };
   }, [containerRef]);

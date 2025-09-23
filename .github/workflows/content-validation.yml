@@ -6,45 +6,65 @@ on:
       - 'content/**/*.json'
       - 'scripts/validate-content.js'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
+    name: Validate Content Changes
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Need full history for git diff
 
-    - name: Use Node.js 20
+    - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'npm'
 
     - name: Install dependencies
-      run: npm ci
+      run: npm ci --ignore-scripts
 
     - name: Get changed content files
-      id: changed-files
-      uses: tj-actions/changed-files@v46
-      with:
-        files: |
-          content/**/*.json
+      id: changed
+      run: |
+        echo "Getting changed files between origin/${{ github.base_ref }} and HEAD"
+        changed_files=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'content/**/*.json' | tr '\n' ' ')
+
+        if [ -z "$changed_files" ]; then
+          echo "No content files changed"
+          echo "files=" >> $GITHUB_OUTPUT
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+        else
+          echo "Changed files: $changed_files"
+          echo "files=$changed_files" >> $GITHUB_OUTPUT
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+        fi
 
     - name: Validate content schema
-      if: steps.changed-files.outputs.any_changed == 'true'
+      if: steps.changed.outputs.has_changes == 'true'
       run: |
         echo "Validating changed content files..."
-        node scripts/validate-content.js ${{ steps.changed-files.outputs.all_changed_files }}
+        for file in ${{ steps.changed.outputs.files }}; do
+          echo "Validating $file"
+          node scripts/validate-content.js "$file"
+        done
 
     - name: Check content metadata
-      if: steps.changed-files.outputs.any_changed == 'true'
+      if: steps.changed.outputs.has_changes == 'true'
       run: |
-        for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-          echo "Checking $file..."
-          
-          # Check required fields
+        for file in ${{ steps.changed.outputs.files }}; do
+          echo "Checking metadata for $file..."
+
+          # Check required fields based on category
           category=$(jq -r '.category' "$file" 2>/dev/null || echo "")
-          
-          # For hooks, agents, rules, and commands, check slug instead of title (slug-only approach)
+
+          # For hooks, agents, rules, and commands, check slug instead of title
           if [[ "$category" == "hooks" || "$category" == "agents" || "$category" == "rules" || "$category" == "commands" ]]; then
             if ! jq -e '.slug' "$file" > /dev/null; then
               echo "ERROR: Missing slug in $category file $file"
@@ -57,44 +77,47 @@ jobs:
               exit 1
             fi
           fi
-          
-          if ! jq -e '.description' "$file" > /dev/null; then
-            echo "ERROR: Missing description in $file"
-            exit 1
-          fi
-          
-          if ! jq -e '.category' "$file" > /dev/null; then
-            echo "ERROR: Missing category in $file"
-            exit 1
-          fi
-          
-          if ! jq -e '.author' "$file" > /dev/null; then
-            echo "ERROR: Missing author in $file"
-            exit 1
-          fi
-          
-          if ! jq -e '.dateAdded' "$file" > /dev/null; then
-            echo "ERROR: Missing dateAdded in $file"
-            exit 1
-          fi
-          
-          # Check date format (YYYY-MM-DD)
+
+          # Check common required fields
+          required_fields=("description" "category" "author" "dateAdded")
+          for field in "${required_fields[@]}"; do
+            if ! jq -e ".$field" "$file" > /dev/null; then
+              echo "ERROR: Missing $field in $file"
+              exit 1
+            fi
+          done
+
+          # Validate date format (YYYY-MM-DD)
           date=$(jq -r '.dateAdded' "$file")
           if ! echo "$date" | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' > /dev/null; then
             echo "ERROR: Invalid date format in $file (should be YYYY-MM-DD)"
             exit 1
           fi
-          
-          # Check category is valid
-          category=$(jq -r '.category' "$file")
+
+          # Validate category is valid
           if [[ ! "$category" =~ ^(agents|mcp|rules|commands|hooks)$ ]]; then
             echo "ERROR: Invalid category '$category' in $file"
             exit 1
           fi
-          
+
           echo "✓ $file passed validation"
         done
 
     - name: Build content to verify generation
-      if: steps.changed-files.outputs.any_changed == 'true'
+      if: steps.changed.outputs.has_changes == 'true'
       run: npm run build:content
+
+    - name: Summary
+      if: always()
+      run: |
+        if [ "${{ steps.changed.outputs.has_changes }}" == "true" ]; then
+          echo "### ✅ Content Validation Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Validated files:" >> $GITHUB_STEP_SUMMARY
+          for file in ${{ steps.changed.outputs.files }}; do
+            echo "- $file" >> $GITHUB_STEP_SUMMARY
+          done
+        else
+          echo "### ℹ️ No Content Changes" >> $GITHUB_STEP_SUMMARY
+          echo "No content files were modified in this PR." >> $GITHUB_STEP_SUMMARY
+        fi
