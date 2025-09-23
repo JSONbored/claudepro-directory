@@ -61,6 +61,10 @@ export interface MDXFrontmatter {
   author?: string;
   category?: string;
   tags?: string[];
+  readingTime?: string;
+  difficulty?: string;
+  aiOptimized?: boolean;
+  citationReady?: boolean;
   schemas?: {
     article?: any;
     faq?: any;

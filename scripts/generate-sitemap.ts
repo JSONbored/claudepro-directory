@@ -54,7 +54,15 @@ function generateSitemap(): string {
   });
 
   // SEO Guide pages from seo/ directory
-  const seoCategories = ['use-cases', 'tutorials', 'collections', 'categories', 'workflows'];
+  const seoCategories = [
+    'use-cases',
+    'tutorials',
+    'collections',
+    'categories',
+    'workflows',
+    'comparisons',
+    'troubleshooting',
+  ];
   seoCategories.forEach((category) => {
     const seoDir = join('seo', category);
     if (existsSync(seoDir)) {

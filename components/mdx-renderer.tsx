@@ -1,14 +1,23 @@
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { mdxOptions } from '@/lib/mdx-config';
 import {
+  Accordion,
   AIOptimizedFAQ,
+  Callout,
+  CaseStudy,
+  Checklist,
+  CodeGroup,
   ComparisonTable,
+  DiagnosticFlow,
+  ErrorTable,
   ExpertQuote,
   FeatureGrid,
   InfoBox,
+  MetricsDisplay,
   QuickReference,
   RelatedResources,
   StepByStepGuide,
+  Tabs,
   TLDRSummary,
 } from './ai-optimized-components';
 import {
@@ -18,6 +27,7 @@ import {
   InternalLinkComponent,
 } from './mdx-components';
 import { OptimizedImage } from './optimized-image';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -154,6 +164,9 @@ const components = {
   ),
 
   // Custom components for enhanced content
+  Alert,
+  AlertDescription,
+  AlertTitle,
   Badge,
   Card,
   CardContent,
@@ -163,15 +176,24 @@ const components = {
   Button,
 
   // AI-Optimized Components with Schema.org markup
+  Accordion,
   AIOptimizedFAQ,
+  Callout,
+  CaseStudy,
+  Checklist,
+  CodeGroup,
   ComparisonTable,
-  StepByStepGuide,
-  FeatureGrid,
-  TLDRSummary,
+  DiagnosticFlow,
+  ErrorTable,
   ExpertQuote,
-  RelatedResources,
+  FeatureGrid,
   InfoBox,
+  MetricsDisplay,
   QuickReference,
+  RelatedResources,
+  StepByStepGuide,
+  Tabs,
+  TLDRSummary,
 };
 
 export function MDXRenderer({ source, className = '' }: MDXRendererProps) {

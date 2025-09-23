@@ -2,9 +2,9 @@ import fs from 'fs/promises';
 import { GitCompare } from 'lucide-react';
 import Link from 'next/link';
 import path from 'path';
-import { GuidesSidebar } from '@/components/guides-sidebar';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { UnifiedSidebar } from '@/components/unified-sidebar';
 
 export const metadata = {
   title: 'Claude Comparisons - Compare AI Tools | Claude Pro Directory',
@@ -163,10 +163,7 @@ export default async function ComparisonsPage() {
           </div>
 
           {/* Sidebar - Takes 1/3 width */}
-          <GuidesSidebar
-            currentCategory="comparisons"
-            guideCounts={{ comparisons: comparisons.length }}
-          />
+          <UnifiedSidebar mode="category" currentCategory="comparisons" />
         </div>
       </div>
     </div>

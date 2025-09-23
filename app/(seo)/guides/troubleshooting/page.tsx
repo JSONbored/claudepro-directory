@@ -2,9 +2,9 @@ import fs from 'fs/promises';
 import { AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import path from 'path';
-import { GuidesSidebar } from '@/components/guides-sidebar';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { UnifiedSidebar } from '@/components/unified-sidebar';
 
 export const metadata = {
   title: 'Claude Troubleshooting - Fix Common Issues | Claude Pro Directory',
@@ -163,10 +163,7 @@ export default async function TroubleshootingPage() {
           </div>
 
           {/* Sidebar - Takes 1/3 width */}
-          <GuidesSidebar
-            currentCategory="troubleshooting"
-            guideCounts={{ troubleshooting: troubleshooting.length }}
-          />
+          <UnifiedSidebar mode="category" currentCategory="troubleshooting" />
         </div>
       </div>
     </div>
