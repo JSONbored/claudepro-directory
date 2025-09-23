@@ -2,9 +2,9 @@ import fs from 'fs/promises';
 import { FileText } from 'lucide-react';
 import Link from 'next/link';
 import path from 'path';
-import { GuidesSidebar } from '@/components/guides-sidebar';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { UnifiedSidebar } from '@/components/unified-sidebar';
 
 export const metadata = {
   title: 'Claude Category Guides - Comprehensive Guides | Claude Pro Directory',
@@ -163,10 +163,7 @@ export default async function CategoriesPage() {
           </div>
 
           {/* Sidebar - Takes 1/3 width */}
-          <GuidesSidebar
-            currentCategory="categories"
-            guideCounts={{ categories: categoryGuides.length }}
-          />
+          <UnifiedSidebar mode="category" currentCategory="categories" />
         </div>
       </div>
     </div>

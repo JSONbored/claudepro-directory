@@ -78,7 +78,7 @@ export default function JobsPage() {
                 </div>
 
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger>
+                  <SelectTrigger aria-label="Filter jobs by category">
                     <Filter className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
@@ -94,7 +94,7 @@ export default function JobsPage() {
                 </Select>
 
                 <Select value={selectedType} onValueChange={setSelectedType}>
-                  <SelectTrigger>
+                  <SelectTrigger aria-label="Filter jobs by type">
                     <Clock className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Job Type" />
                   </SelectTrigger>

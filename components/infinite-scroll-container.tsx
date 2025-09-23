@@ -2,12 +2,13 @@
 
 import { Loader2 } from 'lucide-react';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
+import { ErrorBoundary } from '@/components/error-boundary';
 import { Button } from '@/components/ui/button';
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 
-interface InfiniteScrollContainerProps<T> {
+export interface InfiniteScrollContainerProps<T> {
   items: T[];
   renderItem: (item: T, index: number) => ReactNode;
   loadMore: () => Promise<T[]>;
@@ -114,7 +115,17 @@ export function InfiniteScrollContainer<T>({
       <div className={gridClassName}>
         {allItems.map((item, index) => {
           const key = keyExtractor ? keyExtractor(item, index) : `item-${index}`;
-          return <div key={key}>{renderItem(item, index)}</div>;
+          return (
+            <div key={key}>
+              <ErrorBoundary
+                fallback={
+                  <div className="p-4 text-center text-muted-foreground">Error loading item</div>
+                }
+              >
+                {renderItem(item, index)}
+              </ErrorBoundary>
+            </div>
+          );
         })}
       </div>
 

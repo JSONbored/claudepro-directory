@@ -1,10 +1,28 @@
 'use client';
 
-import { BookOpen, FileText, Search, Users, Workflow, Zap } from 'lucide-react';
+import {
+  AlertTriangle,
+  BookOpen,
+  FileText,
+  GitCompare,
+  Search,
+  Users,
+  Workflow,
+  Zap,
+} from 'lucide-react';
 import Link from 'next/link';
+import { useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface GuideItem {
   title: string;
@@ -49,10 +67,72 @@ const categoryInfo = {
     description: 'Complete workflow guides and strategies',
     color: 'text-pink-500',
   },
+  comparisons: {
+    label: 'Comparisons',
+    icon: GitCompare,
+    description: 'Compare Claude with other development tools',
+    color: 'text-red-500',
+  },
+  troubleshooting: {
+    label: 'Troubleshooting',
+    icon: AlertTriangle,
+    description: 'Solutions for common Claude AI issues',
+    color: 'text-yellow-500',
+  },
 };
 
 export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'title' | 'category' | 'date'>('title');
+
   const totalGuides = Object.values(guides).reduce((acc, cat) => acc + cat.length, 0);
+
+  // Filter and search guides
+  const filteredGuides = useMemo(() => {
+    let result = { ...guides };
+
+    // Apply category filter
+    if (selectedCategory !== 'all') {
+      result = { [selectedCategory]: guides[selectedCategory] || [] };
+    }
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      Object.keys(result).forEach((category) => {
+        result[category] = (result[category] || []).filter(
+          (guide) =>
+            guide.title.toLowerCase().includes(query) ||
+            guide.description.toLowerCase().includes(query)
+        );
+      });
+    }
+
+    // Apply sorting
+    Object.keys(result).forEach((category) => {
+      result[category] = [...(result[category] || [])].sort((a, b) => {
+        switch (sortBy) {
+          case 'title':
+            return a.title.localeCompare(b.title);
+          case 'category':
+            return a.category.localeCompare(b.category);
+          case 'date':
+            if (!a.dateUpdated || !b.dateUpdated) return 0;
+            return new Date(b.dateUpdated).getTime() - new Date(a.dateUpdated).getTime();
+          default:
+            return 0;
+        }
+      });
+    });
+
+    return result;
+  }, [guides, searchQuery, selectedCategory, sortBy]);
+
+  const filteredTotalGuides = Object.values(filteredGuides).reduce(
+    (acc, cat) => acc + cat.length,
+    0
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -63,8 +143,24 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
           <p className="text-xl text-muted-foreground">
             Learn how to use Claude AI effectively with our comprehensive guides
           </p>
-          <div className="mt-4">
-            <Badge variant="secondary">{totalGuides} guides available</Badge>
+          <div className="mt-4 flex flex-wrap gap-4 items-center">
+            <Badge variant="secondary">
+              {filteredTotalGuides} of {totalGuides} guides
+              {searchQuery && ' matching your search'}
+            </Badge>
+            {(searchQuery || selectedCategory !== 'all') && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedCategory('all');
+                  setSortBy('title');
+                }}
+              >
+                Clear filters
+              </Button>
+            )}
           </div>
         </div>
 
@@ -73,7 +169,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
           {/* Main Content - Takes 2/3 width */}
           <div className="lg:col-span-2 space-y-8">
             {/* Quick Stats */}
-            <div className="grid gap-4 md:grid-cols-5">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {Object.entries(categoryInfo).map(([key, info]) => {
                 const Icon = info.icon;
                 const count = guides[key]?.length || 0;
@@ -93,10 +189,11 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
             </div>
 
             {/* Guides by Category */}
-            {Object.entries(guides).map(([category, categoryGuides]) => {
+            {Object.entries(filteredGuides).map(([category, categoryGuides]) => {
               if (categoryGuides.length === 0) return null;
 
               const info = categoryInfo[category as keyof typeof categoryInfo];
+              if (!info) return null;
               const Icon = info.icon;
 
               return (
@@ -154,11 +251,45 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
                   <Input
                     placeholder="Search guides..."
                     className="pl-10"
-                    onChange={(e) => {
-                      // TODO: Implement real-time search
-                      console.log('Search:', e.target.value);
-                    }}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                   />
+                </div>
+
+                {/* Category Filter */}
+                <div className="space-y-2 mb-4">
+                  <span className="text-sm font-medium">Filter by Category</span>
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="All categories" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      {Object.entries(categoryInfo).map(([key, info]) => (
+                        <SelectItem key={key} value={key}>
+                          {info.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Sort Options */}
+                <div className="space-y-2 mb-4">
+                  <span className="text-sm font-medium">Sort by</span>
+                  <Select
+                    value={sortBy}
+                    onValueChange={(value: 'title' | 'category' | 'date') => setSortBy(value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="title">Title (A-Z)</SelectItem>
+                      <SelectItem value="category">Category</SelectItem>
+                      <SelectItem value="date">Date Updated</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Quick Filter Tags */}
@@ -171,6 +302,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
                           key={tag}
                           variant="outline"
                           className="text-xs cursor-pointer hover:bg-accent"
+                          onClick={() => setSearchQuery(tag)}
                         >
                           #{tag}
                         </Badge>

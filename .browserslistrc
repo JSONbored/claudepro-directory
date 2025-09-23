@@ -1,18 +1,28 @@
-# Modern browsers only - reduces polyfills and bundle size
-# This targets browsers that support ES2020+ natively
+# 2025 Modern browsers only - aggressive targeting for minimal polyfills
+# Targets browsers that natively support ES2022+ features
 
-> 0.5%
-last 2 versions
+# Modern browser baselines (2025 standards)
+chrome >= 93
+firefox >= 92  
+safari >= 15.4
+edge >= 93
+
+# Mobile browsers
+ios_saf >= 15.4
+android >= 93
+samsung >= 17
+
+# Exclude all legacy browsers
 not dead
 not ie 11
-not chrome < 91
-not firefox < 90
-not safari < 14
-not edge < 91
+not safari < 15.4
+not chrome < 93
+not firefox < 92
+not edge < 93
 
-# Specifically exclude browsers that need polyfills for:
-# - Array.prototype.at
-# - Array.prototype.flat/flatMap  
-# - Object.fromEntries
-# - Object.hasOwn
-# - String.prototype.trimStart/trimEnd
+# This eliminates polyfills for:
+# ✅ Array.prototype.at (93%+ support)
+# ✅ Object.hasOwn (93%+ support)  
+# ✅ Array.flat/flatMap (95%+ support)
+# ✅ Object.fromEntries (95%+ support)
+# ✅ String.trimStart/trimEnd (94%+ support)
