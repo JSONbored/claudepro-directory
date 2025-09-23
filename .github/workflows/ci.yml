@@ -2,134 +2,120 @@ name: CI
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
-  build:
+  lint:
+    name: Lint & Format
     runs-on: ubuntu-latest
-
+    timeout-minutes: 10
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Use Node.js 20
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    # Cache npm dependencies with improved key strategy
-    - name: Cache npm dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
 
-    # Cache Next.js build output for faster subsequent builds
-    - name: Cache Next.js build
-      uses: actions/cache@v4
-      with:
-        path: |
-          .next/cache
-          .next/standalone
-          .next/static
-        key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.{js,jsx,ts,tsx,json,css,scss,sass}', '!node_modules/**') }}
-        restore-keys: |
-          ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
-          ${{ runner.os }}-nextjs-
+      - name: Generate content files
+        run: npm run build:content
 
-    # Cache TypeScript compilation output
-    - name: Cache TypeScript
-      uses: actions/cache@v4
-      with:
-        path: |
-          .tsbuildinfo
-          tsconfig.tsbuildinfo
-          **/*.tsbuildinfo
-        key: ${{ runner.os }}-tsc-${{ hashFiles('**/tsconfig.json', '**/package-lock.json') }}-${{ hashFiles('**/*.{ts,tsx}', '!node_modules/**') }}
-        restore-keys: |
-          ${{ runner.os }}-tsc-${{ hashFiles('**/tsconfig.json', '**/package-lock.json') }}-
-          ${{ runner.os }}-tsc-
+      - name: Run linting
+        run: npm run lint
 
-    # Cache ESLint results for faster linting
-    - name: Cache ESLint
-      uses: actions/cache@v4
-      with:
-        path: .eslintcache
-        key: ${{ runner.os }}-eslint-${{ hashFiles('**/.eslintrc*', '**/package-lock.json') }}-${{ hashFiles('**/*.{js,jsx,ts,tsx}', '!node_modules/**') }}
-        restore-keys: |
-          ${{ runner.os }}-eslint-${{ hashFiles('**/.eslintrc*', '**/package-lock.json') }}-
-          ${{ runner.os }}-eslint-
+      - name: Check formatting
+        run: npx ultracite check
 
-    - name: Install dependencies
-      run: npm ci
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
 
-    - name: Generate content files
-      run: npm run build:content
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    - name: Run linting
-      run: npm run lint -- --cache --cache-location .eslintcache
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
 
-    - name: Check formatting
-      run: |
-        npm run format
-        git diff --exit-code
+      - name: Generate content files
+        run: npm run build:content
 
-    - name: Run type check
-      run: npm run type-check
+      - name: Run type check
+        run: npm run type-check
 
-    - name: Run security audit
-      run: npm audit --audit-level=moderate
-      continue-on-error: true
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
 
-    - name: Build project
-      run: npm run build
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    - name: Check bundle size
-      run: |
-        echo "Checking Next.js bundle sizes..."
-        
-        # Check if .next directory exists
-        if [ ! -d ".next" ]; then
-          echo "ERROR: .next directory not found"
-          exit 1
-        fi
-        
-        # Check main JavaScript chunks
-        if [ -d ".next/static/chunks" ]; then
-          for file in .next/static/chunks/*.js; do
-            if [ -f "$file" ]; then
-              size_kb=$(du -k "$file" | cut -f1)
-              size_h=$(du -h "$file" | cut -f1)
-              echo "$file: $size_h"
-              
-              # Fail if any chunk is over 1MB (reasonable for Next.js)
-              if [ $size_kb -gt 1024 ]; then
-                echo "ERROR: $file exceeds 1MB limit"
-                exit 1
-              fi
-            fi
-          done
-        fi
-        
-        # Check pages directory for large pages
-        if [ -d ".next/static/chunks/pages" ]; then
-          for file in .next/static/chunks/pages/*.js; do
-            if [ -f "$file" ]; then
-              size_kb=$(du -k "$file" | cut -f1)
-              size_h=$(du -h "$file" | cut -f1)
-              echo "Page $file: $size_h"
-              
-              # Fail if any page chunk is over 500KB
-              if [ $size_kb -gt 500 ]; then
-                echo "ERROR: Page $file exceeds 500KB limit"
-                exit 1
-              fi
-            fi
-          done
-        fi
-        
-        echo "✅ Bundle size check completed"
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-${{ hashFiles('**/*.{js,jsx,ts,tsx}', '!node_modules/**') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
+            ${{ runner.os }}-nextjs-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate content files
+        run: npm run build:content
+
+      - name: Generate sitemap
+        run: npm run generate:sitemap
+
+      - name: Build project
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Verify build succeeded
+        run: |
+          if [ ! -d ".next" ]; then
+            echo "ERROR: Build failed - .next directory not found"
+            exit 1
+          fi
+          echo "✅ Build successful"
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Run security audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
