@@ -1,9 +1,9 @@
 'use client';
 
-import { Filter, RotateCcw, X } from 'lucide-react';
+import { Filter, RotateCcw } from 'lucide-react';
 import { useId } from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { TagBadge } from '@/components/ui/config-badge';
 import {
   Select,
   SelectContent,
@@ -189,18 +189,12 @@ export const FilterBar = ({
           </label>
           <div id={tagsId} className="flex flex-wrap gap-2">
             {availableTags.map((tag) => (
-              <Badge
+              <TagBadge
                 key={tag}
-                variant={filters.tags.includes(tag) ? 'default' : 'outline'}
-                className={`cursor-pointer transition-all duration-200 ${
-                  filters.tags.includes(tag)
-                    ? 'bg-accent text-accent-foreground shadow-lg shadow-primary/25'
-                    : 'hover:bg-accent/10 hover:border-accent/30'
-                }`}
+                tag={tag}
+                isActive={filters.tags.includes(tag)}
                 onClick={() => toggleTag(tag)}
-              >
-                {tag}
-              </Badge>
+              />
             ))}
           </div>
         </div>
@@ -210,17 +204,12 @@ export const FilterBar = ({
           <div className="flex flex-wrap gap-2">
             <span className="text-sm text-muted-foreground">Active:</span>
             {filters.tags.map((tag) => (
-              <Badge
+              <TagBadge
                 key={`active-${tag}`}
-                variant="default"
-                className="bg-accent text-accent-foreground"
-              >
-                {tag}
-                <X
-                  className="h-3 w-3 ml-1 cursor-pointer hover:text-accent-foreground/80"
-                  onClick={() => removeTag(tag)}
-                />
-              </Badge>
+                tag={tag}
+                isActive={true}
+                onRemove={() => removeTag(tag)}
+              />
             ))}
           </div>
         )}

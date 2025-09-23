@@ -103,7 +103,7 @@ export class ContentOptimizer {
     try {
       const seoMetrics = this.calculateSEOScore(content, metadata);
       const citationMetrics = this.calculateCitationScore(content);
-      const freshnessMetrics = this.calculateFreshnessScore(filePath);
+      const freshnessMetrics = this.calculateFreshnessScore(filePath, content);
 
       result.seoScore = this.aggregateSEOScore(seoMetrics);
       result.citationScore = this.aggregateCitationScore(citationMetrics);
@@ -472,7 +472,7 @@ export class ContentOptimizer {
   // Content Freshness Scoring System
   // =============================================================================
 
-  private calculateFreshnessScore(filePath: string): FreshnessMetrics {
+  private calculateFreshnessScore(filePath: string, content: string): FreshnessMetrics {
     const now = new Date();
     const fileStats = statSync(filePath);
     const lastModified = fileStats.mtime;
@@ -504,7 +504,6 @@ export class ContentOptimizer {
     metrics.linkFreshness = 75; // Assume most links are working
 
     // Technology relevance (check for current year, recent versions)
-    const content = readFileSync(filePath, 'utf-8');
     const currentYear = now.getFullYear();
     const hasCurrentYear = content.includes(currentYear.toString());
     const hasRecentVersions = /version\s+[1-9]\d*\./gi.test(content);
