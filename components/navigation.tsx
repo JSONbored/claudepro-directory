@@ -72,6 +72,8 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
       href={href}
       className={`${active ? 'ring-2 ring-accent/30 bg-accent/10 border-accent/50 text-primary' : ''} ${className}`}
       onClick={onClick}
+      aria-current={active ? 'page' : undefined}
+      aria-label={typeof children === 'string' ? children : undefined}
     >
       {children}
     </Link>

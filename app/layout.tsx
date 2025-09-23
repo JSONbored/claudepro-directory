@@ -6,7 +6,7 @@ import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { Toaster } from 'sonner';
 import { Navigation } from '@/components/navigation';
-import { PerformanceOptimizer } from '@/components/performance-optimizer';
+import { PerformanceOptimizer, registerServiceWorker } from '@/components/performance-optimizer';
 import { StructuredData } from '@/components/structured-data';
 import { WebVitals } from './components/web-vitals';
 
@@ -124,6 +124,7 @@ export default function RootLayout({
         <PerformanceOptimizer />
         <Analytics />
         <WebVitals />
+        <Script strategy="afterInteractive">{`(${registerServiceWorker.toString()})()`}</Script>
         {/* Umami Analytics - Privacy-focused analytics (production only) */}
         {process.env.NODE_ENV === 'production' && (
           <Script
