@@ -2,234 +2,175 @@
 
 <div align="center">
 
+[![CI](https://github.com/JSONbored/claudepro-directory/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/JSONbored/claudepro-directory/actions/workflows/ci.yml)
+[![Security](https://github.com/JSONbored/claudepro-directory/actions/workflows/security.yml/badge.svg?branch=main&event=push)](https://github.com/JSONbored/claudepro-directory/actions/workflows/security.yml)
+[![CodeQL Security Scan](https://github.com/JSONbored/claudepro-directory/actions/workflows/codeql-analysis.yml/badge.svg?branch=main&event=push)](https://github.com/JSONbored/claudepro-directory/actions/workflows/codeql-analysis.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15.6-black)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.1-61dafb)](https://react.dev/)
-[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](.github/CONTRIBUTING.md)
 
-**The Ultimate Community-Driven Collection of Claude AI Configurations**
+### **Find the perfect Claude configuration in seconds**
+**129+ community configurations • MCP servers • Agents • Commands • Hooks**
 
-[🌐 Live Site](https://claudepro.directory) | [📖 Documentation](#documentation) | [🤝 Contributing](#contributing) | [💬 Community](#community)
+[🌐 **Browse Configurations**](https://claudepro.directory) • [📝 **Submit Yours**](https://claudepro.directory/submit) • [💬 **Join Discord**](https://discord.gg/Ax3Py4YDrq)
 
 </div>
 
-## 🎯 About
+## 📈 Activity
 
-Claude Pro Directory is an open-source platform serving as the comprehensive hub for Claude AI configurations, MCP servers, agents, commands, hooks, and rules. Built by the community, for the community, we're making AI workflows more accessible and powerful for everyone.
+![RepoBeats Analytics](https://repobeats.axiom.co/api/embed/c2b1b7e36103fba7a650c6d7f2777cba7338a1f7.svg "Repobeats analytics image")
 
-### ✨ Features
+## 🎯 What is Claude Pro Directory?
 
-- **[🤖 AI Agents](https://claudepro.directory/agents)** - Discover specialized Claude agents for every use case
-- **[⚙️ MCP Servers](https://claudepro.directory/mcp)** - Browse Model Context Protocol server configurations
-- **[📜 Rules](https://claudepro.directory/rules)** - Find and share Claude rules to enhance AI interactions
-- **[🔧 Commands](https://claudepro.directory/commands)** - Explore custom commands for Claude Pro
-- **[🪝 Hooks](https://claudepro.directory/hooks)** - Integrate powerful hooks into your workflows
-- **[💼 Jobs Board](https://claudepro.directory/jobs)** - Connect with AI opportunities
-- **[📈 Trending](https://claudepro.directory/trending)** - Stay updated with popular configurations
-- **🔍 Advanced Search** - Find exactly what you need with powerful filters
+**Stop starting from scratch.** Claude Pro Directory is a searchable collection of pre-built configurations, MCP servers, and custom rules that make Claude AI work better for specific tasks.
+
+Whether you need Claude to review code like a senior engineer, write like a professional author, or analyze data like a scientist - we have configurations ready to copy and use.
+
+## ✨ Why Use It?
+
+🚀 **Instant Setup** - Copy, paste, done. No configuration headaches.
+
+🎯 **Task-Specific** - Configurations optimized for coding, writing, analysis, and more.
+
+🔍 **Searchable** - Find exactly what you need with advanced filtering.
+
+📈 **Always Fresh** - New configurations added weekly by the community.
+
+## 🎪 Browse by Category
+
+<div align="center">
+
+| **[🤖 Agents](https://claudepro.directory/agents)** | **[⚙️ MCP Servers](https://claudepro.directory/mcp)** | **[📜 Rules](https://claudepro.directory/rules)** |
+|:---:|:---:|:---:|
+| Specialized AI personas | Model Context Protocol servers | Custom instructions |
+| **[🔧 Commands](https://claudepro.directory/commands)** | **[🪝 Hooks](https://claudepro.directory/hooks)** | **[📊 Trending](https://claudepro.directory/trending)** |
+| Quick actions | Event automation | Popular this week |
+
+</div>
 
 ## 🚀 Quick Start
 
+### For Users
+
+1. **[Visit claudepro.directory](https://claudepro.directory)**
+2. **Search or browse** for configurations
+3. **Copy** the configuration
+4. **Paste** into Claude
+5. **Start using** your enhanced Claude immediately
+
+No account needed. No downloads. Just better AI conversations.
+
+### For Contributors
+
+Want to share your Claude configurations with the community?
+
+1. **Fork** this repository
+2. **Add** your configuration to the appropriate `content/` folder
+3. **Submit** a pull request
+4. **Help** others work smarter with Claude
+
+See our [Contributing Guide](.github/CONTRIBUTING.md) for details.
+
+## 📦 What's Available
+
+- **129+** Configurations and growing
+- **10+** Categories covering all use cases
+- **50+** MCP server integrations
+- **20+** Custom hooks for automation
+- **Updated** weekly with new submissions
+
+## 🛠 Tech Stack
+
+<div align="center">
+
+| Frontend | Backend | Infrastructure |
+|:---:|:---:|:---:|
+| Next.js 15.6 | Node.js | Vercel |
+| React 19 | TypeScript 5.9 | GitHub Actions |
+| Tailwind CSS | Turbopack | CodeQL Security |
+
+</div>
+
+## 🤝 Community
+
+<div align="center">
+
+[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/Ax3Py4YDrq)
+[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/JSONbored/claudepro-directory/discussions)
+[![Twitter](https://img.shields.io/badge/Twitter-@JSONbored-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://x.com/JSONbored)
+
+</div>
+
+## 👥 Contributors
+
+Thanks to everyone who has contributed to making Claude better for everyone!
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<!-- Add contributors here -->
+<!-- markdownlint-enable -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+<a href="https://github.com/JSONbored/claudepro-directory/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=JSONbored/claudepro-directory" />
+</a>
+
+## 📄 License
+
+MIT © [JSONbored](https://github.com/JSONbored)
+
+## 🚧 Development
+
+<details>
+<summary><b>For Developers (click to expand)</b></summary>
+
 ### Prerequisites
+- Node.js 20+
+- npm or yarn
 
-- Node.js 20+ and npm
-- Git
-
-### Installation
-
+### Setup
 ```bash
 # Clone the repository
 git clone https://github.com/JSONbored/claudepro-directory.git
-
-# Navigate to project directory
 cd claudepro-directory
 
 # Install dependencies
 npm install
 
-# Generate content files
-npm run build:content
-
-# Start development server
+# Run development server
 npm run dev
 ```
 
-The application will be available at `http://localhost:3000`.
-
-### Available Scripts
-
+### Scripts
 ```bash
-# Development
-npm run dev              # Start dev server with Turbopack
-npm run build:content    # Generate content files from JSON
-
-# Building
-npm run build           # Full production build
-npm run build:analyze   # Build with bundle analyzer
-
-# Code Quality
-npm run type-check      # TypeScript type checking
-npm run lint           # Code linting with Ultracite
-npm run format         # Code formatting
-
-# Generation
-npm run generate:api    # Generate API endpoints
-npm run generate:sitemap # Generate sitemap
-npm run generate:seo    # Generate SEO metadata
-
-# Testing
-npm run test           # Run tests
-npm run test:run       # Run tests once
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run lint         # Run linting
+npm run type-check   # Check TypeScript
 ```
 
-### Build for Production
-
-```bash
-# Build the application
-npm run build
-
-# Start production server
-npm run start
-```
-
-## 📁 Project Structure
-
+### Project Structure
 ```
 claudepro-directory/
-├── app/                # Next.js App Router pages
-├── components/         # Reusable UI components
-├── content/           # Configuration content (JSON)
-│   ├── agents/
-│   ├── commands/
-│   ├── hooks/         # Event-driven automation hooks
-│   ├── mcp/          # MCP server configurations
-│   └── rules/
-├── generated/         # Auto-generated content files
-├── lib/              # Shared utilities and functions
-├── scripts/          # Build and generation scripts
-├── types/           # TypeScript type definitions
-└── public/         # Static assets
+├── app/           # Next.js pages
+├── components/    # React components
+├── content/       # Configuration JSONs
+├── lib/          # Utilities
+└── public/       # Static assets
 ```
 
-## 🛠️ Technology Stack
+See [Contributing Guide](.github/CONTRIBUTING.md) for more details.
 
-- **Framework**: Next.js 15.6 with App Router & Turbopack
-- **Language**: TypeScript 5.9+
-- **UI Library**: React 19.1
-- **Styling**: Tailwind CSS with shadcn/ui
-- **Deployment**: Vercel
-- **Code Quality**: Ultracite, ESLint
-- **Build Tool**: Turbopack
-- **Security**: CodeQL, Dependabot, TruffleHog
-- **Analytics**: Vercel Web Analytics, Umami (privacy-focused)
-
-## 🤝 Contributing
-
-We welcome contributions! This project follows a structured development workflow to ensure quality and stability.
-
-### Quick Steps
-
-1. **Fork** the repository
-2. **Create a feature branch** from the `dev` branch
-3. **Make your changes** and test locally
-4. **Submit a PR** targeting the `dev` branch (not `main`)
-
-For detailed guidelines, see our [Contributing Guide](.github/CONTRIBUTING.md).
-
-## 🔒 Security
-
-We take security seriously. Please review our [Security Policy](.github/SECURITY.md) for:
-- Vulnerability reporting procedures
-- Security measures in place
-- Response timelines
-
-Report vulnerabilities to **security@claudepro.directory**
-
-## 📊 Privacy & Analytics
-
-We use privacy-focused analytics to improve our platform:
-
-### Analytics Services
-- **[Vercel Web Analytics](https://vercel.com/analytics)** - Basic page views and performance metrics
-- **[Umami Analytics](https://umami.is/)** - Privacy-focused, self-hosted on Railway
-
-### What We Track
-- Page views and popular content
-- Geographic regions (country-level only)
-- Referral sources and search terms
-- Performance metrics (page load times)
-
-### What We DON'T Track
-- Personal identification information (PII)
-- Individual user behavior across sessions
-- IP addresses or precise locations
-- Cookies for tracking purposes
-
-### Your Privacy
-- All analytics are **GDPR compliant**
-- **No personal data** is collected or stored
-- **No tracking cookies** are used
-- Data is **aggregated and anonymized**
-- You can **opt-out** using browser settings or ad blockers
-
-For questions about our privacy practices, contact **hi@claudepro.directory**
-
-## 💬 Community
-
-Join our growing community:
-
-- **Discord**: [Join our server](https://discord.gg/Ax3Py4YDrq)
-- **GitHub Discussions**: [Join the conversation](https://github.com/JSONbored/claudepro-directory/discussions/new/choose)
-- **Twitter/X**: [@JSONbored](https://x.com/JSONbored)
-
-## 🚧 Roadmap
-
-- [ ] User authentication and profiles
-- [ ] Configuration versioning
-- [ ] API for programmatic access
-- [ ] Configuration testing playground
-- [ ] AI-powered recommendations
-- [ ] Mobile application
-- [ ] Browser extension
-- [ ] Real-time collaboration features
-
-## 📞 Contact
-
-- **Website**: [claudepro.directory](https://claudepro.directory)
-- **General Inquiries**: [hi@claudepro.directory](mailto:hi@claudepro.directory)
-- **Security**: [security@claudepro.directory](mailto:security@claudepro.directory)
-- **Partnerships**: [partners@claudepro.directory](mailto:partners@claudepro.directory)
-
-## 💼 Partner With Us
-
-Interested in reaching the Claude AI community? We offer:
-- **Featured Job Listings** - Connect with top AI talent
-- **Sponsored Content** - Showcase your tools and services
-- **Premium Placement** - Get visibility for your configurations
-
-[Contact our partnerships team](mailto:partners@claudepro.directory) to learn more.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Thanks to all our contributors and the Claude AI community
-- Inspired by [cursor.directory](https://github.com/pontusab/cursor.directory)
-- Built with [Next.js](https://nextjs.org/) and [React](https://react.dev/)
-- UI components from [shadcn/ui](https://ui.shadcn.com/)
-- Deployed on [Vercel](https://vercel.com/)
+</details>
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by [JSONbored](https://github.com/JSONbored)**
+**Built with ❤️ by the Claude community**
 
-[GitHub](https://github.com/JSONbored) | [Twitter/X](https://x.com/JSONbored)
-
-[⬆ Back to Top](#claude-pro-directory-)
+[Website](https://claudepro.directory) • [GitHub](https://github.com/JSONbored/claudepro-directory) • [Discord](https://discord.gg/Ax3Py4YDrq)
 
 </div>
