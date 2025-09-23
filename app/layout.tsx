@@ -6,7 +6,7 @@ import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { Toaster } from 'sonner';
 import { Navigation } from '@/components/navigation';
-import { PerformanceOptimizer, registerServiceWorker } from '@/components/performance-optimizer';
+import { PerformanceOptimizer } from '@/components/performance-optimizer';
 import { StructuredData } from '@/components/structured-data';
 import { WebVitals } from './components/web-vitals';
 
@@ -124,7 +124,22 @@ export default function RootLayout({
         <PerformanceOptimizer />
         <Analytics />
         <WebVitals />
-        <Script strategy="afterInteractive">{`(${registerServiceWorker.toString()})()`}</Script>
+        <Script strategy="afterInteractive">
+          {`
+            // Register service worker only on client side
+            if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+              window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js')
+                  .then(function(registration) {
+                    console.log('ServiceWorker registration successful:', registration.scope);
+                  })
+                  .catch(function(error) {
+                    console.log('ServiceWorker registration failed:', error);
+                  });
+              });
+            }
+          `}
+        </Script>
         {/* Umami Analytics - Privacy-focused analytics (production only) */}
         {process.env.NODE_ENV === 'production' && (
           <Script

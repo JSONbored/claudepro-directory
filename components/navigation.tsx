@@ -67,13 +67,12 @@ interface NavLinkProps {
 
 const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkProps) => {
   const active = isActive(href);
+
   return (
     <Link
       href={href}
       className={`${active ? 'ring-2 ring-accent/30 bg-accent/10 border-accent/50 text-primary' : ''} ${className}`}
       onClick={onClick}
-      aria-current={active ? 'page' : undefined}
-      aria-label={typeof children === 'string' ? children : undefined}
     >
       {children}
     </Link>
@@ -83,14 +82,15 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
 export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
-    setMounted(true);
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
+
+    // Check initial scroll position
+    handleScroll();
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -103,13 +103,13 @@ export const Navigation = () => {
   return (
     <header
       className={`sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300 ${
-        mounted && isScrolled ? 'shadow-sm' : ''
+        isScrolled ? 'shadow-sm' : ''
       }`}
     >
       <div className="container mx-auto px-4">
         <div
           className={`flex items-center justify-between transition-all duration-300 ${
-            mounted && isScrolled ? 'h-12' : 'h-16'
+            isScrolled ? 'h-12' : 'h-16'
           }`}
         >
           {/* Logo */}
@@ -120,12 +120,12 @@ export const Navigation = () => {
           >
             <LogoIcon
               className={`transition-all duration-300 flex-shrink-0 hidden xl:block ${
-                mounted && isScrolled ? 'h-6 w-6' : 'h-8 w-8'
+                isScrolled ? 'h-6 w-6' : 'h-8 w-8'
               }`}
             />
             <span
               className={`font-medium text-foreground transition-all duration-300 hidden xl:inline ${
-                mounted && isScrolled ? 'text-base' : 'text-lg'
+                isScrolled ? 'text-base' : 'text-lg'
               }`}
             >
               claudepro.directory
