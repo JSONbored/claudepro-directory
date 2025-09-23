@@ -3,6 +3,7 @@
 import { Check, Copy, ExternalLink, Github } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { memo, useState } from 'react';
+import { trackCopy } from '@/app/actions/track-view';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -63,6 +64,11 @@ export const ConfigCard = memo(
 
       setCopied(true);
       if (success) {
+        // Track copy action for analytics (silent fail)
+        trackCopy(type, slug).catch(() => {
+          // Silent fail - don't break UX
+        });
+
         toast({
           title: 'Link copied!',
           description: 'The config link has been copied to your clipboard.',

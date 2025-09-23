@@ -10,7 +10,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { UnifiedSidebar } from '@/components/unified-sidebar';
+import { ViewTracker } from '@/components/view-tracker';
 import { parseMDXFrontmatter } from '@/lib/mdx-config';
+import { contentCache } from '@/lib/redis';
 
 // ISR Configuration - Revalidate weekly for SEO pages
 export const revalidate = 604800; // 7 days
@@ -52,27 +54,39 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
 
   if (!category || !pathMap[category]) return null;
 
-  try {
-    const filePath = path.join(process.cwd(), 'seo', pathMap[category], filename);
-    const fileContent = await fs.readFile(filePath, 'utf-8');
+  const cacheKey = `guide:${category}:${restSlug.join('-')}`;
 
-    // Parse frontmatter using our MDX parser
-    const { frontmatter, content } = parseMDXFrontmatter(fileContent);
+  return await contentCache.cacheWithRefresh(
+    cacheKey,
+    async () => {
+      try {
+        const mappedPath = pathMap[category];
+        if (!mappedPath) return null;
 
-    return {
-      title: frontmatter.title || '',
-      description: frontmatter.description || '',
-      keywords: Array.isArray(frontmatter.keywords) ? frontmatter.keywords : [],
-      dateUpdated: frontmatter.dateUpdated || '',
-      author: frontmatter.author || 'Claude Pro Directory Team',
-      readingTime: frontmatter.readingTime || '',
-      difficulty: frontmatter.difficulty || '',
-      category: frontmatter.category || category,
-      content,
-    };
-  } catch (_error) {
-    return null;
-  }
+        const filePath = path.join(process.cwd(), 'seo', mappedPath, filename);
+        const fileContent = await fs.readFile(filePath, 'utf-8');
+
+        // Parse frontmatter using our MDX parser
+        const { frontmatter, content } = parseMDXFrontmatter(fileContent);
+
+        return {
+          title: frontmatter.title || '',
+          description: frontmatter.description || '',
+          keywords: Array.isArray(frontmatter.keywords) ? frontmatter.keywords : [],
+          dateUpdated: frontmatter.dateUpdated || '',
+          author: frontmatter.author || 'Claude Pro Directory Team',
+          readingTime: frontmatter.readingTime || '',
+          difficulty: frontmatter.difficulty || '',
+          category: frontmatter.category || category,
+          content,
+        };
+      } catch (_error) {
+        return null;
+      }
+    },
+    24 * 60 * 60, // Cache for 24 hours
+    0.9 // Refresh when 90% of TTL has passed
+  );
 }
 
 async function getRelatedGuides(currentSlug: string[], limit = 3): Promise<RelatedGuide[]> {
@@ -80,33 +94,42 @@ async function getRelatedGuides(currentSlug: string[], limit = 3): Promise<Relat
   if (!currentCategory) return [];
 
   const currentFilename = currentSlug.slice(1).join('-');
-  const relatedGuides: RelatedGuide[] = [];
+  const cacheKey = `related:${currentCategory}:${currentFilename}:${limit}`;
 
-  try {
-    const dir = path.join(process.cwd(), 'seo', currentCategory);
-    const files = await fs.readdir(dir);
+  return await contentCache.cacheWithRefresh(
+    cacheKey,
+    async () => {
+      const relatedGuides: RelatedGuide[] = [];
 
-    for (const file of files) {
-      if (file.endsWith('.mdx') && !file.includes(currentFilename)) {
-        const content = await fs.readFile(path.join(dir, file), 'utf-8');
-        const titleMatch = content.match(/title:\s*["']([^"']+)["']/);
+      try {
+        const dir = path.join(process.cwd(), 'seo', currentCategory);
+        const files = await fs.readdir(dir);
 
-        if (titleMatch?.[1]) {
-          relatedGuides.push({
-            title: titleMatch[1],
-            slug: `/guides/${currentCategory}/${file.replace('.mdx', '')}`,
-            category: currentCategory,
-          });
+        for (const file of files) {
+          if (file.endsWith('.mdx') && !file.includes(currentFilename)) {
+            const content = await fs.readFile(path.join(dir, file), 'utf-8');
+            const titleMatch = content.match(/title:\s*["']([^"']+)["']/);
+
+            if (titleMatch?.[1]) {
+              relatedGuides.push({
+                title: titleMatch[1],
+                slug: `/guides/${currentCategory}/${file.replace('.mdx', '')}`,
+                category: currentCategory,
+              });
+            }
+
+            if (relatedGuides.length >= limit) break;
+          }
         }
-
-        if (relatedGuides.length >= limit) break;
+      } catch {
+        // Directory doesn't exist
       }
-    }
-  } catch {
-    // Directory doesn't exist
-  }
 
-  return relatedGuides;
+      return relatedGuides;
+    },
+    4 * 60 * 60, // Cache for 4 hours
+    0.8 // Refresh when 80% of TTL has passed
+  );
 }
 
 export async function generateStaticParams() {
@@ -412,6 +435,9 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
           </div>
         </div>
       </div>
+
+      {/* Track guide views for trending analytics */}
+      <ViewTracker category="guides" slug={slug.join('/')} />
     </>
   );
 }

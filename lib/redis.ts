@@ -226,7 +226,7 @@ export const statsRedis = {
     if (!redis) return;
 
     try {
-      const categories = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
+      const categories = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'guides'];
       const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
       for (const category of categories) {
@@ -237,11 +237,217 @@ export const statsRedis = {
         'Failed to cleanup old trending data in Redis',
         error instanceof Error ? error : new Error(String(error)),
         {
-          categoriesCount: 5,
+          categoriesCount: 6,
           sampleCategory: 'agents',
           cutoffTime: Date.now() - 7 * 24 * 60 * 60 * 1000,
         }
       );
+    }
+  },
+};
+
+// Content caching functions for MDX and heavy operations
+export const contentCache = {
+  // Check if Redis is enabled
+  isEnabled: () => !!redis,
+
+  // Cache compiled MDX content
+  async cacheMDX(
+    path: string,
+    content: string,
+    ttl: number = 24 * 60 * 60 // 24 hours default
+  ): Promise<void> {
+    if (!redis) return;
+
+    try {
+      const key = `mdx:${path}`;
+      await redis.setex(key, ttl, content);
+    } catch (error) {
+      logger.error(
+        'Failed to cache MDX content',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          path,
+          key: `mdx:${path}`,
+          ttl,
+        }
+      );
+    }
+  },
+
+  // Retrieve cached MDX content
+  async getMDX(path: string): Promise<string | null> {
+    if (!redis) return null;
+
+    try {
+      const key = `mdx:${path}`;
+      const content = await redis.get<string>(key);
+      return content;
+    } catch (error) {
+      logger.error(
+        'Failed to retrieve cached MDX content',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          path,
+          key: `mdx:${path}`,
+        }
+      );
+      return null;
+    }
+  },
+
+  // Cache processed content metadata
+  async cacheContentMetadata(
+    category: string,
+    data: unknown,
+    ttl: number = 4 * 60 * 60 // 4 hours default
+  ): Promise<void> {
+    if (!redis) return;
+
+    try {
+      const key = `content:${category}:metadata`;
+      await redis.setex(key, ttl, JSON.stringify(data));
+    } catch (error) {
+      logger.error(
+        'Failed to cache content metadata',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          category,
+          key: `content:${category}:metadata`,
+          ttl,
+        }
+      );
+    }
+  },
+
+  // Retrieve cached content metadata
+  async getContentMetadata<T>(category: string): Promise<T | null> {
+    if (!redis) return null;
+
+    try {
+      const key = `content:${category}:metadata`;
+      const data = await redis.get<string>(key);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      logger.error(
+        'Failed to retrieve cached content metadata',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          category,
+          key: `content:${category}:metadata`,
+        }
+      );
+      return null;
+    }
+  },
+
+  // Cache API responses
+  async cacheAPIResponse(
+    endpoint: string,
+    data: unknown,
+    ttl: number = 60 * 60 // 1 hour default
+  ): Promise<void> {
+    if (!redis) return;
+
+    try {
+      const key = `api:${endpoint}`;
+      await redis.setex(key, ttl, JSON.stringify(data));
+    } catch (error) {
+      logger.error(
+        'Failed to cache API response',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          endpoint,
+          key: `api:${endpoint}`,
+          ttl,
+        }
+      );
+    }
+  },
+
+  // Retrieve cached API response
+  async getAPIResponse<T>(endpoint: string): Promise<T | null> {
+    if (!redis) return null;
+
+    try {
+      const key = `api:${endpoint}`;
+      const data = await redis.get<string>(key);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      logger.error(
+        'Failed to retrieve cached API response',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          endpoint,
+          key: `api:${endpoint}`,
+        }
+      );
+      return null;
+    }
+  },
+
+  // Invalidate cache by pattern
+  async invalidatePattern(pattern: string): Promise<void> {
+    if (!redis) return;
+
+    try {
+      // Note: Upstash Redis doesn't support KEYS command in production
+      // This is a simplified version - in production you'd use a different approach
+      // or store cache keys in a set for easier invalidation
+      const keys = await redis.keys(pattern);
+      if (keys.length > 0) {
+        await redis.del(...keys);
+      }
+    } catch (error) {
+      logger.error(
+        'Failed to invalidate cache pattern',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          pattern,
+        }
+      );
+    }
+  },
+
+  // Cache with automatic expiration and refresh
+  async cacheWithRefresh<T>(
+    key: string,
+    fetcher: () => Promise<T>,
+    ttl: number = 60 * 60,
+    refreshThreshold: number = 0.8 // Refresh when 80% of TTL has passed
+  ): Promise<T> {
+    if (!redis) {
+      return await fetcher();
+    }
+
+    try {
+      // Try to get cached data with TTL
+      const cached = await redis.get<string>(key);
+      const ttlRemaining = await redis.ttl(key);
+
+      if (cached && ttlRemaining > ttl * (1 - refreshThreshold)) {
+        return JSON.parse(cached);
+      }
+
+      // Data is stale or doesn't exist, fetch fresh data
+      const freshData = await fetcher();
+
+      // Cache the fresh data
+      await redis.setex(key, ttl, JSON.stringify(freshData));
+
+      return freshData;
+    } catch (error) {
+      logger.error(
+        'Failed in cache-with-refresh operation',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          key,
+          ttl,
+          refreshThreshold,
+        }
+      );
+      // Fallback to direct fetch
+      return await fetcher();
     }
   },
 };
