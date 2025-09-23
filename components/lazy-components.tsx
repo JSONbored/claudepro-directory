@@ -1,4 +1,5 @@
 import dynamic from 'next/dynamic';
+import type React from 'react';
 
 // Generate stable keys for skeleton items (prevents unnecessary re-renders)
 const SKELETON_KEYS = Array.from({ length: 6 }, () => crypto.randomUUID());
@@ -29,7 +30,9 @@ export const LazyInfiniteScrollContainer = dynamic(
       </div>
     ),
   }
-);
+) as <T>(
+  props: import('./infinite-scroll-container').InfiniteScrollContainerProps<T>
+) => React.JSX.Element;
 
 export const LazyConfigCard = dynamic(
   () => import('./config-card').then((mod) => ({ default: mod.ConfigCard })),

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import type { Metric } from 'web-vitals';
 
 // Critical resource preloader for perfect Core Web Vitals
 export function PerformanceOptimizer() {
@@ -42,24 +43,32 @@ export function PerformanceOptimizer() {
   // Client-side performance monitoring
   useEffect(() => {
     // Report Web Vitals to analytics
-    const reportWebVitals = (metric: any) => {
-      if (typeof window !== 'undefined' && (window as any).gtag) {
+    const reportWebVitals = (metric: Metric) => {
+      if (
+        typeof window !== 'undefined' &&
+        'gtag' in window &&
+        typeof (window as any).gtag === 'function'
+      ) {
         (window as any).gtag('event', metric.name, {
           custom_parameter_1: metric.value,
-          custom_parameter_2: metric.label,
+          custom_parameter_2: metric.rating,
           custom_parameter_3: metric.id,
         });
       }
     };
 
     // Dynamic import to avoid blocking initial load
-    import('web-vitals').then(({ onCLS, onFCP, onLCP, onTTFB, onINP }) => {
-      onCLS(reportWebVitals);
-      onFCP(reportWebVitals);
-      onLCP(reportWebVitals);
-      onTTFB(reportWebVitals);
-      onINP(reportWebVitals);
-    });
+    import('web-vitals')
+      .then(({ onCLS, onFCP, onLCP, onTTFB, onINP }) => {
+        onCLS(reportWebVitals);
+        onFCP(reportWebVitals);
+        onLCP(reportWebVitals);
+        onTTFB(reportWebVitals);
+        onINP(reportWebVitals);
+      })
+      .catch((error) => {
+        console.error('Failed to load web-vitals:', error);
+      });
   }, []);
 
   return null; // This component doesn't render anything

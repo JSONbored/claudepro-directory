@@ -308,21 +308,17 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
             {['all', 'rules', 'mcp', 'agents', 'commands', 'hooks'].map((tab) => (
               <TabsContent key={tab} value={tab} className="space-y-6">
                 {filteredResults.length > 0 ? (
-                  <LazyInfiniteScrollContainer
+                  <LazyInfiniteScrollContainer<ContentItem>
                     items={displayedItems}
-                    renderItem={(item: any, _index: number) => (
-                      <LazyConfigCard
-                        key={(item as ContentItem).id}
-                        {...(item as ContentItem)}
-                        type={getConfigType(item as ContentItem)}
-                      />
+                    renderItem={(item: ContentItem, _index: number) => (
+                      <LazyConfigCard key={item.id} {...item} type={getConfigType(item)} />
                     )}
                     loadMore={loadMore}
                     hasMore={hasMore}
                     pageSize={20}
                     gridClassName="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
                     emptyMessage={`No ${tab === 'all' ? 'configurations' : tab} found`}
-                    keyExtractor={(item: any, _index: number) => (item as ContentItem).id}
+                    keyExtractor={(item: ContentItem, _index: number) => item.id}
                   />
                 ) : (
                   <div className="text-center py-12">

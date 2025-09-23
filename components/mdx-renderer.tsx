@@ -1,4 +1,5 @@
 import { MDXRemote } from 'next-mdx-remote/rsc';
+import { ErrorBoundary } from '@/components/error-boundary';
 import { mdxOptions } from '@/lib/mdx-config';
 import {
   Accordion,
@@ -199,13 +200,19 @@ const components = {
 export function MDXRenderer({ source, className = '' }: MDXRendererProps) {
   return (
     <div className={`prose prose-invert max-w-none ${className}`}>
-      <MDXRemote
-        source={source}
-        components={components}
-        options={{
-          mdxOptions: mdxOptions,
-        }}
-      />
+      <ErrorBoundary
+        fallback={
+          <div className="p-8 text-center text-muted-foreground">Error rendering content</div>
+        }
+      >
+        <MDXRemote
+          source={source}
+          components={components}
+          options={{
+            mdxOptions: mdxOptions,
+          }}
+        />
+      </ErrorBoundary>
     </div>
   );
 }

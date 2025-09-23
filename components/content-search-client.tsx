@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { ConfigCard } from '@/components/config-card';
+import { ErrorBoundary } from '@/components/error-boundary';
 import { InfiniteScrollContainer } from '@/components/infinite-scroll-container';
 import { type FilterState, UnifiedSearch } from '@/components/unified-search';
 import { getIconByName } from '@/lib/icons';
@@ -125,29 +126,39 @@ export function ContentSearchClient<T extends ContentMetadata>({
   return (
     <div className="space-y-8">
       {/* Unified Search & Filters */}
-      <UnifiedSearch
-        placeholder={searchPlaceholder}
-        onSearch={handleSearch}
-        onFiltersChange={handleFiltersChange}
-        filters={filters}
-        availableTags={tags}
-        availableAuthors={authors}
-        availableCategories={categories}
-        resultCount={filteredItems.length}
-      />
+      <ErrorBoundary
+        fallback={<div className="p-4 text-center text-muted-foreground">Error loading search</div>}
+      >
+        <UnifiedSearch
+          placeholder={searchPlaceholder}
+          onSearch={handleSearch}
+          onFiltersChange={handleFiltersChange}
+          filters={filters}
+          availableTags={tags}
+          availableAuthors={authors}
+          availableCategories={categories}
+          resultCount={filteredItems.length}
+        />
+      </ErrorBoundary>
 
       {/* Infinite Scroll Results */}
       {filteredItems.length > 0 ? (
-        <InfiniteScrollContainer
-          items={displayedItems}
-          renderItem={(item) => <ConfigCard key={item.id} {...item} type={type} />}
-          loadMore={loadMore}
-          hasMore={hasMore}
-          pageSize={20}
-          gridClassName="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-          emptyMessage={`No ${title.toLowerCase()} found`}
-          keyExtractor={(item) => item.id}
-        />
+        <ErrorBoundary
+          fallback={
+            <div className="p-8 text-center text-muted-foreground">Error loading results</div>
+          }
+        >
+          <InfiniteScrollContainer
+            items={displayedItems}
+            renderItem={(item) => <ConfigCard key={item.id} {...item} type={type} />}
+            loadMore={loadMore}
+            hasMore={hasMore}
+            pageSize={20}
+            gridClassName="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+            emptyMessage={`No ${title.toLowerCase()} found`}
+            keyExtractor={(item) => item.id}
+          />
+        </ErrorBoundary>
       ) : (
         <output className="text-center py-12 block">
           {(() => {
