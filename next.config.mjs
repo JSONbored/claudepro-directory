@@ -1,12 +1,19 @@
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+
+// Get __dirname in ES module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 // Only import bundle analyzer when needed
-const withBundleAnalyzer = process.env.ANALYZE === 'true' 
+const withBundleAnalyzer = process.env.ANALYZE === 'true'
   ? (await import('@next/bundle-analyzer')).default({ enabled: true })
   : (config) => config;
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Standalone output for smaller deployments
-  output: 'standalone',
+  // Standard output for Vercel and traditional deployments
+  // Uncomment for Docker/serverless: output: 'standalone',
   
   // Disable powered by header for security and smaller response size
   poweredByHeader: false,
@@ -133,7 +140,7 @@ const nextConfig = {
     // Preload critical resources
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': require('path').resolve(__dirname, './'),
+      '@': resolve(__dirname, './'),
     };
 
     return config;

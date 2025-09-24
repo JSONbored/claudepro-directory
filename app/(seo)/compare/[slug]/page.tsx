@@ -81,9 +81,10 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const data = await getComparisonData(params.slug);
+  const resolvedParams = await params;
+  const data = await getComparisonData(resolvedParams.slug);
 
   if (!data) {
     return {
@@ -108,13 +109,14 @@ export async function generateMetadata({
       description: data.description,
     },
     alternates: {
-      canonical: `/compare/${params.slug}`,
+      canonical: `/compare/${resolvedParams.slug}`,
     },
   };
 }
 
-export default async function ComparisonPage({ params }: { params: { slug: string } }) {
-  const data = await getComparisonData(params.slug);
+export default async function ComparisonPage({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = await params;
+  const data = await getComparisonData(resolvedParams.slug);
 
   if (!data) {
     notFound();
@@ -151,7 +153,7 @@ export default async function ComparisonPage({ params }: { params: { slug: strin
             Compare
           </Link>
           <span>/</span>
-          <span className="text-primary">{params.slug}</span>
+          <span className="text-primary">{resolvedParams.slug}</span>
         </nav>
 
         {/* Back Button */}

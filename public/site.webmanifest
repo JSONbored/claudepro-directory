@@ -1,7 +1,30 @@
 {
   "name": "Claude Pro Directory",
-  "short_name": "ClaudeProDir",
+  "short_name": "ClaudePro",
+  "description": "Discover and share the best Claude AI configurations, MCP servers, agents, rules, commands, and hooks",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "categories": ["productivity", "developer", "utilities"],
+  "dir": "ltr",
+  "lang": "en-US",
+  "scope": "/",
+  "id": "claudepro-directory-pwa",
   "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
     {
       "src": "/android-chrome-192x192.png",
       "sizes": "192x192",
@@ -11,9 +34,55 @@
       "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
     }
   ],
-  "theme_color": "#0a0a0a",
-  "background_color": "#0a0a0a",
-  "display": "standalone"
+  "screenshots": [
+    {
+      "src": "/og-screenshot.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Claude Pro Directory Homepage"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "MCP Servers",
+      "short_name": "MCP",
+      "description": "Browse MCP servers",
+      "url": "/mcp",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Agents",
+      "short_name": "Agents",
+      "description": "Browse AI agents",
+      "url": "/agents",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Commands",
+      "short_name": "Commands",
+      "description": "Browse Claude commands",
+      "url": "/commands",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": []
 }

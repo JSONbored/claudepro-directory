@@ -102,6 +102,18 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <head>
+        {/* PWA Manifest */}
+        <link rel="manifest" href="/site.webmanifest" />
+
+        {/* iOS Safari PWA Support */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="ClaudePro" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+        {/* Theme Color for Mobile Browsers */}
+        <meta name="theme-color" content="#000000" />
+
         {/* Preconnect to external domains for faster loading */}
         <link rel="preconnect" href="https://umami.claudepro.directory" />
         <link rel="dns-prefetch" href="https://umami.claudepro.directory" />

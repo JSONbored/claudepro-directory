@@ -19,18 +19,41 @@ export function middleware(request: NextRequest) {
   // Production CSP with strict security
   const isDevelopment = process.env.NODE_ENV === 'development';
 
+  // Next.js specific style hashes for runtime injected styles
+  const nextJsStyleHashes = [
+    "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='", // Next.js empty style
+    "'sha256-CIxDM5jnsGiKqXs2v7NKCY5MzdR9gu6TtiMJrDw29AY='", // Next.js runtime style
+    "'sha256-skqujXORqzxt1aE0NNXxujEanPTX6raoqSscTV/Ww/Y='", // Next.js component style
+  ];
+
+  // Radix UI inline style hashes for production (calculated from actual runtime styles)
+  const radixStyleHashes = [
+    "'sha256-AbpHGcgLb+kRsJGnwFEktk7uzpZOCcBY74+YBdrKVGs='", // pointer-events:none (most common)
+    "'sha256-2P5tqNMfs5TKPqg9LUKwLEJcNn8FwYwv3QxN4P4XGGc='", // Additional pointer-events variant
+    "'sha256-O4zPQh/HKJJuz6eS8K3TL/dLBhgQv0L7D3awjHhXH3s='", // Radix select hidden styles
+    "'sha256-jHboKxFKJvpJ1ZDh8pGLHWGVL8cOl7sYU5aVauh2qQ4='", // outline:none
+    "'sha256-W9RKCa5I1VVD8vciQnk0UMJ7DQFmMWfHrRL9xqGQDL4='", // animation-duration:0s
+  ];
+
+  // Script hash for next-themes initialization (exact hash from production build)
+  const themeScriptHash = "'sha256-FmalCxHzr5X6Vgb2BnZQ+H70HiNRZBDZliMdtxFMV8E='";
+
   const cspDirectives = [
     "default-src 'self'",
-    // Scripts: nonce-based for inline, specific domains for external
-    `script-src 'self' 'nonce-${nonce}' https://umami.claudepro.directory https://va.vercel-scripts.com https://vercel.live https://vitals.vercel-insights.com${isDevelopment ? " 'unsafe-eval'" : ''}`,
-    // Styles: nonce-based for inline, specific domains for external
-    `style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com`,
+    // Scripts: nonce for inline, self for chunks, theme script hash, unsafe-eval only in dev for HMR
+    `script-src 'self' 'nonce-${nonce}'${isDevelopment ? " 'unsafe-eval'" : ` ${themeScriptHash}`} https://umami.claudepro.directory https://va.vercel-scripts.com https://vercel.live https://vitals.vercel-insights.com`,
+    `script-src-elem 'self' 'nonce-${nonce}'${!isDevelopment ? ` ${themeScriptHash}` : ''} https://umami.claudepro.directory https://va.vercel-scripts.com https://vercel.live https://vitals.vercel-insights.com`,
+    // Styles: comprehensive coverage with hashes for Next.js runtime styles
+    `style-src 'self' 'nonce-${nonce}' ${nextJsStyleHashes.join(' ')} https://fonts.googleapis.com`,
+    `style-src-elem 'self' 'nonce-${nonce}' ${nextJsStyleHashes.join(' ')} https://fonts.googleapis.com`,
+    // style-src-attr: only allow unsafe-inline in dev, production uses nonce + all necessary hashes
+    `style-src-attr 'nonce-${nonce}'${isDevelopment ? " 'unsafe-inline'" : ` ${nextJsStyleHashes.join(' ')} ${radixStyleHashes.join(' ')}`}`,
     // Fonts
     "font-src 'self' https://fonts.gstatic.com data:",
     // Images
     "img-src 'self' data: blob: https://github.com https://*.githubusercontent.com https://claudepro.directory https://www.claudepro.directory",
     // Connections (API, analytics, WebSocket for dev)
-    `connect-src 'self' https://umami.claudepro.directory https://vitals.vercel-insights.com https://va.vercel-scripts.com${isDevelopment ? " ws://localhost:* wss://localhost:*" : ''}`,
+    `connect-src 'self' https://umami.claudepro.directory https://vitals.vercel-insights.com https://va.vercel-scripts.com${isDevelopment ? " ws://localhost:* wss://localhost:* ws://*.local:*" : ''}`,
     // Forms
     "form-action 'self'",
     // Frames

@@ -56,6 +56,7 @@ export function UnifiedSearch({
   const [localFilters, setLocalFilters] = useState<FilterState>(filters);
 
   // Generate unique IDs
+  const searchInputId = useId();
   const searchResultsId = useId();
   const filterPanelId = useId();
   const categorySelectId = useId();
@@ -143,6 +144,8 @@ export function UnifiedSearch({
               aria-hidden="true"
             />
             <Input
+              id={searchInputId}
+              name="search"
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -150,6 +153,7 @@ export function UnifiedSearch({
               className="pl-10 pr-4 h-12 text-base bg-card/50 backdrop-blur-sm border-border/50 focus:border-primary/50 focus:bg-card transition-smooth w-full"
               aria-label="Search configurations"
               aria-describedby={resultCount > 0 && searchQuery ? searchResultsId : undefined}
+              autoComplete="search"
             />
           </div>
 

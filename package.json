@@ -20,7 +20,7 @@
   "type": "module",
   "scripts": {
     "dev": "npm run build:content && next dev --turbopack",
-    "build": "npm run build:content && npm run generate:sitemap && next build --turbopack",
+    "build": "npm run build:content && npm run generate:sitemap && next build",
     "build:analyze": "ANALYZE=true npm run build",
     "build:content": "tsx scripts/build-content.ts",
     "generate:sitemap": "tsx scripts/generate-sitemap.ts",

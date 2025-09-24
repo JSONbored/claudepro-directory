@@ -1,14 +1,16 @@
 // Service Worker for Claude Pro Directory
-// Version: 1.0.0
-// Cache-first strategy for assets, network-first for API calls
+// Version: 1.1.0
+// Cache-first strategy for assets, network-first for API calls, offline support
 
-const CACHE_NAME = 'claudepro-v1';
+const CACHE_NAME = 'claudepro-v1.1';
 const urlsToCache = [
   '/',
   '/offline.html',
   '/manifest.json',
   '/icon-192.png',
-  '/icon-512.png'
+  '/icon-512.png',
+  '/favicon.ico',
+  '/apple-touch-icon.png'
 ];
 
 // Install event - cache initial resources
@@ -17,8 +19,7 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Opened cache');
-        // Only cache core files, skip offline.html if it doesn't exist
-        return cache.addAll(urlsToCache.filter(url => !url.includes('offline.html')));
+        return cache.addAll(urlsToCache);
       })
       .catch((err) => {
         console.log('Service worker installation failed:', err);
@@ -34,7 +35,8 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
+          // Only delete caches that start with 'claudepro-' but aren't current version
+          if (cacheName.startsWith('claudepro-') && cacheName !== CACHE_NAME) {
             console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
