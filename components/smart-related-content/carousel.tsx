@@ -1,13 +1,11 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import {
-  trackCarouselNavigation,
   trackRelatedContentClick,
   trackRelatedContentView,
 } from '@/lib/analytics/events/related-content';
@@ -21,7 +19,6 @@ export function RelatedCarouselClient({
   showTitle = true,
   title = 'Related Content',
 }: RelatedCarouselClientProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [hasTrackedView, setHasTrackedView] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -46,20 +43,6 @@ export function RelatedCarouselClient({
     return () => observer.disconnect();
   }, [trackingEnabled, hasTrackedView, items.length, performance.cacheHit]);
 
-  // Handle carousel navigation
-  const handleNavigation = (direction: 'next' | 'previous') => {
-    const newIndex =
-      direction === 'next'
-        ? Math.min(currentIndex + 1, Math.max(0, items.length - 3))
-        : Math.max(currentIndex - 1, 0);
-
-    setCurrentIndex(newIndex);
-
-    if (trackingEnabled) {
-      trackCarouselNavigation(direction, newIndex, items.length);
-    }
-  };
-
   // Handle item click
   const handleItemClick = (item: RelatedContentItem, index: number) => {
     if (!trackingEnabled) return;
@@ -74,7 +57,7 @@ export function RelatedCarouselClient({
       {
         same_category: { label: 'Related', variant: 'default' },
         tag_match: { label: 'Similar Topics', variant: 'secondary' },
-        keyword_match: { label: 'Keywords Match', variant: 'secondary' },
+        keyword_match: { label: 'Keyword', variant: 'secondary' }, // Short label to prevent overflow
         trending: { label: 'Trending', variant: 'default' },
         popular: { label: 'Popular', variant: 'default' },
         cross_category: { label: 'Recommended', variant: 'outline' },
@@ -83,128 +66,197 @@ export function RelatedCarouselClient({
     return badges[matchType] || { label: 'Related', variant: 'outline' };
   };
 
-  // Get category badge color
-  const getCategoryBadge = (category: string) => {
-    const colors: Record<string, string> = {
-      agents: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-      mcp: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-      rules: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-      commands: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-      hooks: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-      tutorials: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
-      comparisons: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-      workflows: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200',
-      'use-cases': 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
-      troubleshooting: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
+  // Use existing color scheme from config-badge.tsx
+  const getCategoryStyles = (
+    category: string
+  ): { badge: string; border: string; accent: string } => {
+    const styles: Record<string, { badge: string; border: string; accent: string }> = {
+      agents: {
+        badge: 'bg-green-500/20 text-green-500 border-green-500/30',
+        border: 'border-green-500/30 hover:border-green-500/60',
+        accent: 'from-green-500 to-green-600',
+      },
+      mcp: {
+        badge: 'bg-purple-500/20 text-purple-500 border-purple-500/30',
+        border: 'border-purple-500/30 hover:border-purple-500/60',
+        accent: 'from-purple-500 to-purple-600',
+      },
+      rules: {
+        badge: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
+        border: 'border-blue-500/30 hover:border-blue-500/60',
+        accent: 'from-blue-500 to-blue-600',
+      },
+      commands: {
+        badge: 'bg-orange-500/20 text-orange-500 border-orange-500/30',
+        border: 'border-orange-500/30 hover:border-orange-500/60',
+        accent: 'from-orange-500 to-orange-600',
+      },
+      hooks: {
+        badge: 'bg-pink-500/20 text-pink-500 border-pink-500/30',
+        border: 'border-pink-500/30 hover:border-pink-500/60',
+        accent: 'from-pink-500 to-pink-600',
+      },
+      tutorials: {
+        badge: 'bg-green-500/20 text-green-500 border-green-500/30',
+        border: 'border-green-500/30 hover:border-green-500/60',
+        accent: 'from-green-500 to-green-600',
+      },
+      comparisons: {
+        badge: 'bg-primary/20 text-primary border-primary/30',
+        border: 'border-primary/30 hover:border-primary/60',
+        accent: 'from-primary to-primary/80',
+      },
+      workflows: {
+        badge: 'bg-pink-500/20 text-pink-500 border-pink-500/30',
+        border: 'border-pink-500/30 hover:border-pink-500/60',
+        accent: 'from-pink-500 to-pink-600',
+      },
+      'use-cases': {
+        badge: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
+        border: 'border-blue-500/30 hover:border-blue-500/60',
+        accent: 'from-blue-500 to-blue-600',
+      },
+      troubleshooting: {
+        badge: 'bg-red-500/20 text-red-500 border-red-500/30',
+        border: 'border-red-500/30 hover:border-red-500/60',
+        accent: 'from-red-500 to-red-600',
+      },
     };
 
-    return colors[category] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    return (
+      styles[category as keyof typeof styles] || {
+        badge: 'bg-muted/20 text-muted border-muted/30',
+        border: 'border-muted/30 hover:border-muted/60',
+        accent: 'from-muted to-muted/80',
+      }
+    );
   };
 
   if (items.length === 0) return null;
 
   return (
-    <section ref={containerRef} className={`mt-12 space-y-6 ${className}`}>
+    <section
+      ref={containerRef}
+      itemScope
+      itemType="https://schema.org/ItemList"
+      className={`my-12 ${className}`}
+    >
       {showTitle && (
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Sparkles className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold">{title}</h2>
-            <Badge variant="outline" className="border-primary/20 bg-primary/5">
-              AI Recommended
+        <div className="mb-8 p-4 sm:p-6 bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-xl">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
+                <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1" itemProp="name">
+                  {title}
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Intelligently curated based on your current content
+                </p>
+              </div>
+            </div>
+            <Badge
+              variant="secondary"
+              className="bg-primary/10 text-primary border-primary/30 font-medium px-2 sm:px-3 py-1 text-xs sm:text-sm flex-shrink-0"
+            >
+              AI Powered
             </Badge>
           </div>
-          {items.length > 3 && (
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleNavigation('previous')}
-                disabled={currentIndex === 0}
-                className="h-8 w-8"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                <span className="sr-only">Previous</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleNavigation('next')}
-                disabled={currentIndex >= items.length - 3}
-                className="h-8 w-8"
-              >
-                <ChevronRight className="h-4 w-4" />
-                <span className="sr-only">Next</span>
-              </Button>
-            </div>
-          )}
         </div>
       )}
 
-      <div className="relative overflow-hidden">
-        <div
-          className="flex transition-transform duration-300 ease-in-out gap-4"
-          style={{
-            transform: `translateX(-${currentIndex * 33.333}%)`,
-          }}
-        >
-          {items.map((item, index) => {
-            const matchBadge = getMatchTypeBadge(item.matchType);
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+        {items.map((item, index) => {
+          const matchBadge = getMatchTypeBadge(item.matchType);
+          const categoryStyles = getCategoryStyles(item.category);
 
-            return (
+          // Ensure views are never displayed (temporary workaround)
+          const sanitizedItem = { ...item };
+          if ('views' in sanitizedItem) {
+            delete (sanitizedItem as any).views;
+          }
+
+          return (
+            <Card
+              key={`${sanitizedItem.category}-${sanitizedItem.slug}`}
+              itemScope
+              itemType="https://schema.org/ListItem"
+              className={`group relative border-2 ${categoryStyles.border} bg-card hover:shadow-xl hover:shadow-current/5 transition-all duration-300 h-full overflow-hidden flex flex-col`}
+            >
+              {/* Colored gradient accent line based on category */}
               <div
-                key={`${item.category}-${item.slug}`}
-                className="min-w-[calc(33.333%-1rem)] lg:min-w-[calc(33.333%-1rem)] md:min-w-[calc(50%-0.5rem)] sm:min-w-full"
-              >
-                <Link
-                  href={item.url}
-                  onClick={() => handleItemClick(item, index)}
-                  className="block h-full"
-                >
-                  <Card className="h-full hover:shadow-lg transition-shadow duration-200 hover:border-primary/50">
-                    <CardHeader>
-                      <div className="flex items-start justify-between mb-2">
-                        <Badge className={getCategoryBadge(item.category)}>{item.category}</Badge>
-                        <Badge variant={matchBadge.variant}>{matchBadge.label}</Badge>
-                      </div>
-                      <CardTitle className="line-clamp-2 text-lg">{item.title}</CardTitle>
-                      <CardDescription className="line-clamp-3">{item.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {item.matchDetails && (
-                        <div className="space-y-2 text-sm text-muted-foreground">
-                          {item.matchDetails.matchedTags &&
-                            item.matchDetails.matchedTags.length > 0 && (
-                              <div className="flex flex-wrap gap-1">
-                                {item.matchDetails.matchedTags.slice(0, 3).map((tag) => (
-                                  <Badge key={tag} variant="outline" className="text-xs">
-                                    {tag}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                          {item.matchDetails.viewCount && item.matchDetails.viewCount > 100 && (
-                            <p className="text-xs">
-                              {item.matchDetails.viewCount.toLocaleString()} views
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </Link>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+                className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${categoryStyles.accent} opacity-70 group-hover:opacity-100 transition-opacity`}
+              />
 
-      {process.env.NODE_ENV === 'development' && (
-        <div className="text-xs text-muted-foreground">
-          Performance: {performance.fetchTime}ms | Cache: {performance.cacheHit ? 'Hit' : 'Miss'} |
-          Algorithm: {performance.algorithmVersion}
-        </div>
-      )}
+              <Link
+                href={sanitizedItem.url}
+                onClick={() => handleItemClick(sanitizedItem, index)}
+                className="block flex-1 p-4 sm:p-6 hover:bg-accent/20 transition-colors flex flex-col"
+              >
+                <div className="flex items-start justify-between gap-2 mb-4">
+                  <Badge
+                    className={`${categoryStyles.badge} font-medium px-2 sm:px-3 py-1 border text-xs sm:text-sm flex-shrink-0`}
+                    variant="secondary"
+                  >
+                    {sanitizedItem.category}
+                  </Badge>
+                  <Badge
+                    variant={matchBadge.variant}
+                    className="text-[10px] sm:text-xs font-medium border px-1.5 sm:px-2 py-1 group-hover:border-current/40 transition-colors flex-shrink-0"
+                    title={matchBadge.label === 'Keyword' ? 'Keyword Match' : matchBadge.label}
+                  >
+                    {matchBadge.label}
+                  </Badge>
+                </div>
+
+                <div className="flex-1 flex flex-col">
+                  <h3
+                    className="text-base sm:text-lg font-bold leading-tight line-clamp-2 mb-3 group-hover:text-current transition-colors"
+                    itemProp="name"
+                  >
+                    {sanitizedItem.title}
+                  </h3>
+
+                  <p
+                    className="text-muted-foreground leading-relaxed line-clamp-2 sm:line-clamp-3 mb-4 text-xs sm:text-sm flex-1"
+                    itemProp="description"
+                  >
+                    {sanitizedItem.description}
+                  </p>
+                </div>
+
+                {sanitizedItem.matchDetails?.matchedTags &&
+                  sanitizedItem.matchDetails.matchedTags.length > 0 && (
+                    <div className="pt-3 border-t border-border/30 mt-auto">
+                      <div className="flex flex-wrap gap-1">
+                        {sanitizedItem.matchDetails.matchedTags.slice(0, 2).map((tag) => (
+                          <Badge
+                            key={tag}
+                            variant="outline"
+                            className="text-[10px] sm:text-xs bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 transition-colors px-1.5 sm:px-2 py-0.5"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                        {sanitizedItem.matchDetails.matchedTags.length > 2 && (
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] sm:text-xs bg-muted/50 text-muted-foreground border-muted px-1.5 sm:px-2 py-0.5"
+                          >
+                            +{sanitizedItem.matchDetails.matchedTags.length - 2}
+                          </Badge>
+                        )}
+                      </div>
+                      {/* View counter temporarily disabled - functionality still tracks views */}
+                    </div>
+                  )}
+              </Link>
+            </Card>
+          );
+        })}
+      </div>
     </section>
   );
 }

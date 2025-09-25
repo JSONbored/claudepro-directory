@@ -1,7 +1,6 @@
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { headers } from 'next/headers';
 import Script from 'next/script';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
@@ -95,10 +94,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Get nonce from headers for CSP
-  const headersList = await headers();
-  const nonce = headersList.get('x-nonce') || '';
-
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <head>
@@ -141,7 +136,7 @@ export default async function RootLayout({
         <PerformanceOptimizer />
         <Analytics />
         <WebVitals />
-        <Script strategy="afterInteractive" nonce={nonce}>
+        <Script strategy="afterInteractive">
           {`
             // Register service worker only on client side
             if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
@@ -163,7 +158,6 @@ export default async function RootLayout({
             src="https://umami.claudepro.directory/script.js"
             data-website-id="b734c138-2949-4527-9160-7fe5d0e81121"
             strategy="lazyOnload"
-            nonce={nonce}
           />
         )}
       </body>

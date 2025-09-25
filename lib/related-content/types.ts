@@ -187,6 +187,8 @@ export interface SmartRelatedContentProps {
   className?: string;
   trackingEnabled?: boolean;
   algorithmVersion?: string;
+  currentTags?: string[];
+  currentKeywords?: string[];
 }
 
 export interface RelatedCarouselClientProps {

@@ -18,12 +18,12 @@ import type {
 // Default algorithm configuration
 const DEFAULT_ALGORITHM_CONFIG: AlgorithmConfig = {
   weights: {
-    sameCategory: 0.35, // 35% weight for same category
-    tagMatch: 0.25, // 25% weight for tag matches
-    keywordMatch: 0.15, // 15% weight for keyword matches
-    trending: 0.15, // 15% weight for trending items
-    popular: 0.05, // 5% weight for popular items
-    recency: 0.05, // 5% weight for recently updated
+    sameCategory: 0.15, // 15% weight for same category (reduced to allow more cross-category)
+    tagMatch: 0.35, // 35% weight for tag matches (increased for better relevance)
+    keywordMatch: 0.25, // 25% weight for keyword matches (increased)
+    trending: 0.15, // 15% weight for trending items (unchanged)
+    popular: 0.05, // 5% weight for popular items (unchanged)
+    recency: 0.05, // 5% weight for recently updated (unchanged)
   },
   boosts: {
     featured: 1.5, // 50% boost for featured items
@@ -31,12 +31,12 @@ const DEFAULT_ALGORITHM_CONFIG: AlgorithmConfig = {
   },
   limits: {
     maxResults: 6,
-    minScore: 0.1, // Minimum score threshold
+    minScore: 0.02, // Very low threshold to allow cross-category content
   },
 };
 
 // Cache configuration
-const CACHE_TTL = 4 * 60 * 60; // 4 hours
+const CACHE_TTL = 15 * 60; // 15 minutes - shorter to allow variety
 
 export class RelatedContentService {
   private algorithmVersion = 'v2.0.0';
@@ -47,20 +47,24 @@ export class RelatedContentService {
   async getRelatedContent(config: RelatedContentConfig): Promise<RelatedContentResponse> {
     const startTime = performance.now();
     const cacheKey = this.generateCacheKey(config);
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const bypassCache = isDevelopment && process.env.BYPASS_RELATED_CACHE === 'true';
 
     try {
-      // Try to get from cache first
-      const cached = await this.getFromCache(cacheKey);
-      if (cached) {
-        return {
-          ...cached,
-          fromCache: true,
-          performance: {
-            ...cached.performance,
-            fetchTime: Math.round(performance.now() - startTime),
-            cacheHit: true,
-          },
-        };
+      // Try to get from cache first (unless bypassed in development)
+      if (!bypassCache) {
+        const cached = await this.getFromCache(cacheKey);
+        if (cached) {
+          return {
+            ...cached,
+            fromCache: true,
+            performance: {
+              ...cached.performance,
+              fetchTime: Math.round(performance.now() - startTime),
+              cacheHit: true,
+            },
+          };
+        }
       }
 
       // Load content index
@@ -138,6 +142,12 @@ export class RelatedContentService {
         total: 0,
       };
 
+      // Give main config categories a strong boost to ensure they appear
+      const mainCategories = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
+      if (mainCategories.includes(item.category)) {
+        scores.category += 0.15; // Strong boost for main categories to ensure visibility
+      }
+
       // Calculate total score
       scores.total = Object.entries(scores)
         .filter(([key]) => key !== 'total')
@@ -169,7 +179,9 @@ export class RelatedContentService {
     config: RelatedContentConfig,
     algorithmConfig: AlgorithmConfig
   ): number {
-    if (item.slug === config.currentPath) return 0; // Exclude current page
+    // Exclude current page - check both slug and URL
+    const currentSlug = config.currentPath ? config.currentPath.split('/').pop() : '';
+    if (item.slug === currentSlug || item.url === config.currentPath) return 0;
     if (config.exclude?.includes(item.slug)) return 0;
 
     if (item.category === config.currentCategory) {
@@ -180,6 +192,27 @@ export class RelatedContentService {
     const relatedCategories = this.getRelatedCategories(config.currentCategory);
     if (relatedCategories.includes(item.category)) {
       return algorithmConfig.weights.sameCategory * 0.5;
+    }
+
+    // NEW: Boost items when current content is ABOUT that category
+    // e.g., MCP tutorial should boost MCP category items
+    const mainCategories = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
+    if (mainCategories.includes(item.category)) {
+      const currentPath = config.currentPath?.toLowerCase() || '';
+      const currentTags = config.currentTags?.map((t) => t.toLowerCase()) || [];
+      const currentKeywords = config.currentKeywords?.map((k) => k.toLowerCase()) || [];
+
+      // Check if current content is about this category
+      const categoryPattern = item.category.toLowerCase();
+      const isAboutCategory =
+        currentPath.includes(categoryPattern) ||
+        currentTags.some((tag) => tag.includes(categoryPattern)) ||
+        currentKeywords.some((kw) => kw.includes(categoryPattern));
+
+      if (isAboutCategory) {
+        // Give significant boost - treat it like same category
+        return algorithmConfig.weights.sameCategory * 0.8;
+      }
     }
 
     return 0;
@@ -297,21 +330,41 @@ export class RelatedContentService {
     const minScore = DEFAULT_ALGORITHM_CONFIG.limits.minScore;
 
     // Filter by minimum score and exclude current page
+    // Extract slug from currentPath for comparison (e.g., /guides/tutorials/foo -> foo)
+    const currentSlug = config.currentPath ? config.currentPath.split('/').pop() : '';
+
+    // Also handle case where path might have trailing slash
+    const normalizedCurrentPath = config.currentPath ? config.currentPath.replace(/\/$/, '') : '';
+
     const eligible = scoredItems
-      .filter(
-        (result) => result.scores.total >= minScore && result.item.slug !== config.currentPath
-      )
+      .filter((result) => {
+        // Multiple checks to ensure current page is excluded
+        const isCurrentPage =
+          result.item.slug === currentSlug ||
+          result.item.url === config.currentPath ||
+          result.item.url === normalizedCurrentPath ||
+          (result.item.url && result.item.url.replace(/\/$/, '') === normalizedCurrentPath);
+
+        return result.scores.total >= minScore && !isCurrentPage;
+      })
       .sort((a, b) => b.scores.total - a.scores.total);
+
+    // Get a larger pool of eligible items for diversity (not just top N)
+    // Take top 20-30 items to ensure we have options from all categories
+    const eligiblePool = eligible.slice(0, Math.min(30, eligible.length));
 
     // Ensure featured items are included
     const featured = config.featured || [];
-    const featuredItems = eligible.filter((r) => featured.includes(r.item.slug));
-    const otherItems = eligible.filter((r) => !featured.includes(r.item.slug));
+    const featuredItems = eligiblePool.filter((r) => featured.includes(r.item.slug));
+    const otherItems = eligiblePool.filter((r) => !featured.includes(r.item.slug));
 
-    // Combine featured and other items
+    // Diversify categories for better internal linking - this will enforce the mix
+    const diversifiedResults = this.diversifyCategories(otherItems, limit - featuredItems.length);
+
+    // Combine featured and diversified items
     const finalResults = [
       ...featuredItems.slice(0, Math.min(featured.length, limit)),
-      ...otherItems,
+      ...diversifiedResults,
     ].slice(0, limit);
 
     // Convert to RelatedContentItem
@@ -332,6 +385,103 @@ export class RelatedContentService {
         matchDetails,
       };
     });
+  }
+
+  /**
+   * Diversify categories to ensure variety in related content
+   * ENFORCES: 1-2 main config items + 1-2 similar content items
+   */
+  private diversifyCategories(items: ScoringResult[], targetCount: number): ScoringResult[] {
+    const result: ScoringResult[] = [];
+    const mainCategories = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
+
+    // Separate items by category type
+    const mainCategoryItems = items.filter((item) => mainCategories.includes(item.item.category));
+    const similarItems = items.filter((item) => !mainCategories.includes(item.item.category));
+
+    // Shuffle for randomization while keeping relevance (top items have better scores)
+    const shuffleTopItems = (arr: ScoringResult[], poolSize: number = 8) => {
+      const topPool = arr.slice(0, Math.min(poolSize, arr.length));
+      // Fisher-Yates shuffle for better randomization
+      for (let i = topPool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = topPool[i]!;
+        topPool[i] = topPool[j]!;
+        topPool[j] = temp;
+      }
+      return topPool;
+    };
+
+    // STRICT ENFORCEMENT: Always include at least 1 main category if available
+    if (targetCount === 3) {
+      // For standard 3-item display
+      if (mainCategoryItems.length > 0 && similarItems.length > 0) {
+        // Ideal mix: 1-2 main + 1-2 similar
+        const mainCount = Math.random() > 0.5 ? 2 : 1;
+        const similarCount = targetCount - mainCount;
+
+        // Get randomized selections from top items
+        const shuffledMain = shuffleTopItems(mainCategoryItems, 10);
+        const shuffledSimilar = shuffleTopItems(similarItems, 10);
+
+        // Add main category items
+        for (let i = 0; i < mainCount && i < shuffledMain.length; i++) {
+          const item = shuffledMain[i];
+          if (item) result.push(item);
+        }
+
+        // Add similar items
+        for (let i = 0; i < similarCount && i < shuffledSimilar.length; i++) {
+          const item = shuffledSimilar[i];
+          if (item) result.push(item);
+        }
+      } else if (mainCategoryItems.length > 0) {
+        // Only main categories available
+        const shuffled = shuffleTopItems(mainCategoryItems, 10);
+        result.push(...shuffled.slice(0, targetCount));
+      } else {
+        // Only similar items available
+        const shuffled = shuffleTopItems(similarItems, 10);
+        result.push(...shuffled.slice(0, targetCount));
+      }
+    } else {
+      // For non-standard counts, aim for 40-60% main categories if available
+      const mainCount = Math.ceil(targetCount * 0.4);
+      const shuffledMain = shuffleTopItems(mainCategoryItems, 10);
+      const shuffledSimilar = shuffleTopItems(similarItems, 10);
+
+      // Add main items first
+      for (let i = 0; i < mainCount && i < shuffledMain.length; i++) {
+        const item = shuffledMain[i];
+        if (item) result.push(item);
+      }
+
+      // Fill remaining with similar items
+      const remaining = targetCount - result.length;
+      for (let i = 0; i < remaining && i < shuffledSimilar.length; i++) {
+        const item = shuffledSimilar[i];
+        if (item) result.push(item);
+      }
+
+      // If still not enough, add any remaining items
+      if (result.length < targetCount) {
+        const allRemaining = [...mainCategoryItems, ...similarItems].filter(
+          (item) => !result.includes(item)
+        );
+        const shuffledRemaining = shuffleTopItems(allRemaining, 10);
+        result.push(...shuffledRemaining.slice(0, targetCount - result.length));
+      }
+    }
+
+    // Randomize final order for visual variety
+    for (let i = result.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = result[i]!;
+      result[i] = result[j]!;
+      result[j] = temp;
+    }
+
+    return result.slice(0, targetCount);
   }
 
   /**
@@ -454,8 +604,16 @@ export class RelatedContentService {
       const cached = await contentCache.getContentMetadata('all_content');
       if (cached) return cached;
 
-      // In production, this will load the pre-built index
-      // For now, return empty
+      // Load the generated content index
+      const { contentIndexer } = await import('./indexer');
+      const index = await contentIndexer.loadIndex();
+
+      if (index && index.items.length > 0) {
+        // Cache the loaded index
+        await contentCache.cacheContentMetadata('all_content', index, CACHE_TTL);
+        return index;
+      }
+
       return { items: [], categories: {}, tags: {}, keywords: {} };
     } catch (error) {
       logger.error('Failed to load content index', error as Error);

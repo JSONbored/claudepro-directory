@@ -1,118 +1,199 @@
+import arcjet, { shield, detectBot, tokenBucket, fixedWindow } from '@arcjet/next';
+import * as nosecone from '@nosecone/next';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
-  // Generate nonce for this request using Web Crypto API (Edge Runtime compatible)
-  const nonce = Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString('base64');
+// Initialize Arcjet with comprehensive security rules
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    // Shield WAF - protect against common attacks
+    shield({
+      mode: 'LIVE', // LIVE mode blocks malicious requests
+    }),
 
-  // Clone the request headers
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-nonce', nonce);
+    // Bot protection - block malicious bots, allow good ones
+    detectBot({
+      mode: 'LIVE',
+      allow: [
+        'CATEGORY:SEARCH_ENGINE', // Allow search engines (Google, Bing, etc.)
+        'CATEGORY:MONITOR',       // Allow monitoring services (uptime monitors)
+        'CATEGORY:PREVIEW',        // Allow preview bots (social media previews)
+      ],
+    }),
 
-  // Create response with modified request
-  const response = NextResponse.next({
-    request: {
-      headers: requestHeaders,
+    // Rate limiting - general API protection with token bucket
+    tokenBucket({
+      mode: 'LIVE',
+      refillRate: 60,  // 60 tokens
+      interval: 60,    // per 60 seconds (1 minute)
+      capacity: 120,   // burst capacity of 120 tokens
+    }),
+
+    // Fixed window rate limiting for aggressive protection
+    fixedWindow({
+      mode: 'LIVE',
+      window: '1m',    // 1 minute window
+      max: 100,        // max 100 requests per window
+    }),
+  ],
+});
+
+// Nosecone CSP configuration for security headers
+const noseconeConfig: nosecone.NoseconeOptions = {
+  ...nosecone.defaults,
+  contentSecurityPolicy: {
+    ...nosecone.defaults.contentSecurityPolicy,
+    directives: {
+      ...nosecone.defaults.contentSecurityPolicy.directives,
+      scriptSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.scriptSrc,
+        'https://umami.claudepro.directory',     // Analytics
+        'https://va.vercel-scripts.com',         // Vercel Analytics
+        'https://vercel.live',                   // Vercel Live
+        'https://vitals.vercel-insights.com',    // Vercel Web Vitals
+      ],
+      styleSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.styleSrc,
+        'https://fonts.googleapis.com',          // Google Fonts
+      ],
+      imgSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.imgSrc,
+        'https://github.com',                    // GitHub avatars
+        'https://*.githubusercontent.com',       // GitHub content
+        'https://claudepro.directory',           // Our domain
+        'https://www.claudepro.directory',       // Our www domain
+      ],
+      fontSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.fontSrc,
+        'https://fonts.gstatic.com',             // Google Fonts
+      ],
+      connectSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.connectSrc,
+        'https://umami.claudepro.directory',     // Analytics API
+        'https://vitals.vercel-insights.com',    // Vercel Analytics API
+        'https://va.vercel-scripts.com',         // Vercel Scripts
+      ],
+      // Override frameSrc from 'none' to allow specific embeds if needed
+      frameSrc: ["'none'"],
+      // Service worker for PWA
+      workerSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.workerSrc,
+        'blob:',
+      ],
+      // Manifest for PWA
+      manifestSrc: nosecone.defaults.contentSecurityPolicy.directives.manifestSrc,
+      // Only upgrade to HTTPS in production
+      upgradeInsecureRequests: process.env.NODE_ENV === 'production',
     },
-  });
+  },
+  // Disable COEP for compatibility with external resources
+  crossOriginEmbedderPolicy: false,
+  // Keep other defaults for security
+  crossOriginOpenerPolicy: nosecone.defaults.crossOriginOpenerPolicy,
+  crossOriginResourcePolicy: {
+    policy: 'cross-origin', // Allow external resources (GitHub images, etc.)
+  },
+  originAgentCluster: nosecone.defaults.originAgentCluster,
+  referrerPolicy: {
+    policy: ['strict-origin-when-cross-origin'], // More permissive than 'no-referrer'
+  },
+  strictTransportSecurity: nosecone.defaults.strictTransportSecurity,
+  xContentTypeOptions: nosecone.defaults.xContentTypeOptions,
+  xDnsPrefetchControl: {
+    allow: true, // Allow DNS prefetching for performance
+  },
+  xDownloadOptions: nosecone.defaults.xDownloadOptions,
+  xFrameOptions: nosecone.defaults.xFrameOptions,
+  xPermittedCrossDomainPolicies: nosecone.defaults.xPermittedCrossDomainPolicies,
+  xXssProtection: nosecone.defaults.xXssProtection,
+};
 
-  // Production CSP with strict security
-  const isDevelopment = process.env.NODE_ENV === 'development';
+// Create the Nosecone middleware with Vercel toolbar support in preview
+const noseconeMiddleware = nosecone.createMiddleware(
+  process.env.VERCEL_ENV === 'preview'
+    ? nosecone.withVercelToolbar(noseconeConfig)
+    : noseconeConfig,
+);
 
-  // Next.js specific style hashes for runtime injected styles
-  const nextJsStyleHashes = [
-    "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='", // Next.js empty style
-    "'sha256-CIxDM5jnsGiKqXs2v7NKCY5MzdR9gu6TtiMJrDw29AY='", // Next.js runtime style
-    "'sha256-skqujXORqzxt1aE0NNXxujEanPTX6raoqSscTV/Ww/Y='", // Next.js component style
-  ];
+export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
 
-  // Radix UI inline style hashes for production (calculated from actual runtime styles)
-  const radixStyleHashes = [
-    "'sha256-AbpHGcgLb+kRsJGnwFEktk7uzpZOCcBY74+YBdrKVGs='", // pointer-events:none (most common)
-    "'sha256-2P5tqNMfs5TKPqg9LUKwLEJcNn8FwYwv3QxN4P4XGGc='", // Additional pointer-events variant
-    "'sha256-O4zPQh/HKJJuz6eS8K3TL/dLBhgQv0L7D3awjHhXH3s='", // Radix select hidden styles
-    "'sha256-jHboKxFKJvpJ1ZDh8pGLHWGVL8cOl7sYU5aVauh2qQ4='", // outline:none
-    "'sha256-W9RKCa5I1VVD8vciQnk0UMJ7DQFmMWfHrRL9xqGQDL4='", // animation-duration:0s
-  ];
+  // Skip Arcjet protection for static assets and Next.js internals
+  const isStaticAsset =
+    pathname.startsWith('/_next/static') ||
+    pathname.startsWith('/_next/image') ||
+    pathname === '/favicon.ico' ||
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/manifest.json' ||
+    pathname === '/manifest.webmanifest' ||
+    pathname === '/service-worker.js' ||
+    pathname === '/offline.html' ||
+    pathname.endsWith('.png') ||
+    pathname.endsWith('.jpg') ||
+    pathname.endsWith('.jpeg') ||
+    pathname.endsWith('.gif') ||
+    pathname.endsWith('.webp') ||
+    pathname.endsWith('.svg') ||
+    pathname.endsWith('.ico') ||
+    pathname.endsWith('.woff') ||
+    pathname.endsWith('.woff2');
 
-  // Script hash for next-themes initialization (exact hash from production build)
-  const themeScriptHash = "'sha256-FmalCxHzr5X6Vgb2BnZQ+H70HiNRZBDZliMdtxFMV8E='";
+  // Apply Nosecone security headers to all requests
+  const noseconeResponse = await noseconeMiddleware();
 
-  const cspDirectives = [
-    "default-src 'self'",
-    // Scripts: nonce for inline, self for chunks, theme script hash, unsafe-eval only in dev for HMR
-    `script-src 'self' 'nonce-${nonce}'${isDevelopment ? " 'unsafe-eval'" : ` ${themeScriptHash}`} https://umami.claudepro.directory https://va.vercel-scripts.com https://vercel.live https://vitals.vercel-insights.com`,
-    `script-src-elem 'self' 'nonce-${nonce}'${!isDevelopment ? ` ${themeScriptHash}` : ''} https://umami.claudepro.directory https://va.vercel-scripts.com https://vercel.live https://vitals.vercel-insights.com`,
-    // Styles: comprehensive coverage with hashes for Next.js runtime styles
-    `style-src 'self' 'nonce-${nonce}' ${nextJsStyleHashes.join(' ')} https://fonts.googleapis.com`,
-    `style-src-elem 'self' 'nonce-${nonce}' ${nextJsStyleHashes.join(' ')} https://fonts.googleapis.com`,
-    // style-src-attr: only allow unsafe-inline in dev, production uses nonce + all necessary hashes
-    `style-src-attr 'nonce-${nonce}'${isDevelopment ? " 'unsafe-inline'" : ` ${nextJsStyleHashes.join(' ')} ${radixStyleHashes.join(' ')}`}`,
-    // Fonts
-    "font-src 'self' https://fonts.gstatic.com data:",
-    // Images
-    "img-src 'self' data: blob: https://github.com https://*.githubusercontent.com https://claudepro.directory https://www.claudepro.directory",
-    // Connections (API, analytics, WebSocket for dev)
-    `connect-src 'self' https://umami.claudepro.directory https://vitals.vercel-insights.com https://va.vercel-scripts.com${isDevelopment ? " ws://localhost:* wss://localhost:* ws://*.local:*" : ''}`,
-    // Forms
-    "form-action 'self'",
-    // Frames
-    "frame-ancestors 'none'",
-    "frame-src 'none'",
-    // Base
-    "base-uri 'self'",
-    // Objects
-    "object-src 'none'",
-    // Media
-    "media-src 'self'",
-    // Workers
-    "worker-src 'self' blob:",
-    // Manifest
-    "manifest-src 'self'",
-    // Upgrade insecure requests in production
-    ...(isDevelopment ? [] : ["upgrade-insecure-requests"]),
-    // Report violations to monitor CSP issues
-    ...(process.env.CSP_REPORT_URI ? [`report-uri ${process.env.CSP_REPORT_URI}`] : [])
-  ];
+  // For static assets, just return with security headers
+  if (isStaticAsset) {
+    return noseconeResponse;
+  }
 
-  const cspHeader = cspDirectives.join('; ');
+  // Apply Arcjet protection for non-static routes
+  // For token bucket rules, we need to pass requested tokens
+  const decision = await aj.protect(request, { requested: 1 });
 
-  // Security headers following OWASP best practices
-  const securityHeaders = {
-    'Content-Security-Policy': cspHeader,
-    'X-Frame-Options': 'DENY',
-    'X-Content-Type-Options': 'nosniff',
-    'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
-    'X-DNS-Prefetch-Control': 'on',
-    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-  };
+  // Handle denied requests
+  if (decision.isDenied()) {
+    console.error('Arcjet denied request:', {
+      ip: decision.ip,
+      path: pathname,
+      reason: decision.reason,
+      conclusion: decision.conclusion,
+    });
 
-  // Apply all security headers
-  Object.entries(securityHeaders).forEach(([key, value]) => {
-    response.headers.set(key, value);
-  });
+    // Copy security headers from Nosecone response
+    const headers = new Headers();
+    noseconeResponse.headers.forEach((value: string, key: string) => {
+      headers.set(key, value);
+    });
 
-  // Set nonce for use in components
-  response.headers.set('x-nonce', nonce);
+    // Return appropriate error response based on denial reason
+    if (decision.reason.isRateLimit()) {
+      return new NextResponse('Too Many Requests', {
+        status: 429,
+        headers,
+      });
+    }
 
+    if (decision.reason.isBot()) {
+      return new NextResponse('Bot Detected', {
+        status: 403,
+        headers,
+      });
+    }
+
+    // Shield or other security violations
+    return new NextResponse('Forbidden', {
+      status: 403,
+      headers,
+    });
+  }
+
+  // Request allowed - add pathname header for SmartRelatedContent component
+  const response = noseconeResponse;
+  response.headers.set('x-pathname', pathname);
   return response;
 }
 
-export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - robots.txt
-     * - sitemap.xml
-     * - manifest.json
-     * - service-worker.js
-     * - public folder
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.json|service-worker.js|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)).*)',
-  ],
-};
+// Remove the config export to run middleware on all routes
+// This ensures security headers are applied to everything

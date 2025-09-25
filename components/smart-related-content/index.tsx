@@ -27,22 +27,28 @@ function RelatedContentSkeleton() {
 async function RelatedContentServer({
   featured,
   exclude,
-  limit = 6,
+  limit = 3, // Changed from 6 to 3 - one row only
   trackingEnabled = true,
+  currentTags,
+  currentKeywords,
 }: SmartRelatedContentProps) {
   // Get current page info from headers
   const headersList = await headers();
   const pathname = headersList.get('x-pathname') || '';
 
-  // Parse current page metadata
-  const { category, tags, keywords } = parseCurrentPage(pathname);
+  // Get metadata from content index for the current page
+  const pageMetadata = await getPageMetadataFromIndex(pathname);
+
+  // Use provided tags/keywords, then index metadata, then parsed as fallback
+  const effectiveTags = currentTags || pageMetadata.tags || [];
+  const effectiveKeywords = currentKeywords || pageMetadata.keywords || [];
 
   // Get related content from service
   const response = await relatedContentService.getRelatedContent({
     currentPath: pathname,
-    ...(category && { currentCategory: category }),
-    currentTags: tags || [],
-    currentKeywords: keywords || [],
+    ...(pageMetadata.category && { currentCategory: pageMetadata.category }),
+    currentTags: effectiveTags,
+    currentKeywords: effectiveKeywords,
     ...(featured && { featured }),
     ...(exclude && { exclude }),
     limit,
@@ -61,6 +67,44 @@ async function RelatedContentServer({
       showTitle={true}
     />
   );
+}
+
+// Get metadata from content index for SEO pages
+async function getPageMetadataFromIndex(pathname: string): Promise<{
+  category?: ContentCategory;
+  tags?: string[];
+  keywords?: string[];
+}> {
+  try {
+    // For SEO guide pages, extract from the content index
+    if (pathname.includes('/guides/')) {
+      // Load content index
+      const contentIndex = await import('@/generated/content-index.json');
+
+      // Extract slug from pathname (e.g., /guides/tutorials/multi-directory-setup -> multi-directory-setup)
+      const pathParts = pathname.split('/');
+      const category = pathParts[2]; // tutorials, workflows, etc.
+      const slug = pathParts[pathParts.length - 1];
+
+      // Find the item in content index
+      const item = contentIndex.items.find(
+        (item: any) => item.slug === slug && item.category === category
+      );
+
+      if (item) {
+        return {
+          category: item.category as ContentCategory,
+          tags: item.tags || [],
+          keywords: item.keywords || [],
+        };
+      }
+    }
+  } catch (_error) {
+    // Silently fail and return parsed fallback
+  }
+
+  // Fall back to parsing the URL
+  return parseCurrentPage(pathname);
 }
 
 // Parse current page to extract metadata

@@ -28,7 +28,10 @@ import {
   InternalLinkComponent,
 } from './mdx-components';
 import { OptimizedImage } from './optimized-image';
-import { SmartRelatedContent } from './smart-related-content';
+import {
+  SmartRelatedContentWithMetadata,
+  setPageMetadata,
+} from './smart-related-content/with-metadata';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
@@ -37,6 +40,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 interface MDXRendererProps {
   source: string;
   className?: string;
+  metadata?: {
+    tags?: string[];
+    keywords?: string[];
+  };
 }
 
 // Custom components for MDX
@@ -193,13 +200,18 @@ const components = {
   MetricsDisplay,
   QuickReference,
   RelatedResources,
-  SmartRelatedContent,
+  SmartRelatedContent: SmartRelatedContentWithMetadata, // Use the wrapper component
   StepByStepGuide,
   Tabs,
   TLDRSummary,
 };
 
-export function MDXRenderer({ source, className = '' }: MDXRendererProps) {
+export function MDXRenderer({ source, className = '', metadata }: MDXRendererProps) {
+  // Set metadata for SmartRelatedContent to use
+  if (metadata) {
+    setPageMetadata(metadata);
+  }
+
   return (
     <div className={`prose prose-invert max-w-none ${className}`}>
       <ErrorBoundary

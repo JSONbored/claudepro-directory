@@ -414,7 +414,13 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
             <div className="lg:col-span-2 space-y-8">
               <Card>
                 <CardContent className="pt-6">
-                  <MDXRenderer source={data.content} />
+                  <MDXRenderer
+                    source={data.content}
+                    metadata={{
+                      tags: data.keywords || [], // Note: SEO pages use keywords field
+                      keywords: data.keywords || [],
+                    }}
+                  />
                 </CardContent>
               </Card>
             </div>
