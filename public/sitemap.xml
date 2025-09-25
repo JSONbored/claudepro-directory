@@ -2,181 +2,181 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://claudepro.directory</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>1</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/agents</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/mcp</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/rules</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/commands</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/hooks</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/jobs</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/community</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/trending</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/submit</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/use-cases/business-process-automation</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/use-cases/financial-services-guide</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/use-cases/healthcare-hipaa-guide</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/tutorials/build-mcp-server</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/tutorials/claude-4-extended-thinking-tutorial</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/tutorials/claude-agent-development-framework</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/tutorials/claude-mcp-server-setup-guide</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/tutorials/claude-rate-limits-fix</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/tutorials/desktop-mcp-setup</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/tutorials/multi-directory-setup</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/tutorials/wsl-setup-guide</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/workflows/chatgpt-migration-guide</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/comparisons/claude-vs-codewhisperer-gemini</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/comparisons/claude-vs-copilot-python</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/comparisons/claude-vs-cursor-codeium</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/troubleshooting/fix-environment-variables</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/troubleshooting/fix-installation-errors</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/troubleshooting/fix-mcp-connection-errors</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/troubleshooting/fix-memory-leak-performance</loc>
-    <lastmod>2025-09-24</lastmod>
+    <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
