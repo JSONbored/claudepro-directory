@@ -40,6 +40,16 @@ export class ErrorBoundary extends Component<Props, State> {
       url: typeof window !== 'undefined' ? window.location?.href || '' : '',
     });
 
+    // Track error boundary triggers in Umami
+    if (window?.umami) {
+      window.umami.track('error_boundary_triggered', {
+        error_type: error.name || 'Unknown',
+        error_message: error.message?.substring(0, 100) || 'No message',
+        page: window.location.pathname,
+        component_stack_depth: errorInfo.componentStack?.split('\n').length || 0,
+      });
+    }
+
     this.setState({
       error,
       errorInfo,

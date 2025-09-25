@@ -2,6 +2,8 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { onBuildComplete } from '../lib/related-content/cache-invalidation.js';
+import { contentIndexer } from '../lib/related-content/indexer.js';
 
 type ContentCategory = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks';
 
@@ -190,4 +192,24 @@ ${CONTENT_TYPES.map((type) => {
 }
 
 // Run the build
-generateTypeScript().catch(console.error);
+async function build() {
+  try {
+    // Generate TypeScript files
+    await generateTypeScript();
+    console.log('✅ Generated TypeScript files');
+
+    // Build content index
+    const index = await contentIndexer.buildIndex();
+    await contentIndexer.saveIndex(index);
+    console.log(`✅ Built content index with ${index.metadata.totalItems} items`);
+
+    // Invalidate caches after build
+    await onBuildComplete();
+    console.log('✅ Invalidated content caches');
+  } catch (error) {
+    console.error('Build failed:', error);
+    process.exit(1);
+  }
+}
+
+build();

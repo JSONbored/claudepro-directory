@@ -28,6 +28,7 @@ import {
   InternalLinkComponent,
 } from './mdx-components';
 import { OptimizedImage } from './optimized-image';
+import { SmartRelatedContent } from './smart-related-content';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
@@ -192,6 +193,7 @@ const components = {
   MetricsDisplay,
   QuickReference,
   RelatedResources,
+  SmartRelatedContent,
   StepByStepGuide,
   Tabs,
   TLDRSummary,

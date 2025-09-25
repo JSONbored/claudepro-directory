@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
+import { sanitizeSearchQuery } from '@/lib/sanitizer';
 import { cn } from '@/lib/utils';
 
 export interface FilterState {
@@ -78,10 +79,11 @@ export function UnifiedSearch({
     return count;
   }, [localFilters]);
 
-  // Debounced search
+  // Debounced search with sanitization
   useEffect(() => {
     const timer = setTimeout(() => {
-      onSearch(searchQuery);
+      const sanitized = sanitizeSearchQuery(searchQuery);
+      onSearch(sanitized);
     }, 300);
 
     return () => clearTimeout(timer);
