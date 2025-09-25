@@ -139,6 +139,12 @@
     <priority>0.65</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/guides/workflows/migration-workflow-guide</loc>
+    <lastmod>2025-09-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/guides/comparisons/claude-vs-codewhisperer-gemini</loc>
     <lastmod>2025-09-25</lastmod>
     <changefreq>monthly</changefreq>

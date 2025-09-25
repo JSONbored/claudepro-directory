@@ -2,9 +2,10 @@
 
 <div align="center">
 
+[![Mentioned in Awesome Claude Code](https://awesome.re/mentioned-badge.svg)](https://github.com/hesreallyhim/awesome-claude-code)
+
 [![CI](https://github.com/JSONbored/claudepro-directory/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/JSONbored/claudepro-directory/actions/workflows/ci.yml)
 [![Security](https://github.com/JSONbored/claudepro-directory/actions/workflows/security.yml/badge.svg?branch=main&event=push)](https://github.com/JSONbored/claudepro-directory/actions/workflows/security.yml)
-[![CodeQL Security Scan](https://github.com/JSONbored/claudepro-directory/actions/workflows/codeql-analysis.yml/badge.svg?branch=main&event=push)](https://github.com/JSONbored/claudepro-directory/actions/workflows/codeql-analysis.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15.6-black)](https://nextjs.org/)
