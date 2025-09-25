@@ -5,6 +5,7 @@
 
 import { headers } from 'next/headers';
 import { type NextRequest, NextResponse } from 'next/server';
+import { sanitizeApiError } from '@/lib/error-sanitizer';
 import { logger } from '@/lib/logger';
 import redis from '@/lib/redis';
 
@@ -59,6 +60,21 @@ export const RATE_LIMIT_CONFIGS = {
   general: {
     maxRequests: 10000,
     windowSeconds: 3600, // 1 hour
+  },
+  // Heavy API endpoints (large datasets) - moderate restrictions
+  heavyApi: {
+    maxRequests: 50,
+    windowSeconds: 900, // 15 minutes
+  },
+  // Admin operations - extremely restrictive
+  admin: {
+    maxRequests: 5,
+    windowSeconds: 3600, // 1 hour
+  },
+  // Bulk operations - very restrictive with longer window
+  bulk: {
+    maxRequests: 20,
+    windowSeconds: 1800, // 30 minutes
   },
 } as const;
 
@@ -218,16 +234,20 @@ export class RateLimiter {
         resetTime,
         retryAfter: success ? 0 : Math.ceil(this.config.windowSeconds / 2),
       };
-    } catch (error) {
-      logger.error(
-        'Rate limiter error',
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          key,
-          path: new URL(request.url).pathname,
-          fallback: 'allowing request',
-        }
-      );
+    } catch (error: unknown) {
+      // Sanitize error to prevent information leakage
+      const sanitizedError = sanitizeApiError(error, {
+        component: 'rate-limiter',
+        operation: 'check_limit',
+        key: 'redacted',
+      });
+
+      const normalizedError = error instanceof Error ? error : new Error(String(error));
+      logger.error('Rate limiter error', normalizedError, {
+        sanitizedMessage: sanitizedError.message,
+        path: new URL(request.url).pathname,
+        fallback: 'allowing request',
+      });
 
       // On error, allow the request but log the issue
       return {
@@ -269,6 +289,9 @@ export const rateLimiters = {
   search: new RateLimiter(RATE_LIMIT_CONFIGS.search),
   submit: new RateLimiter(RATE_LIMIT_CONFIGS.submit),
   general: new RateLimiter(RATE_LIMIT_CONFIGS.general),
+  heavyApi: new RateLimiter(RATE_LIMIT_CONFIGS.heavyApi),
+  admin: new RateLimiter(RATE_LIMIT_CONFIGS.admin),
+  bulk: new RateLimiter(RATE_LIMIT_CONFIGS.bulk),
 };
 
 /**

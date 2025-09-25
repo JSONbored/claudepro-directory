@@ -1,8 +1,10 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
+import { sanitizeApiError } from '@/lib/error-sanitizer';
 import { logger } from '@/lib/logger';
 import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
 import { contentCache } from '@/lib/redis';
+import { apiSchemas, ValidationError, validation } from '@/lib/validation';
 
 export const runtime = 'nodejs';
 export const revalidate = 14400; // 4 hours
@@ -24,7 +26,25 @@ async function handleGET(request: NextRequest) {
   const requestLogger = logger.forRequest(request);
 
   try {
-    requestLogger.info('All configurations API request started');
+    // Validate query parameters if any exist
+    const url = new URL(request.url);
+    const queryParams = Object.fromEntries(url.searchParams);
+
+    if (Object.keys(queryParams).length > 0) {
+      // Only validate if there are query parameters
+      const validatedQuery = validation.validateQuery(
+        apiSchemas.paginationQuery.partial(),
+        queryParams,
+        'all-configurations query parameters'
+      );
+      requestLogger.info('All configurations API request started', {
+        queryPage: validatedQuery.page || 1,
+        queryLimit: validatedQuery.limit || 50,
+        validated: true,
+      });
+    } else {
+      requestLogger.info('All configurations API request started', { validated: true });
+    }
 
     // Try to get from cache first
     const cacheKey = 'all-configurations';
@@ -95,20 +115,36 @@ async function handleGET(request: NextRequest) {
         'X-Cache': 'MISS',
       },
     });
-  } catch (error) {
-    requestLogger.error(
-      'API Error in all-configurations route',
-      error instanceof Error ? error : new Error(String(error))
-    );
+  } catch (error: unknown) {
+    // Handle validation errors specifically
+    if (error instanceof ValidationError) {
+      requestLogger.warn('Validation error in all-configurations API', {
+        error: error.message,
+        detailsCount: error.details.errors.length,
+      });
 
-    return NextResponse.json(
-      {
-        error: 'Internal server error',
-        message: 'Failed to generate configurations dataset',
-        timestamp: new Date().toISOString(),
-      },
-      { status: 500 }
-    );
+      return NextResponse.json(
+        {
+          error: 'Validation failed',
+          message: error.message,
+          details: error.details.errors.map((e) => ({
+            path: e.path.join('.'),
+            message: e.message,
+            code: e.code,
+          })),
+          timestamp: new Date().toISOString(),
+        },
+        { status: 400 }
+      );
+    }
+
+    // Handle other errors with sanitization
+    const sanitizedError = sanitizeApiError(error, {
+      route: 'all-configurations',
+      operation: 'generate_dataset',
+    });
+
+    return NextResponse.json(sanitizedError, { status: 500 });
   }
 }
 

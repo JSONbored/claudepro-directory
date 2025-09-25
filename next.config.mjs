@@ -14,12 +14,15 @@ const withBundleAnalyzer = process.env.ANALYZE === 'true'
 const nextConfig = {
   // Standard output for Vercel and traditional deployments
   // Uncomment for Docker/serverless: output: 'standalone',
-  
+
   // Disable powered by header for security and smaller response size
   poweredByHeader: false,
-  
+
   // Enable compression
   compress: true,
+
+  // Enable React strict mode for better development warnings
+  reactStrictMode: true,
   
   eslint: {
     // Disable ESLint during builds since we use Biome/Ultracite
@@ -96,45 +99,87 @@ const nextConfig = {
         ...config.optimization,
         splitChunks: {
           chunks: 'all',
+          minSize: 20000,
+          maxSize: 244000,
           cacheGroups: {
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              priority: 10,
+            // React and core libraries
+            react: {
+              test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
+              name: 'react',
+              priority: 20,
               chunks: 'all',
-              maxSize: 244000, // Keep chunks under 244KB for optimal loading
+              enforce: true,
             },
-            common: {
-              name: 'common',
-              minChunks: 2,
-              priority: 5,
+            // Radix UI components (frequently used)
+            radix: {
+              test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
+              name: 'radix',
+              priority: 18,
               chunks: 'all',
-              reuseExistingChunk: true,
-              maxSize: 244000,
             },
+            // Lucide icons (large icon library)
             lucide: {
               test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
               name: 'lucide',
               priority: 15,
               chunks: 'all',
             },
+            // Tremor charts (only loaded when needed)
+            tremor: {
+              test: /[\\/]node_modules[\\/]@tremor[\\/]/,
+              name: 'tremor',
+              priority: 12,
+              chunks: 'async',
+            },
+            // Vendor libraries
+            vendor: {
+              test: /[\\/]node_modules[\\/](?!react|react-dom|scheduler|@radix-ui|lucide-react|@tremor)[\\/]/,
+              name(module, chunks, cacheGroupKey) {
+                // Create separate chunks for large vendors
+                const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)?.[1];
+                if (packageName && ['next', 'framer-motion', '@vercel'].includes(packageName.split('/')[0])) {
+                  return `vendors-${packageName.split('/')[0]}`;
+                }
+                return 'vendors';
+              },
+              priority: 10,
+              chunks: 'all',
+              maxSize: 200000,
+            },
+            // Application content chunks
             content: {
               test: /[\\/]generated[\\/]/,
               name: 'content',
               priority: 8,
               chunks: 'all',
-              maxSize: 200000, // Keep content chunks smaller
+              maxSize: 150000, // Smaller content chunks for better caching
+            },
+            // Common application code
+            common: {
+              name: 'common',
+              minChunks: 2,
+              priority: 5,
+              chunks: 'all',
+              reuseExistingChunk: true,
+              maxSize: 200000,
             },
           },
         },
       };
 
-      // Tree shaking optimizations
+      // Enhanced tree shaking and optimization
       config.optimization.usedExports = true;
       config.optimization.sideEffects = false;
+      config.optimization.providedExports = true;
+      config.optimization.innerGraph = true;
 
-      // Minimize main thread blocking
-      config.optimization.runtimeChunk = 'single';
+      // Minimize main thread blocking with improved runtime chunk handling
+      config.optimization.runtimeChunk = {
+        name: entrypoint => `runtime-${entrypoint.name}`,
+      };
+
+      // Improve module concatenation for smaller bundles
+      config.optimization.concatenateModules = true;
     }
 
     // Preload critical resources

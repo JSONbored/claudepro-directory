@@ -2,7 +2,7 @@ import dynamic from 'next/dynamic';
 import type React from 'react';
 
 // Generate stable keys for skeleton items (prevents unnecessary re-renders)
-const SKELETON_KEYS = Array.from({ length: 6 }, () => crypto.randomUUID());
+const generateSkeletonKeys = () => Array.from({ length: 6 }, () => crypto.randomUUID());
 
 // Lazy load heavy components with proper loading states
 export const LazyUnifiedSearch = dynamic(
@@ -18,7 +18,7 @@ export const LazyInfiniteScrollContainer = dynamic(
   {
     loading: () => (
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {SKELETON_KEYS.map((key) => (
+        {generateSkeletonKeys().map((key) => (
           <div key={key} className="animate-pulse">
             <div className="bg-card/50 rounded-lg p-6 space-y-4">
               <div className="h-6 bg-card/70 rounded w-3/4" />

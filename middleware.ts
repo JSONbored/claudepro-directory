@@ -2,10 +2,12 @@ import arcjet, { shield, detectBot, tokenBucket, fixedWindow } from '@arcjet/nex
 import * as nosecone from '@nosecone/next';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { rateLimiters } from '@/lib/rate-limiter';
 
 // Initialize Arcjet with comprehensive security rules
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
+  // In development, Arcjet uses 127.0.0.1 when no real IP is available - this is expected
   rules: [
     // Shield WAF - protect against common attacks
     shield({
@@ -48,8 +50,7 @@ const noseconeConfig: nosecone.NoseconeOptions = {
       ...nosecone.defaults.contentSecurityPolicy.directives,
       scriptSrc: process.env.NODE_ENV === 'development' ? [
         "'self'",
-        () => `'nonce-${Math.random().toString(36).substring(2, 15)}'`,
-        "'unsafe-eval'",
+        () => `'nonce-${Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString('base64')}'`,
         'https://umami.claudepro.directory',
         'https://va.vercel-scripts.com',
         'https://vercel.live',
@@ -65,8 +66,7 @@ const noseconeConfig: nosecone.NoseconeOptions = {
         'https://localhost:3000',
       ] : [
         "'self'",
-        () => `'nonce-${Math.random().toString(36).substring(2, 15)}'`,
-        "'unsafe-eval'",
+        () => `'nonce-${Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString('base64')}'`,
         'https://umami.claudepro.directory',
         'https://va.vercel-scripts.com',
         'https://vercel.live',
@@ -159,6 +159,80 @@ const noseconeMiddleware = nosecone.createMiddleware(
     : noseconeConfig,
 );
 
+/**
+ * Apply endpoint-specific rate limiting based on the request path
+ */
+async function applyEndpointRateLimit(
+  request: NextRequest,
+  pathname: string
+): Promise<Response | null> {
+  // Define route-specific rate limiting rules
+  const rateLimit = {
+    // Cache warming endpoint - admin operations (extremely restrictive)
+    '/api/cache/warm': rateLimiters.admin, // 5 requests per hour
+
+    // All configurations endpoint - heavy dataset (moderate restrictions)
+    '/api/all-configurations.json': rateLimiters.heavyApi, // 50 requests per 15 minutes
+
+    // Individual content type APIs - standard usage (generous)
+    '/api/agents.json': rateLimiters.api, // 1000 requests per hour
+    '/api/mcp.json': rateLimiters.api,
+    '/api/rules.json': rateLimiters.api,
+    '/api/commands.json': rateLimiters.api,
+    '/api/hooks.json': rateLimiters.api,
+  };
+
+  // Check for exact path matches first
+  if (pathname in rateLimit) {
+    const limiter = rateLimit[pathname as keyof typeof rateLimit];
+    return limiter.middleware(request);
+  }
+
+  // Pattern-based matching for dynamic routes
+  if (pathname.startsWith('/api/')) {
+    // Admin and management endpoints
+    if (pathname.includes('/admin') || pathname.includes('/manage') || pathname.includes('/warm')) {
+      return rateLimiters.admin.middleware(request);
+    }
+
+    // Heavy data endpoints (bulk operations, large datasets)
+    if (pathname.includes('/bulk') || pathname.includes('/export') || pathname.includes('/all-')) {
+      return rateLimiters.heavyApi.middleware(request);
+    }
+
+    // Search-related endpoints (computationally expensive)
+    if (pathname.includes('/search') || pathname.includes('/find') || pathname.includes('/query')) {
+      return rateLimiters.search.middleware(request);
+    }
+
+    // Submit, creation, and modification operations
+    if (
+      request.method === 'POST' ||
+      request.method === 'PUT' ||
+      request.method === 'PATCH' ||
+      request.method === 'DELETE' ||
+      pathname.includes('/submit') ||
+      pathname.includes('/upload') ||
+      pathname.includes('/create') ||
+      pathname.includes('/update') ||
+      pathname.includes('/delete')
+    ) {
+      return rateLimiters.submit.middleware(request);
+    }
+
+    // Dynamic content type routes (e.g., /api/[contentType])
+    if (pathname.match(/^\/api\/[^/]+\.json$/)) {
+      return rateLimiters.api.middleware(request);
+    }
+
+    // Default API rate limiting for other API endpoints
+    return rateLimiters.api.middleware(request);
+  }
+
+  // No specific rate limiting for non-API endpoints
+  return null;
+}
+
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
@@ -230,6 +304,16 @@ export async function middleware(request: NextRequest) {
       status: 403,
       headers,
     });
+  }
+
+  // Apply endpoint-specific rate limiting after Arcjet
+  const rateLimitResponse = await applyEndpointRateLimit(request, pathname);
+  if (rateLimitResponse) {
+    // Merge security headers from Nosecone
+    noseconeResponse.headers.forEach((value: string, key: string) => {
+      rateLimitResponse.headers.set(key, value);
+    });
+    return rateLimitResponse;
   }
 
   // Request allowed - add pathname header for SmartRelatedContent component

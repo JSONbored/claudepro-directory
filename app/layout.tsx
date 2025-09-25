@@ -14,6 +14,15 @@ const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-inter',
+  fallback: [
+    'system-ui',
+    '-apple-system',
+    'BlinkMacSystemFont',
+    'Segoe UI',
+    'Helvetica Neue',
+    'Arial',
+    'sans-serif',
+  ],
 });
 
 export const metadata: Metadata = {
@@ -109,13 +118,15 @@ export default async function RootLayout({
         {/* Theme Color for Mobile Browsers */}
         <meta name="theme-color" content="#000000" />
 
-        {/* Preconnect to external domains for faster loading */}
+        {/* Strategic Resource Hints - Only for confirmed external connections */}
+        {/* Essential font loading optimization */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+
+        {/* Analytics services - used on every page load */}
         <link rel="preconnect" href="https://umami.claudepro.directory" />
-        <link rel="dns-prefetch" href="https://umami.claudepro.directory" />
         <link rel="preconnect" href="https://vitals.vercel-insights.com" />
-        <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
-        <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
       </head>
       <body className="font-sans">
         <StructuredData type="website" />

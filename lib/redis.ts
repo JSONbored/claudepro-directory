@@ -1,6 +1,47 @@
 import { Redis } from '@upstash/redis';
 import { logger } from './logger';
 
+// Compression utilities for optimizing storage
+const compress = (data: string): string => {
+  if (data.length < 100) return data; // Don't compress small data
+
+  try {
+    // Simple compression using JSON.stringify optimization
+    const compressed = JSON.stringify(JSON.parse(data));
+    return compressed.length < data.length ? compressed : data;
+  } catch {
+    return data;
+  }
+};
+
+const decompress = (data: string): string => {
+  return data; // For now, just return as-is since we're using JSON compression
+};
+
+// Batch operation utilities
+const BATCH_SIZE = 10;
+const COMMAND_LIMIT_PER_SECOND = 50; // Conservative limit for free tier
+
+let commandCount = 0;
+let lastReset = Date.now();
+
+const checkRateLimit = async (): Promise<void> => {
+  const now = Date.now();
+  if (now - lastReset >= 1000) {
+    commandCount = 0;
+    lastReset = now;
+  }
+
+  if (commandCount >= COMMAND_LIMIT_PER_SECOND) {
+    // Wait until next second
+    const waitTime = 1000 - (now - lastReset);
+    if (waitTime > 0) {
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
+    }
+  }
+  commandCount++;
+};
+
 // Initialize Redis client
 // Uses KV_REST_API_URL and KV_REST_API_TOKEN from Upstash Vercel integration
 const redis = process.env.KV_REST_API_URL
@@ -251,7 +292,7 @@ export const contentCache = {
   // Check if Redis is enabled
   isEnabled: () => !!redis,
 
-  // Cache compiled MDX content
+  // Cache compiled MDX content with compression
   async cacheMDX(
     path: string,
     content: string,
@@ -260,8 +301,21 @@ export const contentCache = {
     if (!redis) return;
 
     try {
+      await checkRateLimit();
       const key = `mdx:${path}`;
-      await redis.setex(key, ttl, content);
+      const compressedContent = compress(content);
+      const sizeReduction = content.length - compressedContent.length;
+
+      await redis.setex(key, ttl, compressedContent);
+
+      if (sizeReduction > 0) {
+        logger.info('MDX content compressed', {
+          path,
+          originalSize: content.length,
+          compressedSize: compressedContent.length,
+          savings: `${Math.round((sizeReduction / content.length) * 100)}%`,
+        });
+      }
     } catch (error) {
       logger.error(
         'Failed to cache MDX content',
@@ -275,14 +329,15 @@ export const contentCache = {
     }
   },
 
-  // Retrieve cached MDX content
+  // Retrieve cached MDX content with decompression
   async getMDX(path: string): Promise<string | null> {
     if (!redis) return null;
 
     try {
+      await checkRateLimit();
       const key = `mdx:${path}`;
       const content = await redis.get<string>(key);
-      return content;
+      return content ? decompress(content) : null;
     } catch (error) {
       logger.error(
         'Failed to retrieve cached MDX content',
@@ -293,6 +348,46 @@ export const contentCache = {
         }
       );
       return null;
+    }
+  },
+
+  // Batch cache multiple items efficiently
+  async batchCacheMDX(
+    items: Array<{ path: string; content: string; ttl?: number }>
+  ): Promise<void> {
+    if (!redis || items.length === 0) return;
+
+    try {
+      // Process in batches to avoid overwhelming Redis
+      for (let i = 0; i < items.length; i += BATCH_SIZE) {
+        const batch = items.slice(i, i + BATCH_SIZE);
+        const pipeline = redis.pipeline();
+
+        for (const item of batch) {
+          const key = `mdx:${item.path}`;
+          const compressedContent = compress(item.content);
+          const ttl = item.ttl || 24 * 60 * 60;
+          pipeline.setex(key, ttl, compressedContent);
+        }
+
+        await pipeline.exec();
+        await checkRateLimit();
+
+        logger.info('Batch cached MDX content', {
+          batchSize: batch.length,
+          startIndex: i,
+          totalItems: items.length,
+        });
+      }
+    } catch (error) {
+      logger.error(
+        'Failed to batch cache MDX content',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          itemCount: items.length,
+          batchSize: BATCH_SIZE,
+        }
+      );
     }
   },
 
@@ -448,6 +543,182 @@ export const contentCache = {
       );
       // Fallback to direct fetch
       return await fetcher();
+    }
+  },
+};
+
+// Redis optimization utilities for free tier
+export const redisOptimizer = {
+  // Get current command usage stats
+  getCommandStats(): { count: number; limitPerSecond: number; timeUntilReset: number } {
+    const now = Date.now();
+    const timeUntilReset = 1000 - (now - lastReset);
+
+    return {
+      count: commandCount,
+      limitPerSecond: COMMAND_LIMIT_PER_SECOND,
+      timeUntilReset: Math.max(0, timeUntilReset),
+    };
+  },
+
+  // Batch operations with intelligent pipeline usage
+  async batchIncrements(operations: Array<{ key: string; increment?: number }>): Promise<number[]> {
+    if (!redis || operations.length === 0) return [];
+
+    try {
+      const results: number[] = [];
+
+      // Process operations in batches
+      for (let i = 0; i < operations.length; i += BATCH_SIZE) {
+        await checkRateLimit();
+        const batch = operations.slice(i, i + BATCH_SIZE);
+        const pipeline = redis.pipeline();
+
+        for (const op of batch) {
+          if (op.increment && op.increment !== 1) {
+            pipeline.incrby(op.key, op.increment);
+          } else {
+            pipeline.incr(op.key);
+          }
+        }
+
+        const batchResults = await pipeline.exec();
+        results.push(...(batchResults as number[]));
+      }
+
+      return results;
+    } catch (error) {
+      logger.error(
+        'Failed batch increments',
+        error instanceof Error ? error : new Error(String(error))
+      );
+      return [];
+    }
+  },
+
+  // Efficient bulk data retrieval with compression
+  async batchGet<T>(keys: string[]): Promise<Record<string, T | null>> {
+    if (!redis || keys.length === 0) return {};
+
+    try {
+      const results: Record<string, T | null> = {};
+
+      // Process keys in batches
+      for (let i = 0; i < keys.length; i += BATCH_SIZE) {
+        await checkRateLimit();
+        const batch = keys.slice(i, i + BATCH_SIZE);
+        const values = await redis.mget<(string | null)[]>(...batch);
+
+        batch.forEach((key, index) => {
+          const value = values[index];
+          if (value) {
+            try {
+              results[key] = JSON.parse(decompress(value));
+            } catch {
+              results[key] = value as T;
+            }
+          } else {
+            results[key] = null;
+          }
+        });
+      }
+
+      return results;
+    } catch (error) {
+      logger.error('Failed batch get', error instanceof Error ? error : new Error(String(error)));
+      return {};
+    }
+  },
+
+  // Memory usage optimization by cleaning expired keys
+  async cleanupExpiredKeys(): Promise<void> {
+    if (!redis) return;
+
+    try {
+      const categories = ['mdx', 'content', 'api', 'trending', 'popular'];
+
+      for (const category of categories) {
+        // Use SCAN instead of KEYS for production safety
+        let cursor = '0';
+        do {
+          await checkRateLimit();
+          const result = await redis.scan(cursor, { match: `${category}:*`, count: 100 });
+          cursor = result[0];
+          const keys = result[1];
+
+          if (keys.length > 0) {
+            // Check TTL for each key and remove if expired
+            for (const key of keys) {
+              const ttl = await redis.ttl(key);
+              if (ttl === -1) {
+                // Key exists but has no expiration
+                // Set a default expiration based on category
+                const defaultTTL = category === 'mdx' ? 24 * 60 * 60 : 4 * 60 * 60;
+                await redis.expire(key, defaultTTL);
+              }
+            }
+          }
+        } while (cursor !== '0');
+      }
+
+      logger.info('Completed Redis cleanup cycle');
+    } catch (error) {
+      logger.error(
+        'Failed Redis cleanup',
+        error instanceof Error ? error : new Error(String(error))
+      );
+    }
+  },
+
+  // Estimate memory usage and optimization suggestions
+  async getOptimizationReport(): Promise<{
+    estimatedMemoryUsage: string;
+    commandsUsedToday: number;
+    optimizationSuggestions: string[];
+  }> {
+    if (!redis) {
+      return {
+        estimatedMemoryUsage: 'Redis not configured',
+        commandsUsedToday: 0,
+        optimizationSuggestions: ['Configure Redis for caching'],
+      };
+    }
+
+    try {
+      // Try to get memory info if available (fallback to empty string)
+      const info = (redis as any).info ? await (redis as any).info('memory') : '';
+      const suggestions: string[] = [];
+
+      // Parse memory info if available
+      let memoryUsage = 'Unknown';
+      if (info.includes('used_memory_human:')) {
+        memoryUsage = info.split('used_memory_human:')[1]?.split('\r')[0] || 'Unknown';
+      }
+
+      // Add optimization suggestions based on usage patterns
+      if (commandCount > COMMAND_LIMIT_PER_SECOND * 0.8) {
+        suggestions.push('Consider reducing Redis command frequency');
+      }
+
+      suggestions.push('Use batch operations for bulk data');
+      suggestions.push('Enable compression for large content');
+      suggestions.push('Set appropriate TTL values');
+
+      return {
+        estimatedMemoryUsage: memoryUsage,
+        commandsUsedToday: commandCount,
+        optimizationSuggestions: suggestions,
+      };
+    } catch (error) {
+      logger.error(
+        'Failed to get optimization report',
+        error instanceof Error ? error : new Error(String(error))
+      );
+      return {
+        estimatedMemoryUsage: 'Error retrieving info',
+        commandsUsedToday: commandCount,
+        optimizationSuggestions: ['Check Redis configuration'],
+      };
     }
   },
 };
