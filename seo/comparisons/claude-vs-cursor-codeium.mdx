@@ -120,11 +120,11 @@ Choosing the right AI coding assistant impacts development velocity significantl
           
           <h4>Limitations</h4>
           <Callout type="warning" title="Known Limitations">
-          **Terminal-only interface:** Requires command-line comfort and separate IDE usage
-          
-          **No IDE integration:** Must switch between terminal and editor frequently
-          
-          **Token costs accumulate:** Heavy Opus 4.1 usage increases expenses quickly
+            <ul>
+              <li><strong>Terminal-only interface:</strong> Requires command-line comfort and separate IDE usage</li>
+              <li><strong>No IDE integration:</strong> Must switch between terminal and editor frequently</li>
+              <li><strong>Token costs accumulate:</strong> Heavy Opus 4.1 usage increases expenses quickly</li>
+            </ul>
           </Callout>
           
           <h4>Pricing Structure</h4>
@@ -169,11 +169,11 @@ Choosing the right AI coding assistant impacts development velocity significantl
           
           <h4>Limitations</h4>
           <Callout type="warning" title="Known Limitations">
-          **IDE migration required:** Must abandon existing IDE setup and extensions
-          
-          **Quota depletion:** Monthly allowance exhausts in 3-5 days typically
-          
-          **Model downgrading:** Automatically switches to weaker models after quota
+            <ul>
+              <li><strong>IDE migration required:</strong> Must abandon existing IDE setup and extensions</li>
+              <li><strong>Quota depletion:</strong> Monthly allowance exhausts in 3-5 days typically</li>
+              <li><strong>Model downgrading:</strong> Automatically switches to weaker models after quota</li>
+            </ul>
           </Callout>
           
           <h4>Pricing Structure</h4>
@@ -218,11 +218,11 @@ Choosing the right AI coding assistant impacts development velocity significantl
           
           <h4>Limitations</h4>
           <Callout type="warning" title="Known Limitations">
-          **Lower benchmark scores:** 33.2% SWE-bench versus 72.7% for Claude
-          
-          **API restrictions:** Anthropic blocked Windsurf access in June 2025
-          
-          **Limited context window:** Smaller context than Claude's 200K tokens
+            <ul>
+              <li><strong>Lower benchmark scores:</strong> 33.2% SWE-bench versus 72.7% for Claude</li>
+              <li><strong>API restrictions:</strong> Anthropic blocked Windsurf access in June 2025</li>
+              <li><strong>Limited context window:</strong> Smaller context than Claude's 200K tokens</li>
+            </ul>
           </Callout>
           
           <h4>Pricing Structure</h4>
@@ -303,17 +303,10 @@ Choosing the right AI coding assistant impacts development velocity significantl
   ]}
 />
 
-## Real User Experiences
-
-<ExpertQuote
-  quote="The transparency and reasoning capabilities of Claude Code transformed our development process completely."
-  author="Development Team"
-  role="Production Deployment Case Study"
-  company="Technology Company"
-/>
+## Security Considerations
 
 <InfoBox
-  title="Security Considerations"
+  title="Security and Compliance Features"
   content="Studies reveal AI-assisted developers can generate more security vulnerabilities while producing more code. Claude Code's Compliance API, Cursor's privacy mode, and Codeium's FedRAMP certification address these concerns differently. Teams must balance productivity gains against security risks through proper tooling configuration and review processes."
   variant="warning"
 />
@@ -326,33 +319,18 @@ Choosing the right AI coding assistant impacts development velocity significantl
   features={[
     {
       title: "5-Person Team",
-      description: "Codeium Free: $0/month. Cursor: $100/month for team. Claude Code: $150/month for team. Productivity improvements vary.",
-      badge: "Small Team",
-      metrics: {
-        "Best Value": "Codeium",
-        "Best Performance": "Cursor",
-        "Balanced Choice": "Claude Code"
-      }
+      description: "Codeium Free: $0/month. Cursor: $100/month for team. Claude Code: $150/month for team. Best Value: Codeium, Best Performance: Cursor, Balanced: Claude Code.",
+      badge: "Small"
     },
     {
       title: "20-Person Team",
-      description: "GitHub Copilot: $380/month. Cursor: $400/month. Claude Code: $600/month. Performance improvements depend on use case.",
-      badge: "Medium Team",
-      metrics: {
-        "Best Integration": "GitHub Copilot",
-        "Best Features": "Cursor",
-        "Best Support": "Claude Code"
-      }
+      description: "GitHub Copilot: $380/month. Cursor: $400/month. Claude Code: $600/month. Best Integration: GitHub Copilot, Best Features: Cursor.",
+      badge: "Medium"
     },
     {
       title: "100+ Person Organization",
-      description: "GitHub Copilot Enterprise: $3900/month with compliance. Custom Claude/Cursor pricing with dedicated support.",
-      badge: "Enterprise",
-      metrics: {
-        "Best Compliance": "GitHub Copilot",
-        "Best Performance": "Custom Solutions",
-        "Most Flexible": "Negotiated Pricing"
-      }
+      description: "GitHub Copilot Enterprise: $3900/month. Custom Claude/Cursor pricing. Best Compliance: GitHub Copilot.",
+      badge: "Enterprise"
     }
   ]}
   columns={3}
@@ -365,33 +343,33 @@ Choosing the right AI coding assistant impacts development velocity significantl
   steps={[
     {
       title: "Evaluate Current Workflow",
-      content: "Document existing tools, IDE preferences, and team requirements. Identify migration blockers and training needs.",
-      timeEstimate: "1-2 days"
+      description: "Document existing tools, IDE preferences, and team requirements. Identify migration blockers and training needs.",
+      time: "1-2 days"
     },
     {
       title: "Run Pilot Program",
-      content: "Test chosen tool with 2-3 developers on non-critical projects. Measure actual productivity gains and issues.",
-      timeEstimate: "2 weeks"
+      description: "Test chosen tool with 2-3 developers on non-critical projects. Measure actual productivity gains and issues.",
+      time: "2 weeks"
     },
     {
       title: "Configure Security Policies",
-      content: "Implement code review requirements for AI-generated content. Set up compliance monitoring and access controls.",
-      timeEstimate: "3-5 days"
+      description: "Implement code review requirements for AI-generated content. Set up compliance monitoring and access controls.",
+      time: "3-5 days"
     },
     {
       title: "Team Training",
-      content: "Conduct tool-specific training sessions. Share best practices and common pitfalls from pilot program.",
-      timeEstimate: "1 week"
+      description: "Conduct tool-specific training sessions. Share best practices and common pitfalls from pilot program.",
+      time: "1 week"
     },
     {
       title: "Gradual Rollout",
-      content: "Deploy to teams incrementally. Monitor metrics and adjust configuration based on feedback.",
-      timeEstimate: "2-4 weeks"
+      description: "Deploy to teams incrementally. Monitor metrics and adjust configuration based on feedback.",
+      time: "2-4 weeks"
     },
     {
       title: "Optimization Phase",
-      content: "Refine prompts and workflows. Establish team conventions for AI-assisted development.",
-      timeEstimate: "Ongoing"
+      description: "Refine prompts and workflows. Establish team conventions for AI-assisted development.",
+      time: "Ongoing"
     }
   ]}
 />
@@ -455,11 +433,11 @@ Choosing the right AI coding assistant impacts development velocity significantl
 ---
 
 <Callout type="success" title="Make Your Decision">
-**Ready to choose?** Use this comparison data to evaluate which tool best fits your development workflow and budget constraints.
+  <p><strong>Ready to choose?</strong> Use this comparison data to evaluate which tool best fits your development workflow and budget constraints.</p>
 
-**Need more specific guidance?** Join our [community](/community) to discuss your requirements with users of all platforms.
+  <p><strong>Need more specific guidance?</strong> Join our <a href="/community">community</a> to discuss your requirements with users of all platforms.</p>
 
-**Want hands-on experience?** Codeium offers a free tier, while Cursor and Claude Code provide trials. Test with your actual codebase before committing.
+  <p><strong>Want hands-on experience?</strong> Codeium offers a free tier, while Cursor and Claude Code provide trials. Test with your actual codebase before committing.</p>
 </Callout>
 
 *Last updated: September 2025 | Comparison based on SWE-bench scores and production deployments | Found this helpful? Share with your team and explore more [AI tool comparisons](/guides/comparisons).*

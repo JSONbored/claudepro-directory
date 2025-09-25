@@ -119,12 +119,52 @@ ${urls
   return xml;
 }
 
+function generateRobotsTxt(): string {
+  const robotsTxt = `# Robots.txt for Claude Pro Directory
+# https://claudepro.directory/robots.txt
+
+User-agent: *
+Allow: /
+
+# Important pages
+Allow: /agents*
+Allow: /mcp*
+Allow: /rules*
+Allow: /commands*
+Allow: /hooks*
+Allow: /guides*
+
+# API endpoints (allow for better indexing of JSON-LD structured data)
+Allow: /api/*
+
+# Block admin areas if they exist
+Disallow: /admin*
+Disallow: /.well-known*
+
+# Sitemap location
+Sitemap: ${baseUrl}/sitemap.xml
+
+# Crawl delay (be respectful)
+Crawl-delay: 1`;
+
+  return robotsTxt;
+}
+
 function main() {
   try {
+    console.log('🗺️  Generating sitemap...');
     const sitemap = generateSitemap();
     writeFileSync('public/sitemap.xml', sitemap, 'utf-8');
+    console.log('✅ Sitemap generated successfully');
+
+    console.log('🤖 Generating robots.txt...');
+    const robotsTxt = generateRobotsTxt();
+    writeFileSync('public/robots.txt', robotsTxt, 'utf-8');
+    console.log('✅ Robots.txt generated successfully');
+
+    console.log(`📊 Generated ${sitemap.match(/<url>/g)?.length || 0} URLs in sitemap`);
   } catch (error) {
-    console.error('❌ Failed to generate sitemap:', error);
+    console.error('❌ Failed to generate sitemap/robots.txt:', error);
     process.exit(1);
   }
 }

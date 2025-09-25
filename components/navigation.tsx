@@ -55,7 +55,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 interface NavLinkProps {
   href: string;
@@ -172,22 +172,22 @@ export const Navigation = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem asChild>
-                  <Link href="/community" className="flex flex-col items-start space-y-1 px-3 py-3">
+                <DropdownMenuItem>
+                  <Link href="/community" className="flex flex-col items-start space-y-1 w-full">
                     <div>Community</div>
                     <div className="text-xs text-muted-foreground">Join the Claude community</div>
                   </Link>
                 </DropdownMenuItem>
 
-                <DropdownMenuItem asChild>
-                  <Link href="/submit" className="flex flex-col items-start space-y-1 px-3 py-3">
+                <DropdownMenuItem>
+                  <Link href="/submit" className="flex flex-col items-start space-y-1 w-full">
                     <div>Submit Config</div>
                     <div className="text-xs text-muted-foreground">Share your configurations</div>
                   </Link>
                 </DropdownMenuItem>
 
-                <DropdownMenuItem asChild>
-                  <Link href="/partner" className="flex flex-col items-start space-y-1 px-3 py-3">
+                <DropdownMenuItem>
+                  <Link href="/partner" className="flex flex-col items-start space-y-1 w-full">
                     <div>Partner</div>
                     <div className="text-xs text-muted-foreground">Post job listings & more</div>
                   </Link>
@@ -248,6 +248,7 @@ export const Navigation = () => {
                 side="right"
                 className="w-[300px] sm:w-[380px] border-l border-border/50"
               >
+                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                 <div className="flex flex-col h-full">
                   {/* Header */}
                   <div className="flex items-center gap-3 pt-6 pb-8 px-1">

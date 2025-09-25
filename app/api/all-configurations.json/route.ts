@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
 import { logger } from '@/lib/logger';
 import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
+import { contentCache } from '@/lib/redis';
 
 export const runtime = 'nodejs';
 export const revalidate = 14400; // 4 hours
@@ -24,6 +25,21 @@ async function handleGET(request: NextRequest) {
 
   try {
     requestLogger.info('All configurations API request started');
+
+    // Try to get from cache first
+    const cacheKey = 'all-configurations';
+    const cachedResponse = await contentCache.getAPIResponse(cacheKey);
+    if (cachedResponse) {
+      requestLogger.info('Serving cached all-configurations response', {
+        source: 'redis-cache',
+      });
+      return NextResponse.json(cachedResponse, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=14400, stale-while-revalidate=86400',
+          'X-Cache': 'HIT',
+        },
+      });
+    }
     const transformedAgents = transformContent(agents, 'agent', 'agents');
     const transformedMcp = transformContent(mcp, 'mcp', 'mcp');
     const transformedRules = transformContent(rules, 'rule', 'rules');
@@ -66,6 +82,9 @@ async function handleGET(request: NextRequest) {
       },
     };
 
+    // Cache the response for 2 hours (this is a large dataset)
+    await contentCache.cacheAPIResponse(cacheKey, allConfigurations, 2 * 60 * 60);
+
     requestLogger.info('All configurations API request completed successfully', {
       totalConfigurations: allConfigurations.statistics.totalConfigurations,
     });
@@ -73,6 +92,7 @@ async function handleGET(request: NextRequest) {
     return NextResponse.json(allConfigurations, {
       headers: {
         'Cache-Control': 'public, s-maxage=14400, stale-while-revalidate=86400',
+        'X-Cache': 'MISS',
       },
     });
   } catch (error) {

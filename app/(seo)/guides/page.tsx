@@ -8,6 +8,9 @@ export const metadata = {
     'Comprehensive guides, tutorials, and workflows for Claude AI. Learn how to use MCP servers, agents, and more.',
 };
 
+// Enable ISR - revalidate every 4 hours for guide list pages
+export const revalidate = 14400;
+
 interface GuideItem {
   title: string;
   description: string;

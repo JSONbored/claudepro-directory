@@ -48,6 +48,9 @@ export async function generateStaticParams() {
   }));
 }
 
+// Enable ISR - revalidate every 4 hours
+export const revalidate = 14400;
+
 export default async function JobPage({ params }: JobPageProps) {
   const { slug } = await params;
   const job = jobs.find((j) => j.slug === slug);

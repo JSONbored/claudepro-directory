@@ -46,30 +46,73 @@ const noseconeConfig: nosecone.NoseconeOptions = {
     ...nosecone.defaults.contentSecurityPolicy,
     directives: {
       ...nosecone.defaults.contentSecurityPolicy.directives,
-      scriptSrc: [
-        ...nosecone.defaults.contentSecurityPolicy.directives.scriptSrc,
-        'https://umami.claudepro.directory',     // Analytics
-        'https://va.vercel-scripts.com',         // Vercel Analytics
-        'https://vercel.live',                   // Vercel Live
-        'https://vitals.vercel-insights.com',    // Vercel Web Vitals
+      scriptSrc: process.env.NODE_ENV === 'development' ? [
+        "'self'",
+        () => `'nonce-${Math.random().toString(36).substring(2, 15)}'`,
+        "'unsafe-eval'",
+        'https://umami.claudepro.directory',
+        'https://va.vercel-scripts.com',
+        'https://vercel.live',
+        'https://vitals.vercel-insights.com',
+        "'sha256-E8EPi3ovz+EfxEviTr9UjHKYh5PnfxNoZOnJbyuXKOo='",
+        "'sha256-o/9PMZ2H2soabInLejuhS90Bpzx18AfPQsGoMGCzsrc='",
+        "'sha256-p31RDVXHOQSg6Q0CAI3TY0SBnMJNcC/Mfg32/43tAKQ='",
+        'localhost:*',
+        '127.0.0.1:*',
+        'http://localhost:*',
+        'https://localhost:*',
+        'http://localhost:3000',
+        'https://localhost:3000',
+      ] : [
+        "'self'",
+        () => `'nonce-${Math.random().toString(36).substring(2, 15)}'`,
+        "'unsafe-eval'",
+        'https://umami.claudepro.directory',
+        'https://va.vercel-scripts.com',
+        'https://vercel.live',
+        'https://vitals.vercel-insights.com',
+        "'sha256-E8EPi3ovz+EfxEviTr9UjHKYh5PnfxNoZOnJbyuXKOo='",
+        "'sha256-o/9PMZ2H2soabInLejuhS90Bpzx18AfPQsGoMGCzsrc='",
+        "'sha256-p31RDVXHOQSg6Q0CAI3TY0SBnMJNcC/Mfg32/43tAKQ='",
       ],
-      styleSrc: [
-        ...nosecone.defaults.contentSecurityPolicy.directives.styleSrc,
-        'https://fonts.googleapis.com',          // Google Fonts
+      styleSrc: process.env.NODE_ENV === 'development' ? [
+        "'self'",
+        "'unsafe-inline'",
+        'https://fonts.googleapis.com',
+        'http://localhost:*',
+        'https://localhost:*',
+      ] : [
+        "'self'",
+        "'unsafe-inline'",
+        'https://fonts.googleapis.com',
       ],
       imgSrc: [
-        ...nosecone.defaults.contentSecurityPolicy.directives.imgSrc,
+        "'self'",
+        'blob:',
+        'data:',
         'https://github.com',                    // GitHub avatars
         'https://*.githubusercontent.com',       // GitHub content
         'https://claudepro.directory',           // Our domain
         'https://www.claudepro.directory',       // Our www domain
       ],
       fontSrc: [
-        ...nosecone.defaults.contentSecurityPolicy.directives.fontSrc,
+        "'self'",
         'https://fonts.gstatic.com',             // Google Fonts
       ],
-      connectSrc: [
-        ...nosecone.defaults.contentSecurityPolicy.directives.connectSrc,
+      connectSrc: process.env.NODE_ENV === 'development' ? [
+        "'self'",
+        'https://umami.claudepro.directory',     // Analytics API
+        'https://vitals.vercel-insights.com',    // Vercel Analytics API
+        'https://va.vercel-scripts.com',         // Vercel Scripts
+        // Development mode WebSocket and HMR connections
+        'ws://localhost:*',
+        'wss://localhost:*',
+        'ws://127.0.0.1:*',
+        'wss://127.0.0.1:*',
+        'http://localhost:*',
+        'https://localhost:*',
+      ] : [
+        "'self'",
         'https://umami.claudepro.directory',     // Analytics API
         'https://vitals.vercel-insights.com',    // Vercel Analytics API
         'https://va.vercel-scripts.com',         // Vercel Scripts
@@ -78,11 +121,11 @@ const noseconeConfig: nosecone.NoseconeOptions = {
       frameSrc: ["'none'"],
       // Service worker for PWA
       workerSrc: [
-        ...nosecone.defaults.contentSecurityPolicy.directives.workerSrc,
+        "'self'",
         'blob:',
       ],
       // Manifest for PWA
-      manifestSrc: nosecone.defaults.contentSecurityPolicy.directives.manifestSrc,
+      manifestSrc: ["'self'"],
       // Only upgrade to HTTPS in production
       upgradeInsecureRequests: process.env.NODE_ENV === 'production',
     },

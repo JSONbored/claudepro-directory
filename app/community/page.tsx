@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   keywords: 'Claude community, AI developers, collaboration, open source',
 };
 
+// Enable ISR - revalidate every 24 hours for community page
+export const revalidate = 86400;
+
 export default function CommunityPage() {
   return (
     <div className="min-h-screen bg-background">

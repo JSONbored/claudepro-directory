@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
 import { logger } from '@/lib/logger';
 import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
+import { contentCache } from '@/lib/redis';
 
 export const runtime = 'nodejs';
 export const revalidate = 14400; // 4 hours
@@ -24,6 +25,22 @@ async function handleGET(
   try {
     const { contentType } = await params;
     requestLogger.info('Content type API request started', { contentType });
+
+    // Try to get from cache first
+    const cacheKey = `content-api:${contentType}`;
+    const cachedResponse = await contentCache.getAPIResponse(cacheKey);
+    if (cachedResponse) {
+      requestLogger.info('Serving cached content API response', {
+        contentType,
+        source: 'redis-cache',
+      });
+      return NextResponse.json(cachedResponse, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=14400, stale-while-revalidate=86400',
+          'X-Cache': 'HIT',
+        },
+      });
+    }
 
     // Check if the content type is valid
     if (!(contentType in contentMap)) {
@@ -56,6 +73,9 @@ async function handleGET(
       lastUpdated: new Date().toISOString(),
     };
 
+    // Cache the response for 1 hour
+    await contentCache.cacheAPIResponse(cacheKey, responseData, 60 * 60);
+
     requestLogger.info('Content type API request completed successfully', {
       contentType,
       count: data.length,
@@ -64,6 +84,7 @@ async function handleGET(
     return NextResponse.json(responseData, {
       headers: {
         'Cache-Control': 'public, s-maxage=14400, stale-while-revalidate=86400',
+        'X-Cache': 'MISS',
       },
     });
   } catch (error) {

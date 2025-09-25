@@ -843,9 +843,9 @@ export function QuickReference({
       </CardHeader>
       <CardContent>
         <div className={`grid gap-4 ${columns === 2 ? 'md:grid-cols-2' : ''}`}>
-          {items.map((item) => (
+          {items.map((item, index) => (
             <div
-              key={item.label}
+              key={`${item.label}-${index}`}
               itemScope
               itemType="https://schema.org/PropertyValue"
               className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 p-3 bg-card/50 rounded-lg border"

@@ -186,6 +186,27 @@ const nextConfig = {
             key: 'Cache-Control',
             value: 'public, max-age=14400, stale-while-revalidate=86400' // 4 hours cache, 24 hours stale
           },
+          {
+            key: 'Vary',
+            value: 'Accept-Encoding, Accept'
+          },
+          {
+            key: 'ETag',
+            value: 'strong'
+          },
+        ],
+      },
+      {
+        source: '/static-api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, stale-while-revalidate=86400, immutable' // 1 year cache for pre-generated APIs
+          },
+          {
+            key: 'Vary',
+            value: 'Accept-Encoding, Accept'
+          },
         ],
       },
       {
@@ -216,6 +237,63 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable' // 1 year cache for Next.js static files
+          },
+        ],
+      },
+      {
+        source: '/(agents|mcp|rules|commands|hooks|guides)/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, stale-while-revalidate=86400' // 1 hour cache for content pages
+          },
+          {
+            key: 'Vary',
+            value: 'Accept-Encoding'
+          },
+        ],
+      },
+      {
+        source: '/search',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=1800, stale-while-revalidate=3600' // 30 min cache for search page
+          },
+        ],
+      },
+      {
+        source: '/trending',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=300, stale-while-revalidate=1800' // 5 min cache for trending
+          },
+        ],
+      },
+      {
+        source: '/sitemap.xml',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, stale-while-revalidate=604800' // 1 day cache for sitemap
+          },
+          {
+            key: 'Content-Type',
+            value: 'application/xml'
+          },
+        ],
+      },
+      {
+        source: '/robots.txt',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, stale-while-revalidate=604800' // 1 day cache for robots.txt
+          },
+          {
+            key: 'Content-Type',
+            value: 'text/plain'
           },
         ],
       },
