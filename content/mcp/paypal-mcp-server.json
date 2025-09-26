@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "PayPal",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "payments",
-    "paypal",
-    "commerce",
-    "transactions",
-    "financial"
-  ],
+  "tags": ["payments", "paypal", "commerce", "transactions", "financial"],
   "content": "Connect Claude to PayPal for comprehensive payment processing and financial operations.",
   "features": [
     "Process payments and refunds",
@@ -80,11 +74,7 @@
     "Check account balance"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "refund"
-  ],
+  "permissions": ["read", "write", "refund"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://www.paypal.ai/"
 }

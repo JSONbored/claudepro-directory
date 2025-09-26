@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Box",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "storage",
-    "box",
-    "enterprise",
-    "document-management",
-    "collaboration"
-  ],
+  "tags": ["storage", "box", "enterprise", "document-management", "collaboration"],
   "content": "Connect Claude to Box for enterprise content management and document automation.",
   "features": [
     "Access and search files across your Box enterprise",
@@ -82,11 +76,7 @@
     "Organize project files by client and date"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "delete"
-  ],
+  "permissions": ["read", "write", "delete"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://box.dev/guides/box-mcp/remote/"
 }

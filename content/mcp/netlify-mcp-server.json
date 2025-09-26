@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Netlify",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "deployment",
-    "netlify",
-    "hosting",
-    "static-sites",
-    "serverless"
-  ],
+  "tags": ["deployment", "netlify", "hosting", "static-sites", "serverless"],
   "content": "Control Netlify sites and deployments through Claude for comprehensive site management.",
   "features": [
     "Create and deploy sites automatically",
@@ -79,11 +73,7 @@
     "Configure domain redirect"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "deploy"
-  ],
+  "permissions": ["read", "write", "deploy"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/"
 }

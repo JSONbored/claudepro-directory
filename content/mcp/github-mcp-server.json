@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "GitHub",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "github",
-    "git",
-    "repositories",
-    "api",
-    "official"
-  ],
+  "tags": ["github", "git", "repositories", "api", "official"],
   "content": "Access the GitHub API through Claude for comprehensive repository management, file operations, and search functionality.",
   "features": [
     "Create, read, update, and delete files across repositories",
@@ -41,10 +35,7 @@
       "mcpServers": {
         "github": {
           "command": "npx",
-          "args": [
-            "-y",
-            "@modelcontextprotocol/server-github"
-          ],
+          "args": ["-y", "@modelcontextprotocol/server-github"],
           "env": {
             "GITHUB_PERSONAL_ACCESS_TOKEN": "your_github_token_here"
           }
@@ -55,10 +46,7 @@
       "mcpServers": {
         "github": {
           "command": "npx",
-          "args": [
-            "-y",
-            "@modelcontextprotocol/server-github"
-          ],
+          "args": ["-y", "@modelcontextprotocol/server-github"],
           "env": {
             "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
           }
@@ -98,11 +86,7 @@
     "Find all open issues with the bug label"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "repo",
-    "public_repo",
-    "read:user"
-  ],
+  "permissions": ["repo", "public_repo", "read:user"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://www.npmjs.com/package/@modelcontextprotocol/server-github"
 }

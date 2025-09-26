@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Asana",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "asana",
-    "project-management",
-    "tasks",
-    "team-collaboration",
-    "workflow"
-  ],
+  "tags": ["asana", "project-management", "tasks", "team-collaboration", "workflow"],
   "content": "Connect Claude to Asana for comprehensive project management and team collaboration.",
   "features": [
     "Create and manage tasks with rich metadata",
@@ -79,11 +73,7 @@
     "Assign task to team member"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "create"
-  ],
+  "permissions": ["read", "write", "create"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server"
 }

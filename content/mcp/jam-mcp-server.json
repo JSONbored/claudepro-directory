@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Jam",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "debugging",
-    "jam",
-    "testing",
-    "bug-tracking",
-    "developer-tools"
-  ],
+  "tags": ["debugging", "jam", "testing", "bug-tracking", "developer-tools"],
   "content": "Access Jam bug recordings and debug information to troubleshoot issues more efficiently.",
   "features": [
     "Access bug video recordings",
@@ -80,10 +74,7 @@
     "Find all JavaScript errors from today"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "analyze"
-  ],
+  "permissions": ["read", "analyze"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://jam.dev/docs/debug-a-jam/mcp"
 }

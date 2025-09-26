@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Anthropic",
   "dateAdded": "2025-09-16",
-  "tags": [
-    "git",
-    "version-control",
-    "repositories",
-    "official",
-    "anthropic"
-  ],
+  "tags": ["git", "version-control", "repositories", "official", "anthropic"],
   "content": "The official Git MCP Server from Anthropic provides comprehensive tools to read, search, and manipulate Git repositories through Claude.",
   "features": [
     "Access commit history, branch information, and repository status",
@@ -40,10 +34,7 @@
       "mcpServers": {
         "git": {
           "command": "npx",
-          "args": [
-            "-y",
-            "@modelcontextprotocol/server-git"
-          ]
+          "args": ["-y", "@modelcontextprotocol/server-git"]
         }
       }
     },
@@ -51,10 +42,7 @@
       "mcpServers": {
         "git": {
           "command": "npx",
-          "args": [
-            "-y",
-            "@modelcontextprotocol/server-git"
-          ]
+          "args": ["-y", "@modelcontextprotocol/server-git"]
         }
       }
     }
@@ -90,10 +78,7 @@
     "Compare this file between two commits"
   ],
   "requiresAuth": false,
-  "permissions": [
-    "git",
-    "filesystem"
-  ],
+  "permissions": ["git", "filesystem"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://modelcontextprotocol.io/examples"
 }

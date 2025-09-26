@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "saseq",
   "dateAdded": "2025-09-20",
-  "tags": [
-    "discord",
-    "bot",
-    "community",
-    "moderation",
-    "social"
-  ],
+  "tags": ["discord", "bot", "community", "moderation", "social"],
   "content": "Enable your AI assistants to seamlessly interact with Discord servers through comprehensive bot functionality and automation capabilities.",
   "features": [
     "Server information retrieval",
@@ -41,10 +35,7 @@
       "mcpServers": {
         "discord-mcp": {
           "command": "java",
-          "args": [
-            "-jar",
-            "/absolute/path/to/discord-mcp-0.0.1-SNAPSHOT.jar"
-          ],
+          "args": ["-jar", "/absolute/path/to/discord-mcp-0.0.1-SNAPSHOT.jar"],
           "env": {
             "DISCORD_TOKEN": "YOUR_DISCORD_BOT_TOKEN",
             "DISCORD_GUILD_ID": "OPTIONAL_DEFAULT_SERVER_ID"
@@ -56,10 +47,7 @@
       "mcpServers": {
         "discord-mcp": {
           "command": "java",
-          "args": [
-            "-jar",
-            "/absolute/path/to/discord-mcp-0.0.1-SNAPSHOT.jar"
-          ],
+          "args": ["-jar", "/absolute/path/to/discord-mcp-0.0.1-SNAPSHOT.jar"],
           "env": {
             "DISCORD_TOKEN": "${DISCORD_TOKEN}",
             "DISCORD_GUILD_ID": "${DISCORD_GUILD_ID}"
@@ -72,7 +60,7 @@
   "source": "community",
   "useCases": [
     "Automated server moderation and management",
-    "Community engagement and member onboarding", 
+    "Community engagement and member onboarding",
     "Channel organization and content management",
     "Bot-driven notifications and alerts",
     "Member role management and permissions"
@@ -96,12 +84,7 @@
     "Retrieve channel lists and configurations"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "bot",
-    "send_messages",
-    "manage_channels",
-    "manage_roles"
-  ],
+  "permissions": ["bot", "send_messages", "manage_channels", "manage_roles"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://github.com/saseq/discord-mcp"
 }
