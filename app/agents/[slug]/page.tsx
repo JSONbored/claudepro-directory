@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { AgentDetailPage } from '@/components/agent-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { agents, getAgentBySlug, getAgentFullContent } from '@/generated/content';
+import { logger } from '@/lib/logger';
+import { slugParamSchema } from '@/lib/schemas/search.schema';
 import { getDisplayTitle } from '@/lib/utils';
 
 interface AgentPageProps {
@@ -10,7 +12,24 @@ interface AgentPageProps {
 }
 
 export async function generateMetadata({ params }: AgentPageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const rawParams = await params;
+
+  // Validate slug parameter
+  const validationResult = slugParamSchema.safeParse(rawParams);
+
+  if (!validationResult.success) {
+    logger.warn('Invalid slug parameter for agent metadata', {
+      slug: rawParams.slug,
+      errorCount: validationResult.error.issues.length,
+      firstError: validationResult.error.issues[0]?.message || 'Unknown error',
+    });
+    return {
+      title: 'Agent Not Found',
+      description: 'The requested AI agent could not be found.',
+    };
+  }
+
+  const { slug } = validationResult.data;
   const agent = getAgentBySlug(slug);
 
   if (!agent) {
@@ -44,7 +63,30 @@ export async function generateStaticParams() {
 export const revalidate = 14400;
 
 export default async function AgentPage({ params }: AgentPageProps) {
-  const { slug } = await params;
+  const rawParams = await params;
+
+  // Validate slug parameter
+  const validationResult = slugParamSchema.safeParse(rawParams);
+
+  if (!validationResult.success) {
+    logger.error(
+      'Invalid slug parameter for agent page',
+      new Error(validationResult.error.issues[0]?.message || 'Invalid slug'),
+      {
+        slug: rawParams.slug,
+        errorCount: validationResult.error.issues.length,
+      }
+    );
+    notFound();
+  }
+
+  const { slug } = validationResult.data;
+
+  logger.info('Agent page accessed', {
+    slug: slug,
+    validated: true,
+  });
+
   const agentMeta = getAgentBySlug(slug);
 
   if (!agentMeta) {
@@ -55,7 +97,7 @@ export default async function AgentPage({ params }: AgentPageProps) {
   const fullAgent = await getAgentFullContent(slug);
 
   const relatedAgents = agents
-    .filter((a) => a.id !== agentMeta.id && a.category === agentMeta.category)
+    .filter((a) => a.slug !== agentMeta.slug && a.category === agentMeta.category)
     .slice(0, 3);
 
   return (

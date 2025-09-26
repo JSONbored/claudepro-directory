@@ -5,14 +5,21 @@
 
 import { headers } from 'next/headers';
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { sanitizeApiError } from '@/lib/error-sanitizer';
 import { logger } from '@/lib/logger';
 import redis from '@/lib/redis';
+import {
+  ipAddressSchema,
+  type MiddlewareRateLimitConfig,
+  middlewareRateLimitConfigSchema,
+  requestPathSchema,
+} from '@/lib/schemas/middleware.schema';
 
-export interface RateLimitConfig {
-  /** Maximum requests per window */
-  maxRequests: number;
-  /** Window duration in seconds */
+// Use MiddlewareRateLimitConfig from middleware schema
+// Additional interface for extended functionality
+export interface ExtendedRateLimitConfig extends Omit<MiddlewareRateLimitConfig, 'windowMs'> {
+  /** Window duration in seconds (converted from windowMs) */
   windowSeconds: number;
   /** Custom identifier function */
   keyGenerator?: (request: NextRequest) => Promise<string>;
@@ -22,64 +29,103 @@ export interface RateLimitConfig {
   onLimitReached?: (request: NextRequest, limit: RateLimitInfo) => Promise<Response>;
 }
 
-export interface RateLimitInfo {
-  limit: number;
-  remaining: number;
-  resetTime: number;
-  retryAfter: number;
-}
+/**
+ * Rate limit information schema
+ */
+export const rateLimitInfoSchema = z.object({
+  limit: z.number().int().min(1).max(100000),
+  remaining: z.number().int().min(0),
+  resetTime: z.number().int().min(0),
+  retryAfter: z.number().int().min(0),
+});
 
-export interface RateLimitResult {
-  success: boolean;
-  limit: number;
-  remaining: number;
-  resetTime: number;
-  retryAfter: number;
-}
+/**
+ * Rate limit result schema
+ */
+export const rateLimitResultSchema = z.object({
+  success: z.boolean(),
+  limit: z.number().int().min(1).max(100000),
+  remaining: z.number().int().min(0),
+  resetTime: z.number().int().min(0),
+  retryAfter: z.number().int().min(0),
+});
+
+/**
+ * Rate limit key components schema
+ */
+export const rateLimitKeySchema = z.object({
+  prefix: z
+    .string()
+    .min(1)
+    .max(50)
+    .regex(/^[a-z_]+$/, 'Invalid prefix format'),
+  clientIP: ipAddressSchema.or(z.literal('unknown')),
+  pathname: requestPathSchema,
+  userAgentHash: z
+    .string()
+    .max(32)
+    .regex(/^[A-Za-z0-9+/=]+$/, 'Invalid base64 format')
+    .or(z.literal('no-ua')),
+});
+
+export type RateLimitInfo = z.infer<typeof rateLimitInfoSchema>;
+export type RateLimitResult = z.infer<typeof rateLimitResultSchema>;
+export type RateLimitKey = z.infer<typeof rateLimitKeySchema>;
 
 /**
  * Default rate limit configurations for different endpoint types
+ * All configurations are validated using Zod schemas
  */
 export const RATE_LIMIT_CONFIGS = {
   // Public API endpoints - generous but protected
-  api: {
+  api: middlewareRateLimitConfigSchema.parse({
     maxRequests: 1000,
-    windowSeconds: 3600, // 1 hour
-  },
+    windowMs: 3600000, // 1 hour in ms
+  }),
   // Search endpoints - more restrictive due to computational cost
-  search: {
+  search: middlewareRateLimitConfigSchema.parse({
     maxRequests: 100,
-    windowSeconds: 300, // 5 minutes
-  },
-  // Submit endpoints - very restrictive to prevent abuse
-  submit: {
-    maxRequests: 10,
-    windowSeconds: 3600, // 1 hour
-  },
+    windowMs: 300000, // 5 minutes in ms
+  }),
+  // Submit endpoints - balanced to prevent abuse while allowing legitimate use
+  submit: middlewareRateLimitConfigSchema.parse({
+    maxRequests: 30, // Increased from 10 to allow form corrections
+    windowMs: 3600000, // 1 hour in ms
+  }),
   // General pages - very generous
-  general: {
+  general: middlewareRateLimitConfigSchema.parse({
     maxRequests: 10000,
-    windowSeconds: 3600, // 1 hour
-  },
-  // Heavy API endpoints (large datasets) - moderate restrictions
-  heavyApi: {
-    maxRequests: 50,
-    windowSeconds: 900, // 15 minutes
-  },
-  // Admin operations - extremely restrictive
-  admin: {
-    maxRequests: 5,
-    windowSeconds: 3600, // 1 hour
-  },
-  // Bulk operations - very restrictive with longer window
-  bulk: {
-    maxRequests: 20,
-    windowSeconds: 1800, // 30 minutes
-  },
+    windowMs: 3600000, // 1 hour in ms
+  }),
+  // Heavy API endpoints (large datasets) - reasonable for data access
+  heavyApi: middlewareRateLimitConfigSchema.parse({
+    maxRequests: 100, // Increased from 50 for legitimate data operations
+    windowMs: 900000, // 15 minutes in ms
+  }),
+  // Admin operations - reasonable for maintenance tasks
+  admin: middlewareRateLimitConfigSchema.parse({
+    maxRequests: 50, // Increased from 5 - needed for cache warming and maintenance
+    windowMs: 3600000, // 1 hour in ms
+  }),
+  // Bulk operations - balanced for legitimate bulk access
+  bulk: middlewareRateLimitConfigSchema.parse({
+    maxRequests: 50, // Increased from 20 for legitimate bulk operations
+    windowMs: 1800000, // 30 minutes in ms
+  }),
 } as const;
 
 /**
- * Generate rate limit key for Redis storage
+ * Convert rate limit config from ms to seconds for internal use
+ */
+function configToExtended(config: MiddlewareRateLimitConfig): ExtendedRateLimitConfig {
+  return {
+    ...config,
+    windowSeconds: Math.floor(config.windowMs / 1000),
+  };
+}
+
+/**
+ * Generate rate limit key for Redis storage with validation
  */
 async function generateKey(request: NextRequest, prefix: string = 'rate_limit'): Promise<string> {
   // Priority order for client identification:
@@ -89,40 +135,47 @@ async function generateKey(request: NextRequest, prefix: string = 'rate_limit'):
   // 4. Connection remote address
 
   const headersList = await headers();
-  const clientIP =
+  const rawClientIP =
     headersList.get('cf-connecting-ip') ||
     headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     headersList.get('x-real-ip') ||
     'unknown';
 
-  const userAgent = headersList.get('user-agent') || '';
-  const pathname = new URL(request.url).pathname;
+  const rawUserAgent = headersList.get('user-agent') || '';
+  const rawPathname = new URL(request.url).pathname;
 
-  // Create a composite key for better uniqueness
-  const keyComponents = [
+  // Validate all components
+  const keyComponents: RateLimitKey = rateLimitKeySchema.parse({
     prefix,
-    clientIP,
-    pathname,
-    // Hash user agent to prevent key explosion while maintaining uniqueness
-    userAgent ? Buffer.from(userAgent).toString('base64').slice(0, 16) : 'no-ua',
-  ];
+    clientIP: rawClientIP,
+    pathname: rawPathname,
+    userAgentHash: rawUserAgent
+      ? Buffer.from(rawUserAgent).toString('base64').slice(0, 16)
+      : 'no-ua',
+  });
 
-  return keyComponents.join(':');
+  return `${keyComponents.prefix}:${keyComponents.clientIP}:${keyComponents.pathname}:${keyComponents.userAgentHash}`;
 }
 
 /**
  * Sliding window rate limiter using Redis
  */
 export class RateLimiter {
-  private config: Required<RateLimitConfig>;
+  private config: Required<ExtendedRateLimitConfig>;
 
-  constructor(config: RateLimitConfig) {
+  constructor(config: MiddlewareRateLimitConfig) {
+    // Validate the input configuration
+    const validatedConfig = middlewareRateLimitConfigSchema.parse(config);
+    const extendedConfig = configToExtended(validatedConfig);
+
     this.config = {
       keyGenerator: generateKey,
       skip: () => false,
       onLimitReached: this.defaultErrorResponse.bind(this),
-      ...config,
-    };
+      skipFailedRequests: false,
+      skipSuccessfulRequests: false,
+      ...extendedConfig,
+    } as Required<ExtendedRateLimitConfig>;
   }
 
   private async defaultErrorResponse(request: NextRequest, info: RateLimitInfo): Promise<Response> {
@@ -166,13 +219,14 @@ export class RateLimiter {
   async checkLimit(request: NextRequest): Promise<RateLimitResult> {
     // Skip if configured to do so
     if (this.config.skip(request)) {
-      return {
+      const result = {
         success: true,
         limit: this.config.maxRequests,
         remaining: this.config.maxRequests,
         resetTime: Date.now() + this.config.windowSeconds * 1000,
         retryAfter: 0,
       };
+      return rateLimitResultSchema.parse(result);
     }
 
     const key = await this.config.keyGenerator(request);
@@ -187,13 +241,14 @@ export class RateLimiter {
           fallback: 'allowing request',
         });
 
-        return {
+        const fallbackResult = {
           success: true,
           limit: this.config.maxRequests,
           remaining: this.config.maxRequests - 1,
           resetTime: now + this.config.windowSeconds * 1000,
           retryAfter: 0,
         };
+        return rateLimitResultSchema.parse(fallbackResult);
       }
 
       // Use Redis pipeline for atomic operations
@@ -227,13 +282,14 @@ export class RateLimiter {
         await redis.zremrangebyrank(key, -1, -1);
       }
 
-      return {
+      const result = {
         success,
         limit: this.config.maxRequests,
         remaining,
         resetTime,
         retryAfter: success ? 0 : Math.ceil(this.config.windowSeconds / 2),
       };
+      return rateLimitResultSchema.parse(result);
     } catch (error: unknown) {
       // Sanitize error to prevent information leakage
       const sanitizedError = sanitizeApiError(error, {
@@ -250,13 +306,14 @@ export class RateLimiter {
       });
 
       // On error, allow the request but log the issue
-      return {
+      const errorResult = {
         success: true,
         limit: this.config.maxRequests,
         remaining: this.config.maxRequests - 1,
         resetTime: now + this.config.windowSeconds * 1000,
         retryAfter: 0,
       };
+      return rateLimitResultSchema.parse(errorResult);
     }
   }
 
@@ -267,12 +324,12 @@ export class RateLimiter {
     const result = await this.checkLimit(request);
 
     if (!result.success) {
-      const info: RateLimitInfo = {
+      const info: RateLimitInfo = rateLimitInfoSchema.parse({
         limit: result.limit,
         remaining: result.remaining,
         resetTime: result.resetTime,
         retryAfter: result.retryAfter || Math.ceil(this.config.windowSeconds / 2),
-      };
+      });
 
       return this.config.onLimitReached(request, info);
     }
@@ -283,6 +340,7 @@ export class RateLimiter {
 
 /**
  * Create rate limiter instances for different endpoint types
+ * All configurations are pre-validated through Zod schemas
  */
 export const rateLimiters = {
   api: new RateLimiter(RATE_LIMIT_CONFIGS.api),

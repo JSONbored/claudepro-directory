@@ -11,6 +11,8 @@ import {
   Zap,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -71,6 +73,24 @@ export function GuidesSidebar({
   guideCounts = {},
   showSearch = true,
 }: GuidesSidebarProps) {
+  const router = useRouter();
+  const [searchValue, setSearchValue] = useState('');
+
+  // Handle search with debounce effect
+  const handleSearchChange = (value: string) => {
+    setSearchValue(value);
+
+    // Navigate to search page with query param after debounce
+    if (value.trim()) {
+      const timeoutId = setTimeout(() => {
+        router.push(`/guides/search?q=${encodeURIComponent(value)}`);
+      }, 500);
+      // Store timeout ID for cleanup
+      return () => clearTimeout(timeoutId);
+    }
+    return undefined;
+  };
+
   return (
     <div className="space-y-6">
       <div className="sticky top-20 space-y-6">
@@ -88,10 +108,8 @@ export function GuidesSidebar({
               <Input
                 placeholder="Search guides..."
                 className="pl-10"
-                onChange={(e) => {
-                  // TODO: Implement real-time search
-                  console.log('Search:', e.target.value);
-                }}
+                value={searchValue}
+                onChange={(e) => handleSearchChange(e.target.value)}
               />
             </div>
 
@@ -104,6 +122,7 @@ export function GuidesSidebar({
                     key={tag}
                     variant="outline"
                     className="text-xs cursor-pointer hover:bg-accent"
+                    onClick={() => handleSearchChange(tag)}
                   >
                     #{tag}
                   </Badge>

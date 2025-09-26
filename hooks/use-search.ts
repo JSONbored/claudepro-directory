@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FilterState } from '@/components/unified-search';
+import { extractFilterOptions } from '@/lib/schemas/content-filter.schema';
 import { type SearchableItem, type SearchFilters, searchCache } from '@/lib/search-cache';
+import { getDisplayTitle } from '@/lib/utils';
 import type { ContentItem } from '@/types/content';
 
 interface SearchOptions {
@@ -13,16 +15,21 @@ interface SearchOptions {
 }
 
 interface UseSearchProps {
-  data: ContentItem[];
+  data: readonly ContentItem[] | ContentItem[];
   searchOptions?: SearchOptions;
 }
 
 // Convert ContentItem to SearchableItem for compatibility
 function convertToSearchableItem(item: ContentItem): SearchableItem {
   return {
-    ...item,
-    title: item.name || item.title || '',
-    slug: item.slug || item.id,
+    id: item.slug, // Use slug as id since SearchableItem requires id
+    title: getDisplayTitle(item),
+    name: item.name || '', // Ensure name is always a string
+    description: item.description,
+    tags: [...(item.tags || [])], // Convert readonly array to mutable array
+    category: item.category,
+    popularity: item.popularity || 0,
+    slug: item.slug,
   };
 }
 
@@ -67,8 +74,15 @@ async function performCachedSearch(
 
   // Convert back to ContentItem format
   return results.map((item) => {
-    const original = data.find((d) => d.id === item.id);
-    return original || (item as ContentItem);
+    const original = [...data].find((d) => d.slug === item.slug);
+    return (
+      original ||
+      ({
+        ...item,
+        author: '',
+        dateAdded: new Date().toISOString(),
+      } as ContentItem)
+    );
   });
 }
 
@@ -113,18 +127,19 @@ export { getDateThreshold };
 export function useSearch({ data, searchOptions }: UseSearchProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<FilterState>({ sort: 'trending' });
-  const [searchResults, setSearchResults] = useState<ContentItem[]>(data);
+  const [searchResults, setSearchResults] = useState<ContentItem[]>([...data]);
 
   // Memoize search options to prevent unnecessary re-renders
   const memoizedSearchOptions = useMemo(() => searchOptions || {}, [searchOptions]);
 
-  // Memoize filter options
+  // Memoize filter options with safe extraction
   const filterOptions = useMemo(() => {
-    const categories = [...new Set(data.map((item) => item.category))].filter(Boolean) as string[];
-    const tags = [...new Set(data.flatMap((item) => item.tags || []))].filter(Boolean);
-    const authors = [...new Set(data.map((item) => item.author))].filter(Boolean) as string[];
-
-    return { categories, tags, authors };
+    const compatibleData = [...data].map((item) => ({
+      category: item.category,
+      author: item.author,
+      tags: [...(item.tags || [])] as unknown[],
+    }));
+    return extractFilterOptions(compatibleData);
   }, [data]);
 
   // Update search results when data, query, or filters change
@@ -132,7 +147,7 @@ export function useSearch({ data, searchOptions }: UseSearchProps) {
     const updateResults = async () => {
       try {
         const results = await performCachedSearch(
-          data,
+          [...data],
           searchQuery,
           filters,
           memoizedSearchOptions
@@ -140,7 +155,7 @@ export function useSearch({ data, searchOptions }: UseSearchProps) {
         setSearchResults(results);
       } catch (error) {
         console.error('Search failed, falling back to original data:', error);
-        setSearchResults(data);
+        setSearchResults([...data]);
       }
     };
 

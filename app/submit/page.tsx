@@ -2,6 +2,7 @@
 
 import { CheckCircle, ExternalLink, FileJson, Github, Loader2, Send } from 'lucide-react';
 import { useActionState, useId, useState } from 'react';
+import { z } from 'zod';
 import { submitConfiguration } from '@/app/actions/submit-config';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
+import { type ConfigSubmissionInput, configSubmissionSchema } from '@/lib/schemas/form.schema';
 
 export default function SubmitPage() {
   // Generate unique IDs for form elements
@@ -24,9 +26,9 @@ export default function SubmitPage() {
   // React 19 useActionState for Server Actions
   const [state, formAction, isPending] = useActionState(submitConfiguration, null);
 
-  // Local form state for validation and UX
-  const [formData, setFormData] = useState({
-    type: '',
+  // Local form state for validation and UX with proper typing
+  const [formData, setFormData] = useState<ConfigSubmissionInput>({
+    type: '' as any, // Will be validated by Zod
     name: '',
     description: '',
     category: '',
@@ -37,6 +39,7 @@ export default function SubmitPage() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isValidating, setIsValidating] = useState(false);
 
   // Show toast notifications based on server action state
   if (state?.success && !isPending) {
@@ -70,29 +73,87 @@ export default function SubmitPage() {
     }
   }
 
+  // Client-side validation with Zod
+  const validateField = (fieldName: string, value: string | undefined) => {
+    try {
+      // Validate individual field using Zod schema
+      const fieldSchema =
+        configSubmissionSchema.shape[fieldName as keyof typeof configSubmissionSchema.shape];
+      if (fieldSchema) {
+        fieldSchema.parse(value);
+        // Clear error if validation passes
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[fieldName];
+          return newErrors;
+        });
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errorMessage = error.issues[0]?.message || 'Invalid value';
+        setErrors((prev) => ({ ...prev, [fieldName]: errorMessage }));
+      }
+    }
+  };
+
+  const validateAllFields = () => {
+    try {
+      configSubmissionSchema.parse(formData);
+      setErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const fieldErrors: Record<string, string> = {};
+        for (const issue of error.issues) {
+          const path = issue.path.join('.');
+          fieldErrors[path] = issue.message;
+        }
+        setErrors(fieldErrors);
+        return false;
+      }
+      return false;
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error for this field when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
+
+    // Validate field on change for immediate feedback
+    validateField(name, value);
   };
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error for this field
-    if (errors[name]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
+
+    // Validate field on change for immediate feedback
+    validateField(name, value);
+  };
+
+  // Enhanced form submission with client-side validation
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    setIsValidating(true);
+
+    // Run client-side validation before submitting
+    const isValid = validateAllFields();
+
+    if (!isValid) {
+      setIsValidating(false);
+      toast({
+        title: 'Validation Failed',
+        description: 'Please fix the errors below before submitting.',
+        variant: 'destructive',
       });
+      return;
     }
+
+    setIsValidating(false);
+
+    // If validation passes, submit via Server Action
+    const formData = new FormData(event.currentTarget);
+    formAction(formData);
   };
 
   return (
@@ -139,7 +200,7 @@ export default function SubmitPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={formAction} className="space-y-6">
+            <form onSubmit={handleFormSubmit} className="space-y-6">
               {/* Type and Category Row */}
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
@@ -155,11 +216,11 @@ export default function SubmitPage() {
                     className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.type ? 'border-red-500' : ''}`}
                   >
                     <option value="">Select type</option>
-                    <option value="agent">AI Agent</option>
+                    <option value="agents">AI Agent</option>
                     <option value="mcp">MCP Server</option>
-                    <option value="rule">Rule</option>
-                    <option value="command">Command</option>
-                    <option value="hook">Hook</option>
+                    <option value="rules">Rule</option>
+                    <option value="commands">Command</option>
+                    <option value="hooks">Hook</option>
                   </select>
                   {errors.type && <p className="text-sm text-red-500">{errors.type}</p>}
                 </div>
@@ -291,11 +352,21 @@ export default function SubmitPage() {
               </div>
 
               {/* Submit Button */}
-              <Button type="submit" className="w-full" disabled={isPending} size="lg">
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isPending || isValidating}
+                size="lg"
+              >
                 {isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Submitting...
+                  </>
+                ) : isValidating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Validating...
                   </>
                 ) : (
                   <>

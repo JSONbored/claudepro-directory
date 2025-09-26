@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
-import { sanitizeApiError } from '@/lib/error-sanitizer';
+import { handleApiError, handleValidationError } from '@/lib/error-handler';
 import { logger } from '@/lib/logger';
 import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
 import { contentCache } from '@/lib/redis';
@@ -99,38 +99,31 @@ async function handleGET(
       },
     });
   } catch (error: unknown) {
-    // Handle validation errors specifically
-    if (error instanceof ValidationError) {
-      requestLogger.warn('Validation error in content type API', {
-        error: error.message,
-        detailsCount: error.details.errors.length,
-      });
-
-      return NextResponse.json(
-        {
-          error: 'Validation failed',
-          message: error.message,
-          details: error.details.errors.map((e) => ({
-            path: e.path.join('.'),
-            message: e.message,
-            code: e.code,
-          })),
-          timestamp: new Date().toISOString(),
-        },
-        { status: 400 }
-      );
-    }
-
-    // Handle other errors with sanitization
+    // Get content type for error context
     const rawParams = await params.catch(() => ({ contentType: 'unknown' }));
     const { contentType: errorContentType } = rawParams;
 
-    const sanitizedError = sanitizeApiError(error, {
-      contentType: errorContentType,
-      route: '[contentType]',
-    });
+    // Use centralized error handling for consistent responses
+    if (error instanceof ValidationError) {
+      return handleValidationError(error, {
+        route: '[contentType]',
+        operation: 'get_content',
+        method: 'GET',
+        logContext: {
+          contentType: errorContentType,
+        },
+      });
+    }
 
-    return NextResponse.json(sanitizedError, { status: 500 });
+    // Handle all other errors with centralized handler
+    return handleApiError(error, {
+      route: '[contentType]',
+      operation: 'get_content',
+      method: 'GET',
+      logContext: {
+        contentType: errorContentType,
+      },
+    });
   }
 }
 

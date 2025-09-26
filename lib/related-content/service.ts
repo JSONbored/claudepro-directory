@@ -3,17 +3,27 @@
  * Implements multi-algorithm scoring with caching and performance monitoring
  */
 
+import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { contentCache, statsRedis } from '@/lib/redis';
-import type {
-  AlgorithmConfig,
-  ContentCategory,
-  ContentItem,
-  RelatedContentConfig,
-  RelatedContentItem,
-  RelatedContentResponse,
-  ScoringResult,
-} from './types';
+import { env, isDevelopment } from '@/lib/schemas/env.schema';
+import {
+  type AlgorithmConfig,
+  type ContentCategory,
+  type ContentIndex,
+  type ContentItem,
+  cacheKeySchema,
+  contentIndexSchema,
+  type RelatedContentConfig,
+  type RelatedContentItem,
+  type RelatedContentResponse,
+  type RelatedPopularItem,
+  relatedContentResponseSchema,
+  relatedPopularItemSchema,
+  type ScoringResult,
+  scoringResultSchema,
+  validateRelatedContentConfig,
+} from '@/lib/schemas/related-content.schema';
 
 // Default algorithm configuration
 const DEFAULT_ALGORITHM_CONFIG: AlgorithmConfig = {
@@ -46,11 +56,35 @@ export class RelatedContentService {
    */
   async getRelatedContent(config: RelatedContentConfig): Promise<RelatedContentResponse> {
     const startTime = performance.now();
-    const cacheKey = this.generateCacheKey(config);
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    const bypassCache = isDevelopment && process.env.BYPASS_RELATED_CACHE === 'true';
 
     try {
+      // Validate config with graceful fallback
+      let validatedConfig: RelatedContentConfig;
+      try {
+        validatedConfig = validateRelatedContentConfig(config);
+      } catch (validationError) {
+        // Log validation error but continue with defaults
+        logger.warn('Related content config validation failed, using defaults', undefined, {
+          error:
+            validationError instanceof Error ? validationError.message : String(validationError),
+          currentPath: config.currentPath || '/',
+          currentCategory: config.currentCategory || 'unknown',
+          limit: config.limit || 6,
+        });
+
+        // Use safe defaults if validation fails
+        validatedConfig = {
+          currentPath: config.currentPath || '/',
+          currentCategory: config.currentCategory,
+          currentTags: [],
+          currentKeywords: [],
+          featured: [],
+          exclude: [],
+          limit: 6,
+        };
+      }
+      const cacheKey = this.generateCacheKey(validatedConfig);
+      const bypassCache = isDevelopment && env.BYPASS_RELATED_CACHE === 'true';
       // Try to get from cache first (unless bypassed in development)
       if (!bypassCache) {
         const cached = await this.getFromCache(cacheKey);
@@ -76,18 +110,23 @@ export class RelatedContentService {
 
       // Get trending and popular data from Redis
       const [trending, popular] = await Promise.all([
-        this.getTrendingItems(config.currentCategory),
-        this.getPopularItems(config.currentCategory),
+        this.getTrendingItems(validatedConfig.currentCategory),
+        this.getPopularItems(validatedConfig.currentCategory),
       ]);
 
       // Score all items
-      const scoredItems = await this.scoreItems(contentIndex.items, config, trending, popular);
+      const scoredItems = await this.scoreItems(
+        contentIndex.items,
+        validatedConfig,
+        trending,
+        popular
+      );
 
       // Filter and sort
-      const finalItems = this.selectFinalItems(scoredItems, config);
+      const finalItems = this.selectFinalItems(scoredItems, validatedConfig);
 
-      // Create response
-      const response: RelatedContentResponse = {
+      // Create and validate response
+      const response = relatedContentResponseSchema.parse({
         items: finalItems,
         performance: {
           fetchTime: Math.round(performance.now() - startTime),
@@ -97,17 +136,27 @@ export class RelatedContentService {
         },
         fromCache: false,
         algorithm: this.algorithmVersion,
-      };
+      });
 
       // Cache the results
       await this.cacheResults(cacheKey, response);
 
       return response;
     } catch (error) {
-      logger.error('Failed to get related content', error as Error, {
-        config: this.sanitizeConfig(config),
-        cacheKey,
-      });
+      if (error instanceof z.ZodError) {
+        logger.error(
+          'Invalid related content configuration',
+          new Error(error.issues[0]?.message || 'Validation failed'),
+          {
+            validationErrors: error.issues.length,
+            firstError: error.issues[0]?.message || 'Unknown validation error',
+          }
+        );
+      } else {
+        logger.error('Failed to get related content', error as Error, {
+          config: config ? this.sanitizeConfig(config) : 'invalid',
+        });
+      }
 
       return this.createEmptyResponse(performance.now() - startTime);
     }
@@ -120,11 +169,21 @@ export class RelatedContentService {
     items: ContentItem[],
     config: RelatedContentConfig,
     trending: string[],
-    popular: Array<{ slug: string; views: number }>
+    popular: RelatedPopularItem[]
   ): Promise<ScoringResult[]> {
-    const algorithmConfig = {
-      ...DEFAULT_ALGORITHM_CONFIG,
-      ...config.algorithm,
+    const algorithmConfig: AlgorithmConfig = {
+      weights: {
+        ...DEFAULT_ALGORITHM_CONFIG.weights,
+        ...(config.algorithm?.weights || {}),
+      },
+      boosts: {
+        ...DEFAULT_ALGORITHM_CONFIG.boosts,
+        ...(config.algorithm?.boosts || {}),
+      },
+      limits: {
+        ...DEFAULT_ALGORITHM_CONFIG.limits,
+        ...(config.algorithm?.limits || {}),
+      },
     };
 
     const popularMap = new Map(popular.map((p) => [p.slug, p.views]));
@@ -153,19 +212,19 @@ export class RelatedContentService {
         .filter(([key]) => key !== 'total')
         .reduce((sum, [, value]) => sum + value, 0);
 
-      const result: ScoringResult = {
+      // Validate scoring result
+      const result = scoringResultSchema.parse({
         item,
         scores,
-      };
-
-      if (process.env.NODE_ENV === 'development') {
-        result.debug = {
-          matchedTags: this.getMatchedTags(item, config),
-          matchedKeywords: this.getMatchedKeywords(item, config),
-          daysSinceUpdate: this.getDaysSinceUpdate(item),
-          viewCount: popularMap.get(item.slug) || 0,
-        };
-      }
+        ...(isDevelopment && {
+          debug: {
+            matchedTags: this.getMatchedTags(item, config),
+            matchedKeywords: this.getMatchedKeywords(item, config),
+            daysSinceUpdate: this.getDaysSinceUpdate(item),
+            viewCount: popularMap.get(item.slug) || 0,
+          },
+        }),
+      });
 
       return result;
     });
@@ -490,6 +549,14 @@ export class RelatedContentService {
   private determineMatchType(result: ScoringResult): RelatedContentItem['matchType'] {
     const { scores } = result;
 
+    // Check if featured score is the dominant factor
+    if (scores.featured && scores.featured > 0) {
+      const nonFeaturedTotal = scores.total - scores.featured;
+      if (scores.featured >= nonFeaturedTotal) {
+        return 'featured';
+      }
+    }
+
     // Find the highest contributing score
     const scoreEntries = Object.entries(scores)
       .filter(([key]) => key !== 'total' && key !== 'featured')
@@ -572,9 +639,22 @@ export class RelatedContentService {
     if (!category) return [];
 
     try {
-      return await statsRedis.getTrending(category, 20);
+      const items = await statsRedis.getTrending(category, 20);
+      // Validate as array of strings
+      return z.array(z.string()).parse(items);
     } catch (error) {
-      logger.error('Failed to get trending items', error as Error);
+      if (error instanceof z.ZodError) {
+        logger.error(
+          'Invalid trending items data',
+          new Error(error.issues[0]?.message || 'Invalid data'),
+          {
+            category,
+            errorCount: error.issues.length,
+          }
+        );
+      } else {
+        logger.error('Failed to get trending items', error as Error, { category });
+      }
       return [];
     }
   }
@@ -582,15 +662,26 @@ export class RelatedContentService {
   /**
    * Get popular items from Redis
    */
-  private async getPopularItems(
-    category?: ContentCategory
-  ): Promise<Array<{ slug: string; views: number }>> {
+  private async getPopularItems(category?: ContentCategory): Promise<RelatedPopularItem[]> {
     if (!category) return [];
 
     try {
-      return await statsRedis.getPopular(category, 20);
+      const items = await statsRedis.getPopular(category, 20);
+      // Validate popular items
+      return z.array(relatedPopularItemSchema).parse(items);
     } catch (error) {
-      logger.error('Failed to get popular items', error as Error);
+      if (error instanceof z.ZodError) {
+        logger.error(
+          'Invalid popular items data',
+          new Error(error.issues[0]?.message || 'Invalid data'),
+          {
+            category,
+            errorCount: error.issues.length,
+          }
+        );
+      } else {
+        logger.error('Failed to get popular items', error as Error, { category });
+      }
       return [];
     }
   }
@@ -598,25 +689,44 @@ export class RelatedContentService {
   /**
    * Load content index (will be generated at build time)
    */
-  private async loadContentIndex(): Promise<any> {
+  private async loadContentIndex(): Promise<ContentIndex | null> {
     try {
       // Try to get from cache first
-      const cached = await contentCache.getContentMetadata('all_content');
-      if (cached) return cached;
+      const cached = await contentCache.getContentMetadata<unknown>('all_content');
+      if (cached) {
+        // Validate cached data
+        return contentIndexSchema.parse(cached);
+      }
 
       // Load the generated content index
       const { contentIndexer } = await import('./indexer');
       const index = await contentIndexer.loadIndex();
 
-      if (index && index.items.length > 0) {
-        // Cache the loaded index
-        await contentCache.cacheContentMetadata('all_content', index, CACHE_TTL);
-        return index;
+      if (index) {
+        // Validate loaded index
+        const validated = contentIndexSchema.parse(index);
+
+        if (validated.items.length > 0) {
+          // Cache the validated index
+          await contentCache.cacheContentMetadata('all_content', validated, CACHE_TTL);
+          return validated;
+        }
       }
 
-      return { items: [], categories: {}, tags: {}, keywords: {} };
+      return contentIndexSchema.parse({ items: [], categories: {}, tags: {}, keywords: {} });
     } catch (error) {
-      logger.error('Failed to load content index', error as Error);
+      if (error instanceof z.ZodError) {
+        logger.error(
+          'Invalid content index data',
+          new Error(error.issues[0]?.message || 'Invalid index'),
+          {
+            errorCount: error.issues.length,
+            firstError: error.issues[0]?.message || 'Unknown validation error',
+          }
+        );
+      } else {
+        logger.error('Failed to load content index', error as Error);
+      }
       return null;
     }
   }
@@ -626,9 +736,25 @@ export class RelatedContentService {
    */
   private async getFromCache(key: string): Promise<RelatedContentResponse | null> {
     try {
-      return await contentCache.getAPIResponse(key);
+      const cached = await contentCache.getAPIResponse<unknown>(key);
+      if (cached) {
+        // Validate cached response
+        return relatedContentResponseSchema.parse(cached);
+      }
+      return null;
     } catch (error) {
-      logger.error('Cache retrieval failed', error as Error);
+      if (error instanceof z.ZodError) {
+        logger.error(
+          'Invalid cached related content data',
+          new Error(error.issues[0]?.message || 'Invalid cache'),
+          {
+            key,
+            errorCount: error.issues.length,
+          }
+        );
+      } else {
+        logger.error('Cache retrieval failed', error as Error, { key });
+      }
       return null;
     }
   }
@@ -657,14 +783,16 @@ export class RelatedContentService {
       this.algorithmVersion,
     ];
 
-    return parts.join(':');
+    const key = parts.join(':');
+    // Validate cache key
+    return cacheKeySchema.parse(key);
   }
 
   /**
    * Create empty response
    */
   private createEmptyResponse(fetchTime: number): RelatedContentResponse {
-    return {
+    return relatedContentResponseSchema.parse({
       items: [],
       performance: {
         fetchTime: Math.round(fetchTime),
@@ -674,7 +802,7 @@ export class RelatedContentService {
       },
       fromCache: false,
       algorithm: this.algorithmVersion,
-    };
+    });
   }
 
   /**

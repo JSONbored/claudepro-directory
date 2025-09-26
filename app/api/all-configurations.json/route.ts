@@ -11,7 +11,7 @@ export const revalidate = 14400; // 4 hours
 
 // Helper function to transform content with type and URL
 function transformContent<T extends { slug: string }>(
-  content: T[],
+  content: readonly T[] | T[],
   type: string,
   category: string
 ): (T & { type: string; url: string })[] {
@@ -120,14 +120,14 @@ async function handleGET(request: NextRequest) {
     if (error instanceof ValidationError) {
       requestLogger.warn('Validation error in all-configurations API', {
         error: error.message,
-        detailsCount: error.details.errors.length,
+        detailsCount: error.details.issues.length,
       });
 
       return NextResponse.json(
         {
           error: 'Validation failed',
           message: error.message,
-          details: error.details.errors.map((e) => ({
+          details: error.details.issues.map((e) => ({
             path: e.path.join('.'),
             message: e.message,
             code: e.code,

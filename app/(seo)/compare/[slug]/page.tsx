@@ -7,6 +7,8 @@ import path from 'path';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { logger } from '@/lib/logger';
+import { markdownToSafeHtml } from '@/lib/markdown-utils';
 
 // ISR Configuration - Revalidate every 7 days for SEO pages
 export const revalidate = 604800; // 7 days in seconds
@@ -122,23 +124,75 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
     notFound();
   }
 
-  // Convert markdown to HTML (simple conversion for now)
-  const htmlContent = data.content
-    .replace(/^# (.*?)$/gm, '<h1 class="text-3xl font-bold mt-8 mb-4">$1</h1>')
-    .replace(/^## (.*?)$/gm, '<h2 class="text-2xl font-semibold mt-6 mb-3">$1</h2>')
-    .replace(/^### (.*?)$/gm, '<h3 class="text-xl font-medium mt-4 mb-2">$1</h3>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-primary hover:underline">$1</a>')
-    .replace(/^- (.*?)$/gm, '<li class="ml-6 list-disc">$1</li>')
-    .replace(/\|([^|]+)\|([^|]+)\|([^|]+)\|/g, (_match, col1, col2, col3) => {
-      return `<tr class="border-b"><td class="p-2">${col1.trim()}</td><td class="p-2">${col2.trim()}</td><td class="p-2">${col3.trim()}</td></tr>`;
-    })
-    .replace(/<tr class="border-b"><td class="p-2">-+<\/td>/g, '') // Remove separator rows
-    .replace(/(<tr[\s\S]*?<\/tr>)/g, '<table class="w-full border-collapse my-4">$1</table>')
-    .replace(/\n\n/g, '</p><p class="mb-4">')
-    .replace(/^/, '<p class="mb-4">')
-    .replace(/$/, '</p>');
+  // Securely convert markdown to sanitized HTML
+  let htmlContent = '';
+  try {
+    const result = await markdownToSafeHtml(data.content, {
+      parseOptions: {
+        gfm: true,
+        breaks: false,
+      },
+      sanitizeOptions: {
+        allowedTags: [
+          'h1',
+          'h2',
+          'h3',
+          'h4',
+          'h5',
+          'h6',
+          'p',
+          'br',
+          'hr',
+          'ul',
+          'ol',
+          'li',
+          'strong',
+          'b',
+          'em',
+          'i',
+          'code',
+          'pre',
+          'blockquote',
+          'a',
+          'span',
+          'div',
+          'table',
+          'thead',
+          'tbody',
+          'tr',
+          'th',
+          'td',
+        ],
+        allowedAttributes: ['class', 'href', 'target', 'rel', 'title'],
+        enforceNoFollow: true,
+        enforceNoOpener: true,
+      },
+    });
+    htmlContent = result.html;
+
+    // Add Tailwind classes to the sanitized HTML for proper styling
+    htmlContent = htmlContent
+      .replace(/<h1>/g, '<h1 class="text-3xl font-bold mt-8 mb-4">')
+      .replace(/<h2>/g, '<h2 class="text-2xl font-semibold mt-6 mb-3">')
+      .replace(/<h3>/g, '<h3 class="text-xl font-medium mt-4 mb-2">')
+      .replace(/<a /g, '<a class="text-primary hover:underline" ')
+      .replace(/<li>/g, '<li class="ml-6 list-disc">')
+      .replace(/<table>/g, '<table class="w-full border-collapse my-4">')
+      .replace(/<tr>/g, '<tr class="border-b">')
+      .replace(/<td>/g, '<td class="p-2">')
+      .replace(/<p>/g, '<p class="mb-4">');
+  } catch (error) {
+    logger.error(
+      'Failed to convert markdown to safe HTML',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        slug: resolvedParams.slug,
+        contentLength: data.content.length,
+      }
+    );
+    // Fallback to plain text display
+    htmlContent = `<p class="text-muted-foreground">Content could not be displayed safely.</p>`;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -175,7 +229,7 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
         <Card className="p-8">
           <article
             className="prose prose-invert max-w-none"
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is generated internally, not user input
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized using DOMPurify
             dangerouslySetInnerHTML={{ __html: htmlContent }}
           />
         </Card>

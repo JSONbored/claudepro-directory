@@ -49,7 +49,7 @@ export function ContentListWithLoadMore({
     <div className="space-y-8">
       <div className={`grid gap-6 ${gridCols}`}>
         {displayedItems.map((item) => (
-          <ConfigCard key={item.id} {...item} type={type} />
+          <ConfigCard key={item.slug} {...item} type={type} />
         ))}
       </div>
 

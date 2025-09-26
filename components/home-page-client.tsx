@@ -15,12 +15,12 @@ import type { ContentItem } from '@/types/content';
 
 interface HomePageClientProps {
   initialData: {
-    rules: ContentItem[];
-    mcp: ContentItem[];
-    agents: ContentItem[];
-    commands: ContentItem[];
-    hooks: ContentItem[];
-    allConfigs: ContentItem[];
+    rules: readonly ContentItem[] | ContentItem[];
+    mcp: readonly ContentItem[] | ContentItem[];
+    agents: readonly ContentItem[] | ContentItem[];
+    commands: readonly ContentItem[] | ContentItem[];
+    hooks: readonly ContentItem[] | ContentItem[];
+    allConfigs: readonly ContentItem[] | ContentItem[];
   };
 }
 
@@ -50,15 +50,15 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
 
     switch (activeTab) {
       case 'rules':
-        return searchResults.filter((item) => rules.some((r) => r.id === item.id));
+        return searchResults.filter((item) => rules.some((r) => r.slug === item.slug));
       case 'mcp':
-        return searchResults.filter((item) => mcp.some((m) => m.id === item.id));
+        return searchResults.filter((item) => mcp.some((m) => m.slug === item.slug));
       case 'agents':
-        return searchResults.filter((item) => agents.some((a) => a.id === item.id));
+        return searchResults.filter((item) => agents.some((a) => a.slug === item.slug));
       case 'commands':
-        return searchResults.filter((item) => commands.some((c) => c.id === item.id));
+        return searchResults.filter((item) => commands.some((c) => c.slug === item.slug));
       case 'hooks':
-        return searchResults.filter((item) => hooks.some((h) => h.id === item.id));
+        return searchResults.filter((item) => hooks.some((h) => h.slug === item.slug));
       default:
         return searchResults;
     }
@@ -92,11 +92,11 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
     config: ContentItem
   ): 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks' => {
     // Determine type based on which array the config came from
-    if (agents.some((a) => a.id === config.id)) return 'agents';
-    if (commands.some((c) => c.id === config.id)) return 'commands';
-    if (hooks.some((h) => h.id === config.id)) return 'hooks';
-    if (mcp.some((m) => m.id === config.id)) return 'mcp';
-    if (rules.some((r) => r.id === config.id)) return 'rules';
+    if (agents.some((a) => a.slug === config.slug)) return 'agents';
+    if (commands.some((c) => c.slug === config.slug)) return 'commands';
+    if (hooks.some((h) => h.slug === config.slug)) return 'hooks';
+    if (mcp.some((m) => m.slug === config.slug)) return 'mcp';
+    if (rules.some((r) => r.slug === config.slug)) return 'rules';
 
     // Fallback: check for content field
     return 'content' in config ? 'rules' : 'mcp';
@@ -150,14 +150,14 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
               <InfiniteScrollContainer
                 items={displayedItems}
                 renderItem={(item) => (
-                  <ConfigCard key={item.id} {...item} type={getConfigType(item)} />
+                  <ConfigCard key={item.slug} {...item} type={getConfigType(item)} />
                 )}
                 loadMore={loadMore}
                 hasMore={hasMore}
                 pageSize={20}
                 gridClassName="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
                 emptyMessage="No results found"
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.slug}
               />
             ) : (
               <div className="text-center py-12 bg-card/50 rounded-xl border border-border/50">
@@ -184,7 +184,7 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {rules.slice(0, 6).map((rule) => (
-                  <LazyConfigCard key={rule.id} {...rule} type="rules" />
+                  <LazyConfigCard key={rule.slug} {...rule} type="rules" />
                 ))}
               </div>
             </div>
@@ -199,7 +199,7 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {mcp.slice(0, 6).map((mcpItem) => (
-                  <LazyConfigCard key={mcpItem.id} {...mcpItem} type="mcp" />
+                  <LazyConfigCard key={mcpItem.slug} {...mcpItem} type="mcp" />
                 ))}
               </div>
             </div>
@@ -217,7 +217,7 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {agents.slice(0, 6).map((agent) => (
-                  <LazyConfigCard key={agent.id} {...agent} type="agents" />
+                  <LazyConfigCard key={agent.slug} {...agent} type="agents" />
                 ))}
               </div>
             </div>
@@ -235,7 +235,7 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {commands.slice(0, 6).map((command) => (
-                  <LazyConfigCard key={command.id} {...command} type="commands" />
+                  <LazyConfigCard key={command.slug} {...command} type="commands" />
                 ))}
               </div>
             </div>
@@ -250,7 +250,7 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {hooks.slice(0, 6).map((hook) => (
-                  <LazyConfigCard key={hook.id} {...hook} type="hooks" />
+                  <LazyConfigCard key={hook.slug} {...hook} type="hooks" />
                 ))}
               </div>
             </div>
@@ -311,14 +311,14 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
                   <LazyInfiniteScrollContainer<ContentItem>
                     items={displayedItems}
                     renderItem={(item: ContentItem, _index: number) => (
-                      <LazyConfigCard key={item.id} {...item} type={getConfigType(item)} />
+                      <LazyConfigCard key={item.slug} {...item} type={getConfigType(item)} />
                     )}
                     loadMore={loadMore}
                     hasMore={hasMore}
                     pageSize={20}
                     gridClassName="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
                     emptyMessage={`No ${tab === 'all' ? 'configurations' : tab} found`}
-                    keyExtractor={(item: ContentItem, _index: number) => item.id}
+                    keyExtractor={(item: ContentItem, _index: number) => item.slug}
                   />
                 ) : (
                   <div className="text-center py-12">

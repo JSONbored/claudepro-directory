@@ -93,6 +93,15 @@ const nextConfig = {
   
   // Advanced webpack optimizations for better Core Web Vitals
   webpack: (config, { dev, isServer }) => {
+    // Fix webpack cache serialization warning for production builds
+    // Use memory cache to avoid serialization of large strings
+    if (config.cache && !dev) {
+      config.cache = Object.freeze({
+        type: 'memory',
+        maxGenerations: 1,
+      });
+    }
+
     // Optimize bundle splitting for better LCP
     if (!dev && !isServer) {
       config.optimization = {
@@ -191,39 +200,10 @@ const nextConfig = {
     return config;
   },
 
-  // Headers for security and caching
+  // Headers for caching only - security headers handled by Nosecone in middleware.ts
   async headers() {
     return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on'
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload'
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff'
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY'
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block'
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
-          },
-          // CSP is now handled by middleware.ts with proper nonce support
-        ],
-      },
+      // Cache-Control headers only (no security headers to avoid conflicts with Nosecone)
       {
         source: '/api/:path*',
         headers: [
@@ -234,10 +214,6 @@ const nextConfig = {
           {
             key: 'Vary',
             value: 'Accept-Encoding, Accept'
-          },
-          {
-            key: 'ETag',
-            value: 'strong'
           },
         ],
       },
@@ -268,11 +244,11 @@ const nextConfig = {
         ],
       },
       {
-        source: '/script.js',
+        source: '/scripts/service-worker-init.js',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=604800, stale-while-revalidate=86400' // 1 week cache for analytics script
+            value: 'public, max-age=3600, stale-while-revalidate=86400' // 1 hour cache
           },
         ],
       },

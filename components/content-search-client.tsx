@@ -9,7 +9,7 @@ import { getIconByName } from '@/lib/icons';
 import type { ContentCategory, ContentMetadata } from '@/types/content';
 
 interface ContentSearchClientProps<T extends ContentMetadata> {
-  items: T[];
+  items: readonly T[] | T[];
   type: ContentCategory;
   searchPlaceholder: string;
   title: string;
@@ -23,8 +23,8 @@ export function ContentSearchClient<T extends ContentMetadata>({
   title,
   icon,
 }: ContentSearchClientProps<T>) {
-  const [filteredItems, setFilteredItems] = useState<T[]>(items);
-  const [displayedItems, setDisplayedItems] = useState<T[]>(items.slice(0, 20));
+  const [filteredItems, setFilteredItems] = useState<T[]>([...items]);
+  const [displayedItems, setDisplayedItems] = useState<T[]>([...items].slice(0, 20));
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<FilterState>({ sort: 'trending' });
   const pageSize = 20;
@@ -150,13 +150,13 @@ export function ContentSearchClient<T extends ContentMetadata>({
         >
           <InfiniteScrollContainer
             items={displayedItems}
-            renderItem={(item) => <ConfigCard key={item.id} {...item} type={type} />}
+            renderItem={(item) => <ConfigCard key={item.slug} {...item} type={type} />}
             loadMore={loadMore}
             hasMore={hasMore}
             pageSize={20}
             gridClassName="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
             emptyMessage={`No ${title.toLowerCase()} found`}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.slug}
           />
         </ErrorBoundary>
       ) : (

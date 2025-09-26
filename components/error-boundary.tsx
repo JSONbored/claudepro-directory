@@ -4,7 +4,8 @@ import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { logger } from '@/lib/logger';
+import { createErrorBoundaryFallback } from '@/lib/error-handler';
+import { isDevelopment } from '@/lib/schemas/env.schema';
 
 interface Props {
   children: ReactNode;
@@ -33,11 +34,9 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    logger.error('React Error Boundary caught uncaught error', error, {
+    // Use centralized error handler for consistent logging and tracking
+    const errorResponse = createErrorBoundaryFallback(error, {
       componentStack: errorInfo.componentStack || '',
-      errorBoundary: true,
-      userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent || '' : '',
-      url: typeof window !== 'undefined' ? window.location?.href || '' : '',
     });
 
     // Track error boundary triggers in Umami
@@ -47,6 +46,7 @@ export class ErrorBoundary extends Component<Props, State> {
         error_message: error.message?.substring(0, 100) || 'No message',
         page: window.location.pathname,
         component_stack_depth: errorInfo.componentStack?.split('\n').length || 0,
+        request_id: errorResponse.requestId,
       });
     }
 
@@ -93,7 +93,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {isDevelopment && this.state.error && (
                 <div className="rounded-lg bg-muted p-4 space-y-2">
                   <p className="font-semibold text-sm">Error Details:</p>
                   <pre className="text-xs overflow-auto">{this.state.error.toString()}</pre>

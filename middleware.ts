@@ -2,12 +2,24 @@ import arcjet, { shield, detectBot, tokenBucket, fixedWindow } from '@arcjet/nex
 import * as nosecone from '@nosecone/next';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { z } from 'zod';
 import { rateLimiters } from '@/lib/rate-limiter';
+import { env, isDevelopment, isProduction, securityConfig } from '@/lib/schemas/env.schema';
+import {
+  type ApiEndpointType,
+  type RequestValidation,
+  classifyApiEndpoint,
+  requestPathSchema,
+  sanitizePathForLogging,
+  staticAssetSchema,
+  validateRequest,
+  validateSearchQuery,
+} from '@/lib/schemas/middleware.schema';
 
 // Initialize Arcjet with comprehensive security rules
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!,
-  // In development, Arcjet uses 127.0.0.1 when no real IP is available - this is expected
+  key: securityConfig.arcjetKey!,
+  // In development, Arcjet uses 127.0.0.1 when no real IP is available - this is expected behavior
   rules: [
     // Shield WAF - protect against common attacks
     shield({
@@ -41,70 +53,59 @@ const aj = arcjet({
   ],
 });
 
-// Nosecone CSP configuration for security headers
+// Nosecone security headers configuration
 const noseconeConfig: nosecone.NoseconeOptions = {
   ...nosecone.defaults,
   contentSecurityPolicy: {
     ...nosecone.defaults.contentSecurityPolicy,
     directives: {
       ...nosecone.defaults.contentSecurityPolicy.directives,
-      scriptSrc: process.env.NODE_ENV === 'development' ? [
-        "'self'",
-        () => `'nonce-${Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString('base64')}'`,
+
+      // Script sources - Nosecone defaults already include nonce function
+      // We just add our external scripts
+      scriptSrc: isDevelopment ? [
+        ...nosecone.defaults.contentSecurityPolicy.directives.scriptSrc,
         'https://umami.claudepro.directory',
         'https://va.vercel-scripts.com',
         'https://vercel.live',
         'https://vitals.vercel-insights.com',
-        "'sha256-E8EPi3ovz+EfxEviTr9UjHKYh5PnfxNoZOnJbyuXKOo='",
-        "'sha256-o/9PMZ2H2soabInLejuhS90Bpzx18AfPQsGoMGCzsrc='",
-        "'sha256-p31RDVXHOQSg6Q0CAI3TY0SBnMJNcC/Mfg32/43tAKQ='",
         'localhost:*',
         '127.0.0.1:*',
-        'http://localhost:*',
-        'https://localhost:*',
-        'http://localhost:3000',
-        'https://localhost:3000',
       ] : [
-        "'self'",
-        () => `'nonce-${Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString('base64')}'`,
+        ...nosecone.defaults.contentSecurityPolicy.directives.scriptSrc,
         'https://umami.claudepro.directory',
         'https://va.vercel-scripts.com',
         'https://vercel.live',
         'https://vitals.vercel-insights.com',
-        "'sha256-E8EPi3ovz+EfxEviTr9UjHKYh5PnfxNoZOnJbyuXKOo='",
-        "'sha256-o/9PMZ2H2soabInLejuhS90Bpzx18AfPQsGoMGCzsrc='",
-        "'sha256-p31RDVXHOQSg6Q0CAI3TY0SBnMJNcC/Mfg32/43tAKQ='",
       ],
-      styleSrc: process.env.NODE_ENV === 'development' ? [
-        "'self'",
-        "'unsafe-inline'",
-        'https://fonts.googleapis.com',
-        'http://localhost:*',
-        'https://localhost:*',
-      ] : [
-        "'self'",
-        "'unsafe-inline'",
+
+      // Style sources
+      styleSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.styleSrc,
         'https://fonts.googleapis.com',
       ],
+
+      // Image sources - extend defaults to add GitHub
       imgSrc: [
-        "'self'",
-        'blob:',
-        'data:',
-        'https://github.com',                    // GitHub avatars
-        'https://*.githubusercontent.com',       // GitHub content
-        'https://claudepro.directory',           // Our domain
-        'https://www.claudepro.directory',       // Our www domain
+        ...nosecone.defaults.contentSecurityPolicy.directives.imgSrc,
+        'https://github.com',
+        'https://*.githubusercontent.com',
+        'https://claudepro.directory',
+        'https://www.claudepro.directory',
       ],
+
+      // Font sources - extend defaults to add Google Fonts
       fontSrc: [
-        "'self'",
-        'https://fonts.gstatic.com',             // Google Fonts
+        ...nosecone.defaults.contentSecurityPolicy.directives.fontSrc,
+        'https://fonts.gstatic.com',
       ],
-      connectSrc: process.env.NODE_ENV === 'development' ? [
-        "'self'",
-        'https://umami.claudepro.directory',     // Analytics API
-        'https://vitals.vercel-insights.com',    // Vercel Analytics API
-        'https://va.vercel-scripts.com',         // Vercel Scripts
-        // Development mode WebSocket and HMR connections
+
+      // Connect sources (XHR, fetch, WebSocket, etc.)
+      connectSrc: isDevelopment ? [
+        ...nosecone.defaults.contentSecurityPolicy.directives.connectSrc,
+        'https://umami.claudepro.directory',
+        'https://vitals.vercel-insights.com',
+        'https://va.vercel-scripts.com',
         'ws://localhost:*',
         'wss://localhost:*',
         'ws://127.0.0.1:*',
@@ -112,49 +113,100 @@ const noseconeConfig: nosecone.NoseconeOptions = {
         'http://localhost:*',
         'https://localhost:*',
       ] : [
-        "'self'",
-        'https://umami.claudepro.directory',     // Analytics API
-        'https://vitals.vercel-insights.com',    // Vercel Analytics API
-        'https://va.vercel-scripts.com',         // Vercel Scripts
+        ...nosecone.defaults.contentSecurityPolicy.directives.connectSrc,
+        'https://umami.claudepro.directory',
+        'https://vitals.vercel-insights.com',
+        'https://va.vercel-scripts.com',
       ],
-      // Override frameSrc from 'none' to allow specific embeds if needed
+
+      // Frame ancestors - prevent clickjacking
+      frameAncestors: ["'none'"],
+
+      // Base URI
+      baseUri: ["'self'"],
+
+      // Form action
+      formAction: ["'self'"],
+
+      // Frame/child sources
       frameSrc: ["'none'"],
-      // Service worker for PWA
+      childSrc: ["'none'"],
+
+      // Media sources
+      mediaSrc: ["'self'"],
+
+      // Object sources - none for security
+      objectSrc: ["'none'"],
+
+      // Worker sources for service workers - extend defaults to add blob:
       workerSrc: [
-        "'self'",
+        ...nosecone.defaults.contentSecurityPolicy.directives.workerSrc,
         'blob:',
       ],
-      // Manifest for PWA
-      manifestSrc: ["'self'"],
-      // Only upgrade to HTTPS in production
-      upgradeInsecureRequests: process.env.NODE_ENV === 'production',
+
+      // Upgrade insecure requests in production
+      upgradeInsecureRequests: isProduction,
     },
   },
-  // Disable COEP for compatibility with external resources
-  crossOriginEmbedderPolicy: false,
-  // Keep other defaults for security
-  crossOriginOpenerPolicy: nosecone.defaults.crossOriginOpenerPolicy,
+
+  // Cross-Origin Embedder Policy - credentialless for compatibility with external resources
+  crossOriginEmbedderPolicy: {
+    policy: 'credentialless',
+  },
+
+  // Cross-Origin Opener Policy - allow popups for OAuth flows
+  crossOriginOpenerPolicy: {
+    policy: 'same-origin-allow-popups',
+  },
+
+  // Cross-Origin Resource Policy - cross-origin for GitHub images and CDN resources
   crossOriginResourcePolicy: {
-    policy: 'cross-origin', // Allow external resources (GitHub images, etc.)
+    policy: 'cross-origin',
   },
-  originAgentCluster: nosecone.defaults.originAgentCluster,
+
+  // Origin Agent Cluster - isolate origin
+  originAgentCluster: true,
+
+  // Referrer Policy - no-referrer for privacy
   referrerPolicy: {
-    policy: ['strict-origin-when-cross-origin'], // More permissive than 'no-referrer'
+    policy: ['no-referrer'],
   },
-  strictTransportSecurity: nosecone.defaults.strictTransportSecurity,
-  xContentTypeOptions: nosecone.defaults.xContentTypeOptions,
+
+  // Strict Transport Security - force HTTPS with preload
+  strictTransportSecurity: {
+    maxAge: 63072000, // 2 years
+    includeSubDomains: true,
+    preload: true,
+  },
+
+  // X-Content-Type-Options - prevent MIME sniffing
+  xContentTypeOptions: true,
+
+  // X-DNS-Prefetch-Control - disable for privacy
   xDnsPrefetchControl: {
-    allow: true, // Allow DNS prefetching for performance
+    allow: false,
   },
-  xDownloadOptions: nosecone.defaults.xDownloadOptions,
-  xFrameOptions: nosecone.defaults.xFrameOptions,
-  xPermittedCrossDomainPolicies: nosecone.defaults.xPermittedCrossDomainPolicies,
-  xXssProtection: nosecone.defaults.xXssProtection,
+
+  // X-Download-Options - prevent IE downloads
+  xDownloadOptions: true,
+
+  // X-Frame-Options - prevent clickjacking
+  xFrameOptions: {
+    action: 'deny',
+  },
+
+  // X-Permitted-Cross-Domain-Policies - none for security
+  xPermittedCrossDomainPolicies: {
+    permittedPolicies: 'none',
+  },
+
+  // X-XSS-Protection - disable (can cause vulnerabilities in old browsers)
+  xXssProtection: true,
 };
 
 // Create the Nosecone middleware with Vercel toolbar support in preview
 const noseconeMiddleware = nosecone.createMiddleware(
-  process.env.VERCEL_ENV === 'preview'
+  env.VERCEL_ENV === 'preview'
     ? nosecone.withVercelToolbar(noseconeConfig)
     : noseconeConfig,
 );
@@ -166,6 +218,19 @@ async function applyEndpointRateLimit(
   request: NextRequest,
   pathname: string
 ): Promise<Response | null> {
+  // Validate the pathname
+  try {
+    requestPathSchema.parse(pathname);
+  } catch (error) {
+    console.error('Invalid pathname detected:', {
+      pathname: sanitizePathForLogging(pathname),
+      error: error instanceof z.ZodError ? error.issues : String(error),
+    });
+    return new NextResponse('Bad Request', { status: 400 });
+  }
+  // Classify the API endpoint type
+  const endpointType: ApiEndpointType = classifyApiEndpoint(pathname, request.method);
+
   // Define route-specific rate limiting rules
   const rateLimit = {
     // Cache warming endpoint - admin operations (extremely restrictive)
@@ -188,45 +253,50 @@ async function applyEndpointRateLimit(
     return limiter.middleware(request);
   }
 
-  // Pattern-based matching for dynamic routes
+  // Pattern-based matching using classified endpoint type
   if (pathname.startsWith('/api/')) {
-    // Admin and management endpoints
-    if (pathname.includes('/admin') || pathname.includes('/manage') || pathname.includes('/warm')) {
-      return rateLimiters.admin.middleware(request);
+    // Use endpoint classification for rate limiting
+    switch (endpointType) {
+      case 'admin':
+        return rateLimiters.admin.middleware(request);
+      case 'heavy_api':
+        return rateLimiters.heavyApi.middleware(request);
+      case 'search':
+        // Validate search query parameters if present
+        try {
+          const searchParams = new URLSearchParams(request.nextUrl.search);
+          validateSearchQuery(searchParams);
+        } catch (error) {
+          console.error('Invalid search query:', {
+            pathname: sanitizePathForLogging(pathname),
+            error: error instanceof z.ZodError ? error.issues : String(error),
+          });
+          return new NextResponse(JSON.stringify({
+            success: false,
+            error: 'Bad Request',
+            message: 'Invalid search parameters',
+            code: 'SEARCH_VALIDATION_FAILED',
+            timestamp: new Date().toISOString(),
+          }), {
+            status: 400,
+            headers: { 'content-type': 'application/json' },
+          });
+        }
+        return rateLimiters.search.middleware(request);
+      case 'submit':
+        return rateLimiters.submit.middleware(request);
+      case 'api':
+        // Dynamic content type routes (e.g., /api/[contentType])
+        if (pathname.match(/^\/api\/[^/]+\.json$/)) {
+          return rateLimiters.api.middleware(request);
+        }
+        return rateLimiters.api.middleware(request);
+      case 'static':
+        // No rate limiting for static assets
+        return null;
+      default:
+        return rateLimiters.api.middleware(request);
     }
-
-    // Heavy data endpoints (bulk operations, large datasets)
-    if (pathname.includes('/bulk') || pathname.includes('/export') || pathname.includes('/all-')) {
-      return rateLimiters.heavyApi.middleware(request);
-    }
-
-    // Search-related endpoints (computationally expensive)
-    if (pathname.includes('/search') || pathname.includes('/find') || pathname.includes('/query')) {
-      return rateLimiters.search.middleware(request);
-    }
-
-    // Submit, creation, and modification operations
-    if (
-      request.method === 'POST' ||
-      request.method === 'PUT' ||
-      request.method === 'PATCH' ||
-      request.method === 'DELETE' ||
-      pathname.includes('/submit') ||
-      pathname.includes('/upload') ||
-      pathname.includes('/create') ||
-      pathname.includes('/update') ||
-      pathname.includes('/delete')
-    ) {
-      return rateLimiters.submit.middleware(request);
-    }
-
-    // Dynamic content type routes (e.g., /api/[contentType])
-    if (pathname.match(/^\/api\/[^/]+\.json$/)) {
-      return rateLimiters.api.middleware(request);
-    }
-
-    // Default API rate limiting for other API endpoints
-    return rateLimiters.api.middleware(request);
   }
 
   // No specific rate limiting for non-API endpoints
@@ -236,26 +306,47 @@ async function applyEndpointRateLimit(
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
+  // Validate the incoming request
+  try {
+    const requestValidation: RequestValidation = validateRequest({
+      method: request.method,
+      url: request.url,
+      headers: Object.fromEntries(request.headers.entries()),
+    });
+
+    // Log validated request data (in development only)
+    if (isDevelopment) {
+      console.log('Validated request:', {
+        method: requestValidation.method,
+        path: sanitizePathForLogging(requestValidation.path),
+        userAgent: requestValidation.userAgent?.slice(0, 50) + '...',
+      });
+    }
+  } catch (error) {
+    // Log validation error for monitoring
+    console.error('Request validation failed:', {
+      pathname: sanitizePathForLogging(pathname),
+      method: request.method,
+      error: error instanceof z.ZodError ? error.issues : String(error),
+    });
+
+    // Return standardized error response
+    return new NextResponse(JSON.stringify({
+      success: false,
+      error: 'Bad Request',
+      message: 'Invalid request format',
+      code: 'REQUEST_VALIDATION_FAILED',
+      timestamp: new Date().toISOString(),
+    }), {
+      status: 400,
+      headers: {
+        'content-type': 'application/json',
+      },
+    });
+  }
+
   // Skip Arcjet protection for static assets and Next.js internals
-  const isStaticAsset =
-    pathname.startsWith('/_next/static') ||
-    pathname.startsWith('/_next/image') ||
-    pathname === '/favicon.ico' ||
-    pathname === '/robots.txt' ||
-    pathname === '/sitemap.xml' ||
-    pathname === '/manifest.json' ||
-    pathname === '/manifest.webmanifest' ||
-    pathname === '/service-worker.js' ||
-    pathname === '/offline.html' ||
-    pathname.endsWith('.png') ||
-    pathname.endsWith('.jpg') ||
-    pathname.endsWith('.jpeg') ||
-    pathname.endsWith('.gif') ||
-    pathname.endsWith('.webp') ||
-    pathname.endsWith('.svg') ||
-    pathname.endsWith('.ico') ||
-    pathname.endsWith('.woff') ||
-    pathname.endsWith('.woff2');
+  const isStaticAsset = staticAssetSchema.safeParse(pathname).success;
 
   // Apply Nosecone security headers to all requests
   const noseconeResponse = await noseconeMiddleware();
@@ -273,7 +364,7 @@ export async function middleware(request: NextRequest) {
   if (decision.isDenied()) {
     console.error('Arcjet denied request:', {
       ip: decision.ip,
-      path: pathname,
+      path: sanitizePathForLogging(pathname),
       reason: decision.reason,
       conclusion: decision.conclusion,
     });

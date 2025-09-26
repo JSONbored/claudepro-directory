@@ -477,7 +477,7 @@ export function Accordion({
       <div className="space-y-2">
         {validItems.map((item, index) => (
           <Card
-            key={item.title}
+            key={`accordion-item-${index}-${item.title}`}
             itemScope
             itemType="https://schema.org/Question"
             className="border border-border"

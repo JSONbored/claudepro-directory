@@ -1,24 +1,16 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { ZodError } from 'zod';
 import { logger } from '@/lib/logger';
+import { type ConfigSubmissionData, parseConfigSubmissionForm } from '@/lib/schemas/form.schema';
 
 interface FormState {
   success?: boolean;
   error?: string;
+  errors?: Record<string, string[]>;
   issueUrl?: string;
   fallback?: boolean;
-}
-
-interface ConfigSubmissionData {
-  type: string;
-  name: string;
-  description: string;
-  category: string;
-  author: string;
-  github: string;
-  content: string;
-  tags: string;
 }
 
 export async function submitConfiguration(
@@ -26,45 +18,46 @@ export async function submitConfiguration(
   formData: FormData
 ): Promise<FormState> {
   try {
-    // Extract form data
-    const data: ConfigSubmissionData = {
-      type: formData.get('type') as string,
-      name: formData.get('name') as string,
-      description: formData.get('description') as string,
-      category: formData.get('category') as string,
-      author: formData.get('author') as string,
-      github: formData.get('github') as string,
-      content: formData.get('content') as string,
-      tags: formData.get('tags') as string,
-    };
+    // Parse and validate form data using Zod
+    let validatedData: ConfigSubmissionData;
 
-    // Validate required fields
-    const requiredFields = ['type', 'name', 'description', 'category', 'author', 'content'];
-    const missingFields = requiredFields.filter(
-      (field) => !data[field as keyof ConfigSubmissionData]
-    );
-
-    if (missingFields.length > 0) {
-      return {
-        error: `Missing required fields: ${missingFields.join(', ')}`,
-      };
-    }
-
-    // Validate JSON content
     try {
-      JSON.parse(data.content);
-    } catch {
+      validatedData = parseConfigSubmissionForm(formData);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        // Return field-specific errors for better UX
+        const fieldErrors: Record<string, string[]> = {};
+
+        for (const issue of error.issues) {
+          const path = issue.path.join('.');
+          if (!fieldErrors[path]) {
+            fieldErrors[path] = [];
+          }
+          fieldErrors[path].push(issue.message);
+        }
+
+        return {
+          error: 'Please correct the validation errors below',
+          errors: fieldErrors,
+        };
+      }
+
+      // Unexpected validation error
+      logger.error(
+        'Form validation failed',
+        error instanceof Error ? error : new Error(String(error))
+      );
       return {
-        error: 'Invalid JSON format in configuration content',
+        error: 'Invalid form data. Please check your input and try again.',
       };
     }
 
-    // Log the submission attempt
+    // Log the submission attempt with validated data
     logger.info('Configuration submission attempt', {
-      type: data.type,
-      name: data.name,
-      author: data.author,
-      hasGithub: !!data.github,
+      type: validatedData.type,
+      name: validatedData.name,
+      author: validatedData.author,
+      hasGithub: !!validatedData.github,
     });
 
     // For now, simulate a successful submission
@@ -83,8 +76,8 @@ export async function submitConfiguration(
 
       logger.info('Configuration submitted successfully', {
         issueUrl: mockIssueUrl,
-        type: data.type,
-        name: data.name,
+        type: validatedData.type,
+        name: validatedData.name,
       });
 
       return {

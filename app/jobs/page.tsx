@@ -14,28 +14,33 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { type Job, jobs } from '@/data/jobs';
+import { logger } from '@/lib/logger';
+import {
+  type JobsSearchParams,
+  jobsSearchSchema,
+  parseSearchParams,
+} from '@/lib/schemas/search.schema';
 
 interface JobsPageProps {
-  searchParams: Promise<{
-    search?: string;
-    category?: string;
-    type?: string;
-    remote?: string;
-  }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export async function generateMetadata({ searchParams }: JobsPageProps): Promise<Metadata> {
-  const params = await searchParams;
+  const rawParams = await searchParams;
+  const params = parseSearchParams(jobsSearchSchema, rawParams, 'jobs page metadata');
+
   let title = 'AI Jobs Board - Find Your Dream Job | Claude Pro Directory';
   let description =
     'Discover opportunities with companies building the future of artificial intelligence. From startups to industry giants, find your perfect role.';
 
-  if (params.category) {
-    title = `${params.category.charAt(0).toUpperCase() + params.category.slice(1)} Jobs | Claude Pro Directory`;
-    description = `Find ${params.category} positions in AI companies. ${description}`;
+  // Safely handle category if it exists in the validated params
+  const category = (params as JobsSearchParams).category;
+  if (category && category !== 'all') {
+    title = `${category.charAt(0).toUpperCase() + category.slice(1)} Jobs | Claude Pro Directory`;
+    description = `Find ${category} positions in AI companies. ${description}`;
   }
 
-  if (params.remote === 'true') {
+  if (params.remote === true) {
     title = `Remote ${title}`;
     description = `Remote ${description.toLowerCase()}`;
   }
@@ -51,45 +56,80 @@ export async function generateMetadata({ searchParams }: JobsPageProps): Promise
 export const revalidate = 14400;
 
 // Server-side filtering function
-function filterJobs(
-  jobs: Job[],
-  params: {
-    search?: string;
-    category?: string;
-    type?: string;
-    remote?: string;
-  }
-): Job[] {
+function filterJobs(jobs: Job[], params: JobsSearchParams): Job[] {
   return jobs.filter((job) => {
+    // Use validated search query - combined from q, query, or search fields
+    const searchQuery = params.q || params.query || params.search || params.location;
     const matchesSearch =
-      !params.search ||
-      job.title.toLowerCase().includes(params.search.toLowerCase()) ||
-      job.company.toLowerCase().includes(params.search.toLowerCase()) ||
-      job.tags.some((tag) => tag.toLowerCase().includes(params.search!.toLowerCase()));
+      !searchQuery ||
+      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (params.location && job.location?.toLowerCase().includes(params.location.toLowerCase()));
 
-    const matchesCategory = !params.category || job.category === params.category;
-    const matchesType = !params.type || job.type === params.type;
-    const matchesRemote = params.remote !== 'true' || job.remote === true;
+    // Handle category filtering with the validated enum
+    const matchesCategory =
+      !params.category || params.category === 'all' || job.category === params.category;
 
-    return matchesSearch && matchesCategory && matchesType && matchesRemote;
+    // Handle employment type
+    const matchesType =
+      !params.employment ||
+      params.employment === 'any' ||
+      job.type === params.employment.replace('-', ' '); // Convert 'full-time' to 'full time'
+
+    // Handle remote filtering with validated boolean
+    const matchesRemote = params.remote !== true || job.remote === true;
+
+    // Handle experience level filtering - skip since Job type doesn't have level field
+    const matchesExperience = !params.experience || params.experience === 'any';
+
+    return matchesSearch && matchesCategory && matchesType && matchesRemote && matchesExperience;
   });
 }
 
 export default async function JobsPage({ searchParams }: JobsPageProps) {
-  const params = await searchParams;
+  const rawParams = await searchParams;
+
+  // Validate and parse search parameters with Zod
+  const params = parseSearchParams(jobsSearchSchema, rawParams, 'jobs page');
+
+  // Log validated parameters for monitoring
+  logger.info('Jobs page accessed', {
+    search: params.q || params.query || params.search || '',
+    location: params.location || '',
+    category: params.category,
+    employment: params.employment,
+    remote: params.remote ? 'true' : 'false',
+    experience: params.experience,
+    page: params.page,
+    limit: params.limit,
+  });
+
   const filteredJobs = filterJobs(jobs, params);
 
   // Generate unique ID for search input
   const searchInputId = `jobs-search-${Math.random().toString(36).substr(2, 9)}`;
 
-  // Build current filter URL for form actions
-  const buildFilterUrl = (newParams: Record<string, string | undefined>) => {
+  // Build current filter URL for form actions with validated params
+  const buildFilterUrl = (newParams: Record<string, string | boolean | undefined>) => {
     const urlParams = new URLSearchParams();
-    const merged = { ...params, ...newParams };
+
+    // Convert validated params back to URL-compatible strings
+    const currentParams: Record<string, string | undefined> = {
+      search: params.search || params.q || params.query || undefined,
+      location: params.location,
+      category: params.category !== 'all' ? params.category : undefined,
+      employment: params.employment !== 'any' ? params.employment : undefined,
+      experience: params.experience !== 'any' ? params.experience : undefined,
+      remote: params.remote === true ? 'true' : undefined,
+    };
+
+    // Merge with new params
+    const merged = { ...currentParams, ...newParams };
 
     Object.entries(merged).forEach(([key, value]) => {
-      if (value && value !== 'all' && value !== '') {
-        urlParams.set(key, value);
+      if (value !== undefined && value !== null && value !== '') {
+        urlParams.set(key, String(value));
       }
     });
 
@@ -147,7 +187,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                       id={searchInputId}
                       name="search"
                       placeholder="Search jobs, companies, or skills..."
-                      defaultValue={params.search || ''}
+                      defaultValue={params.search || params.q || params.query || ''}
                       className="pl-10"
                     />
                   </div>
@@ -168,30 +208,30 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                     </SelectContent>
                   </Select>
 
-                  <Select name="type" defaultValue={params.type || 'all'}>
-                    <SelectTrigger aria-label="Filter jobs by type">
+                  <Select name="employment" defaultValue={params.employment || 'any'}>
+                    <SelectTrigger aria-label="Filter jobs by employment type">
                       <Clock className="h-4 w-4 mr-2" />
-                      <SelectValue placeholder="Job Type" />
+                      <SelectValue placeholder="Employment Type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Types</SelectItem>
-                      <SelectItem value="full-time">Full Time</SelectItem>
-                      <SelectItem value="part-time">Part Time</SelectItem>
+                      <SelectItem value="any">All Types</SelectItem>
+                      <SelectItem value="fulltime">Full Time</SelectItem>
+                      <SelectItem value="parttime">Part Time</SelectItem>
                       <SelectItem value="contract">Contract</SelectItem>
-                      <SelectItem value="internship">Internship</SelectItem>
+                      <SelectItem value="freelance">Freelance</SelectItem>
                     </SelectContent>
                   </Select>
 
                   <div className="flex gap-2">
                     <Button
                       type="button"
-                      variant={params.remote === 'true' ? 'default' : 'outline'}
+                      variant={params.remote === true ? 'default' : 'outline'}
                       className="flex-1"
                       asChild
                     >
                       <Link
                         href={buildFilterUrl({
-                          remote: params.remote === 'true' ? undefined : 'true',
+                          remote: params.remote === true ? undefined : 'true',
                         })}
                       >
                         <MapPin className="h-4 w-4 mr-2" />
@@ -205,12 +245,18 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                 </form>
 
                 {/* Active Filters */}
-                {(params.search || params.category || params.type || params.remote) && (
+                {(params.search ||
+                  params.q ||
+                  params.query ||
+                  params.location ||
+                  (params.category && params.category !== 'all') ||
+                  (params.employment && params.employment !== 'any') ||
+                  params.remote) && (
                   <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border">
                     <span className="text-sm text-muted-foreground">Active filters:</span>
-                    {params.search && (
+                    {(params.search || params.q || params.query) && (
                       <Badge variant="secondary">
-                        Search: {params.search}
+                        Search: {params.search || params.q || params.query}
                         <Link
                           href={buildFilterUrl({ search: undefined })}
                           className="ml-1 hover:text-destructive"
@@ -219,7 +265,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                         </Link>
                       </Badge>
                     )}
-                    {params.category && (
+                    {params.category && params.category !== 'all' && (
                       <Badge variant="secondary">
                         {params.category.charAt(0).toUpperCase() + params.category.slice(1)}
                         <Link
@@ -230,18 +276,19 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                         </Link>
                       </Badge>
                     )}
-                    {params.type && (
+                    {params.employment && params.employment !== 'any' && (
                       <Badge variant="secondary">
-                        {params.type.charAt(0).toUpperCase() + params.type.slice(1)}
+                        {params.employment.charAt(0).toUpperCase() +
+                          params.employment.slice(1).replace('time', ' Time')}
                         <Link
-                          href={buildFilterUrl({ type: undefined })}
+                          href={buildFilterUrl({ employment: undefined })}
                           className="ml-1 hover:text-destructive"
                         >
                           ×
                         </Link>
                       </Badge>
                     )}
-                    {params.remote === 'true' && (
+                    {params.remote === true && (
                       <Badge variant="secondary">
                         Remote
                         <Link
@@ -322,7 +369,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
 
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredJobs.map((job) => (
-                  <JobCard key={job.id} job={job} />
+                  <JobCard key={job.slug} job={job} />
                 ))}
               </div>
             </>

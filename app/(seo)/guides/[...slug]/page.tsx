@@ -5,12 +5,14 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import path from 'path';
+import { z } from 'zod';
 import { MDXRenderer } from '@/components/mdx-renderer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { UnifiedSidebar } from '@/components/unified-sidebar';
 import { ViewTracker } from '@/components/view-tracker';
+import { logger } from '@/lib/logger';
 import { parseMDXFrontmatter } from '@/lib/mdx-config';
 import { contentCache } from '@/lib/redis';
 
@@ -18,6 +20,24 @@ import { contentCache } from '@/lib/redis';
 export const revalidate = 604800; // 7 days
 export const dynamic = 'force-static';
 export const dynamicParams = true;
+
+// Validation schema for guide parameters
+const guideParamsSchema = z.object({
+  slug: z
+    .array(
+      z
+        .string()
+        .min(1, 'Slug segment cannot be empty')
+        .max(100, 'Slug segment too long')
+        .regex(
+          /^[a-zA-Z0-9-_]+$/,
+          'Slug can only contain letters, numbers, hyphens, and underscores'
+        )
+        .transform((val) => val.toLowerCase().trim())
+    )
+    .min(1, 'At least one slug segment required')
+    .max(5, 'Too many slug segments'),
+});
 
 interface SEOPageData {
   title: string;
@@ -64,6 +84,14 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
         if (!mappedPath) return null;
 
         const filePath = path.join(process.cwd(), 'seo', mappedPath, filename);
+
+        // Check if file exists before attempting to read
+        try {
+          await fs.access(filePath);
+        } catch {
+          return null;
+        }
+
         const fileContent = await fs.readFile(filePath, 'utf-8');
 
         // Parse frontmatter using our MDX parser
@@ -103,6 +131,14 @@ async function getRelatedGuides(currentSlug: string[], limit = 3): Promise<Relat
 
       try {
         const dir = path.join(process.cwd(), 'seo', currentCategory);
+
+        // Check if directory exists before attempting to read
+        try {
+          await fs.access(dir);
+        } catch {
+          return [];
+        }
+
         const files = await fs.readdir(dir);
 
         for (const file of files) {
@@ -148,6 +184,14 @@ export async function generateStaticParams() {
   for (const category of categories) {
     try {
       const dir = path.join(process.cwd(), 'seo', category);
+
+      // Check if directory exists before attempting to read
+      try {
+        await fs.access(dir);
+      } catch {
+        continue; // Skip non-existent directories
+      }
+
       const files = await fs.readdir(dir);
 
       for (const file of files) {
@@ -171,279 +215,334 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string[] }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const data = await getSEOPageData(slug);
+  try {
+    const rawParams = await params;
+    const validationResult = guideParamsSchema.safeParse(rawParams);
 
-  if (!data) {
+    if (!validationResult.success) {
+      logger.warn('Invalid guide slug parameters for metadata', {
+        slug: rawParams.slug?.join('/') || 'unknown',
+        errorCount: validationResult.error.issues.length,
+        firstError: validationResult.error.issues[0]?.message || 'Unknown error',
+      });
+      return {
+        title: 'Guide Not Found',
+        description: 'The requested guide could not be found.',
+      };
+    }
+
+    const { slug } = validationResult.data;
+    const data = await getSEOPageData(slug);
+
+    if (!data) {
+      return {
+        title: 'Guide Not Found',
+        description: 'The requested guide could not be found.',
+      };
+    }
+
+    const baseUrl = 'https://claudepro.directory';
+    const canonicalUrl = `${baseUrl}/guides/${slug.join('/')}`;
+
     return {
-      title: 'Guide Not Found',
-      description: 'The requested guide could not be found.',
-    };
-  }
-
-  const baseUrl = 'https://claudepro.directory';
-  const canonicalUrl = `${baseUrl}/guides/${slug.join('/')}`;
-
-  return {
-    title: data.title,
-    description: data.description,
-    keywords: data.keywords?.join(', '),
-    authors: [{ name: data.author || 'Claude Pro Directory Team' }],
-    alternates: {
-      canonical: canonicalUrl,
-    },
-    openGraph: {
       title: data.title,
       description: data.description,
-      type: 'article',
-      publishedTime: data.dateUpdated,
-      authors: [data.author || 'Claude Pro Directory Team'],
-      url: canonicalUrl,
-      siteName: 'Claude Pro Directory',
-      images: [
-        {
-          url: `${baseUrl}/api/og?title=${encodeURIComponent(data.title)}&category=${slug[0]}`,
-          width: 1200,
-          height: 630,
-          alt: data.title,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: data.title,
-      description: data.description,
-      images: [`${baseUrl}/api/og?title=${encodeURIComponent(data.title)}&category=${slug[0]}`],
-      creator: '@claudeprodirectory',
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
+      keywords: data.keywords?.join(', '),
+      authors: [{ name: data.author || 'Claude Pro Directory Team' }],
+      alternates: {
+        canonical: canonicalUrl,
+      },
+      openGraph: {
+        title: data.title,
+        description: data.description,
+        type: 'article',
+        publishedTime: data.dateUpdated,
+        authors: [data.author || 'Claude Pro Directory Team'],
+        url: canonicalUrl,
+        siteName: 'Claude Pro Directory',
+        images: [
+          {
+            url: `${baseUrl}/api/og?title=${encodeURIComponent(data.title)}&category=${slug[0]}`,
+            width: 1200,
+            height: 630,
+            alt: data.title,
+          },
+        ],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: data.title,
+        description: data.description,
+        images: [`${baseUrl}/api/og?title=${encodeURIComponent(data.title)}&category=${slug[0]}`],
+        creator: '@claudeprodirectory',
+      },
+      robots: {
         index: true,
         follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
+        googleBot: {
+          index: true,
+          follow: true,
+          'max-video-preview': -1,
+          'max-image-preview': 'large',
+          'max-snippet': -1,
+        },
       },
-    },
-  };
+    };
+  } catch (error: unknown) {
+    logger.error(
+      'Error generating guide metadata',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        type: 'metadata_generation',
+      }
+    );
+    return {
+      title: 'Guide Error',
+      description: 'An error occurred while loading the guide.',
+    };
+  }
 }
 
 export default async function SEOGuidePage({ params }: { params: Promise<{ slug: string[] }> }) {
-  const { slug } = await params;
-  const data = await getSEOPageData(slug);
+  try {
+    const rawParams = await params;
+    const validationResult = guideParamsSchema.safeParse(rawParams);
 
-  if (!data) {
-    notFound();
-  }
-
-  const [category] = slug;
-  const categoryLabels: Record<string, string> = {
-    'use-cases': 'Use Case',
-    tutorials: 'Tutorial',
-    collections: 'Collection',
-    categories: 'Category Guide',
-    workflows: 'Workflow',
-    comparisons: 'Comparison',
-    troubleshooting: 'Troubleshooting',
-  };
-
-  const categoryIcons: Record<string, typeof Zap> = {
-    'use-cases': Zap,
-    tutorials: BookOpen,
-    collections: Users,
-    categories: FileText,
-    workflows: Zap,
-    comparisons: FileText,
-    troubleshooting: Zap,
-  };
-
-  const Icon = (category && categoryIcons[category]) || BookOpen;
-  const relatedGuides = await getRelatedGuides(slug);
-
-  // Format date if available
-  const formatDate = (dateStr: string) => {
-    try {
-      return new Date(dateStr).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-    } catch {
-      return dateStr;
+    if (!validationResult.success) {
+      logger.error(
+        'Invalid guide slug parameters',
+        new Error(validationResult.error.issues[0]?.message || 'Invalid guide parameters'),
+        {
+          slug: rawParams.slug?.join('/') || 'unknown',
+          errorCount: validationResult.error.issues.length,
+        }
+      );
+      notFound();
     }
-  };
 
-  // Generate breadcrumb structured data
-  const breadcrumbList = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: 'https://claudepro.directory',
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: 'Guides',
-        item: 'https://claudepro.directory/guides',
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: categoryLabels[category || ''] || 'Guide',
-        item: `https://claudepro.directory/guides/${category}`,
-      },
-      {
-        '@type': 'ListItem',
-        position: 4,
-        name: data.title,
-        item: `https://claudepro.directory/guides/${slug.join('/')}`,
-      },
-    ],
-  };
+    const { slug } = validationResult.data;
+    const data = await getSEOPageData(slug);
 
-  // Article structured data
-  const articleData = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: data.title,
-    description: data.description,
-    keywords: data.keywords?.join(', '),
-    author: {
-      '@type': 'Person',
-      name: data.author || 'Claude Pro Directory Team',
-    },
-    datePublished: data.dateUpdated,
-    dateModified: data.dateUpdated,
-    publisher: {
-      '@type': 'Organization',
-      name: 'Claude Pro Directory',
-      logo: {
-        '@type': 'ImageObject',
-        url: 'https://claudepro.directory/logo.png',
+    if (!data) {
+      notFound();
+    }
+
+    const [category] = slug;
+    const categoryLabels: Record<string, string> = {
+      'use-cases': 'Use Case',
+      tutorials: 'Tutorial',
+      collections: 'Collection',
+      categories: 'Category Guide',
+      workflows: 'Workflow',
+      comparisons: 'Comparison',
+      troubleshooting: 'Troubleshooting',
+    };
+
+    const categoryIcons: Record<string, typeof Zap> = {
+      'use-cases': Zap,
+      tutorials: BookOpen,
+      collections: Users,
+      categories: FileText,
+      workflows: Zap,
+      comparisons: FileText,
+      troubleshooting: Zap,
+    };
+
+    const Icon = (category && categoryIcons[category]) || BookOpen;
+    const relatedGuides = await getRelatedGuides(slug);
+
+    // Format date if available
+    const formatDate = (dateStr: string) => {
+      try {
+        return new Date(dateStr).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+      } catch {
+        return dateStr;
+      }
+    };
+
+    // Generate breadcrumb structured data
+    const breadcrumbList = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: 'https://claudepro.directory',
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Guides',
+          item: 'https://claudepro.directory/guides',
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: categoryLabels[category || ''] || 'Guide',
+          item: `https://claudepro.directory/guides/${category}`,
+        },
+        {
+          '@type': 'ListItem',
+          position: 4,
+          name: data.title,
+          item: `https://claudepro.directory/guides/${slug.join('/')}`,
+        },
+      ],
+    };
+
+    // Article structured data
+    const articleData = {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: data.title,
+      description: data.description,
+      keywords: data.keywords?.join(', '),
+      author: {
+        '@type': 'Person',
+        name: data.author || 'Claude Pro Directory Team',
       },
-    },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': `https://claudepro.directory/guides/${slug.join('/')}`,
-    },
-    articleSection: categoryLabels[category || ''] || 'Guide',
-    wordCount: data.content.split(/\s+/).length,
-  };
+      datePublished: data.dateUpdated,
+      dateModified: data.dateUpdated,
+      publisher: {
+        '@type': 'Organization',
+        name: 'Claude Pro Directory',
+        logo: {
+          '@type': 'ImageObject',
+          url: 'https://claudepro.directory/logo.png',
+        },
+      },
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': `https://claudepro.directory/guides/${slug.join('/')}`,
+      },
+      articleSection: categoryLabels[category || ''] || 'Guide',
+      wordCount: data.content.split(/\s+/).length,
+    };
 
-  // Generate unique IDs based on the page slug to avoid conflicts
-  const pageId = slug.join('-');
-  const breadcrumbId = `breadcrumb-${pageId}`;
-  const articleId = `article-${pageId}`;
+    // Generate unique IDs based on the page slug to avoid conflicts
+    const pageId = slug.join('-');
+    const breadcrumbId = `breadcrumb-${pageId}`;
+    const articleId = `article-${pageId}`;
 
-  return (
-    <>
-      <Script id={breadcrumbId} type="application/ld+json" strategy="afterInteractive">
-        {JSON.stringify(breadcrumbList)}
-      </Script>
-      <Script id={articleId} type="application/ld+json" strategy="afterInteractive">
-        {JSON.stringify(articleData)}
-      </Script>
-      <div className="min-h-screen bg-background">
-        {/* Header - matches content pages */}
-        <div className="border-b border-border/50 bg-card/30">
-          <div className="container mx-auto px-4 py-8">
-            {/* Modern back navigation */}
-            <div className="mb-6">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="-ml-2 text-muted-foreground hover:text-foreground"
-                asChild
-              >
-                <Link href="/guides">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  All Guides
-                </Link>
-              </Button>
-            </div>
-
-            <div className="max-w-4xl">
-              <div className="flex items-start gap-4 mb-6">
-                <div className="p-3 bg-accent/10 rounded-lg">
-                  <Icon className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h1 className="text-3xl font-bold mb-2">{data.title}</h1>
-                  <p className="text-lg text-muted-foreground">{data.description}</p>
-                </div>
+    return (
+      <>
+        <Script id={breadcrumbId} type="application/ld+json" strategy="afterInteractive">
+          {JSON.stringify(breadcrumbList)}
+        </Script>
+        <Script id={articleId} type="application/ld+json" strategy="afterInteractive">
+          {JSON.stringify(articleData)}
+        </Script>
+        <div className="min-h-screen bg-background">
+          {/* Header - matches content pages */}
+          <div className="border-b border-border/50 bg-card/30">
+            <div className="container mx-auto px-4 py-8">
+              {/* Modern back navigation */}
+              <div className="mb-6">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="-ml-2 text-muted-foreground hover:text-foreground"
+                  asChild
+                >
+                  <Link href="/guides">
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    All Guides
+                  </Link>
+                </Button>
               </div>
 
-              {/* Metadata */}
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                <Badge variant="secondary">
-                  {category ? categoryLabels[category] || category : 'Guide'}
-                </Badge>
-                {data.dateUpdated && (
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    <span>Updated {formatDate(data.dateUpdated)}</span>
+              <div className="max-w-4xl">
+                <div className="flex items-start gap-4 mb-6">
+                  <div className="p-3 bg-accent/10 rounded-lg">
+                    <Icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h1 className="text-3xl font-bold mb-2">{data.title}</h1>
+                    <p className="text-lg text-muted-foreground">{data.description}</p>
+                  </div>
+                </div>
+
+                {/* Metadata */}
+                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                  <Badge variant="secondary">
+                    {category ? categoryLabels[category] || category : 'Guide'}
+                  </Badge>
+                  {data.dateUpdated && (
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-4 w-4" />
+                      <span>Updated {formatDate(data.dateUpdated)}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Tags/Keywords */}
+                {data.keywords && data.keywords.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {data.keywords.map((keyword: string) => (
+                      <Badge key={keyword} variant="outline">
+                        <Tag className="h-3 w-3 mr-1" />
+                        {keyword}
+                      </Badge>
+                    ))}
                   </div>
                 )}
               </div>
+            </div>
+          </div>
 
-              {/* Tags/Keywords */}
-              {data.keywords && data.keywords.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {data.keywords.map((keyword: string) => (
-                    <Badge key={keyword} variant="outline">
-                      <Tag className="h-3 w-3 mr-1" />
-                      {keyword}
-                    </Badge>
-                  ))}
-                </div>
-              )}
+          {/* Content with sidebar layout - matches content pages */}
+          <div className="container mx-auto px-4 py-12">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Main Content */}
+              <div className="lg:col-span-2 space-y-8">
+                <Card>
+                  <CardContent className="pt-6">
+                    <MDXRenderer
+                      source={data.content}
+                      metadata={{
+                        tags: data.keywords || [], // Note: SEO pages use keywords field
+                        keywords: data.keywords || [],
+                      }}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Sidebar */}
+              <UnifiedSidebar
+                mode="content"
+                contentData={{
+                  title: data.title,
+                  description: data.description,
+                  keywords: data.keywords,
+                  dateUpdated: data.dateUpdated,
+                  category: category || '',
+                  content: data.content,
+                }}
+                relatedGuides={relatedGuides}
+              />
             </div>
           </div>
         </div>
 
-        {/* Content with sidebar layout - matches content pages */}
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-8">
-              <Card>
-                <CardContent className="pt-6">
-                  <MDXRenderer
-                    source={data.content}
-                    metadata={{
-                      tags: data.keywords || [], // Note: SEO pages use keywords field
-                      keywords: data.keywords || [],
-                    }}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Sidebar */}
-            <UnifiedSidebar
-              mode="content"
-              contentData={{
-                title: data.title,
-                description: data.description,
-                keywords: data.keywords,
-                dateUpdated: data.dateUpdated,
-                category: category || '',
-                content: data.content,
-              }}
-              relatedGuides={relatedGuides}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Track guide views for trending analytics */}
-      <ViewTracker category="guides" slug={slug.join('/')} />
-    </>
-  );
+        {/* Track guide views for trending analytics */}
+        <ViewTracker category="guides" slug={slug.join('/')} />
+      </>
+    );
+  } catch (error: unknown) {
+    logger.error(
+      'Error rendering guide page',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        type: 'page_rendering',
+      }
+    );
+    notFound();
+  }
 }

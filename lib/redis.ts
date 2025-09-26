@@ -1,14 +1,37 @@
 import { Redis } from '@upstash/redis';
+import { z } from 'zod';
 import { logger } from './logger';
+import {
+  apiResponseCacheSchema,
+  cacheCategorySchema,
+  cacheContentMetadataSchema,
+  cachedApiResponseSchema,
+  cacheKeyParamsSchema,
+  cacheStatsSchema,
+  mdxCacheSchema,
+  parseCachedJSON,
+  parseGenericCachedJSON,
+  parseRedisZRangeResponse,
+  popularItemsQuerySchema,
+  validateBatchIncrements,
+  validateCacheKey,
+  validateTTL,
+} from './schemas/cache.schema';
+import { redisConfig } from './schemas/env.schema';
 
 // Compression utilities for optimizing storage
 const compress = (data: string): string => {
   if (data.length < 100) return data; // Don't compress small data
 
   try {
-    // Simple compression using JSON.stringify optimization
-    const compressed = JSON.stringify(JSON.parse(data));
-    return compressed.length < data.length ? compressed : data;
+    // Validate string before compression
+    const validData = z.string().max(10485760).parse(data); // 10MB max
+    // Safe JSON compression using Zod validation
+    const parsed = parseGenericCachedJSON(validData, { operation: 'compress' });
+    if (parsed === null) return validData; // Return original if parse failed
+
+    const compressed = JSON.stringify(parsed);
+    return compressed.length < validData.length ? compressed : validData;
   } catch {
     return data;
   }
@@ -43,11 +66,11 @@ const checkRateLimit = async (): Promise<void> => {
 };
 
 // Initialize Redis client
-// Uses KV_REST_API_URL and KV_REST_API_TOKEN from Upstash Vercel integration
-const redis = process.env.KV_REST_API_URL
+// Uses validated environment variables from env schema
+const redis = redisConfig.isConfigured
   ? new Redis({
-      url: process.env.KV_REST_API_URL,
-      token: process.env.KV_REST_API_TOKEN!,
+      url: redisConfig.url!,
+      token: redisConfig.token!,
     })
   : null;
 
@@ -146,20 +169,28 @@ export const statsRedis = {
     if (!redis) return [];
 
     try {
+      // Validate inputs
+      const validatedQuery = popularItemsQuerySchema.parse({ category, limit });
+
       // Get items from the last 7 days
       const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
       // Get trending items from the weekly sorted set
       // Use zrange with byScore option for Upstash Redis
-      const items = await redis.zrange(`trending:${category}:weekly`, oneWeekAgo, Date.now(), {
-        byScore: true,
-        rev: true,
-        withScores: false,
-        offset: 0,
-        count: limit,
-      });
+      const items = await redis.zrange(
+        `trending:${validatedQuery.category}:weekly`,
+        oneWeekAgo,
+        Date.now(),
+        {
+          byScore: true,
+          rev: true,
+          withScores: false,
+          offset: 0,
+          count: validatedQuery.limit,
+        }
+      );
 
-      return items as string[];
+      return z.array(z.string()).parse(items || []);
     } catch (error) {
       logger.error(
         'Failed to get trending items from Redis',
@@ -182,21 +213,24 @@ export const statsRedis = {
     if (!redis) return [];
 
     try {
-      const items = await redis.zrange(`popular:${category}:all`, 0, limit - 1, {
-        rev: true,
-        withScores: true,
+      // Validate inputs
+      const validatedQuery = popularItemsQuerySchema.parse({ category, limit });
+
+      const items = await redis.zrange(
+        `popular:${validatedQuery.category}:all`,
+        0,
+        validatedQuery.limit - 1,
+        {
+          rev: true,
+          withScores: true,
+        }
+      );
+
+      // Convert to array of objects using safe parsing
+      return parseRedisZRangeResponse(items, {
+        operation: 'getPopular',
+        key: `popular:${validatedQuery.category}:all`,
       });
-
-      // Convert to array of objects
-      const result: Array<{ slug: string; views: number }> = [];
-      for (let i = 0; i < items.length; i += 2) {
-        result.push({
-          slug: items[i] as string,
-          views: Number(items[i + 1]),
-        });
-      }
-
-      return result;
     } catch (error) {
       logger.error(
         'Failed to get popular items from Redis',
@@ -216,11 +250,14 @@ export const statsRedis = {
     if (!redis) return;
 
     try {
-      const key = `copies:${category}:${slug}`;
+      // Validate inputs
+      const validated = cacheKeyParamsSchema.parse({ category, slug });
+
+      const key = `copies:${validated.category}:${validated.slug}`;
       await redis.incr(key);
 
       // Update copy leaderboard
-      await redis.zincrby(`copied:${category}:all`, 1, slug);
+      await redis.zincrby(`copied:${validated.category}:all`, 1, validated.slug);
     } catch (error) {
       logger.error(
         'Failed to track copy action in Redis',
@@ -248,11 +285,12 @@ export const statsRedis = {
     try {
       // This would need to aggregate data - simplified for now
       // In production, you'd maintain running counters
-      return {
+      const stats = cacheStatsSchema.parse({
         totalViews: 0,
         totalCopies: 0,
         topCategories: [],
-      };
+      });
+      return stats;
     } catch (error) {
       logger.error(
         'Failed to get overall stats from Redis',
@@ -267,10 +305,12 @@ export const statsRedis = {
     if (!redis) return;
 
     try {
-      const categories = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'guides'];
+      const categories = ['agents', 'mcp', 'rules', 'commands', 'hooks'] as const;
       const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
-      for (const category of categories) {
+      for (const categoryRaw of categories) {
+        // Validate category
+        const category = cacheCategorySchema.parse(categoryRaw);
         await redis.zremrangebyscore(`trending:${category}:weekly`, 0, oneWeekAgo);
       }
     } catch (error) {
@@ -301,12 +341,15 @@ export const contentCache = {
     if (!redis) return;
 
     try {
+      // Validate inputs
+      const validated = mdxCacheSchema.parse({ path, content, ttl });
+
       await checkRateLimit();
-      const key = `mdx:${path}`;
-      const compressedContent = compress(content);
+      const key = `mdx:${validated.path}`;
+      const compressedContent = compress(validated.content);
       const sizeReduction = content.length - compressedContent.length;
 
-      await redis.setex(key, ttl, compressedContent);
+      await redis.setex(key, validated.ttl, compressedContent);
 
       if (sizeReduction > 0) {
         logger.info('MDX content compressed', {
@@ -334,8 +377,11 @@ export const contentCache = {
     if (!redis) return null;
 
     try {
+      // Validate path
+      const validatedPath = validateCacheKey(`mdx:${path}`);
+
       await checkRateLimit();
-      const key = `mdx:${path}`;
+      const key = validatedPath;
       const content = await redis.get<string>(key);
       return content ? decompress(content) : null;
     } catch (error) {
@@ -364,10 +410,11 @@ export const contentCache = {
         const pipeline = redis.pipeline();
 
         for (const item of batch) {
-          const key = `mdx:${item.path}`;
-          const compressedContent = compress(item.content);
-          const ttl = item.ttl || 24 * 60 * 60;
-          pipeline.setex(key, ttl, compressedContent);
+          // Validate each item
+          const validated = mdxCacheSchema.parse(item);
+          const key = `mdx:${validated.path}`;
+          const compressedContent = compress(validated.content);
+          pipeline.setex(key, validated.ttl, compressedContent);
         }
 
         await pipeline.exec();
@@ -400,8 +447,12 @@ export const contentCache = {
     if (!redis) return;
 
     try {
-      const key = `content:${category}:metadata`;
-      await redis.setex(key, ttl, JSON.stringify(data));
+      // Validate inputs
+      const validatedCategory = cacheCategorySchema.parse(category);
+      const validatedTTL = validateTTL(ttl);
+
+      const key = `content:${validatedCategory}:metadata`;
+      await redis.setex(key, validatedTTL, JSON.stringify(data));
     } catch (error) {
       logger.error(
         'Failed to cache content metadata',
@@ -420,9 +471,21 @@ export const contentCache = {
     if (!redis) return null;
 
     try {
-      const key = `content:${category}:metadata`;
+      // Validate category
+      const validatedCategory = cacheCategorySchema.parse(category);
+
+      const key = `content:${validatedCategory}:metadata`;
       const data = await redis.get<string>(key);
-      return data ? JSON.parse(data) : null;
+
+      if (!data) return null;
+
+      // Use safe JSON parsing with content metadata schema
+      const parsed = parseCachedJSON(data, cacheContentMetadataSchema, {
+        key,
+        operation: 'getContentMetadata',
+      });
+
+      return parsed as T | null;
     } catch (error) {
       logger.error(
         'Failed to retrieve cached content metadata',
@@ -445,8 +508,14 @@ export const contentCache = {
     if (!redis) return;
 
     try {
-      const key = `api:${endpoint}`;
-      await redis.setex(key, ttl, JSON.stringify(data));
+      // Validate inputs
+      const validated = apiResponseCacheSchema.parse({
+        key: `api:${endpoint}`,
+        data,
+        ttl,
+      });
+
+      await redis.setex(validated.key, validated.ttl, JSON.stringify(validated.data));
     } catch (error) {
       logger.error(
         'Failed to cache API response',
@@ -465,9 +534,19 @@ export const contentCache = {
     if (!redis) return null;
 
     try {
-      const key = `api:${endpoint}`;
+      // Validate key
+      const key = validateCacheKey(`api:${endpoint}`);
       const data = await redis.get<string>(key);
-      return data ? JSON.parse(data) : null;
+
+      if (!data) return null;
+
+      // Use safe JSON parsing with cached API response schema
+      const parsed = parseCachedJSON(data, cachedApiResponseSchema, {
+        key,
+        operation: 'getAPIResponse',
+      });
+
+      return parsed as T | null;
     } catch (error) {
       logger.error(
         'Failed to retrieve cached API response',
@@ -486,10 +565,17 @@ export const contentCache = {
     if (!redis) return;
 
     try {
+      // Validate pattern (max 100 chars, simple pattern)
+      const validPattern = z
+        .string()
+        .max(100, 'Pattern too long')
+        .regex(/^[a-zA-Z0-9:_\-/*]+$/, 'Invalid pattern format')
+        .parse(pattern);
+
       // Note: Upstash Redis doesn't support KEYS command in production
       // This is a simplified version - in production you'd use a different approach
       // or store cache keys in a set for easier invalidation
-      const keys = await redis.keys(pattern);
+      const keys = await redis.keys(validPattern);
       if (keys.length > 0) {
         await redis.del(...keys);
       }
@@ -516,19 +602,37 @@ export const contentCache = {
     }
 
     try {
-      // Try to get cached data with TTL
-      const cached = await redis.get<string>(key);
-      const ttlRemaining = await redis.ttl(key);
+      // Validate inputs
+      const validKey = validateCacheKey(key);
+      const validTTL = validateTTL(ttl);
+      const validThreshold = z
+        .number()
+        .min(0, 'Threshold must be at least 0')
+        .max(1, 'Threshold cannot exceed 1')
+        .parse(refreshThreshold);
 
-      if (cached && ttlRemaining > ttl * (1 - refreshThreshold)) {
-        return JSON.parse(cached);
+      // Try to get cached data with TTL
+      const cached = await redis.get<string>(validKey);
+      const ttlRemaining = await redis.ttl(validKey);
+
+      if (cached && ttlRemaining > validTTL * (1 - validThreshold)) {
+        // Use safe JSON parsing with cached API response schema
+        const parsed = parseCachedJSON(cached, cachedApiResponseSchema, {
+          key: validKey,
+          operation: 'cacheWithRefresh',
+        });
+
+        if (parsed !== null) {
+          return parsed as T;
+        }
+        // If parsing fails, fall through to fetch fresh data
       }
 
       // Data is stale or doesn't exist, fetch fresh data
       const freshData = await fetcher();
 
       // Cache the fresh data
-      await redis.setex(key, ttl, JSON.stringify(freshData));
+      await redis.setex(validKey, validTTL, JSON.stringify(freshData));
 
       return freshData;
     } catch (error) {
@@ -566,16 +670,22 @@ export const redisOptimizer = {
     if (!redis || operations.length === 0) return [];
 
     try {
+      // Validate batch increment operations with safe parsing
+      const validatedOps = validateBatchIncrements(operations);
+      if (validatedOps.length === 0) {
+        return [];
+      }
+
       const results: number[] = [];
 
       // Process operations in batches
-      for (let i = 0; i < operations.length; i += BATCH_SIZE) {
+      for (let i = 0; i < validatedOps.length; i += BATCH_SIZE) {
         await checkRateLimit();
-        const batch = operations.slice(i, i + BATCH_SIZE);
+        const batch = validatedOps.slice(i, i + BATCH_SIZE);
         const pipeline = redis.pipeline();
 
         for (const op of batch) {
-          if (op.increment && op.increment !== 1) {
+          if (op.increment !== 1) {
             pipeline.incrby(op.key, op.increment);
           } else {
             pipeline.incr(op.key);
@@ -583,7 +693,11 @@ export const redisOptimizer = {
         }
 
         const batchResults = await pipeline.exec();
-        results.push(...(batchResults as number[]));
+        // Validate batch results are numbers
+        const validatedResults = z.array(z.number()).safeParse(batchResults);
+        if (validatedResults.success) {
+          results.push(...validatedResults.data);
+        }
       }
 
       return results;
@@ -601,20 +715,30 @@ export const redisOptimizer = {
     if (!redis || keys.length === 0) return {};
 
     try {
+      // Validate all keys
+      const validatedKeys = keys.map((key) => validateCacheKey(key));
       const results: Record<string, T | null> = {};
 
       // Process keys in batches
-      for (let i = 0; i < keys.length; i += BATCH_SIZE) {
+      for (let i = 0; i < validatedKeys.length; i += BATCH_SIZE) {
         await checkRateLimit();
-        const batch = keys.slice(i, i + BATCH_SIZE);
+        const batch = validatedKeys.slice(i, i + BATCH_SIZE);
         const values = await redis.mget<(string | null)[]>(...batch);
 
         batch.forEach((key, index) => {
           const value = values[index];
           if (value) {
-            try {
-              results[key] = JSON.parse(decompress(value));
-            } catch {
+            // Use safe JSON parsing with decompression
+            const decompressed = decompress(value);
+            const parsed = parseGenericCachedJSON(decompressed, {
+              key,
+              operation: 'batchGet',
+            });
+
+            if (parsed !== null) {
+              results[key] = parsed as T;
+            } else {
+              // Fallback to raw value if JSON parsing fails
               results[key] = value as T;
             }
           } else {
@@ -635,7 +759,10 @@ export const redisOptimizer = {
     if (!redis) return;
 
     try {
-      const categories = ['mdx', 'content', 'api', 'trending', 'popular'];
+      // Validate cleanup categories
+      const categories = z
+        .array(z.enum(['mdx', 'content', 'api', 'trending', 'popular']))
+        .parse(['mdx', 'content', 'api', 'trending', 'popular']);
 
       for (const category of categories) {
         // Use SCAN instead of KEYS for production safety

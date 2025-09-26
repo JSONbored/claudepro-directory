@@ -9,23 +9,51 @@
 
 import { mkdir, writeFile } from 'fs/promises';
 import { join } from 'path';
+import { z } from 'zod';
 import { agents, commands, hooks, mcp, rules } from '../generated/content';
-import type { SearchableItem } from '../lib/search-cache';
+import { buildConfig, env } from '../lib/schemas/env.schema';
+import {
+  type ContentCategory,
+  type ContentType,
+  contentCategorySchema,
+} from '../lib/schemas/shared.schema';
+import {
+  type AllConfigurationsResponse,
+  allConfigurationsResponseSchema,
+  type CategorySearchIndex,
+  type CombinedSearchIndex,
+  type ContentTypeApiResponse,
+  categorySearchIndexSchema,
+  combinedSearchIndexSchema,
+  contentTypeApiResponseSchema,
+  type GenerationResult,
+  type HealthCheckResponse,
+  healthCheckResponseSchema,
+  type SearchableItem,
+  searchableItemSchema,
+  type TransformedContentItem,
+  transformedContentItemSchema,
+} from '../lib/schemas/static-api.schema';
 
 // Output directory for static APIs
 const OUTPUT_DIR = join(process.cwd(), 'public', 'static-api');
 
 // Helper function to transform content with type and URL
 function transformContent<T extends { slug: string }>(
-  content: T[],
-  type: string,
+  content: readonly T[] | T[],
+  type: ContentType,
   category: string
-): (T & { type: string; url: string })[] {
-  return content.map((item) => ({
-    ...item,
-    type,
-    url: `https://claudepro.directory/${category}/${item.slug}`,
-  }));
+): TransformedContentItem[] {
+  return content.map((item) => {
+    const transformed = {
+      ...item,
+      type,
+      url: `https://claudepro.directory/${category}/${item.slug}`,
+    };
+
+    // Validate the transformed item
+    return transformedContentItemSchema.parse(transformed);
+  });
 }
 
 // Convert content items to searchable format
@@ -34,54 +62,70 @@ function toSearchableItems<
     title?: string;
     name?: string;
     description: string;
-    tags: string[];
+    tags: readonly string[] | string[];
     slug: string;
-    id: string;
     category?: string;
   },
->(items: T[], category: string): SearchableItem[] {
-  return items.map((item) => ({
-    title: item.title || item.name || '',
-    name: item.name || '',
-    description: item.description,
-    tags: item.tags,
-    category: item.category || category,
-    popularity: 0, // Will be populated from Redis in production
-    slug: item.slug,
-    id: item.id,
-  }));
+>(items: readonly T[] | T[], category: string): SearchableItem[] {
+  return items.map((item) => {
+    const searchable = {
+      title: item.title || item.name || '',
+      name: item.name || '',
+      description: item.description,
+      tags: [...item.tags],
+      category: item.category || category,
+      popularity: 0, // Will be populated from Redis in production
+      slug: item.slug,
+      id: item.slug, // Use slug as id
+    };
+
+    // Validate the searchable item
+    return searchableItemSchema.parse(searchable);
+  });
 }
 
 // Generate individual content type APIs
 async function generateContentTypeAPIs() {
   const contentMap = {
-    'agents.json': { data: agents, type: 'agent' },
-    'mcp.json': { data: mcp, type: 'mcp' },
-    'hooks.json': { data: hooks, type: 'hook' },
-    'commands.json': { data: commands, type: 'command' },
-    'rules.json': { data: rules, type: 'rule' },
-  } as const;
+    'agents.json': { data: agents, type: 'agent' as ContentType },
+    'mcp.json': { data: mcp, type: 'mcp' as ContentType },
+    'hooks.json': { data: hooks, type: 'hook' as ContentType },
+    'commands.json': { data: commands, type: 'command' as ContentType },
+    'rules.json': { data: rules, type: 'rule' as ContentType },
+  };
 
   console.log('📦 Generating individual content type APIs...');
 
   for (const [filename, { data, type }] of Object.entries(contentMap)) {
-    const category = filename.replace('.json', '');
+    const category = filename.replace('.json', '') as ContentCategory;
 
-    const responseData = {
-      [category]: data.map((item) => ({
+    // Validate category
+    const validatedCategory = contentCategorySchema.parse(category);
+
+    // Transform and validate items
+    const transformedItems = data.map((item) => {
+      const transformed = {
         ...item,
         type,
-        url: `https://claudepro.directory/${category}/${item.slug}`,
-      })),
-      count: data.length,
+        url: `https://claudepro.directory/${validatedCategory}/${item.slug}`,
+      };
+      return transformedContentItemSchema.parse(transformed);
+    });
+
+    const responseData: ContentTypeApiResponse = {
+      [validatedCategory]: transformedItems,
+      count: transformedItems.length,
       lastUpdated: new Date().toISOString(),
-      generated: 'static',
+      generated: 'static' as const,
     };
 
-    const outputFile = join(OUTPUT_DIR, filename);
-    await writeFile(outputFile, JSON.stringify(responseData, null, 2));
+    // Validate the full response
+    const validatedResponse = contentTypeApiResponseSchema.parse(responseData);
 
-    console.log(`  ✅ Generated ${filename} (${data.length} items)`);
+    const outputFile = join(OUTPUT_DIR, filename);
+    await writeFile(outputFile, JSON.stringify(validatedResponse, null, 2));
+
+    console.log(`  ✅ Generated ${filename} (${transformedItems.length} items)`);
   }
 }
 
@@ -89,20 +133,20 @@ async function generateContentTypeAPIs() {
 async function generateAllConfigurationsAPI() {
   console.log('📦 Generating all-configurations API...');
 
-  const transformedAgents = transformContent(agents, 'agent', 'agents');
-  const transformedMcp = transformContent(mcp, 'mcp', 'mcp');
-  const transformedRules = transformContent(rules, 'rule', 'rules');
-  const transformedCommands = transformContent(commands, 'command', 'commands');
-  const transformedHooks = transformContent(hooks, 'hook', 'hooks');
+  const transformedAgents = transformContent(agents, 'agent' as ContentType, 'agents');
+  const transformedMcp = transformContent(mcp, 'mcp' as ContentType, 'mcp');
+  const transformedRules = transformContent(rules, 'rule' as ContentType, 'rules');
+  const transformedCommands = transformContent(commands, 'command' as ContentType, 'commands');
+  const transformedHooks = transformContent(hooks, 'hook' as ContentType, 'hooks');
 
-  const allConfigurations = {
+  const allConfigurations: AllConfigurationsResponse = {
     '@context': 'https://schema.org',
     '@type': 'Dataset',
     name: 'Claude Pro Directory - All Configurations',
     description: 'Complete database of Claude AI configurations',
     license: 'MIT',
     lastUpdated: new Date().toISOString(),
-    generated: 'static',
+    generated: 'static' as const,
     statistics: {
       totalConfigurations:
         transformedAgents.length +
@@ -132,11 +176,14 @@ async function generateAllConfigurationsAPI() {
     },
   };
 
+  // Validate the full response
+  const validatedConfigurations = allConfigurationsResponseSchema.parse(allConfigurations);
+
   const outputFile = join(OUTPUT_DIR, 'all-configurations.json');
-  await writeFile(outputFile, JSON.stringify(allConfigurations, null, 2));
+  await writeFile(outputFile, JSON.stringify(validatedConfigurations, null, 2));
 
   console.log(
-    `  ✅ Generated all-configurations.json (${allConfigurations.statistics.totalConfigurations} total items)`
+    `  ✅ Generated all-configurations.json (${validatedConfigurations.statistics.totalConfigurations} total items)`
   );
 }
 
@@ -146,25 +193,25 @@ async function generateSearchIndexes() {
 
   // Create combined searchable dataset
   const allSearchableItems: SearchableItem[] = [
-    ...toSearchableItems(agents, 'agents'),
-    ...toSearchableItems(mcp, 'mcp'),
-    ...toSearchableItems(rules, 'rules'),
-    ...toSearchableItems(commands, 'commands'),
-    ...toSearchableItems(hooks, 'hooks'),
+    ...toSearchableItems([...agents], 'agents'),
+    ...toSearchableItems([...mcp], 'mcp'),
+    ...toSearchableItems([...rules], 'rules'),
+    ...toSearchableItems([...commands], 'commands'),
+    ...toSearchableItems([...hooks], 'hooks'),
   ];
 
   // Generate category-specific indexes
-  const categories = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
+  const categories: ContentCategory[] = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
 
   for (const category of categories) {
     const categoryItems = allSearchableItems.filter((item) => item.category === category);
 
-    const searchIndex = {
+    const searchIndex: CategorySearchIndex = {
       category,
       items: categoryItems,
       count: categoryItems.length,
       lastUpdated: new Date().toISOString(),
-      generated: 'static',
+      generated: 'static' as const,
       // Pre-computed search metadata
       tags: [...new Set(categoryItems.flatMap((item) => item.tags))].sort(),
       popularTags: [...new Set(categoryItems.flatMap((item) => item.tags))]
@@ -176,18 +223,21 @@ async function generateSearchIndexes() {
         .slice(0, 20),
     };
 
+    // Validate the search index
+    const validatedIndex = categorySearchIndexSchema.parse(searchIndex);
+
     const outputFile = join(OUTPUT_DIR, 'search-indexes', `${category}.json`);
-    await writeFile(outputFile, JSON.stringify(searchIndex, null, 2));
+    await writeFile(outputFile, JSON.stringify(validatedIndex, null, 2));
 
     console.log(`  ✅ Generated search index for ${category} (${categoryItems.length} items)`);
   }
 
   // Generate combined search index
-  const combinedSearchIndex = {
+  const combinedSearchIndex: CombinedSearchIndex = {
     items: allSearchableItems,
     count: allSearchableItems.length,
     lastUpdated: new Date().toISOString(),
-    generated: 'static',
+    generated: 'static' as const,
     categories: categories.map((category) => ({
       category,
       count: allSearchableItems.filter((item) => item.category === category).length,
@@ -202,8 +252,11 @@ async function generateSearchIndexes() {
       .slice(0, 50),
   };
 
+  // Validate the combined index
+  const validatedCombinedIndex = combinedSearchIndexSchema.parse(combinedSearchIndex);
+
   const combinedOutputFile = join(OUTPUT_DIR, 'search-indexes', 'combined.json');
-  await writeFile(combinedOutputFile, JSON.stringify(combinedSearchIndex, null, 2));
+  await writeFile(combinedOutputFile, JSON.stringify(validatedCombinedIndex, null, 2));
 
   console.log(`  ✅ Generated combined search index (${allSearchableItems.length} items)`);
 }
@@ -212,12 +265,12 @@ async function generateSearchIndexes() {
 async function generateHealthCheck() {
   console.log('📦 Generating health check endpoint...');
 
-  const healthData = {
+  const healthData: HealthCheckResponse = {
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    generated: 'static',
-    version: process.env.npm_package_version || '1.0.0',
-    environment: process.env.NODE_ENV || 'production',
+    generated: 'static' as const,
+    version: buildConfig.version,
+    environment: env.NODE_ENV,
     counts: {
       agents: agents.length,
       mcp: mcp.length,
@@ -234,15 +287,21 @@ async function generateHealthCheck() {
     },
   };
 
+  // Validate health check response
+  const validatedHealth = healthCheckResponseSchema.parse(healthData);
+
   const outputFile = join(OUTPUT_DIR, 'health.json');
-  await writeFile(outputFile, JSON.stringify(healthData, null, 2));
+  await writeFile(outputFile, JSON.stringify(validatedHealth, null, 2));
 
   console.log(`  ✅ Generated health check endpoint`);
 }
 
 // Main generation function
-async function generateStaticAPIs() {
+async function generateStaticAPIs(): Promise<GenerationResult> {
   console.log('🚀 Starting static API generation...\n');
+  const startTime = performance.now();
+  const filesGenerated: string[] = [];
+  const errors: string[] = [];
 
   try {
     // Ensure output directories exist
@@ -251,22 +310,52 @@ async function generateStaticAPIs() {
 
     // Generate all static APIs
     await generateContentTypeAPIs();
+    filesGenerated.push('agents.json', 'mcp.json', 'hooks.json', 'commands.json', 'rules.json');
     console.log();
 
     await generateAllConfigurationsAPI();
+    filesGenerated.push('all-configurations.json');
     console.log();
 
     await generateSearchIndexes();
+    filesGenerated.push(
+      'search-indexes/agents.json',
+      'search-indexes/mcp.json',
+      'search-indexes/rules.json',
+      'search-indexes/commands.json',
+      'search-indexes/hooks.json',
+      'search-indexes/combined.json'
+    );
     console.log();
 
     await generateHealthCheck();
+    filesGenerated.push('health.json');
     console.log();
+
+    const duration = performance.now() - startTime;
+    const totalItems = agents.length + mcp.length + rules.length + commands.length + hooks.length;
 
     console.log('✅ All static APIs generated successfully!');
     console.log(`📁 Output directory: ${OUTPUT_DIR}`);
     console.log('🎯 APIs can now be served directly from CDN for maximum performance');
+
+    return {
+      success: true,
+      outputDir: OUTPUT_DIR,
+      filesGenerated,
+      totalItems,
+      duration,
+      errors: errors.length > 0 ? errors : undefined,
+    };
   } catch (error) {
-    console.error('❌ Failed to generate static APIs:', error);
+    if (error instanceof z.ZodError) {
+      console.error('Validation error during generation:', error.issues);
+      errors.push(...error.issues.map((i) => `${i.path.join('.')}: ${i.message}`));
+    } else {
+      console.error('❌ Failed to generate static APIs:', error);
+      errors.push(String(error));
+    }
+
     process.exit(1);
   }
 }

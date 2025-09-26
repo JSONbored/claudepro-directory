@@ -2,18 +2,10 @@
  * Types for the smart related content system
  */
 
-// Content types that can be related
-export type ContentCategory =
-  | 'agents'
-  | 'mcp'
-  | 'rules'
-  | 'commands'
-  | 'hooks'
-  | 'tutorials'
-  | 'comparisons'
-  | 'workflows'
-  | 'use-cases'
-  | 'troubleshooting';
+import type { ContentCategory } from '../schemas/shared.schema';
+
+// Re-export ContentCategory from shared schema for consistency
+export type { ContentCategory };
 
 // Unified content item interface
 export interface ContentItem {
@@ -24,6 +16,7 @@ export interface ContentItem {
   tags?: string[];
   keywords?: string[];
   url: string;
+  dateCreated?: string;
   dateUpdated?: string;
   views?: number;
   trending?: boolean;
@@ -39,6 +32,7 @@ export interface RelatedContentItem extends ContentItem {
     | 'keyword_match'
     | 'trending'
     | 'popular'
+    | 'featured'
     | 'cross_category';
   matchDetails?: {
     matchedTags?: string[];

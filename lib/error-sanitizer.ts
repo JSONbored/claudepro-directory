@@ -5,6 +5,16 @@
  */
 
 import { logger } from '@/lib/logger';
+import { isProduction } from '@/lib/schemas/env.schema';
+import {
+  determineErrorType,
+  type ErrorContext,
+  type ErrorSeverity,
+  errorSeveritySchema,
+  type SanitizedError,
+  validateErrorInput,
+  validateSanitizedError,
+} from '@/lib/schemas/error.schema';
 
 /**
  * Sensitive patterns that must be removed from error messages
@@ -85,40 +95,8 @@ const SAFE_ERROR_MESSAGES = {
   default: 'An error occurred while processing your request',
 } as const;
 
-/**
- * Error severity levels for logging and response
- */
-export enum ErrorSeverity {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-}
-
-/**
- * Sanitized error response interface
- */
-export interface SanitizedError {
-  error: string;
-  message: string;
-  code: string;
-  timestamp: string;
-  requestId: string;
-  severity: ErrorSeverity;
-}
-
-/**
- * Context information for error sanitization
- */
-export interface ErrorContext {
-  route?: string;
-  operation?: string;
-  method?: string;
-  component?: string;
-  key?: string;
-  contentType?: string;
-  [key: string]: string | number | boolean;
-}
+// Re-export types from schema for backward compatibility
+export type { ErrorSeverity } from '@/lib/schemas/error.schema';
 
 /**
  * Error sanitization utility class
@@ -162,68 +140,39 @@ export class ErrorSanitizer {
   }
 
   /**
-   * Convert unknown error to Error instance
+   * Convert unknown error to Error instance using Zod validation
    */
   private normalizeError(error: unknown): Error {
-    if (error instanceof Error) {
-      return error;
+    const validatedInput = validateErrorInput(error);
+
+    if (validatedInput.isValid && validatedInput.error) {
+      // Create Error instance from validated data
+      const err = new Error(validatedInput.error.message);
+      if (validatedInput.error.name) {
+        err.name = validatedInput.error.name;
+      }
+      if (validatedInput.error.stack) {
+        err.stack = validatedInput.error.stack;
+      }
+      return err;
     }
-    if (typeof error === 'string') {
-      return new Error(error);
+
+    if (validatedInput.fallback) {
+      return new Error(validatedInput.fallback);
     }
-    if (typeof error === 'object' && error !== null) {
-      return new Error(JSON.stringify(error));
-    }
+
     return new Error('Unknown error occurred');
   }
 
   /**
-   * Determine error type from error object
+   * Determine error type from error object using schema validation
    */
   private determineErrorType(error: Error): keyof typeof SAFE_ERROR_MESSAGES {
-    const errorName = error.name || error.constructor.name;
-    const errorMessage = error.message.toLowerCase();
-
-    // Check for specific error types
-    if (errorName.includes('Validation') || errorMessage.includes('validation')) {
-      return 'ValidationError';
-    }
-    if (errorName.includes('Database') || errorMessage.includes('database')) {
-      return 'DatabaseError';
-    }
-    if (errorName.includes('Auth') && errorMessage.includes('auth')) {
-      return 'AuthenticationError';
-    }
-    if (errorMessage.includes('access denied') || errorMessage.includes('forbidden')) {
-      return 'AuthorizationError';
-    }
-    if (errorMessage.includes('not found') || errorName.includes('NotFound')) {
-      return 'NotFoundError';
-    }
-    if (errorMessage.includes('rate limit') || errorMessage.includes('too many')) {
-      return 'RateLimitError';
-    }
-    if (errorMessage.includes('network') || errorMessage.includes('connection')) {
-      return 'NetworkError';
-    }
-    if (errorMessage.includes('timeout') || errorName.includes('Timeout')) {
-      return 'TimeoutError';
-    }
-    if (errorMessage.includes('unavailable') || errorMessage.includes('service')) {
-      return 'ServiceUnavailableError';
-    }
-    if (errorName.includes('File') || errorMessage.includes('file')) {
-      return 'FileSystemError';
-    }
-    if (errorMessage.includes('config')) {
-      return 'ConfigurationError';
-    }
-
-    return 'InternalServerError';
+    return determineErrorType(error);
   }
 
   /**
-   * Determine error severity based on error type and content
+   * Determine error severity based on error type and content using schema validation
    */
   private determineErrorSeverity(error: Error, errorType: string): ErrorSeverity {
     const message = error.message.toLowerCase();
@@ -236,7 +185,7 @@ export class ErrorSanitizer {
       message.includes('breach') ||
       errorType === 'AuthorizationError'
     ) {
-      return ErrorSeverity.CRITICAL;
+      return errorSeveritySchema.parse('critical');
     }
 
     // High severity errors
@@ -246,7 +195,7 @@ export class ErrorSanitizer {
       message.includes('crash') ||
       message.includes('corruption')
     ) {
-      return ErrorSeverity.HIGH;
+      return errorSeveritySchema.parse('high');
     }
 
     // Medium severity errors
@@ -255,26 +204,26 @@ export class ErrorSanitizer {
       errorType === 'TimeoutError' ||
       errorType === 'ServiceUnavailableError'
     ) {
-      return ErrorSeverity.MEDIUM;
+      return errorSeveritySchema.parse('medium');
     }
 
     // Low severity errors
     if (errorType === 'ValidationError' || errorType === 'NotFoundError') {
-      return ErrorSeverity.LOW;
+      return errorSeveritySchema.parse('low');
     }
 
-    return ErrorSeverity.MEDIUM;
+    return errorSeveritySchema.parse('medium');
   }
 
   /**
    * Generate a safe error code that doesn't reveal internals
    */
   private generateErrorCode(severity: ErrorSeverity): string {
-    const prefixes = {
-      [ErrorSeverity.LOW]: 'USR',
-      [ErrorSeverity.MEDIUM]: 'SYS',
-      [ErrorSeverity.HIGH]: 'SVR',
-      [ErrorSeverity.CRITICAL]: 'SEC',
+    const prefixes: Record<ErrorSeverity, string> = {
+      low: 'USR',
+      medium: 'SYS',
+      high: 'SVR',
+      critical: 'SEC',
     };
 
     const timestamp = Date.now().toString(36).toUpperCase();
@@ -322,7 +271,7 @@ export class ErrorSanitizer {
    * Only use in non-production environments
    */
   public sanitizeStackTrace(stackTrace: string): string {
-    if (process.env.NODE_ENV === 'production') {
+    if (isProduction) {
       return '[Stack trace hidden in production]';
     }
 
@@ -340,7 +289,8 @@ export class ErrorSanitizer {
    */
   public shouldReportError(severity: ErrorSeverity): boolean {
     // Only report medium and above severity errors
-    return [ErrorSeverity.MEDIUM, ErrorSeverity.HIGH, ErrorSeverity.CRITICAL].includes(severity);
+    const reportableSeverities: ErrorSeverity[] = ['medium', 'high', 'critical'];
+    return reportableSeverities.includes(severity);
   }
 }
 
@@ -361,19 +311,10 @@ export function sanitizeApiError(
 }
 
 /**
- * Type guard to check if error is a sanitized error
+ * Type guard to check if error is a sanitized error using Zod validation
  */
-export function isSanitizedError(obj: object): obj is SanitizedError {
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    'error' in obj &&
-    'message' in obj &&
-    'timestamp' in obj &&
-    'severity' in obj &&
-    'code' in obj &&
-    'requestId' in obj
-  );
+export function isSanitizedError(obj: unknown): obj is SanitizedError {
+  return validateSanitizedError(obj) !== null;
 }
 
 export default ErrorSanitizer;

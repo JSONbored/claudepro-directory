@@ -47,7 +47,7 @@ const RelatedConfigsComponent = <T extends ContentMetadata = ContentMetadata>({
       >
         <CarouselContent className="-ml-2 md:-ml-4">
           {configs.map((config) => (
-            <CarouselItem key={config.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+            <CarouselItem key={config.slug} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
               <div className="relative">
                 {typeof (config as { similarity?: number }).similarity === 'number' &&
                   (config as { similarity?: number }).similarity! > 0.7 && (

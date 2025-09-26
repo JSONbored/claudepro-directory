@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
+import { getDisplayTitle } from '@/lib/utils';
 import type { ContentItem, MCPServer } from '@/types/content';
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
@@ -34,7 +35,7 @@ interface MCPDetailPageProps {
 }
 
 // Helper function to render MCP features section
-const renderMCPFeatures = (features: string[]): ReactNode => (
+const renderMCPFeatures = (features: readonly string[] | string[]): ReactNode => (
   <ul className="space-y-2">
     {features.map((feature: string) => (
       <li key={feature.slice(0, 50)} className="flex items-start gap-3">
@@ -162,7 +163,7 @@ const renderMCPInstallation = (item: MCPServer): ReactNode => {
 };
 
 // Helper function to render MCP use cases section
-const renderMCPUseCases = (useCases: string[]): ReactNode => (
+const renderMCPUseCases = (useCases: readonly string[] | string[]): ReactNode => (
   <ul className="space-y-2">
     {useCases.map((useCase: string) => (
       <li key={useCase.slice(0, 50)} className="flex items-start gap-3">
@@ -174,7 +175,7 @@ const renderMCPUseCases = (useCases: string[]): ReactNode => (
 );
 
 // Helper function to render MCP security section
-const renderMCPSecurity = (security: string[]): ReactNode => (
+const renderMCPSecurity = (security: readonly string[] | string[]): ReactNode => (
   <ul className="space-y-2">
     {security.map((securityItem: string) => (
       <li key={securityItem.slice(0, 50)} className="flex items-start gap-3">
@@ -187,7 +188,9 @@ const renderMCPSecurity = (security: string[]): ReactNode => (
 
 // Helper function to render MCP troubleshooting section
 const renderMCPTroubleshooting = (
-  troubleshooting: Array<string | { issue: string; solution: string }>
+  troubleshooting:
+    | Array<string | { issue: string; solution: string }>
+    | ReadonlyArray<string | { issue: string; solution: string }>
 ): ReactNode => (
   <ul className="space-y-4">
     {troubleshooting.map((trouble: string | { issue: string; solution: string }) => {
@@ -218,7 +221,9 @@ const renderMCPTroubleshooting = (
 
 // Helper function to render MCP examples section
 const renderMCPExamples = (
-  examples: Array<string | { title?: string; code: string; description?: string }>
+  examples:
+    | Array<string | { title?: string; code: string; description?: string }>
+    | ReadonlyArray<string | { title?: string; code: string; description?: string }>
 ): ReactNode => (
   <ul className="space-y-2">
     {examples.map((example: string | { title?: string; code: string; description?: string }) => {
@@ -349,14 +354,14 @@ const renderMCPSidebar = (item: MCPServer, relatedItems: ContentItem[], router: 
         <CardContent className="space-y-3">
           {relatedItems.slice(0, 3).map((relatedItem) => (
             <Button
-              key={relatedItem.id}
+              key={relatedItem.slug}
               variant="ghost"
               className="w-full justify-start h-auto p-3 text-left"
               onClick={() => router.push(`/mcp/${relatedItem.slug}`)}
             >
               <div className="text-left w-full min-w-0">
                 <div className="font-medium text-sm leading-tight mb-1">
-                  {relatedItem.name || relatedItem.title || relatedItem.slug}
+                  {getDisplayTitle(relatedItem)}
                 </div>
                 <div className="flex flex-wrap gap-1 mb-1">
                   {/* Show primary tags */}

@@ -15,13 +15,32 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { jobs } from '@/data/jobs';
+import { logger } from '@/lib/logger';
+import { slugParamSchema } from '@/lib/schemas/search.schema';
 
 interface JobPageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: JobPageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const rawParams = await params;
+
+  // Validate slug parameter
+  const validationResult = slugParamSchema.safeParse(rawParams);
+
+  if (!validationResult.success) {
+    logger.warn('Invalid slug parameter for job metadata', {
+      slug: rawParams.slug,
+      errorCount: validationResult.error.issues.length,
+      firstError: validationResult.error.issues[0]?.message || 'Unknown error',
+    });
+    return {
+      title: 'Job Not Found',
+      description: 'The requested job posting could not be found.',
+    };
+  }
+
+  const { slug } = validationResult.data;
   const job = jobs.find((j) => j.slug === slug);
 
   if (!job) {
@@ -52,7 +71,30 @@ export async function generateStaticParams() {
 export const revalidate = 14400;
 
 export default async function JobPage({ params }: JobPageProps) {
-  const { slug } = await params;
+  const rawParams = await params;
+
+  // Validate slug parameter
+  const validationResult = slugParamSchema.safeParse(rawParams);
+
+  if (!validationResult.success) {
+    logger.error(
+      'Invalid slug parameter for job page',
+      new Error(validationResult.error.issues[0]?.message || 'Invalid slug'),
+      {
+        slug: rawParams.slug,
+        errorCount: validationResult.error.issues.length,
+      }
+    );
+    notFound();
+  }
+
+  const { slug } = validationResult.data;
+
+  logger.info('Job page accessed', {
+    slug: slug,
+    validated: true,
+  });
+
   const job = jobs.find((j) => j.slug === slug);
 
   if (!job) {

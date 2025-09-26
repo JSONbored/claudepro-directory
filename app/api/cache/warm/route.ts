@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { cacheWarmer } from '@/lib/cache-warmer';
-import { sanitizeApiError } from '@/lib/error-sanitizer';
+import { handleApiError, handleValidationError } from '@/lib/error-handler';
 import { logger } from '@/lib/logger';
 import { apiSchemas, baseSchemas, ValidationError, validation } from '@/lib/validation';
 
@@ -19,8 +19,7 @@ export async function POST(request: NextRequest) {
   try {
     // Validate authentication header if present
     const authHeader = request.headers.get('authorization');
-    if (authHeader && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      // Only validate non-cron tokens
+    if (authHeader) {
       validation.validate(
         baseSchemas.authToken,
         authHeader.replace('Bearer ', ''),
@@ -46,21 +45,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check if this is a scheduled cron job (Vercel Cron)
-    const isScheduledJob = authHeader === `Bearer ${process.env.CRON_SECRET}`;
-
-    if (isScheduledJob) {
-      logger.info('Cache warming triggered by scheduled job', {
-        hasParams:
-          typeof validatedBody === 'object' ? Object.keys(validatedBody).length > 0 : false,
-      });
-    } else {
-      logger.info('Cache warming triggered manually', {
-        ip: request.headers.get('x-forwarded-for') || 'unknown',
-        hasParams: Object.keys(validatedBody).length > 0,
-        validated: true,
-      });
-    }
+    // Log cache warming trigger
+    logger.info('Cache warming triggered manually', {
+      ip: request.headers.get('x-forwarded-for') || 'unknown',
+      hasParams: Object.keys(validatedBody).length > 0,
+      validated: true,
+    });
 
     // Trigger cache warming
     const result = await cacheWarmer.triggerManualWarming();
@@ -85,43 +75,21 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error: unknown) {
-    // Handle validation errors specifically
+    // Use centralized error handling for consistent responses
     if (error instanceof ValidationError) {
-      logger.warn('Validation error in cache warm API', {
-        error: error.message,
-        detailsCount: error.details.errors.length,
+      return handleValidationError(error, {
+        route: 'cache/warm',
+        operation: 'cache_warming',
+        method: 'POST',
       });
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Validation failed',
-          message: error.message,
-          details: error.details.errors.map((e) => ({
-            path: e.path.join('.'),
-            message: e.message,
-            code: e.code,
-          })),
-          timestamp: new Date().toISOString(),
-        },
-        { status: 400 }
-      );
     }
 
-    // Handle other errors with sanitization
-    const sanitizedError = sanitizeApiError(error, {
+    // Handle all other errors with centralized handler
+    return handleApiError(error, {
       route: 'cache/warm',
       operation: 'cache_warming',
       method: 'POST',
     });
-
-    return NextResponse.json(
-      {
-        success: false,
-        ...sanitizedError,
-      },
-      { status: 500 }
-    );
   }
 }
 
@@ -158,35 +126,20 @@ export async function GET(request: NextRequest) {
       { status: 200 }
     );
   } catch (error: unknown) {
-    // Handle validation errors specifically
+    // Use centralized error handling for consistent responses
     if (error instanceof ValidationError) {
-      logger.warn('Validation error in cache status API', {
-        error: error.message,
-        detailsCount: error.details.errors.length,
+      return handleValidationError(error, {
+        route: 'cache/warm',
+        operation: 'get_status',
+        method: 'GET',
       });
-
-      return NextResponse.json(
-        {
-          error: 'Validation failed',
-          message: error.message,
-          details: error.details.errors.map((e) => ({
-            path: e.path.join('.'),
-            message: e.message,
-            code: e.code,
-          })),
-          timestamp: new Date().toISOString(),
-        },
-        { status: 400 }
-      );
     }
 
-    // Handle other errors with sanitization
-    const sanitizedError = sanitizeApiError(error, {
+    // Handle all other errors with centralized handler
+    return handleApiError(error, {
       route: 'cache/warm',
       operation: 'get_status',
       method: 'GET',
     });
-
-    return NextResponse.json(sanitizedError, { status: 500 });
   }
 }

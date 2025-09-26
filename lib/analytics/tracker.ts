@@ -3,13 +3,23 @@
  * Provides a simple, consistent API for tracking events across the application
  */
 
+import { z } from 'zod';
+import {
+  errorTrackingSchema,
+  interactionEventSchema,
+  navigationEventSchema,
+  performanceMetricSchema,
+  trackingEventSchema,
+  userIdentificationSchema,
+} from '@/lib/schemas/analytics.schema';
+import { env, isDevelopment, isProduction } from '@/lib/schemas/env.schema';
 import { EVENT_CONFIG, type EventName, type EventPayload } from './events.config';
 import { isUmamiAvailable } from './umami';
 
-// Environment checks
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
-const ENABLE_DEBUG = process.env.NEXT_PUBLIC_DEBUG_ANALYTICS === 'true';
+// Environment checks using validated env schema
+const IS_PRODUCTION = isProduction;
+const IS_DEVELOPMENT = isDevelopment;
+const ENABLE_DEBUG = env.NEXT_PUBLIC_DEBUG_ANALYTICS === 'true';
 
 /**
  * Universal tracking function that all components can use
@@ -65,12 +75,25 @@ export function trackEvent<T extends EventName>(eventName: T, payload?: EventPay
  * No need to import event names or types
  */
 export function track(eventName: string, payload?: Record<string, any>): void {
-  // This allows components to track events without importing types
-  // But loses type safety - use trackEvent when possible
-  if (isUmamiAvailable()) {
-    window.umami?.track(eventName, sanitizePayload(payload) || {});
-  } else if (IS_DEVELOPMENT && ENABLE_DEBUG) {
-    console.log('[Analytics]', eventName, payload);
+  try {
+    // Validate event name and payload
+    const validated = trackingEventSchema.parse({
+      eventName,
+      payload: payload || {},
+      timestamp: Date.now(),
+    });
+
+    // This allows components to track events without importing types
+    // But loses type safety - use trackEvent when possible
+    if (isUmamiAvailable()) {
+      window.umami?.track(validated.eventName, sanitizePayload(validated.payload) || {});
+    } else if (IS_DEVELOPMENT && ENABLE_DEBUG) {
+      console.log('[Analytics]', validated.eventName, validated.payload);
+    }
+  } catch (error) {
+    if (ENABLE_DEBUG) {
+      console.error('[Analytics Validation Error]', eventName, error);
+    }
   }
 }
 
@@ -87,8 +110,20 @@ export function trackPageView(_url: string, _referrer?: string): void {
  * Track user identification (for session tracking)
  */
 export function identify(userId: string, traits?: Record<string, any>): void {
-  if (isUmamiAvailable()) {
-    window.umami?.identify(userId, sanitizePayload(traits) || {});
+  try {
+    // Validate user identification
+    const validated = userIdentificationSchema.parse({
+      userId,
+      traits: traits || {},
+    });
+
+    if (isUmamiAvailable()) {
+      window.umami?.identify(validated.userId, sanitizePayload(validated.traits) || {});
+    }
+  } catch (error) {
+    if (ENABLE_DEBUG) {
+      console.error('[Analytics Identify Error]', userId, error);
+    }
   }
 }
 
@@ -98,34 +133,47 @@ export function identify(userId: string, traits?: Record<string, any>): void {
 function sanitizePayload(payload?: any): Record<string, any> | undefined {
   if (!payload) return undefined;
 
-  const sanitized: Record<string, any> = {};
+  // Define PII detection schema
   const PII_KEYWORDS = ['email', 'name', 'phone', 'address', 'ssn', 'credit', 'password'];
+  const emailPattern = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 
-  for (const [key, value] of Object.entries(payload)) {
-    // Check for PII keywords
-    const lowerKey = key.toLowerCase();
-    if (PII_KEYWORDS.some((keyword) => lowerKey.includes(keyword))) {
-      continue;
-    }
+  // Schema for validating and sanitizing payload values
+  const payloadSchema = z.record(
+    z.string(),
+    z.union([
+      z
+        .string()
+        .max(500)
+        .transform((val) => val.replace(emailPattern, '[email]')),
+      z.number(),
+      z.boolean(),
+      z.array(z.any()).transform((val) => val.slice(0, 10).join(',').substring(0, 500)),
+      z.null(),
+      z.undefined(),
+    ])
+  );
 
-    // Sanitize value based on type
-    if (value === null || value === undefined) {
-    } else if (typeof value === 'string') {
-      // Truncate long strings and check for email patterns
-      const emailPattern = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-      sanitized[key] = value.replace(emailPattern, '[email]').substring(0, 500);
-    } else if (typeof value === 'number' || typeof value === 'boolean') {
+  try {
+    // First validate the entire payload structure
+    const validatedPayload = payloadSchema.parse(payload);
+    const sanitized: Record<string, any> = {};
+
+    for (const [key, value] of Object.entries(validatedPayload)) {
+      // Check for PII keywords
+      const lowerKey = key.toLowerCase();
+      if (PII_KEYWORDS.some((keyword) => lowerKey.includes(keyword))) {
+        continue;
+      }
+
+      // Value is already sanitized by the schema
       sanitized[key] = value;
-    } else if (Array.isArray(value)) {
-      // Convert arrays to comma-separated strings
-      sanitized[key] = value.slice(0, 10).join(',').substring(0, 500);
-    } else if (typeof value === 'object') {
-      // Recursively sanitize objects (max depth of 2)
-      sanitized[key] = sanitizePayload(value);
     }
-  }
 
-  return sanitized;
+    return sanitized;
+  } catch {
+    // If sanitization fails, return undefined to prevent tracking
+    return undefined;
+  }
 }
 
 /**
@@ -142,23 +190,44 @@ export async function measurePerformance<T>(
     const result = await operation();
     const duration = Math.round(performance.now() - start);
 
-    track('performance_metric', {
+    // Validate performance metric
+    const validated = performanceMetricSchema.parse({
+      eventName: 'performance_metric',
       metric: eventName,
       duration_ms: duration,
       success: true,
-      ...metadata,
+      metadata: metadata || {},
+      timestamp: Date.now(),
+    });
+
+    track('performance_metric', {
+      metric: validated.metric,
+      duration_ms: validated.duration_ms,
+      success: validated.success,
+      ...validated.metadata,
     });
 
     return result;
   } catch (error) {
     const duration = Math.round(performance.now() - start);
 
-    track('performance_metric', {
+    // Validate performance metric for error case
+    const validated = performanceMetricSchema.parse({
+      eventName: 'performance_metric',
       metric: eventName,
       duration_ms: duration,
       success: false,
       error_type: error instanceof Error ? error.name : 'unknown',
-      ...metadata,
+      metadata: metadata || {},
+      timestamp: Date.now(),
+    });
+
+    track('performance_metric', {
+      metric: validated.metric,
+      duration_ms: validated.duration_ms,
+      success: validated.success,
+      error_type: validated.error_type,
+      ...validated.metadata,
     });
 
     throw error;
@@ -169,14 +238,28 @@ export async function measurePerformance<T>(
  * Error tracking helper
  */
 export function trackError(error: Error | unknown, context?: string): void {
-  const errorData = {
-    error_type: error instanceof Error ? error.name : 'unknown',
-    error_message: error instanceof Error ? error.message.substring(0, 200) : 'unknown',
-    context: context || 'unknown',
-    page: typeof window !== 'undefined' ? window.location.pathname : 'unknown',
-  };
+  try {
+    // Validate error tracking data
+    const validated = errorTrackingSchema.parse({
+      error_type: error instanceof Error ? error.name : 'unknown',
+      error_message: error instanceof Error ? error.message.substring(0, 200) : 'unknown',
+      context: context || 'unknown',
+      page: typeof window !== 'undefined' ? window.location.pathname : 'unknown',
+      stack_trace: error instanceof Error ? error.stack?.substring(0, 500) : undefined,
+      timestamp: Date.now(),
+    });
 
-  track('error_occurred', errorData);
+    track('error_occurred', {
+      error_type: validated.error_type,
+      error_message: validated.error_message,
+      context: validated.context,
+      page: validated.page,
+    });
+  } catch (validationError) {
+    if (ENABLE_DEBUG) {
+      console.error('[Analytics Error Tracking Failed]', validationError);
+    }
+  }
 }
 
 /**
@@ -184,24 +267,61 @@ export function trackError(error: Error | unknown, context?: string): void {
  */
 export const interactions = {
   copyCode: (category: string, slug: string) => {
-    track('copy_code', {
-      content_category: category,
-      content_slug: slug,
-    });
+    try {
+      const validated = interactionEventSchema.parse({
+        action: 'copy',
+        target: 'code',
+        category,
+        slug,
+        timestamp: Date.now(),
+      });
+      track('copy_code', {
+        content_category: validated.category,
+        content_slug: validated.slug,
+      });
+    } catch (error) {
+      if (ENABLE_DEBUG) {
+        console.error('[Analytics Copy Code Error]', error);
+      }
+    }
   },
 
   share: (method: string, contentSlug: string) => {
-    track('share_content', {
-      share_method: method,
-      content_slug: contentSlug,
-    });
+    try {
+      const validated = interactionEventSchema.parse({
+        action: 'share',
+        target: contentSlug,
+        method,
+        timestamp: Date.now(),
+      });
+      track('share_content', {
+        share_method: validated.method || method,
+        content_slug: validated.target,
+      });
+    } catch (error) {
+      if (ENABLE_DEBUG) {
+        console.error('[Analytics Share Error]', error);
+      }
+    }
   },
 
   feedback: (type: 'helpful' | 'not_helpful', page: string) => {
-    track('feedback_submitted', {
-      feedback_type: type,
-      page,
-    });
+    try {
+      const validated = z
+        .object({
+          feedback_type: z.enum(['helpful', 'not_helpful']),
+          page: z.string().max(200),
+        })
+        .parse({
+          feedback_type: type,
+          page,
+        });
+      track('feedback_submitted', validated);
+    } catch (error) {
+      if (ENABLE_DEBUG) {
+        console.error('[Analytics Feedback Error]', error);
+      }
+    }
   },
 };
 
@@ -210,27 +330,66 @@ export const interactions = {
  */
 export const navigation = {
   tabSwitch: (from: string, to: string) => {
-    track('tab_switched', {
-      from_tab: from,
-      to_tab: to,
-      page: window.location.pathname,
-    });
+    try {
+      const validated = navigationEventSchema.parse({
+        action: 'tab_switch',
+        from,
+        to,
+        page: typeof window !== 'undefined' ? window.location.pathname : undefined,
+        timestamp: Date.now(),
+      });
+      track('tab_switched', {
+        from_tab: validated.from,
+        to_tab: validated.to,
+        page: validated.page || '/',
+      });
+    } catch (error) {
+      if (ENABLE_DEBUG) {
+        console.error('[Analytics Tab Switch Error]', error);
+      }
+    }
   },
 
   filterToggle: (filterName: string, state: boolean) => {
-    track('filter_toggled', {
-      filter_name: filterName,
-      filter_state: state,
-      page: window.location.pathname,
-    });
+    try {
+      const validated = navigationEventSchema.parse({
+        action: 'filter_toggle',
+        filter_name: filterName,
+        filter_state: state,
+        page: typeof window !== 'undefined' ? window.location.pathname : undefined,
+        timestamp: Date.now(),
+      });
+      track('filter_toggled', {
+        filter_name: validated.filter_name || filterName,
+        filter_state: validated.filter_state !== undefined ? validated.filter_state : state,
+        page: validated.page || '/',
+      });
+    } catch (error) {
+      if (ENABLE_DEBUG) {
+        console.error('[Analytics Filter Toggle Error]', error);
+      }
+    }
   },
 
   sortChange: (field: string, direction: 'asc' | 'desc') => {
-    track('sort_changed', {
-      sort_field: field,
-      sort_direction: direction,
-      page: window.location.pathname,
-    });
+    try {
+      const validated = z
+        .object({
+          sort_field: z.string().max(50),
+          sort_direction: z.enum(['asc', 'desc']),
+          page: z.string().max(200),
+        })
+        .parse({
+          sort_field: field,
+          sort_direction: direction,
+          page: typeof window !== 'undefined' ? window.location.pathname : '/',
+        });
+      track('sort_changed', validated);
+    } catch (error) {
+      if (ENABLE_DEBUG) {
+        console.error('[Analytics Sort Change Error]', error);
+      }
+    }
   },
 };
 

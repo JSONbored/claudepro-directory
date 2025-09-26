@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { type SearchableItem, type SearchFilters, searchCache } from '@/lib/search-cache';
+import { getDisplayTitle } from '@/lib/utils';
 import type { ContentItem } from '@/types/content';
 
 export interface FilterState {
@@ -54,9 +55,14 @@ export interface SearchResult {
 // Convert ContentItem to SearchableItem for compatibility
 function convertToSearchableItem(item: ContentItem): SearchableItem {
   return {
-    ...item,
-    title: item.name || item.title || '',
-    slug: item.slug || item.id,
+    id: item.slug, // Use slug as id since SearchableItem requires id
+    title: getDisplayTitle(item),
+    name: item.name || '', // Ensure name is always a string
+    description: item.description,
+    tags: [...(item.tags || [])], // Convert readonly array to mutable array
+    category: item.category,
+    popularity: item.popularity || 0,
+    slug: item.slug,
   };
 }
 
@@ -156,8 +162,8 @@ function applyClientSideFiltering(data: ContentItem[], filters: FilterState): Co
         break;
       case 'alphabetical':
         filtered.sort((a, b) => {
-          const nameA = (a.name || a.title || '').toLowerCase();
-          const nameB = (b.name || b.title || '').toLowerCase();
+          const nameA = getDisplayTitle(a).toLowerCase();
+          const nameB = getDisplayTitle(b).toLowerCase();
           return nameA.localeCompare(nameB);
         });
         break;
@@ -204,8 +210,15 @@ async function performCachedSearch(
 
     // Convert back to ContentItem format
     return results.map((item) => {
-      const original = data.find((d) => d.id === item.id);
-      return original || (item as ContentItem);
+      const original = data.find((d) => d.slug === item.slug);
+      return (
+        original ||
+        ({
+          ...item,
+          author: '',
+          dateAdded: new Date().toISOString(),
+        } as ContentItem)
+      );
     });
   } catch (error) {
     console.error('Search failed, falling back to client-side filtering:', error);

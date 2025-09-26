@@ -6,7 +6,8 @@
 import fs from 'fs/promises';
 import matter from 'gray-matter';
 import path from 'path';
-import type { ContentCategory, ContentIndex, ContentItem } from './types';
+import type { ContentCategory } from '../schemas/shared.schema';
+import type { ContentIndex, ContentItem } from './types';
 
 const CONTENT_DIRECTORIES = {
   // Main content
@@ -30,7 +31,21 @@ export class ContentIndexer {
    */
   async buildIndex(): Promise<ContentIndex> {
     const items: ContentItem[] = [];
-    const categories: Record<ContentCategory, ContentItem[]> = {} as any;
+    // Initialize all possible categories with empty arrays
+    const categories: Record<ContentCategory, ContentItem[]> = {
+      agents: [],
+      mcp: [],
+      rules: [],
+      commands: [],
+      hooks: [],
+      guides: [],
+      tutorials: [],
+      comparisons: [],
+      workflows: [],
+      'use-cases': [],
+      troubleshooting: [],
+      jobs: [],
+    };
     const tags: Record<string, ContentItem[]> = {};
     const keywords: Record<string, ContentItem[]> = {};
 
@@ -39,7 +54,7 @@ export class ContentIndexer {
       const categoryItems = await this.indexDirectory(category as ContentCategory, dirPath);
 
       items.push(...categoryItems);
-      categories[category as ContentCategory] = categoryItems;
+      categories[category as ContentCategory].push(...categoryItems);
 
       // Build tag and keyword indexes
       for (const item of categoryItems) {
@@ -142,7 +157,8 @@ export class ContentIndexer {
         tags: data.tags || [],
         keywords: data.keywords || [],
         url: this.generateUrl(category, slug),
-        dateUpdated: data.dateUpdated,
+        dateUpdated: data.dateUpdated || data.dateAdded || new Date().toISOString(),
+        dateCreated: data.dateCreated || data.dateAdded || new Date().toISOString(),
         featured: data.featured || false,
       };
     } catch (error) {
@@ -170,7 +186,8 @@ export class ContentIndexer {
         tags: this.parseArrayField(data.tags),
         keywords: this.parseArrayField(data.keywords),
         url: this.generateUrl(category, slug),
-        dateUpdated: data.dateUpdated,
+        dateUpdated: data.dateUpdated || data.dateAdded || new Date().toISOString(),
+        dateCreated: data.dateCreated || data.dateAdded || new Date().toISOString(),
         featured: data.featured || false,
       };
     } catch (error) {
@@ -200,11 +217,13 @@ export class ContentIndexer {
       rules: '/rules',
       commands: '/commands',
       hooks: '/hooks',
+      guides: '/guides',
       tutorials: '/guides/tutorials',
       comparisons: '/guides/comparisons',
       workflows: '/guides/workflows',
       'use-cases': '/guides/use-cases',
       troubleshooting: '/guides/troubleshooting',
+      jobs: '/jobs',
     };
 
     return `${urlPaths[category]}/${slug}`;

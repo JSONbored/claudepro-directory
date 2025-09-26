@@ -277,8 +277,8 @@ export class ValidationError extends Error {
 
   constructor(zodError: z.ZodError, context?: string) {
     const message = context
-      ? `Validation failed in ${context}: ${zodError.errors.map((e) => e.message).join(', ')}`
-      : `Validation failed: ${zodError.errors.map((e) => e.message).join(', ')}`;
+      ? `Validation failed in ${context}: ${zodError.issues.map((e) => e.message).join(', ')}`
+      : `Validation failed: ${zodError.issues.map((e) => e.message).join(', ')}`;
 
     super(message);
     this.name = 'ValidationError';

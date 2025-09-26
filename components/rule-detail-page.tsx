@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
+import { getDisplayTitle } from '@/lib/utils';
 import type { ContentItem, Rule } from '@/types/content';
 
 interface RuleDetailPageProps {
@@ -109,14 +110,14 @@ const renderRuleSidebar = (
         <CardContent className="space-y-3">
           {relatedItems.slice(0, 3).map((relatedItem) => (
             <Button
-              key={relatedItem.id}
+              key={relatedItem.slug}
               variant="ghost"
               className="w-full justify-start h-auto p-3 text-left"
               onClick={() => router.push(`/rules/${relatedItem.slug}`)}
             >
               <div className="text-left w-full min-w-0">
                 <div className="font-medium text-sm leading-tight mb-1">
-                  {relatedItem.name || relatedItem.title || relatedItem.slug}
+                  {getDisplayTitle(relatedItem)}
                 </div>
                 <div className="flex flex-wrap gap-1 mb-1">
                   {/* Show primary tags */}

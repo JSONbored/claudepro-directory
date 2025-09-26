@@ -2,43 +2,42 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { z } from 'zod';
 import { onBuildComplete } from '../lib/related-content/cache-invalidation.js';
 import { contentIndexer } from '../lib/related-content/indexer.js';
-
-type ContentCategory = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks';
+import {
+  type AgentContent,
+  type CommandContent,
+  type HookContent,
+  type JobContent,
+  type MCPServerContent,
+  type RuleContent,
+  validateContent,
+} from '../lib/schemas/content.schema.js';
+import {
+  type BuildConfig,
+  type BuildResult,
+  buildConfigSchema,
+  type GeneratedFile,
+  generateSlugFromFilename,
+  slugToTitle,
+} from '../lib/schemas/content-generation.schema.js';
+import { type ContentCategory, contentCategorySchema } from '../lib/schemas/shared.schema.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.join(__dirname, '..');
 const CONTENT_DIR = path.join(ROOT_DIR, 'content');
 const GENERATED_DIR = path.join(ROOT_DIR, 'generated');
 
-// Content types to process
-const CONTENT_TYPES: ContentCategory[] = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
-
-interface BaseContent {
-  id: string;
-  name?: string;
-  title?: string;
-  slug?: string;
-  description: string;
-  category: string;
-  author: string;
-  tags: string[];
-  content?: string;
-  config?: string;
-  configuration?: Record<
-    string,
-    string | number | boolean | Record<string, string | number | boolean>
-  >;
-}
-
-// Generate title from slug
-function _slugToTitle(slug: string): string {
-  return slug
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
+// Build configuration with validation
+const buildConfig: BuildConfig = buildConfigSchema.parse({
+  contentDir: CONTENT_DIR,
+  generatedDir: GENERATED_DIR,
+  contentTypes: ['agents', 'mcp', 'rules', 'commands', 'hooks'],
+  generateTypeScript: true,
+  generateIndex: true,
+  invalidateCaches: true,
+});
 
 async function ensureDir(dir: string) {
   try {
@@ -48,104 +47,242 @@ async function ensureDir(dir: string) {
   }
 }
 
-async function loadJsonFiles(type: string): Promise<BaseContent[]> {
-  const dir = path.join(CONTENT_DIR, type);
+// Define union type for all possible content types
+type ValidatedContent =
+  | AgentContent
+  | MCPServerContent
+  | HookContent
+  | CommandContent
+  | RuleContent
+  | JobContent;
+
+async function loadJsonFiles(type: ContentCategory): Promise<ValidatedContent[]> {
+  // Validate the content category with strict validation
+  const validatedType = contentCategorySchema.parse(type);
+  const dir = path.join(buildConfig.contentDir, validatedType);
+
+  // Security: Ensure directory path is within expected boundaries
+  const resolvedDir = path.resolve(dir);
+  const resolvedContentDir = path.resolve(buildConfig.contentDir);
+  if (!resolvedDir.startsWith(resolvedContentDir)) {
+    throw new Error(`Security violation: Directory traversal detected for type ${type}`);
+  }
 
   try {
     const files = await fs.readdir(dir);
-    const jsonFiles = files.filter((f) => f.endsWith('.json'));
+    // Security: Filter for valid JSON files only, prevent execution of other file types
+    const jsonFiles = files.filter(
+      (f) =>
+        f.endsWith('.json') &&
+        !f.includes('..') &&
+        !f.startsWith('.') &&
+        f.match(/^[a-zA-Z0-9\-_]+\.json$/)
+    );
 
     const items = await Promise.all(
       jsonFiles.map(async (file) => {
-        const content = await fs.readFile(path.join(dir, file), 'utf-8');
+        const filePath = path.join(dir, file);
+
+        // Security: Additional path validation
+        const resolvedFilePath = path.resolve(filePath);
+        if (!resolvedFilePath.startsWith(resolvedDir)) {
+          console.error(`Security violation: Path traversal attempt in file ${file}`);
+          return null;
+        }
+
         try {
-          const item = JSON.parse(content);
+          const content = await fs.readFile(filePath, 'utf-8');
 
-          // All content types now use slug-based schema
+          // Security: Validate content size to prevent DoS
+          if (content.length > 1024 * 1024) {
+            // 1MB limit
+            console.error(`File ${file} exceeds maximum size limit`);
+            return null;
+          }
+
+          // Parse and validate JSON with strict, production-grade typing
+          type ContentDataShape = Record<
+            string,
+            string | number | boolean | string[] | Record<string, string | number | boolean>
+          >;
+          let parsedData: ContentDataShape;
+          try {
+            const rawParsed: string | number | boolean | object | null = JSON.parse(content);
+
+            // Security: Ensure parsed data is a plain object
+            if (!rawParsed || typeof rawParsed !== 'object' || Array.isArray(rawParsed)) {
+              console.error(
+                `Invalid JSON structure in ${file}: Expected object, got ${typeof rawParsed}`
+              );
+              return null;
+            }
+
+            parsedData = rawParsed as ContentDataShape;
+          } catch (parseError) {
+            console.error(
+              `JSON parse error in ${file}:`,
+              parseError instanceof Error ? parseError.message : String(parseError)
+            );
+            return null;
+          }
+
           // Auto-generate slug from filename if not provided
-          if (!item.slug) {
-            item.slug = path.basename(file, '.json');
+          if (!parsedData.slug) {
+            parsedData.slug = generateSlugFromFilename(file);
           }
 
-          // Auto-generate id and title from slug for all content types
-          item.id = item.slug;
-          if (!item.title) {
-            item.title = _slugToTitle(item.slug);
+          // Auto-generate title from slug if not provided (for display purposes)
+          if (!parsedData.title && typeof parsedData.slug === 'string') {
+            parsedData.title = slugToTitle(parsedData.slug);
           }
 
-          return item;
-        } catch (error) {
-          console.error(`Error parsing ${file}:`, error);
+          // Use category-specific validation instead of generic schema
+          try {
+            const validatedItem = validateContent(validatedType, parsedData);
+            return validatedItem;
+          } catch (validationError) {
+            if (validationError instanceof z.ZodError) {
+              console.error(
+                `Category-specific validation failed for ${file} (type: ${validatedType}):`,
+                validationError.issues.map((i) => `${i.path.join('.')}: ${i.message}`)
+              );
+            } else {
+              console.error(
+                `Validation error for ${file}:`,
+                validationError instanceof Error ? validationError.message : String(validationError)
+              );
+            }
+            return null;
+          }
+        } catch (fileError) {
+          console.error(
+            `Error reading file ${file}:`,
+            fileError instanceof Error ? fileError.message : String(fileError)
+          );
           return null;
         }
       })
     );
 
-    return items.filter(Boolean);
-  } catch (_error) {
+    // Filter out null values with type safety
+    const validItems = items.filter((item): item is NonNullable<typeof item> => item !== null);
+
+    console.log(`✅ Loaded ${validItems.length}/${jsonFiles.length} valid ${validatedType} files`);
+    return validItems;
+  } catch (error) {
+    console.error(
+      `Failed to load JSON files from ${dir}:`,
+      error instanceof Error ? error.message : String(error)
+    );
     return [];
   }
 }
 
-async function generateTypeScript() {
-  await ensureDir(GENERATED_DIR);
+async function generateTypeScript(): Promise<GeneratedFile[]> {
+  await ensureDir(buildConfig.generatedDir);
 
-  const allContent: Record<string, BaseContent[]> = {};
+  const allContent: Record<ContentCategory, ValidatedContent[]> = {} as Record<
+    ContentCategory,
+    ValidatedContent[]
+  >;
+  const generatedFiles: GeneratedFile[] = [];
 
-  // Load all content
-  for (const type of CONTENT_TYPES) {
-    const items = await loadJsonFiles(type);
-    allContent[type] = items;
+  // Load all content with category-specific validation
+  for (const type of buildConfig.contentTypes) {
+    try {
+      const items = await loadJsonFiles(type);
+      allContent[type] = items;
+      console.log(`✅ Processed ${items.length} ${type} items`);
+    } catch (error) {
+      console.error(
+        `❌ Failed to load ${type} content:`,
+        error instanceof Error ? error.message : String(error)
+      );
+      allContent[type] = [];
+    }
   }
 
   // Generate separate files for each content type with metadata only
-  for (const type of CONTENT_TYPES) {
-    const varName = type.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+  for (const type of buildConfig.contentTypes) {
+    const varName = type.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
     const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
     const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
 
     // Create metadata version (without heavy content fields for listing pages)
     const contentData = allContent[type];
-    if (!contentData) continue;
+    if (!contentData || contentData.length === 0) continue;
 
     const metadata = contentData.map((item) => {
-      const { content: _content, config: _config, configuration: _configuration, ...meta } = item;
-      return meta;
+      // Create a safe copy without heavy fields, preserving all other properties
+      const safeItem = { ...item };
+
+      // Remove heavy content fields if they exist
+      if ('content' in safeItem) {
+        delete (safeItem as { content?: unknown }).content;
+      }
+      if ('config' in safeItem) {
+        delete (safeItem as { config?: unknown }).config;
+      }
+      if ('configuration' in safeItem) {
+        delete (safeItem as { configuration?: unknown }).configuration;
+      }
+
+      return safeItem;
     });
 
-    // Generate metadata file
+    // Generate metadata file without problematic type imports
     const metadataContent = `// Auto-generated metadata file - DO NOT EDIT
 // Generated at: ${new Date().toISOString()}
+// Content Type: ${type}
 
-import type { ${capitalizedSingular === 'Mcp' ? 'MCPServer' : capitalizedSingular}, ContentMetadata } from '../types/content';
+export const ${varName}Metadata = ${JSON.stringify(metadata, null, 2)} as const;
 
-type ${capitalizedSingular}Metadata = Omit<${capitalizedSingular === 'Mcp' ? 'MCPServer' : capitalizedSingular}, 'content'> & ContentMetadata;
+export const ${varName}MetadataBySlug = new Map(${varName}Metadata.map(item => [item.slug as string, item]));
 
-export const ${varName}Metadata: ${capitalizedSingular}Metadata[] = ${JSON.stringify(metadata, null, 2)};
-
-export const ${varName}MetadataBySlug = new Map(${varName}Metadata.map(item => [item.slug, item]));
-
-export function get${capitalizedSingular}MetadataBySlug(slug: string): ${capitalizedSingular}Metadata | null {
+export function get${capitalizedSingular}MetadataBySlug(slug: string) {
   return ${varName}MetadataBySlug.get(slug) || null;
-}`;
+}
 
-    await fs.writeFile(path.join(GENERATED_DIR, `${type}-metadata.ts`), metadataContent, 'utf-8');
+// Type for this content category metadata
+export type ${capitalizedSingular}Metadata = typeof ${varName}Metadata[number];`;
 
-    // Generate full content file (loaded lazily when needed)
+    const metadataPath = path.join(buildConfig.generatedDir, `${type}-metadata.ts`);
+    await fs.writeFile(metadataPath, metadataContent, 'utf-8');
+
+    generatedFiles.push({
+      path: metadataPath,
+      type: 'metadata',
+      category: type,
+      itemCount: metadata.length,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Generate full content file without problematic type imports
     const fullContent = `// Auto-generated full content file - DO NOT EDIT
 // Generated at: ${new Date().toISOString()}
+// Content Type: ${type}
 
-import type { ${capitalizedSingular === 'Mcp' ? 'MCPServer' : capitalizedSingular} } from '../types/content';
+export const ${varName}Full = ${JSON.stringify(allContent[type], null, 2)} as const;
 
-export const ${varName}Full: ${capitalizedSingular === 'Mcp' ? 'MCPServer' : capitalizedSingular}[] = ${JSON.stringify(allContent[type], null, 2)};
+export const ${varName}FullBySlug = new Map(${varName}Full.map(item => [item.slug as string, item]));
 
-export const ${varName}FullBySlug = new Map(${varName}Full.map(item => [item.slug, item]));
-
-export function get${capitalizedSingular}FullBySlug(slug: string): ${capitalizedSingular === 'Mcp' ? 'MCPServer' : capitalizedSingular} | null {
+export function get${capitalizedSingular}FullBySlug(slug: string) {
   return ${varName}FullBySlug.get(slug) || null;
-}`;
+}
 
-    await fs.writeFile(path.join(GENERATED_DIR, `${type}-full.ts`), fullContent, 'utf-8');
+// Type for this content category (full content)
+export type ${capitalizedSingular}Full = typeof ${varName}Full[number];`;
+
+    const fullPath = path.join(buildConfig.generatedDir, `${type}-full.ts`);
+    await fs.writeFile(fullPath, fullContent, 'utf-8');
+
+    generatedFiles.push({
+      path: fullPath,
+      type: 'full',
+      category: type,
+      itemCount: contentData.length,
+      timestamp: new Date().toISOString(),
+    });
   }
 
   // Generate main index file that exports metadata by default
@@ -153,50 +290,69 @@ export function get${capitalizedSingular}FullBySlug(slug: string): ${capitalized
 // Generated at: ${new Date().toISOString()}
 
 // Export metadata by default for list views
-${CONTENT_TYPES.map((type) => {
-  const varName = type.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-  const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
-  const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
+${buildConfig.contentTypes
+  .map((type) => {
+    const varName = type.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+    const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
+    const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
 
-  return `export { 
-  ${varName}Metadata as ${varName}, 
-  ${varName}MetadataBySlug as ${varName}BySlug, 
-  get${capitalizedSingular}MetadataBySlug as get${capitalizedSingular}BySlug 
+    return `export {
+  ${varName}Metadata as ${varName},
+  ${varName}MetadataBySlug as ${varName}BySlug,
+  get${capitalizedSingular}MetadataBySlug as get${capitalizedSingular}BySlug
 } from './${type}-metadata';`;
-}).join('\n')}
+  })
+  .join('\n')}
 
 // Export lazy loaders for full content (used in detail pages)
-${CONTENT_TYPES.map((type) => {
-  const varName = type.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-  const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
-  const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
+${buildConfig.contentTypes
+  .map((type) => {
+    const varName = type.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+    const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
+    const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
 
-  return `export async function get${capitalizedSingular}FullContent(slug: string) {
+    return `export async function get${capitalizedSingular}FullContent(slug: string) {
   const module = await import('./${type}-full');
   return module.get${capitalizedSingular}FullBySlug(slug);
 }`;
-}).join('\n\n')}
+  })
+  .join('\n\n')}
 
 // Export counts for stats
 import type { ContentStats } from '../types/content';
 
 export const contentStats: ContentStats = {
-${CONTENT_TYPES.map((type) => {
-  const varName = type.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-  const typeData = allContent[type];
-  return `  ${varName}: ${typeData ? typeData.length : 0}`;
-}).join(',\n')}
+${buildConfig.contentTypes
+  .map((type) => {
+    const varName = type.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+    const typeData = allContent[type];
+    return `  ${varName}: ${typeData ? typeData.length : 0}`;
+  })
+  .join(',\n')}
 };`;
 
-  await fs.writeFile(path.join(GENERATED_DIR, 'content.ts'), indexContent);
+  const indexPath = path.join(buildConfig.generatedDir, 'content.ts');
+  await fs.writeFile(indexPath, indexContent);
+
+  generatedFiles.push({
+    path: indexPath,
+    type: 'index',
+    itemCount: Object.values(allContent).reduce((sum, items) => sum + items.length, 0),
+    timestamp: new Date().toISOString(),
+  });
+
+  return generatedFiles;
 }
 
 // Run the build
-async function build() {
+async function build(): Promise<BuildResult> {
+  const startTime = performance.now();
+  const errors: string[] = [];
+
   try {
-    // Generate TypeScript files
-    await generateTypeScript();
-    console.log('✅ Generated TypeScript files');
+    // Generate TypeScript files with validation
+    const generatedFiles = await generateTypeScript();
+    console.log(`✅ Generated ${generatedFiles.length} TypeScript files`);
 
     // Build content index
     const index = await contentIndexer.buildIndex();
@@ -204,12 +360,67 @@ async function build() {
     console.log(`✅ Built content index with ${index.metadata.totalItems} items`);
 
     // Invalidate caches after build
-    await onBuildComplete();
-    console.log('✅ Invalidated content caches');
+    if (buildConfig.invalidateCaches) {
+      await onBuildComplete();
+      console.log('✅ Invalidated content caches');
+    }
+
+    const duration = performance.now() - startTime;
+
+    // Calculate content stats
+    const contentStats: Record<ContentCategory, number> = {} as Record<ContentCategory, number>;
+    for (const type of buildConfig.contentTypes) {
+      const files = generatedFiles.filter((f) => f.category === type && f.type === 'full');
+      contentStats[type] = files[0]?.itemCount || 0;
+    }
+
+    const result: BuildResult = {
+      success: true,
+      contentStats,
+      generatedFiles,
+      indexItems: index.metadata.totalItems,
+      cacheInvalidated: buildConfig.invalidateCaches,
+      duration,
+      errors: errors.length > 0 ? errors : undefined,
+    };
+
+    console.log('✅ Build completed successfully');
+    return result;
   } catch (error) {
-    console.error('Build failed:', error);
+    const duration = performance.now() - startTime;
+
+    if (error instanceof z.ZodError) {
+      console.error('Validation error during build:', error.issues);
+      errors.push(...error.issues.map((i) => `${i.path.join('.')}: ${i.message}`));
+    } else {
+      console.error('Build failed:', error);
+      errors.push(String(error));
+    }
+
+    const result: BuildResult = {
+      success: false,
+      contentStats: {} as Record<ContentCategory, number>,
+      generatedFiles: [],
+      indexItems: 0,
+      cacheInvalidated: false,
+      duration,
+      errors,
+    };
+
+    console.error('Build failed with result:', JSON.stringify(result, null, 2));
     process.exit(1);
   }
 }
 
-build();
+// Execute build and handle results
+build()
+  .then((result) => {
+    if (!result.success) {
+      console.error('❌ Build failed with errors:', result.errors);
+      process.exit(1);
+    }
+  })
+  .catch((error) => {
+    console.error('Unexpected error during build:', error);
+    process.exit(1);
+  });

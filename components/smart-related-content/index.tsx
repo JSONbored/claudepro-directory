@@ -6,7 +6,11 @@
 import { headers } from 'next/headers';
 import { Suspense } from 'react';
 import { relatedContentService } from '@/lib/related-content/service';
-import type { ContentCategory, SmartRelatedContentProps } from '@/lib/related-content/types';
+import type {
+  ContentCategory,
+  RelatedContentItem,
+  SmartRelatedContentProps,
+} from '@/lib/related-content/types';
 import { RelatedCarouselClient } from './carousel';
 
 // Loading skeleton
@@ -60,7 +64,7 @@ async function RelatedContentServer({
 
   return (
     <RelatedCarouselClient
-      items={response.items}
+      items={response.items as RelatedContentItem[]}
       performance={response.performance}
       trackingEnabled={trackingEnabled}
       title="Related Content"
@@ -127,8 +131,8 @@ function parseCurrentPage(pathname: string): {
   else if (pathname.includes('/use-cases')) category = 'use-cases';
   else if (pathname.includes('/troubleshooting')) category = 'troubleshooting';
 
-  // TODO: Extract tags and keywords from page metadata
-  // This will be populated from the MDX frontmatter in production
+  // Tags and keywords are provided via props from MDX frontmatter
+  // See SmartRelatedContentWithMetadata for the integration
 
   const result: {
     category?: ContentCategory;

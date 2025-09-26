@@ -13,11 +13,10 @@ import { copyToClipboard } from '@/lib/clipboard-utils';
 import { getDisplayTitle } from '@/lib/utils';
 
 interface ConfigCardProps {
-  id: string;
   title?: string;
   name?: string;
   description: string;
-  tags: string[];
+  tags: readonly string[] | string[];
   author: string;
   slug: string;
   category: string;

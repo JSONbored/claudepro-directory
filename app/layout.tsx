@@ -1,13 +1,15 @@
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import Script from 'next/script';
+import { connection } from 'next/server';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { Toaster } from 'sonner';
+import { ErrorBoundary } from '@/components/error-boundary';
 import { Navigation } from '@/components/navigation';
 import { PerformanceOptimizer } from '@/components/performance-optimizer';
 import { StructuredData } from '@/components/structured-data';
+import { UmamiScript } from '@/components/umami-script';
 import { WebVitals } from './components/web-vitals';
 
 const inter = Inter({
@@ -103,6 +105,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Opt-out of static generation for every page so the CSP nonce can be applied
+  await connection();
+
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <head>
@@ -131,46 +136,26 @@ export default async function RootLayout({
       <body className="font-sans">
         <StructuredData type="website" />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md"
-          >
-            Skip to main content
-          </a>
-          <div className="min-h-screen bg-background">
-            <Navigation />
-            {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
-            <main id="main-content">{children}</main>
-          </div>
+          <ErrorBoundary>
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md"
+            >
+              Skip to main content
+            </a>
+            <div className="min-h-screen bg-background">
+              <Navigation />
+              {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
+              <main id="main-content">{children}</main>
+            </div>
+          </ErrorBoundary>
           <Toaster />
         </ThemeProvider>
         <PerformanceOptimizer />
         <Analytics />
         <WebVitals />
-        <Script strategy="afterInteractive">
-          {`
-            // Register service worker only on client side
-            if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-              window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/service-worker.js')
-                  .then(function(registration) {
-                    console.log('ServiceWorker registration successful:', registration.scope);
-                  })
-                  .catch(function(error) {
-                    console.log('ServiceWorker registration failed:', error);
-                  });
-              });
-            }
-          `}
-        </Script>
         {/* Umami Analytics - Privacy-focused analytics (production only) */}
-        {process.env.NODE_ENV === 'production' && (
-          <Script
-            src="https://umami.claudepro.directory/script.js"
-            data-website-id="b734c138-2949-4527-9160-7fe5d0e81121"
-            strategy="lazyOnload"
-          />
-        )}
+        <UmamiScript />
       </body>
     </html>
   );
