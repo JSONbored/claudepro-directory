@@ -44,6 +44,7 @@ export const cacheCategorySchema = z.enum([
   'hooks',
   'guides',
   'jobs',
+  'all_content', // Special category for combined content operations
 ]);
 
 /**
@@ -345,6 +346,62 @@ export const batchIncrementOperationSchema = z.object({
   increment: z.number().int().min(1).max(1000).optional().default(1),
 });
 
+/**
+ * Redis SCAN operation parameters schema for production security
+ */
+export const redisScanParamsSchema = z.object({
+  cursor: z.string().regex(/^\d+$/, 'Cursor must be numeric string').default('0'),
+  pattern: z
+    .string()
+    .min(1, 'Pattern is required')
+    .max(100, 'Pattern too long')
+    .regex(
+      /^[a-zA-Z0-9:_\-/*]+$/,
+      'Invalid pattern format - only alphanumeric, :, _, -, / and * allowed'
+    )
+    .refine(
+      (pattern) => !pattern.includes('../') && !pattern.includes('..\\'),
+      'Path traversal patterns not allowed'
+    )
+    .refine((pattern) => pattern.split('*').length <= 3, 'Too many wildcards - maximum 2 allowed'),
+  count: z.number().int().min(1).max(1000).default(100),
+});
+
+/**
+ * Redis SCAN response validation schema
+ */
+export const redisScanResponseSchema = z.tuple([
+  z
+    .string()
+    .regex(/^\d+$/, 'Cursor must be numeric string'), // Next cursor
+  z
+    .array(z.string().max(CACHE_LIMITS.MAX_KEY_LENGTH))
+    .max(1000), // Keys array
+]);
+
+/**
+ * Cache invalidation operation result schema
+ */
+export const cacheInvalidationResultSchema = z.object({
+  pattern: z.string(),
+  keysScanned: z.number().int().min(0),
+  keysDeleted: z.number().int().min(0),
+  scanCycles: z.number().int().min(1),
+  duration: z.number().min(0),
+  rateLimited: z.boolean().default(false),
+});
+
+/**
+ * Rate limit tracking schema for production monitoring
+ */
+export const rateLimitTrackingSchema = z.object({
+  commandCount: z.number().int().min(0),
+  limitPerSecond: z.number().int().min(1),
+  timeUntilReset: z.number().min(0),
+  isNearLimit: z.boolean(),
+  utilizationPercent: z.number().min(0).max(100),
+});
+
 // Auto-generated type exports
 export type MdxCache = z.infer<typeof mdxCacheSchema>;
 export type ApiResponseCache = z.infer<typeof apiResponseCacheSchema>;
@@ -428,3 +485,7 @@ export type ViewCountResponse = z.infer<typeof viewCountResponseSchema>;
 export type PopularItemsQuery = z.infer<typeof popularItemsQuerySchema>;
 export type CachedString = z.infer<typeof cachedStringSchema>;
 export type RedisZRangeResponse = z.infer<typeof redisZRangeResponseSchema>;
+export type RedisScanParams = z.infer<typeof redisScanParamsSchema>;
+export type RedisScanResponse = z.infer<typeof redisScanResponseSchema>;
+export type CacheInvalidationResult = z.infer<typeof cacheInvalidationResultSchema>;
+export type RateLimitTracking = z.infer<typeof rateLimitTrackingSchema>;

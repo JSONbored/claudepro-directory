@@ -3,9 +3,11 @@ import { z } from 'zod';
 import { logger } from './logger';
 import {
   apiResponseCacheSchema,
+  type CacheInvalidationResult,
   cacheCategorySchema,
   cacheContentMetadataSchema,
   cachedApiResponseSchema,
+  cacheInvalidationResultSchema,
   cacheKeyParamsSchema,
   cacheStatsSchema,
   mdxCacheSchema,
@@ -13,6 +15,10 @@ import {
   parseGenericCachedJSON,
   parseRedisZRangeResponse,
   popularItemsQuerySchema,
+  type RateLimitTracking,
+  rateLimitTrackingSchema,
+  redisScanParamsSchema,
+  redisScanResponseSchema,
   validateBatchIncrements,
   validateCacheKey,
   validateTTL,
@@ -560,33 +566,157 @@ export const contentCache = {
     }
   },
 
-  // Invalidate cache by pattern
-  async invalidatePattern(pattern: string): Promise<void> {
-    if (!redis) return;
+  // Invalidate cache by pattern using SCAN for production safety with comprehensive monitoring
+  async invalidatePattern(pattern: string): Promise<CacheInvalidationResult> {
+    const startTime = Date.now();
+    let keysScanned = 0;
+    let keysDeleted = 0;
+    let scanCycles = 0;
+    let rateLimited = false;
+
+    // Default result for early returns
+    const defaultResult: CacheInvalidationResult = {
+      pattern,
+      keysScanned: 0,
+      keysDeleted: 0,
+      scanCycles: 0,
+      duration: 0,
+      rateLimited: false,
+    };
+
+    if (!redis) {
+      logger.warn('Redis not configured - cache invalidation skipped', { pattern });
+      return defaultResult;
+    }
 
     try {
-      // Validate pattern (max 100 chars, simple pattern)
-      const validPattern = z
-        .string()
-        .max(100, 'Pattern too long')
-        .regex(/^[a-zA-Z0-9:_\-/*]+$/, 'Invalid pattern format')
-        .parse(pattern);
+      // Validate SCAN parameters with production schemas
+      const scanParams = redisScanParamsSchema.parse({
+        cursor: '0',
+        pattern,
+        count: 100,
+      });
 
-      // Note: Upstash Redis doesn't support KEYS command in production
-      // This is a simplified version - in production you'd use a different approach
-      // or store cache keys in a set for easier invalidation
-      const keys = await redis.keys(validPattern);
-      if (keys.length > 0) {
-        await redis.del(...keys);
+      let cursor = scanParams.cursor;
+
+      do {
+        scanCycles++;
+
+        // Check rate limits before each operation
+        const rateLimitStats = redisOptimizer.getRateLimitStats();
+        if (rateLimitStats.isNearLimit) {
+          rateLimited = true;
+          logger.warn('Rate limit approaching during cache invalidation', {
+            pattern: scanParams.pattern,
+            utilizationPercent: rateLimitStats.utilizationPercent,
+          });
+        }
+
+        await checkRateLimit();
+
+        // Execute SCAN with validated parameters
+        const rawResult = await redis.scan(cursor, {
+          match: scanParams.pattern,
+          count: scanParams.count,
+        });
+
+        // Validate SCAN response structure
+        const validatedResult = redisScanResponseSchema.parse(rawResult);
+        cursor = validatedResult[0];
+        const keys = validatedResult[1];
+
+        keysScanned += keys.length;
+
+        if (keys.length > 0) {
+          // Delete keys in batches to avoid overwhelming Redis
+          for (let i = 0; i < keys.length; i += BATCH_SIZE) {
+            const batch = keys.slice(i, i + BATCH_SIZE);
+
+            // Validate each key before deletion (security)
+            const validatedKeys = batch.filter((key) => {
+              try {
+                validateCacheKey(key);
+                return true;
+              } catch {
+                logger.warn('Skipping invalid key during invalidation', {
+                  key,
+                  pattern: scanParams.pattern,
+                });
+                return false;
+              }
+            });
+
+            if (validatedKeys.length > 0) {
+              await redis.del(...validatedKeys);
+              keysDeleted += validatedKeys.length;
+            }
+
+            await checkRateLimit();
+          }
+        }
+
+        // Safety circuit breaker for runaway operations
+        if (scanCycles > 1000) {
+          logger.error(
+            'Cache invalidation circuit breaker triggered - too many SCAN cycles',
+            new Error('Circuit breaker triggered'),
+            {
+              pattern: scanParams.pattern,
+              scanCycles,
+              keysScanned,
+              keysDeleted,
+            }
+          );
+          break;
+        }
+      } while (cursor !== '0');
+
+      const duration = Date.now() - startTime;
+
+      // Validate and return comprehensive result
+      const result = cacheInvalidationResultSchema.parse({
+        pattern: scanParams.pattern,
+        keysScanned,
+        keysDeleted,
+        scanCycles,
+        duration,
+        rateLimited,
+      });
+
+      // Log operation details for production monitoring
+      if (keysDeleted > 0) {
+        logger.info('Cache pattern invalidation completed', result);
+      } else {
+        logger.debug('No keys found for invalidation pattern', {
+          pattern: scanParams.pattern,
+          keysScanned,
+          scanCycles,
+          duration,
+        });
       }
+
+      return result;
     } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorResult = {
+        ...defaultResult,
+        keysScanned,
+        keysDeleted,
+        scanCycles,
+        duration,
+        rateLimited,
+      };
+
       logger.error(
         'Failed to invalidate cache pattern',
         error instanceof Error ? error : new Error(String(error)),
         {
-          pattern,
+          ...errorResult,
+          errorType: error instanceof z.ZodError ? 'validation' : 'redis_operation',
         }
       );
+
+      return errorResult;
     }
   },
 
@@ -663,6 +793,22 @@ export const redisOptimizer = {
       limitPerSecond: COMMAND_LIMIT_PER_SECOND,
       timeUntilReset: Math.max(0, timeUntilReset),
     };
+  },
+
+  // Get comprehensive rate limit stats for production monitoring
+  getRateLimitStats(): RateLimitTracking {
+    const now = Date.now();
+    const timeUntilReset = Math.max(0, 1000 - (now - lastReset));
+    const utilizationPercent = Math.round((commandCount / COMMAND_LIMIT_PER_SECOND) * 100);
+    const isNearLimit = utilizationPercent >= 80;
+
+    return rateLimitTrackingSchema.parse({
+      commandCount,
+      limitPerSecond: COMMAND_LIMIT_PER_SECOND,
+      timeUntilReset,
+      isNearLimit,
+      utilizationPercent,
+    });
   },
 
   // Batch operations with intelligent pipeline usage
