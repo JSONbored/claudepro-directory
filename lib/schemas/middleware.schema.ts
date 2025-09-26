@@ -113,6 +113,7 @@ export const staticAssetSchema = z
       path === '/sitemap.xml' ||
       path === '/manifest.json' ||
       path === '/manifest.webmanifest' ||
+      path === '/manifest' ||
       path === '/service-worker.js' ||
       path === '/offline.html' ||
       /\.(png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)$/.test(path),

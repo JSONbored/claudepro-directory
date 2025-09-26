@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { CommandDetailPage } from '@/components/command-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { commands, getCommandBySlug, getCommandFullContent } from '@/generated/content';
+import { sortCommands } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
 import { slugParamSchema } from '@/lib/schemas/search.schema';
 import { getDisplayTitle } from '@/lib/utils';
@@ -54,9 +55,40 @@ export async function generateMetadata({ params }: CommandPageProps): Promise<Me
 }
 
 export async function generateStaticParams() {
-  return commands.map((command) => ({
-    slug: command.slug,
-  }));
+  try {
+    // Sort commands by popularity/trending for optimized static generation
+    // Most popular items will be generated first, improving initial page loads
+    const sortedCommands = await sortCommands([...commands], 'popularity');
+
+    return sortedCommands
+      .map((command) => {
+        // Validate slug using existing schema before static generation
+        const validation = slugParamSchema.safeParse({ slug: command.slug });
+
+        if (!validation.success) {
+          logger.warn('Invalid slug in generateStaticParams for commands', {
+            slug: command.slug,
+            error: validation.error.issues[0]?.message || 'Unknown validation error',
+          });
+          return null;
+        }
+
+        return {
+          slug: command.slug,
+        };
+      })
+      .filter(Boolean);
+  } catch (error) {
+    // Fallback to unsorted if sorting fails
+    logger.error(
+      'Failed to sort commands for static generation, using default order',
+      error instanceof Error ? error : new Error(String(error))
+    );
+
+    return commands.map((command) => ({
+      slug: command.slug,
+    }));
+  }
 }
 
 export default async function CommandPage({ params }: CommandPageProps) {

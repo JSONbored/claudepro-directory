@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { HookDetailPage } from '@/components/hook-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { getHookBySlug, getHookFullContent, hooks } from '@/generated/content';
+import { sortHooks } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
 import { slugParamSchema } from '@/lib/schemas/search.schema';
 import { getDisplayTitle } from '@/lib/utils';
@@ -52,9 +53,40 @@ export async function generateMetadata({ params }: HookPageProps): Promise<Metad
 }
 
 export async function generateStaticParams() {
-  return hooks.map((hook) => ({
-    slug: hook.slug,
-  }));
+  try {
+    // Sort hooks by popularity/trending for optimized static generation
+    // Most popular items will be generated first, improving initial page loads
+    const sortedHooks = await sortHooks([...hooks], 'popularity');
+
+    return sortedHooks
+      .map((hook) => {
+        // Validate slug using existing schema before static generation
+        const validation = slugParamSchema.safeParse({ slug: hook.slug });
+
+        if (!validation.success) {
+          logger.warn('Invalid slug in generateStaticParams for hooks', {
+            slug: hook.slug,
+            error: validation.error.issues[0]?.message || 'Unknown validation error',
+          });
+          return null;
+        }
+
+        return {
+          slug: hook.slug,
+        };
+      })
+      .filter(Boolean);
+  } catch (error) {
+    // Fallback to unsorted if sorting fails
+    logger.error(
+      'Failed to sort hooks for static generation, using default order',
+      error instanceof Error ? error : new Error(String(error))
+    );
+
+    return hooks.map((hook) => ({
+      slug: hook.slug,
+    }));
+  }
 }
 
 export default async function HookPage({ params }: HookPageProps) {
