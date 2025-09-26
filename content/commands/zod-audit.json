@@ -1,0 +1,76 @@
+{
+  "slug": "zod-audit",
+  "description": "Production codebase auditor specialized in Zod schema validation coverage, security vulnerability detection, and dead code elimination",
+  "category": "commands",
+  "author": "JSONbored",
+  "dateAdded": "2025-09-26",
+  "tags": [
+    "zod",
+    "validation",
+    "security-audit",
+    "typescript",
+    "dead-code",
+    "duplication",
+    "schema-validation",
+    "open-source",
+    "production",
+    "technical-debt"
+  ],
+  "content": "---\nallowed-tools: Bash(find:*), Bash(grep:*), Bash(rg:*), Bash(ls:*), Read, Write, Edit, Grep, Glob, Task\nargument-hint: [audit-type=full|security|duplication|validation|zod] [path]\ndescription: Audits codebase for Zod validation coverage, security gaps, and code quality issues\nmodel: claude-3-5-sonnet-20241022\n---\n\n## Context\n\n- Current directory: !`pwd`\n- Project structure: !`ls -la`\n- TypeScript/JavaScript files: !`find . -type f \\( -name \"*.ts\" -o -name \"*.tsx\" -o -name \"*.js\" -o -name \"*.jsx\" \\) -not -path \"*/node_modules/*\" -not -path \"*/dist/*\" | head -20`\n- Package dependencies: !`[ -f package.json ] && cat package.json | grep -A 20 '\"dependencies\"'`\n\n## Audit Scope\n\nAudit Type: ${1:-full}\nTarget Path: ${2:-.}\n\n## Your Task\n\nPerform a comprehensive codebase audit focusing on:\n\n### Phase 1: Security Analysis\n- Identify ALL missing input validations, especially Zod schemas\n- Find unvalidated API endpoints and form handlers\n- Detect exposed secrets, API keys, or sensitive data\n- Spot authentication/authorization gaps\n- Check for common vulnerabilities (XSS, SQL injection, CSRF)\n- Verify environment variable validation\n\n### Phase 2: Code Quality Assessment\n- Find exact duplicates and near-duplicate code (>80% similarity)\n- Identify dead code and unused exports\n- Locate commented-out code blocks\n- Spot orphaned files and abandoned features\n- Detect inconsistent naming patterns\n- Find magic numbers and hardcoded values\n\n### Phase 3: Validation Coverage\n- Every user input MUST have Zod validation\n- All API responses MUST be validated\n- Database query results MUST have schemas\n- File uploads MUST be sanitized\n- Environment variables MUST use schemas\n- Form submissions MUST validate all fields\n\n### Phase 4: Modernization Opportunities\n- Identify legacy patterns needing updates\n- Find opportunities for React/Next.js optimizations\n- Detect outdated dependencies\n- Spot over-engineered abstractions\n- Locate performance bottlenecks\n\n## Deliverables\n\nProvide a structured report with:\n\n### Critical Security Issues\n- File paths and line numbers\n- Specific vulnerability details\n- Recommended fixes with code examples\n- Priority: CRITICAL\n\n### Code Duplication Report\n- Duplicated code blocks with locations\n- Consolidation strategies\n- Estimated lines of code reduction\n- Priority: HIGH\n\n### Missing Validations\n- Unvalidated endpoints/inputs\n- Required Zod schemas\n- Implementation examples\n- Priority: CRITICAL\n\n### Modernization Recommendations\n- Legacy patterns to update\n- Modern alternatives\n- Migration strategies\n- Priority: MEDIUM\n\n### Metrics Summary\n- Total files audited\n- Security gaps identified\n- Lines of duplicate code\n- Missing validation schemas\n- Estimated maintenance reduction %\n\n## Open-Source Considerations\n\nThis audit assumes an open-source production codebase:\n- No security through obscurity\n- All code is publicly visible\n- Clear, auditable validation logic\n- Explicit security boundaries\n- Well-documented threat model\n\n## Implementation Notes\n\nWhen auditing:\n1. Start with high-risk areas (auth, API, forms)\n2. Use ripgrep for fast pattern matching\n3. Check all file extensions, not just .ts/.tsx\n4. Include configuration files in security scan\n5. Verify all external data sources have validation\n\nPrioritize findings by:\n- CRITICAL: Security vulnerabilities, missing validations\n- HIGH: Major duplication, abandoned code\n- MEDIUM: Modernization opportunities\n- LOW: Style inconsistencies",
+  "source": "community",
+  "configuration": {
+    "temperature": 0.2,
+    "maxTokens": 16000
+  },
+  "features": [
+    "Complete security vulnerability scanning with Zod validation focus",
+    "Advanced code duplication detection and consolidation analysis",
+    "Dead code identification and cleanup recommendations",
+    "Modern architecture assessment and migration paths",
+    "Production-ready validation schema generation"
+  ],
+  "useCases": [
+    "Pre-deployment security audit for production applications",
+    "Open-source project hardening before public release",
+    "Technical debt assessment and prioritization",
+    "Legacy codebase modernization planning",
+    "Validation coverage analysis for TypeScript projects"
+  ],
+  "requirements": [
+    "Claude Code CLI installed",
+    "Understanding of TypeScript/JavaScript patterns",
+    "Familiarity with Zod validation schemas",
+    "Knowledge of OWASP security principles"
+  ],
+  "installation": {
+    "claudeCode": {
+      "steps": [
+        "Create command directory: mkdir -p .claude/commands",
+        "Create command file: audit-codebase.md in the commands directory",
+        "Copy the command content with YAML frontmatter format",
+        "Use /audit-codebase to execute the full audit",
+        "Use /audit-codebase security for security-focused audit",
+        "Use /audit-codebase validation for validation coverage check"
+      ],
+      "configFormat": "Markdown file with YAML frontmatter",
+      "configPath": {
+        "project": ".claude/commands/audit-codebase.md",
+        "user": "~/.claude/commands/audit-codebase.md"
+      }
+    }
+  },
+  "argumentTypes": [
+    {
+      "name": "audit-type",
+      "description": "Type of audit to perform: full, security, duplication, or validation",
+      "example": "/audit-codebase security"
+    },
+    {
+      "name": "path",
+      "description": "Specific path or directory to audit (defaults to current directory)",
+      "example": "/audit-codebase full ./src"
+    }
+  ],
+  "documentationUrl": "https://owasp.org/www-project-top-ten/",
+  "githubUrl": "https://github.com/colinhacks/zod"
+}
