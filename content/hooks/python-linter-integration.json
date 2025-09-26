@@ -4,12 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "python",
-    "linting",
-    "code-quality",
-    "pylint"
-  ],
+  "tags": ["python", "linting", "code-quality", "pylint"],
   "hookType": "PostToolUse",
   "features": [
     "Automatic pylint execution on Python file changes",
@@ -34,10 +29,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/python-linter-integration.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },

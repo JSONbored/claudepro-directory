@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-16",
-  "tags": [
-    "git",
-    "validation",
-    "code-quality",
-    "testing",
-    "automation"
-  ],
+  "tags": ["git", "validation", "code-quality", "testing", "automation"],
   "hookType": "PreToolUse",
   "features": [
     "Code quality validation with linting and formatting",
@@ -26,9 +20,7 @@
       "hooks": {
         "preToolUse": {
           "script": "./.claude/hooks/git-pre-commit-validator.sh",
-          "matchers": [
-            "git"
-          ]
+          "matchers": ["git"]
         }
       }
     },

@@ -4,12 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "docker",
-    "containers",
-    "devops",
-    "automation"
-  ],
+  "tags": ["docker", "containers", "devops", "automation"],
   "hookType": "PostToolUse",
   "features": [
     "Automatic Docker image rebuilding on Dockerfile changes",
@@ -24,10 +19,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/docker-container-auto-rebuild.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },
