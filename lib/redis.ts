@@ -49,7 +49,7 @@ const decompress = (data: string): string => {
 
 // Batch operation utilities
 const BATCH_SIZE = 10;
-const COMMAND_LIMIT_PER_SECOND = 50; // Conservative limit for free tier
+const COMMAND_LIMIT_PER_SECOND = 100; // Optimized for 500k commands/month free tier (≈193 commands/second sustainable)
 
 let commandCount = 0;
 let lastReset = Date.now();
@@ -71,12 +71,26 @@ const checkRateLimit = async (): Promise<void> => {
   commandCount++;
 };
 
-// Initialize Redis client
+// Redis connection pool configuration for production optimization
+const REDIS_CONNECTION_CONFIG = {
+  // Connection pooling settings
+  maxRetriesPerRequest: 3,
+  retryDelayOnFailover: 100,
+  enableReadyCheck: false,
+  maxMemoryPolicy: 'allkeys-lru',
+  // Connection timeout and keep-alive settings
+  connectTimeout: 10000,
+  commandTimeout: 5000,
+  lazyConnect: true,
+} as const;
+
+// Initialize Redis client with connection pooling
 // Uses validated environment variables from env schema
 const redis = redisConfig.isConfigured
   ? new Redis({
       url: redisConfig.url!,
       token: redisConfig.token!,
+      ...REDIS_CONNECTION_CONFIG,
     })
   : null;
 
