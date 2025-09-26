@@ -42,27 +42,26 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
       },
     });
 
-  // Filter search results by active tab
+  // Create lookup maps for O(1) slug checking instead of O(n) array.some() calls
+  const slugLookupMaps = useMemo(() => {
+    return {
+      rules: new Set(rules.map((r) => r.slug)),
+      mcp: new Set(mcp.map((m) => m.slug)),
+      agents: new Set(agents.map((a) => a.slug)),
+      commands: new Set(commands.map((c) => c.slug)),
+      hooks: new Set(hooks.map((h) => h.slug)),
+    };
+  }, [rules, mcp, agents, commands, hooks]);
+
+  // Filter search results by active tab - optimized with Set lookups
   const filteredResults = useMemo(() => {
     if (activeTab === 'all' || activeTab === 'community') {
       return searchResults;
     }
 
-    switch (activeTab) {
-      case 'rules':
-        return searchResults.filter((item) => rules.some((r) => r.slug === item.slug));
-      case 'mcp':
-        return searchResults.filter((item) => mcp.some((m) => m.slug === item.slug));
-      case 'agents':
-        return searchResults.filter((item) => agents.some((a) => a.slug === item.slug));
-      case 'commands':
-        return searchResults.filter((item) => commands.some((c) => c.slug === item.slug));
-      case 'hooks':
-        return searchResults.filter((item) => hooks.some((h) => h.slug === item.slug));
-      default:
-        return searchResults;
-    }
-  }, [searchResults, activeTab, agents, commands, hooks, mcp, rules]);
+    const lookupSet = slugLookupMaps[activeTab as keyof typeof slugLookupMaps];
+    return lookupSet ? searchResults.filter((item) => lookupSet.has(item.slug)) : searchResults;
+  }, [searchResults, activeTab, slugLookupMaps]);
 
   // Update displayed items when filtered results change
   useEffect(() => {
@@ -88,24 +87,32 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
 
   const hasMore = displayedItems.length < filteredResults.length;
 
-  const getConfigType = (
-    config: ContentItem
-  ): 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks' => {
-    // Determine type based on which array the config came from
-    if (agents.some((a) => a.slug === config.slug)) return 'agents';
-    if (commands.some((c) => c.slug === config.slug)) return 'commands';
-    if (hooks.some((h) => h.slug === config.slug)) return 'hooks';
-    if (mcp.some((m) => m.slug === config.slug)) return 'mcp';
-    if (rules.some((r) => r.slug === config.slug)) return 'rules';
+  // Optimized config type lookup using Set - O(1) instead of O(n)
+  const getConfigType = useMemo(() => {
+    return (config: ContentItem): 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks' => {
+      const { slug } = config;
 
-    // Fallback: check for content field
-    return 'content' in config ? 'rules' : 'mcp';
-  };
+      if (slugLookupMaps.agents.has(slug)) return 'agents';
+      if (slugLookupMaps.commands.has(slug)) return 'commands';
+      if (slugLookupMaps.hooks.has(slug)) return 'hooks';
+      if (slugLookupMaps.mcp.has(slug)) return 'mcp';
+      if (slugLookupMaps.rules.has(slug)) return 'rules';
+
+      // Fallback: check for content field
+      return 'content' in config ? 'rules' : 'mcp';
+    };
+  }, [slugLookupMaps]);
 
   // Handle tab change
   const handleTabChange = useCallback((value: string) => {
     setActiveTab(value);
   }, []);
+
+  // Handle clear search
+  const handleClearSearch = useCallback(() => {
+    handleSearch('');
+    setDisplayedItems([]);
+  }, [handleSearch]);
 
   return (
     <>
@@ -134,14 +141,7 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
                 Search Results
                 <span className="text-muted-foreground ml-2">({filteredResults.length} found)</span>
               </h2>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  handleSearch('');
-                  setDisplayedItems([]);
-                }}
-                className="text-sm"
-              >
+              <Button variant="outline" onClick={handleClearSearch} className="text-sm">
                 Clear Search
               </Button>
             </div>

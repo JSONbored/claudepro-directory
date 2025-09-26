@@ -131,11 +131,6 @@ async function loadJsonFiles(type: ContentCategory): Promise<ValidatedContent[]>
             parsedData.slug = generateSlugFromFilename(file);
           }
 
-          // Auto-generate id from slug if not provided (required for validation)
-          if (!parsedData.id && typeof parsedData.slug === 'string') {
-            parsedData.id = parsedData.slug;
-          }
-
           // Auto-generate title from slug if not provided (for display purposes)
           if (!parsedData.title && typeof parsedData.slug === 'string') {
             parsedData.title = slugToTitle(parsedData.slug);

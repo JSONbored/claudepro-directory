@@ -50,33 +50,44 @@ export function FloatingSearchSidebar({
     };
   }, [items]);
 
-  // Filter and search items
+  // Pre-computed search index for optimal performance
+  const searchIndex = useMemo(() => {
+    return items.map((item) => ({
+      item,
+      searchText: [
+        item.name || '',
+        item.description || '',
+        ...(item.tags || []),
+        item.category || '',
+        item.author || '',
+      ]
+        .join(' ')
+        .toLowerCase(),
+      tagsSet: new Set(item.tags || []),
+    }));
+  }, [items]);
+
+  // Filter and search items - optimized with pre-computed index
   const filteredItems = useMemo(() => {
-    const searchLower = query.toLowerCase();
+    return searchIndex
+      .filter(({ item, searchText, tagsSet }) => {
+        // Text search - single string comparison instead of multiple
+        const matchesSearch = !query || searchText.includes(query.toLowerCase());
 
-    return items.filter((item) => {
-      // Text search
-      const matchesSearch =
-        !query ||
-        item.name?.toLowerCase().includes(searchLower) ||
-        item.description?.toLowerCase().includes(searchLower) ||
-        item.tags?.some((tag) => tag.toLowerCase().includes(searchLower)) ||
-        item.category?.toLowerCase().includes(searchLower) ||
-        item.author?.toLowerCase().includes(searchLower);
+        // Category filter
+        const matchesCategory = !selectedCategory || item.category === selectedCategory;
 
-      // Category filter
-      const matchesCategory = !selectedCategory || item.category === selectedCategory;
+        // Author filter
+        const matchesAuthor = !selectedAuthor || item.author === selectedAuthor;
 
-      // Author filter
-      const matchesAuthor = !selectedAuthor || item.author === selectedAuthor;
+        // Tags filter - using Set for O(1) lookups
+        const matchesTags =
+          selectedTags.length === 0 || selectedTags.every((tag) => tagsSet.has(tag));
 
-      // Tags filter
-      const matchesTags =
-        selectedTags.length === 0 || selectedTags.every((tag) => item.tags?.includes(tag));
-
-      return matchesSearch && matchesCategory && matchesAuthor && matchesTags;
-    });
-  }, [items, query, selectedCategory, selectedAuthor, selectedTags]);
+        return matchesSearch && matchesCategory && matchesAuthor && matchesTags;
+      })
+      .map(({ item }) => item);
+  }, [searchIndex, query, selectedCategory, selectedAuthor, selectedTags]);
 
   // Keyboard shortcuts
   useEffect(() => {

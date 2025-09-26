@@ -1,7 +1,7 @@
 'use client';
 
 import { Filter, RotateCcw } from 'lucide-react';
-import { useId } from 'react';
+import { useCallback, useId, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { TagBadge } from '@/components/ui/config-badge';
 import {
@@ -38,27 +38,65 @@ export const FilterBar = ({
   const popularityId = useId();
   const tagsId = useId();
 
-  const hasActiveFilters =
-    filters.category !== 'all' ||
-    filters.tags.length > 0 ||
-    filters.author !== 'all' ||
-    filters.popularityRange[0] > 0 ||
-    filters.popularityRange[1] < 100 ||
-    filters.dateRange !== 'all';
+  const hasActiveFilters = useMemo(
+    () =>
+      filters.category !== 'all' ||
+      filters.tags.length > 0 ||
+      filters.author !== 'all' ||
+      filters.popularityRange[0] > 0 ||
+      filters.popularityRange[1] < 100 ||
+      filters.dateRange !== 'all',
+    [filters]
+  );
 
-  const toggleTag = (tag: string) => {
-    const newTags = filters.tags.includes(tag)
-      ? filters.tags.filter((t) => t !== tag)
-      : [...filters.tags, tag];
-    onFilterChange('tags', newTags);
-  };
+  const toggleTag = useCallback(
+    (tag: string) => {
+      const newTags = filters.tags.includes(tag)
+        ? filters.tags.filter((t) => t !== tag)
+        : [...filters.tags, tag];
+      onFilterChange('tags', newTags);
+    },
+    [filters.tags, onFilterChange]
+  );
 
-  const removeTag = (tag: string) => {
-    onFilterChange(
-      'tags',
-      filters.tags.filter((t) => t !== tag)
-    );
-  };
+  const removeTag = useCallback(
+    (tag: string) => {
+      onFilterChange(
+        'tags',
+        filters.tags.filter((t) => t !== tag)
+      );
+    },
+    [filters.tags, onFilterChange]
+  );
+
+  // Optimized event handlers
+  const handleCategoryChange = useCallback(
+    (value: string) => {
+      onFilterChange('category', value);
+    },
+    [onFilterChange]
+  );
+
+  const handleAuthorChange = useCallback(
+    (value: string) => {
+      onFilterChange('author', value);
+    },
+    [onFilterChange]
+  );
+
+  const handleDateRangeChange = useCallback(
+    (value: string) => {
+      onFilterChange('dateRange', value as 'all' | 'week' | 'month' | 'year');
+    },
+    [onFilterChange]
+  );
+
+  const handlePopularityChange = useCallback(
+    (value: number[]) => {
+      onFilterChange('popularityRange', value as [number, number]);
+    },
+    [onFilterChange]
+  );
 
   return (
     <div className="bg-card/30 border border-border/50 rounded-lg p-6 space-y-6">
@@ -86,10 +124,7 @@ export const FilterBar = ({
           <label htmlFor={categoryId} className="text-sm font-medium text-foreground">
             Category
           </label>
-          <Select
-            value={filters.category}
-            onValueChange={(value) => onFilterChange('category', value)}
-          >
+          <Select value={filters.category} onValueChange={handleCategoryChange}>
             <SelectTrigger
               id={categoryId}
               className="bg-background/50 border-border/50"
@@ -113,7 +148,7 @@ export const FilterBar = ({
           <label htmlFor={authorId} className="text-sm font-medium text-foreground">
             Author
           </label>
-          <Select value={filters.author} onValueChange={(value) => onFilterChange('author', value)}>
+          <Select value={filters.author} onValueChange={handleAuthorChange}>
             <SelectTrigger
               id={authorId}
               className="bg-background/50 border-border/50"
@@ -137,12 +172,7 @@ export const FilterBar = ({
           <label htmlFor={dateRangeId} className="text-sm font-medium text-foreground">
             Date Range
           </label>
-          <Select
-            value={filters.dateRange}
-            onValueChange={(value) =>
-              onFilterChange('dateRange', value as 'all' | 'week' | 'month' | 'year')
-            }
-          >
+          <Select value={filters.dateRange} onValueChange={handleDateRangeChange}>
             <SelectTrigger
               id={dateRangeId}
               className="bg-background/50 border-border/50"
@@ -168,9 +198,7 @@ export const FilterBar = ({
             <Slider
               id={popularityId}
               value={filters.popularityRange}
-              onValueChange={(value) =>
-                onFilterChange('popularityRange', value as [number, number])
-              }
+              onValueChange={handlePopularityChange}
               min={0}
               max={100}
               step={5}

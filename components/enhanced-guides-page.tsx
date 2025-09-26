@@ -88,24 +88,39 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
 
   const totalGuides = Object.values(guides).reduce((acc, cat) => acc + cat.length, 0);
 
-  // Filter and search guides
+  // Pre-computed search index for optimal performance
+  const searchIndex = useMemo(() => {
+    const index: Record<string, Array<{ guide: GuideItem; searchText: string }>> = {};
+
+    Object.entries(guides).forEach(([category, guideList]) => {
+      index[category] = guideList.map((guide) => ({
+        guide,
+        searchText: [guide.title, guide.description].join(' ').toLowerCase(),
+      }));
+    });
+
+    return index;
+  }, [guides]);
+
+  // Filter and search guides - optimized with pre-computed search index
   const filteredGuides = useMemo(() => {
-    let result = { ...guides };
+    let result: Record<string, GuideItem[]> = {};
 
     // Apply category filter
     if (selectedCategory !== 'all') {
       result = { [selectedCategory]: guides[selectedCategory] || [] };
+    } else {
+      result = { ...guides };
     }
 
-    // Apply search filter
+    // Apply search filter using pre-computed index
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       Object.keys(result).forEach((category) => {
-        result[category] = (result[category] || []).filter(
-          (guide) =>
-            guide.title.toLowerCase().includes(query) ||
-            guide.description.toLowerCase().includes(query)
-        );
+        const categoryIndex = searchIndex[category] || [];
+        result[category] = categoryIndex
+          .filter(({ searchText }) => searchText.includes(query))
+          .map(({ guide }) => guide);
       });
     }
 
@@ -127,7 +142,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
     });
 
     return result;
-  }, [guides, searchQuery, selectedCategory, sortBy]);
+  }, [guides, searchIndex, searchQuery, selectedCategory, sortBy]);
 
   const filteredTotalGuides = Object.values(filteredGuides).reduce(
     (acc, cat) => acc + cat.length,

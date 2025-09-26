@@ -76,7 +76,6 @@ function toSearchableItems<
       category: item.category || category,
       popularity: 0, // Will be populated from Redis in production
       slug: item.slug,
-      id: item.slug, // Use slug as id
     };
 
     // Validate the searchable item - this will throw if validation fails

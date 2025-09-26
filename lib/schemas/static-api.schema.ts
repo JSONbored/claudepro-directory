@@ -49,8 +49,6 @@ export const baseContentItemSchema = z.object({
     .max(STATIC_API_LIMITS.MAX_TAGS)
     .default([]),
 
-  id: z.string().min(1).max(STATIC_API_LIMITS.MAX_SLUG_LENGTH),
-
   category: z.string().optional(),
 });
 
@@ -77,7 +75,6 @@ export const searchableItemSchema = z.object({
   category: z.string(),
   popularity: z.number().int().min(0).default(0),
   slug: z.string().max(STATIC_API_LIMITS.MAX_SLUG_LENGTH),
-  id: z.string().max(STATIC_API_LIMITS.MAX_SLUG_LENGTH),
 });
 
 /**
