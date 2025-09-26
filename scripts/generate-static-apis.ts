@@ -72,14 +72,14 @@ function toSearchableItems<
       title: item.title || item.name || '',
       name: item.name || '',
       description: item.description,
-      tags: [...item.tags],
+      tags: Array.isArray(item.tags) ? [...item.tags] : [],
       category: item.category || category,
       popularity: 0, // Will be populated from Redis in production
       slug: item.slug,
       id: item.slug, // Use slug as id
     };
 
-    // Validate the searchable item
+    // Validate the searchable item - this will throw if validation fails
     return searchableItemSchema.parse(searchable);
   });
 }
