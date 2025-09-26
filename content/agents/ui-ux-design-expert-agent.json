@@ -4,13 +4,7 @@
   "category": "agents",
   "author": "JSONbored",
   "dateAdded": "2025-09-15",
-  "tags": [
-    "ui",
-    "ux",
-    "design",
-    "user-experience",
-    "interface"
-  ],
+  "tags": ["ui", "ux", "design", "user-experience", "interface"],
   "features": [
     "User-centered design methodology and design thinking processes",
     "Accessibility compliance with WCAG 2.1 guidelines and inclusive design",
