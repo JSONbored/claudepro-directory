@@ -4,26 +4,54 @@ import { Badge } from '@/components/ui/badge';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
 import { logger } from '@/lib/logger';
 import { statsRedis } from '@/lib/redis';
+import {
+  parseSearchParams,
+  type TrendingParams,
+  trendingParamsSchema,
+} from '@/lib/schemas/search.schema';
 import { sortByPopularity } from '@/lib/sorting';
+import type { ContentItem } from '@/types/content';
 
 // Force dynamic rendering since we're fetching from Redis
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-async function getTrendingData() {
+interface TrendingPageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+async function getTrendingData(params: TrendingParams) {
+  // Validate trending parameters for security
+  const validatedParams = Object.keys(params).length > 0 ? params : {};
+
+  // Log trending data access for analytics
+  if (Object.keys(validatedParams).length > 0) {
+    logger.info('Trending data accessed with parameters', {
+      period: params.period,
+      metric: params.metric,
+      category: params.category,
+      page: params.page,
+      limit: params.limit,
+    });
+  }
+
   // Helper function to get mixed content from categories
   const getMixedContent = (
-    categories: { items: any[]; type: string; count: number }[],
+    categories: { items: ContentItem[]; type: string; count: number }[],
     totalCount: number
-  ) => {
-    const result: any[] = [];
+  ): Array<ContentItem & { type: string; viewCount?: number }> => {
+    const result: Array<ContentItem & { type: string; viewCount?: number }> = [];
     let currentIndex = 0;
 
     // Round-robin through categories to ensure variety
     while (result.length < totalCount) {
       for (const category of categories) {
         if (category.items.length > currentIndex && result.length < totalCount) {
-          const item = { ...category.items[currentIndex], type: category.type };
+          const baseItem = category.items[currentIndex];
+          const item = { ...baseItem, type: category.type } as ContentItem & {
+            type: string;
+            viewCount?: number;
+          };
           result.push(item);
         }
       }
@@ -37,12 +65,12 @@ async function getTrendingData() {
 
   if (!statsRedis.isEnabled()) {
     // Fallback to static data if Redis is not available
-    // Sort each category by popularity
-    const sortedRules = sortByPopularity(rules);
-    const sortedMcp = sortByPopularity(mcp);
-    const sortedAgents = sortByPopularity(agents);
-    const sortedCommands = sortByPopularity(commands);
-    const sortedHooks = sortByPopularity(hooks);
+    // Sort each category by popularity - cast readonly tuple types to ContentItem arrays
+    const sortedRules = sortByPopularity(rules as readonly ContentItem[]);
+    const sortedMcp = sortByPopularity(mcp as readonly ContentItem[]);
+    const sortedAgents = sortByPopularity(agents as readonly ContentItem[]);
+    const sortedCommands = sortByPopularity(commands as readonly ContentItem[]);
+    const sortedHooks = sortByPopularity(hooks as readonly ContentItem[]);
 
     // Mix categories for trending (12 items total, ~2-3 per category)
     const trending = getMixedContent(
@@ -107,17 +135,26 @@ async function getTrendingData() {
     // Map Redis IDs back to actual content items
     const mapToContent = (
       items: string[] | { slug: string; views?: number }[],
-      contentArray: any[],
+      contentArray: readonly ContentItem[],
       type: string
-    ) =>
-      items
-        .map((item) => {
-          const slug = typeof item === 'string' ? item : item.slug;
-          const views = typeof item === 'object' ? item.views : undefined;
-          const content = contentArray.find((c) => c.slug === slug);
-          return content ? { ...content, type, viewCount: views } : null;
-        })
-        .filter(Boolean);
+    ): Array<ContentItem & { type: string; viewCount?: number }> => {
+      const result: Array<ContentItem & { type: string; viewCount?: number }> = [];
+
+      for (const item of items) {
+        const slug = typeof item === 'string' ? item : item.slug;
+        const views = typeof item === 'object' ? item.views : undefined;
+        const content = contentArray.find((c) => c.slug === slug);
+
+        if (content) {
+          result.push({ ...content, type, viewCount: views } as ContentItem & {
+            type: string;
+            viewCount?: number;
+          });
+        }
+      }
+
+      return result;
+    };
 
     // Trending - mix from all categories (last 7 days)
     const trending = [
@@ -162,12 +199,12 @@ async function getTrendingData() {
         component: 'TrendingPage',
       }
     );
-    // Use same fallback as non-Redis case
-    const sortedRules = sortByPopularity(rules);
-    const sortedMcp = sortByPopularity(mcp);
-    const sortedAgents = sortByPopularity(agents);
-    const sortedCommands = sortByPopularity(commands);
-    const sortedHooks = sortByPopularity(hooks);
+    // Use same fallback as non-Redis case - cast readonly tuple types to ContentItem arrays
+    const sortedRules = sortByPopularity(rules as readonly ContentItem[]);
+    const sortedMcp = sortByPopularity(mcp as readonly ContentItem[]);
+    const sortedAgents = sortByPopularity(agents as readonly ContentItem[]);
+    const sortedCommands = sortByPopularity(commands as readonly ContentItem[]);
+    const sortedHooks = sortByPopularity(hooks as readonly ContentItem[]);
 
     const trending = getMixedContent(
       [
@@ -206,8 +243,22 @@ async function getTrendingData() {
   }
 }
 
-export default async function TrendingPage() {
-  const { trending, popular, recent } = await getTrendingData();
+export default async function TrendingPage({ searchParams }: TrendingPageProps) {
+  const rawParams = await searchParams;
+
+  // Validate and parse search parameters with Zod
+  const params = parseSearchParams(trendingParamsSchema, rawParams, 'trending page');
+
+  // Log validated parameters for monitoring
+  logger.info('Trending page accessed', {
+    period: params.period,
+    metric: params.metric,
+    category: params.category,
+    page: params.page,
+    limit: params.limit,
+  });
+
+  const { trending, popular, recent } = await getTrendingData(params);
   const totalCount = rules.length + mcp.length + agents.length + commands.length + hooks.length;
 
   // This is a server component, so we'll use a static ID

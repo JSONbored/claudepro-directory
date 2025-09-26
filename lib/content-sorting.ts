@@ -1,6 +1,7 @@
 import type { ContentItem } from '@/types/content';
 import { logger } from './logger';
 import { contentCache, statsRedis } from './redis';
+import { getDisplayTitle } from './utils';
 
 export type SortOption = 'trending' | 'newest' | 'alphabetical' | 'popularity';
 
@@ -18,7 +19,7 @@ interface ViewDataMap {
 function generateSortCacheKey(items: ContentItem[], options: SortingOptions): string {
   const itemsHash =
     items.length > 0
-      ? `${items.length}-${items[0]?.id || 'no-id'}-${items[items.length - 1]?.id || 'no-id'}`
+      ? `${items.length}-${items[0]?.slug || 'no-slug'}-${items[items.length - 1]?.slug || 'no-slug'}`
       : 'empty';
 
   return `sort:${itemsHash}:${JSON.stringify(options)}`;
@@ -31,7 +32,7 @@ async function getViewDataForItems(items: ContentItem[], category: string): Prom
   try {
     const viewRequests = items.map((item) => ({
       category,
-      slug: item.slug || item.id,
+      slug: item.slug,
     }));
 
     const viewCounts = await statsRedis.getViewCounts(viewRequests);
@@ -39,8 +40,8 @@ async function getViewDataForItems(items: ContentItem[], category: string): Prom
     // Convert to item ID based map
     const viewDataMap: ViewDataMap = {};
     items.forEach((item) => {
-      const key = `${category}:${item.slug || item.id}`;
-      viewDataMap[item.id] = viewCounts[key] || 0;
+      const key = `${category}:${item.slug}`;
+      viewDataMap[item.slug] = viewCounts[key] || 0;
     });
 
     return viewDataMap;
@@ -59,8 +60,8 @@ const sortingFunctions = {
   trending: (items: ContentItem[], viewData: ViewDataMap = {}) => {
     return [...items].sort((a, b) => {
       // Use Redis view data if available, otherwise fall back to popularity
-      const aViews = viewData[a.id] ?? a.popularity ?? 0;
-      const bViews = viewData[b.id] ?? b.popularity ?? 0;
+      const aViews = viewData[a.slug] ?? a.popularity ?? 0;
+      const bViews = viewData[b.slug] ?? b.popularity ?? 0;
 
       // For trending, weight recent activity higher
       const aScore = aViews * (1 + (a.popularity || 0) * 0.1);
@@ -80,8 +81,8 @@ const sortingFunctions = {
 
   alphabetical: (items: ContentItem[]) => {
     return [...items].sort((a, b) => {
-      const aName = (a.name || a.title || '').toLowerCase();
-      const bName = (b.name || b.title || '').toLowerCase();
+      const aName = getDisplayTitle(a).toLowerCase();
+      const bName = getDisplayTitle(b).toLowerCase();
       return aName.localeCompare(bName);
     });
   },
@@ -89,8 +90,8 @@ const sortingFunctions = {
   popularity: (items: ContentItem[], viewData: ViewDataMap = {}) => {
     return [...items].sort((a, b) => {
       // Combine static popularity with actual view data
-      const aPopularity = (a.popularity || 0) + (viewData[a.id] || 0) * 0.1;
-      const bPopularity = (b.popularity || 0) + (viewData[b.id] || 0) * 0.1;
+      const aPopularity = (a.popularity || 0) + (viewData[a.slug] || 0) * 0.1;
+      const bPopularity = (b.popularity || 0) + (viewData[b.slug] || 0) * 0.1;
       return bPopularity - aPopularity;
     });
   },
@@ -110,7 +111,7 @@ export async function sortContentWithCache<T extends ContentItem>(
     const cached = await contentCache.getAPIResponse<T[]>(cacheKey);
     if (cached && cached.length > 0) {
       // Validate cached data integrity
-      if (cached.length === items.length && cached.every((item) => item.id)) {
+      if (cached.length === items.length && cached.every((item) => item.slug)) {
         return cached;
       }
     }

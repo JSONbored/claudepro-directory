@@ -17,7 +17,7 @@ aiOptimized: true
 citationReady: true
 ---
 
-import { Callout, InfoBox, Accordion, StepByStepGuide, CodeGroup, ComparisonTable, AIOptimizedFAQ, FeatureGrid, Tabs, QuickReference, RelatedResources } from '@/components/MDXComponents';
+import { Callout, InfoBox, Accordion, StepByStepGuide, CodeGroup, ComparisonTable, AIOptimizedFAQ, FeatureGrid, Tabs, QuickReference, SmartRelatedContent } from '@/components/MDXComponents';
 
 # Fix Claude Code Memory Leaks & Performance Issues
 
@@ -557,50 +557,7 @@ done`
 
 ## Related Issues and Solutions
 
-<RelatedResources
-  title="Related Troubleshooting Guides"
-  description="Additional resources for related problems and advanced topics"
-  resources={[
-    {
-      title: "Claude API Rate Limiting Issues",
-      description: "Fix 429 errors and implement retry logic. Common when exceeding 1000 requests per minute.",
-      url: "/guides/troubleshooting/claude-api-rate-limits",
-      type: "guide"
-    },
-    {
-      title: "Context Window Token Optimization", 
-      description: "Maximize the 1M token context efficiently. Advanced strategies for large codebases.",
-      url: "/guides/troubleshooting/context-token-management",
-      type: "guide"
-    },
-    {
-      title: "Official Claude Code Documentation",
-      description: "Comprehensive technical reference from Anthropic with latest updates and features.",
-      url: "https://docs.anthropic.com/claude/docs/claude-code",
-      type: "documentation",
-      external: true
-    },
-    {
-      title: "WSL2 Memory Configuration Guide",
-      description: "Configure Windows Subsystem for optimal Claude performance. Essential for Windows developers.",
-      url: "/guides/workflows/wsl2-claude-optimization",
-      type: "guide"
-    },
-    {
-      title: "Community Support Forum",
-      description: "Active developer community sharing solutions and workarounds for edge cases.",
-      url: "https://github.com/anthropics/claude-code/discussions",
-      type: "documentation",
-      external: true
-    },
-    {
-      title: "Performance Monitoring Best Practices",
-      description: "Comprehensive guide to preventing Claude issues through proactive monitoring strategies.",
-      url: "/guides/workflows/claude-performance-monitoring",
-      type: "guide"
-    }
-  ]}
-/>
+<SmartRelatedContent title="Related Troubleshooting Guides" />
 
 ---
 

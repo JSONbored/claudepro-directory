@@ -35,7 +35,7 @@ const GridCell = memo(function GridCellComponent(props: CellComponentProps<GridC
       <ErrorBoundary
         fallback={<div className="p-4 text-center text-muted-foreground">Error loading item</div>}
       >
-        <ConfigCard key={item.id} {...item} type={type} />
+        <ConfigCard key={item.slug} {...item} type={type} />
       </ErrorBoundary>
     </div>
   );

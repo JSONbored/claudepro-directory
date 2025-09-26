@@ -1,7 +1,10 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
+import { handleApiError, handleValidationError } from '@/lib/error-handler';
 import { logger } from '@/lib/logger';
 import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
+import { contentCache } from '@/lib/redis';
+import { apiSchemas, ValidationError, validation } from '@/lib/validation';
 
 export const runtime = 'nodejs';
 export const revalidate = 14400; // 4 hours
@@ -22,8 +25,33 @@ async function handleGET(
   const requestLogger = logger.forRequest(request);
 
   try {
-    const { contentType } = await params;
-    requestLogger.info('Content type API request started', { contentType });
+    const rawParams = await params;
+
+    // Validate parameters with strict schema
+    const validatedParams = validation.validateParams(
+      apiSchemas.contentTypeParams,
+      rawParams,
+      'content type route parameters'
+    );
+
+    const { contentType } = validatedParams;
+    requestLogger.info('Content type API request started', { contentType, validated: true });
+
+    // Try to get from cache first
+    const cacheKey = `content-api:${contentType}`;
+    const cachedResponse = await contentCache.getAPIResponse(cacheKey);
+    if (cachedResponse) {
+      requestLogger.info('Serving cached content API response', {
+        contentType,
+        source: 'redis-cache',
+      });
+      return NextResponse.json(cachedResponse, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=14400, stale-while-revalidate=86400',
+          'X-Cache': 'HIT',
+        },
+      });
+    }
 
     // Check if the content type is valid
     if (!(contentType in contentMap)) {
@@ -56,6 +84,9 @@ async function handleGET(
       lastUpdated: new Date().toISOString(),
     };
 
+    // Cache the response for 1 hour
+    await contentCache.cacheAPIResponse(cacheKey, responseData, 60 * 60);
+
     requestLogger.info('Content type API request completed successfully', {
       contentType,
       count: data.length,
@@ -64,24 +95,35 @@ async function handleGET(
     return NextResponse.json(responseData, {
       headers: {
         'Cache-Control': 'public, s-maxage=14400, stale-while-revalidate=86400',
+        'X-Cache': 'MISS',
       },
     });
-  } catch (error) {
-    const { contentType: errorContentType } = await params;
-    requestLogger.error(
-      'API Error in [contentType] route',
-      error instanceof Error ? error : new Error(String(error)),
-      { contentType: errorContentType }
-    );
+  } catch (error: unknown) {
+    // Get content type for error context
+    const rawParams = await params.catch(() => ({ contentType: 'unknown' }));
+    const { contentType: errorContentType } = rawParams;
 
-    return NextResponse.json(
-      {
-        error: 'Internal server error',
-        message: 'Failed to process request',
-        timestamp: new Date().toISOString(),
+    // Use centralized error handling for consistent responses
+    if (error instanceof ValidationError) {
+      return handleValidationError(error, {
+        route: '[contentType]',
+        operation: 'get_content',
+        method: 'GET',
+        logContext: {
+          contentType: errorContentType,
+        },
+      });
+    }
+
+    // Handle all other errors with centralized handler
+    return handleApiError(error, {
+      route: '[contentType]',
+      operation: 'get_content',
+      method: 'GET',
+      logContext: {
+        contentType: errorContentType,
       },
-      { status: 500 }
-    );
+    });
   }
 }
 

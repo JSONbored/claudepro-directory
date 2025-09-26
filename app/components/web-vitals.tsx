@@ -1,11 +1,12 @@
 'use client';
 
 import { useReportWebVitals } from 'next/web-vitals';
+import { isDevelopment, isProduction } from '@/lib/schemas/env.schema';
 
 export function WebVitals() {
   useReportWebVitals((metric) => {
     // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
+    if (isDevelopment) {
       console.log(metric);
     }
 
@@ -21,7 +22,7 @@ export function WebVitals() {
     }
 
     // Or send to custom endpoint
-    if (process.env.NODE_ENV === 'production') {
+    if (isProduction) {
       const body = JSON.stringify({
         metric: metric.name,
         value: metric.value,

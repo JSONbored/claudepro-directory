@@ -3,19 +3,14 @@
  * Provides better observability and error tracking than console statements
  */
 
-export interface LogContext {
-  userId?: string;
-  sessionId?: string;
-  userAgent?: string;
-  ip?: string;
-  url?: string;
-  method?: string;
-  timestamp?: string;
-  requestId?: string;
-  [key: string]: string | number | boolean;
-}
-
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+import { env, isDevelopment, isProduction, isVercel } from './schemas/env.schema';
+import {
+  type LogContext,
+  type LogLevel,
+  parseDevelopmentLogComponents,
+  sanitizeLogMessage,
+  validateLogContext,
+} from './schemas/logger.schema';
 
 export interface LogEntry {
   level: LogLevel;
@@ -26,8 +21,9 @@ export interface LogEntry {
 }
 
 class Logger {
-  private isDevelopment = process.env.NODE_ENV === 'development';
-  private isVercel = process.env.VERCEL === '1';
+  private isDevelopment = isDevelopment;
+  private isProduction = isProduction;
+  private isVercel = isVercel;
 
   /**
    * Format log entry for structured output
@@ -64,12 +60,13 @@ class Logger {
    * Format logs for better readability in development
    */
   private formatForDevelopment(logObject: Record<string, unknown>): string {
-    const timestamp = logObject.timestamp as string;
-    const level = logObject.level as string;
-    const message = logObject.message as string;
-    const context = logObject.context as LogContext | undefined;
-    const metadata = logObject.metadata as Record<string, unknown> | undefined;
-    const error = logObject.error as { name: string; message: string; stack?: string } | undefined;
+    // Use safe parsing with Zod validation
+    const components = parseDevelopmentLogComponents(logObject);
+    if (!components) {
+      return `[INVALID LOG] ${JSON.stringify(logObject)}`;
+    }
+
+    const { timestamp, level, message, context, metadata, error } = components;
 
     let output = `[${timestamp}] ${level.toUpperCase()}: ${message}`;
 
@@ -92,6 +89,11 @@ class Logger {
    * Output log entry using appropriate method
    */
   private output(entry: LogEntry): void {
+    // In production, only output errors and fatal logs
+    if (this.isProduction && entry.level !== 'error' && entry.level !== 'fatal') {
+      return;
+    }
+
     const formattedLog = this.formatLog(entry);
 
     switch (entry.level) {
@@ -122,9 +124,17 @@ class Logger {
     metadata?: Record<string, string | number | boolean>
   ): void {
     if (this.isDevelopment) {
-      const entry: LogEntry = { level: 'debug', message };
-      if (context) entry.context = context;
-      if (metadata) entry.metadata = metadata;
+      const entry: LogEntry = {
+        level: 'debug',
+        message: sanitizeLogMessage(message),
+      };
+
+      const validatedContext = validateLogContext(context);
+      if (validatedContext) entry.context = validatedContext;
+
+      const validatedMetadata = validateLogContext(metadata);
+      if (validatedMetadata) entry.metadata = validatedMetadata;
+
       this.output(entry);
     }
   }
@@ -137,9 +147,17 @@ class Logger {
     context?: LogContext,
     metadata?: Record<string, string | number | boolean>
   ): void {
-    const entry: LogEntry = { level: 'info', message };
-    if (context) entry.context = context;
-    if (metadata) entry.metadata = metadata;
+    const entry: LogEntry = {
+      level: 'info',
+      message: sanitizeLogMessage(message),
+    };
+
+    const validatedContext = validateLogContext(context);
+    if (validatedContext) entry.context = validatedContext;
+
+    const validatedMetadata = validateLogContext(metadata);
+    if (validatedMetadata) entry.metadata = validatedMetadata;
+
     this.output(entry);
   }
 
@@ -151,9 +169,17 @@ class Logger {
     context?: LogContext,
     metadata?: Record<string, string | number | boolean>
   ): void {
-    const entry: LogEntry = { level: 'warn', message };
-    if (context) entry.context = context;
-    if (metadata) entry.metadata = metadata;
+    const entry: LogEntry = {
+      level: 'warn',
+      message: sanitizeLogMessage(message),
+    };
+
+    const validatedContext = validateLogContext(context);
+    if (validatedContext) entry.context = validatedContext;
+
+    const validatedMetadata = validateLogContext(metadata);
+    if (validatedMetadata) entry.metadata = validatedMetadata;
+
     this.output(entry);
   }
 
@@ -166,10 +192,19 @@ class Logger {
     context?: LogContext,
     metadata?: Record<string, string | number | boolean>
   ): void {
-    const entry: LogEntry = { level: 'error', message };
+    const entry: LogEntry = {
+      level: 'error',
+      message: sanitizeLogMessage(message),
+    };
+
     if (error) entry.error = error;
-    if (context) entry.context = context;
-    if (metadata) entry.metadata = metadata;
+
+    const validatedContext = validateLogContext(context);
+    if (validatedContext) entry.context = validatedContext;
+
+    const validatedMetadata = validateLogContext(metadata);
+    if (validatedMetadata) entry.metadata = validatedMetadata;
+
     this.output(entry);
   }
 
@@ -182,10 +217,19 @@ class Logger {
     context?: LogContext,
     metadata?: Record<string, string | number | boolean>
   ): void {
-    const entry: LogEntry = { level: 'fatal', message };
+    const entry: LogEntry = {
+      level: 'fatal',
+      message: sanitizeLogMessage(message),
+    };
+
     if (error) entry.error = error;
-    if (context) entry.context = context;
-    if (metadata) entry.metadata = metadata;
+
+    const validatedContext = validateLogContext(context);
+    if (validatedContext) entry.context = validatedContext;
+
+    const validatedMetadata = validateLogContext(metadata);
+    if (validatedMetadata) entry.metadata = validatedMetadata;
+
     this.output(entry);
   }
 
@@ -267,8 +311,8 @@ class Logger {
     if (this.isVercel) {
       const vercelContext = {
         region: request.headers.get('x-vercel-id') || undefined,
-        deployment: process.env.VERCEL_URL || undefined,
-        environment: process.env.VERCEL_ENV || undefined,
+        deployment: env.VERCEL_URL || undefined,
+        environment: env.VERCEL_ENV || undefined,
       };
       Object.assign(context, vercelContext);
     }

@@ -10,6 +10,28 @@ interface OptimizedImageProps {
   height?: number;
   className?: string;
   priority?: boolean;
+  blurDataURL?: string;
+}
+
+/**
+ * Generate a blur placeholder as a base64-encoded 1x1 SVG
+ * Uses a subtle gradient for better visual transition
+ */
+function generateBlurDataURL(width: number, height: number): string {
+  const svg = `
+    <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:hsl(var(--muted));stop-opacity:0.8" />
+          <stop offset="50%" style="stop-color:hsl(var(--card));stop-opacity:0.6" />
+          <stop offset="100%" style="stop-color:hsl(var(--muted));stop-opacity:0.8" />
+        </linearGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#grad)" />
+    </svg>
+  `.trim();
+
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
 }
 
 export function OptimizedImage({
@@ -19,12 +41,16 @@ export function OptimizedImage({
   height = 600,
   className = '',
   priority = false,
+  blurDataURL,
 }: OptimizedImageProps) {
   const [isLoading, setLoading] = useState(true);
   const [hasError, setError] = useState(false);
 
   // Check if it's a local image
   const isLocal = src.startsWith('/') || !src.match(/^https?:\/\//);
+
+  // Generate blur placeholder if not provided
+  const blurPlaceholder = blurDataURL || generateBlurDataURL(width, height);
 
   if (hasError) {
     return (
@@ -63,8 +89,10 @@ export function OptimizedImage({
           width={width}
           height={height}
           priority={priority}
-          className={`w-full h-auto object-cover transition-opacity duration-300 ${
-            isLoading ? 'opacity-0' : 'opacity-100'
+          placeholder="blur"
+          blurDataURL={blurPlaceholder}
+          className={`w-full h-auto object-cover transition-all duration-500 ease-out ${
+            isLoading ? 'opacity-0 scale-105 blur-sm' : 'opacity-100 scale-100 blur-0'
           }`}
           style={{ aspectRatio: `${width}/${height}` }}
           onLoad={() => setLoading(false)}
@@ -77,8 +105,10 @@ export function OptimizedImage({
           alt={alt}
           width={width}
           height={height}
-          className={`w-full h-auto object-cover transition-opacity duration-300 ${
-            isLoading ? 'opacity-0' : 'opacity-100'
+          placeholder="blur"
+          blurDataURL={blurPlaceholder}
+          className={`w-full h-auto object-cover transition-all duration-500 ease-out ${
+            isLoading ? 'opacity-0 scale-105 blur-sm' : 'opacity-100 scale-100 blur-0'
           }`}
           style={{ aspectRatio: `${width}/${height}` }}
           onLoad={() => setLoading(false)}
@@ -86,34 +116,6 @@ export function OptimizedImage({
           loading="lazy"
           unoptimized
         />
-      )}
-
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted animate-pulse">
-          <div className="text-muted-foreground">
-            <svg
-              className="w-8 h-8 animate-spin"
-              fill="none"
-              viewBox="0 0 24 24"
-              role="img"
-              aria-label="Loading image"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-                className="opacity-25"
-              />
-              <path
-                fill="currentColor"
-                className="opacity-75"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
-          </div>
-        </div>
       )}
     </div>
   );

@@ -9,9 +9,9 @@ import { agents, commands, hooks, mcp, rules } from '@/generated/content';
 import type { ContentItem } from '@/types/content';
 
 interface TrendingContentProps {
-  trending: ContentItem[];
-  popular: ContentItem[];
-  recent: ContentItem[];
+  trending: Array<ContentItem & { type?: string; viewCount?: number }>;
+  popular: Array<ContentItem & { type?: string; viewCount?: number }>;
+  recent: Array<ContentItem & { type?: string; viewCount?: number }>;
 }
 
 export function TrendingContent({ trending, popular, recent }: TrendingContentProps) {
@@ -21,14 +21,14 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
   const recentHeadingId = useId();
 
   const getConfigType = (
-    config: ContentItem
+    config: ContentItem & { type?: string }
   ): 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks' => {
     if (config.type) return config.type as 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks';
-    if (agents.some((a) => a.id === config.id)) return 'agents';
-    if (commands.some((c) => c.id === config.id)) return 'commands';
-    if (hooks.some((h) => h.id === config.id)) return 'hooks';
-    if (mcp.some((m) => m.id === config.id)) return 'mcp';
-    if (rules.some((r) => r.id === config.id)) return 'rules';
+    if (agents.some((a) => a.slug === config.slug)) return 'agents';
+    if (commands.some((c) => c.slug === config.slug)) return 'commands';
+    if (hooks.some((h) => h.slug === config.slug)) return 'hooks';
+    if (mcp.some((m) => m.slug === config.slug)) return 'mcp';
+    if (rules.some((r) => r.slug === config.slug)) return 'rules';
     return 'content' in config ? 'rules' : 'mcp';
   };
 
@@ -65,7 +65,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
           </h2>
           <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 list-none">
             {trending.map((item, index) => (
-              <li key={item.id} className="relative">
+              <li key={item.slug} className="relative">
                 {index < 3 && (
                   <Badge
                     className="absolute -top-2 -right-2 z-10"
@@ -94,7 +94,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
           </h2>
           <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 list-none">
             {popular.map((item) => (
-              <li key={item.id}>
+              <li key={item.slug}>
                 <ConfigCard {...item} type={getConfigType(item)} />
               </li>
             ))}
@@ -114,7 +114,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
           </h2>
           <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 list-none">
             {recent.map((item) => (
-              <li key={item.id}>
+              <li key={item.slug}>
                 <ConfigCard {...item} type={getConfigType(item)} />
               </li>
             ))}

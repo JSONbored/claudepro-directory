@@ -1,14 +1,17 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
+import { sanitizeApiError } from '@/lib/error-sanitizer';
 import { logger } from '@/lib/logger';
 import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
+import { contentCache } from '@/lib/redis';
+import { apiSchemas, ValidationError, validation } from '@/lib/validation';
 
 export const runtime = 'nodejs';
 export const revalidate = 14400; // 4 hours
 
 // Helper function to transform content with type and URL
 function transformContent<T extends { slug: string }>(
-  content: T[],
+  content: readonly T[] | T[],
   type: string,
   category: string
 ): (T & { type: string; url: string })[] {
@@ -23,7 +26,40 @@ async function handleGET(request: NextRequest) {
   const requestLogger = logger.forRequest(request);
 
   try {
-    requestLogger.info('All configurations API request started');
+    // Validate query parameters if any exist
+    const url = new URL(request.url);
+    const queryParams = Object.fromEntries(url.searchParams);
+
+    if (Object.keys(queryParams).length > 0) {
+      // Only validate if there are query parameters
+      const validatedQuery = validation.validateQuery(
+        apiSchemas.paginationQuery.partial(),
+        queryParams,
+        'all-configurations query parameters'
+      );
+      requestLogger.info('All configurations API request started', {
+        queryPage: validatedQuery.page || 1,
+        queryLimit: validatedQuery.limit || 50,
+        validated: true,
+      });
+    } else {
+      requestLogger.info('All configurations API request started', { validated: true });
+    }
+
+    // Try to get from cache first
+    const cacheKey = 'all-configurations';
+    const cachedResponse = await contentCache.getAPIResponse(cacheKey);
+    if (cachedResponse) {
+      requestLogger.info('Serving cached all-configurations response', {
+        source: 'redis-cache',
+      });
+      return NextResponse.json(cachedResponse, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=14400, stale-while-revalidate=86400',
+          'X-Cache': 'HIT',
+        },
+      });
+    }
     const transformedAgents = transformContent(agents, 'agent', 'agents');
     const transformedMcp = transformContent(mcp, 'mcp', 'mcp');
     const transformedRules = transformContent(rules, 'rule', 'rules');
@@ -66,6 +102,9 @@ async function handleGET(request: NextRequest) {
       },
     };
 
+    // Cache the response for 2 hours (this is a large dataset)
+    await contentCache.cacheAPIResponse(cacheKey, allConfigurations, 2 * 60 * 60);
+
     requestLogger.info('All configurations API request completed successfully', {
       totalConfigurations: allConfigurations.statistics.totalConfigurations,
     });
@@ -73,22 +112,39 @@ async function handleGET(request: NextRequest) {
     return NextResponse.json(allConfigurations, {
       headers: {
         'Cache-Control': 'public, s-maxage=14400, stale-while-revalidate=86400',
+        'X-Cache': 'MISS',
       },
     });
-  } catch (error) {
-    requestLogger.error(
-      'API Error in all-configurations route',
-      error instanceof Error ? error : new Error(String(error))
-    );
+  } catch (error: unknown) {
+    // Handle validation errors specifically
+    if (error instanceof ValidationError) {
+      requestLogger.warn('Validation error in all-configurations API', {
+        error: error.message,
+        detailsCount: error.details.issues.length,
+      });
 
-    return NextResponse.json(
-      {
-        error: 'Internal server error',
-        message: 'Failed to generate configurations dataset',
-        timestamp: new Date().toISOString(),
-      },
-      { status: 500 }
-    );
+      return NextResponse.json(
+        {
+          error: 'Validation failed',
+          message: error.message,
+          details: error.details.issues.map((e) => ({
+            path: e.path.join('.'),
+            message: e.message,
+            code: e.code,
+          })),
+          timestamp: new Date().toISOString(),
+        },
+        { status: 400 }
+      );
+    }
+
+    // Handle other errors with sanitization
+    const sanitizedError = sanitizeApiError(error, {
+      route: 'all-configurations',
+      operation: 'generate_dataset',
+    });
+
+    return NextResponse.json(sanitizedError, { status: 500 });
   }
 }
 

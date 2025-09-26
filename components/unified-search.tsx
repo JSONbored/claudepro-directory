@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
+import { sanitizeSearchQuery } from '@/lib/sanitizer';
 import { cn } from '@/lib/utils';
 
 export interface FilterState {
@@ -78,10 +79,11 @@ export function UnifiedSearch({
     return count;
   }, [localFilters]);
 
-  // Debounced search
+  // Debounced search with sanitization
   useEffect(() => {
     const timer = setTimeout(() => {
-      onSearch(searchQuery);
+      const sanitized = sanitizeSearchQuery(searchQuery);
+      onSearch(sanitized);
     }, 300);
 
     return () => clearTimeout(timer);
@@ -163,6 +165,7 @@ export function UnifiedSearch({
             <Select
               value={localFilters.sort || 'trending'}
               onValueChange={(value) => handleSortChange(value as FilterState['sort'])}
+              name="sort"
             >
               <SelectTrigger
                 className="w-auto h-10 px-4 bg-background border-border hover:bg-accent/10 transition-smooth"
@@ -238,6 +241,7 @@ export function UnifiedSearch({
                       onValueChange={(value) =>
                         handleFilterChange('category', value === 'all' ? undefined : value)
                       }
+                      name="category"
                     >
                       <SelectTrigger
                         className="bg-background/50"
@@ -267,6 +271,7 @@ export function UnifiedSearch({
                       onValueChange={(value) =>
                         handleFilterChange('author', value === 'all' ? undefined : value)
                       }
+                      name="author"
                     >
                       <SelectTrigger
                         className="bg-background/50"
@@ -330,6 +335,7 @@ export function UnifiedSearch({
                     max={100}
                     step={1}
                     className="w-full"
+                    name="popularity-range"
                     aria-label="Set popularity range"
                     aria-valuetext={`Popularity range from ${localFilters.popularity?.[0] || 0} to ${localFilters.popularity?.[1] || 100}`}
                   />

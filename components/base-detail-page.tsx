@@ -331,7 +331,7 @@ export function BaseDetailPage({
                     <CardContent className="space-y-3">
                       {relatedItems.slice(0, 5).map((relatedItem) => (
                         <button
-                          key={relatedItem.id}
+                          key={relatedItem.slug}
                           className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer w-full text-left"
                           onClick={() =>
                             router.push(`/${relatedItem.category}/${relatedItem.slug}`)

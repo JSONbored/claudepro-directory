@@ -14,5 +14,11 @@
     "app/page.tsx": {
       "maxDuration": 5
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cache/warm",
+      "schedule": "0 3 * * *"
+    }
+  ]
 }

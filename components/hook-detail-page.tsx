@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
+import { getDisplayTitle } from '@/lib/utils';
 import type { ContentItem, Hook } from '@/types/content';
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
@@ -179,7 +180,7 @@ const generateTroubleshooting = (item: Hook): Array<{ issue: string; solution: s
 const generateUseCases = (item: Hook): string[] => {
   // If manual use cases exist, use them (they're usually more specific and valuable)
   if (item.useCases && item.useCases.length > 0) {
-    return item.useCases;
+    return [...item.useCases];
   }
 
   const generatedUseCases: string[] = [];
@@ -463,14 +464,14 @@ const renderHookSidebar = (item: Hook, relatedItems: ContentItem[], router: any)
         <CardContent className="space-y-3">
           {relatedItems.slice(0, 3).map((relatedItem) => (
             <Button
-              key={relatedItem.id}
+              key={relatedItem.slug}
               variant="ghost"
               className="w-full justify-start h-auto p-3 text-left"
               onClick={() => router.push(`/hooks/${relatedItem.slug}`)}
             >
               <div className="text-left w-full min-w-0">
                 <div className="font-medium text-sm leading-tight mb-1">
-                  {relatedItem.name || relatedItem.title || relatedItem.slug}
+                  {getDisplayTitle(relatedItem)}
                 </div>
                 <div className="flex flex-wrap gap-1 mb-1">
                   {/* Show primary tags */}
@@ -517,7 +518,7 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
   };
 
   // Create hook-specific content components for BaseDetailPage
-  const createFeaturesList = (features: string[]): ReactNode => (
+  const createFeaturesList = (features: readonly string[] | string[]): ReactNode => (
     <ul className="space-y-2">
       {features.map((feature: string) => (
         <li key={feature.slice(0, 50)} className="flex items-start gap-3">

@@ -48,7 +48,7 @@ const generateInstallationSteps = (item: Command): CommandInstallation => {
 const generateUseCases = (item: Command): string[] => {
   // If manual use cases exist, prioritize them
   if (item.useCases && item.useCases.length > 0) {
-    return item.useCases;
+    return [...item.useCases];
   }
 
   const generatedUseCases: string[] = [];
@@ -91,7 +91,7 @@ const generateUseCases = (item: Command): string[] => {
 const generateFeatures = (item: Command): string[] => {
   // If manual features exist, prioritize them
   if (item.features && item.features.length > 0) {
-    return item.features;
+    return [...item.features];
   }
 
   const generatedFeatures: string[] = [];
@@ -422,14 +422,14 @@ const renderCommandSidebar = (
         <CardContent className="space-y-3">
           {relatedItems.slice(0, 3).map((relatedItem) => (
             <Button
-              key={relatedItem.id}
+              key={relatedItem.slug}
               variant="ghost"
               className="w-full justify-start h-auto p-3 text-left"
               onClick={() => router.push(`/commands/${relatedItem.slug}`)}
             >
               <div className="text-left w-full min-w-0">
                 <div className="font-medium text-sm leading-tight mb-1">
-                  {relatedItem.name || relatedItem.title || relatedItem.slug}
+                  {getDisplayTitle(relatedItem)}
                 </div>
                 <div className="flex flex-wrap gap-1 mb-1">
                   {/* Show primary tags */}

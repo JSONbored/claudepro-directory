@@ -6,6 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { UnifiedSidebar } from '@/components/unified-sidebar';
 
+// Enable ISR - revalidate every 4 hours
+export const revalidate = 14400;
+
 export const metadata = {
   title: 'Claude Collections - Curated Tools & Agents | Claude Pro Directory',
   description:

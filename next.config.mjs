@@ -14,12 +14,15 @@ const withBundleAnalyzer = process.env.ANALYZE === 'true'
 const nextConfig = {
   // Standard output for Vercel and traditional deployments
   // Uncomment for Docker/serverless: output: 'standalone',
-  
+
   // Disable powered by header for security and smaller response size
   poweredByHeader: false,
-  
+
   // Enable compression
   compress: true,
+
+  // Enable React strict mode for better development warnings
+  reactStrictMode: true,
   
   eslint: {
     // Disable ESLint during builds since we use Biome/Ultracite
@@ -90,51 +93,102 @@ const nextConfig = {
   
   // Advanced webpack optimizations for better Core Web Vitals
   webpack: (config, { dev, isServer }) => {
+    // Fix webpack cache serialization warning for production builds
+    // Use memory cache to avoid serialization of large strings
+    if (config.cache && !dev) {
+      config.cache = Object.freeze({
+        type: 'memory',
+        maxGenerations: 1,
+      });
+    }
+
     // Optimize bundle splitting for better LCP
     if (!dev && !isServer) {
       config.optimization = {
         ...config.optimization,
         splitChunks: {
           chunks: 'all',
+          minSize: 20000,
+          maxSize: 244000,
           cacheGroups: {
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              priority: 10,
+            // React and core libraries
+            react: {
+              test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
+              name: 'react',
+              priority: 20,
               chunks: 'all',
-              maxSize: 244000, // Keep chunks under 244KB for optimal loading
+              enforce: true,
             },
-            common: {
-              name: 'common',
-              minChunks: 2,
-              priority: 5,
+            // Radix UI components (frequently used)
+            radix: {
+              test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
+              name: 'radix',
+              priority: 18,
               chunks: 'all',
-              reuseExistingChunk: true,
-              maxSize: 244000,
             },
+            // Lucide icons (large icon library)
             lucide: {
               test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
               name: 'lucide',
               priority: 15,
               chunks: 'all',
             },
+            // Tremor charts (only loaded when needed)
+            tremor: {
+              test: /[\\/]node_modules[\\/]@tremor[\\/]/,
+              name: 'tremor',
+              priority: 12,
+              chunks: 'async',
+            },
+            // Vendor libraries
+            vendor: {
+              test: /[\\/]node_modules[\\/](?!react|react-dom|scheduler|@radix-ui|lucide-react|@tremor)[\\/]/,
+              name(module, chunks, cacheGroupKey) {
+                // Create separate chunks for large vendors
+                const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)?.[1];
+                if (packageName && ['next', 'framer-motion', '@vercel'].includes(packageName.split('/')[0])) {
+                  return `vendors-${packageName.split('/')[0]}`;
+                }
+                return 'vendors';
+              },
+              priority: 10,
+              chunks: 'all',
+              maxSize: 200000,
+            },
+            // Application content chunks
             content: {
               test: /[\\/]generated[\\/]/,
               name: 'content',
               priority: 8,
               chunks: 'all',
-              maxSize: 200000, // Keep content chunks smaller
+              maxSize: 150000, // Smaller content chunks for better caching
+            },
+            // Common application code
+            common: {
+              name: 'common',
+              minChunks: 2,
+              priority: 5,
+              chunks: 'all',
+              reuseExistingChunk: true,
+              maxSize: 200000,
             },
           },
         },
       };
 
-      // Tree shaking optimizations
+      // Enhanced tree shaking and optimization
       config.optimization.usedExports = true;
       config.optimization.sideEffects = false;
+      config.optimization.providedExports = true;
+      config.optimization.innerGraph = true;
 
-      // Minimize main thread blocking
-      config.optimization.runtimeChunk = 'single';
+      // Minimize main thread blocking with improved runtime chunk handling
+      config.optimization.runtimeChunk = {
+        name: entrypoint => `runtime-${entrypoint.name}`,
+      };
+
+      // Improve module concatenation for smaller bundles
+      config.optimization.concatenateModules = true;
     }
 
     // Preload critical resources
@@ -146,45 +200,33 @@ const nextConfig = {
     return config;
   },
 
-  // Headers for security and caching
+  // Headers for caching only - security headers handled by Nosecone in middleware.ts
   async headers() {
     return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on'
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload'
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff'
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY'
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block'
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
-          },
-          // CSP is now handled by middleware.ts with proper nonce support
-        ],
-      },
+      // Cache-Control headers only (no security headers to avoid conflicts with Nosecone)
       {
         source: '/api/:path*',
         headers: [
           {
             key: 'Cache-Control',
             value: 'public, max-age=14400, stale-while-revalidate=86400' // 4 hours cache, 24 hours stale
+          },
+          {
+            key: 'Vary',
+            value: 'Accept-Encoding, Accept'
+          },
+        ],
+      },
+      {
+        source: '/static-api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, stale-while-revalidate=86400, immutable' // 1 year cache for pre-generated APIs
+          },
+          {
+            key: 'Vary',
+            value: 'Accept-Encoding, Accept'
           },
         ],
       },
@@ -202,11 +244,11 @@ const nextConfig = {
         ],
       },
       {
-        source: '/script.js',
+        source: '/scripts/service-worker-init.js',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=604800, stale-while-revalidate=86400' // 1 week cache for analytics script
+            value: 'public, max-age=3600, stale-while-revalidate=86400' // 1 hour cache
           },
         ],
       },
@@ -216,6 +258,63 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable' // 1 year cache for Next.js static files
+          },
+        ],
+      },
+      {
+        source: '/(agents|mcp|rules|commands|hooks|guides)/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, stale-while-revalidate=86400' // 1 hour cache for content pages
+          },
+          {
+            key: 'Vary',
+            value: 'Accept-Encoding'
+          },
+        ],
+      },
+      {
+        source: '/search',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=1800, stale-while-revalidate=3600' // 30 min cache for search page
+          },
+        ],
+      },
+      {
+        source: '/trending',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=300, stale-while-revalidate=1800' // 5 min cache for trending
+          },
+        ],
+      },
+      {
+        source: '/sitemap.xml',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, stale-while-revalidate=604800' // 1 day cache for sitemap
+          },
+          {
+            key: 'Content-Type',
+            value: 'application/xml'
+          },
+        ],
+      },
+      {
+        source: '/robots.txt',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, stale-while-revalidate=604800' // 1 day cache for robots.txt
+          },
+          {
+            key: 'Content-Type',
+            value: 'text/plain'
           },
         ],
       },

@@ -477,7 +477,7 @@ export function Accordion({
       <div className="space-y-2">
         {validItems.map((item, index) => (
           <Card
-            key={item.title}
+            key={`accordion-item-${index}-${item.title}`}
             itemScope
             itemType="https://schema.org/Question"
             className="border border-border"
@@ -843,9 +843,9 @@ export function QuickReference({
       </CardHeader>
       <CardContent>
         <div className={`grid gap-4 ${columns === 2 ? 'md:grid-cols-2' : ''}`}>
-          {items.map((item) => (
+          {items.map((item, index) => (
             <div
-              key={item.label}
+              key={`${item.label}-${index}`}
               itemScope
               itemType="https://schema.org/PropertyValue"
               className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 p-3 bg-card/50 rounded-lg border"

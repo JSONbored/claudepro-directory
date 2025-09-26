@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { getDisplayTitle } from '@/lib/utils';
 import type { ContentMetadata } from '@/types/content';
 
 interface FloatingSearchSidebarProps {
@@ -316,13 +317,13 @@ export function FloatingSearchSidebar({
                 <div className="space-y-2">
                   {filteredItems.slice(0, 20).map((item) => (
                     <Card
-                      key={item.id}
+                      key={item.slug}
                       className="p-3 cursor-pointer hover:bg-muted/50 transition-colors"
                       onClick={() => onItemSelect(item)}
                     >
                       <div className="space-y-2">
                         <div className="font-medium text-sm leading-tight">
-                          {item.name || item.title || item.slug}
+                          {getDisplayTitle(item)}
                         </div>
                         {item.description && (
                           <p className="text-xs text-muted-foreground line-clamp-2">

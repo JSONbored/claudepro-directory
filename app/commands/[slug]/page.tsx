@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { CommandDetailPage } from '@/components/command-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { commands, getCommandBySlug, getCommandFullContent } from '@/generated/content';
+import { logger } from '@/lib/logger';
+import { slugParamSchema } from '@/lib/schemas/search.schema';
 import { getDisplayTitle } from '@/lib/utils';
 
 interface CommandPageProps {
@@ -10,7 +12,24 @@ interface CommandPageProps {
 }
 
 export async function generateMetadata({ params }: CommandPageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const rawParams = await params;
+
+  // Validate slug parameter
+  const validationResult = slugParamSchema.safeParse(rawParams);
+
+  if (!validationResult.success) {
+    logger.warn('Invalid slug parameter for command metadata', {
+      slug: rawParams.slug,
+      errorCount: validationResult.error.issues.length,
+      firstError: validationResult.error.issues[0]?.message || 'Unknown error',
+    });
+    return {
+      title: 'Command Not Found',
+      description: 'The requested command could not be found.',
+    };
+  }
+
+  const { slug } = validationResult.data;
   const command = getCommandBySlug(slug);
 
   if (!command) {
@@ -41,7 +60,30 @@ export async function generateStaticParams() {
 }
 
 export default async function CommandPage({ params }: CommandPageProps) {
-  const { slug } = await params;
+  const rawParams = await params;
+
+  // Validate slug parameter
+  const validationResult = slugParamSchema.safeParse(rawParams);
+
+  if (!validationResult.success) {
+    logger.error(
+      'Invalid slug parameter for command page',
+      new Error(validationResult.error.issues[0]?.message || 'Invalid slug'),
+      {
+        slug: rawParams.slug,
+        errorCount: validationResult.error.issues.length,
+      }
+    );
+    notFound();
+  }
+
+  const { slug } = validationResult.data;
+
+  logger.info('Command page accessed', {
+    slug: slug,
+    validated: true,
+  });
+
   const commandMeta = getCommandBySlug(slug);
 
   if (!commandMeta) {
@@ -52,7 +94,7 @@ export default async function CommandPage({ params }: CommandPageProps) {
   const fullCommand = await getCommandFullContent(slug);
 
   const relatedCommands = commands
-    .filter((c) => c.id !== commandMeta.id && c.category === commandMeta.category)
+    .filter((c) => c.slug !== commandMeta.slug && c.category === commandMeta.category)
     .slice(0, 3);
 
   return (

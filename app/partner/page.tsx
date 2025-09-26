@@ -17,6 +17,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
+// Enable ISR - revalidate every 24 hours for static marketing pages
+export const revalidate = 86400;
+
 export default function PartnerPage() {
   return (
     <div className="container mx-auto px-4 py-12">

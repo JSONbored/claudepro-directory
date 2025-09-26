@@ -11,7 +11,7 @@ interface ContentListServerProps<T extends ContentMetadata> {
   title: string;
   description: string;
   icon: string;
-  items: T[];
+  items: readonly T[] | T[];
   type: ContentCategory;
   searchPlaceholder?: string;
   badges?: Array<{
