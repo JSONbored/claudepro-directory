@@ -6,7 +6,6 @@
  * Supports: tutorials, use-cases, comparisons, troubleshooting, categories, collections, workflows
  */
 
-import { BadgeDelta, Flex, Grid, Metric, Text, Card as TremorCard } from '@tremor/react';
 import {
   AlertTriangle,
   BookOpen,
@@ -18,6 +17,30 @@ import {
   Star,
   Zap,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+// Dynamic imports for Tremor components to reduce bundle size
+// These are only loaded when MetricsDisplay component is used
+const BadgeDelta = dynamic(
+  () => import('@tremor/react').then((mod) => ({ default: mod.BadgeDelta })),
+  { ssr: false }
+);
+const Flex = dynamic(() => import('@tremor/react').then((mod) => ({ default: mod.Flex })), {
+  ssr: false,
+});
+const Grid = dynamic(() => import('@tremor/react').then((mod) => ({ default: mod.Grid })), {
+  ssr: false,
+});
+const Metric = dynamic(() => import('@tremor/react').then((mod) => ({ default: mod.Metric })), {
+  ssr: false,
+});
+const Text = dynamic(() => import('@tremor/react').then((mod) => ({ default: mod.Text })), {
+  ssr: false,
+});
+const TremorCard = dynamic(() => import('@tremor/react').then((mod) => ({ default: mod.Card })), {
+  ssr: false,
+});
+
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';

@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "formatting",
-    "prettier",
-    "black",
-    "code-quality",
-    "automation"
-  ],
+  "tags": ["formatting", "prettier", "black", "code-quality", "automation"],
   "hookType": "PostToolUse",
   "features": [
     "Supports multiple formatters (Prettier, Black, gofmt, rustfmt)",
@@ -25,11 +19,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/auto-code-formatter-hook.sh",
-          "matchers": [
-            "write",
-            "edit",
-            "multiedit"
-          ]
+          "matchers": ["write", "edit", "multiedit"]
         }
       }
     },

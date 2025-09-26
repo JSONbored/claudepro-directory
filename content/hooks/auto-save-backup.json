@@ -4,12 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "backup",
-    "safety",
-    "file-management",
-    "data-protection"
-  ],
+  "tags": ["backup", "safety", "file-management", "data-protection"],
   "hookType": "PreToolUse",
   "features": [
     "Automatic timestamped backups before file modification",
@@ -24,11 +19,7 @@
       "hooks": {
         "preToolUse": {
           "script": "./.claude/hooks/auto-save-backup.sh",
-          "matchers": [
-            "edit",
-            "write",
-            "multiedit"
-          ]
+          "matchers": ["edit", "write", "multiedit"]
         }
       }
     },

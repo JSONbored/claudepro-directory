@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { RuleDetailPage } from '@/components/rule-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { getRuleBySlug, getRuleFullContent, rules } from '@/generated/content';
+import { sortRules } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
 import { slugParamSchema } from '@/lib/schemas/search.schema';
 import { getDisplayTitle } from '@/lib/utils';
@@ -52,9 +53,40 @@ export async function generateMetadata({ params }: RulePageProps): Promise<Metad
 }
 
 export async function generateStaticParams() {
-  return rules.map((rule) => ({
-    slug: rule.slug,
-  }));
+  try {
+    // Sort rules by popularity/trending for optimized static generation
+    // Most popular items will be generated first, improving initial page loads
+    const sortedRules = await sortRules([...rules], 'popularity');
+
+    return sortedRules
+      .map((rule) => {
+        // Validate slug using existing schema before static generation
+        const validation = slugParamSchema.safeParse({ slug: rule.slug });
+
+        if (!validation.success) {
+          logger.warn('Invalid slug in generateStaticParams for rules', {
+            slug: rule.slug,
+            error: validation.error.issues[0]?.message || 'Unknown validation error',
+          });
+          return null;
+        }
+
+        return {
+          slug: rule.slug,
+        };
+      })
+      .filter(Boolean);
+  } catch (error) {
+    // Fallback to unsorted if sorting fails
+    logger.error(
+      'Failed to sort rules for static generation, using default order',
+      error instanceof Error ? error : new Error(String(error))
+    );
+
+    return rules.map((rule) => ({
+      slug: rule.slug,
+    }));
+  }
 }
 
 export default async function RulePage({ params }: RulePageProps) {

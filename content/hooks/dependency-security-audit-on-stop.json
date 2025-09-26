@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "security",
-    "dependencies",
-    "audit",
-    "stop-hook",
-    "vulnerabilities"
-  ],
+  "tags": ["security", "dependencies", "audit", "stop-hook", "vulnerabilities"],
   "hookType": "Stop",
   "features": [
     "Comprehensive security audit for multiple package managers",

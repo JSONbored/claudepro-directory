@@ -75,8 +75,9 @@ const nextConfig = {
   },
   
   experimental: {
-    // Optimize CSS - enables critical CSS extraction and better chunking
-    optimizeCss: true,
+    // Note: optimizeCss disabled due to deprecated critters dependency in Next.js 15.5.x
+    // CSS optimization handled by TailwindCSS v4 and PostCSS instead
+    // optimizeCss: true,
     // Enable React Compiler for automatic optimization
     reactCompiler: true,
     // Enable aggressive optimization for better Core Web Vitals

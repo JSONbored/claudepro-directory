@@ -1,9 +1,13 @@
+import { z } from 'zod';
 import type { ContentItem } from '@/types/content';
 import { logger } from './logger';
 import { contentCache, statsRedis } from './redis';
+import { cacheCategorySchema } from './schemas/cache.schema';
 import { getDisplayTitle } from './utils';
 
-export type SortOption = 'trending' | 'newest' | 'alphabetical' | 'popularity';
+// Production-grade sort option validation schema
+export const sortOptionSchema = z.enum(['trending', 'newest', 'alphabetical', 'popularity']);
+export type SortOption = z.infer<typeof sortOptionSchema>;
 
 export interface SortingOptions {
   sort: SortOption;
@@ -163,46 +167,63 @@ async function performSort<T extends ContentItem>(
 }
 
 // Specialized sorting for different content types
+// Generic content sorting function - consolidates all duplicate sorting logic
+export async function sortContent(
+  items: ContentItem[],
+  category: string,
+  sort: SortOption = 'trending'
+): Promise<ContentItem[]> {
+  // Validate inputs using existing schemas for production safety
+  const validatedCategory = cacheCategorySchema.parse(category);
+  const validatedSort = sortOptionSchema.parse(sort);
+  return sortContentWithCache(items, {
+    sort: validatedSort,
+    category: validatedCategory,
+    useViewData: true,
+  });
+}
+
+// Specific sorting functions for backward compatibility and type safety
 export async function sortAgents(
   items: ContentItem[],
   sort: SortOption = 'trending'
 ): Promise<ContentItem[]> {
-  return sortContentWithCache(items, { sort, category: 'agents', useViewData: true });
+  return sortContent(items, 'agents', sort);
 }
 
 export async function sortMcp(
   items: ContentItem[],
   sort: SortOption = 'trending'
 ): Promise<ContentItem[]> {
-  return sortContentWithCache(items, { sort, category: 'mcp', useViewData: true });
+  return sortContent(items, 'mcp', sort);
 }
 
 export async function sortRules(
   items: ContentItem[],
   sort: SortOption = 'trending'
 ): Promise<ContentItem[]> {
-  return sortContentWithCache(items, { sort, category: 'rules', useViewData: true });
+  return sortContent(items, 'rules', sort);
 }
 
 export async function sortCommands(
   items: ContentItem[],
   sort: SortOption = 'trending'
 ): Promise<ContentItem[]> {
-  return sortContentWithCache(items, { sort, category: 'commands', useViewData: true });
+  return sortContent(items, 'commands', sort);
 }
 
 export async function sortHooks(
   items: ContentItem[],
   sort: SortOption = 'trending'
 ): Promise<ContentItem[]> {
-  return sortContentWithCache(items, { sort, category: 'hooks', useViewData: true });
+  return sortContent(items, 'hooks', sort);
 }
 
 export async function sortGuides(
   items: ContentItem[],
   sort: SortOption = 'trending'
 ): Promise<ContentItem[]> {
-  return sortContentWithCache(items, { sort, category: 'guides', useViewData: true });
+  return sortContent(items, 'guides', sort);
 }
 
 // Clear sorting cache for a specific category

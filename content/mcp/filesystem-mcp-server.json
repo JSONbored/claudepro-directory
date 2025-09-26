@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Anthropic",
   "dateAdded": "2025-09-15",
-  "tags": [
-    "filesystem",
-    "files",
-    "directories",
-    "official",
-    "anthropic"
-  ],
+  "tags": ["filesystem", "files", "directories", "official", "anthropic"],
   "content": "The official Filesystem MCP Server from Anthropic enables Claude to interact with your local file system securely with configurable access controls.",
   "features": [
     "Secure file operations with proper permissions",

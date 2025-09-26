@@ -3,12 +3,14 @@
 import { ArrowLeft, Calendar, Copy, ExternalLink, Tag, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { lazy, type ReactNode, Suspense, useState } from 'react';
+import { z } from 'zod';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import { formatDate } from '@/lib/date-utils';
+import { logger } from '@/lib/logger';
 import { getDisplayTitle } from '@/lib/utils';
 import type { ContentItem } from '@/types/content';
 
@@ -19,6 +21,41 @@ const CodeHighlight = lazy(() =>
   }))
 );
 
+/**
+ * Zod schemas for detail page configuration validation
+ */
+const actionButtonSchema = z.object({
+  label: z.string().min(1).max(50),
+  icon: z.any().optional(),
+  onClick: z.function(),
+  variant: z.enum(['default', 'destructive', 'outline', 'secondary', 'ghost', 'link']).optional(),
+  disabled: z.boolean().optional(),
+});
+
+const customSectionSchema = z.object({
+  title: z.string().min(1).max(100),
+  icon: z.any().optional(),
+  content: z.any(), // ReactNode
+  collapsible: z.boolean().optional(),
+  defaultCollapsed: z.boolean().optional(),
+});
+
+const detailPageConfigSchema = z.object({
+  typeName: z.string().min(1).max(50),
+  showConfiguration: z.boolean().default(false),
+  showInstallation: z.boolean().default(false),
+  showUseCases: z.boolean().default(false),
+  showRequirements: z.boolean().default(true),
+  showMetadata: z.boolean().default(true),
+  showTags: z.boolean().default(true),
+  showRelatedItems: z.boolean().default(true),
+  enableCopyContent: z.boolean().default(true),
+  enableShareButton: z.boolean().default(true),
+  customSections: z.array(customSectionSchema).default([]),
+  primaryAction: actionButtonSchema.optional(),
+  secondaryActions: z.array(actionButtonSchema).default([]),
+});
+
 export interface BaseDetailPageProps {
   item: ContentItem;
   relatedItems?: ContentItem[];
@@ -27,25 +64,41 @@ export interface BaseDetailPageProps {
     label: string;
     icon?: ReactNode;
     onClick: () => void;
+    variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+    disabled?: boolean;
   };
   secondaryActions?: Array<{
     label: string;
     icon?: ReactNode;
     onClick: () => void;
+    variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+    disabled?: boolean;
   }>;
   customSections?: Array<{
     title: string;
     icon?: ReactNode;
     content: ReactNode;
+    collapsible?: boolean;
+    defaultCollapsed?: boolean;
   }>;
   showConfiguration?: boolean;
   showInstallation?: boolean;
   showUseCases?: boolean;
+  showRequirements?: boolean;
+  showMetadata?: boolean;
+  showTags?: boolean;
+  showRelatedItems?: boolean;
+  enableCopyContent?: boolean;
+  enableShareButton?: boolean;
   installationContent?: ReactNode;
   useCasesContent?: ReactNode;
   configurationContent?: ReactNode;
   customSidebar?: ReactNode;
 }
+
+export type DetailPageConfig = z.infer<typeof detailPageConfigSchema>;
+export type ActionButton = z.infer<typeof actionButtonSchema>;
+export type CustomSection = z.infer<typeof customSectionSchema>;
 
 export function BaseDetailPage({
   item,
@@ -364,4 +417,184 @@ export function BaseDetailPage({
       </div>
     </div>
   );
+}
+
+/**
+ * DetailPageFactory - Production-grade factory functions for creating detail pages
+ * Validates configuration and provides type-safe detail page creation
+ */
+
+/**
+ * Create a validated detail page configuration
+ */
+export function createDetailPageConfig(config: Partial<DetailPageConfig>): DetailPageConfig {
+  try {
+    return detailPageConfigSchema.parse(config);
+  } catch (error) {
+    logger.error(
+      'Invalid detail page configuration',
+      error instanceof Error ? error : new Error(String(error)),
+      { configKeysCount: Object.keys(config || {}).length }
+    );
+    throw new Error('Failed to create detail page configuration');
+  }
+}
+
+/**
+ * Validate action buttons
+ */
+export function validateActionButton(action: unknown): ActionButton {
+  try {
+    return actionButtonSchema.parse(action);
+  } catch (error) {
+    logger.error(
+      'Invalid action button configuration',
+      error instanceof Error ? error : new Error(String(error)),
+      { actionType: typeof action }
+    );
+    throw new Error('Failed to validate action button');
+  }
+}
+
+/**
+ * Validate custom sections
+ */
+export function validateCustomSection(section: unknown): CustomSection {
+  try {
+    return customSectionSchema.parse(section);
+  } catch (error) {
+    logger.error(
+      'Invalid custom section configuration',
+      error instanceof Error ? error : new Error(String(error)),
+      { sectionType: typeof section }
+    );
+    throw new Error('Failed to validate custom section');
+  }
+}
+
+/**
+ * Create a content-type specific detail page
+ */
+export function createContentDetailPage(
+  contentType: 'agent' | 'command' | 'hook' | 'mcp' | 'rule'
+): DetailPageConfig {
+  const configurations: Record<string, Partial<DetailPageConfig>> = {
+    agent: {
+      typeName: 'Agent',
+      showConfiguration: true,
+      showInstallation: true,
+      showUseCases: true,
+      enableCopyContent: true,
+    },
+    command: {
+      typeName: 'Command',
+      showConfiguration: true,
+      showUseCases: true,
+      enableCopyContent: true,
+    },
+    hook: {
+      typeName: 'Hook',
+      showConfiguration: true,
+      showInstallation: true,
+      enableCopyContent: true,
+    },
+    mcp: {
+      typeName: 'MCP Server',
+      showConfiguration: true,
+      showInstallation: true,
+      showRequirements: true,
+      enableCopyContent: true,
+    },
+    rule: {
+      typeName: 'Rule',
+      showConfiguration: true,
+      showUseCases: true,
+      enableCopyContent: true,
+    },
+  };
+
+  const config = configurations[contentType];
+  if (!config) {
+    throw new Error(`Unknown content type: ${contentType}`);
+  }
+
+  return createDetailPageConfig(config);
+}
+
+/**
+ * Create standardized action buttons for common operations
+ */
+export const actionButtonTemplates = {
+  copy: (content: string): ActionButton => ({
+    label: 'Copy',
+    icon: undefined,
+    onClick: () => {
+      copyToClipboard(content);
+      toast({ title: 'Copied to clipboard' });
+    },
+    variant: 'outline' as const,
+  }),
+
+  share: (item: ContentItem): ActionButton => ({
+    label: 'Share',
+    icon: undefined,
+    onClick: () => {
+      if (navigator?.share) {
+        navigator
+          .share({
+            title: item.title || item.name || 'Shared content',
+            text: item.description,
+            url: window.location.href,
+          })
+          .catch(() => {
+            // Fallback to clipboard
+            copyToClipboard(window.location.href);
+            toast({ title: 'Link copied to clipboard' });
+          });
+      } else {
+        copyToClipboard(window.location.href);
+        toast({ title: 'Link copied to clipboard' });
+      }
+    },
+    variant: 'ghost' as const,
+  }),
+
+  external: (url: string): ActionButton => ({
+    label: 'View Source',
+    icon: undefined,
+    onClick: () => {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    },
+    variant: 'outline' as const,
+  }),
+};
+
+/**
+ * Helper function to create detail pages with validation and error handling
+ */
+export function createDetailPage(item: ContentItem, config: Partial<DetailPageConfig>) {
+  try {
+    const validatedConfig = createDetailPageConfig(config);
+
+    return {
+      config: validatedConfig,
+      render: (props: Omit<BaseDetailPageProps, 'typeName'>) => (
+        <BaseDetailPage
+          {...props}
+          item={item}
+          typeName={validatedConfig.typeName}
+          showConfiguration={validatedConfig.showConfiguration}
+          showInstallation={validatedConfig.showInstallation}
+          showUseCases={validatedConfig.showUseCases}
+        />
+      ),
+    };
+  } catch (error) {
+    logger.error(
+      'Failed to create detail page',
+      error instanceof Error ? error : new Error(String(error)),
+      { itemSlug: item.slug, configKeysCount: Object.keys(config || {}).length }
+    );
+    throw error;
+  }
 }

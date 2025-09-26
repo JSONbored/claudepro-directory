@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "redis",
-    "cache",
-    "performance",
-    "data-models",
-    "invalidation"
-  ],
+  "tags": ["redis", "cache", "performance", "data-models", "invalidation"],
   "hookType": "PostToolUse",
   "features": [
     "Intelligent cache key invalidation",
@@ -35,10 +29,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/redis-cache-invalidator.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },

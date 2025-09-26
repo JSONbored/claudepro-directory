@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-16",
-  "tags": [
-    "testing",
-    "automation",
-    "ci-cd",
-    "watch",
-    "parallel"
-  ],
+  "tags": ["testing", "automation", "ci-cd", "watch", "parallel"],
   "hookType": "PostToolUse",
   "features": [
     "Intelligent test selection based on code changes",
@@ -26,11 +20,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/code-test-runner-hook.sh",
-          "matchers": [
-            "write",
-            "edit",
-            "multiedit"
-          ]
+          "matchers": ["write", "edit", "multiedit"]
         }
       }
     },

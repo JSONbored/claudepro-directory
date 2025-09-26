@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "JSONbored",
   "dateAdded": "2025-09-16",
-  "tags": [
-    "docker",
-    "containers",
-    "devops",
-    "orchestration",
-    "deployment"
-  ],
+  "tags": ["docker", "containers", "devops", "orchestration", "deployment"],
   "content": "Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration.",
   "features": [
     "Container lifecycle management (start, stop, restart)",
@@ -93,12 +87,7 @@
     "Deploy a multi-service application using Docker Compose"
   ],
   "requiresAuth": false,
-  "permissions": [
-    "containers",
-    "images",
-    "volumes",
-    "networks"
-  ],
+  "permissions": ["containers", "images", "volumes", "networks"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://docs.docker.com/engine/api/"
 }

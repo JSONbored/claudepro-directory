@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { AgentDetailPage } from '@/components/agent-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { agents, getAgentBySlug, getAgentFullContent } from '@/generated/content';
+import { sortAgents } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
 import { slugParamSchema } from '@/lib/schemas/search.schema';
 import { getDisplayTitle } from '@/lib/utils';
@@ -54,9 +55,40 @@ export async function generateMetadata({ params }: AgentPageProps): Promise<Meta
 }
 
 export async function generateStaticParams() {
-  return agents.map((agent) => ({
-    slug: agent.slug,
-  }));
+  try {
+    // Sort agents by popularity/trending for optimized static generation
+    // Most popular items will be generated first, improving initial page loads
+    const sortedAgents = await sortAgents([...agents], 'popularity');
+
+    return sortedAgents
+      .map((agent) => {
+        // Validate slug using existing schema before static generation
+        const validation = slugParamSchema.safeParse({ slug: agent.slug });
+
+        if (!validation.success) {
+          logger.warn('Invalid slug in generateStaticParams for agents', {
+            slug: agent.slug,
+            error: validation.error.issues[0]?.message || 'Unknown validation error',
+          });
+          return null;
+        }
+
+        return {
+          slug: agent.slug,
+        };
+      })
+      .filter(Boolean);
+  } catch (error) {
+    // Fallback to unsorted if sorting fails
+    logger.error(
+      'Failed to sort agents for static generation, using default order',
+      error instanceof Error ? error : new Error(String(error))
+    );
+
+    return agents.map((agent) => ({
+      slug: agent.slug,
+    }));
+  }
 }
 
 // Enable ISR - revalidate every hour

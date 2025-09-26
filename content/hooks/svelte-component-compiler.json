@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "svelte",
-    "components",
-    "compilation",
-    "validation",
-    "frontend"
-  ],
+  "tags": ["svelte", "components", "compilation", "validation", "frontend"],
   "hookType": "PostToolUse",
   "features": [
     "Automatic Svelte component compilation and validation",
@@ -35,10 +29,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/svelte-component-compiler.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },

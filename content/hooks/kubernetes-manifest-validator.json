@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "kubernetes",
-    "k8s",
-    "yaml",
-    "validation",
-    "devops"
-  ],
+  "tags": ["kubernetes", "k8s", "yaml", "validation", "devops"],
   "hookType": "PostToolUse",
   "features": [
     "Comprehensive Kubernetes manifest validation using kubectl dry-run",
@@ -27,10 +21,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/kubernetes-manifest-validator.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },

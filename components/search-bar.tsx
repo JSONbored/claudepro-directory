@@ -2,7 +2,7 @@
 
 import Fuse from 'fuse.js';
 import { Filter, Search, X } from 'lucide-react';
-import { useEffect, useId, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -86,20 +86,35 @@ export const SearchBar = <T extends SearchableItem = SearchableItem>({
     onFilteredResults(filteredResults);
   }, [filteredResults, onFilteredResults]);
 
-  const handleCategoryToggle = (category: string) => {
+  const handleCategoryToggle = useCallback((category: string) => {
     setSelectedCategories((prev) =>
       prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
     );
-  };
+  }, []);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setSearchQuery('');
     setSelectedCategories([]);
     setShowFilters(false);
     onSearchQueryChange?.('');
-  };
+  }, [onSearchQueryChange]);
 
-  const hasActiveFilters = searchQuery.trim() || selectedCategories.length > 0;
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchQuery(e.target.value);
+      onSearchQueryChange?.(e.target.value);
+    },
+    [onSearchQueryChange]
+  );
+
+  const toggleFilters = useCallback(() => {
+    setShowFilters(!showFilters);
+  }, [showFilters]);
+
+  const hasActiveFilters = useMemo(
+    () => searchQuery.trim() || selectedCategories.length > 0,
+    [searchQuery, selectedCategories]
+  );
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-4">
@@ -113,10 +128,7 @@ export const SearchBar = <T extends SearchableItem = SearchableItem>({
           type="text"
           placeholder={placeholder}
           value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            onSearchQueryChange?.(e.target.value);
-          }}
+          onChange={handleSearchChange}
           className="pl-10 pr-20 h-12 text-base bg-card/50 backdrop-blur-sm border-border/50 focus:border-primary/50 focus:bg-card transition-smooth"
           aria-label="Search configurations"
           role="searchbox"
@@ -126,7 +138,7 @@ export const SearchBar = <T extends SearchableItem = SearchableItem>({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setShowFilters(!showFilters)}
+            onClick={toggleFilters}
             className={`h-8 px-2 transition-smooth hover:bg-accent/10 hover:text-accent ${selectedCategories.length > 0 ? 'text-primary bg-accent/10' : ''}`}
             aria-label={`${showFilters ? 'Hide' : 'Show'} category filters`}
             aria-expanded={showFilters}

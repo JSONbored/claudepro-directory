@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "vue",
-    "vue3",
-    "composition-api",
-    "linting",
-    "best-practices"
-  ],
+  "tags": ["vue", "vue3", "composition-api", "linting", "best-practices"],
   "hookType": "PostToolUse",
   "features": [
     "Vue 3 Composition API best practices validation",
@@ -35,10 +29,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/vue-composition-api-linter.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },

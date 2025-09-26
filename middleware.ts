@@ -413,5 +413,21 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
-// Remove the config export to run middleware on all routes
-// This ensures security headers are applied to everything
+// Matcher configuration to exclude static assets and improve performance
+// This prevents middleware from running on static files, images, and Next.js internal routes
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - robots.txt (robots file)
+     * - sitemap.xml (sitemap file)
+     * - .well-known (well-known files)
+     * - *.png, *.jpg, *.jpeg, *.gif, *.webp, *.svg, *.ico (image files)
+     * - *.css, *.js (static assets)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.well-known|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js)$).*)',
+  ],
+};

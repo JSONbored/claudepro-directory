@@ -4,12 +4,7 @@
   "category": "agents",
   "author": "JSONbored",
   "dateAdded": "2025-09-15",
-  "tags": [
-    "documentation",
-    "api",
-    "technical-writing",
-    "developer-resources"
-  ],
+  "tags": ["documentation", "api", "technical-writing", "developer-resources"],
   "features": [
     "Comprehensive API documentation with interactive examples and code samples",
     "Architecture documentation and system design diagrams",

@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "security",
-    "sensitive-data",
-    "notification",
-    "scanning",
-    "privacy"
-  ],
+  "tags": ["security", "sensitive-data", "notification", "scanning", "privacy"],
   "hookType": "Notification",
   "features": [
     "Real-time sensitive data detection",
@@ -35,9 +29,7 @@
       "hooks": {
         "notification": {
           "script": "./.claude/hooks/sensitive-data-alert-scanner.sh",
-          "matchers": [
-            "*"
-          ]
+          "matchers": ["*"]
         }
       }
     },

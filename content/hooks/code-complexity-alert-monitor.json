@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "complexity",
-    "code-quality",
-    "notification",
-    "monitoring",
-    "maintainability"
-  ],
+  "tags": ["complexity", "code-quality", "notification", "monitoring", "maintainability"],
   "hookType": "Notification",
   "features": [
     "Real-time complexity monitoring for JavaScript, TypeScript, and Python",

@@ -4,13 +4,7 @@
   "category": "agents",
   "author": "JSONbored",
   "dateAdded": "2025-09-16",
-  "tags": [
-    "debugging",
-    "troubleshooting",
-    "error-analysis",
-    "diagnostics",
-    "problem-solving"
-  ],
+  "tags": ["debugging", "troubleshooting", "error-analysis", "diagnostics", "problem-solving"],
   "features": [
     "Systematic bug reproduction and root cause analysis methodology",
     "Multi-language debugging techniques for JavaScript, Python, Java, and more",

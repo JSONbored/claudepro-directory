@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "git",
-    "version-control",
-    "stop-hook",
-    "automation",
-    "commit"
-  ],
+  "tags": ["git", "version-control", "stop-hook", "automation", "commit"],
   "hookType": "Stop",
   "features": [
     "Automatic git commit creation when session ends",

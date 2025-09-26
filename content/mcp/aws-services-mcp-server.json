@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "AWS Labs",
   "dateAdded": "2025-09-16",
-  "tags": [
-    "aws",
-    "cloud",
-    "infrastructure",
-    "deployment",
-    "monitoring"
-  ],
+  "tags": ["aws", "cloud", "infrastructure", "deployment", "monitoring"],
   "content": "Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring.",
   "features": [
     "EC2 instance management and monitoring",
@@ -45,9 +39,7 @@
       "mcpServers": {
         "aws": {
           "command": "uvx",
-          "args": [
-            "awslabs.core-mcp-server@latest"
-          ],
+          "args": ["awslabs.core-mcp-server@latest"],
           "env": {
             "AWS_PROFILE": "your-aws-profile",
             "AWS_REGION": "us-east-1",
@@ -60,9 +52,7 @@
       "mcpServers": {
         "aws": {
           "command": "uvx",
-          "args": [
-            "awslabs.core-mcp-server@latest"
-          ],
+          "args": ["awslabs.core-mcp-server@latest"],
           "env": {
             "AWS_PROFILE": "${AWS_PROFILE}",
             "AWS_REGION": "${AWS_REGION:-us-east-1}",
@@ -111,13 +101,7 @@
     "Deploy a complete web application stack via CloudFormation"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "ec2:*",
-    "s3:*",
-    "lambda:*",
-    "rds:*",
-    "cloudwatch:*"
-  ],
+  "permissions": ["ec2:*", "s3:*", "lambda:*", "rds:*", "cloudwatch:*"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://github.com/awslabs/mcp"
 }

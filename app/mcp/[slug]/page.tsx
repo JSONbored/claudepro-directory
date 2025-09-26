@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { MCPDetailPage } from '@/components/mcp-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { getMcpBySlug, getMcpFullContent, mcp } from '@/generated/content';
+import { sortMcp } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
 import { slugParamSchema } from '@/lib/schemas/search.schema';
 import { getDisplayTitle } from '@/lib/utils';
@@ -52,9 +53,40 @@ export async function generateMetadata({ params }: MCPPageProps): Promise<Metada
 }
 
 export async function generateStaticParams() {
-  return mcp.map((mcpItem) => ({
-    slug: mcpItem.slug,
-  }));
+  try {
+    // Sort MCP servers by popularity/trending for optimized static generation
+    // Most popular items will be generated first, improving initial page loads
+    const sortedMcp = await sortMcp([...mcp], 'popularity');
+
+    return sortedMcp
+      .map((mcpItem) => {
+        // Validate slug using existing schema before static generation
+        const validation = slugParamSchema.safeParse({ slug: mcpItem.slug });
+
+        if (!validation.success) {
+          logger.warn('Invalid slug in generateStaticParams for MCP', {
+            slug: mcpItem.slug,
+            error: validation.error.issues[0]?.message || 'Unknown validation error',
+          });
+          return null;
+        }
+
+        return {
+          slug: mcpItem.slug,
+        };
+      })
+      .filter(Boolean);
+  } catch (error) {
+    // Fallback to unsorted if sorting fails
+    logger.error(
+      'Failed to sort MCP servers for static generation, using default order',
+      error instanceof Error ? error : new Error(String(error))
+    );
+
+    return mcp.map((mcpItem) => ({
+      slug: mcpItem.slug,
+    }));
+  }
 }
 
 export default async function MCPPage({ params }: MCPPageProps) {

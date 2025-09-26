@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Cloudflare",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "cloudflare",
-    "cdn",
-    "security",
-    "dns",
-    "infrastructure"
-  ],
+  "tags": ["cloudflare", "cdn", "security", "dns", "infrastructure"],
   "content": "Manage Cloudflare services and configurations through Claude for comprehensive infrastructure control.",
   "features": [
     "Configure DNS settings and records",
@@ -88,11 +82,7 @@
     "Configure firewall rule"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "deploy"
-  ],
+  "permissions": ["read", "write", "deploy"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://developers.cloudflare.com/agents/model-context-protocol/mcp-servers-for-cloudflare/"
 }

@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "api",
-    "documentation",
-    "openapi",
-    "swagger",
-    "automation"
-  ],
+  "tags": ["api", "documentation", "openapi", "swagger", "automation"],
   "hookType": "PostToolUse",
   "features": [
     "Automatic OpenAPI/Swagger documentation generation",
@@ -25,10 +19,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/api-endpoint-documentation-generator.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },

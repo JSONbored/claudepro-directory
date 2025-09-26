@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "accessibility",
-    "a11y",
-    "wcag",
-    "testing",
-    "compliance"
-  ],
+  "tags": ["accessibility", "a11y", "wcag", "testing", "compliance"],
   "hookType": "PostToolUse",
   "features": [
     "Automated WCAG compliance testing with axe-core",
@@ -25,10 +19,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/accessibility-checker.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },

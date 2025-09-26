@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Linear",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "project-management",
-    "linear",
-    "issues",
-    "tasks",
-    "agile"
-  ],
+  "tags": ["project-management", "linear", "issues", "tasks", "agile"],
   "content": "Connect Claude to Linear for comprehensive project management, issue tracking, and team collaboration.",
   "features": [
     "Create and update issues with full metadata",
@@ -79,11 +73,7 @@
     "List all issues in the current sprint"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "admin"
-  ],
+  "permissions": ["read", "write", "admin"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://linear.app/docs/mcp"
 }

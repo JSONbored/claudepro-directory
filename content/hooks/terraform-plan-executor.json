@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "terraform",
-    "infrastructure",
-    "iac",
-    "devops",
-    "cloud"
-  ],
+  "tags": ["terraform", "infrastructure", "iac", "devops", "cloud"],
   "hookType": "PostToolUse",
   "features": [
     "Automatic Terraform plan execution on file changes",
@@ -35,10 +29,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/terraform-plan-executor.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },

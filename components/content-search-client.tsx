@@ -29,23 +29,42 @@ export function ContentSearchClient<T extends ContentMetadata>({
   const [filters, setFilters] = useState<FilterState>({ sort: 'trending' });
   const pageSize = 20;
 
-  // Filter and search logic - optimized with React 19 patterns
+  // Pre-computed search index for better performance
+  const searchIndex = useMemo(() => {
+    return items.map((item) => ({
+      item,
+      searchText: [
+        item.name || '',
+        item.description || '',
+        ...(item.tags || []),
+        item.category || '',
+        item.author || '',
+      ]
+        .join(' ')
+        .toLowerCase(),
+    }));
+  }, [items]);
+
+  // Filter and search logic - optimized with pre-computed search index
   const handleSearch = useCallback(
     (query: string) => {
+      if (!query.trim()) {
+        setFilteredItems([...items]);
+        setDisplayedItems([...items].slice(0, pageSize));
+        setCurrentPage(1);
+        return;
+      }
+
       const searchLower = query.toLowerCase();
-      const filtered = items.filter(
-        (item) =>
-          item.name?.toLowerCase().includes(searchLower) ||
-          item.description?.toLowerCase().includes(searchLower) ||
-          item.tags?.some((tag) => tag.toLowerCase().includes(searchLower)) ||
-          item.category?.toLowerCase().includes(searchLower) ||
-          item.author?.toLowerCase().includes(searchLower)
-      );
+      const filtered = searchIndex
+        .filter(({ searchText }) => searchText.includes(searchLower))
+        .map(({ item }) => item);
+
       setFilteredItems(filtered);
       setDisplayedItems(filtered.slice(0, pageSize));
       setCurrentPage(1);
     },
-    [items]
+    [items, searchIndex]
   );
 
   const handleFiltersChange = useCallback(

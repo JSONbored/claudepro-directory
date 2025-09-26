@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Anthropic",
   "dateAdded": "2025-09-16",
-  "tags": [
-    "postgresql",
-    "database",
-    "sql",
-    "official",
-    "anthropic"
-  ],
+  "tags": ["postgresql", "database", "sql", "official", "anthropic"],
   "content": "The official PostgreSQL MCP Server from Anthropic provides read-only access to PostgreSQL databases, enabling Claude to inspect schemas and execute safe queries.",
   "features": [
     "Read-only access for safe database exploration",

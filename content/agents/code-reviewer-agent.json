@@ -4,13 +4,7 @@
   "category": "agents",
   "author": "JSONbored",
   "dateAdded": "2025-09-15",
-  "tags": [
-    "code-review",
-    "quality",
-    "best-practices",
-    "security",
-    "performance"
-  ],
+  "tags": ["code-review", "quality", "best-practices", "security", "performance"],
   "features": [
     "Comprehensive code quality analysis across multiple programming languages",
     "Security vulnerability identification and mitigation recommendations",

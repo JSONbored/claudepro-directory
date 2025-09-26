@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "documentation",
-    "stop-hook",
-    "automation",
-    "markdown",
-    "jsdoc"
-  ],
+  "tags": ["documentation", "stop-hook", "automation", "markdown", "jsdoc"],
   "hookType": "Stop",
   "features": [
     "Automatic API documentation generation for multiple languages",

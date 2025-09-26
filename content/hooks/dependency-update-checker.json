@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-16",
-  "tags": [
-    "dependencies",
-    "security",
-    "automation",
-    "npm",
-    "package-management"
-  ],
+  "tags": ["dependencies", "security", "automation", "npm", "package-management"],
   "hookType": "PostToolUse",
   "features": [
     "Automated dependency analysis for multiple package managers",
@@ -25,10 +19,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/dependency-update-checker.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },

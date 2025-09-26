@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Notion",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "documentation",
-    "notion",
-    "wiki",
-    "notes",
-    "knowledge-base"
-  ],
+  "tags": ["documentation", "notion", "wiki", "notes", "knowledge-base"],
   "content": "Access and manage your Notion workspace directly from Claude for documentation and knowledge management.",
   "features": [
     "Read and update Notion pages with rich content",
@@ -79,11 +73,7 @@
     "Add this conversation summary to Notion"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "create"
-  ],
+  "permissions": ["read", "write", "create"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://developers.notion.com/docs/mcp"
 }
