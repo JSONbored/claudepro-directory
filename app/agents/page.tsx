@@ -3,6 +3,12 @@ import { ContentListServer } from '@/components/content-list-server';
 import { agents } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
 
+// Enable ISR - revalidate every 4 hours
+export const revalidate = 14400;
+
+// Use Edge Runtime for better performance and lower costs
+export const runtime = 'edge';
+
 export const metadata: Metadata = {
   title: `AI Agents - Specialized Claude Agents | ${APP_CONFIG.name}`,
   description:
@@ -27,6 +33,3 @@ export default function AgentsPage() {
     />
   );
 }
-
-// Enable ISR - revalidate every hour
-export const revalidate = 14400;

@@ -83,6 +83,23 @@ const nextConfig = {
     },
   },
   
+  // File tracing optimization (stable in Next.js 15)
+  outputFileTracingExcludes: {
+    // Exclude cache and development files from all serverless functions
+    '/*': [
+      '.next/cache/**/*',
+      '.next/trace',
+      '.git/**/*',
+      'node_modules/@types/**/*',
+      'node_modules/typescript/**/*',
+    ],
+    // Specific exclusions for guide pages
+    '/guides/**': [
+      './docs/**/*',
+      './scripts/**/*',
+    ]
+  },
+
   experimental: {
     // Note: optimizeCss disabled due to deprecated critters dependency in Next.js 15.5.x
     // CSS optimization handled by TailwindCSS v4 and PostCSS instead

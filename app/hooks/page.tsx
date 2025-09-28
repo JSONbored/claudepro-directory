@@ -3,6 +3,12 @@ import { ContentListServer } from '@/components/content-list-server';
 import { hooks } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
 
+// Enable ISR - revalidate every 4 hours
+export const revalidate = 14400;
+
+// Use Edge Runtime for better performance and lower costs
+export const runtime = 'edge';
+
 export const metadata: Metadata = {
   title: `Automation Hooks - Claude Event Hooks | ${APP_CONFIG.name}`,
   description: 'Discover automation hooks to trigger actions and workflows based on Claude events.',
@@ -26,6 +32,3 @@ export default function HooksPage() {
     />
   );
 }
-
-// Enable ISR - revalidate every hour
-export const revalidate = 14400;
