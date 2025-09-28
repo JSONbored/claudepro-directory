@@ -5,6 +5,7 @@
  */
 
 import { logger } from '@/lib/logger';
+import type { RequestId } from '@/lib/schemas/branded-types.schema';
 import { isProduction } from '@/lib/schemas/env.schema';
 import {
   determineErrorType,
@@ -145,7 +146,7 @@ export class ErrorSanitizer {
   private normalizeError(error: unknown): Error {
     const validatedInput = validateErrorInput(error);
 
-    if (validatedInput.isValid && validatedInput.error) {
+    if (validatedInput.isValid && validatedInput.type === 'error') {
       // Create Error instance from validated data
       const err = new Error(validatedInput.error.message);
       if (validatedInput.error.name) {
@@ -157,7 +158,11 @@ export class ErrorSanitizer {
       return err;
     }
 
-    if (validatedInput.fallback) {
+    if (validatedInput.isValid && validatedInput.type === 'string') {
+      return new Error(validatedInput.fallback);
+    }
+
+    if (!validatedInput.isValid) {
       return new Error(validatedInput.fallback);
     }
 
@@ -235,8 +240,8 @@ export class ErrorSanitizer {
    */
   public sanitizeError(
     inputError: unknown,
-    context: ErrorContext = {},
-    requestId = 'unknown'
+    requestId: RequestId,
+    context: ErrorContext = {}
   ): SanitizedError {
     const error = this.normalizeError(inputError);
     const errorType = this.determineErrorType(error);
@@ -304,10 +309,10 @@ export const errorSanitizer = ErrorSanitizer.getInstance();
  */
 export function sanitizeApiError(
   error: unknown,
-  context: ErrorContext = {},
-  requestId = 'unknown'
+  requestId: RequestId,
+  context: ErrorContext = {}
 ): SanitizedError {
-  return errorSanitizer.sanitizeError(error, context, requestId);
+  return errorSanitizer.sanitizeError(error, requestId, context);
 }
 
 /**

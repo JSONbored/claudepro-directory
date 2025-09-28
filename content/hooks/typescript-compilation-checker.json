@@ -4,12 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "typescript",
-    "validation",
-    "type-safety",
-    "compilation"
-  ],
+  "tags": ["typescript", "validation", "type-safety", "compilation"],
   "hookType": "PostToolUse",
   "features": [
     "Real-time TypeScript compilation checking",
@@ -34,10 +29,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/typescript-compilation-checker.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },

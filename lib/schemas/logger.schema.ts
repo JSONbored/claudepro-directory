@@ -42,6 +42,21 @@ export const logContextSchema = z
   );
 
 /**
+ * Log entry schema for structured logging
+ */
+export const logEntrySchema = z.object({
+  level: logLevelSchema,
+  message: z.string().min(1).max(LOGGER_LIMITS.MAX_MESSAGE_LENGTH),
+  context: logContextSchema.optional(),
+  error: z
+    .union([z.instanceof(Error), z.string().max(LOGGER_LIMITS.MAX_ERROR_MESSAGE_LENGTH)])
+    .optional(),
+  metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
+});
+
+export type LogEntry = z.infer<typeof logEntrySchema>;
+
+/**
  * Error object validation
  */
 export const logErrorSchema = z.object({
@@ -127,15 +142,12 @@ export const performanceMetadataSchema = z.object({
  */
 export function parseLogObject(
   logObject: Record<string, unknown>
-): z.infer<typeof logObjectSchema> | null {
+): { success: true; data: z.infer<typeof logObjectSchema> } | { success: false; error: string } {
   try {
-    return logObjectSchema.parse(logObject);
-  } catch (error) {
-    console.error('Failed to parse log object:', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
-      objectKeys: Object.keys(logObject),
-    });
-    return null;
+    const parsed = logObjectSchema.parse(logObject);
+    return { success: true, data: parsed };
+  } catch {
+    return { success: false, error: 'Validation failed' };
   }
 }
 
@@ -144,15 +156,14 @@ export function parseLogObject(
  */
 export function parseDevelopmentLogComponents(
   logObject: Record<string, unknown>
-): z.infer<typeof developmentLogComponentsSchema> | null {
+):
+  | { success: true; data: z.infer<typeof developmentLogComponentsSchema> }
+  | { success: false; error: string } {
   try {
-    return developmentLogComponentsSchema.parse(logObject);
-  } catch (error) {
-    console.error('Failed to parse development log components:', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
-      objectKeys: Object.keys(logObject),
-    });
-    return null;
+    const parsed = developmentLogComponentsSchema.parse(logObject);
+    return { success: true, data: parsed };
+  } catch {
+    return { success: false, error: 'Validation failed' };
   }
 }
 
@@ -208,10 +219,7 @@ export function validateLogContext(context: unknown): z.infer<typeof logContextS
     }
 
     return logContextSchema.parse(sanitized);
-  } catch (error) {
-    console.error('Failed to validate log context:', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
-    });
+  } catch {
     return null;
   }
 }

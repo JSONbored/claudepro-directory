@@ -1,14 +1,10 @@
 import { ChevronDown, ChevronUp, Maximize2, Minimize2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import type { ContentViewerProps } from '@/lib/schemas/component.schema';
 import { cn } from '@/lib/utils';
 
-interface ContentViewerProps {
-  content: string;
-  language?: string;
-  maxHeight?: number;
-  className?: string;
-}
+// ContentViewerProps is now imported from component.schema.ts
 
 export const ContentViewer = ({
   content,
@@ -23,10 +19,24 @@ export const ContentViewer = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (contentRef.current) {
-      const contentHeight = contentRef.current.scrollHeight;
-      setShowExpandButton(contentHeight > maxHeight);
-    }
+    if (!contentRef.current) return;
+
+    // Use ResizeObserver to avoid forced reflow
+    const resizeObserver = new ResizeObserver((entries) => {
+      // Use requestAnimationFrame to batch DOM reads
+      requestAnimationFrame(() => {
+        for (const entry of entries) {
+          const contentHeight = entry.target.scrollHeight;
+          setShowExpandButton(contentHeight > maxHeight);
+        }
+      });
+    });
+
+    resizeObserver.observe(contentRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
   }, [maxHeight]);
 
   const toggleFullscreen = () => {
@@ -63,7 +73,7 @@ export const ContentViewer = ({
     <div
       ref={containerRef}
       className={cn(
-        'relative rounded-lg border border-border bg-card',
+        'relative rounded-lg border border-border bg-card container-card contain-content',
         isFullscreen && 'fixed inset-0 z-50 bg-background p-4',
         className
       )}
@@ -113,12 +123,12 @@ export const ContentViewer = ({
         ref={contentRef}
         className={cn(
           'overflow-auto transition-all duration-300',
-          !isExpanded && !isFullscreen && showExpandButton && 'max-h-[600px]',
+          !(isExpanded || isFullscreen) && showExpandButton && 'max-h-[600px]',
           isFullscreen && 'h-[calc(100vh-8rem)]'
         )}
         style={{
           maxHeight:
-            !isExpanded && !isFullscreen && showExpandButton ? `${maxHeight}px` : undefined,
+            !(isExpanded || isFullscreen) && showExpandButton ? `${maxHeight}px` : undefined,
         }}
       >
         <pre

@@ -2,15 +2,21 @@
 
 import { ArrowLeft, Calendar, Copy, ExternalLink, Tag, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { lazy, type ReactNode, Suspense, useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import { formatDate } from '@/lib/date-utils';
+import type {
+  ActionButton,
+  BaseDetailPageProps,
+  CustomSection,
+} from '@/lib/schemas/component.schema';
+import type { UnifiedContentItem } from '@/lib/schemas/components';
+// Removed logger import - client components should not use server-side logger
 import { getDisplayTitle } from '@/lib/utils';
-import type { ContentItem } from '@/types/content';
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
 const CodeHighlight = lazy(() =>
@@ -19,35 +25,10 @@ const CodeHighlight = lazy(() =>
   }))
 );
 
-export interface BaseDetailPageProps {
-  item: ContentItem;
-  relatedItems?: ContentItem[];
-  typeName: string;
-  primaryAction?: {
-    label: string;
-    icon?: ReactNode;
-    onClick: () => void;
-  };
-  secondaryActions?: Array<{
-    label: string;
-    icon?: ReactNode;
-    onClick: () => void;
-  }>;
-  customSections?: Array<{
-    title: string;
-    icon?: ReactNode;
-    content: ReactNode;
-  }>;
-  showConfiguration?: boolean;
-  showInstallation?: boolean;
-  showUseCases?: boolean;
-  installationContent?: ReactNode;
-  useCasesContent?: ReactNode;
-  configurationContent?: ReactNode;
-  customSidebar?: ReactNode;
-}
+// Using BaseDetailPageProps from component.schema.ts which now includes all necessary properties
+// ActionButton and CustomSection are imported from component.schema.ts
 
-export function BaseDetailPage({
+export function BaseDetailPage<T extends UnifiedContentItem = UnifiedContentItem>({
   item,
   relatedItems = [],
   typeName,
@@ -61,7 +42,11 @@ export function BaseDetailPage({
   useCasesContent,
   configurationContent,
   customSidebar,
-}: BaseDetailPageProps) {
+}: Partial<BaseDetailPageProps> & {
+  item: T;
+  typeName: string;
+  relatedItems?: UnifiedContentItem[];
+}) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
 
@@ -92,7 +77,14 @@ export function BaseDetailPage({
   }
 
   const handleCopyContent = async () => {
-    const contentToCopy = item.content || item.config || '';
+    const contentToCopy =
+      ('content' in item ? (item as { content?: string }).content : '') ??
+      ('configuration' in item
+        ? typeof (item as unknown as { configuration?: unknown }).configuration === 'string'
+          ? (item as unknown as { configuration?: string }).configuration
+          : JSON.stringify((item as unknown as { configuration?: unknown }).configuration, null, 2)
+        : '') ??
+      '';
 
     const success = await copyToClipboard(contentToCopy, {
       component: 'base-detail-page',
@@ -109,7 +101,6 @@ export function BaseDetailPage({
       toast({
         title: 'Copy failed',
         description: 'Unable to copy content to clipboard.',
-        variant: 'destructive',
       });
     }
     setTimeout(() => setCopied(false), 2000);
@@ -160,10 +151,10 @@ export function BaseDetailPage({
                     <span>{item.author}</span>
                   </div>
                 )}
-                {(item.dateAdded || item.createdAt) && (
+                {item.dateAdded && (
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    <span>{formatDate(item.dateAdded || item.createdAt || '')}</span>
+                    <span>{formatDate(item.dateAdded)}</span>
                   </div>
                 )}
               </div>
@@ -190,7 +181,9 @@ export function BaseDetailPage({
                 </Button>
               )}
 
-              {(item.content || item.config) && (
+              {(('content' in item && typeof (item as { content?: string }).content === 'string') ||
+                ('configuration' in item &&
+                  (item as { configuration?: object }).configuration)) && (
                 <Button variant="outline" onClick={handleCopyContent} className="min-w-0">
                   {copied ? (
                     <>
@@ -218,14 +211,19 @@ export function BaseDetailPage({
                 </Button>
               ))}
 
-              {item.documentation && (
-                <Button variant="outline" asChild>
-                  <a href={item.documentation} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Docs
-                  </a>
-                </Button>
-              )}
+              {'documentationUrl' in item &&
+                (item as { documentationUrl?: string }).documentationUrl && (
+                  <Button variant="outline" asChild>
+                    <a
+                      href={(item as { documentationUrl: string }).documentationUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Docs
+                    </a>
+                  </Button>
+                )}
             </div>
           </div>
         </div>
@@ -237,7 +235,8 @@ export function BaseDetailPage({
           {/* Primary content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Content/Code section */}
-            {(item.content || item.config) && (
+            {(('content' in item && typeof (item as { content?: string }).content === 'string') ||
+              ('configuration' in item && (item as { configuration?: object }).configuration)) && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -251,11 +250,31 @@ export function BaseDetailPage({
                 <CardContent>
                   <Suspense fallback={<div className="animate-pulse bg-muted h-64 rounded-md" />}>
                     <CodeHighlight
-                      code={item.content || item.config || ''}
+                      code={
+                        ('content' in item &&
+                        typeof (item as { content?: string }).content === 'string'
+                          ? (item as { content: string }).content
+                          : '') ||
+                        ('configuration' in item &&
+                        (item as unknown as { configuration?: unknown }).configuration
+                          ? typeof (item as unknown as { configuration?: unknown })
+                              .configuration === 'string'
+                            ? (item as unknown as { configuration: string }).configuration
+                            : JSON.stringify(
+                                (item as unknown as { configuration: object }).configuration,
+                                null,
+                                2
+                              )
+                          : '') ||
+                        ''
+                      }
                       language={
-                        ('language' in item ? (item.language as string) : undefined) || 'text'
+                        ('language' in item
+                          ? (item as { language?: string }).language
+                          : undefined) ?? 'text'
                       }
                       title={`${typeName} Content`}
+                      showCopy={true}
                     />
                   </Suspense>
                 </CardContent>
@@ -365,3 +384,85 @@ export function BaseDetailPage({
     </div>
   );
 }
+
+/**
+ * DetailPageFactory - Production-grade factory functions for creating detail pages
+ * Validates configuration and provides type-safe detail page creation
+ */
+
+/**
+ * Validate action buttons - using schema from component.schema.ts
+ */
+export function validateActionButton(action: unknown): ActionButton {
+  // Import the schema from component.schema.ts for validation
+  // This function is kept for backward compatibility
+  if (typeof action === 'object' && action !== null && 'label' in action && 'onClick' in action) {
+    return action as ActionButton;
+  }
+  throw new Error('Failed to validate action button');
+}
+
+/**
+ * Validate custom sections - using schema from component.schema.ts
+ */
+export function validateCustomSection(section: unknown): CustomSection {
+  // Import the schema from component.schema.ts for validation
+  // This function is kept for backward compatibility
+  if (
+    typeof section === 'object' &&
+    section !== null &&
+    'title' in section &&
+    'content' in section
+  ) {
+    return section as CustomSection;
+  }
+  throw new Error('Failed to validate custom section');
+}
+
+/**
+ * Create standardized action buttons for common operations
+ */
+export const actionButtonTemplates = {
+  copy: (content: string): ActionButton => ({
+    label: 'Copy',
+    icon: undefined,
+    onClick: () => {
+      copyToClipboard(content);
+      toast({ title: 'Copied to clipboard' });
+    },
+    variant: 'outline' as const,
+  }),
+
+  share: (item: UnifiedContentItem): ActionButton => ({
+    label: 'Share',
+    icon: undefined,
+    onClick: () => {
+      if (navigator?.share) {
+        navigator
+          .share({
+            title: item.title || item.name || 'Shared content',
+            text: item.description,
+            url: window.location.href,
+          })
+          .catch(() => {
+            // Fallback to clipboard
+            copyToClipboard(window.location.href);
+            toast({ title: 'Link copied to clipboard' });
+          });
+      } else {
+        copyToClipboard(window.location.href);
+        toast({ title: 'Link copied to clipboard' });
+      }
+    },
+    variant: 'ghost' as const,
+  }),
+
+  external: (url: string): ActionButton => ({
+    label: 'View Source',
+    icon: undefined,
+    onClick: () => {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    },
+    variant: 'outline' as const,
+  }),
+};

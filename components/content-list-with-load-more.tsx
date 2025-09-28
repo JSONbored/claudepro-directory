@@ -1,21 +1,15 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { ConfigCard } from '@/components/config-card';
 import { Button } from '@/components/ui/button';
-import type { ContentItem } from '@/types/content';
+import type { ContentListWithLoadMoreProps } from '@/lib/schemas/component.schema';
 
-interface ContentListWithLoadMoreProps {
-  items: ContentItem[];
-  type: 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks';
-  initialCount?: number;
-  loadMoreCount?: number;
-  gridCols?: string;
-}
+// Note: ContentListWithLoadMoreProps is now imported from component.schema.ts
+// This provides runtime validation and type safety
 
-export function ContentListWithLoadMore({
+function ContentListWithLoadMoreComponent({
   items,
-  type,
   initialCount = 12,
   loadMoreCount = 12,
   gridCols = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
@@ -49,7 +43,13 @@ export function ContentListWithLoadMore({
     <div className="space-y-8">
       <div className={`grid gap-6 ${gridCols}`}>
         {displayedItems.map((item) => (
-          <ConfigCard key={item.slug} {...item} type={type} />
+          <ConfigCard
+            key={item.slug}
+            item={item}
+            variant="default"
+            showCategory={true}
+            showActions={true}
+          />
         ))}
       </div>
 
@@ -73,3 +73,6 @@ export function ContentListWithLoadMore({
     </div>
   );
 }
+
+// Memoize to prevent re-renders when parent component updates
+export const ContentListWithLoadMore = memo(ContentListWithLoadMoreComponent);

@@ -162,7 +162,7 @@ export class CacheWarmer {
     try {
       // Pre-calculate related content for top pages
       const topPages = [
-        { path: '/', category: undefined },
+        { path: '/', category: 'agents' as WarmableCategory },
         { path: '/agents', category: 'agents' as WarmableCategory },
         { path: '/mcp', category: 'mcp' as WarmableCategory },
         { path: '/rules', category: 'rules' as WarmableCategory },
@@ -181,6 +181,8 @@ export class CacheWarmer {
             currentTags: [],
             currentKeywords: [],
             limit: 6,
+            featured: [],
+            exclude: [],
           });
         } catch (error) {
           logger.warn('Failed to warm related content', { page: page.path, error: String(error) });

@@ -11,7 +11,7 @@ import {
   Zap,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -23,18 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-interface GuideItem {
-  title: string;
-  description: string;
-  slug: string;
-  category: string;
-  dateUpdated?: string;
-}
-
-interface EnhancedGuidesPageProps {
-  guides: Record<string, GuideItem[]>;
-}
+import type { GuideItemWithCategory } from '@/lib/components/guide-page-factory';
+import type { EnhancedGuidesPageProps } from '@/lib/schemas/component.schema';
 
 const categoryInfo = {
   'use-cases': {
@@ -86,26 +76,46 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'title' | 'category' | 'date'>('title');
 
+  // Generate unique IDs for form controls
+  const searchInputId = useId();
+  const categorySelectId = useId();
+  const sortSelectId = useId();
+
   const totalGuides = Object.values(guides).reduce((acc, cat) => acc + cat.length, 0);
 
-  // Filter and search guides
+  // Pre-computed search index for optimal performance
+  const searchIndex = useMemo(() => {
+    const index: Record<string, Array<{ guide: GuideItemWithCategory; searchText: string }>> = {};
+
+    Object.entries(guides).forEach(([category, guideList]) => {
+      index[category] = guideList.map((guide) => ({
+        guide,
+        searchText: [guide.title, guide.description].join(' ').toLowerCase(),
+      }));
+    });
+
+    return index;
+  }, [guides]);
+
+  // Filter and search guides - optimized with pre-computed search index
   const filteredGuides = useMemo(() => {
-    let result = { ...guides };
+    let result: Record<string, GuideItemWithCategory[]> = {};
 
     // Apply category filter
     if (selectedCategory !== 'all') {
       result = { [selectedCategory]: guides[selectedCategory] || [] };
+    } else {
+      result = { ...guides };
     }
 
-    // Apply search filter
+    // Apply search filter using pre-computed index
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       Object.keys(result).forEach((category) => {
-        result[category] = (result[category] || []).filter(
-          (guide) =>
-            guide.title.toLowerCase().includes(query) ||
-            guide.description.toLowerCase().includes(query)
-        );
+        const categoryIndex = searchIndex[category] || [];
+        result[category] = categoryIndex
+          .filter(({ searchText }) => searchText.includes(query))
+          .map(({ guide }) => guide);
       });
     }
 
@@ -118,7 +128,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
           case 'category':
             return a.category.localeCompare(b.category);
           case 'date':
-            if (!a.dateUpdated || !b.dateUpdated) return 0;
+            if (!(a.dateUpdated && b.dateUpdated)) return 0;
             return new Date(b.dateUpdated).getTime() - new Date(a.dateUpdated).getTime();
           default:
             return 0;
@@ -127,7 +137,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
     });
 
     return result;
-  }, [guides, searchQuery, selectedCategory, sortBy]);
+  }, [guides, searchIndex, searchQuery, selectedCategory, sortBy]);
 
   const filteredTotalGuides = Object.values(filteredGuides).reduce(
     (acc, cat) => acc + cat.length,
@@ -249,6 +259,8 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
                 <div className="relative mb-4">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
+                    id={searchInputId}
+                    name="guidesSearch"
                     placeholder="Search guides..."
                     className="pl-10"
                     value={searchQuery}
@@ -260,7 +272,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
                 <div className="space-y-2 mb-4">
                   <span className="text-sm font-medium">Filter by Category</span>
                   <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full" id={categorySelectId} name="categoryFilter">
                       <SelectValue placeholder="All categories" />
                     </SelectTrigger>
                     <SelectContent>
@@ -281,7 +293,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
                     value={sortBy}
                     onValueChange={(value: 'title' | 'category' | 'date') => setSortBy(value)}
                   >
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full" id={sortSelectId} name="sortFilter">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

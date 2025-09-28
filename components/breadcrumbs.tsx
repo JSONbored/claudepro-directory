@@ -4,11 +4,7 @@ import { ChevronRight, Home } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Fragment } from 'react';
-
-interface BreadcrumbItem {
-  label: string;
-  href?: string;
-}
+import type { BreadcrumbItem } from '@/lib/schemas/component.schema';
 
 export function Breadcrumbs() {
   const pathname = usePathname();

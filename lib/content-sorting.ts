@@ -1,22 +1,28 @@
-import type { ContentItem } from '@/types/content';
+import { z } from 'zod';
+import type { ContentMetadata } from '@/lib/schemas/content.schema';
 import { logger } from './logger';
 import { contentCache, statsRedis } from './redis';
+import { cacheCategorySchema } from './schemas/cache.schema';
 import { getDisplayTitle } from './utils';
 
-export type SortOption = 'trending' | 'newest' | 'alphabetical' | 'popularity';
+// Production-grade sort option validation schema
+export const sortOptionSchema = z.enum(['trending', 'newest', 'alphabetical', 'popularity']);
+export type SortOption = z.infer<typeof sortOptionSchema>;
 
-export interface SortingOptions {
-  sort: SortOption;
-  category?: string;
-  useViewData?: boolean;
-}
+// Sorting options schema for production-grade validation
+export const sortingOptionsSchema = z.object({
+  sort: sortOptionSchema,
+  category: z.string().optional(),
+  useViewData: z.boolean().optional(),
+});
+export type SortingOptions = z.infer<typeof sortingOptionsSchema>;
 
-interface ViewDataMap {
-  [key: string]: number;
-}
+// View data map schema for type safety
+export const viewDataMapSchema = z.record(z.string(), z.number());
+export type ViewDataMap = z.infer<typeof viewDataMapSchema>;
 
 // Generate cache key for sorted content
-function generateSortCacheKey(items: ContentItem[], options: SortingOptions): string {
+function generateSortCacheKey(items: ContentMetadata[], options: SortingOptions): string {
   const itemsHash =
     items.length > 0
       ? `${items.length}-${items[0]?.slug || 'no-slug'}-${items[items.length - 1]?.slug || 'no-slug'}`
@@ -26,7 +32,10 @@ function generateSortCacheKey(items: ContentItem[], options: SortingOptions): st
 }
 
 // Get view data for items from Redis
-async function getViewDataForItems(items: ContentItem[], category: string): Promise<ViewDataMap> {
+async function getViewDataForItems(
+  items: ContentMetadata[],
+  category: string
+): Promise<ViewDataMap> {
   if (!statsRedis.isEnabled()) return {};
 
   try {
@@ -57,29 +66,31 @@ async function getViewDataForItems(items: ContentItem[], category: string): Prom
 
 // Sorting functions
 const sortingFunctions = {
-  trending: (items: ContentItem[], viewData: ViewDataMap = {}) => {
+  trending: (items: ContentMetadata[], viewData: ViewDataMap = {}) => {
     return [...items].sort((a, b) => {
       // Use Redis view data if available, otherwise fall back to popularity
-      const aViews = viewData[a.slug] ?? a.popularity ?? 0;
-      const bViews = viewData[b.slug] ?? b.popularity ?? 0;
+      const aPopularity = (a as typeof a & { popularity?: number }).popularity ?? 0;
+      const bPopularity = (b as typeof b & { popularity?: number }).popularity ?? 0;
+      const aViews = viewData[a.slug] ?? aPopularity;
+      const bViews = viewData[b.slug] ?? bPopularity;
 
       // For trending, weight recent activity higher
-      const aScore = aViews * (1 + (a.popularity || 0) * 0.1);
-      const bScore = bViews * (1 + (b.popularity || 0) * 0.1);
+      const aScore = aViews * (1 + aPopularity * 0.1);
+      const bScore = bViews * (1 + bPopularity * 0.1);
 
       return bScore - aScore;
     });
   },
 
-  newest: (items: ContentItem[]) => {
+  newest: (items: ContentMetadata[]) => {
     return [...items].sort((a, b) => {
-      const aDate = a.dateAdded ? new Date(a.dateAdded).getTime() : 0;
-      const bDate = b.dateAdded ? new Date(b.dateAdded).getTime() : 0;
+      const aDate = a.dateAdded != null ? new Date(a.dateAdded).getTime() : 0;
+      const bDate = b.dateAdded != null ? new Date(b.dateAdded).getTime() : 0;
       return bDate - aDate;
     });
   },
 
-  alphabetical: (items: ContentItem[]) => {
+  alphabetical: (items: ContentMetadata[]) => {
     return [...items].sort((a, b) => {
       const aName = getDisplayTitle(a).toLowerCase();
       const bName = getDisplayTitle(b).toLowerCase();
@@ -87,18 +98,22 @@ const sortingFunctions = {
     });
   },
 
-  popularity: (items: ContentItem[], viewData: ViewDataMap = {}) => {
+  popularity: (items: ContentMetadata[], viewData: ViewDataMap = {}) => {
     return [...items].sort((a, b) => {
       // Combine static popularity with actual view data
-      const aPopularity = (a.popularity || 0) + (viewData[a.slug] || 0) * 0.1;
-      const bPopularity = (b.popularity || 0) + (viewData[b.slug] || 0) * 0.1;
+      const aBasePopularity = (a as typeof a & { popularity?: number }).popularity ?? 0;
+      const bBasePopularity = (b as typeof b & { popularity?: number }).popularity ?? 0;
+      const aViewBonus = (viewData[a.slug] ?? 0) * 0.1;
+      const bViewBonus = (viewData[b.slug] ?? 0) * 0.1;
+      const aPopularity = aBasePopularity + aViewBonus;
+      const bPopularity = bBasePopularity + bViewBonus;
       return bPopularity - aPopularity;
     });
   },
 };
 
 // Main sorting function with caching
-export async function sortContentWithCache<T extends ContentItem>(
+export async function sortContentWithCache<T extends ContentMetadata>(
   items: T[],
   options: SortingOptions
 ): Promise<T[]> {
@@ -130,7 +145,7 @@ export async function sortContentWithCache<T extends ContentItem>(
       {
         itemCount: items.length,
         sort: options.sort,
-        category: options.category || 'none',
+        category: options.category ?? 'none',
       }
     );
 
@@ -140,7 +155,7 @@ export async function sortContentWithCache<T extends ContentItem>(
 }
 
 // Perform the actual sorting
-async function performSort<T extends ContentItem>(
+async function performSort<T extends ContentMetadata>(
   items: T[],
   options: SortingOptions
 ): Promise<T[]> {
@@ -148,7 +163,7 @@ async function performSort<T extends ContentItem>(
 
   // Get view data if needed and available
   let viewData: ViewDataMap = {};
-  if (useViewData && category && (sort === 'trending' || sort === 'popularity')) {
+  if (useViewData && category != null && (sort === 'trending' || sort === 'popularity')) {
     viewData = await getViewDataForItems(items, category);
   }
 
@@ -163,64 +178,111 @@ async function performSort<T extends ContentItem>(
 }
 
 // Specialized sorting for different content types
-export async function sortAgents(
-  items: ContentItem[],
+// Generic content sorting function - consolidates all duplicate sorting logic
+export async function sortContent(
+  items: ContentMetadata[],
+  category: string,
   sort: SortOption = 'trending'
-): Promise<ContentItem[]> {
-  return sortContentWithCache(items, { sort, category: 'agents', useViewData: true });
+): Promise<ContentMetadata[]> {
+  // Validate inputs using existing schemas for production safety
+  const validatedCategory = cacheCategorySchema.parse(category);
+  const validatedSort = sortOptionSchema.parse(sort);
+  return sortContentWithCache(items, {
+    sort: validatedSort,
+    category: validatedCategory,
+    useViewData: true,
+  });
+}
+
+// Specific sorting functions for backward compatibility and type safety
+export async function sortAgents(
+  items: ContentMetadata[],
+  sort: SortOption = 'trending'
+): Promise<ContentMetadata[]> {
+  return sortContent(items, 'agents', sort);
 }
 
 export async function sortMcp(
-  items: ContentItem[],
+  items: ContentMetadata[],
   sort: SortOption = 'trending'
-): Promise<ContentItem[]> {
-  return sortContentWithCache(items, { sort, category: 'mcp', useViewData: true });
+): Promise<ContentMetadata[]> {
+  return sortContent(items, 'mcp', sort);
 }
 
 export async function sortRules(
-  items: ContentItem[],
+  items: ContentMetadata[],
   sort: SortOption = 'trending'
-): Promise<ContentItem[]> {
-  return sortContentWithCache(items, { sort, category: 'rules', useViewData: true });
+): Promise<ContentMetadata[]> {
+  return sortContent(items, 'rules', sort);
 }
 
 export async function sortCommands(
-  items: ContentItem[],
+  items: ContentMetadata[],
   sort: SortOption = 'trending'
-): Promise<ContentItem[]> {
-  return sortContentWithCache(items, { sort, category: 'commands', useViewData: true });
+): Promise<ContentMetadata[]> {
+  return sortContent(items, 'commands', sort);
 }
 
 export async function sortHooks(
-  items: ContentItem[],
+  items: ContentMetadata[],
   sort: SortOption = 'trending'
-): Promise<ContentItem[]> {
-  return sortContentWithCache(items, { sort, category: 'hooks', useViewData: true });
+): Promise<ContentMetadata[]> {
+  return sortContent(items, 'hooks', sort);
 }
 
 export async function sortGuides(
-  items: ContentItem[],
+  items: ContentMetadata[],
   sort: SortOption = 'trending'
-): Promise<ContentItem[]> {
-  return sortContentWithCache(items, { sort, category: 'guides', useViewData: true });
+): Promise<ContentMetadata[]> {
+  return sortContent(items, 'guides', sort);
 }
 
 // Clear sorting cache for a specific category
 export async function clearSortingCache(category?: string): Promise<void> {
   try {
-    const pattern = category ? `sort:*:*"category":"${category}"*` : 'sort:*';
+    const pattern = category != null ? `sort:*:*"category":"${category}"*` : 'sort:*';
     await contentCache.invalidatePattern(pattern);
   } catch (error) {
     logger.error(
       'Failed to clear sorting cache',
       error instanceof Error ? error : new Error(String(error)),
       {
-        category: category || 'none',
-        pattern: category ? `sort:*:*"category":"${category}"*` : 'sort:*',
+        category: category ?? 'none',
+        pattern: category != null ? `sort:*:*"category":"${category}"*` : 'sort:*',
       }
     );
   }
 }
 
-// Export for components that need direct access
-export type { ViewDataMap };
+// Simple synchronous sorting functions for backward compatibility
+// Moved from sorting.ts
+export function sortByPopularity<T extends ContentMetadata>(items: readonly T[] | T[]): T[] {
+  return [...items].sort(
+    (a, b) =>
+      ((b as typeof b & { popularity?: number }).popularity ?? 0) -
+      ((a as typeof a & { popularity?: number }).popularity ?? 0)
+  );
+}
+
+export function sortByNewest<T extends { createdAt?: string; date?: string }>(
+  items: readonly T[] | T[]
+): T[] {
+  return [...items].sort((a, b) => {
+    const dateA = new Date(a.createdAt ?? a.date ?? '1970-01-01').getTime();
+    const dateB = new Date(b.createdAt ?? b.date ?? '1970-01-01').getTime();
+    return dateB - dateA;
+  });
+}
+
+export function sortAlphabetically<
+  T extends { name?: string | undefined; title?: string | undefined; slug: string },
+>(items: readonly T[] | T[]): T[] {
+  return [...items].sort((a, b) => {
+    // Use a type-safe approach for getting display title
+    const nameA = (a.title ?? a.name ?? a.slug).toLowerCase();
+    const nameB = (b.title ?? b.name ?? b.slug).toLowerCase();
+    return nameA.localeCompare(nameB);
+  });
+}
+
+// Note: ViewDataMap is already exported via the viewDataMapSchema type inference above

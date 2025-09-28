@@ -121,8 +121,9 @@ export class ContentOptimizer {
       const validationResults = this.validateContent(content, contentType);
       result.validationErrors = validationResults.errors;
       result.validationWarnings = validationResults.warnings;
-    } catch (error: any) {
-      result.validationErrors.push(`Optimization failed: ${error.message || error}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      result.validationErrors.push(`Optimization failed: ${errorMessage}`);
     }
 
     return result;
@@ -160,14 +161,16 @@ export class ContentOptimizer {
       try {
         const result = await this.optimizeContent(file);
         results.push(result);
-      } catch (error: any) {
+      } catch (error) {
         results.push({
           filePath: file,
           contentType: this.detectContentType(file),
           seoScore: 0,
           citationScore: 0,
           freshnessScore: 0,
-          validationErrors: [`Failed to process: ${error.message || error}`],
+          validationErrors: [
+            `Failed to process: ${error instanceof Error ? error.message : String(error)}`,
+          ],
           validationWarnings: [],
           recommendations: [],
         });
@@ -203,7 +206,7 @@ export class ContentOptimizer {
 
     // Safe extraction with proper null checks
     const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-    if (!frontmatterMatch || !frontmatterMatch[1]) {
+    if (!frontmatterMatch?.[1]) {
       return metadata;
     }
 
@@ -615,12 +618,12 @@ export class ContentOptimizer {
         }
         break;
       case 'comparisons':
-        if (!content.includes('vs') && !content.includes('compared')) {
+        if (!(content.includes('vs') || content.includes('compared'))) {
           warnings.push('Comparison content should include comparative language');
         }
         break;
       case 'troubleshooting':
-        if (!content.includes('fix') && !content.includes('solve') && !content.includes('error')) {
+        if (!(content.includes('fix') || content.includes('solve') || content.includes('error'))) {
           warnings.push('Troubleshooting content should include problem-solving language');
         }
         break;

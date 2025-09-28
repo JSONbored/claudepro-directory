@@ -79,7 +79,7 @@ export const transforms = {
 
   // Parse positive integer
   positiveInt: (value: string | number) => {
-    const num = typeof value === 'string' ? parseInt(value, 10) : value;
+    const num = typeof value === 'string' ? Number.parseInt(value, 10) : value;
     return Number.isNaN(num) || num < 0 ? 0 : num;
   },
 } as const;
@@ -343,3 +343,128 @@ export const validation = {
 } as const;
 
 export default validation;
+
+/**
+ * XSS Sanitization Utilities
+ * Provides secure sanitization for user input
+ * Consolidated from lib/sanitizer.ts for better maintainability
+ */
+import DOMPurify from 'isomorphic-dompurify';
+
+export const sanitizers = {
+  /**
+   * Sanitize search queries to prevent XSS attacks
+   * Allows only alphanumeric characters, spaces, hyphens, and underscores
+   */
+  sanitizeSearchQuery: (query: string): string => {
+    // First, use DOMPurify to remove any HTML/Script tags
+    const htmlSanitized = DOMPurify.sanitize(query, {
+      ALLOWED_TAGS: [],
+      ALLOWED_ATTR: [],
+      KEEP_CONTENT: true,
+    });
+
+    // Then apply additional restrictions for search queries
+    // Allow: letters, numbers, spaces, hyphens, underscores, dots, and common search operators
+    const searchSanitized = htmlSanitized
+      .replace(/[^a-zA-Z0-9\s\-_.+*]/g, '') // Remove special characters except common search ones
+      .trim()
+      .substring(0, 100); // Limit length
+
+    return searchSanitized;
+  },
+
+  /**
+   * Sanitize form input fields
+   * Strips all HTML and limits length
+   */
+  sanitizeFormInput: (input: string, maxLength = 500): string => {
+    const sanitized = DOMPurify.sanitize(input, {
+      ALLOWED_TAGS: [],
+      ALLOWED_ATTR: [],
+      KEEP_CONTENT: true,
+    });
+
+    return sanitized.trim().substring(0, maxLength);
+  },
+
+  /**
+   * Sanitize URL parameters
+   * Ensures safe URL construction
+   */
+  sanitizeURLParam: (param: string): string => {
+    // Remove any potential URL injection attempts
+    const sanitized = param
+      .replace(/[<>"'`]/g, '') // Remove HTML/JS injection characters
+      .replace(/javascript:/gi, '') // Remove javascript: protocol
+      .replace(/data:/gi, '') // Remove data: protocol
+      .trim();
+
+    // Encode for URL
+    return encodeURIComponent(sanitized);
+  },
+
+  /**
+   * Validate and sanitize category input
+   * Ensures only valid categories are accepted
+   */
+  sanitizeCategory: (category: string): string | null => {
+    const validCategories = [
+      'agents',
+      'mcp',
+      'rules',
+      'commands',
+      'hooks',
+      'tutorials',
+      'comparisons',
+      'workflows',
+      'use-cases',
+      'troubleshooting',
+    ];
+
+    const sanitized = sanitizers.sanitizeFormInput(category, 50).toLowerCase();
+
+    if (validCategories.includes(sanitized)) {
+      return sanitized;
+    }
+
+    return null;
+  },
+
+  /**
+   * Sanitize array of tags
+   * Ensures each tag is safe and valid
+   */
+  sanitizeTags: (tags: string[]): string[] => {
+    return tags
+      .map((tag) => sanitizers.sanitizeFormInput(tag, 50))
+      .filter((tag) => tag.length > 0 && tag.length <= 50)
+      .slice(0, 20); // Limit to 20 tags
+  },
+
+  /**
+   * Create a sanitized excerpt from HTML content
+   * Useful for meta descriptions and previews
+   */
+  createSafeExcerpt: (html: string, maxLength = 160): string => {
+    const textOnly = DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: [],
+      KEEP_CONTENT: true,
+    });
+
+    return textOnly
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim()
+      .substring(0, maxLength);
+  },
+} as const;
+
+// Re-export individual functions for backward compatibility
+export const {
+  sanitizeSearchQuery,
+  sanitizeFormInput,
+  sanitizeURLParam,
+  sanitizeCategory,
+  sanitizeTags,
+  createSafeExcerpt,
+} = sanitizers;

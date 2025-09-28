@@ -1,7 +1,9 @@
 'use client';
 
 import Script from 'next/script';
-import { isProduction } from '@/lib/schemas/env.schema';
+
+// Client-safe environment check - doesn't trigger server env validation
+const isProduction = process.env.NODE_ENV === 'production';
 
 export function UmamiScript() {
   // Only load analytics in production

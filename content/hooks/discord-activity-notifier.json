@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "discord",
-    "notification",
-    "collaboration",
-    "webhooks",
-    "team"
-  ],
+  "tags": ["discord", "notification", "collaboration", "webhooks", "team"],
   "hookType": "Notification",
   "features": [
     "Real-time Discord notifications for Claude Code activities",

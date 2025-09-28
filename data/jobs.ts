@@ -1,22 +1,7 @@
-import type { ContentMetadata } from '@/types/content';
+import type { JobContent } from '@/lib/schemas/content.schema';
 
-export interface Job extends ContentMetadata {
-  // Job-specific fields (ContentMetadata provides: slug, description, category, author, dateAdded, tags, etc.)
-  title: string;
-  company: string;
-  companyLogo?: string;
-  location: string;
-  remote: boolean;
-  type: 'full-time' | 'part-time' | 'contract' | 'internship';
-  salary?: string;
-  requirements: string[];
-  benefits?: string[];
-  postedAt: string;
-  expiresAt?: string;
-  featured: boolean;
-  applyUrl: string;
-  contactEmail?: string;
-}
+// Use Zod schema type instead of interface
+export type Job = JobContent;
 
 // Example jobs for demonstration - currently empty
 // Template job structure for future reference:

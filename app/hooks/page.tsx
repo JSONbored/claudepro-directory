@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { ContentListServer } from '@/components/content-list-server';
 import { hooks } from '@/generated/content';
+import { APP_CONFIG } from '@/lib/constants';
 
 export const metadata: Metadata = {
-  title: 'Automation Hooks - Claude Event Hooks | Claude Pro Directory',
+  title: `Automation Hooks - Claude Event Hooks | ${APP_CONFIG.name}`,
   description: 'Discover automation hooks to trigger actions and workflows based on Claude events.',
   keywords: 'Claude hooks, automation, event triggers, workflow automation, Claude Pro',
 };

@@ -117,13 +117,7 @@ export function InfiniteScrollContainer<T>({
           const key = keyExtractor ? keyExtractor(item, index) : `item-${index}`;
           return (
             <div key={key}>
-              <ErrorBoundary
-                fallback={
-                  <div className="p-4 text-center text-muted-foreground">Error loading item</div>
-                }
-              >
-                {renderItem(item, index)}
-              </ErrorBoundary>
+              <ErrorBoundary>{renderItem(item, index)}</ErrorBoundary>
             </div>
           );
         })}

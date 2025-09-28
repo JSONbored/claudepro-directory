@@ -2,6 +2,7 @@ import { BookOpen, Server, Sparkles } from 'lucide-react';
 
 import HomePageClient from '@/components/home-page-client';
 import { lazyContentLoaders } from '@/components/lazy-components';
+import { transformForHomePage } from '@/lib/transformers';
 
 // Enable ISR - revalidate every hour
 export const revalidate = 3600;
@@ -17,7 +18,18 @@ export default async function HomePage() {
     lazyContentLoaders.hooks(),
   ]);
 
+  // Create stable allConfigs array to prevent infinite re-renders
   const allConfigs = [...rules, ...mcp, ...agents, ...commands, ...hooks];
+
+  // Transform data using transform functions to convert readonly arrays to mutable
+  const initialData = transformForHomePage({
+    rules,
+    mcp,
+    agents,
+    commands,
+    hooks,
+    allConfigs,
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -66,16 +78,7 @@ export default async function HomePage() {
       </section>
 
       {/* Client Component for Interactive Features */}
-      <HomePageClient
-        initialData={{
-          rules,
-          mcp,
-          agents,
-          commands,
-          hooks,
-          allConfigs,
-        }}
-      />
+      <HomePageClient initialData={initialData} />
     </div>
   );
 }

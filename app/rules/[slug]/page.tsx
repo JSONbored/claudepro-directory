@@ -1,25 +1,33 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { RuleDetailPage } from '@/components/rule-detail-page';
+import { RuleStructuredData } from '@/components/structured-data/rule-schema';
 import { ViewTracker } from '@/components/view-tracker';
 import { getRuleBySlug, getRuleFullContent, rules } from '@/generated/content';
+import { APP_CONFIG } from '@/lib/constants';
+import { sortRules } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
-import { slugParamSchema } from '@/lib/schemas/search.schema';
+import type { PageProps } from '@/lib/schemas/app.schema';
+import { slugParamsSchema } from '@/lib/schemas/app.schema';
+import { ruleContentSchema } from '@/lib/schemas/content.schema';
 import { getDisplayTitle } from '@/lib/utils';
 
-interface RulePageProps {
-  params: Promise<{ slug: string }>;
-}
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  if (!params) {
+    return {
+      title: 'Rule Not Found',
+      description: 'The requested Claude rule could not be found.',
+    };
+  }
 
-export async function generateMetadata({ params }: RulePageProps): Promise<Metadata> {
   const rawParams = await params;
 
   // Validate slug parameter
-  const validationResult = slugParamSchema.safeParse(rawParams);
+  const validationResult = slugParamsSchema.safeParse(rawParams);
 
   if (!validationResult.success) {
     logger.warn('Invalid slug parameter for rule metadata', {
-      slug: rawParams.slug,
+      slug: String(rawParams.slug),
       errorCount: validationResult.error.issues.length,
       firstError: validationResult.error.issues[0]?.message || 'Unknown error',
     });
@@ -40,7 +48,7 @@ export async function generateMetadata({ params }: RulePageProps): Promise<Metad
   }
 
   return {
-    title: `${getDisplayTitle(rule)} - Claude Rule | Claude Pro Directory`,
+    title: `${getDisplayTitle(rule)} - Claude Rule | ${APP_CONFIG.name}`,
     description: rule.description,
     keywords: rule.tags?.join(', '),
     openGraph: {
@@ -52,23 +60,58 @@ export async function generateMetadata({ params }: RulePageProps): Promise<Metad
 }
 
 export async function generateStaticParams() {
-  return rules.map((rule) => ({
-    slug: rule.slug,
-  }));
+  try {
+    // Sort rules by popularity/trending for optimized static generation
+    // Most popular items will be generated first, improving initial page loads
+    const sortedRules = await sortRules([...rules], 'popularity');
+
+    return sortedRules
+      .map((rule) => {
+        // Validate slug using existing schema before static generation
+        const validation = slugParamsSchema.safeParse({ slug: rule.slug });
+
+        if (!validation.success) {
+          logger.warn('Invalid slug in generateStaticParams for rules', {
+            slug: rule.slug,
+            error: validation.error.issues[0]?.message || 'Unknown validation error',
+          });
+          return null;
+        }
+
+        return {
+          slug: rule.slug,
+        };
+      })
+      .filter(Boolean);
+  } catch (error) {
+    // Fallback to unsorted if sorting fails
+    logger.error(
+      'Failed to sort rules for static generation, using default order',
+      error instanceof Error ? error : new Error(String(error))
+    );
+
+    return rules.map((rule) => ({
+      slug: rule.slug,
+    }));
+  }
 }
 
-export default async function RulePage({ params }: RulePageProps) {
+export default async function RulePage({ params }: PageProps) {
+  if (!params) {
+    notFound();
+  }
+
   const rawParams = await params;
 
   // Validate slug parameter
-  const validationResult = slugParamSchema.safeParse(rawParams);
+  const validationResult = slugParamsSchema.safeParse(rawParams);
 
   if (!validationResult.success) {
     logger.error(
       'Invalid slug parameter for rule page',
       new Error(validationResult.error.issues[0]?.message || 'Invalid rule slug'),
       {
-        slug: rawParams.slug,
+        slug: String(rawParams.slug),
         errorCount: validationResult.error.issues.length,
       }
     );
@@ -95,10 +138,14 @@ export default async function RulePage({ params }: RulePageProps) {
     .filter((r) => r.slug !== ruleMeta.slug && r.category === ruleMeta.category)
     .slice(0, 3);
 
+  const rule = ruleContentSchema.parse(fullRule || ruleMeta);
+  const relatedRulesParsed = relatedRules.map((r) => ruleContentSchema.parse(r));
+
   return (
     <>
       <ViewTracker category="rules" slug={slug} />
-      <RuleDetailPage item={fullRule || ruleMeta} relatedItems={relatedRules} />
+      <RuleStructuredData item={rule} />
+      <RuleDetailPage item={rule} relatedItems={relatedRulesParsed} />
     </>
   );
 }

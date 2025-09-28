@@ -3,16 +3,18 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { z } from 'zod';
+// Content metadata schema import removed - using direct object destructuring
 import { onBuildComplete } from '../lib/related-content/cache-invalidation.js';
 import { contentIndexer } from '../lib/related-content/indexer.js';
-import {
-  type AgentContent,
-  type CommandContent,
-  type HookContent,
-  type JobContent,
-  type MCPServerContent,
-  type RuleContent,
-  validateContent,
+import { validateContentByCategory } from '../lib/schemas/content/index.js';
+import type {
+  AgentContent,
+  CommandContent,
+  GuideContent,
+  HookContent,
+  JobContent,
+  MCPServerContent,
+  RuleContent,
 } from '../lib/schemas/content.schema.js';
 import {
   type BuildConfig,
@@ -20,9 +22,9 @@ import {
   buildConfigSchema,
   type GeneratedFile,
   generateSlugFromFilename,
-  slugToTitle,
 } from '../lib/schemas/content-generation.schema.js';
 import { type ContentCategory, contentCategorySchema } from '../lib/schemas/shared.schema.js';
+import { slugToTitle } from '../lib/utils.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.join(__dirname, '..');
@@ -54,7 +56,8 @@ type ValidatedContent =
   | HookContent
   | CommandContent
   | RuleContent
-  | JobContent;
+  | JobContent
+  | GuideContent;
 
 async function loadJsonFiles(type: ContentCategory): Promise<ValidatedContent[]> {
   // Validate the content category with strict validation
@@ -71,11 +74,13 @@ async function loadJsonFiles(type: ContentCategory): Promise<ValidatedContent[]>
   try {
     const files = await fs.readdir(dir);
     // Security: Filter for valid JSON files only, prevent execution of other file types
+    // Exclude template files from processing
     const jsonFiles = files.filter(
       (f) =>
         f.endsWith('.json') &&
         !f.includes('..') &&
         !f.startsWith('.') &&
+        !f.includes('template') &&
         f.match(/^[a-zA-Z0-9\-_]+\.json$/)
     );
 
@@ -100,24 +105,12 @@ async function loadJsonFiles(type: ContentCategory): Promise<ValidatedContent[]>
             return null;
           }
 
-          // Parse and validate JSON with strict, production-grade typing
-          type ContentDataShape = Record<
-            string,
-            string | number | boolean | string[] | Record<string, string | number | boolean>
-          >;
-          let parsedData: ContentDataShape;
+          // Parse and validate JSON structure with Zod
+          const rawJsonStructureSchema = z.object({}).passthrough();
+          let parsedData: z.infer<typeof rawJsonStructureSchema>;
           try {
-            const rawParsed: string | number | boolean | object | null = JSON.parse(content);
-
-            // Security: Ensure parsed data is a plain object
-            if (!rawParsed || typeof rawParsed !== 'object' || Array.isArray(rawParsed)) {
-              console.error(
-                `Invalid JSON structure in ${file}: Expected object, got ${typeof rawParsed}`
-              );
-              return null;
-            }
-
-            parsedData = rawParsed as ContentDataShape;
+            const rawParsed = JSON.parse(content);
+            parsedData = rawJsonStructureSchema.parse(rawParsed);
           } catch (parseError) {
             console.error(
               `JSON parse error in ${file}:`,
@@ -138,7 +131,7 @@ async function loadJsonFiles(type: ContentCategory): Promise<ValidatedContent[]>
 
           // Use category-specific validation instead of generic schema
           try {
-            const validatedItem = validateContent(validatedType, parsedData);
+            const validatedItem = validateContentByCategory(parsedData, validatedType);
             return validatedItem;
           } catch (validationError) {
             if (validationError instanceof z.ZodError) {
@@ -212,32 +205,40 @@ async function generateTypeScript(): Promise<GeneratedFile[]> {
     const contentData = allContent[type];
     if (!contentData || contentData.length === 0) continue;
 
+    // Extract metadata fields, preserving type-specific fields like 'source'
     const metadata = contentData.map((item) => {
-      // Create a safe copy without heavy fields, preserving all other properties
-      const safeItem = { ...item };
-
-      // Remove heavy content fields if they exist
-      if ('content' in safeItem) {
-        delete (safeItem as { content?: unknown }).content;
-      }
-      if ('config' in safeItem) {
-        delete (safeItem as { config?: unknown }).config;
-      }
-      if ('configuration' in safeItem) {
-        delete (safeItem as { configuration?: unknown }).configuration;
-      }
-
-      return safeItem;
+      // Create metadata by excluding only very heavy content fields
+      const {
+        features,
+        useCases,
+        installation,
+        documentationUrl,
+        githubUrl,
+        package: packageField,
+        ...metadata
+      } = item as Record<string, unknown>;
+      return metadata;
     });
 
-    // Generate metadata file without problematic type imports
+    // Generate metadata file with proper types
+    const typeImportMap = {
+      agents: 'AgentContent',
+      mcp: 'McpContent',
+      hooks: 'HookContent',
+      commands: 'CommandContent',
+      rules: 'RuleContent',
+    };
+    const typeImport = typeImportMap[type as keyof typeof typeImportMap] || 'ContentMetadata';
+
     const metadataContent = `// Auto-generated metadata file - DO NOT EDIT
 // Generated at: ${new Date().toISOString()}
 // Content Type: ${type}
 
-export const ${varName}Metadata = ${JSON.stringify(metadata, null, 2)} as const;
+import type { ${typeImport} } from '@/lib/schemas/content.schema';
 
-export const ${varName}MetadataBySlug = new Map(${varName}Metadata.map(item => [item.slug as string, item]));
+export const ${varName}Metadata: ${typeImport}[] = ${JSON.stringify(metadata, null, 2)};
+
+export const ${varName}MetadataBySlug = new Map(${varName}Metadata.map(item => [item.slug, item]));
 
 export function get${capitalizedSingular}MetadataBySlug(slug: string) {
   return ${varName}MetadataBySlug.get(slug) || null;
@@ -257,14 +258,18 @@ export type ${capitalizedSingular}Metadata = typeof ${varName}Metadata[number];`
       timestamp: new Date().toISOString(),
     });
 
-    // Generate full content file without problematic type imports
+    // Generate full content file with proper schema imports
+    const schemaImport = typeImportMap[type as keyof typeof typeImportMap] || 'ContentMetadata';
+
     const fullContent = `// Auto-generated full content file - DO NOT EDIT
 // Generated at: ${new Date().toISOString()}
 // Content Type: ${type}
 
-export const ${varName}Full = ${JSON.stringify(allContent[type], null, 2)} as const;
+import type { ${schemaImport} } from '@/lib/schemas/content.schema';
 
-export const ${varName}FullBySlug = new Map(${varName}Full.map(item => [item.slug as string, item]));
+export const ${varName}Full: ${schemaImport}[] = ${JSON.stringify(allContent[type], null, 2)};
+
+export const ${varName}FullBySlug = new Map(${varName}Full.map(item => [item.slug, item]));
 
 export function get${capitalizedSingular}FullBySlug(slug: string) {
   return ${varName}FullBySlug.get(slug) || null;
@@ -319,7 +324,7 @@ ${buildConfig.contentTypes
   .join('\n\n')}
 
 // Export counts for stats
-import type { ContentStats } from '../types/content';
+import type { ContentStats } from '../lib/schemas/content.schema';
 
 export const contentStats: ContentStats = {
 ${buildConfig.contentTypes
@@ -328,7 +333,8 @@ ${buildConfig.contentTypes
     const typeData = allContent[type];
     return `  ${varName}: ${typeData ? typeData.length : 0}`;
   })
-  .join(',\n')}
+  .join(',\n')},
+  guides: 0
 };`;
 
   const indexPath = path.join(buildConfig.generatedDir, 'content.ts');
@@ -357,7 +363,7 @@ async function build(): Promise<BuildResult> {
     // Build content index
     const index = await contentIndexer.buildIndex();
     await contentIndexer.saveIndex(index);
-    console.log(`✅ Built content index with ${index.metadata.totalItems} items`);
+    console.log(`✅ Built content index with ${index.items.length} items`);
 
     // Invalidate caches after build
     if (buildConfig.invalidateCaches) {
@@ -378,7 +384,7 @@ async function build(): Promise<BuildResult> {
       success: true,
       contentStats,
       generatedFiles,
-      indexItems: index.metadata.totalItems,
+      indexItems: index.items.length,
       cacheInvalidated: buildConfig.invalidateCaches,
       duration,
       errors: errors.length > 0 ? errors : undefined,
@@ -419,6 +425,7 @@ build()
       console.error('❌ Build failed with errors:', result.errors);
       process.exit(1);
     }
+    process.exit(0);
   })
   .catch((error) => {
     console.error('Unexpected error during build:', error);

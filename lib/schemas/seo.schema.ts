@@ -5,6 +5,8 @@
  */
 
 import { z } from 'zod';
+import { APP_CONFIG } from '@/lib/constants';
+import { logger } from '@/lib/logger';
 
 /**
  * Security constants for SEO content
@@ -362,15 +364,24 @@ export type Alternates = z.infer<typeof alternatesSchema>;
 /**
  * Utility functions for SEO validation
  */
-export function validateSeoMetadata(metadata: unknown): z.infer<typeof seoMetadataSchema> | null {
+export function validateSeoMetadata(
+  metadata: z.input<typeof seoMetadataSchema>
+): { success: true; data: z.infer<typeof seoMetadataSchema> } | { success: false; error: string } {
   try {
-    return seoMetadataSchema.parse(metadata);
+    const data = seoMetadataSchema.parse(metadata);
+    return { success: true, data };
   } catch (error) {
-    console.error('SEO metadata validation failed:', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
-      metadata: typeof metadata === 'object' ? Object.keys(metadata || {}) : typeof metadata,
-    });
-    return null;
+    logger.error(
+      'SEO metadata validation failed',
+      error instanceof Error
+        ? error
+        : new Error(error instanceof z.ZodError ? error.issues.join(', ') : String(error)),
+      {
+        metadataKeys: String(typeof metadata === 'object' ? Object.keys(metadata || {}).length : 0),
+        metadataType: String(typeof metadata),
+      }
+    );
+    return { success: false, error: 'SEO metadata validation failed' };
   }
 }
 
@@ -383,18 +394,22 @@ export function buildSeoMetadata(
   try {
     // Ensure required fields have defaults
     const metadata = {
-      title: 'Claude Pro Directory',
-      description:
-        'Your essential AI toolkit - discover AI Agents, MCP Servers, Rules, Commands & Hooks',
+      title: APP_CONFIG.name,
+      description: APP_CONFIG.description,
       ...baseMetadata,
     };
 
     return seoMetadataSchema.parse(metadata);
   } catch (error) {
-    console.error('Failed to build SEO metadata:', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
-      baseMetadata: Object.keys(baseMetadata),
-    });
+    logger.error(
+      'Failed to build SEO metadata',
+      error instanceof Error
+        ? error
+        : new Error(error instanceof z.ZodError ? error.issues.join(', ') : String(error)),
+      {
+        baseMetadataKeys: String(Object.keys(baseMetadata).length),
+      }
+    );
     return null;
   }
 }

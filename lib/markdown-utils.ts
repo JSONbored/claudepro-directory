@@ -3,8 +3,7 @@
  * Used for converting markdown to safe HTML in production
  */
 
-import DOMPurify from 'dompurify';
-import { JSDOM } from 'jsdom';
+import DOMPurify from 'isomorphic-dompurify';
 import { marked } from 'marked';
 import { logger } from './logger';
 import {
@@ -13,15 +12,13 @@ import {
   type MarkdownToHtmlResponse,
   markdownContentSchema,
   markdownParseOptionsSchema,
+  markdownSanitizedHtmlSchema,
   type SanitizationOptions,
   type SanitizedHtml,
   sanitizationOptionsSchema,
-  sanitizedHtmlSchema,
 } from './schemas/markdown.schema';
 
-// Create a DOMPurify instance for server-side usage
-const window = new JSDOM('').window;
-const purify = DOMPurify(window as unknown as Window & typeof globalThis);
+// isomorphic-dompurify handles server/client compatibility automatically
 
 /**
  * Configure marked options for secure parsing
@@ -108,7 +105,7 @@ export async function markdownToSafeHtml(
     };
 
     // Sanitize HTML - the result is a string when not using RETURN_DOM
-    let sanitizedHtml = purify.sanitize(rawHtml, purifyConfig) as string;
+    let sanitizedHtml = DOMPurify.sanitize(rawHtml, purifyConfig) as string;
 
     // Post-process for additional security
     if (sanitizeOptions.enforceNoFollow || sanitizeOptions.enforceNoOpener) {
@@ -134,7 +131,7 @@ export async function markdownToSafeHtml(
     }
 
     // Validate final output
-    const validatedHtml: SanitizedHtml = sanitizedHtmlSchema.parse(sanitizedHtml);
+    const validatedHtml: SanitizedHtml = markdownSanitizedHtmlSchema.parse(sanitizedHtml);
 
     // Calculate metadata
     const plainText = validatedHtml.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
@@ -176,30 +173,6 @@ export async function trustedMarkdownToHtml(markdown: string): Promise<string> {
       error instanceof Error ? error : new Error(String(error))
     );
     throw new Error('Failed to parse markdown');
-  }
-}
-
-/**
- * Sanitize existing HTML content
- */
-export function sanitizeHtml(html: string, options?: Partial<SanitizationOptions>): SanitizedHtml {
-  try {
-    const sanitizeOptions = sanitizationOptionsSchema.parse(options || {});
-
-    const purifyConfig = {
-      ALLOWED_TAGS: sanitizeOptions.allowedTags as string[],
-      ALLOWED_ATTR: sanitizeOptions.allowedAttributes as string[],
-      ALLOW_DATA_ATTR: sanitizeOptions.allowDataAttributes,
-    };
-
-    const sanitized = purify.sanitize(html, purifyConfig) as string;
-    return sanitizedHtmlSchema.parse(sanitized);
-  } catch (error) {
-    logger.error(
-      'Failed to sanitize HTML',
-      error instanceof Error ? error : new Error(String(error))
-    );
-    throw new Error('Failed to sanitize HTML content');
   }
 }
 

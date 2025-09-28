@@ -3,8 +3,10 @@ import * as nosecone from '@nosecone/next';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
+import { isDevelopment, isProduction } from '@/lib/env-client';
+import { logger } from '@/lib/logger';
 import { rateLimiters } from '@/lib/rate-limiter';
-import { env, isDevelopment, isProduction, securityConfig } from '@/lib/schemas/env.schema';
+import { env, securityConfig } from '@/lib/schemas/env.schema';
 import {
   type ApiEndpointType,
   type RequestValidation,
@@ -23,12 +25,12 @@ const aj = arcjet({
   rules: [
     // Shield WAF - protect against common attacks
     shield({
-      mode: 'LIVE', // LIVE mode blocks malicious requests
+      mode: isDevelopment ? 'DRY_RUN' : 'LIVE', // DRY_RUN in development, LIVE in production
     }),
 
     // Bot protection - block malicious bots, allow good ones
     detectBot({
-      mode: 'LIVE',
+      mode: isDevelopment ? 'DRY_RUN' : 'LIVE',
       allow: [
         'CATEGORY:SEARCH_ENGINE', // Allow search engines (Google, Bing, etc.)
         'CATEGORY:MONITOR',       // Allow monitoring services (uptime monitors)
@@ -38,7 +40,7 @@ const aj = arcjet({
 
     // Rate limiting - general API protection with token bucket
     tokenBucket({
-      mode: 'LIVE',
+      mode: isDevelopment ? 'DRY_RUN' : 'LIVE',
       refillRate: 60,  // 60 tokens
       interval: 60,    // per 60 seconds (1 minute)
       capacity: 120,   // burst capacity of 120 tokens
@@ -46,107 +48,87 @@ const aj = arcjet({
 
     // Fixed window rate limiting for aggressive protection
     fixedWindow({
-      mode: 'LIVE',
+      mode: isDevelopment ? 'DRY_RUN' : 'LIVE',
       window: '1m',    // 1 minute window
       max: 100,        // max 100 requests per window
     }),
   ],
 });
 
+
 // Nosecone security headers configuration
-const noseconeConfig: nosecone.NoseconeOptions = {
+// IMPORTANT: We're using 'unsafe-inline' for scripts because:
+// 1. Using nonces would require making ALL pages dynamic (no static generation)
+// 2. This would significantly impact performance for a content-heavy site
+// 3. We still have other security layers (Arcjet WAF, rate limiting, etc.)
+const noseconeConfig = {
   ...nosecone.defaults,
-  contentSecurityPolicy: {
-    ...nosecone.defaults.contentSecurityPolicy,
+  // Custom CSP configuration that allows necessary resources
+  contentSecurityPolicy: isDevelopment ? false : {
     directives: {
+      // Start with Nosecone's secure defaults
       ...nosecone.defaults.contentSecurityPolicy.directives,
 
-      // Script sources - Nosecone defaults already include nonce function
-      // We just add our external scripts
-      scriptSrc: isDevelopment ? [
-        ...nosecone.defaults.contentSecurityPolicy.directives.scriptSrc,
-        'https://umami.claudepro.directory',
-        'https://va.vercel-scripts.com',
-        'https://vercel.live',
-        'https://vitals.vercel-insights.com',
-        'localhost:*',
-        '127.0.0.1:*',
-      ] : [
-        ...nosecone.defaults.contentSecurityPolicy.directives.scriptSrc,
-        'https://umami.claudepro.directory',
-        'https://va.vercel-scripts.com',
-        'https://vercel.live',
-        'https://vitals.vercel-insights.com',
+      // Override scriptSrc to allow inline scripts (required for static pages)
+      // Remove 'unsafe-eval' in production for better security
+      scriptSrc: [
+        "'self'",
+        "'unsafe-inline'", // Required for Next.js with static generation
+        ...(isDevelopment ? ["'unsafe-eval'"] : []), // Only in development
+        "https://umami.claudepro.directory", // Umami analytics
+        "https://*.vercel-scripts.com", // Vercel analytics
+        "https://vercel.live", // Vercel toolbar
       ],
 
-      // Style sources
+      // Styles already include 'unsafe-inline' in defaults
       styleSrc: [
         ...nosecone.defaults.contentSecurityPolicy.directives.styleSrc,
-        'https://fonts.googleapis.com',
       ],
 
-      // Image sources - extend defaults to add GitHub
+      // Images - extend defaults with GitHub and our domains
       imgSrc: [
         ...nosecone.defaults.contentSecurityPolicy.directives.imgSrc,
-        'https://github.com',
-        'https://*.githubusercontent.com',
-        'https://claudepro.directory',
-        'https://www.claudepro.directory',
+        "https://github.com",
+        "https://*.githubusercontent.com",
+        "https://claudepro.directory",
+        "https://www.claudepro.directory",
       ],
 
-      // Font sources - extend defaults to add Google Fonts
+      // Fonts - extend defaults
       fontSrc: [
         ...nosecone.defaults.contentSecurityPolicy.directives.fontSrc,
-        'https://fonts.gstatic.com',
+        "data:",
       ],
 
-      // Connect sources (XHR, fetch, WebSocket, etc.)
-      connectSrc: isDevelopment ? [
+      // Connect sources - extend defaults with our required domains
+      connectSrc: [
         ...nosecone.defaults.contentSecurityPolicy.directives.connectSrc,
-        'https://umami.claudepro.directory',
-        'https://vitals.vercel-insights.com',
-        'https://va.vercel-scripts.com',
-        'ws://localhost:*',
-        'wss://localhost:*',
-        'ws://127.0.0.1:*',
-        'wss://127.0.0.1:*',
-        'http://localhost:*',
-        'https://localhost:*',
-      ] : [
-        ...nosecone.defaults.contentSecurityPolicy.directives.connectSrc,
-        'https://umami.claudepro.directory',
-        'https://vitals.vercel-insights.com',
-        'https://va.vercel-scripts.com',
+        "wss://*.vercel.app", // WebSocket for HMR in preview
+        "wss://*.vercel-scripts.com", // Vercel live reload
+        "https://umami.claudepro.directory", // Umami analytics
+        "https://*.vercel-scripts.com", // Vercel analytics
+        "https://vercel.live", // Vercel toolbar
+        "https://api.github.com", // GitHub API
+        // Preview-specific WebSocket connections
+        ...(env.VERCEL_ENV === 'preview' ? [
+          "ws://localhost:*",
+          "wss://localhost:*",
+          env.VERCEL_URL ? `wss://${env.VERCEL_URL}` : "",
+        ].filter(Boolean) : []),
       ],
 
-      // Frame ancestors - prevent clickjacking
-      frameAncestors: ["'none'"],
+      // Only override what we need to change from defaults
+      // Nosecone already sets secure defaults for:
+      // - frameAncestors: ['none']
+      // - objectSrc: ['none']
+      // - baseUri: ['none']
+      // - formAction: ['self']
+      // - workerSrc: ['self']
+      // - childSrc: ['none']
 
-      // Base URI
-      baseUri: ["'self'"],
-
-      // Form action
-      formAction: ["'self'"],
-
-      // Frame/child sources
-      frameSrc: ["'none'"],
-      childSrc: ["'none'"],
-
-      // Media sources
-      mediaSrc: ["'self'"],
-
-      // Object sources - none for security
-      objectSrc: ["'none'"],
-
-      // Worker sources for service workers - extend defaults to add blob:
-      workerSrc: [
-        ...nosecone.defaults.contentSecurityPolicy.directives.workerSrc,
-        'blob:',
-      ],
-
-      // Upgrade insecure requests in production
+      // Upgrade insecure requests in production (not in defaults)
       upgradeInsecureRequests: isProduction,
-    },
+    }
   },
 
   // Cross-Origin Embedder Policy - credentialless for compatibility with external resources
@@ -207,8 +189,8 @@ const noseconeConfig: nosecone.NoseconeOptions = {
 // Create the Nosecone middleware with Vercel toolbar support in preview
 const noseconeMiddleware = nosecone.createMiddleware(
   env.VERCEL_ENV === 'preview'
-    ? nosecone.withVercelToolbar(noseconeConfig)
-    : noseconeConfig,
+    ? nosecone.withVercelToolbar(noseconeConfig as any)
+    : noseconeConfig as any,
 );
 
 /**
@@ -222,10 +204,12 @@ async function applyEndpointRateLimit(
   try {
     requestPathSchema.parse(pathname);
   } catch (error) {
-    console.error('Invalid pathname detected:', {
-      pathname: sanitizePathForLogging(pathname),
-      error: error instanceof z.ZodError ? error.issues : String(error),
-    });
+    logger.error('Invalid pathname detected',
+      error instanceof z.ZodError ? new Error('Pathname validation failed') : new Error(String(error)),
+      {
+        pathname: sanitizePathForLogging(pathname),
+        type: 'validation',
+      });
     return new NextResponse('Bad Request', { status: 400 });
   }
   // Classify the API endpoint type
@@ -267,10 +251,12 @@ async function applyEndpointRateLimit(
           const searchParams = new URLSearchParams(request.nextUrl.search);
           validateSearchQuery(searchParams);
         } catch (error) {
-          console.error('Invalid search query:', {
-            pathname: sanitizePathForLogging(pathname),
-            error: error instanceof z.ZodError ? error.issues : String(error),
-          });
+          logger.error('Invalid search query',
+            error instanceof z.ZodError ? new Error('Search query validation failed') : new Error(String(error)),
+            {
+              pathname: sanitizePathForLogging(pathname),
+              type: 'search_validation',
+            });
           return new NextResponse(JSON.stringify({
             success: false,
             error: 'Bad Request',
@@ -316,7 +302,7 @@ export async function middleware(request: NextRequest) {
 
     // Log validated request data (in development only)
     if (isDevelopment) {
-      console.log('Validated request:', {
+      logger.debug('Validated request', {
         method: requestValidation.method,
         path: sanitizePathForLogging(requestValidation.path),
         userAgent: requestValidation.userAgent?.slice(0, 50) + '...',
@@ -324,11 +310,13 @@ export async function middleware(request: NextRequest) {
     }
   } catch (error) {
     // Log validation error for monitoring
-    console.error('Request validation failed:', {
-      pathname: sanitizePathForLogging(pathname),
-      method: request.method,
-      error: error instanceof z.ZodError ? error.issues : String(error),
-    });
+    logger.error('Request validation failed',
+      error instanceof z.ZodError ? new Error('Request validation failed') : new Error(String(error)),
+      {
+        pathname: sanitizePathForLogging(pathname),
+        method: request.method,
+        type: 'request_validation',
+      });
 
     // Return standardized error response
     return new NextResponse(JSON.stringify({
@@ -362,12 +350,15 @@ export async function middleware(request: NextRequest) {
 
   // Handle denied requests
   if (decision.isDenied()) {
-    console.error('Arcjet denied request:', {
-      ip: decision.ip,
-      path: sanitizePathForLogging(pathname),
-      reason: decision.reason,
-      conclusion: decision.conclusion,
-    });
+    logger.error('Arcjet denied request',
+      new Error(`Request denied: ${decision.conclusion}`),
+      {
+        ip: String(decision.ip),
+        path: sanitizePathForLogging(pathname),
+        reason: String(decision.reason),
+        conclusion: decision.conclusion,
+        type: 'security_denial',
+      });
 
     // Copy security headers from Nosecone response
     const headers = new Headers();
@@ -407,11 +398,37 @@ export async function middleware(request: NextRequest) {
     return rateLimitResponse;
   }
 
-  // Request allowed - add pathname header for SmartRelatedContent component
-  const response = noseconeResponse;
+  // Request allowed - create new response with pathname header for SmartRelatedContent component
+  const response = NextResponse.next();
+
+  // Copy all security headers from nosecone
+  noseconeResponse.headers.forEach((value: string, key: string) => {
+    response.headers.set(key, value);
+  });
+
+  // Add pathname header for SmartRelatedContent component
   response.headers.set('x-pathname', pathname);
+
   return response;
 }
 
-// Remove the config export to run middleware on all routes
-// This ensures security headers are applied to everything
+// Matcher configuration to exclude static assets and improve performance
+// This prevents middleware from running on static files, images, and Next.js internal routes
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - robots.txt (robots file)
+     * - sitemap.xml (sitemap file)
+     * - manifest.json (PWA manifest)
+     * - .well-known (well-known files for verification)
+     * - /js/ (public JavaScript files)
+     * - /css/ (public CSS files)
+     * - *.png, *.jpg, *.jpeg, *.gif, *.webp, *.svg, *.ico (image files)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.json|\\.well-known|js/|css/|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
+  ],
+};

@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { logger } from '@/lib/logger';
 
 /**
  * Security constants for webhook validation
@@ -92,7 +93,13 @@ export const baseWebhookPayloadSchema = z.object({
   id: z.string().uuid('Invalid webhook ID'),
   event: webhookEventTypeSchema,
   timestamp: z.string().datetime('Invalid timestamp format'),
-  data: z.unknown(), // Will be validated based on event type
+  data: z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.array(z.union([z.string(), z.number(), z.boolean()])),
+    z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
+  ]), // Will be validated based on event type
   metadata: z
     .record(
       z.string().max(100, 'Metadata key too long'),
@@ -140,14 +147,14 @@ export const userEventDataSchema = z.object({
   role: z.enum(['user', 'admin', 'moderator']).optional(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime().optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
 });
 
 /**
  * Analytics event data schemas
  */
 export const analyticsEventDataSchema = z.object({
-  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks']),
+  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'guides']),
   slug: z.string(),
   action: z.enum(['view', 'copy', 'click', 'search']),
   value: z.number().optional(),
@@ -170,7 +177,7 @@ export const submissionEventDataSchema = z.object({
   submittedAt: z.string().datetime(),
   status: z.enum(['pending', 'approved', 'rejected', 'reviewing']),
   reviewNotes: z.string().max(1000, 'Review notes are too long').optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
 });
 
 /**
@@ -193,7 +200,7 @@ export const systemEventDataSchema = z.object({
   type: z.enum(['deploy', 'error', 'alert', 'health']),
   severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
   message: z.string().max(1000, 'Message is too long'),
-  details: z.record(z.string(), z.unknown()).optional(),
+  details: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
   environment: z.enum(['development', 'staging', 'production']).optional(),
   service: z.string().max(100, 'Service name is too long').optional(),
   timestamp: z.string().datetime(),
@@ -202,7 +209,15 @@ export const systemEventDataSchema = z.object({
 /**
  * Custom event data schema (flexible)
  */
-export const customEventDataSchema = z.record(z.string(), z.unknown());
+export const customEventDataSchema = z.record(
+  z.string(),
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.array(z.union([z.string(), z.number(), z.boolean()])),
+  ])
+);
 
 /**
  * Map event types to their data schemas
@@ -246,26 +261,34 @@ const eventDataSchemas = {
  * Complete webhook payload validation
  */
 export function validateWebhookPayload(
-  payload: unknown,
+  payload: z.input<typeof baseWebhookPayloadSchema>,
   eventType?: string
-): z.infer<typeof baseWebhookPayloadSchema> | null {
+):
+  | { success: true; data: z.infer<typeof baseWebhookPayloadSchema> }
+  | { success: false; error: string } {
   try {
     // First validate the base structure
     const basePayload = baseWebhookPayloadSchema.parse(payload);
 
-    // Then validate the data based on event type
+    // Validate the data based on event type
     const eventSchema = eventDataSchemas[basePayload.event as keyof typeof eventDataSchemas];
     if (eventSchema) {
-      basePayload.data = eventSchema.parse(basePayload.data);
+      // Validate the data but don't assign back due to type constraints
+      eventSchema.parse(basePayload.data);
     }
 
-    return basePayload;
+    return { success: true, data: basePayload };
   } catch (error) {
-    console.error('Webhook payload validation failed:', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
-      eventType,
-    });
-    return null;
+    logger.error(
+      'Webhook payload validation failed',
+      error instanceof Error
+        ? error
+        : new Error(error instanceof z.ZodError ? error.issues.join(', ') : String(error)),
+      {
+        eventType: String(eventType || 'none'),
+      }
+    );
+    return { success: false, error: 'Webhook payload validation failed' };
   }
 }
 
@@ -369,30 +392,95 @@ export const webhookRegistrationSchema = z.object({
 });
 
 /**
- * Webhook signature verification
+ * Webhook signature verification with proper HMAC-SHA256 implementation
  */
 export function verifyWebhookSignature(
-  _payload: string,
-  _signature: string,
-  _secret: string,
+  payload: string,
+  signature: string,
+  secret: string,
   timestamp: string
 ): boolean {
   try {
     // Check timestamp to prevent replay attacks (5 minute window)
     const currentTime = Date.now();
-    const webhookTime = parseInt(timestamp, 10);
+    const webhookTime = Number.parseInt(timestamp, 10);
     if (Math.abs(currentTime - webhookTime) > 300000) {
-      console.error('Webhook timestamp outside acceptable window');
+      logger.error(
+        'Webhook timestamp outside acceptable window',
+        new Error('Timestamp validation failed'),
+        {
+          currentTime: String(currentTime),
+          webhookTime: String(webhookTime),
+          timeDifference: String(Math.abs(currentTime - webhookTime)),
+        }
+      );
       return false;
     }
 
-    // In production, implement proper HMAC verification
-    // This is a placeholder for the actual implementation
-    // Example: crypto.createHmac('sha256', secret).update(`${timestamp}.${payload}`).digest('hex')
+    // Implement proper HMAC-SHA256 signature verification
+    // This follows GitHub webhook signature verification standards
+    try {
+      const crypto = require('crypto');
 
-    return true; // Placeholder
+      // Create the payload to sign: timestamp + payload
+      const signedPayload = `${timestamp}.${payload}`;
+
+      // Generate HMAC-SHA256 signature
+      const expectedSignature = crypto
+        .createHmac('sha256', secret)
+        .update(signedPayload, 'utf8')
+        .digest('hex');
+
+      // GitHub-style signature comparison (with 'sha256=' prefix)
+      const formattedExpectedSignature = `sha256=${expectedSignature}`;
+
+      // Use timing-safe comparison to prevent timing attacks
+      const providedSignature = signature.toLowerCase();
+      const expectedSignatureLower = formattedExpectedSignature.toLowerCase();
+
+      if (providedSignature.length !== expectedSignatureLower.length) {
+        logger.warn('Webhook signature length mismatch', undefined, {
+          providedLength: String(providedSignature.length),
+          expectedLength: String(expectedSignatureLower.length),
+        });
+        return false;
+      }
+
+      // Timing-safe comparison
+      let result = 0;
+      for (let i = 0; i < providedSignature.length; i++) {
+        result |= providedSignature.charCodeAt(i) ^ expectedSignatureLower.charCodeAt(i);
+      }
+
+      const isValid = result === 0;
+
+      if (!isValid) {
+        logger.warn('Webhook signature verification failed', undefined, {
+          expectedPrefix: 'sha256=',
+          providedPrefix: signature.substring(0, 7),
+          payloadLength: String(payload.length),
+          timestampProvided: timestamp,
+        });
+      }
+
+      return isValid;
+    } catch (cryptoError) {
+      logger.error(
+        'Webhook HMAC calculation failed',
+        cryptoError instanceof Error ? cryptoError : new Error(String(cryptoError)),
+        {
+          payloadLength: String(payload.length),
+          timestamp,
+        }
+      );
+      return false;
+    }
   } catch (error) {
-    console.error('Webhook signature verification failed:', error);
+    logger.error(
+      'Webhook signature verification failed',
+      error instanceof Error ? error : new Error(String(error)),
+      {}
+    );
     return false;
   }
 }

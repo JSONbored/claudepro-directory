@@ -6,12 +6,7 @@
   "category": "commands",
   "author": "Your Name or GitHub Username",
   "dateAdded": "YYYY-MM-DD",
-  "tags": [
-    "primary-function",
-    "secondary-feature", 
-    "technology-stack",
-    "use-case"
-  ],
+  "tags": ["primary-function", "secondary-feature", "technology-stack", "use-case"],
   "content": "---\nallowed-tools: Bash(git add:*), Bash(git status:*), Read, Write, Edit\nargument-hint: [required-arg] [optional-arg]\ndescription: Brief command description for help text\nmodel: claude-3-5-sonnet-20241022\n---\n\n## Context\n\n- Current project status: !`pwd && ls -la`\n- Git status: !`git status --short`\n- Recent activity: !`git log --oneline -3`\n\n## Your Task\n\nDescribe what this command should accomplish when executed.\n\n### Command Behavior\n1. Step 1: What the command does first\n2. Step 2: How it processes arguments\n3. Step 3: What output it generates\n\n### Arguments\n- `$1` - First argument description\n- `$2` - Second argument description  \n- `$ARGUMENTS` - All arguments as single string\n\n### Examples\n```bash\n# Basic usage\n/your-command\n\n# With arguments\n/your-command arg1 arg2\n\n# Advanced usage\n/your-command --option value\n```\n\n## Implementation\n\nProvide specific instructions for what Claude should do when this command is executed.",
   "source": "community",
 
@@ -23,7 +18,7 @@
   ],
   "useCases": [
     "Common scenario where this command excels 1",
-    "Common scenario where this command excels 2", 
+    "Common scenario where this command excels 2",
     "Common scenario where this command excels 3"
   ],
   "configuration": {
@@ -74,7 +69,7 @@
       "example": "echo 'Processing file $1 with option $2' > .claude/commands/process.md"
     },
     {
-      "name": "$ARGUMENTS", 
+      "name": "$ARGUMENTS",
       "description": "All arguments as single string - useful for flexible input",
       "example": "echo 'Fix issue #$ARGUMENTS following our standards' > .claude/commands/fix.md"
     }

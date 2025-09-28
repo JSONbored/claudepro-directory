@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Zapier",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "automation",
-    "zapier",
-    "integration",
-    "workflow",
-    "no-code"
-  ],
+  "tags": ["automation", "zapier", "integration", "workflow", "no-code"],
   "content": "Access thousands of app integrations through Zapier's no-code automation platform.",
   "features": [
     "Trigger Zaps (workflows) programmatically",
@@ -39,7 +33,7 @@
       "mcpServers": {
         "zapier": {
           "transport": "http",
-          "url": "YOUR_GENERATED_ZAPIER_URL"
+          "url": "https://mcp.zapier.com/YOUR_GENERATED_URL"
         }
       }
     },
@@ -47,7 +41,7 @@
       "mcpServers": {
         "zapier": {
           "transport": "http",
-          "url": "YOUR_GENERATED_ZAPIER_URL"
+          "url": "https://mcp.zapier.com/YOUR_GENERATED_URL"
         }
       }
     }
@@ -80,11 +74,7 @@
     "Create Trello card from email"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "trigger"
-  ],
+  "permissions": ["read", "write", "trigger"],
   "configLocation": "user_specific",
   "documentationUrl": "https://help.zapier.com/hc/en-us/articles/36265392843917"
 }

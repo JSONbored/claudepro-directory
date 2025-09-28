@@ -4,6 +4,46 @@
  */
 
 import { z } from 'zod';
+import { logger } from '@/lib/logger';
+
+/**
+ * Searchable item schema for search cache
+ */
+export const fuseSearchableItemSchema = z.object({
+  title: z.string().min(1).max(200),
+  name: z.string().optional(),
+  description: z.string().max(1000),
+  tags: z.array(z.string().max(50)),
+  category: z.string().max(50),
+  popularity: z.number().min(0).max(100).optional(),
+  slug: z.string().min(1).max(200),
+  id: z.string().min(1).max(200),
+});
+
+export type FuseSearchableItem = z.infer<typeof fuseSearchableItemSchema>;
+
+/**
+ * Search filters schema for search cache
+ */
+export const searchFiltersSchema = z.object({
+  categories: z.array(z.string().max(50)),
+  tags: z.array(z.string().max(50)),
+  authors: z.array(z.string().max(100)),
+  sort: z.enum(['trending', 'newest', 'alphabetical', 'popularity']),
+  popularity: z.tuple([z.number().min(0), z.number().max(100)]),
+});
+
+export type SearchFilters = z.infer<typeof searchFiltersSchema>;
+
+/**
+ * Search cache key schema
+ */
+export const searchCacheKeySchema = z.object({
+  query: z.string().max(500),
+  filters: searchFiltersSchema,
+});
+
+export type SearchCacheKey = z.infer<typeof searchCacheKeySchema>;
 
 /**
  * Search pagination schema
@@ -127,11 +167,11 @@ export type SortParams = z.infer<typeof sortSchema>;
 export const filterSchema = z.object({
   category: z
     .union([
-      z.enum(['all', 'agents', 'mcp', 'rules', 'commands', 'hooks']),
+      z.enum(['all', 'agents', 'mcp', 'rules', 'commands', 'hooks', 'guides']),
       z.string().transform((val) => {
         const normalized = val.toLowerCase().trim();
-        if (['all', 'agents', 'mcp', 'rules', 'commands', 'hooks'].includes(normalized)) {
-          return normalized as 'all' | 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks';
+        if (['all', 'agents', 'mcp', 'rules', 'commands', 'hooks', 'guides'].includes(normalized)) {
+          return normalized as 'all' | 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides';
         }
         return 'all';
       }),
@@ -195,17 +235,17 @@ export type FilterParams = z.infer<typeof filterSchema>;
 /**
  * Combined search parameters schema
  */
-export const searchParamsSchema = searchPaginationSchema
+export const searchAPIParamsSchema = searchPaginationSchema
   .merge(searchQuerySchema)
   .merge(sortSchema)
   .merge(filterSchema);
 
-export type SearchParams = z.infer<typeof searchParamsSchema>;
+export type SearchAPIParams = z.infer<typeof searchAPIParamsSchema>;
 
 /**
  * Jobs page specific schema
  */
-export const jobsSearchSchema = searchParamsSchema.extend({
+export const jobsSearchSchema = searchAPIParamsSchema.extend({
   location: z
     .string()
     .optional()
@@ -282,11 +322,9 @@ export function parseSearchParams<T extends z.ZodType>(
     return schema.parse(params);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.warn(`Invalid search parameters${context ? ` for ${context}` : ''}:`, {
-        errors: error.issues.map((e) => ({
-          path: e.path.join('.'),
-          message: e.message,
-        })),
+      logger.error('Invalid search parameters', error, {
+        context: String(context || 'default'),
+        errors: String(error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')),
       });
       // Return default values on validation failure
       return schema.parse({});
@@ -298,11 +336,13 @@ export function parseSearchParams<T extends z.ZodType>(
 /**
  * Helper function to convert validated params back to URLSearchParams
  */
-export function toURLSearchParams(params: Record<string, any>): URLSearchParams {
+export function toURLSearchParams(
+  params: Record<string, string | number | boolean | string[]>
+): URLSearchParams {
   const searchParams = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
-    if (value === undefined || value === null || value === '') {
+    if (value === '' || value === false) {
       return;
     }
 
@@ -326,7 +366,7 @@ export const searchSchemas = {
   searchQuery: searchQuerySchema,
   sort: sortSchema,
   filter: filterSchema,
-  searchParams: searchParamsSchema,
+  searchParams: searchAPIParamsSchema,
   jobsSearch: jobsSearchSchema,
   trending: trendingParamsSchema,
   slug: slugParamSchema,

@@ -4,21 +4,15 @@ import { useCallback, useMemo, useState } from 'react';
 import { ConfigCard } from '@/components/config-card';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { InfiniteScrollContainer } from '@/components/infinite-scroll-container';
-import { type FilterState, UnifiedSearch } from '@/components/unified-search';
+import { UnifiedSearch } from '@/components/unified-search';
+import { sortAlphabetically } from '@/lib/content-sorting';
 import { getIconByName } from '@/lib/icons';
-import type { ContentCategory, ContentMetadata } from '@/types/content';
+import type { ContentSearchClientProps, FilterState } from '@/lib/schemas/component.schema';
 
-interface ContentSearchClientProps<T extends ContentMetadata> {
-  items: readonly T[] | T[];
-  type: ContentCategory;
-  searchPlaceholder: string;
-  title: string;
-  icon: string;
-}
+import type { UnifiedContentItem } from '@/lib/schemas/components';
 
-export function ContentSearchClient<T extends ContentMetadata>({
+export function ContentSearchClient<T extends UnifiedContentItem>({
   items,
-  type,
   searchPlaceholder,
   title,
   icon,
@@ -26,26 +20,47 @@ export function ContentSearchClient<T extends ContentMetadata>({
   const [filteredItems, setFilteredItems] = useState<T[]>([...items]);
   const [displayedItems, setDisplayedItems] = useState<T[]>([...items].slice(0, 20));
   const [currentPage, setCurrentPage] = useState(1);
-  const [filters, setFilters] = useState<FilterState>({ sort: 'trending' });
+  const [filters, setFilters] = useState<FilterState>({
+    sort: 'trending',
+  });
   const pageSize = 20;
 
-  // Filter and search logic - optimized with React 19 patterns
+  // Pre-computed search index for better performance
+  const searchIndex = useMemo(() => {
+    return items.map((item) => ({
+      item,
+      searchText: [
+        item.name || '',
+        item.description || '',
+        ...(item.tags || []),
+        item.category || '',
+        item.author || '',
+      ]
+        .join(' ')
+        .toLowerCase(),
+    }));
+  }, [items]);
+
+  // Filter and search logic - optimized with pre-computed search index
   const handleSearch = useCallback(
     (query: string) => {
+      if (!query.trim()) {
+        setFilteredItems([...items]);
+        setDisplayedItems([...items].slice(0, pageSize));
+        setCurrentPage(1);
+        return;
+      }
+
       const searchLower = query.toLowerCase();
-      const filtered = items.filter(
-        (item) =>
-          item.name?.toLowerCase().includes(searchLower) ||
-          item.description?.toLowerCase().includes(searchLower) ||
-          item.tags?.some((tag) => tag.toLowerCase().includes(searchLower)) ||
-          item.category?.toLowerCase().includes(searchLower) ||
-          item.author?.toLowerCase().includes(searchLower)
-      );
+      const filtered = searchIndex
+        .filter(({ searchText }) => searchText.includes(searchLower))
+        .map(({ item }) => item);
+
       setFilteredItems(filtered);
       setDisplayedItems(filtered.slice(0, pageSize));
       setCurrentPage(1);
     },
-    [items]
+    [items, searchIndex]
   );
 
   const handleFiltersChange = useCallback(
@@ -71,10 +86,10 @@ export function ContentSearchClient<T extends ContentMetadata>({
         );
       }
 
-      // Apply sorting
+      // Apply sorting using centralized content-sorting utilities
       switch (newFilters.sort) {
         case 'alphabetical':
-          processed.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+          processed = sortAlphabetically(processed);
           break;
         case 'newest':
           // Keep original order for newest (should be sorted by date if available)
@@ -97,9 +112,6 @@ export function ContentSearchClient<T extends ContentMetadata>({
     const startIndex = (nextPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     const nextItems = filteredItems.slice(startIndex, endIndex);
-
-    // Simulate async load with small delay for UX
-    await new Promise((resolve) => setTimeout(resolve, 100));
 
     setDisplayedItems((prev) => [...prev, ...nextItems]);
     setCurrentPage(nextPage);
@@ -126,9 +138,7 @@ export function ContentSearchClient<T extends ContentMetadata>({
   return (
     <div className="space-y-8">
       {/* Unified Search & Filters */}
-      <ErrorBoundary
-        fallback={<div className="p-4 text-center text-muted-foreground">Error loading search</div>}
-      >
+      <ErrorBoundary>
         <UnifiedSearch
           placeholder={searchPlaceholder}
           onSearch={handleSearch}
@@ -143,14 +153,18 @@ export function ContentSearchClient<T extends ContentMetadata>({
 
       {/* Infinite Scroll Results */}
       {filteredItems.length > 0 ? (
-        <ErrorBoundary
-          fallback={
-            <div className="p-8 text-center text-muted-foreground">Error loading results</div>
-          }
-        >
+        <ErrorBoundary>
           <InfiniteScrollContainer
             items={displayedItems}
-            renderItem={(item) => <ConfigCard key={item.slug} {...item} type={type} />}
+            renderItem={(item) => (
+              <ConfigCard
+                key={item.slug}
+                item={item}
+                variant="default"
+                showCategory={true}
+                showActions={true}
+              />
+            )}
             loadMore={loadMore}
             hasMore={hasMore}
             pageSize={20}

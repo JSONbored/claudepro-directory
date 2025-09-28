@@ -4,13 +4,14 @@
  */
 
 import { z } from 'zod';
+import { logger } from '@/lib/logger';
 import type {
   CarouselNavigationEvent,
   RelatedContentClickEvent,
   RelatedContentImpressionEvent,
   RelatedContentViewEvent,
-  UmamiEventData,
-} from '@/lib/related-content/types';
+} from '@/lib/related-content/service';
+import { type UmamiEventData, umamiEventDataSchema } from '@/lib/schemas/analytics.schema';
 import { isDevelopment } from '@/lib/schemas/env.schema';
 
 /**
@@ -141,8 +142,8 @@ function validateEventData(data: unknown): Record<string, string | number | bool
 
     return analyticsDataSchema.parse(data);
   } catch (error) {
-    console.error('[Analytics Validation Error]', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
+    logger.error('[Analytics Validation Error]', new Error('Validation failed'), {
+      error: error instanceof z.ZodError ? JSON.stringify(error.issues) : String(error),
       dataType: typeof data,
     });
     return null;
@@ -156,10 +157,14 @@ function validateEventName(name: unknown): string | null {
   try {
     return eventNameSchema.parse(name);
   } catch (error) {
-    console.error('[Analytics Event Name Validation Error]', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
-      name: typeof name === 'string' ? name.slice(0, 50) : String(name).slice(0, 50),
-    });
+    logger.error(
+      'Analytics Event Name Validation Error',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        error: error instanceof z.ZodError ? error.issues.join(', ') : String(error),
+        name: typeof name === 'string' ? name.slice(0, 50) : String(name).slice(0, 50),
+      }
+    );
     return null;
   }
 }
@@ -173,7 +178,10 @@ export const isUmamiAvailable = (): boolean => {
 export const trackEvent = (eventName: string, data?: UmamiEventData): void => {
   if (!isUmamiAvailable()) {
     if (isDevelopment) {
-      console.log('[Umami Debug]', eventName, data);
+      logger.debug('Umami Debug - tracking unavailable', {
+        eventName: typeof eventName === 'string' ? eventName : String(eventName),
+        hasData: !!data,
+      });
     }
     return;
   }
@@ -182,24 +190,32 @@ export const trackEvent = (eventName: string, data?: UmamiEventData): void => {
     // Validate event name
     const validatedEventName = validateEventName(eventName);
     if (!validatedEventName) {
-      console.warn('[Analytics] Invalid event name, skipping:', eventName);
+      logger.warn('Analytics: Invalid event name, skipping', {
+        eventName: typeof eventName === 'string' ? eventName.slice(0, 50) : String(eventName),
+      });
       return;
     }
 
     // Validate and sanitize data to ensure no PII
     const sanitizedData = data ? sanitizeEventData(data) : {};
     if (sanitizedData === null) {
-      console.warn('[Analytics] Data validation failed, tracking without data');
+      logger.warn('Analytics: Data validation failed, tracking without data', {
+        eventName: validatedEventName,
+      });
       window.umami?.track(validatedEventName, {});
       return;
     }
 
     window.umami?.track(validatedEventName, sanitizedData);
   } catch (error) {
-    console.error('[Umami Error]', {
-      error: String(error),
-      eventName: typeof eventName === 'string' ? eventName.slice(0, 50) : 'invalid',
-    });
+    logger.error(
+      'Umami tracking error',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        error: error instanceof Error ? error.message : String(error),
+        eventName: typeof eventName === 'string' ? eventName.slice(0, 50) : 'invalid',
+      }
+    );
   }
 };
 
@@ -220,13 +236,17 @@ const sanitizeEventData = (
       const containsPII = PII_PATTERNS.some((pattern) => pattern.test(keyLower));
 
       if (containsPII) {
-        console.warn('[Analytics] Skipping potential PII field:', key);
+        logger.warn('Analytics: Skipping potential PII field', {
+          field: key.slice(0, 20),
+        });
         continue;
       }
 
       // Validate property key format
       if (!PROPERTY_KEY_PATTERN.test(key)) {
-        console.warn('[Analytics] Invalid property key format:', key);
+        logger.warn('Analytics: Invalid property key format', {
+          key: key.slice(0, 30),
+        });
         continue;
       }
 
@@ -235,10 +255,13 @@ const sanitizeEventData = (
         const validatedValue = analyticsPropertyValueSchema.parse(value);
         sanitized[key] = validatedValue;
       } catch (error) {
-        console.warn('[Analytics] Invalid property value:', {
-          key,
+        logger.warn('Analytics: Invalid property value', {
+          key: key.slice(0, 20),
           valueType: typeof value,
-          error: error instanceof z.ZodError ? error.issues[0]?.message : String(error),
+          error:
+            error instanceof z.ZodError
+              ? error.issues[0]?.message || 'Validation failed'
+              : String(error),
         });
       }
     }
@@ -246,10 +269,14 @@ const sanitizeEventData = (
     // Final validation of the complete object
     return validateEventData(sanitized);
   } catch (error) {
-    console.error('[Analytics Sanitization Error]', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
-      dataType: typeof data,
-    });
+    logger.error(
+      'Analytics sanitization error',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        error: error instanceof z.ZodError ? error.issues.join(', ') : String(error),
+        dataType: typeof data,
+      }
+    );
     return null;
   }
 };
@@ -280,13 +307,12 @@ export const trackPerformance = (
   metadata?: Record<string, unknown>
 ): void => {
   try {
-    const data: Record<string, any> = {
+    const rawData = {
       metric: metricName,
       value,
+      ...(metadata || {}),
     };
-    if (metadata) {
-      Object.assign(data, { metadata });
-    }
+    const data = umamiEventDataSchema.parse(rawData);
     const validatedData = performanceMetricSchema.parse(data);
 
     // Create clean data object without undefined values for Umami
@@ -303,11 +329,15 @@ export const trackPerformance = (
     }
     trackEvent('performance_metric', eventData);
   } catch (error) {
-    console.error('[Analytics] Performance tracking validation failed:', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
-      metricName,
-      value,
-    });
+    logger.error(
+      'Analytics: Performance tracking validation failed',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        error: error instanceof z.ZodError ? error.issues.join(', ') : String(error),
+        metricName: String(metricName).slice(0, 30),
+        value: Number(value),
+      }
+    );
   }
 };
 
@@ -331,12 +361,16 @@ export const trackError = (errorType: string, errorCode?: string, context?: stri
     }
     trackEvent('error_occurred', eventData);
   } catch (error) {
-    console.error('[Analytics] Error tracking validation failed:', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
-      errorType,
-      errorCode,
-      context,
-    });
+    logger.error(
+      'Analytics: Error tracking validation failed',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        error: error instanceof z.ZodError ? error.issues.join(', ') : String(error),
+        errorType: String(errorType).slice(0, 30),
+        errorCode: String(errorCode || '').slice(0, 20),
+        context: String(context || '').slice(0, 50),
+      }
+    );
   }
 };
 
@@ -350,12 +384,16 @@ export const trackJourney = (from: string, to: string, step: number): void => {
     });
     trackEvent('content_journey', validatedData);
   } catch (error) {
-    console.error('[Analytics] Journey tracking validation failed:', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
-      from,
-      to,
-      step,
-    });
+    logger.error(
+      'Analytics: Journey tracking validation failed',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        error: error instanceof z.ZodError ? error.issues.join(', ') : String(error),
+        from: String(from).slice(0, 30),
+        to: String(to).slice(0, 30),
+        step: Number(step),
+      }
+    );
   }
 };
 
@@ -375,13 +413,17 @@ export const trackAlgorithmPerformance = (
     });
     trackEvent('algorithm_performance', validatedData);
   } catch (error) {
-    console.error('[Analytics] Algorithm performance tracking validation failed:', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
-      algorithm,
-      score,
-      clicked,
-      position,
-    });
+    logger.error(
+      'Analytics: Algorithm performance tracking validation failed',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        error: error instanceof z.ZodError ? error.issues.join(', ') : String(error),
+        algorithm,
+        score,
+        clicked,
+        position: position ?? 0,
+      }
+    );
   }
 };
 
@@ -403,12 +445,16 @@ export const trackCachePerformance = (hit: boolean, latency: number, key?: strin
     }
     trackEvent('cache_performance', eventData);
   } catch (error) {
-    console.error('[Analytics] Cache performance tracking validation failed:', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
-      hit,
-      latency,
-      keyLength: key?.length || 0,
-    });
+    logger.error(
+      'Analytics: Cache performance tracking validation failed',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        error: error instanceof z.ZodError ? error.issues.join(', ') : String(error),
+        hit,
+        latency,
+        keyLength: key?.length || 0,
+      }
+    );
   }
 };
 
@@ -416,7 +462,7 @@ export const trackCachePerformance = (hit: boolean, latency: number, key?: strin
 export const measureTiming = async <T>(
   operation: () => Promise<T>,
   eventName: string,
-  metadata?: Record<string, any>
+  metadata?: UmamiEventData
 ): Promise<T> => {
   const startTime = performance.now();
 
@@ -466,7 +512,9 @@ export const trackEventBatched = (eventName: string, data?: UmamiEventData): voi
     // Validate event before adding to queue
     const validatedEventName = validateEventName(eventName);
     if (!validatedEventName) {
-      console.warn('[Analytics] Invalid batched event name, skipping:', eventName);
+      logger.warn('Analytics: Invalid batched event name, skipping', {
+        eventName: String(eventName).slice(0, 30),
+      });
       return;
     }
 
@@ -500,11 +548,15 @@ export const trackEventBatched = (eventName: string, data?: UmamiEventData): voi
       flushEventQueue();
     }
   } catch (error) {
-    console.error('[Analytics] Batched event validation failed:', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
-      eventName,
-      dataType: typeof data,
-    });
+    logger.error(
+      'Analytics: Batched event validation failed',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        error: error instanceof z.ZodError ? error.issues.join(', ') : String(error),
+        eventName,
+        dataType: typeof data,
+      }
+    );
   }
 };
 
@@ -521,10 +573,14 @@ const flushEventQueue = (): void => {
       trackEvent(name, data);
     });
   } catch (error) {
-    console.error('[Analytics] Queue validation failed during flush:', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
-      queueLength: eventQueue.length,
-    });
+    logger.error(
+      'Analytics: Queue validation failed during flush',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        error: error instanceof z.ZodError ? error.issues.join(', ') : String(error),
+        queueLength: eventQueue.length,
+      }
+    );
     // Clear invalid queue to prevent corruption
     eventQueue = [];
   }

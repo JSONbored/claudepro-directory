@@ -16,6 +16,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SOCIAL_LINKS } from '@/lib/constants';
 
 // Enable ISR - revalidate every 24 hours for static marketing pages
 export const revalidate = 86400;
@@ -113,7 +114,7 @@ export default function PartnerPage() {
               </p>
               <Button className="w-full" size="lg" asChild>
                 <a
-                  href={`mailto:partner@claudepro.directory?subject=${encodeURIComponent(
+                  href={`mailto:${SOCIAL_LINKS.partnerEmail}?subject=${encodeURIComponent(
                     'Job Listing Inquiry - Claude Pro Directory'
                   )}&body=${encodeURIComponent(
                     `Hi Claude Pro Directory Team,
@@ -203,7 +204,7 @@ Best regards,
               </p>
               <Button className="w-full" size="lg" variant="default" asChild>
                 <a
-                  href={`mailto:partner@claudepro.directory?subject=${encodeURIComponent(
+                  href={`mailto:${SOCIAL_LINKS.partnerEmail}?subject=${encodeURIComponent(
                     'Sponsored Placement Inquiry - Claude Pro Directory'
                   )}&body=${encodeURIComponent(
                     `Hi Claude Pro Directory Team,
@@ -385,7 +386,7 @@ Best regards,
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" asChild>
-                <a href="mailto:partner@claudepro.directory">
+                <a href={`mailto:${SOCIAL_LINKS.partnerEmail}`}>
                   <Mail className="h-4 w-4 mr-2" />
                   Contact Sales
                 </a>

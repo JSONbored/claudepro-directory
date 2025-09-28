@@ -159,7 +159,7 @@ export const searchApiSchema = z
       .regex(/^[^<>'"&]*$/, 'Query contains invalid characters')
       .transform((val) => val.trim()),
     category: z
-      .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'all'])
+      .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'guides', 'all'])
       .optional()
       .default('all'),
     tags: z
@@ -187,7 +187,7 @@ export const searchApiSchema = z
  */
 export const cacheWarmApiSchema = z.object({
   types: z
-    .array(z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks']))
+    .array(z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'guides']))
     .min(1, 'At least one type required')
     .max(10, 'Too many types specified')
     .optional(),
@@ -283,12 +283,21 @@ export const paginatedResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =
   });
 
 // Content API response
+const contentItemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  category: z.string(),
+  tags: z.array(z.string()).optional(),
+  metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
+});
+
 export const contentApiResponseSchema = z.object({
-  agents: z.array(z.any()).optional(),
-  mcp: z.array(z.any()).optional(),
-  rules: z.array(z.any()).optional(),
-  commands: z.array(z.any()).optional(),
-  hooks: z.array(z.any()).optional(),
+  agents: z.array(contentItemSchema).optional(),
+  mcp: z.array(contentItemSchema).optional(),
+  rules: z.array(contentItemSchema).optional(),
+  commands: z.array(contentItemSchema).optional(),
+  hooks: z.array(contentItemSchema).optional(),
   count: z.number().int().min(0),
   lastUpdated: z.string().datetime(),
 });
@@ -318,7 +327,17 @@ export const webhookPayloadSchema = z
     ]),
     timestamp: z.string().datetime(),
     signature: z.string().regex(/^[A-Za-z0-9+/=]{64,}$/, 'Invalid signature format'),
-    data: z.record(z.string(), z.unknown()).optional(),
+    data: z
+      .record(
+        z.string(),
+        z.union([
+          z.string(),
+          z.number(),
+          z.boolean(),
+          z.array(z.union([z.string(), z.number(), z.boolean()])),
+        ])
+      )
+      .optional(),
     source: z.string().max(100, 'Source is too long').optional(),
     version: z.string().optional(),
   })

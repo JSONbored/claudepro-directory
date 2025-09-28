@@ -9,7 +9,10 @@ import {
   trackRelatedContentClick,
   trackRelatedContentView,
 } from '@/lib/analytics/events/related-content';
-import type { RelatedCarouselClientProps, RelatedContentItem } from '@/lib/related-content/types';
+import type {
+  RelatedCarouselClientProps,
+  RelatedContentItem,
+} from '@/lib/schemas/related-content.schema';
 
 export function RelatedCarouselClient({
   items,
@@ -47,8 +50,11 @@ export function RelatedCarouselClient({
   const handleItemClick = (item: RelatedContentItem, index: number) => {
     if (!trackingEnabled) return;
 
+    // Generate URL from category and slug (modern approach)
+    const itemUrl = `/${item.category}/${item.slug}`;
+
     // Track click event
-    trackRelatedContentClick(window.location.pathname, item.url, index + 1, item.score);
+    trackRelatedContentClick(window.location.pathname, itemUrl, index + 1, item.score);
   };
 
   // Get match type badge color
@@ -173,10 +179,7 @@ export function RelatedCarouselClient({
           const categoryStyles = getCategoryStyles(item.category);
 
           // Ensure views are never displayed (temporary workaround)
-          const sanitizedItem = { ...item };
-          if ('views' in sanitizedItem) {
-            delete (sanitizedItem as any).views;
-          }
+          const { views: _views, ...sanitizedItem } = item;
 
           return (
             <Card
@@ -191,7 +194,7 @@ export function RelatedCarouselClient({
               />
 
               <Link
-                href={sanitizedItem.url}
+                href={`/${sanitizedItem.category}/${sanitizedItem.slug}`}
                 onClick={() => handleItemClick(sanitizedItem, index)}
                 className="block flex-1 p-4 sm:p-6 hover:bg-accent/20 transition-colors flex flex-col"
               >
@@ -231,7 +234,7 @@ export function RelatedCarouselClient({
                   sanitizedItem.matchDetails.matchedTags.length > 0 && (
                     <div className="pt-3 border-t border-border/30 mt-auto">
                       <div className="flex flex-wrap gap-1">
-                        {sanitizedItem.matchDetails.matchedTags.slice(0, 2).map((tag) => (
+                        {sanitizedItem.matchDetails.matchedTags.slice(0, 2).map((tag: string) => (
                           <Badge
                             key={tag}
                             variant="outline"

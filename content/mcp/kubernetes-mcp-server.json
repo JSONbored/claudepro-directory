@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "feiskyer",
   "dateAdded": "2025-09-20",
-  "tags": [
-    "kubernetes",
-    "k8s",
-    "container",
-    "orchestration",
-    "devops"
-  ],
+  "tags": ["kubernetes", "k8s", "container", "orchestration", "devops"],
   "content": "A Model Context Protocol server that enables AI assistants to interact with Kubernetes clusters, translating natural language requests into Kubernetes operations.",
   "features": [
     "Cluster resource management",
@@ -41,9 +35,7 @@
       "mcpServers": {
         "kubernetes": {
           "command": "uvx",
-          "args": [
-            "mcp-kubernetes-server"
-          ],
+          "args": ["mcp-kubernetes-server"],
           "env": {
             "KUBECONFIG": "/path/to/your/kubeconfig"
           }
@@ -54,9 +46,7 @@
       "mcpServers": {
         "kubernetes": {
           "command": "uvx",
-          "args": [
-            "mcp-kubernetes-server"
-          ],
+          "args": ["mcp-kubernetes-server"],
           "env": {
             "KUBECONFIG": "${KUBECONFIG:-~/.kube/config}"
           }
@@ -93,11 +83,7 @@
     "Get cluster node information and status"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "cluster-admin",
-    "view",
-    "edit"
-  ],
+  "permissions": ["cluster-admin", "view", "edit"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://github.com/feiskyer/mcp-kubernetes-server"
 }

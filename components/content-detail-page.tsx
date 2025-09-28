@@ -1,16 +1,17 @@
 'use client';
 
-import { Check, Copy, ExternalLink, Github } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { lazy, Suspense, useState } from 'react';
+import { Copy, ExternalLink, Github } from 'lucide-react';
+import { lazy, memo, Suspense } from 'react';
 import { BaseDetailPage } from '@/components/base-detail-page';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
-import { copyToClipboard } from '@/lib/clipboard-utils';
-import { getDisplayTitle } from '@/lib/utils';
-import type { ContentCategory, ContentItem } from '@/types/content';
+import { CardDescription } from '@/components/ui/card';
+import type { ContentDetailPageProps, CustomSection } from '@/lib/schemas/component.schema';
+import type { UnifiedContentItem } from '@/lib/schemas/components';
+import type { ContentItem } from '@/lib/schemas/content.schema';
+
+// Content items that have rich content fields for detail pages
+type DetailedContent = ContentItem;
+
+import { ContentSidebar } from './content-detail-page/sidebar';
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
 const CodeHighlight = lazy(() =>
@@ -26,232 +27,41 @@ const ContentViewer = lazy(() =>
   }))
 );
 
-interface ContentDetailPageProps<T extends ContentItem> {
-  item: T | null;
-  type: ContentCategory;
-  typeName: string;
-  relatedItems?: T[];
-  customSections?: React.ReactNode;
-}
+// DetailedContent is now imported from content.schema.ts
 
-// Helper function to render Content sidebar with resources and details
-const renderContentSidebar = <T extends ContentItem>(
-  item: T,
-  relatedItems: T[],
-  router: any,
-  type: ContentCategory,
-  typeName: string
-): React.ReactNode => (
-  <div className="space-y-6 sticky top-20 self-start">
-    {/* Resources */}
-    <Card>
-      <CardHeader>
-        <CardTitle>Resources</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {/* Always show GitHub link to the Content file in our repo */}
-        <Button variant="outline" className="w-full justify-start" asChild>
-          <a
-            href={`https://github.com/JSONbored/claudepro-directory/blob/main/content/${type}/${item.slug}.json`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Github className="h-4 w-4 mr-2" />
-            View on GitHub
-          </a>
-        </Button>
-        {(item.documentationUrl || item.documentation) && (
-          <Button variant="outline" className="w-full justify-start" asChild>
-            <a
-              href={item.documentationUrl || item.documentation}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Documentation
-            </a>
-          </Button>
-        )}
-      </CardContent>
-    </Card>
-
-    {/* Content Details */}
-    <Card>
-      <CardHeader>
-        <CardTitle>Content Details</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Category */}
-        {item.category && (
-          <div>
-            <h4 className="font-medium mb-1">Category</h4>
-            <Badge
-              variant="default"
-              className="text-xs font-medium bg-purple-500/20 text-purple-500 border-purple-500/30"
-            >
-              {item.category === type ? typeName : item.category}
-            </Badge>
-          </div>
-        )}
-
-        {/* Content Type */}
-        {(() => {
-          const contentType = (() => {
-            if (type === 'commands') return 'Command Script';
-            if (type === 'mcp') return 'MCP Configuration';
-            if (type === 'hooks') return 'Hook Script';
-            if (type === 'rules') return 'System Rule';
-            if (type === 'agents') return 'Agent Definition';
-            return 'Content';
-          })();
-          return (
-            <div>
-              <h4 className="font-medium mb-1">Content Type</h4>
-              <Badge variant="outline" className="text-xs">
-                {contentType}
-              </Badge>
-            </div>
-          );
-        })()}
-
-        {/* Format */}
-        {(() => {
-          const format = (() => {
-            if (item.config) return 'JSON Configuration';
-            if (item.content) {
-              if (type === 'commands') return 'Bash Script';
-              if (type === 'mcp') return 'JSON Configuration';
-              return 'Markdown Content';
-            }
-            return 'Text';
-          })();
-          return (
-            <div>
-              <h4 className="font-medium mb-1">Format</h4>
-              <Badge variant="outline" className="text-xs font-mono">
-                {format}
-              </Badge>
-            </div>
-          );
-        })()}
-
-        {/* Language */}
-        {(() => {
-          const language = (() => {
-            if (type === 'commands') return 'bash';
-            if (type === 'mcp') return 'json';
-            return 'markdown';
-          })();
-          return (
-            <div>
-              <h4 className="font-medium mb-1">Language</h4>
-              <Badge variant="outline" className="text-xs font-mono">
-                {language}
-              </Badge>
-            </div>
-          );
-        })()}
-
-        {item.source && (
-          <div>
-            <h4 className="font-medium mb-1">Source</h4>
-            <Badge variant="outline">{item.source}</Badge>
-          </div>
-        )}
-
-        {/* Tags */}
-        {item.tags && item.tags.length > 0 && (
-          <div>
-            <h4 className="font-medium mb-1">Tags</h4>
-            <div className="flex flex-wrap gap-1">
-              {item.tags.map((tag: string) => (
-                <Badge key={tag} variant="outline" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-
-    {/* Related Content */}
-    {relatedItems.length > 0 && (
-      <Card>
-        <CardHeader>
-          <CardTitle>Related {typeName}s</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {relatedItems.slice(0, 3).map((relatedItem) => (
-            <Button
-              key={relatedItem.slug}
-              variant="ghost"
-              className="w-full justify-start h-auto p-3 text-left"
-              onClick={() => router.push(`/${type}/${relatedItem.slug}`)}
-            >
-              <div className="text-left w-full min-w-0">
-                <div className="font-medium text-sm leading-tight mb-1">
-                  {getDisplayTitle(relatedItem)}
-                </div>
-                <div className="flex flex-wrap gap-1 mb-1">
-                  {/* Show primary tags */}
-                  {relatedItem.tags?.slice(0, 2).map((tag: string) => (
-                    <Badge key={tag} variant="secondary" className="text-xs px-1 py-0">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-                <div className="text-xs text-muted-foreground line-clamp-2">
-                  {relatedItem.description}
-                </div>
-              </div>
-            </Button>
-          ))}
-        </CardContent>
-      </Card>
-    )}
-  </div>
-);
-
-export function ContentDetailPage<T extends ContentItem>({
+function ContentDetailPageComponent<T extends UnifiedContentItem>({
   item,
   type,
   typeName,
   relatedItems = [],
   customSections,
 }: ContentDetailPageProps<T>) {
-  const router = useRouter();
-  const [copied, setCopied] = useState(false);
-
   if (!item) {
     return null; // Let BaseDetailPage handle the not found case
   }
 
-  const handleCopyContent = async () => {
-    const contentToCopy = item.content || item.config || '';
+  // Type guard to check if item has content properties
+  const hasContent = (item: UnifiedContentItem): item is ContentItem => {
+    return 'content' in item || 'configuration' in item;
+  };
 
-    const success = await copyToClipboard(contentToCopy, {
-      component: 'content-detail-page',
-      action: 'copy-content',
-    });
+  const contentToCopy = (() => {
+    if (!hasContent(item)) return '';
 
-    setCopied(true);
-    if (success) {
-      toast({
-        title: 'Content copied!',
-        description: `The ${typeName.toLowerCase()} ${item.config ? 'configuration' : 'content'} has been copied to your clipboard.`,
-      });
-    } else {
-      toast({
-        title: 'Failed to copy',
-        description: 'Could not copy the content to clipboard.',
-        variant: 'destructive',
-      });
+    // Check for content property
+    if ('content' in item && typeof item.content === 'string') {
+      return item.content;
     }
 
-    // Reset copied state after 2 seconds
-    setTimeout(() => setCopied(false), 2000);
-  };
+    // Check for configuration property
+    if ('configuration' in item && item.configuration) {
+      return typeof item.configuration === 'string'
+        ? item.configuration
+        : JSON.stringify(item.configuration, null, 2);
+    }
+
+    return '';
+  })();
 
   // Get the appropriate language for syntax highlighting
   const getLanguage = () => {
@@ -261,10 +71,10 @@ export function ContentDetailPage<T extends ContentItem>({
   };
 
   // Build custom sections
-  const contentCustomSections = [];
+  const contentCustomSections: CustomSection[] = [];
 
   // Configuration section (if applicable)
-  if (item.configuration) {
+  if (hasContent(item) && 'configuration' in item && item.configuration) {
     contentCustomSections.push({
       title: 'Configuration',
       icon: <Copy className="h-5 w-5" />,
@@ -274,15 +84,21 @@ export function ContentDetailPage<T extends ContentItem>({
             Recommended settings for this {typeName.toLowerCase()}
           </CardDescription>
           <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}>
-            <CodeHighlight code={JSON.stringify(item.configuration, null, 2)} language="json" />
+            <CodeHighlight
+              code={JSON.stringify((item as Record<string, unknown>).configuration || {}, null, 2)}
+              language="json"
+              showCopy={true}
+            />
           </Suspense>
         </>
       ),
+      collapsible: false,
+      defaultCollapsed: false,
     });
   }
 
   // Examples section (for commands)
-  if (item.examples && item.examples.length > 0) {
+  if (hasContent(item) && 'examples' in item && item.examples && item.examples.length > 0) {
     contentCustomSections.push({
       title: 'Examples',
       icon: <Copy className="h-5 w-5" />,
@@ -292,7 +108,10 @@ export function ContentDetailPage<T extends ContentItem>({
             Usage examples for this {typeName.toLowerCase()}
           </CardDescription>
           <div className="space-y-4">
-            {(Array.isArray(item.examples) ? item.examples : []).map(
+            {(Array.isArray((item as DetailedContent & { examples?: readonly string[] }).examples)
+              ? (item as DetailedContent & { examples: readonly string[] }).examples
+              : []
+            ).map(
               (
                 example: string | { title?: string; code: string; description?: string },
                 idx: number
@@ -304,7 +123,7 @@ export function ContentDetailPage<T extends ContentItem>({
                       <Suspense
                         fallback={<div className="animate-pulse bg-muted h-16 rounded-md" />}
                       >
-                        <CodeHighlight code={example} language="bash" />
+                        <CodeHighlight code={example} language="bash" showCopy={true} />
                       </Suspense>
                     </div>
                   );
@@ -314,7 +133,7 @@ export function ContentDetailPage<T extends ContentItem>({
                   <div key={example.title || `example-${idx}`}>
                     <h4 className="font-medium mb-2">{example.title}</h4>
                     <Suspense fallback={<div className="animate-pulse bg-muted h-16 rounded-md" />}>
-                      <CodeHighlight code={example.code} language="bash" />
+                      <CodeHighlight code={example.code} language="bash" showCopy={true} />
                     </Suspense>
                     {example.description && (
                       <p className="text-sm text-muted-foreground mt-2">{example.description}</p>
@@ -326,6 +145,8 @@ export function ContentDetailPage<T extends ContentItem>({
           </div>
         </>
       ),
+      collapsible: false,
+      defaultCollapsed: false,
     });
   }
 
@@ -335,6 +156,8 @@ export function ContentDetailPage<T extends ContentItem>({
       title: 'Additional Information',
       icon: <Copy className="h-5 w-5" />,
       content: customSections,
+      collapsible: false,
+      defaultCollapsed: false,
     });
   }
 
@@ -353,25 +176,29 @@ export function ContentDetailPage<T extends ContentItem>({
   });
 
   // Documentation link if available
-  if (item.documentationUrl || item.documentation) {
+  if (
+    hasContent(item) &&
+    (('documentationUrl' in item && item.documentationUrl) ||
+      ('documentation' in item &&
+        (item as DetailedContent & { documentation?: string }).documentation))
+  ) {
+    const docUrl =
+      ('documentationUrl' in item && item.documentationUrl) ||
+      (item as DetailedContent & { documentation?: string }).documentation;
     secondaryActions.push({
       label: 'Documentation',
       icon: <ExternalLink className="h-4 w-4 mr-2" />,
-      onClick: () => window.open(item.documentationUrl || item.documentation, '_blank'),
+      onClick: () => window.open(docUrl, '_blank'),
     });
   }
 
   // Custom content display for BaseDetailPage
   const contentDisplay = (
     <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}>
-      {(item.content || item.config || '').length > 3000 ? (
-        <ContentViewer
-          content={item.content || item.config || ''}
-          language={getLanguage()}
-          maxHeight={600}
-        />
+      {contentToCopy.length > 3000 ? (
+        <ContentViewer content={contentToCopy} language={getLanguage()} maxHeight={600} />
       ) : (
-        <CodeHighlight code={item.content || item.config || ''} language={getLanguage()} />
+        <CodeHighlight code={contentToCopy} language={getLanguage()} showCopy={true} />
       )}
     </Suspense>
   );
@@ -382,16 +209,29 @@ export function ContentDetailPage<T extends ContentItem>({
       relatedItems={relatedItems}
       typeName={typeName}
       primaryAction={{
-        label: copied ? 'Copied!' : 'Copy Content',
-        icon: copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />,
-        onClick: handleCopyContent,
+        label: 'Copy Content',
+        icon: <Copy className="h-4 w-4 mr-2" />,
+        onClick: async () => {
+          const { copyToClipboard } = await import('@/lib/clipboard-utils');
+          await copyToClipboard(contentToCopy, {
+            component: 'content-detail-page',
+            action: 'copy-content',
+          });
+        },
       }}
       secondaryActions={secondaryActions}
       customSections={contentCustomSections}
       // Override the default content display with our custom content viewer
       configurationContent={contentDisplay}
       showConfiguration={true}
-      customSidebar={renderContentSidebar(item, relatedItems, router, type, typeName)}
+      customSidebar={
+        <ContentSidebar item={item} relatedItems={relatedItems} type={type} typeName={typeName} />
+      }
     />
   );
 }
+
+// Memoize the component to prevent unnecessary re-renders
+export const ContentDetailPage = memo(
+  ContentDetailPageComponent
+) as typeof ContentDetailPageComponent;

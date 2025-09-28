@@ -1,30 +1,10 @@
 import Fuse, { type IFuseOptions } from 'fuse.js';
 import { logger } from './logger';
 import { contentCache } from './redis';
+import type { FuseSearchableItem, SearchCacheKey, SearchFilters } from './schemas/search.schema';
 
-export interface SearchableItem {
-  title: string;
-  name?: string;
-  description: string;
-  tags: string[];
-  category: string;
-  popularity?: number;
-  slug: string;
-  id: string;
-}
-
-export interface SearchFilters {
-  categories: string[];
-  tags: string[];
-  authors: string[];
-  sort: 'trending' | 'newest' | 'alphabetical' | 'popularity';
-  popularity: [number, number];
-}
-
-export interface SearchCacheKey {
-  query: string;
-  filters: SearchFilters;
-}
+// Re-export types for backward compatibility
+export type { FuseSearchableItem as SearchableItem, SearchFilters, SearchCacheKey };
 
 // Generate a cache key from search parameters
 function generateSearchCacheKey(query: string, filters: SearchFilters): string {
@@ -44,32 +24,34 @@ function generateSearchCacheKey(query: string, filters: SearchFilters): string {
 function createSortFunction(sort: string) {
   switch (sort) {
     case 'newest':
-      return (a: SearchableItem, b: SearchableItem) => {
+      return (a: FuseSearchableItem, b: FuseSearchableItem) => {
         // Assume newer items have higher popularity for now
         return (b.popularity || 0) - (a.popularity || 0);
       };
     case 'alphabetical':
-      return (a: SearchableItem, b: SearchableItem) => {
+      return (a: FuseSearchableItem, b: FuseSearchableItem) => {
         const aTitle = a.title || a.name || '';
         const bTitle = b.title || b.name || '';
         return aTitle.localeCompare(bTitle);
       };
     case 'popularity':
-      return (a: SearchableItem, b: SearchableItem) => (b.popularity || 0) - (a.popularity || 0);
+      return (a: FuseSearchableItem, b: FuseSearchableItem) =>
+        (b.popularity || 0) - (a.popularity || 0);
     case 'trending':
       // For trending, factor in recency with popularity
-      return (a: SearchableItem, b: SearchableItem) => {
+      return (a: FuseSearchableItem, b: FuseSearchableItem) => {
         const aScore = (a.popularity || 0) * 1.2; // Weight trending higher
         const bScore = (b.popularity || 0) * 1.2;
         return bScore - aScore;
       };
     default:
-      return (a: SearchableItem, b: SearchableItem) => (b.popularity || 0) - (a.popularity || 0);
+      return (a: FuseSearchableItem, b: FuseSearchableItem) =>
+        (b.popularity || 0) - (a.popularity || 0);
   }
 }
 
 // Filter function
-function applyFilters<T extends SearchableItem>(items: T[], filters: SearchFilters): T[] {
+function applyFilters<T extends FuseSearchableItem>(items: T[], filters: SearchFilters): T[] {
   let filtered = items;
 
   // Category filter
@@ -100,13 +82,13 @@ function applyFilters<T extends SearchableItem>(items: T[], filters: SearchFilte
 
 // Main search cache class
 export class SearchCache {
-  private fuseCache = new Map<string, Fuse<SearchableItem>>();
+  private fuseCache = new Map<string, Fuse<FuseSearchableItem>>();
   private lastCacheCleanup = Date.now();
   private readonly CACHE_CLEANUP_INTERVAL = 30 * 60 * 1000; // 30 minutes
   private readonly MAX_CACHE_SIZE = 100;
 
   // Get or create Fuse instance for a dataset
-  private getFuseInstance<T extends SearchableItem>(
+  private getFuseInstance<T extends FuseSearchableItem>(
     items: T[],
     cacheKey: string,
     options?: IFuseOptions<T>
@@ -136,7 +118,7 @@ export class SearchCache {
       this.cleanupCache();
     }
 
-    this.fuseCache.set(cacheKey, fuse as Fuse<SearchableItem>);
+    this.fuseCache.set(cacheKey, fuse as Fuse<FuseSearchableItem>);
     return fuse;
   }
 
@@ -162,7 +144,7 @@ export class SearchCache {
   }
 
   // Cached search function
-  async search<T extends SearchableItem>(
+  async search<T extends FuseSearchableItem>(
     items: T[],
     query: string,
     filters: SearchFilters = {
@@ -203,7 +185,7 @@ export class SearchCache {
   }
 
   // Perform the actual search
-  private async performSearch<T extends SearchableItem>(
+  private async performSearch<T extends FuseSearchableItem>(
     items: T[],
     query: string,
     filters: SearchFilters = {

@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-interface UseInfiniteScrollOptions {
+interface InfiniteScrollHookOptions {
   threshold?: number;
   rootMargin?: string;
-  hasMore: boolean;
-  loading: boolean;
+  hasMore?: boolean;
+  loading?: boolean;
 }
 
 export function useInfiniteScroll(
   onLoadMore: () => void | Promise<void>,
-  options: UseInfiniteScrollOptions
+  options: InfiniteScrollHookOptions
 ) {
   const { threshold = 0.1, rootMargin = '100px', hasMore, loading } = options;
   const observerTarget = useRef<HTMLDivElement>(null);

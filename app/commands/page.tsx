@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { ContentListServer } from '@/components/content-list-server';
 import { commands } from '@/generated/content';
+import { APP_CONFIG } from '@/lib/constants';
 
 export const metadata: Metadata = {
-  title: 'Commands - Claude CLI Commands | Claude Pro Directory',
+  title: `Commands - Claude CLI Commands | ${APP_CONFIG.name}`,
   description:
     'Explore custom commands and shortcuts to enhance your Claude experience with powerful functionality.',
   keywords: 'Claude commands, CLI commands, shortcuts, productivity tools, Claude Pro',

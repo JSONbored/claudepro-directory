@@ -4,13 +4,7 @@
   "category": "agents",
   "author": "JSONbored",
   "dateAdded": "2025-09-16",
-  "tags": [
-    "database",
-    "sql",
-    "optimization",
-    "architecture",
-    "data-modeling"
-  ],
+  "tags": ["database", "sql", "optimization", "architecture", "data-modeling"],
   "features": [
     "Expert database schema design and entity-relationship modeling",
     "Advanced SQL query optimization and performance tuning",

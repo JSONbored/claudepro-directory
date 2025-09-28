@@ -67,7 +67,7 @@ export async function getAllGuideMetadata(): Promise<GuideMetadata[]> {
 export async function getGuideBySlug(slug: string): Promise<GuideMetadata | null> {
   const [category, ...restSlug] = slug.split('/');
 
-  if (!category || !GUIDE_CATEGORIES.includes(category as GuideCategory)) {
+  if (!(category && GUIDE_CATEGORIES.includes(category as GuideCategory))) {
     return null;
   }
 

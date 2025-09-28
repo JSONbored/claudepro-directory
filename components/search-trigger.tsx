@@ -4,8 +4,8 @@ import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface SearchTriggerProps {
-  onClick: () => void;
-  variant?: 'default' | 'outline' | 'ghost' | 'minimal';
+  onClick?: () => void;
+  variant?: 'outline' | 'minimal' | 'ghost' | 'default';
   size?: 'sm' | 'md' | 'lg';
   showShortcut?: boolean;
   className?: string;

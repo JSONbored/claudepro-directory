@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { APP_CONFIG, SOCIAL_LINKS } from '@/lib/constants';
 
 export const metadata: Metadata = {
-  title: 'Community - Claude Pro Directory',
+  title: `Community - ${APP_CONFIG.name}`,
   description:
     'Join the Claude AI community. Connect with developers, share configurations, and learn from experts.',
   keywords: 'Claude community, AI developers, collaboration, open source',
@@ -36,23 +37,19 @@ export default function CommunityPage() {
 
             <div className="flex flex-wrap gap-4 justify-center">
               <Button size="lg" asChild>
-                <a
-                  href="https://github.com/JSONbored/claudepro-directory"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer">
                   <Github className="h-5 w-5 mr-2" />
                   GitHub
                 </a>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <a href="https://discord.gg/Ax3Py4YDrq" target="_blank" rel="noopener noreferrer">
+                <a href={SOCIAL_LINKS.discord} target="_blank" rel="noopener noreferrer">
                   <MessageSquare className="h-5 w-5 mr-2" />
                   Discord
                 </a>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <a href="https://x.com/JSONbored" target="_blank" rel="noopener noreferrer">
+                <a href={SOCIAL_LINKS.twitter} target="_blank" rel="noopener noreferrer">
                   <Twitter className="h-5 w-5 mr-2" />X (Twitter)
                 </a>
               </Button>

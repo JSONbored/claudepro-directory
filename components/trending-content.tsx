@@ -5,14 +5,7 @@ import { useId } from 'react';
 import { ConfigCard } from '@/components/config-card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { agents, commands, hooks, mcp, rules } from '@/generated/content';
-import type { ContentItem } from '@/types/content';
-
-interface TrendingContentProps {
-  trending: Array<ContentItem & { type?: string; viewCount?: number }>;
-  popular: Array<ContentItem & { type?: string; viewCount?: number }>;
-  recent: Array<ContentItem & { type?: string; viewCount?: number }>;
-}
+import type { TrendingContentProps, UnifiedContentItem } from '@/lib/schemas/component.schema';
 
 export function TrendingContent({ trending, popular, recent }: TrendingContentProps) {
   // Generate unique IDs for headings
@@ -20,17 +13,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
   const popularHeadingId = useId();
   const recentHeadingId = useId();
 
-  const getConfigType = (
-    config: ContentItem & { type?: string }
-  ): 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks' => {
-    if (config.type) return config.type as 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks';
-    if (agents.some((a) => a.slug === config.slug)) return 'agents';
-    if (commands.some((c) => c.slug === config.slug)) return 'commands';
-    if (hooks.some((h) => h.slug === config.slug)) return 'hooks';
-    if (mcp.some((m) => m.slug === config.slug)) return 'mcp';
-    if (rules.some((r) => r.slug === config.slug)) return 'rules';
-    return 'content' in config ? 'rules' : 'mcp';
-  };
+  // Removed unused getConfigType function
 
   return (
     <Tabs defaultValue="trending" className="space-y-8">
@@ -64,7 +47,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
             🔥 Trending This Week
           </h2>
           <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 list-none">
-            {trending.map((item, index) => (
+            {trending.map((item: UnifiedContentItem, index: number) => (
               <li key={item.slug} className="relative">
                 {index < 3 && (
                   <Badge
@@ -75,7 +58,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
                     #{index + 1}
                   </Badge>
                 )}
-                <ConfigCard {...item} type={getConfigType(item)} />
+                <ConfigCard item={item} variant="default" showCategory={true} showActions={false} />
               </li>
             ))}
           </ul>
@@ -95,7 +78,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
           <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 list-none">
             {popular.map((item) => (
               <li key={item.slug}>
-                <ConfigCard {...item} type={getConfigType(item)} />
+                <ConfigCard item={item} variant="default" showCategory={true} showActions={false} />
               </li>
             ))}
           </ul>
@@ -115,7 +98,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
           <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 list-none">
             {recent.map((item) => (
               <li key={item.slug}>
-                <ConfigCard {...item} type={getConfigType(item)} />
+                <ConfigCard item={item} variant="default" showCategory={true} showActions={false} />
               </li>
             ))}
           </ul>

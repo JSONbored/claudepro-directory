@@ -1,13 +1,28 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
+import { APP_CONFIG } from '@/lib/constants';
 import { sanitizeApiError } from '@/lib/error-sanitizer';
 import { logger } from '@/lib/logger';
 import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
 import { contentCache } from '@/lib/redis';
-import { apiSchemas, ValidationError, validation } from '@/lib/validation';
+import { createRequestId } from '@/lib/schemas/branded-types.schema';
+import { apiSchemas, ValidationError } from '@/lib/validation';
 
 export const runtime = 'nodejs';
 export const revalidate = 14400; // 4 hours
+
+// Streaming query parameters validation schema
+const streamingQuerySchema = z
+  .object({
+    stream: z
+      .enum(['true', 'false'])
+      .default('false')
+      .transform((val) => val === 'true'),
+    format: z.enum(['json', 'ndjson']).default('json'),
+    batchSize: z.coerce.number().min(10).max(100).default(50),
+  })
+  .merge(apiSchemas.paginationQuery.partial());
 
 // Helper function to transform content with type and URL
 function transformContent<T extends { slug: string }>(
@@ -18,32 +33,170 @@ function transformContent<T extends { slug: string }>(
   return content.map((item) => ({
     ...item,
     type,
-    url: `https://claudepro.directory/${category}/${item.slug}`,
+    url: `${APP_CONFIG.url}/${category}/${item.slug}`,
   }));
+}
+
+// Streaming response generator for large datasets
+async function* createStreamingResponse(
+  batchSize: number,
+  format: 'json' | 'ndjson'
+): AsyncGenerator<string, void, unknown> {
+  const transformedAgents = transformContent(agents, 'agent', 'agents');
+  const transformedMcp = transformContent(mcp, 'mcp', 'mcp');
+  const transformedRules = transformContent(rules, 'rule', 'rules');
+  const transformedCommands = transformContent(commands, 'command', 'commands');
+  const transformedHooks = transformContent(hooks, 'hook', 'hooks');
+
+  const metadata = {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    name: `${APP_CONFIG.name} - All Configurations`,
+    description: APP_CONFIG.description,
+    license: APP_CONFIG.license,
+    lastUpdated: new Date().toISOString(),
+    statistics: {
+      totalConfigurations:
+        transformedAgents.length +
+        transformedMcp.length +
+        transformedRules.length +
+        transformedCommands.length +
+        transformedHooks.length,
+      agents: transformedAgents.length,
+      mcp: transformedMcp.length,
+      rules: transformedRules.length,
+      commands: transformedCommands.length,
+      hooks: transformedHooks.length,
+    },
+    endpoints: {
+      agents: `${APP_CONFIG.url}/api/agents.json`,
+      mcp: `${APP_CONFIG.url}/api/mcp.json`,
+      rules: `${APP_CONFIG.url}/api/rules.json`,
+      commands: `${APP_CONFIG.url}/api/commands.json`,
+      hooks: `${APP_CONFIG.url}/api/hooks.json`,
+    },
+  };
+
+  if (format === 'ndjson') {
+    // NDJSON format - each line is a separate JSON object
+    yield `${JSON.stringify({ type: 'metadata', ...metadata })}\n`;
+
+    // Stream each category in batches
+    const categories = [
+      { name: 'agents', data: transformedAgents },
+      { name: 'mcp', data: transformedMcp },
+      { name: 'rules', data: transformedRules },
+      { name: 'commands', data: transformedCommands },
+      { name: 'hooks', data: transformedHooks },
+    ];
+
+    for (const category of categories) {
+      for (let i = 0; i < category.data.length; i += batchSize) {
+        const batch = category.data.slice(i, i + batchSize);
+        yield `${JSON.stringify({ type: 'data', category: category.name, items: batch })}\n`;
+      }
+    }
+  } else {
+    // JSON format - stream as valid JSON with chunked data
+    yield '{\n';
+    yield `  "metadata": ${JSON.stringify(metadata, null, 2)},\n`;
+    yield '  "data": {\n';
+
+    const categories = [
+      { name: 'agents', data: transformedAgents },
+      { name: 'mcp', data: transformedMcp },
+      { name: 'rules', data: transformedRules },
+      { name: 'commands', data: transformedCommands },
+      { name: 'hooks', data: transformedHooks },
+    ];
+
+    for (let categoryIndex = 0; categoryIndex < categories.length; categoryIndex++) {
+      const category = categories[categoryIndex]!;
+      yield `    "${category.name}": [\n`;
+
+      for (let i = 0; i < category.data.length; i += batchSize) {
+        const batch = category.data.slice(i, i + batchSize);
+        for (let j = 0; j < batch.length; j++) {
+          const item = batch[j]!;
+          const isLastInBatch = j === batch.length - 1;
+          const isLastBatch = i + batchSize >= category.data.length;
+          const isLastItem = isLastInBatch && isLastBatch;
+
+          yield `      ${JSON.stringify(item)}${isLastItem ? '' : ','}\n`;
+        }
+      }
+
+      const isLastCategory = categoryIndex === categories.length - 1;
+      yield `    ]${isLastCategory ? '' : ','}\n`;
+    }
+
+    yield '  }\n';
+    yield '}\n';
+  }
 }
 
 async function handleGET(request: NextRequest) {
   const requestLogger = logger.forRequest(request);
 
   try {
-    // Validate query parameters if any exist
+    // Parse and validate query parameters with streaming support
     const url = new URL(request.url);
     const queryParams = Object.fromEntries(url.searchParams);
 
-    if (Object.keys(queryParams).length > 0) {
-      // Only validate if there are query parameters
-      const validatedQuery = validation.validateQuery(
-        apiSchemas.paginationQuery.partial(),
-        queryParams,
-        'all-configurations query parameters'
-      );
-      requestLogger.info('All configurations API request started', {
-        queryPage: validatedQuery.page || 1,
-        queryLimit: validatedQuery.limit || 50,
-        validated: true,
+    const validatedQuery = streamingQuerySchema.parse(queryParams);
+
+    requestLogger.info('All configurations API request started', {
+      streaming: validatedQuery.stream,
+      format: validatedQuery.format,
+      batchSize: validatedQuery.batchSize,
+      queryPage: validatedQuery.page || 1,
+      queryLimit: validatedQuery.limit || 50,
+      validated: true,
+    });
+
+    // Handle streaming response
+    if (validatedQuery.stream) {
+      const responseHeaders = {
+        'Content-Type':
+          validatedQuery.format === 'ndjson'
+            ? 'application/x-ndjson; charset=utf-8'
+            : 'application/json; charset=utf-8',
+        'Transfer-Encoding': 'chunked',
+        'Cache-Control': 'public, s-maxage=7200, stale-while-revalidate=86400', // Shorter cache for streaming
+        'X-Stream': 'true',
+        'X-Format': validatedQuery.format,
+      };
+
+      // Create streaming response using ReadableStream
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            const encoder = new TextEncoder();
+
+            for await (const chunk of createStreamingResponse(
+              validatedQuery.batchSize,
+              validatedQuery.format
+            )) {
+              controller.enqueue(encoder.encode(chunk));
+            }
+
+            controller.close();
+
+            requestLogger.info('Streaming response completed successfully', {
+              format: validatedQuery.format,
+              batchSize: validatedQuery.batchSize,
+            });
+          } catch (error) {
+            requestLogger.error('Streaming response failed', error as Error, {
+              format: validatedQuery.format,
+              batchSize: validatedQuery.batchSize,
+            });
+            controller.error(error);
+          }
+        },
       });
-    } else {
-      requestLogger.info('All configurations API request started', { validated: true });
+
+      return new Response(stream, { headers: responseHeaders });
     }
 
     // Try to get from cache first
@@ -69,9 +222,9 @@ async function handleGET(request: NextRequest) {
     const allConfigurations = {
       '@context': 'https://schema.org',
       '@type': 'Dataset',
-      name: 'Claude Pro Directory - All Configurations',
-      description: 'Complete database of Claude AI configurations',
-      license: 'MIT',
+      name: `${APP_CONFIG.name} - All Configurations`,
+      description: APP_CONFIG.description,
+      license: APP_CONFIG.license,
       lastUpdated: new Date().toISOString(),
       statistics: {
         totalConfigurations:
@@ -94,11 +247,11 @@ async function handleGET(request: NextRequest) {
         hooks: transformedHooks,
       },
       endpoints: {
-        agents: 'https://claudepro.directory/api/agents.json',
-        mcp: 'https://claudepro.directory/api/mcp.json',
-        rules: 'https://claudepro.directory/api/rules.json',
-        commands: 'https://claudepro.directory/api/commands.json',
-        hooks: 'https://claudepro.directory/api/hooks.json',
+        agents: `${APP_CONFIG.url}/api/agents.json`,
+        mcp: `${APP_CONFIG.url}/api/mcp.json`,
+        rules: `${APP_CONFIG.url}/api/rules.json`,
+        commands: `${APP_CONFIG.url}/api/commands.json`,
+        hooks: `${APP_CONFIG.url}/api/hooks.json`,
       },
     };
 
@@ -115,7 +268,35 @@ async function handleGET(request: NextRequest) {
         'X-Cache': 'MISS',
       },
     });
-  } catch (error: unknown) {
+  } catch (error) {
+    // Handle Zod validation errors from streaming query schema
+    if (error instanceof z.ZodError) {
+      requestLogger.warn('Streaming query validation error in all-configurations API', {
+        error: 'Invalid query parameters',
+        issuesCount: error.issues.length,
+        firstIssue: error.issues[0]?.message || 'Validation error',
+      });
+
+      return NextResponse.json(
+        {
+          error: 'Query validation failed',
+          message: 'Invalid query parameters for streaming API',
+          details: error.issues.map((issue) => ({
+            path: issue.path.join('.'),
+            message: issue.message,
+            code: issue.code,
+          })),
+          timestamp: new Date().toISOString(),
+          availableParams: {
+            stream: 'true|false (default: false)',
+            format: 'json|ndjson (default: json)',
+            batchSize: 'number 10-100 (default: 50)',
+          },
+        },
+        { status: 400 }
+      );
+    }
+
     // Handle validation errors specifically
     if (error instanceof ValidationError) {
       requestLogger.warn('Validation error in all-configurations API', {
@@ -139,7 +320,7 @@ async function handleGET(request: NextRequest) {
     }
 
     // Handle other errors with sanitization
-    const sanitizedError = sanitizeApiError(error, {
+    const sanitizedError = sanitizeApiError(error, createRequestId(), {
       route: 'all-configurations',
       operation: 'generate_dataset',
     });

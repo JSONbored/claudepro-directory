@@ -2,16 +2,19 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import { z } from 'zod';
 
-interface OptimizedImageProps {
-  src: string;
-  alt: string;
-  width?: number;
-  height?: number;
-  className?: string;
-  priority?: boolean;
-  blurDataURL?: string;
-}
+const optimizedImagePropsSchema = z.object({
+  src: z.string(),
+  alt: z.string(),
+  width: z.number().default(800),
+  height: z.number().default(600),
+  className: z.string().default(''),
+  priority: z.boolean().default(false),
+  blurDataURL: z.string().default(''),
+});
+
+type OptimizedImageProps = z.infer<typeof optimizedImagePropsSchema>;
 
 /**
  * Generate a blur placeholder as a base64-encoded 1x1 SVG
@@ -34,15 +37,9 @@ function generateBlurDataURL(width: number, height: number): string {
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
 }
 
-export function OptimizedImage({
-  src,
-  alt,
-  width = 800,
-  height = 600,
-  className = '',
-  priority = false,
-  blurDataURL,
-}: OptimizedImageProps) {
+export function OptimizedImage(props: OptimizedImageProps) {
+  const { src, alt, width, height, className, priority, blurDataURL } =
+    optimizedImagePropsSchema.parse(props);
   const [isLoading, setLoading] = useState(true);
   const [hasError, setError] = useState(false);
 
@@ -50,7 +47,7 @@ export function OptimizedImage({
   const isLocal = src.startsWith('/') || !src.match(/^https?:\/\//);
 
   // Generate blur placeholder if not provided
-  const blurPlaceholder = blurDataURL || generateBlurDataURL(width, height);
+  const blurPlaceholder = blurDataURL.length > 0 ? blurDataURL : generateBlurDataURL(width, height);
 
   if (hasError) {
     return (

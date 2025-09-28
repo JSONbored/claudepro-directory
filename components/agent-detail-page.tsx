@@ -16,12 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
-import type { Agent, ContentItem } from '@/types/content';
-
-interface AgentDetailPageProps {
-  item: Agent;
-  relatedItems?: ContentItem[];
-}
+import type { AgentDetailPageProps, CustomSection } from '@/lib/schemas/component.schema';
 
 export function AgentDetailPage({ item, relatedItems = [] }: AgentDetailPageProps) {
   // Auto-generate requirements based on agent configuration
@@ -101,7 +96,6 @@ export function AgentDetailPage({ item, relatedItems = [] }: AgentDetailPageProp
       toast({
         title: 'Copy failed',
         description: 'Unable to copy configuration to clipboard',
-        variant: 'destructive',
       });
     }
   };
@@ -122,13 +116,12 @@ export function AgentDetailPage({ item, relatedItems = [] }: AgentDetailPageProp
       toast({
         title: 'Copy failed',
         description: 'Unable to copy installation steps to clipboard.',
-        variant: 'destructive',
       });
     }
   };
 
   // Build custom sections for agent-specific content
-  const customSections = [];
+  const customSections: CustomSection[] = [];
 
   // Features section
   if (item.features && item.features.length > 0) {
@@ -148,6 +141,8 @@ export function AgentDetailPage({ item, relatedItems = [] }: AgentDetailPageProp
           </ul>
         </>
       ),
+      collapsible: false,
+      defaultCollapsed: false,
     });
   }
 
@@ -170,6 +165,8 @@ export function AgentDetailPage({ item, relatedItems = [] }: AgentDetailPageProp
           </pre>
         </>
       ),
+      collapsible: false,
+      defaultCollapsed: false,
     });
   }
 
@@ -253,6 +250,8 @@ export function AgentDetailPage({ item, relatedItems = [] }: AgentDetailPageProp
           </ul>
         </>
       ),
+      collapsible: false,
+      defaultCollapsed: false,
     });
   }
 

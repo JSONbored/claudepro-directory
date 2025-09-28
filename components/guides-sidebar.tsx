@@ -12,16 +12,11 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-
-interface GuidesSidebarProps {
-  currentCategory?: string;
-  guideCounts?: Record<string, number>;
-  showSearch?: boolean;
-}
+import type { GuidesSidebarProps } from '@/lib/schemas/component.schema';
 
 const categoryInfo = {
   'use-cases': {
@@ -76,6 +71,9 @@ export function GuidesSidebar({
   const router = useRouter();
   const [searchValue, setSearchValue] = useState('');
 
+  // Generate unique ID for the search input
+  const searchInputId = useId();
+
   // Handle search with debounce effect
   const handleSearchChange = (value: string) => {
     setSearchValue(value);
@@ -88,7 +86,10 @@ export function GuidesSidebar({
       // Store timeout ID for cleanup
       return () => clearTimeout(timeoutId);
     }
-    return undefined;
+    // No cleanup needed when search value is empty
+    return () => {
+      // Intentionally empty - no cleanup required
+    };
   };
 
   return (
@@ -106,6 +107,8 @@ export function GuidesSidebar({
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
+                id={searchInputId}
+                name="sidebarGuidesSearch"
                 placeholder="Search guides..."
                 className="pl-10"
                 value={searchValue}

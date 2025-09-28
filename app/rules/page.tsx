@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { ContentListServer } from '@/components/content-list-server';
 import { rules } from '@/generated/content';
+import { APP_CONFIG } from '@/lib/constants';
 
 export const metadata: Metadata = {
-  title: 'Claude Rules - Expert System Prompts | Claude Pro Directory',
+  title: `Claude Rules - Expert System Prompts | ${APP_CONFIG.name}`,
   description:
     "Expert-crafted system prompts and configurations to enhance Claude's capabilities across different domains and use cases.",
   keywords: 'Claude rules, system prompts, AI configurations, prompt engineering, Claude AI',

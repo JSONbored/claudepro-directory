@@ -4,6 +4,7 @@ import { handleApiError, handleValidationError } from '@/lib/error-handler';
 import { logger } from '@/lib/logger';
 import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
 import { contentCache } from '@/lib/redis';
+import { errorInputSchema } from '@/lib/schemas/error.schema';
 import { apiSchemas, ValidationError, validation } from '@/lib/validation';
 
 export const runtime = 'nodejs';
@@ -116,14 +117,18 @@ async function handleGET(
     }
 
     // Handle all other errors with centralized handler
-    return handleApiError(error, {
-      route: '[contentType]',
-      operation: 'get_content',
-      method: 'GET',
-      logContext: {
-        contentType: errorContentType,
-      },
-    });
+    const validatedError = errorInputSchema.safeParse(error);
+    return handleApiError(
+      validatedError.success ? validatedError.data : { message: 'API error occurred' },
+      {
+        route: '[contentType]',
+        operation: 'get_content',
+        method: 'GET',
+        logContext: {
+          contentType: errorContentType,
+        },
+      }
+    );
   }
 }
 

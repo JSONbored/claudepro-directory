@@ -5,6 +5,8 @@
  */
 
 import { z } from 'zod';
+import { logger } from '@/lib/logger';
+import { requestIdSchema } from './branded-types.schema';
 
 /**
  * Security constants for error handling
@@ -68,13 +70,12 @@ export const basicErrorSchema = z.object({
 });
 
 /**
- * Error input validation - handles unknown error types
+ * Production error input validation - strict type safety
  */
 export const errorInputSchema = z.union([
   basicErrorSchema,
   z.string().max(ERROR_LIMITS.MAX_MESSAGE_LENGTH, 'Error message is too long'),
-  z.record(z.string(), z.unknown()),
-  z.unknown(),
+  z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
 ]);
 
 /**
@@ -85,7 +86,7 @@ export const sanitizedErrorSchema = z.object({
   message: z.string().max(200),
   code: z.string().regex(/^[A-Z]{3}_[A-Z0-9]{8,12}$/, 'Invalid error code format'),
   timestamp: z.string().datetime(),
-  requestId: z.string().min(1).max(100),
+  requestId: requestIdSchema,
   severity: errorSeveritySchema,
 });
 
@@ -107,13 +108,36 @@ export const stackTraceSanitizationSchema = z.object({
 });
 
 /**
- * Safe error input validation helper
+ * Error validation result schema - discriminated union for type safety
  */
-export function validateErrorInput(error: unknown): {
-  isValid: boolean;
-  error?: z.infer<typeof basicErrorSchema>;
-  fallback?: string;
-} {
+export const errorValidationResultSchema = z.discriminatedUnion('isValid', [
+  z.object({
+    isValid: z.literal(true),
+    type: z.literal('error'),
+    error: basicErrorSchema,
+    fallback: z.never().optional(),
+  }),
+  z.object({
+    isValid: z.literal(true),
+    type: z.literal('string'),
+    error: z.never().optional(),
+    fallback: z.string(),
+  }),
+  z.object({
+    isValid: z.literal(false),
+    type: z.literal('invalid'),
+    error: z.never().optional(),
+    fallback: z.string(),
+  }),
+]);
+
+export type ErrorValidationResult = z.infer<typeof errorValidationResultSchema>;
+
+/**
+ * Safe error input validation helper
+ * Note: error parameter must be unknown as we're catching thrown errors
+ */
+export function validateErrorInput(error: unknown): ErrorValidationResult {
   try {
     // Try to parse as Error object first
     if (error instanceof Error) {
@@ -122,12 +146,16 @@ export function validateErrorInput(error: unknown): {
         message: error.message,
         stack: error.stack,
       });
-      return { isValid: true, error: validated };
+      return { isValid: true, type: 'error', error: validated };
     }
 
     // Try to parse as string
     if (typeof error === 'string') {
-      return { isValid: true, fallback: error.slice(0, ERROR_LIMITS.MAX_MESSAGE_LENGTH) };
+      return {
+        isValid: true,
+        type: 'string',
+        fallback: error.slice(0, ERROR_LIMITS.MAX_MESSAGE_LENGTH),
+      };
     }
 
     // Try to parse as object
@@ -137,36 +165,44 @@ export function validateErrorInput(error: unknown): {
         const validated = basicErrorSchema.parse({
           name: typeof obj.name === 'string' ? obj.name : 'Error',
           message: obj.message,
-          stack: typeof obj.stack === 'string' ? obj.stack : undefined,
+          stack: typeof obj.stack === 'string' ? obj.stack : '',
         });
-        return { isValid: true, error: validated };
+        return { isValid: true, type: 'error', error: validated };
       }
     }
 
-    return { isValid: false, fallback: 'Unknown error occurred' };
+    return { isValid: false, type: 'invalid', fallback: 'Unknown error occurred' };
   } catch (validationError) {
-    console.error('[Error Validation] Failed to validate error input:', {
-      validationError:
-        validationError instanceof z.ZodError ? validationError.issues : String(validationError),
-      errorType: typeof error,
-      errorConstructor: error?.constructor?.name,
-    });
-    return { isValid: false, fallback: 'Error validation failed' };
+    logger.error(
+      'Error Validation: Failed to validate error input',
+      validationError instanceof Error ? validationError : new Error(String(validationError)),
+      {
+        validationError:
+          validationError instanceof z.ZodError
+            ? validationError.issues.join(', ')
+            : String(validationError),
+        errorType: typeof error,
+        errorConstructor: error?.constructor?.name || 'Error',
+      }
+    );
+    return { isValid: false, type: 'invalid', fallback: 'Error validation failed' };
   }
 }
 
 /**
  * Safe error context validation helper
  */
-export function validateErrorContext(context: unknown): z.infer<typeof errorContextSchema> | null {
+export function validateErrorContext(
+  context: Record<string, unknown>
+): z.infer<typeof errorContextSchema> {
   try {
     if (!context || typeof context !== 'object') {
-      return null;
+      return {};
     }
 
     // Sanitize context object
     const sanitized: Record<string, string | number | boolean> = {};
-    for (const [key, value] of Object.entries(context as Record<string, unknown>)) {
+    for (const [key, value] of Object.entries(context)) {
       // Validate key format
       if (typeof key === 'string' && key.length <= 50) {
         // Validate value type and sanitize
@@ -182,11 +218,15 @@ export function validateErrorContext(context: unknown): z.infer<typeof errorCont
 
     return errorContextSchema.parse(sanitized);
   } catch (error) {
-    console.error('[Error Context Validation] Failed to validate context:', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
-      contextType: typeof context,
-    });
-    return null;
+    logger.error(
+      'Error Context Validation: Failed to validate context',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        error: error instanceof z.ZodError ? error.issues.join(', ') : String(error),
+        contextType: typeof context,
+      }
+    );
+    return {};
   }
 }
 
@@ -199,11 +239,18 @@ export function validateSanitizedError(
   try {
     return sanitizedErrorSchema.parse(error);
   } catch (validationError) {
-    console.error('[Sanitized Error Validation] Failed to validate sanitized error:', {
-      error:
-        validationError instanceof z.ZodError ? validationError.issues : String(validationError),
-      errorKeys: typeof error === 'object' && error ? Object.keys(error) : 'not-object',
-    });
+    logger.error(
+      'Sanitized Error Validation: Failed to validate sanitized error',
+      validationError instanceof Error ? validationError : new Error(String(validationError)),
+      {
+        error:
+          validationError instanceof z.ZodError
+            ? validationError.issues.join(', ')
+            : String(validationError),
+        errorKeys: typeof error === 'object' && error ? Object.keys(error).length : 0,
+        errorType: typeof error,
+      }
+    );
     return null;
   }
 }
@@ -225,8 +272,15 @@ export function determineErrorType(error: unknown): z.infer<typeof errorTypeSche
     return 'InternalServerError';
   }
 
-  const errorData = validatedError.error;
-  const fallbackMessage = validatedError.fallback || '';
+  // Use discriminated union to safely access properties
+  let errorData: z.infer<typeof basicErrorSchema> | undefined;
+  let fallbackMessage = '';
+
+  if (validatedError.type === 'error') {
+    errorData = validatedError.error;
+  } else {
+    fallbackMessage = validatedError.fallback;
+  }
 
   const errorName = errorData?.name || '';
   const errorMessage = (errorData?.message || fallbackMessage).toLowerCase();
@@ -270,6 +324,55 @@ export function determineErrorType(error: unknown): z.infer<typeof errorTypeSche
 }
 
 /**
+ * Error handler configuration schema
+ */
+export const errorHandlerConfigSchema = z.object({
+  // Context information
+  route: z.string().max(500).optional(),
+  operation: z.string().max(100).optional(),
+  method: z.string().max(10).optional(),
+  userId: z.string().max(100).optional(),
+  requestId: requestIdSchema.optional(),
+
+  // Response configuration
+  includeStack: z.boolean().optional(),
+  includeDetails: z.boolean().optional(),
+  customMessage: z.string().max(500).optional(),
+
+  // Logging configuration
+  logLevel: z.enum(['debug', 'info', 'warn', 'error', 'fatal']).optional(),
+  logContext: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
+
+  // Security configuration
+  sanitizeResponse: z.boolean().optional(),
+  hideInternalErrors: z.boolean().optional(),
+});
+
+/**
+ * Standardized error response schema
+ */
+export const errorResponseSchema = z.object({
+  success: z.literal(false),
+  error: z.string().min(1).max(200),
+  message: z.string().min(1).max(1000),
+  code: z.string().min(1).max(50),
+  timestamp: z.string().datetime(),
+  requestId: requestIdSchema.optional(),
+  details: z
+    .array(
+      z.object({
+        field: z.string().max(100).optional(),
+        message: z.string().max(500),
+        code: z.string().max(50).optional(),
+      })
+    )
+    .optional(),
+  stack: z.string().max(ERROR_LIMITS.MAX_STACK_TRACE_LENGTH).optional(),
+  severity: errorSeveritySchema.optional(),
+  type: errorTypeSchema.optional(),
+});
+
+/**
  * Type exports
  */
 export type ErrorSeverity = z.infer<typeof errorSeveritySchema>;
@@ -280,3 +383,5 @@ export type SanitizedError = z.infer<typeof sanitizedErrorSchema>;
 export type ErrorSanitizationResult = z.infer<typeof errorSanitizationResultSchema>;
 export type StackTraceSanitization = z.infer<typeof stackTraceSanitizationSchema>;
 export type ErrorInput = z.infer<typeof errorInputSchema>;
+export type ErrorHandlerConfig = z.infer<typeof errorHandlerConfigSchema>;
+export type ErrorResponse = z.infer<typeof errorResponseSchema>;

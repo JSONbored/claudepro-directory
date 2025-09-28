@@ -5,7 +5,7 @@
  */
 
 import { z } from 'zod';
-import { contentCategorySchema, contentTypeSchema } from './shared.schema';
+import { appContentTypeSchema, contentCategorySchema } from './shared.schema';
 
 /**
  * Security constants for static API generation
@@ -49,8 +49,6 @@ export const baseContentItemSchema = z.object({
     .max(STATIC_API_LIMITS.MAX_TAGS)
     .default([]),
 
-  id: z.string().min(1).max(STATIC_API_LIMITS.MAX_SLUG_LENGTH),
-
   category: z.string().optional(),
 });
 
@@ -58,7 +56,7 @@ export const baseContentItemSchema = z.object({
  * Transformed content item with type and URL
  */
 export const transformedContentItemSchema = baseContentItemSchema.extend({
-  type: contentTypeSchema,
+  type: appContentTypeSchema,
   url: z
     .string()
     .url()
@@ -69,7 +67,7 @@ export const transformedContentItemSchema = baseContentItemSchema.extend({
 /**
  * Searchable item schema
  */
-export const searchableItemSchema = z.object({
+export const staticAPISearchableItemSchema = z.object({
   title: z.string().max(STATIC_API_LIMITS.MAX_TITLE_LENGTH),
   name: z.string().max(STATIC_API_LIMITS.MAX_TITLE_LENGTH),
   description: z.string().max(STATIC_API_LIMITS.MAX_DESCRIPTION_LENGTH),
@@ -77,7 +75,6 @@ export const searchableItemSchema = z.object({
   category: z.string(),
   popularity: z.number().int().min(0).default(0),
   slug: z.string().max(STATIC_API_LIMITS.MAX_SLUG_LENGTH),
-  id: z.string().max(STATIC_API_LIMITS.MAX_SLUG_LENGTH),
 });
 
 /**
@@ -160,7 +157,7 @@ export const categoryCountSchema = z.object({
  */
 export const categorySearchIndexSchema = z.object({
   category: contentCategorySchema,
-  items: z.array(searchableItemSchema).max(STATIC_API_LIMITS.MAX_ITEMS_PER_CATEGORY),
+  items: z.array(staticAPISearchableItemSchema).max(STATIC_API_LIMITS.MAX_ITEMS_PER_CATEGORY),
   count: z.number().int().min(0),
   lastUpdated: z.string().datetime(),
   generated: z.literal('static'),
@@ -172,7 +169,7 @@ export const categorySearchIndexSchema = z.object({
  * Combined search index schema
  */
 export const combinedSearchIndexSchema = z.object({
-  items: z.array(searchableItemSchema),
+  items: z.array(staticAPISearchableItemSchema),
   count: z.number().int().min(0),
   lastUpdated: z.string().datetime(),
   generated: z.literal('static'),
@@ -221,7 +218,9 @@ export const generationResultSchema = z.object({
 /**
  * Helper to validate and transform content item
  */
-export function validateContentItem(item: unknown): z.infer<typeof baseContentItemSchema> {
+export function validateContentItem(
+  item: z.input<typeof baseContentItemSchema>
+): z.infer<typeof baseContentItemSchema> {
   return baseContentItemSchema.parse(item);
 }
 
@@ -229,7 +228,7 @@ export function validateContentItem(item: unknown): z.infer<typeof baseContentIt
  * Helper to validate API response
  */
 export function validateApiResponse(
-  response: unknown,
+  response: z.input<typeof contentTypeApiResponseSchema>,
   category: string
 ): z.infer<typeof contentTypeApiResponseSchema> {
   const validated = contentTypeApiResponseSchema.parse(response);
@@ -246,7 +245,7 @@ export function validateApiResponse(
  * Helper to validate search index
  */
 export function validateSearchIndex(
-  index: unknown,
+  index: z.input<typeof categorySearchIndexSchema> | z.input<typeof combinedSearchIndexSchema>,
   type: 'category' | 'combined'
 ): z.infer<typeof categorySearchIndexSchema | typeof combinedSearchIndexSchema> {
   if (type === 'category') {
@@ -259,7 +258,7 @@ export function validateSearchIndex(
  * Type exports
  */ export type BaseContentItem = z.infer<typeof baseContentItemSchema>;
 export type TransformedContentItem = z.infer<typeof transformedContentItemSchema>;
-export type SearchableItem = z.infer<typeof searchableItemSchema>;
+export type StaticAPISearchableItem = z.infer<typeof staticAPISearchableItemSchema>;
 export type ContentTypeApiResponse = z.infer<typeof contentTypeApiResponseSchema>;
 export type AllConfigurationsResponse = z.infer<typeof allConfigurationsResponseSchema>;
 export type CategorySearchIndex = z.infer<typeof categorySearchIndexSchema>;

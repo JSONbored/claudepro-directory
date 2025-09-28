@@ -7,12 +7,8 @@ import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Job } from '@/data/jobs';
 import { formatRelativeDate } from '@/lib/date-utils';
-
-interface JobCardProps {
-  job: Job;
-}
+import type { JobCardProps } from '@/lib/schemas/component.schema';
 
 export const JobCard = memo(({ job }: JobCardProps) => {
   const getTypeColor = (type: string) => {

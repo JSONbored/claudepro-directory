@@ -2,26 +2,11 @@ import { forwardRef, memo } from 'react';
 import { type CellComponentProps, Grid } from 'react-window';
 import { ConfigCard } from '@/components/config-card';
 import { ErrorBoundary } from '@/components/error-boundary';
-import type { ContentMetadata } from '@/types/content';
-
-interface VirtualGridProps {
-  items: ContentMetadata[];
-  width: number;
-  height: number;
-  itemsPerRow: number;
-  itemHeight: number;
-  type: 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks';
-}
-
-interface GridCellProps {
-  items: ContentMetadata[];
-  itemsPerRow: number;
-  type: 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks';
-}
+import type { GridCellProps, VirtualGridProps } from '@/lib/schemas/component.schema';
 
 // Grid cell component properly typed for new react-window API
 const GridCell = memo(function GridCellComponent(props: CellComponentProps<GridCellProps>) {
-  const { items, itemsPerRow, type, columnIndex, rowIndex, style } = props;
+  const { items, itemsPerRow, columnIndex, rowIndex, style } = props;
 
   const index = rowIndex * itemsPerRow + columnIndex;
   const item = items[index];
@@ -32,10 +17,14 @@ const GridCell = memo(function GridCellComponent(props: CellComponentProps<GridC
 
   return (
     <div style={style} className="p-3">
-      <ErrorBoundary
-        fallback={<div className="p-4 text-center text-muted-foreground">Error loading item</div>}
-      >
-        <ConfigCard key={item.slug} {...item} type={type} />
+      <ErrorBoundary>
+        <ConfigCard
+          key={item.slug}
+          item={item}
+          variant="default"
+          showCategory={false}
+          showActions={false}
+        />
       </ErrorBoundary>
     </div>
   );
@@ -65,19 +54,13 @@ export const VirtualGrid = memo(
 
       return (
         <div ref={ref}>
-          <ErrorBoundary
-            fallback={
-              <div className="flex items-center justify-center h-64 text-muted-foreground">
-                Error loading virtual grid
-              </div>
-            }
-          >
+          <ErrorBoundary>
             <Grid
               cellComponent={GridCell}
               cellProps={{
                 items,
                 itemsPerRow,
-                type,
+                ...(type !== undefined && { type }),
               }}
               columnCount={itemsPerRow}
               columnWidth={columnWidth}

@@ -14,29 +14,29 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { type Job, jobs } from '@/data/jobs';
+import { APP_CONFIG } from '@/lib/constants';
 import { logger } from '@/lib/logger';
+import type { PagePropsWithSearchParams } from '@/lib/schemas/app.schema';
 import {
   type JobsSearchParams,
   jobsSearchSchema,
   parseSearchParams,
 } from '@/lib/schemas/search.schema';
 
-interface JobsPageProps {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}
-
-export async function generateMetadata({ searchParams }: JobsPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: PagePropsWithSearchParams): Promise<Metadata> {
   const rawParams = await searchParams;
   const params = parseSearchParams(jobsSearchSchema, rawParams, 'jobs page metadata');
 
-  let title = 'AI Jobs Board - Find Your Dream Job | Claude Pro Directory';
+  let title = `AI Jobs Board - Find Your Dream Job | ${APP_CONFIG.name}`;
   let description =
     'Discover opportunities with companies building the future of artificial intelligence. From startups to industry giants, find your perfect role.';
 
   // Safely handle category if it exists in the validated params
   const category = (params as JobsSearchParams).category;
   if (category && category !== 'all') {
-    title = `${category.charAt(0).toUpperCase() + category.slice(1)} Jobs | Claude Pro Directory`;
+    title = `${category.charAt(0).toUpperCase() + category.slice(1)} Jobs | ${APP_CONFIG.name}`;
     description = `Find ${category} positions in AI companies. ${description}`;
   }
 
@@ -87,7 +87,7 @@ function filterJobs(jobs: Job[], params: JobsSearchParams): Job[] {
   });
 }
 
-export default async function JobsPage({ searchParams }: JobsPageProps) {
+export default async function JobsPage({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
 
   // Validate and parse search parameters with Zod
@@ -107,8 +107,11 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
 
   const filteredJobs = filterJobs(jobs, params);
 
-  // Generate unique ID for search input
-  const searchInputId = `jobs-search-${Math.random().toString(36).substr(2, 9)}`;
+  // Generate stable, unique IDs for accessibility
+  const baseId = 'jobs-page';
+  const searchInputId = `${baseId}-search`;
+  const categoryFilterId = `${baseId}-category`;
+  const employmentFilterId = `${baseId}-employment`;
 
   // Build current filter URL for form actions with validated params
   const buildFilterUrl = (newParams: Record<string, string | boolean | undefined>) => {
@@ -193,7 +196,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                   </div>
 
                   <Select name="category" defaultValue={params.category || 'all'}>
-                    <SelectTrigger aria-label="Filter jobs by category">
+                    <SelectTrigger id={categoryFilterId} aria-label="Filter jobs by category">
                       <Filter className="h-4 w-4 mr-2" />
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
@@ -209,7 +212,10 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
                   </Select>
 
                   <Select name="employment" defaultValue={params.employment || 'any'}>
-                    <SelectTrigger aria-label="Filter jobs by employment type">
+                    <SelectTrigger
+                      id={employmentFilterId}
+                      aria-label="Filter jobs by employment type"
+                    >
                       <Clock className="h-4 w-4 mr-2" />
                       <SelectValue placeholder="Employment Type" />
                     </SelectTrigger>

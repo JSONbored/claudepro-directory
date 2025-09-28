@@ -83,7 +83,7 @@ export const markdownParseOptionsSchema = z.object({
 /**
  * Schema for sanitized HTML output
  */
-export const sanitizedHtmlSchema = z.string().refine(
+export const markdownSanitizedHtmlSchema = z.string().refine(
   (html) => {
     // Ensure no script tags or event handlers
     const dangerousPatterns = [
@@ -113,7 +113,7 @@ export const markdownToHtmlRequestSchema = z.object({
  * Schema for markdown to HTML conversion response
  */
 export const markdownToHtmlResponseSchema = z.object({
-  html: sanitizedHtmlSchema,
+  html: markdownSanitizedHtmlSchema,
   wordCount: z.number().int().nonnegative(),
   readingTime: z.number().int().nonnegative(), // in minutes
   hasCodeBlocks: z.boolean(),
@@ -127,20 +127,55 @@ export const markdownToHtmlResponseSchema = z.object({
 export type MarkdownContent = z.infer<typeof markdownContentSchema>;
 export type SanitizationOptions = z.infer<typeof sanitizationOptionsSchema>;
 export type MarkdownParseOptions = z.infer<typeof markdownParseOptionsSchema>;
-export type SanitizedHtml = z.infer<typeof sanitizedHtmlSchema>;
+export type SanitizedHtml = z.infer<typeof markdownSanitizedHtmlSchema>;
 export type MarkdownToHtmlRequest = z.infer<typeof markdownToHtmlRequestSchema>;
 export type MarkdownToHtmlResponse = z.infer<typeof markdownToHtmlResponseSchema>;
 
 /**
  * Helper to validate markdown content
  */
-export function validateMarkdownContent(content: unknown): MarkdownContent {
+export function validateMarkdownContent(content: string): MarkdownContent {
   return markdownContentSchema.parse(content);
 }
 
 /**
  * Helper to validate sanitized HTML
  */
-export function validateSanitizedHtml(html: unknown): SanitizedHtml {
-  return sanitizedHtmlSchema.parse(html);
+export function validateSanitizedHtml(html: string): SanitizedHtml {
+  return markdownSanitizedHtmlSchema.parse(html);
 }
+
+/**
+ * MDX frontmatter schema
+ */
+export const mdxFrontmatterSchema = z.object({
+  title: z.string().min(1).max(200),
+  description: z.string().min(1).max(500),
+  keywords: z.array(z.string().max(50)).optional(),
+  dateUpdated: z.string().optional(),
+  author: z.string().max(100).optional(),
+  category: z.string().max(50).optional(),
+  tags: z.array(z.string().max(50)).optional(),
+  readingTime: z.string().max(20).optional(),
+  difficulty: z.string().max(20).optional(),
+  aiOptimized: z.boolean().optional(),
+  citationReady: z.boolean().optional(),
+  schemas: z
+    .object({
+      article: z
+        .record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]))
+        .optional(),
+      faq: z
+        .record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]))
+        .optional(),
+      breadcrumb: z
+        .record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]))
+        .optional(),
+      howto: z
+        .record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]))
+        .optional(),
+    })
+    .optional(),
+});
+
+export type MDXFrontmatter = z.infer<typeof mdxFrontmatterSchema>;

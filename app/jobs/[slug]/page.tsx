@@ -16,21 +16,25 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { jobs } from '@/data/jobs';
 import { logger } from '@/lib/logger';
-import { slugParamSchema } from '@/lib/schemas/search.schema';
+import type { PageProps } from '@/lib/schemas/app.schema';
+import { slugParamsSchema } from '@/lib/schemas/app.schema';
 
-interface JobPageProps {
-  params: Promise<{ slug: string }>;
-}
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  if (!params) {
+    return {
+      title: 'Job Not Found',
+      description: 'The requested job posting could not be found.',
+    };
+  }
 
-export async function generateMetadata({ params }: JobPageProps): Promise<Metadata> {
   const rawParams = await params;
 
   // Validate slug parameter
-  const validationResult = slugParamSchema.safeParse(rawParams);
+  const validationResult = slugParamsSchema.safeParse(rawParams);
 
   if (!validationResult.success) {
     logger.warn('Invalid slug parameter for job metadata', {
-      slug: rawParams.slug,
+      slug: String(rawParams.slug),
       errorCount: validationResult.error.issues.length,
       firstError: validationResult.error.issues[0]?.message || 'Unknown error',
     });
@@ -70,18 +74,22 @@ export async function generateStaticParams() {
 // Enable ISR - revalidate every 4 hours
 export const revalidate = 14400;
 
-export default async function JobPage({ params }: JobPageProps) {
+export default async function JobPage({ params }: PageProps) {
+  if (!params) {
+    notFound();
+  }
+
   const rawParams = await params;
 
   // Validate slug parameter
-  const validationResult = slugParamSchema.safeParse(rawParams);
+  const validationResult = slugParamsSchema.safeParse(rawParams);
 
   if (!validationResult.success) {
     logger.error(
       'Invalid slug parameter for job page',
       new Error(validationResult.error.issues[0]?.message || 'Invalid slug'),
       {
-        slug: rawParams.slug,
+        slug: String(rawParams.slug),
         errorCount: validationResult.error.issues.length,
       }
     );

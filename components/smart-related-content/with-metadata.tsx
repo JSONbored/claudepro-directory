@@ -3,13 +3,8 @@
  * Used by MDXRenderer to pass frontmatter data to the component
  */
 
-import type { SmartRelatedContentProps } from '@/lib/related-content/types';
+import type { SmartRelatedContentWithMetadataProps } from '@/lib/schemas/related-content.schema';
 import { SmartRelatedContent } from './index';
-
-interface SmartRelatedContentWithMetadataProps
-  extends Omit<SmartRelatedContentProps, 'currentTags' | 'currentKeywords'> {
-  // These will be provided by the wrapper
-}
 
 // This will be populated by MDXRenderer
 let currentPageMetadata: {
@@ -23,12 +18,16 @@ export function setPageMetadata(metadata: { tags?: string[]; keywords?: string[]
 }
 
 // Wrapper component that injects metadata
-export function SmartRelatedContentWithMetadata(props: SmartRelatedContentWithMetadataProps) {
+export function SmartRelatedContentWithMetadata({
+  pathname,
+  ...props
+}: SmartRelatedContentWithMetadataProps) {
   return (
     <SmartRelatedContent
       {...props}
       currentTags={currentPageMetadata.tags || []}
       currentKeywords={currentPageMetadata.keywords || []}
+      pathname={pathname || ''}
     />
   );
 }

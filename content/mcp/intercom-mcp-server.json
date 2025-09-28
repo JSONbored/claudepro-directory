@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Intercom",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "customer-support",
-    "intercom",
-    "chat",
-    "helpdesk",
-    "crm"
-  ],
+  "tags": ["customer-support", "intercom", "chat", "helpdesk", "crm"],
   "content": "Connect Claude to Intercom for customer support operations and conversation management.",
   "features": [
     "Access customer conversations in real-time",
@@ -79,11 +73,7 @@
     "Generate weekly support metrics"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "respond"
-  ],
+  "permissions": ["read", "write", "respond"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://developers.intercom.com/docs/guides/mcp"
 }

@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { UnifiedSidebar } from '@/components/unified-sidebar';
 import { ViewTracker } from '@/components/view-tracker';
+import { APP_CONFIG } from '@/lib/constants';
 import { logger } from '@/lib/logger';
 import { parseMDXFrontmatter } from '@/lib/mdx-config';
 import { contentCache } from '@/lib/redis';
@@ -39,23 +40,7 @@ const guideParamsSchema = z.object({
     .max(5, 'Too many slug segments'),
 });
 
-interface SEOPageData {
-  title: string;
-  description: string;
-  keywords: string[];
-  dateUpdated: string;
-  content: string;
-  author?: string;
-  readingTime?: string;
-  difficulty?: string;
-  category?: string;
-}
-
-interface RelatedGuide {
-  title: string;
-  slug: string;
-  category: string;
-}
+import type { RelatedGuide, SEOPageData } from '@/lib/schemas/app.schema';
 
 async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
   // Map URL paths to file locations
@@ -72,7 +57,7 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
   const [category, ...restSlug] = slug;
   const filename = `${restSlug.join('-')}.mdx`;
 
-  if (!category || !pathMap[category]) return null;
+  if (!(category && pathMap[category])) return null;
 
   const cacheKey = `guide:${category}:${restSlug.join('-')}`;
 
@@ -102,7 +87,7 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
           description: frontmatter.description || '',
           keywords: Array.isArray(frontmatter.keywords) ? frontmatter.keywords : [],
           dateUpdated: frontmatter.dateUpdated || '',
-          author: frontmatter.author || 'Claude Pro Directory Team',
+          author: frontmatter.author || APP_CONFIG.author,
           readingTime: frontmatter.readingTime || '',
           difficulty: frontmatter.difficulty || '',
           category: frontmatter.category || category,
@@ -112,8 +97,7 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
         return null;
       }
     },
-    24 * 60 * 60, // Cache for 24 hours
-    0.9 // Refresh when 90% of TTL has passed
+    24 * 60 * 60 // Cache for 24 hours
   );
 }
 
@@ -163,8 +147,7 @@ async function getRelatedGuides(currentSlug: string[], limit = 3): Promise<Relat
 
       return relatedGuides;
     },
-    4 * 60 * 60, // Cache for 4 hours
-    0.8 // Refresh when 80% of TTL has passed
+    4 * 60 * 60 // Cache for 4 hours
   );
 }
 
@@ -241,14 +224,14 @@ export async function generateMetadata({
       };
     }
 
-    const baseUrl = 'https://claudepro.directory';
+    const baseUrl = APP_CONFIG.url;
     const canonicalUrl = `${baseUrl}/guides/${slug.join('/')}`;
 
     return {
       title: data.title,
       description: data.description,
       keywords: data.keywords?.join(', '),
-      authors: [{ name: data.author || 'Claude Pro Directory Team' }],
+      authors: [{ name: data.author || APP_CONFIG.author }],
       alternates: {
         canonical: canonicalUrl,
       },
@@ -257,9 +240,9 @@ export async function generateMetadata({
         description: data.description,
         type: 'article',
         publishedTime: data.dateUpdated,
-        authors: [data.author || 'Claude Pro Directory Team'],
+        authors: [data.author || APP_CONFIG.author],
         url: canonicalUrl,
-        siteName: 'Claude Pro Directory',
+        siteName: APP_CONFIG.name,
         images: [
           {
             url: `${baseUrl}/api/og?title=${encodeURIComponent(data.title)}&category=${slug[0]}`,
@@ -373,25 +356,25 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
           '@type': 'ListItem',
           position: 1,
           name: 'Home',
-          item: 'https://claudepro.directory',
+          item: APP_CONFIG.url,
         },
         {
           '@type': 'ListItem',
           position: 2,
           name: 'Guides',
-          item: 'https://claudepro.directory/guides',
+          item: `${APP_CONFIG.url}/guides`,
         },
         {
           '@type': 'ListItem',
           position: 3,
           name: categoryLabels[category || ''] || 'Guide',
-          item: `https://claudepro.directory/guides/${category}`,
+          item: `${APP_CONFIG.url}/guides/${category}`,
         },
         {
           '@type': 'ListItem',
           position: 4,
           name: data.title,
-          item: `https://claudepro.directory/guides/${slug.join('/')}`,
+          item: `${APP_CONFIG.url}/guides/${slug.join('/')}`,
         },
       ],
     };
@@ -405,21 +388,21 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
       keywords: data.keywords?.join(', '),
       author: {
         '@type': 'Person',
-        name: data.author || 'Claude Pro Directory Team',
+        name: data.author || APP_CONFIG.author,
       },
       datePublished: data.dateUpdated,
       dateModified: data.dateUpdated,
       publisher: {
         '@type': 'Organization',
-        name: 'Claude Pro Directory',
+        name: APP_CONFIG.name,
         logo: {
           '@type': 'ImageObject',
-          url: 'https://claudepro.directory/logo.png',
+          url: `${APP_CONFIG.url}/logo.png`,
         },
       },
       mainEntityOfPage: {
         '@type': 'WebPage',
-        '@id': `https://claudepro.directory/guides/${slug.join('/')}`,
+        '@id': `${APP_CONFIG.url}/guides/${slug.join('/')}`,
       },
       articleSection: categoryLabels[category || ''] || 'Guide',
       wordCount: data.content.split(/\s+/).length,
@@ -429,7 +412,6 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
     const pageId = slug.join('-');
     const breadcrumbId = `breadcrumb-${pageId}`;
     const articleId = `article-${pageId}`;
-
     return (
       <>
         <Script id={breadcrumbId} type="application/ld+json" strategy="afterInteractive">
@@ -505,6 +487,8 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
                   <CardContent className="pt-6">
                     <MDXRenderer
                       source={data.content}
+                      className=""
+                      pathname={`/guides/${slug.join('/')}`}
                       metadata={{
                         tags: data.keywords || [], // Note: SEO pages use keywords field
                         keywords: data.keywords || [],

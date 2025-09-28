@@ -240,23 +240,23 @@ Implement post-edit hooks maintaining code quality automatically. Hooks trigger 
   title="Implementation Challenges"
   items={[
     {
-      question: "How do I prevent context window overflow?",
-      answer: "Implement token optimization through directory exclusions. Filter node_modules, dist, and build directories automatically. Monitor usage staying below 80% of limits for optimal performance. Use clear commands between major tasks resetting context.",
+      title: "How do I prevent context window overflow?",
+      content: "Implement token optimization through directory exclusions. Filter node_modules, dist, and build directories automatically. Monitor usage staying below 80% of limits for optimal performance. Use clear commands between major tasks resetting context.",
       category: "performance"
     },
     {
-      question: "What if Claude makes incorrect changes?",
-      answer: "Start with read-only permissions during onboarding phase. Implement approval workflows for critical codebases. Use Git worktrees for safe experimentation. Review all changes before merging to main branches.",
+      title: "What if Claude makes incorrect changes?",
+      content: "Start with read-only permissions during onboarding phase. Implement approval workflows for critical codebases. Use Git worktrees for safe experimentation. Review all changes before merging to main branches.",
       category: "safety"
     },
     {
-      question: "How do I handle multiple team members using Claude?",
-      answer: "Configure team-wide CLAUDE.md for consistency. Use Git-ignored local overrides for personal preferences. Implement shared command libraries for common tasks. Establish code review processes for Claude-generated changes.",
+      title: "How do I handle multiple team members using Claude?",
+      content: "Configure team-wide CLAUDE.md for consistency. Use Git-ignored local overrides for personal preferences. Implement shared command libraries for common tasks. Establish code review processes for Claude-generated changes.",
       category: "collaboration"
     },
     {
-      question: "Can Claude work with proprietary frameworks?",
-      answer: "Document internal frameworks thoroughly in CLAUDE.md files. Create custom commands for framework-specific operations. Use example-driven documentation showing correct patterns. Build MCP servers for proprietary API integration.",
+      title: "Can Claude work with proprietary frameworks?",
+      content: "Document internal frameworks thoroughly in CLAUDE.md files. Create custom commands for framework-specific operations. Use example-driven documentation showing correct patterns. Build MCP servers for proprietary API integration.",
       category: "customization"
     }
   ]}

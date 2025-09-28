@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowDown, ArrowUp } from 'lucide-react';
+import { useCallback, useId, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -9,27 +10,39 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { SortDirection, SortOption } from '@/hooks/use-sorting';
-
-interface SortDropdownProps {
-  sortBy: SortOption;
-  sortDirection: SortDirection;
-  onSortChange: (option: SortOption, direction?: SortDirection) => void;
-}
+import type { SortDropdownProps, SortOption } from '@/lib/schemas/component.schema';
 
 export const SortDropdown = ({ sortBy, sortDirection, onSortChange }: SortDropdownProps) => {
-  const sortOptions = [
-    { value: 'popularity', label: 'Popularity' },
-    { value: 'date', label: 'Date Created' },
-    { value: 'name', label: 'Name' },
-    { value: 'author', label: 'Author' },
-  ];
+  const sortDropdownId = useId();
+
+  const sortOptions = useMemo(
+    () => [
+      { value: 'popularity', label: 'Popularity' },
+      { value: 'date', label: 'Date Created' },
+      { value: 'name', label: 'Name' },
+      { value: 'author', label: 'Author' },
+    ],
+    []
+  );
+
+  const handleSortValueChange = useCallback(
+    (value: string) => {
+      onSortChange(value as SortOption);
+    },
+    [onSortChange]
+  );
+
+  const handleDirectionToggle = useCallback(() => {
+    onSortChange(sortBy);
+  }, [onSortChange, sortBy]);
 
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm text-muted-foreground">Sort by:</span>
-      <Select value={sortBy} onValueChange={(value) => onSortChange(value as SortOption)}>
+      <Select value={sortBy} onValueChange={handleSortValueChange}>
         <SelectTrigger
+          id={sortDropdownId}
+          name="sortBy"
           className="w-40 bg-background/50 border-border/50"
           aria-label="Sort configurations"
         >
@@ -47,7 +60,7 @@ export const SortDropdown = ({ sortBy, sortDirection, onSortChange }: SortDropdo
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => onSortChange(sortBy)}
+        onClick={handleDirectionToggle}
         className="p-2 hover:bg-accent/10"
       >
         {sortDirection === 'asc' ? (

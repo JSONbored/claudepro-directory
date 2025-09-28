@@ -77,26 +77,22 @@ Configuration issues represent a significant portion of Claude Code support requ
   title="Claude Code Configuration Errors"
   errors={[
     {
-      error: "OAuth account information not found in config",
-      description: "OAuth callback handling failure after browser authentication. Corporate networks blocking OAuth callbacks require API key fallback.",
+      message: "OAuth account information not found in config",
       solution: "Remove all Claude directories (~/.claude, ~/.npm-global/lib/node_modules/@anthropic-ai/). Clear npm cache. Reinstall fresh.",
       code: "AUTH_001"
     },
     {
-      error: "Missing API key · Run /login",
-      description: "Token storage limitations in SSH environments. Config mismatches between installation methods.",
+      message: "Missing API key · Run /login",
       solution: "Run /doctor command. Set install method: claude config set --global installMethod npm-global",
       code: "AUTH_002"
     },
     {
-      error: "Permission denied: Cannot access file",
-      description: "File access patterns misconfigured. Security rules blocking legitimate operations.",
+      message: "Permission denied: Cannot access file",
       solution: "Configure permission scopes: Read(src/**), Edit(/docs/**), Deny(~/.env)",
       code: "PERM_001"
     },
     {
-      error: "MCP server connection failed",
-      description: "Stack Overflow integration requires dedicated environment variables. Rate limiting exceeded.",
+      message: "MCP server connection failed",
       solution: "Set STACK_EXCHANGE_API_KEY and MAX_REQUEST_PER_WINDOW=30 in configuration",
       code: "MCP_001"
     }

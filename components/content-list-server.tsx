@@ -5,22 +5,10 @@ import { ContentSearchClient } from '@/components/content-search-client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getIconByName } from '@/lib/icons';
-import type { ContentCategory, ContentMetadata } from '@/types/content';
+import type { ContentListServerProps } from '@/lib/schemas/component.schema';
+import type { UnifiedContentItem } from '@/lib/schemas/components';
 
-interface ContentListServerProps<T extends ContentMetadata> {
-  title: string;
-  description: string;
-  icon: string;
-  items: readonly T[] | T[];
-  type: ContentCategory;
-  searchPlaceholder?: string;
-  badges?: Array<{
-    icon?: string | React.ComponentType<{ className?: string }>;
-    text: string;
-  }>;
-}
-
-function ContentHeroSection<T extends ContentMetadata>({
+function ContentHeroSection<T extends UnifiedContentItem>({
   title,
   description,
   icon,
@@ -68,10 +56,9 @@ function ContentHeroSection<T extends ContentMetadata>({
                       if (typeof badge.icon === 'string') {
                         const BadgeIconComponent = getIconByName(badge.icon);
                         return <BadgeIconComponent className="h-3 w-3 mr-1" aria-hidden="true" />;
-                      } else {
-                        const BadgeIcon = badge.icon;
-                        return <BadgeIcon className="h-3 w-3 mr-1" aria-hidden="true" />;
                       }
+                      const BadgeIcon = badge.icon;
+                      return <BadgeIcon className="h-3 w-3 mr-1" aria-hidden="true" />;
                     })()}
                   {badge.text}
                 </Badge>
@@ -107,7 +94,7 @@ function ContentSearchSkeleton() {
   );
 }
 
-export function ContentListServer<T extends ContentMetadata>({
+export function ContentListServer<T extends UnifiedContentItem>({
   title,
   description,
   icon,

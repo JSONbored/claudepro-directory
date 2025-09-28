@@ -1,18 +1,19 @@
 #!/usr/bin/env tsx
 
 import fs from 'fs';
-import { validateContent } from '../lib/schemas/content.schema';
+import { z } from 'zod';
+import { logger } from '@/lib/logger';
+import {
+  type ContentCategory,
+  type contentItemSchema,
+  validateContentByCategory,
+} from '../lib/schemas/content/index';
 
-// Type for content JSON data structure
-interface ContentData {
-  slug: string;
-  description: string;
-  category: string;
-  author: string;
-  dateAdded: string;
-  tags?: string[];
-  [key: string]: string | string[] | number | boolean | Record<string, unknown> | undefined;
-}
+// Schema for raw JSON data validation
+const rawJsonSchema = z.record(z.string(), z.unknown());
+
+// Type for validated content data
+type ContentData = z.infer<typeof contentItemSchema>;
 
 // Get file paths from command line arguments
 const files = process.argv.slice(2);
@@ -32,7 +33,6 @@ const contentFiles = files.filter(
 );
 
 if (contentFiles.length === 0) {
-  console.log('No content files to validate');
   process.exit(0);
 }
 
@@ -53,51 +53,78 @@ contentFiles.forEach((filePath) => {
     const content = fs.readFileSync(filePath, 'utf8');
     let data: ContentData;
 
+    let rawData: unknown;
     try {
-      data = JSON.parse(content);
-    } catch (e) {
-      console.error(`ERROR: Invalid JSON in ${filePath}`);
-      console.error(e instanceof Error ? e.message : String(e));
+      rawData = JSON.parse(content);
+    } catch (error) {
+      logger.error(
+        'Invalid JSON in content file',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          filePath: String(filePath),
+        }
+      );
       hasErrors = true;
       return;
     }
 
+    // Validate raw JSON structure
+    const rawValidation = rawJsonSchema.safeParse(rawData);
+    if (!rawValidation.success) {
+      logger.error('Invalid JSON structure', new Error(rawValidation.error.issues.join(', ')), {
+        filePath: String(filePath),
+      });
+      hasErrors = true;
+      return;
+    }
+
+    data = rawValidation.data as ContentData;
+
     // Get category from file path
     const category = getCategoryFromPath(filePath);
     if (!category) {
-      console.error(`ERROR: Cannot determine category from path ${filePath}`);
+      logger.error(
+        'Cannot determine content category from file path',
+        new Error('Category determination failed'),
+        {
+          filePath: String(filePath),
+          pathParts: String(filePath.split('/').length),
+        }
+      );
       hasErrors = true;
       return;
     }
 
     // Use Zod schema validation
     try {
-      validateContent(category, data);
-      console.log(`✅ VALID: ${filePath}`);
+      validateContentByCategory(data, category as ContentCategory);
+      logger.info('Content validation successful', {
+        filePath,
+        category,
+        slug: data.slug,
+      });
     } catch (validationError) {
-      console.error(`❌ VALIDATION ERROR in ${filePath}:`);
-      if (validationError instanceof Error) {
-        console.error(`  - ${validationError.message}`);
-      } else {
-        console.error(`  - ${String(validationError)}`);
-      }
+      logger.error(
+        'Content validation failed',
+        validationError instanceof Error ? validationError : new Error(String(validationError)),
+        {
+          filePath: String(filePath),
+          category: String(category),
+        }
+      );
       hasErrors = true;
     }
   } catch (error) {
-    console.error(`ERROR: Failed to process ${filePath}`);
-    if (error instanceof Error) {
-      console.error(error.message);
-    } else {
-      console.error(String(error));
-    }
+    logger.error(
+      'Failed to process content file',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        filePath: String(filePath),
+      }
+    );
     hasErrors = true;
   }
 });
 
 // Exit with error code if validation failed
-if (hasErrors) {
-  console.error('\n❌ Content validation failed');
-  process.exit(1);
-} else {
-  process.exit(0);
-}
+process.exit(hasErrors ? 1 : 0);

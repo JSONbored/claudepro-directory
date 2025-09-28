@@ -91,10 +91,10 @@ export const relatedContentWarmingSchema = z.object({
     .max(CACHE_WARMER_LIMITS.MAX_PATH_LENGTH)
     .regex(/^\/[a-zA-Z0-9\-_/]*$/, 'Invalid path format')
     .refine((path) => !path.includes('..'), 'Path traversal detected'),
-  category: warmableCategorySchema.optional(),
-  tags: z.array(z.string()).max(50).optional(),
-  keywords: z.array(z.string()).max(50).optional(),
-  limit: z.number().int().min(1).max(20).optional(),
+  category: warmableCategorySchema.default('agents'),
+  tags: z.array(z.string()).max(50).default([]),
+  keywords: z.array(z.string()).max(50).default([]),
+  limit: z.number().int().min(1).max(20).default(6),
 });
 
 /**

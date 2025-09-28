@@ -1,28 +1,17 @@
 'use client';
 
 import { ArrowRight, Filter, Hash, Search, User, X } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import type { FloatingSearchSidebarProps } from '@/lib/schemas/component.schema';
+import type { ContentFilterOptions } from '@/lib/schemas/content-filter.schema';
 import { getDisplayTitle } from '@/lib/utils';
-import type { ContentMetadata } from '@/types/content';
 
-interface FloatingSearchSidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
-  items: ContentMetadata[];
-  onItemSelect: (item: ContentMetadata) => void;
-  placeholder?: string;
-}
-
-interface FilterOptions {
-  categories: string[];
-  tags: string[];
-  authors: string[];
-}
+// FloatingSearchSidebarProps and FilterOptions are now imported from component.schema.ts
 
 export function FloatingSearchSidebar({
   isOpen,
@@ -37,8 +26,11 @@ export function FloatingSearchSidebar({
   const [selectedAuthor, setSelectedAuthor] = useState<string>('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
+  // Generate unique ID for the search input
+  const searchInputId = useId();
+
   // Extract filter options from items
-  const filterOptions: FilterOptions = useMemo(() => {
+  const filterOptions: ContentFilterOptions = useMemo(() => {
     const categories = [...new Set(items.map((item) => item.category).filter(Boolean))];
     const tags = [...new Set(items.flatMap((item) => item.tags || []))];
     const authors = [...new Set(items.map((item) => item.author).filter(Boolean))];
@@ -50,33 +42,44 @@ export function FloatingSearchSidebar({
     };
   }, [items]);
 
-  // Filter and search items
+  // Pre-computed search index for optimal performance
+  const searchIndex = useMemo(() => {
+    return items.map((item) => ({
+      item,
+      searchText: [
+        item.name || '',
+        item.description || '',
+        ...(item.tags || []),
+        item.category || '',
+        item.author || '',
+      ]
+        .join(' ')
+        .toLowerCase(),
+      tagsSet: new Set(item.tags || []),
+    }));
+  }, [items]);
+
+  // Filter and search items - optimized with pre-computed index
   const filteredItems = useMemo(() => {
-    const searchLower = query.toLowerCase();
+    return searchIndex
+      .filter(({ item, searchText, tagsSet }) => {
+        // Text search - single string comparison instead of multiple
+        const matchesSearch = !query || searchText.includes(query.toLowerCase());
 
-    return items.filter((item) => {
-      // Text search
-      const matchesSearch =
-        !query ||
-        item.name?.toLowerCase().includes(searchLower) ||
-        item.description?.toLowerCase().includes(searchLower) ||
-        item.tags?.some((tag) => tag.toLowerCase().includes(searchLower)) ||
-        item.category?.toLowerCase().includes(searchLower) ||
-        item.author?.toLowerCase().includes(searchLower);
+        // Category filter
+        const matchesCategory = !selectedCategory || item.category === selectedCategory;
 
-      // Category filter
-      const matchesCategory = !selectedCategory || item.category === selectedCategory;
+        // Author filter
+        const matchesAuthor = !selectedAuthor || item.author === selectedAuthor;
 
-      // Author filter
-      const matchesAuthor = !selectedAuthor || item.author === selectedAuthor;
+        // Tags filter - using Set for O(1) lookups
+        const matchesTags =
+          selectedTags.length === 0 || selectedTags.every((tag) => tagsSet.has(tag));
 
-      // Tags filter
-      const matchesTags =
-        selectedTags.length === 0 || selectedTags.every((tag) => item.tags?.includes(tag));
-
-      return matchesSearch && matchesCategory && matchesAuthor && matchesTags;
-    });
-  }, [items, query, selectedCategory, selectedAuthor, selectedTags]);
+        return matchesSearch && matchesCategory && matchesAuthor && matchesTags;
+      })
+      .map(({ item }) => item);
+  }, [searchIndex, query, selectedCategory, selectedAuthor, selectedTags]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -160,6 +163,8 @@ export function FloatingSearchSidebar({
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
+                  id={searchInputId}
+                  name="floatingSearchInput"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={placeholder}

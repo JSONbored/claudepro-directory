@@ -3,22 +3,17 @@
  * Provides better observability and error tracking than console statements
  */
 
-import { env, isDevelopment, isProduction, isVercel } from './schemas/env.schema';
+import { isDevelopment, isProduction, isVercel } from './env-client';
 import {
   type LogContext,
-  type LogLevel,
+  type LogEntry,
   parseDevelopmentLogComponents,
   sanitizeLogMessage,
   validateLogContext,
 } from './schemas/logger.schema';
 
-export interface LogEntry {
-  level: LogLevel;
-  message: string;
-  context?: LogContext;
-  error?: Error | string;
-  metadata?: Record<string, string | number | boolean>;
-}
+// Re-export type for backward compatibility
+export type { LogEntry };
 
 class Logger {
   private isDevelopment = isDevelopment;
@@ -66,7 +61,11 @@ class Logger {
       return `[INVALID LOG] ${JSON.stringify(logObject)}`;
     }
 
-    const { timestamp, level, message, context, metadata, error } = components;
+    if (!components.success) {
+      return `[INVALID LOG] ${components.error}`;
+    }
+
+    const { timestamp, level, message, context, metadata, error } = components.data;
 
     let output = `[${timestamp}] ${level.toUpperCase()}: ${message}`;
 
@@ -87,31 +86,57 @@ class Logger {
 
   /**
    * Output log entry using appropriate method
+   * IMPORTANT: True server-only logging - never expose to browser console
    */
   private output(entry: LogEntry): void {
+    // Multiple checks to ensure we're truly server-side only
+    if (
+      typeof window !== 'undefined' ||
+      typeof document !== 'undefined' ||
+      typeof navigator !== 'undefined' ||
+      process.env.NEXT_RUNTIME === 'edge'
+    ) {
+      return;
+    }
+
+    // Additional check for Node.js server environment
+    if (!process?.env) {
+      return;
+    }
+
     // In production, only output errors and fatal logs
     if (this.isProduction && entry.level !== 'error' && entry.level !== 'fatal') {
       return;
     }
 
+    // For debug logs, write directly to process.stdout to avoid SSR leakage
     const formattedLog = this.formatLog(entry);
 
+    if (entry.level === 'debug' && this.isDevelopment) {
+      // Use console.debug for debug logs (Edge Runtime compatible)
+      // biome-ignore lint/suspicious/noConsole: Development debug logging
+      console.debug(`[DEBUG] ${formattedLog}`);
+      return;
+    }
+
+    // Server-only console output for non-debug levels
     switch (entry.level) {
-      case 'debug':
-        console.debug(formattedLog);
-        break;
       case 'info':
-        console.info(formattedLog);
+        // biome-ignore lint/suspicious/noConsole: Server-only logger implementation
+        console.info(`[SERVER] ${formattedLog}`);
         break;
       case 'warn':
-        console.warn(formattedLog);
+        // biome-ignore lint/suspicious/noConsole: Server-only logger implementation
+        console.warn(`[SERVER] ${formattedLog}`);
         break;
       case 'error':
       case 'fatal':
-        console.error(formattedLog);
+        // biome-ignore lint/suspicious/noConsole: Server-only logger implementation
+        console.error(`[SERVER] ${formattedLog}`);
         break;
       default:
-        console.log(formattedLog);
+        // biome-ignore lint/suspicious/noConsole: Server-only logger implementation
+        console.log(`[SERVER] ${formattedLog}`);
     }
   }
 
@@ -311,8 +336,8 @@ class Logger {
     if (this.isVercel) {
       const vercelContext = {
         region: request.headers.get('x-vercel-id') || undefined,
-        deployment: env.VERCEL_URL || undefined,
-        environment: env.VERCEL_ENV || undefined,
+        deployment: process.env.VERCEL_URL || undefined,
+        environment: process.env.VERCEL_ENV || undefined,
       };
       Object.assign(context, vercelContext);
     }
@@ -361,6 +386,61 @@ class Logger {
       throw error;
     }
   }
+
+  /**
+   * CLI-specific logging methods for scripts and build processes
+   * Provides environment-aware output suitable for command line interfaces
+   */
+
+  /**
+   * Simple console log for CLI scripts (environment-aware)
+   */
+  log(message: string, ...args: unknown[]): void {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isVerbose = process.env.VERBOSE === 'true';
+
+    if (!isProduction || isVerbose) {
+      // biome-ignore lint/suspicious/noConsole: CLI output for scripts
+      console.log(message, ...args);
+    }
+  }
+
+  /**
+   * Progress indicator for long-running operations
+   */
+  progress(message: string): void {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isVerbose = process.env.VERBOSE === 'true';
+    const isCI = process.env.CI === 'true';
+
+    if (!isProduction || isVerbose || isCI) {
+      // Use console.log for progress messages (Edge Runtime compatible)
+      // biome-ignore lint/suspicious/noConsole: Progress logging
+      console.log(message);
+    }
+  }
+
+  /**
+   * Success message with emoji for CLI
+   */
+  success(message: string): void {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isVerbose = process.env.VERBOSE === 'true';
+
+    if (!isProduction || isVerbose) {
+      // biome-ignore lint/suspicious/noConsole: CLI output for scripts
+      console.log(`✅ ${message}`);
+    }
+  }
+
+  /**
+   * Failure message with emoji for CLI (always shown)
+   */
+  failure(message: string): void {
+    // Always log failures
+    // biome-ignore lint/suspicious/noConsole: CLI output for scripts
+    console.error(`❌ ${message}`);
+  }
 }
 
 // Export singleton instance
@@ -399,6 +479,19 @@ export const log = {
     context?: LogContext,
     metadata?: Record<string, string | number | boolean>
   ) => logger.fatal(message, error, context, metadata),
+};
+
+// Export scriptLogger for backward compatibility with CLI scripts
+export const scriptLogger = {
+  log: (message: string, ...args: unknown[]) => logger.log(message, ...args),
+  info: (message: string, ..._args: unknown[]) => logger.info(message),
+  warn: (message: string, ..._args: unknown[]) => logger.warn(message),
+  error: (message: string, ...args: unknown[]) =>
+    logger.error(message, args[0] instanceof Error ? args[0] : undefined),
+  debug: (message: string) => logger.debug(message),
+  progress: (message: string) => logger.progress(message),
+  success: (message: string) => logger.success(message),
+  failure: (message: string) => logger.failure(message),
 };
 
 export default logger;

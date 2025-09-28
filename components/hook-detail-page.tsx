@@ -2,325 +2,94 @@
 
 import { AlertTriangle, Copy, ExternalLink, Github, Lightbulb, Webhook } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { lazy, type ReactNode, Suspense } from 'react';
+import { type ReactNode, useCallback, useMemo } from 'react';
+import { z } from 'zod';
 import { BaseDetailPage } from '@/components/base-detail-page';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
+import { hookContentSchema } from '@/lib/schemas/content.schema';
 import { getDisplayTitle } from '@/lib/utils';
-import type { ContentItem, Hook } from '@/types/content';
+import { ConfigDisplay } from './hook-detail-page/config-display';
+import {
+  generateInstallationSteps,
+  generateTroubleshooting,
+  generateUseCases,
+} from './hook-detail-page/helpers';
+import {
+  HookDetailsSection,
+  InstallationSteps,
+  RequirementsSection,
+  TroubleshootingSection,
+  UseCasesSection,
+} from './hook-detail-page/sections';
 
-// Lazy load CodeHighlight to split syntax-highlighter into its own chunk
-const CodeHighlight = lazy(() =>
-  import('@/components/code-highlight').then((module) => ({
-    default: module.CodeHighlight,
-  }))
-);
+// Use Zod schema types consistently
+type HookContent = z.infer<typeof hookContentSchema>;
 
-interface HookDetailPageProps {
-  item: Hook;
-  relatedItems?: ContentItem[];
-}
+// Zod schema for component props
+const hookDetailPagePropsSchema = z.object({
+  item: hookContentSchema,
+  relatedItems: z.array(hookContentSchema).optional(),
+});
 
-// Hook-specific helper functions
-const generateRequirements = (item: Hook): string[] => {
-  const baseRequirements = ['Claude Desktop or Claude Code'];
-  const scriptContent =
-    typeof item.configuration?.scriptContent === 'string' ? item.configuration.scriptContent : '';
-  const detectedRequirements: string[] = [];
+type HookDetailPageProps = z.infer<typeof hookDetailPagePropsSchema>;
 
-  // Detect common tools and dependencies from script content
-  const detections = [
-    { pattern: /jq\s/, requirement: 'jq command-line tool for JSON parsing' },
-    { pattern: /prettier\s|npx prettier/, requirement: 'Prettier code formatter' },
-    { pattern: /black\s|python.*black/, requirement: 'Black Python formatter' },
-    { pattern: /gofmt\s/, requirement: 'Go formatting tools (gofmt)' },
-    { pattern: /rustfmt\s/, requirement: 'Rust formatting tools (rustfmt)' },
-    { pattern: /ruff\s/, requirement: 'Ruff Python linter and formatter' },
-    { pattern: /npm\s|npx\s/, requirement: 'Node.js and npm' },
-    { pattern: /pip\s|python\s/, requirement: 'Python 3.x' },
-    { pattern: /axe-core|puppeteer/, requirement: 'Node.js dependencies (axe-core, puppeteer)' },
-    { pattern: /curl\s/, requirement: 'curl command-line tool' },
-    { pattern: /git\s/, requirement: 'Git version control' },
-    { pattern: /docker\s/, requirement: 'Docker container runtime' },
-    { pattern: /kubectl\s/, requirement: 'Kubernetes CLI (kubectl)' },
-    { pattern: /terraform\s/, requirement: 'Terraform CLI' },
-    { pattern: /chmod\s/, requirement: 'Execute permissions on hook scripts' },
-  ];
-
-  // Check script content for patterns
-  detections.forEach(({ pattern, requirement }) => {
-    if (pattern.test(scriptContent) && !detectedRequirements.includes(requirement)) {
-      detectedRequirements.push(requirement);
-    }
-  });
-
-  // Add manual requirements if they exist, filtering out duplicates
-  const manualRequirements = (item.requirements || []).filter(
-    (req: string) =>
-      !req.toLowerCase().includes('claude desktop') &&
-      !req.toLowerCase().includes('claude code') &&
-      !detectedRequirements.some(
-        (detected) =>
-          detected.toLowerCase().includes(req.toLowerCase()) ||
-          req.toLowerCase().includes(detected.toLowerCase())
-      )
-  );
-
-  return [...baseRequirements, ...detectedRequirements, ...manualRequirements];
-};
-
-const generateTroubleshooting = (item: Hook): Array<{ issue: string; solution: string }> => {
-  const scriptContent =
-    typeof item.configuration?.scriptContent === 'string' ? item.configuration.scriptContent : '';
-  const generatedTroubleshooting: Array<{ issue: string; solution: string }> = [];
-
-  // Common troubleshooting patterns based on detected tools
-  const troubleshootingPatterns = [
-    {
-      pattern: /chmod\s/,
-      issue: 'Script permission denied',
-      solution: `Run chmod +x .claude/hooks/${item.slug}.sh to make script executable`,
-    },
-    {
-      pattern: /jq\s/,
-      issue: 'jq command not found',
-      solution: 'Install jq: brew install jq (macOS) or apt-get install jq (Ubuntu)',
-    },
-    {
-      pattern: /prettier\s|npx prettier/,
-      issue: 'Prettier not found in PATH',
-      solution: 'Install Prettier: npm install -g prettier',
-    },
-    {
-      pattern: /black\s|python.*black/,
-      issue: 'Black formatter not found',
-      solution: 'Install Black: pip install black',
-    },
-    {
-      pattern: /gofmt\s/,
-      issue: 'Go formatting tools not available',
-      solution: 'Install Go development tools and ensure gofmt is in PATH',
-    },
-    {
-      pattern: /rustfmt\s/,
-      issue: 'Rust formatting tools not available',
-      solution:
-        "Install Rust toolchain: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh",
-    },
-    {
-      pattern: /ruff\s/,
-      issue: 'Ruff not found',
-      solution: 'Install Ruff: pip install ruff',
-    },
-    {
-      pattern: /npm\s|npx\s/,
-      issue: 'Node.js or npm not found',
-      solution: 'Install Node.js from https://nodejs.org/ or use nvm',
-    },
-    {
-      pattern: /python\s/,
-      issue: 'Python not found in PATH',
-      solution: 'Install Python 3.x from https://python.org/ or use package manager',
-    },
-    {
-      pattern: /git\s/,
-      issue: 'Git command not available',
-      solution: 'Install Git from https://git-scm.com/ or use package manager',
-    },
-    {
-      pattern: /docker\s/,
-      issue: 'Docker not running or not installed',
-      solution: 'Install Docker Desktop and ensure Docker daemon is running',
-    },
-    {
-      pattern: /curl\s/,
-      issue: 'curl command not found',
-      solution: 'Install curl: brew install curl (macOS) or apt-get install curl (Ubuntu)',
-    },
-    {
-      pattern: /kubectl\s/,
-      issue: 'kubectl not configured',
-      solution: 'Install kubectl and configure cluster access: kubectl config view',
-    },
-    {
-      pattern: /terraform\s/,
-      issue: 'Terraform command not found',
-      solution: 'Install Terraform from https://terraform.io/downloads',
-    },
-  ];
-
-  // Generate troubleshooting entries based on script content
-  troubleshootingPatterns.forEach(({ pattern, issue, solution }) => {
-    if (pattern.test(scriptContent)) {
-      generatedTroubleshooting.push({ issue, solution });
-    }
-  });
-
-  // Add manual troubleshooting entries if they exist, avoiding duplicates
-  const manualTroubleshooting = (item.troubleshooting || []).filter(
-    (tip: string | { issue: string; solution: string }) => {
-      const tipIssue = typeof tip === 'string' ? tip : tip.issue;
-      return !generatedTroubleshooting.some(
-        (generated) =>
-          generated.issue.toLowerCase().includes(tipIssue.toLowerCase()) ||
-          tipIssue.toLowerCase().includes(generated.issue.toLowerCase())
-      );
-    }
-  );
-
-  return [...generatedTroubleshooting, ...manualTroubleshooting] as Array<{
-    issue: string;
-    solution: string;
-  }>;
-};
-
-const generateUseCases = (item: Hook): string[] => {
-  // If manual use cases exist, use them (they're usually more specific and valuable)
-  if (item.useCases && item.useCases.length > 0) {
-    return [...item.useCases];
-  }
-
-  const generatedUseCases: string[] = [];
-  const tags = item.tags || [];
-  const hookType = item.hookType;
-
-  // Generate base use cases based on hook type
-  if (hookType === 'PostToolUse') {
-    generatedUseCases.push('Automate post-processing tasks after Claude modifies files');
-    generatedUseCases.push('Maintain code quality and consistency across projects');
-  } else if (hookType === 'PreToolUse') {
-    generatedUseCases.push('Validate inputs before Claude processes files');
-    generatedUseCases.push('Implement safety checks and permissions validation');
-  }
-
-  // Add tag-specific use cases
-  const tagBasedUseCases: Record<string, string[]> = {
-    formatting: [
-      'Enforce consistent code style across team projects',
-      'Reduce code review friction by handling formatting automatically',
-    ],
-    testing: ['Automated testing in CI/CD pipelines', 'Real-time feedback during development'],
-    security: ['Continuous security monitoring', 'Automated vulnerability detection'],
-    documentation: [
-      'Keep documentation synchronized with code changes',
-      'Generate comprehensive project documentation',
-    ],
-    git: ['Streamline version control workflows', 'Automate commit and branch management'],
-    automation: ['Reduce manual development tasks', 'Improve development workflow efficiency'],
+// Type guard for installation - moved outside component to avoid re-creation
+type InstallationType = HookContent['installation'];
+const isValidInstallation = (
+  inst: InstallationType
+): inst is NonNullable<InstallationType> & {
+  claudeDesktop?: {
+    steps?: string[];
+    configPath?: Record<string, string>;
   };
+  requirements?: string[];
+} => typeof inst === 'object' && inst !== null && !Array.isArray(inst);
 
-  // Add use cases based on tags
-  tags.forEach((tag: string) => {
-    const tagUseCases = tagBasedUseCases[tag.toLowerCase()];
-    if (tagUseCases) {
-      tagUseCases.forEach((useCase) => {
-        if (!generatedUseCases.includes(useCase)) {
-          generatedUseCases.push(useCase);
-        }
-      });
-    }
-  });
-
-  // Ensure we have at least some generic use cases
-  if (generatedUseCases.length === 0) {
-    generatedUseCases.push('Automate repetitive development tasks');
-    generatedUseCases.push('Improve code quality and consistency');
-    generatedUseCases.push('Streamline development workflows');
-  }
-
-  return generatedUseCases.slice(0, 5); // Limit to 5 use cases max
-};
-
-const generateInstallationSteps = (item: Hook) => {
-  const fileExtension = item.hookType === 'PostToolUse' ? 'sh' : 'sh';
-  const scriptName = `${item.slug}.${fileExtension}`;
-
-  return {
-    claudeDesktop: {
-      steps: [
-        'Create the hooks directory: mkdir -p .claude/hooks',
-        `Create the script file: .claude/hooks/${scriptName}`,
-        `Make the script executable: chmod +x .claude/hooks/${scriptName}`,
-        'Add hook configuration to .claude.md file',
-      ],
-      configPath: {
-        macOS: '~/.claude/config.json',
-        windows: '%APPDATA%\\Claude\\config.json',
-        linux: '~/.config/claude/config.json',
-      },
-    },
-    requirements: generateRequirements(item),
-  };
-};
-
-const getDisplayConfig = (item: Hook) => {
+// Optimized helper with memoization
+const getDisplayConfig = (item: HookContent): HookContent['configuration'] => {
   if (!item.configuration?.hookConfig) return item.configuration;
-
-  const config = JSON.parse(JSON.stringify(item.configuration)); // Deep clone
-  const fileExtension = 'sh';
-  const dynamicScriptPath = `./.claude/hooks/${item.slug}.${fileExtension}`;
-
-  // Replace script paths in hookConfig
+  const config = structuredClone(item.configuration);
+  const dynamicScriptPath = `./.claude/hooks/${item.slug}.sh`;
   if (config.hookConfig?.hooks) {
-    Object.keys(config.hookConfig.hooks).forEach((hookType) => {
-      if (config.hookConfig.hooks[hookType]?.script) {
-        config.hookConfig.hooks[hookType].script = dynamicScriptPath;
+    Object.values(config.hookConfig.hooks).forEach((hook) => {
+      if (typeof hook === 'object' && hook !== null && 'script' in hook) {
+        (hook as { script: string }).script = dynamicScriptPath;
       }
     });
   }
-
   return config;
 };
 
-const handleCopyConfig = async (item: Hook) => {
-  const displayConfig = getDisplayConfig(item);
-  const configText = JSON.stringify(displayConfig || {}, null, 2);
-
-  const success = await copyToClipboard(configText, {
+// Consolidated copy handler
+const handleCopy = async (
+  content: HookContent['configuration'] | HookContent['installation'],
+  type: 'config' | 'installation'
+) => {
+  const text = JSON.stringify(content || {}, null, 2);
+  const success = await copyToClipboard(text, {
     component: 'hook-detail-page',
-    action: 'copy-config',
+    action: `copy-${type}`,
   });
-
-  if (success) {
-    toast({
-      title: 'Configuration copied!',
-      description: 'Hook configuration has been copied to your clipboard.',
-    });
-  } else {
-    toast({
-      title: 'Copy failed',
-      description: 'Unable to copy configuration to clipboard.',
-      variant: 'destructive',
-    });
-  }
+  toast({
+    title: success
+      ? `${type === 'config' ? 'Configuration' : 'Installation steps'} copied!`
+      : 'Copy failed',
+    description: success
+      ? `${type === 'config' ? 'Hook configuration' : 'Installation instructions'} has been copied to your clipboard.`
+      : 'Unable to copy to clipboard.',
+  });
 };
 
-const handleCopyInstallation = async (installation: unknown) => {
-  const installText = JSON.stringify(installation, null, 2);
-  const success = await copyToClipboard(installText, {
-    component: 'hook-detail-page',
-    action: 'copy-installation',
-  });
-
-  if (success) {
-    toast({
-      title: 'Installation steps copied!',
-      description: 'Installation instructions have been copied to your clipboard.',
-    });
-  } else {
-    toast({
-      title: 'Copy failed',
-      description: 'Unable to copy installation steps to clipboard.',
-      variant: 'destructive',
-    });
-  }
-};
-
-// Helper function to render Hook sidebar with resources and details
-const renderHookSidebar = (item: Hook, relatedItems: ContentItem[], router: any): ReactNode => (
+// Memoized sidebar renderer
+const renderHookSidebar = (
+  item: HookContent,
+  relatedItems: HookContent[],
+  router: ReturnType<typeof useRouter>
+): ReactNode => (
   <div className="space-y-6 sticky top-20 self-start">
     {/* Resources */}
     <Card>
@@ -350,106 +119,20 @@ const renderHookSidebar = (item: Hook, relatedItems: ContentItem[], router: any)
       </CardContent>
     </Card>
 
-    {/* Hook Details */}
+    {/* Hook Details - Use shared component */}
     <Card>
       <CardHeader>
         <CardTitle>Hook Details</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Category */}
-        {item.category && (
-          <div>
-            <h4 className="font-medium mb-1">Category</h4>
-            <Badge
-              variant="default"
-              className="text-xs font-medium bg-pink-500/20 text-pink-500 border-pink-500/30"
-            >
-              {item.category === 'hooks' ? 'Hook' : item.category}
-            </Badge>
-          </div>
-        )}
-
-        {/* Hook Type */}
-        {item.hookType && (
-          <div>
-            <h4 className="font-medium mb-1">Hook Type</h4>
-            <Badge
-              variant="default"
-              className={`text-xs font-medium ${
-                item.hookType === 'PreToolUse'
-                  ? 'bg-blue-500/20 text-blue-500 border-blue-500/30'
-                  : 'bg-green-500/20 text-green-500 border-green-500/30'
-              }`}
-            >
-              {item.hookType}
-            </Badge>
-          </div>
-        )}
-
-        {/* Trigger Events */}
-        {(() => {
-          const hookTypeKey = item.hookType?.toLowerCase();
-          const matchers = (() => {
-            if (item.matchers) return item.matchers;
-            if (hookTypeKey && item.configuration?.hookConfig?.hooks) {
-              const hooks = item.configuration?.hookConfig?.hooks;
-              const hookConfig =
-                typeof hooks === 'object' && !Array.isArray(hooks)
-                  ? (hooks as Record<string, unknown>)[hookTypeKey]
-                  : undefined;
-              if (hookConfig && typeof hookConfig === 'object' && !Array.isArray(hookConfig)) {
-                const config = hookConfig as Record<string, unknown>;
-                if (Array.isArray(config.matchers)) {
-                  return config.matchers;
-                }
-              }
-            }
-            return [];
-          })();
-          return (
-            matchers.length > 0 && (
-              <div>
-                <h4 className="font-medium mb-1">Trigger Events</h4>
-                <div className="flex flex-wrap gap-1">
-                  {matchers.map((matcher: string) => (
-                    <Badge key={matcher} variant="outline" className="font-mono text-xs">
-                      {matcher}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )
-          );
-        })()}
-
+      <CardContent>
+        <HookDetailsSection item={item} />
         {/* Execution Context */}
         {item.configuration && (
-          <div>
+          <div className="mt-4">
             <h4 className="font-medium mb-1">Execution Context</h4>
             <Badge variant="outline" className="text-xs">
               {item.configuration.hookConfig ? 'Claude Desktop' : 'Script-based'}
             </Badge>
-          </div>
-        )}
-
-        {item.source && (
-          <div>
-            <h4 className="font-medium mb-1">Source</h4>
-            <Badge variant="outline">{item.source}</Badge>
-          </div>
-        )}
-
-        {/* Tags */}
-        {item.tags && item.tags.length > 0 && (
-          <div>
-            <h4 className="font-medium mb-1">Tags</h4>
-            <div className="flex flex-wrap gap-1">
-              {item.tags.map((tag: string) => (
-                <Badge key={tag} variant="outline" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
           </div>
         )}
       </CardContent>
@@ -495,300 +178,159 @@ const renderHookSidebar = (item: Hook, relatedItems: ContentItem[], router: any)
 
 export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps) {
   const router = useRouter();
-  // Generate all hook-specific data
-  const installation = item.installation || generateInstallationSteps(item);
-  const troubleshooting =
-    item.troubleshooting && item.troubleshooting.length > 0
-      ? item.troubleshooting
-      : generateTroubleshooting(item);
-  const useCases = generateUseCases(item);
-  const displayConfig = getDisplayConfig(item);
 
-  // Type guard for installation structure
-  const isValidInstallation = (
-    inst: unknown
-  ): inst is {
-    claudeDesktop?: {
-      steps?: string[];
-      configPath?: Record<string, string>;
-    };
-    requirements?: string[];
-  } => {
-    return typeof inst === 'object' && inst !== null;
-  };
-
-  // Create hook-specific content components for BaseDetailPage
-  const createFeaturesList = (features: readonly string[] | string[]): ReactNode => (
-    <ul className="space-y-2">
-      {features.map((feature: string) => (
-        <li key={feature.slice(0, 50)} className="flex items-start gap-3">
-          <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-          <span className="text-sm leading-relaxed">{feature}</span>
-        </li>
-      ))}
-    </ul>
+  // Memoize all generated data
+  const { installation, troubleshooting, useCases, displayConfig } = useMemo(
+    () => ({
+      installation: item.installation || generateInstallationSteps(item),
+      troubleshooting: item.troubleshooting?.length
+        ? item.troubleshooting
+        : generateTroubleshooting(item),
+      useCases: generateUseCases(item),
+      displayConfig: getDisplayConfig(item),
+    }),
+    [item]
   );
 
-  const createConfigurationContent = (): ReactNode => (
-    <div className="space-y-4">
-      {item.configuration?.hookConfig && (
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <h4 className="font-medium">Hook Configuration</h4>
-            <Button size="sm" variant="outline" onClick={() => handleCopyConfig(item)}>
-              <Copy className="h-4 w-4 mr-2" />
-              Copy Config
-            </Button>
-          </div>
-          <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}>
-            <CodeHighlight
-              code={JSON.stringify(displayConfig.hookConfig, null, 2)}
-              language="json"
-            />
-          </Suspense>
-        </div>
-      )}
-      {item.configuration?.scriptContent && (
-        <div>
-          <h4 className="font-medium mb-2">Script Content</h4>
-          <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}>
-            <CodeHighlight
-              code={
-                typeof item.configuration?.scriptContent === 'string'
-                  ? item.configuration.scriptContent
-                  : ''
-              }
-              language="bash"
-            />
-          </Suspense>
-        </div>
-      )}
-    </div>
+  // Reusable list component
+  const List = useCallback(
+    ({ items, dotColor = 'primary' }: { items: string[]; dotColor?: string }) => (
+      <ul className="space-y-2">
+        {items.map((item) => (
+          <li key={item.slice(0, 50)} className="flex items-start gap-3">
+            <div className={`h-1.5 w-1.5 rounded-full bg-${dotColor} mt-2 flex-shrink-0`} />
+            <span className="text-sm leading-relaxed">{item}</span>
+          </li>
+        ))}
+      </ul>
+    ),
+    []
   );
 
-  const createInstallationContent = (): ReactNode => (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h4 className="font-medium">Installation Instructions</h4>
-          <p className="text-sm text-muted-foreground">Setup steps and requirements</p>
-        </div>
-        <Button size="sm" variant="outline" onClick={() => handleCopyInstallation(installation)}>
-          <Copy className="h-4 w-4 mr-2" />
-          Copy Steps
-        </Button>
-      </div>
-      {isValidInstallation(installation) && installation.claudeDesktop && (
-        <div className="space-y-4">
+  const handleCopyConfig = useCallback(() => {
+    handleCopy(displayConfig, 'config');
+  }, [displayConfig]);
+
+  const createConfigurationContent = useCallback(
+    () => <ConfigDisplay item={item} displayConfig={displayConfig} onCopy={handleCopyConfig} />,
+    [item, displayConfig, handleCopyConfig]
+  );
+
+  const createInstallationContent = useCallback(() => {
+    if (Array.isArray(installation)) return <InstallationSteps steps={installation} />;
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <h4 className="font-medium mb-2">Claude Desktop Setup</h4>
-            <ol className="list-decimal list-inside space-y-1 text-sm">
-              {installation.claudeDesktop.steps?.map((step: string) => (
-                <li key={step.slice(0, 50)} className="leading-relaxed">
-                  {step}
-                </li>
-              ))}
-            </ol>
+            <h4 className="font-medium">Installation Instructions</h4>
+            <p className="text-sm text-muted-foreground">Setup steps and requirements</p>
           </div>
-          {installation.claudeDesktop.configPath && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => handleCopy(installation, 'installation')}
+          >
+            <Copy className="h-4 w-4 mr-2" />
+            Copy Steps
+          </Button>
+        </div>
+        {isValidInstallation(installation) && installation.claudeCode && (
+          <div className="space-y-4">
             <div>
-              <h4 className="font-medium mb-2">Configuration Paths</h4>
-              <div className="space-y-1 text-sm">
-                {Object.entries(installation.claudeDesktop.configPath).map(([os, path]) => (
-                  <div key={os} className="flex gap-2">
-                    <Badge variant="outline" className="capitalize">
-                      {os}
-                    </Badge>
-                    <code className="text-xs bg-muted px-1 py-0.5 rounded">{String(path)}</code>
-                  </div>
+              <h4 className="font-medium mb-2">Claude Code Setup</h4>
+              <ol className="list-decimal list-inside space-y-1 text-sm">
+                {installation.claudeCode?.steps?.map((step: string) => (
+                  <li key={step.slice(0, 50)} className="leading-relaxed">
+                    {step}
+                  </li>
                 ))}
-              </div>
+              </ol>
             </div>
-          )}
-        </div>
-      )}
-      {/* Requirements */}
-      {isValidInstallation(installation) &&
-        installation.requirements &&
-        installation.requirements.length > 0 && (
-          <div>
-            <h4 className="font-medium mb-2">Requirements</h4>
-            <ul className="space-y-2">
-              {installation.requirements.map((requirement: string) => (
-                <li key={requirement.slice(0, 50)} className="flex items-start gap-3">
-                  <div className="h-1.5 w-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
-                  <span className="text-sm leading-relaxed">{requirement}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-    </div>
-  );
-
-  const createUseCasesContent = (): ReactNode => (
-    <ul className="space-y-2">
-      {useCases.map((useCase: string) => (
-        <li key={useCase.slice(0, 50)} className="flex items-start gap-3">
-          <div className="h-1.5 w-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
-          <span className="text-sm leading-relaxed">{useCase}</span>
-        </li>
-      ))}
-    </ul>
-  );
-
-  const createTroubleshootingContent = (): ReactNode => (
-    <ul className="space-y-4">
-      {troubleshooting.map((tip: { issue: string; solution: string } | string, index: number) => (
-        <li
-          key={
-            typeof tip === 'string'
-              ? tip.slice(0, 50)
-              : tip.issue?.slice(0, 50) || `troubleshooting-${index}`
-          }
-          className="space-y-2"
-        >
-          {typeof tip === 'string' ? (
-            <div className="flex items-start gap-3">
-              <div className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
-              <span className="text-sm leading-relaxed">{tip}</span>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-red-700 dark:text-red-400">{tip.issue}</p>
-                  <p className="text-sm text-muted-foreground">{tip.solution}</p>
+            {installation.claudeCode?.configPath && (
+              <div>
+                <h4 className="font-medium mb-2">Configuration Paths</h4>
+                <div className="space-y-1 text-sm">
+                  {Object.entries(installation.claudeCode.configPath).map(([os, path]) => (
+                    <div key={os} className="flex gap-2">
+                      <Badge variant="outline" className="capitalize">
+                        {os}
+                      </Badge>
+                      <code className="text-xs bg-muted px-1 py-0.5 rounded">{String(path)}</code>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
-          )}
-        </li>
-      ))}
-    </ul>
-  );
-
-  const createHookDetailsContent = (): ReactNode => (
-    <div className="space-y-4">
-      {/* Category */}
-      {item.category && (
-        <div>
-          <h4 className="font-medium mb-1">Category</h4>
-          <Badge
-            variant="default"
-            className="text-xs font-medium bg-pink-500/20 text-pink-500 border-pink-500/30"
-          >
-            {item.category === 'hooks' ? 'Hook' : item.category}
-          </Badge>
-        </div>
-      )}
-
-      {/* Hook Type */}
-      {item.hookType && (
-        <div>
-          <h4 className="font-medium mb-1">Hook Type</h4>
-          <div className="flex flex-wrap gap-1">
-            <Badge
-              variant="default"
-              className={`text-xs font-medium ${
-                item.hookType === 'PreToolUse'
-                  ? 'bg-blue-500/20 text-blue-500 border-blue-500/30'
-                  : 'bg-green-500/20 text-green-500 border-green-500/30'
-              }`}
-            >
-              {item.hookType}
-            </Badge>
+            )}
           </div>
-        </div>
-      )}
+        )}
+        {isValidInstallation(installation) &&
+          installation.requirements &&
+          installation.requirements.length > 0 && (
+            <RequirementsSection requirements={[...(installation.requirements || [])]} />
+          )}
+      </div>
+    );
+  }, [installation]);
 
-      {/* Tool Matchers */}
-      {(() => {
-        const hookTypeKey = item.hookType?.toLowerCase();
-        const matchers = (() => {
-          if (item.matchers) return item.matchers;
-          if (hookTypeKey && item.configuration?.hookConfig?.hooks) {
-            const hooks = item.configuration?.hookConfig?.hooks;
-            const hookConfig =
-              typeof hooks === 'object' && !Array.isArray(hooks)
-                ? (hooks as Record<string, unknown>)[hookTypeKey]
-                : undefined;
-            if (hookConfig && typeof hookConfig === 'object' && !Array.isArray(hookConfig)) {
-              const config = hookConfig as Record<string, unknown>;
-              if (Array.isArray(config.matchers)) {
-                return config.matchers;
-              }
-            }
-          }
-          return [];
-        })();
-        return (
-          matchers.length > 0 && (
-            <div>
-              <h4 className="font-medium mb-1">Tool Matchers</h4>
-              <div className="flex flex-wrap gap-1">
-                {matchers.map((matcher: string) => (
-                  <Badge key={matcher} variant="outline" className="font-mono text-xs">
-                    {matcher}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )
-        );
-      })()}
-
-      {item.source && (
-        <div>
-          <h4 className="font-medium mb-1">Source</h4>
-          <Badge variant="outline">{item.source}</Badge>
-        </div>
-      )}
-    </div>
+  const createUseCasesContent = useCallback(
+    () => <UseCasesSection useCases={[...useCases]} />,
+    [useCases]
   );
 
-  // Build custom sections for hook-specific content
-  const customSections = [
-    // Features section
-    ...(item.features && item.features.length > 0
-      ? [
-          {
-            title: 'Features',
-            icon: <Lightbulb className="h-5 w-5" />,
-            content: (
-              <div>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Key capabilities and functionality
-                </p>
-                {createFeaturesList(item.features)}
-              </div>
-            ),
-          },
-        ]
-      : []),
-    // Hook Details section
-    {
-      title: 'Hook Details',
-      icon: <Webhook className="h-5 w-5" />,
-      content: createHookDetailsContent(),
-    },
-    // Troubleshooting section
-    ...(troubleshooting && troubleshooting.length > 0
-      ? [
-          {
-            title: 'Troubleshooting',
-            icon: <AlertTriangle className="h-5 w-5" />,
-            content: (
-              <div>
-                <p className="text-sm text-muted-foreground mb-4">Common issues and solutions</p>
-                {createTroubleshootingContent()}
-              </div>
-            ),
-          },
-        ]
-      : []),
-  ];
+  const createTroubleshootingContent = useCallback(
+    () => <TroubleshootingSection troubleshooting={[...troubleshooting]} />,
+    [troubleshooting]
+  );
+
+  const createHookDetailsContent = useCallback(() => <HookDetailsSection item={item} />, [item]);
+
+  // Optimized sections with conditional rendering
+  const customSections = useMemo(
+    () => [
+      ...(item.features?.length
+        ? [
+            {
+              title: 'Features',
+              icon: <Lightbulb className="h-5 w-5" />,
+              content: (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Key capabilities and functionality
+                  </p>
+                  <List items={[...(item.features || [])]} />
+                </div>
+              ),
+              collapsible: false,
+              defaultCollapsed: false,
+            },
+          ]
+        : []),
+      {
+        title: 'Hook Details',
+        icon: <Webhook className="h-5 w-5" />,
+        content: createHookDetailsContent(),
+        collapsible: false,
+        defaultCollapsed: false,
+      },
+      ...(troubleshooting?.length
+        ? [
+            {
+              title: 'Troubleshooting',
+              icon: <AlertTriangle className="h-5 w-5" />,
+              content: (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-4">Common issues and solutions</p>
+                  {createTroubleshootingContent()}
+                </div>
+              ),
+              collapsible: false,
+              defaultCollapsed: false,
+            },
+          ]
+        : []),
+    ],
+    [item.features, createHookDetailsContent, troubleshooting, createTroubleshootingContent, List]
+  );
 
   return (
     <BaseDetailPage
@@ -798,20 +340,19 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
       primaryAction={{
         label: 'View on GitHub',
         icon: <Webhook className="h-4 w-4 mr-2" />,
-        onClick: () => {
+        onClick: () =>
           window.open(
             `https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/${item.slug}.json`,
             '_blank'
-          );
-        },
+          ),
       }}
       customSections={customSections}
       showConfiguration={!!item.configuration}
-      showInstallation={true}
-      showUseCases={useCases && useCases.length > 0}
+      showInstallation
+      showUseCases={!!useCases?.length}
       configurationContent={createConfigurationContent()}
       installationContent={createInstallationContent()}
-      useCasesContent={useCases && useCases.length > 0 ? createUseCasesContent() : undefined}
+      useCasesContent={useCases?.length ? createUseCasesContent() : undefined}
       customSidebar={renderHookSidebar(item, relatedItems, router)}
     />
   );

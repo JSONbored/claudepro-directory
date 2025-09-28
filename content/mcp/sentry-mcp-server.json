@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Sentry",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "monitoring",
-    "sentry",
-    "debugging",
-    "errors",
-    "devops"
-  ],
+  "tags": ["monitoring", "sentry", "debugging", "errors", "devops"],
   "content": "Connect Claude to Sentry for comprehensive error monitoring, debugging, and application health tracking.",
   "features": [
     "View and analyze error reports in real-time",
@@ -79,10 +73,7 @@
     "Find all errors affecting the checkout flow"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write"
-  ],
+  "permissions": ["read", "write"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://docs.sentry.io/product/sentry-mcp/"
 }

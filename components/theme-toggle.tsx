@@ -2,13 +2,18 @@
 
 import { Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
+
+const themeSchema = z.enum(['light', 'dark']);
 
 export function ThemeToggle() {
   const [theme, setTheme] = useState<'light' | 'dark' | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    const savedTheme = localStorage.getItem('theme');
+    const validatedTheme = savedTheme ? themeSchema.safeParse(savedTheme) : null;
+    const saved = validatedTheme?.success ? validatedTheme.data : null;
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const initial = saved || (prefersDark ? 'dark' : 'light');
 

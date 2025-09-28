@@ -8,7 +8,8 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { sanitizeApiError } from '@/lib/error-sanitizer';
 import { logger } from '@/lib/logger';
-import redis from '@/lib/redis';
+import { redisClient } from '@/lib/redis/client';
+import { createRequestId } from '@/lib/schemas/branded-types.schema';
 import {
   ipAddressSchema,
   type MiddlewareRateLimitConfig,
@@ -235,7 +236,7 @@ export class RateLimiter {
 
     try {
       // If Redis is not available, allow requests but log warning
-      if (!redis) {
+      if (!(redisClient.getStatus().isConnected || redisClient.getStatus().isFallback)) {
         logger.warn('Redis not available for rate limiting', {
           path: new URL(request.url).pathname,
           fallback: 'allowing request',
@@ -251,27 +252,31 @@ export class RateLimiter {
         return rateLimitResultSchema.parse(fallbackResult);
       }
 
-      // Use Redis pipeline for atomic operations
-      const pipeline = redis.pipeline();
+      // Execute Redis operations using the client manager
+      const requestCount = await redisClient.executeOperation(
+        async (redis) => {
+          // Use Redis pipeline for atomic operations
+          const pipeline = redis.pipeline();
 
-      // Remove expired entries and add current request
-      pipeline.zremrangebyscore(key, 0, windowStart);
-      pipeline.zadd(key, { score: now, member: `${now}-${Math.random()}` });
-      pipeline.zcard(key);
-      pipeline.expire(key, this.config.windowSeconds);
+          // Remove expired entries and add current request
+          pipeline.zremrangebyscore(key, 0, windowStart);
+          pipeline.zadd(key, { score: now, member: `${now}-${crypto.randomUUID()}` });
+          pipeline.zcard(key);
+          pipeline.expire(key, this.config.windowSeconds);
 
-      const results = await pipeline.exec();
+          const results = await pipeline.exec();
 
-      if (
-        !results ||
-        results.some((result) => result && (result as [Error | null, string | number])[0])
-      ) {
-        throw new Error('Redis pipeline failed');
-      }
+          if (!results || results.length < 3) {
+            throw new Error('Redis pipeline failed');
+          }
 
-      // Redis pipeline results: [error, result] tuple for each command
-      const zcardResult = results[2] as [Error | null, number] | null;
-      const requestCount = zcardResult?.[1] ?? 0;
+          // Get the count from zcard result (third command)
+          const count = results[2] as number;
+          return count || 0;
+        },
+        () => 0, // Fallback: allow request on failure
+        'rate_limit_check'
+      );
       const remaining = Math.max(0, this.config.maxRequests - requestCount);
       const resetTime = now + this.config.windowSeconds * 1000;
 
@@ -279,7 +284,15 @@ export class RateLimiter {
 
       // If limit exceeded, remove the request we just added
       if (!success) {
-        await redis.zremrangebyrank(key, -1, -1);
+        await redisClient.executeOperation(
+          async (redis) => {
+            await redis.zremrangebyrank(key, -1, -1);
+          },
+          () => {
+            // Fallback: no-op
+          },
+          'rate_limit_cleanup'
+        );
       }
 
       const result = {
@@ -292,7 +305,7 @@ export class RateLimiter {
       return rateLimitResultSchema.parse(result);
     } catch (error: unknown) {
       // Sanitize error to prevent information leakage
-      const sanitizedError = sanitizeApiError(error, {
+      const sanitizedError = sanitizeApiError(error, createRequestId(), {
         component: 'rate-limiter',
         operation: 'check_limit',
         key: 'redacted',

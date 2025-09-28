@@ -7,7 +7,8 @@ import { z } from 'zod';
 import { type ContentCategory, contentCategorySchema } from './shared.schema';
 
 /**
- * Slug validation for content identifiers
+ * Branded slug validation for content identifiers
+ * Provides compile-time type safety for content slugs
  */
 export const contentSlugSchema = z
   .string()
@@ -17,9 +18,23 @@ export const contentSlugSchema = z
     /^[a-zA-Z0-9-_/]+$/,
     'Slug can only contain letters, numbers, hyphens, underscores, and forward slashes'
   )
-  .transform((val) => val.toLowerCase().trim());
+  .transform((val) => val.toLowerCase().trim())
+  .brand<'ContentSlug'>();
 
 export type ContentSlug = z.infer<typeof contentSlugSchema>;
+
+/**
+ * Branded UserId schema for strong type safety
+ * Ensures user IDs are properly validated and typed
+ */
+export const userIdSchema = z
+  .string()
+  .min(1, 'User ID is required')
+  .max(100, 'User ID too long')
+  .regex(/^[a-zA-Z0-9_-]+$/, 'Invalid user ID format')
+  .brand<'UserId'>();
+
+export type UserId = z.infer<typeof userIdSchema>;
 
 /**
  * View tracking event schema
@@ -83,7 +98,7 @@ export const trackSearchSchema = z.object({
     .min(1, 'Search query is required')
     .max(200, 'Search query is too long')
     .transform((val) => val.trim()),
-  category: z.enum(['all', 'agents', 'mcp', 'rules', 'commands', 'hooks']).optional(),
+  category: z.enum(['all', 'agents', 'mcp', 'rules', 'commands', 'hooks', 'guides']).optional(),
   resultsCount: z.number().int().min(0).optional(),
   clickedResult: z.string().optional(),
   timestamp: z
@@ -140,7 +155,7 @@ export const trackErrorSchema = z.object({
     .default(() => new Date()),
   userId: z.string().uuid().optional(),
   sessionId: z.string().optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
 });
 
 export type TrackErrorEvent = z.infer<typeof trackErrorSchema>;
@@ -168,6 +183,70 @@ export const webVitalsMetricsSchema = z.object({
 export type WebVitalsMetrics = z.infer<typeof webVitalsMetricsSchema>;
 
 /**
+ * Umami analytics event data schema
+ * Strict validation for production analytics tracking
+ */
+export const umamiEventDataSchema = z.record(
+  z.string().min(1).max(50),
+  z.union([z.string().max(500), z.number(), z.boolean(), z.null()])
+);
+
+export type UmamiEventData = z.infer<typeof umamiEventDataSchema>;
+
+/**
+ * Umami payload schema for pageview and custom events
+ */
+export const umamiPayloadSchema = z.object({
+  hostname: z.string().optional(),
+  language: z.string().optional(),
+  referrer: z.string().optional(),
+  screen: z.string().optional(),
+  title: z.string().optional(),
+  url: z.string().optional(),
+  website: z.string().optional(),
+  name: z.string().optional(),
+  data: umamiEventDataSchema.optional(),
+});
+
+export type UmamiPayload = z.infer<typeof umamiPayloadSchema>;
+
+/**
+ * Umami track event schema
+ */
+export const umamiTrackEventSchema = z.object({
+  eventName: z.string().min(1).max(50),
+  data: umamiEventDataSchema.optional(),
+});
+
+export type UmamiTrackEvent = z.infer<typeof umamiTrackEventSchema>;
+
+/**
+ * Umami identify schema
+ */
+export const umamiIdentifySchema = z.object({
+  userId: z.string().min(1).max(100).optional(),
+  data: umamiEventDataSchema,
+});
+
+export type UmamiIdentify = z.infer<typeof umamiIdentifySchema>;
+
+/**
+ * Umami Global Interface Schema
+ * Represents the global umami tracking object
+ */
+export const umamiGlobalSchema = z.object({
+  track: z.custom<
+    (eventName: string, data?: Record<string, string | number | boolean | null>) => void
+  >((val) => typeof val === 'function', { message: 'Expected a track function' }),
+  identify: z.custom<(data: Record<string, string | number | boolean | null>) => void>(
+    (val) => typeof val === 'function',
+    { message: 'Expected an identify function' }
+  ),
+});
+
+export type UmamiGlobal = z.infer<typeof umamiGlobalSchema>;
+
+/**
  * Custom event schema for flexible tracking
  */
 export const customEventSchema = z.object({
@@ -180,7 +259,7 @@ export const customEventSchema = z.object({
   action: z.string().max(50, 'Action is too long').optional(),
   label: z.string().max(200, 'Label is too long').optional(),
   value: z.number().optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
   timestamp: z
     .date()
     .optional()
@@ -198,7 +277,7 @@ export const analyticsResponseSchema = z.object({
   success: z.boolean(),
   message: z.string().optional(),
   viewCount: z.number().int().min(0).optional(),
-  data: z.record(z.string(), z.unknown()).optional(),
+  data: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
 });
 
 export type AnalyticsResponse = z.infer<typeof analyticsResponseSchema>;
@@ -259,7 +338,6 @@ export const trackingEventSchema = z.object({
         z.string().max(TRACKER_LIMITS.MAX_STRING_VALUE_LENGTH),
         z.number().finite(),
         z.boolean(),
-        z.null(),
       ])
     )
     .optional()
@@ -273,11 +351,7 @@ export type TrackingEvent = z.infer<typeof trackingEventSchema>;
  * User identification schema for session tracking
  */
 export const userIdentificationSchema = z.object({
-  userId: z
-    .string()
-    .min(1, 'User ID is required')
-    .max(100, 'User ID too long')
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Invalid user ID format'),
+  userId: userIdSchema,
   traits: z
     .record(
       z.string().max(50, 'Field is too long'),
@@ -413,24 +487,19 @@ export const navigationEventSchema = z.object({
 export type NavigationEvent = z.infer<typeof navigationEventSchema>;
 
 /**
+ * Google Analytics gtag event schema
+ */
+export const gtagEventSchema = z.object({
+  command: z.literal('event'),
+  action: z.string().min(1, 'Action is required').max(100, 'Action is too long'),
+  parameters: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
+});
+
+export type GtagEvent = z.infer<typeof gtagEventSchema>;
+
+// Global interface declarations for Umami are handled in global.d.ts
+// This file focuses on data validation schemas only
+
+/**
  * Export all schemas for centralized access
  */
-export const analyticsSchemas = {
-  contentCategory: contentCategorySchema,
-  contentSlug: contentSlugSchema,
-  trackView: trackViewSchema,
-  trackCopy: trackCopySchema,
-  trackClick: trackClickSchema,
-  trackSearch: trackSearchSchema,
-  pageView: pageViewSchema,
-  trackError: trackErrorSchema,
-  webVitalsMetrics: webVitalsMetricsSchema,
-  customEvent: customEventSchema,
-  analyticsResponse: analyticsResponseSchema,
-  trackingEvent: trackingEventSchema,
-  userIdentification: userIdentificationSchema,
-  performanceMetric: performanceMetricSchema,
-  errorTracking: errorTrackingSchema,
-  interactionEvent: interactionEventSchema,
-  navigationEvent: navigationEventSchema,
-} as const;

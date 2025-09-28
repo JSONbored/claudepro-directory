@@ -1,174 +1,26 @@
-import fs from 'fs/promises';
 import { BookOpen } from 'lucide-react';
-import Link from 'next/link';
-import path from 'path';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
-import { UnifiedSidebar } from '@/components/unified-sidebar';
+import { GuidePageFactory, generateGuideMetadata } from '@/lib/components/guide-page-factory';
+import { APP_CONFIG } from '@/lib/constants';
 
 // Enable ISR - revalidate every 4 hours
 export const revalidate = 14400;
 
-export const metadata = {
-  title: 'Claude Tutorials - Step-by-Step Guides | Claude Pro Directory',
-  description:
+const config = {
+  type: 'tutorials',
+  directory: 'seo/tutorials',
+  icon: BookOpen as React.ComponentType,
+  iconColor: 'text-green-500',
+  title: 'Tutorials',
+  description: 'Step-by-step tutorials to help you master Claude AI features',
+  badgeLabel: 'Tutorial',
+  breadcrumbText: 'Tutorials',
+  metaTitle: `Claude Tutorials - Step-by-Step Guides | ${APP_CONFIG.name}`,
+  metaDescription:
     'Learn Claude AI with our comprehensive step-by-step tutorials. Master MCP servers, agents, rules, and more.',
 };
 
-interface GuideItem {
-  title: string;
-  description: string;
-  slug: string;
-  dateUpdated?: string;
-}
-
-async function getTutorials(): Promise<GuideItem[]> {
-  const tutorials: GuideItem[] = [];
-
-  try {
-    const dir = path.join(process.cwd(), 'seo', 'tutorials');
-    const files = await fs.readdir(dir);
-
-    for (const file of files) {
-      if (file.endsWith('.mdx')) {
-        const content = await fs.readFile(path.join(dir, file), 'utf-8');
-        const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-
-        if (frontmatterMatch?.[1]) {
-          const metadata: Record<string, string> = {};
-          frontmatterMatch[1].split('\n').forEach((line) => {
-            const [key, ...valueParts] = line.split(':');
-            if (key && valueParts.length) {
-              const value = valueParts
-                .join(':')
-                .trim()
-                .replace(/^["']|["']$/g, '');
-              metadata[key.trim()] = value;
-            }
-          });
-
-          tutorials.push({
-            title: metadata.title || file.replace('.mdx', ''),
-            description: metadata.description || '',
-            slug: `/guides/tutorials/${file.replace('.mdx', '')}`,
-            dateUpdated: metadata.dateUpdated || '',
-          });
-        }
-      }
-    }
-  } catch {
-    // Directory doesn't exist
-  }
-
-  return tutorials.sort((a, b) => a.title.localeCompare(b.title));
-}
+export const metadata = generateGuideMetadata(config);
 
 export default async function TutorialsPage() {
-  const tutorials = await getTutorials();
-
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <BookOpen className="h-8 w-8 text-green-500" />
-            <h1 className="text-4xl font-bold">Claude Tutorials</h1>
-          </div>
-          <p className="text-xl text-muted-foreground">
-            Step-by-step guides to master Claude AI features and capabilities
-          </p>
-          <div className="mt-4">
-            <Badge variant="secondary">{tutorials.length} tutorials available</Badge>
-          </div>
-        </div>
-
-        {/* Breadcrumb */}
-        <div className="mb-6">
-          <nav className="flex" aria-label="Breadcrumb">
-            <ol className="flex items-center space-x-2">
-              <li>
-                <Link href="/guides" className="text-muted-foreground hover:text-foreground">
-                  Guides
-                </Link>
-              </li>
-              <li>/</li>
-              <li className="text-foreground font-medium">Tutorials</li>
-            </ol>
-          </nav>
-        </div>
-
-        {/* Main Layout: Content + Sidebar */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content - Takes 2/3 width */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Tutorials Grid */}
-            {tutorials.length > 0 ? (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-                {tutorials.map((tutorial) => (
-                  <Link key={tutorial.slug} href={tutorial.slug}>
-                    <Card className="p-6 h-full hover:bg-accent/10 transition-colors">
-                      <div className="flex flex-col h-full">
-                        <h3 className="font-semibold mb-2 line-clamp-2">{tutorial.title}</h3>
-                        <p className="text-sm text-muted-foreground mb-4 line-clamp-3 flex-grow">
-                          {tutorial.description}
-                        </p>
-                        <div className="flex items-center justify-between mt-auto">
-                          <Badge variant="outline" className="text-xs">
-                            Tutorial
-                          </Badge>
-                          {tutorial.dateUpdated && (
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(tutorial.dateUpdated).toLocaleDateString()}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <Card className="p-8 text-center">
-                <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h2 className="text-xl font-semibold mb-2">No tutorials yet</h2>
-                <p className="text-muted-foreground">
-                  Tutorials are coming soon. Check back later for step-by-step guides.
-                </p>
-              </Card>
-            )}
-
-            {/* CTA */}
-            <Card className="p-8 text-center bg-accent/10">
-              <h2 className="text-2xl font-semibold mb-4">Want to contribute?</h2>
-              <p className="text-muted-foreground mb-6">
-                Share your knowledge by creating tutorials for the community
-              </p>
-              <div className="flex gap-4 justify-center">
-                <Link href="/guides">
-                  <button
-                    type="button"
-                    className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
-                  >
-                    All Guides
-                  </button>
-                </Link>
-                <Link href="/submit">
-                  <button
-                    type="button"
-                    className="px-6 py-2 border border-border rounded-lg hover:bg-accent"
-                  >
-                    Submit Tutorial
-                  </button>
-                </Link>
-              </div>
-            </Card>
-          </div>
-
-          {/* Sidebar - Takes 1/3 width */}
-          <UnifiedSidebar mode="category" currentCategory="tutorials" />
-        </div>
-      </div>
-    </div>
-  );
+  return <GuidePageFactory config={config} />;
 }

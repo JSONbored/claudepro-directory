@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "performance",
-    "benchmarking",
-    "stop-hook",
-    "testing",
-    "metrics"
-  ],
+  "tags": ["performance", "benchmarking", "stop-hook", "testing", "metrics"],
   "hookType": "Stop",
   "features": [
     "Multi-language performance benchmarking for Node.js, Python, Go, and Rust",

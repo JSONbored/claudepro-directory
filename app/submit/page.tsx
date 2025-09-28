@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
+import { SOCIAL_LINKS } from '@/lib/constants';
 import { type ConfigSubmissionInput, configSubmissionSchema } from '@/lib/schemas/form.schema';
 
 export default function SubmitPage() {
@@ -28,7 +29,7 @@ export default function SubmitPage() {
 
   // Local form state for validation and UX with proper typing
   const [formData, setFormData] = useState<ConfigSubmissionInput>({
-    type: '' as any, // Will be validated by Zod
+    type: 'agents', // Default to first valid enum value
     name: '',
     description: '',
     category: '',
@@ -54,11 +55,7 @@ export default function SubmitPage() {
         description: state.error,
         action: (
           <Button variant="outline" size="sm" asChild>
-            <a
-              href="https://github.com/JSONbored/claudepro-directory/issues/new"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={`${SOCIAL_LINKS.github}/issues/new`} target="_blank" rel="noopener noreferrer">
               Open GitHub
             </a>
           </Button>
@@ -68,7 +65,6 @@ export default function SubmitPage() {
       toast({
         title: 'Submission Failed',
         description: state.error,
-        variant: 'destructive',
       });
     }
   }
@@ -144,7 +140,6 @@ export default function SubmitPage() {
       toast({
         title: 'Validation Failed',
         description: 'Please fix the errors below before submitting.',
-        variant: 'destructive',
       });
       return;
     }
@@ -213,6 +208,7 @@ export default function SubmitPage() {
                     value={formData.type}
                     onChange={(e) => handleSelectChange('type', e.target.value)}
                     disabled={isPending}
+                    autoComplete="off"
                     className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.type ? 'border-red-500' : ''}`}
                   >
                     <option value="">Select type</option>
@@ -235,6 +231,7 @@ export default function SubmitPage() {
                     value={formData.category}
                     onChange={(e) => handleSelectChange('category', e.target.value)}
                     disabled={isPending}
+                    autoComplete="off"
                     className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.category ? 'border-red-500' : ''}`}
                   >
                     <option value="">Select category</option>
@@ -262,6 +259,7 @@ export default function SubmitPage() {
                   onChange={handleInputChange}
                   placeholder="e.g., Code Review Assistant"
                   disabled={isPending}
+                  autoComplete="off"
                   className={errors.name ? 'border-red-500' : ''}
                 />
                 {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
@@ -280,6 +278,7 @@ export default function SubmitPage() {
                   placeholder="Describe what your configuration does and how it helps users..."
                   rows={3}
                   disabled={isPending}
+                  autoComplete="off"
                   className={errors.description ? 'border-red-500' : ''}
                 />
                 {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
@@ -298,6 +297,7 @@ export default function SubmitPage() {
                     onChange={handleInputChange}
                     placeholder="John Doe"
                     disabled={isPending}
+                    autoComplete="name"
                     className={errors.author ? 'border-red-500' : ''}
                   />
                   {errors.author && <p className="text-sm text-red-500">{errors.author}</p>}
@@ -312,6 +312,7 @@ export default function SubmitPage() {
                     onChange={handleInputChange}
                     placeholder="johndoe"
                     disabled={isPending}
+                    autoComplete="username"
                   />
                   <p className="text-xs text-muted-foreground">Optional</p>
                 </div>
@@ -331,6 +332,7 @@ export default function SubmitPage() {
                   rows={8}
                   className={`font-mono text-sm ${errors.content ? 'border-red-500' : ''}`}
                   disabled={isPending}
+                  autoComplete="off"
                 />
                 {errors.content && <p className="text-sm text-red-500">{errors.content}</p>}
               </div>
@@ -345,6 +347,7 @@ export default function SubmitPage() {
                   onChange={handleInputChange}
                   placeholder="productivity, automation, coding (comma-separated)"
                   disabled={isPending}
+                  autoComplete="off"
                 />
                 <p className="text-xs text-muted-foreground">
                   Optional - Help others find your configuration
@@ -411,11 +414,7 @@ export default function SubmitPage() {
                 </li>
               </ol>
               <Button variant="outline" size="sm" asChild className="w-full">
-                <a
-                  href="https://github.com/JSONbored/claudepro-directory"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer">
                   <Github className="h-4 w-4 mr-2" />
                   View Repository
                 </a>

@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "github-actions",
-    "ci-cd",
-    "workflows",
-    "validation",
-    "yaml"
-  ],
+  "tags": ["github-actions", "ci-cd", "workflows", "validation", "yaml"],
   "hookType": "PostToolUse",
   "features": [
     "Comprehensive GitHub Actions workflow YAML validation",
@@ -27,10 +21,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/github-actions-workflow-validator.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },
