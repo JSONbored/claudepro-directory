@@ -3,13 +3,13 @@ import { notFound } from 'next/navigation';
 import { HookDetailPage } from '@/components/hook-detail-page';
 import { HookStructuredData } from '@/components/structured-data/hook-schema';
 import { ViewTracker } from '@/components/view-tracker';
-import { getHookBySlug, getHookFullContent, hooks } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
-import { sortHooks } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
 import type { PageProps } from '@/lib/schemas/app.schema';
 import { slugParamsSchema } from '@/lib/schemas/app.schema';
 import { hookContentSchema } from '@/lib/schemas/content.schema';
+import { contentCache } from '@/lib/services/content-cache.service';
+import { contentProcessor } from '@/lib/services/content-processor.service';
 import { getDisplayTitle } from '@/lib/utils';
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -38,7 +38,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const { slug } = validationResult.data;
-  const hook = getHookBySlug(slug);
+
+  // Get hook metadata from content processor
+  const hook = await contentProcessor.getContentItemBySlug('hooks', slug);
 
   if (!hook) {
     return {
@@ -59,42 +61,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export async function generateStaticParams() {
-  try {
-    // Sort hooks by popularity/trending for optimized static generation
-    // Most popular items will be generated first, improving initial page loads
-    const sortedHooks = await sortHooks([...hooks], 'popularity');
-
-    return sortedHooks
-      .map((hook) => {
-        // Validate slug using existing schema before static generation
-        const validation = slugParamsSchema.safeParse({ slug: hook.slug });
-
-        if (!validation.success) {
-          logger.warn('Invalid slug in generateStaticParams for hooks', {
-            slug: hook.slug,
-            error: validation.error.issues[0]?.message || 'Unknown validation error',
-          });
-          return null;
-        }
-
-        return {
-          slug: hook.slug,
-        };
-      })
-      .filter(Boolean);
-  } catch (error) {
-    // Fallback to unsorted if sorting fails
-    logger.error(
-      'Failed to sort hooks for static generation, using default order',
-      error instanceof Error ? error : new Error(String(error))
-    );
-
-    return hooks.map((hook) => ({
-      slug: hook.slug,
-    }));
-  }
-}
+// Note: generateStaticParams removed to enable Edge Runtime
+// Pages will be generated on-demand with ISR (4-hour revalidation)
 
 export default async function HookPage({ params }: PageProps) {
   if (!params) {
@@ -125,22 +93,38 @@ export default async function HookPage({ params }: PageProps) {
     validated: true,
   });
 
-  const hookMeta = getHookBySlug(slug);
+  // Try cache first for metadata
+  let hookMeta = await contentCache.getContentItemBySlug('hooks', slug);
 
   if (!hookMeta) {
-    notFound();
+    // Fetch from GitHub API if not cached
+    hookMeta = await contentProcessor.getContentItemBySlug('hooks', slug);
+
+    if (!hookMeta) {
+      notFound();
+    }
+
+    // Cache the metadata
+    await contentCache.setContentItemBySlug('hooks', slug, hookMeta);
   }
 
-  // Load full content
-  const fullHook = await getHookFullContent(slug);
+  // Load full content from GitHub
+  const fullContent = await contentProcessor.getFullContentBySlug('hooks', slug);
+  const hookData = fullContent || hookMeta;
 
-  const relatedHooksData = hooks
-    .filter((h) => h.slug !== hookMeta.slug && h.category === hookMeta.category)
+  // Get all hooks for related items
+  let allHooks = await contentCache.getContentByCategory('hooks');
+
+  if (!allHooks) {
+    allHooks = await contentProcessor.getContentByCategory('hooks');
+    if (allHooks) {
+      await contentCache.setContentByCategory('hooks', allHooks);
+    }
+  }
+
+  const relatedHooksData = (allHooks || [])
+    .filter((h) => h.slug !== slug && h.category === hookMeta.category)
     .slice(0, 3);
-
-  // Create a properly typed hook that conforms to HookContent schema
-  // Use fullHook if available, otherwise use metadata with safe defaults
-  const hookData = fullHook || hookMeta;
 
   // Parse through Zod to ensure type safety - this will add defaults for missing fields
   const hook = hookContentSchema.parse(hookData);
@@ -154,5 +138,8 @@ export default async function HookPage({ params }: PageProps) {
     </>
   );
 }
-// Enable ISR - revalidate every hour
+// Enable ISR - revalidate every 4 hours
 export const revalidate = 14400;
+
+// Use Edge Runtime for better performance
+export const runtime = 'edge';

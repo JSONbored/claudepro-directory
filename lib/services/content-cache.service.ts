@@ -217,6 +217,24 @@ class ContentCacheService {
     });
   }
 
+  async getContentItemBySlug(category: string, slug: string): Promise<UnifiedContentItem | null> {
+    return this.get<UnifiedContentItem>(`item:${category}:${slug}`, {
+      keyPrefix: 'content',
+      ttlSeconds: this.defaultTTL,
+    });
+  }
+
+  async setContentItemBySlug(
+    category: string,
+    slug: string,
+    item: UnifiedContentItem
+  ): Promise<void> {
+    await this.set(`item:${category}:${slug}`, item, {
+      keyPrefix: 'content',
+      ttlSeconds: this.defaultTTL,
+    });
+  }
+
   async getAllContent(): Promise<ContentByCategory | null> {
     return this.get<ContentByCategory>('all-content', {
       keyPrefix: 'content',

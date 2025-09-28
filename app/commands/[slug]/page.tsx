@@ -3,13 +3,13 @@ import { notFound } from 'next/navigation';
 import { CommandDetailPage } from '@/components/command-detail-page';
 import { CommandStructuredData } from '@/components/structured-data/command-schema';
 import { ViewTracker } from '@/components/view-tracker';
-import { commands, getCommandBySlug, getCommandFullContent } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
-import { sortCommands } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
 import type { PageProps } from '@/lib/schemas/app.schema';
 import { slugParamsSchema } from '@/lib/schemas/app.schema';
 import { commandContentSchema } from '@/lib/schemas/content.schema';
+import { contentCache } from '@/lib/services/content-cache.service';
+import { contentProcessor } from '@/lib/services/content-processor.service';
 import { getDisplayTitle } from '@/lib/utils';
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -38,7 +38,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const { slug } = validationResult.data;
-  const command = getCommandBySlug(slug);
+
+  // Get command metadata from content processor
+  const command = await contentProcessor.getContentItemBySlug('commands', slug);
 
   if (!command) {
     return {
@@ -61,42 +63,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export async function generateStaticParams() {
-  try {
-    // Sort commands by popularity/trending for optimized static generation
-    // Most popular items will be generated first, improving initial page loads
-    const sortedCommands = await sortCommands([...commands], 'popularity');
-
-    return sortedCommands
-      .map((command) => {
-        // Validate slug using existing schema before static generation
-        const validation = slugParamsSchema.safeParse({ slug: command.slug });
-
-        if (!validation.success) {
-          logger.warn('Invalid slug in generateStaticParams for commands', {
-            slug: command.slug,
-            error: validation.error.issues[0]?.message || 'Unknown validation error',
-          });
-          return null;
-        }
-
-        return {
-          slug: command.slug,
-        };
-      })
-      .filter(Boolean);
-  } catch (error) {
-    // Fallback to unsorted if sorting fails
-    logger.error(
-      'Failed to sort commands for static generation, using default order',
-      error instanceof Error ? error : new Error(String(error))
-    );
-
-    return commands.map((command) => ({
-      slug: command.slug,
-    }));
-  }
-}
+// Note: generateStaticParams removed to enable Edge Runtime
+// Pages will be generated on-demand with ISR (4-hour revalidation)
 
 export default async function CommandPage({ params }: PageProps) {
   if (!params) {
@@ -127,20 +95,38 @@ export default async function CommandPage({ params }: PageProps) {
     validated: true,
   });
 
-  const commandMeta = getCommandBySlug(slug);
+  // Try cache first for metadata
+  let commandMeta = await contentCache.getContentItemBySlug('commands', slug);
 
   if (!commandMeta) {
-    notFound();
+    // Fetch from GitHub API if not cached
+    commandMeta = await contentProcessor.getContentItemBySlug('commands', slug);
+
+    if (!commandMeta) {
+      notFound();
+    }
+
+    // Cache the metadata
+    await contentCache.setContentItemBySlug('commands', slug, commandMeta);
   }
 
-  // Load full content
-  const fullCommand = await getCommandFullContent(slug);
+  // Load full content from GitHub
+  const fullContent = await contentProcessor.getFullContentBySlug('commands', slug);
+  const commandData = fullContent || commandMeta;
 
-  const relatedCommandsData = commands
-    .filter((c) => c.slug !== commandMeta.slug && c.category === commandMeta.category)
+  // Get all commands for related items
+  let allCommands = await contentCache.getContentByCategory('commands');
+
+  if (!allCommands) {
+    allCommands = await contentProcessor.getContentByCategory('commands');
+    if (allCommands) {
+      await contentCache.setContentByCategory('commands', allCommands);
+    }
+  }
+
+  const relatedCommandsData = (allCommands || [])
+    .filter((c) => c.slug !== slug && c.category === commandMeta.category)
     .slice(0, 3);
-
-  const commandData = fullCommand || commandMeta;
 
   // Parse through Zod to ensure type safety
   const command = commandContentSchema.parse(commandData);
@@ -154,5 +140,8 @@ export default async function CommandPage({ params }: PageProps) {
     </>
   );
 }
-// Enable ISR - revalidate every hour
+// Enable ISR - revalidate every 4 hours
 export const revalidate = 14400;
+
+// Use Edge Runtime for better performance
+export const runtime = 'edge';

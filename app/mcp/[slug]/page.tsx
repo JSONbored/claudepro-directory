@@ -3,13 +3,13 @@ import { notFound } from 'next/navigation';
 import { MCPDetailPage } from '@/components/mcp-detail-page';
 import { MCPStructuredData } from '@/components/structured-data/mcp-schema';
 import { ViewTracker } from '@/components/view-tracker';
-import { getMcpBySlug, getMcpFullContent, mcp } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
-import { sortMcp } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
 import type { PageProps } from '@/lib/schemas/app.schema';
 import { slugParamsSchema } from '@/lib/schemas/app.schema';
 import { mcpServerContentSchema } from '@/lib/schemas/content.schema';
+import { contentCache } from '@/lib/services/content-cache.service';
+import { contentProcessor } from '@/lib/services/content-processor.service';
 import { transformForDetailPage } from '@/lib/transformers';
 import { getDisplayTitle } from '@/lib/utils';
 
@@ -39,7 +39,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const { slug } = validationResult.data;
-  const mcpServer = getMcpBySlug(slug);
+
+  // Get MCP metadata from content processor
+  const mcpServer = await contentProcessor.getContentItemBySlug('mcp', slug);
 
   if (!mcpServer) {
     return {
@@ -60,42 +62,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export async function generateStaticParams() {
-  try {
-    // Sort MCP servers by popularity/trending for optimized static generation
-    // Most popular items will be generated first, improving initial page loads
-    const sortedMcp = await sortMcp([...mcp], 'popularity');
-
-    return sortedMcp
-      .map((mcpItem) => {
-        // Validate slug using existing schema before static generation
-        const validation = slugParamsSchema.safeParse({ slug: mcpItem.slug });
-
-        if (!validation.success) {
-          logger.warn('Invalid slug in generateStaticParams for MCP', {
-            slug: mcpItem.slug,
-            error: validation.error.issues[0]?.message || 'Unknown validation error',
-          });
-          return null;
-        }
-
-        return {
-          slug: mcpItem.slug,
-        };
-      })
-      .filter(Boolean);
-  } catch (error) {
-    // Fallback to unsorted if sorting fails
-    logger.error(
-      'Failed to sort MCP servers for static generation, using default order',
-      error instanceof Error ? error : new Error(String(error))
-    );
-
-    return mcp.map((mcpItem) => ({
-      slug: mcpItem.slug,
-    }));
-  }
-}
+// Note: generateStaticParams removed to enable Edge Runtime
+// Pages will be generated on-demand with ISR (4-hour revalidation)
 
 export default async function MCPPage({ params }: PageProps) {
   if (!params) {
@@ -126,20 +94,40 @@ export default async function MCPPage({ params }: PageProps) {
     validated: true,
   });
 
-  const mcpMeta = getMcpBySlug(slug);
+  // Try cache first for metadata
+  let mcpMeta = await contentCache.getContentItemBySlug('mcp', slug);
 
   if (!mcpMeta) {
-    notFound();
+    // Fetch from GitHub API if not cached
+    mcpMeta = await contentProcessor.getContentItemBySlug('mcp', slug);
+
+    if (!mcpMeta) {
+      notFound();
+    }
+
+    // Cache the metadata
+    await contentCache.setContentItemBySlug('mcp', slug, mcpMeta);
   }
 
-  // Load full content
-  const fullMCP = await getMcpFullContent(slug);
+  // Load full content from GitHub
+  const fullContent = await contentProcessor.getFullContentBySlug('mcp', slug);
+  const mcpData = fullContent || mcpMeta;
 
-  const relatedMCPs = mcp
-    .filter((m) => m.slug !== mcpMeta.slug && m.category === mcpMeta.category)
+  // Get all MCP servers for related items
+  let allMcp = await contentCache.getContentByCategory('mcp');
+
+  if (!allMcp) {
+    allMcp = await contentProcessor.getContentByCategory('mcp');
+    if (allMcp) {
+      await contentCache.setContentByCategory('mcp', allMcp);
+    }
+  }
+
+  const relatedMCPs = (allMcp || [])
+    .filter((m) => m.slug !== slug && m.category === mcpMeta.category)
     .slice(0, 3);
 
-  const mcpServer = mcpServerContentSchema.parse(fullMCP || mcpMeta);
+  const mcpServer = mcpServerContentSchema.parse(mcpData);
   const relatedMCPsParsed = relatedMCPs.map((m) => mcpServerContentSchema.parse(m));
 
   // Transform for component interface
@@ -156,5 +144,8 @@ export default async function MCPPage({ params }: PageProps) {
     </>
   );
 }
-// Enable ISR - revalidate every hour
+// Enable ISR - revalidate every 4 hours
 export const revalidate = 14400;
+
+// Use Edge Runtime for better performance
+export const runtime = 'edge';

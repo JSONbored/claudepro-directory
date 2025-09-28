@@ -215,6 +215,81 @@ class ContentProcessor {
     }
   }
 
+  async getContentItemBySlug(category: string, slug: string): Promise<UnifiedContentItem | null> {
+    try {
+      // Get all items in the category
+      const items = await this.getContentByCategory(category);
+
+      // Find the specific item by slug
+      const item = items.find((i) => i.slug === slug || i.slug.endsWith(`/${slug}`));
+
+      return item || null;
+    } catch (error) {
+      logger.error(`Failed to get content item by slug: ${category}/${slug}`, error as Error);
+      return null;
+    }
+  }
+
+  async getFullContentBySlug(category: string, slug: string): Promise<unknown> {
+    try {
+      // Determine the base path based on category
+      let basePath = '';
+      if (['agents', 'commands', 'hooks', 'mcp', 'rules'].includes(category)) {
+        basePath = `content/${category}`;
+      } else if (
+        [
+          'use-cases',
+          'tutorials',
+          'collections',
+          'categories',
+          'workflows',
+          'comparisons',
+          'troubleshooting',
+        ].includes(category)
+      ) {
+        basePath = `seo/${category}`;
+      } else {
+        throw new Error(`Unknown category: ${category}`);
+      }
+
+      // Fetch the full content from GitHub
+      const content = await githubContentService.getFileContent(`${basePath}/${slug}.json`);
+
+      // Parse and validate JSON content
+      const parsed = JSON.parse(content);
+
+      // Basic validation to ensure it's an object with expected shape
+      if (typeof parsed !== 'object' || parsed === null) {
+        throw new Error(`Invalid content format for ${category}/${slug}`);
+      }
+
+      return parsed;
+    } catch (error) {
+      // Try with .mdx extension for SEO content
+      try {
+        if (
+          [
+            'use-cases',
+            'tutorials',
+            'collections',
+            'categories',
+            'workflows',
+            'comparisons',
+            'troubleshooting',
+          ].includes(category)
+        ) {
+          const content = await githubContentService.getFileContent(`seo/${category}/${slug}.mdx`);
+          return content; // Return raw MDX content as string
+        }
+      } catch {
+        // Fall through to error handling
+      }
+
+      logger.error(`Failed to get full content by slug: ${category}/${slug}`, error as Error);
+      throw error;
+    }
+  }
+
   clearCache(): void {
     this.cache.clear();
     this.cacheTimestamps.clear();

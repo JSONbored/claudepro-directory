@@ -3,13 +3,13 @@ import { notFound } from 'next/navigation';
 import { RuleDetailPage } from '@/components/rule-detail-page';
 import { RuleStructuredData } from '@/components/structured-data/rule-schema';
 import { ViewTracker } from '@/components/view-tracker';
-import { getRuleBySlug, getRuleFullContent, rules } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
-import { sortRules } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
 import type { PageProps } from '@/lib/schemas/app.schema';
 import { slugParamsSchema } from '@/lib/schemas/app.schema';
 import { ruleContentSchema } from '@/lib/schemas/content.schema';
+import { contentCache } from '@/lib/services/content-cache.service';
+import { contentProcessor } from '@/lib/services/content-processor.service';
 import { getDisplayTitle } from '@/lib/utils';
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -38,7 +38,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const { slug } = validationResult.data;
-  const rule = getRuleBySlug(slug);
+
+  // Get rule metadata from content processor
+  const rule = await contentProcessor.getContentItemBySlug('rules', slug);
 
   if (!rule) {
     return {
@@ -59,42 +61,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export async function generateStaticParams() {
-  try {
-    // Sort rules by popularity/trending for optimized static generation
-    // Most popular items will be generated first, improving initial page loads
-    const sortedRules = await sortRules([...rules], 'popularity');
-
-    return sortedRules
-      .map((rule) => {
-        // Validate slug using existing schema before static generation
-        const validation = slugParamsSchema.safeParse({ slug: rule.slug });
-
-        if (!validation.success) {
-          logger.warn('Invalid slug in generateStaticParams for rules', {
-            slug: rule.slug,
-            error: validation.error.issues[0]?.message || 'Unknown validation error',
-          });
-          return null;
-        }
-
-        return {
-          slug: rule.slug,
-        };
-      })
-      .filter(Boolean);
-  } catch (error) {
-    // Fallback to unsorted if sorting fails
-    logger.error(
-      'Failed to sort rules for static generation, using default order',
-      error instanceof Error ? error : new Error(String(error))
-    );
-
-    return rules.map((rule) => ({
-      slug: rule.slug,
-    }));
-  }
-}
+// Note: generateStaticParams removed to enable Edge Runtime
+// Pages will be generated on-demand with ISR (4-hour revalidation)
 
 export default async function RulePage({ params }: PageProps) {
   if (!params) {
@@ -125,20 +93,40 @@ export default async function RulePage({ params }: PageProps) {
     validated: true,
   });
 
-  const ruleMeta = getRuleBySlug(slug);
+  // Try cache first for metadata
+  let ruleMeta = await contentCache.getContentItemBySlug('rules', slug);
 
   if (!ruleMeta) {
-    notFound();
+    // Fetch from GitHub API if not cached
+    ruleMeta = await contentProcessor.getContentItemBySlug('rules', slug);
+
+    if (!ruleMeta) {
+      notFound();
+    }
+
+    // Cache the metadata
+    await contentCache.setContentItemBySlug('rules', slug, ruleMeta);
   }
 
-  // Load full content
-  const fullRule = await getRuleFullContent(slug);
+  // Load full content from GitHub
+  const fullContent = await contentProcessor.getFullContentBySlug('rules', slug);
+  const ruleData = fullContent || ruleMeta;
 
-  const relatedRules = rules
-    .filter((r) => r.slug !== ruleMeta.slug && r.category === ruleMeta.category)
+  // Get all rules for related items
+  let allRules = await contentCache.getContentByCategory('rules');
+
+  if (!allRules) {
+    allRules = await contentProcessor.getContentByCategory('rules');
+    if (allRules) {
+      await contentCache.setContentByCategory('rules', allRules);
+    }
+  }
+
+  const relatedRules = (allRules || [])
+    .filter((r) => r.slug !== slug && r.category === ruleMeta.category)
     .slice(0, 3);
 
-  const rule = ruleContentSchema.parse(fullRule || ruleMeta);
+  const rule = ruleContentSchema.parse(ruleData);
   const relatedRulesParsed = relatedRules.map((r) => ruleContentSchema.parse(r));
 
   return (
@@ -149,5 +137,8 @@ export default async function RulePage({ params }: PageProps) {
     </>
   );
 }
-// Enable ISR - revalidate every hour
+// Enable ISR - revalidate every 4 hours
 export const revalidate = 14400;
+
+// Use Edge Runtime for better performance
+export const runtime = 'edge';

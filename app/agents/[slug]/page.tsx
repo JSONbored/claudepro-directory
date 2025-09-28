@@ -3,13 +3,13 @@ import { notFound } from 'next/navigation';
 import { AgentDetailPage } from '@/components/agent-detail-page';
 import { AgentStructuredData } from '@/components/structured-data/agent-schema';
 import { ViewTracker } from '@/components/view-tracker';
-import { agents, getAgentBySlug, getAgentFullContent } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
-import { sortAgents } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
 import type { PageProps } from '@/lib/schemas/app.schema';
 import { slugParamsSchema } from '@/lib/schemas/app.schema';
 import { agentContentSchema } from '@/lib/schemas/content/agent.schema';
+import { contentCache } from '@/lib/services/content-cache.service';
+import { contentProcessor } from '@/lib/services/content-processor.service';
 import { transformForDetailPage } from '@/lib/transformers';
 import { getDisplayTitle } from '@/lib/utils';
 
@@ -39,7 +39,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const { slug } = validationResult.data;
-  const agent = getAgentBySlug(slug);
+
+  // Get agent metadata from content processor
+  const agent = await contentProcessor.getContentItemBySlug('agents', slug);
 
   if (!agent) {
     return {
@@ -62,45 +64,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export async function generateStaticParams() {
-  try {
-    // Sort agents by popularity/trending for optimized static generation
-    // Most popular items will be generated first, improving initial page loads
-    const sortedAgents = await sortAgents([...agents], 'popularity');
+// Note: generateStaticParams removed to enable Edge Runtime
+// Pages will be generated on-demand with ISR (4-hour revalidation)
 
-    return sortedAgents
-      .map((agent) => {
-        // Validate slug using existing schema before static generation
-        const validation = slugParamsSchema.safeParse({ slug: agent.slug });
-
-        if (!validation.success) {
-          logger.warn('Invalid slug in generateStaticParams for agents', {
-            slug: agent.slug,
-            error: validation.error.issues[0]?.message || 'Unknown validation error',
-          });
-          return null;
-        }
-
-        return {
-          slug: agent.slug,
-        };
-      })
-      .filter(Boolean);
-  } catch (error) {
-    // Fallback to unsorted if sorting fails
-    logger.error(
-      'Failed to sort agents for static generation, using default order',
-      error instanceof Error ? error : new Error(String(error))
-    );
-
-    return agents.map((agent) => ({
-      slug: agent.slug,
-    }));
-  }
-}
-
-// Enable ISR - revalidate every hour
+// Enable ISR - revalidate every 4 hours
 export const revalidate = 14400;
+
+// Use Edge Runtime for better performance
+export const runtime = 'edge';
 
 export default async function AgentPage({ params }: PageProps) {
   if (!params) {
@@ -131,18 +102,37 @@ export default async function AgentPage({ params }: PageProps) {
     validated: true,
   });
 
-  const agentMeta = getAgentBySlug(slug);
+  // Try cache first for metadata
+  let agentMeta = await contentCache.getContentItemBySlug('agents', slug);
 
   if (!agentMeta) {
-    notFound();
+    // Fetch from GitHub API if not cached
+    agentMeta = await contentProcessor.getContentItemBySlug('agents', slug);
+
+    if (!agentMeta) {
+      notFound();
+    }
+
+    // Cache the metadata
+    await contentCache.setContentItemBySlug('agents', slug, agentMeta);
   }
 
-  // Load full content
-  const fullAgent = await getAgentFullContent(slug);
-  const agentData = fullAgent || agentMeta;
+  // Load full content from GitHub
+  const fullContent = await contentProcessor.getFullContentBySlug('agents', slug);
+  const agentData = fullContent || agentMeta;
 
-  const relatedAgentsData = agents
-    .filter((a) => a.slug !== agentMeta.slug && a.category === agentMeta.category)
+  // Get all agents for related items
+  let allAgents = await contentCache.getContentByCategory('agents');
+
+  if (!allAgents) {
+    allAgents = await contentProcessor.getContentByCategory('agents');
+    if (allAgents) {
+      await contentCache.setContentByCategory('agents', allAgents);
+    }
+  }
+
+  const relatedAgentsData = (allAgents || [])
+    .filter((a) => a.slug !== slug && a.category === agentMeta.category)
     .slice(0, 3);
 
   // Parse through Zod to ensure type safety
