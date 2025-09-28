@@ -170,7 +170,7 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
                     key={rule.slug}
                     item={rule}
                     variant="default"
-                    showCategory={false}
+                    showCategory={true}
                     showActions={true}
                   />
                 ))}
@@ -191,7 +191,7 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
                     key={mcpItem.slug}
                     item={mcpItem}
                     variant="default"
-                    showCategory={false}
+                    showCategory={true}
                     showActions={true}
                   />
                 ))}
@@ -215,7 +215,7 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
                     key={agent.slug}
                     item={agent}
                     variant="default"
-                    showCategory={false}
+                    showCategory={true}
                     showActions={true}
                   />
                 ))}
@@ -239,7 +239,7 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
                     key={command.slug}
                     item={command}
                     variant="default"
-                    showCategory={false}
+                    showCategory={true}
                     showActions={true}
                   />
                 ))}
@@ -260,7 +260,7 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
                     key={hook.slug}
                     item={hook}
                     variant="default"
-                    showCategory={false}
+                    showCategory={true}
                     showActions={true}
                   />
                 ))}
