@@ -74,11 +74,13 @@ async function loadJsonFiles(type: ContentCategory): Promise<ValidatedContent[]>
   try {
     const files = await fs.readdir(dir);
     // Security: Filter for valid JSON files only, prevent execution of other file types
+    // Exclude template files from processing
     const jsonFiles = files.filter(
       (f) =>
         f.endsWith('.json') &&
         !f.includes('..') &&
         !f.startsWith('.') &&
+        !f.includes('template') &&
         f.match(/^[a-zA-Z0-9\-_]+\.json$/)
     );
 

@@ -24,12 +24,12 @@ const aj = arcjet({
   rules: [
     // Shield WAF - protect against common attacks
     shield({
-      mode: 'LIVE', // LIVE mode blocks malicious requests
+      mode: isDevelopment ? 'DRY_RUN' : 'LIVE', // DRY_RUN in development, LIVE in production
     }),
 
     // Bot protection - block malicious bots, allow good ones
     detectBot({
-      mode: 'LIVE',
+      mode: isDevelopment ? 'DRY_RUN' : 'LIVE',
       allow: [
         'CATEGORY:SEARCH_ENGINE', // Allow search engines (Google, Bing, etc.)
         'CATEGORY:MONITOR',       // Allow monitoring services (uptime monitors)
@@ -39,7 +39,7 @@ const aj = arcjet({
 
     // Rate limiting - general API protection with token bucket
     tokenBucket({
-      mode: 'LIVE',
+      mode: isDevelopment ? 'DRY_RUN' : 'LIVE',
       refillRate: 60,  // 60 tokens
       interval: 60,    // per 60 seconds (1 minute)
       capacity: 120,   // burst capacity of 120 tokens
@@ -47,7 +47,7 @@ const aj = arcjet({
 
     // Fixed window rate limiting for aggressive protection
     fixedWindow({
-      mode: 'LIVE',
+      mode: isDevelopment ? 'DRY_RUN' : 'LIVE',
       window: '1m',    // 1 minute window
       max: 100,        // max 100 requests per window
     }),

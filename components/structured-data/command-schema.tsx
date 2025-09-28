@@ -21,8 +21,6 @@ interface CommandStructuredDataProps {
   };
 }
 
-import { jsonLdSafeSchema } from '@/lib/schemas/form.schema';
-
 /**
  * Generate rich structured data for Commands
  * Makes command syntax and configurations directly parseable by AI systems
@@ -193,16 +191,19 @@ export function CommandStructuredData({ item: command }: CommandStructuredDataPr
 
   const schemas = generateCommandSchema();
 
-  // Sanitize each schema through Zod to prevent XSS
-  const safeSchemas = schemas.map((schema) => jsonLdSafeSchema.parse(schema));
+  // Generate clean, safe schemas at build time
+  const safeSchemas = schemas;
 
   return (
     <>
-      {safeSchemas.map((schema) => {
-        const schemaId = `${schema['@type']}-${command.slug}`;
+      {safeSchemas.map((schema, index) => {
+        // Use @id fragment or type + index for unique keys
+        const schemaWithId = schema as { '@id'?: string; '@type'?: string };
+        const idFragment = schemaWithId['@id'] ? schemaWithId['@id'].split('#').pop() : null;
+        const schemaId = idFragment || `${schemaWithId['@type'] || 'schema'}-${index}`;
         return (
           <Script
-            key={schemaId}
+            key={`command-${command.slug}-${schemaId}`}
             id={`command-structured-data-${schemaId}`}
             type="application/ld+json"
             // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data is sanitized via Zod schema

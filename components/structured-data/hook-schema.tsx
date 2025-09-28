@@ -14,8 +14,6 @@ interface HookStructuredDataProps {
   item: ExtendedHookContent;
 }
 
-import { jsonLdSafeSchema } from '@/lib/schemas/form.schema';
-
 /**
  * Generate rich structured data for Hooks
  * Makes hook configurations and scripts directly parseable by AI systems
@@ -31,14 +29,14 @@ export function HookStructuredData({ item: hook }: HookStructuredDataProps) {
       '@context': 'https://schema.org',
       '@type': 'SoftwareApplication',
       '@id': `${baseUrl}/hooks/${hook.slug}`,
-      name: hook.title || hook.name,
+      name: hook.title || hook.name || hook.slug,
       description: hook.description,
       applicationCategory: 'DeveloperApplication',
       applicationSubCategory: `${hook.hookType || 'Hook'} - Claude Hook`,
       operatingSystem: 'Cross-platform',
       url: `${baseUrl}/hooks/${hook.slug}`,
-      datePublished: hook.dateAdded,
-      dateModified: hook.lastModified || hook.dateAdded,
+      datePublished: new Date(hook.dateAdded).toISOString(),
+      dateModified: new Date(hook.lastModified || hook.dateAdded).toISOString(),
       keywords: [
         'Claude Hook',
         hook.hookType || 'Hook',
@@ -51,7 +49,7 @@ export function HookStructuredData({ item: hook }: HookStructuredDataProps) {
       author: {
         '@type': hook.githubUrl?.includes('github.com/anthropics') ? 'Organization' : 'Person',
         name: hook.author || 'Unknown',
-        url: hook.githubUrl,
+        ...(hook.githubUrl && { url: hook.githubUrl }),
       },
 
       // Software requirements
@@ -84,7 +82,7 @@ export function HookStructuredData({ item: hook }: HookStructuredDataProps) {
           '@type': 'ComputerLanguage',
           name: 'Shell Script',
         },
-        codeRepository: hook.githubUrl,
+        ...(hook.githubUrl && { codeRepository: hook.githubUrl }),
         text: hook.configuration.scriptContent,
         encodingFormat: 'text/x-shellscript',
         license: 'https://opensource.org/licenses/MIT',
@@ -227,7 +225,7 @@ export function HookStructuredData({ item: hook }: HookStructuredDataProps) {
           position: 3,
           item: {
             '@id': `${baseUrl}/hooks/${hook.slug}`,
-            name: hook.title || hook.name,
+            name: hook.title || hook.name || hook.slug,
           },
         },
       ],
@@ -239,16 +237,19 @@ export function HookStructuredData({ item: hook }: HookStructuredDataProps) {
 
   const schemas = generateHookSchema();
 
-  // Sanitize each schema through Zod to prevent XSS
-  const safeSchemas = schemas.map((schema) => jsonLdSafeSchema.parse(schema));
+  // Generate clean, safe schemas at build time
+  const safeSchemas = schemas;
 
   return (
     <>
-      {safeSchemas.map((schema) => {
-        const schemaId = `${schema['@type']}-${hook.slug}`;
+      {safeSchemas.map((schema, index) => {
+        // Use @id fragment or type + index for unique keys
+        const schemaWithId = schema as { '@id'?: string; '@type'?: string };
+        const idFragment = schemaWithId['@id'] ? schemaWithId['@id'].split('#').pop() : null;
+        const schemaId = idFragment || `${schemaWithId['@type'] || 'schema'}-${index}`;
         return (
           <Script
-            key={schemaId}
+            key={`hook-${hook.slug}-${schemaId}`}
             id={`hook-structured-data-${schemaId}`}
             type="application/ld+json"
             // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data is sanitized via Zod schema

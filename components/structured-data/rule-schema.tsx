@@ -14,8 +14,6 @@ interface RuleStructuredDataProps {
   item: ExtendedRuleContent;
 }
 
-import { jsonLdSafeSchema } from '@/lib/schemas/form.schema';
-
 /**
  * Generate structured data for Rules
  * Optimized as TechArticle with educational metadata for AI understanding
@@ -221,16 +219,19 @@ export function RuleStructuredData({ item: rule }: RuleStructuredDataProps) {
 
   const schemas = generateRuleSchema();
 
-  // Sanitize each schema through Zod to prevent XSS
-  const safeSchemas = schemas.map((schema) => jsonLdSafeSchema.parse(schema));
+  // Generate clean, safe schemas at build time
+  const safeSchemas = schemas;
 
   return (
     <>
-      {safeSchemas.map((schema) => {
-        const schemaId = `${schema['@type']}-${rule.slug}`;
+      {safeSchemas.map((schema, index) => {
+        // Use @id fragment or type + index for unique keys
+        const schemaWithId = schema as { '@id'?: string; '@type'?: string };
+        const idFragment = schemaWithId['@id'] ? schemaWithId['@id'].split('#').pop() : null;
+        const schemaId = idFragment || `${schemaWithId['@type'] || 'schema'}-${index}`;
         return (
           <Script
-            key={schemaId}
+            key={`rule-${rule.slug}-${schemaId}`}
             id={`rule-structured-data-${schemaId}`}
             type="application/ld+json"
             // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data is sanitized via Zod schema

@@ -113,8 +113,9 @@ class Logger {
     const formattedLog = this.formatLog(entry);
 
     if (entry.level === 'debug' && this.isDevelopment) {
-      // Use process.stdout.write for debug logs to prevent SSR console leakage
-      process.stdout.write(`[DEBUG] ${formattedLog}\n`);
+      // Use console.debug for debug logs (Edge Runtime compatible)
+      // biome-ignore lint/suspicious/noConsole: Development debug logging
+      console.debug(`[DEBUG] ${formattedLog}`);
       return;
     }
 
@@ -413,7 +414,9 @@ class Logger {
     const isCI = process.env.CI === 'true';
 
     if (!isProduction || isVerbose || isCI) {
-      process.stdout.write(`${message}\r`);
+      // Use console.log for progress messages (Edge Runtime compatible)
+      // biome-ignore lint/suspicious/noConsole: Progress logging
+      console.log(message);
     }
   }
 

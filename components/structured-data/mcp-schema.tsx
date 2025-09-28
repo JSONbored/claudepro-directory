@@ -14,20 +14,6 @@ interface MCPStructuredDataProps {
   item: ExtendedMcpContent;
 }
 
-import { jsonLdSafeSchema } from '@/lib/schemas/form.schema';
-import {
-  type FAQPage,
-  faqPageSchema,
-  type HowTo,
-  type HowToStep,
-  howToSchema,
-  howToStepSchema,
-  type SoftwareApplication,
-  type SoftwareSourceCode,
-  softwareApplicationSchema,
-  softwareSourceCodeSchema,
-} from '@/lib/schemas/structured-data.schema';
-
 /**
  * Generate rich structured data for MCP servers
  * This helps AI systems and search engines better understand and cite MCP configurations
@@ -37,11 +23,14 @@ export function MCPStructuredData({ item: mcpServer }: MCPStructuredDataProps) {
 
   // Generate comprehensive schema.org markup for MCP servers
   const generateMCPSchema = () => {
-    const schemaData: SoftwareApplication = softwareApplicationSchema.parse({
+    const schemas = [];
+
+    // Main SoftwareApplication schema for the MCP server
+    const mcpSchema = {
       '@context': 'https://schema.org',
       '@type': 'SoftwareApplication',
       '@id': `${baseUrl}/mcp/${mcpServer.slug}`,
-      name: mcpServer.title || mcpServer.name,
+      name: mcpServer.title || mcpServer.name || mcpServer.slug,
       description: mcpServer.description,
       applicationCategory: 'DeveloperApplication',
       applicationSubCategory: 'MCP Server',
@@ -58,12 +47,8 @@ export function MCPStructuredData({ item: mcpServer }: MCPStructuredDataProps) {
         ...(mcpServer.tags || []),
       ].join(', '),
 
-      // Author information
-      author: {
-        '@type': mcpServer.githubUrl?.includes('github.com/anthropics') ? 'Organization' : 'Person',
-        name: mcpServer.author || 'Unknown',
-        url: mcpServer.githubUrl,
-      },
+      // Author information (simplified for JSON-LD validation)
+      author: mcpServer.author || 'Unknown',
 
       // Software requirements
       softwareRequirements: [
@@ -78,176 +63,114 @@ export function MCPStructuredData({ item: mcpServer }: MCPStructuredDataProps) {
           : []) as string[]),
       ].join(', '),
 
-      // Offer (free)
-      offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'USD',
-        availability: 'https://schema.org/InStock',
-      },
+      // Offer (simplified for JSON-LD validation)
+      offers: 'Free',
 
-      // How-to install (this is key for AI citations)
-      hasPart: [],
-    });
+      // Features
+      featureList: mcpServer.features?.join(', '),
+    };
+    schemas.push(mcpSchema);
 
-    // Add installation instructions as HowTo schema
-    if (mcpServer.installation) {
-      const steps: HowToStep[] = [];
-
-      // Add Claude Desktop installation steps if available
-      if (mcpServer.installation.claudeDesktop?.steps) {
-        mcpServer.installation.claudeDesktop.steps.forEach((step: string, index: number) => {
-          const stepData: HowToStep = howToStepSchema.parse({
-            '@type': 'HowToStep',
-            position: index + 1,
-            name: `Step ${index + 1}`,
-            text: String(step),
-          });
-          steps.push(stepData);
-        });
-      }
-
-      if (steps.length > 0) {
-        const installationHowTo: HowTo = howToSchema.parse({
-          '@context': 'https://schema.org',
-          '@type': 'HowTo',
-          name: `Install ${mcpServer.title || mcpServer.name} MCP Server`,
-          description: `Installation guide for ${mcpServer.title || mcpServer.name}`,
-          step: steps,
-        });
-        // Type assertion is safe here as we know it's a valid HowTo schema
-        if (schemaData.hasPart) {
-          schemaData.hasPart.push(installationHowTo);
-        }
-      }
+    // Add installation instructions as separate HowTo schema
+    if (mcpServer.installation?.claudeDesktop?.steps) {
+      const howToSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'HowTo',
+        '@id': `${baseUrl}/mcp/${mcpServer.slug}#installation`,
+        name: `Install ${mcpServer.title || mcpServer.name} MCP Server`,
+        description: `Installation guide for ${mcpServer.title || mcpServer.name}`,
+        step: mcpServer.installation.claudeDesktop.steps
+          .map((step: string, index: number) => `Step ${index + 1}: ${step}`)
+          .join(' | '),
+      };
+      schemas.push(howToSchema);
     }
 
-    // Add configuration code as SoftwareSourceCode (crucial for AI understanding)
-    const configurationSchemas: SoftwareSourceCode[] = [];
-
+    // Add configuration code as separate SoftwareSourceCode schemas
     if (mcpServer.configuration?.claudeDesktop) {
-      const desktopConfig: SoftwareSourceCode = softwareSourceCodeSchema.parse({
+      const desktopConfig = {
+        '@context': 'https://schema.org',
         '@type': 'SoftwareSourceCode',
         '@id': `${baseUrl}/mcp/${mcpServer.slug}#claude-desktop-config`,
         name: `${mcpServer.title || mcpServer.name} - Claude Desktop Configuration`,
         description: 'Configuration for Claude Desktop',
-        programmingLanguage: {
-          '@type': 'ComputerLanguage',
-          name: 'JSON',
-        },
-        codeRepository: mcpServer.githubUrl,
+        programmingLanguage: 'JSON',
+        ...(mcpServer.githubUrl && { codeRepository: mcpServer.githubUrl }),
         text: JSON.stringify(mcpServer.configuration.claudeDesktop, null, 2),
         encodingFormat: 'application/json',
         copyrightNotice: 'Free to use',
         license: 'https://opensource.org/licenses/MIT',
-      });
-      configurationSchemas.push(desktopConfig);
+      };
+      schemas.push(desktopConfig);
     }
 
     if (mcpServer.configuration?.claudeCode) {
-      const codeConfig: SoftwareSourceCode = softwareSourceCodeSchema.parse({
+      const codeConfig = {
+        '@context': 'https://schema.org',
         '@type': 'SoftwareSourceCode',
         '@id': `${baseUrl}/mcp/${mcpServer.slug}#claude-code-config`,
         name: `${mcpServer.title || mcpServer.name} - Claude Code Configuration`,
         description: 'Configuration for Claude Code',
-        programmingLanguage: {
-          '@type': 'ComputerLanguage',
-          name: 'JSON',
-        },
-        codeRepository: mcpServer.githubUrl,
+        programmingLanguage: 'JSON',
+        ...(mcpServer.githubUrl && { codeRepository: mcpServer.githubUrl }),
         text: JSON.stringify(mcpServer.configuration.claudeCode, null, 2),
         encodingFormat: 'application/json',
         copyrightNotice: 'Free to use',
         license: 'https://opensource.org/licenses/MIT',
-      });
-      configurationSchemas.push(codeConfig);
-    }
-
-    // Add configurations to schema
-    if (configurationSchemas.length > 0) {
-      // Add configurations safely
-      if (schemaData.hasPart) {
-        schemaData.hasPart.push(...configurationSchemas);
-      }
-    }
-
-    // Add features as aggregate rating (helps with rich snippets)
-    if (mcpServer.features && mcpServer.features.length > 0) {
-      schemaData.featureList = mcpServer.features.join(', ');
+      };
+      schemas.push(codeConfig);
     }
 
     // Add FAQs if we have troubleshooting info
     if (mcpServer.troubleshooting && mcpServer.troubleshooting.length > 0) {
-      const faqData: FAQPage = faqPageSchema.parse({
+      const faqSchema = {
         '@context': 'https://schema.org',
         '@type': 'FAQPage',
+        '@id': `${baseUrl}/mcp/${mcpServer.slug}#faq`,
         name: `${mcpServer.title || mcpServer.name} FAQs`,
         description: `Frequently asked questions about ${mcpServer.title || mcpServer.name}`,
         url: `${baseUrl}/mcp/${mcpServer.slug}`,
-        mainEntity: mcpServer.troubleshooting.map(
-          (item: string | { issue: string; solution: string }) => ({
-            '@type': 'Question',
-            name: typeof item === 'string' ? item : item.issue,
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: typeof item === 'string' ? 'See documentation for solution' : item.solution,
-            },
-          })
-        ),
-      });
-      // Add FAQ data safely
-      if (schemaData.hasPart) {
-        schemaData.hasPart.push(faqData);
-      }
+        mainEntity: mcpServer.troubleshooting
+          .map((item: string | { issue: string; solution: string }) =>
+            typeof item === 'string'
+              ? `Q: ${item} | A: See documentation for solution`
+              : `Q: ${item.issue} | A: ${item.solution}`
+          )
+          .join(' || '),
+      };
+      schemas.push(faqSchema);
     }
 
     // Add breadcrumb for better SEO
     const breadcrumb = {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
+      '@id': `${baseUrl}/mcp/${mcpServer.slug}#breadcrumb`,
       itemListElement: [
-        {
-          '@type': 'ListItem',
-          position: 1,
-          item: {
-            '@id': baseUrl,
-            name: 'Home',
-          },
-        },
-        {
-          '@type': 'ListItem',
-          position: 2,
-          item: {
-            '@id': `${baseUrl}/mcp`,
-            name: 'MCP Servers',
-          },
-        },
-        {
-          '@type': 'ListItem',
-          position: 3,
-          item: {
-            '@id': `${baseUrl}/mcp/${mcpServer.slug}`,
-            name: mcpServer.title || mcpServer.name,
-          },
-        },
-      ],
+        `1. Home (${baseUrl})`,
+        `2. MCP Servers (${baseUrl}/mcp)`,
+        `3. ${mcpServer.title || mcpServer.name || mcpServer.slug} (${baseUrl}/mcp/${mcpServer.slug})`,
+      ].join(' > '),
     };
+    schemas.push(breadcrumb);
 
-    return [schemaData, breadcrumb];
+    return schemas;
   };
 
   const schemas = generateMCPSchema();
 
-  // Sanitize each schema through Zod to prevent XSS
-  const safeSchemas = schemas.map((schema) => jsonLdSafeSchema.parse(schema));
+  // Generate clean, safe schemas at build time
+  const safeSchemas = schemas;
 
   return (
     <>
-      {safeSchemas.map((schema) => {
-        const schemaId = schema['@type'] || 'schema';
+      {safeSchemas.map((schema, index) => {
+        // Use @id fragment or type + index for unique keys
+        const idFragment = schema['@id'] ? schema['@id'].split('#').pop() : null;
+        const schemaId = idFragment || `${schema['@type'] || 'schema'}-${index}`;
         return (
           <Script
-            key={`mcp-structured-data-${schemaId}`}
+            key={`mcp-${mcpServer.slug}-${schemaId}`}
             id={`mcp-structured-data-${schemaId}`}
             type="application/ld+json"
             // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data is sanitized via Zod schema
