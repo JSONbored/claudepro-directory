@@ -3,9 +3,10 @@ import * as nosecone from '@nosecone/next';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
+import { isDevelopment, isProduction } from '@/lib/env-client';
 import { logger } from '@/lib/logger';
 import { rateLimiters } from '@/lib/rate-limiter';
-import { env, isDevelopment, securityConfig } from '@/lib/schemas/env.schema';
+import { env, securityConfig } from '@/lib/schemas/env.schema';
 import {
   type ApiEndpointType,
   type RequestValidation,
@@ -56,11 +57,79 @@ const aj = arcjet({
 
 
 // Nosecone security headers configuration
-const noseconeConfig: nosecone.NoseconeOptions = {
+// IMPORTANT: We're using 'unsafe-inline' for scripts because:
+// 1. Using nonces would require making ALL pages dynamic (no static generation)
+// 2. This would significantly impact performance for a content-heavy site
+// 3. We still have other security layers (Arcjet WAF, rate limiting, etc.)
+const noseconeConfig = {
   ...nosecone.defaults,
-  // Disable CSP entirely in development mode
-  // In production, use full CSP with external script sources
-  contentSecurityPolicy: isDevelopment ? false : true, // Will be replaced with dynamic CSP
+  // Custom CSP configuration that allows necessary resources
+  contentSecurityPolicy: isDevelopment ? false : {
+    directives: {
+      // Start with Nosecone's secure defaults
+      ...nosecone.defaults.contentSecurityPolicy.directives,
+
+      // Override scriptSrc to allow inline scripts (required for static pages)
+      // Remove 'unsafe-eval' in production for better security
+      scriptSrc: [
+        "'self'",
+        "'unsafe-inline'", // Required for Next.js with static generation
+        ...(isDevelopment ? ["'unsafe-eval'"] : []), // Only in development
+        "https://umami.claudepro.directory", // Umami analytics
+        "https://*.vercel-scripts.com", // Vercel analytics
+        "https://vercel.live", // Vercel toolbar
+      ],
+
+      // Styles already include 'unsafe-inline' in defaults
+      styleSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.styleSrc,
+      ],
+
+      // Images - extend defaults with GitHub and our domains
+      imgSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.imgSrc,
+        "https://github.com",
+        "https://*.githubusercontent.com",
+        "https://claudepro.directory",
+        "https://www.claudepro.directory",
+      ],
+
+      // Fonts - extend defaults
+      fontSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.fontSrc,
+        "data:",
+      ],
+
+      // Connect sources - extend defaults with our required domains
+      connectSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.connectSrc,
+        "wss://*.vercel.app", // WebSocket for HMR in preview
+        "wss://*.vercel-scripts.com", // Vercel live reload
+        "https://umami.claudepro.directory", // Umami analytics
+        "https://*.vercel-scripts.com", // Vercel analytics
+        "https://vercel.live", // Vercel toolbar
+        "https://api.github.com", // GitHub API
+        // Preview-specific WebSocket connections
+        ...(env.VERCEL_ENV === 'preview' ? [
+          "ws://localhost:*",
+          "wss://localhost:*",
+          env.VERCEL_URL ? `wss://${env.VERCEL_URL}` : "",
+        ].filter(Boolean) : []),
+      ],
+
+      // Only override what we need to change from defaults
+      // Nosecone already sets secure defaults for:
+      // - frameAncestors: ['none']
+      // - objectSrc: ['none']
+      // - baseUri: ['none']
+      // - formAction: ['self']
+      // - workerSrc: ['self']
+      // - childSrc: ['none']
+
+      // Upgrade insecure requests in production (not in defaults)
+      upgradeInsecureRequests: isProduction,
+    }
+  },
 
   // Cross-Origin Embedder Policy - credentialless for compatibility with external resources
   crossOriginEmbedderPolicy: {
@@ -120,8 +189,8 @@ const noseconeConfig: nosecone.NoseconeOptions = {
 // Create the Nosecone middleware with Vercel toolbar support in preview
 const noseconeMiddleware = nosecone.createMiddleware(
   env.VERCEL_ENV === 'preview'
-    ? nosecone.withVercelToolbar(noseconeConfig)
-    : noseconeConfig,
+    ? nosecone.withVercelToolbar(noseconeConfig as any)
+    : noseconeConfig as any,
 );
 
 /**
