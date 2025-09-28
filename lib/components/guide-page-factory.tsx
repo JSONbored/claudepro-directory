@@ -4,15 +4,15 @@
  * Reduces code duplication by ~80% across guide pages
  */
 
-import fs from 'fs/promises';
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
-import path from 'path';
 import { z } from 'zod';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { UnifiedSidebar } from '@/components/unified-sidebar';
 import { logger } from '@/lib/logger';
+import { contentCache } from '@/lib/services/content-cache.service';
+import { contentProcessor } from '@/lib/services/content-processor.service';
 
 // Define schemas locally since they're not exported from component.schema
 const guidePageConfigSchema = z.object({
@@ -167,54 +167,58 @@ export function parseFrontmatter(content: string): GuideFrontmatter | null {
 }
 
 /**
- * Load guides from directory with validation
+ * Load guides from our optimized content system
  */
 export async function loadGuides(directory: string, type: string): Promise<GuideItem[]> {
   const guides: GuideItem[] = [];
 
   try {
-    const dir = path.join(process.cwd(), directory);
-    const files = await fs.readdir(dir);
+    // Get all SEO content using our optimized system
+    let seoContent = await contentCache.getSEOContent();
 
-    for (const file of files) {
-      if (file.endsWith('.mdx')) {
-        try {
-          const content = await fs.readFile(path.join(dir, file), 'utf-8');
-          const metadata = parseFrontmatter(content);
-
-          const guideItem: GuideItem = {
-            title: metadata?.title || file.replace('.mdx', ''),
-            description: metadata?.description || '',
-            slug: `/guides/${type}/${file.replace('.mdx', '')}`,
-            dateUpdated: metadata?.dateUpdated || '',
-          };
-
-          const validation = guideItemSchema.safeParse(guideItem);
-          if (validation.success) {
-            guides.push(validation.data);
-          } else {
-            logger.error('Invalid guide item', new Error(validation.error.issues.join(', ')), {
-              file,
-              directory,
-            });
-          }
-        } catch (fileError) {
-          logger.error('Failed to process guide file', fileError as Error, {
-            file,
-            directory,
-          });
-        }
+    if (!seoContent) {
+      seoContent = await contentProcessor.getSEOContent();
+      if (seoContent) {
+        await contentCache.setSEOContent(seoContent);
       }
     }
-  } catch (dirError) {
-    // Directory doesn't exist - this is acceptable
-    logger.warn('Guide directory not found', {
+
+    // Get the content for this specific category/type
+    const categoryContent = seoContent?.[type] || [];
+
+    for (const item of categoryContent) {
+      // Skip items without required fields
+      if (!(item.title && item.description)) {
+        continue;
+      }
+
+      const itemSlug = item.slug.split('/').pop() || '';
+
+      const guideItem: GuideItem = {
+        title: item.title,
+        description: item.description,
+        slug: `/guides/${type}/${itemSlug}`,
+        dateUpdated: item.dateAdded,
+      };
+
+      const validation = guideItemSchema.safeParse(guideItem);
+      if (validation.success) {
+        guides.push(validation.data);
+      } else {
+        logger.error('Invalid guide item', new Error(validation.error.issues.join(', ')), {
+          item: item.title,
+          type,
+        });
+      }
+    }
+  } catch (error) {
+    logger.error('Failed to load guides', error as Error, {
       directory,
-      error: String(dirError),
+      type,
     });
   }
 
-  return guides.sort((a, b) => a.title.localeCompare(b.title));
+  return guides.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
 }
 
 /**

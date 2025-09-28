@@ -1,11 +1,10 @@
-import fs from 'fs/promises';
 import { ArrowLeft, BookOpen, Calendar, FileText, Tag, Users, Zap } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Script from 'next/script';
-import path from 'path';
 import { z } from 'zod';
+import { ContentErrorBoundary } from '@/components/content-error-boundary';
 import { MDXRenderer } from '@/components/mdx-renderer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,13 +13,17 @@ import { UnifiedSidebar } from '@/components/unified-sidebar';
 import { ViewTracker } from '@/components/view-tracker';
 import { APP_CONFIG } from '@/lib/constants';
 import { logger } from '@/lib/logger';
-import { parseMDXFrontmatter } from '@/lib/mdx-config';
-import { contentCache } from '@/lib/redis';
+import { contentCache } from '@/lib/services/content-cache.service';
+import { contentProcessor } from '@/lib/services/content-processor.service';
+import { githubContentService } from '@/lib/services/github-content.service';
 
-// ISR Configuration - Revalidate weekly for SEO pages
-export const revalidate = 604800; // 7 days
+// ISR Configuration - Revalidate every 4 hours
+export const revalidate = 14400; // 4 hours
 export const dynamic = 'force-static';
 export const dynamicParams = true;
+
+// Use Edge Runtime for better performance and lower costs
+export const runtime = 'edge';
 
 // Validation schema for guide parameters
 const guideParamsSchema = z.object({
@@ -43,154 +46,132 @@ const guideParamsSchema = z.object({
 import type { RelatedGuide, SEOPageData } from '@/lib/schemas/app.schema';
 
 async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
-  // Map URL paths to file locations
-  const pathMap: Record<string, string> = {
-    'use-cases': 'use-cases',
-    tutorials: 'tutorials',
-    collections: 'collections',
-    categories: 'categories',
-    workflows: 'workflows',
-    comparisons: 'comparisons',
-    troubleshooting: 'troubleshooting',
-  };
-
   const [category, ...restSlug] = slug;
-  const filename = `${restSlug.join('-')}.mdx`;
+  const targetSlug = restSlug.join('-');
 
-  if (!(category && pathMap[category])) return null;
+  if (!category) return null;
 
-  const cacheKey = `guide:${category}:${restSlug.join('-')}`;
+  try {
+    // Get all SEO content using our optimized system
+    let seoContent = await contentCache.getSEOContent();
 
-  return await contentCache.cacheWithRefresh(
-    cacheKey,
-    async () => {
-      try {
-        const mappedPath = pathMap[category];
-        if (!mappedPath) return null;
-
-        const filePath = path.join(process.cwd(), 'seo', mappedPath, filename);
-
-        // Check if file exists before attempting to read
-        try {
-          await fs.access(filePath);
-        } catch {
-          return null;
-        }
-
-        const fileContent = await fs.readFile(filePath, 'utf-8');
-
-        // Parse frontmatter using our MDX parser
-        const { frontmatter, content } = parseMDXFrontmatter(fileContent);
-
-        return {
-          title: frontmatter.title || '',
-          description: frontmatter.description || '',
-          keywords: Array.isArray(frontmatter.keywords) ? frontmatter.keywords : [],
-          dateUpdated: frontmatter.dateUpdated || '',
-          author: frontmatter.author || APP_CONFIG.author,
-          readingTime: frontmatter.readingTime || '',
-          difficulty: frontmatter.difficulty || '',
-          category: frontmatter.category || category,
-          content,
-        };
-      } catch (_error) {
-        return null;
+    if (!seoContent) {
+      seoContent = await contentProcessor.getSEOContent();
+      if (seoContent) {
+        await contentCache.setSEOContent(seoContent);
       }
-    },
-    24 * 60 * 60 // Cache for 24 hours
-  );
+    }
+
+    // Find the specific content item
+    const categoryContent = seoContent?.[category] || [];
+    const contentItem = categoryContent.find((item) => {
+      const itemSlug = item.slug.split('/').pop() || '';
+      return (
+        itemSlug === targetSlug || item.title?.toLowerCase().replace(/\s+/g, '-') === targetSlug
+      );
+    });
+
+    if (!contentItem) return null;
+
+    // Get the full content from GitHub
+    const fullContent = await githubContentService.getFileContent(
+      `seo/${category}/${targetSlug}.mdx`
+    );
+
+    if (!fullContent) return null;
+
+    return {
+      title: contentItem.title || '',
+      description: contentItem.description || '',
+      keywords: contentItem.tags || [],
+      dateUpdated: contentItem.dateAdded || '',
+      author: contentItem.author || APP_CONFIG.author,
+      readingTime: '', // Can be calculated from content if needed
+      difficulty: contentItem.difficulty || '',
+      category: contentItem.category || category,
+      content: fullContent,
+    };
+  } catch (error) {
+    logger.error('Failed to get SEO page data', error as Error, { slug: slug.join('/') });
+    return null;
+  }
 }
 
 async function getRelatedGuides(currentSlug: string[], limit = 3): Promise<RelatedGuide[]> {
   const [currentCategory] = currentSlug;
   if (!currentCategory) return [];
 
-  const currentFilename = currentSlug.slice(1).join('-');
-  const cacheKey = `related:${currentCategory}:${currentFilename}:${limit}`;
+  const currentTargetSlug = currentSlug.slice(1).join('-');
 
-  return await contentCache.cacheWithRefresh(
-    cacheKey,
-    async () => {
-      const relatedGuides: RelatedGuide[] = [];
+  try {
+    // Get all SEO content using our optimized system
+    let seoContent = await contentCache.getSEOContent();
 
-      try {
-        const dir = path.join(process.cwd(), 'seo', currentCategory);
+    if (!seoContent) {
+      seoContent = await contentProcessor.getSEOContent();
+      if (seoContent) {
+        await contentCache.setSEOContent(seoContent);
+      }
+    }
 
-        // Check if directory exists before attempting to read
-        try {
-          await fs.access(dir);
-        } catch {
-          return [];
-        }
+    // Get related guides from the same category, excluding current item
+    const categoryContent = seoContent?.[currentCategory] || [];
+    const relatedGuides: RelatedGuide[] = [];
 
-        const files = await fs.readdir(dir);
+    for (const item of categoryContent) {
+      const itemSlug = item.slug.split('/').pop() || '';
 
-        for (const file of files) {
-          if (file.endsWith('.mdx') && !file.includes(currentFilename)) {
-            const content = await fs.readFile(path.join(dir, file), 'utf-8');
-            const titleMatch = content.match(/title:\s*["']([^"']+)["']/);
-
-            if (titleMatch?.[1]) {
-              relatedGuides.push({
-                title: titleMatch[1],
-                slug: `/guides/${currentCategory}/${file.replace('.mdx', '')}`,
-                category: currentCategory,
-              });
-            }
-
-            if (relatedGuides.length >= limit) break;
-          }
-        }
-      } catch {
-        // Directory doesn't exist
+      // Skip the current item
+      if (
+        itemSlug === currentTargetSlug ||
+        item.title?.toLowerCase().replace(/\s+/g, '-') === currentTargetSlug
+      ) {
+        continue;
       }
 
-      return relatedGuides;
-    },
-    4 * 60 * 60 // Cache for 4 hours
-  );
+      if (item.title) {
+        relatedGuides.push({
+          title: item.title,
+          slug: `/guides/${currentCategory}/${itemSlug}`,
+          category: currentCategory,
+        });
+      }
+
+      if (relatedGuides.length >= limit) break;
+    }
+
+    return relatedGuides;
+  } catch (error) {
+    logger.error('Failed to get related guides', error as Error, {
+      currentSlug: currentSlug.join('/'),
+    });
+    return [];
+  }
 }
 
 export async function generateStaticParams() {
-  // Generate paths for all SEO pages
-  const categories = [
-    'use-cases',
-    'tutorials',
-    'collections',
-    'categories',
-    'workflows',
-    'comparisons',
-    'troubleshooting',
-  ];
-  const paths = [];
+  try {
+    // Use our optimized content system instead of filesystem operations
+    const seoContent = await contentProcessor.getSEOContent();
 
-  for (const category of categories) {
-    try {
-      const dir = path.join(process.cwd(), 'seo', category);
+    const paths = [];
 
-      // Check if directory exists before attempting to read
-      try {
-        await fs.access(dir);
-      } catch {
-        continue; // Skip non-existent directories
-      }
-
-      const files = await fs.readdir(dir);
-
-      for (const file of files) {
-        if (file.endsWith('.mdx')) {
-          const slug = file.replace('.mdx', '');
+    for (const [category, items] of Object.entries(seoContent)) {
+      for (const item of items) {
+        const itemSlug = item.slug.split('/').pop();
+        if (itemSlug) {
           paths.push({
-            slug: [category, slug],
+            slug: [category, itemSlug],
           });
         }
       }
-    } catch {
-      // Directory doesn't exist yet
     }
-  }
 
-  return paths;
+    return paths;
+  } catch (error) {
+    logger.error('Failed to generate static params for guides', error as Error);
+    return [];
+  }
 }
 
 export async function generateMetadata({
@@ -413,7 +394,7 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
     const breadcrumbId = `breadcrumb-${pageId}`;
     const articleId = `article-${pageId}`;
     return (
-      <>
+      <ContentErrorBoundary>
         <Script id={breadcrumbId} type="application/ld+json" strategy="afterInteractive">
           {JSON.stringify(breadcrumbList)}
         </Script>
@@ -517,7 +498,7 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
 
         {/* Track guide views for trending analytics */}
         <ViewTracker category="guides" slug={slug.join('/')} />
-      </>
+      </ContentErrorBoundary>
     );
   } catch (error: unknown) {
     logger.error(

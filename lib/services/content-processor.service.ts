@@ -1,0 +1,231 @@
+import { z } from 'zod';
+import { logger } from '../logger';
+import type { UnifiedContentItem } from '../schemas/components';
+import { githubContentService } from './github-content.service';
+
+export const frontmatterSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  category: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  dateUpdated: z.string().optional(),
+  author: z.string().optional(),
+  version: z.string().optional(),
+  featured: z.boolean().optional(),
+  difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
+});
+
+export type Frontmatter = z.infer<typeof frontmatterSchema>;
+
+export interface ContentByCategory {
+  [category: string]: UnifiedContentItem[];
+}
+
+export function parseFrontmatter(content: string): Frontmatter | null {
+  try {
+    const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
+    if (!frontmatterMatch?.[1]) return null;
+
+    const frontmatterText = frontmatterMatch[1];
+    const frontmatterObject: Record<string, unknown> = {};
+
+    const lines = frontmatterText.split('\n');
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      if (!trimmedLine || trimmedLine.startsWith('#')) continue;
+
+      const colonIndex = trimmedLine.indexOf(':');
+      if (colonIndex === -1) continue;
+
+      const key = trimmedLine.substring(0, colonIndex).trim();
+      let value = trimmedLine.substring(colonIndex + 1).trim();
+
+      if (value.startsWith('"') && value.endsWith('"')) {
+        value = value.slice(1, -1);
+      } else if (value.startsWith("'") && value.endsWith("'")) {
+        value = value.slice(1, -1);
+      } else if (value === 'true' || value === 'false') {
+        frontmatterObject[key] = value === 'true';
+        continue;
+      } else if (value.startsWith('[') && value.endsWith(']')) {
+        try {
+          frontmatterObject[key] = JSON.parse(value);
+          continue;
+        } catch {
+          // Fall back to string parsing
+        }
+      }
+
+      frontmatterObject[key] = value;
+    }
+
+    const parsed = frontmatterSchema.safeParse(frontmatterObject);
+    return parsed.success ? parsed.data : null;
+  } catch (error) {
+    logger.error('Failed to parse frontmatter', error as Error);
+    return null;
+  }
+}
+
+class ContentProcessor {
+  private cache = new Map<string, ContentByCategory>();
+  private readonly cacheTimeout = 5 * 60 * 1000; // 5 minutes
+  private cacheTimestamps = new Map<string, number>();
+
+  private isValidCache(key: string): boolean {
+    const timestamp = this.cacheTimestamps.get(key);
+    return timestamp ? Date.now() - timestamp < this.cacheTimeout : false;
+  }
+
+  private setCacheEntry(key: string, data: ContentByCategory): void {
+    this.cache.set(key, data);
+    this.cacheTimestamps.set(key, Date.now());
+  }
+
+  async getContentDirectory(directoryPath: string): Promise<UnifiedContentItem[]> {
+    try {
+      const files = await githubContentService.getDirectoryContents(directoryPath);
+      const contentItems: UnifiedContentItem[] = [];
+
+      for (const file of files) {
+        if (file.type === 'file' && file.name.endsWith('.mdx')) {
+          try {
+            const content = await githubContentService.getFileContent(file.path);
+            const frontmatter = parseFrontmatter(content);
+
+            if (frontmatter) {
+              const slug = `/${directoryPath}/${file.name.replace('.mdx', '')}`;
+              const categoryFromPath = directoryPath.split('/').pop() || 'uncategorized';
+
+              const contentItem: UnifiedContentItem = {
+                slug,
+                description: frontmatter.description,
+                category: (frontmatter.category ||
+                  categoryFromPath) as UnifiedContentItem['category'],
+                author: frontmatter.author || 'Claude Pro Community',
+                dateAdded: frontmatter.dateUpdated || new Date().toISOString(),
+                tags: frontmatter.tags || [],
+                title: frontmatter.title,
+                name: frontmatter.title,
+                source: 'community',
+                featured: frontmatter.featured,
+                difficulty: frontmatter.difficulty || 'intermediate',
+                features: [],
+                useCases: [],
+                requirements: [],
+                examples: [],
+                keywords: [],
+                ...(frontmatter.version && { version: frontmatter.version }),
+              };
+
+              contentItems.push(contentItem);
+            }
+          } catch (fileError) {
+            logger.error('Failed to process content file', fileError as Error, {
+              file: file.name,
+              path: directoryPath,
+            });
+          }
+        }
+      }
+
+      return contentItems;
+    } catch (error) {
+      logger.error(`Failed to get content directory: ${directoryPath}`, error as Error);
+      return [];
+    }
+  }
+
+  async getContentCategories(basePath: string, categories: string[]): Promise<ContentByCategory> {
+    const cacheKey = `${basePath}:${categories.join(',')}`;
+
+    if (this.isValidCache(cacheKey)) {
+      return this.cache.get(cacheKey) || {};
+    }
+
+    const contentByCategory: ContentByCategory = {};
+
+    for (const category of categories) {
+      const categoryPath = `${basePath}/${category}`;
+      contentByCategory[category] = await this.getContentDirectory(categoryPath);
+    }
+
+    this.setCacheEntry(cacheKey, contentByCategory);
+    return contentByCategory;
+  }
+
+  async getSEOContent(): Promise<ContentByCategory> {
+    const seoCategories = [
+      'use-cases',
+      'tutorials',
+      'collections',
+      'categories',
+      'workflows',
+      'comparisons',
+      'troubleshooting',
+    ];
+
+    return this.getContentCategories('seo', seoCategories);
+  }
+
+  async getMainContent(): Promise<ContentByCategory> {
+    const mainCategories = ['agents', 'commands', 'hooks', 'mcp', 'rules'];
+    return this.getContentCategories('content', mainCategories);
+  }
+
+  async getAllContent(): Promise<ContentByCategory> {
+    try {
+      const [seoContent, mainContent] = await Promise.all([
+        this.getSEOContent(),
+        this.getMainContent(),
+      ]);
+
+      return { ...seoContent, ...mainContent };
+    } catch (error) {
+      logger.error('Failed to get all content', error as Error);
+      return {};
+    }
+  }
+
+  async getContentByCategory(category: string): Promise<UnifiedContentItem[]> {
+    try {
+      if (['agents', 'commands', 'hooks', 'mcp', 'rules'].includes(category)) {
+        return this.getContentDirectory(`content/${category}`);
+      }
+
+      if (
+        [
+          'use-cases',
+          'tutorials',
+          'collections',
+          'categories',
+          'workflows',
+          'comparisons',
+          'troubleshooting',
+        ].includes(category)
+      ) {
+        return this.getContentDirectory(`seo/${category}`);
+      }
+
+      logger.warn(`Unknown content category: ${category}`);
+      return [];
+    } catch (error) {
+      logger.error(`Failed to get content for category: ${category}`, error as Error);
+      return [];
+    }
+  }
+
+  clearCache(): void {
+    this.cache.clear();
+    this.cacheTimestamps.clear();
+  }
+
+  getCacheStats(): { size: number; keys: string[] } {
+    return {
+      size: this.cache.size,
+      keys: Array.from(this.cache.keys()),
+    };
+  }
+}
+
+export const contentProcessor = new ContentProcessor();

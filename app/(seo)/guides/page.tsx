@@ -1,15 +1,15 @@
-import fs from 'fs/promises';
-import path from 'path';
 import { z } from 'zod';
+import { ContentErrorBoundary } from '@/components/content-error-boundary';
 import { EnhancedGuidesPage } from '@/components/enhanced-guides-page';
 import {
   type GuideItemWithCategory,
   type GuidesByCategory,
   guideItemWithCategorySchema,
-  parseFrontmatter,
 } from '@/lib/components/guide-page-factory';
 import { APP_CONFIG } from '@/lib/constants';
 import { logger } from '@/lib/logger';
+import { contentCache } from '@/lib/services/content-cache.service';
+import { contentProcessor } from '@/lib/services/content-processor.service';
 
 export const metadata = {
   title: `Claude Guides & Tutorials - ${APP_CONFIG.name}`,
@@ -39,7 +39,7 @@ const guideCategoriesSchema = z.enum([
 type GuideCategory = z.infer<typeof guideCategoriesSchema>;
 
 /**
- * Load and validate guides from all categories
+ * Load and validate guides from all categories using GitHub API
  */
 async function getGuides(): Promise<GuidesByCategory> {
   const categories: GuideCategory[] = [
@@ -54,63 +54,74 @@ async function getGuides(): Promise<GuidesByCategory> {
 
   const guides: GuidesByCategory = {};
 
-  for (const category of categories) {
-    guides[category] = [];
+  try {
+    // Try cache first
+    let seoContent = await contentCache.getSEOContent();
 
-    try {
-      const dir = path.join(process.cwd(), 'seo', category);
-      const files = await fs.readdir(dir);
+    // Fetch from GitHub API if cache miss
+    if (!seoContent) {
+      seoContent = await contentProcessor.getSEOContent();
 
-      for (const file of files) {
-        if (file.endsWith('.mdx')) {
-          try {
-            const content = await fs.readFile(path.join(dir, file), 'utf-8');
-            const metadata = parseFrontmatter(content);
+      // Cache the result
+      if (seoContent) {
+        await contentCache.setSEOContent(seoContent);
+      }
+    }
 
-            const guideItem: GuideItemWithCategory = {
-              title: metadata?.title || file.replace('.mdx', ''),
-              description: metadata?.description || '',
-              slug: `/guides/${category}/${file.replace('.mdx', '')}`,
+    // Convert UnifiedContentItem[] to GuideItemWithCategory[] for each category
+    for (const category of categories) {
+      guides[category] = [];
+
+      const categoryContent = seoContent?.[category] || [];
+
+      for (const item of categoryContent) {
+        // Skip items without required fields
+        if (!(item.title && item.description)) {
+          continue;
+        }
+
+        const slugParts = item.slug.split('/');
+        const fileName =
+          slugParts[slugParts.length - 1] || item.title.toLowerCase().replace(/\s+/g, '-');
+
+        const guideItem: GuideItemWithCategory = {
+          title: item.title,
+          description: item.description,
+          slug: `/guides/${category}/${fileName}`,
+          category,
+          dateUpdated: item.dateAdded,
+        };
+
+        // Validate the guide item with Zod
+        const validatedGuide = guideItemWithCategorySchema.safeParse(guideItem);
+
+        if (validatedGuide.success) {
+          guides[category].push(validatedGuide.data);
+        } else {
+          logger.error(
+            'Invalid guide item structure',
+            new Error(validatedGuide.error.issues.join(', ')),
+            {
+              item: item.title,
               category,
-              dateUpdated: metadata?.dateUpdated || '',
-            };
-
-            // Validate the guide item with Zod
-            const validatedGuide = guideItemWithCategorySchema.safeParse(guideItem);
-
-            if (validatedGuide.success) {
-              guides[category].push(validatedGuide.data);
-            } else {
-              logger.error(
-                'Invalid guide item structure',
-                new Error(validatedGuide.error.issues.join(', ')),
-                {
-                  file,
-                  category,
-                }
-              );
             }
-          } catch (fileError) {
-            logger.error('Failed to process guide file', fileError as Error, {
-              file,
-              category,
-            });
-          }
+          );
         }
       }
-    } catch (dirError) {
-      // Directory doesn't exist - this is acceptable
-      logger.warn('Guide directory not found', {
-        category,
-        error: String(dirError),
-      });
     }
-  }
 
-  return guides;
+    return guides;
+  } catch (error) {
+    logger.error('Failed to fetch guides content', error as Error);
+    return {};
+  }
 }
 
 export default async function GuidesPage() {
   const guides = await getGuides();
-  return <EnhancedGuidesPage guides={guides} />;
+  return (
+    <ContentErrorBoundary>
+      <EnhancedGuidesPage guides={guides} />
+    </ContentErrorBoundary>
+  );
 }

@@ -50,9 +50,13 @@ const serverEnvSchema = z.object({
   GITHUB_TOKEN: z.string().min(1).optional(),
   GITHUB_OWNER: z.string().min(1).optional(),
   GITHUB_REPO: z.string().min(1).optional(),
+  GITHUB_BRANCH: z.string().min(1).default('main'),
 
   // Webhook security
   WEBHOOK_SECRET: z.string().min(32).optional(),
+
+  // Upstash telemetry (disable for security)
+  UPSTASH_DISABLE_TELEMETRY: z.enum(['1', 'true']).optional(),
 });
 
 /**
@@ -250,6 +254,7 @@ export const githubConfig = {
   token: env.GITHUB_TOKEN,
   owner: env.GITHUB_OWNER,
   repo: env.GITHUB_REPO,
+  branch: env.GITHUB_BRANCH,
   isConfigured: !!(env.GITHUB_TOKEN && env.GITHUB_OWNER && env.GITHUB_REPO),
 } as const;
 
