@@ -8,9 +8,9 @@
 
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { isDevelopment, isProduction } from '@/lib/env-client';
 import { logger } from '@/lib/logger';
 import { createRequestId, type RequestId } from '@/lib/schemas/branded-types.schema';
-import { isDevelopment, isProduction } from '@/lib/schemas/env.schema';
 import {
   determineErrorType,
   type ErrorContext,

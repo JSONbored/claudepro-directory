@@ -3,7 +3,7 @@
  * Provides better observability and error tracking than console statements
  */
 
-import { env, isDevelopment, isProduction, isVercel } from './schemas/env.schema';
+import { isDevelopment, isProduction, isVercel } from './env-client';
 import {
   type LogContext,
   type LogEntry,
@@ -336,8 +336,8 @@ class Logger {
     if (this.isVercel) {
       const vercelContext = {
         region: request.headers.get('x-vercel-id') || undefined,
-        deployment: env.VERCEL_URL || undefined,
-        environment: env.VERCEL_ENV || undefined,
+        deployment: process.env.VERCEL_URL || undefined,
+        environment: process.env.VERCEL_ENV || undefined,
       };
       Object.assign(context, vercelContext);
     }

@@ -7,7 +7,6 @@
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { statsRedis } from '@/lib/redis';
-import { env } from '@/lib/schemas/env.schema';
 
 // Zod schemas for type safety
 const viewCountRequestSchema = z.object({
@@ -35,7 +34,7 @@ type ViewCountResponse = z.infer<typeof viewCountResponseSchema>;
 class ViewCountService {
   private cache = new Map<string, { views: number; timestamp: number }>();
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-  private readonly VIEW_COUNT_SALT = env.VIEW_COUNT_SALT || 'claudepro-view-salt-2024';
+  private readonly VIEW_COUNT_SALT = process.env.VIEW_COUNT_SALT || 'claudepro-view-salt-2024';
 
   /**
    * Get view count with proper fallback strategy

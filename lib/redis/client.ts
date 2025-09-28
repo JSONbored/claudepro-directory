@@ -7,7 +7,13 @@ import { Redis } from '@upstash/redis';
 import { z } from 'zod';
 import { logger } from '../logger';
 import type { RedisConnectionStatus } from '../schemas/cache.schema';
-import { redisConfig } from '../schemas/env.schema';
+
+// Client-safe Redis config
+const redisConfig = {
+  url: process.env.KV_REST_API_URL,
+  token: process.env.KV_REST_API_TOKEN,
+  isConfigured: !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN),
+} as const;
 
 // Redis client configuration schema
 const redisClientConfigSchema = z.object({
