@@ -137,8 +137,16 @@ function validateEnv() {
     });
   }
 
-  // Additional production validation
-  if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') {
+  // Additional production validation - Skip during build phase
+  // These variables are injected at runtime in Vercel, not available during build
+  const isBuildPhase =
+    process.env.NEXT_PHASE === 'phase-production-build' ||
+    (typeof window === 'undefined' && !process.env.VERCEL);
+
+  if (
+    !isBuildPhase &&
+    (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production')
+  ) {
     const missingRequiredEnvs = productionRequiredEnvs.filter((envVar) => !process.env[envVar]);
 
     if (missingRequiredEnvs.length > 0) {

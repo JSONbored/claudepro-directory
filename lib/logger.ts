@@ -100,7 +100,7 @@ class Logger {
     }
 
     // Additional check for Node.js server environment
-    if (!process?.env || typeof process.stdout === 'undefined') {
+    if (!process?.env) {
       return;
     }
 
