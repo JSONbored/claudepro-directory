@@ -1,6 +1,92 @@
 import rehypePrettyCode from 'rehype-pretty-code';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
+import { z } from 'zod';
+import { logger } from '@/lib/logger';
+import type { MDXFrontmatter } from '@/lib/schemas/markdown.schema';
+
+// Re-export type for backward compatibility
+export type { MDXFrontmatter };
+
+// MDX node schema for type safety
+const mdxNodeChildSchema = z.object({
+  type: z.string(),
+  value: z.string(),
+});
+
+const mdxNodePropsSchema = z.object({
+  className: z.array(z.string()).default([]),
+});
+
+const mdxNodeSchema = z.object({
+  properties: mdxNodePropsSchema.default({ className: [] }),
+  children: z.array(mdxNodeChildSchema).default([]),
+});
+
+type MDXNode = z.infer<typeof mdxNodeSchema>;
+
+// Frontmatter value schema - supports strings, numbers, booleans, and arrays
+const frontmatterValueSchema = z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]);
+
+// Frontmatter schema for YAML parsing
+const frontmatterSchema = z.record(z.string(), frontmatterValueSchema);
+
+// Local MDX frontmatter schema for validation
+const localMdxFrontmatterSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  keywords: z.array(z.string()).default([]),
+  dateUpdated: z.string().default(''),
+  author: z.string().default(''),
+  category: z.string().default(''),
+  tags: z.array(z.string()).default([]),
+  readingTime: z.string().default(''),
+  difficulty: z.string().default(''),
+  aiOptimized: z.boolean().default(false),
+  citationReady: z.boolean().default(false),
+  schemas: z
+    .object({
+      article: z
+        .record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]))
+        .default({}),
+    })
+    .default({ article: {} }),
+});
+
+// Helper function to safely parse frontmatter with Zod validation
+function parseFrontmatterWithValidation(
+  rawFrontmatter: z.infer<typeof frontmatterSchema>
+): z.infer<typeof localMdxFrontmatterSchema> {
+  return localMdxFrontmatterSchema.parse({
+    title: rawFrontmatter.title || 'Untitled',
+    description: rawFrontmatter.description || '',
+    keywords: Array.isArray(rawFrontmatter.keywords) ? rawFrontmatter.keywords : [],
+    dateUpdated: typeof rawFrontmatter.dateUpdated === 'string' ? rawFrontmatter.dateUpdated : '',
+    author: typeof rawFrontmatter.author === 'string' ? rawFrontmatter.author : '',
+    category: typeof rawFrontmatter.category === 'string' ? rawFrontmatter.category : '',
+    tags: Array.isArray(rawFrontmatter.tags) ? rawFrontmatter.tags : [],
+    readingTime: typeof rawFrontmatter.readingTime === 'string' ? rawFrontmatter.readingTime : '',
+    difficulty: typeof rawFrontmatter.difficulty === 'string' ? rawFrontmatter.difficulty : '',
+    aiOptimized:
+      typeof rawFrontmatter.aiOptimized === 'boolean' ? rawFrontmatter.aiOptimized : false,
+    citationReady:
+      typeof rawFrontmatter.citationReady === 'boolean' ? rawFrontmatter.citationReady : false,
+    schemas:
+      typeof rawFrontmatter.schemas === 'object' && rawFrontmatter.schemas !== null
+        ? {
+            article:
+              'article' in rawFrontmatter.schemas &&
+              typeof rawFrontmatter.schemas.article === 'object' &&
+              rawFrontmatter.schemas.article !== null
+                ? (rawFrontmatter.schemas.article as Record<
+                    string,
+                    string | number | boolean | string[]
+                  >)
+                : {},
+          }
+        : { article: {} },
+  });
+}
 
 // Shiki configuration for syntax highlighting
 const shikiOptions = {
@@ -14,7 +100,7 @@ const shikiOptions = {
     {
       // Add copy button functionality to code blocks
       name: 'copy-button',
-      pre(node: any) {
+      pre(node: MDXNode) {
         node.properties = node.properties || {};
         node.properties.className = node.properties.className || [];
         if (Array.isArray(node.properties.className)) {
@@ -28,19 +114,21 @@ const shikiOptions = {
 // Rehype Pretty Code configuration
 const rehypePrettyCodeOptions = {
   ...shikiOptions,
-  onVisitLine(node: any) {
+  onVisitLine(node: MDXNode) {
     // Prevent lines from collapsing in `display: grid` mode, and
     // allow empty lines to be copy/pasted
-    if (node.children.length === 0) {
+    if (!node.children || node.children.length === 0) {
       node.children = [{ type: 'text', value: ' ' }];
     }
   },
-  onVisitHighlightedLine(node: any) {
+  onVisitHighlightedLine(node: MDXNode) {
     // Add class to highlighted lines
+    if (!node.properties) node.properties = { className: [] };
     node.properties.className = ['line--highlighted'];
   },
-  onVisitHighlightedChars(node: any) {
+  onVisitHighlightedChars(node: MDXNode) {
     // Add class to highlighted characters
+    if (!node.properties) node.properties = { className: [] };
     node.properties.className = ['word--highlighted'];
   },
 };
@@ -48,30 +136,15 @@ const rehypePrettyCodeOptions = {
 // Complete MDX options for next-mdx-remote
 export const mdxOptions = {
   remarkPlugins: [remarkGfm],
-  rehypePlugins: [rehypeSlug, [rehypePrettyCode, rehypePrettyCodeOptions] as any],
+  rehypePlugins: [
+    rehypeSlug,
+    [rehypePrettyCode, rehypePrettyCodeOptions] as [
+      typeof rehypePrettyCode,
+      typeof rehypePrettyCodeOptions,
+    ],
+  ],
   format: 'mdx' as const,
 };
-
-// Type definitions for MDX frontmatter
-export interface MDXFrontmatter {
-  title: string;
-  description: string;
-  keywords?: string[];
-  dateUpdated?: string;
-  author?: string;
-  category?: string;
-  tags?: string[];
-  readingTime?: string;
-  difficulty?: string;
-  aiOptimized?: boolean;
-  citationReady?: boolean;
-  schemas?: {
-    article?: any;
-    faq?: any;
-    breadcrumb?: any;
-    howto?: any;
-  };
-}
 
 // Helper function to parse frontmatter from MDX content
 export function parseMDXFrontmatter(content: string): {
@@ -94,7 +167,7 @@ export function parseMDXFrontmatter(content: string): {
   const contentString = frontmatterMatch[2] || '';
 
   // Enhanced YAML/JSON parser for frontmatter
-  const frontmatter: Record<string, any> = {};
+  const frontmatter: z.infer<typeof frontmatterSchema> = {};
   const lines = frontmatterString.split('\n');
   let currentKey = '';
   let inArray = false;
@@ -103,8 +176,7 @@ export function parseMDXFrontmatter(content: string): {
   let objectContent = '';
   let arrayItems: string[] = [];
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+  for (const line of lines) {
     if (!line) continue;
     const trimmedLine = line.trim();
 
@@ -130,8 +202,15 @@ export function parseMDXFrontmatter(content: string): {
         // If object closed on same line
         if (objectDepth === 0) {
           try {
-            frontmatter[currentKey] = JSON.parse(objectContent);
-          } catch {
+            const parsed = JSON.parse(objectContent);
+            const validated = frontmatterValueSchema.safeParse(parsed);
+            frontmatter[currentKey] = validated.success ? validated.data : objectContent;
+          } catch (error) {
+            logger.warn('Failed to parse frontmatter object', {
+              key: currentKey,
+              content: objectContent.slice(0, 100),
+              error: error instanceof Error ? error.message : String(error),
+            });
             frontmatter[currentKey] = objectContent;
           }
           inObject = false;
@@ -154,8 +233,15 @@ export function parseMDXFrontmatter(content: string): {
       // Object complete
       if (objectDepth === 0) {
         try {
-          frontmatter[currentKey] = JSON.parse(objectContent);
-        } catch {
+          const parsed = JSON.parse(objectContent);
+          const validated = frontmatterValueSchema.safeParse(parsed);
+          frontmatter[currentKey] = validated.success ? validated.data : objectContent;
+        } catch (error) {
+          logger.warn('Failed to parse multiline frontmatter object', {
+            key: currentKey,
+            content: objectContent.slice(0, 100),
+            error: error instanceof Error ? error.message : String(error),
+          });
           frontmatter[currentKey] = objectContent;
         }
         inObject = false;
@@ -213,17 +299,11 @@ export function parseMDXFrontmatter(content: string): {
     frontmatter[currentKey] = arrayItems;
   }
 
+  // Validate parsed frontmatter using proper Zod schema
+  const validatedFrontmatter = parseFrontmatterWithValidation(frontmatter);
+
   return {
-    frontmatter: {
-      title: frontmatter.title || '',
-      description: frontmatter.description || '',
-      keywords: frontmatter.keywords,
-      dateUpdated: frontmatter.dateUpdated,
-      author: frontmatter.author,
-      category: frontmatter.category,
-      tags: frontmatter.tags,
-      schemas: frontmatter.schemas,
-    } as MDXFrontmatter,
+    frontmatter: validatedFrontmatter,
     content: contentString,
   };
 }

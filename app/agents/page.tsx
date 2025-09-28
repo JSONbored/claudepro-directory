@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { ContentListServer } from '@/components/content-list-server';
 import { agents } from '@/generated/content';
+import { APP_CONFIG } from '@/lib/constants';
 
 export const metadata: Metadata = {
-  title: 'AI Agents - Specialized Claude Agents | Claude Pro Directory',
+  title: `AI Agents - Specialized Claude Agents | ${APP_CONFIG.name}`,
   description:
     "Browse specialized AI agents designed for specific tasks and workflows using Claude's capabilities.",
   keywords: 'Claude agents, AI agents, specialized assistants, workflow automation, Claude AI',

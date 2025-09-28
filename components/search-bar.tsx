@@ -6,22 +6,9 @@ import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import type { SearchableItem, SearchBarGenericProps } from '@/lib/schemas/component.schema';
 
-interface SearchableItem {
-  title?: string;
-  name?: string;
-  description: string;
-  tags: string[];
-  category: string;
-  popularity?: number;
-}
-
-interface SearchBarProps<T extends SearchableItem = SearchableItem> {
-  data: T[];
-  onFilteredResults: (results: T[]) => void;
-  onSearchQueryChange?: (query: string) => void;
-  placeholder?: string;
-}
+// SearchableItem and SearchBarGenericProps are now imported from component.schema.ts
 
 const categories = [
   'development',
@@ -55,9 +42,10 @@ export const SearchBar = <T extends SearchableItem = SearchableItem>({
   onFilteredResults,
   onSearchQueryChange,
   placeholder = 'Search...',
-}: SearchBarProps<T>) => {
+}: SearchBarGenericProps<T>) => {
   const _categoryFiltersId = useId();
   const _searchResultsCountId = useId();
+  const searchInputId = useId();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -79,7 +67,8 @@ export const SearchBar = <T extends SearchableItem = SearchableItem>({
       results = results.filter((item) => selectedCategories.includes(item.category));
     }
 
-    return results.sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0));
+    // Sort by popularity if items have popularity field
+    return [...results].sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0));
   }, [data, fuse, searchQuery, selectedCategories]);
 
   useEffect(() => {
@@ -125,6 +114,8 @@ export const SearchBar = <T extends SearchableItem = SearchableItem>({
           aria-hidden="true"
         />
         <Input
+          id={searchInputId}
+          name="searchBarInput"
           type="text"
           placeholder={placeholder}
           value={searchQuery}

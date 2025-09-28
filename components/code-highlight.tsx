@@ -5,13 +5,10 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Button } from '@/components/ui/button';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import { logger } from '@/lib/logger';
+import type { CodeHighlightProps } from '@/lib/schemas/component.schema';
+import { highlightedCodeSafeSchema } from '@/lib/schemas/form.schema';
 
-interface CodeHighlightProps {
-  code: string;
-  language?: string;
-  title?: string;
-  showCopy?: boolean;
-}
+// CodeHighlightProps is now imported from component.schema.ts
 
 export const CodeHighlight = ({
   code,
@@ -90,7 +87,9 @@ export const CodeHighlight = ({
             },
           ],
         });
-        setHighlightedCode(html);
+        // Sanitize the generated HTML through our Zod schema
+        const sanitizedHtml = highlightedCodeSafeSchema.parse(html);
+        setHighlightedCode(sanitizedHtml);
       } catch (error) {
         logger.error(
           'Failed to highlight code syntax',
@@ -134,13 +133,7 @@ export const CodeHighlight = ({
   };
 
   return (
-    <ErrorBoundary
-      fallback={
-        <div className="p-4 bg-card border border-border rounded-lg text-center text-muted-foreground">
-          Error highlighting code
-        </div>
-      }
-    >
+    <ErrorBoundary>
       <div className="relative group">
         {title && (
           <div className="flex items-center justify-between bg-card/50 border-x border-t border-border rounded-t-lg px-4 py-2">
@@ -173,8 +166,8 @@ export const CodeHighlight = ({
                 minHeight: '4rem',
               }}
             >
-              <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-              <div className="h-4 bg-muted rounded w-1/2"></div>
+              <div className="h-4 bg-muted rounded w-3/4 mb-2" />
+              <div className="h-4 bg-muted rounded w-1/2" />
             </div>
           ) : (
             <div

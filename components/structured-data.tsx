@@ -1,12 +1,25 @@
 import Script from 'next/script';
-import type { ContentItem } from '@/types/content';
+import { APP_CONFIG, SEO_CONFIG } from '@/lib/constants';
 
 interface StructuredDataProps {
-  type?: 'website' | 'article' | 'softwareApplication' | 'itemList';
-  data?: ContentItem | ContentItem[];
+  type?: string;
+  data?: {
+    slug?: string;
+    author?: string;
+    dateAdded?: string;
+    lastModified?: string;
+    tags?: string[];
+    category?: string;
+    [key: string]: unknown;
+  };
   pageTitle?: string;
   pageDescription?: string;
+  imageUrl?: string;
+  publishDate?: string;
+  breadcrumbs?: Array<{ name: string; url: string }>;
 }
+
+import { jsonLdSafeSchema } from '@/lib/schemas/form.schema';
 
 export function StructuredData({
   type = 'website',
@@ -15,16 +28,15 @@ export function StructuredData({
   pageDescription,
 }: StructuredDataProps) {
   const generateLD = () => {
-    const baseUrl = 'https://claudepro.directory';
+    const baseUrl = APP_CONFIG.url;
 
     switch (type) {
       case 'website':
         return {
           '@context': 'https://schema.org',
           '@type': 'WebSite',
-          name: 'Claude Pro Directory',
-          description:
-            'Community-driven directory of Claude AI configurations, MCP servers, agents, rules, commands, and hooks',
+          name: APP_CONFIG.name,
+          description: SEO_CONFIG.defaultDescription,
           url: baseUrl,
           potentialAction: {
             '@type': 'SearchAction',
@@ -36,7 +48,7 @@ export function StructuredData({
           },
           publisher: {
             '@type': 'Organization',
-            name: 'Claude Pro Directory',
+            name: APP_CONFIG.name,
             url: baseUrl,
           },
         };
@@ -104,7 +116,7 @@ export function StructuredData({
           dateModified: data.lastModified || data.dateAdded,
           publisher: {
             '@type': 'Organization',
-            name: 'Claude Pro Directory',
+            name: APP_CONFIG.name,
             url: baseUrl,
           },
           mainEntityOfPage: {
@@ -123,15 +135,18 @@ export function StructuredData({
 
   if (!jsonLd) return null;
 
+  // Sanitize the JSON-LD data through our Zod schema to prevent XSS
+  const safeJsonLd = jsonLdSafeSchema.parse(jsonLd);
+
   return (
     <>
       {/* biome-ignore lint/correctness/useUniqueElementIds: Script tag needs consistent ID for Next.js */}
       <Script
         id="structured-data"
         type="application/ld+json"
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data is safe and trusted
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data is sanitized via Zod schema
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(jsonLd),
+          __html: JSON.stringify(safeJsonLd),
         }}
         strategy="afterInteractive"
       />

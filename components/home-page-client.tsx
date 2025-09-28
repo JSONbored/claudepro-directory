@@ -2,7 +2,7 @@
 
 import { Briefcase, ExternalLink, Search } from 'lucide-react';
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ConfigCard } from '@/components/config-card';
 import { InfiniteScrollContainer } from '@/components/infinite-scroll-container';
@@ -11,35 +11,30 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UnifiedSearch } from '@/components/unified-search';
 import { useSearch } from '@/hooks/use-search';
-import type { ContentItem } from '@/types/content';
+import type { HomePageClientProps, UnifiedContentItem } from '@/lib/schemas/component.schema';
 
-interface HomePageClientProps {
-  initialData: {
-    rules: readonly ContentItem[] | ContentItem[];
-    mcp: readonly ContentItem[] | ContentItem[];
-    agents: readonly ContentItem[] | ContentItem[];
-    commands: readonly ContentItem[] | ContentItem[];
-    hooks: readonly ContentItem[] | ContentItem[];
-    allConfigs: readonly ContentItem[] | ContentItem[];
-  };
-}
-
-export default function HomePageClient({ initialData }: HomePageClientProps) {
+function HomePageClientComponent({ initialData }: HomePageClientProps) {
   const { rules, mcp, agents, commands, hooks, allConfigs } = initialData;
 
   const [activeTab, setActiveTab] = useState('all');
-  const [displayedItems, setDisplayedItems] = useState<ContentItem[]>([]);
+  const [displayedItems, setDisplayedItems] = useState<UnifiedContentItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20;
+
+  // Memoize search options to prevent infinite re-renders
+  const searchOptions = useMemo(
+    () => ({
+      threshold: 0.3,
+      minMatchCharLength: 2,
+    }),
+    []
+  );
 
   // Use React 19 optimized search hook
   const { filters, searchResults, filterOptions, handleSearch, handleFiltersChange, isSearching } =
     useSearch({
       data: allConfigs,
-      searchOptions: {
-        threshold: 0.3,
-        minMatchCharLength: 2,
-      },
+      searchOptions,
     });
 
   // Create lookup maps for O(1) slug checking instead of O(n) array.some() calls
@@ -65,7 +60,7 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
 
   // Update displayed items when filtered results change
   useEffect(() => {
-    setDisplayedItems(filteredResults.slice(0, pageSize));
+    setDisplayedItems(filteredResults.slice(0, pageSize) as UnifiedContentItem[]);
     setCurrentPage(1);
   }, [filteredResults]);
 
@@ -76,32 +71,13 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
     const endIndex = startIndex + pageSize;
     const nextItems = filteredResults.slice(startIndex, endIndex);
 
-    // Simulate async load with small delay
-    await new Promise((resolve) => setTimeout(resolve, 200));
-
-    setDisplayedItems((prev) => [...prev, ...nextItems]);
+    setDisplayedItems((prev) => [...prev, ...nextItems] as UnifiedContentItem[]);
     setCurrentPage(nextPage);
 
-    return nextItems;
+    return nextItems as UnifiedContentItem[];
   }, [currentPage, filteredResults]);
 
   const hasMore = displayedItems.length < filteredResults.length;
-
-  // Optimized config type lookup using Set - O(1) instead of O(n)
-  const getConfigType = useMemo(() => {
-    return (config: ContentItem): 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks' => {
-      const { slug } = config;
-
-      if (slugLookupMaps.agents.has(slug)) return 'agents';
-      if (slugLookupMaps.commands.has(slug)) return 'commands';
-      if (slugLookupMaps.hooks.has(slug)) return 'hooks';
-      if (slugLookupMaps.mcp.has(slug)) return 'mcp';
-      if (slugLookupMaps.rules.has(slug)) return 'rules';
-
-      // Fallback: check for content field
-      return 'content' in config ? 'rules' : 'mcp';
-    };
-  }, [slugLookupMaps]);
 
   // Handle tab change
   const handleTabChange = useCallback((value: string) => {
@@ -150,7 +126,13 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
               <InfiniteScrollContainer
                 items={displayedItems}
                 renderItem={(item) => (
-                  <ConfigCard key={item.slug} {...item} type={getConfigType(item)} />
+                  <ConfigCard
+                    key={item.slug}
+                    item={item}
+                    variant="default"
+                    showCategory={true}
+                    showActions={true}
+                  />
                 )}
                 loadMore={loadMore}
                 hasMore={hasMore}
@@ -184,7 +166,13 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {rules.slice(0, 6).map((rule) => (
-                  <LazyConfigCard key={rule.slug} {...rule} type="rules" />
+                  <LazyConfigCard
+                    key={rule.slug}
+                    item={rule}
+                    variant="default"
+                    showCategory={false}
+                    showActions={true}
+                  />
                 ))}
               </div>
             </div>
@@ -199,7 +187,13 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {mcp.slice(0, 6).map((mcpItem) => (
-                  <LazyConfigCard key={mcpItem.slug} {...mcpItem} type="mcp" />
+                  <LazyConfigCard
+                    key={mcpItem.slug}
+                    item={mcpItem}
+                    variant="default"
+                    showCategory={false}
+                    showActions={true}
+                  />
                 ))}
               </div>
             </div>
@@ -217,7 +211,13 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {agents.slice(0, 6).map((agent) => (
-                  <LazyConfigCard key={agent.slug} {...agent} type="agents" />
+                  <LazyConfigCard
+                    key={agent.slug}
+                    item={agent}
+                    variant="default"
+                    showCategory={false}
+                    showActions={true}
+                  />
                 ))}
               </div>
             </div>
@@ -235,7 +235,13 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {commands.slice(0, 6).map((command) => (
-                  <LazyConfigCard key={command.slug} {...command} type="commands" />
+                  <LazyConfigCard
+                    key={command.slug}
+                    item={command}
+                    variant="default"
+                    showCategory={false}
+                    showActions={true}
+                  />
                 ))}
               </div>
             </div>
@@ -250,7 +256,13 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {hooks.slice(0, 6).map((hook) => (
-                  <LazyConfigCard key={hook.slug} {...hook} type="hooks" />
+                  <LazyConfigCard
+                    key={hook.slug}
+                    item={hook}
+                    variant="default"
+                    showCategory={false}
+                    showActions={true}
+                  />
                 ))}
               </div>
             </div>
@@ -308,17 +320,23 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
             {['all', 'rules', 'mcp', 'agents', 'commands', 'hooks'].map((tab) => (
               <TabsContent key={tab} value={tab} className="space-y-6">
                 {filteredResults.length > 0 ? (
-                  <LazyInfiniteScrollContainer<ContentItem>
+                  <LazyInfiniteScrollContainer<UnifiedContentItem>
                     items={displayedItems}
-                    renderItem={(item: ContentItem, _index: number) => (
-                      <LazyConfigCard key={item.slug} {...item} type={getConfigType(item)} />
+                    renderItem={(item: UnifiedContentItem, _index: number) => (
+                      <LazyConfigCard
+                        key={item.slug}
+                        item={item}
+                        variant="default"
+                        showCategory={true}
+                        showActions={true}
+                      />
                     )}
                     loadMore={loadMore}
                     hasMore={hasMore}
                     pageSize={20}
                     gridClassName="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
                     emptyMessage={`No ${tab === 'all' ? 'configurations' : tab} found`}
-                    keyExtractor={(item: ContentItem, _index: number) => item.slug}
+                    keyExtractor={(item: UnifiedContentItem, _index: number) => item.slug}
                   />
                 ) : (
                   <div className="text-center py-12">
@@ -359,3 +377,8 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
     </>
   );
 }
+
+// Memoize the component to prevent unnecessary re-renders when initialData prop hasn't changed
+const HomePageClient = memo(HomePageClientComponent);
+
+export default HomePageClient;

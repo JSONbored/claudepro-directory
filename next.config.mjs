@@ -33,8 +33,10 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   images: {
-    // Image formats
+    // Image formats - AVIF first for better compression
     formats: ['image/avif', 'image/webp'],
+    // Minimize Largest Contentful Paint (LCP)
+    minimumCacheTTL: 60 * 60 * 24 * 365, // 1 year
     // Allow images from trusted domains only
     remotePatterns: [
       {
@@ -54,10 +56,17 @@ const nextConfig = {
         hostname: 'www.claudepro.directory',
       },
     ],
-    // Device sizes for responsive images
+    // Device sizes for responsive images (optimized for common viewports)
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    // Image sizes for the sizes prop
+    // Image sizes for the sizes prop (optimized for icons and thumbnails)
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Disable static imports for smaller bundle
+    disableStaticImages: false,
+    // Content Security Policy
+    contentDispositionType: 'inline',
+    // Danger: allow SVG (we trust our sources)
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   
   // Turbopack-specific optimizations
@@ -80,20 +89,70 @@ const nextConfig = {
     // optimizeCss: true,
     // Enable React Compiler for automatic optimization
     reactCompiler: true,
-    // Enable aggressive optimization for better Core Web Vitals
     webVitalsAttribution: ['CLS', 'FCP', 'FID', 'INP', 'LCP', 'TTFB'],
-    // Better memory management
     gzipSize: true,
-    // Optimize package imports for better tree shaking
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'fuse.js'],
-    // Scroll restoration
+    optimizePackageImports: [
+      'lucide-react',
+      '@radix-ui/react-icons',
+      'fuse.js',
+      // Add all Radix UI packages for aggressive tree-shaking
+      '@radix-ui/react-accordion',
+      '@radix-ui/react-alert-dialog',
+      '@radix-ui/react-aspect-ratio',
+      '@radix-ui/react-avatar',
+      '@radix-ui/react-checkbox',
+      '@radix-ui/react-collapsible',
+      '@radix-ui/react-context-menu',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-hover-card',
+      '@radix-ui/react-label',
+      '@radix-ui/react-menubar',
+      '@radix-ui/react-navigation-menu',
+      '@radix-ui/react-popover',
+      '@radix-ui/react-progress',
+      '@radix-ui/react-radio-group',
+      '@radix-ui/react-scroll-area',
+      '@radix-ui/react-select',
+      '@radix-ui/react-separator',
+      '@radix-ui/react-slider',
+      '@radix-ui/react-slot',
+      '@radix-ui/react-switch',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-toast',
+      '@radix-ui/react-toggle',
+      '@radix-ui/react-toggle-group',
+      '@radix-ui/react-tooltip',
+    ],
     scrollRestoration: true,
-    // Enable CSS layer optimization for better chunking
     cssChunking: 'strict',
+  },
+
+  // SWC minification is now the default in Next.js 15
+  compiler: {
+    // Remove console logs in production
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+    // Strip specific data attributes in production to reduce HTML size
+    reactRemoveProperties: process.env.NODE_ENV === 'production' ? {
+      properties: ['^data-test'],
+    } : false,
+    // Note: Dead code elimination is handled by SWC by default in Next.js 15
   },
   
   // Advanced webpack optimizations for better Core Web Vitals
-  webpack: (config, { dev, isServer }) => {
+  webpack: (config, { dev, isServer, webpack }) => {
+    // Add Radix UI tree-shaking alias optimization
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        // Direct imports for commonly used Radix primitives to avoid barrel imports
+        '@radix-ui/react-slot$': '@radix-ui/react-slot/dist/index.mjs',
+        '@radix-ui/react-primitive$': '@radix-ui/react-primitive/dist/index.mjs',
+      };
+    }
+
     // Fix webpack cache serialization warning for production builds
     // Use memory cache to avoid serialization of large strings
     if (config.cache && !dev) {
@@ -101,6 +160,17 @@ const nextConfig = {
         type: 'memory',
         maxGenerations: 1,
       });
+    }
+
+    // Exclude template files from production builds
+    if (!dev) {
+      // Use webpack's IgnorePlugin to completely exclude template files
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          resourceRegExp: /-template\.(json|mdx|ts|tsx)$/,
+          contextRegExp: /\/(content|seo\/templates)\//,
+        })
+      );
     }
 
     // Optimize bundle splitting for better LCP
@@ -120,12 +190,38 @@ const nextConfig = {
               chunks: 'all',
               enforce: true,
             },
-            // Radix UI components (frequently used)
-            radix: {
-              test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
-              name: 'radix',
-              priority: 18,
+            // Radix UI components - split into smaller chunks for better tree-shaking
+            radixCore: {
+              test: /[\\/]node_modules[\\/]@radix-ui[\\/](react-primitive|react-compose-refs|react-context|react-id|react-slot|react-use-.*|react-portal)[\\/]/,
+              name: 'radix-core',
+              priority: 19,
               chunks: 'all',
+              enforce: true,
+            },
+            radixComponents: {
+              test: /[\\/]node_modules[\\/]@radix-ui[\\/](?!react-primitive|react-compose-refs|react-context|react-id|react-slot|react-use-|react-portal)/,
+              name(module) {
+                // Create separate chunks for each Radix component for maximum tree-shaking
+                const match = module.context.match(/@radix-ui[\\/](react-[^\\/]+)/);
+                if (match) {
+                  const componentName = match[1].replace('react-', '');
+                  // Group related components together
+                  if (['dialog', 'alert-dialog', 'popover', 'hover-card'].includes(componentName)) {
+                    return 'radix-dialogs';
+                  }
+                  if (['dropdown-menu', 'context-menu', 'menubar', 'navigation-menu'].includes(componentName)) {
+                    return 'radix-menus';
+                  }
+                  if (['select', 'checkbox', 'radio-group', 'switch', 'slider'].includes(componentName)) {
+                    return 'radix-forms';
+                  }
+                  return `radix-${componentName}`;
+                }
+                return 'radix-misc';
+              },
+              priority: 18,
+              chunks: 'async',
+              maxSize: 50000, // Keep Radix chunks small for better tree-shaking
             },
             // Lucide icons (large icon library)
             lucide: {
@@ -183,6 +279,10 @@ const nextConfig = {
       config.optimization.providedExports = true;
       config.optimization.innerGraph = true;
 
+      // Aggressive module optimization for Radix UI
+      config.optimization.realContentHash = true;
+      config.optimization.moduleIds = 'deterministic';
+
       // Minimize main thread blocking with improved runtime chunk handling
       config.optimization.runtimeChunk = {
         name: entrypoint => `runtime-${entrypoint.name}`,
@@ -190,6 +290,37 @@ const nextConfig = {
 
       // Improve module concatenation for smaller bundles
       config.optimization.concatenateModules = true;
+
+      // Add tree-shaking hints for Radix UI
+      config.module.rules.push({
+        test: /node_modules\/@radix-ui/,
+        sideEffects: false,
+      });
+
+      // Add performance hints for production builds
+      config.performance = {
+        hints: 'warning',
+        maxEntrypointSize: 512000, // 500KB
+        maxAssetSize: 512000, // 500KB
+        assetFilter: (assetFilename) => {
+          // Only check JS and CSS files for performance
+          return /\.(js|css)$/.test(assetFilename);
+        },
+      };
+
+      // Add bundle analyzer for ANALYZE builds
+      if (process.env.ANALYZE === 'true') {
+        const { BundleAnalyzerPlugin } = webpack;
+        config.plugins.push(
+          new BundleAnalyzerPlugin({
+            analyzerMode: 'static',
+            reportFilename: './analyze/client.html',
+            openAnalyzer: false,
+            generateStatsFile: true,
+            statsFilename: './analyze/stats.json',
+          })
+        );
+      }
     }
 
     // Preload critical resources

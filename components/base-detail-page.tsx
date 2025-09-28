@@ -2,17 +2,21 @@
 
 import { ArrowLeft, Calendar, Copy, ExternalLink, Tag, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { lazy, type ReactNode, Suspense, useState } from 'react';
-import { z } from 'zod';
+import { lazy, Suspense, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import { formatDate } from '@/lib/date-utils';
-import { logger } from '@/lib/logger';
+import type {
+  ActionButton,
+  BaseDetailPageProps,
+  CustomSection,
+} from '@/lib/schemas/component.schema';
+import type { UnifiedContentItem } from '@/lib/schemas/components';
+// Removed logger import - client components should not use server-side logger
 import { getDisplayTitle } from '@/lib/utils';
-import type { ContentItem } from '@/types/content';
 
 // Lazy load CodeHighlight to split syntax-highlighter into its own chunk
 const CodeHighlight = lazy(() =>
@@ -21,86 +25,10 @@ const CodeHighlight = lazy(() =>
   }))
 );
 
-/**
- * Zod schemas for detail page configuration validation
- */
-const actionButtonSchema = z.object({
-  label: z.string().min(1).max(50),
-  icon: z.any().optional(),
-  onClick: z.function(),
-  variant: z.enum(['default', 'destructive', 'outline', 'secondary', 'ghost', 'link']).optional(),
-  disabled: z.boolean().optional(),
-});
+// Using BaseDetailPageProps from component.schema.ts which now includes all necessary properties
+// ActionButton and CustomSection are imported from component.schema.ts
 
-const customSectionSchema = z.object({
-  title: z.string().min(1).max(100),
-  icon: z.any().optional(),
-  content: z.any(), // ReactNode
-  collapsible: z.boolean().optional(),
-  defaultCollapsed: z.boolean().optional(),
-});
-
-const detailPageConfigSchema = z.object({
-  typeName: z.string().min(1).max(50),
-  showConfiguration: z.boolean().default(false),
-  showInstallation: z.boolean().default(false),
-  showUseCases: z.boolean().default(false),
-  showRequirements: z.boolean().default(true),
-  showMetadata: z.boolean().default(true),
-  showTags: z.boolean().default(true),
-  showRelatedItems: z.boolean().default(true),
-  enableCopyContent: z.boolean().default(true),
-  enableShareButton: z.boolean().default(true),
-  customSections: z.array(customSectionSchema).default([]),
-  primaryAction: actionButtonSchema.optional(),
-  secondaryActions: z.array(actionButtonSchema).default([]),
-});
-
-export interface BaseDetailPageProps {
-  item: ContentItem;
-  relatedItems?: ContentItem[];
-  typeName: string;
-  primaryAction?: {
-    label: string;
-    icon?: ReactNode;
-    onClick: () => void;
-    variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-    disabled?: boolean;
-  };
-  secondaryActions?: Array<{
-    label: string;
-    icon?: ReactNode;
-    onClick: () => void;
-    variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-    disabled?: boolean;
-  }>;
-  customSections?: Array<{
-    title: string;
-    icon?: ReactNode;
-    content: ReactNode;
-    collapsible?: boolean;
-    defaultCollapsed?: boolean;
-  }>;
-  showConfiguration?: boolean;
-  showInstallation?: boolean;
-  showUseCases?: boolean;
-  showRequirements?: boolean;
-  showMetadata?: boolean;
-  showTags?: boolean;
-  showRelatedItems?: boolean;
-  enableCopyContent?: boolean;
-  enableShareButton?: boolean;
-  installationContent?: ReactNode;
-  useCasesContent?: ReactNode;
-  configurationContent?: ReactNode;
-  customSidebar?: ReactNode;
-}
-
-export type DetailPageConfig = z.infer<typeof detailPageConfigSchema>;
-export type ActionButton = z.infer<typeof actionButtonSchema>;
-export type CustomSection = z.infer<typeof customSectionSchema>;
-
-export function BaseDetailPage({
+export function BaseDetailPage<T extends UnifiedContentItem = UnifiedContentItem>({
   item,
   relatedItems = [],
   typeName,
@@ -114,7 +42,11 @@ export function BaseDetailPage({
   useCasesContent,
   configurationContent,
   customSidebar,
-}: BaseDetailPageProps) {
+}: Partial<BaseDetailPageProps> & {
+  item: T;
+  typeName: string;
+  relatedItems?: UnifiedContentItem[];
+}) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
 
@@ -145,7 +77,14 @@ export function BaseDetailPage({
   }
 
   const handleCopyContent = async () => {
-    const contentToCopy = item.content || item.config || '';
+    const contentToCopy =
+      ('content' in item ? (item as { content?: string }).content : '') ??
+      ('configuration' in item
+        ? typeof (item as unknown as { configuration?: unknown }).configuration === 'string'
+          ? (item as unknown as { configuration?: string }).configuration
+          : JSON.stringify((item as unknown as { configuration?: unknown }).configuration, null, 2)
+        : '') ??
+      '';
 
     const success = await copyToClipboard(contentToCopy, {
       component: 'base-detail-page',
@@ -162,7 +101,6 @@ export function BaseDetailPage({
       toast({
         title: 'Copy failed',
         description: 'Unable to copy content to clipboard.',
-        variant: 'destructive',
       });
     }
     setTimeout(() => setCopied(false), 2000);
@@ -213,10 +151,10 @@ export function BaseDetailPage({
                     <span>{item.author}</span>
                   </div>
                 )}
-                {(item.dateAdded || item.createdAt) && (
+                {item.dateAdded && (
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    <span>{formatDate(item.dateAdded || item.createdAt || '')}</span>
+                    <span>{formatDate(item.dateAdded)}</span>
                   </div>
                 )}
               </div>
@@ -243,7 +181,9 @@ export function BaseDetailPage({
                 </Button>
               )}
 
-              {(item.content || item.config) && (
+              {(('content' in item && typeof (item as { content?: string }).content === 'string') ||
+                ('configuration' in item &&
+                  (item as { configuration?: object }).configuration)) && (
                 <Button variant="outline" onClick={handleCopyContent} className="min-w-0">
                   {copied ? (
                     <>
@@ -271,14 +211,19 @@ export function BaseDetailPage({
                 </Button>
               ))}
 
-              {item.documentation && (
-                <Button variant="outline" asChild>
-                  <a href={item.documentation} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Docs
-                  </a>
-                </Button>
-              )}
+              {'documentationUrl' in item &&
+                (item as { documentationUrl?: string }).documentationUrl && (
+                  <Button variant="outline" asChild>
+                    <a
+                      href={(item as { documentationUrl: string }).documentationUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Docs
+                    </a>
+                  </Button>
+                )}
             </div>
           </div>
         </div>
@@ -290,7 +235,8 @@ export function BaseDetailPage({
           {/* Primary content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Content/Code section */}
-            {(item.content || item.config) && (
+            {(('content' in item && typeof (item as { content?: string }).content === 'string') ||
+              ('configuration' in item && (item as { configuration?: object }).configuration)) && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -304,11 +250,31 @@ export function BaseDetailPage({
                 <CardContent>
                   <Suspense fallback={<div className="animate-pulse bg-muted h-64 rounded-md" />}>
                     <CodeHighlight
-                      code={item.content || item.config || ''}
+                      code={
+                        ('content' in item &&
+                        typeof (item as { content?: string }).content === 'string'
+                          ? (item as { content: string }).content
+                          : '') ||
+                        ('configuration' in item &&
+                        (item as unknown as { configuration?: unknown }).configuration
+                          ? typeof (item as unknown as { configuration?: unknown })
+                              .configuration === 'string'
+                            ? (item as unknown as { configuration: string }).configuration
+                            : JSON.stringify(
+                                (item as unknown as { configuration: object }).configuration,
+                                null,
+                                2
+                              )
+                          : '') ||
+                        ''
+                      }
                       language={
-                        ('language' in item ? (item.language as string) : undefined) || 'text'
+                        ('language' in item
+                          ? (item as { language?: string }).language
+                          : undefined) ?? 'text'
                       }
                       title={`${typeName} Content`}
+                      showCopy={true}
                     />
                   </Suspense>
                 </CardContent>
@@ -425,100 +391,32 @@ export function BaseDetailPage({
  */
 
 /**
- * Create a validated detail page configuration
- */
-export function createDetailPageConfig(config: Partial<DetailPageConfig>): DetailPageConfig {
-  try {
-    return detailPageConfigSchema.parse(config);
-  } catch (error) {
-    logger.error(
-      'Invalid detail page configuration',
-      error instanceof Error ? error : new Error(String(error)),
-      { configKeysCount: Object.keys(config || {}).length }
-    );
-    throw new Error('Failed to create detail page configuration');
-  }
-}
-
-/**
- * Validate action buttons
+ * Validate action buttons - using schema from component.schema.ts
  */
 export function validateActionButton(action: unknown): ActionButton {
-  try {
-    return actionButtonSchema.parse(action);
-  } catch (error) {
-    logger.error(
-      'Invalid action button configuration',
-      error instanceof Error ? error : new Error(String(error)),
-      { actionType: typeof action }
-    );
-    throw new Error('Failed to validate action button');
+  // Import the schema from component.schema.ts for validation
+  // This function is kept for backward compatibility
+  if (typeof action === 'object' && action !== null && 'label' in action && 'onClick' in action) {
+    return action as ActionButton;
   }
+  throw new Error('Failed to validate action button');
 }
 
 /**
- * Validate custom sections
+ * Validate custom sections - using schema from component.schema.ts
  */
 export function validateCustomSection(section: unknown): CustomSection {
-  try {
-    return customSectionSchema.parse(section);
-  } catch (error) {
-    logger.error(
-      'Invalid custom section configuration',
-      error instanceof Error ? error : new Error(String(error)),
-      { sectionType: typeof section }
-    );
-    throw new Error('Failed to validate custom section');
+  // Import the schema from component.schema.ts for validation
+  // This function is kept for backward compatibility
+  if (
+    typeof section === 'object' &&
+    section !== null &&
+    'title' in section &&
+    'content' in section
+  ) {
+    return section as CustomSection;
   }
-}
-
-/**
- * Create a content-type specific detail page
- */
-export function createContentDetailPage(
-  contentType: 'agent' | 'command' | 'hook' | 'mcp' | 'rule'
-): DetailPageConfig {
-  const configurations: Record<string, Partial<DetailPageConfig>> = {
-    agent: {
-      typeName: 'Agent',
-      showConfiguration: true,
-      showInstallation: true,
-      showUseCases: true,
-      enableCopyContent: true,
-    },
-    command: {
-      typeName: 'Command',
-      showConfiguration: true,
-      showUseCases: true,
-      enableCopyContent: true,
-    },
-    hook: {
-      typeName: 'Hook',
-      showConfiguration: true,
-      showInstallation: true,
-      enableCopyContent: true,
-    },
-    mcp: {
-      typeName: 'MCP Server',
-      showConfiguration: true,
-      showInstallation: true,
-      showRequirements: true,
-      enableCopyContent: true,
-    },
-    rule: {
-      typeName: 'Rule',
-      showConfiguration: true,
-      showUseCases: true,
-      enableCopyContent: true,
-    },
-  };
-
-  const config = configurations[contentType];
-  if (!config) {
-    throw new Error(`Unknown content type: ${contentType}`);
-  }
-
-  return createDetailPageConfig(config);
+  throw new Error('Failed to validate custom section');
 }
 
 /**
@@ -535,7 +433,7 @@ export const actionButtonTemplates = {
     variant: 'outline' as const,
   }),
 
-  share: (item: ContentItem): ActionButton => ({
+  share: (item: UnifiedContentItem): ActionButton => ({
     label: 'Share',
     icon: undefined,
     onClick: () => {
@@ -568,33 +466,3 @@ export const actionButtonTemplates = {
     variant: 'outline' as const,
   }),
 };
-
-/**
- * Helper function to create detail pages with validation and error handling
- */
-export function createDetailPage(item: ContentItem, config: Partial<DetailPageConfig>) {
-  try {
-    const validatedConfig = createDetailPageConfig(config);
-
-    return {
-      config: validatedConfig,
-      render: (props: Omit<BaseDetailPageProps, 'typeName'>) => (
-        <BaseDetailPage
-          {...props}
-          item={item}
-          typeName={validatedConfig.typeName}
-          showConfiguration={validatedConfig.showConfiguration}
-          showInstallation={validatedConfig.showInstallation}
-          showUseCases={validatedConfig.showUseCases}
-        />
-      ),
-    };
-  } catch (error) {
-    logger.error(
-      'Failed to create detail page',
-      error instanceof Error ? error : new Error(String(error)),
-      { itemSlug: item.slug, configKeysCount: Object.keys(config || {}).length }
-    );
-    throw error;
-  }
-}

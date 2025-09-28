@@ -5,6 +5,8 @@
  */
 
 import { z } from 'zod';
+import { logger } from '@/lib/logger';
+import type { ContentIndex, ContentItem } from '@/lib/related-content/service';
 
 /**
  * Security constants for cache operations
@@ -138,7 +140,13 @@ export const apiResponseCacheSchema = z.object({
     .min(1)
     .max(CACHE_LIMITS.MAX_KEY_LENGTH)
     .regex(KEY_PATTERNS.CACHE_KEY, 'Invalid cache key format'),
-  data: z.unknown(), // Will be JSON stringified
+  data: z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.array(z.union([z.string(), z.number(), z.boolean()])),
+    z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
+  ]), // Will be JSON stringified
   ttl: z
     .number()
     .int()
@@ -158,7 +166,14 @@ export const batchOperationSchema = z.object({
       z.object({
         type: z.enum(['set', 'get', 'del', 'incr', 'zadd']),
         key: z.string().max(CACHE_LIMITS.MAX_KEY_LENGTH),
-        value: z.any().optional(),
+        value: z
+          .union([
+            z.string(),
+            z.number(),
+            z.boolean(),
+            z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
+          ])
+          .optional(),
         ttl: z.number().int().min(0).max(CACHE_LIMITS.MAX_TTL).optional(),
         score: z.number().optional(),
         member: z.string().optional(),
@@ -211,7 +226,16 @@ export const relatedItemsCacheSchema = z.object({
 export const searchResultsCacheSchema = z.object({
   query: z.string().min(1).max(200),
   category: cacheCategorySchema.optional(),
-  results: z.array(z.any()).max(CACHE_LIMITS.MAX_MEMBERS),
+  results: z
+    .array(
+      z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
+      ])
+    )
+    .max(CACHE_LIMITS.MAX_MEMBERS),
   totalCount: z.number().int().min(0),
   ttl: z.number().int().min(60).max(3600).optional().default(600), // 10 minutes default
 });
@@ -229,7 +253,7 @@ export const cleanupParamsSchema = z.object({
 /**
  * Helper function to validate cache key
  */
-export function validateCacheKey(key: unknown): string {
+export function validateCacheKey(key: string | number): string {
   const schema = z
     .string()
     .min(1, 'Cache key is required')
@@ -243,7 +267,7 @@ export function validateCacheKey(key: unknown): string {
 /**
  * Helper function to validate TTL
  */
-export function validateTTL(ttl: unknown): number {
+export function validateTTL(ttl: string | number): number {
   const schema = z.coerce
     .number()
     .int('TTL must be an integer')
@@ -258,28 +282,42 @@ export function validateTTL(ttl: unknown): number {
  */
 export const cacheContentMetadataSchema = z
   .object({
-    items: z.array(z.any()).optional(),
+    items: z
+      .array(
+        z.union([
+          z.string(),
+          z.number(),
+          z.boolean(),
+          z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
+        ])
+      )
+      .optional(),
     lastUpdated: z.string().datetime().optional(),
     count: z.number().int().min(0).optional(),
-    metadata: z.record(z.string(), z.any()).optional(),
+    metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
   })
   .passthrough(); // Allow additional fields
 
 /**
  * Generic cached API response schema
  */
+const baseValueSchema = z.union([z.string(), z.number(), z.boolean()]);
+
 export const cachedApiResponseSchema = z.union([
   z.object({
-    data: z.any(),
+    data: z.union([
+      baseValueSchema,
+      z.array(baseValueSchema),
+      z.record(z.string(), baseValueSchema),
+    ]),
     timestamp: z.number().optional(),
     version: z.string().optional(),
   }),
-  z.array(z.any()),
-  z.record(z.string(), z.any()),
+  z.array(baseValueSchema),
+  z.record(z.string(), baseValueSchema),
   z.string(),
   z.number(),
   z.boolean(),
-  z.null(),
 ]);
 
 /**
@@ -288,13 +326,22 @@ export const cachedApiResponseSchema = z.union([
 export const cachedStringSchema = z.string().min(0).max(CACHE_LIMITS.MAX_CONTENT_LENGTH);
 
 /**
+ * Cache parse result schema
+ */
+export const cacheParseResultSchema = <T extends z.ZodTypeAny>(schema: T) =>
+  z.union([
+    z.object({ success: z.literal(true), data: schema }),
+    z.object({ success: z.literal(false), error: z.string() }),
+  ]);
+
+/**
  * Helper to safely parse cached JSON data with logging
  */
 export function parseCachedJSON<T>(
   data: string,
   schema: z.ZodSchema<T>,
   context?: { key?: string; operation?: string }
-): T | null {
+): { success: true; data: T } | { success: false; error: string } {
   try {
     // First validate the raw data string
     const validatedData = cachedStringSchema.parse(data);
@@ -303,15 +350,19 @@ export function parseCachedJSON<T>(
     const parsed = JSON.parse(validatedData);
 
     // Validate against schema
-    return schema.parse(parsed);
+    const result = schema.parse(parsed);
+    return { success: true, data: result };
   } catch (error) {
-    console.error('Failed to parse cached JSON:', {
-      error: error instanceof Error ? error.message : String(error),
-      context: context || {},
-      dataLength: data?.length || 0,
-      dataPreview: data?.slice(0, 100) || '',
-    });
-    return null;
+    logger.error(
+      'Failed to parse cached JSON',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        contextKeys: String(Object.keys(context || {}).length),
+        dataLength: String(data?.length || 0),
+        dataPreview: String(data?.slice(0, 100) || ''),
+      }
+    );
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 }
 
@@ -321,7 +372,9 @@ export function parseCachedJSON<T>(
 export function parseGenericCachedJSON(
   data: string,
   context?: { key?: string; operation?: string }
-): unknown | null {
+):
+  | { success: true; data: z.infer<typeof cachedApiResponseSchema> }
+  | { success: false; error: string } {
   return parseCachedJSON(data, cachedApiResponseSchema, context);
 }
 
@@ -360,7 +413,7 @@ export const redisScanParamsSchema = z.object({
       'Invalid pattern format - only alphanumeric, :, _, -, / and * allowed'
     )
     .refine(
-      (pattern) => !pattern.includes('../') && !pattern.includes('..\\'),
+      (pattern) => !(pattern.includes('../') || pattern.includes('..\\')),
       'Path traversal patterns not allowed'
     )
     .refine((pattern) => pattern.split('*').length <= 3, 'Too many wildcards - maximum 2 allowed'),
@@ -433,11 +486,17 @@ export function parseRedisZRangeResponse(
 
     return result;
   } catch (error) {
-    console.error('Failed to parse Redis ZRANGE response:', {
-      error: error instanceof z.ZodError ? error.issues : String(error),
-      context: context || {},
-      itemsLength: Array.isArray(items) ? items.length : 'not array',
-    });
+    logger.error(
+      'Failed to parse Redis ZRANGE response',
+      error instanceof Error
+        ? error
+        : new Error(error instanceof z.ZodError ? error.issues.join(', ') : String(error)),
+      {
+        contextKeys: String(Object.keys(context || {}).length),
+        itemsLength: String(Array.isArray(items) ? items.length : 0),
+        itemsType: String(typeof items),
+      }
+    );
     return [];
   }
 }
@@ -453,14 +512,59 @@ export function validateBatchIncrements(
       try {
         return batchIncrementOperationSchema.parse(op);
       } catch (error) {
-        console.error('Invalid batch increment operation:', {
-          operation: op,
-          error: error instanceof z.ZodError ? error.issues : String(error),
-        });
+        logger.error(
+          'Invalid batch increment operation',
+          error instanceof Error
+            ? error
+            : new Error(error instanceof z.ZodError ? error.issues.join(', ') : String(error)),
+          {
+            operationType: String(typeof op),
+          }
+        );
         return null;
       }
     })
     .filter(Boolean) as Array<z.infer<typeof batchIncrementOperationSchema>>;
+}
+
+/**
+ * Content transformation schema for cache storage
+ * Transforms ContentIndex items to cache-compatible format
+ */
+export const contentIndexToCacheSchema = z.object({
+  items: z.array(
+    z.object({
+      slug: z.string(),
+      title: z.string(),
+      description: z.string(),
+      category: z.string(),
+      url: z.string(),
+      tags: z.string().default(''), // Transform from string[] to comma-separated string
+      keywords: z.string().default(''), // Transform from string[] to comma-separated string
+      popularity: z.number().default(0),
+      dateAdded: z.string(),
+      dateUpdated: z.string(),
+      dateCreated: z.string(),
+      featured: z.boolean().default(false),
+    })
+  ),
+  lastUpdated: z.string().datetime(),
+  count: z.number().int().min(0),
+});
+
+/**
+ * Function to transform ContentIndex to cache format
+ */
+export function transformContentIndexForCache(index: ContentIndex) {
+  return contentIndexToCacheSchema.parse({
+    items: index.items.map((item: ContentItem) => ({
+      ...item,
+      tags: Array.isArray(item.tags) ? item.tags.join(',') : item.tags || '',
+      keywords: Array.isArray(item.keywords) ? item.keywords.join(',') : item.keywords || '',
+    })),
+    lastUpdated: new Date().toISOString(),
+    count: index.items.length,
+  });
 }
 
 /**
@@ -489,3 +593,17 @@ export type RedisScanParams = z.infer<typeof redisScanParamsSchema>;
 export type RedisScanResponse = z.infer<typeof redisScanResponseSchema>;
 export type CacheInvalidationResult = z.infer<typeof cacheInvalidationResultSchema>;
 export type RateLimitTracking = z.infer<typeof rateLimitTrackingSchema>;
+
+/**
+ * Redis connection status schema
+ */
+export const redisConnectionStatusSchema = z.object({
+  isConnected: z.boolean(),
+  isFallback: z.boolean(),
+  lastConnectionAttempt: z.date().nullable(),
+  consecutiveFailures: z.number().int().min(0),
+  totalOperations: z.number().int().min(0),
+  failedOperations: z.number().int().min(0),
+});
+
+export type RedisConnectionStatus = z.infer<typeof redisConnectionStatusSchema>;

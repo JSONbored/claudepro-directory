@@ -2,23 +2,20 @@ import { Clock, Star, TrendingUp, Users } from 'lucide-react';
 import { TrendingContent } from '@/components/trending-content';
 import { Badge } from '@/components/ui/badge';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
+import { sortByPopularity } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
 import { statsRedis } from '@/lib/redis';
+import type { PagePropsWithSearchParams } from '@/lib/schemas/app.schema';
+import type { ContentMetadata } from '@/lib/schemas/content.schema';
 import {
   parseSearchParams,
   type TrendingParams,
   trendingParamsSchema,
 } from '@/lib/schemas/search.schema';
-import { sortByPopularity } from '@/lib/sorting';
-import type { ContentItem } from '@/types/content';
 
 // Force dynamic rendering since we're fetching from Redis
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
-interface TrendingPageProps {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}
 
 async function getTrendingData(params: TrendingParams) {
   // Validate trending parameters for security
@@ -37,10 +34,10 @@ async function getTrendingData(params: TrendingParams) {
 
   // Helper function to get mixed content from categories
   const getMixedContent = (
-    categories: { items: ContentItem[]; type: string; count: number }[],
+    categories: { items: ContentMetadata[]; type: string; count: number }[],
     totalCount: number
-  ): Array<ContentItem & { type: string; viewCount?: number }> => {
-    const result: Array<ContentItem & { type: string; viewCount?: number }> = [];
+  ): Array<ContentMetadata & { type: string; viewCount?: number }> => {
+    const result: Array<ContentMetadata & { type: string; viewCount?: number }> = [];
     let currentIndex = 0;
 
     // Round-robin through categories to ensure variety
@@ -48,11 +45,16 @@ async function getTrendingData(params: TrendingParams) {
       for (const category of categories) {
         if (category.items.length > currentIndex && result.length < totalCount) {
           const baseItem = category.items[currentIndex];
-          const item = { ...baseItem, type: category.type } as ContentItem & {
-            type: string;
-            viewCount?: number;
-          };
-          result.push(item);
+          if (baseItem) {
+            const item = {
+              ...baseItem,
+              type: category.type,
+            } as ContentMetadata & {
+              type: string;
+              viewCount?: number;
+            };
+            result.push(item);
+          }
         }
       }
       currentIndex++;
@@ -65,12 +67,12 @@ async function getTrendingData(params: TrendingParams) {
 
   if (!statsRedis.isEnabled()) {
     // Fallback to static data if Redis is not available
-    // Sort each category by popularity - cast readonly tuple types to ContentItem arrays
-    const sortedRules = sortByPopularity(rules as readonly ContentItem[]);
-    const sortedMcp = sortByPopularity(mcp as readonly ContentItem[]);
-    const sortedAgents = sortByPopularity(agents as readonly ContentItem[]);
-    const sortedCommands = sortByPopularity(commands as readonly ContentItem[]);
-    const sortedHooks = sortByPopularity(hooks as readonly ContentItem[]);
+    // Sort each category by popularity - cast readonly tuple types to ContentMetadata arrays
+    const sortedRules = sortByPopularity(rules as readonly ContentMetadata[]);
+    const sortedMcp = sortByPopularity(mcp as readonly ContentMetadata[]);
+    const sortedAgents = sortByPopularity(agents as readonly ContentMetadata[]);
+    const sortedCommands = sortByPopularity(commands as readonly ContentMetadata[]);
+    const sortedHooks = sortByPopularity(hooks as readonly ContentMetadata[]);
 
     // Mix categories for trending (12 items total, ~2-3 per category)
     const trending = getMixedContent(
@@ -135,10 +137,10 @@ async function getTrendingData(params: TrendingParams) {
     // Map Redis IDs back to actual content items
     const mapToContent = (
       items: string[] | { slug: string; views?: number }[],
-      contentArray: readonly ContentItem[],
+      contentArray: readonly ContentMetadata[],
       type: string
-    ): Array<ContentItem & { type: string; viewCount?: number }> => {
-      const result: Array<ContentItem & { type: string; viewCount?: number }> = [];
+    ): Array<ContentMetadata & { type: string; viewCount?: number }> => {
+      const result: Array<ContentMetadata & { type: string; viewCount?: number }> = [];
 
       for (const item of items) {
         const slug = typeof item === 'string' ? item : item.slug;
@@ -146,7 +148,11 @@ async function getTrendingData(params: TrendingParams) {
         const content = contentArray.find((c) => c.slug === slug);
 
         if (content) {
-          result.push({ ...content, type, viewCount: views } as ContentItem & {
+          result.push({
+            ...content,
+            type,
+            viewCount: views,
+          } as ContentMetadata & {
             type: string;
             viewCount?: number;
           });
@@ -199,12 +205,12 @@ async function getTrendingData(params: TrendingParams) {
         component: 'TrendingPage',
       }
     );
-    // Use same fallback as non-Redis case - cast readonly tuple types to ContentItem arrays
-    const sortedRules = sortByPopularity(rules as readonly ContentItem[]);
-    const sortedMcp = sortByPopularity(mcp as readonly ContentItem[]);
-    const sortedAgents = sortByPopularity(agents as readonly ContentItem[]);
-    const sortedCommands = sortByPopularity(commands as readonly ContentItem[]);
-    const sortedHooks = sortByPopularity(hooks as readonly ContentItem[]);
+    // Use same fallback as non-Redis case - cast readonly tuple types to ContentMetadata arrays
+    const sortedRules = sortByPopularity(rules as readonly ContentMetadata[]);
+    const sortedMcp = sortByPopularity(mcp as readonly ContentMetadata[]);
+    const sortedAgents = sortByPopularity(agents as readonly ContentMetadata[]);
+    const sortedCommands = sortByPopularity(commands as readonly ContentMetadata[]);
+    const sortedHooks = sortByPopularity(hooks as readonly ContentMetadata[]);
 
     const trending = getMixedContent(
       [
@@ -243,7 +249,7 @@ async function getTrendingData(params: TrendingParams) {
   }
 }
 
-export default async function TrendingPage({ searchParams }: TrendingPageProps) {
+export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
 
   // Validate and parse search parameters with Zod

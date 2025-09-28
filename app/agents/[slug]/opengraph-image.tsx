@@ -142,7 +142,9 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       { ...size }
     );
   } catch (error: unknown) {
+    // LEGITIMATE: Catch blocks must handle unknown error types
     // Log validation error securely
+    // biome-ignore lint/suspicious/noConsole: Error logging needed for debugging
     console.error('Agent opengraph validation error:', {
       error: error instanceof Error ? error.message : String(error),
       type: 'validation',

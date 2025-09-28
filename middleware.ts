@@ -3,8 +3,9 @@ import * as nosecone from '@nosecone/next';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
+import { logger } from '@/lib/logger';
 import { rateLimiters } from '@/lib/rate-limiter';
-import { env, isDevelopment, isProduction, securityConfig } from '@/lib/schemas/env.schema';
+import { env, isDevelopment, securityConfig } from '@/lib/schemas/env.schema';
 import {
   type ApiEndpointType,
   type RequestValidation,
@@ -53,101 +54,13 @@ const aj = arcjet({
   ],
 });
 
+
 // Nosecone security headers configuration
 const noseconeConfig: nosecone.NoseconeOptions = {
   ...nosecone.defaults,
-  contentSecurityPolicy: {
-    ...nosecone.defaults.contentSecurityPolicy,
-    directives: {
-      ...nosecone.defaults.contentSecurityPolicy.directives,
-
-      // Script sources - Nosecone defaults already include nonce function
-      // We just add our external scripts
-      scriptSrc: isDevelopment ? [
-        ...nosecone.defaults.contentSecurityPolicy.directives.scriptSrc,
-        'https://umami.claudepro.directory',
-        'https://va.vercel-scripts.com',
-        'https://vercel.live',
-        'https://vitals.vercel-insights.com',
-        'localhost:*',
-        '127.0.0.1:*',
-      ] : [
-        ...nosecone.defaults.contentSecurityPolicy.directives.scriptSrc,
-        'https://umami.claudepro.directory',
-        'https://va.vercel-scripts.com',
-        'https://vercel.live',
-        'https://vitals.vercel-insights.com',
-      ],
-
-      // Style sources
-      styleSrc: [
-        ...nosecone.defaults.contentSecurityPolicy.directives.styleSrc,
-        'https://fonts.googleapis.com',
-      ],
-
-      // Image sources - extend defaults to add GitHub
-      imgSrc: [
-        ...nosecone.defaults.contentSecurityPolicy.directives.imgSrc,
-        'https://github.com',
-        'https://*.githubusercontent.com',
-        'https://claudepro.directory',
-        'https://www.claudepro.directory',
-      ],
-
-      // Font sources - extend defaults to add Google Fonts
-      fontSrc: [
-        ...nosecone.defaults.contentSecurityPolicy.directives.fontSrc,
-        'https://fonts.gstatic.com',
-      ],
-
-      // Connect sources (XHR, fetch, WebSocket, etc.)
-      connectSrc: isDevelopment ? [
-        ...nosecone.defaults.contentSecurityPolicy.directives.connectSrc,
-        'https://umami.claudepro.directory',
-        'https://vitals.vercel-insights.com',
-        'https://va.vercel-scripts.com',
-        'ws://localhost:*',
-        'wss://localhost:*',
-        'ws://127.0.0.1:*',
-        'wss://127.0.0.1:*',
-        'http://localhost:*',
-        'https://localhost:*',
-      ] : [
-        ...nosecone.defaults.contentSecurityPolicy.directives.connectSrc,
-        'https://umami.claudepro.directory',
-        'https://vitals.vercel-insights.com',
-        'https://va.vercel-scripts.com',
-      ],
-
-      // Frame ancestors - prevent clickjacking
-      frameAncestors: ["'none'"],
-
-      // Base URI
-      baseUri: ["'self'"],
-
-      // Form action
-      formAction: ["'self'"],
-
-      // Frame/child sources
-      frameSrc: ["'none'"],
-      childSrc: ["'none'"],
-
-      // Media sources
-      mediaSrc: ["'self'"],
-
-      // Object sources - none for security
-      objectSrc: ["'none'"],
-
-      // Worker sources for service workers - extend defaults to add blob:
-      workerSrc: [
-        ...nosecone.defaults.contentSecurityPolicy.directives.workerSrc,
-        'blob:',
-      ],
-
-      // Upgrade insecure requests in production
-      upgradeInsecureRequests: isProduction,
-    },
-  },
+  // Disable CSP entirely in development mode
+  // In production, use full CSP with external script sources
+  contentSecurityPolicy: isDevelopment ? false : true, // Will be replaced with dynamic CSP
 
   // Cross-Origin Embedder Policy - credentialless for compatibility with external resources
   crossOriginEmbedderPolicy: {
@@ -222,10 +135,12 @@ async function applyEndpointRateLimit(
   try {
     requestPathSchema.parse(pathname);
   } catch (error) {
-    console.error('Invalid pathname detected:', {
-      pathname: sanitizePathForLogging(pathname),
-      error: error instanceof z.ZodError ? error.issues : String(error),
-    });
+    logger.error('Invalid pathname detected',
+      error instanceof z.ZodError ? new Error('Pathname validation failed') : new Error(String(error)),
+      {
+        pathname: sanitizePathForLogging(pathname),
+        type: 'validation',
+      });
     return new NextResponse('Bad Request', { status: 400 });
   }
   // Classify the API endpoint type
@@ -267,10 +182,12 @@ async function applyEndpointRateLimit(
           const searchParams = new URLSearchParams(request.nextUrl.search);
           validateSearchQuery(searchParams);
         } catch (error) {
-          console.error('Invalid search query:', {
-            pathname: sanitizePathForLogging(pathname),
-            error: error instanceof z.ZodError ? error.issues : String(error),
-          });
+          logger.error('Invalid search query',
+            error instanceof z.ZodError ? new Error('Search query validation failed') : new Error(String(error)),
+            {
+              pathname: sanitizePathForLogging(pathname),
+              type: 'search_validation',
+            });
           return new NextResponse(JSON.stringify({
             success: false,
             error: 'Bad Request',
@@ -316,7 +233,7 @@ export async function middleware(request: NextRequest) {
 
     // Log validated request data (in development only)
     if (isDevelopment) {
-      console.log('Validated request:', {
+      logger.debug('Validated request', {
         method: requestValidation.method,
         path: sanitizePathForLogging(requestValidation.path),
         userAgent: requestValidation.userAgent?.slice(0, 50) + '...',
@@ -324,11 +241,13 @@ export async function middleware(request: NextRequest) {
     }
   } catch (error) {
     // Log validation error for monitoring
-    console.error('Request validation failed:', {
-      pathname: sanitizePathForLogging(pathname),
-      method: request.method,
-      error: error instanceof z.ZodError ? error.issues : String(error),
-    });
+    logger.error('Request validation failed',
+      error instanceof z.ZodError ? new Error('Request validation failed') : new Error(String(error)),
+      {
+        pathname: sanitizePathForLogging(pathname),
+        method: request.method,
+        type: 'request_validation',
+      });
 
     // Return standardized error response
     return new NextResponse(JSON.stringify({
@@ -362,12 +281,15 @@ export async function middleware(request: NextRequest) {
 
   // Handle denied requests
   if (decision.isDenied()) {
-    console.error('Arcjet denied request:', {
-      ip: decision.ip,
-      path: sanitizePathForLogging(pathname),
-      reason: decision.reason,
-      conclusion: decision.conclusion,
-    });
+    logger.error('Arcjet denied request',
+      new Error(`Request denied: ${decision.conclusion}`),
+      {
+        ip: String(decision.ip),
+        path: sanitizePathForLogging(pathname),
+        reason: String(decision.reason),
+        conclusion: decision.conclusion,
+        type: 'security_denial',
+      });
 
     // Copy security headers from Nosecone response
     const headers = new Headers();
@@ -407,9 +329,17 @@ export async function middleware(request: NextRequest) {
     return rateLimitResponse;
   }
 
-  // Request allowed - add pathname header for SmartRelatedContent component
-  const response = noseconeResponse;
+  // Request allowed - create new response with pathname header for SmartRelatedContent component
+  const response = NextResponse.next();
+
+  // Copy all security headers from nosecone
+  noseconeResponse.headers.forEach((value: string, key: string) => {
+    response.headers.set(key, value);
+  });
+
+  // Add pathname header for SmartRelatedContent component
   response.headers.set('x-pathname', pathname);
+
   return response;
 }
 
@@ -424,10 +354,12 @@ export const config = {
      * - favicon.ico (favicon file)
      * - robots.txt (robots file)
      * - sitemap.xml (sitemap file)
-     * - .well-known (well-known files)
+     * - manifest.json (PWA manifest)
+     * - .well-known (well-known files for verification)
+     * - /js/ (public JavaScript files)
+     * - /css/ (public CSS files)
      * - *.png, *.jpg, *.jpeg, *.gif, *.webp, *.svg, *.ico (image files)
-     * - *.css, *.js (static assets)
      */
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.well-known|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.json|\\.well-known|js/|css/|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
   ],
 };

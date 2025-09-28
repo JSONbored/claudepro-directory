@@ -1,129 +1,101 @@
 'use client';
 
 import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
-import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { useCallback } from 'react';
+import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { createErrorBoundaryFallback } from '@/lib/error-handler';
+import { umamiEventDataSchema } from '@/lib/schemas/analytics.schema';
+import type { ErrorBoundaryProps, ErrorFallbackProps } from '@/lib/schemas/component.schema';
 import { isDevelopment } from '@/lib/schemas/env.schema';
 
-interface Props {
-  children: ReactNode;
-  fallback?: ReactNode;
+function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
+  const handleGoHome = useCallback(() => {
+    resetErrorBoundary();
+    window.location.href = '/';
+  }, [resetErrorBoundary]);
+
+  const handleReset = useCallback(() => {
+    resetErrorBoundary();
+    window.location.reload();
+  }, [resetErrorBoundary]);
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="max-w-2xl w-full">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="h-8 w-8 text-destructive" />
+            <CardTitle className="text-2xl">Something went wrong</CardTitle>
+          </div>
+          <CardDescription className="mt-2">
+            An unexpected error occurred. The error has been logged and we&apos;ll look into it.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {isDevelopment && error && (
+            <div className="rounded-lg bg-muted p-4 space-y-2">
+              <p className="font-semibold text-sm">Error Details:</p>
+              <pre className="text-xs overflow-auto">{error.toString()}</pre>
+              {error.stack && (
+                <details className="text-xs">
+                  <summary className="cursor-pointer font-semibold">Stack Trace</summary>
+                  <pre className="mt-2 overflow-auto">{error.stack}</pre>
+                </details>
+              )}
+            </div>
+          )}
+
+          <div className="flex gap-3">
+            <Button onClick={handleReset} variant="default">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Try Again
+            </Button>
+            <Button onClick={handleGoHome} variant="outline">
+              <Home className="h-4 w-4 mr-2" />
+              Go Home
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
 
-interface State {
-  hasError: boolean;
-  error: Error | null;
-  errorInfo: ErrorInfo | null;
-}
-
-export class ErrorBoundary extends Component<Props, State> {
-  public state: State = {
-    hasError: false,
-    error: null,
-    errorInfo: null,
-  };
-
-  public static getDerivedStateFromError(error: Error): State {
-    return {
-      hasError: true,
-      error,
-      errorInfo: null,
-    };
-  }
-
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+export function ErrorBoundary({ children, fallback }: ErrorBoundaryProps) {
+  const handleError = useCallback((error: Error, errorInfo: { componentStack?: string | null }) => {
     // Use centralized error handler for consistent logging and tracking
     const errorResponse = createErrorBoundaryFallback(error, {
       componentStack: errorInfo.componentStack || '',
     });
 
-    // Track error boundary triggers in Umami
+    // Track error boundary triggers in Umami with validated data
     if (window?.umami) {
-      window.umami.track('error_boundary_triggered', {
+      const eventData = umamiEventDataSchema.safeParse({
         error_type: error.name || 'Unknown',
         error_message: error.message?.substring(0, 100) || 'No message',
         page: window.location.pathname,
         component_stack_depth: errorInfo.componentStack?.split('\n').length || 0,
-        request_id: errorResponse.requestId,
+        request_id: errorResponse.requestId || null,
       });
-    }
 
-    this.setState({
-      error,
-      errorInfo,
-    });
-  }
-
-  private handleReset = () => {
-    this.setState({
-      hasError: false,
-      error: null,
-      errorInfo: null,
-    });
-    window.location.reload();
-  };
-
-  private handleGoHome = () => {
-    this.setState({
-      hasError: false,
-      error: null,
-      errorInfo: null,
-    });
-    window.location.href = '/';
-  };
-
-  public render() {
-    if (this.state.hasError) {
-      if (this.props.fallback) {
-        return this.props.fallback;
+      if (eventData.success) {
+        window.umami?.track('error_boundary_triggered', eventData.data);
       }
-
-      return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-4">
-          <Card className="max-w-2xl w-full">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <AlertTriangle className="h-8 w-8 text-destructive" />
-                <CardTitle className="text-2xl">Something went wrong</CardTitle>
-              </div>
-              <CardDescription className="mt-2">
-                An unexpected error occurred. The error has been logged and we&apos;ll look into it.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {isDevelopment && this.state.error && (
-                <div className="rounded-lg bg-muted p-4 space-y-2">
-                  <p className="font-semibold text-sm">Error Details:</p>
-                  <pre className="text-xs overflow-auto">{this.state.error.toString()}</pre>
-                  {this.state.errorInfo && (
-                    <details className="text-xs">
-                      <summary className="cursor-pointer font-semibold">Component Stack</summary>
-                      <pre className="mt-2 overflow-auto">
-                        {this.state.errorInfo.componentStack}
-                      </pre>
-                    </details>
-                  )}
-                </div>
-              )}
-
-              <div className="flex gap-3">
-                <Button onClick={this.handleReset} variant="default">
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Try Again
-                </Button>
-                <Button onClick={this.handleGoHome} variant="outline">
-                  <Home className="h-4 w-4 mr-2" />
-                  Go Home
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      );
     }
+  }, []);
 
-    return this.props.children;
-  }
+  return (
+    <ReactErrorBoundary
+      FallbackComponent={fallback ? () => <>{fallback}</> : ErrorFallback}
+      onError={handleError}
+    >
+      {children}
+    </ReactErrorBoundary>
+  );
 }
+
+// Custom hook for manually triggering error boundaries
+// Note: For manual error throwing, use the standard React pattern:
+// throw new Error('message') inside components to trigger the boundary

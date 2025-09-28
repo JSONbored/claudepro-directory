@@ -10,86 +10,56 @@ import { execSync } from 'child_process';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { urls } from '@/lib/get-base-url';
+import { scriptLogger } from '@/lib/logger';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.join(__dirname, '../..');
 
 async function runCommand(command: string, description: string): Promise<boolean> {
-  console.log(`\n📝 ${description}...`);
+  scriptLogger.log(`\n📝 ${description}...`);
   try {
     execSync(command, { stdio: 'inherit', cwd: ROOT_DIR });
-    console.log(`✅ ${description} completed`);
+    scriptLogger.success(`${description} completed`);
     return true;
   } catch (error) {
-    console.error(
-      `❌ ${description} failed:`,
-      error instanceof Error ? error.message : String(error)
+    scriptLogger.failure(
+      `${description} failed: ${error instanceof Error ? error.message : String(error)}`
     );
     return false;
   }
 }
 
 async function generateAllSEO(): Promise<void> {
-  console.log('🚀 Starting complete SEO generation pipeline...\n');
-  console.log('This will automatically:');
-  console.log('1. Generate SEO content for MCP servers');
-  console.log('2. Generate SEO content for Agents');
-  console.log('3. Generate SEO content for Rules');
-  console.log('4. Generate SEO content for Hooks');
-  console.log('5. Generate SEO content for Commands');
-  console.log('6. Update sitemap with all pages');
-  console.log('7. Generate API endpoints');
-  console.log('8. Build content metadata\n');
+  scriptLogger.log('🚀 Starting optimized SEO pipeline...\n');
+  scriptLogger.log('This will automatically:');
+  scriptLogger.log('1. Build content metadata');
+  scriptLogger.log('2. Update sitemap with all pages');
+  scriptLogger.log('3. Validate guide content structure\n');
+  scriptLogger.log('📝 Note: Main category SEO (agents, mcp, etc.) now handled by ISR');
+  scriptLogger.log('📝 Guide content (/seo/*.mdx) already optimized with ISR + AI search\n');
 
   const startTime = Date.now();
 
-  // Step 1: Build content metadata (needed for SEO generators)
+  // Step 1: Build content metadata
   await runCommand('npm run build:content', 'Building content metadata');
 
-  // Step 2: API endpoints now handled by ISR - no longer needed
-
-  // Step 3: Generate MCP SEO content
-  await runCommand('tsx scripts/seo/generators/mcp-seo-generator.ts', 'Generating MCP SEO content');
-
-  // Step 4: Generate Agents SEO content
-  await runCommand(
-    'tsx scripts/seo/generators/agents-seo-generator.ts',
-    'Generating Agents SEO content'
-  );
-
-  // Step 5: Generate Rules SEO content
-  await runCommand(
-    'tsx scripts/seo/generators/rules-seo-generator.ts',
-    'Generating Rules SEO content'
-  );
-
-  // Step 6: Generate Hooks SEO content
-  await runCommand(
-    'tsx scripts/seo/generators/hooks-seo-generator.ts',
-    'Generating Hooks SEO content'
-  );
-
-  // Step 7: Generate Commands SEO content
-  await runCommand(
-    'tsx scripts/seo/generators/commands-seo-generator.ts',
-    'Generating Commands SEO content'
-  );
-
-  // Step 8: Generate sitemap with all content
+  // Step 2: Generate sitemap with all content
   await runCommand('npm run generate:sitemap', 'Generating sitemap');
 
-  // Step 9: Count generated files
+  // Step 3: Count guide content files
   const seoDir = path.join(ROOT_DIR, 'seo');
-  const categories = ['use-cases', 'tutorials', 'collections', 'categories', 'workflows'];
+  const categories = ['use-cases', 'tutorials', 'workflows', 'comparisons', 'troubleshooting'];
   let totalPages = 0;
 
+  scriptLogger.log('\n📊 Guide Content Summary:');
   for (const category of categories) {
     try {
       const dir = path.join(seoDir, category);
       const files = await fs.readdir(dir);
       const mdxFiles = files.filter((f) => f.endsWith('.mdx'));
       totalPages += mdxFiles.length;
-      console.log(`  📁 ${category}: ${mdxFiles.length} pages`);
+      scriptLogger.log(`  📁 ${category}: ${mdxFiles.length} pages`);
     } catch {
       // Directory doesn't exist
     }
@@ -97,25 +67,26 @@ async function generateAllSEO(): Promise<void> {
 
   const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
-  console.log(`\n${'='.repeat(50)}`);
-  console.log(`✨ SEO Generation Complete!`);
-  console.log(`📊 Total SEO pages: ${totalPages}`);
-  console.log(`⏱️  Time taken: ${duration}s`);
-  console.log('='.repeat(50));
+  scriptLogger.log(`\n${'='.repeat(50)}`);
+  scriptLogger.success('SEO Pipeline Complete!');
+  scriptLogger.log(`📊 Guide content pages: ${totalPages}`);
+  scriptLogger.log(`⏱️  Time taken: ${duration}s`);
+  scriptLogger.log('='.repeat(50));
 
   // Show next steps
-  console.log('\n📋 Next Steps:');
-  console.log('1. Run "npm run dev" to preview SEO pages locally');
-  console.log('2. Visit http://localhost:3000/guides to see all guides');
-  console.log('3. Commit and deploy to production');
-  console.log('\n💡 This script runs automatically when you:');
-  console.log('   - Add new content files (agents, MCP servers, etc.)');
-  console.log('   - Run "npm run build"');
+  scriptLogger.log('\n📋 Next Steps:');
+  scriptLogger.log('1. Run "npm run dev" to preview content locally');
+  scriptLogger.log(`2. Visit ${urls.guides()} for guide content`);
+  scriptLogger.log(`3. Visit ${urls.agents()} for main categories`);
+  scriptLogger.log('4. Commit and deploy to production');
+  scriptLogger.log('\n💡 ISR Optimization Active:');
+  scriptLogger.log('   - Guide content: Enhanced with AI search optimization');
+  scriptLogger.log('   - Main categories: JSON-based content with ISR performance');
 }
 
 // Run if executed directly
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  generateAllSEO().catch(console.error);
+  generateAllSEO().catch((error) => scriptLogger.error('SEO generation failed:', error));
 }
 
 export { generateAllSEO };

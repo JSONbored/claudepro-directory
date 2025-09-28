@@ -81,7 +81,7 @@ export const userAgentSchema = z
  * More flexible to handle charset parameters (e.g., text/plain;charset=UTF-8)
  * Includes Next.js server action content types
  */
-export const contentTypeSchema = z
+export const httpContentTypeSchema = z
   .string()
   .transform((value) => value?.split(';')[0]?.trim().toLowerCase() || '')
   .refine(
@@ -153,7 +153,7 @@ export const requestValidationSchema = z.object({
   path: requestPathSchema,
   userAgent: userAgentSchema.optional(),
   ip: ipAddressSchema.optional(),
-  contentType: contentTypeSchema.optional(),
+  contentType: httpContentTypeSchema.optional(),
   contentLength: z.number().int().min(0).max(MIDDLEWARE_LIMITS.MAX_FORM_DATA_SIZE).optional(),
 });
 
@@ -166,7 +166,7 @@ export const searchQueryValidationSchema = z.object({
     .max(MIDDLEWARE_LIMITS.MAX_SEARCH_QUERY_LENGTH)
     .regex(/^[a-zA-Z0-9\s\-_]+$/, 'Invalid search query format')
     .optional(),
-  category: z.enum(['all', 'agents', 'mcp', 'rules', 'commands', 'hooks']).optional(),
+  category: z.enum(['all', 'agents', 'mcp', 'rules', 'commands', 'hooks', 'guides']).optional(),
   page: z.number().int().min(1).max(1000).optional(),
   limit: z.number().int().min(1).max(100).optional(),
 });
@@ -221,7 +221,7 @@ export function validateRequest(request: {
     ip: request.headers['x-forwarded-for'] || request.headers['x-real-ip'],
     contentType: request.headers['content-type'],
     contentLength: request.headers['content-length']
-      ? parseInt(request.headers['content-length'], 10)
+      ? Number.parseInt(request.headers['content-length'], 10)
       : undefined,
   });
 }
@@ -288,8 +288,8 @@ export function validateSearchQuery(
   const params = {
     q: searchParams.get('q') || undefined,
     category: searchParams.get('category') || undefined,
-    page: searchParams.get('page') ? parseInt(searchParams.get('page')!, 10) : undefined,
-    limit: searchParams.get('limit') ? parseInt(searchParams.get('limit')!, 10) : undefined,
+    page: searchParams.get('page') ? Number.parseInt(searchParams.get('page')!, 10) : undefined,
+    limit: searchParams.get('limit') ? Number.parseInt(searchParams.get('limit')!, 10) : undefined,
   };
 
   return searchQueryValidationSchema.parse(params);
@@ -314,7 +314,7 @@ export type HttpMethod = z.infer<typeof httpMethodSchema>;
 export type RequestPath = z.infer<typeof requestPathSchema>;
 export type IpAddress = z.infer<typeof ipAddressSchema>;
 export type UserAgent = z.infer<typeof userAgentSchema>;
-export type MiddlewareContentType = z.infer<typeof contentTypeSchema>;
+export type MiddlewareContentType = z.infer<typeof httpContentTypeSchema>;
 export type MiddlewareRateLimitConfig = z.infer<typeof middlewareRateLimitConfigSchema>;
 export type RequestValidation = z.infer<typeof requestValidationSchema>;
 export type SearchQueryValidation = z.infer<typeof searchQueryValidationSchema>;

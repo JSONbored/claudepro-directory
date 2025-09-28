@@ -235,16 +235,6 @@ export function generateSlugFromFilename(filename: string): string {
 }
 
 /**
- * Helper to convert slug to title
- */
-export function slugToTitle(slug: string): string {
-  return slug
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
-
-/**
  * Type exports
  */
 export type BaseContent = z.infer<typeof baseContentSchema>;

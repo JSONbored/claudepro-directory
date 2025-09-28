@@ -1,7 +1,8 @@
 import { ImageResponse } from 'next/og';
+import { APP_CONFIG, SEO_CONFIG } from '@/lib/constants';
 
 export const runtime = 'edge';
-export const alt = 'Claude Pro Directory - Your Essential AI Toolkit';
+export const alt = `${APP_CONFIG.name} - Your Essential AI Toolkit`;
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -64,7 +65,7 @@ export default async function Image() {
             lineHeight: 1.3,
           }}
         >
-          Discover AI Agents, MCP Servers, Rules, Commands & Hooks for Claude
+          {SEO_CONFIG.defaultDescription}
         </p>
 
         {/* Stats */}
@@ -94,7 +95,7 @@ export default async function Image() {
           color: 'rgba(255, 255, 255, 0.5)',
         }}
       >
-        <div>claudepro.directory</div>
+        <div>{APP_CONFIG.domain}</div>
         <div>Open Source • Community Driven</div>
       </div>
     </div>,

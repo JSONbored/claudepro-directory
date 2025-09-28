@@ -2,20 +2,19 @@
 
 import { CheckCircle, Copy, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { z } from 'zod';
+import { copyToClipboard } from '@/lib/clipboard-utils';
+import type { MdxElementProps, MdxHeadingProps, MdxLinkProps } from '@/lib/schemas/shared.schema';
 
 // Client component for copy-to-clipboard headings
 export function CopyableHeading({
   level,
   children,
   id,
+  className,
   ...props
-}: {
-  level: 1 | 2 | 3;
-  children: React.ReactNode;
-  id?: string | undefined;
-  [key: string]: any;
-}) {
+}: MdxHeadingProps & { level: 1 | 2 | 3 }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -37,8 +36,8 @@ export function CopyableHeading({
   return (
     <Tag
       id={id}
-      className={`${sizeClasses[level]} scroll-mt-16 group flex items-center gap-2`}
       {...props}
+      className={`${sizeClasses[level]} scroll-mt-16 group flex items-center gap-2 ${className || ''}`}
     >
       {children}
       {id && (
@@ -59,29 +58,48 @@ export function CopyableHeading({
   );
 }
 
+// Schema for validating text content extraction
+const textContentSchema = z.string().min(0);
+
 // Client component for copyable code blocks
-export function CopyableCodeBlock({
-  children,
-  ...props
-}: {
-  children: React.ReactNode;
-  [key: string]: any;
-}) {
+export function CopyableCodeBlock({ children, className, ...props }: MdxElementProps) {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = () => {
-    const codeElement = children as any;
-    const code = codeElement?.props?.children || '';
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = async () => {
+    // Extract text content from React children with proper validation
+    const extractTextContent = (node: React.ReactNode): string => {
+      if (typeof node === 'string') return node;
+      if (typeof node === 'number') return String(node);
+      if (Array.isArray(node)) {
+        return node.map(extractTextContent).join('');
+      }
+      if (React.isValidElement(node)) {
+        // Use type assertion only after React.isValidElement check
+        const element = node as React.ReactElement<{ children?: React.ReactNode }>;
+        return extractTextContent(element.props.children);
+      }
+      return '';
+    };
+
+    const rawText = extractTextContent(children);
+    const validatedText = textContentSchema.parse(rawText);
+
+    const success = await copyToClipboard(validatedText, {
+      component: 'CopyableCodeBlock',
+      action: 'copy-code',
+    });
+
+    if (success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
     <div className="relative group my-6">
       <pre
-        className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 overflow-x-auto text-sm font-mono text-zinc-300"
         {...props}
+        className={`bg-zinc-900 border border-zinc-800 rounded-lg p-4 overflow-x-auto text-sm font-mono text-zinc-300 ${className || ''}`}
       >
         {children}
       </pre>
@@ -102,22 +120,14 @@ export function CopyableCodeBlock({
 }
 
 // External link component
-export function ExternalLinkComponent({
-  href,
-  children,
-  ...props
-}: {
-  href: string;
-  children: React.ReactNode;
-  [key: string]: any;
-}) {
+export function ExternalLinkComponent({ href, children, className, ...props }: MdxLinkProps) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-primary hover:underline transition-colors inline-flex items-center gap-1"
       {...props}
+      className={`text-primary hover:underline transition-colors inline-flex items-center gap-1 ${className || ''}`}
     >
       {children}
       <ExternalLink className="h-3 w-3" />
@@ -126,17 +136,13 @@ export function ExternalLinkComponent({
 }
 
 // Internal link component
-export function InternalLinkComponent({
-  href,
-  children,
-  ...props
-}: {
-  href: string;
-  children: React.ReactNode;
-  [key: string]: any;
-}) {
+export function InternalLinkComponent({ href, children, className, ...props }: MdxLinkProps) {
   return (
-    <Link href={href} className="text-primary hover:underline transition-colors" {...props}>
+    <Link
+      href={href}
+      {...props}
+      className={`text-primary hover:underline transition-colors ${className || ''}`}
+    >
       {children}
     </Link>
   );

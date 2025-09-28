@@ -10,6 +10,7 @@ import { type AnalyticsResponse, validateTrackingParams } from '@/lib/schemas/an
  * Validates parameters to prevent data corruption
  */
 export async function trackView(category: unknown, slug: unknown): Promise<AnalyticsResponse> {
+  // LEGITIMATE: Server actions accept unknown for validation
   try {
     // Validate input parameters
     const validated = validateTrackingParams(category, slug);
@@ -30,7 +31,7 @@ export async function trackView(category: unknown, slug: unknown): Promise<Analy
       viewCount: viewCount ?? 0,
     });
 
-    return { success: true, viewCount: viewCount ?? undefined };
+    return { success: true, viewCount: viewCount ?? 0 };
   } catch (error) {
     if (error instanceof z.ZodError) {
       logger.warn('Invalid tracking parameters', {
@@ -63,6 +64,7 @@ export async function trackView(category: unknown, slug: unknown): Promise<Analy
  * Validates parameters to prevent data corruption
  */
 export async function trackCopy(category: unknown, slug: unknown): Promise<AnalyticsResponse> {
+  // LEGITIMATE: Server actions accept unknown for validation
   try {
     // Validate input parameters
     const validated = validateTrackingParams(category, slug);

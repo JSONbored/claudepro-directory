@@ -9,58 +9,22 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
+import { createRequestId, type RequestId } from '@/lib/schemas/branded-types.schema';
 import { isDevelopment, isProduction } from '@/lib/schemas/env.schema';
 import {
   determineErrorType,
   type ErrorContext,
+  type ErrorHandlerConfig,
+  type ErrorResponse,
   type ErrorType,
+  errorInputSchema,
   validateErrorContext,
   validateErrorInput,
 } from '@/lib/schemas/error.schema';
 import { ValidationError } from '@/lib/validation';
 
-/**
- * Error handler configuration
- */
-export interface ErrorHandlerConfig {
-  // Context information
-  route?: string;
-  operation?: string;
-  method?: string;
-  userId?: string;
-  requestId?: string;
-
-  // Response configuration
-  includeStack?: boolean;
-  includeDetails?: boolean;
-  customMessage?: string;
-
-  // Logging configuration
-  logLevel?: 'debug' | 'info' | 'warn' | 'error' | 'fatal';
-  logContext?: Record<string, unknown>;
-
-  // Security configuration
-  sanitizeResponse?: boolean;
-  hideInternalErrors?: boolean;
-}
-
-/**
- * Standardized error response format
- */
-export interface ErrorResponse {
-  success: false;
-  error: string;
-  message: string;
-  code: string;
-  timestamp: string;
-  requestId?: string;
-  details?: Array<{
-    path: string;
-    message: string;
-    code: string;
-  }>;
-  stack?: string;
-}
+// Re-export types for backward compatibility
+export type { ErrorHandlerConfig, ErrorResponse };
 
 /**
  * HTTP status code mapping for different error types
@@ -116,12 +80,20 @@ export class ErrorHandler {
   /**
    * Handle any error and return standardized response
    */
-  public handleError(error: unknown, config: ErrorHandlerConfig = {}): ErrorResponse {
+  public handleError(
+    error: z.infer<typeof errorInputSchema>,
+    config: ErrorHandlerConfig = {}
+  ): ErrorResponse {
     const startTime = performance.now();
 
     try {
       // Validate and extract error information
-      const { error: validatedError, fallback } = validateErrorInput(error);
+      const validationResult = validateErrorInput(error);
+      const validatedError = validationResult.type === 'error' ? validationResult.error : undefined;
+      const fallback =
+        validationResult.type === 'string' || validationResult.type === 'invalid'
+          ? validationResult.fallback
+          : undefined;
       const errorType = determineErrorType(error);
 
       // Generate request ID if not provided
@@ -189,7 +161,7 @@ export class ErrorHandler {
    */
   private handleZodError(
     zodError: z.ZodError,
-    requestId: string,
+    requestId: RequestId,
     config: ErrorHandlerConfig
   ): ErrorResponse {
     const details = zodError.issues.map((issue) => ({
@@ -218,7 +190,7 @@ export class ErrorHandler {
    */
   private handleValidationError(
     validationError: ValidationError,
-    requestId: string,
+    requestId: RequestId,
     config: ErrorHandlerConfig
   ): ErrorResponse {
     return this.handleZodError(validationError.details, requestId, {
@@ -233,7 +205,7 @@ export class ErrorHandler {
   private handleGenericError(
     error: Error,
     errorType: ErrorType,
-    requestId: string,
+    requestId: RequestId,
     config: ErrorHandlerConfig
   ): ErrorResponse {
     const userMessage =
@@ -262,7 +234,7 @@ export class ErrorHandler {
   /**
    * Create fallback error response when error handler fails
    */
-  private createFallbackErrorResponse(requestId?: string): ErrorResponse {
+  private createFallbackErrorResponse(requestId?: RequestId): ErrorResponse {
     return {
       success: false,
       error: 'Internal Server Error',
@@ -277,7 +249,7 @@ export class ErrorHandler {
    * Log errors with appropriate level and context
    */
   private logError(
-    error: unknown,
+    error: z.infer<typeof errorInputSchema>,
     errorType: ErrorType,
     context: ErrorContext | null,
     level: 'debug' | 'info' | 'warn' | 'error' | 'fatal'
@@ -331,8 +303,8 @@ export class ErrorHandler {
   /**
    * Generate unique request ID
    */
-  private generateRequestId(): string {
-    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  private generateRequestId(): RequestId {
+    return createRequestId();
   }
 
   /**
@@ -347,7 +319,10 @@ export class ErrorHandler {
   /**
    * Create Next.js Response from ErrorResponse
    */
-  public createNextResponse(error: unknown, config: ErrorHandlerConfig = {}): NextResponse {
+  public createNextResponse(
+    error: z.infer<typeof errorInputSchema>,
+    config: ErrorHandlerConfig = {}
+  ): NextResponse {
     const errorResponse = this.handleError(error, config);
     const statusCode = this.getStatusCodeForError(error);
 
@@ -380,7 +355,11 @@ export class ErrorHandler {
       const data = await operation();
       return { success: true, data };
     } catch (error) {
-      const errorResponse = this.handleError(error, config);
+      const validatedError = errorInputSchema.safeParse(error);
+      const errorResponse = this.handleError(
+        validatedError.success ? validatedError.data : { message: 'Unknown error occurred' },
+        config
+      );
       return { success: false, error: errorResponse };
     }
   }
@@ -389,12 +368,13 @@ export class ErrorHandler {
    * Middleware-friendly error handler for Next.js
    */
   public handleMiddlewareError(
-    error: unknown,
+    error: z.infer<typeof errorInputSchema>,
     request: NextRequest,
     config: Partial<ErrorHandlerConfig> = {}
   ): NextResponse {
     const url = new URL(request.url);
-    const requestId = request.headers.get('x-request-id') || this.generateRequestId();
+    const headerRequestId = request.headers.get('x-request-id');
+    const requestId = headerRequestId ? (headerRequestId as RequestId) : this.generateRequestId();
 
     const fullConfig: ErrorHandlerConfig = {
       route: url.pathname,
@@ -416,7 +396,10 @@ export class ErrorHandler {
 export const errorHandler = ErrorHandler.getInstance();
 
 // Convenience functions for common use cases
-export const handleApiError = (error: unknown, config: ErrorHandlerConfig = {}): NextResponse => {
+export const handleApiError = (
+  error: z.infer<typeof errorInputSchema>,
+  config: ErrorHandlerConfig = {}
+): NextResponse => {
   return errorHandler.createNextResponse(error, {
     hideInternalErrors: true,
     sanitizeResponse: true,
@@ -458,7 +441,11 @@ export const withErrorHandling = (
         ? response
         : new NextResponse(response.body, response);
     } catch (error) {
-      return errorHandler.handleMiddlewareError(error, request);
+      const validatedError = errorInputSchema.safeParse(error);
+      return errorHandler.handleMiddlewareError(
+        validatedError.success ? validatedError.data : { message: 'Unknown middleware error' },
+        request
+      );
     }
   };
 };

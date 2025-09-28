@@ -29,28 +29,24 @@ citationReady: true
 
 ## Prerequisites & Requirements
 
-<Checklist type="testing"
+<Checklist type="prerequisites"
   title="Before Starting This Tutorial"
-  requirements={[
-    { 
-      item: "Claude Desktop installed (macOS, Windows, or Linux)",
-      description: "Version 1.0+ with MCP support enabled",
-      link: "https://claude.ai/download"
+  items={[
+    {
+      task: "Claude Desktop installed (macOS, Windows, or Linux)",
+      description: "Version 1.0+ with MCP support enabled"
     },
     {
-      item: "Node.js v18+ or Python 3.11+ environment",
-      description: "TypeScript SDK v1.18.1 or Python MCP v1.2.0+",
-      link: "https://nodejs.org"
+      task: "Node.js v18+ or Python 3.11+ environment",
+      description: "TypeScript SDK v1.18.1 or Python MCP v1.2.0+"
     },
     {
-      item: "Familiarity with JSON-RPC and async programming", 
-      description: "Understanding of protocol-based communication",
-      link: "#"
+      task: "Familiarity with JSON-RPC and async programming",
+      description: "Understanding of protocol-based communication"
     },
     {
-      item: "Access to Claude Desktop config file",
-      description: "Located at ~/Library/Application Support/Claude/",
-      link: "#"
+      task: "Access to Claude Desktop config file",
+      description: "Located at ~/Library/Application Support/Claude/"
     }
   ]}
   estimatedTime="60 minutes"
@@ -279,30 +275,25 @@ Cloudflare maintains 10+ specialized servers demonstrating scalability. Each ser
 
 <Checklist type="testing"
   items={[
-    { 
-      test: "Unit test individual tool handlers",
-      command: "npm test -- --coverage",
-      expected: "100% coverage for tool logic, input validation verified"
+    {
+      task: "Unit test individual tool handlers",
+      description: "npm test -- --coverage - 100% coverage for tool logic, input validation verified"
     },
     {
-      test: "Integration test transport layer",
-      command: "npm run test:integration",
-      expected: "All JSON-RPC methods respond correctly within 100ms"
+      task: "Integration test transport layer",
+      description: "npm run test:integration - All JSON-RPC methods respond correctly within 100ms"
     },
     {
-      test: "Load test with concurrent connections",
-      command: "artillery run load-test.yml",
-      expected: "Handles 100 concurrent sessions maintaining <200ms response"
+      task: "Load test with concurrent connections",
+      description: "artillery run load-test.yml - Handles 100 concurrent sessions maintaining <200ms response"
     },
     {
-      test: "Security scan for vulnerabilities", 
-      command: "npm audit && snyk test",
-      expected: "No high/critical vulnerabilities in dependencies"
+      task: "Security scan for vulnerabilities",
+      description: "npm audit && snyk test - No high/critical vulnerabilities in dependencies"
     },
     {
-      test: "Validate Claude Desktop integration",
-      command: "Check Claude Developer Tools",
-      expected: "Server connected, all tools visible in Claude interface"
+      task: "Validate Claude Desktop integration",
+      description: "Check Claude Developer Tools - Server connected, all tools visible in Claude interface"
     }
   ]}
 />
@@ -312,24 +303,24 @@ Cloudflare maintains 10+ specialized servers demonstrating scalability. Each ser
 <Accordion
   items={[
     {
-      question: "Server fails to connect in Claude Desktop",
-      answer: "Verify absolute paths in configuration file match exactly. Check stderr output using Developer Tools console. Ensure Node.js/Python executable paths are correct. Common issue: relative paths cause connection failures immediately."
+      title: "Server fails to connect in Claude Desktop",
+      content: "Verify absolute paths in configuration file match exactly. Check stderr output using Developer Tools console. Ensure Node.js/Python executable paths are correct. Common issue: relative paths cause connection failures immediately."
     },
     {
-      question: "Tools don't appear in Claude interface",
-      answer: "Confirm server capabilities include 'tools: true' setting. Check tool registration happens before server.connect() call. Validate input schemas using Zod or Pydantic correctly. Inspector shows which tools register successfully."
+      title: "Tools don't appear in Claude interface",
+      content: "Confirm server capabilities include 'tools: true' setting. Check tool registration happens before server.connect() call. Validate input schemas using Zod or Pydantic correctly. Inspector shows which tools register successfully."
     },
     {
-      question: "Session state not persisting between calls",
-      answer: "Implement external storage replacing in-memory objects. Redis provides simple session management starting quickly. Set appropriate TTLs preventing memory exhaustion. Session IDs must be unique per conversation."
+      title: "Session state not persisting between calls",
+      content: "Implement external storage replacing in-memory objects. Redis provides simple session management starting quickly. Set appropriate TTLs preventing memory exhaustion. Session IDs must be unique per conversation."
     },
     {
-      question: "Performance degrades with multiple users",
-      answer: "Implement connection pooling for database queries. Add caching layers reducing redundant computations. Use streaming responses for long-running operations. Monitor memory usage preventing leaks accumulating."
+      title: "Performance degrades with multiple users",
+      content: "Implement connection pooling for database queries. Add caching layers reducing redundant computations. Use streaming responses for long-running operations. Monitor memory usage preventing leaks accumulating."
     },
     {
-      question: "Authentication tokens expire during sessions",
-      answer: "Implement refresh token rotation automatically. Store tokens securely using platform keychains. Handle 401 responses triggering re-authentication flows. PKCE prevents token interception consistently."
+      title: "Authentication tokens expire during sessions",
+      content: "Implement refresh token rotation automatically. Store tokens securely using platform keychains. Handle 401 responses triggering re-authentication flows. PKCE prevents token interception consistently."
     }
   ]}
 />

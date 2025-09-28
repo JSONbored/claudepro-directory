@@ -14,35 +14,57 @@ import {
   Zap,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
+import { z } from 'zod';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+// Removed logger import - client components should not use server-side logger
 // Dynamic imports for server-side functions
 import { statsRedis } from '@/lib/redis';
+import { viewCountService } from '@/lib/view-count.service';
 
-interface RelatedGuide {
-  title: string;
-  slug: string;
-  category: string;
-}
+// Zod schemas for type safety and validation
+const contentDataSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  keywords: z.array(z.string()).optional(),
+  dateUpdated: z.string().optional(),
+  category: z.string().optional(),
+  content: z.string().optional(),
+});
 
+const relatedGuideSchema = z.object({
+  title: z.string(),
+  slug: z.string(),
+  category: z.string(),
+});
+
+const trendingGuideSchema = z.object({
+  title: z.string(),
+  slug: z.string(),
+  views: z.string(),
+});
+
+// Define UnifiedSidebarProps locally
 interface UnifiedSidebarProps {
-  // For content pages
-  mode?: 'category' | 'content';
-  contentData?: {
-    title?: string;
-    description?: string;
-    keywords?: string[];
-    dateUpdated?: string;
-    category?: string;
-    content?: string;
-  };
-  relatedGuides?: RelatedGuide[];
-  currentCategory?: string; // Allow explicit category for category pages
+  mode?: 'category' | 'unified' | 'content';
+  contentData?: z.infer<typeof contentDataSchema>;
+  relatedGuides?: Array<z.infer<typeof relatedGuideSchema>>;
+  currentCategory?: string;
 }
+
+const recentGuideSchema = z.object({
+  title: z.string(),
+  slug: z.string(),
+  date: z.string(),
+});
+
+// Infer types from Zod schemas
+type TrendingGuide = z.infer<typeof trendingGuideSchema>;
+type RecentGuide = z.infer<typeof recentGuideSchema>;
 
 const categoryInfo = {
   'use-cases': {
@@ -82,32 +104,29 @@ const categoryInfo = {
   },
 };
 
-interface TrendingGuide {
-  title: string;
-  slug: string;
-  views: string;
-}
-
-interface RecentGuide {
-  title: string;
-  slug: string;
-  date: string;
-}
-
-export function UnifiedSidebar({
+function UnifiedSidebarComponent({
   mode = 'category',
   contentData,
   relatedGuides = [],
   currentCategory: explicitCategory,
 }: UnifiedSidebarProps) {
+  // Validate props with Zod schemas
+  const validatedContentData = contentData ? contentDataSchema.parse(contentData) : undefined;
+  const validatedRelatedGuides = z.array(relatedGuideSchema).parse(relatedGuides);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [trendingGuides, setTrendingGuides] = useState<TrendingGuide[]>([]);
   const [recentGuides, setRecentGuides] = useState<RecentGuide[]>([]);
   const [isLoadingTrending, setIsLoadingTrending] = useState(false);
 
-  // Fetch trending guides data
+  // Static, deterministic ID - production-safe for SSR
+  const searchInputId = 'unified-sidebar-guides-search';
+
+  // Fetch trending guides data - only run once on mount
   useEffect(() => {
+    let isMounted = true;
+
     async function fetchTrendingData() {
       if (!statsRedis.isEnabled()) return;
 
@@ -116,50 +135,69 @@ export function UnifiedSidebar({
         // Get trending guide slugs from Redis
         const trendingSlugs = await statsRedis.getTrending('guides', 5);
 
-        // For now, create mock trending data based on Redis trending slugs
-        // TODO: Implement proper server-side API for guide metadata
-        const trendingData: TrendingGuide[] = trendingSlugs.map((slug, index) => ({
-          title: `Guide: ${slug.replace(/[-_]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}`,
-          slug: `/guides/${slug}`,
-          views: `${Math.max(1, 50 - index * 5)} views`,
-        }));
+        if (!isMounted) return;
+
+        // Fetch real view counts for trending guides
+        const viewCountResults = await viewCountService.getBatchViewCounts(
+          trendingSlugs.map((slug) => ({ category: 'guides', slug }))
+        );
+
+        const trendingData: TrendingGuide[] = trendingSlugs.map((slug) => {
+          const viewKey = `guides:${slug}`;
+          const viewData = viewCountResults[viewKey];
+          const viewCount = viewData?.views || 0;
+
+          return {
+            title: `Guide: ${slug.replace(/[-_]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}`,
+            slug: `/guides/${slug}`,
+            views: `${viewCount.toLocaleString()} views`,
+          };
+        });
 
         setTrendingGuides(trendingData);
-
-        // Mock recent guides data
-        const recentData: RecentGuide[] = [
-          {
-            title: 'Getting Started with Claude',
-            slug: '/guides/use-cases/getting-started',
-            date: new Date().toLocaleDateString(),
-          },
-          {
-            title: 'Advanced Automation',
-            slug: '/guides/workflows/automation',
-            date: new Date(Date.now() - 86400000).toLocaleDateString(),
-          },
-          {
-            title: 'Development Tips',
-            slug: '/guides/tutorials/development',
-            date: new Date(Date.now() - 172800000).toLocaleDateString(),
-          },
-        ];
-
-        setRecentGuides(recentData);
-      } catch (error) {
-        console.error('Failed to fetch trending guides:', error);
+      } catch {
+        // client-side error silently handled - no logging to prevent browser console exposure
       } finally {
-        setIsLoadingTrending(false);
+        if (isMounted) {
+          setIsLoadingTrending(false);
+        }
       }
     }
 
     fetchTrendingData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Initialize recent guides once on mount
+  useEffect(() => {
+    const recentData: RecentGuide[] = [
+      {
+        title: 'Getting Started with Claude',
+        slug: '/guides/use-cases/getting-started',
+        date: new Date().toLocaleDateString(),
+      },
+      {
+        title: 'Advanced Automation',
+        slug: '/guides/workflows/automation',
+        date: new Date(Date.now() - 86400000).toLocaleDateString(),
+      },
+      {
+        title: 'Development Tips',
+        slug: '/guides/tutorials/development',
+        date: new Date(Date.now() - 172800000).toLocaleDateString(),
+      },
+    ];
+
+    setRecentGuides(recentData);
   }, []);
 
   // Determine active category from explicit prop, URL, or contentData
   const currentCategory =
     explicitCategory ||
-    contentData?.category ||
+    validatedContentData?.category ||
     (typeof window !== 'undefined' ? window.location.pathname.split('/')[2] : '');
 
   return (
@@ -179,6 +217,8 @@ export function UnifiedSidebar({
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                 <Input
+                  id={searchInputId}
+                  name="guidesSearch"
                   placeholder="Search guides..."
                   className="h-8 pl-8 pr-8 text-xs bg-muted/30 border-muted/50 focus:bg-background transition-colors"
                   value={searchQuery}
@@ -284,12 +324,12 @@ export function UnifiedSidebar({
           )}
 
           {/* Content-specific sections */}
-          {mode === 'content' && contentData && (
+          {mode === 'content' && validatedContentData && (
             <>
               {/* Table of Contents */}
-              {contentData.content &&
+              {validatedContentData.content &&
                 (() => {
-                  const headings = contentData.content.match(/^##\s+(.+)$/gm);
+                  const headings = validatedContentData.content.match(/^##\s+(.+)$/gm);
                   if (!headings || headings.length === 0) return null;
 
                   return (
@@ -326,7 +366,7 @@ export function UnifiedSidebar({
                 })()}
 
               {/* Related Guides - Only on content pages */}
-              {relatedGuides && relatedGuides.length > 0 && (
+              {validatedRelatedGuides && validatedRelatedGuides.length > 0 && (
                 <Card className="border-muted/40 shadow-sm">
                   <CardHeader className="pb-2 pt-3 px-3">
                     <CardTitle className="text-xs font-medium flex items-center gap-1.5">
@@ -336,19 +376,19 @@ export function UnifiedSidebar({
                   </CardHeader>
                   <CardContent className="pb-3 px-3">
                     <div className="space-y-1">
-                      {relatedGuides.slice(0, 3).map((guide) => (
+                      {validatedRelatedGuides.slice(0, 3).map((guide) => (
                         <Link key={guide.slug} href={guide.slug} className="block group">
                           <div className="text-[11px] text-muted-foreground group-hover:text-primary transition-colors py-0.5 truncate">
                             {guide.title}
                           </div>
                         </Link>
                       ))}
-                      {relatedGuides.length > 3 && (
+                      {validatedRelatedGuides.length > 3 && (
                         <Link
                           href="/guides"
                           className="text-[10px] text-primary hover:underline inline-flex items-center gap-0.5 mt-1"
                         >
-                          View all ({relatedGuides.length})
+                          View all ({validatedRelatedGuides.length})
                         </Link>
                       )}
                     </div>
@@ -433,3 +473,14 @@ export function UnifiedSidebar({
     </TooltipProvider>
   );
 }
+
+// Memoize the component to prevent unnecessary re-renders when props haven't changed
+export const UnifiedSidebar = memo(UnifiedSidebarComponent, (prevProps, nextProps) => {
+  // Custom comparison function to prevent re-renders when object references change but values are the same
+  return (
+    prevProps.mode === nextProps.mode &&
+    prevProps.currentCategory === nextProps.currentCategory &&
+    JSON.stringify(prevProps.contentData) === JSON.stringify(nextProps.contentData) &&
+    JSON.stringify(prevProps.relatedGuides) === JSON.stringify(nextProps.relatedGuides)
+  );
+});

@@ -56,27 +56,27 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { APP_CONFIG } from '@/lib/constants';
 
 interface NavLinkProps {
   href: string;
   children: React.ReactNode;
   className?: string;
-  isActive: (path: string) => boolean;
-  onClick: () => void;
+  isActive: (href: string) => boolean;
+  onClick?: () => void;
 }
 
 const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkProps) => {
   const active = isActive(href);
 
-  return (
-    <Link
-      href={href}
-      className={`${active ? 'ring-2 ring-accent/30 bg-accent/10 border-accent/50 text-primary' : ''} ${className}`}
-      onClick={onClick}
-    >
-      {children}
-    </Link>
-  );
+  // Only spread onClick if it's defined to avoid exactOptionalPropertyTypes issues
+  const linkProps = {
+    href,
+    className: `${active ? 'ring-2 ring-accent/30 bg-accent/10 border-accent/50 text-primary' : ''} ${className}`,
+    ...(onClick && { onClick }),
+  };
+
+  return <Link {...linkProps}>{children}</Link>;
 };
 
 export const Navigation = () => {
@@ -128,7 +128,7 @@ export const Navigation = () => {
                 isScrolled ? 'text-base' : 'text-lg'
               }`}
             >
-              claudepro.directory
+              {APP_CONFIG.domain}
             </span>
           </Link>
 
@@ -212,9 +212,7 @@ export const Navigation = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() =>
-                window.open('https://github.com/JSONbored/claudepro-directory', '_blank')
-              }
+              onClick={() => window.open('{SOCIAL_LINKS.github}', '_blank')}
               className="hidden sm:flex hover:bg-accent/10 hover:text-accent"
               aria-label="View source code on GitHub"
             >
@@ -254,7 +252,7 @@ export const Navigation = () => {
                   <div className="flex items-center gap-3 pt-6 pb-8 px-1">
                     <LogoIcon className="h-8 w-8 flex-shrink-0" />
                     <span className="font-semibold text-lg text-foreground">
-                      claudepro.directory
+                      {APP_CONFIG.domain}
                     </span>
                   </div>
 
@@ -386,9 +384,7 @@ export const Navigation = () => {
                         variant="outline"
                         size="lg"
                         className="w-16 h-16 rounded-2xl border-border/40 bg-card hover:bg-accent/10 hover:border-accent/30 transition-all duration-200 active:scale-[0.95]"
-                        onClick={() =>
-                          window.open('https://github.com/JSONbored/claudepro-directory', '_blank')
-                        }
+                        onClick={() => window.open('{SOCIAL_LINKS.github}', '_blank')}
                         aria-label="View source code on GitHub"
                       >
                         <Github className="h-7 w-7" />

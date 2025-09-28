@@ -277,6 +277,14 @@
         "rules": {
           "suspicious": {
             "noConsole": "off"
+          },
+          "correctness": {
+            "noUnusedVariables": {
+              "level": "warn",
+              "options": {
+                "ignoreRestSiblings": true
+              }
+            }
           }
         }
       }

@@ -1,16 +1,13 @@
 /**
- * SmartRelatedContent Server Component
- * Automatically discovers and displays related content with Redis caching
+ * SmartRelatedContent - Simplified Server Component
+ * Displays related content with clean, streamlined architecture
  */
 
 import { headers } from 'next/headers';
 import { Suspense } from 'react';
+import { logger } from '@/lib/logger';
 import { relatedContentService } from '@/lib/related-content/service';
-import type {
-  ContentCategory,
-  RelatedContentItem,
-  SmartRelatedContentProps,
-} from '@/lib/related-content/types';
+import type { SmartRelatedContentProps } from '@/lib/schemas/related-content.schema';
 import { RelatedCarouselClient } from './carousel';
 
 // Loading skeleton
@@ -29,122 +26,84 @@ function RelatedContentSkeleton() {
 
 // Server component that fetches related content
 async function RelatedContentServer({
-  featured,
-  exclude,
-  limit = 3, // Changed from 6 to 3 - one row only
+  featured = [],
+  exclude = [],
+  limit = 3,
   trackingEnabled = true,
-  currentTags,
-  currentKeywords,
+  currentTags = [],
+  currentKeywords = [],
+  pathname: providedPathname,
+  title = 'Related Content',
+  showTitle = true,
 }: SmartRelatedContentProps) {
-  // Get current page info from headers
+  // Get pathname from props or headers
   const headersList = await headers();
-  const pathname = headersList.get('x-pathname') || '';
+  const pathname = providedPathname || headersList.get('x-pathname') || '';
 
-  // Get metadata from content index for the current page
-  const pageMetadata = await getPageMetadataFromIndex(pathname);
+  // Extract category from pathname
+  const getCategory = (path: string): string => {
+    if (path.includes('/agents')) return 'agents';
+    if (path.includes('/mcp')) return 'mcp';
+    if (path.includes('/rules')) return 'rules';
+    if (path.includes('/commands')) return 'commands';
+    if (path.includes('/hooks')) return 'hooks';
+    if (path.includes('/tutorials')) return 'tutorials';
+    if (path.includes('/comparisons')) return 'comparisons';
+    if (path.includes('/workflows')) return 'workflows';
+    if (path.includes('/use-cases')) return 'use-cases';
+    if (path.includes('/troubleshooting')) return 'troubleshooting';
+    return 'tutorials';
+  };
 
-  // Use provided tags/keywords, then index metadata, then parsed as fallback
-  const effectiveTags = currentTags || pageMetadata.tags || [];
-  const effectiveKeywords = currentKeywords || pageMetadata.keywords || [];
+  try {
+    // Get related content from simplified service
+    const response = await relatedContentService.getRelatedContent({
+      currentPath: pathname,
+      currentCategory: getCategory(pathname),
+      currentTags,
+      currentKeywords,
+      featured,
+      exclude,
+      limit,
+    });
 
-  // Get related content from service
-  const response = await relatedContentService.getRelatedContent({
-    currentPath: pathname,
-    ...(pageMetadata.category && { currentCategory: pageMetadata.category }),
-    currentTags: effectiveTags,
-    currentKeywords: effectiveKeywords,
-    ...(featured && { featured }),
-    ...(exclude && { exclude }),
-    limit,
-  });
+    // Return early if no items
+    if (response.items.length === 0) {
+      return null;
+    }
 
-  if (response.items.length === 0) {
+    // Transform service response to match RelatedContentItem interface
+    const transformedItems = response.items.map((item) => ({
+      ...item,
+      // Map service response fields to RelatedContentItem fields
+      author: 'Community', // Default author since not provided by service
+      dateAdded: new Date().toISOString(), // Default date since not provided by service
+      tags: [] as const, // Default empty tags since not provided by service
+      source: 'community' as const, // Default source since not provided by service
+    }));
+
+    return (
+      <RelatedCarouselClient
+        items={transformedItems}
+        performance={response.performance}
+        trackingEnabled={trackingEnabled}
+        title={title}
+        showTitle={showTitle}
+        autoPlay={false}
+        autoPlayInterval={5000}
+        showDots={true}
+        showArrows={true}
+      />
+    );
+  } catch (error) {
+    // Log error properly through logger utility
+    logger.error(
+      'SmartRelatedContent rendering failed',
+      error instanceof Error ? error : new Error(String(error)),
+      { component: 'SmartRelatedContent', pathname }
+    );
     return null;
   }
-
-  return (
-    <RelatedCarouselClient
-      items={response.items as RelatedContentItem[]}
-      performance={response.performance}
-      trackingEnabled={trackingEnabled}
-      title="Related Content"
-      showTitle={true}
-    />
-  );
-}
-
-// Get metadata from content index for SEO pages
-async function getPageMetadataFromIndex(pathname: string): Promise<{
-  category?: ContentCategory;
-  tags?: string[];
-  keywords?: string[];
-}> {
-  try {
-    // For SEO guide pages, extract from the content index
-    if (pathname.includes('/guides/')) {
-      // Load content index
-      const contentIndex = await import('@/generated/content-index.json');
-
-      // Extract slug from pathname (e.g., /guides/tutorials/multi-directory-setup -> multi-directory-setup)
-      const pathParts = pathname.split('/');
-      const category = pathParts[2]; // tutorials, workflows, etc.
-      const slug = pathParts[pathParts.length - 1];
-
-      // Find the item in content index
-      const item = contentIndex.items.find(
-        (item: any) => item.slug === slug && item.category === category
-      );
-
-      if (item) {
-        return {
-          category: item.category as ContentCategory,
-          tags: item.tags || [],
-          keywords: item.keywords || [],
-        };
-      }
-    }
-  } catch (_error) {
-    // Silently fail and return parsed fallback
-  }
-
-  // Fall back to parsing the URL
-  return parseCurrentPage(pathname);
-}
-
-// Parse current page to extract metadata
-function parseCurrentPage(pathname: string): {
-  category?: ContentCategory;
-  tags?: string[];
-  keywords?: string[];
-} {
-  // Parse category from URL
-  let category: ContentCategory | undefined;
-
-  if (pathname.includes('/agents')) category = 'agents';
-  else if (pathname.includes('/mcp')) category = 'mcp';
-  else if (pathname.includes('/rules')) category = 'rules';
-  else if (pathname.includes('/commands')) category = 'commands';
-  else if (pathname.includes('/hooks')) category = 'hooks';
-  else if (pathname.includes('/tutorials')) category = 'tutorials';
-  else if (pathname.includes('/comparisons')) category = 'comparisons';
-  else if (pathname.includes('/workflows')) category = 'workflows';
-  else if (pathname.includes('/use-cases')) category = 'use-cases';
-  else if (pathname.includes('/troubleshooting')) category = 'troubleshooting';
-
-  // Tags and keywords are provided via props from MDX frontmatter
-  // See SmartRelatedContentWithMetadata for the integration
-
-  const result: {
-    category?: ContentCategory;
-    tags?: string[];
-    keywords?: string[];
-  } = {};
-
-  if (category) {
-    result.category = category;
-  }
-
-  return result;
 }
 
 // Main export with Suspense boundary

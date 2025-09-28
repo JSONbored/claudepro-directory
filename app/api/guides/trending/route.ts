@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { handleApiError } from '@/lib/error-handler';
 import { logger } from '@/lib/logger';
 import { statsRedis } from '@/lib/redis';
+import { errorInputSchema } from '@/lib/schemas/error.schema';
+import { viewCountService } from '@/lib/view-count.service';
 
 export const runtime = 'nodejs';
 export const revalidate = 3600; // 1 hour cache
@@ -34,17 +36,26 @@ export async function GET(request: NextRequest) {
     const trendingSlugs = await statsRedis.getTrending(category, params.limit);
 
     // For now, return the trending slugs
-    // In production, you would fetch full metadata for these guides
-    const trendingGuides = trendingSlugs.map((slug, index) => ({
-      slug,
-      title: slug
-        .split('-')
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' '),
-      url: `/guides/${category}/${slug}`,
-      views: Math.floor(Math.random() * 1000) + 100, // Placeholder
-      rank: index + 1,
-    }));
+    // Get view counts for all trending guides using centralized service
+    const viewCountRequests = trendingSlugs.map((slug) => ({ category, slug }));
+    const viewCounts = await viewCountService.getBatchViewCounts(viewCountRequests);
+
+    // In production, fetch full metadata for these guides
+    const trendingGuides = trendingSlugs.map((slug, index) => {
+      const viewCountKey = `${category}:${slug}`;
+      const viewCountResult = viewCounts[viewCountKey];
+
+      return {
+        slug,
+        title: slug
+          .split('-')
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' '),
+        url: `/guides/${category}/${slug}`,
+        views: viewCountResult?.views || 0, // Real/deterministic view count from centralized service
+        rank: index + 1,
+      };
+    });
 
     const response = {
       guides: trendingGuides,
@@ -64,6 +75,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    return handleApiError(error);
+    const validatedError = errorInputSchema.safeParse(error);
+    return handleApiError(
+      validatedError.success ? validatedError.data : { message: 'Trending guides error occurred' }
+    );
   }
 }

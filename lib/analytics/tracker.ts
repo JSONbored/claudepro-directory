@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod';
+import { logger } from '@/lib/logger';
 import {
   errorTrackingSchema,
   interactionEventSchema,
@@ -13,6 +14,7 @@ import {
   userIdentificationSchema,
 } from '@/lib/schemas/analytics.schema';
 import { env, isDevelopment, isProduction } from '@/lib/schemas/env.schema';
+import type { errorInputSchema } from '@/lib/schemas/error.schema';
 import { EVENT_CONFIG, type EventName, type EventPayload } from './events.config';
 import { isUmamiAvailable } from './umami';
 
@@ -31,7 +33,7 @@ export function trackEvent<T extends EventName>(eventName: T, payload?: EventPay
   // Check if event is enabled
   if (!config?.enabled) {
     if (ENABLE_DEBUG) {
-      console.log('[Analytics] Event disabled:', eventName);
+      logger.debug('[Analytics] Event disabled:', { eventName });
     }
     return;
   }
@@ -45,7 +47,10 @@ export function trackEvent<T extends EventName>(eventName: T, payload?: EventPay
   if (config.sampleRate && config.sampleRate < 1) {
     if (Math.random() > config.sampleRate) {
       if (ENABLE_DEBUG) {
-        console.log('[Analytics] Event sampled out:', eventName, config.sampleRate);
+        logger.debug('[Analytics] Event sampled out:', {
+          eventName,
+          sampleRate: config.sampleRate,
+        });
       }
       return;
     }
@@ -58,15 +63,15 @@ export function trackEvent<T extends EventName>(eventName: T, payload?: EventPay
       window.umami?.track(eventName, sanitizePayload(payload) || {});
     } else if (IS_DEVELOPMENT && ENABLE_DEBUG) {
       // Development logging
-      console.log('[Analytics Dev]', {
+      logger.debug('[Analytics Dev]', {
         event: eventName,
-        payload,
+        payload: JSON.stringify(payload),
         category: config.category,
         description: config.description,
       });
     }
   } catch (error) {
-    console.error('[Analytics Error]', eventName, error);
+    logger.error('[Analytics Error]', error as Error, { eventName });
   }
 }
 
@@ -74,7 +79,10 @@ export function trackEvent<T extends EventName>(eventName: T, payload?: EventPay
  * Simplified tracking function for components
  * No need to import event names or types
  */
-export function track(eventName: string, payload?: Record<string, any>): void {
+export function track(
+  eventName: string,
+  payload?: Record<string, string | number | boolean>
+): void {
   try {
     // Validate event name and payload
     const validated = trackingEventSchema.parse({
@@ -88,11 +96,14 @@ export function track(eventName: string, payload?: Record<string, any>): void {
     if (isUmamiAvailable()) {
       window.umami?.track(validated.eventName, sanitizePayload(validated.payload) || {});
     } else if (IS_DEVELOPMENT && ENABLE_DEBUG) {
-      console.log('[Analytics]', validated.eventName, validated.payload);
+      logger.debug('[Analytics]', {
+        eventName: validated.eventName,
+        payload: JSON.stringify(validated.payload),
+      });
     }
   } catch (error) {
     if (ENABLE_DEBUG) {
-      console.error('[Analytics Validation Error]', eventName, error);
+      logger.error('[Analytics Validation Error]', error as Error, { eventName });
     }
   }
 }
@@ -100,16 +111,16 @@ export function track(eventName: string, payload?: Record<string, any>): void {
 /**
  * Track page views (automatically called by Next.js)
  */
-export function trackPageView(_url: string, _referrer?: string): void {
+export function trackPageView(url: string, _referrer?: string): void {
   if (isUmamiAvailable()) {
-    window.umami?.track();
+    window.umami?.track('pageview', { url });
   }
 }
 
 /**
  * Track user identification (for session tracking)
  */
-export function identify(userId: string, traits?: Record<string, any>): void {
+export function identify(userId: string, traits?: Record<string, string | number | boolean>): void {
   try {
     // Validate user identification
     const validated = userIdentificationSchema.parse({
@@ -118,11 +129,14 @@ export function identify(userId: string, traits?: Record<string, any>): void {
     });
 
     if (isUmamiAvailable()) {
-      window.umami?.identify(validated.userId, sanitizePayload(validated.traits) || {});
+      window.umami?.identify({
+        userId: validated.userId,
+        ...(sanitizePayload(validated.traits) || {}),
+      });
     }
   } catch (error) {
     if (ENABLE_DEBUG) {
-      console.error('[Analytics Identify Error]', userId, error);
+      logger.error('[Analytics Identify Error]', error as Error, { userId });
     }
   }
 }
@@ -130,8 +144,10 @@ export function identify(userId: string, traits?: Record<string, any>): void {
 /**
  * Sanitize payload to remove PII and ensure data safety
  */
-function sanitizePayload(payload?: any): Record<string, any> | undefined {
-  if (!payload) return undefined;
+function sanitizePayload(
+  payload?: Record<string, unknown>
+): Record<string, string | number | boolean> | null {
+  if (!payload) return {};
 
   // Define PII detection schema
   const PII_KEYWORDS = ['email', 'name', 'phone', 'address', 'ssn', 'credit', 'password'];
@@ -147,16 +163,16 @@ function sanitizePayload(payload?: any): Record<string, any> | undefined {
         .transform((val) => val.replace(emailPattern, '[email]')),
       z.number(),
       z.boolean(),
-      z.array(z.any()).transform((val) => val.slice(0, 10).join(',').substring(0, 500)),
-      z.null(),
-      z.undefined(),
+      z
+        .array(z.union([z.string(), z.number(), z.boolean()]))
+        .transform((val) => val.slice(0, 10).join(',').substring(0, 500)),
     ])
   );
 
   try {
     // First validate the entire payload structure
     const validatedPayload = payloadSchema.parse(payload);
-    const sanitized: Record<string, any> = {};
+    const sanitized: Record<string, string | number | boolean> = {};
 
     for (const [key, value] of Object.entries(validatedPayload)) {
       // Check for PII keywords
@@ -165,14 +181,14 @@ function sanitizePayload(payload?: any): Record<string, any> | undefined {
         continue;
       }
 
-      // Value is already sanitized by the schema
+      // Value is already validated by the schema
       sanitized[key] = value;
     }
 
     return sanitized;
   } catch {
-    // If sanitization fails, return undefined to prevent tracking
-    return undefined;
+    // If sanitization fails, return empty object to prevent tracking
+    return {};
   }
 }
 
@@ -182,7 +198,7 @@ function sanitizePayload(payload?: any): Record<string, any> | undefined {
 export async function measurePerformance<T>(
   operation: () => Promise<T>,
   eventName: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, string | number | boolean>
 ): Promise<T> {
   const start = performance.now();
 
@@ -222,13 +238,16 @@ export async function measurePerformance<T>(
       timestamp: Date.now(),
     });
 
-    track('performance_metric', {
+    const trackData: Record<string, string | number | boolean> = {
       metric: validated.metric,
       duration_ms: validated.duration_ms,
       success: validated.success,
-      error_type: validated.error_type,
       ...validated.metadata,
-    });
+    };
+    if (validated.error_type) {
+      trackData.error_type = validated.error_type;
+    }
+    track('performance_metric', trackData);
 
     throw error;
   }
@@ -237,7 +256,7 @@ export async function measurePerformance<T>(
 /**
  * Error tracking helper
  */
-export function trackError(error: Error | unknown, context?: string): void {
+export function trackError(error: z.infer<typeof errorInputSchema>, context?: string): void {
   try {
     // Validate error tracking data
     const validated = errorTrackingSchema.parse({
@@ -249,15 +268,20 @@ export function trackError(error: Error | unknown, context?: string): void {
       timestamp: Date.now(),
     });
 
-    track('error_occurred', {
+    const errorTrackData: Record<string, string | number | boolean> = {
       error_type: validated.error_type,
       error_message: validated.error_message,
-      context: validated.context,
-      page: validated.page,
-    });
+    };
+    if (validated.page) {
+      errorTrackData.page = validated.page;
+    }
+    if (validated.context) {
+      errorTrackData.context = validated.context;
+    }
+    track('error_occurred', errorTrackData);
   } catch (validationError) {
     if (ENABLE_DEBUG) {
-      console.error('[Analytics Error Tracking Failed]', validationError);
+      logger.error('[Analytics Error Tracking Failed]', validationError as Error);
     }
   }
 }
@@ -275,13 +299,13 @@ export const interactions = {
         slug,
         timestamp: Date.now(),
       });
-      track('copy_code', {
-        content_category: validated.category,
-        content_slug: validated.slug,
-      });
+      const copyData: Record<string, string | number | boolean> = {};
+      if (validated.category) copyData.content_category = validated.category;
+      if (validated.slug) copyData.content_slug = validated.slug;
+      track('copy_code', copyData);
     } catch (error) {
       if (ENABLE_DEBUG) {
-        console.error('[Analytics Copy Code Error]', error);
+        logger.error('[Analytics Copy Code Error]', error as Error);
       }
     }
   },
@@ -300,7 +324,7 @@ export const interactions = {
       });
     } catch (error) {
       if (ENABLE_DEBUG) {
-        console.error('[Analytics Share Error]', error);
+        logger.error('[Analytics Share Error]', error as Error);
       }
     }
   },
@@ -319,7 +343,7 @@ export const interactions = {
       track('feedback_submitted', validated);
     } catch (error) {
       if (ENABLE_DEBUG) {
-        console.error('[Analytics Feedback Error]', error);
+        logger.error('[Analytics Feedback Error]', error as Error);
       }
     }
   },
@@ -338,14 +362,15 @@ export const navigation = {
         page: typeof window !== 'undefined' ? window.location.pathname : undefined,
         timestamp: Date.now(),
       });
-      track('tab_switched', {
-        from_tab: validated.from,
-        to_tab: validated.to,
+      const tabData: Record<string, string | number | boolean> = {
         page: validated.page || '/',
-      });
+      };
+      if (validated.from) tabData.from_tab = validated.from;
+      if (validated.to) tabData.to_tab = validated.to;
+      track('tab_switched', tabData);
     } catch (error) {
       if (ENABLE_DEBUG) {
-        console.error('[Analytics Tab Switch Error]', error);
+        logger.error('[Analytics Tab Switch Error]', error as Error);
       }
     }
   },
@@ -366,7 +391,7 @@ export const navigation = {
       });
     } catch (error) {
       if (ENABLE_DEBUG) {
-        console.error('[Analytics Filter Toggle Error]', error);
+        logger.error('[Analytics Filter Toggle Error]', error as Error);
       }
     }
   },
@@ -387,7 +412,7 @@ export const navigation = {
       track('sort_changed', validated);
     } catch (error) {
       if (ENABLE_DEBUG) {
-        console.error('[Analytics Sort Change Error]', error);
+        logger.error('[Analytics Sort Change Error]', error as Error);
       }
     }
   },

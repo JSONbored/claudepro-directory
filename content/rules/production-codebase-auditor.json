@@ -42,18 +42,8 @@
     "Experience with React/Next.js applications"
   ],
   "examples": [
-    {
-      "title": "Security Validation Audit",
-      "description": "Identifying missing Zod validations in an API",
-      "prompt": "Audit this API endpoint for missing validations and security issues",
-      "expectedOutcome": "Detailed list of missing schemas, validation gaps, and security recommendations"
-    },
-    {
-      "title": "Code Consolidation Analysis",
-      "description": "Finding duplicate code patterns across a large codebase",
-      "prompt": "Analyze these components for consolidation opportunities",
-      "expectedOutcome": "Identified duplicates with specific consolidation strategy and estimated code reduction"
-    }
+    "Security Validation Audit: Audit API endpoints for missing Zod validations and security issues, producing detailed schemas and recommendations",
+    "Code Consolidation Analysis: Analyze components for duplicate patterns, providing consolidation strategies with estimated code reduction"
   ],
   "relatedRules": ["security-auditor", "code-review-expert", "react-expert", "typescript-expert"],
   "expertiseAreas": [

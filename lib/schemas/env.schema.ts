@@ -18,7 +18,7 @@ const serverEnvSchema = z.object({
   KV_REST_API_URL: z.string().url().optional(),
   KV_REST_API_TOKEN: z.string().min(1).optional(),
 
-  // Arcjet security
+  // Arcjet security - Required in production for rate limiting and DDoS protection
   ARCJET_KEY: z.string().min(1).optional(),
 
   // Vercel environment
@@ -42,6 +42,17 @@ const serverEnvSchema = z.object({
 
   // Development cache bypass flags
   BYPASS_RELATED_CACHE: z.enum(['true', 'false']).optional(),
+
+  // View count security salt
+  VIEW_COUNT_SALT: z.string().min(16).optional(),
+
+  // GitHub API integration
+  GITHUB_TOKEN: z.string().min(1).optional(),
+  GITHUB_OWNER: z.string().min(1).optional(),
+  GITHUB_REPO: z.string().min(1).optional(),
+
+  // Webhook security
+  WEBHOOK_SECRET: z.string().min(32).optional(),
 });
 
 /**
@@ -89,13 +100,27 @@ export type BuildEnv = z.infer<typeof buildEnvSchema>;
 export type Env = z.infer<typeof envSchema>;
 
 /**
+ * Production-specific required environment variables
+ * These must be set in production for security and functionality
+ */
+const productionRequiredEnvs = [
+  'ARCJET_KEY', // DDoS and rate limiting protection
+  'RATE_LIMIT_SECRET', // Rate limiting security
+  'CACHE_WARM_AUTH_TOKEN', // Cache warming authorization
+  'VIEW_COUNT_SALT', // Secure view count generation
+  'WEBHOOK_SECRET', // Webhook signature validation
+] as const;
+
+/**
  * Validation function with comprehensive error handling
  */
 function validateEnv() {
   const parsed = envSchema.safeParse(process.env);
 
   if (!parsed.success) {
+    // biome-ignore lint/suspicious/noConsole: Critical environment validation requires console output
     console.error('❌ Invalid environment variables detected:');
+    // biome-ignore lint/suspicious/noConsole: Critical environment validation requires console output
     console.error(parsed.error.flatten().fieldErrors);
 
     // In production, we should fail fast on invalid env vars
@@ -104,11 +129,43 @@ function validateEnv() {
     }
 
     // In development, warn but continue with defaults
+    // biome-ignore lint/suspicious/noConsole: Critical environment validation requires console output
     console.warn('⚠️ Using default values for missing environment variables');
     return envSchema.parse({
       ...process.env,
       NODE_ENV: process.env.NODE_ENV || 'development',
     });
+  }
+
+  // Additional production validation
+  if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') {
+    const missingRequiredEnvs = productionRequiredEnvs.filter((envVar) => !process.env[envVar]);
+
+    if (missingRequiredEnvs.length > 0) {
+      // biome-ignore lint/suspicious/noConsole: Critical environment validation requires console output
+      console.error('❌ Missing required production environment variables:');
+      // biome-ignore lint/suspicious/noConsole: Critical environment validation requires console output
+      console.error(missingRequiredEnvs.join(', '));
+      throw new Error(
+        `Missing required production environment variables: ${missingRequiredEnvs.join(', ')}. These are required for security and functionality in production.`
+      );
+    }
+
+    // Validate that security tokens meet minimum requirements
+    if (process.env.RATE_LIMIT_SECRET && process.env.RATE_LIMIT_SECRET.length < 32) {
+      throw new Error('RATE_LIMIT_SECRET must be at least 32 characters for production security');
+    }
+    if (process.env.CACHE_WARM_AUTH_TOKEN && process.env.CACHE_WARM_AUTH_TOKEN.length < 32) {
+      throw new Error(
+        'CACHE_WARM_AUTH_TOKEN must be at least 32 characters for production security'
+      );
+    }
+    if (process.env.VIEW_COUNT_SALT && process.env.VIEW_COUNT_SALT.length < 16) {
+      throw new Error('VIEW_COUNT_SALT must be at least 16 characters for production security');
+    }
+    if (process.env.WEBHOOK_SECRET && process.env.WEBHOOK_SECRET.length < 32) {
+      throw new Error('WEBHOOK_SECRET must be at least 32 characters for production security');
+    }
   }
 
   return parsed.data;
@@ -179,6 +236,24 @@ export const buildConfig = {
 } as const;
 
 /**
+ * GitHub configuration
+ */
+export const githubConfig = {
+  token: env.GITHUB_TOKEN,
+  owner: env.GITHUB_OWNER,
+  repo: env.GITHUB_REPO,
+  isConfigured: !!(env.GITHUB_TOKEN && env.GITHUB_OWNER && env.GITHUB_REPO),
+} as const;
+
+/**
+ * Webhook configuration
+ */
+export const webhookConfig = {
+  secret: env.WEBHOOK_SECRET,
+  isConfigured: !!env.WEBHOOK_SECRET,
+} as const;
+
+/**
  * Export the schema for use in other files
  */
 export { envSchema, serverEnvSchema, clientEnvSchema, buildEnvSchema };
@@ -196,4 +271,12 @@ export function hasSecurityConfig(): boolean {
 
 export function hasAnalyticsConfig(): boolean {
   return analyticsConfig.isConfigured;
+}
+
+export function hasGitHubConfig(): boolean {
+  return githubConfig.isConfigured;
+}
+
+export function hasWebhookConfig(): boolean {
+  return webhookConfig.isConfigured;
 }

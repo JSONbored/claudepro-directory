@@ -33,7 +33,7 @@
       "mcpServers": {
         "workato": {
           "transport": "http",
-          "url": "YOUR_GENERATED_WORKATO_URL"
+          "url": "https://your-workspace.workato.com/mcp"
         }
       }
     },
@@ -41,7 +41,7 @@
       "mcpServers": {
         "workato": {
           "transport": "http",
-          "url": "YOUR_GENERATED_WORKATO_URL"
+          "url": "https://your-workspace.workato.com/mcp"
         }
       }
     }

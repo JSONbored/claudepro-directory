@@ -1,34 +1,26 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { FilterState } from '@/components/unified-search';
+import { logger } from '@/lib/logger';
+import type { FilterState, SearchOptions, UseSearchProps } from '@/lib/schemas/component.schema';
+import type { ContentMetadata } from '@/lib/schemas/content.schema';
 import { extractFilterOptions } from '@/lib/schemas/content-filter.schema';
 import { type SearchableItem, type SearchFilters, searchCache } from '@/lib/search-cache';
 import { getDisplayTitle } from '@/lib/utils';
-import type { ContentItem } from '@/types/content';
 
-interface SearchOptions {
-  threshold?: number;
-  includeScore?: boolean;
-  includeMatches?: boolean;
-  minMatchCharLength?: number;
-}
+// Define ContentItem as ContentMetadata for this hook
+type ContentItem = ContentMetadata;
 
-interface UseSearchProps {
-  data: readonly ContentItem[] | ContentItem[];
-  searchOptions?: SearchOptions;
-}
-
-// Convert ContentItem to SearchableItem for compatibility
-function convertToSearchableItem(item: ContentItem): SearchableItem {
+// Convert ContentMetadata to SearchableItem for compatibility
+function convertToSearchableItem(item: ContentMetadata): SearchableItem {
   return {
     id: item.slug, // Use slug as id since SearchableItem requires id
     title: getDisplayTitle(item),
-    name: item.name || '', // Ensure name is always a string
+    name: (item as typeof item & { name?: string }).name || getDisplayTitle(item), // Ensure name is always a string
     description: item.description,
     tags: [...(item.tags || [])], // Convert readonly array to mutable array
     category: item.category,
-    popularity: item.popularity || 0,
+    popularity: (item as typeof item & { popularity?: number }).popularity || 0,
     slug: item.slug,
   };
 }
@@ -51,7 +43,7 @@ async function performCachedSearch(
   filters: FilterState,
   options: SearchOptions = {}
 ): Promise<ContentItem[]> {
-  if (!query.trim() && !hasActiveFilters(filters)) {
+  if (!(query.trim() || hasActiveFilters(filters))) {
     return data;
   }
 
@@ -62,7 +54,7 @@ async function performCachedSearch(
   // Use cached search
   const results = await searchCache.search(searchableData, query, searchFilters, {
     threshold: options.threshold || 0.3,
-    includeScore: options.includeScore || false,
+    includeScore: options.includeScore ?? true,
     keys: [
       { name: 'name', weight: 2 },
       { name: 'description', weight: 1.5 },
@@ -81,7 +73,9 @@ async function performCachedSearch(
         ...item,
         author: '',
         dateAdded: new Date().toISOString(),
-      } as ContentItem)
+        content: '',
+        tags: item.tags || [],
+      } as unknown as ContentItem)
     );
   });
 }
@@ -126,8 +120,10 @@ export { getDateThreshold };
 
 export function useSearch({ data, searchOptions }: UseSearchProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState<FilterState>({ sort: 'trending' });
-  const [searchResults, setSearchResults] = useState<ContentItem[]>([...data]);
+  const [filters, setFilters] = useState<FilterState>({
+    sort: 'trending',
+  });
+  const [searchResults, setSearchResults] = useState<ContentItem[]>([...data] as ContentItem[]);
 
   // Memoize search options to prevent unnecessary re-renders
   const memoizedSearchOptions = useMemo(() => searchOptions || {}, [searchOptions]);
@@ -137,7 +133,7 @@ export function useSearch({ data, searchOptions }: UseSearchProps) {
     const compatibleData = [...data].map((item) => ({
       category: item.category,
       author: item.author,
-      tags: [...(item.tags || [])] as unknown[],
+      tags: [...(item.tags || [])] as string[],
     }));
     return extractFilterOptions(compatibleData);
   }, [data]);
@@ -147,15 +143,15 @@ export function useSearch({ data, searchOptions }: UseSearchProps) {
     const updateResults = async () => {
       try {
         const results = await performCachedSearch(
-          [...data],
+          [...data] as ContentItem[],
           searchQuery,
           filters,
           memoizedSearchOptions
         );
         setSearchResults(results);
       } catch (error) {
-        console.error('Search failed, falling back to original data:', error);
-        setSearchResults([...data]);
+        logger.error('Search failed, falling back to original data', error as Error);
+        setSearchResults([...data] as ContentItem[]);
       }
     };
 

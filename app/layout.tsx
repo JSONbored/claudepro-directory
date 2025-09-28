@@ -9,56 +9,56 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Navigation } from '@/components/navigation';
 import { PerformanceOptimizer } from '@/components/performance-optimizer';
 import { StructuredData } from '@/components/structured-data';
+import { OrganizationStructuredData } from '@/components/structured-data/organization-schema';
 import { UmamiScript } from '@/components/umami-script';
+import { APP_CONFIG, SEO_CONFIG } from '@/lib/constants';
 import { WebVitals } from './components/web-vitals';
 
+// Configure Inter font with optimizations
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-inter',
+  preload: true,
   fallback: [
     'system-ui',
     '-apple-system',
     'BlinkMacSystemFont',
     'Segoe UI',
-    'Helvetica Neue',
+    'Helvetica',
     'Arial',
     'sans-serif',
   ],
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://claudepro.directory'),
-  title: 'Claude Pro Directory - Community Configurations for Claude AI',
-  description:
-    'Discover and share the best Claude AI configurations, MCP servers, agents, rules, commands, and hooks. The ultimate community-driven directory for Claude Pro users.',
-  keywords:
-    'Claude AI, MCP servers, AI agents, Claude rules, Claude commands, Claude hooks, Model Context Protocol, prompt engineering, AI configurations, Claude Pro',
-  authors: [{ name: 'JSONbored', url: 'https://github.com/JSONbored' }],
+  metadataBase: new URL(APP_CONFIG.url),
+  title: SEO_CONFIG.titleTemplate.replace('%s', SEO_CONFIG.defaultTitle),
+  description: SEO_CONFIG.defaultDescription,
+  keywords: SEO_CONFIG.keywords.join(', '),
+  authors: [{ name: APP_CONFIG.author, url: `${APP_CONFIG.url}/about` }],
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://claudepro.directory/',
-    siteName: 'Claude Pro Directory',
-    title: 'Claude Pro Directory - Community Configurations for Claude AI',
-    description:
-      'Explore 50+ Claude configurations including agents, MCP servers, rules, commands, and hooks. Free and open source.',
+    url: `${APP_CONFIG.url}/`,
+    siteName: APP_CONFIG.name,
+    title: SEO_CONFIG.titleTemplate.replace('%s', SEO_CONFIG.defaultTitle),
+    description: SEO_CONFIG.defaultDescription,
     images: [
       {
         url: '/opengraph-image',
         width: 1200,
         height: 630,
-        alt: 'Claude Pro Directory - Community Configurations',
+        alt: `${APP_CONFIG.name} - Community Configurations`,
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Claude Pro Directory - Community Configurations for Claude AI',
-    description:
-      'Explore 50+ Claude configurations including agents, MCP servers, rules, commands, and hooks. Free and open source.',
+    title: SEO_CONFIG.titleTemplate.replace('%s', SEO_CONFIG.defaultTitle),
+    description: SEO_CONFIG.defaultDescription,
     images: ['/twitter-image'],
-    creator: '@JSONbored',
+    creator: '@shadowbook',
   },
   robots: {
     index: true,
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://claudepro.directory/',
+    canonical: `${APP_CONFIG.url}/`,
   },
   icons: {
     icon: [
@@ -109,8 +109,16 @@ export default async function RootLayout({
   await connection();
 
   return (
-    <html lang="en" suppressHydrationWarning className={inter.variable}>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} font-sans`}>
       <head>
+        {/* Critical Resource Preloading for optimal network chain */}
+        <link
+          rel="preload"
+          href="/_next/static/css/app/layout.css"
+          as="style"
+          crossOrigin="anonymous"
+        />
+
         {/* PWA Manifest */}
         <link rel="manifest" href="/site.webmanifest" />
 
@@ -124,17 +132,19 @@ export default async function RootLayout({
         <meta name="theme-color" content="#000000" />
 
         {/* Strategic Resource Hints - Only for confirmed external connections */}
-        {/* Essential font loading optimization */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
 
-        {/* Analytics services - used on every page load */}
-        <link rel="preconnect" href="https://umami.claudepro.directory" />
-        <link rel="preconnect" href="https://vitals.vercel-insights.com" />
+        {/* DNS Prefetch for faster resolution */}
+        <link rel="dns-prefetch" href="https://umami.claudepro.directory" />
+        <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
+
+        {/* Preconnect for critical third-party resources */}
+        <link rel="preconnect" href="https://umami.claudepro.directory" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://vitals.vercel-insights.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
       </head>
       <body className="font-sans">
         <StructuredData type="website" />
+        <OrganizationStructuredData />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <ErrorBoundary>
             <a

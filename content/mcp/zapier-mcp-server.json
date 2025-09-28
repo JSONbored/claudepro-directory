@@ -33,7 +33,7 @@
       "mcpServers": {
         "zapier": {
           "transport": "http",
-          "url": "YOUR_GENERATED_ZAPIER_URL"
+          "url": "https://mcp.zapier.com/YOUR_GENERATED_URL"
         }
       }
     },
@@ -41,7 +41,7 @@
       "mcpServers": {
         "zapier": {
           "transport": "http",
-          "url": "YOUR_GENERATED_ZAPIER_URL"
+          "url": "https://mcp.zapier.com/YOUR_GENERATED_URL"
         }
       }
     }

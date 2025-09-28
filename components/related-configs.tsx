@@ -11,20 +11,14 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import type { ContentMetadata } from '@/types/content';
+import type { RelatedConfigsProps } from '@/lib/schemas/component.schema';
+import type { UnifiedContentItem } from '@/lib/schemas/components';
 
-type RelatedType = 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks';
+// RelatedConfigsProps is now imported from component.schema.ts
 
-interface RelatedConfigsProps<T extends ContentMetadata = ContentMetadata> {
-  configs: T[];
-  title?: string;
-  type?: RelatedType;
-}
-
-const RelatedConfigsComponent = <T extends ContentMetadata = ContentMetadata>({
+const RelatedConfigsComponent = <T extends UnifiedContentItem = UnifiedContentItem>({
   configs,
   title = 'Related Configurations',
-  type,
 }: RelatedConfigsProps<T>) => {
   if (configs.length === 0) return null;
 
@@ -61,7 +55,12 @@ const RelatedConfigsComponent = <T extends ContentMetadata = ContentMetadata>({
                     </div>
                   )}
                 <div className="h-full">
-                  <ConfigCard {...config} type={type || ('agents' as RelatedType)} />
+                  <ConfigCard
+                    item={config}
+                    variant="default"
+                    showCategory={false}
+                    showActions={false}
+                  />
                 </div>
               </div>
             </CarouselItem>

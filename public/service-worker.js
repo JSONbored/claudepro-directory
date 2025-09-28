@@ -2,6 +2,11 @@
 // Version: 1.2.0
 // Enhanced PWA support with dynamic content caching and background sync
 
+// Production-safe logging - only in development
+const isDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+const log = isDev ? console.log.bind(console) : () => {};
+const error = isDev ? console.error.bind(console) : () => {};
+
 const CACHE_NAME = 'claudepro-v1.2';
 const STATIC_CACHE = 'claudepro-static-v1.2';
 const DYNAMIC_CACHE = 'claudepro-dynamic-v1.2';
@@ -33,16 +38,16 @@ self.addEventListener('install', (event) => {
     Promise.all([
       // Cache static assets
       caches.open(STATIC_CACHE).then((cache) => {
-        console.log('Opened static cache');
+        log('Opened static cache');
         return cache.addAll(urlsToCache);
       }),
       // Pre-cache content routes for offline browsing
       caches.open(DYNAMIC_CACHE).then((cache) => {
-        console.log('Opened dynamic cache');
+        log('Opened dynamic cache');
         return cache.addAll(CONTENT_ROUTES);
       })
     ]).catch((err) => {
-      console.log('Service worker installation failed:', err);
+      error('Service worker installation failed:', err);
     })
   );
   // Activate new service worker immediately
@@ -59,7 +64,7 @@ self.addEventListener('activate', (event) => {
         cacheNames.map((cacheName) => {
           // Delete old caches that aren't in current cache list
           if (cacheName.startsWith('claudepro-') && !currentCaches.includes(cacheName)) {
-            console.log('Deleting old cache:', cacheName);
+            log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -87,7 +92,11 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Different strategies based on request type
-  if (url.pathname.startsWith('/api/')) {
+
+  // Special handling for Umami analytics script - cache for 7 days
+  if (url.hostname.includes('umami.claudepro.directory') && url.pathname.includes('script.js')) {
+    event.respondWith(longTermCacheStrategy(request, STATIC_CACHE, 7 * 24 * 60 * 60 * 1000)); // 7 days
+  } else if (url.pathname.startsWith('/api/')) {
     // API requests: Network first, cache as fallback
     event.respondWith(networkFirstStrategy(request, API_CACHE));
   } else if (url.pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|webp|avif)$/)) {
@@ -102,6 +111,48 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(networkFirstWithOfflineStrategy(request, DYNAMIC_CACHE));
   }
 });
+
+// Long-term cache strategy with TTL for third-party scripts
+async function longTermCacheStrategy(request, cacheName, ttl) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+
+  // Check if cached and still within TTL
+  if (cached) {
+    const cacheTimestamp = cached.headers.get('sw-cache-timestamp');
+    if (cacheTimestamp && Date.now() - parseInt(cacheTimestamp) < ttl) {
+      return cached;
+    }
+  }
+
+  // Fetch fresh copy
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      // Clone response and add cache timestamp
+      const responseToCache = response.clone();
+      const headers = new Headers(responseToCache.headers);
+      headers.set('sw-cache-timestamp', Date.now().toString());
+      headers.set('Cache-Control', `public, max-age=${Math.floor(ttl / 1000)}`);
+
+      const cachedResponse = new Response(responseToCache.body, {
+        status: responseToCache.status,
+        statusText: responseToCache.statusText,
+        headers: headers
+      });
+
+      cache.put(request, cachedResponse);
+    }
+    return response;
+  } catch (error) {
+    // Return cached version even if expired when offline
+    if (cached) {
+      return cached;
+    }
+    log('Long-term cache fetch failed:', error);
+    return new Response('Script unavailable offline', { status: 503 });
+  }
+}
 
 // Cache-first strategy for static assets
 async function cacheFirstStrategy(request, cacheName) {
@@ -119,7 +170,7 @@ async function cacheFirstStrategy(request, cacheName) {
     }
     return response;
   } catch (error) {
-    console.log('Cache-first fetch failed:', error);
+    log('Cache-first fetch failed:', error);
     return new Response('Asset unavailable offline', { status: 503 });
   }
 }
@@ -138,7 +189,7 @@ async function networkFirstStrategy(request, cacheName) {
     }
     return response;
   } catch (error) {
-    console.log('Network request failed, trying cache:', error);
+    log('Network request failed, trying cache:', error);
     const cached = await cache.match(request);
     if (cached) {
       // Check if cached response is less than 5 minutes old
@@ -183,7 +234,7 @@ async function networkFirstWithOfflineStrategy(request, cacheName) {
     }
     return response;
   } catch (error) {
-    console.log('Network request failed, trying cache or offline page:', error);
+    log('Network request failed, trying cache or offline page:', error);
     const cache = await caches.open(cacheName);
     const cached = await cache.match(request);
 
@@ -200,16 +251,212 @@ async function networkFirstWithOfflineStrategy(request, cacheName) {
   }
 }
 
-// Background sync for failed requests (if supported)
-if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
-  self.addEventListener('sync', (event) => {
-    if (event.tag === 'background-sync') {
-      event.waitUntil(retryFailedRequests());
-    }
+// Background sync for failed requests
+self.addEventListener('sync', (event) => {
+  log('Background sync triggered:', event.tag);
+
+  if (event.tag === 'submit-config') {
+    event.waitUntil(syncConfigSubmissions());
+  } else if (event.tag === 'track-view') {
+    event.waitUntil(syncViewTracking());
+  } else if (event.tag === 'analytics') {
+    event.waitUntil(syncAnalyticsData());
+  } else if (event.tag.startsWith('retry-')) {
+    event.waitUntil(retryFailedRequest(event.tag));
+  }
+});
+
+// Store for failed requests
+const FAILED_REQUESTS_STORE = 'failed-requests-v1';
+const MAX_RETRY_ATTEMPTS = 3;
+
+// Queue failed requests for background sync
+async function queueFailedRequest(request, attempt = 1) {
+  const cache = await caches.open(FAILED_REQUESTS_STORE);
+  const id = `retry-${Date.now()}-${crypto.randomUUID()}`;
+
+  // Store request with metadata
+  const requestData = {
+    url: request.url,
+    method: request.method,
+    headers: Object.fromEntries(request.headers.entries()),
+    body: request.method !== 'GET' && request.method !== 'HEAD'
+      ? await request.text()
+      : null,
+    attempt,
+    timestamp: Date.now(),
+    id
+  };
+
+  const metadataResponse = new Response(JSON.stringify(requestData), {
+    headers: { 'Content-Type': 'application/json' }
   });
+
+  await cache.put(new Request(id), metadataResponse);
+
+  // Register sync if available
+  if (self.registration && self.registration.sync) {
+    try {
+      await self.registration.sync.register(id);
+      log('Queued for background sync:', id);
+    } catch (err) {
+      log('Background sync registration failed:', err);
+      // Fallback to periodic retry
+      setTimeout(() => retryFailedRequest(id), 30000);
+    }
+  }
+
+  return id;
 }
 
-async function retryFailedRequests() {
-  // Implementation for retrying failed requests when back online
-  console.log('Background sync: Retrying failed requests');
+// Retry a specific failed request
+async function retryFailedRequest(tag) {
+  const cache = await caches.open(FAILED_REQUESTS_STORE);
+  const metadataResponse = await cache.match(tag);
+
+  if (!metadataResponse) {
+    log('No failed request found for:', tag);
+    return;
+  }
+
+  const requestData = await metadataResponse.json();
+
+  // Check if request is too old (24 hours)
+  if (Date.now() - requestData.timestamp > 24 * 60 * 60 * 1000) {
+    await cache.delete(tag);
+    log('Request too old, removing:', tag);
+    return;
+  }
+
+  try {
+    const request = new Request(requestData.url, {
+      method: requestData.method,
+      headers: requestData.headers,
+      body: requestData.body
+    });
+
+    const response = await fetch(request);
+
+    if (response.ok) {
+      // Success - remove from failed requests
+      await cache.delete(tag);
+      log('Successfully retried request:', requestData.url);
+
+      // Notify clients of success
+      const clients = await self.clients.matchAll();
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'sync-success',
+          url: requestData.url,
+          id: requestData.id
+        });
+      });
+    } else if (requestData.attempt < MAX_RETRY_ATTEMPTS) {
+      // Failed but can retry
+      requestData.attempt++;
+      const newResponse = new Response(JSON.stringify(requestData), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      await cache.put(new Request(tag), newResponse);
+
+      // Register for another sync
+      if (self.registration && self.registration.sync) {
+        await self.registration.sync.register(tag);
+      }
+    } else {
+      // Max attempts reached
+      await cache.delete(tag);
+      log('Max retry attempts reached for:', requestData.url);
+
+      // Notify clients of failure
+      const clients = await self.clients.matchAll();
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'sync-failed',
+          url: requestData.url,
+          id: requestData.id,
+          error: 'Max retry attempts reached'
+        });
+      });
+    }
+  } catch (err) {
+    error('Error retrying request:', err);
+
+    if (requestData.attempt < MAX_RETRY_ATTEMPTS) {
+      // Network error - try again later
+      requestData.attempt++;
+      const newResponse = new Response(JSON.stringify(requestData), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      await cache.put(new Request(tag), newResponse);
+
+      // Register for another sync
+      if (self.registration && self.registration.sync) {
+        await self.registration.sync.register(tag);
+      }
+    } else {
+      await cache.delete(tag);
+    }
+  }
 }
+
+// Sync configuration submissions
+async function syncConfigSubmissions() {
+  log('Syncing configuration submissions');
+  const cache = await caches.open(FAILED_REQUESTS_STORE);
+  const requests = await cache.keys();
+
+  const submissionRequests = requests.filter(req =>
+    req.url.includes('/api/submit') || req.url.includes('/submit')
+  );
+
+  for (const request of submissionRequests) {
+    await retryFailedRequest(request.url);
+  }
+}
+
+// Sync view tracking data
+async function syncViewTracking() {
+  log('Syncing view tracking data');
+  const cache = await caches.open(FAILED_REQUESTS_STORE);
+  const requests = await cache.keys();
+
+  const trackingRequests = requests.filter(req =>
+    req.url.includes('/api/track') || req.url.includes('/actions/track')
+  );
+
+  for (const request of trackingRequests) {
+    await retryFailedRequest(request.url);
+  }
+}
+
+// Sync analytics data
+async function syncAnalyticsData() {
+  log('Syncing analytics data');
+  const cache = await caches.open(FAILED_REQUESTS_STORE);
+  const requests = await cache.keys();
+
+  const analyticsRequests = requests.filter(req =>
+    req.url.includes('umami') || req.url.includes('analytics') || req.url.includes('vitals')
+  );
+
+  for (const request of analyticsRequests) {
+    await retryFailedRequest(request.url);
+  }
+}
+
+// Periodic background sync (fallback)
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'start-periodic-sync') {
+    setInterval(async () => {
+      const cache = await caches.open(FAILED_REQUESTS_STORE);
+      const requests = await cache.keys();
+
+      for (const request of requests) {
+        if (request.url.startsWith('retry-')) {
+          await retryFailedRequest(request.url);
+        }
+      }
+    }, 60000); // Check every minute
+  }
+});

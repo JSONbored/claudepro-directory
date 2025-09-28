@@ -1,26 +1,34 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { AgentDetailPage } from '@/components/agent-detail-page';
+import { AgentStructuredData } from '@/components/structured-data/agent-schema';
 import { ViewTracker } from '@/components/view-tracker';
 import { agents, getAgentBySlug, getAgentFullContent } from '@/generated/content';
+import { APP_CONFIG } from '@/lib/constants';
 import { sortAgents } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
-import { slugParamSchema } from '@/lib/schemas/search.schema';
+import type { PageProps } from '@/lib/schemas/app.schema';
+import { slugParamsSchema } from '@/lib/schemas/app.schema';
+import { agentContentSchema } from '@/lib/schemas/content/agent.schema';
+import { transformForDetailPage } from '@/lib/transformers';
 import { getDisplayTitle } from '@/lib/utils';
 
-interface AgentPageProps {
-  params: Promise<{ slug: string }>;
-}
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  if (!params) {
+    return {
+      title: 'Agent Not Found',
+      description: 'The requested AI agent could not be found.',
+    };
+  }
 
-export async function generateMetadata({ params }: AgentPageProps): Promise<Metadata> {
   const rawParams = await params;
 
   // Validate slug parameter
-  const validationResult = slugParamSchema.safeParse(rawParams);
+  const validationResult = slugParamsSchema.safeParse(rawParams);
 
   if (!validationResult.success) {
     logger.warn('Invalid slug parameter for agent metadata', {
-      slug: rawParams.slug,
+      slug: String(rawParams.slug),
       errorCount: validationResult.error.issues.length,
       firstError: validationResult.error.issues[0]?.message || 'Unknown error',
     });
@@ -43,7 +51,7 @@ export async function generateMetadata({ params }: AgentPageProps): Promise<Meta
   const displayTitle = getDisplayTitle(agent);
 
   return {
-    title: `${displayTitle} - AI Agent | Claude Pro Directory`,
+    title: `${displayTitle} - AI Agent | ${APP_CONFIG.name}`,
     description: agent.description,
     keywords: agent.tags?.join(', '),
     openGraph: {
@@ -63,7 +71,7 @@ export async function generateStaticParams() {
     return sortedAgents
       .map((agent) => {
         // Validate slug using existing schema before static generation
-        const validation = slugParamSchema.safeParse({ slug: agent.slug });
+        const validation = slugParamsSchema.safeParse({ slug: agent.slug });
 
         if (!validation.success) {
           logger.warn('Invalid slug in generateStaticParams for agents', {
@@ -94,18 +102,22 @@ export async function generateStaticParams() {
 // Enable ISR - revalidate every hour
 export const revalidate = 14400;
 
-export default async function AgentPage({ params }: AgentPageProps) {
+export default async function AgentPage({ params }: PageProps) {
+  if (!params) {
+    notFound();
+  }
+
   const rawParams = await params;
 
   // Validate slug parameter
-  const validationResult = slugParamSchema.safeParse(rawParams);
+  const validationResult = slugParamsSchema.safeParse(rawParams);
 
   if (!validationResult.success) {
     logger.error(
       'Invalid slug parameter for agent page',
       new Error(validationResult.error.issues[0]?.message || 'Invalid slug'),
       {
-        slug: rawParams.slug,
+        slug: String(rawParams.slug),
         errorCount: validationResult.error.issues.length,
       }
     );
@@ -127,15 +139,24 @@ export default async function AgentPage({ params }: AgentPageProps) {
 
   // Load full content
   const fullAgent = await getAgentFullContent(slug);
+  const agentData = fullAgent || agentMeta;
 
-  const relatedAgents = agents
+  const relatedAgentsData = agents
     .filter((a) => a.slug !== agentMeta.slug && a.category === agentMeta.category)
     .slice(0, 3);
+
+  // Parse through Zod to ensure type safety
+  const agent = agentContentSchema.parse(agentData);
+  const relatedAgents = relatedAgentsData.map((a) => agentContentSchema.parse(a));
+
+  // Transform for component interface
+  const { item, relatedItems } = transformForDetailPage(agent, relatedAgents);
 
   return (
     <>
       <ViewTracker category="agents" slug={slug} />
-      <AgentDetailPage item={fullAgent || agentMeta} relatedItems={relatedAgents} />
+      <AgentStructuredData agent={agent} />
+      <AgentDetailPage item={item} relatedItems={relatedItems} />
     </>
   );
 }

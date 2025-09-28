@@ -12,27 +12,20 @@ import {
   Shield,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { lazy, type ReactNode, Suspense, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { BaseDetailPage } from '@/components/base-detail-page';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
+import type { ContentItem } from '@/lib/related-content/service';
+import type { MCPDetailPageProps } from '@/lib/schemas/component.schema';
+import type { MCPServerContent } from '@/lib/schemas/content.schema';
 import { getDisplayTitle } from '@/lib/utils';
-import type { ContentItem, MCPServer } from '@/types/content';
 
-// Lazy load CodeHighlight to split syntax-highlighter into its own chunk
-const CodeHighlight = lazy(() =>
-  import('@/components/code-highlight').then((module) => ({
-    default: module.CodeHighlight,
-  }))
-);
-
-interface MCPDetailPageProps {
-  item: MCPServer;
-  relatedItems?: ContentItem[];
-}
+// Type aliases for compatibility
+type MCPServer = MCPServerContent;
 
 // Helper function to render MCP features section
 const renderMCPFeatures = (features: readonly string[] | string[]): ReactNode => (
@@ -57,7 +50,7 @@ const renderMCPConfiguration = (
   return (
     <div className="space-y-6">
       {/* Claude Desktop Configuration */}
-      {item.configuration.claudeDesktop && (
+      {!!item.configuration.claudeDesktop && (
         <div>
           <div className="flex items-center justify-between mb-3">
             <h4 className="font-medium">Claude Desktop</h4>
@@ -71,18 +64,15 @@ const renderMCPConfiguration = (
             </Button>
           </div>
           <div className="max-h-[400px] overflow-y-auto rounded-md border">
-            <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}>
-              <CodeHighlight
-                code={JSON.stringify(item.configuration.claudeDesktop, null, 2)}
-                language="json"
-              />
-            </Suspense>
+            <pre className="p-4 overflow-x-auto text-sm font-mono bg-black text-green-400 rounded-md">
+              <code>{JSON.stringify(item.configuration.claudeDesktop, null, 2)}</code>
+            </pre>
           </div>
         </div>
       )}
 
       {/* Claude Code Configuration */}
-      {item.configuration.claudeCode && (
+      {!!item.configuration.claudeCode && (
         <div>
           <div className="flex items-center justify-between mb-3">
             <h4 className="font-medium">Claude Code</h4>
@@ -96,12 +86,9 @@ const renderMCPConfiguration = (
             </Button>
           </div>
           <div className="max-h-[400px] overflow-y-auto rounded-md border">
-            <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}>
-              <CodeHighlight
-                code={JSON.stringify(item.configuration.claudeCode, null, 2)}
-                language="json"
-              />
-            </Suspense>
+            <pre className="p-4 overflow-x-auto text-sm font-mono bg-black text-green-400 rounded-md">
+              <code>{JSON.stringify(item.configuration.claudeCode, null, 2)}</code>
+            </pre>
           </div>
         </div>
       )}
@@ -222,30 +209,37 @@ const renderMCPTroubleshooting = (
 // Helper function to render MCP examples section
 const renderMCPExamples = (
   examples:
-    | Array<string | { title?: string; code: string; description?: string }>
-    | ReadonlyArray<string | { title?: string; code: string; description?: string }>
+    | Array<
+        string | { title: string; description: string; prompt: string; expectedOutcome: string }
+      >
+    | ReadonlyArray<
+        string | { title: string; description: string; prompt: string; expectedOutcome: string }
+      >
 ): ReactNode => (
   <ul className="space-y-2">
-    {examples.map((example: string | { title?: string; code: string; description?: string }) => {
-      const key =
-        typeof example === 'string'
-          ? example.slice(0, 50)
-          : `${example.title || ''}-${example.code}`.slice(0, 50);
+    {examples.map((example) => {
+      // Handle both string and object formats
+      if (typeof example === 'string') {
+        const key = example.slice(0, 50);
+        return (
+          <li key={key} className="flex items-start gap-3">
+            <div className="h-1.5 w-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
+            <div className="text-sm leading-relaxed">{example}</div>
+          </li>
+        );
+      }
+      // Handle object format (for rules)
       return (
-        <li key={key} className="flex items-start gap-3">
+        <li key={example.title} className="flex items-start gap-3">
           <div className="h-1.5 w-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
           <div className="text-sm leading-relaxed">
-            {typeof example === 'string' ? (
-              <code className="bg-muted px-1 py-0.5 rounded">{example}</code>
-            ) : (
-              <div className="space-y-1">
-                {example.title && <div className="font-medium">{example.title}</div>}
-                <code className="block bg-muted px-2 py-1 rounded text-xs overflow-x-auto">
-                  {example.code}
-                </code>
-                {example.description && (
-                  <div className="text-muted-foreground text-xs">{example.description}</div>
-                )}
+            <strong>{example.title}:</strong> {example.description}
+            {example.prompt && (
+              <div className="mt-1 text-xs text-muted-foreground">Prompt: {example.prompt}</div>
+            )}
+            {example.expectedOutcome && (
+              <div className="text-xs text-muted-foreground">
+                Expected: {example.expectedOutcome}
               </div>
             )}
           </div>
@@ -256,7 +250,11 @@ const renderMCPExamples = (
 );
 
 // Helper function to render MCP sidebar with resources and details
-const renderMCPSidebar = (item: MCPServer, relatedItems: ContentItem[], router: any): ReactNode => (
+const renderMCPSidebar = (
+  item: MCPServer,
+  relatedItems: ContentItem[],
+  router: ReturnType<typeof useRouter>
+): ReactNode => (
   <div className="space-y-6 sticky top-20 self-start">
     {/* Resources */}
     <Card>
@@ -406,7 +404,6 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
       toast({
         title: 'Copy failed',
         description: 'Unable to copy configuration to clipboard.',
-        variant: 'destructive',
       });
     }
     setTimeout(() => setCopied(false), 2000);
@@ -430,7 +427,6 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
       toast({
         title: 'Copy failed',
         description: 'Unable to copy installation steps to clipboard.',
-        variant: 'destructive',
       });
     }
   };
@@ -438,16 +434,20 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
   // Build custom sections for MCP-specific content
   const customSections: Array<{
     title: string;
-    icon?: ReactNode;
     content: ReactNode;
+    collapsible: boolean;
+    defaultCollapsed: boolean;
+    icon?: ReactNode;
   }> = [];
 
   // Features section
   if (item.features && item.features.length > 0) {
     customSections.push({
       title: 'Features',
-      icon: <Lightbulb className="h-5 w-5" />,
       content: renderMCPFeatures(item.features),
+      collapsible: true,
+      defaultCollapsed: false,
+      icon: <Lightbulb className="h-5 w-5" />,
     });
   }
 
@@ -455,8 +455,10 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
   if (item.content) {
     customSections.push({
       title: 'Overview',
-      icon: <Server className="h-5 w-5" />,
       content: <p className="text-sm leading-relaxed">{item.content}</p>,
+      collapsible: true,
+      defaultCollapsed: false,
+      icon: <Server className="h-5 w-5" />,
     });
   }
 
@@ -464,8 +466,10 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
   if (item.security && item.security.length > 0) {
     customSections.push({
       title: 'Security',
-      icon: <Shield className="h-5 w-5" />,
       content: renderMCPSecurity(item.security),
+      collapsible: true,
+      defaultCollapsed: true,
+      icon: <Shield className="h-5 w-5" />,
     });
   }
 
@@ -473,8 +477,10 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
   if (item.troubleshooting && item.troubleshooting.length > 0) {
     customSections.push({
       title: 'Troubleshooting',
-      icon: <AlertTriangle className="h-5 w-5" />,
       content: renderMCPTroubleshooting(item.troubleshooting),
+      collapsible: true,
+      defaultCollapsed: true,
+      icon: <AlertTriangle className="h-5 w-5" />,
     });
   }
 
@@ -482,8 +488,10 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
   if (item.examples && item.examples.length > 0) {
     customSections.push({
       title: 'Examples',
-      icon: <PlayCircle className="h-5 w-5" />,
       content: renderMCPExamples(item.examples),
+      collapsible: true,
+      defaultCollapsed: false,
+      icon: <PlayCircle className="h-5 w-5" />,
     });
   }
 
@@ -523,15 +531,15 @@ export function MCPDetailPage({ item, relatedItems = [] }: MCPDetailPageProps) {
             <CardDescription className="mb-6">
               Add these configurations to your Claude Desktop or Claude Code setup
             </CardDescription>
-            {renderMCPConfiguration(item, handleCopyConfiguration, copied)}
+            {renderMCPConfiguration(item as MCPServer, handleCopyConfiguration, copied)}
           </div>
         ) : null
       }
-      installationContent={item.installation ? renderMCPInstallation(item) : null}
+      installationContent={item.installation ? renderMCPInstallation(item as MCPServer) : null}
       useCasesContent={
         item.useCases && item.useCases.length > 0 ? renderMCPUseCases(item.useCases) : null
       }
-      customSidebar={renderMCPSidebar(item, relatedItems, router)}
+      customSidebar={renderMCPSidebar(item as MCPServer, relatedItems, router)}
     />
   );
 }

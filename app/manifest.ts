@@ -1,11 +1,11 @@
 import type { MetadataRoute } from 'next';
+import { APP_CONFIG, SEO_CONFIG } from '@/lib/constants';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Claude Pro Directory',
-    short_name: 'ClaudeDir',
-    description:
-      'Community configurations for Claude AI - MCP servers, agents, rules, commands, and hooks',
+    name: APP_CONFIG.name,
+    short_name: 'ClaudePro',
+    description: SEO_CONFIG.defaultDescription,
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

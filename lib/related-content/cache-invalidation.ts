@@ -5,7 +5,7 @@
 
 import { logger } from '@/lib/logger';
 import { contentCache } from '@/lib/redis';
-import type { ContentCategory } from './types';
+import type { ContentCategory } from '@/lib/schemas/shared.schema';
 
 export class CacheInvalidationService {
   /**

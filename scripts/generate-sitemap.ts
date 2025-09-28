@@ -1,10 +1,10 @@
 import { existsSync, readdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { agents, commands, hooks, mcp, rules } from '../generated/content.js';
+import { agents, commands, hooks, mcp, rules } from '../generated/content';
+import { APP_CONFIG } from '../lib/constants';
+import type { ContentItem } from '../lib/schemas/content.schema';
 
-// Always use production URL for sitemap
-const baseUrl = 'https://claudepro.directory';
-
+// Define SitemapUrl type locally
 interface SitemapUrl {
   loc: string;
   lastmod: string;
@@ -12,11 +12,8 @@ interface SitemapUrl {
   priority: number;
 }
 
-interface ContentItem {
-  slug: string;
-  dateAdded: string;
-  lastModified?: string;
-}
+// Always use production URL for sitemap
+const baseUrl = APP_CONFIG.url;
 
 function generateSitemap(): string {
   // Use generated content directly instead of static API files
@@ -83,19 +80,13 @@ function generateSitemap(): string {
     }
   });
 
-  // Individual content pages
-  const allContent = [
-    ...rules.map((item) => ({ ...item, category: 'rules' })),
-    ...mcp.map((item) => ({ ...item, category: 'mcp' })),
-    ...agents.map((item) => ({ ...item, category: 'agents' })),
-    ...commands.map((item) => ({ ...item, category: 'commands' })),
-    ...hooks.map((item) => ({ ...item, category: 'hooks' })),
-  ] as Array<ContentItem & { category: string }>;
+  // Individual content pages - each content type already has proper category
+  const allContent: ContentItem[] = [...rules, ...mcp, ...agents, ...commands, ...hooks];
 
   allContent.forEach((item) => {
     urls.push({
       loc: `${baseUrl}/${item.category}/${item.slug}`,
-      lastmod: item.lastModified ? item.lastModified : item.dateAdded,
+      lastmod: (item.dateAdded || new Date().toISOString()).split('T')[0] || '',
       changefreq: 'weekly',
       priority: 0.7,
     });
@@ -120,8 +111,8 @@ ${urls
 }
 
 function generateRobotsTxt(): string {
-  const robotsTxt = `# Robots.txt for Claude Pro Directory
-# https://claudepro.directory/robots.txt
+  const robotsTxt = `# Robots.txt for ${APP_CONFIG.name}
+# ${APP_CONFIG.url}/robots.txt
 
 User-agent: *
 Allow: /

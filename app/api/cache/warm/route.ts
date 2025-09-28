@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { cacheWarmer } from '@/lib/cache-warmer';
 import { handleApiError, handleValidationError } from '@/lib/error-handler';
 import { logger } from '@/lib/logger';
+import { errorInputSchema } from '@/lib/schemas/error.schema';
 import { apiSchemas, baseSchemas, ValidationError, validation } from '@/lib/validation';
 
 /**
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate request body if present
-    let validatedBody: any = {};
+    let validatedBody: Record<string, unknown> = {};
     if (request.headers.get('content-type')?.includes('application/json')) {
       try {
         const rawBody = await request.json();
@@ -64,16 +65,15 @@ export async function POST(request: NextRequest) {
         },
         { status: 200 }
       );
-    } else {
-      return NextResponse.json(
-        {
-          success: false,
-          message: result.message,
-          timestamp: new Date().toISOString(),
-        },
-        { status: 429 } // Too Many Requests if already running
-      );
     }
+    return NextResponse.json(
+      {
+        success: false,
+        message: result.message,
+        timestamp: new Date().toISOString(),
+      },
+      { status: 429 } // Too Many Requests if already running
+    );
   } catch (error: unknown) {
     // Use centralized error handling for consistent responses
     if (error instanceof ValidationError) {
@@ -85,11 +85,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Handle all other errors with centralized handler
-    return handleApiError(error, {
-      route: 'cache/warm',
-      operation: 'cache_warming',
-      method: 'POST',
-    });
+    const validatedError = errorInputSchema.safeParse(error);
+    return handleApiError(
+      validatedError.success ? validatedError.data : { message: 'Cache warm error occurred' },
+      {
+        route: 'cache/warm',
+        operation: 'cache_warming',
+        method: 'POST',
+      }
+    );
   }
 }
 
@@ -136,10 +140,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Handle all other errors with centralized handler
-    return handleApiError(error, {
-      route: 'cache/warm',
-      operation: 'get_status',
-      method: 'GET',
-    });
+    const validatedError = errorInputSchema.safeParse(error);
+    return handleApiError(
+      validatedError.success ? validatedError.data : { message: 'Cache warm error occurred' },
+      {
+        route: 'cache/warm',
+        operation: 'get_status',
+        method: 'GET',
+      }
+    );
   }
 }

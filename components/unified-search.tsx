@@ -17,29 +17,20 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { sanitizeSearchQuery } from '@/lib/sanitizer';
+import type { FilterState, UnifiedSearchProps } from '@/lib/schemas/component.schema';
 import { cn } from '@/lib/utils';
+import { sanitizeSearchQuery } from '@/lib/validation';
 
-export interface FilterState {
-  category?: string;
-  author?: string;
-  dateRange?: string;
-  popularity?: [number, number];
-  tags?: string[];
-  sort?: 'trending' | 'newest' | 'alphabetical';
-}
+// FilterState and UnifiedSearchProps are now imported from component.schema.ts
+// This provides runtime validation and type safety
 
-interface UnifiedSearchProps {
-  placeholder?: string;
-  onSearch: (query: string) => void;
-  onFiltersChange: (filters: FilterState) => void;
-  filters: FilterState;
-  availableTags?: string[];
-  availableAuthors?: string[];
-  availableCategories?: string[];
-  resultCount?: number;
-  className?: string;
-}
+// Re-export FilterState for backward compatibility
+export type { FilterState };
+
+// SearchErrorFallback component moved outside to avoid recreation on every render
+const SearchErrorFallback = () => (
+  <div className="p-4 text-center text-muted-foreground">Error loading search</div>
+);
 
 export function UnifiedSearch({
   placeholder = 'Search...',
@@ -63,6 +54,7 @@ export function UnifiedSearch({
   const categorySelectId = useId();
   const authorSelectId = useId();
   const dateRangeSelectId = useId();
+  const sortSelectId = useId();
 
   // Calculate active filter count
   const activeFilterCount = useMemo(() => {
@@ -92,7 +84,7 @@ export function UnifiedSearch({
   // Handle filter changes
   const handleFilterChange = useCallback(
     (key: keyof FilterState, value: FilterState[keyof FilterState]) => {
-      setLocalFilters((prev) => ({ ...prev, [key]: value }));
+      setLocalFilters((prev: FilterState) => ({ ...prev, [key]: value }));
     },
     []
   );
@@ -114,10 +106,10 @@ export function UnifiedSearch({
 
   // Toggle tag
   const toggleTag = useCallback((tag: string) => {
-    setLocalFilters((prev) => {
+    setLocalFilters((prev: FilterState) => {
       const currentTags = prev.tags || [];
       const newTags = currentTags.includes(tag)
-        ? currentTags.filter((t) => t !== tag)
+        ? currentTags.filter((t: string) => t !== tag)
         : [...currentTags, tag];
       return { ...prev, tags: newTags.length > 0 ? newTags : [] };
     });
@@ -134,9 +126,7 @@ export function UnifiedSearch({
   );
 
   return (
-    <ErrorBoundary
-      fallback={<div className="p-4 text-center text-muted-foreground">Error loading search</div>}
-    >
+    <ErrorBoundary fallback={SearchErrorFallback}>
       <search className={cn('w-full space-y-4', className)}>
         {/* Search Bar */}
         <div className="space-y-3">
@@ -168,6 +158,7 @@ export function UnifiedSearch({
               name="sort"
             >
               <SelectTrigger
+                id={sortSelectId}
                 className="w-auto h-10 px-4 bg-background border-border hover:bg-accent/10 transition-smooth"
                 aria-label="Sort configurations"
               >

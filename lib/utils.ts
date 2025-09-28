@@ -166,12 +166,21 @@ export function formatTitle(title: string): string {
  * Universal function to get display title from any content item
  * This ensures consistent title display across the entire application
  */
-export function getDisplayTitle(item: {
-  title?: string;
-  name?: string;
-  slug: string;
-  category?: string;
-}): string {
+export function getDisplayTitle(
+  item:
+    | {
+        readonly title?: string | undefined;
+        readonly name?: string | undefined;
+        readonly slug: string;
+        readonly category: string | undefined;
+      }
+    | {
+        readonly title?: string | undefined;
+        readonly name?: string | undefined;
+        readonly slug: string;
+        readonly category?: string | undefined;
+      }
+): string {
   // For hooks (no title/name), use enhanced slugToTitle directly
   // For other content (has title/name), use formatTitle for consistency
   const titleOrName = item.title || item.name;

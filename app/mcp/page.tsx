@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { ContentListServer } from '@/components/content-list-server';
 import { mcp } from '@/generated/content';
+import { APP_CONFIG } from '@/lib/constants';
 
 export const metadata: Metadata = {
-  title: 'MCP Servers - Model Context Protocol | Claude Pro Directory',
+  title: `MCP Servers - Model Context Protocol | ${APP_CONFIG.name}`,
   description:
     "Discover powerful MCP servers to extend Claude's capabilities with external tools, data sources, and integrations.",
   keywords: 'MCP servers, Model Context Protocol, Claude integrations, AI tools, Claude extensions',

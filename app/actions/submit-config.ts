@@ -2,16 +2,10 @@
 
 import { redirect } from 'next/navigation';
 import { ZodError } from 'zod';
+import { githubService } from '@/lib/github.service';
 import { logger } from '@/lib/logger';
+import type { FormState } from '@/lib/schemas/app.schema';
 import { type ConfigSubmissionData, parseConfigSubmissionForm } from '@/lib/schemas/form.schema';
-
-interface FormState {
-  success?: boolean;
-  error?: string;
-  errors?: Record<string, string[]>;
-  issueUrl?: string;
-  fallback?: boolean;
-}
 
 export async function submitConfiguration(
   _prevState: FormState | null,
@@ -60,34 +54,49 @@ export async function submitConfiguration(
       hasGithub: !!validatedData.github,
     });
 
-    // For now, simulate a successful submission
-    // In a real implementation, you would:
-    // 1. Create a GitHub issue or PR
-    // 2. Send email notifications
-    // 3. Store in database for review
+    // Check if GitHub service is configured
+    if (!githubService.isConfigured()) {
+      logger.warn('GitHub service not configured, falling back to manual submission', {
+        type: validatedData.type,
+        name: validatedData.name,
+      });
 
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      return {
+        error: 'Automated submission is currently unavailable. Please submit directly via GitHub.',
+        fallback: true,
+      };
+    }
 
-    // Simulate different outcomes
-    const shouldSucceed = Math.random() > 0.1; // 90% success rate for demo
+    try {
+      // Create GitHub issue using real API
+      const issueResponse = await githubService.createSubmissionIssue(validatedData);
 
-    if (shouldSucceed) {
-      const mockIssueUrl = `https://github.com/JSONbored/claudepro-directory/issues/${Math.floor(Math.random() * 1000) + 100}`;
-
-      logger.info('Configuration submitted successfully', {
-        issueUrl: mockIssueUrl,
+      logger.info('Configuration submitted successfully via GitHub API', {
+        issueUrl: issueResponse.issueUrl,
+        issueNumber: issueResponse.issueNumber,
         type: validatedData.type,
         name: validatedData.name,
       });
 
       return {
         success: true,
-        issueUrl: mockIssueUrl,
+        issueUrl: issueResponse.issueUrl,
       };
-    } else {
-      // Simulate rate limiting or API issues
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      logger.error(
+        'GitHub submission failed',
+        error instanceof Error ? error : new Error(errorMessage),
+        {
+          type: validatedData.type,
+          name: validatedData.name,
+        }
+      );
+
+      // Provide fallback option for users
       return {
-        error: 'GitHub API rate limit exceeded. Please try submitting directly via GitHub.',
+        error: `Submission failed: ${errorMessage}. Please try submitting directly via GitHub.`,
         fallback: true,
       };
     }

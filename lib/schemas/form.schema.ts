@@ -3,8 +3,47 @@
  * Security-first approach to prevent injection attacks and data corruption
  */
 
+import DOMPurify from 'isomorphic-dompurify';
 import { z } from 'zod';
 import { VALIDATION_PATTERNS } from '../validation';
+
+// GitHub-related schemas for form submissions
+export const gitHubConfigValidationSchema = z.object({
+  token: z.string().min(1, 'GitHub token is required'),
+  owner: z.string().min(1, 'GitHub owner is required').max(100),
+  repo: z.string().min(1, 'GitHub repo is required').max(100),
+});
+
+export const issueCreationRequestSchema = z.object({
+  title: z.string().min(1, 'Issue title is required').max(200, 'Title too long'),
+  body: z.string().min(1, 'Issue body is required').max(50000, 'Body too long'),
+  labels: z.array(z.string().min(1).max(50)).max(10, 'Too many labels').default([]),
+  assignees: z.array(z.string().min(1).max(50)).max(10, 'Too many assignees').default([]),
+});
+
+export const issueCreationResponseSchema = z.object({
+  issueNumber: z.number().int().positive('Issue number must be positive'),
+  issueUrl: z.string().url('Invalid issue URL'),
+  success: z.boolean(),
+});
+
+export const githubApiRateLimitSchema = z.object({
+  remaining: z.number().int().min(0),
+  resetTime: z.string().datetime(),
+});
+
+export const githubHealthCheckResponseSchema = z.object({
+  configured: z.boolean(),
+  authenticated: z.boolean(),
+  rateLimit: githubApiRateLimitSchema.optional(),
+});
+
+// GitHub-related type exports
+export type GitHubConfigValidation = z.infer<typeof gitHubConfigValidationSchema>;
+export type IssueCreationRequest = z.infer<typeof issueCreationRequestSchema>;
+export type IssueCreationResponse = z.infer<typeof issueCreationResponseSchema>;
+export type GitHubApiRateLimit = z.infer<typeof githubApiRateLimitSchema>;
+export type GitHubHealthCheckResponse = z.infer<typeof githubHealthCheckResponseSchema>;
 
 /**
  * Configuration submission form schema
@@ -12,7 +51,7 @@ import { VALIDATION_PATTERNS } from '../validation';
  */
 export const configSubmissionSchema = z.object({
   // Content type selection
-  type: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks']),
+  type: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'guides']),
 
   // Basic information
   name: z
@@ -207,7 +246,7 @@ export const searchFormSchema = z.object({
     }),
 
   category: z
-    .enum(['all', 'agents', 'mcp', 'rules', 'commands', 'hooks'])
+    .enum(['all', 'agents', 'mcp', 'rules', 'commands', 'hooks', 'guides'])
     .optional()
     .default('all'),
 
@@ -295,3 +334,214 @@ export const formParsers = {
   search: createFormDataParser(searchFormSchema),
   feedback: createFormDataParser(feedbackFormSchema),
 } as const;
+
+/**
+ * HTML Sanitization Schemas for XSS Prevention
+ * Comprehensive sanitization for different content contexts
+ */
+
+/**
+ * Sanitized HTML content schema
+ * Removes dangerous elements while preserving safe formatting
+ */
+export const sanitizedHtmlSchema = z.string().transform((html) => {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: [
+      'p',
+      'br',
+      'strong',
+      'em',
+      'u',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'ul',
+      'ol',
+      'li',
+      'blockquote',
+      'a',
+      'code',
+      'pre',
+      'span',
+      'div',
+      'table',
+      'thead',
+      'tbody',
+      'tr',
+      'th',
+      'td',
+    ],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'title'],
+    FORBID_TAGS: ['script', 'style', 'iframe', 'form', 'input', 'object', 'embed'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur'],
+    KEEP_CONTENT: true,
+  });
+});
+
+/**
+ * Strict text-only schema (no HTML allowed)
+ * Use for contexts where HTML should never be present
+ */
+export const textOnlySchema = z.string().transform((str) => {
+  return DOMPurify.sanitize(str, {
+    ALLOWED_TAGS: [],
+    ALLOWED_ATTR: [],
+    KEEP_CONTENT: true,
+  });
+});
+
+/**
+ * JSON-LD structured data schema
+ * Ensures no script injection in JSON content while supporting nested objects
+ */
+type JsonLdValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonLdValue[]
+  | { [key: string]: JsonLdValue };
+
+const jsonLdValue: z.ZodType<JsonLdValue> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.array(jsonLdValue),
+    z.record(z.string(), jsonLdValue),
+  ])
+);
+
+export const jsonLdSafeSchema = jsonLdValue.transform((data) => {
+  // Convert to JSON string to ensure it's safe
+  const jsonString = JSON.stringify(data);
+
+  // Check for script tag injection attempts
+  if (/<script\b/i.test(jsonString)) {
+    throw new Error('Script tags are not allowed in JSON-LD data');
+  }
+
+  // Ensure no JavaScript protocol handlers
+  if (/javascript:/i.test(jsonString)) {
+    throw new Error('JavaScript protocol not allowed in JSON-LD data');
+  }
+
+  // Parse back to ensure valid JSON
+  return JSON.parse(jsonString);
+});
+
+/**
+ * Code block sanitization schema
+ * Preserves code but ensures it can't execute
+ */
+export const codeBlockSafeSchema = z.string().transform((code) => {
+  // Escape HTML entities to prevent execution
+  return code
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+});
+
+/**
+ * Syntax-highlighted code schema
+ * Validates that HTML comes from trusted syntax highlighter
+ */
+export const highlightedCodeSafeSchema = z.string().transform((html) => {
+  // Allow specific classes and elements used by syntax highlighters
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['pre', 'code', 'span', 'div'],
+    ALLOWED_ATTR: ['class', 'style', 'data-language'],
+    FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick'],
+    // Allow style attribute but sanitize its content
+    ALLOW_DATA_ATTR: false,
+  });
+});
+
+/**
+ * Markdown-derived HTML schema
+ * More permissive but still safe for user-generated content
+ */
+export const markdownHtmlSafeSchema = z.string().transform((html) => {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: [
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'p',
+      'br',
+      'hr',
+      'strong',
+      'b',
+      'em',
+      'i',
+      'u',
+      's',
+      'del',
+      'ins',
+      'mark',
+      'ul',
+      'ol',
+      'li',
+      'blockquote',
+      'q',
+      'cite',
+      'a',
+      'code',
+      'pre',
+      'kbd',
+      'samp',
+      'var',
+      'table',
+      'thead',
+      'tbody',
+      'tfoot',
+      'tr',
+      'th',
+      'td',
+      'img',
+      'span',
+      'div',
+    ],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'title', 'src', 'alt', 'width', 'height', 'class'],
+    ALLOW_DATA_ATTR: false,
+    FORBID_TAGS: ['script', 'style', 'iframe', 'form', 'input', 'object', 'embed'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
+  });
+});
+
+/**
+ * URL parameter sanitization schema
+ * Prevents URL injection attacks
+ */
+export const urlParamSafeSchema = z.string().transform((param) => {
+  // Remove potential injection characters
+  const cleaned = param
+    .replace(/[<>"'`]/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/data:/gi, '')
+    .trim();
+
+  // URL encode for safety
+  return encodeURIComponent(cleaned);
+});
+
+/**
+ * Export type definitions for sanitization schemas
+ */
+export type SanitizedHTML = z.infer<typeof sanitizedHtmlSchema>;
+export type TextOnly = z.infer<typeof textOnlySchema>;
+export type SafeJSONLD = z.infer<typeof jsonLdSafeSchema>;
+export type SafeCodeBlock = z.infer<typeof codeBlockSafeSchema>;
+export type SafeHighlightedCode = z.infer<typeof highlightedCodeSafeSchema>;
+export type SafeMarkdownHTML = z.infer<typeof markdownHtmlSafeSchema>;
+export type SafeURLParam = z.infer<typeof urlParamSafeSchema>;

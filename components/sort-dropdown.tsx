@@ -1,7 +1,7 @@
 'use client';
 
 import { ArrowDown, ArrowUp } from 'lucide-react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useId, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -10,15 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { SortDirection, SortOption } from '@/hooks/use-sorting';
-
-interface SortDropdownProps {
-  sortBy: SortOption;
-  sortDirection: SortDirection;
-  onSortChange: (option: SortOption, direction?: SortDirection) => void;
-}
+import type { SortDropdownProps, SortOption } from '@/lib/schemas/component.schema';
 
 export const SortDropdown = ({ sortBy, sortDirection, onSortChange }: SortDropdownProps) => {
+  const sortDropdownId = useId();
+
   const sortOptions = useMemo(
     () => [
       { value: 'popularity', label: 'Popularity' },
@@ -45,6 +41,8 @@ export const SortDropdown = ({ sortBy, sortDirection, onSortChange }: SortDropdo
       <span className="text-sm text-muted-foreground">Sort by:</span>
       <Select value={sortBy} onValueChange={handleSortValueChange}>
         <SelectTrigger
+          id={sortDropdownId}
+          name="sortBy"
           className="w-40 bg-background/50 border-border/50"
           aria-label="Sort configurations"
         >

@@ -8,19 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
+import type { RuleDetailPageProps } from '@/lib/schemas/component.schema';
+import type { UnifiedContentItem } from '@/lib/schemas/components';
+import type { RuleContent } from '@/lib/schemas/content.schema';
 import { getDisplayTitle } from '@/lib/utils';
-import type { ContentItem, Rule } from '@/types/content';
-
-interface RuleDetailPageProps {
-  item: Rule;
-  relatedItems?: ContentItem[];
-}
 
 // Helper function to render Rule sidebar with resources and details
 const renderRuleSidebar = (
-  item: Rule,
-  relatedItems: ContentItem[],
-  router: any
+  item: RuleContent,
+  relatedItems: UnifiedContentItem[],
+  router: ReturnType<typeof useRouter>
 ): React.ReactNode => (
   <div className="space-y-6 sticky top-20 self-start">
     {/* Resources */}
@@ -70,14 +67,7 @@ const renderRuleSidebar = (
           </div>
         )}
 
-        {/* Type */}
-        {item.type && (
-          <div>
-            <h4 className="font-medium mb-1">Type</h4>
-            <Badge variant="outline">{item.type}</Badge>
-          </div>
-        )}
-
+        {/* Source */}
         {item.source && (
           <div>
             <h4 className="font-medium mb-1">Source</h4>
@@ -220,7 +210,6 @@ export function RuleDetailPage({ item, relatedItems = [] }: RuleDetailPageProps)
       toast({
         title: 'Copy failed',
         description: 'Unable to copy configuration to clipboard.',
-        variant: 'destructive',
       });
     }
   };
@@ -231,7 +220,6 @@ export function RuleDetailPage({ item, relatedItems = [] }: RuleDetailPageProps)
   const customSections = [
     {
       title: 'Use Cases',
-      icon: <Lightbulb className="h-5 w-5" />,
       content: (
         <>
           <CardDescription className="mb-4">
@@ -247,6 +235,9 @@ export function RuleDetailPage({ item, relatedItems = [] }: RuleDetailPageProps)
           </ul>
         </>
       ),
+      collapsible: true,
+      defaultCollapsed: false,
+      icon: <Lightbulb className="h-5 w-5" />,
     },
   ];
 
@@ -254,7 +245,6 @@ export function RuleDetailPage({ item, relatedItems = [] }: RuleDetailPageProps)
   if (item.configuration) {
     customSections.push({
       title: 'Configuration',
-      icon: <Settings className="h-5 w-5" />,
       content: (
         <>
           <div className="flex items-center justify-between mb-4">
@@ -269,6 +259,9 @@ export function RuleDetailPage({ item, relatedItems = [] }: RuleDetailPageProps)
           </pre>
         </>
       ),
+      collapsible: true,
+      defaultCollapsed: true,
+      icon: <Settings className="h-5 w-5" />,
     });
   }
 
@@ -289,7 +282,7 @@ export function RuleDetailPage({ item, relatedItems = [] }: RuleDetailPageProps)
         },
       }}
       customSections={customSections}
-      customSidebar={renderRuleSidebar(item, relatedItems, router)}
+      customSidebar={renderRuleSidebar(item as RuleContent, relatedItems, router)}
     />
   );
 }

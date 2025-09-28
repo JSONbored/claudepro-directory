@@ -16,17 +16,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
+import type {
+  ActionButton,
+  BaseDetailPageProps,
+  CommandDetailPageProps,
+} from '@/lib/schemas/component.schema';
+import type { UnifiedContentItem } from '@/lib/schemas/components';
 import { getDisplayTitle } from '@/lib/utils';
-import type { Command, CommandInstallation, ContentItem } from '@/types/content';
-import { BaseDetailPage, type BaseDetailPageProps } from './base-detail-page';
-
-interface CommandDetailPageProps {
-  item: Command;
-  relatedItems?: ContentItem[];
-}
+import { BaseDetailPage } from './base-detail-page';
 
 // Helper functions for command-specific logic
-const generateInstallationSteps = (item: Command): CommandInstallation => {
+const generateInstallationSteps = (item: UnifiedContentItem) => {
   return {
     claudeCode: {
       steps: [
@@ -45,9 +45,9 @@ const generateInstallationSteps = (item: Command): CommandInstallation => {
   };
 };
 
-const generateUseCases = (item: Command): string[] => {
+const generateUseCases = (item: UnifiedContentItem): string[] => {
   // If manual use cases exist, prioritize them
-  if (item.useCases && item.useCases.length > 0) {
+  if ('useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0) {
     return [...item.useCases];
   }
 
@@ -55,7 +55,12 @@ const generateUseCases = (item: Command): string[] => {
   const tags = item.tags;
 
   // Generate base use cases based on common command patterns
-  const commandName = getDisplayTitle(item);
+  const commandName = getDisplayTitle({
+    title: item.title,
+    name: item.name,
+    slug: item.slug,
+    category: item.category,
+  });
   generatedUseCases.push(`Execute ${commandName} to automate repetitive tasks`);
   generatedUseCases.push(`Integrate ${commandName} into development workflows`);
 
@@ -88,9 +93,9 @@ const generateUseCases = (item: Command): string[] => {
   return generatedUseCases.slice(0, 4); // Limit to 4 use cases max
 };
 
-const generateFeatures = (item: Command): string[] => {
+const generateFeatures = (item: UnifiedContentItem): string[] => {
   // If manual features exist, prioritize them
-  if (item.features && item.features.length > 0) {
+  if ('features' in item && Array.isArray(item.features) && item.features.length > 0) {
     return [...item.features];
   }
 
@@ -98,7 +103,12 @@ const generateFeatures = (item: Command): string[] => {
   const tags = item.tags;
 
   // Generate base features based on command type
-  const commandName = getDisplayTitle(item);
+  const commandName = getDisplayTitle({
+    title: item.title,
+    name: item.name,
+    slug: item.slug,
+    category: item.category,
+  });
   generatedFeatures.push(`${commandName} command execution with customizable parameters`);
   generatedFeatures.push('Seamless integration with Claude Code workflows');
 
@@ -166,7 +176,7 @@ const generateFeatures = (item: Command): string[] => {
   return generatedFeatures.slice(0, 6); // Limit to 6 features max
 };
 
-const generateRequirements = (item: Command): string[] => {
+const generateRequirements = (item: UnifiedContentItem): string[] => {
   const baseRequirements = ['Claude Code CLI installed and configured'];
   const detectedRequirements: string[] = [];
 
@@ -210,10 +220,17 @@ const generateRequirements = (item: Command): string[] => {
   return [...baseRequirements, ...detectedRequirements];
 };
 
-const generateTroubleshooting = (item: Command): Array<{ issue: string; solution: string }> => {
+const generateTroubleshooting = (
+  item: UnifiedContentItem
+): Array<{ issue: string; solution: string }> => {
   const generatedTroubleshooting: Array<{ issue: string; solution: string }> = [];
   const tags = item.tags;
-  const commandName = getDisplayTitle(item);
+  const commandName = getDisplayTitle({
+    title: item.title,
+    name: item.name,
+    slug: item.slug,
+    category: item.category,
+  });
 
   // Common troubleshooting patterns based on command type
   const troubleshootingPatterns: Record<string, Array<{ issue: string; solution: string }>> = {
@@ -289,9 +306,9 @@ const generateTroubleshooting = (item: Command): Array<{ issue: string; solution
 
 // Helper function to render Command sidebar with resources and details
 const renderCommandSidebar = (
-  item: Command,
-  relatedItems: ContentItem[],
-  router: any
+  item: UnifiedContentItem,
+  relatedItems: UnifiedContentItem[],
+  router: ReturnType<typeof useRouter>
 ): React.ReactNode => (
   <div className="space-y-6 sticky top-20 self-start">
     {/* Resources */}
@@ -364,7 +381,7 @@ const renderCommandSidebar = (
         {(() => {
           const requirements = generateRequirements(item);
           const dependencies = requirements.filter(
-            (req) => !req.includes('Claude Code') && !req.includes('Active development')
+            (req) => !(req.includes('Claude Code') || req.includes('Active development'))
           );
           return (
             dependencies.length > 0 && (
@@ -429,7 +446,12 @@ const renderCommandSidebar = (
             >
               <div className="text-left w-full min-w-0">
                 <div className="font-medium text-sm leading-tight mb-1">
-                  {getDisplayTitle(relatedItem)}
+                  {getDisplayTitle({
+                    title: relatedItem.title,
+                    name: relatedItem.name,
+                    slug: relatedItem.slug,
+                    category: relatedItem.category,
+                  })}
                 </div>
                 <div className="flex flex-wrap gap-1 mb-1">
                   {/* Show primary tags */}
@@ -479,7 +501,6 @@ export function CommandDetailPage({ item, relatedItems = [] }: CommandDetailPage
       toast({
         title: 'Copy failed',
         description: 'Unable to copy installation steps to clipboard.',
-        variant: 'destructive',
       });
     }
   };
@@ -505,6 +526,8 @@ export function CommandDetailPage({ item, relatedItems = [] }: CommandDetailPage
                 </ul>
               </div>
             ),
+            collapsible: false,
+            defaultCollapsed: false,
           },
         ]
       : []),
@@ -522,7 +545,7 @@ export function CommandDetailPage({ item, relatedItems = [] }: CommandDetailPage
               Copy Steps
             </Button>
           </div>
-          {installation.claudeCode && (
+          {typeof installation === 'object' && installation.claudeCode && (
             <div className="space-y-4">
               <div>
                 <h4 className="font-medium mb-2">Claude Code Setup</h4>
@@ -551,8 +574,17 @@ export function CommandDetailPage({ item, relatedItems = [] }: CommandDetailPage
               )}
             </div>
           )}
+          {typeof installation === 'string' && (
+            <div className="prose prose-sm max-w-none">
+              <pre className="bg-muted p-4 rounded-lg overflow-x-auto">
+                <code>{installation}</code>
+              </pre>
+            </div>
+          )}
         </div>
       ),
+      collapsible: false,
+      defaultCollapsed: false,
     },
 
     // Use Cases Section
@@ -574,6 +606,8 @@ export function CommandDetailPage({ item, relatedItems = [] }: CommandDetailPage
                 </ul>
               </div>
             ),
+            collapsible: false,
+            defaultCollapsed: false,
           },
         ]
       : []),
@@ -597,6 +631,8 @@ export function CommandDetailPage({ item, relatedItems = [] }: CommandDetailPage
                 </ul>
               </div>
             ),
+            collapsible: false,
+            defaultCollapsed: false,
           },
         ]
       : []),
@@ -627,13 +663,15 @@ export function CommandDetailPage({ item, relatedItems = [] }: CommandDetailPage
                 </ul>
               </div>
             ),
+            collapsible: false,
+            defaultCollapsed: false,
           },
         ]
       : []),
   ];
 
   // Command-specific secondary actions
-  const secondaryActions: BaseDetailPageProps['secondaryActions'] = [
+  const baseActions: ActionButton[] = [
     // GitHub link to the command file in our repo
     {
       label: 'View on GitHub',
@@ -646,19 +684,27 @@ export function CommandDetailPage({ item, relatedItems = [] }: CommandDetailPage
         );
       },
     },
-    // Documentation link if available
-    ...(item.documentationUrl
+  ];
+
+  // Add documentation action if available
+  const documentationAction: ActionButton[] =
+    'documentationUrl' in item && (item as { documentationUrl?: string }).documentationUrl
       ? [
           {
             label: 'Documentation',
             icon: <Terminal className="h-4 w-4 mr-2" />,
             onClick: () => {
-              window.open(item.documentationUrl, '_blank', 'noopener,noreferrer');
+              window.open(
+                (item as { documentationUrl: string }).documentationUrl,
+                '_blank',
+                'noopener,noreferrer'
+              );
             },
           },
         ]
-      : []),
-  ];
+      : [];
+
+  const secondaryActions = [...baseActions, ...documentationAction] as ActionButton[];
 
   return (
     <BaseDetailPage

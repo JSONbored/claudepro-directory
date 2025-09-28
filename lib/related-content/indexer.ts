@@ -6,8 +6,11 @@
 import fs from 'fs/promises';
 import matter from 'gray-matter';
 import path from 'path';
-import type { ContentCategory } from '../schemas/shared.schema';
-import type { ContentIndex, ContentItem } from './types';
+import { logger } from '../logger';
+import type { ContentCategory } from '../schemas/components/content-item.schema';
+import { basicErrorSchema } from '../schemas/error.schema';
+import { logContextSchema } from '../schemas/logger.schema';
+import type { ContentIndex, ContentItem } from './service';
 
 const CONTENT_DIRECTORIES = {
   // Main content
@@ -39,12 +42,14 @@ export class ContentIndexer {
       commands: [],
       hooks: [],
       guides: [],
+      jobs: [],
       tutorials: [],
       comparisons: [],
       workflows: [],
       'use-cases': [],
       troubleshooting: [],
-      jobs: [],
+      categories: [],
+      collections: [],
     };
     const tags: Record<string, ContentItem[]> = {};
     const keywords: Record<string, ContentItem[]> = {};
@@ -81,11 +86,8 @@ export class ContentIndexer {
       categories,
       tags,
       keywords,
-      metadata: {
-        totalItems: items.length,
-        lastUpdated: new Date().toISOString(),
-        version: '1.0.0',
-      },
+      generated: new Date().toISOString(),
+      version: '1.0.0',
     };
   }
 
@@ -106,7 +108,19 @@ export class ContentIndexer {
         }
       }
     } catch (error) {
-      console.warn(`Failed to index directory ${dirPath}:`, error);
+      const errorData = basicErrorSchema.parse({
+        name: error instanceof Error ? error.name : 'UnknownError',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : '',
+      });
+
+      const context = logContextSchema.parse({
+        dirPath,
+        operation: 'indexDirectory',
+        errorName: errorData.name,
+      });
+
+      logger.warn(`Failed to index directory ${dirPath}`, context);
     }
 
     return items;
@@ -128,11 +142,25 @@ export class ContentIndexer {
 
       if (fileName.endsWith('.json')) {
         return this.processJsonFile(category, slug, content);
-      } else if (fileName.endsWith('.mdx')) {
+      }
+      if (fileName.endsWith('.mdx')) {
         return this.processMdxFile(category, slug, content);
       }
     } catch (error) {
-      console.warn(`Failed to process file ${fileName}:`, error);
+      const errorData = basicErrorSchema.parse({
+        name: error instanceof Error ? error.name : 'UnknownError',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : '',
+      });
+
+      const context = logContextSchema.parse({
+        fileName,
+        category,
+        operation: 'processFile',
+        errorName: errorData.name,
+      });
+
+      logger.warn(`Failed to process file ${fileName}`, context);
     }
 
     return null;
@@ -154,15 +182,26 @@ export class ContentIndexer {
         title: data.title || data.name || slug,
         description: data.description || '',
         category,
+        author: data.author || 'Community',
+        dateAdded: data.dateUpdated || data.dateAdded || new Date().toISOString(),
         tags: data.tags || [],
-        keywords: data.keywords || [],
-        url: this.generateUrl(category, slug),
-        dateUpdated: data.dateUpdated || data.dateAdded || new Date().toISOString(),
-        dateCreated: data.dateCreated || data.dateAdded || new Date().toISOString(),
-        featured: data.featured || false,
+        featured: data.featured ?? false,
       };
     } catch (error) {
-      console.warn(`Failed to parse JSON for ${slug}:`, error);
+      const errorData = basicErrorSchema.parse({
+        name: error instanceof Error ? error.name : 'UnknownError',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : '',
+      });
+
+      const context = logContextSchema.parse({
+        slug,
+        category,
+        operation: 'parseJsonFile',
+        errorName: errorData.name,
+      });
+
+      logger.warn(`Failed to parse JSON for ${slug}`, context);
       return null;
     }
   }
@@ -183,15 +222,26 @@ export class ContentIndexer {
         title: data.title || slug,
         description: data.description || '',
         category,
+        author: data.author || 'Community',
+        dateAdded: data.dateUpdated || data.dateAdded || new Date().toISOString(),
         tags: this.parseArrayField(data.tags),
-        keywords: this.parseArrayField(data.keywords),
-        url: this.generateUrl(category, slug),
-        dateUpdated: data.dateUpdated || data.dateAdded || new Date().toISOString(),
-        dateCreated: data.dateCreated || data.dateAdded || new Date().toISOString(),
-        featured: data.featured || false,
+        featured: data.featured ?? false,
       };
     } catch (error) {
-      console.warn(`Failed to parse MDX for ${slug}:`, error);
+      const errorData = basicErrorSchema.parse({
+        name: error instanceof Error ? error.name : 'UnknownError',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : '',
+      });
+
+      const context = logContextSchema.parse({
+        slug,
+        category,
+        operation: 'parseMdxFile',
+        errorName: errorData.name,
+      });
+
+      logger.warn(`Failed to parse MDX for ${slug}`, context);
       return null;
     }
   }
@@ -199,34 +249,11 @@ export class ContentIndexer {
   /**
    * Parse array field from frontmatter
    */
-  private parseArrayField(field: any): string[] {
+  private parseArrayField(field: string | string[] | null | undefined): string[] {
     if (!field) return [];
     if (Array.isArray(field)) return field;
     if (typeof field === 'string') return field.split(',').map((s) => s.trim());
     return [];
-  }
-
-  /**
-   * Generate URL for content item
-   */
-  private generateUrl(category: ContentCategory, slug: string): string {
-    // Map categories to URL paths
-    const urlPaths: Record<ContentCategory, string> = {
-      agents: '/agents',
-      mcp: '/mcp',
-      rules: '/rules',
-      commands: '/commands',
-      hooks: '/hooks',
-      guides: '/guides',
-      tutorials: '/guides/tutorials',
-      comparisons: '/guides/comparisons',
-      workflows: '/guides/workflows',
-      'use-cases': '/guides/use-cases',
-      troubleshooting: '/guides/troubleshooting',
-      jobs: '/jobs',
-    };
-
-    return `${urlPaths[category]}/${slug}`;
   }
 
   /**
@@ -248,7 +275,19 @@ export class ContentIndexer {
       const content = await fs.readFile(indexPath, 'utf-8');
       return JSON.parse(content);
     } catch (error) {
-      console.warn('Failed to load content index:', error);
+      const errorData = basicErrorSchema.parse({
+        name: error instanceof Error ? error.name : 'UnknownError',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : '',
+      });
+
+      const context = logContextSchema.parse({
+        indexPath,
+        operation: 'loadIndex',
+        errorName: errorData.name,
+      });
+
+      logger.warn('Failed to load content index', context);
       return null;
     }
   }

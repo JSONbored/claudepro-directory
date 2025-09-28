@@ -14,6 +14,7 @@ const configBadgeVariants = cva('text-xs font-medium border transition-colors', 
       agents: 'bg-green-500/20 text-green-500 border-green-500/30',
       commands: 'bg-orange-500/20 text-orange-500 border-orange-500/30',
       hooks: 'bg-pink-500/20 text-pink-500 border-pink-500/30',
+      guides: 'bg-indigo-500/20 text-indigo-500 border-indigo-500/30',
       default: 'bg-gray-500/20 text-gray-500 border-gray-500/30',
     },
     source: {
@@ -40,15 +41,13 @@ const configBadgeVariants = cva('text-xs font-medium border transition-colors', 
 export interface ConfigBadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof configBadgeVariants> {
-  variant?: 'default' | 'secondary' | 'destructive' | 'outline';
-  type?: 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks' | 'default';
+  type?: 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks' | 'guides' | 'default';
   source?: 'official' | 'partner' | 'community' | 'verified' | 'experimental' | 'other';
   status?: 'active' | 'trending' | 'new' | 'updated' | 'deprecated';
 }
 
 export function ConfigBadge({
   className,
-  variant = 'default',
   type,
   source,
   status,
@@ -74,7 +73,7 @@ export function ConfigBadge({
   }
 
   return (
-    <Badge variant={variant} className={className} {...props}>
+    <Badge className={className} {...props}>
       {children}
     </Badge>
   );
@@ -84,7 +83,10 @@ export function TypeBadge({
   type,
   className,
   ...props
-}: { type: 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks' } & Omit<ConfigBadgeProps, 'type'>) {
+}: { type: 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks' | 'guides' } & Omit<
+  ConfigBadgeProps,
+  'type'
+>) {
   const displayText =
     type === 'mcp'
       ? 'MCP'
@@ -94,7 +96,9 @@ export function TypeBadge({
           ? 'Agent'
           : type === 'commands'
             ? 'Command'
-            : 'Hook';
+            : type === 'hooks'
+              ? 'Hook'
+              : 'Guide';
 
   return (
     <ConfigBadge type={type} className={className} {...props}>
@@ -140,7 +144,6 @@ export function TagBadge({
     return (
       <ConfigBadge
         status="active"
-        variant="default"
         className={cn(
           'cursor-pointer transition-all duration-200 bg-accent text-accent-foreground shadow-lg shadow-primary/25',
           className

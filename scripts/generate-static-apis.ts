@@ -11,10 +11,11 @@ import { mkdir, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { z } from 'zod';
 import { agents, commands, hooks, mcp, rules } from '../generated/content';
+import { APP_CONFIG } from '../lib/constants';
 import { buildConfig, env } from '../lib/schemas/env.schema';
 import {
+  type AppContentType,
   type ContentCategory,
-  type ContentType,
   contentCategorySchema,
 } from '../lib/schemas/shared.schema';
 import {
@@ -29,8 +30,8 @@ import {
   type GenerationResult,
   type HealthCheckResponse,
   healthCheckResponseSchema,
-  type SearchableItem,
-  searchableItemSchema,
+  type StaticAPISearchableItem,
+  staticAPISearchableItemSchema,
   type TransformedContentItem,
   transformedContentItemSchema,
 } from '../lib/schemas/static-api.schema';
@@ -41,14 +42,14 @@ const OUTPUT_DIR = join(process.cwd(), 'public', 'static-api');
 // Helper function to transform content with type and URL
 function transformContent<T extends { slug: string }>(
   content: readonly T[] | T[],
-  type: ContentType,
+  type: AppContentType,
   category: string
 ): TransformedContentItem[] {
   return content.map((item) => {
     const transformed = {
       ...item,
       type,
-      url: `https://claudepro.directory/${category}/${item.slug}`,
+      url: `${APP_CONFIG.url}/${category}/${item.slug}`,
     };
 
     // Validate the transformed item
@@ -59,14 +60,15 @@ function transformContent<T extends { slug: string }>(
 // Convert content items to searchable format
 function toSearchableItems<
   T extends {
-    title?: string;
-    name?: string;
+    title?: string | undefined;
+    name?: string | undefined;
     description: string;
     tags: readonly string[] | string[];
     slug: string;
-    category?: string;
+    category?: string | undefined;
+    [key: string]: unknown;
   },
->(items: readonly T[] | T[], category: string): SearchableItem[] {
+>(items: readonly T[] | T[], category: string): StaticAPISearchableItem[] {
   return items.map((item) => {
     const searchable = {
       title: item.title || item.name || '',
@@ -79,18 +81,18 @@ function toSearchableItems<
     };
 
     // Validate the searchable item - this will throw if validation fails
-    return searchableItemSchema.parse(searchable);
+    return staticAPISearchableItemSchema.parse(searchable);
   });
 }
 
 // Generate individual content type APIs
 async function generateContentTypeAPIs() {
   const contentMap = {
-    'agents.json': { data: agents, type: 'agent' as ContentType },
-    'mcp.json': { data: mcp, type: 'mcp' as ContentType },
-    'hooks.json': { data: hooks, type: 'hook' as ContentType },
-    'commands.json': { data: commands, type: 'command' as ContentType },
-    'rules.json': { data: rules, type: 'rule' as ContentType },
+    'agents.json': { data: agents, type: 'agent' as AppContentType },
+    'mcp.json': { data: mcp, type: 'mcp' as AppContentType },
+    'hooks.json': { data: hooks, type: 'hook' as AppContentType },
+    'commands.json': { data: commands, type: 'command' as AppContentType },
+    'rules.json': { data: rules, type: 'rule' as AppContentType },
   };
 
   console.log('📦 Generating individual content type APIs...');
@@ -106,7 +108,7 @@ async function generateContentTypeAPIs() {
       const transformed = {
         ...item,
         type,
-        url: `https://claudepro.directory/${validatedCategory}/${item.slug}`,
+        url: `${APP_CONFIG.url}/${validatedCategory}/${item.slug}`,
       };
       return transformedContentItemSchema.parse(transformed);
     });
@@ -132,18 +134,18 @@ async function generateContentTypeAPIs() {
 async function generateAllConfigurationsAPI() {
   console.log('📦 Generating all-configurations API...');
 
-  const transformedAgents = transformContent(agents, 'agent' as ContentType, 'agents');
-  const transformedMcp = transformContent(mcp, 'mcp' as ContentType, 'mcp');
-  const transformedRules = transformContent(rules, 'rule' as ContentType, 'rules');
-  const transformedCommands = transformContent(commands, 'command' as ContentType, 'commands');
-  const transformedHooks = transformContent(hooks, 'hook' as ContentType, 'hooks');
+  const transformedAgents = transformContent(agents, 'agent' as AppContentType, 'agents');
+  const transformedMcp = transformContent(mcp, 'mcp' as AppContentType, 'mcp');
+  const transformedRules = transformContent(rules, 'rule' as AppContentType, 'rules');
+  const transformedCommands = transformContent(commands, 'command' as AppContentType, 'commands');
+  const transformedHooks = transformContent(hooks, 'hook' as AppContentType, 'hooks');
 
   const allConfigurations: AllConfigurationsResponse = {
     '@context': 'https://schema.org',
     '@type': 'Dataset',
-    name: 'Claude Pro Directory - All Configurations',
-    description: 'Complete database of Claude AI configurations',
-    license: 'MIT',
+    name: `${APP_CONFIG.name} - All Configurations`,
+    description: APP_CONFIG.description,
+    license: APP_CONFIG.license,
     lastUpdated: new Date().toISOString(),
     generated: 'static' as const,
     statistics: {
@@ -167,11 +169,11 @@ async function generateAllConfigurationsAPI() {
       hooks: transformedHooks,
     },
     endpoints: {
-      agents: 'https://claudepro.directory/api/agents.json',
-      mcp: 'https://claudepro.directory/api/mcp.json',
-      rules: 'https://claudepro.directory/api/rules.json',
-      commands: 'https://claudepro.directory/api/commands.json',
-      hooks: 'https://claudepro.directory/api/hooks.json',
+      agents: `${APP_CONFIG.url}/api/agents.json`,
+      mcp: `${APP_CONFIG.url}/api/mcp.json`,
+      rules: `${APP_CONFIG.url}/api/rules.json`,
+      commands: `${APP_CONFIG.url}/api/commands.json`,
+      hooks: `${APP_CONFIG.url}/api/hooks.json`,
     },
   };
 
@@ -191,7 +193,7 @@ async function generateSearchIndexes() {
   console.log('📦 Generating search indexes...');
 
   // Create combined searchable dataset
-  const allSearchableItems: SearchableItem[] = [
+  const allSearchableItems: StaticAPISearchableItem[] = [
     ...toSearchableItems([...agents], 'agents'),
     ...toSearchableItems([...mcp], 'mcp'),
     ...toSearchableItems([...rules], 'rules'),
@@ -292,7 +294,7 @@ async function generateHealthCheck() {
   const outputFile = join(OUTPUT_DIR, 'health.json');
   await writeFile(outputFile, JSON.stringify(validatedHealth, null, 2));
 
-  console.log(`  ✅ Generated health check endpoint`);
+  console.log('  ✅ Generated health check endpoint');
 }
 
 // Main generation function

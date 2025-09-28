@@ -7,6 +7,7 @@ import path from 'path';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { APP_CONFIG } from '@/lib/constants';
 import { logger } from '@/lib/logger';
 import { markdownToSafeHtml } from '@/lib/markdown-utils';
 
@@ -15,16 +16,7 @@ export const revalidate = 604800; // 7 days in seconds
 export const dynamic = 'force-static'; // Force static generation
 export const dynamicParams = true; // Allow new pages to be generated on-demand
 
-interface ComparisonData {
-  title: string;
-  description: string;
-  content: string;
-  item1Id: string;
-  item2Id: string;
-  category1: string;
-  category2: string;
-  lastUpdated: string;
-}
+import type { ComparisonData } from '@/lib/schemas/app.schema';
 
 async function getComparisonData(slug: string): Promise<ComparisonData | null> {
   try {
@@ -33,7 +25,7 @@ async function getComparisonData(slug: string): Promise<ComparisonData | null> {
 
     // Parse frontmatter
     const frontmatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-    if (!frontmatterMatch?.[1] || !frontmatterMatch?.[2]) return null;
+    if (!(frontmatterMatch?.[1] && frontmatterMatch?.[2])) return null;
 
     const frontmatter = frontmatterMatch[1];
     const content = frontmatterMatch[2];
@@ -71,7 +63,7 @@ export async function generateStaticParams() {
     const metadataPath = path.join(process.cwd(), 'seo', 'comparisons', '_metadata.json');
     const metadata = JSON.parse(await fs.readFile(metadataPath, 'utf-8'));
 
-    return metadata.map((item: any) => ({
+    return metadata.map((item: { slug: string }) => ({
       slug: item.slug,
     }));
   } catch (_error) {
@@ -103,7 +95,7 @@ export async function generateMetadata({
       description: data.description,
       type: 'article',
       publishedTime: data.lastUpdated,
-      authors: ['Claude Pro Directory'],
+      authors: [APP_CONFIG.author],
     },
     twitter: {
       card: 'summary_large_image',

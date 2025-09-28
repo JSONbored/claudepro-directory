@@ -1,26 +1,34 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { MCPDetailPage } from '@/components/mcp-detail-page';
+import { MCPStructuredData } from '@/components/structured-data/mcp-schema';
 import { ViewTracker } from '@/components/view-tracker';
 import { getMcpBySlug, getMcpFullContent, mcp } from '@/generated/content';
+import { APP_CONFIG } from '@/lib/constants';
 import { sortMcp } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
-import { slugParamSchema } from '@/lib/schemas/search.schema';
+import type { PageProps } from '@/lib/schemas/app.schema';
+import { slugParamsSchema } from '@/lib/schemas/app.schema';
+import { mcpServerContentSchema } from '@/lib/schemas/content.schema';
+import { transformForDetailPage } from '@/lib/transformers';
 import { getDisplayTitle } from '@/lib/utils';
 
-interface MCPPageProps {
-  params: Promise<{ slug: string }>;
-}
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  if (!params) {
+    return {
+      title: 'MCP Server Not Found',
+      description: 'The requested MCP server could not be found.',
+    };
+  }
 
-export async function generateMetadata({ params }: MCPPageProps): Promise<Metadata> {
   const rawParams = await params;
 
   // Validate slug parameter
-  const validationResult = slugParamSchema.safeParse(rawParams);
+  const validationResult = slugParamsSchema.safeParse(rawParams);
 
   if (!validationResult.success) {
     logger.warn('Invalid slug parameter for MCP metadata', {
-      slug: rawParams.slug,
+      slug: String(rawParams.slug),
       errorCount: validationResult.error.issues.length,
       firstError: validationResult.error.issues[0]?.message || 'Unknown error',
     });
@@ -41,7 +49,7 @@ export async function generateMetadata({ params }: MCPPageProps): Promise<Metada
   }
 
   return {
-    title: `${getDisplayTitle(mcpServer)} - MCP Server | Claude Pro Directory`,
+    title: `${getDisplayTitle(mcpServer)} - MCP Server | ${APP_CONFIG.name}`,
     description: mcpServer.description,
     keywords: mcpServer.tags?.join(', '),
     openGraph: {
@@ -61,7 +69,7 @@ export async function generateStaticParams() {
     return sortedMcp
       .map((mcpItem) => {
         // Validate slug using existing schema before static generation
-        const validation = slugParamSchema.safeParse({ slug: mcpItem.slug });
+        const validation = slugParamsSchema.safeParse({ slug: mcpItem.slug });
 
         if (!validation.success) {
           logger.warn('Invalid slug in generateStaticParams for MCP', {
@@ -89,18 +97,22 @@ export async function generateStaticParams() {
   }
 }
 
-export default async function MCPPage({ params }: MCPPageProps) {
+export default async function MCPPage({ params }: PageProps) {
+  if (!params) {
+    notFound();
+  }
+
   const rawParams = await params;
 
   // Validate slug parameter
-  const validationResult = slugParamSchema.safeParse(rawParams);
+  const validationResult = slugParamsSchema.safeParse(rawParams);
 
   if (!validationResult.success) {
     logger.error(
       'Invalid slug parameter for MCP page',
       new Error(validationResult.error.issues[0]?.message || 'Invalid MCP slug'),
       {
-        slug: rawParams.slug,
+        slug: String(rawParams.slug),
         errorCount: validationResult.error.issues.length,
       }
     );
@@ -127,10 +139,20 @@ export default async function MCPPage({ params }: MCPPageProps) {
     .filter((m) => m.slug !== mcpMeta.slug && m.category === mcpMeta.category)
     .slice(0, 3);
 
+  const mcpServer = mcpServerContentSchema.parse(fullMCP || mcpMeta);
+  const relatedMCPsParsed = relatedMCPs.map((m) => mcpServerContentSchema.parse(m));
+
+  // Transform for component interface
+  const { item: transformedMCP, relatedItems: transformedRelatedMCPs } = transformForDetailPage(
+    mcpServer,
+    relatedMCPsParsed
+  );
+
   return (
     <>
       <ViewTracker category="mcp" slug={slug} />
-      <MCPDetailPage item={fullMCP || mcpMeta} relatedItems={relatedMCPs} />
+      <MCPStructuredData item={mcpServer} />
+      <MCPDetailPage item={transformedMCP} relatedItems={transformedRelatedMCPs} />
     </>
   );
 }
