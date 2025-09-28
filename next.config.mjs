@@ -147,9 +147,7 @@ const nextConfig = {
     if (!isServer) {
       config.resolve.alias = {
         ...config.resolve.alias,
-        // Direct imports for commonly used Radix primitives to avoid barrel imports
-        '@radix-ui/react-slot$': '@radix-ui/react-slot/dist/index.mjs',
-        '@radix-ui/react-primitive$': '@radix-ui/react-primitive/dist/index.mjs',
+        // Tree-shaking is now handled by optimizePackageImports in experimental config
       };
     }
 
