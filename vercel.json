@@ -13,6 +13,9 @@
     },
     "app/page.tsx": {
       "maxDuration": 5
+    },
+    "app/manifest.ts": {
+      "maxDuration": 5
     }
   },
   "crons": [

@@ -8,7 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { createErrorBoundaryFallback } from '@/lib/error-handler';
 import { umamiEventDataSchema } from '@/lib/schemas/analytics.schema';
 import type { ErrorBoundaryProps, ErrorFallbackProps } from '@/lib/schemas/component.schema';
-import { isDevelopment } from '@/lib/schemas/env.schema';
+
+// Client-safe environment check - doesn't trigger server env validation
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
   const handleGoHome = useCallback(() => {
