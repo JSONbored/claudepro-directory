@@ -19,8 +19,7 @@ import { githubContentService } from '@/lib/services/github-content.service';
 
 // ISR Configuration - Revalidate every 4 hours
 export const revalidate = 14400; // 4 hours
-export const dynamic = 'force-static';
-export const dynamicParams = true;
+export const dynamicParams = true; // Allow on-demand generation of new pages
 
 // Use Edge Runtime for better performance and lower costs
 export const runtime = 'edge';
@@ -149,30 +148,8 @@ async function getRelatedGuides(currentSlug: string[], limit = 3): Promise<Relat
   }
 }
 
-export async function generateStaticParams() {
-  try {
-    // Use our optimized content system instead of filesystem operations
-    const seoContent = await contentProcessor.getSEOContent();
-
-    const paths = [];
-
-    for (const [category, items] of Object.entries(seoContent)) {
-      for (const item of items) {
-        const itemSlug = item.slug.split('/').pop();
-        if (itemSlug) {
-          paths.push({
-            slug: [category, itemSlug],
-          });
-        }
-      }
-    }
-
-    return paths;
-  } catch (error) {
-    logger.error('Failed to generate static params for guides', error as Error);
-    return [];
-  }
-}
+// Note: generateStaticParams removed to enable Edge Runtime
+// Pages will be generated on-demand with ISR (4-hour revalidation)
 
 export async function generateMetadata({
   params,
