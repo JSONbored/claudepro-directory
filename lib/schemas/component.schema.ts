@@ -16,7 +16,6 @@ import {
   type ContentCategory,
   commandDetailPagePropsSchema,
   configCardPropsSchema,
-  contentCategorySchema,
   type HomePageClientProps,
   type HookDetailPageProps,
   homePageClientPropsSchema,
@@ -119,6 +118,7 @@ export type { FilterOptions, SortDirection, SortOption };
 export type { FAQItem };
 
 // Re-export ContentCategory from components
+import { contentCategorySchema } from './shared.schema';
 export { contentCategorySchema };
 export type { ContentCategory };
 

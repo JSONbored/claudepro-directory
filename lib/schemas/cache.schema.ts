@@ -37,17 +37,13 @@ const KEY_PATTERNS = {
 
 /**
  * Content category enum for cache operations
+ * Using subset schema from shared source of truth
  */
-export const cacheCategorySchema = z.enum([
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'guides',
-  'jobs',
-  'all_content', // Special category for combined content operations
-]);
+import { cacheableCategorySchema } from './shared.schema';
+
+// Re-export with original name for backward compatibility
+// Adding 'all_content' as a special category for combined operations
+export const cacheCategorySchema = z.union([cacheableCategorySchema, z.literal('all_content')]);
 
 /**
  * Base cache key parameters

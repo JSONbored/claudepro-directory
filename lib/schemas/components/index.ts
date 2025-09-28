@@ -6,7 +6,6 @@
 // Content item schemas
 export {
   type ContentCategory,
-  contentCategorySchema,
   type UnifiedContentItem,
   unifiedContentItemSchema,
 } from './content-item.schema';

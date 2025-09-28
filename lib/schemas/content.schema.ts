@@ -6,10 +6,7 @@
  */
 
 // Re-export ContentCategory from components for compatibility
-export {
-  type ContentCategory as ComponentContentCategory,
-  contentCategorySchema as componentContentCategorySchema,
-} from './components/content-item.schema';
+export type { ContentCategory as ComponentContentCategory } from './components/content-item.schema';
 
 // Import for local use and re-export
 import {

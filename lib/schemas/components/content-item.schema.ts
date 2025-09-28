@@ -184,20 +184,6 @@ export type UnifiedContentItem = z.infer<typeof unifiedContentItemSchema>;
 /**
  * Content category enum for type safety
  */
-export const contentCategorySchema = z.enum([
-  'agents',
-  'mcp',
-  'rules',
-  'commands',
-  'hooks',
-  'guides',
-  'jobs',
-  'tutorials',
-  'comparisons',
-  'workflows',
-  'use-cases',
-  'troubleshooting',
-  'categories',
-  'collections',
-]);
+// Import the single source of truth for content categories
+import type { contentCategorySchema } from '../shared.schema';
 export type ContentCategory = z.infer<typeof contentCategorySchema>;

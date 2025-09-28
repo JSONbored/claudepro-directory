@@ -16,19 +16,54 @@ import { z } from 'zod';
  * Content Categories
  * Used across: analytics, content, content-generation, related-content, static-api
  */
+// Main comprehensive schema - single source of truth for ALL content categories
 export const contentCategorySchema = z.enum([
+  // Core content types (have dedicated directories in /content)
   'agents',
   'mcp',
   'rules',
   'commands',
   'hooks',
+
+  // SEO content types (in /seo directory)
   'guides',
   'tutorials',
   'comparisons',
   'workflows',
   'use-cases',
   'troubleshooting',
+  'categories',
+  'collections',
+
+  // Special types
+  'jobs', // Has route but no content directory
+]);
+
+// Subset schema for core content only (used in various places)
+export const coreContentCategorySchema = z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks']);
+
+// Subset schema for SEO content types
+export const seoContentCategorySchema = z.enum([
+  'guides',
+  'tutorials',
+  'comparisons',
+  'workflows',
+  'use-cases',
+  'troubleshooting',
+  'categories',
+  'collections',
+]);
+
+// Subset schema for cacheable categories (used by Redis caching)
+export const cacheableCategorySchema = z.enum([
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'guides',
   'jobs',
+  // Note: SEO content doesn't need Redis caching
 ]);
 
 export type ContentCategory = z.infer<typeof contentCategorySchema>;
