@@ -10,7 +10,7 @@ import { contentProcessor } from '@/lib/services/content-processor.service';
 export const revalidate = 14400;
 
 // Use Edge Runtime for better performance and lower costs
-export const runtime = 'edge';
+// Use Node.js runtime for GitHub API and Redis compatibility
 
 export const metadata: Metadata = {
   title: `MCP Servers - Model Context Protocol | ${APP_CONFIG.name}`,

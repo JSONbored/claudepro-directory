@@ -143,5 +143,4 @@ export default async function CommandPage({ params }: PageProps) {
 // Enable ISR - revalidate every 4 hours
 export const revalidate = 14400;
 
-// Use Edge Runtime for better performance
-export const runtime = 'edge';
+// Use Node.js runtime for GitHub API and Redis compatibility

@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export const revalidate = 14400;
 
 // Use Edge Runtime for better performance
-export const runtime = 'edge';
+// Use Node.js runtime for GitHub API and Redis compatibility
 
 export default async function AgentPage({ params }: PageProps) {
   if (!params) {
