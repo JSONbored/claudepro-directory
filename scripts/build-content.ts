@@ -163,8 +163,12 @@ async function processJsonFile(
       parsedData.slug = generateSlugFromFilename(file);
     }
 
-    // Auto-generate title from slug if not provided (for display purposes)
-    if (!parsedData.title && typeof parsedData.slug === 'string') {
+    // Auto-generate title from slug if not provided or empty (for display purposes)
+    if (
+      (!parsedData.title ||
+        (typeof parsedData.title === 'string' && parsedData.title.trim() === '')) &&
+      typeof parsedData.slug === 'string'
+    ) {
       parsedData.title = slugToTitle(parsedData.slug);
     }
 

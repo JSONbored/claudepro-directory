@@ -1,28 +1,30 @@
 /**
  * Rule Content Schema
  * Based on actual rule JSON files structure and rules template
+ *
+ * Uses Zod v4 shape destructuring pattern for composition with base content schema.
+ * This approach is more tsc-efficient than .extend() and follows Zod best practices.
+ *
+ * Phase 2: Content Schema Consolidation
+ * - Eliminates duplication by inheriting from base-content.schema.ts
+ * - Uses shape destructuring for optimal TypeScript performance
+ * - Maintains all rule-specific validation logic
  */
 
 import { z } from 'zod';
-import { limitedMediumStringArray, requiredTagArray } from '@/lib/schemas/primitives/base-arrays';
-import { aiTemperature, optionalPositiveInt } from '@/lib/schemas/primitives/base-numbers';
 import {
-  codeString,
-  isoDateString,
-  mediumString,
-  nonEmptyString,
-  optionalNonEmptyString,
-  optionalUrlString,
-} from '@/lib/schemas/primitives/base-strings';
+  baseConfigurationSchema,
+  baseContentMetadataSchema,
+} from '@/lib/schemas/content/base-content.schema';
+import { limitedMediumStringArray } from '@/lib/schemas/primitives/base-arrays';
+import { codeString, mediumString } from '@/lib/schemas/primitives/base-strings';
 
-// Base configuration schema for rules
-const ruleConfigurationSchema = z.object({
-  temperature: aiTemperature.optional(),
-  maxTokens: optionalPositiveInt,
-  systemPrompt: z.string().optional(),
-});
-
-// Rule example schema
+/**
+ * Rule Example Schema
+ *
+ * Structured example showing how to use a rule effectively.
+ * Includes prompt and expected outcome for demonstration purposes.
+ */
 const ruleExampleSchema = z.object({
   title: z.string().max(200),
   description: mediumString,
@@ -30,7 +32,13 @@ const ruleExampleSchema = z.object({
   expectedOutcome: codeString,
 });
 
-// Troubleshooting entry for rules
+/**
+ * Rule Troubleshooting Schema
+ *
+ * Troubleshooting guidance can be either:
+ * - Simple string for quick tips
+ * - Structured object with issue and solution for complex scenarios
+ */
 const ruleTroubleshootingSchema = z.union([
   mediumString,
   z.object({
@@ -41,49 +49,59 @@ const ruleTroubleshootingSchema = z.union([
 
 /**
  * Rule content schema - matches actual production rule JSON structure
+ *
+ * Inherits common fields from baseContentMetadataSchema via shape destructuring:
+ * - slug: URL-safe identifier for the rule
+ * - description: Clear explanation of what the rule does
+ * - author: Rule creator or maintainer
+ * - dateAdded: ISO date when rule was added
+ * - tags: Required array of tags for categorization and search
+ * - content: Main rule content body (markdown supported)
+ * - title: Optional display title (often auto-generated from slug)
+ * - source: Content source type (community, official, verified, claudepro)
+ * - documentationUrl: Optional link to external documentation
+ * - features: Optional list of key features this rule provides
+ * - useCases: Optional list of scenarios where this rule is useful
+ *
+ * Rule-specific additions:
+ * - category: 'rules' literal for type discrimination
+ * - configuration: AI model settings (temperature, maxTokens, systemPrompt)
+ * - githubUrl: Optional GitHub repository link for rule source
+ * - requirements: List of prerequisites or dependencies
+ * - examples: Usage examples (simple strings or structured objects)
+ * - troubleshooting: Common issues and solutions
+ * - relatedRules: Links to related rules for cross-reference
+ * - expertiseAreas: Domains or topics this rule applies to
+ * - difficultyLevel: Skill level required to use this rule effectively
  */
 export const ruleContentSchema = z.object({
-  // Required base properties (always present in rules)
-  slug: nonEmptyString,
-  description: nonEmptyString,
+  // Inherit all base content metadata fields using shape destructuring (Zod v4 best practice)
+  ...baseContentMetadataSchema.shape,
+
+  // Rule-specific required fields
   category: z.literal('rules'),
-  author: nonEmptyString,
-  dateAdded: isoDateString,
 
-  // Required rule-specific properties
-  tags: requiredTagArray,
-  content: nonEmptyString, // Long rule content/prompt
+  // Rule-specific optional fields
+  configuration: baseConfigurationSchema.optional(),
 
-  // Auto-generated but present in actual files
-  title: optionalNonEmptyString,
-
-  // Optional properties (can be undefined)
-  source: z.enum(['community', 'official', 'verified', 'claudepro']).optional(),
-
-  // Configuration settings
-  configuration: ruleConfigurationSchema.optional(),
-
-  // URLs and documentation
-  documentationUrl: optionalUrlString,
+  // GitHub URL with validation
   githubUrl: z
     .string()
     .url()
     .refine((url) => url.includes('github.com'), { message: 'Must be a GitHub URL' })
     .optional(),
 
-  // Rule features and capabilities
-  features: z.array(mediumString).max(50).optional(),
-  useCases: z.array(mediumString).max(50).optional(),
+  // Prerequisites and dependencies
   requirements: limitedMediumStringArray.optional(),
 
-  // Examples and troubleshooting
+  // Examples and troubleshooting guidance
   examples: z
     .array(z.union([codeString, ruleExampleSchema]))
     .max(10)
     .optional(),
   troubleshooting: z.array(ruleTroubleshootingSchema).max(20).optional(),
 
-  // Rule metadata
+  // Rule metadata for organization and discovery
   relatedRules: z.array(z.string()).max(20).optional(),
   expertiseAreas: z.array(z.string().max(200)).max(10).optional(),
   difficultyLevel: z.enum(['Beginner', 'Intermediate', 'Advanced', 'Expert']).optional(),

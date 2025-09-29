@@ -1,51 +1,38 @@
 /**
  * Agent Content Schema
  * Based on actual agent JSON files structure
+ *
+ * Uses Zod v4 shape destructuring pattern for composition with base content schema.
+ * This approach is more tsc-efficient than .extend() and follows Zod best practices.
  */
 
 import { z } from 'zod';
-import { optionalStringArray, requiredTagArray } from '@/lib/schemas/primitives/base-arrays';
-import { aiTemperature, optionalPositiveInt } from '@/lib/schemas/primitives/base-numbers';
 import {
-  isoDateString,
-  nonEmptyString,
-  optionalNonEmptyString,
-  optionalUrlString,
-} from '@/lib/schemas/primitives/base-strings';
-
-// Base configuration schema for agents
-const agentConfigurationSchema = z.object({
-  temperature: aiTemperature.optional(),
-  maxTokens: optionalPositiveInt,
-  systemPrompt: z.string().optional(),
-});
+  baseConfigurationSchema,
+  baseContentMetadataSchema,
+} from '@/lib/schemas/content/base-content.schema';
 
 /**
  * Agent content schema - matches actual production agent JSON structure
+ *
+ * Inherits common fields from baseContentMetadataSchema via shape destructuring:
+ * - slug, description, author, dateAdded, tags, content
+ * - title, source, documentationUrl, features, useCases
+ *
+ * Agent-specific additions:
+ * - category: 'agents' literal
+ * - configuration: AI model settings (temperature, maxTokens, systemPrompt)
+ * - installation: Optional complex installation object
  */
 export const agentContentSchema = z.object({
-  // Required base properties (always present in agents)
-  slug: nonEmptyString,
-  description: nonEmptyString,
+  // Inherit all base content metadata fields using shape destructuring (Zod v4 best practice)
+  ...baseContentMetadataSchema.shape,
+
+  // Agent-specific required fields
   category: z.literal('agents'),
-  author: nonEmptyString,
-  dateAdded: isoDateString,
 
-  // Required agent-specific properties
-  tags: requiredTagArray,
-  content: nonEmptyString,
-
-  // Auto-generated but present in actual files
-  title: optionalNonEmptyString,
-
-  // Optional properties
-  features: optionalStringArray,
-  useCases: optionalStringArray,
-
-  // Optional properties (can be undefined)
-  documentationUrl: optionalUrlString,
-  configuration: agentConfigurationSchema.optional(),
-  source: z.enum(['community', 'official', 'verified', 'claudepro']).optional(),
+  // Agent-specific optional fields
+  configuration: baseConfigurationSchema.optional(),
   installation: z.record(z.string(), z.any()).optional(), // Complex installation object
 });
 

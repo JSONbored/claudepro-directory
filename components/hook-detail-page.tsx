@@ -234,35 +234,37 @@ export function HookDetailPage({ item, relatedItems = [] }: HookDetailPageProps)
             Copy Steps
           </Button>
         </div>
-        {isValidInstallation(installation) && installation.claudeCode && (
-          <div className="space-y-4">
-            <div>
-              <h4 className="font-medium mb-2">Claude Code Setup</h4>
-              <ol className="list-decimal list-inside space-y-1 text-sm">
-                {installation.claudeCode?.steps?.map((step: string) => (
-                  <li key={step.slice(0, 50)} className="leading-relaxed">
-                    {step}
-                  </li>
-                ))}
-              </ol>
-            </div>
-            {installation.claudeCode?.configPath && (
+        {isValidInstallation(installation) &&
+          installation.claudeCode &&
+          typeof installation.claudeCode === 'object' && (
+            <div className="space-y-4">
               <div>
-                <h4 className="font-medium mb-2">Configuration Paths</h4>
-                <div className="space-y-1 text-sm">
-                  {Object.entries(installation.claudeCode.configPath).map(([os, path]) => (
-                    <div key={os} className="flex gap-2">
-                      <Badge variant="outline" className="capitalize">
-                        {os}
-                      </Badge>
-                      <code className="text-xs bg-muted px-1 py-0.5 rounded">{String(path)}</code>
-                    </div>
+                <h4 className="font-medium mb-2">Claude Code Setup</h4>
+                <ol className="list-decimal list-inside space-y-1 text-sm">
+                  {installation.claudeCode?.steps?.map((step: string) => (
+                    <li key={step.slice(0, 50)} className="leading-relaxed">
+                      {step}
+                    </li>
                   ))}
-                </div>
+                </ol>
               </div>
-            )}
-          </div>
-        )}
+              {installation.claudeCode?.configPath && (
+                <div>
+                  <h4 className="font-medium mb-2">Configuration Paths</h4>
+                  <div className="space-y-1 text-sm">
+                    {Object.entries(installation.claudeCode.configPath).map(([os, path]) => (
+                      <div key={os} className="flex gap-2">
+                        <Badge variant="outline" className="capitalize">
+                          {os}
+                        </Badge>
+                        <code className="text-xs bg-muted px-1 py-0.5 rounded">{String(path)}</code>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         {isValidInstallation(installation) &&
           installation.requirements &&
           installation.requirements.length > 0 && (

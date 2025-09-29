@@ -1,14 +1,13 @@
 /**
  * Guide Content Schema
  * Based on SEO/tutorial MDX files structure and frontmatter
+ *
+ * Phase 2: Refactored using base-content.schema.ts with shape destructuring
  */
 
 import { z } from 'zod';
-import {
-  largeContentArray,
-  limitedMediumStringArray,
-  requiredTagArray,
-} from '@/lib/schemas/primitives/base-arrays';
+import { baseContentMetadataSchema } from '@/lib/schemas/content/base-content.schema';
+import { requiredTagArray } from '@/lib/schemas/primitives/base-arrays';
 import {
   isoDateString,
   nonEmptyString,
@@ -16,12 +15,67 @@ import {
 } from '@/lib/schemas/primitives/base-strings';
 
 /**
- * Guide content schema - matches MDX files with frontmatter in seo/ directory
+ * Guide Content Schema
+ *
+ * Matches MDX files with frontmatter in seo/ directory.
+ * Uses Zod v4 shape destructuring pattern for composition with base content schema.
+ *
+ * Inherited Fields from baseContentMetadataSchema:
+ * - slug: URL-safe identifier (generated from file path)
+ * - description: Guide description
+ * - author: Content creator
+ * - dateAdded: ISO date when guide was added (fallback)
+ * - tags: Required array of tags
+ * - content: Full MDX content without frontmatter
+ * - title: Display title (overridden as required for guides)
+ * - source: Content source type (overridden with 'claudepro' default)
+ * - documentationUrl: Optional external documentation link
+ * - features: Optional list of features
+ * - useCases: Optional list of use cases
+ *
+ * Guide-Specific Required Fields:
+ * - category: Guide category (tutorials, comparisons, troubleshooting, etc.)
+ * - title: Required title (overrides optional title from base)
+ * - keywords: Required SEO keywords array
+ *
+ * Guide-Specific Date Fields (template variations):
+ * - datePublished: tutorial-template
+ * - dateModified: tutorial-template
+ * - dateUpdated: category, comparison, troubleshooting, workflow, collection templates
+ * - dateAdded: Auto-generated fallback (inherited from base)
+ *
+ * Guide-Specific Optional Metadata:
+ * - readingTime: Estimated reading time
+ * - difficulty: Skill level (beginner, intermediate, advanced, expert, or dynamic string)
+ * - featured: Featured guide flag
+ * - lastReviewed: Last review date
+ * - aiOptimized: AI optimization flag
+ * - citationReady: Citation readiness flag
+ *
+ * Community Properties (template-specific):
+ * - communityEngagement: tutorial-template
+ * - communityDriven: comparison, troubleshooting, workflow templates
+ *
+ * Additional Guide Fields:
+ * - source: Defaults to 'claudepro' for guides
+ * - githubUrl: Optional GitHub repository URL
+ * - relatedGuides: Array of related guide slugs (max 20)
+ *
+ * Category Types (matching template variations):
+ * - tutorials: tutorial-template.mdx
+ * - comparisons: comparison-template.mdx
+ * - troubleshooting: troubleshooting-template.mdx
+ * - use-cases: use-case-template.mdx
+ * - workflows: workflow-template.mdx
+ * - categories: category-template.mdx
+ * - collections: collection-template.mdx
+ * - guides: General guide category
  */
 export const guideContentSchema = z.object({
-  // Required base properties from frontmatter (matching actual template structure)
-  title: nonEmptyString,
-  description: nonEmptyString,
+  // Inherit all base content metadata fields using shape destructuring (Zod v4 best practice)
+  ...baseContentMetadataSchema.shape,
+
+  // Guide-specific required fields (category discriminator)
   category: z.enum([
     'tutorials', // tutorial-template.mdx
     'comparisons', // comparison-template.mdx
@@ -32,17 +86,17 @@ export const guideContentSchema = z.object({
     'collections', // collection-template.mdx
     'guides', // General guide category
   ]),
-  author: nonEmptyString,
 
-  // Date fields matching template structure variations
+  // Override: title is required for guides (not optional like in base)
+  title: nonEmptyString,
+
+  // Guide-specific date fields (template variations)
   datePublished: isoDateString.optional(), // tutorial-template
   dateModified: isoDateString.optional(), // tutorial-template
   dateUpdated: isoDateString.optional(), // category, comparison, troubleshooting, workflow, collection templates
-  dateAdded: isoDateString.optional(), // Auto-generated fallback
 
-  // Required guide-specific properties
+  // Keywords in addition to tags (required for SEO)
   keywords: requiredTagArray,
-  tags: requiredTagArray,
 
   // Optional metadata properties (common across all templates)
   readingTime: z.string().optional(),
@@ -61,24 +115,14 @@ export const guideContentSchema = z.object({
   communityEngagement: z.boolean().optional(), // tutorial-template
   communityDriven: z.boolean().optional(), // comparison, troubleshooting, workflow templates
 
-  // Content (extracted from MDX body)
-  content: nonEmptyString, // Full MDX content without frontmatter
-
-  // Auto-generated properties
-  slug: nonEmptyString, // Generated from file path
-
-  // Additional optional properties
+  // Override: source defaults to 'claudepro' for guides
   source: z
     .enum(['community', 'official', 'verified', 'claudepro'])
     .optional()
     .default('claudepro'),
-  githubUrl: optionalUrlString,
-  documentationUrl: optionalUrlString,
 
-  // Guide features and use cases
-  features: largeContentArray.optional(),
-  useCases: largeContentArray.optional(),
-  requirements: limitedMediumStringArray.optional(),
+  // Additional guide-specific URLs
+  githubUrl: optionalUrlString,
 
   // Related content
   relatedGuides: z.array(z.string()).max(20).optional(),

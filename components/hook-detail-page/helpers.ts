@@ -267,7 +267,11 @@ export const generateInstallationSteps = (
   });
 
   // Add any custom installation steps from the item
-  if (item.installation?.claudeCode?.steps) {
+  if (
+    item.installation?.claudeCode &&
+    typeof item.installation.claudeCode === 'object' &&
+    item.installation.claudeCode.steps
+  ) {
     item.installation.claudeCode.steps.forEach((customStep: string) => {
       steps.push({
         step: steps.length + 1,
