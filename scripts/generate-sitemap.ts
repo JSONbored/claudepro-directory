@@ -1,8 +1,7 @@
-import { existsSync, readdirSync, writeFileSync } from 'fs';
-import { join } from 'path';
-import { agents, commands, hooks, mcp, rules } from '../generated/content';
+import { writeFileSync } from 'fs';
 import { APP_CONFIG } from '../lib/constants';
-import type { ContentItem } from '../lib/schemas/content.schema';
+import type { UnifiedContentItem } from '../lib/schemas/components';
+import { contentProcessor } from '../lib/services/content-processor.service';
 
 // Define SitemapUrl type locally
 interface SitemapUrl {
@@ -15,9 +14,8 @@ interface SitemapUrl {
 // Always use production URL for sitemap
 const baseUrl = APP_CONFIG.url;
 
-function generateSitemap(): string {
-  // Use generated content directly instead of static API files
-
+async function generateSitemap(): Promise<string> {
+  // Fetch content dynamically from GitHub API via content processor
   const urls: SitemapUrl[] = [];
 
   // Homepage
@@ -50,7 +48,7 @@ function generateSitemap(): string {
     });
   });
 
-  // SEO Guide pages from seo/ directory
+  // SEO Guide pages - fetch from content processor
   const seoCategories = [
     'use-cases',
     'tutorials',
@@ -60,32 +58,38 @@ function generateSitemap(): string {
     'comparisons',
     'troubleshooting',
   ];
-  seoCategories.forEach((category) => {
-    const seoDir = join('seo', category);
-    if (existsSync(seoDir)) {
-      try {
-        const files = readdirSync(seoDir).filter((f) => f.endsWith('.mdx'));
-        files.forEach((file) => {
-          const slug = file.replace('.mdx', '');
-          urls.push({
-            loc: `${baseUrl || ''}/guides/${category}/${slug}`,
-            lastmod: new Date().toISOString().split('T')[0] || '',
-            changefreq: 'monthly',
-            priority: 0.65,
-          });
-        });
-      } catch {
-        // Directory doesn't exist yet
-      }
-    }
-  });
 
-  // Individual content pages - each content type already has proper category
-  const allContent: ContentItem[] = [...rules, ...mcp, ...agents, ...commands, ...hooks];
+  for (const category of seoCategories) {
+    try {
+      const seoContent = await contentProcessor.getContentByCategory(category);
+      seoContent.forEach((item) => {
+        const slug = item.slug.split('/').pop() || item.slug;
+        urls.push({
+          loc: `${baseUrl || ''}/guides/${category}/${slug}`,
+          lastmod: (item.dateAdded || new Date().toISOString()).split('T')[0] || '',
+          changefreq: 'monthly',
+          priority: 0.65,
+        });
+      });
+    } catch (error) {
+      console.warn(`Failed to fetch ${category} content:`, error);
+    }
+  }
+
+  // Individual content pages - fetch all content from content processor
+  const allCategories = await contentProcessor.getAllCategories();
+  const allContent: UnifiedContentItem[] = [
+    ...allCategories.rules,
+    ...allCategories.mcp,
+    ...allCategories.agents,
+    ...allCategories.commands,
+    ...allCategories.hooks,
+  ];
 
   allContent.forEach((item) => {
+    const slug = item.slug.split('/').pop() || item.slug;
     urls.push({
-      loc: `${baseUrl}/${item.category}/${item.slug}`,
+      loc: `${baseUrl}/${item.category}/${slug}`,
       lastmod: (item.dateAdded || new Date().toISOString()).split('T')[0] || '',
       changefreq: 'weekly',
       priority: 0.7,
@@ -141,10 +145,10 @@ Crawl-delay: 1`;
   return robotsTxt;
 }
 
-function main() {
+async function main() {
   try {
     console.log('🗺️  Generating sitemap...');
-    const sitemap = generateSitemap();
+    const sitemap = await generateSitemap();
     writeFileSync('public/sitemap.xml', sitemap, 'utf-8');
     console.log('✅ Sitemap generated successfully');
 

@@ -55,6 +55,9 @@ export async function generateMetadata({
 // Enable ISR - revalidate every 4 hours for job listings
 export const revalidate = 14400;
 
+// Use Edge Runtime for better performance
+export const runtime = 'edge';
+
 // Server-side filtering function
 function filterJobs(jobs: Job[], params: JobsSearchParams): Job[] {
   return jobs.filter((job) => {

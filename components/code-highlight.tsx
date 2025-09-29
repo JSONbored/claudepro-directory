@@ -1,4 +1,7 @@
+'use client';
+
 import { Check, Copy } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { codeToHtml } from 'shiki';
 import { ErrorBoundary } from '@/components/error-boundary';
@@ -7,6 +10,40 @@ import { copyToClipboard } from '@/lib/clipboard-utils';
 import { logger } from '@/lib/logger';
 import type { CodeHighlightProps } from '@/lib/schemas/component.schema';
 import { highlightedCodeSafeSchema } from '@/lib/schemas/form.schema';
+
+// Optimized language support - only languages actually used in codebase
+const SUPPORTED_LANGUAGES = [
+  'bash',
+  'json',
+  'javascript',
+  'typescript',
+  'markdown',
+  'plaintext',
+] as const;
+
+// Validate and normalize language for security and bundle optimization
+function validateLanguage(language: string): string {
+  const normalizedLang = language.toLowerCase().trim();
+
+  // Map common aliases to supported languages
+  const languageMap: Record<string, string> = {
+    js: 'javascript',
+    ts: 'typescript',
+    sh: 'bash',
+    shell: 'bash',
+    md: 'markdown',
+    jsonc: 'json',
+  };
+
+  const mappedLang = languageMap[normalizedLang] || normalizedLang;
+
+  if (SUPPORTED_LANGUAGES.includes(mappedLang as (typeof SUPPORTED_LANGUAGES)[number])) {
+    return mappedLang;
+  }
+
+  // Fallback to plaintext for unsupported languages
+  return 'plaintext';
+}
 
 // CodeHighlightProps is now imported from component.schema.ts
 
@@ -24,9 +61,10 @@ export const CodeHighlight = ({
     const highlightCode = async () => {
       setIsLoading(true);
       try {
+        const validatedLanguage = validateLanguage(language);
         const html = await codeToHtml(code, {
-          lang: language,
-          theme: 'one-dark-pro',
+          lang: validatedLanguage,
+          theme: 'github-dark-dimmed',
           transformers: [
             {
               pre(node) {
@@ -192,3 +230,17 @@ export const CodeHighlight = ({
     </ErrorBoundary>
   );
 };
+
+// Loading component for dynamic imports
+export const CodeHighlightLoader = () => (
+  <div className="animate-pulse bg-card border border-border rounded-lg p-4 min-h-[4rem]">
+    <div className="h-4 bg-muted rounded w-3/4 mb-2" />
+    <div className="h-4 bg-muted rounded w-1/2" />
+  </div>
+);
+
+// Dynamic version for lazy loading (consolidates code-highlight-dynamic.tsx functionality)
+export const CodeHighlightDynamic = dynamic(() => Promise.resolve({ default: CodeHighlight }), {
+  loading: () => <CodeHighlightLoader />,
+  ssr: false, // Disable SSR for this component as it uses browser APIs
+});

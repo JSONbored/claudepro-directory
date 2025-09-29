@@ -4,13 +4,8 @@
  */
 
 import { z } from 'zod';
-import { agentsMetadata } from '@/generated/agents-metadata';
-import { commandsMetadata } from '@/generated/commands-metadata';
-import { hooksMetadata } from '@/generated/hooks-metadata';
-import { mcpMetadata } from '@/generated/mcp-metadata';
-import { rulesMetadata } from '@/generated/rules-metadata';
-import { contentIndexer } from '@/lib/related-content/indexer';
 import { relatedContentService } from '@/lib/related-content/service';
+import { contentProcessor } from '@/lib/services/content-processor.service';
 import { logger } from './logger';
 import { contentCache, statsRedis } from './redis';
 import {
@@ -50,12 +45,13 @@ export class CacheWarmer {
       logger.info('Starting cache warming for popular content');
 
       // Get popular items from each category
+      const allCategories = await contentProcessor.getAllCategories();
       const categories = [
-        { name: 'agents' as WarmableCategory, items: agentsMetadata },
-        { name: 'mcp' as WarmableCategory, items: mcpMetadata },
-        { name: 'rules' as WarmableCategory, items: rulesMetadata },
-        { name: 'commands' as WarmableCategory, items: commandsMetadata },
-        { name: 'hooks' as WarmableCategory, items: hooksMetadata },
+        { name: 'agents' as WarmableCategory, items: allCategories.agents },
+        { name: 'mcp' as WarmableCategory, items: allCategories.mcp },
+        { name: 'rules' as WarmableCategory, items: allCategories.rules },
+        { name: 'commands' as WarmableCategory, items: allCategories.commands },
+        { name: 'hooks' as WarmableCategory, items: allCategories.hooks },
       ];
 
       // Validate categories
@@ -198,9 +194,8 @@ export class CacheWarmer {
    */
   private async warmSearchIndexes(): Promise<void> {
     try {
-      // Build and cache the content index
-      const index = await contentIndexer.buildIndex();
-      await contentIndexer.saveIndex(index);
+      // Content is now dynamically fetched from GitHub API via content processor
+      // No need to build static indexes anymore
 
       // Cache common search queries
       const rawQueries = [
@@ -327,8 +322,28 @@ export class CacheWarmer {
 // Export singleton instance
 export const cacheWarmer = new CacheWarmer();
 
-// Auto-schedule if running on server
-if (typeof window === 'undefined' && isProduction) {
-  // Schedule cache warming in production
-  cacheWarmer.scheduleWarming();
+// Auto-schedule if running on Node.js server (not Edge Runtime or build time)
+// Check for server-side environment safely for Edge Runtime compatibility
+let isServerSide = false;
+try {
+  isServerSide = typeof window === 'undefined' && typeof document === 'undefined';
+} catch {
+  // In Edge Runtime, these checks might throw - that's fine, consider it server-side
+  isServerSide = true;
+}
+
+if (
+  isServerSide &&
+  isProduction &&
+  typeof process !== 'undefined' &&
+  process.env.NODE_ENV === 'production' &&
+  process.env.NEXT_RUNTIME !== 'edge' && // Skip Edge Runtime
+  !process.env.NEXT_PHASE // Avoid running during Next.js build phase
+) {
+  try {
+    // Schedule cache warming in Node.js runtime only (not Edge Runtime)
+    cacheWarmer.scheduleWarming();
+  } catch {
+    // Silently fail if running in incompatible environment
+  }
 }

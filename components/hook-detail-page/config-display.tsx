@@ -4,17 +4,12 @@
  */
 
 import { Copy } from 'lucide-react';
-import { lazy, memo, Suspense } from 'react';
+import { memo, Suspense } from 'react';
 import { z } from 'zod';
+// Use optimized dynamic CodeHighlight with consolidated functionality
+import { CodeHighlightDynamic as CodeHighlight } from '@/components/code-highlight';
 import { Button } from '@/components/ui/button';
 import { type HookContent, hookContentSchema } from '@/lib/schemas/content.schema';
-
-// Lazy load CodeHighlight only when needed
-const CodeHighlight = lazy(() =>
-  import('@/components/code-highlight').then((module) => ({
-    default: module.CodeHighlight,
-  }))
-);
 
 // Zod schema for component props
 const configDisplayPropsSchema = z.object({

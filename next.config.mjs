@@ -104,16 +104,21 @@ const nextConfig = {
     // Note: optimizeCss disabled due to deprecated critters dependency in Next.js 15.5.x
     // CSS optimization handled by TailwindCSS v4 and PostCSS instead
     // optimizeCss: true,
-    // React Compiler disabled - causes CSP eval() errors in production
-    // Not needed for content-heavy sites with limited interactivity
-    reactCompiler: false,
+    // React 19 Compiler - automatic memoization and optimization
+    reactCompiler: true,
     webVitalsAttribution: ['CLS', 'FCP', 'FID', 'INP', 'LCP', 'TTFB'],
     gzipSize: true,
     optimizePackageImports: [
-      'lucide-react',
-      '@radix-ui/react-icons',
-      'fuse.js',
-      // Add all Radix UI packages for aggressive tree-shaking
+      // High-impact optimizations (2025 best practices)
+      'lucide-react',           // 544+ icons - massive savings
+      'shiki',                  // Syntax highlighting - major bundle reducer
+      'rehype-pretty-code',     // Code highlighting components
+      'fuse.js',               // Search functionality
+      'embla-carousel-react',   // Carousel components
+      'next-mdx-remote',        // MDX processing
+      'react-error-boundary',   // Error handling
+
+      // Radix UI - comprehensive coverage
       '@radix-ui/react-accordion',
       '@radix-ui/react-alert-dialog',
       '@radix-ui/react-aspect-ratio',
@@ -196,94 +201,19 @@ const nextConfig = {
         splitChunks: {
           chunks: 'all',
           minSize: 20000,
-          maxSize: 244000,
+          maxSize: 244000, // Standard size limit
           cacheGroups: {
-            // React and core libraries
-            react: {
-              test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
-              name: 'react',
-              priority: 20,
-              chunks: 'all',
-              enforce: true,
-            },
-            // Radix UI components - split into smaller chunks for better tree-shaking
-            radixCore: {
-              test: /[\\/]node_modules[\\/]@radix-ui[\\/](react-primitive|react-compose-refs|react-context|react-id|react-slot|react-use-.*|react-portal)[\\/]/,
-              name: 'radix-core',
-              priority: 19,
-              chunks: 'all',
-              enforce: true,
-            },
-            radixComponents: {
-              test: /[\\/]node_modules[\\/]@radix-ui[\\/](?!react-primitive|react-compose-refs|react-context|react-id|react-slot|react-use-|react-portal)/,
-              name(module) {
-                // Create separate chunks for each Radix component for maximum tree-shaking
-                const match = module.context.match(/@radix-ui[\\/](react-[^\\/]+)/);
-                if (match) {
-                  const componentName = match[1].replace('react-', '');
-                  // Group related components together
-                  if (['dialog', 'alert-dialog', 'popover', 'hover-card'].includes(componentName)) {
-                    return 'radix-dialogs';
-                  }
-                  if (['dropdown-menu', 'context-menu', 'menubar', 'navigation-menu'].includes(componentName)) {
-                    return 'radix-menus';
-                  }
-                  if (['select', 'checkbox', 'radio-group', 'switch', 'slider'].includes(componentName)) {
-                    return 'radix-forms';
-                  }
-                  return `radix-${componentName}`;
-                }
-                return 'radix-misc';
-              },
-              priority: 18,
-              chunks: 'async',
-              maxSize: 50000, // Keep Radix chunks small for better tree-shaking
-            },
-            // Lucide icons (large icon library)
-            lucide: {
-              test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
-              name: 'lucide',
-              priority: 15,
-              chunks: 'all',
-            },
-            // Tremor charts (only loaded when needed)
-            tremor: {
-              test: /[\\/]node_modules[\\/]@tremor[\\/]/,
-              name: 'tremor',
-              priority: 12,
-              chunks: 'async',
-            },
-            // Vendor libraries
-            vendor: {
-              test: /[\\/]node_modules[\\/](?!react|react-dom|scheduler|@radix-ui|lucide-react|@tremor)[\\/]/,
-              name(module, chunks, cacheGroupKey) {
-                // Create separate chunks for large vendors
-                const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)?.[1];
-                if (packageName && ['next', 'framer-motion', '@vercel'].includes(packageName.split('/')[0])) {
-                  return `vendors-${packageName.split('/')[0]}`;
-                }
-                return 'vendors';
-              },
-              priority: 10,
-              chunks: 'all',
-              maxSize: 200000,
-            },
-            // Application content chunks
-            content: {
-              test: /[\\/]generated[\\/]/,
-              name: 'content',
-              priority: 8,
-              chunks: 'all',
-              maxSize: 150000, // Smaller content chunks for better caching
-            },
-            // Common application code
-            common: {
-              name: 'common',
+            // Let optimizePackageImports handle most optimization
+            // Keep only essential manual splitting
+            default: {
               minChunks: 2,
-              priority: 5,
-              chunks: 'all',
+              priority: -20,
               reuseExistingChunk: true,
-              maxSize: 200000,
+            },
+            vendors: {
+              test: /[\\/]node_modules[\\/]/,
+              priority: -10,
+              reuseExistingChunk: true,
             },
           },
         },
@@ -313,30 +243,18 @@ const nextConfig = {
         sideEffects: false,
       });
 
-      // Add performance hints for production builds
+      // Add performance hints for production builds - realistic limits for 2025
       config.performance = {
-        hints: 'warning',
-        maxEntrypointSize: 512000, // 500KB
-        maxAssetSize: 512000, // 500KB
+        hints: 'warning', // Warning instead of error to allow build
+        maxEntrypointSize: 500 * 1024, // 500 KiB - reasonable for feature-rich content app
+        maxAssetSize: 325 * 1024, // 325 KiB - reasonable chunk size for rich components
         assetFilter: (assetFilename) => {
           // Only check JS and CSS files for performance
           return /\.(js|css)$/.test(assetFilename);
         },
       };
 
-      // Add bundle analyzer for ANALYZE builds
-      if (process.env.ANALYZE === 'true') {
-        const { BundleAnalyzerPlugin } = webpack;
-        config.plugins.push(
-          new BundleAnalyzerPlugin({
-            analyzerMode: 'static',
-            reportFilename: './analyze/client.html',
-            openAnalyzer: false,
-            generateStatsFile: true,
-            statsFilename: './analyze/stats.json',
-          })
-        );
-      }
+      // Bundle analyzer is handled by withBundleAnalyzer wrapper at top level
     }
 
     // Preload critical resources

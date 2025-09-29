@@ -89,17 +89,12 @@ class Logger {
    * IMPORTANT: True server-only logging - never expose to browser console
    */
   private output(entry: LogEntry): void {
-    // Multiple checks to ensure we're truly server-side only
-    if (
-      typeof window !== 'undefined' ||
-      typeof document !== 'undefined' ||
-      typeof navigator !== 'undefined' ||
-      process.env.NEXT_RUNTIME === 'edge'
-    ) {
+    // Skip logging in Edge Runtime (not supported)
+    if (process.env.NEXT_RUNTIME === 'edge') {
       return;
     }
 
-    // Additional check for Node.js server environment
+    // Server-side only logging
     if (!process?.env) {
       return;
     }

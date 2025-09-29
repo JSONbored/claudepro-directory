@@ -21,6 +21,9 @@ import { SOCIAL_LINKS } from '@/lib/constants';
 // Enable ISR - revalidate every 24 hours for static marketing pages
 export const revalidate = 86400;
 
+// Use Edge Runtime for better performance
+export const runtime = 'edge';
+
 export default function PartnerPage() {
   return (
     <div className="container mx-auto px-4 py-12">

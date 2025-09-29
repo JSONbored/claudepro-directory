@@ -11,14 +11,9 @@ import type { ContentItem } from '@/lib/schemas/content.schema';
 // Content items that have rich content fields for detail pages
 type DetailedContent = ContentItem;
 
+// Use optimized dynamic CodeHighlight with consolidated functionality
+import { CodeHighlightDynamic as CodeHighlight } from '@/components/code-highlight';
 import { ContentSidebar } from './content-detail-page/sidebar';
-
-// Lazy load CodeHighlight to split syntax-highlighter into its own chunk
-const CodeHighlight = lazy(() =>
-  import('@/components/code-highlight').then((module) => ({
-    default: module.CodeHighlight,
-  }))
-);
 
 // Lazy load ContentViewer for large content
 const ContentViewer = lazy(() =>

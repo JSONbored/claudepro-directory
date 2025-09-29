@@ -79,7 +79,7 @@ class ViewCountService {
       }
 
       // Fallback to deterministic view count
-      const deterministicViews = this.getDeterministicViewCount(request.slug);
+      const deterministicViews = await this.getDeterministicViewCount(request.slug);
       this.setCache(cacheKey, deterministicViews);
 
       return viewCountResponseSchema.parse({
@@ -164,7 +164,7 @@ class ViewCountService {
           // Fallback to deterministic for failed items
           for (const item of uncachedItems) {
             if (!result[item.key]) {
-              const deterministicViews = this.getDeterministicViewCount(item.slug);
+              const deterministicViews = await this.getDeterministicViewCount(item.slug);
               this.setCache(item.key, deterministicViews);
 
               result[item.key] = viewCountResponseSchema.parse({
@@ -178,7 +178,7 @@ class ViewCountService {
       } else {
         // Use deterministic for all uncached items
         for (const item of uncachedItems) {
-          const deterministicViews = this.getDeterministicViewCount(item.slug);
+          const deterministicViews = await this.getDeterministicViewCount(item.slug);
           this.setCache(item.key, deterministicViews);
 
           result[item.key] = viewCountResponseSchema.parse({
@@ -216,17 +216,30 @@ class ViewCountService {
   /**
    * Cryptographically secure deterministic view count generation
    */
-  private getDeterministicViewCount(slug: string): number {
+  private async getDeterministicViewCount(slug: string): Promise<number> {
     try {
-      // Use Node.js crypto for secure, deterministic hashing
-      const crypto = require('crypto');
-      const hash = crypto.createHmac('sha256', this.VIEW_COUNT_SALT).update(slug).digest('hex');
+      // Use Web Crypto API for Edge Runtime compatibility
+      const encoder = new TextEncoder();
+      const keyData = encoder.encode(this.VIEW_COUNT_SALT);
+      const messageData = encoder.encode(slug);
+
+      const key = await crypto.subtle.importKey(
+        'raw',
+        keyData,
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign']
+      );
+
+      const signature = await crypto.subtle.sign('HMAC', key, messageData);
+      const hashArray = Array.from(new Uint8Array(signature));
+      const hash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 
       // Convert hex to integer and normalize to view count range
       const hashInt = Number.parseInt(hash.substring(0, 8), 16);
       return (hashInt % 900) + 100; // 100-999 range
     } catch (error) {
-      logger.warn('Crypto deterministic view count failed, using simple hash', {
+      logger.warn('Web Crypto deterministic view count failed, using simple hash', {
         slug,
         error: error instanceof Error ? error.message : String(error),
       });

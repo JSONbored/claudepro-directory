@@ -2,12 +2,14 @@
 
 import { useEffect } from 'react';
 import type { Metric } from 'web-vitals';
+import { isEdgeRuntime } from '@/lib/env-client';
 import { logger } from '@/lib/logger';
 import { gtagEventSchema } from '@/lib/schemas/analytics.schema';
 
 // Critical resource preloader for perfect Core Web Vitals
 export function PerformanceOptimizer() {
   useEffect(() => {
+    if (isEdgeRuntime) return;
     // Prefetch critical API routes
     const prefetchAPI = (url: string) => {
       const link = document.createElement('link');
@@ -44,9 +46,11 @@ export function PerformanceOptimizer() {
 
   // Client-side performance monitoring
   useEffect(() => {
+    if (isEdgeRuntime) return;
+
     // Report Web Vitals to analytics
     const reportWebVitals = (metric: Metric) => {
-      if (window?.gtag) {
+      if (!isEdgeRuntime && window?.gtag) {
         // Validate gtag event with Zod schema
         const gtagEvent = gtagEventSchema.safeParse({
           command: 'event',
@@ -59,7 +63,8 @@ export function PerformanceOptimizer() {
         });
 
         if (gtagEvent.success) {
-          window.gtag(gtagEvent.data.command, gtagEvent.data.action, gtagEvent.data.parameters);
+          !isEdgeRuntime &&
+            window.gtag(gtagEvent.data.command, gtagEvent.data.action, gtagEvent.data.parameters);
         }
       }
     };
@@ -85,26 +90,27 @@ export function PerformanceOptimizer() {
 
 // Prefetch critical routes for instant navigation
 export function prefetchCriticalRoutes() {
-  if (typeof window !== 'undefined') {
+  if (!isEdgeRuntime && typeof window !== 'undefined') {
     const routes = ['/rules', '/mcp', '/agents', '/commands', '/hooks'];
 
     // Use requestIdleCallback for non-blocking prefetch
     if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(() => {
-        routes.forEach((route) => {
-          const link = document.createElement('link');
-          link.rel = 'prefetch';
-          link.href = route;
-          document.head.appendChild(link);
+      !isEdgeRuntime &&
+        window.requestIdleCallback(() => {
+          routes.forEach((route) => {
+            const link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = route;
+            document.head.appendChild(link);
+          });
         });
-      });
     }
   }
 }
 
 // Critical CSS injection for above-the-fold content
 export function injectCriticalCSS() {
-  if (typeof window !== 'undefined') {
+  if (!isEdgeRuntime && typeof window !== 'undefined') {
     const criticalCSS = `
       /* Critical above-the-fold styles to prevent CLS */
       :root {

@@ -1,27 +1,35 @@
-import fs from 'fs/promises';
 import { ArrowLeft, Tags } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import path from 'path';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { APP_CONFIG } from '@/lib/constants';
 import { logger } from '@/lib/logger';
 import { markdownToSafeHtml } from '@/lib/markdown-utils';
+import { contentCache } from '@/lib/services/content-cache.service';
+import { contentProcessor } from '@/lib/services/content-processor.service';
 
-// ISR Configuration - Revalidate every 7 days for SEO pages
-export const revalidate = 604800; // 7 days in seconds
-export const dynamic = 'force-static'; // Force static generation
+// ISR Configuration - Revalidate every 4 hours for consistency
+export const revalidate = 14400; // 4 hours in seconds
 export const dynamicParams = true; // Allow new pages to be generated on-demand
+
+// Use Edge Runtime for better performance
+export const runtime = 'edge';
 
 import type { ComparisonData } from '@/lib/schemas/app.schema';
 
 async function getComparisonData(slug: string): Promise<ComparisonData | null> {
   try {
-    const filePath = path.join(process.cwd(), 'seo', 'comparisons', `${slug}.mdx`);
-    const fileContent = await fs.readFile(filePath, 'utf-8');
+    // Try cache first
+    const cacheKey = `comparison:${slug}`;
+    const cached = await contentCache.get<ComparisonData>(cacheKey);
+    if (cached) return cached;
+
+    // Fetch from content processor (which handles GitHub API)
+    const fileContent = await contentProcessor.getComparisonContent(slug);
+    if (!fileContent) return null;
 
     // Parse frontmatter
     const frontmatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
@@ -43,7 +51,7 @@ async function getComparisonData(slug: string): Promise<ComparisonData | null> {
       }
     });
 
-    return {
+    const data: ComparisonData = {
       title: metadata.title || '',
       description: metadata.description || '',
       content,
@@ -53,24 +61,18 @@ async function getComparisonData(slug: string): Promise<ComparisonData | null> {
       category2: metadata.category2 || '',
       lastUpdated: metadata.lastUpdated || '',
     };
-  } catch (_error) {
+
+    // Cache the result
+    await contentCache.set(cacheKey, data, { ttlSeconds: 14400 });
+    return data;
+  } catch (error) {
+    logger.error('Failed to get comparison data', error as Error, { slug });
     return null;
   }
 }
 
-export async function generateStaticParams() {
-  try {
-    const metadataPath = path.join(process.cwd(), 'seo', 'comparisons', '_metadata.json');
-    const metadata = JSON.parse(await fs.readFile(metadataPath, 'utf-8'));
-
-    return metadata.map((item: { slug: string }) => ({
-      slug: item.slug,
-    }));
-  } catch (_error) {
-    // Return empty array if no comparisons generated yet
-    return [];
-  }
-}
+// Note: generateStaticParams removed to enable Edge Runtime
+// Pages will be generated on-demand with ISR (4-hour revalidation)
 
 export async function generateMetadata({
   params,

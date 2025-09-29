@@ -1,15 +1,16 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { agents, commands, hooks, mcp, rules } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
 import { sanitizeApiError } from '@/lib/error-sanitizer';
 import { logger } from '@/lib/logger';
 import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
 import { contentCache } from '@/lib/redis';
 import { createRequestId } from '@/lib/schemas/branded-types.schema';
+import type { UnifiedContentItem } from '@/lib/schemas/components';
+import { contentProcessor } from '@/lib/services/content-processor.service';
 import { apiSchemas, ValidationError } from '@/lib/validation';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge'; // Use Edge Runtime for better performance
 export const revalidate = 14400; // 4 hours
 
 // Streaming query parameters validation schema
@@ -25,11 +26,11 @@ const streamingQuerySchema = z
   .merge(apiSchemas.paginationQuery.partial());
 
 // Helper function to transform content with type and URL
-function transformContent<T extends { slug: string }>(
-  content: readonly T[] | T[],
+function transformContent(
+  content: UnifiedContentItem[],
   type: string,
   category: string
-): (T & { type: string; url: string })[] {
+): (UnifiedContentItem & { type: string; url: string })[] {
   return content.map((item) => ({
     ...item,
     type,
@@ -42,11 +43,14 @@ async function* createStreamingResponse(
   batchSize: number,
   format: 'json' | 'ndjson'
 ): AsyncGenerator<string, void, unknown> {
-  const transformedAgents = transformContent(agents, 'agent', 'agents');
-  const transformedMcp = transformContent(mcp, 'mcp', 'mcp');
-  const transformedRules = transformContent(rules, 'rule', 'rules');
-  const transformedCommands = transformContent(commands, 'command', 'commands');
-  const transformedHooks = transformContent(hooks, 'hook', 'hooks');
+  // Fetch all content from content processor
+  const allContent = await contentProcessor.getAllCategories();
+
+  const transformedAgents = transformContent(allContent.agents, 'agent', 'agents');
+  const transformedMcp = transformContent(allContent.mcp, 'mcp', 'mcp');
+  const transformedRules = transformContent(allContent.rules, 'rule', 'rules');
+  const transformedCommands = transformContent(allContent.commands, 'command', 'commands');
+  const transformedHooks = transformContent(allContent.hooks, 'hook', 'hooks');
 
   const metadata = {
     '@context': 'https://schema.org',
@@ -213,11 +217,14 @@ async function handleGET(request: NextRequest) {
         },
       });
     }
-    const transformedAgents = transformContent(agents, 'agent', 'agents');
-    const transformedMcp = transformContent(mcp, 'mcp', 'mcp');
-    const transformedRules = transformContent(rules, 'rule', 'rules');
-    const transformedCommands = transformContent(commands, 'command', 'commands');
-    const transformedHooks = transformContent(hooks, 'hook', 'hooks');
+    // Fetch all content from content processor
+    const allContent = await contentProcessor.getAllCategories();
+
+    const transformedAgents = transformContent(allContent.agents, 'agent', 'agents');
+    const transformedMcp = transformContent(allContent.mcp, 'mcp', 'mcp');
+    const transformedRules = transformContent(allContent.rules, 'rule', 'rules');
+    const transformedCommands = transformContent(allContent.commands, 'command', 'commands');
+    const transformedHooks = transformContent(allContent.hooks, 'hook', 'hooks');
 
     const allConfigurations = {
       '@context': 'https://schema.org',

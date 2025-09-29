@@ -7,6 +7,9 @@ import { transformForHomePage } from '@/lib/transformers';
 // Enable ISR - revalidate every hour
 export const revalidate = 3600;
 
+// Use Edge Runtime for better performance
+export const runtime = 'edge';
+
 // Server component that loads data
 export default async function HomePage() {
   // Load all content server-side for better SEO and initial page load

@@ -62,13 +62,43 @@ export const LazyContentSearchClient = dynamic(
   }
 );
 
-// Chunk heavy data imports by category
+export const LazyTabsComponents = {
+  Tabs: dynamic(() => import('./ui/tabs').then((mod) => ({ default: mod.Tabs })), {
+    loading: () => <div className="w-full h-10 bg-card/50 rounded-lg animate-pulse" />,
+  }),
+  TabsContent: dynamic(() => import('./ui/tabs').then((mod) => ({ default: mod.TabsContent })), {
+    loading: () => <div className="w-full min-h-96 bg-card/50 rounded-lg animate-pulse" />,
+  }),
+  TabsList: dynamic(() => import('./ui/tabs').then((mod) => ({ default: mod.TabsList })), {
+    loading: () => <div className="w-full h-10 bg-card/50 rounded-lg animate-pulse" />,
+  }),
+  TabsTrigger: dynamic(() => import('./ui/tabs').then((mod) => ({ default: mod.TabsTrigger })), {
+    loading: () => <div className="w-16 h-8 bg-card/50 rounded animate-pulse" />,
+  }),
+};
+
+// Content loaders using content processor (dynamic GitHub API fetching)
 export const lazyContentLoaders = {
-  agents: () => import('../generated/agents-metadata').then((m) => m.agentsMetadata),
-  mcp: () => import('../generated/mcp-metadata').then((m) => m.mcpMetadata),
-  rules: () => import('../generated/rules-metadata').then((m) => m.rulesMetadata),
-  commands: () => import('../generated/commands-metadata').then((m) => m.commandsMetadata),
-  hooks: () => import('../generated/hooks-metadata').then((m) => m.hooksMetadata),
+  agents: async () => {
+    const { contentProcessor } = await import('@/lib/services/content-processor.service');
+    return contentProcessor.getContentByCategory('agents');
+  },
+  mcp: async () => {
+    const { contentProcessor } = await import('@/lib/services/content-processor.service');
+    return contentProcessor.getContentByCategory('mcp');
+  },
+  rules: async () => {
+    const { contentProcessor } = await import('@/lib/services/content-processor.service');
+    return contentProcessor.getContentByCategory('rules');
+  },
+  commands: async () => {
+    const { contentProcessor } = await import('@/lib/services/content-processor.service');
+    return contentProcessor.getContentByCategory('commands');
+  },
+  hooks: async () => {
+    const { contentProcessor } = await import('@/lib/services/content-processor.service');
+    return contentProcessor.getContentByCategory('hooks');
+  },
 };
 
 // Create lazy-loaded content chunks for better performance

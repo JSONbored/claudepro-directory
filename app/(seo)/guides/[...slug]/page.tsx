@@ -15,7 +15,6 @@ import { APP_CONFIG } from '@/lib/constants';
 import { logger } from '@/lib/logger';
 import { contentCache } from '@/lib/services/content-cache.service';
 import { contentProcessor } from '@/lib/services/content-processor.service';
-import { githubContentService } from '@/lib/services/github-content.service';
 
 // ISR Configuration - Revalidate every 4 hours
 export const revalidate = 14400; // 4 hours
@@ -72,12 +71,10 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
 
     if (!contentItem) return null;
 
-    // Get the full content from GitHub
-    const fullContent = await githubContentService.getFileContent(
-      `seo/${category}/${targetSlug}.mdx`
-    );
+    // Get the full content from content processor
+    const fullContent = await contentProcessor.getFullContentBySlug(category, targetSlug);
 
-    if (!fullContent) return null;
+    if (!fullContent || typeof fullContent !== 'string') return null;
 
     return {
       title: contentItem.title || '',

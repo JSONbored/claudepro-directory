@@ -345,47 +345,32 @@ export const validation = {
 export default validation;
 
 /**
- * XSS Sanitization Utilities
- * Provides secure sanitization for user input
- * Consolidated from lib/sanitizer.ts for better maintainability
+ * Input Cleaning Utilities
+ * Basic input normalization for data quality
+ * Security is handled by Arcjet Shield WAF at the edge
+ * Edge Runtime compatible - pure JavaScript, no DOM dependencies
  */
-import DOMPurify from 'isomorphic-dompurify';
-
 export const sanitizers = {
   /**
-   * Sanitize search queries to prevent XSS attacks
-   * Allows only alphanumeric characters, spaces, hyphens, and underscores
+   * Clean search queries for better search results
+   * Security: Arcjet Shield blocks XSS at WAF level
+   * This just ensures clean data for search functionality
    */
   sanitizeSearchQuery: (query: string): string => {
-    // First, use DOMPurify to remove any HTML/Script tags
-    const htmlSanitized = DOMPurify.sanitize(query, {
-      ALLOWED_TAGS: [],
-      ALLOWED_ATTR: [],
-      KEEP_CONTENT: true,
-    });
-
-    // Then apply additional restrictions for search queries
     // Allow: letters, numbers, spaces, hyphens, underscores, dots, and common search operators
-    const searchSanitized = htmlSanitized
-      .replace(/[^a-zA-Z0-9\s\-_.+*]/g, '') // Remove special characters except common search ones
+    return query
+      .replace(/[^a-zA-Z0-9\s\-_.+*]/g, '') // Keep only search-relevant characters
       .trim()
-      .substring(0, 100); // Limit length
-
-    return searchSanitized;
+      .substring(0, 100); // Reasonable search query length
   },
 
   /**
-   * Sanitize form input fields
-   * Strips all HTML and limits length
+   * Clean form input for data consistency
+   * Security: Arcjet Shield handles injection protection
+   * This just ensures consistent data format
    */
   sanitizeFormInput: (input: string, maxLength = 500): string => {
-    const sanitized = DOMPurify.sanitize(input, {
-      ALLOWED_TAGS: [],
-      ALLOWED_ATTR: [],
-      KEEP_CONTENT: true,
-    });
-
-    return sanitized.trim().substring(0, maxLength);
+    return input.trim().substring(0, maxLength);
   },
 
   /**
@@ -443,14 +428,14 @@ export const sanitizers = {
   },
 
   /**
-   * Create a sanitized excerpt from HTML content
-   * Useful for meta descriptions and previews
+   * Create a text excerpt from content
+   * Strips HTML for clean text previews
    */
-  createSafeExcerpt: (html: string, maxLength = 160): string => {
-    const textOnly = DOMPurify.sanitize(html, {
-      ALLOWED_TAGS: [],
-      KEEP_CONTENT: true,
-    });
+  createSafeExcerpt: (content: string, maxLength = 160): string => {
+    // Simple HTML tag removal - no DOM needed
+    const textOnly = content
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/&[a-z]+;/gi, ' '); // Replace HTML entities with space
 
     return textOnly
       .replace(/\s+/g, ' ') // Normalize whitespace

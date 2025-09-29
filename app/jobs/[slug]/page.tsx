@@ -65,14 +65,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export async function generateStaticParams() {
-  return jobs.map((job) => ({
-    slug: job.slug,
-  }));
-}
-
 // Enable ISR - revalidate every 4 hours
 export const revalidate = 14400;
+
+// Use Edge Runtime for better performance
+export const runtime = 'edge';
 
 export default async function JobPage({ params }: PageProps) {
   if (!params) {

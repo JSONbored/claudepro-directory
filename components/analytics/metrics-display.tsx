@@ -1,34 +1,51 @@
 'use client';
 
 /**
- * MetricsDisplay - KPI metrics visualization using Tremor
+ * MetricsDisplay - Lightweight KPI metrics visualization
+ * Native implementation optimized for performance - no external dependencies
  * Used in 2 MDX files across the codebase - Specialized component for business metrics
  */
 
-import dynamic from 'next/dynamic';
+import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 import { type MetricsDisplayProps, metricsDisplayPropsSchema } from '@/lib/schemas/shared.schema';
 
-// Dynamic imports for Tremor components to reduce bundle size
-// These are only loaded when MetricsDisplay component is used
-const BadgeDelta = dynamic(
-  () => import('@tremor/react').then((mod) => ({ default: mod.BadgeDelta })),
-  { ssr: false }
-);
-const Flex = dynamic(() => import('@tremor/react').then((mod) => ({ default: mod.Flex })), {
-  ssr: false,
-});
-const Grid = dynamic(() => import('@tremor/react').then((mod) => ({ default: mod.Grid })), {
-  ssr: false,
-});
-const Metric = dynamic(() => import('@tremor/react').then((mod) => ({ default: mod.Metric })), {
-  ssr: false,
-});
-const Text = dynamic(() => import('@tremor/react').then((mod) => ({ default: mod.Text })), {
-  ssr: false,
-});
-const TremorCard = dynamic(() => import('@tremor/react').then((mod) => ({ default: mod.Card })), {
-  ssr: false,
-});
+// Lightweight badge component for trend indicators
+function BadgeDelta({
+  deltaType,
+  children,
+}: {
+  deltaType: 'increase' | 'decrease' | 'unchanged';
+  children?: React.ReactNode;
+}) {
+  const config = {
+    increase: {
+      className:
+        'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800',
+      icon: <ArrowUp className="w-3 h-3" />,
+    },
+    decrease: {
+      className:
+        'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800',
+      icon: <ArrowDown className="w-3 h-3" />,
+    },
+    unchanged: {
+      className:
+        'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800',
+      icon: <Minus className="w-3 h-3" />,
+    },
+  };
+
+  const { className, icon } = config[deltaType];
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${className}`}
+    >
+      {icon}
+      {children}
+    </span>
+  );
+}
 
 export function MetricsDisplay(props: MetricsDisplayProps) {
   const validated = metricsDisplayPropsSchema.parse(props);
@@ -52,7 +69,8 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
         </div>
       )}
 
-      <Grid numItemsMd={2} numItemsLg={3} className="gap-6">
+      {/* Native CSS Grid with responsive layout - replaces Tremor Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {validMetrics.map((metric, index) => {
           // Support both new and old formats
           const metricLabel = metric.label || metric.metric || `Metric ${index + 1}`;
@@ -70,26 +88,31 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
                 : 'from-gray-500/10 to-slate-500/10 border-gray-500/20 hover:border-gray-500/40';
 
           return (
-            <TremorCard
+            <div
               key={`${metricLabel}-${metricValue}`}
-              className={`bg-gradient-to-br ${gradientClass} border backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl`}
+              className={`bg-gradient-to-br ${gradientClass} border backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl rounded-lg p-6`}
             >
-              <Text className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+              {/* Label - replaces Tremor Text */}
+              <div className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                 {metricLabel}
-              </Text>
-              <Metric className="mt-2 text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              </div>
+
+              {/* Metric Value - replaces Tremor Metric */}
+              <div className="mt-2 text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
                 {metricValue}
-              </Metric>
+              </div>
+
+              {/* Change indicator - replaces Tremor Flex */}
               {metricChange && (
-                <Flex className="mt-4 items-center">
-                  <BadgeDelta deltaType={deltaType} className="font-semibold" />
-                  <Text className="ml-2 text-sm font-medium">{metricChange}</Text>
-                </Flex>
+                <div className="mt-4 flex items-center gap-2">
+                  <BadgeDelta deltaType={deltaType} />
+                  <span className="text-sm font-medium text-muted-foreground">{metricChange}</span>
+                </div>
               )}
-            </TremorCard>
+            </div>
           );
         })}
-      </Grid>
+      </div>
     </section>
   );
 }

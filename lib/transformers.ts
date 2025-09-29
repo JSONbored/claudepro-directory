@@ -92,14 +92,15 @@ export function transformForDetailPage(
 
 /**
  * Transform for home page props
+ * Now handles UnifiedContentItem arrays from content processor
  */
 export function transformForHomePage(data: {
-  rules: readonly ContentItem[];
-  mcp: readonly ContentItem[];
-  agents: readonly ContentItem[];
-  commands: readonly ContentItem[];
-  hooks: readonly ContentItem[];
-  allConfigs: readonly ContentItem[];
+  rules: readonly UnifiedContentItem[];
+  mcp: readonly UnifiedContentItem[];
+  agents: readonly UnifiedContentItem[];
+  commands: readonly UnifiedContentItem[];
+  hooks: readonly UnifiedContentItem[];
+  allConfigs: readonly UnifiedContentItem[];
 }): {
   rules: UnifiedContentItem[];
   mcp: UnifiedContentItem[];
@@ -108,12 +109,13 @@ export function transformForHomePage(data: {
   hooks: UnifiedContentItem[];
   allConfigs: UnifiedContentItem[];
 } {
+  // Convert readonly arrays to mutable arrays for component use
   return {
-    rules: transformContentArray(data.rules),
-    mcp: transformContentArray(data.mcp),
-    agents: transformContentArray(data.agents),
-    commands: transformContentArray(data.commands),
-    hooks: transformContentArray(data.hooks),
-    allConfigs: transformContentArray(data.allConfigs),
+    rules: [...data.rules],
+    mcp: [...data.mcp],
+    agents: [...data.agents],
+    commands: [...data.commands],
+    hooks: [...data.hooks],
+    allConfigs: [...data.allConfigs],
   };
 }

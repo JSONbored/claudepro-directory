@@ -5,10 +5,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import {
-  trackRelatedContentClick,
-  trackRelatedContentView,
-} from '@/lib/analytics/events/related-content';
+import { trackEvent } from '@/lib/analytics/client-tracker';
 import type {
   RelatedCarouselClientProps,
   RelatedContentItem,
@@ -32,7 +29,11 @@ export function RelatedCarouselClient({
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
-          trackRelatedContentView(window.location.pathname, items.length, performance.cacheHit);
+          trackEvent('related_content_view', {
+            source_page: window.location.pathname,
+            items_shown: items.length,
+            cache_hit: performance.cacheHit,
+          });
           setHasTrackedView(true);
         }
       },
@@ -54,7 +55,12 @@ export function RelatedCarouselClient({
     const itemUrl = `/${item.category}/${item.slug}`;
 
     // Track click event
-    trackRelatedContentClick(window.location.pathname, itemUrl, index + 1, item.score);
+    trackEvent('related_content_click', {
+      source_page: window.location.pathname,
+      target_page: itemUrl,
+      position: index + 1,
+      match_score: Math.round(item.score * 100) / 100,
+    });
   };
 
   // Get match type badge color

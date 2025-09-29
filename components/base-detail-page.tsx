@@ -2,7 +2,9 @@
 
 import { ArrowLeft, Calendar, Copy, ExternalLink, Tag, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { lazy, Suspense, useState } from 'react';
+import { Suspense, useState } from 'react';
+// Use optimized dynamic CodeHighlight with consolidated functionality
+import { CodeHighlightDynamic as CodeHighlight } from '@/components/code-highlight';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,13 +19,6 @@ import type {
 import type { UnifiedContentItem } from '@/lib/schemas/components';
 // Removed logger import - client components should not use server-side logger
 import { getDisplayTitle } from '@/lib/utils';
-
-// Lazy load CodeHighlight to split syntax-highlighter into its own chunk
-const CodeHighlight = lazy(() =>
-  import('@/components/code-highlight').then((module) => ({
-    default: module.CodeHighlight,
-  }))
-);
 
 // Using BaseDetailPageProps from component.schema.ts which now includes all necessary properties
 // ActionButton and CustomSection are imported from component.schema.ts

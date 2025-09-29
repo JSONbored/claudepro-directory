@@ -122,6 +122,35 @@ export const CONTENT_CATEGORIES = {
   jobs: 'jobs',
 } as const;
 
+// Main content categories (for GitHub content/ directory)
+export const MAIN_CONTENT_CATEGORIES = {
+  agents: 'agents',
+  mcp: 'mcp',
+  rules: 'rules',
+  commands: 'commands',
+  hooks: 'hooks',
+} as const;
+
+// SEO guide categories (for GitHub seo/ directory)
+export const SEO_CATEGORIES = {
+  'use-cases': 'use-cases',
+  tutorials: 'tutorials',
+  collections: 'collections',
+  categories: 'categories',
+  workflows: 'workflows',
+  comparisons: 'comparisons',
+  troubleshooting: 'troubleshooting',
+} as const;
+
+// Static pages that appear in sitemap
+export const STATIC_PAGES = {
+  jobs: 'jobs',
+  community: 'community',
+  trending: 'trending',
+  submit: 'submit',
+  guides: 'guides',
+} as const;
+
 // Validate each category exists in the schema
 Object.values(CONTENT_CATEGORIES).forEach((category) => {
   contentCategorySchema.parse(category);

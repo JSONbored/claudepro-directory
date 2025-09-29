@@ -4,7 +4,7 @@ import { contentProcessor } from '@/lib/services/content-processor.service';
 import { getDisplayTitle } from '@/lib/utils';
 
 export const runtime = 'edge';
-export const alt = 'Claude Pro Directory - Claude Agents';
+export const alt = 'Claude Pro Directory - Jobs';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -24,9 +24,9 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     const rawParams = await params;
     const validatedParams = paramsSchema.parse(rawParams);
 
-    const agent = await contentProcessor.getContentItemBySlug('agents', validatedParams.slug);
+    const job = await contentProcessor.getContentItemBySlug('jobs', validatedParams.slug);
 
-    if (!agent) {
+    if (!job) {
       return new ImageResponse(
         <div
           style={{
@@ -41,7 +41,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             color: 'white',
           }}
         >
-          Agents Not Found
+          Jobs Not Found
         </div>,
         { ...size }
       );
@@ -104,7 +104,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               fontFamily: 'monospace',
             }}
           >
-            claudepro.directory/agents/{agent.slug}
+            claudepro.directory/jobs/{job.slug}
           </div>
         </div>
 
@@ -132,7 +132,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
                 fontWeight: 600,
               }}
             >
-              AGENTS
+              JOBS
             </div>
             <div
               style={{
@@ -144,7 +144,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
                 fontSize: 12,
               }}
             >
-              {agent.category}
+              {job.category}
             </div>
           </div>
 
@@ -158,7 +158,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               lineHeight: 1.1,
             }}
           >
-            {getDisplayTitle(agent)}
+            {getDisplayTitle(job)}
           </h1>
 
           {/* Description */}
@@ -170,8 +170,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               lineHeight: 1.4,
             }}
           >
-            {agent.description?.substring(0, 120)}
-            {agent.description && agent.description.length > 120 ? '...' : ''}
+            {job.description?.substring(0, 120)}
+            {job.description && job.description.length > 120 ? '...' : ''}
           </p>
 
           {/* Code Preview */}
@@ -183,31 +183,31 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               padding: 20,
               fontFamily: 'monospace',
               fontSize: 14,
-              color: '#8b5cf6',
+              color: '#06b6d4',
               marginBottom: 24,
             }}
           >
-            <div style={{ color: '#6b7280', marginBottom: 8 }}>// Agent Configuration</div>
-            <div style={{ color: '#10b981' }}>"agents": &#123;</div>
-            <div style={{ marginLeft: 16, color: '#c084fc' }}>"{agent.slug}": &#123;</div>
-            <div style={{ marginLeft: 32, color: '#fbbf24' }}>"description": "..."</div>
-            <div style={{ marginLeft: 16, color: '#c084fc' }}>&#125;</div>
+            <div style={{ color: '#6b7280', marginBottom: 8 }}>// Job Opportunity</div>
+            <div style={{ color: '#10b981' }}>const position = &#123;</div>
+            <div style={{ marginLeft: 16, color: '#0891b2' }}>title: "{job.slug}",</div>
+            <div style={{ marginLeft: 16, color: '#fbbf24' }}>type: "remote",</div>
+            <div style={{ marginLeft: 16, color: '#fbbf24' }}>experience: "all-levels"</div>
             <div style={{ color: '#10b981' }}>&#125;</div>
           </div>
 
           {/* Tags */}
-          {agent.tags && agent.tags.length > 0 && (
+          {job.tags && job.tags.length > 0 && (
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {agent.tags.slice(0, 4).map((tag: string) => (
+              {job.tags.slice(0, 4).map((tag: string) => (
                 <div
                   key={`tag-${tag}`}
                   style={{
-                    background: 'rgba(139, 92, 246, 0.1)',
-                    border: '1px solid rgba(139, 92, 246, 0.2)',
+                    background: 'rgba(6, 182, 212, 0.1)',
+                    border: '1px solid rgba(6, 182, 212, 0.2)',
                     borderRadius: 16,
                     padding: '6px 12px',
                     fontSize: 14,
-                    color: '#c084fc',
+                    color: '#22d3ee',
                   }}
                 >
                   {tag}
@@ -228,7 +228,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               color: '#71717a',
             }}
           >
-            by {agent.author || 'Community'}
+            by {job.author || 'Community'}
           </div>
         </div>
       </div>,
@@ -238,7 +238,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     // LEGITIMATE: Catch blocks must handle unknown error types
     // Log validation error securely
     // biome-ignore lint/suspicious/noConsole: Error logging needed for debugging
-    console.error('Agent opengraph validation error:', {
+    console.error('Jobs opengraph validation error:', {
       error: error instanceof Error ? error.message : String(error),
       type: 'validation',
     });
@@ -247,7 +247,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     return new ImageResponse(
       <div
         style={{
-          background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+          background: '#ef4444',
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -258,7 +258,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           color: 'white',
         }}
       >
-        Invalid Agent
+        Invalid Jobs
       </div>,
       { ...size }
     );

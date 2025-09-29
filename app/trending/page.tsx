@@ -1,7 +1,6 @@
 import { Clock, Star, TrendingUp, Users } from 'lucide-react';
 import { TrendingContent } from '@/components/trending-content';
 import { Badge } from '@/components/ui/badge';
-import { agents, commands, hooks, mcp, rules } from '@/generated/content';
 import { sortByPopularity } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
 import { statsRedis } from '@/lib/redis';
@@ -12,10 +11,11 @@ import {
   type TrendingParams,
   trendingParamsSchema,
 } from '@/lib/schemas/search.schema';
+import { contentProcessor } from '@/lib/services/content-processor.service';
 
-// Force dynamic rendering since we're fetching from Redis
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Use Edge Runtime with ISR for better performance
+export const runtime = 'edge';
+export const revalidate = 3600; // 1 hour - trending data updates frequently
 
 async function getTrendingData(params: TrendingParams) {
   // Validate trending parameters for security
@@ -31,6 +31,14 @@ async function getTrendingData(params: TrendingParams) {
       limit: params.limit,
     });
   }
+
+  // Fetch all content from the content processor
+  const allCategories = await contentProcessor.getAllCategories();
+  const rules = allCategories.rules as ContentMetadata[];
+  const mcp = allCategories.mcp as ContentMetadata[];
+  const agents = allCategories.agents as ContentMetadata[];
+  const commands = allCategories.commands as ContentMetadata[];
+  const hooks = allCategories.hooks as ContentMetadata[];
 
   // Helper function to get mixed content from categories
   const getMixedContent = (
@@ -265,7 +273,15 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
   });
 
   const { trending, popular, recent } = await getTrendingData(params);
-  const totalCount = rules.length + mcp.length + agents.length + commands.length + hooks.length;
+
+  // Get total count from content processor
+  const allCategories = await contentProcessor.getAllCategories();
+  const totalCount =
+    allCategories.rules.length +
+    allCategories.mcp.length +
+    allCategories.agents.length +
+    allCategories.commands.length +
+    allCategories.hooks.length;
 
   // This is a server component, so we'll use a static ID
   const pageTitleId = 'trending-page-title';

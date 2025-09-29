@@ -1,29 +1,32 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { agents, commands, hooks, mcp, rules } from '@/generated/content';
+import { APP_CONFIG } from '@/lib/constants';
 import { handleApiError, handleValidationError } from '@/lib/error-handler';
-import { logger } from '@/lib/logger';
+
 import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
 import { contentCache } from '@/lib/redis';
 import { errorInputSchema } from '@/lib/schemas/error.schema';
+import { contentProcessor } from '@/lib/services/content-processor.service';
 import { apiSchemas, ValidationError, validation } from '@/lib/validation';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge'; // Use Edge Runtime for better performance
 export const revalidate = 14400; // 4 hours
 
 // Content type mapping
-const contentMap = {
-  'agents.json': { data: agents, type: 'agent' },
-  'mcp.json': { data: mcp, type: 'mcp' },
-  'hooks.json': { data: hooks, type: 'hook' },
-  'commands.json': { data: commands, type: 'command' },
-  'rules.json': { data: rules, type: 'rule' },
+const contentTypeMap = {
+  'agents.json': { category: 'agents', type: 'agent' },
+  'mcp.json': { category: 'mcp', type: 'mcp' },
+  'hooks.json': { category: 'hooks', type: 'hook' },
+  'commands.json': { category: 'commands', type: 'command' },
+  'rules.json': { category: 'rules', type: 'rule' },
 } as const;
 
 async function handleGET(
   request: NextRequest,
   { params }: { params: Promise<{ contentType: string }> }
 ) {
-  const requestLogger = logger.forRequest(request);
+  // Extract request metadata for error context
+  const requestUrl = request.url;
+  const userAgent = request.headers.get('user-agent') || 'unknown';
 
   try {
     const rawParams = await params;
@@ -36,16 +39,11 @@ async function handleGET(
     );
 
     const { contentType } = validatedParams;
-    requestLogger.info('Content type API request started', { contentType, validated: true });
 
     // Try to get from cache first
     const cacheKey = `content-api:${contentType}`;
     const cachedResponse = await contentCache.getAPIResponse(cacheKey);
     if (cachedResponse) {
-      requestLogger.info('Serving cached content API response', {
-        contentType,
-        source: 'redis-cache',
-      });
       return NextResponse.json(cachedResponse, {
         headers: {
           'Cache-Control': 'public, s-maxage=14400, stale-while-revalidate=86400',
@@ -55,31 +53,38 @@ async function handleGET(
     }
 
     // Check if the content type is valid
-    if (!(contentType in contentMap)) {
-      requestLogger.warn('Invalid content type requested', {
-        contentType,
-        availableTypesCount: Object.keys(contentMap).length,
-        sampleType: Object.keys(contentMap)[0] || '',
-      });
-
+    if (!(contentType in contentTypeMap)) {
       return NextResponse.json(
         {
           error: 'Content type not found',
-          message: `Available content types: ${Object.keys(contentMap).join(', ')}`,
+          message: `Available content types: ${Object.keys(contentTypeMap).join(', ')}`,
           timestamp: new Date().toISOString(),
         },
         { status: 404 }
       );
     }
 
-    const { data, type } = contentMap[contentType as keyof typeof contentMap];
-    const contentCategory = contentType.replace('.json', '');
+    const { category, type } = contentTypeMap[contentType as keyof typeof contentTypeMap];
+
+    // Fetch content from content processor
+    const data = await contentProcessor.getContentByCategory(category);
+
+    if (!data) {
+      return NextResponse.json(
+        {
+          error: 'Content not available',
+          message: `No content found for ${category}`,
+          timestamp: new Date().toISOString(),
+        },
+        { status: 404 }
+      );
+    }
 
     const responseData = {
-      [contentCategory]: data.map((item) => ({
+      [category]: data.map((item) => ({
         ...item,
         type,
-        url: `https://claudepro.directory/${contentCategory}/${item.slug}`,
+        url: `${APP_CONFIG.url}/${category}/${item.slug}`,
       })),
       count: data.length,
       lastUpdated: new Date().toISOString(),
@@ -87,11 +92,6 @@ async function handleGET(
 
     // Cache the response for 1 hour
     await contentCache.cacheAPIResponse(cacheKey, responseData, 60 * 60);
-
-    requestLogger.info('Content type API request completed successfully', {
-      contentType,
-      count: data.length,
-    });
 
     return NextResponse.json(responseData, {
       headers: {
@@ -112,6 +112,8 @@ async function handleGET(
         method: 'GET',
         logContext: {
           contentType: errorContentType,
+          requestUrl,
+          userAgent,
         },
       });
     }
@@ -126,6 +128,8 @@ async function handleGET(
         method: 'GET',
         logContext: {
           contentType: errorContentType,
+          requestUrl,
+          userAgent,
         },
       }
     );

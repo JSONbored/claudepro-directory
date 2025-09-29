@@ -4,7 +4,7 @@ import { contentProcessor } from '@/lib/services/content-processor.service';
 import { getDisplayTitle } from '@/lib/utils';
 
 export const runtime = 'edge';
-export const alt = 'Claude Pro Directory - Claude Agents';
+export const alt = 'Claude Pro Directory - Claude Hooks';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -24,9 +24,9 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     const rawParams = await params;
     const validatedParams = paramsSchema.parse(rawParams);
 
-    const agent = await contentProcessor.getContentItemBySlug('agents', validatedParams.slug);
+    const hook = await contentProcessor.getContentItemBySlug('hooks', validatedParams.slug);
 
-    if (!agent) {
+    if (!hook) {
       return new ImageResponse(
         <div
           style={{
@@ -41,7 +41,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             color: 'white',
           }}
         >
-          Agents Not Found
+          Hooks Not Found
         </div>,
         { ...size }
       );
@@ -104,7 +104,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               fontFamily: 'monospace',
             }}
           >
-            claudepro.directory/agents/{agent.slug}
+            claudepro.directory/hooks/{hook.slug}
           </div>
         </div>
 
@@ -132,7 +132,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
                 fontWeight: 600,
               }}
             >
-              AGENTS
+              HOOKS
             </div>
             <div
               style={{
@@ -144,7 +144,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
                 fontSize: 12,
               }}
             >
-              {agent.category}
+              {hook.category}
             </div>
           </div>
 
@@ -158,7 +158,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               lineHeight: 1.1,
             }}
           >
-            {getDisplayTitle(agent)}
+            {getDisplayTitle(hook)}
           </h1>
 
           {/* Description */}
@@ -170,8 +170,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               lineHeight: 1.4,
             }}
           >
-            {agent.description?.substring(0, 120)}
-            {agent.description && agent.description.length > 120 ? '...' : ''}
+            {hook.description?.substring(0, 120)}
+            {hook.description && hook.description.length > 120 ? '...' : ''}
           </p>
 
           {/* Code Preview */}
@@ -183,31 +183,29 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               padding: 20,
               fontFamily: 'monospace',
               fontSize: 14,
-              color: '#8b5cf6',
+              color: '#f59e0b',
               marginBottom: 24,
             }}
           >
-            <div style={{ color: '#6b7280', marginBottom: 8 }}>// Agent Configuration</div>
-            <div style={{ color: '#10b981' }}>"agents": &#123;</div>
-            <div style={{ marginLeft: 16, color: '#c084fc' }}>"{agent.slug}": &#123;</div>
-            <div style={{ marginLeft: 32, color: '#fbbf24' }}>"description": "..."</div>
-            <div style={{ marginLeft: 16, color: '#c084fc' }}>&#125;</div>
+            <div style={{ color: '#6b7280', marginBottom: 8 }}>// Claude Desktop Configuration</div>
+            <div style={{ color: '#10b981' }}>"hooks": &#123;</div>
+            <div style={{ marginLeft: 16, color: '#fbbf24' }}>"{hook.slug}": "..."</div>
             <div style={{ color: '#10b981' }}>&#125;</div>
           </div>
 
           {/* Tags */}
-          {agent.tags && agent.tags.length > 0 && (
+          {hook.tags && hook.tags.length > 0 && (
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {agent.tags.slice(0, 4).map((tag: string) => (
+              {hook.tags.slice(0, 4).map((tag: string) => (
                 <div
                   key={`tag-${tag}`}
                   style={{
-                    background: 'rgba(139, 92, 246, 0.1)',
-                    border: '1px solid rgba(139, 92, 246, 0.2)',
+                    background: 'rgba(245, 158, 11, 0.1)',
+                    border: '1px solid rgba(245, 158, 11, 0.2)',
                     borderRadius: 16,
                     padding: '6px 12px',
                     fontSize: 14,
-                    color: '#c084fc',
+                    color: '#fbbf24',
                   }}
                 >
                   {tag}
@@ -228,7 +226,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               color: '#71717a',
             }}
           >
-            by {agent.author || 'Community'}
+            by {hook.author || 'Community'}
           </div>
         </div>
       </div>,
@@ -238,7 +236,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     // LEGITIMATE: Catch blocks must handle unknown error types
     // Log validation error securely
     // biome-ignore lint/suspicious/noConsole: Error logging needed for debugging
-    console.error('Agent opengraph validation error:', {
+    console.error('Hooks opengraph validation error:', {
       error: error instanceof Error ? error.message : String(error),
       type: 'validation',
     });
@@ -247,7 +245,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     return new ImageResponse(
       <div
         style={{
-          background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+          background: '#ef4444',
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -258,7 +256,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           color: 'white',
         }}
       >
-        Invalid Agent
+        Invalid Hooks
       </div>,
       { ...size }
     );

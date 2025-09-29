@@ -200,9 +200,23 @@ class RelatedContentService {
     }
 
     try {
-      // Load from indexer
-      const { contentIndexer } = await import('./indexer');
-      const rawData = await contentIndexer.loadIndex();
+      // Load from content processor (fetches from GitHub API)
+      const { contentProcessor } = await import('@/lib/services/content-processor.service');
+      const allContent = await contentProcessor.getAllContent();
+
+      // Flatten all content into items array
+      const items: ContentItem[] = [];
+      Object.values(allContent).forEach((categoryItems) => {
+        if (Array.isArray(categoryItems)) {
+          items.push(...categoryItems);
+        }
+      });
+
+      const rawData = {
+        items,
+        generated: new Date().toISOString(),
+        version: '1.0.0',
+      };
 
       if (isDevelopment) {
         logger.debug('RAW INDEX DATA', {

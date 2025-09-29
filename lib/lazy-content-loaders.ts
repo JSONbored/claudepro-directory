@@ -1,44 +1,62 @@
 /**
  * Lazy Content Loaders
- * Provides lazy-loaded access to large generated content files
+ * Provides lazy-loaded access to content via GitHub API + content processor
  */
 
-import { z } from 'zod';
+import type { UnifiedContentItem } from '@/lib/schemas/components';
 import type { HookContent, MCPServerContent } from '@/lib/schemas/content.schema';
 import { BatchLazyLoader, createLazyModule, PaginatedLazyLoader } from './lazy-loader';
-
-// Schema for metadata lookup
-const metadataLookupSchema = z.record(z.string(), z.any());
 
 // Type aliases for consistency
 export type McpContent = MCPServerContent;
 
-// Lazy load the full MCP content
+// Lazy load the full MCP content via content processor
 export const mcpFullLoader = createLazyModule<McpContent[]>(
-  () => import('@/generated/mcp-full').then((m) => [...m.mcpFull]),
+  async () => {
+    const { contentProcessor } = await import('@/lib/services/content-processor.service');
+    return contentProcessor.getContentByCategory('mcp') as Promise<McpContent[]>;
+  },
   {
     preload: false, // Don't preload by default
     cacheTimeout: 5 * 60 * 1000, // Clear cache after 5 minutes of inactivity
   }
 );
 
-// Lazy load the full hooks content
+// Lazy load the full hooks content via content processor
 export const hooksFullLoader = createLazyModule<HookContent[]>(
-  () => import('@/generated/hooks-full').then((m) => [...m.hooksFull]),
+  async () => {
+    const { contentProcessor } = await import('@/lib/services/content-processor.service');
+    return contentProcessor.getContentByCategory('hooks') as Promise<HookContent[]>;
+  },
   {
     preload: false,
     cacheTimeout: 5 * 60 * 1000,
   }
 );
 
-// Batch loader for all metadata files
+// Batch loader for all metadata files via content processor
 export const metadataLoader = new BatchLazyLoader(
   {
-    mcpMetadata: () => import('@/generated/mcp-metadata').then((m) => m.mcpMetadata),
-    hooksMetadata: () => import('@/generated/hooks-metadata').then((m) => m.hooksMetadata),
-    agentsMetadata: () => import('@/generated/agents-metadata').then((m) => m.agentsMetadata),
-    commandsMetadata: () => import('@/generated/commands-metadata').then((m) => m.commandsMetadata),
-    rulesMetadata: () => import('@/generated/rules-metadata').then((m) => m.rulesMetadata),
+    mcpMetadata: async () => {
+      const { contentProcessor } = await import('@/lib/services/content-processor.service');
+      return contentProcessor.getContentByCategory('mcp');
+    },
+    hooksMetadata: async () => {
+      const { contentProcessor } = await import('@/lib/services/content-processor.service');
+      return contentProcessor.getContentByCategory('hooks');
+    },
+    agentsMetadata: async () => {
+      const { contentProcessor } = await import('@/lib/services/content-processor.service');
+      return contentProcessor.getContentByCategory('agents');
+    },
+    commandsMetadata: async () => {
+      const { contentProcessor } = await import('@/lib/services/content-processor.service');
+      return contentProcessor.getContentByCategory('commands');
+    },
+    rulesMetadata: async () => {
+      const { contentProcessor } = await import('@/lib/services/content-processor.service');
+      return contentProcessor.getContentByCategory('rules');
+    },
   },
   {
     preloadKeys: [], // Don't preload any by default
@@ -107,14 +125,14 @@ export async function getHookContentBySlug(slug: string): Promise<HookContent | 
  */
 export async function getMcpMetadataBySlug(slug: string) {
   const metadata = await metadataLoader.get('mcpMetadata');
-  const parsed = metadataLookupSchema.parse(metadata);
-  return parsed[slug] || null;
+  const metadataArray = Array.isArray(metadata) ? metadata : [];
+  return metadataArray.find((item: UnifiedContentItem) => item.slug === slug) || null;
 }
 
 export async function getHooksMetadataBySlug(slug: string) {
   const metadata = await metadataLoader.get('hooksMetadata');
-  const parsed = metadataLookupSchema.parse(metadata);
-  return parsed[slug] || null;
+  const metadataArray = Array.isArray(metadata) ? metadata : [];
+  return metadataArray.find((item: UnifiedContentItem) => item.slug === slug) || null;
 }
 
 /**

@@ -290,6 +290,41 @@ class ContentProcessor {
     }
   }
 
+  async getComparisonContent(slug: string): Promise<string | null> {
+    try {
+      // Fetch comparison MDX content from GitHub
+      const content = await githubContentService.getFileContent(`seo/comparisons/${slug}.mdx`);
+      return content;
+    } catch (error) {
+      logger.error(`Failed to get comparison content: ${slug}`, error as Error);
+      return null;
+    }
+  }
+
+  async getAllCategories(): Promise<{
+    agents: UnifiedContentItem[];
+    mcp: UnifiedContentItem[];
+    rules: UnifiedContentItem[];
+    commands: UnifiedContentItem[];
+    hooks: UnifiedContentItem[];
+  }> {
+    const [agents, mcp, rules, commands, hooks] = await Promise.all([
+      this.getContentByCategory('agents'),
+      this.getContentByCategory('mcp'),
+      this.getContentByCategory('rules'),
+      this.getContentByCategory('commands'),
+      this.getContentByCategory('hooks'),
+    ]);
+
+    return {
+      agents: agents || [],
+      mcp: mcp || [],
+      rules: rules || [],
+      commands: commands || [],
+      hooks: hooks || [],
+    };
+  }
+
   clearCache(): void {
     this.cache.clear();
     this.cacheTimestamps.clear();
