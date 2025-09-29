@@ -290,24 +290,56 @@ export type ${capitalizedSingular}Full = typeof ${varName}Full[number];`;
     });
   }
 
-  // Generate main index file that exports metadata by default
+  // Generate main index file with lazy loading using existing infrastructure
   const indexContent = `// Auto-generated index file - DO NOT EDIT
 // Generated at: ${new Date().toISOString()}
 
-// Export metadata by default for list views
+// OPTIMIZATION: Use lazy loading to reduce initial bundle size
+// Instead of direct imports, use the existing lazy loading infrastructure
+import { metadataLoader } from '@/lib/lazy-content-loaders';
+
+// Lazy metadata getters - only load when accessed
+${buildConfig.contentTypes
+  .map((type) => {
+    const varName = type.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+    return `export const get${varName.charAt(0).toUpperCase() + varName.slice(1)} = () => metadataLoader.get('${varName}Metadata');`;
+  })
+  .join('\n')}
+
+// Backward compatibility: export promises that resolve to the data
+${buildConfig.contentTypes
+  .map((type) => {
+    const varName = type.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+    const capitalizedName = varName.charAt(0).toUpperCase() + varName.slice(1);
+    return `export const ${varName} = get${capitalizedName}();`;
+  })
+  .join('\n')}
+
+// By-slug getters - load metadata on demand and find by slug
 ${buildConfig.contentTypes
   .map((type) => {
     const varName = type.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
     const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
     const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
+    const capitalizedName = varName.charAt(0).toUpperCase() + varName.slice(1);
 
-    return `export {
-  ${varName}Metadata as ${varName},
-  ${varName}MetadataBySlug as ${varName}BySlug,
-  get${capitalizedSingular}MetadataBySlug as get${capitalizedSingular}BySlug
-} from './${type}-metadata';`;
+    return `export const get${capitalizedSingular}BySlug = async (slug: string) => {
+  const ${varName}Data = await get${capitalizedName}();
+  return (${varName}Data as any[]).find(item => item.slug === slug);
+};`;
   })
-  .join('\n')}
+  .join('\n\n')}
+
+// Legacy exports for backward compatibility (return promises)
+${buildConfig.contentTypes
+  .map((type) => {
+    const varName = type.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+    const capitalizedName = varName.charAt(0).toUpperCase() + varName.slice(1);
+    return `export const ${varName}BySlug = get${capitalizedName}().then(data =>
+  Object.fromEntries((data as any[]).map(item => [item.slug, item]))
+);`;
+  })
+  .join('')}
 
 // Export lazy loaders for full content (used in detail pages)
 ${buildConfig.contentTypes

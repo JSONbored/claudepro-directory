@@ -15,17 +15,18 @@ export const metadata: Metadata = {
   keywords: 'Claude agents, AI agents, specialized assistants, workflow automation, Claude AI',
 };
 
-export default function AgentsPage() {
+export default async function AgentsPage() {
+  const agentsData = await agents;
   return (
     <ContentListServer
       title="AI Agents"
       description="Browse specialized AI agents designed for specific tasks and workflows using Claude's capabilities."
       icon="sparkles"
-      items={agents}
+      items={agentsData}
       type="agents"
       searchPlaceholder="Search AI agents..."
       badges={[
-        { icon: 'sparkles', text: `${agents.length} Agents Available` },
+        { icon: 'sparkles', text: `${agentsData.length} Agents Available` },
         { text: 'Task Optimized' },
         { text: 'Ready to Deploy' },
       ]}

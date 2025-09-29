@@ -67,12 +67,21 @@ async function getTrendingData(params: TrendingParams) {
 
   if (!statsRedis.isEnabled()) {
     // Fallback to static data if Redis is not available
+    // Await all content promises first
+    const [rulesData, mcpData, agentsData, commandsData, hooksData] = await Promise.all([
+      rules,
+      mcp,
+      agents,
+      commands,
+      hooks,
+    ]);
+
     // Sort each category by popularity - cast readonly tuple types to ContentMetadata arrays
-    const sortedRules = sortByPopularity(rules as readonly ContentMetadata[]);
-    const sortedMcp = sortByPopularity(mcp as readonly ContentMetadata[]);
-    const sortedAgents = sortByPopularity(agents as readonly ContentMetadata[]);
-    const sortedCommands = sortByPopularity(commands as readonly ContentMetadata[]);
-    const sortedHooks = sortByPopularity(hooks as readonly ContentMetadata[]);
+    const sortedRules = sortByPopularity(rulesData as readonly ContentMetadata[]);
+    const sortedMcp = sortByPopularity(mcpData as readonly ContentMetadata[]);
+    const sortedAgents = sortByPopularity(agentsData as readonly ContentMetadata[]);
+    const sortedCommands = sortByPopularity(commandsData as readonly ContentMetadata[]);
+    const sortedHooks = sortByPopularity(hooksData as readonly ContentMetadata[]);
 
     // Mix categories for trending (12 items total, ~2-3 per category)
     const trending = getMixedContent(
@@ -101,11 +110,11 @@ async function getTrendingData(params: TrendingParams) {
     // Recent shows newest from each category (simulate by reversing arrays)
     const recent = getMixedContent(
       [
-        { items: [...rules].reverse(), type: 'rules', count: 2 },
-        { items: [...mcp].reverse(), type: 'mcp', count: 2 },
-        { items: [...agents].reverse(), type: 'agents', count: 2 },
-        { items: [...commands].reverse(), type: 'commands', count: 2 },
-        { items: [...hooks].reverse(), type: 'hooks', count: 1 },
+        { items: [...rulesData].reverse(), type: 'rules', count: 2 },
+        { items: [...mcpData].reverse(), type: 'mcp', count: 2 },
+        { items: [...agentsData].reverse(), type: 'agents', count: 2 },
+        { items: [...commandsData].reverse(), type: 'commands', count: 2 },
+        { items: [...hooksData].reverse(), type: 'hooks', count: 1 },
       ],
       9
     );
@@ -114,6 +123,15 @@ async function getTrendingData(params: TrendingParams) {
   }
 
   try {
+    // Await all content promises first
+    const [agentsData, mcpData, rulesData, commandsData, hooksData] = await Promise.all([
+      agents,
+      mcp,
+      rules,
+      commands,
+      hooks,
+    ]);
+
     // Fetch trending data from Redis for each category
     const [trendingAgents, trendingMcp, trendingRules, trendingCommands, trendingHooks] =
       await Promise.all([
@@ -164,30 +182,30 @@ async function getTrendingData(params: TrendingParams) {
 
     // Trending - mix from all categories (last 7 days)
     const trending = [
-      ...mapToContent(trendingAgents, agents, 'agents'),
-      ...mapToContent(trendingMcp, mcp, 'mcp'),
-      ...mapToContent(trendingRules, rules, 'rules'),
-      ...mapToContent(trendingCommands, commands, 'commands'),
-      ...mapToContent(trendingHooks, hooks, 'hooks'),
+      ...mapToContent(trendingAgents, agentsData, 'agents'),
+      ...mapToContent(trendingMcp, mcpData, 'mcp'),
+      ...mapToContent(trendingRules, rulesData, 'rules'),
+      ...mapToContent(trendingCommands, commandsData, 'commands'),
+      ...mapToContent(trendingHooks, hooksData, 'hooks'),
     ].slice(0, 12);
 
     // Popular - all-time most viewed
     const popular = [
-      ...mapToContent(popularAgents, agents, 'agents'),
-      ...mapToContent(popularMcp, mcp, 'mcp'),
-      ...mapToContent(popularRules, rules, 'rules'),
-      ...mapToContent(popularCommands, commands, 'commands'),
-      ...mapToContent(popularHooks, hooks, 'hooks'),
+      ...mapToContent(popularAgents, agentsData, 'agents'),
+      ...mapToContent(popularMcp, mcpData, 'mcp'),
+      ...mapToContent(popularRules, rulesData, 'rules'),
+      ...mapToContent(popularCommands, commandsData, 'commands'),
+      ...mapToContent(popularHooks, hooksData, 'hooks'),
     ].slice(0, 9);
 
     // Recent - if we don't have enough data, use fallback mixing
     const recentFallback = getMixedContent(
       [
-        { items: [...rules].reverse(), type: 'rules', count: 2 },
-        { items: [...mcp].reverse(), type: 'mcp', count: 2 },
-        { items: [...agents].reverse(), type: 'agents', count: 2 },
-        { items: [...commands].reverse(), type: 'commands', count: 2 },
-        { items: [...hooks].reverse(), type: 'hooks', count: 1 },
+        { items: [...rulesData].reverse(), type: 'rules', count: 2 },
+        { items: [...mcpData].reverse(), type: 'mcp', count: 2 },
+        { items: [...agentsData].reverse(), type: 'agents', count: 2 },
+        { items: [...commandsData].reverse(), type: 'commands', count: 2 },
+        { items: [...hooksData].reverse(), type: 'hooks', count: 1 },
       ],
       9
     );
@@ -205,12 +223,22 @@ async function getTrendingData(params: TrendingParams) {
         component: 'TrendingPage',
       }
     );
-    // Use same fallback as non-Redis case - cast readonly tuple types to ContentMetadata arrays
-    const sortedRules = sortByPopularity(rules as readonly ContentMetadata[]);
-    const sortedMcp = sortByPopularity(mcp as readonly ContentMetadata[]);
-    const sortedAgents = sortByPopularity(agents as readonly ContentMetadata[]);
-    const sortedCommands = sortByPopularity(commands as readonly ContentMetadata[]);
-    const sortedHooks = sortByPopularity(hooks as readonly ContentMetadata[]);
+    // Use same fallback as non-Redis case
+    // Await all content promises first
+    const [rulesData, mcpData, agentsData, commandsData, hooksData] = await Promise.all([
+      rules,
+      mcp,
+      agents,
+      commands,
+      hooks,
+    ]);
+
+    // Cast readonly tuple types to ContentMetadata arrays
+    const sortedRules = sortByPopularity(rulesData as readonly ContentMetadata[]);
+    const sortedMcp = sortByPopularity(mcpData as readonly ContentMetadata[]);
+    const sortedAgents = sortByPopularity(agentsData as readonly ContentMetadata[]);
+    const sortedCommands = sortByPopularity(commandsData as readonly ContentMetadata[]);
+    const sortedHooks = sortByPopularity(hooksData as readonly ContentMetadata[]);
 
     const trending = getMixedContent(
       [
@@ -236,11 +264,11 @@ async function getTrendingData(params: TrendingParams) {
 
     const recent = getMixedContent(
       [
-        { items: [...rules].reverse(), type: 'rules', count: 2 },
-        { items: [...mcp].reverse(), type: 'mcp', count: 2 },
-        { items: [...agents].reverse(), type: 'agents', count: 2 },
-        { items: [...commands].reverse(), type: 'commands', count: 2 },
-        { items: [...hooks].reverse(), type: 'hooks', count: 1 },
+        { items: [...rulesData].reverse(), type: 'rules', count: 2 },
+        { items: [...mcpData].reverse(), type: 'mcp', count: 2 },
+        { items: [...agentsData].reverse(), type: 'agents', count: 2 },
+        { items: [...commandsData].reverse(), type: 'commands', count: 2 },
+        { items: [...hooksData].reverse(), type: 'hooks', count: 1 },
       ],
       9
     );
@@ -265,7 +293,17 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
   });
 
   const { trending, popular, recent } = await getTrendingData(params);
-  const totalCount = rules.length + mcp.length + agents.length + commands.length + hooks.length;
+
+  // Await all content promises to calculate total count
+  const [rulesData, mcpData, agentsData, commandsData, hooksData] = await Promise.all([
+    rules,
+    mcp,
+    agents,
+    commands,
+    hooks,
+  ]);
+  const totalCount =
+    rulesData.length + mcpData.length + agentsData.length + commandsData.length + hooksData.length;
 
   // This is a server component, so we'll use a static ID
   const pageTitleId = 'trending-page-title';

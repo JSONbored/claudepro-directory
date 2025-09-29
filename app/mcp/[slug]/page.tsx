@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const { slug } = validationResult.data;
-  const mcpServer = getMcpBySlug(slug);
+  const mcpServer = await getMcpBySlug(slug);
 
   if (!mcpServer) {
     return {
@@ -64,7 +64,8 @@ export async function generateStaticParams() {
   try {
     // Sort MCP servers by popularity/trending for optimized static generation
     // Most popular items will be generated first, improving initial page loads
-    const sortedMcp = await sortMcp([...mcp], 'popularity');
+    const mcpData = await mcp;
+    const sortedMcp = await sortMcp([...mcpData], 'popularity');
 
     return sortedMcp
       .map((mcpItem) => {
@@ -91,7 +92,8 @@ export async function generateStaticParams() {
       error instanceof Error ? error : new Error(String(error))
     );
 
-    return mcp.map((mcpItem) => ({
+    const mcpData = await mcp;
+    return mcpData.map((mcpItem) => ({
       slug: mcpItem.slug,
     }));
   }
@@ -126,7 +128,7 @@ export default async function MCPPage({ params }: PageProps) {
     validated: true,
   });
 
-  const mcpMeta = getMcpBySlug(slug);
+  const mcpMeta = await getMcpBySlug(slug);
 
   if (!mcpMeta) {
     notFound();
@@ -135,7 +137,8 @@ export default async function MCPPage({ params }: PageProps) {
   // Load full content
   const fullMCP = await getMcpFullContent(slug);
 
-  const relatedMCPs = mcp
+  const mcpData = await mcp;
+  const relatedMCPs = mcpData
     .filter((m) => m.slug !== mcpMeta.slug && m.category === mcpMeta.category)
     .slice(0, 3);
 

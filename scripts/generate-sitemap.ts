@@ -15,7 +15,7 @@ interface SitemapUrl {
 // Always use production URL for sitemap
 const baseUrl = APP_CONFIG.url;
 
-function generateSitemap(): string {
+async function generateSitemap(): Promise<string> {
   // Use generated content directly instead of static API files
 
   const urls: SitemapUrl[] = [];
@@ -81,7 +81,20 @@ function generateSitemap(): string {
   });
 
   // Individual content pages - each content type already has proper category
-  const allContent: ContentItem[] = [...rules, ...mcp, ...agents, ...commands, ...hooks];
+  const [rulesData, mcpData, agentsData, commandsData, hooksData] = await Promise.all([
+    rules,
+    mcp,
+    agents,
+    commands,
+    hooks,
+  ]);
+  const allContent: ContentItem[] = [
+    ...rulesData,
+    ...mcpData,
+    ...agentsData,
+    ...commandsData,
+    ...hooksData,
+  ];
 
   allContent.forEach((item) => {
     urls.push({
@@ -141,10 +154,10 @@ Crawl-delay: 1`;
   return robotsTxt;
 }
 
-function main() {
+async function main() {
   try {
     console.log('🗺️  Generating sitemap...');
-    const sitemap = generateSitemap();
+    const sitemap = await generateSitemap();
     writeFileSync('public/sitemap.xml', sitemap, 'utf-8');
     console.log('✅ Sitemap generated successfully');
 

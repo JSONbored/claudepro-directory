@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const { slug } = validationResult.data;
-  const agent = getAgentBySlug(slug);
+  const agent = await getAgentBySlug(slug);
 
   if (!agent) {
     return {
@@ -66,7 +66,8 @@ export async function generateStaticParams() {
   try {
     // Sort agents by popularity/trending for optimized static generation
     // Most popular items will be generated first, improving initial page loads
-    const sortedAgents = await sortAgents([...agents], 'popularity');
+    const agentsData = await agents;
+    const sortedAgents = await sortAgents([...agentsData], 'popularity');
 
     return sortedAgents
       .map((agent) => {
@@ -93,7 +94,8 @@ export async function generateStaticParams() {
       error instanceof Error ? error : new Error(String(error))
     );
 
-    return agents.map((agent) => ({
+    const agentsData = await agents;
+    return agentsData.map((agent) => ({
       slug: agent.slug,
     }));
   }
@@ -131,7 +133,7 @@ export default async function AgentPage({ params }: PageProps) {
     validated: true,
   });
 
-  const agentMeta = getAgentBySlug(slug);
+  const agentMeta = await getAgentBySlug(slug);
 
   if (!agentMeta) {
     notFound();
@@ -141,7 +143,8 @@ export default async function AgentPage({ params }: PageProps) {
   const fullAgent = await getAgentFullContent(slug);
   const agentData = fullAgent || agentMeta;
 
-  const relatedAgentsData = agents
+  const agentsData = await agents;
+  const relatedAgentsData = agentsData
     .filter((a) => a.slug !== agentMeta.slug && a.category === agentMeta.category)
     .slice(0, 3);
 

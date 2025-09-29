@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const { slug } = validationResult.data;
-  const rule = getRuleBySlug(slug);
+  const rule = await getRuleBySlug(slug);
 
   if (!rule) {
     return {
@@ -63,7 +63,8 @@ export async function generateStaticParams() {
   try {
     // Sort rules by popularity/trending for optimized static generation
     // Most popular items will be generated first, improving initial page loads
-    const sortedRules = await sortRules([...rules], 'popularity');
+    const rulesData = await rules;
+    const sortedRules = await sortRules([...rulesData], 'popularity');
 
     return sortedRules
       .map((rule) => {
@@ -90,7 +91,8 @@ export async function generateStaticParams() {
       error instanceof Error ? error : new Error(String(error))
     );
 
-    return rules.map((rule) => ({
+    const rulesData = await rules;
+    return rulesData.map((rule) => ({
       slug: rule.slug,
     }));
   }
@@ -125,7 +127,7 @@ export default async function RulePage({ params }: PageProps) {
     validated: true,
   });
 
-  const ruleMeta = getRuleBySlug(slug);
+  const ruleMeta = await getRuleBySlug(slug);
 
   if (!ruleMeta) {
     notFound();
@@ -134,7 +136,8 @@ export default async function RulePage({ params }: PageProps) {
   // Load full content
   const fullRule = await getRuleFullContent(slug);
 
-  const relatedRules = rules
+  const rulesData = await rules;
+  const relatedRules = rulesData
     .filter((r) => r.slug !== ruleMeta.slug && r.category === ruleMeta.category)
     .slice(0, 3);
 

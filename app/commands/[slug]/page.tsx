@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const { slug } = validationResult.data;
-  const command = getCommandBySlug(slug);
+  const command = await getCommandBySlug(slug);
 
   if (!command) {
     return {
@@ -65,7 +65,8 @@ export async function generateStaticParams() {
   try {
     // Sort commands by popularity/trending for optimized static generation
     // Most popular items will be generated first, improving initial page loads
-    const sortedCommands = await sortCommands([...commands], 'popularity');
+    const commandsData = await commands;
+    const sortedCommands = await sortCommands([...commandsData], 'popularity');
 
     return sortedCommands
       .map((command) => {
@@ -92,7 +93,8 @@ export async function generateStaticParams() {
       error instanceof Error ? error : new Error(String(error))
     );
 
-    return commands.map((command) => ({
+    const commandsData = await commands;
+    return commandsData.map((command) => ({
       slug: command.slug,
     }));
   }
@@ -127,7 +129,7 @@ export default async function CommandPage({ params }: PageProps) {
     validated: true,
   });
 
-  const commandMeta = getCommandBySlug(slug);
+  const commandMeta = await getCommandBySlug(slug);
 
   if (!commandMeta) {
     notFound();
@@ -136,7 +138,8 @@ export default async function CommandPage({ params }: PageProps) {
   // Load full content
   const fullCommand = await getCommandFullContent(slug);
 
-  const relatedCommandsData = commands
+  const commandsData = await commands;
+  const relatedCommandsData = commandsData
     .filter((c) => c.slug !== commandMeta.slug && c.category === commandMeta.category)
     .slice(0, 3);
 

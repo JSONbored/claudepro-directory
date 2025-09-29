@@ -87,12 +87,21 @@ function toSearchableItems<
 
 // Generate individual content type APIs
 async function generateContentTypeAPIs() {
+  // Await all content promises
+  const [agentsData, mcpData, hooksData, commandsData, rulesData] = await Promise.all([
+    agents,
+    mcp,
+    hooks,
+    commands,
+    rules,
+  ]);
+
   const contentMap = {
-    'agents.json': { data: agents, type: 'agent' as AppContentType },
-    'mcp.json': { data: mcp, type: 'mcp' as AppContentType },
-    'hooks.json': { data: hooks, type: 'hook' as AppContentType },
-    'commands.json': { data: commands, type: 'command' as AppContentType },
-    'rules.json': { data: rules, type: 'rule' as AppContentType },
+    'agents.json': { data: agentsData, type: 'agent' as AppContentType },
+    'mcp.json': { data: mcpData, type: 'mcp' as AppContentType },
+    'hooks.json': { data: hooksData, type: 'hook' as AppContentType },
+    'commands.json': { data: commandsData, type: 'command' as AppContentType },
+    'rules.json': { data: rulesData, type: 'rule' as AppContentType },
   };
 
   console.log('📦 Generating individual content type APIs...');
@@ -134,11 +143,24 @@ async function generateContentTypeAPIs() {
 async function generateAllConfigurationsAPI() {
   console.log('📦 Generating all-configurations API...');
 
-  const transformedAgents = transformContent(agents, 'agent' as AppContentType, 'agents');
-  const transformedMcp = transformContent(mcp, 'mcp' as AppContentType, 'mcp');
-  const transformedRules = transformContent(rules, 'rule' as AppContentType, 'rules');
-  const transformedCommands = transformContent(commands, 'command' as AppContentType, 'commands');
-  const transformedHooks = transformContent(hooks, 'hook' as AppContentType, 'hooks');
+  // Await all content promises
+  const [agentsData, mcpData, rulesData, commandsData, hooksData] = await Promise.all([
+    agents,
+    mcp,
+    rules,
+    commands,
+    hooks,
+  ]);
+
+  const transformedAgents = transformContent(agentsData, 'agent' as AppContentType, 'agents');
+  const transformedMcp = transformContent(mcpData, 'mcp' as AppContentType, 'mcp');
+  const transformedRules = transformContent(rulesData, 'rule' as AppContentType, 'rules');
+  const transformedCommands = transformContent(
+    commandsData,
+    'command' as AppContentType,
+    'commands'
+  );
+  const transformedHooks = transformContent(hooksData, 'hook' as AppContentType, 'hooks');
 
   const allConfigurations: AllConfigurationsResponse = {
     '@context': 'https://schema.org',
@@ -192,13 +214,22 @@ async function generateAllConfigurationsAPI() {
 async function generateSearchIndexes() {
   console.log('📦 Generating search indexes...');
 
+  // Await all content promises
+  const [agentsData, mcpData, rulesData, commandsData, hooksData] = await Promise.all([
+    agents,
+    mcp,
+    rules,
+    commands,
+    hooks,
+  ]);
+
   // Create combined searchable dataset
   const allSearchableItems: StaticAPISearchableItem[] = [
-    ...toSearchableItems([...agents], 'agents'),
-    ...toSearchableItems([...mcp], 'mcp'),
-    ...toSearchableItems([...rules], 'rules'),
-    ...toSearchableItems([...commands], 'commands'),
-    ...toSearchableItems([...hooks], 'hooks'),
+    ...toSearchableItems([...agentsData], 'agents'),
+    ...toSearchableItems([...mcpData], 'mcp'),
+    ...toSearchableItems([...rulesData], 'rules'),
+    ...toSearchableItems([...commandsData], 'commands'),
+    ...toSearchableItems([...hooksData], 'hooks'),
   ];
 
   // Generate category-specific indexes
@@ -266,6 +297,15 @@ async function generateSearchIndexes() {
 async function generateHealthCheck() {
   console.log('📦 Generating health check endpoint...');
 
+  // Await all content promises
+  const [agentsData, mcpData, rulesData, commandsData, hooksData] = await Promise.all([
+    agents,
+    mcp,
+    rules,
+    commands,
+    hooks,
+  ]);
+
   const healthData: HealthCheckResponse = {
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -273,12 +313,17 @@ async function generateHealthCheck() {
     version: buildConfig.version,
     environment: env.NODE_ENV,
     counts: {
-      agents: agents.length,
-      mcp: mcp.length,
-      rules: rules.length,
-      commands: commands.length,
-      hooks: hooks.length,
-      total: agents.length + mcp.length + rules.length + commands.length + hooks.length,
+      agents: agentsData.length,
+      mcp: mcpData.length,
+      rules: rulesData.length,
+      commands: commandsData.length,
+      hooks: hooksData.length,
+      total:
+        agentsData.length +
+        mcpData.length +
+        rulesData.length +
+        commandsData.length +
+        hooksData.length,
     },
     features: {
       staticGeneration: true,
@@ -334,7 +379,21 @@ async function generateStaticAPIs(): Promise<GenerationResult> {
     console.log();
 
     const duration = performance.now() - startTime;
-    const totalItems = agents.length + mcp.length + rules.length + commands.length + hooks.length;
+
+    // Await all content promises to get lengths
+    const [agentsData, mcpData, rulesData, commandsData, hooksData] = await Promise.all([
+      agents,
+      mcp,
+      rules,
+      commands,
+      hooks,
+    ]);
+    const totalItems =
+      agentsData.length +
+      mcpData.length +
+      rulesData.length +
+      commandsData.length +
+      hooksData.length;
 
     console.log('✅ All static APIs generated successfully!');
     console.log(`📁 Output directory: ${OUTPUT_DIR}`);

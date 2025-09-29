@@ -15,17 +15,18 @@ export const metadata: Metadata = {
   keywords: 'Claude rules, system prompts, AI configurations, prompt engineering, Claude AI',
 };
 
-export default function RulesPage() {
+export default async function RulesPage() {
+  const rulesData = await rules;
   return (
     <ContentListServer
       title="Claude Rules"
       description="Expert-crafted system prompts and configurations to enhance Claude's capabilities across different domains and use cases."
       icon="book-open"
-      items={rules}
+      items={rulesData}
       type="rules"
       searchPlaceholder="Search Claude rules..."
       badges={[
-        { icon: 'book-open', text: `${rules.length} Rules Available` },
+        { icon: 'book-open', text: `${rulesData.length} Rules Available` },
         { text: 'Expert Tested' },
         { text: 'Copy & Paste Ready' },
       ]}

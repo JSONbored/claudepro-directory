@@ -42,11 +42,18 @@ async function* createStreamingResponse(
   batchSize: number,
   format: 'json' | 'ndjson'
 ): AsyncGenerator<string, void, unknown> {
-  const transformedAgents = transformContent(agents, 'agent', 'agents');
-  const transformedMcp = transformContent(mcp, 'mcp', 'mcp');
-  const transformedRules = transformContent(rules, 'rule', 'rules');
-  const transformedCommands = transformContent(commands, 'command', 'commands');
-  const transformedHooks = transformContent(hooks, 'hook', 'hooks');
+  const [agentsData, mcpData, rulesData, commandsData, hooksData] = await Promise.all([
+    agents,
+    mcp,
+    rules,
+    commands,
+    hooks,
+  ]);
+  const transformedAgents = transformContent(agentsData, 'agent', 'agents');
+  const transformedMcp = transformContent(mcpData, 'mcp', 'mcp');
+  const transformedRules = transformContent(rulesData, 'rule', 'rules');
+  const transformedCommands = transformContent(commandsData, 'command', 'commands');
+  const transformedHooks = transformContent(hooksData, 'hook', 'hooks');
 
   const metadata = {
     '@context': 'https://schema.org',
@@ -213,11 +220,18 @@ async function handleGET(request: NextRequest) {
         },
       });
     }
-    const transformedAgents = transformContent(agents, 'agent', 'agents');
-    const transformedMcp = transformContent(mcp, 'mcp', 'mcp');
-    const transformedRules = transformContent(rules, 'rule', 'rules');
-    const transformedCommands = transformContent(commands, 'command', 'commands');
-    const transformedHooks = transformContent(hooks, 'hook', 'hooks');
+    const [agentsData, mcpData, rulesData, commandsData, hooksData] = await Promise.all([
+      agents,
+      mcp,
+      rules,
+      commands,
+      hooks,
+    ]);
+    const transformedAgents = transformContent(agentsData, 'agent', 'agents');
+    const transformedMcp = transformContent(mcpData, 'mcp', 'mcp');
+    const transformedRules = transformContent(rulesData, 'rule', 'rules');
+    const transformedCommands = transformContent(commandsData, 'command', 'commands');
+    const transformedHooks = transformContent(hooksData, 'hook', 'hooks');
 
     const allConfigurations = {
       '@context': 'https://schema.org',

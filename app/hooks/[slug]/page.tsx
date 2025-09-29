@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const { slug } = validationResult.data;
-  const hook = getHookBySlug(slug);
+  const hook = await getHookBySlug(slug);
 
   if (!hook) {
     return {
@@ -63,7 +63,8 @@ export async function generateStaticParams() {
   try {
     // Sort hooks by popularity/trending for optimized static generation
     // Most popular items will be generated first, improving initial page loads
-    const sortedHooks = await sortHooks([...hooks], 'popularity');
+    const hooksData = await hooks;
+    const sortedHooks = await sortHooks([...hooksData], 'popularity');
 
     return sortedHooks
       .map((hook) => {
@@ -90,7 +91,8 @@ export async function generateStaticParams() {
       error instanceof Error ? error : new Error(String(error))
     );
 
-    return hooks.map((hook) => ({
+    const hooksData = await hooks;
+    return hooksData.map((hook) => ({
       slug: hook.slug,
     }));
   }
@@ -125,7 +127,7 @@ export default async function HookPage({ params }: PageProps) {
     validated: true,
   });
 
-  const hookMeta = getHookBySlug(slug);
+  const hookMeta = await getHookBySlug(slug);
 
   if (!hookMeta) {
     notFound();
@@ -134,7 +136,8 @@ export default async function HookPage({ params }: PageProps) {
   // Load full content
   const fullHook = await getHookFullContent(slug);
 
-  const relatedHooksData = hooks
+  const hooksData = await hooks;
+  const relatedHooksData = hooksData
     .filter((h) => h.slug !== hookMeta.slug && h.category === hookMeta.category)
     .slice(0, 3);
 

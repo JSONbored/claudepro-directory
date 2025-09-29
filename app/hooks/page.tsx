@@ -14,17 +14,18 @@ export const metadata: Metadata = {
   keywords: 'Claude hooks, automation, event triggers, workflow automation, Claude Pro',
 };
 
-export default function HooksPage() {
+export default async function HooksPage() {
+  const hooksData = await hooks;
   return (
     <ContentListServer
       title="Automation Hooks"
       description="Discover automation hooks to trigger actions and workflows based on Claude events."
       icon="webhook"
-      items={hooks}
+      items={hooksData}
       type="hooks"
       searchPlaceholder="Search automation hooks..."
       badges={[
-        { icon: 'webhook', text: `${hooks.length} Hooks Available` },
+        { icon: 'webhook', text: `${hooksData.length} Hooks Available` },
         { text: 'Event Driven' },
         { text: 'Automation Ready' },
       ]}

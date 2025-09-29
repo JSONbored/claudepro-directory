@@ -15,17 +15,18 @@ export const metadata: Metadata = {
   keywords: 'Claude commands, CLI commands, shortcuts, productivity tools, Claude Pro',
 };
 
-export default function CommandsPage() {
+export default async function CommandsPage() {
+  const commandsData = await commands;
   return (
     <ContentListServer
       title="Commands"
       description="Explore custom commands and shortcuts to enhance your Claude experience with powerful functionality."
       icon="terminal"
-      items={commands}
+      items={commandsData}
       type="commands"
       searchPlaceholder="Search commands..."
       badges={[
-        { icon: 'terminal', text: `${commands.length} Commands Available` },
+        { icon: 'terminal', text: `${commandsData.length} Commands Available` },
         { text: 'Time Saving' },
         { text: 'Easy to Use' },
       ]}

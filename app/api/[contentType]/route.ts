@@ -10,13 +10,13 @@ import { apiSchemas, ValidationError, validation } from '@/lib/validation';
 export const runtime = 'nodejs';
 export const revalidate = 14400; // 4 hours
 
-// Content type mapping
+// Content type mapping with async data getters
 const contentMap = {
-  'agents.json': { data: agents, type: 'agent' },
-  'mcp.json': { data: mcp, type: 'mcp' },
-  'hooks.json': { data: hooks, type: 'hook' },
-  'commands.json': { data: commands, type: 'command' },
-  'rules.json': { data: rules, type: 'rule' },
+  'agents.json': { getData: () => agents, type: 'agent' },
+  'mcp.json': { getData: () => mcp, type: 'mcp' },
+  'hooks.json': { getData: () => hooks, type: 'hook' },
+  'commands.json': { getData: () => commands, type: 'command' },
+  'rules.json': { getData: () => rules, type: 'rule' },
 } as const;
 
 async function handleGET(
@@ -72,7 +72,8 @@ async function handleGET(
       );
     }
 
-    const { data, type } = contentMap[contentType as keyof typeof contentMap];
+    const { getData, type } = contentMap[contentType as keyof typeof contentMap];
+    const data = await getData();
     const contentCategory = contentType.replace('.json', '');
 
     const responseData = {

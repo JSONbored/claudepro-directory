@@ -15,17 +15,18 @@ export const metadata: Metadata = {
   keywords: 'MCP servers, Model Context Protocol, Claude integrations, AI tools, Claude extensions',
 };
 
-export default function MCPPage() {
+export default async function MCPPage() {
+  const mcpData = await mcp;
   return (
     <ContentListServer
       title="MCP Servers"
       description="Discover powerful MCP servers to extend Claude's capabilities with external tools, data sources, and integrations."
       icon="server"
-      items={mcp}
+      items={mcpData}
       type="mcp"
       searchPlaceholder="Search MCP servers..."
       badges={[
-        { icon: 'server', text: `${mcp.length} Servers Available` },
+        { icon: 'server', text: `${mcpData.length} Servers Available` },
         { text: 'Production Ready' },
         { text: 'Easy Integration' },
       ]}
