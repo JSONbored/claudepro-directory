@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { nonEmptyString, nonNegativeInt, positiveInt } from './primitives';
 
 /**
  * Security constants for middleware
@@ -34,9 +35,7 @@ export const httpMethodSchema = z.enum([
 /**
  * Valid request paths (with security checks)
  */
-export const requestPathSchema = z
-  .string()
-  .min(1)
+export const requestPathSchema = nonEmptyString
   .max(MIDDLEWARE_LIMITS.MAX_PATH_LENGTH)
   .refine((path) => path.startsWith('/'), 'Path must start with /')
   .refine((path) => !path.includes('..'), 'Path traversal detected')
@@ -124,8 +123,8 @@ export const staticAssetSchema = z
  * Rate limit configuration
  */
 export const middlewareRateLimitConfigSchema = z.object({
-  windowMs: z.number().int().min(1000).max(3600000), // 1 second to 1 hour
-  maxRequests: z.number().int().min(1).max(10000),
+  windowMs: positiveInt.min(1000).max(3600000), // 1 second to 1 hour
+  maxRequests: positiveInt.max(10000),
   skipFailedRequests: z.boolean().optional(),
   skipSuccessfulRequests: z.boolean().optional(),
 });
@@ -154,7 +153,7 @@ export const requestValidationSchema = z.object({
   userAgent: userAgentSchema.optional(),
   ip: ipAddressSchema.optional(),
   contentType: httpContentTypeSchema.optional(),
-  contentLength: z.number().int().min(0).max(MIDDLEWARE_LIMITS.MAX_FORM_DATA_SIZE).optional(),
+  contentLength: nonNegativeInt.max(MIDDLEWARE_LIMITS.MAX_FORM_DATA_SIZE).optional(),
 });
 
 /**
@@ -167,8 +166,8 @@ export const searchQueryValidationSchema = z.object({
     .regex(/^[a-zA-Z0-9\s\-_]+$/, 'Invalid search query format')
     .optional(),
   category: z.enum(['all', 'agents', 'mcp', 'rules', 'commands', 'hooks', 'guides']).optional(),
-  page: z.number().int().min(1).max(1000).optional(),
-  limit: z.number().int().min(1).max(100).optional(),
+  page: positiveInt.max(1000).optional(),
+  limit: positiveInt.max(100).optional(),
 });
 
 /**
@@ -187,7 +186,7 @@ export const apiEndpointTypeSchema = z.enum([
  * Middleware response schema
  */
 export const middlewareResponseSchema = z.object({
-  status: z.number().int().min(100).max(599),
+  status: positiveInt.min(100).max(599),
   headers: z.record(z.string(), z.string()),
   body: z.string().optional(),
 });

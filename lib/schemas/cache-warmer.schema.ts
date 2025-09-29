@@ -5,6 +5,13 @@
  */
 
 import { z } from 'zod';
+import {
+  isoDatetimeString,
+  nonEmptyString,
+  nonNegativeInt,
+  positiveInt,
+  stringArray,
+} from '@/lib/schemas/primitives';
 
 /**
  * Security constants for cache warming
@@ -39,30 +46,21 @@ export const warmableCategorySchema = z.enum([
  */
 export const cacheWarmingItemSchema = z.object({
   category: warmableCategorySchema,
-  slug: z
-    .string()
-    .min(1)
+  slug: nonEmptyString
     .max(CACHE_WARMER_LIMITS.MAX_SLUG_LENGTH)
     .regex(/^[a-zA-Z0-9\-_]+$/, 'Invalid slug format'),
   priority: z.number().min(0).max(10).optional(),
-  ttl: z
-    .number()
-    .int()
-    .min(CACHE_WARMER_LIMITS.MIN_TTL)
-    .max(CACHE_WARMER_LIMITS.MAX_TTL)
-    .optional(),
+  ttl: positiveInt.min(CACHE_WARMER_LIMITS.MIN_TTL).max(CACHE_WARMER_LIMITS.MAX_TTL).optional(),
 });
 
 /**
  * Popular item from Redis for cache warming
  */
 export const cacheWarmerPopularItemSchema = z.object({
-  slug: z
-    .string()
-    .min(1)
+  slug: nonEmptyString
     .max(CACHE_WARMER_LIMITS.MAX_SLUG_LENGTH)
     .regex(/^[a-zA-Z0-9\-_]+$/, 'Invalid slug format'),
-  views: z.number().int().min(0),
+  views: nonNegativeInt,
 });
 
 /**
@@ -73,9 +71,9 @@ export const categoryMetadataSchema = z.object({
   items: z
     .array(
       z.object({
-        slug: z.string(),
-        title: z.string().optional(),
-        description: z.string().optional(),
+        slug: nonEmptyString,
+        title: nonEmptyString.optional(),
+        description: nonEmptyString.optional(),
       })
     )
     .max(CACHE_WARMER_LIMITS.MAX_ITEMS_PER_CATEGORY),
@@ -85,24 +83,20 @@ export const categoryMetadataSchema = z.object({
  * Related content warming config
  */
 export const relatedContentWarmingSchema = z.object({
-  path: z
-    .string()
-    .min(1)
+  path: nonEmptyString
     .max(CACHE_WARMER_LIMITS.MAX_PATH_LENGTH)
     .regex(/^\/[a-zA-Z0-9\-_/]*$/, 'Invalid path format')
     .refine((path) => !path.includes('..'), 'Path traversal detected'),
   category: warmableCategorySchema.default('agents'),
-  tags: z.array(z.string()).max(50).default([]),
-  keywords: z.array(z.string()).max(50).default([]),
-  limit: z.number().int().min(1).max(20).default(6),
+  tags: stringArray.max(50).default([]),
+  keywords: stringArray.max(50).default([]),
+  limit: positiveInt.min(1).max(20).default(6),
 });
 
 /**
  * Common search query schema
  */
-export const commonQuerySchema = z
-  .string()
-  .min(1)
+export const commonQuerySchema = nonEmptyString
   .max(CACHE_WARMER_LIMITS.MAX_QUERY_LENGTH)
   .regex(/^[a-zA-Z0-9\s\-_]+$/, 'Invalid query format')
   .transform((val) => val.toLowerCase().trim());
@@ -111,12 +105,12 @@ export const commonQuerySchema = z
  * Cache warming status schema
  */
 export const cacheWarmingStatusSchema = z.object({
-  lastRun: z.string().datetime(),
-  itemsWarmed: z.number().int().min(0),
-  errors: z.number().int().min(0),
-  duration: z.number().int().min(0),
+  lastRun: isoDatetimeString,
+  itemsWarmed: nonNegativeInt,
+  errors: nonNegativeInt,
+  duration: nonNegativeInt,
   isWarming: z.boolean().optional(),
-  nextScheduledRun: z.string().datetime().optional(),
+  nextScheduledRun: isoDatetimeString.optional(),
 });
 
 /**
@@ -124,10 +118,10 @@ export const cacheWarmingStatusSchema = z.object({
  */
 export const cacheWarmingResultSchema = z.object({
   success: z.boolean(),
-  message: z.string(),
-  itemsWarmed: z.number().int().min(0).optional(),
-  errors: z.number().int().min(0).optional(),
-  duration: z.number().int().min(0).optional(),
+  message: nonEmptyString,
+  itemsWarmed: nonNegativeInt.optional(),
+  errors: nonNegativeInt.optional(),
+  duration: nonNegativeInt.optional(),
 });
 
 /**
@@ -135,19 +129,14 @@ export const cacheWarmingResultSchema = z.object({
  */
 export const cacheWarmingConfigSchema = z.object({
   enabled: z.boolean().default(true),
-  scheduleInterval: z.number().int().min(3600000).max(86400000).default(21600000), // 1h to 24h, default 6h
+  scheduleInterval: positiveInt.min(3600000).max(86400000).default(21600000), // 1h to 24h, default 6h
   offPeakHours: z
     .object({
-      startHour: z.number().int().min(0).max(23).default(0),
-      endHour: z.number().int().min(0).max(23).default(6),
+      startHour: nonNegativeInt.max(23).default(0),
+      endHour: nonNegativeInt.max(23).default(6),
     })
     .optional(),
-  maxItemsPerCategory: z
-    .number()
-    .int()
-    .min(1)
-    .max(CACHE_WARMER_LIMITS.MAX_ITEMS_PER_CATEGORY)
-    .default(10),
+  maxItemsPerCategory: positiveInt.max(CACHE_WARMER_LIMITS.MAX_ITEMS_PER_CATEGORY).default(10),
   categories: z.array(warmableCategorySchema).optional(),
   commonQueries: z.array(commonQuerySchema).max(CACHE_WARMER_LIMITS.MAX_COMMON_QUERIES).optional(),
 });
@@ -157,11 +146,11 @@ export const cacheWarmingConfigSchema = z.object({
  */
 export const cachedContentSchema = z.object({
   category: warmableCategorySchema,
-  slug: z.string(),
+  slug: nonEmptyString,
   warmed: z.boolean(),
-  timestamp: z.string().datetime(),
-  ttl: z.number().int().min(0).optional(),
-  size: z.number().int().min(0).optional(),
+  timestamp: isoDatetimeString,
+  ttl: nonNegativeInt.optional(),
+  size: nonNegativeInt.optional(),
 });
 
 /**

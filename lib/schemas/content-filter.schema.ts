@@ -6,6 +6,7 @@
 
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
+import { nonEmptyString, shortString, stringArray } from '@/lib/schemas/primitives';
 
 /**
  * UI Sort/Filter schemas (preserved from deprecated hooks)
@@ -20,9 +21,9 @@ export type SortDirection = z.infer<typeof sortDirectionSchema>;
 
 // UI Filter options for filter-bar component
 export const uiFilterOptionsSchema = z.object({
-  category: z.string(),
-  tags: z.array(z.string()),
-  author: z.string(),
+  category: nonEmptyString,
+  tags: stringArray,
+  author: nonEmptyString,
   popularityRange: z.tuple([z.number(), z.number()]),
   dateRange: z.enum(['all', 'week', 'month', 'year']),
 });
@@ -37,7 +38,7 @@ export function extractStringArray(
   maxLength: number = 100
 ): string[] {
   try {
-    const stringSchema = z.string().min(1).max(maxLength);
+    const stringSchema = nonEmptyString.max(maxLength);
     const uniqueValues = [...new Set(values)];
 
     return uniqueValues
@@ -63,9 +64,9 @@ export function extractStringArray(
  * Content filter options schema
  */
 export const contentFilterOptionsSchema = z.object({
-  categories: z.array(z.string().min(1).max(50)).max(20),
-  tags: z.array(z.string().min(1).max(50)).max(100),
-  authors: z.array(z.string().min(1).max(100)).max(50),
+  categories: z.array(shortString.max(50)).max(20),
+  tags: z.array(shortString.max(50)).max(100),
+  authors: z.array(shortString.max(100)).max(50),
 });
 
 /**

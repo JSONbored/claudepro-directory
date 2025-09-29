@@ -276,7 +276,7 @@ export const contentIndexHelpers = {
         (item) =>
           item.title?.toLowerCase().includes(query.toLowerCase()) ||
           item.description.toLowerCase().includes(query.toLowerCase()) ||
-          item.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase()))
+          item.tags?.some((tag) => tag.toLowerCase().includes(query.toLowerCase()))
       );
     });
 
@@ -307,7 +307,8 @@ export const contentIndexHelpers = {
     if (item.description.toLowerCase().includes(lowerQuery)) score += 5;
 
     // Tag matches
-    const tagMatches = item.tags.filter((tag) => tag.toLowerCase().includes(lowerQuery)).length;
+    const tagMatches =
+      item.tags?.filter((tag) => tag.toLowerCase().includes(lowerQuery)).length ?? 0;
     score += tagMatches * 3;
 
     // Featured boost

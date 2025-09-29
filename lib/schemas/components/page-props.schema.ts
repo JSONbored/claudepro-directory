@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod';
+import { nonNegativeInt, positiveInt, shortString } from '../primitives';
 import { unifiedContentItemSchema } from './content-item.schema';
 
 /**
@@ -20,7 +21,7 @@ export type PageProps = z.infer<typeof pagePropsSchema>;
  * Slug params validation schema for detail pages
  */
 export const slugParamsSchema = z.object({
-  slug: z.string().min(1, 'Slug is required').max(200, 'Slug too long'),
+  slug: shortString.min(1, 'Slug is required'),
 });
 
 export type SlugParams = z.infer<typeof slugParamsSchema>;
@@ -78,9 +79,9 @@ export type HomePageClientProps = z.infer<typeof homePageClientPropsSchema>;
  */
 export const contentListPagePropsSchema = z.object({
   items: z.array(unifiedContentItemSchema),
-  totalCount: z.number().int().min(0),
-  currentPage: z.number().int().min(1).default(1),
-  itemsPerPage: z.number().int().min(1).default(20),
+  totalCount: nonNegativeInt,
+  currentPage: positiveInt.default(1),
+  itemsPerPage: positiveInt.default(20),
   category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'guides']),
 });
 

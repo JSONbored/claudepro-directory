@@ -4,32 +4,40 @@
  */
 
 import { z } from 'zod';
+import { nonNegativeInt, positiveInt } from '@/lib/schemas/primitives/base-numbers';
+import {
+  emailString,
+  isoDatetimeString,
+  nonEmptyString,
+  shortString,
+  urlString,
+} from '@/lib/schemas/primitives/base-strings';
 import { DOMPurify } from '../sanitizer';
 import { VALIDATION_PATTERNS } from '../validation';
 
 // GitHub-related schemas for form submissions
 export const gitHubConfigValidationSchema = z.object({
-  token: z.string().min(1, 'GitHub token is required'),
-  owner: z.string().min(1, 'GitHub owner is required').max(100),
-  repo: z.string().min(1, 'GitHub repo is required').max(100),
+  token: nonEmptyString.describe('GitHub token is required'),
+  owner: shortString.describe('GitHub owner is required'),
+  repo: shortString.describe('GitHub repo is required'),
 });
 
 export const issueCreationRequestSchema = z.object({
   title: z.string().min(1, 'Issue title is required').max(200, 'Title too long'),
   body: z.string().min(1, 'Issue body is required').max(50000, 'Body too long'),
-  labels: z.array(z.string().min(1).max(50)).max(10, 'Too many labels').default([]),
-  assignees: z.array(z.string().min(1).max(50)).max(10, 'Too many assignees').default([]),
+  labels: z.array(shortString).max(10, 'Too many labels').default([]),
+  assignees: z.array(shortString).max(10, 'Too many assignees').default([]),
 });
 
 export const issueCreationResponseSchema = z.object({
-  issueNumber: z.number().int().positive('Issue number must be positive'),
-  issueUrl: z.string().url('Invalid issue URL'),
+  issueNumber: positiveInt.describe('Issue number must be positive'),
+  issueUrl: urlString.describe('Invalid issue URL'),
   success: z.boolean(),
 });
 
 export const githubApiRateLimitSchema = z.object({
-  remaining: z.number().int().min(0),
-  resetTime: z.string().datetime(),
+  remaining: nonNegativeInt,
+  resetTime: isoDatetimeString,
 });
 
 export const githubHealthCheckResponseSchema = z.object({
@@ -182,11 +190,7 @@ export const contactFormSchema = z.object({
     .max(100, 'Name must be less than 100 characters')
     .regex(/^[a-zA-Z\s]+$/, 'Name can only contain letters and spaces'),
 
-  email: z
-    .string()
-    .email('Please enter a valid email address')
-    .max(255, 'Email address is too long')
-    .toLowerCase(),
+  email: emailString.max(255, 'Email address is too long').toLowerCase(),
 
   subject: z
     .string()
@@ -212,9 +216,7 @@ export type ContactFormData = z.infer<typeof contactFormSchema>;
  * Newsletter subscription schema
  */
 export const newsletterSchema = z.object({
-  email: z
-    .string()
-    .email('Please enter a valid email address')
+  email: emailString
     .max(255, 'Email address is too long')
     .toLowerCase()
     .refine(
@@ -232,9 +234,7 @@ export type NewsletterData = z.infer<typeof newsletterSchema>;
  * Search form schema
  */
 export const searchFormSchema = z.object({
-  query: z
-    .string()
-    .min(1, 'Search query is required')
+  query: nonEmptyString
     .max(200, 'Search query is too long')
     .transform((val) => val.trim())
     .refine((val) => val.length >= 2, 'Search query must be at least 2 characters after trimming')
@@ -272,7 +272,7 @@ export const feedbackFormSchema = z.object({
       'Feedback contains potentially malicious content'
     ),
 
-  email: z.string().email('Please enter a valid email address').optional(),
+  email: emailString.optional(),
 
   // Anonymous submission option
   anonymous: z.boolean().optional().default(false),

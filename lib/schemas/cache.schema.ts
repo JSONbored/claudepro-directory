@@ -7,6 +7,13 @@
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import type { ContentIndex, ContentItem } from '@/lib/related-content/service';
+import {
+  nonNegativeInt,
+  positiveInt,
+  score,
+  viewCount,
+} from '@/lib/schemas/primitives/base-numbers';
+import { isoDatetimeString, nonEmptyString } from '@/lib/schemas/primitives/base-strings';
 
 /**
  * Security constants for cache operations
@@ -50,9 +57,7 @@ export const cacheCategorySchema = z.union([cacheableCategorySchema, z.literal('
  */
 export const cacheKeyParamsSchema = z.object({
   category: cacheCategorySchema,
-  slug: z
-    .string()
-    .min(1, 'Slug is required')
+  slug: nonEmptyString
     .max(CACHE_LIMITS.MAX_SLUG_LENGTH)
     .regex(KEY_PATTERNS.SLUG, 'Invalid slug format')
     .transform((val) => val.toLowerCase()),
@@ -63,24 +68,17 @@ export const cacheKeyParamsSchema = z.object({
  */
 export const viewTrackingSchema = z.object({
   category: cacheCategorySchema,
-  slug: z
-    .string()
-    .min(1)
+  slug: nonEmptyString
     .max(CACHE_LIMITS.MAX_SLUG_LENGTH)
     .regex(KEY_PATTERNS.SLUG, 'Invalid slug format'),
-  timestamp: z
-    .number()
-    .int()
-    .min(0)
-    .optional()
-    .default(() => Date.now()),
+  timestamp: nonNegativeInt.optional().default(() => Date.now()),
 });
 
 /**
  * View count response schema
  */
 export const viewCountResponseSchema = z.object({
-  count: z.number().int().min(0).max(CACHE_LIMITS.MAX_VIEW_COUNT),
+  count: viewCount.max(CACHE_LIMITS.MAX_VIEW_COUNT),
   category: cacheCategorySchema.optional(),
   slug: z.string().optional(),
 });
@@ -90,9 +88,9 @@ export const viewCountResponseSchema = z.object({
  */
 export const cacheTrendingItemSchema = z.object({
   slug: z.string(),
-  score: z.number().min(0).max(CACHE_LIMITS.MAX_SCORE),
-  views: z.number().int().min(0).optional(),
-  lastUpdated: z.number().int().min(0).optional(),
+  score: score.max(CACHE_LIMITS.MAX_SCORE),
+  views: viewCount.optional(),
+  lastUpdated: nonNegativeInt.optional(),
 });
 
 /**
@@ -100,27 +98,20 @@ export const cacheTrendingItemSchema = z.object({
  */
 export const popularItemsQuerySchema = z.object({
   category: cacheCategorySchema,
-  limit: z.number().int().min(1).max(100).default(10),
-  offset: z.number().int().min(0).max(1000).optional().default(0),
+  limit: positiveInt.max(100).default(10),
+  offset: nonNegativeInt.max(1000).optional().default(0),
 });
 
 /**
  * MDX cache schema
  */
 export const mdxCacheSchema = z.object({
-  path: z
-    .string()
-    .min(1, 'Path is required')
+  path: nonEmptyString
     .max(CACHE_LIMITS.MAX_PATH_LENGTH)
     .regex(KEY_PATTERNS.PATH, 'Invalid path format')
     .refine((path) => !path.includes('..'), 'Path traversal detected'),
-  content: z
-    .string()
-    .min(1, 'Content is required')
-    .max(CACHE_LIMITS.MAX_CONTENT_LENGTH, 'Content exceeds maximum size'),
-  ttl: z
-    .number()
-    .int()
+  content: nonEmptyString.max(CACHE_LIMITS.MAX_CONTENT_LENGTH, 'Content exceeds maximum size'),
+  ttl: positiveInt
     .min(CACHE_LIMITS.MIN_TTL, `TTL must be at least ${CACHE_LIMITS.MIN_TTL} seconds`)
     .max(CACHE_LIMITS.MAX_TTL, `TTL cannot exceed ${CACHE_LIMITS.MAX_TTL} seconds`)
     .optional()
@@ -131,9 +122,7 @@ export const mdxCacheSchema = z.object({
  * API response cache schema
  */
 export const apiResponseCacheSchema = z.object({
-  key: z
-    .string()
-    .min(1)
+  key: nonEmptyString
     .max(CACHE_LIMITS.MAX_KEY_LENGTH)
     .regex(KEY_PATTERNS.CACHE_KEY, 'Invalid cache key format'),
   data: z.union([
@@ -143,13 +132,7 @@ export const apiResponseCacheSchema = z.object({
     z.array(z.union([z.string(), z.number(), z.boolean()])),
     z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
   ]), // Will be JSON stringified
-  ttl: z
-    .number()
-    .int()
-    .min(CACHE_LIMITS.MIN_TTL)
-    .max(CACHE_LIMITS.MAX_TTL)
-    .optional()
-    .default(3600), // 1 hour default
+  ttl: positiveInt.min(CACHE_LIMITS.MIN_TTL).max(CACHE_LIMITS.MAX_TTL).optional().default(3600), // 1 hour default
   tags: z.array(z.string().max(50)).max(20).optional(),
 });
 
@@ -170,7 +153,7 @@ export const batchOperationSchema = z.object({
             z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
           ])
           .optional(),
-        ttl: z.number().int().min(0).max(CACHE_LIMITS.MAX_TTL).optional(),
+        ttl: nonNegativeInt.max(CACHE_LIMITS.MAX_TTL).optional(),
         score: z.number().optional(),
         member: z.string().optional(),
       })
@@ -186,16 +169,16 @@ export const batchOperationSchema = z.object({
  * Cache stats response schema
  */
 export const cacheStatsSchema = z.object({
-  totalViews: z.number().int().min(0),
-  totalCopies: z.number().int().min(0),
+  totalViews: nonNegativeInt,
+  totalCopies: nonNegativeInt,
   topCategories: z.array(
     z.object({
       category: cacheCategorySchema,
-      views: z.number().int().min(0),
+      views: viewCount,
     })
   ),
   cacheHitRate: z.number().min(0).max(1).optional(),
-  memoryUsage: z.number().int().min(0).optional(),
+  memoryUsage: nonNegativeInt.optional(),
 });
 
 /**
@@ -213,14 +196,14 @@ export const relatedItemsCacheSchema = z.object({
       })
     )
     .max(50),
-  ttl: z.number().int().min(CACHE_LIMITS.MIN_TTL).max(CACHE_LIMITS.MAX_TTL).optional(),
+  ttl: positiveInt.min(CACHE_LIMITS.MIN_TTL).max(CACHE_LIMITS.MAX_TTL).optional(),
 });
 
 /**
  * Search results cache schema
  */
 export const searchResultsCacheSchema = z.object({
-  query: z.string().min(1).max(200),
+  query: nonEmptyString.max(200),
   category: cacheCategorySchema.optional(),
   results: z
     .array(
@@ -232,8 +215,8 @@ export const searchResultsCacheSchema = z.object({
       ])
     )
     .max(CACHE_LIMITS.MAX_MEMBERS),
-  totalCount: z.number().int().min(0),
-  ttl: z.number().int().min(60).max(3600).optional().default(600), // 10 minutes default
+  totalCount: nonNegativeInt,
+  ttl: positiveInt.min(60).max(3600).optional().default(600), // 10 minutes default
 });
 
 /**
@@ -241,7 +224,7 @@ export const searchResultsCacheSchema = z.object({
  */
 export const cleanupParamsSchema = z.object({
   categories: z.array(cacheCategorySchema).optional(),
-  olderThan: z.number().int().min(0).optional(),
+  olderThan: nonNegativeInt.optional(),
   pattern: z.string().max(100).optional(),
   dryRun: z.boolean().optional().default(false),
 });
@@ -250,9 +233,7 @@ export const cleanupParamsSchema = z.object({
  * Helper function to validate cache key
  */
 export function validateCacheKey(key: string | number): string {
-  const schema = z
-    .string()
-    .min(1, 'Cache key is required')
+  const schema = nonEmptyString
     .max(CACHE_LIMITS.MAX_KEY_LENGTH, 'Cache key too long')
     .regex(KEY_PATTERNS.CACHE_KEY, 'Invalid cache key format')
     .refine((key) => !key.includes('\0'), 'Null bytes not allowed in cache key');
@@ -267,6 +248,7 @@ export function validateTTL(ttl: string | number): number {
   const schema = z.coerce
     .number()
     .int('TTL must be an integer')
+    .positive()
     .min(CACHE_LIMITS.MIN_TTL, `TTL must be at least ${CACHE_LIMITS.MIN_TTL} seconds`)
     .max(CACHE_LIMITS.MAX_TTL, `TTL cannot exceed ${CACHE_LIMITS.MAX_TTL} seconds`);
 
@@ -288,8 +270,8 @@ export const cacheContentMetadataSchema = z
         ])
       )
       .optional(),
-    lastUpdated: z.string().datetime().optional(),
-    count: z.number().int().min(0).optional(),
+    lastUpdated: isoDatetimeString.optional(),
+    count: nonNegativeInt.optional(),
     metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
   })
   .passthrough(); // Allow additional fields
@@ -383,8 +365,8 @@ export const redisZRangeResponseSchema = z.array(z.union([z.string(), z.number()
  * Popular items with scores schema
  */
 export const popularItemWithScoreSchema = z.object({
-  slug: z.string().min(1).max(CACHE_LIMITS.MAX_SLUG_LENGTH),
-  views: z.number().int().min(0).max(CACHE_LIMITS.MAX_VIEW_COUNT),
+  slug: nonEmptyString.max(CACHE_LIMITS.MAX_SLUG_LENGTH),
+  views: viewCount.max(CACHE_LIMITS.MAX_VIEW_COUNT),
 });
 
 /**
@@ -392,7 +374,7 @@ export const popularItemWithScoreSchema = z.object({
  */
 export const batchIncrementOperationSchema = z.object({
   key: z.string().max(CACHE_LIMITS.MAX_KEY_LENGTH),
-  increment: z.number().int().min(1).max(1000).optional().default(1),
+  increment: positiveInt.max(1000).optional().default(1),
 });
 
 /**
@@ -400,9 +382,7 @@ export const batchIncrementOperationSchema = z.object({
  */
 export const redisScanParamsSchema = z.object({
   cursor: z.string().regex(/^\d+$/, 'Cursor must be numeric string').default('0'),
-  pattern: z
-    .string()
-    .min(1, 'Pattern is required')
+  pattern: nonEmptyString
     .max(100, 'Pattern too long')
     .regex(
       /^[a-zA-Z0-9:_\-/*]+$/,
@@ -413,7 +393,7 @@ export const redisScanParamsSchema = z.object({
       'Path traversal patterns not allowed'
     )
     .refine((pattern) => pattern.split('*').length <= 3, 'Too many wildcards - maximum 2 allowed'),
-  count: z.number().int().min(1).max(1000).default(100),
+  count: positiveInt.max(1000).default(100),
 });
 
 /**
@@ -433,9 +413,9 @@ export const redisScanResponseSchema = z.tuple([
  */
 export const cacheInvalidationResultSchema = z.object({
   pattern: z.string(),
-  keysScanned: z.number().int().min(0),
-  keysDeleted: z.number().int().min(0),
-  scanCycles: z.number().int().min(1),
+  keysScanned: nonNegativeInt,
+  keysDeleted: nonNegativeInt,
+  scanCycles: positiveInt,
   duration: z.number().min(0),
   rateLimited: z.boolean().default(false),
 });
@@ -444,8 +424,8 @@ export const cacheInvalidationResultSchema = z.object({
  * Rate limit tracking schema for production monitoring
  */
 export const rateLimitTrackingSchema = z.object({
-  commandCount: z.number().int().min(0),
-  limitPerSecond: z.number().int().min(1),
+  commandCount: nonNegativeInt,
+  limitPerSecond: positiveInt,
   timeUntilReset: z.number().min(0),
   isNearLimit: z.boolean(),
   utilizationPercent: z.number().min(0).max(100),
@@ -544,8 +524,8 @@ export const contentIndexToCacheSchema = z.object({
       featured: z.boolean().default(false),
     })
   ),
-  lastUpdated: z.string().datetime(),
-  count: z.number().int().min(0),
+  lastUpdated: isoDatetimeString,
+  count: nonNegativeInt,
 });
 
 /**
@@ -597,9 +577,9 @@ export const redisConnectionStatusSchema = z.object({
   isConnected: z.boolean(),
   isFallback: z.boolean(),
   lastConnectionAttempt: z.date().nullable(),
-  consecutiveFailures: z.number().int().min(0),
-  totalOperations: z.number().int().min(0),
-  failedOperations: z.number().int().min(0),
+  consecutiveFailures: nonNegativeInt,
+  totalOperations: nonNegativeInt,
+  failedOperations: nonNegativeInt,
 });
 
 export type RedisConnectionStatus = z.infer<typeof redisConnectionStatusSchema>;

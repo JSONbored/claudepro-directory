@@ -4,28 +4,38 @@
  */
 
 import { z } from 'zod';
+import { limitedMediumStringArray, requiredTagArray } from '@/lib/schemas/primitives/base-arrays';
+import { aiTemperature, optionalPositiveInt } from '@/lib/schemas/primitives/base-numbers';
+import {
+  codeString,
+  isoDateString,
+  mediumString,
+  nonEmptyString,
+  optionalNonEmptyString,
+  optionalUrlString,
+} from '@/lib/schemas/primitives/base-strings';
 
 // Base configuration schema for rules
 const ruleConfigurationSchema = z.object({
-  temperature: z.number().min(0).max(2).optional(),
-  maxTokens: z.number().positive().optional(),
+  temperature: aiTemperature.optional(),
+  maxTokens: optionalPositiveInt,
   systemPrompt: z.string().optional(),
 });
 
 // Rule example schema
 const ruleExampleSchema = z.object({
   title: z.string().max(200),
-  description: z.string().max(500),
-  prompt: z.string().max(1000),
-  expectedOutcome: z.string().max(1000),
+  description: mediumString,
+  prompt: codeString,
+  expectedOutcome: codeString,
 });
 
 // Troubleshooting entry for rules
 const ruleTroubleshootingSchema = z.union([
-  z.string().max(500),
+  mediumString,
   z.object({
     issue: z.string().max(300),
-    solution: z.string().max(500),
+    solution: mediumString,
   }),
 ]);
 
@@ -34,18 +44,18 @@ const ruleTroubleshootingSchema = z.union([
  */
 export const ruleContentSchema = z.object({
   // Required base properties (always present in rules)
-  slug: z.string().min(1),
-  description: z.string().min(1),
+  slug: nonEmptyString,
+  description: nonEmptyString,
   category: z.literal('rules'),
-  author: z.string().min(1),
-  dateAdded: z.string(), // ISO date string
+  author: nonEmptyString,
+  dateAdded: isoDateString,
 
   // Required rule-specific properties
-  tags: z.array(z.string()).min(1),
-  content: z.string().min(1), // Long rule content/prompt
+  tags: requiredTagArray,
+  content: nonEmptyString, // Long rule content/prompt
 
   // Auto-generated but present in actual files
-  title: z.string().optional(),
+  title: optionalNonEmptyString,
 
   // Optional properties (can be undefined)
   source: z.enum(['community', 'official', 'verified', 'claudepro']).optional(),
@@ -54,7 +64,7 @@ export const ruleContentSchema = z.object({
   configuration: ruleConfigurationSchema.optional(),
 
   // URLs and documentation
-  documentationUrl: z.string().url().optional(),
+  documentationUrl: optionalUrlString,
   githubUrl: z
     .string()
     .url()
@@ -62,13 +72,13 @@ export const ruleContentSchema = z.object({
     .optional(),
 
   // Rule features and capabilities
-  features: z.array(z.string().max(500)).max(50).optional(),
-  useCases: z.array(z.string().max(500)).max(50).optional(),
-  requirements: z.array(z.string().max(500)).max(20).optional(),
+  features: z.array(mediumString).max(50).optional(),
+  useCases: z.array(mediumString).max(50).optional(),
+  requirements: limitedMediumStringArray.optional(),
 
   // Examples and troubleshooting
   examples: z
-    .array(z.union([z.string().max(1000), ruleExampleSchema]))
+    .array(z.union([codeString, ruleExampleSchema]))
     .max(10)
     .optional(),
   troubleshooting: z.array(ruleTroubleshootingSchema).max(20).optional(),

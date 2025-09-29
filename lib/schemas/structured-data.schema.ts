@@ -5,6 +5,13 @@
  */
 
 import { z } from 'zod';
+import {
+  isoDatetimeString,
+  optionalUrlString,
+  positiveInt,
+  stringArray,
+  urlString,
+} from './primitives';
 
 /**
  * Common schema.org types
@@ -45,7 +52,7 @@ export const schemaOrgTypeSchema = z.enum([
 export const baseSchemaOrgEntitySchema = z.object({
   '@context': z.literal('https://schema.org'),
   '@type': schemaOrgTypeSchema,
-  '@id': z.string().url().optional(),
+  '@id': optionalUrlString,
 });
 
 /**
@@ -54,10 +61,10 @@ export const baseSchemaOrgEntitySchema = z.object({
 export const personOrOrganizationSchema = z.object({
   '@type': z.enum(['Person', 'Organization']),
   name: z.string(),
-  url: z.string().url().optional(),
-  image: z.string().url().optional(),
+  url: optionalUrlString,
+  image: optionalUrlString,
   email: z.string().email().optional(),
-  sameAs: z.array(z.string().url()).optional(),
+  sameAs: stringArray.optional(),
 });
 
 /**
@@ -65,11 +72,11 @@ export const personOrOrganizationSchema = z.object({
  */
 export const howToStepSchema = z.object({
   '@type': z.literal('HowToStep'),
-  position: z.number().int().positive(),
+  position: positiveInt,
   name: z.string(),
   text: z.string(),
-  url: z.string().url().optional(),
-  image: z.string().url().optional(),
+  url: optionalUrlString,
+  image: optionalUrlString,
 });
 
 /**
@@ -81,7 +88,7 @@ export const faqQuestionSchema = z.object({
   acceptedAnswer: z.object({
     '@type': z.literal('Answer'),
     text: z.string(),
-    url: z.string().url().optional(),
+    url: optionalUrlString,
   }),
 });
 
@@ -92,7 +99,7 @@ export const faqPageSchema = baseSchemaOrgEntitySchema.extend({
   '@type': z.literal('FAQPage'),
   name: z.string(),
   description: z.string().optional(),
-  url: z.string().url(),
+  url: urlString,
   mainEntity: z.array(faqQuestionSchema),
 });
 
@@ -103,11 +110,11 @@ export const howToSchema = baseSchemaOrgEntitySchema.extend({
   '@type': z.literal('HowTo'),
   name: z.string(),
   description: z.string().optional(),
-  url: z.string().url().optional(),
+  url: optionalUrlString,
   step: z.array(howToStepSchema),
   totalTime: z.string().optional(),
-  supply: z.array(z.string()).optional(),
-  tool: z.array(z.string()).optional(),
+  supply: stringArray.optional(),
+  tool: stringArray.optional(),
 });
 
 /**
@@ -117,13 +124,13 @@ export const softwareApplicationSchema = baseSchemaOrgEntitySchema.extend({
   '@type': z.literal('SoftwareApplication'),
   name: z.string(),
   description: z.string(),
-  url: z.string().url().optional(),
+  url: optionalUrlString,
   applicationCategory: z.string().optional(),
   applicationSubCategory: z.string().optional(),
   operatingSystem: z.string().optional(),
   softwareVersion: z.string().optional(),
-  datePublished: z.string().datetime().optional(),
-  dateModified: z.string().datetime().optional(),
+  datePublished: isoDatetimeString.optional(),
+  dateModified: isoDatetimeString.optional(),
   author: personOrOrganizationSchema.optional(),
   publisher: personOrOrganizationSchema.optional(),
   softwareRequirements: z.string().optional(),
@@ -132,7 +139,7 @@ export const softwareApplicationSchema = baseSchemaOrgEntitySchema.extend({
       '@type': z.literal('Offer'),
       price: z.union([z.string(), z.number()]),
       priceCurrency: z.string().length(3),
-      availability: z.string().url().optional(),
+      availability: optionalUrlString,
     })
     .optional(),
   featureList: z.string().optional(),
@@ -154,7 +161,7 @@ export const apiReferenceSchema = baseSchemaOrgEntitySchema.extend({
   '@type': z.literal('APIReference'),
   name: z.string(),
   description: z.string(),
-  url: z.string().url(),
+  url: urlString,
   assemblyVersion: z.string().optional(),
   executableLibraryName: z.string().optional(),
   targetPlatform: z.string().optional(),
@@ -164,8 +171,8 @@ export const apiReferenceSchema = baseSchemaOrgEntitySchema.extend({
       name: z.string(),
     })
     .optional(),
-  datePublished: z.string().datetime().optional(),
-  dateModified: z.string().datetime().optional(),
+  datePublished: isoDatetimeString.optional(),
+  dateModified: isoDatetimeString.optional(),
   author: personOrOrganizationSchema.optional(),
   isPartOf: z
     .object({
@@ -182,7 +189,7 @@ export const apiReferenceSchema = baseSchemaOrgEntitySchema.extend({
  */
 export const techArticleSchema = z.object({
   '@type': z.literal('TechArticle'),
-  '@id': z.string().url(),
+  '@id': urlString,
   headline: z.string(),
   articleBody: z.string(),
   encodingFormat: z.string().optional(),
@@ -196,9 +203,9 @@ export const webApiSchema = baseSchemaOrgEntitySchema.extend({
   '@type': z.literal('WebAPI'),
   name: z.string(),
   description: z.string(),
-  documentation: z.string().url().optional(),
+  documentation: optionalUrlString,
   provider: personOrOrganizationSchema.optional(),
-  endpointUrl: z.array(z.string()).optional(),
+  endpointUrl: stringArray.optional(),
   category: z.string().optional(),
 });
 
@@ -209,8 +216,8 @@ export const codeRepositorySchema = baseSchemaOrgEntitySchema.extend({
   '@type': z.literal('CodeRepository'),
   name: z.string(),
   description: z.string(),
-  url: z.string().url(),
-  codeRepository: z.string().url(),
+  url: urlString,
+  codeRepository: urlString,
   programmingLanguage: z
     .object({
       '@type': z.literal('ComputerLanguage'),
@@ -219,7 +226,7 @@ export const codeRepositorySchema = baseSchemaOrgEntitySchema.extend({
     .optional(),
   mainEntityOfPage: z
     .object({
-      '@id': z.string().url(),
+      '@id': urlString,
     })
     .optional(),
 });
@@ -231,17 +238,17 @@ export const organizationSchema = baseSchemaOrgEntitySchema.extend({
   '@type': z.literal('Organization'),
   name: z.string(),
   description: z.string().optional(),
-  url: z.string().url().optional(),
-  logo: z.string().url().optional(),
+  url: optionalUrlString,
+  logo: optionalUrlString,
   contactPoint: z
     .object({
       '@type': z.literal('ContactPoint'),
       contactType: z.string(),
       email: z.string().email().optional(),
-      url: z.string().url().optional(),
+      url: optionalUrlString,
     })
     .optional(),
-  sameAs: z.array(z.string().url()).optional(),
+  sameAs: stringArray.optional(),
   parentOrganization: z
     .object({
       '@type': z.literal('Organization'),
@@ -257,7 +264,7 @@ export const websiteSchema = baseSchemaOrgEntitySchema.extend({
   '@type': z.literal('WebSite'),
   name: z.string(),
   description: z.string().optional(),
-  url: z.string().url(),
+  url: urlString,
   publisher: personOrOrganizationSchema.optional(),
   potentialAction: z
     .object({
@@ -278,15 +285,15 @@ export const collectionPageSchema = baseSchemaOrgEntitySchema.extend({
   '@type': z.literal('CollectionPage'),
   name: z.string(),
   description: z.string().optional(),
-  url: z.string().url(),
+  url: urlString,
   mainEntity: z
     .object({
       '@type': z.literal('ItemList'),
       itemListElement: z.array(
         z.object({
           '@type': z.literal('ListItem'),
-          position: z.number().int().positive(),
-          url: z.string().url(),
+          position: positiveInt,
+          url: urlString,
         })
       ),
     })
@@ -306,7 +313,7 @@ export const serviceSchema = baseSchemaOrgEntitySchema.extend({
   availableChannel: z
     .object({
       '@type': z.literal('ServiceChannel'),
-      serviceUrl: z.string().url(),
+      serviceUrl: urlString,
       servicePhone: z.string().optional(),
       serviceEmail: z.string().email().optional(),
     })
@@ -318,18 +325,18 @@ export const serviceSchema = baseSchemaOrgEntitySchema.extend({
  */
 export const softwareSourceCodeSchema = z.object({
   '@type': z.literal('SoftwareSourceCode'),
-  '@id': z.string().url(),
+  '@id': urlString,
   name: z.string(),
   description: z.string(),
   programmingLanguage: z.object({
     '@type': z.literal('ComputerLanguage'),
     name: z.string(),
   }),
-  codeRepository: z.string().url().optional(),
+  codeRepository: optionalUrlString,
   text: z.string(),
   encodingFormat: z.string().optional(),
   copyrightNotice: z.string().optional(),
-  license: z.string().url().optional(),
+  license: optionalUrlString,
 });
 
 /**

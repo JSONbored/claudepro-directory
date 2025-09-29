@@ -5,6 +5,15 @@
  */
 
 import { z } from 'zod';
+import {
+  isoDatetimeString,
+  nonEmptyString,
+  nonNegativeInt,
+  positiveInt,
+  shortString,
+  stringArray,
+  urlString,
+} from '@/lib/schemas/primitives';
 
 /**
  * Security-focused constants for API validation
@@ -92,7 +101,7 @@ export const httpHeadersSchema = z
       .max(500, 'Content is too long')
       .regex(/^https?:\/\/[a-zA-Z0-9\-.:]+$/, 'Invalid origin format')
       .optional(),
-    referer: z.string().max(API_LIMITS.MAX_URL_LENGTH).url('Invalid referer URL').optional(),
+    referer: urlString.max(API_LIMITS.MAX_URL_LENGTH, 'Referer URL is too long').optional(),
   })
   .strict()
   .refine(
@@ -152,9 +161,7 @@ export const apiPaginationSchema = z.object({
  */
 export const searchApiSchema = z
   .object({
-    q: z
-      .string()
-      .min(1, 'Search query is required')
+    q: nonEmptyString
       .max(API_LIMITS.MAX_QUERY_LENGTH, `Query too long (max ${API_LIMITS.MAX_QUERY_LENGTH} chars)`)
       .regex(/^[^<>'"&]*$/, 'Query contains invalid characters')
       .transform((val) => val.trim()),
@@ -163,13 +170,7 @@ export const searchApiSchema = z
       .optional()
       .default('all'),
     tags: z
-      .array(
-        z
-          .string()
-          .min(1, 'Tag must not be empty')
-          .max(50, 'Tag is too long')
-          .regex(/^[a-zA-Z0-9\-_]+$/, 'Invalid tag format')
-      )
+      .array(shortString.regex(/^[a-zA-Z0-9\-_]+$/, 'Invalid tag format'))
       .max(API_LIMITS.MAX_TAGS, `Too many tags (max ${API_LIMITS.MAX_TAGS})`)
       .optional(),
     sortBy: z
@@ -204,9 +205,7 @@ export const cacheWarmApiSchema = z.object({
  * Validates rate limit settings for API endpoints
  */
 export const apiRateLimitConfigSchema = z.object({
-  window: z
-    .number()
-    .int()
+  window: positiveInt
     .min(
       API_LIMITS.MIN_RATE_LIMIT_WINDOW,
       `Window must be at least ${API_LIMITS.MIN_RATE_LIMIT_WINDOW}s`
@@ -215,11 +214,7 @@ export const apiRateLimitConfigSchema = z.object({
       API_LIMITS.MAX_RATE_LIMIT_WINDOW,
       `Window cannot exceed ${API_LIMITS.MAX_RATE_LIMIT_WINDOW}s`
     ),
-  limit: z
-    .number()
-    .int()
-    .min(1, 'Limit must be at least 1')
-    .max(10000, 'Limit cannot exceed 10000'),
+  limit: positiveInt.max(10000, 'Limit cannot exceed 10000'),
   keyGenerator: z.enum(['ip', 'api-key', 'user-agent', 'combined']).optional().default('ip'),
   skipSuccessfulRequests: z.boolean().optional().default(false),
   skipFailedRequests: z.boolean().optional().default(false),
@@ -243,7 +238,7 @@ export const apiErrorResponseSchema = z.object({
       })
     )
     .optional(),
-  timestamp: z.string().datetime(),
+  timestamp: isoDatetimeString,
   requestId: z.string().uuid().optional(),
 });
 
@@ -254,7 +249,7 @@ export const apiSuccessResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) 
     data: dataSchema,
     meta: z
       .object({
-        timestamp: z.string().datetime(),
+        timestamp: isoDatetimeString,
         version: z.string().optional(),
         cache: z.enum(['HIT', 'MISS', 'BYPASS']).optional(),
       })
@@ -266,16 +261,16 @@ export const paginatedResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =
   z.object({
     items: z.array(itemSchema).max(API_LIMITS.MAX_ARRAY_LENGTH),
     pagination: z.object({
-      total: z.number().int().min(0),
-      page: z.number().int().min(1),
-      limit: z.number().int().min(1).max(API_LIMITS.MAX_PAGE_SIZE),
-      pages: z.number().int().min(0),
+      total: nonNegativeInt,
+      page: positiveInt,
+      limit: positiveInt.max(API_LIMITS.MAX_PAGE_SIZE),
+      pages: nonNegativeInt,
       hasNext: z.boolean(),
       hasPrev: z.boolean(),
     }),
     meta: z
       .object({
-        timestamp: z.string().datetime(),
+        timestamp: isoDatetimeString,
         processingTime: z.number().min(0).optional(),
         cache: z.enum(['HIT', 'MISS', 'BYPASS']).optional(),
       })
@@ -288,7 +283,7 @@ const contentItemSchema = z.object({
   name: z.string(),
   description: z.string(),
   category: z.string(),
-  tags: z.array(z.string()).optional(),
+  tags: stringArray.optional(),
   metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
 });
 
@@ -298,17 +293,17 @@ export const contentApiResponseSchema = z.object({
   rules: z.array(contentItemSchema).optional(),
   commands: z.array(contentItemSchema).optional(),
   hooks: z.array(contentItemSchema).optional(),
-  count: z.number().int().min(0),
-  lastUpdated: z.string().datetime(),
+  count: nonNegativeInt,
+  lastUpdated: isoDatetimeString,
 });
 
 // Cache warm response
 export const cacheWarmResponseSchema = z.object({
   success: z.boolean(),
-  warmed: z.array(z.string()),
-  failed: z.array(z.string()).optional(),
+  warmed: stringArray,
+  failed: stringArray.optional(),
   duration: z.number().min(0),
-  timestamp: z.string().datetime(),
+  timestamp: isoDatetimeString,
 });
 
 /**
@@ -325,7 +320,7 @@ export const webhookPayloadSchema = z
       'deployment.success',
       'deployment.failed',
     ]),
-    timestamp: z.string().datetime(),
+    timestamp: isoDatetimeString,
     signature: z.string().regex(/^[A-Za-z0-9+/=]{64,}$/, 'Invalid signature format'),
     data: z
       .record(
@@ -338,7 +333,7 @@ export const webhookPayloadSchema = z
         ])
       )
       .optional(),
-    source: z.string().max(100, 'Source is too long').optional(),
+    source: shortString.optional(),
     version: z.string().optional(),
   })
   .strict();
@@ -355,18 +350,18 @@ export const githubApiResponseSchema = z.object({
   stargazers_count: z.number(),
   watchers_count: z.number(),
   language: z.string().nullable(),
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
-  pushed_at: z.string().datetime(),
-  topics: z.array(z.string()).optional(),
+  created_at: isoDatetimeString,
+  updated_at: isoDatetimeString,
+  pushed_at: isoDatetimeString,
+  topics: stringArray.optional(),
 });
 
 export const npmApiResponseSchema = z.object({
   name: z.string(),
   version: z.string(),
   description: z.string().optional(),
-  keywords: z.array(z.string()).optional(),
-  homepage: z.string().url().optional(),
+  keywords: stringArray.optional(),
+  homepage: urlString.optional(),
   repository: z
     .object({
       type: z.string(),
@@ -384,14 +379,11 @@ export const submitConfigBodySchema = z
     type: z.enum(['agent', 'mcp', 'rule', 'command', 'hook']),
     name: z.string().min(2, 'Name too short').max(200, 'Name is too long'),
     description: z.string().min(10, 'Description too short').max(2000, 'Description is too long'),
-    content: z.string().min(1, 'Content is required').max(1000000, 'Content exceeds 1MB limit'), // 1MB max
-    author: z.string().min(1, 'Author is required').max(100, 'Author name is too long'),
+    content: nonEmptyString.max(1000000, 'Content exceeds 1MB limit'), // 1MB max
+    author: shortString,
     email: z.string().email().optional(),
-    githubUrl: z.string().url().startsWith('https://github.com/').optional(),
-    tags: z
-      .array(z.string().min(1, 'Tag must not be empty').max(50, 'Tag is too long'))
-      .max(20, 'Too many tags')
-      .optional(),
+    githubUrl: urlString.startsWith('https://github.com/', 'Must be a GitHub URL').optional(),
+    tags: z.array(shortString).max(20, 'Too many tags').optional(),
     version: z.string().optional(),
   })
   .strict();

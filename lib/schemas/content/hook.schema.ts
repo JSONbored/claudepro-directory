@@ -4,21 +4,37 @@
  */
 
 import { z } from 'zod';
+import {
+  largeContentArray,
+  limitedMediumStringArray,
+  mediumStringArray,
+  requiredTagArray,
+} from '@/lib/schemas/primitives/base-arrays';
+import { timeoutMs } from '@/lib/schemas/primitives/base-numbers';
+import {
+  codeString,
+  isoDateString,
+  massiveString,
+  mediumString,
+  nonEmptyString,
+  optionalUrlString,
+  shortString,
+} from '@/lib/schemas/primitives/base-strings';
 
 // Hook configuration schema - individual hook definition
 const hookConfigSchema = z.object({
-  script: z.string().max(500),
-  matchers: z.array(z.string().max(100)).optional(),
-  timeout: z.number().int().min(100).max(300000).optional(),
-  description: z.string().max(500).optional(),
+  script: mediumString,
+  matchers: z.array(shortString).optional(),
+  timeout: timeoutMs.optional(),
+  description: mediumString.optional(),
 });
 
 // Hook configuration array schema (for array-based hook configs)
 const hookConfigArraySchema = z.array(
   z.object({
-    matchers: z.array(z.string().max(100)).optional(),
-    description: z.string().max(500).optional(),
-    timeout: z.number().int().min(100).max(300000).optional(),
+    matchers: z.array(shortString).optional(),
+    description: mediumString.optional(),
+    timeout: timeoutMs.optional(),
   })
 );
 
@@ -27,36 +43,36 @@ const fullHookConfigSchema = z.object({
   hookConfig: z.object({
     hooks: z.record(z.string(), z.union([hookConfigSchema, hookConfigArraySchema])).optional(),
   }),
-  scriptContent: z.string().max(1000000).optional(), // 1MB limit for script content
+  scriptContent: massiveString.optional(), // 1MB limit for script content
 });
 
 // Installation configuration for hooks
 const hookInstallationSchema = z.object({
   claudeDesktop: z
     .object({
-      steps: z.array(z.string().max(1000)),
-      configPath: z.record(z.string(), z.string().max(500)).optional(),
+      steps: z.array(codeString),
+      configPath: z.record(z.string(), mediumString).optional(),
     })
     .optional(),
   claudeCode: z
     .object({
-      steps: z.array(z.string().max(1000)).optional(),
-      configFormat: z.string().max(500).optional(),
+      steps: z.array(codeString).optional(),
+      configFormat: mediumString.optional(),
       configPath: z
         .object({
-          project: z.string().max(500).optional(),
-          user: z.string().max(500).optional(),
+          project: mediumString.optional(),
+          user: mediumString.optional(),
         })
         .optional(),
     })
     .optional(),
-  requirements: z.array(z.string().max(500)).optional(),
+  requirements: mediumStringArray.optional(),
 });
 
 // Troubleshooting entry for hooks
 const hookTroubleshootingSchema = z.object({
   issue: z.string().max(300),
-  solution: z.string().max(500),
+  solution: mediumString,
 });
 
 /**
@@ -64,14 +80,14 @@ const hookTroubleshootingSchema = z.object({
  */
 export const hookContentSchema = z.object({
   // Required base properties (always present in hooks)
-  slug: z.string().min(1),
-  description: z.string().min(1),
+  slug: nonEmptyString,
+  description: nonEmptyString,
   category: z.literal('hooks'),
-  author: z.string().min(1),
-  dateAdded: z.string(), // ISO date string
+  author: nonEmptyString,
+  dateAdded: isoDateString,
 
   // Required hook-specific properties
-  tags: z.array(z.string()).min(1),
+  tags: requiredTagArray,
   hookType: z.enum([
     'PostToolUse',
     'PreToolUse',
@@ -94,12 +110,12 @@ export const hookContentSchema = z.object({
   source: z.enum(['community', 'official', 'verified', 'claudepro']).optional(),
 
   // Hook features and capabilities
-  features: z.array(z.string().max(500)).max(50).optional(),
-  useCases: z.array(z.string().max(500)).max(50).optional(),
-  requirements: z.array(z.string().max(500)).max(20).optional(),
+  features: largeContentArray.optional(),
+  useCases: largeContentArray.optional(),
+  requirements: limitedMediumStringArray.optional(),
 
   // Documentation
-  documentationUrl: z.string().url().optional(),
+  documentationUrl: optionalUrlString,
 
   // Installation and setup
   installation: hookInstallationSchema.optional(),

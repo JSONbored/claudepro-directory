@@ -4,14 +4,14 @@
  * Using Zod's brand feature to create nominal types
  */
 
-import { z } from 'zod';
+import type { z } from 'zod';
+import { isoDatetimeString, nonEmptyString, urlString } from '@/lib/schemas/primitives';
 
 /**
  * RequestId - Unique identifier for API requests
  * Used for tracing and debugging
  */
-export const requestIdSchema = z
-  .string()
+export const requestIdSchema = nonEmptyString
   .uuid('Request ID must be a valid UUID')
   .brand<'RequestId'>();
 
@@ -21,8 +21,7 @@ export type RequestId = z.infer<typeof requestIdSchema>;
  * SessionId - Unique identifier for user sessions
  * Used for analytics and session tracking
  */
-export const sessionIdSchema = z
-  .string()
+export const sessionIdSchema = nonEmptyString
   .min(16, 'Session ID must be at least 16 characters')
   .max(128, 'Session ID must not exceed 128 characters')
   .regex(/^[a-zA-Z0-9_-]+$/, 'Invalid session ID format')
@@ -34,8 +33,7 @@ export type SessionId = z.infer<typeof sessionIdSchema>;
  * ApiKey - Branded type for API keys
  * Ensures API keys follow the expected format
  */
-export const apiKeySchema = z
-  .string()
+export const apiKeySchema = nonEmptyString
   .min(32, 'API key must be at least 32 characters')
   .max(256, 'API key must not exceed 256 characters')
   .regex(/^[a-zA-Z0-9_-]+$/, 'Invalid API key format')
@@ -47,10 +45,7 @@ export type ApiKey = z.infer<typeof apiKeySchema>;
  * Timestamp - Branded ISO 8601 timestamp
  * Ensures timestamps are in the correct format
  */
-export const timestampSchema = z
-  .string()
-  .datetime({ message: 'Invalid ISO 8601 timestamp' })
-  .brand<'Timestamp'>();
+export const timestampSchema = isoDatetimeString.brand<'Timestamp'>();
 
 export type Timestamp = z.infer<typeof timestampSchema>;
 
@@ -58,7 +53,10 @@ export type Timestamp = z.infer<typeof timestampSchema>;
  * Email - Branded email address type
  * Provides strong typing for email addresses
  */
-export const emailSchema = z.string().email('Invalid email address').toLowerCase().brand<'Email'>();
+export const emailSchema = nonEmptyString
+  .email('Invalid email address')
+  .toLowerCase()
+  .brand<'Email'>();
 
 export type Email = z.infer<typeof emailSchema>;
 
@@ -66,7 +64,7 @@ export type Email = z.infer<typeof emailSchema>;
  * URL - Branded URL type
  * Ensures URLs are properly formatted
  */
-export const urlSchema = z.string().url('Invalid URL format').brand<'URL'>();
+export const urlSchema = urlString.brand<'URL'>();
 
 export type URL = z.infer<typeof urlSchema>;
 

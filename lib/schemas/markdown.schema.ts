@@ -4,6 +4,9 @@
  */
 
 import { z } from 'zod';
+import { nonEmptyStringArray } from './primitives/base-arrays';
+import { nonNegativeInt } from './primitives/base-numbers';
+import { nonEmptyString, shortString } from './primitives/base-strings';
 
 /**
  * Allowed HTML tags for sanitized content
@@ -114,8 +117,8 @@ export const markdownToHtmlRequestSchema = z.object({
  */
 export const markdownToHtmlResponseSchema = z.object({
   html: markdownSanitizedHtmlSchema,
-  wordCount: z.number().int().nonnegative(),
-  readingTime: z.number().int().nonnegative(), // in minutes
+  wordCount: nonNegativeInt,
+  readingTime: nonNegativeInt, // in minutes
   hasCodeBlocks: z.boolean(),
   hasLinks: z.boolean(),
   hasImages: z.boolean(),
@@ -149,11 +152,11 @@ export function validateSanitizedHtml(html: string): SanitizedHtml {
  * MDX frontmatter schema
  */
 export const mdxFrontmatterSchema = z.object({
-  title: z.string().min(1).max(200),
-  description: z.string().min(1).max(500),
+  title: nonEmptyString.max(200),
+  description: nonEmptyString.max(500),
   keywords: z.array(z.string().max(50)).optional(),
   dateUpdated: z.string().optional(),
-  author: z.string().max(100).optional(),
+  author: shortString.optional(),
   category: z.string().max(50).optional(),
   tags: z.array(z.string().max(50)).optional(),
   readingTime: z.string().max(20).optional(),
@@ -163,16 +166,16 @@ export const mdxFrontmatterSchema = z.object({
   schemas: z
     .object({
       article: z
-        .record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]))
+        .record(z.string(), z.union([z.string(), z.number(), z.boolean(), nonEmptyStringArray]))
         .optional(),
       faq: z
-        .record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]))
+        .record(z.string(), z.union([z.string(), z.number(), z.boolean(), nonEmptyStringArray]))
         .optional(),
       breadcrumb: z
-        .record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]))
+        .record(z.string(), z.union([z.string(), z.number(), z.boolean(), nonEmptyStringArray]))
         .optional(),
       howto: z
-        .record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]))
+        .record(z.string(), z.union([z.string(), z.number(), z.boolean(), nonEmptyStringArray]))
         .optional(),
     })
     .optional(),

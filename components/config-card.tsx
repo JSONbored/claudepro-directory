@@ -110,10 +110,10 @@ export const ConfigCard = memo(
 
         <CardContent className="pt-0">
           <div className="flex flex-wrap gap-1 mb-4">
-            {item.tags.slice(0, 4).map((tag: string) => (
+            {item.tags?.slice(0, 4).map((tag: string) => (
               <TagBadge key={tag} tag={tag} />
             ))}
-            {item.tags.length > 4 && (
+            {item.tags && item.tags.length > 4 && (
               <Badge
                 variant="outline"
                 className="text-xs border-muted-foreground/20 text-muted-foreground"

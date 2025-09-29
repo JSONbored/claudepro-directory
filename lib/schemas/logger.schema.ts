@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { isoDatetimeString, nonEmptyString } from '@/lib/schemas/primitives';
 
 /**
  * Security constants for logging
@@ -28,7 +29,7 @@ export const logLevelSchema = z.enum(['debug', 'info', 'warn', 'error', 'fatal']
  */
 export const logContextSchema = z
   .record(
-    z.string().max(100, 'Context key too long'),
+    nonEmptyString.max(100, 'Context key too long'),
     z.union([z.string(), z.number(), z.boolean()]).refine((value) => {
       if (typeof value === 'string') {
         return value.length <= LOGGER_LIMITS.MAX_CONTEXT_VALUE_LENGTH;
@@ -46,12 +47,12 @@ export const logContextSchema = z
  */
 export const logEntrySchema = z.object({
   level: logLevelSchema,
-  message: z.string().min(1).max(LOGGER_LIMITS.MAX_MESSAGE_LENGTH),
+  message: nonEmptyString.max(LOGGER_LIMITS.MAX_MESSAGE_LENGTH),
   context: logContextSchema.optional(),
   error: z
     .union([z.instanceof(Error), z.string().max(LOGGER_LIMITS.MAX_ERROR_MESSAGE_LENGTH)])
     .optional(),
-  metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
+  metadata: z.record(nonEmptyString, z.union([z.string(), z.number(), z.boolean()])).optional(),
 });
 
 export type LogEntry = z.infer<typeof logEntrySchema>;
@@ -60,8 +61,8 @@ export type LogEntry = z.infer<typeof logEntrySchema>;
  * Error object validation
  */
 export const logErrorSchema = z.object({
-  name: z.string().max(LOGGER_LIMITS.MAX_ERROR_NAME_LENGTH),
-  message: z.string().max(LOGGER_LIMITS.MAX_ERROR_MESSAGE_LENGTH),
+  name: nonEmptyString.max(LOGGER_LIMITS.MAX_ERROR_NAME_LENGTH),
+  message: nonEmptyString.max(LOGGER_LIMITS.MAX_ERROR_MESSAGE_LENGTH),
   stack: z.string().max(LOGGER_LIMITS.MAX_STACK_TRACE_LENGTH).optional(),
 });
 
@@ -70,7 +71,7 @@ export const logErrorSchema = z.object({
  */
 export const logObjectSchema = z
   .object({
-    timestamp: z.string().datetime(),
+    timestamp: isoDatetimeString,
     level: logLevelSchema,
     message: z.string().max(LOGGER_LIMITS.MAX_MESSAGE_LENGTH),
     context: logContextSchema.optional(),
@@ -83,11 +84,11 @@ export const logObjectSchema = z
  * Development log format components validation
  */
 export const developmentLogComponentsSchema = z.object({
-  timestamp: z.string().datetime(),
+  timestamp: isoDatetimeString,
   level: logLevelSchema,
   message: z.string().max(LOGGER_LIMITS.MAX_MESSAGE_LENGTH),
   context: logContextSchema.optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  metadata: z.record(nonEmptyString, z.unknown()).optional(),
   error: logErrorSchema.optional(),
 });
 
@@ -96,14 +97,8 @@ export const developmentLogComponentsSchema = z.object({
  */
 export const requestContextSchema = z
   .object({
-    method: z
-      .string()
-      .max(10)
-      .regex(/^[A-Z]+$/, 'Invalid HTTP method'),
-    url: z
-      .string()
-      .max(2048)
-      .regex(/^[^\s<>'"]+$/, 'Invalid URL format'),
+    method: nonEmptyString.max(10).regex(/^[A-Z]+$/, 'Invalid HTTP method'),
+    url: nonEmptyString.max(2048).regex(/^[^\s<>'"]+$/, 'Invalid URL format'),
     userAgent: z
       .string()
       .max(512)
@@ -118,11 +113,8 @@ export const requestContextSchema = z
         }
         return true;
       }, 'Invalid user agent: contains control characters'),
-    requestId: z
-      .string()
-      .max(100)
-      .regex(/^[a-zA-Z0-9\-_]*$/, 'Invalid request ID'),
-    timestamp: z.string().datetime(),
+    requestId: nonEmptyString.max(100).regex(/^[a-zA-Z0-9\-_]*$/, 'Invalid request ID'),
+    timestamp: isoDatetimeString,
     region: z.string().max(50).optional(),
     deployment: z.string().max(100).optional(),
     environment: z.string().max(20).optional(),

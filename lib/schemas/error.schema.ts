@@ -6,6 +6,7 @@
 
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
+import { isoDatetimeString, nonEmptyString, stringArray } from '@/lib/schemas/primitives';
 import { requestIdSchema } from './branded-types.schema';
 
 /**
@@ -65,7 +66,7 @@ export const errorContextSchema = z
  */
 export const basicErrorSchema = z.object({
   name: z.string().max(ERROR_LIMITS.MAX_ERROR_NAME_LENGTH).optional(),
-  message: z.string().max(ERROR_LIMITS.MAX_MESSAGE_LENGTH),
+  message: nonEmptyString.max(ERROR_LIMITS.MAX_MESSAGE_LENGTH),
   stack: z.string().max(ERROR_LIMITS.MAX_STACK_TRACE_LENGTH).optional(),
 });
 
@@ -82,10 +83,10 @@ export const errorInputSchema = z.union([
  * Sanitized error response schema
  */
 export const sanitizedErrorSchema = z.object({
-  error: z.string().min(1).max(200),
+  error: nonEmptyString.max(200),
   message: z.string().max(200),
   code: z.string().regex(/^[A-Z]{3}_[A-Z0-9]{8,12}$/, 'Invalid error code format'),
-  timestamp: z.string().datetime(),
+  timestamp: isoDatetimeString,
   requestId: requestIdSchema,
   severity: errorSeveritySchema,
 });
@@ -95,7 +96,7 @@ export const sanitizedErrorSchema = z.object({
  */
 export const errorSanitizationResultSchema = z.object({
   sanitized: z.string().max(ERROR_LIMITS.MAX_MESSAGE_LENGTH),
-  removed: z.array(z.string()).max(100),
+  removed: stringArray.max(100),
 });
 
 /**
@@ -341,7 +342,7 @@ export const errorHandlerConfigSchema = z.object({
 
   // Logging configuration
   logLevel: z.enum(['debug', 'info', 'warn', 'error', 'fatal']).optional(),
-  logContext: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
+  logContext: z.record(nonEmptyString, z.union([z.string(), z.number(), z.boolean()])).optional(),
 
   // Security configuration
   sanitizeResponse: z.boolean().optional(),
@@ -353,10 +354,10 @@ export const errorHandlerConfigSchema = z.object({
  */
 export const errorResponseSchema = z.object({
   success: z.literal(false),
-  error: z.string().min(1).max(200),
-  message: z.string().min(1).max(1000),
-  code: z.string().min(1).max(50),
-  timestamp: z.string().datetime(),
+  error: nonEmptyString.max(200),
+  message: nonEmptyString.max(1000),
+  code: nonEmptyString.max(50),
+  timestamp: isoDatetimeString,
   requestId: requestIdSchema.optional(),
   details: z
     .array(

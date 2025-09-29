@@ -5,6 +5,16 @@
  */
 
 import { z } from 'zod';
+import {
+  isoDatetimeString,
+  mediumString,
+  nonEmptyString,
+  nonNegativeInt,
+  percentage,
+  positiveInt,
+  shortString,
+  stringArray,
+} from './primitives';
 
 /**
  * Related Content Item Schema
@@ -12,12 +22,12 @@ import { z } from 'zod';
  * Based on actual ContentMetadata structure
  */
 export const relatedContentItemSchema = z.object({
-  slug: z.string().min(1).max(200),
-  description: z.string().max(1000),
+  slug: nonEmptyString.max(200),
+  description: mediumString,
   category: z.string().max(50),
-  author: z.string().max(100),
+  author: shortString,
   dateAdded: z.string().max(50),
-  tags: z.array(z.string()).readonly(),
+  tags: stringArray.readonly(),
   source: z.enum(['official', 'community', 'verified', 'claudepro']),
   // Optional fields that may exist on some content types
   name: z.string().optional(),
@@ -26,13 +36,13 @@ export const relatedContentItemSchema = z.object({
   githubUrl: z.string().optional(),
   documentationUrl: z.string().optional(),
   // Related content specific fields
-  score: z.number().min(0).max(100),
+  score: percentage,
   matchType: z.enum(['same_category', 'tag_match', 'keyword_match', 'trending']),
   views: z.number().optional(),
   matchDetails: z
     .object({
-      matchedTags: z.array(z.string()),
-      matchedKeywords: z.array(z.string()),
+      matchedTags: stringArray,
+      matchedKeywords: stringArray,
     })
     .optional(),
 });
@@ -46,11 +56,11 @@ export type RelatedContentItem = z.infer<typeof relatedContentItemSchema>;
 export const smartRelatedContentPropsSchema = z.object({
   featured: z.array(z.string().max(200)).optional(),
   exclude: z.array(z.string().max(200)).optional(),
-  limit: z.number().int().min(1).max(50).default(6),
+  limit: positiveInt.max(50).default(6),
   trackingEnabled: z.boolean().default(true),
   currentTags: z.array(z.string().max(50)).optional(),
-  currentKeywords: z.array(z.string().max(100)).optional(),
-  pathname: z.string().max(500).optional(),
+  currentKeywords: z.array(shortString).optional(),
+  pathname: mediumString.optional(),
   title: z.string().max(200).optional(),
   showTitle: z.boolean().default(true),
 });
@@ -64,7 +74,7 @@ export type SmartRelatedContentProps = z.infer<typeof smartRelatedContentPropsSc
 export const smartRelatedContentWithMetadataPropsSchema = smartRelatedContentPropsSchema
   .omit({ currentTags: true, currentKeywords: true })
   .extend({
-    pathname: z.string().max(500).optional(), // Allow pathname to be passed explicitly
+    pathname: mediumString.optional(), // Allow pathname to be passed explicitly
   });
 
 export type SmartRelatedContentWithMetadataProps = z.infer<
@@ -75,9 +85,9 @@ export type SmartRelatedContentWithMetadataProps = z.infer<
  * Related Content Performance Metrics Schema
  */
 export const relatedContentPerformanceSchema = z.object({
-  fetchTime: z.number().min(0),
+  fetchTime: nonNegativeInt,
   cacheHit: z.boolean(),
-  itemCount: z.number().int().min(0),
+  itemCount: nonNegativeInt,
   algorithmVersion: z.string().max(50),
   cacheKey: z.string().optional(),
   ttl: z.number().optional(),
@@ -97,7 +107,7 @@ export const relatedCarouselClientPropsSchema = z.object({
   trackingEnabled: z.boolean().default(true),
   className: z.string().optional(),
   autoPlay: z.boolean().default(false),
-  autoPlayInterval: z.number().min(1000).max(10000).default(5000),
+  autoPlayInterval: positiveInt.min(1000).max(10000).default(5000),
   showDots: z.boolean().default(true),
   showArrows: z.boolean().default(true),
 });
@@ -110,12 +120,12 @@ export type RelatedCarouselClientProps = z.infer<typeof relatedCarouselClientPro
  */
 export const relatedContentViewEventSchema = z.object({
   eventType: z.literal('related_content_view'),
-  timestamp: z.string().datetime(),
+  timestamp: isoDatetimeString,
   pathname: z.string(),
-  itemCount: z.number().int().min(0),
+  itemCount: nonNegativeInt,
   algorithmVersion: z.string(),
   cacheHit: z.boolean(),
-  fetchTime: z.number().min(0),
+  fetchTime: nonNegativeInt,
 });
 
 export type RelatedContentViewEvent = z.infer<typeof relatedContentViewEventSchema>;
@@ -125,17 +135,17 @@ export type RelatedContentViewEvent = z.infer<typeof relatedContentViewEventSche
  */
 export const relatedContentClickEventSchema = z.object({
   eventType: z.literal('related_content_click'),
-  timestamp: z.string().datetime(),
+  timestamp: isoDatetimeString,
   pathname: z.string(),
   clickedItem: z.object({
     slug: z.string(),
     category: z.string(),
-    position: z.number().int().min(0),
+    position: nonNegativeInt,
     score: z.number().optional(),
   }),
   context: z
     .object({
-      totalItems: z.number().int().min(0),
+      totalItems: nonNegativeInt,
       algorithmVersion: z.string(),
     })
     .optional(),
@@ -148,16 +158,16 @@ export type RelatedContentClickEvent = z.infer<typeof relatedContentClickEventSc
  */
 export const relatedContentImpressionEventSchema = z.object({
   eventType: z.literal('related_content_impression'),
-  timestamp: z.string().datetime(),
+  timestamp: isoDatetimeString,
   pathname: z.string(),
   visibleItems: z.array(
     z.object({
       slug: z.string(),
       category: z.string(),
-      position: z.number().int().min(0),
+      position: nonNegativeInt,
     })
   ),
-  viewportPercentage: z.number().min(0).max(100),
+  viewportPercentage: percentage,
 });
 
 export type RelatedContentImpressionEvent = z.infer<typeof relatedContentImpressionEventSchema>;
@@ -167,12 +177,12 @@ export type RelatedContentImpressionEvent = z.infer<typeof relatedContentImpress
  */
 export const carouselNavigationEventSchema = z.object({
   eventType: z.literal('carousel_navigation'),
-  timestamp: z.string().datetime(),
+  timestamp: isoDatetimeString,
   pathname: z.string(),
   direction: z.enum(['next', 'previous', 'dot']),
-  currentIndex: z.number().int().min(0),
-  targetIndex: z.number().int().min(0),
-  totalSlides: z.number().int().min(0),
+  currentIndex: nonNegativeInt,
+  targetIndex: nonNegativeInt,
+  totalSlides: nonNegativeInt,
 });
 
 export type CarouselNavigationEvent = z.infer<typeof carouselNavigationEventSchema>;
@@ -194,13 +204,13 @@ export const relatedContentConfigSchema = z.object({
   cacheConfig: z
     .object({
       enabled: z.boolean().default(true),
-      ttl: z.number().min(60).max(86400).default(3600), // 1 hour default
-      maxSize: z.number().min(100).max(10000).default(1000),
+      ttl: positiveInt.min(60).max(86400).default(3600), // 1 hour default
+      maxSize: positiveInt.min(100).max(10000).default(1000),
     })
     .optional(),
   limits: z
     .object({
-      maxItems: z.number().min(1).max(50).default(12),
+      maxItems: positiveInt.max(50).default(12),
       minScore: z.number().min(0).max(1).default(0.1),
     })
     .optional(),
@@ -213,11 +223,11 @@ export type RelatedContentConfig = z.infer<typeof relatedContentConfigSchema>;
  * For API endpoints
  */
 export const relatedContentRequestSchema = z.object({
-  slug: z.string().min(1).max(200),
+  slug: nonEmptyString.max(200),
   category: z.string().max(50),
   tags: z.array(z.string().max(50)).optional(),
-  limit: z.number().int().min(1).max(50).optional(),
-  exclude: z.array(z.string()).optional(),
+  limit: positiveInt.max(50).optional(),
+  exclude: stringArray.optional(),
   includeScore: z.boolean().optional(),
 });
 
@@ -229,10 +239,10 @@ export type RelatedContentRequest = z.infer<typeof relatedContentRequestSchema>;
 export const relatedContentResponseSchema = z.object({
   items: z.array(relatedContentItemSchema),
   metadata: z.object({
-    totalFound: z.number().int().min(0),
-    returnedCount: z.number().int().min(0),
+    totalFound: nonNegativeInt,
+    returnedCount: nonNegativeInt,
     algorithmUsed: z.string(),
-    processingTime: z.number().min(0),
+    processingTime: nonNegativeInt,
     cacheStatus: z.enum(['hit', 'miss', 'bypass']),
   }),
   performance: relatedContentPerformanceSchema.optional(),

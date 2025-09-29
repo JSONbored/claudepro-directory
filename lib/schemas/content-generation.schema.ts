@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { isoDatetimeString, nonEmptyString, nonNegativeInt } from '@/lib/schemas/primitives';
 import { contentCategorySchema } from './shared.schema';
 
 /**
@@ -26,41 +27,30 @@ const CONTENT_LIMITS = {
  * Base content schema for all content types
  */
 export const baseContentSchema = z.object({
-  id: z
-    .string()
-    .min(1, 'ID is required')
+  id: nonEmptyString
     .max(CONTENT_LIMITS.MAX_SLUG_LENGTH)
     .regex(/^[a-zA-Z0-9\-_]+$/, 'Invalid ID format'),
 
-  name: z.string().min(1).max(CONTENT_LIMITS.MAX_TITLE_LENGTH).optional(),
+  name: nonEmptyString.max(CONTENT_LIMITS.MAX_TITLE_LENGTH).optional(),
 
-  title: z.string().min(1).max(CONTENT_LIMITS.MAX_TITLE_LENGTH).optional(),
+  title: nonEmptyString.max(CONTENT_LIMITS.MAX_TITLE_LENGTH).optional(),
 
-  slug: z
-    .string()
-    .min(1, 'Slug is required')
+  slug: nonEmptyString
     .max(CONTENT_LIMITS.MAX_SLUG_LENGTH)
     .regex(/^[a-zA-Z0-9\-_]+$/, 'Invalid slug format')
     .optional(),
 
-  description: z
-    .string()
-    .min(1, 'Description is required')
-    .max(CONTENT_LIMITS.MAX_DESCRIPTION_LENGTH),
+  description: nonEmptyString.max(CONTENT_LIMITS.MAX_DESCRIPTION_LENGTH),
 
-  category: z.string().min(1),
+  category: nonEmptyString,
 
-  author: z
-    .string()
-    .min(1, 'Author is required')
+  author: nonEmptyString
     .max(CONTENT_LIMITS.MAX_AUTHOR_LENGTH)
     .regex(/^[a-zA-Z0-9\s\-_.@]+$/, 'Invalid author format'),
 
   tags: z
     .array(
-      z
-        .string()
-        .min(1)
+      nonEmptyString
         .max(CONTENT_LIMITS.MAX_TAG_LENGTH)
         .regex(/^[a-zA-Z0-9\-_]+$/, 'Invalid tag format')
     )
@@ -110,8 +100,8 @@ export const generatedContentMetadataSchema = baseContentSchema.omit({
  * File loading result schema
  */
 export const fileLoadResultSchema = z.object({
-  filename: z.string(),
-  path: z.string(),
+  filename: nonEmptyString,
+  path: nonEmptyString,
   content: baseContentSchema.nullable(),
   error: z.string().optional(),
 });
@@ -122,22 +112,16 @@ export const fileLoadResultSchema = z.object({
 export const contentCollectionSchema = z.object({
   category: contentCategorySchema,
   items: z.array(baseContentSchema).max(CONTENT_LIMITS.MAX_ITEMS_PER_CATEGORY),
-  count: z.number().int().min(0),
+  count: nonNegativeInt,
 });
 
 /**
  * Build configuration schema
  */
 export const buildConfigSchema = z.object({
-  contentDir: z
-    .string()
-    .min(1)
-    .refine((path) => !path.includes('..'), 'Path traversal detected'),
+  contentDir: nonEmptyString.refine((path) => !path.includes('..'), 'Path traversal detected'),
 
-  generatedDir: z
-    .string()
-    .min(1)
-    .refine((path) => !path.includes('..'), 'Path traversal detected'),
+  generatedDir: nonEmptyString.refine((path) => !path.includes('..'), 'Path traversal detected'),
 
   contentTypes: z.array(contentCategorySchema).min(1),
 
@@ -150,12 +134,12 @@ export const buildConfigSchema = z.object({
  * Generated file info schema
  */
 export const generatedFileSchema = z.object({
-  path: z.string(),
+  path: nonEmptyString,
   type: z.enum(['metadata', 'full', 'index']),
   category: contentCategorySchema.optional(),
-  itemCount: z.number().int().min(0),
-  sizeBytes: z.number().int().min(0).optional(),
-  timestamp: z.string().datetime(),
+  itemCount: nonNegativeInt,
+  sizeBytes: nonNegativeInt.optional(),
+  timestamp: isoDatetimeString,
 });
 
 /**
@@ -163,11 +147,11 @@ export const generatedFileSchema = z.object({
  */
 export const buildResultSchema = z.object({
   success: z.boolean(),
-  contentStats: z.record(contentCategorySchema, z.number().int().min(0)),
+  contentStats: z.record(contentCategorySchema, nonNegativeInt),
   generatedFiles: z.array(generatedFileSchema),
-  indexItems: z.number().int().min(0),
+  indexItems: nonNegativeInt,
   cacheInvalidated: z.boolean(),
-  duration: z.number().min(0),
+  duration: nonNegativeInt,
   errors: z.array(z.string()).optional(),
 });
 
@@ -176,7 +160,7 @@ export const buildResultSchema = z.object({
  */
 export const jsonFileValidationSchema = z.object({
   valid: z.boolean(),
-  file: z.string(),
+  file: nonEmptyString,
   data: baseContentSchema.optional(),
   errors: z.array(z.string()).optional(),
 });

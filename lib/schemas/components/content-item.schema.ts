@@ -5,6 +5,8 @@
  */
 
 import { z } from 'zod';
+import { stringArray } from '../primitives/base-arrays';
+import { optionalUrlString } from '../primitives/base-strings';
 
 /**
  * Unified content item schema for components
@@ -34,7 +36,7 @@ export const unifiedContentItemSchema = z.object({
   ]),
   author: z.string(),
   dateAdded: z.string().optional(), // Optional for guides
-  tags: z.array(z.string()),
+  tags: stringArray.optional(), // Required in individual schemas, but optional here for flexibility
 
   // Optional properties that may exist on different content types
   title: z.string().optional(), // guides, auto-generated for others
@@ -46,13 +48,13 @@ export const unifiedContentItemSchema = z.object({
   source: z.enum(['community', 'official', 'verified', 'claudepro']).optional(),
 
   // Features and capabilities
-  features: z.array(z.string()).optional(),
-  useCases: z.array(z.string()).optional(),
-  requirements: z.array(z.string()).optional(),
+  features: stringArray.optional(),
+  useCases: stringArray.optional(),
+  requirements: stringArray.optional(),
 
   // URLs and documentation
-  documentationUrl: z.string().url().optional(),
-  githubUrl: z.string().url().optional(),
+  documentationUrl: optionalUrlString,
+  githubUrl: optionalUrlString,
 
   // Configuration (flexible for different types)
   configuration: z.record(z.string(), z.any()).optional(),
@@ -81,7 +83,7 @@ export const unifiedContentItemSchema = z.object({
     .optional(),
 
   // Security and troubleshooting
-  security: z.array(z.string()).optional(),
+  security: stringArray.optional(),
   troubleshooting: z
     .array(
       z.union([
@@ -114,13 +116,13 @@ export const unifiedContentItemSchema = z.object({
   package: z.string().nullable().optional(),
   requiresAuth: z.boolean().optional(),
   authType: z.enum(['api_key', 'oauth', 'connection_string', 'basic_auth']).optional(),
-  permissions: z.array(z.string()).optional(),
+  permissions: stringArray.optional(),
   configLocation: z.string().optional(),
   mcpVersion: z.string().optional(),
   serverType: z.enum(['stdio', 'http', 'sse']).optional(),
-  dataTypes: z.array(z.string()).optional(),
-  toolsProvided: z.array(z.string()).optional(),
-  resourcesProvided: z.array(z.string()).optional(),
+  dataTypes: stringArray.optional(),
+  toolsProvided: stringArray.optional(),
+  resourcesProvided: stringArray.optional(),
   transport: z.record(z.string(), z.any()).optional(),
   capabilities: z
     .object({
@@ -139,8 +141,8 @@ export const unifiedContentItemSchema = z.object({
     .optional(),
 
   // Rule-specific properties
-  relatedRules: z.array(z.string()).optional(),
-  expertiseAreas: z.array(z.string()).optional(),
+  relatedRules: stringArray.optional(),
+  expertiseAreas: stringArray.optional(),
   difficultyLevel: z.enum(['Beginner', 'Intermediate', 'Advanced', 'Expert']).optional(),
 
   // Command-specific properties
@@ -149,14 +151,14 @@ export const unifiedContentItemSchema = z.object({
       z.object({
         name: z.string(),
         description: z.string(),
-        example: z.string(),
+        example: z.string().optional(), // Optional since some commands may not have examples for all args
       })
     )
     .optional(),
   frontmatterOptions: z.record(z.string(), z.string()).optional(),
 
   // Guide-specific properties
-  keywords: z.array(z.string()).optional(),
+  keywords: stringArray.optional(),
   readingTime: z.string().optional(),
   difficulty: z
     .union([
@@ -168,7 +170,7 @@ export const unifiedContentItemSchema = z.object({
   lastReviewed: z.string().optional(),
   aiOptimized: z.boolean().optional(),
   citationReady: z.boolean().optional(),
-  relatedGuides: z.array(z.string()).optional(),
+  relatedGuides: stringArray.optional(),
 
   // Component-specific display properties
   type: z.string().optional(), // for component display logic

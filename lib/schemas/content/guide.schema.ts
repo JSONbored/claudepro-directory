@@ -4,14 +4,24 @@
  */
 
 import { z } from 'zod';
+import {
+  largeContentArray,
+  limitedMediumStringArray,
+  requiredTagArray,
+} from '@/lib/schemas/primitives/base-arrays';
+import {
+  isoDateString,
+  nonEmptyString,
+  optionalUrlString,
+} from '@/lib/schemas/primitives/base-strings';
 
 /**
  * Guide content schema - matches MDX files with frontmatter in seo/ directory
  */
 export const guideContentSchema = z.object({
   // Required base properties from frontmatter (matching actual template structure)
-  title: z.string().min(1),
-  description: z.string().min(1),
+  title: nonEmptyString,
+  description: nonEmptyString,
   category: z.enum([
     'tutorials', // tutorial-template.mdx
     'comparisons', // comparison-template.mdx
@@ -22,17 +32,17 @@ export const guideContentSchema = z.object({
     'collections', // collection-template.mdx
     'guides', // General guide category
   ]),
-  author: z.string().min(1),
+  author: nonEmptyString,
 
   // Date fields matching template structure variations
-  datePublished: z.string().optional(), // tutorial-template
-  dateModified: z.string().optional(), // tutorial-template
-  dateUpdated: z.string().optional(), // category, comparison, troubleshooting, workflow, collection templates
-  dateAdded: z.string().optional(), // Auto-generated fallback
+  datePublished: isoDateString.optional(), // tutorial-template
+  dateModified: isoDateString.optional(), // tutorial-template
+  dateUpdated: isoDateString.optional(), // category, comparison, troubleshooting, workflow, collection templates
+  dateAdded: isoDateString.optional(), // Auto-generated fallback
 
   // Required guide-specific properties
-  keywords: z.array(z.string()).min(1),
-  tags: z.array(z.string()).min(1),
+  keywords: requiredTagArray,
+  tags: requiredTagArray,
 
   // Optional metadata properties (common across all templates)
   readingTime: z.string().optional(),
@@ -43,7 +53,7 @@ export const guideContentSchema = z.object({
     ])
     .optional(),
   featured: z.boolean().optional(),
-  lastReviewed: z.string().optional(), // ISO date string
+  lastReviewed: isoDateString.optional(),
   aiOptimized: z.boolean().optional(),
   citationReady: z.boolean().optional(),
 
@@ -52,23 +62,23 @@ export const guideContentSchema = z.object({
   communityDriven: z.boolean().optional(), // comparison, troubleshooting, workflow templates
 
   // Content (extracted from MDX body)
-  content: z.string().min(1), // Full MDX content without frontmatter
+  content: nonEmptyString, // Full MDX content without frontmatter
 
   // Auto-generated properties
-  slug: z.string().min(1), // Generated from file path
+  slug: nonEmptyString, // Generated from file path
 
   // Additional optional properties
   source: z
     .enum(['community', 'official', 'verified', 'claudepro'])
     .optional()
     .default('claudepro'),
-  githubUrl: z.string().url().optional(),
-  documentationUrl: z.string().url().optional(),
+  githubUrl: optionalUrlString,
+  documentationUrl: optionalUrlString,
 
   // Guide features and use cases
-  features: z.array(z.string().max(500)).max(50).optional(),
-  useCases: z.array(z.string().max(500)).max(50).optional(),
-  requirements: z.array(z.string().max(500)).max(20).optional(),
+  features: largeContentArray.optional(),
+  useCases: largeContentArray.optional(),
+  requirements: limitedMediumStringArray.optional(),
 
   // Related content
   relatedGuides: z.array(z.string()).max(20).optional(),

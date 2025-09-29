@@ -4,25 +4,41 @@
  */
 
 import { z } from 'zod';
+import {
+  examplesArray,
+  largeContentArray,
+  limitedMediumStringArray,
+  mediumStringArray,
+  requiredTagArray,
+} from '@/lib/schemas/primitives/base-arrays';
+import {
+  codeString,
+  isoDateString,
+  mediumString,
+  nonEmptyString,
+  optionalUrlString,
+  shortString,
+  urlString,
+} from '@/lib/schemas/primitives/base-strings';
 
 // MCP transport configurations - flexible for different transport types
 const mcpTransportConfigSchema = z.object({
-  command: z.string().max(500).optional(), // For stdio transport
+  command: mediumString.optional(), // For stdio transport
   args: z.array(z.string().max(200)).optional(), // For stdio transport
-  env: z.record(z.string(), z.string().max(1000)).optional(),
-  transport: z.string().max(50).optional(), // For SSE/HTTP transport
+  env: z.record(z.string(), codeString).optional(),
+  transport: shortString.optional(), // For SSE/HTTP transport
   url: z.string().url().max(2048).optional(), // For SSE/HTTP transport
 });
 
 const mcpHttpConfigSchema = z.object({
   type: z.literal('http'),
-  url: z.string().url(),
+  url: urlString,
   headers: z.record(z.string(), z.string()).optional(),
 });
 
 const mcpSseConfigSchema = z.object({
   type: z.literal('sse'),
-  url: z.string().url(),
+  url: urlString,
   headers: z.record(z.string(), z.string()).optional(),
 });
 
@@ -52,12 +68,12 @@ const mcpConfigurationSchema = z.object({
 const mcpInstallationSchema = z.object({
   claudeDesktop: z
     .object({
-      steps: z.array(z.string().max(500)),
-      configPath: z.record(z.string(), z.string().max(500)).optional(),
+      steps: mediumStringArray,
+      configPath: z.record(z.string(), mediumString).optional(),
     })
     .optional(),
-  claudeCode: z.string().max(1000).optional(), // Actually a string command, not an object
-  requirements: z.array(z.string().max(500)).optional(),
+  claudeCode: codeString.optional(), // Actually a string command, not an object
+  requirements: mediumStringArray.optional(),
 });
 
 // Transport layer configuration
@@ -77,8 +93,8 @@ const mcpCapabilitiesSchema = z.object({
 
 // Server info
 const mcpServerInfoSchema = z.object({
-  name: z.string(),
-  version: z.string(),
+  name: nonEmptyString,
+  version: nonEmptyString,
   protocol_version: z.string().optional(),
 });
 
@@ -87,22 +103,22 @@ const mcpServerInfoSchema = z.object({
  */
 export const mcpContentSchema = z.object({
   // Required base properties (always present in MCP servers)
-  slug: z.string().min(1),
-  description: z.string().min(1),
+  slug: nonEmptyString,
+  description: nonEmptyString,
   category: z.literal('mcp'),
-  author: z.string().min(1),
-  dateAdded: z.string(), // ISO date string
+  author: nonEmptyString,
+  dateAdded: isoDateString,
 
   // Required MCP-specific properties
-  tags: z.array(z.string()).min(1),
-  content: z.string().min(1), // Long MCP server description
+  tags: requiredTagArray,
+  content: nonEmptyString, // Long MCP server description
 
   // Configuration (either simple or complex MCP config)
   configuration: mcpConfigurationSchema,
 
   // Optional properties (can be undefined)
-  features: z.array(z.string().max(500)).max(50).optional(),
-  useCases: z.array(z.string().max(500)).max(50).optional(),
+  features: largeContentArray.optional(),
+  useCases: largeContentArray.optional(),
   package: z.string().max(200).nullable().optional(),
   source: z.enum(['community', 'official', 'verified', 'claudepro']).optional(),
 
@@ -110,31 +126,31 @@ export const mcpContentSchema = z.object({
   installation: mcpInstallationSchema.optional(),
 
   // Security guidelines
-  security: z.array(z.string().max(500)).max(20).optional(),
+  security: limitedMediumStringArray.optional(),
 
   // Troubleshooting information - array of strings, not objects
-  troubleshooting: z.array(z.string().max(500)).max(20).optional(),
+  troubleshooting: limitedMediumStringArray.optional(),
 
   // Usage examples
-  examples: z.array(z.string().max(1000)).max(10).optional(),
+  examples: examplesArray.optional(),
 
   // Authentication and permissions
   requiresAuth: z.boolean().optional(),
   authType: z.enum(['api_key', 'oauth', 'connection_string', 'basic_auth']).optional(),
-  permissions: z.array(z.string().max(100)).max(20).optional(),
-  configLocation: z.string().max(500).optional(),
+  permissions: z.array(shortString).max(20).optional(),
+  configLocation: mediumString.optional(),
 
   // Documentation
-  documentationUrl: z.string().url().optional(),
+  documentationUrl: optionalUrlString,
 
   // MCP protocol specific
   mcpVersion: z.string().optional(),
   serverType: z.enum(['stdio', 'http', 'sse']).optional(),
 
   // Data and capability descriptions
-  dataTypes: z.array(z.string().max(500)).max(20).optional(),
-  toolsProvided: z.array(z.string().max(500)).max(20).optional(),
-  resourcesProvided: z.array(z.string().max(500)).max(20).optional(),
+  dataTypes: limitedMediumStringArray.optional(),
+  toolsProvided: limitedMediumStringArray.optional(),
+  resourcesProvided: limitedMediumStringArray.optional(),
 
   // Advanced MCP configurations
   transport: mcpTransportSchema.optional(),

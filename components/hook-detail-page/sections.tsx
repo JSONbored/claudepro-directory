@@ -160,7 +160,7 @@ export const HookDetailsSection = memo(({ item }: { item: ExtendedHookContent })
         <div>
           <h4 className="font-medium mb-1">Tags</h4>
           <div className="flex flex-wrap gap-1">
-            {item.tags.map((tag) => (
+            {item.tags?.map((tag: string) => (
               <Badge key={tag} variant="secondary" className="text-xs">
                 {tag}
               </Badge>

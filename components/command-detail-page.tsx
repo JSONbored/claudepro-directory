@@ -79,7 +79,7 @@ const generateUseCases = (item: UnifiedContentItem): string[] => {
   };
 
   // Add use cases based on tags
-  tags.forEach((tag: string) => {
+  tags?.forEach((tag: string) => {
     const tagUseCases = tagBasedUseCases[tag.toLowerCase()];
     if (tagUseCases) {
       tagUseCases.forEach((useCase) => {
@@ -162,7 +162,7 @@ const generateFeatures = (item: UnifiedContentItem): string[] => {
   };
 
   // Add features based on tags
-  tags.forEach((tag: string) => {
+  tags?.forEach((tag: string) => {
     const tagFeatures = tagBasedFeatures[tag.toLowerCase()];
     if (tagFeatures) {
       tagFeatures.forEach((feature) => {
@@ -182,7 +182,7 @@ const generateRequirements = (item: UnifiedContentItem): string[] => {
 
   // Add command-specific requirements based on tags and content
   const tags = item.tags;
-  tags.forEach((tag: string) => {
+  tags?.forEach((tag: string) => {
     switch (tag.toLowerCase()) {
       case 'git':
         if (!detectedRequirements.includes('Git version control system')) {
@@ -290,7 +290,7 @@ const generateTroubleshooting = (
   });
 
   // Add tag-specific troubleshooting
-  tags.forEach((tag: string) => {
+  tags?.forEach((tag: string) => {
     const tagTroubleshooting = troubleshootingPatterns[tag.toLowerCase()];
     if (tagTroubleshooting) {
       tagTroubleshooting.forEach((trouble) => {

@@ -5,6 +5,13 @@
  */
 
 import { z } from 'zod';
+import { nonNegativeInt, positiveInt } from './primitives/base-numbers';
+import {
+  isoDatetimeString,
+  mediumString,
+  nonEmptyString,
+  urlString,
+} from './primitives/base-strings';
 import { appContentTypeSchema, contentCategorySchema } from './shared.schema';
 
 /**
@@ -26,9 +33,7 @@ const STATIC_API_LIMITS = {
  * Base content item schema
  */
 export const baseContentItemSchema = z.object({
-  slug: z
-    .string()
-    .min(1)
+  slug: nonEmptyString
     .max(STATIC_API_LIMITS.MAX_SLUG_LENGTH)
     .regex(/^[a-zA-Z0-9\-_]+$/, 'Invalid slug format'),
 
@@ -36,13 +41,11 @@ export const baseContentItemSchema = z.object({
 
   name: z.string().max(STATIC_API_LIMITS.MAX_TITLE_LENGTH).optional(),
 
-  description: z.string().min(1).max(STATIC_API_LIMITS.MAX_DESCRIPTION_LENGTH),
+  description: nonEmptyString.max(STATIC_API_LIMITS.MAX_DESCRIPTION_LENGTH),
 
   tags: z
     .array(
-      z
-        .string()
-        .min(1)
+      nonEmptyString
         .max(STATIC_API_LIMITS.MAX_TAG_LENGTH)
         .regex(/^[a-zA-Z0-9\-_]+$/, 'Invalid tag format')
     )
@@ -57,9 +60,7 @@ export const baseContentItemSchema = z.object({
  */
 export const transformedContentItemSchema = baseContentItemSchema.extend({
   type: appContentTypeSchema,
-  url: z
-    .string()
-    .url()
+  url: urlString
     .max(STATIC_API_LIMITS.MAX_URL_LENGTH)
     .regex(/^https:\/\/claudepro\.directory\//, 'Invalid URL format'),
 });
@@ -70,10 +71,10 @@ export const transformedContentItemSchema = baseContentItemSchema.extend({
 export const staticAPISearchableItemSchema = z.object({
   title: z.string().max(STATIC_API_LIMITS.MAX_TITLE_LENGTH),
   name: z.string().max(STATIC_API_LIMITS.MAX_TITLE_LENGTH),
-  description: z.string().max(STATIC_API_LIMITS.MAX_DESCRIPTION_LENGTH),
+  description: mediumString,
   tags: z.array(z.string().max(STATIC_API_LIMITS.MAX_TAG_LENGTH)).max(STATIC_API_LIMITS.MAX_TAGS),
   category: z.string(),
-  popularity: z.number().int().min(0).default(0),
+  popularity: nonNegativeInt.default(0),
   slug: z.string().max(STATIC_API_LIMITS.MAX_SLUG_LENGTH),
 });
 
@@ -86,8 +87,8 @@ export const contentTypeApiResponseSchema = z.object({
   hooks: z.array(transformedContentItemSchema).optional(),
   commands: z.array(transformedContentItemSchema).optional(),
   rules: z.array(transformedContentItemSchema).optional(),
-  count: z.number().int().min(0).max(STATIC_API_LIMITS.MAX_ITEMS_PER_CATEGORY),
-  lastUpdated: z.string().datetime(),
+  count: nonNegativeInt.max(STATIC_API_LIMITS.MAX_ITEMS_PER_CATEGORY),
+  lastUpdated: isoDatetimeString,
   generated: z.literal('static'),
 });
 
@@ -95,23 +96,23 @@ export const contentTypeApiResponseSchema = z.object({
  * Statistics schema
  */
 export const statisticsSchema = z.object({
-  totalConfigurations: z.number().int().min(0),
-  agents: z.number().int().min(0),
-  mcp: z.number().int().min(0),
-  rules: z.number().int().min(0),
-  commands: z.number().int().min(0),
-  hooks: z.number().int().min(0),
+  totalConfigurations: nonNegativeInt,
+  agents: nonNegativeInt,
+  mcp: nonNegativeInt,
+  rules: nonNegativeInt,
+  commands: nonNegativeInt,
+  hooks: nonNegativeInt,
 });
 
 /**
  * Endpoints schema
  */
 export const endpointsSchema = z.object({
-  agents: z.string().url(),
-  mcp: z.string().url(),
-  rules: z.string().url(),
-  commands: z.string().url(),
-  hooks: z.string().url(),
+  agents: urlString,
+  mcp: urlString,
+  rules: urlString,
+  commands: urlString,
+  hooks: urlString,
 });
 
 /**
@@ -123,7 +124,7 @@ export const allConfigurationsResponseSchema = z.object({
   name: z.string(),
   description: z.string(),
   license: z.string(),
-  lastUpdated: z.string().datetime(),
+  lastUpdated: isoDatetimeString,
   generated: z.literal('static'),
   statistics: statisticsSchema,
   data: z.object({
@@ -141,7 +142,7 @@ export const allConfigurationsResponseSchema = z.object({
  */
 export const popularTagSchema = z.object({
   tag: z.string().max(STATIC_API_LIMITS.MAX_TAG_LENGTH),
-  count: z.number().int().min(1),
+  count: positiveInt,
 });
 
 /**
@@ -149,7 +150,7 @@ export const popularTagSchema = z.object({
  */
 export const categoryCountSchema = z.object({
   category: z.string(),
-  count: z.number().int().min(0),
+  count: nonNegativeInt,
 });
 
 /**
@@ -158,8 +159,8 @@ export const categoryCountSchema = z.object({
 export const categorySearchIndexSchema = z.object({
   category: contentCategorySchema,
   items: z.array(staticAPISearchableItemSchema).max(STATIC_API_LIMITS.MAX_ITEMS_PER_CATEGORY),
-  count: z.number().int().min(0),
-  lastUpdated: z.string().datetime(),
+  count: nonNegativeInt,
+  lastUpdated: isoDatetimeString,
   generated: z.literal('static'),
   tags: z.array(z.string()).max(STATIC_API_LIMITS.MAX_TAGS * 10),
   popularTags: z.array(popularTagSchema).max(STATIC_API_LIMITS.MAX_CATEGORY_TAGS),
@@ -170,8 +171,8 @@ export const categorySearchIndexSchema = z.object({
  */
 export const combinedSearchIndexSchema = z.object({
   items: z.array(staticAPISearchableItemSchema),
-  count: z.number().int().min(0),
-  lastUpdated: z.string().datetime(),
+  count: nonNegativeInt,
+  lastUpdated: isoDatetimeString,
   generated: z.literal('static'),
   categories: z.array(categoryCountSchema),
   tags: z.array(z.string()),
@@ -183,17 +184,17 @@ export const combinedSearchIndexSchema = z.object({
  */
 export const healthCheckResponseSchema = z.object({
   status: z.enum(['healthy', 'degraded', 'unhealthy']),
-  timestamp: z.string().datetime(),
+  timestamp: isoDatetimeString,
   generated: z.literal('static'),
   version: z.string(),
   environment: z.string(),
   counts: z.object({
-    agents: z.number().int().min(0),
-    mcp: z.number().int().min(0),
-    rules: z.number().int().min(0),
-    commands: z.number().int().min(0),
-    hooks: z.number().int().min(0),
-    total: z.number().int().min(0),
+    agents: nonNegativeInt,
+    mcp: nonNegativeInt,
+    rules: nonNegativeInt,
+    commands: nonNegativeInt,
+    hooks: nonNegativeInt,
+    total: nonNegativeInt,
   }),
   features: z.object({
     staticGeneration: z.boolean(),
@@ -210,8 +211,8 @@ export const generationResultSchema = z.object({
   success: z.boolean(),
   outputDir: z.string(),
   filesGenerated: z.array(z.string()),
-  totalItems: z.number().int().min(0),
-  duration: z.number().min(0),
+  totalItems: nonNegativeInt,
+  duration: nonNegativeInt,
   errors: z.array(z.string()).optional(),
 });
 

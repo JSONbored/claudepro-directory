@@ -256,6 +256,7 @@ class RelatedContentService {
       // Extend item with required scoring properties
       const scoringItem = {
         ...item,
+        tags: item.tags || [],
         keywords: (item as typeof item & { keywords?: string[] }).keywords || [],
         priority: (item as typeof item & { priority?: number }).priority || 0,
         featured: (item as typeof item & { featured?: boolean }).featured,
@@ -269,7 +270,7 @@ class RelatedContentService {
       }
 
       // Tag matching (highest weight)
-      const tagMatches = item.tags.filter((tag) =>
+      const tagMatches = (item.tags || []).filter((tag) =>
         config.currentTags.some(
           (currentTag) =>
             tag.toLowerCase().includes(currentTag.toLowerCase()) ||

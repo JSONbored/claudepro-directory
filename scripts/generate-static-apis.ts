@@ -70,7 +70,7 @@ function toSearchableItems<
     title?: string | undefined;
     name?: string | undefined;
     description: string;
-    tags: readonly string[] | string[];
+    tags?: readonly string[] | string[] | undefined; // Optional tags
     slug: string;
     category?: string | undefined;
     [key: string]: unknown;
@@ -81,7 +81,7 @@ function toSearchableItems<
       title: item.title || item.name || '',
       name: item.name || '',
       description: item.description,
-      tags: Array.isArray(item.tags) ? [...item.tags] : [],
+      tags: item.tags ? (Array.isArray(item.tags) ? [...item.tags] : []) : [],
       category: item.category || category,
       popularity: 0, // Will be populated from Redis in production
       slug: item.slug,

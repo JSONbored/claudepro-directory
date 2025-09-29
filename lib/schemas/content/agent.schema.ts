@@ -4,11 +4,19 @@
  */
 
 import { z } from 'zod';
+import { optionalStringArray, requiredTagArray } from '@/lib/schemas/primitives/base-arrays';
+import { aiTemperature, optionalPositiveInt } from '@/lib/schemas/primitives/base-numbers';
+import {
+  isoDateString,
+  nonEmptyString,
+  optionalNonEmptyString,
+  optionalUrlString,
+} from '@/lib/schemas/primitives/base-strings';
 
 // Base configuration schema for agents
 const agentConfigurationSchema = z.object({
-  temperature: z.number().min(0).max(2).optional(),
-  maxTokens: z.number().positive().optional(),
+  temperature: aiTemperature.optional(),
+  maxTokens: optionalPositiveInt,
   systemPrompt: z.string().optional(),
 });
 
@@ -17,25 +25,25 @@ const agentConfigurationSchema = z.object({
  */
 export const agentContentSchema = z.object({
   // Required base properties (always present in agents)
-  slug: z.string().min(1),
-  description: z.string().min(1),
+  slug: nonEmptyString,
+  description: nonEmptyString,
   category: z.literal('agents'),
-  author: z.string().min(1),
-  dateAdded: z.string(), // ISO date string
+  author: nonEmptyString,
+  dateAdded: isoDateString,
 
   // Required agent-specific properties
-  tags: z.array(z.string()).min(1),
-  content: z.string().min(1),
+  tags: requiredTagArray,
+  content: nonEmptyString,
 
   // Auto-generated but present in actual files
-  title: z.string().optional(),
+  title: optionalNonEmptyString,
 
   // Optional properties
-  features: z.array(z.string()).optional(),
-  useCases: z.array(z.string()).optional(), // Long agent prompt content
+  features: optionalStringArray,
+  useCases: optionalStringArray,
 
   // Optional properties (can be undefined)
-  documentationUrl: z.string().url().optional(),
+  documentationUrl: optionalUrlString,
   configuration: agentConfigurationSchema.optional(),
   source: z.enum(['community', 'official', 'verified', 'claudepro']).optional(),
   installation: z.record(z.string(), z.any()).optional(), // Complex installation object

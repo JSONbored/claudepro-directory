@@ -78,20 +78,21 @@ export type JobContent = {
 
 // Export-specific schema for content transformers
 import { z } from 'zod';
+import { nonEmptyString, optionalUrlString, stringArray } from '@/lib/schemas/primitives';
 
 export const exportableItemSchema = z.object({
-  slug: z.string(),
-  name: z.string(),
+  slug: nonEmptyString,
+  name: nonEmptyString,
   title: z.string().optional(),
-  description: z.string(),
-  category: z.string(),
-  tags: z.array(z.string()).optional(),
-  author: z.string(),
-  dateAdded: z.string(),
-  githubUrl: z.string().optional(),
+  description: nonEmptyString,
+  category: nonEmptyString,
+  tags: stringArray.optional(),
+  author: nonEmptyString,
+  dateAdded: nonEmptyString,
+  githubUrl: optionalUrlString,
   source: z.string().optional(),
-  features: z.array(z.string()).optional(),
-  useCases: z.array(z.string()).optional(),
+  features: stringArray.optional(),
+  useCases: stringArray.optional(),
   content: z.string().optional(),
   configuration: z.any().optional(),
 });

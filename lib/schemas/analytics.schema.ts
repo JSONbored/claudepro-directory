@@ -4,15 +4,15 @@
  */
 
 import { z } from 'zod';
+import { loadTime, nonNegativeInt, viewCount } from '@/lib/schemas/primitives/base-numbers';
+import { nonEmptyString, shortString } from '@/lib/schemas/primitives/base-strings';
 import { type ContentCategory, contentCategorySchema } from './shared.schema';
 
 /**
  * Branded slug validation for content identifiers
  * Provides compile-time type safety for content slugs
  */
-export const contentSlugSchema = z
-  .string()
-  .min(1, 'Content slug is required')
+export const contentSlugSchema = nonEmptyString
   .max(200, 'Content slug is too long')
   .regex(
     /^[a-zA-Z0-9-_/]+$/,
@@ -27,10 +27,7 @@ export type ContentSlug = z.infer<typeof contentSlugSchema>;
  * Branded UserId schema for strong type safety
  * Ensures user IDs are properly validated and typed
  */
-export const userIdSchema = z
-  .string()
-  .min(1, 'User ID is required')
-  .max(100, 'User ID too long')
+export const userIdSchema = shortString
   .regex(/^[a-zA-Z0-9_-]+$/, 'Invalid user ID format')
   .brand<'UserId'>();
 
@@ -49,7 +46,7 @@ export const trackViewSchema = z.object({
   userId: z.string().uuid().optional(),
   sessionId: z.string().optional(),
   referrer: z.string().url().optional(),
-  userAgent: z.string().max(500, 'User agent is too long').optional(),
+  userAgent: z.string().max(500).optional(),
 });
 
 export type TrackViewEvent = z.infer<typeof trackViewSchema>;
@@ -93,13 +90,9 @@ export type TrackClickEvent = z.infer<typeof trackClickSchema>;
  * Search event schema
  */
 export const trackSearchSchema = z.object({
-  query: z
-    .string()
-    .min(1, 'Search query is required')
-    .max(200, 'Search query is too long')
-    .transform((val) => val.trim()),
+  query: nonEmptyString.max(200, 'Search query is too long').transform((val) => val.trim()),
   category: z.enum(['all', 'agents', 'mcp', 'rules', 'commands', 'hooks', 'guides']).optional(),
-  resultsCount: z.number().int().min(0).optional(),
+  resultsCount: nonNegativeInt.optional(),
   clickedResult: z.string().optional(),
   timestamp: z
     .date()
@@ -115,8 +108,8 @@ export type TrackSearchEvent = z.infer<typeof trackSearchSchema>;
  * Page view event schema
  */
 export const pageViewSchema = z.object({
-  pathname: z.string().min(1, 'Pathname is required').max(500, 'Pathname is too long'),
-  title: z.string().max(200, 'Title is too long').optional(),
+  pathname: nonEmptyString.max(500, 'Pathname is too long'),
+  title: z.string().max(200).optional(),
   referrer: z.string().url().optional(),
   timestamp: z
     .date()
@@ -144,8 +137,8 @@ export type PageViewEvent = z.infer<typeof pageViewSchema>;
  * Error tracking event schema
  */
 export const trackErrorSchema = z.object({
-  message: z.string().min(1, 'Message is required').max(1000, 'Message is too long'),
-  stack: z.string().max(5000, 'Stack trace is too long').optional(),
+  message: nonEmptyString.max(1000, 'Message is too long'),
+  stack: z.string().max(5000).optional(),
   category: z.enum(['client', 'server', 'api', 'validation', 'network']),
   severity: z.enum(['low', 'medium', 'high', 'critical']).default('medium'),
   pathname: z.string().optional(),
@@ -164,12 +157,12 @@ export type TrackErrorEvent = z.infer<typeof trackErrorSchema>;
  * Web Vitals metrics schema
  */
 export const webVitalsMetricsSchema = z.object({
-  pathname: z.string().min(1, 'Pathname is required').max(500, 'Pathname is too long'),
+  pathname: nonEmptyString.max(500, 'Pathname is too long'),
   ttfb: z.number().positive().optional(), // Time to First Byte
   fcp: z.number().positive().optional(), // First Contentful Paint
   lcp: z.number().positive().optional(), // Largest Contentful Paint
   fid: z.number().positive().optional(), // First Input Delay
-  cls: z.number().min(0, 'CLS must be non-negative').optional(), // Cumulative Layout Shift
+  cls: loadTime.optional(), // Cumulative Layout Shift (min 0)
   tbt: z.number().positive().optional(), // Total Blocking Time
   tti: z.number().positive().optional(), // Time to Interactive
   timestamp: z
@@ -187,7 +180,7 @@ export type WebVitalsMetrics = z.infer<typeof webVitalsMetricsSchema>;
  * Strict validation for production analytics tracking
  */
 export const umamiEventDataSchema = z.record(
-  z.string().min(1).max(50),
+  nonEmptyString.max(50),
   z.union([z.string().max(500), z.number(), z.boolean(), z.null()])
 );
 
@@ -214,7 +207,7 @@ export type UmamiPayload = z.infer<typeof umamiPayloadSchema>;
  * Umami track event schema
  */
 export const umamiTrackEventSchema = z.object({
-  eventName: z.string().min(1).max(50),
+  eventName: nonEmptyString.max(50),
   data: umamiEventDataSchema.optional(),
 });
 
@@ -224,7 +217,7 @@ export type UmamiTrackEvent = z.infer<typeof umamiTrackEventSchema>;
  * Umami identify schema
  */
 export const umamiIdentifySchema = z.object({
-  userId: z.string().min(1).max(100).optional(),
+  userId: shortString.optional(),
   data: umamiEventDataSchema,
 });
 
@@ -250,14 +243,10 @@ export type UmamiGlobal = z.infer<typeof umamiGlobalSchema>;
  * Custom event schema for flexible tracking
  */
 export const customEventSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Event name is required')
-    .max(100, 'Event name is too long')
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Event name contains invalid characters'),
-  category: z.string().max(50, 'Category is too long').optional(),
-  action: z.string().max(50, 'Action is too long').optional(),
-  label: z.string().max(200, 'Label is too long').optional(),
+  name: shortString.regex(/^[a-zA-Z0-9_-]+$/, 'Event name contains invalid characters'),
+  category: z.string().max(50).optional(),
+  action: z.string().max(50).optional(),
+  label: z.string().max(200).optional(),
   value: z.number().optional(),
   metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
   timestamp: z
@@ -276,7 +265,7 @@ export type CustomEvent = z.infer<typeof customEventSchema>;
 export const analyticsResponseSchema = z.object({
   success: z.boolean(),
   message: z.string().optional(),
-  viewCount: z.number().int().min(0).optional(),
+  viewCount: viewCount.optional(),
   data: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
 });
 
@@ -326,9 +315,7 @@ const EVENT_NAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9_-]{0,99}$/;
  * Generic tracking event schema for flexible event tracking
  */
 export const trackingEventSchema = z.object({
-  eventName: z
-    .string()
-    .min(1, 'Event name is required')
+  eventName: nonEmptyString
     .max(TRACKER_LIMITS.MAX_EVENT_NAME_LENGTH)
     .regex(EVENT_NAME_PATTERN, 'Invalid event name format'),
   payload: z
@@ -376,22 +363,14 @@ export type UserIdentification = z.infer<typeof userIdentificationSchema>;
  * Performance metric schema for tracking operation timings
  */
 export const performanceMetricSchema = z.object({
-  eventName: z.string().min(1, 'Event name is required').max(100, 'Event name is too long'),
-  metric: z
-    .string()
-    .min(1, 'Metric name is required')
-    .max(50)
-    .regex(/^[a-zA-Z][a-zA-Z0-9_]{0,49}$/, 'Invalid metric name'),
-  duration_ms: z
-    .number()
-    .int()
-    .min(0, 'Duration cannot be negative')
-    .max(3600000, 'Duration exceeds 1 hour'), // Max 1 hour
+  eventName: shortString,
+  metric: nonEmptyString.max(50).regex(/^[a-zA-Z][a-zA-Z0-9_]{0,49}$/, 'Invalid metric name'),
+  duration_ms: z.number().int().min(0).max(3600000), // Max 1 hour
   success: z.boolean(),
-  error_type: z.string().max(100, 'Error type is too long').optional(),
+  error_type: shortString.optional(),
   metadata: z
     .record(
-      z.string().max(50, 'Field is too long'),
+      z.string().max(50),
       z.union([
         z.string().max(TRACKER_LIMITS.MAX_STRING_VALUE_LENGTH),
         z.number().finite(),
@@ -413,18 +392,12 @@ export type PerformanceMetric = z.infer<typeof performanceMetricSchema>;
  * Error tracking schema with security considerations
  */
 export const errorTrackingSchema = z.object({
-  error_type: z
-    .string()
-    .min(1)
-    .max(100, 'Event name is too long')
-    .transform((val) => val.replace(/[^\w\s-]/g, '')), // Sanitize
-  error_message: z
-    .string()
-    .min(1)
-    .max(1000, 'Message is too long')
+  error_type: nonEmptyString.max(100).transform((val) => val.replace(/[^\w\s-]/g, '')), // Sanitize
+  error_message: nonEmptyString
+    .max(1000)
     .transform((val) => val.replace(/\b(?:password|token|key|secret)\b[^,\s]*/gi, '[REDACTED]')), // Remove sensitive patterns
   context: z.string().max(TRACKER_LIMITS.MAX_CONTEXT_LENGTH).optional(),
-  page: z.string().max(500, 'Page is too long').optional(),
+  page: z.string().max(500).optional(),
   stack_trace: z
     .string()
     .max(TRACKER_LIMITS.MAX_STACK_TRACE_LENGTH)
@@ -447,13 +420,11 @@ export type ErrorTracking = z.infer<typeof errorTrackingSchema>;
  */
 export const interactionEventSchema = z.object({
   action: z.enum(['click', 'hover', 'focus', 'blur', 'copy', 'paste', 'share', 'download']),
-  target: z.string().min(1, 'Target is required').max(200, 'Target is too long'),
-  category: z.string().max(50, 'Category is too long').optional(),
-  slug: z.string().max(200, 'Slug is too long').optional(),
-  method: z.string().max(50, 'Method is too long').optional(),
-  value: z
-    .union([z.string().max(500, 'Value is too long'), z.number().finite(), z.boolean()])
-    .optional(),
+  target: nonEmptyString.max(200),
+  category: z.string().max(50).optional(),
+  slug: z.string().max(200).optional(),
+  method: z.string().max(50).optional(),
+  value: z.union([z.string().max(500), z.number().finite(), z.boolean()]).optional(),
   timestamp: z.number().int().positive(),
 });
 
@@ -473,14 +444,14 @@ export const navigationEventSchema = z.object({
     'menu_open',
     'menu_close',
   ]),
-  from: z.string().max(500, 'From is too long').optional(),
-  to: z.string().max(500, 'To is too long').optional(),
-  page: z.string().max(500, 'Page is too long').optional(),
-  filter_name: z.string().max(100, 'Filter name is too long').optional(),
+  from: z.string().max(500).optional(),
+  to: z.string().max(500).optional(),
+  page: z.string().max(500).optional(),
+  filter_name: shortString.optional(),
   filter_state: z.boolean().optional(),
-  sort_field: z.string().max(50, 'Sort field is too long').optional(),
+  sort_field: z.string().max(50).optional(),
   sort_direction: z.enum(['asc', 'desc']).optional(),
-  search_query: z.string().max(200, 'Search query is too long').optional(),
+  search_query: z.string().max(200).optional(),
   timestamp: z.number().int().positive(),
 });
 
@@ -491,7 +462,7 @@ export type NavigationEvent = z.infer<typeof navigationEventSchema>;
  */
 export const gtagEventSchema = z.object({
   command: z.literal('event'),
-  action: z.string().min(1, 'Action is required').max(100, 'Action is too long'),
+  action: shortString,
   parameters: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
 });
 

@@ -5,6 +5,7 @@
 
 import type { ReactNode } from 'react';
 import { z } from 'zod';
+import { stringArray } from '../primitives';
 import { unifiedContentItemSchema } from './content-item.schema';
 
 /**
@@ -162,12 +163,12 @@ export type SearchProps = z.infer<typeof searchPropsSchema>;
  * Filter component props schema
  */
 export const filterPropsSchema = z.object({
-  categories: z.array(z.string()),
-  tags: z.array(z.string()),
-  authors: z.array(z.string()).optional(),
-  selectedCategories: z.array(z.string()),
-  selectedTags: z.array(z.string()),
-  selectedAuthors: z.array(z.string()).optional(),
+  categories: stringArray,
+  tags: stringArray,
+  authors: stringArray.optional(),
+  selectedCategories: stringArray,
+  selectedTags: stringArray,
+  selectedAuthors: stringArray.optional(),
   onFilterChange: z.function().optional(),
   onReset: z.function().optional(),
 });

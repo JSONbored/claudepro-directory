@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { nonEmptyString, shortString } from '@/lib/schemas/primitives';
 
 // Import new component schemas
 import {
@@ -173,7 +174,7 @@ export const reactComponentSchema = z.custom<React.ComponentType>(
  */
 export const viewTrackerPropsSchema = z.object({
   category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'guides']),
-  slug: z.string().min(1).max(200),
+  slug: nonEmptyString.max(200),
 });
 
 export type ViewTrackerProps = z.infer<typeof viewTrackerPropsSchema>;
@@ -303,7 +304,7 @@ export type SearchBarGenericProps<T extends FuseSearchableItem = FuseSearchableI
 
 // Action button schema for detail pages
 export const actionButtonSchema = z.object({
-  label: z.string().min(1).max(50),
+  label: shortString.max(50),
   icon: reactNodeSchema.optional(),
   onClick: reactEventHandlerSchema,
   variant: z.enum(['default', 'destructive', 'outline', 'secondary', 'ghost', 'link']).optional(),
@@ -314,7 +315,7 @@ export type ActionButton = z.infer<typeof actionButtonSchema>;
 
 // Custom section schema for detail pages
 export const customSectionSchema = z.object({
-  title: z.string().min(1).max(100),
+  title: nonEmptyString.max(100),
   icon: reactNodeSchema.optional(),
   content: reactNodeSchema,
   collapsible: z.boolean().default(false),
@@ -327,7 +328,7 @@ export type CustomSection = z.infer<typeof customSectionSchema>;
 export const baseDetailPagePropsSchema = z.object({
   item: unifiedContentItemSchema,
   relatedItems: z.array(unifiedContentItemSchema).optional(),
-  typeName: z.string().min(1).max(50),
+  typeName: shortString.max(50),
   primaryAction: actionButtonSchema.optional(),
   secondaryActions: z.array(actionButtonSchema).default([]),
   customSections: z.array(customSectionSchema).default([]),
@@ -352,17 +353,17 @@ export type BaseDetailPageProps = z.infer<typeof baseDetailPagePropsSchema>;
 
 // Breadcrumb item schema
 export const breadcrumbItemSchema = z.object({
-  label: z.string().min(1).max(100),
-  href: z.string().max(500).optional(),
+  label: nonEmptyString.max(100),
+  href: nonEmptyString.max(500).optional(),
 });
 
 export type BreadcrumbItem = z.infer<typeof breadcrumbItemSchema>;
 
 // Code highlight props schema
 export const codeHighlightPropsSchema = z.object({
-  code: z.string(),
-  language: z.string().default('typescript'),
-  title: z.string().optional(),
+  code: nonEmptyString,
+  language: nonEmptyString.default('typescript'),
+  title: nonEmptyString.optional(),
   showCopy: z.boolean().default(true),
 });
 
@@ -370,9 +371,9 @@ export type CodeHighlightProps = z.infer<typeof codeHighlightPropsSchema>;
 
 // Toast component schemas
 export const toasterToastSchema = z.object({
-  id: z.string(),
-  title: z.string().optional(),
-  description: z.string().optional(),
+  id: nonEmptyString,
+  title: nonEmptyString.optional(),
+  description: nonEmptyString.optional(),
   action: reactNodeSchema.optional(),
   open: z.boolean().default(true).optional(),
   onOpenChange: z.function().optional(),
@@ -397,11 +398,11 @@ export const toastActionSchema = z.discriminatedUnion('type', [
   }),
   z.object({
     type: z.literal('DISMISS_TOAST'),
-    toastId: z.string().optional(),
+    toastId: nonEmptyString.optional(),
   }),
   z.object({
     type: z.literal('REMOVE_TOAST'),
-    toastId: z.string().optional(),
+    toastId: nonEmptyString.optional(),
   }),
 ]);
 

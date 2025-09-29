@@ -11,6 +11,26 @@
  */
 
 import { z } from 'zod';
+import { stringArray } from '@/lib/schemas/primitives/base-arrays';
+import {
+  imageDimension,
+  loadTime,
+  nonNegativeInt,
+  percentage,
+} from '@/lib/schemas/primitives/base-numbers';
+import {
+  codeString,
+  extraLongString,
+  isoDatetimeString,
+  longString,
+  mediumString,
+  nonEmptyString,
+  optionalUrlString,
+  shortString,
+  ultraLongString,
+  urlString,
+  veryLongCodeString,
+} from '@/lib/schemas/primitives/base-strings';
 
 /**
  * Content Categories
@@ -83,7 +103,7 @@ export type AppContentType = z.infer<typeof appContentTypeSchema>;
 export const paginationParamsSchema = z.object({
   page: z.number().int().min(1).default(1),
   limit: z.number().int().min(1).max(100).default(20),
-  offset: z.number().int().min(0).optional(),
+  offset: nonNegativeInt.optional(),
 });
 
 export type PaginationParams = z.infer<typeof paginationParamsSchema>;
@@ -108,7 +128,7 @@ export const popularItemSchema = z.object({
   slug: z.string(),
   score: z.number(),
   category: contentCategorySchema,
-  lastUpdated: z.string().datetime(),
+  lastUpdated: isoDatetimeString,
 });
 
 export type PopularItem = z.infer<typeof popularItemSchema>;
@@ -122,7 +142,7 @@ export const trendingItemSchema = z.object({
   category: contentCategorySchema,
   score: z.number(),
   viewCount: z.number(),
-  lastViewed: z.string().datetime(),
+  lastViewed: isoDatetimeString,
   trend: z.enum(['rising', 'stable', 'falling']).optional(),
 });
 
@@ -133,12 +153,12 @@ export type TrendingItem = z.infer<typeof trendingItemSchema>;
  * Used across: analytics, related-content
  */
 export const performanceMetricsSchema = z.object({
-  loadTime: z.number().min(0),
-  renderTime: z.number().min(0),
-  interactionTime: z.number().min(0).optional(),
-  totalTime: z.number().min(0),
-  resourceCount: z.number().int().min(0).optional(),
-  errorCount: z.number().int().min(0).default(0),
+  loadTime,
+  renderTime: loadTime,
+  interactionTime: loadTime.optional(),
+  totalTime: loadTime,
+  resourceCount: nonNegativeInt.optional(),
+  errorCount: nonNegativeInt.default(0),
 });
 
 export type PerformanceMetrics = z.infer<typeof performanceMetricsSchema>;
@@ -148,14 +168,14 @@ export type PerformanceMetrics = z.infer<typeof performanceMetricsSchema>;
  * Shared structure for content metadata across the application
  */
 export const baseContentMetadataSchema = z.object({
-  slug: z.string().min(1),
+  slug: nonEmptyString,
   name: z.string().optional(),
   title: z.string().optional(),
   description: z.string(),
-  tags: z.array(z.string()).default([]),
+  tags: stringArray.default([]),
   category: contentCategorySchema.optional(),
   author: z.string().optional(),
-  popularity: z.number().min(0).max(100).optional(),
+  popularity: percentage.optional(),
   dateAdded: z.string().optional(),
   lastModified: z.string().optional(),
 });
@@ -197,11 +217,11 @@ export const mdxImagePropsSchema = mdxBasePropsSchema.extend({
   src: z.string(),
   alt: z.string(),
   width: z
-    .union([z.number(), z.string()])
+    .union([imageDimension, z.string()])
     .transform((val) => (typeof val === 'string' ? Number.parseInt(val, 10) : val))
     .default(800),
   height: z
-    .union([z.number(), z.string()])
+    .union([imageDimension, z.string()])
     .transform((val) => (typeof val === 'string' ? Number.parseInt(val, 10) : val))
     .default(600),
 });
@@ -219,8 +239,8 @@ export type MdxImageProps = z.infer<typeof mdxImagePropsSchema>;
 
 // Core Components
 export const featureSchema = z.object({
-  title: z.string().min(1).max(100),
-  description: z.string().min(1).max(500),
+  title: shortString,
+  description: mediumString,
   badge: z.string().max(50).optional(),
 });
 
@@ -232,13 +252,13 @@ export const accordionItemSchema = z.object({
 
 export const calloutPropsSchema = z.object({
   type: z.enum(['info', 'warning', 'success', 'error', 'tip']).default('info'),
-  title: z.string().max(100).optional(),
+  title: shortString.optional(),
   children: z.custom<React.ReactNode>(),
 });
 
 export const tldrSummaryPropsSchema = z
   .object({
-    content: z.string().min(1).max(1000).optional(),
+    content: codeString.optional(),
     keyPoints: z.array(z.string().min(1).max(200)).max(10).optional(),
     title: z.string().max(50).default('TL;DR'),
   })
@@ -250,23 +270,23 @@ export const tldrSummaryPropsSchema = z
 
 // Template Components
 export const guideStepSchema = z.object({
-  title: z.string().min(1).max(100),
-  description: z.string().min(1).max(2000).optional(),
+  title: shortString,
+  description: longString.optional(),
   content: z.any().optional(), // React.ReactNode for complex content
-  code: z.string().max(10000).optional(),
-  tip: z.string().max(500).optional(),
+  code: veryLongCodeString.optional(),
+  tip: mediumString.optional(),
   time: z.string().max(20).optional(),
   defaultOpen: z.boolean().optional(),
 });
 
 export const codeExampleSchema = z.object({
   language: z.string().min(1).max(50),
-  filename: z.string().max(100).optional(),
-  code: z.string().min(1).max(50000),
+  filename: shortString.optional(),
+  code: ultraLongString,
 });
 
 export const comparisonItemSchema = z.object({
-  feature: z.string().min(1).max(100),
+  feature: shortString,
   option1: z.union([z.string().max(200), z.boolean()]),
   option2: z.union([z.string().max(200), z.boolean()]),
   option3: z.union([z.string().max(200), z.boolean()]).optional(),
@@ -282,8 +302,8 @@ export const tabItemSchema = z.object({
 
 export const quickReferenceItemSchema = z
   .object({
-    label: z.string().min(1).max(100).optional(),
-    value: z.string().min(1).max(500).optional(),
+    label: shortString.optional(),
+    value: mediumString.optional(),
     description: z.string().max(300).optional(),
   })
   .transform((data) => ({
@@ -299,13 +319,13 @@ export const quickReferenceItemSchema = z
 export const searchDocumentSchema = z.object({
   id: z.string().min(1).max(200),
   title: z.string().min(1).max(200),
-  description: z.string().max(1000),
-  content: z.string().max(50000),
+  description: codeString,
+  content: ultraLongString,
   category: z.string().max(50),
   tags: z.array(z.string().max(50)),
   type: z.enum(['agent', 'mcp', 'command', 'hook', 'rule']),
-  url: z.string().max(500),
-  score: z.number().min(0).max(100).optional(),
+  url: mediumString,
+  score: percentage.optional(),
 });
 
 export type SearchDocument = z.infer<typeof searchDocumentSchema>;
@@ -316,51 +336,51 @@ export type SearchDocument = z.infer<typeof searchDocumentSchema>;
  */
 export const socialShareDataSchema = z.object({
   title: z.string().min(1).max(200),
-  description: z.string().min(1).max(500),
-  url: z.string().url().max(500),
+  description: mediumString,
+  url: urlString.max(500),
   hashtags: z.array(z.string().max(50)),
 });
 
 export type SocialShareData = z.infer<typeof socialShareDataSchema>;
 
 export const expertQuotePropsSchema = z.object({
-  quote: z.string().min(10).max(1000),
-  author: z.string().min(1).max(100),
-  role: z.string().max(100).optional(),
-  company: z.string().max(100).optional(),
-  imageUrl: z.string().url().optional(),
+  quote: codeString,
+  author: shortString,
+  role: shortString.optional(),
+  company: shortString.optional(),
+  imageUrl: optionalUrlString,
 });
 
 // Component Props Schemas
 export const featureGridPropsSchema = z.object({
   features: z.array(featureSchema).max(20).default([]),
-  title: z.string().max(100).default('Key Features'),
+  title: shortString.default('Key Features'),
   description: z.string().max(300).optional(),
   columns: z.union([z.literal(2), z.literal(3), z.literal(4)]).default(2),
 });
 
 export const accordionPropsSchema = z.object({
   items: z.array(accordionItemSchema).max(20).default([]),
-  title: z.string().max(100).optional(),
+  title: shortString.optional(),
   description: z.string().max(300).optional(),
   allowMultiple: z.boolean().default(false),
 });
 
 export const stepGuidePropsSchema = z.object({
   steps: z.array(guideStepSchema).max(20).default([]),
-  title: z.string().max(100).default('Step-by-Step Guide'),
+  title: shortString.default('Step-by-Step Guide'),
   description: z.string().max(300).optional(),
   totalTime: z.string().max(20).optional(),
 });
 
 export const codeGroupPropsSchema = z.object({
   examples: z.array(codeExampleSchema).max(10).default([]),
-  title: z.string().max(100).optional(),
+  title: shortString.optional(),
   description: z.string().max(300).optional(),
 });
 
 export const comparisonTablePropsSchema = z.object({
-  title: z.string().max(100).optional(),
+  title: shortString.optional(),
   description: z.string().max(300).optional(),
   headers: z.array(z.string().max(50)).max(10).default([]),
   items: z.array(comparisonItemSchema).max(50).default([]),
@@ -368,13 +388,13 @@ export const comparisonTablePropsSchema = z.object({
 
 export const contentTabsPropsSchema = z.object({
   items: z.array(tabItemSchema).max(10).default([]),
-  title: z.string().max(100).optional(),
+  title: shortString.optional(),
   description: z.string().max(300).optional(),
   defaultValue: z.string().max(50).optional(),
 });
 
 export const quickReferencePropsSchema = z.object({
-  title: z.string().min(1).max(100),
+  title: shortString,
   description: z.string().max(300).optional(),
   items: z.array(quickReferenceItemSchema).max(50).default([]),
   columns: z.union([z.literal(1), z.literal(2)]).default(1),
@@ -382,47 +402,47 @@ export const quickReferencePropsSchema = z.object({
 
 // FAQ Component Schemas
 export const faqItemSchema = z.object({
-  question: z.string().min(1).max(500),
-  answer: z.string().min(1).max(5000),
-  category: z.string().max(100).optional(),
+  question: mediumString,
+  answer: extraLongString,
+  category: shortString.optional(),
 });
 
 export const faqPropsSchema = z.object({
   questions: z.array(faqItemSchema).max(50).default([]),
-  title: z.string().max(100).default('Frequently Asked Questions'),
+  title: shortString.default('Frequently Asked Questions'),
   description: z.string().max(300).optional(),
 });
 
 // Metrics Component Schemas
 export const metricDataSchema = z.object({
-  label: z.string().max(100).optional(),
+  label: shortString.optional(),
   value: z.string().min(1).max(50),
-  change: z.string().max(100).optional(),
+  change: shortString.optional(),
   trend: z.enum(['up', 'down', 'neutral', '+']).optional(),
   // Support legacy healthcare guide format
-  metric: z.string().max(100).optional(),
+  metric: shortString.optional(),
   before: z.string().max(50).optional(),
   after: z.string().max(50).optional(),
   improvement: z.string().max(50).optional(),
-  description: z.string().max(500).optional(),
+  description: mediumString.optional(),
 });
 
 export const metricsDisplayPropsSchema = z.object({
-  title: z.string().max(100).optional(),
+  title: shortString.optional(),
   metrics: z.array(metricDataSchema).max(20).default([]),
-  description: z.string().max(500).optional(),
+  description: mediumString.optional(),
 });
 
 // Checklist Component Schemas
 export const checklistItemSchema = z.object({
   task: z.string().min(1).max(200),
-  description: z.string().max(500).optional(),
+  description: mediumString.optional(),
   completed: z.boolean().default(false),
   priority: z.enum(['critical', 'high', 'medium', 'low']).optional(),
 });
 
 export const checklistPropsSchema = z.object({
-  title: z.string().max(100).optional(),
+  title: shortString.optional(),
   items: z.array(checklistItemSchema).min(1).max(50),
   description: z.string().max(300).optional(),
   type: z.enum(['prerequisites', 'security', 'testing']).default('prerequisites'),
@@ -430,23 +450,23 @@ export const checklistPropsSchema = z.object({
 
 // CaseStudy Component Schemas
 export const caseStudyMetricSchema = z.object({
-  label: z.string().min(1).max(100),
+  label: shortString,
   value: z.string().min(1).max(50),
   trend: z.enum(['up', 'down', 'neutral', '+']).optional(),
 });
 
 export const caseStudyTestimonialSchema = z.object({
-  quote: z.string().min(10).max(1000),
-  author: z.string().min(1).max(100),
-  role: z.string().max(100).optional(),
+  quote: codeString,
+  author: shortString,
+  role: shortString.optional(),
 });
 
 export const caseStudyPropsSchema = z.object({
-  company: z.string().min(1).max(100),
-  industry: z.string().max(100).optional(),
-  challenge: z.string().min(10).max(2000),
-  solution: z.string().min(10).max(2000),
-  results: z.string().min(10).max(2000),
+  company: shortString,
+  industry: shortString.optional(),
+  challenge: longString,
+  solution: longString,
+  results: longString,
   metrics: z.array(caseStudyMetricSchema).max(10).optional(),
   testimonial: caseStudyTestimonialSchema.optional(),
   logo: z.string().max(200).optional(),
@@ -484,12 +504,12 @@ export type CaseStudyProps = z.infer<typeof caseStudyPropsSchema>;
 export const errorItemSchema = z.object({
   code: z.string().min(1).max(50),
   message: z.string().min(1).max(200),
-  solution: z.string().min(1).max(500),
+  solution: mediumString,
   severity: z.enum(['critical', 'warning', 'info']).default('info'),
 });
 
 export const errorTablePropsSchema = z.object({
-  title: z.string().max(100).default('Common Errors & Solutions'),
+  title: shortString.default('Common Errors & Solutions'),
   errors: z.array(errorItemSchema).min(1).max(50),
   description: z.string().max(300).optional(),
 });
@@ -502,11 +522,11 @@ export const diagnosticStepSchema = z.object({
   question: z.string().min(1).max(200),
   yesPath: z.string().max(200).optional(),
   noPath: z.string().max(200).optional(),
-  solution: z.string().max(500).optional(),
+  solution: mediumString.optional(),
 });
 
 export const diagnosticFlowPropsSchema = z.object({
-  title: z.string().max(100).default('Diagnostic Flow'),
+  title: shortString.default('Diagnostic Flow'),
   steps: z.array(diagnosticStepSchema).max(20).default([]),
   description: z.string().max(300).optional(),
 });
@@ -516,7 +536,7 @@ export type DiagnosticFlowProps = z.infer<typeof diagnosticFlowPropsSchema>;
 
 // InfoBox Component Schemas
 export const infoBoxPropsSchema = z.object({
-  title: z.string().max(100).optional(),
+  title: shortString.optional(),
   children: z.any(), // React.ReactNode can't be validated by Zod, so we use any
   variant: z.enum(['default', 'important', 'success', 'warning', 'info']).default('default'),
 });

@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { nonEmptyString, urlString } from '@/lib/schemas/primitives';
 
 // Logger import - must be lazy to avoid circular dependency during env initialization
 function getLogger(): { error: (msg: string) => void; warn: (msg: string) => void } {
@@ -36,11 +37,11 @@ const serverEnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 
   // Redis/Upstash configuration
-  KV_REST_API_URL: z.string().url().optional(),
-  KV_REST_API_TOKEN: z.string().min(1).optional(),
+  KV_REST_API_URL: urlString.optional(),
+  KV_REST_API_TOKEN: nonEmptyString.optional(),
 
   // Arcjet security - Required in production for rate limiting and DDoS protection
-  ARCJET_KEY: z.string().min(1).optional(),
+  ARCJET_KEY: nonEmptyString.optional(),
 
   // Vercel environment
   VERCEL: z.enum(['1']).optional(),
@@ -53,7 +54,7 @@ const serverEnvSchema = z.object({
 
   // Analytics configuration (optional for development)
   UMAMI_WEBSITE_ID: z.string().uuid().optional(),
-  UMAMI_API_URL: z.string().url().optional(),
+  UMAMI_API_URL: urlString.optional(),
 
   // Rate limiting secrets
   RATE_LIMIT_SECRET: z.string().min(32).optional(),
@@ -68,9 +69,9 @@ const serverEnvSchema = z.object({
   VIEW_COUNT_SALT: z.string().min(16).optional(),
 
   // GitHub API integration
-  GITHUB_TOKEN: z.string().min(1).optional(),
-  GITHUB_OWNER: z.string().min(1).optional(),
-  GITHUB_REPO: z.string().min(1).optional(),
+  GITHUB_TOKEN: nonEmptyString.optional(),
+  GITHUB_OWNER: nonEmptyString.optional(),
+  GITHUB_REPO: nonEmptyString.optional(),
 
   // Webhook security
   WEBHOOK_SECRET: z.string().min(32).optional(),
@@ -82,10 +83,10 @@ const serverEnvSchema = z.object({
  */
 const buildEnvSchema = z.object({
   // Package version from npm
-  npm_package_version: z.string().default('1.0.0'),
+  npm_package_version: nonEmptyString.default('1.0.0'),
   npm_package_name: z.string().optional(),
   // Server port
-  PORT: z.string().default('3000'),
+  PORT: nonEmptyString.default('3000'),
 });
 
 /**
@@ -96,15 +97,15 @@ const buildEnvSchema = z.object({
 const clientEnvSchema = z.object({
   // Public analytics
   NEXT_PUBLIC_UMAMI_WEBSITE_ID: z.string().uuid().optional(),
-  NEXT_PUBLIC_UMAMI_SCRIPT_URL: z.string().url().optional(),
+  NEXT_PUBLIC_UMAMI_SCRIPT_URL: urlString.optional(),
 
   // Debug flags
   NEXT_PUBLIC_DEBUG_ANALYTICS: z.enum(['true', 'false']).optional(),
   NEXT_PUBLIC_ENABLE_PWA: z.enum(['true', 'false']).optional(),
 
   // Public API endpoints
-  NEXT_PUBLIC_API_URL: z.string().url().optional(),
-  NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
+  NEXT_PUBLIC_API_URL: urlString.optional(),
+  NEXT_PUBLIC_SITE_URL: urlString.optional(),
 });
 
 /**

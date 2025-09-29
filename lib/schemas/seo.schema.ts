@@ -7,6 +7,9 @@
 import { z } from 'zod';
 import { APP_CONFIG } from '@/lib/constants';
 import { logger } from '@/lib/logger';
+import { authorsArray, smallUrlArray } from '@/lib/schemas/primitives/base-arrays';
+import { imageDimension } from '@/lib/schemas/primitives/base-numbers';
+import { nonEmptyString, shortString, urlString } from '@/lib/schemas/primitives/base-strings';
 
 /**
  * Security constants for SEO content
@@ -45,27 +48,21 @@ export const openGraphTypeSchema = z.enum([
 /**
  * Safe URL validation
  */
-export const seoUrlSchema = z
-  .string()
-  .url('Invalid URL format')
+export const seoUrlSchema = urlString
   .max(SEO_LIMITS.MAX_URL_LENGTH, 'URL too long')
   .regex(/^https?:\/\/[^\s<>"']+$/, 'Invalid URL characters');
 
 /**
  * Safe text content validation (prevents XSS)
  */
-export const seoTextSchema = z
-  .string()
-  .min(1, 'Text content is required')
+export const seoTextSchema = nonEmptyString
   .regex(/^[^<>]*$/, 'HTML tags not allowed')
   .transform((text) => text.trim());
 
 /**
  * SEO title validation
  */
-export const seoTitleSchema = z
-  .string()
-  .min(1, 'Text content is required')
+export const seoTitleSchema = nonEmptyString
   .max(
     SEO_LIMITS.MAX_TITLE_LENGTH,
     `Title must be ${SEO_LIMITS.MAX_TITLE_LENGTH} characters or less`
@@ -76,9 +73,7 @@ export const seoTitleSchema = z
 /**
  * SEO description validation
  */
-export const seoDescriptionSchema = z
-  .string()
-  .min(1, 'Text content is required')
+export const seoDescriptionSchema = nonEmptyString
   .max(
     SEO_LIMITS.MAX_DESCRIPTION_LENGTH,
     `Description must be ${SEO_LIMITS.MAX_DESCRIPTION_LENGTH} characters or less`
@@ -101,9 +96,7 @@ export const seoKeywordsSchema = z
  */
 export const seoKeywordsArraySchema = z
   .array(
-    z
-      .string()
-      .min(1, 'Keyword cannot be empty')
+    nonEmptyString
       .max(50, 'Individual keyword too long')
       .regex(/^[a-zA-Z0-9\s.-]+$/, 'Invalid keyword characters')
   )
@@ -115,15 +108,13 @@ export const seoKeywordsArraySchema = z
  */
 export const openGraphImageSchema = z.object({
   url: seoUrlSchema,
-  alt: z
-    .string()
-    .min(1, 'Text content is required')
+  alt: nonEmptyString
     .max(SEO_LIMITS.MAX_ALT_TEXT_LENGTH, 'Alt text too long')
     .regex(/^[^<>]*$/, 'HTML tags not allowed')
     .transform((text) => text.trim())
     .optional(),
-  width: z.number().int().min(200).max(2000).optional(),
-  height: z.number().int().min(200).max(2000).optional(),
+  width: imageDimension.optional(),
+  height: imageDimension.optional(),
   type: z
     .string()
     .regex(/^image\/(jpeg|jpg|png|gif|webp)$/, 'Invalid image type')
@@ -134,9 +125,7 @@ export const openGraphImageSchema = z.object({
  * OpenGraph metadata validation
  */
 export const openGraphSchema = z.object({
-  title: z
-    .string()
-    .min(1, 'Text content is required')
+  title: nonEmptyString
     .max(
       SEO_LIMITS.MAX_OG_TITLE_LENGTH,
       `OpenGraph title must be ${SEO_LIMITS.MAX_OG_TITLE_LENGTH} characters or less`
@@ -144,9 +133,7 @@ export const openGraphSchema = z.object({
     .regex(/^[^<>]*$/, 'HTML tags not allowed')
     .transform((text) => text.trim())
     .optional(),
-  description: z
-    .string()
-    .min(1, 'Text content is required')
+  description: nonEmptyString
     .max(
       SEO_LIMITS.MAX_OG_DESCRIPTION_LENGTH,
       `OpenGraph description must be ${SEO_LIMITS.MAX_OG_DESCRIPTION_LENGTH} characters or less`
@@ -156,9 +143,7 @@ export const openGraphSchema = z.object({
     .optional(),
   type: openGraphTypeSchema.optional(),
   url: seoUrlSchema.optional(),
-  siteName: z
-    .string()
-    .min(1, 'Text content is required')
+  siteName: shortString
     .max(SEO_LIMITS.MAX_SITE_NAME_LENGTH, 'Site name too long')
     .regex(/^[^<>]*$/, 'HTML tags not allowed')
     .transform((text) => text.trim())
@@ -170,7 +155,7 @@ export const openGraphSchema = z.object({
     .optional(),
   publishedTime: z.string().datetime().optional(),
   modifiedTime: z.string().datetime().optional(),
-  authors: z.array(z.string().min(1).max(100)).max(10, 'Maximum 10 authors').optional(),
+  authors: authorsArray.optional(),
   tags: seoKeywordsArraySchema,
 });
 
@@ -189,21 +174,17 @@ export const twitterCardSchema = z.object({
     .regex(/^@[a-zA-Z0-9_]{1,15}$/, 'Invalid Twitter handle format')
     .max(SEO_LIMITS.MAX_TWITTER_HANDLE_LENGTH + 1, 'Twitter handle too long')
     .optional(),
-  title: z
-    .string()
-    .min(1, 'Text content is required')
+  title: nonEmptyString
     .max(70, 'Twitter title must be 70 characters or less')
     .regex(/^[^<>]*$/, 'HTML tags not allowed')
     .transform((text) => text.trim())
     .optional(),
-  description: z
-    .string()
-    .min(1, 'Text content is required')
+  description: nonEmptyString
     .max(200, 'Twitter description must be 200 characters or less')
     .regex(/^[^<>]*$/, 'HTML tags not allowed')
     .transform((text) => text.trim())
     .optional(),
-  images: z.array(seoUrlSchema).max(1, 'Maximum 1 Twitter image').optional(),
+  images: smallUrlArray.max(1, 'Maximum 1 Twitter image').optional(),
 });
 
 /**
@@ -255,10 +236,8 @@ export const seoMetadataSchema = z
     twitter: twitterCardSchema.optional(),
     robots: robotsSchema.optional(),
     alternates: alternatesSchema.optional(),
-    generator: z.string().max(100).optional(),
-    applicationName: z
-      .string()
-      .min(1, 'Text content is required')
+    generator: shortString.optional(),
+    applicationName: shortString
       .max(50, 'Application name must be 50 characters or less')
       .regex(/^[^<>]*$/, 'HTML tags not allowed')
       .transform((text) => text.trim())
@@ -278,9 +257,7 @@ export const seoMetadataSchema = z
     authors: z
       .array(
         z.object({
-          name: z
-            .string()
-            .min(1, 'Text content is required')
+          name: shortString
             .max(100, 'Author name must be 100 characters or less')
             .regex(/^[^<>]*$/, 'HTML tags not allowed')
             .transform((text) => text.trim()),
@@ -289,30 +266,22 @@ export const seoMetadataSchema = z
       )
       .max(10, 'Maximum 10 authors')
       .optional(),
-    creator: z
-      .string()
-      .min(1, 'Text content is required')
+    creator: shortString
       .max(100, 'Creator must be 100 characters or less')
       .regex(/^[^<>]*$/, 'HTML tags not allowed')
       .transform((text) => text.trim())
       .optional(),
-    publisher: z
-      .string()
-      .min(1, 'Text content is required')
+    publisher: shortString
       .max(100, 'Publisher must be 100 characters or less')
       .regex(/^[^<>]*$/, 'HTML tags not allowed')
       .transform((text) => text.trim())
       .optional(),
-    category: z
-      .string()
-      .min(1, 'Text content is required')
+    category: shortString
       .max(50, 'Category must be 50 characters or less')
       .regex(/^[^<>]*$/, 'HTML tags not allowed')
       .transform((text) => text.trim())
       .optional(),
-    classification: z
-      .string()
-      .min(1, 'Text content is required')
+    classification: shortString
       .max(100, 'Classification must be 100 characters or less')
       .regex(/^[^<>]*$/, 'HTML tags not allowed')
       .transform((text) => text.trim())

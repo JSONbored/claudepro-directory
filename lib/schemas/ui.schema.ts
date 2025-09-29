@@ -6,6 +6,7 @@
 
 import { z } from 'zod';
 import { reactNodeSchema } from './component.schema';
+import { percentage, shortString } from './primitives';
 
 /**
  * Common variant schemas used across UI components
@@ -58,7 +59,7 @@ export type BadgeProps = z.infer<typeof badgePropsSchema>;
  * Config Badge Props Schema
  */
 export const configBadgePropsSchema = z.object({
-  label: z.string().min(1).max(100),
+  label: shortString.min(1),
   value: z.union([z.string(), z.number(), z.boolean()]),
   variant: badgeVariantSchema.optional(),
   className: z.string().optional(),
@@ -325,7 +326,7 @@ export type AlertDescriptionProps = z.infer<typeof alertDescriptionPropsSchema>;
  */
 export const progressPropsSchema = z
   .object({
-    value: z.number().min(0).max(100).optional(),
+    value: percentage.optional(),
     max: z.number().optional(),
     className: z.string().optional(),
     indicatorClassName: z.string().optional(),

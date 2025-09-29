@@ -4,6 +4,12 @@
  */
 
 import { z } from 'zod';
+import {
+  nonEmptyString,
+  optionalUrlString,
+  positiveInt,
+  shortString,
+} from '@/lib/schemas/primitives';
 
 /**
  * Next.js 15 compatible page props - EXACTLY matches Next.js generated types
@@ -25,7 +31,7 @@ export type PagePropsWithSearchParams = {
  * Slug-specific params validation schema
  */
 export const slugParamsSchema = z.object({
-  slug: z.string().min(1, 'Slug is required').max(200, 'Slug too long'),
+  slug: nonEmptyString.max(200, 'Slug too long'),
 });
 
 export type SlugParams = z.infer<typeof slugParamsSchema>;
@@ -37,7 +43,7 @@ export const formStateSchema = z.object({
   success: z.boolean().optional(),
   error: z.string().optional(),
   errors: z.record(z.string(), z.array(z.string())).optional(),
-  issueUrl: z.string().url().optional(),
+  issueUrl: optionalUrlString,
   fallback: z.boolean().optional(),
 });
 
@@ -61,7 +67,7 @@ export type LazyLoadedData<T> = {
 
 export const lazyLoaderOptionsSchema = z.object({
   preload: z.boolean().optional(),
-  cacheTimeout: z.number().positive().optional(),
+  cacheTimeout: positiveInt.optional(),
   onLoad: z.function().optional(),
   onError: z.function().optional(),
 });
@@ -77,15 +83,15 @@ export type LazyLoaderOptions<T> = {
  * SEO page data schema
  */
 export const seoPageDataSchema = z.object({
-  title: z.string().min(1).max(200),
-  description: z.string().min(1).max(500),
-  keywords: z.array(z.string().min(1).max(50)).max(20),
-  dateUpdated: z.string().max(100),
-  content: z.string().min(1),
-  author: z.string().max(100).optional(),
-  readingTime: z.string().max(50).optional(),
-  difficulty: z.string().max(50).optional(),
-  category: z.string().max(100).optional(),
+  title: nonEmptyString.max(200),
+  description: nonEmptyString.max(500),
+  keywords: z.array(shortString.max(50)).max(20),
+  dateUpdated: shortString,
+  content: nonEmptyString,
+  author: shortString.optional(),
+  readingTime: shortString.optional(),
+  difficulty: shortString.optional(),
+  category: shortString.optional(),
 });
 
 export type SEOPageData = z.infer<typeof seoPageDataSchema>;
@@ -94,9 +100,9 @@ export type SEOPageData = z.infer<typeof seoPageDataSchema>;
  * Related guide schema
  */
 export const relatedGuideSchema = z.object({
-  title: z.string().min(1).max(200),
-  slug: z.string().min(1).max(200),
-  category: z.string().min(1).max(100),
+  title: nonEmptyString.max(200),
+  slug: nonEmptyString.max(200),
+  category: nonEmptyString.max(100),
 });
 
 export type RelatedGuide = z.infer<typeof relatedGuideSchema>;
@@ -105,14 +111,14 @@ export type RelatedGuide = z.infer<typeof relatedGuideSchema>;
  * Comparison data schema for SEO comparison pages
  */
 export const comparisonDataSchema = z.object({
-  title: z.string().min(1).max(200),
-  description: z.string().min(1).max(500),
-  content: z.string().min(1),
-  item1Id: z.string().min(1).max(100),
-  item2Id: z.string().min(1).max(100),
-  category1: z.string().min(1).max(100),
-  category2: z.string().min(1).max(100),
-  lastUpdated: z.string().max(100),
+  title: nonEmptyString.max(200),
+  description: nonEmptyString.max(500),
+  content: nonEmptyString,
+  item1Id: nonEmptyString.max(100),
+  item2Id: nonEmptyString.max(100),
+  category1: nonEmptyString.max(100),
+  category2: nonEmptyString.max(100),
+  lastUpdated: shortString,
 });
 
 export type ComparisonData = z.infer<typeof comparisonDataSchema>;

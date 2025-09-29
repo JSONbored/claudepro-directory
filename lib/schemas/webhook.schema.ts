@@ -6,6 +6,14 @@
 
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
+import { nonNegativeInt, positiveInt } from '@/lib/schemas/primitives/base-numbers';
+import {
+  emailString,
+  isoDatetimeString,
+  nonEmptyString,
+  shortString,
+  urlString,
+} from '@/lib/schemas/primitives/base-strings';
 
 /**
  * Security constants for webhook validation
@@ -72,9 +80,7 @@ export const webhookEventTypeSchema = z.enum([
  * Webhook signature header validation
  */
 export const webhookSignatureHeaderSchema = z.object({
-  'x-webhook-signature': z
-    .string()
-    .min(1, 'Webhook signature is required')
+  'x-webhook-signature': nonEmptyString
     .max(WEBHOOK_LIMITS.MAX_HEADER_LENGTH, 'Signature too long')
     .regex(/^[a-zA-Z0-9+/=]+$/, 'Invalid signature format'),
   'x-webhook-timestamp': z.string().regex(/^\d{13}$/, 'Invalid timestamp format'),
@@ -92,7 +98,7 @@ export const webhookSignatureHeaderSchema = z.object({
 export const baseWebhookPayloadSchema = z.object({
   id: z.string().uuid('Invalid webhook ID'),
   event: webhookEventTypeSchema,
-  timestamp: z.string().datetime('Invalid timestamp format'),
+  timestamp: isoDatetimeString,
   data: z.union([
     z.string(),
     z.number(),
@@ -123,18 +129,16 @@ export const baseWebhookPayloadSchema = z.object({
 export const contentEventDataSchema = z.object({
   id: z.string(),
   type: z.enum(['agent', 'mcp', 'rule', 'command', 'hook']),
-  slug: z
-    .string()
-    .min(1)
+  slug: nonEmptyString
     .max(200, 'String is too long')
     .regex(/^[a-zA-Z0-9-_]+$/, 'Invalid slug format'),
-  title: z.string().min(1, 'Title is required').max(200, 'Title is too long'),
+  title: nonEmptyString.max(200, 'Title is too long'),
   description: z.string().max(1000, 'Description is too long').optional(),
   category: z.string().max(50, 'Category is too long'),
   tags: z.array(z.string().max(50, 'Tag is too long')).max(20, 'Too many tags').optional(),
-  author: z.string().max(100, 'Author is too long').optional(),
+  author: shortString.optional(),
   version: z.string().max(20, 'Version is too long').optional(),
-  url: z.string().url().max(WEBHOOK_LIMITS.MAX_URL_LENGTH).optional(),
+  url: urlString.max(WEBHOOK_LIMITS.MAX_URL_LENGTH).optional(),
 });
 
 /**
@@ -142,11 +146,11 @@ export const contentEventDataSchema = z.object({
  */
 export const userEventDataSchema = z.object({
   id: z.string().uuid(),
-  email: z.string().email().max(255, 'Email is too long'),
-  username: z.string().min(1, 'Username is required').max(50, 'Username is too long').optional(),
+  email: emailString.max(255, 'Email is too long'),
+  username: nonEmptyString.max(50, 'Username is too long').optional(),
   role: z.enum(['user', 'admin', 'moderator']).optional(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime().optional(),
+  createdAt: isoDatetimeString,
+  updatedAt: isoDatetimeString.optional(),
   metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
 });
 
@@ -160,8 +164,8 @@ export const analyticsEventDataSchema = z.object({
   value: z.number().optional(),
   userId: z.string().uuid().optional(),
   sessionId: z.string().optional(),
-  url: z.string().url().optional(),
-  referrer: z.string().url().optional(),
+  url: urlString.optional(),
+  referrer: urlString.optional(),
   userAgent: z.string().max(500, 'User agent is too long').optional(),
 });
 
@@ -171,10 +175,10 @@ export const analyticsEventDataSchema = z.object({
 export const submissionEventDataSchema = z.object({
   id: z.string().uuid(),
   type: z.enum(['agent', 'mcp', 'rule', 'command', 'hook']),
-  title: z.string().min(1, 'Title is required').max(200, 'Title is too long'),
+  title: nonEmptyString.max(200, 'Title is too long'),
   description: z.string().max(5000, 'Description is too long'),
-  submittedBy: z.string().email(),
-  submittedAt: z.string().datetime(),
+  submittedBy: emailString,
+  submittedAt: isoDatetimeString,
   status: z.enum(['pending', 'approved', 'rejected', 'reviewing']),
   reviewNotes: z.string().max(1000, 'Review notes are too long').optional(),
   metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
@@ -187,9 +191,9 @@ export const cacheEventDataSchema = z.object({
   operation: z.enum(['warm', 'clear', 'expire', 'invalidate']),
   categories: z.array(z.string()).optional(),
   keys: z.array(z.string()).optional(),
-  duration: z.number().positive().optional(),
+  duration: positiveInt.optional(),
   success: z.boolean(),
-  itemsAffected: z.number().int().min(0).optional(),
+  itemsAffected: nonNegativeInt.optional(),
   error: z.string().optional(),
 });
 
@@ -202,8 +206,8 @@ export const systemEventDataSchema = z.object({
   message: z.string().max(1000, 'Message is too long'),
   details: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
   environment: z.enum(['development', 'staging', 'production']).optional(),
-  service: z.string().max(100, 'Service name is too long').optional(),
-  timestamp: z.string().datetime(),
+  service: shortString.optional(),
+  timestamp: isoDatetimeString,
 });
 
 /**
@@ -296,13 +300,10 @@ export function validateWebhookPayload(
  * Webhook configuration schema
  */
 export const webhookConfigSchema = z.object({
-  url: z
-    .string()
-    .url('Invalid webhook URL')
+  url: urlString
     .max(WEBHOOK_LIMITS.MAX_URL_LENGTH, 'URL too long')
     .refine((url) => url.startsWith('https://'), 'Webhook URL must use HTTPS'),
-  secret: z
-    .string()
+  secret: nonEmptyString
     .min(32, 'Secret must be at least 32 characters')
     .max(WEBHOOK_LIMITS.MAX_SECRET_LENGTH, 'Secret too long')
     .regex(/^[a-zA-Z0-9+/=]+$/, 'Invalid secret format'),
@@ -313,7 +314,7 @@ export const webhookConfigSchema = z.object({
   active: z.boolean().default(true),
   retryConfig: z
     .object({
-      maxRetries: z.number().int().min(0).max(WEBHOOK_LIMITS.MAX_RETRY_COUNT).default(3),
+      maxRetries: nonNegativeInt.max(WEBHOOK_LIMITS.MAX_RETRY_COUNT).default(3),
       retryDelay: z
         .number()
         .int()
@@ -350,7 +351,7 @@ export const webhookResponseSchema = z.object({
     .min(100, 'Status code must be at least 100')
     .max(599, 'Status code cannot exceed 599'),
   message: z.string().optional(),
-  retryAfter: z.number().int().positive().optional(),
+  retryAfter: positiveInt.optional(),
   error: z.string().optional(),
 });
 
@@ -361,8 +362,8 @@ export const webhookDeliveryAttemptSchema = z.object({
   id: z.string().uuid(),
   webhookId: z.string().uuid(),
   eventId: z.string().uuid(),
-  attemptNumber: z.number().int().min(1),
-  timestamp: z.string().datetime(),
+  attemptNumber: positiveInt,
+  timestamp: isoDatetimeString,
   statusCode: z
     .number()
     .int()
@@ -370,9 +371,9 @@ export const webhookDeliveryAttemptSchema = z.object({
     .max(599, 'Status code cannot exceed 599')
     .optional(),
   success: z.boolean(),
-  responseTime: z.number().positive().optional(),
+  responseTime: positiveInt.optional(),
   error: z.string().optional(),
-  nextRetryAt: z.string().datetime().optional(),
+  nextRetryAt: isoDatetimeString.optional(),
 });
 
 /**
@@ -380,15 +381,15 @@ export const webhookDeliveryAttemptSchema = z.object({
  */
 export const webhookRegistrationSchema = z.object({
   id: z.string().uuid().optional(),
-  name: z.string().min(1, 'Name is required').max(100, 'Name too long'),
+  name: shortString,
   description: z.string().max(500, 'Description is too long').optional(),
   config: webhookConfigSchema,
-  createdAt: z.string().datetime().optional(),
-  updatedAt: z.string().datetime().optional(),
-  lastTriggeredAt: z.string().datetime().optional(),
-  totalDeliveries: z.number().int().min(0).default(0),
-  successfulDeliveries: z.number().int().min(0).default(0),
-  failedDeliveries: z.number().int().min(0).default(0),
+  createdAt: isoDatetimeString.optional(),
+  updatedAt: isoDatetimeString.optional(),
+  lastTriggeredAt: isoDatetimeString.optional(),
+  totalDeliveries: nonNegativeInt.default(0),
+  successfulDeliveries: nonNegativeInt.default(0),
+  failedDeliveries: nonNegativeInt.default(0),
 });
 
 /**

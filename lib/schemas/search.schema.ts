@@ -5,19 +5,21 @@
 
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
+import { nonNegativeInt, percentage, positiveInt } from './primitives/base-numbers';
+import { mediumString, nonEmptyString, shortString } from './primitives/base-strings';
 
 /**
  * Searchable item schema for search cache
  */
 export const fuseSearchableItemSchema = z.object({
-  title: z.string().min(1).max(200),
+  title: nonEmptyString.max(200),
   name: z.string().optional(),
-  description: z.string().max(1000),
+  description: mediumString,
   tags: z.array(z.string().max(50)),
   category: z.string().max(50),
-  popularity: z.number().min(0).max(100).optional(),
-  slug: z.string().min(1).max(200),
-  id: z.string().min(1).max(200),
+  popularity: percentage.optional(),
+  slug: nonEmptyString.max(200),
+  id: nonEmptyString.max(200),
 });
 
 export type FuseSearchableItem = z.infer<typeof fuseSearchableItemSchema>;
@@ -28,9 +30,9 @@ export type FuseSearchableItem = z.infer<typeof fuseSearchableItemSchema>;
 export const searchFiltersSchema = z.object({
   categories: z.array(z.string().max(50)),
   tags: z.array(z.string().max(50)),
-  authors: z.array(z.string().max(100)),
+  authors: z.array(shortString),
   sort: z.enum(['trending', 'newest', 'alphabetical', 'popularity']),
-  popularity: z.tuple([z.number().min(0), z.number().max(100)]),
+  popularity: z.tuple([nonNegativeInt, percentage]),
 });
 
 export type SearchFilters = z.infer<typeof searchFiltersSchema>;
@@ -39,7 +41,7 @@ export type SearchFilters = z.infer<typeof searchFiltersSchema>;
  * Search cache key schema
  */
 export const searchCacheKeySchema = z.object({
-  query: z.string().max(500),
+  query: mediumString,
   filters: searchFiltersSchema,
 });
 
@@ -52,39 +54,21 @@ export const searchPaginationSchema = z.object({
   page: z
     .union([z.string(), z.number()])
     .transform((val) => Number(val))
-    .pipe(
-      z
-        .number()
-        .int('Page must be an integer')
-        .min(1, 'Page must be at least 1')
-        .max(1000, 'Page exceeds maximum allowed value')
-    )
+    .pipe(positiveInt.max(1000))
     .optional()
     .default(1),
 
   limit: z
     .union([z.string(), z.number()])
     .transform((val) => Number(val))
-    .pipe(
-      z
-        .number()
-        .int('Limit must be an integer')
-        .min(1, 'Limit must be at least 1')
-        .max(100, 'Limit exceeds maximum allowed value of 100')
-    )
+    .pipe(positiveInt.max(100))
     .optional()
     .default(20),
 
   offset: z
     .union([z.string(), z.number()])
     .transform((val) => Number(val))
-    .pipe(
-      z
-        .number()
-        .int('Offset must be an integer')
-        .min(0, 'Offset cannot be negative')
-        .max(10000, 'Offset exceeds maximum allowed value')
-    )
+    .pipe(nonNegativeInt.max(10000))
     .optional(),
 });
 
@@ -281,9 +265,7 @@ export type TrendingParams = z.infer<typeof trendingParamsSchema>;
  * Slug parameter schema for dynamic routes
  */
 export const slugParamSchema = z.object({
-  slug: z
-    .string()
-    .min(1, 'Slug is required')
+  slug: nonEmptyString
     .max(200, 'Slug is too long')
     .regex(/^[a-zA-Z0-9-_]+$/, 'Slug can only contain letters, numbers, hyphens, and underscores')
     .transform((val) => val.toLowerCase()),
