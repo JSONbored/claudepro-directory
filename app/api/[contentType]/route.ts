@@ -3,12 +3,12 @@ import { APP_CONFIG } from '@/lib/constants';
 import { handleApiError, handleValidationError } from '@/lib/error-handler';
 
 import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
-import { contentCache } from '@/lib/redis';
 import { errorInputSchema } from '@/lib/schemas/error.schema';
+import { contentCache } from '@/lib/services/content-cache.service';
 import { contentProcessor } from '@/lib/services/content-processor.service';
 import { apiSchemas, ValidationError, validation } from '@/lib/validation';
 
-export const runtime = 'edge'; // Use Edge Runtime for better performance
+// Use Node.js runtime for GitHub API and Redis compatibility
 export const revalidate = 14400; // 4 hours
 
 // Content type mapping
@@ -42,7 +42,7 @@ async function handleGET(
 
     // Try to get from cache first
     const cacheKey = `content-api:${contentType}`;
-    const cachedResponse = await contentCache.getAPIResponse(cacheKey);
+    const cachedResponse = await contentCache.get(cacheKey);
     if (cachedResponse) {
       return NextResponse.json(cachedResponse, {
         headers: {
@@ -91,7 +91,7 @@ async function handleGET(
     };
 
     // Cache the response for 1 hour
-    await contentCache.cacheAPIResponse(cacheKey, responseData, 60 * 60);
+    await contentCache.set(cacheKey, responseData, { ttlSeconds: 3600 });
 
     return NextResponse.json(responseData, {
       headers: {

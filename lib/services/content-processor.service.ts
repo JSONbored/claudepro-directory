@@ -88,8 +88,39 @@ class ContentProcessor {
       const contentItems: UnifiedContentItem[] = [];
 
       for (const file of files) {
-        if (file.type === 'file' && file.name.endsWith('.mdx')) {
-          try {
+        if (file.type !== 'file') continue;
+
+        try {
+          let contentItem: UnifiedContentItem | null = null;
+
+          // Handle JSON files (main content: agents, mcp, hooks, commands, rules)
+          if (file.name.endsWith('.json')) {
+            const content = await githubContentService.getFileContent(file.path);
+            const jsonData = JSON.parse(content);
+            const categoryFromPath = directoryPath.split('/').pop() || 'uncategorized';
+
+            contentItem = {
+              slug: jsonData.slug || `/${directoryPath}/${file.name.replace('.json', '')}`,
+              description: jsonData.description || '',
+              category: (jsonData.category || categoryFromPath) as UnifiedContentItem['category'],
+              author: jsonData.author || 'Claude Pro Community',
+              dateAdded: jsonData.dateAdded || new Date().toISOString(),
+              tags: jsonData.tags || [],
+              title: jsonData.title || jsonData.name || file.name.replace('.json', ''),
+              name: jsonData.name || jsonData.title || file.name.replace('.json', ''),
+              source: jsonData.source || 'community',
+              featured: jsonData.featured,
+              difficulty: jsonData.difficulty || 'intermediate',
+              features: jsonData.features || [],
+              useCases: jsonData.useCases || [],
+              requirements: jsonData.requirements || [],
+              examples: jsonData.examples || [],
+              keywords: jsonData.keywords || [],
+              ...(jsonData.version && { version: jsonData.version }),
+            };
+          }
+          // Handle MDX files (SEO content: guides)
+          else if (file.name.endsWith('.mdx')) {
             const content = await githubContentService.getFileContent(file.path);
             const frontmatter = parseFrontmatter(content);
 
@@ -97,7 +128,7 @@ class ContentProcessor {
               const slug = `/${directoryPath}/${file.name.replace('.mdx', '')}`;
               const categoryFromPath = directoryPath.split('/').pop() || 'uncategorized';
 
-              const contentItem: UnifiedContentItem = {
+              contentItem = {
                 slug,
                 description: frontmatter.description,
                 category: (frontmatter.category ||
@@ -117,15 +148,18 @@ class ContentProcessor {
                 keywords: [],
                 ...(frontmatter.version && { version: frontmatter.version }),
               };
-
-              contentItems.push(contentItem);
             }
-          } catch (fileError) {
-            logger.error('Failed to process content file', fileError as Error, {
-              file: file.name,
-              path: directoryPath,
-            });
           }
+
+          if (contentItem) {
+            contentItems.push(contentItem);
+          }
+        } catch (fileError) {
+          logger.error('Failed to process content file', fileError as Error, {
+            file: file.name,
+            path: directoryPath,
+            type: file.name.endsWith('.json') ? 'json' : 'mdx',
+          });
         }
       }
 
