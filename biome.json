@@ -18,6 +18,7 @@
       "dist/**/*",
       "generated/**/*",
       "src/generated/**/*",
+      "public/static-api/**/*",
       "node_modules/**/*"
     ],
     "ignoreUnknown": false

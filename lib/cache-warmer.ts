@@ -4,11 +4,7 @@
  */
 
 import { z } from 'zod';
-import { agentsMetadata } from '@/generated/agents-metadata';
-import { commandsMetadata } from '@/generated/commands-metadata';
-import { hooksMetadata } from '@/generated/hooks-metadata';
-import { mcpMetadata } from '@/generated/mcp-metadata';
-import { rulesMetadata } from '@/generated/rules-metadata';
+import { metadataLoader } from '@/lib/lazy-content-loaders';
 import { contentIndexer } from '@/lib/related-content/indexer';
 import { relatedContentService } from '@/lib/related-content/service';
 import { logger } from './logger';
@@ -48,6 +44,16 @@ export class CacheWarmer {
 
     try {
       logger.info('Starting cache warming for popular content');
+
+      // Lazy load metadata only when needed
+      const [agentsMetadata, mcpMetadata, rulesMetadata, commandsMetadata, hooksMetadata] =
+        await Promise.all([
+          metadataLoader.get('agentsMetadata'),
+          metadataLoader.get('mcpMetadata'),
+          metadataLoader.get('rulesMetadata'),
+          metadataLoader.get('commandsMetadata'),
+          metadataLoader.get('hooksMetadata'),
+        ]);
 
       // Get popular items from each category
       const categories = [

@@ -1,6 +1,11 @@
 import { existsSync, readdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { agents, commands, hooks, mcp, rules } from '../generated/content';
+// Import directly from metadata files for build-time usage (not runtime lazy loaders)
+import { agentsMetadata } from '../generated/agents-metadata.js';
+import { commandsMetadata } from '../generated/commands-metadata.js';
+import { hooksMetadata } from '../generated/hooks-metadata.js';
+import { mcpMetadata } from '../generated/mcp-metadata.js';
+import { rulesMetadata } from '../generated/rules-metadata.js';
 import { APP_CONFIG } from '../lib/constants';
 import type { ContentItem } from '../lib/schemas/content.schema';
 
@@ -81,19 +86,12 @@ async function generateSitemap(): Promise<string> {
   });
 
   // Individual content pages - each content type already has proper category
-  const [rulesData, mcpData, agentsData, commandsData, hooksData] = await Promise.all([
-    rules,
-    mcp,
-    agents,
-    commands,
-    hooks,
-  ]);
   const allContent: ContentItem[] = [
-    ...rulesData,
-    ...mcpData,
-    ...agentsData,
-    ...commandsData,
-    ...hooksData,
+    ...rulesMetadata,
+    ...mcpMetadata,
+    ...agentsMetadata,
+    ...commandsMetadata,
+    ...hooksMetadata,
   ];
 
   allContent.forEach((item) => {

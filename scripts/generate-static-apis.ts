@@ -9,8 +9,14 @@
 
 import { mkdir, writeFile } from 'fs/promises';
 import { join } from 'path';
+import { fileURLToPath } from 'url';
 import { z } from 'zod';
-import { agents, commands, hooks, mcp, rules } from '../generated/content';
+// Import directly from metadata files for build-time usage (not runtime lazy loaders)
+import { agentsMetadata } from '../generated/agents-metadata.js';
+import { commandsMetadata } from '../generated/commands-metadata.js';
+import { hooksMetadata } from '../generated/hooks-metadata.js';
+import { mcpMetadata } from '../generated/mcp-metadata.js';
+import { rulesMetadata } from '../generated/rules-metadata.js';
 import { APP_CONFIG } from '../lib/constants';
 import { buildConfig, env } from '../lib/schemas/env.schema';
 import {
@@ -87,21 +93,12 @@ function toSearchableItems<
 
 // Generate individual content type APIs
 async function generateContentTypeAPIs() {
-  // Await all content promises
-  const [agentsData, mcpData, hooksData, commandsData, rulesData] = await Promise.all([
-    agents,
-    mcp,
-    hooks,
-    commands,
-    rules,
-  ]);
-
   const contentMap = {
-    'agents.json': { data: agentsData, type: 'agent' as AppContentType },
-    'mcp.json': { data: mcpData, type: 'mcp' as AppContentType },
-    'hooks.json': { data: hooksData, type: 'hook' as AppContentType },
-    'commands.json': { data: commandsData, type: 'command' as AppContentType },
-    'rules.json': { data: rulesData, type: 'rule' as AppContentType },
+    'agents.json': { data: agentsMetadata, type: 'agent' as AppContentType },
+    'mcp.json': { data: mcpMetadata, type: 'mcp' as AppContentType },
+    'hooks.json': { data: hooksMetadata, type: 'hook' as AppContentType },
+    'commands.json': { data: commandsMetadata, type: 'command' as AppContentType },
+    'rules.json': { data: rulesMetadata, type: 'rule' as AppContentType },
   };
 
   console.log('📦 Generating individual content type APIs...');
@@ -143,24 +140,15 @@ async function generateContentTypeAPIs() {
 async function generateAllConfigurationsAPI() {
   console.log('📦 Generating all-configurations API...');
 
-  // Await all content promises
-  const [agentsData, mcpData, rulesData, commandsData, hooksData] = await Promise.all([
-    agents,
-    mcp,
-    rules,
-    commands,
-    hooks,
-  ]);
-
-  const transformedAgents = transformContent(agentsData, 'agent' as AppContentType, 'agents');
-  const transformedMcp = transformContent(mcpData, 'mcp' as AppContentType, 'mcp');
-  const transformedRules = transformContent(rulesData, 'rule' as AppContentType, 'rules');
+  const transformedAgents = transformContent(agentsMetadata, 'agent' as AppContentType, 'agents');
+  const transformedMcp = transformContent(mcpMetadata, 'mcp' as AppContentType, 'mcp');
+  const transformedRules = transformContent(rulesMetadata, 'rule' as AppContentType, 'rules');
   const transformedCommands = transformContent(
-    commandsData,
+    commandsMetadata,
     'command' as AppContentType,
     'commands'
   );
-  const transformedHooks = transformContent(hooksData, 'hook' as AppContentType, 'hooks');
+  const transformedHooks = transformContent(hooksMetadata, 'hook' as AppContentType, 'hooks');
 
   const allConfigurations: AllConfigurationsResponse = {
     '@context': 'https://schema.org',
@@ -214,22 +202,13 @@ async function generateAllConfigurationsAPI() {
 async function generateSearchIndexes() {
   console.log('📦 Generating search indexes...');
 
-  // Await all content promises
-  const [agentsData, mcpData, rulesData, commandsData, hooksData] = await Promise.all([
-    agents,
-    mcp,
-    rules,
-    commands,
-    hooks,
-  ]);
-
   // Create combined searchable dataset
   const allSearchableItems: StaticAPISearchableItem[] = [
-    ...toSearchableItems([...agentsData], 'agents'),
-    ...toSearchableItems([...mcpData], 'mcp'),
-    ...toSearchableItems([...rulesData], 'rules'),
-    ...toSearchableItems([...commandsData], 'commands'),
-    ...toSearchableItems([...hooksData], 'hooks'),
+    ...toSearchableItems([...agentsMetadata], 'agents'),
+    ...toSearchableItems([...mcpMetadata], 'mcp'),
+    ...toSearchableItems([...rulesMetadata], 'rules'),
+    ...toSearchableItems([...commandsMetadata], 'commands'),
+    ...toSearchableItems([...hooksMetadata], 'hooks'),
   ];
 
   // Generate category-specific indexes
@@ -297,15 +276,6 @@ async function generateSearchIndexes() {
 async function generateHealthCheck() {
   console.log('📦 Generating health check endpoint...');
 
-  // Await all content promises
-  const [agentsData, mcpData, rulesData, commandsData, hooksData] = await Promise.all([
-    agents,
-    mcp,
-    rules,
-    commands,
-    hooks,
-  ]);
-
   const healthData: HealthCheckResponse = {
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -313,17 +283,17 @@ async function generateHealthCheck() {
     version: buildConfig.version,
     environment: env.NODE_ENV,
     counts: {
-      agents: agentsData.length,
-      mcp: mcpData.length,
-      rules: rulesData.length,
-      commands: commandsData.length,
-      hooks: hooksData.length,
+      agents: agentsMetadata.length,
+      mcp: mcpMetadata.length,
+      rules: rulesMetadata.length,
+      commands: commandsMetadata.length,
+      hooks: hooksMetadata.length,
       total:
-        agentsData.length +
-        mcpData.length +
-        rulesData.length +
-        commandsData.length +
-        hooksData.length,
+        agentsMetadata.length +
+        mcpMetadata.length +
+        rulesMetadata.length +
+        commandsMetadata.length +
+        hooksMetadata.length,
     },
     features: {
       staticGeneration: true,
@@ -380,20 +350,12 @@ async function generateStaticAPIs(): Promise<GenerationResult> {
 
     const duration = performance.now() - startTime;
 
-    // Await all content promises to get lengths
-    const [agentsData, mcpData, rulesData, commandsData, hooksData] = await Promise.all([
-      agents,
-      mcp,
-      rules,
-      commands,
-      hooks,
-    ]);
     const totalItems =
-      agentsData.length +
-      mcpData.length +
-      rulesData.length +
-      commandsData.length +
-      hooksData.length;
+      agentsMetadata.length +
+      mcpMetadata.length +
+      rulesMetadata.length +
+      commandsMetadata.length +
+      hooksMetadata.length;
 
     console.log('✅ All static APIs generated successfully!');
     console.log(`📁 Output directory: ${OUTPUT_DIR}`);
@@ -421,11 +383,19 @@ async function generateStaticAPIs(): Promise<GenerationResult> {
 }
 
 // Run if called directly (ESM compatible)
-const scriptPath = new URL(import.meta.url).pathname;
-const argPath = process.argv[1];
-
-if (scriptPath === argPath) {
-  generateStaticAPIs().catch(console.error);
+if (import.meta.url.startsWith('file:')) {
+  const modulePath = fileURLToPath(import.meta.url);
+  if (
+    process.argv[1] &&
+    (process.argv[1] === modulePath || process.argv[1].endsWith('generate-static-apis.ts'))
+  ) {
+    generateStaticAPIs()
+      .then(() => process.exit(0))
+      .catch((error) => {
+        console.error(error);
+        process.exit(1);
+      });
+  }
 }
 
 export { generateStaticAPIs };

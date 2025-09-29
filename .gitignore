@@ -38,6 +38,9 @@ src/generated/
 generated/
 assets/
 
+# Build-generated API files
+public/static-api/
+
 # Cache files
 .eslintcache
 *.tsbuildinfo
