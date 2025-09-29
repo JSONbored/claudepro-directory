@@ -34,8 +34,8 @@ import { contentProcessor } from '@/lib/services/content-processor.service';
 export const revalidate = 14400; // 4 hours
 export const dynamicParams = true; // Allow on-demand generation of new pages
 
-// Use Edge Runtime for better performance and lower costs
-export const runtime = 'edge';
+// Use Node.js runtime for content services compatibility
+// Edge runtime disabled due to Redis and GitHub API service dependencies
 
 // Validation schema for guide parameters
 const guideParamsSchema = z.object({
