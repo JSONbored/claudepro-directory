@@ -1,6 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { z } from 'zod';
 import { getMcpMetadataBySlug } from '@/generated/mcp-metadata';
+import { logger } from '@/lib/logger';
 import { getDisplayTitle } from '@/lib/utils';
 
 export const alt = 'Claude Pro Directory - MCP Server';
@@ -140,13 +141,12 @@ export default async function Image({ params }: { params: Promise<{ slug: string
       { ...size }
     );
   } catch (error: unknown) {
-    // LEGITIMATE: Catch blocks must handle unknown error types
-    // Log validation error securely
-    // biome-ignore lint/suspicious/noConsole: Error logging needed for debugging
-    console.error('MCP opengraph validation error:', {
-      error: error instanceof Error ? error.message : String(error),
-      type: 'validation',
-    });
+    // Log validation error securely with structured logging
+    logger.error(
+      'MCP opengraph validation error',
+      error instanceof Error ? error : new Error(String(error)),
+      { type: 'validation' }
+    );
 
     // Return error fallback image
     return new ImageResponse(

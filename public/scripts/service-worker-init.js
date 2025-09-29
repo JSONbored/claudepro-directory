@@ -12,6 +12,11 @@
 (function() {
   'use strict';
 
+  // Development-only logging
+  const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const log = isDev ? console.log.bind(console) : () => {};
+  const error = isDev ? console.error.bind(console) : () => {};
+
   // Feature detection and security checks
   if (typeof window === 'undefined' ||
       !('serviceWorker' in navigator) ||
@@ -23,7 +28,7 @@
 
   // Check if user has opted out of service workers (privacy preference)
   if (localStorage.getItem('claudepro-disable-sw') === 'true') {
-    console.log('[SW] Service worker disabled by user preference');
+    // Silent return - no need to log in production
     return;
   }
 
@@ -43,7 +48,7 @@
         updateViaCache: 'none'
       });
 
-      console.log('[SW] Service worker registered successfully', {
+      log('[SW] Service worker registered successfully', {
         scope: registration.scope,
         active: !!registration.active,
         waiting: !!registration.waiting,
@@ -56,31 +61,31 @@
       // Check for updates periodically
       setInterval(() => {
         registration.update().catch(err => {
-          console.error('[SW] Update check failed:', err);
+          error('[SW] Update check failed:', err);
         });
       }, UPDATE_CHECK_INTERVAL);
 
       // Handle controller changes (new SW activated)
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        console.log('[SW] New service worker activated');
+        log('[SW] New service worker activated');
         // Optionally show update notification to user
         showUpdateNotification();
       });
 
       return registration;
-    } catch (error) {
-      console.error('[SW] Registration failed:', error);
+    } catch (err) {
+      error('[SW] Registration failed:', err);
 
       // Log specific error types for debugging
-      if (error.name === 'SecurityError') {
-        console.error('[SW] Registration blocked by security policy');
-      } else if (error.name === 'TypeError') {
-        console.error('[SW] Invalid service worker URL or scope');
-      } else if (error.name === 'NetworkError') {
-        console.error('[SW] Network error while fetching service worker');
+      if (err.name === 'SecurityError') {
+        error('[SW] Registration blocked by security policy');
+      } else if (err.name === 'TypeError') {
+        error('[SW] Invalid service worker URL or scope');
+      } else if (err.name === 'NetworkError') {
+        error('[SW] Network error while fetching service worker');
       }
 
-      throw error;
+      throw err;
     }
   }
 
@@ -133,7 +138,7 @@
       }
     };
 
-    console.log('[SW] Update available. Call window.claudeProSWUpdate.applyUpdate() to activate.');
+    log('[SW] Update available. Call window.claudeProSWUpdate.applyUpdate() to activate.');
   }
 
   /**
@@ -172,10 +177,10 @@
 
       if (deletePromises.length > 0) {
         await Promise.all(deletePromises);
-        console.log('[SW] Cleaned up', deletePromises.length, 'old cache(s)');
+        log('[SW] Cleaned up', deletePromises.length, 'old cache(s)');
       }
-    } catch (error) {
-      console.error('[SW] Cache cleanup failed:', error);
+    } catch (err) {
+      error('[SW] Cache cleanup failed:', err);
     }
   }
 
@@ -216,7 +221,7 @@
         await registration.unregister();
       }
       localStorage.setItem('claudepro-disable-sw', 'true');
-      console.log('[SW] Service worker unregistered and disabled');
+      log('[SW] Service worker unregistered and disabled');
     },
     enable: () => {
       localStorage.removeItem('claudepro-disable-sw');

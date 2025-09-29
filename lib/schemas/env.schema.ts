@@ -6,6 +6,27 @@
 
 import { z } from 'zod';
 
+// Logger import - must be lazy to avoid circular dependency during env initialization
+function getLogger(): { error: (msg: string) => void; warn: (msg: string) => void } {
+  try {
+    // Lazy load to avoid circular dependency
+    const loggerModule = require('../logger');
+    return loggerModule.logger;
+  } catch {
+    // Fallback to console if logger is not available during early initialization
+    return {
+      error: (msg: string) => {
+        // biome-ignore lint/suspicious/noConsole: Fallback for early initialization before logger is available
+        console.error(msg);
+      },
+      warn: (msg: string) => {
+        // biome-ignore lint/suspicious/noConsole: Fallback for early initialization before logger is available
+        console.warn(msg);
+      },
+    };
+  }
+}
+
 /**
  * Server-side environment variables schema
  * These are only available on the server and contain sensitive data
@@ -118,10 +139,10 @@ function validateEnv() {
   const parsed = envSchema.safeParse(process.env);
 
   if (!parsed.success) {
-    // biome-ignore lint/suspicious/noConsole: Critical environment validation requires console output
-    console.error('❌ Invalid environment variables detected:');
-    // biome-ignore lint/suspicious/noConsole: Critical environment validation requires console output
-    console.error(parsed.error.flatten().fieldErrors);
+    const log = getLogger();
+    const errorDetails = JSON.stringify(parsed.error.flatten().fieldErrors, null, 2);
+
+    log.error(`Invalid environment variables detected: ${errorDetails}`);
 
     // In production, we should fail fast on invalid env vars
     if (process.env.NODE_ENV === 'production') {
@@ -129,8 +150,7 @@ function validateEnv() {
     }
 
     // In development, warn but continue with defaults
-    // biome-ignore lint/suspicious/noConsole: Critical environment validation requires console output
-    console.warn('⚠️ Using default values for missing environment variables');
+    log.warn('Using default values for missing environment variables');
     return envSchema.parse({
       ...process.env,
       NODE_ENV: process.env.NODE_ENV || 'development',
@@ -150,12 +170,12 @@ function validateEnv() {
     const missingRequiredEnvs = productionRequiredEnvs.filter((envVar) => !process.env[envVar]);
 
     if (missingRequiredEnvs.length > 0) {
-      // biome-ignore lint/suspicious/noConsole: Critical environment validation requires console output
-      console.error('❌ Missing required production environment variables:');
-      // biome-ignore lint/suspicious/noConsole: Critical environment validation requires console output
-      console.error(missingRequiredEnvs.join(', '));
+      const log = getLogger();
+      const missingVars = missingRequiredEnvs.join(', ');
+
+      log.error(`Missing required production environment variables: ${missingVars}`);
       throw new Error(
-        `Missing required production environment variables: ${missingRequiredEnvs.join(', ')}. These are required for security and functionality in production.`
+        `Missing required production environment variables: ${missingVars}. These are required for security and functionality in production.`
       );
     }
 

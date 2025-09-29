@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { z } from 'zod';
+import { scriptLogger } from '../lib/logger.js';
 // Content metadata schema import removed - using direct object destructuring
 import { onBuildComplete } from '../lib/related-content/cache-invalidation.js';
 import { contentIndexer } from '../lib/related-content/indexer.js';
@@ -91,7 +92,7 @@ async function loadJsonFiles(type: ContentCategory): Promise<ValidatedContent[]>
         // Security: Additional path validation
         const resolvedFilePath = path.resolve(filePath);
         if (!resolvedFilePath.startsWith(resolvedDir)) {
-          console.error(`Security violation: Path traversal attempt in file ${file}`);
+          scriptLogger.error(`Security violation: Path traversal attempt in file ${file}`);
           return null;
         }
 
@@ -101,7 +102,7 @@ async function loadJsonFiles(type: ContentCategory): Promise<ValidatedContent[]>
           // Security: Validate content size to prevent DoS
           if (content.length > 1024 * 1024) {
             // 1MB limit
-            console.error(`File ${file} exceeds maximum size limit`);
+            scriptLogger.error(`File ${file} exceeds maximum size limit`);
             return null;
           }
 
@@ -112,9 +113,8 @@ async function loadJsonFiles(type: ContentCategory): Promise<ValidatedContent[]>
             const rawParsed = JSON.parse(content);
             parsedData = rawJsonStructureSchema.parse(rawParsed);
           } catch (parseError) {
-            console.error(
-              `JSON parse error in ${file}:`,
-              parseError instanceof Error ? parseError.message : String(parseError)
+            scriptLogger.error(
+              `JSON parse error in ${file}: ${parseError instanceof Error ? parseError.message : String(parseError)}`
             );
             return null;
           }
@@ -135,22 +135,19 @@ async function loadJsonFiles(type: ContentCategory): Promise<ValidatedContent[]>
             return validatedItem;
           } catch (validationError) {
             if (validationError instanceof z.ZodError) {
-              console.error(
-                `Category-specific validation failed for ${file} (type: ${validatedType}):`,
-                validationError.issues.map((i) => `${i.path.join('.')}: ${i.message}`)
+              scriptLogger.error(
+                `Category-specific validation failed for ${file} (type: ${validatedType}): ${validationError.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ')}`
               );
             } else {
-              console.error(
-                `Validation error for ${file}:`,
-                validationError instanceof Error ? validationError.message : String(validationError)
+              scriptLogger.error(
+                `Validation error for ${file}: ${validationError instanceof Error ? validationError.message : String(validationError)}`
               );
             }
             return null;
           }
         } catch (fileError) {
-          console.error(
-            `Error reading file ${file}:`,
-            fileError instanceof Error ? fileError.message : String(fileError)
+          scriptLogger.error(
+            `Error reading file ${file}: ${fileError instanceof Error ? fileError.message : String(fileError)}`
           );
           return null;
         }
@@ -160,12 +157,13 @@ async function loadJsonFiles(type: ContentCategory): Promise<ValidatedContent[]>
     // Filter out null values with type safety
     const validItems = items.filter((item): item is NonNullable<typeof item> => item !== null);
 
-    console.log(`✅ Loaded ${validItems.length}/${jsonFiles.length} valid ${validatedType} files`);
+    scriptLogger.success(
+      `Loaded ${validItems.length}/${jsonFiles.length} valid ${validatedType} files`
+    );
     return validItems;
   } catch (error) {
-    console.error(
-      `Failed to load JSON files from ${dir}:`,
-      error instanceof Error ? error.message : String(error)
+    scriptLogger.error(
+      `Failed to load JSON files from ${dir}: ${error instanceof Error ? error.message : String(error)}`
     );
     return [];
   }
@@ -185,11 +183,10 @@ async function generateTypeScript(): Promise<GeneratedFile[]> {
     try {
       const items = await loadJsonFiles(type);
       allContent[type] = items;
-      console.log(`✅ Processed ${items.length} ${type} items`);
+      scriptLogger.success(`Processed ${items.length} ${type} items`);
     } catch (error) {
-      console.error(
-        `❌ Failed to load ${type} content:`,
-        error instanceof Error ? error.message : String(error)
+      scriptLogger.failure(
+        `Failed to load ${type} content: ${error instanceof Error ? error.message : String(error)}`
       );
       allContent[type] = [];
     }
@@ -390,7 +387,7 @@ async function build(): Promise<BuildResult> {
   try {
     // Generate TypeScript files with validation
     const generatedFiles = await generateTypeScript();
-    console.log(`✅ Generated ${generatedFiles.length} TypeScript files`);
+    scriptLogger.success(`Generated ${generatedFiles.length} TypeScript files`);
 
     // Build content index
     const index = await contentIndexer.buildIndex();
@@ -400,12 +397,12 @@ async function build(): Promise<BuildResult> {
       contentIndexer.saveIndex(index), // Keep original for backward compatibility
       contentIndexer.saveSplitIndex(index), // New split files for performance
     ]);
-    console.log(`✅ Built content index with ${index.items.length} items`);
+    scriptLogger.success(`Built content index with ${index.items.length} items`);
 
     // Invalidate caches after build
     if (buildConfig.invalidateCaches) {
       await onBuildComplete();
-      console.log('✅ Invalidated content caches');
+      scriptLogger.success('Invalidated content caches');
     }
 
     const duration = performance.now() - startTime;
@@ -427,16 +424,21 @@ async function build(): Promise<BuildResult> {
       errors: errors.length > 0 ? errors : undefined,
     };
 
-    console.log('✅ Build completed successfully');
+    scriptLogger.success('Build completed successfully');
     return result;
   } catch (error) {
     const duration = performance.now() - startTime;
 
     if (error instanceof z.ZodError) {
-      console.error('Validation error during build:', error.issues);
+      scriptLogger.error(
+        `Validation error during build: ${error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ')}`
+      );
       errors.push(...error.issues.map((i) => `${i.path.join('.')}: ${i.message}`));
     } else {
-      console.error('Build failed:', error);
+      scriptLogger.error(
+        'Build failed:',
+        error instanceof Error ? error : new Error(String(error))
+      );
       errors.push(String(error));
     }
 
@@ -450,7 +452,7 @@ async function build(): Promise<BuildResult> {
       errors,
     };
 
-    console.error('Build failed with result:', JSON.stringify(result, null, 2));
+    scriptLogger.error(`Build failed with result: ${JSON.stringify(result, null, 2)}`);
     process.exit(1);
   }
 }
@@ -459,12 +461,15 @@ async function build(): Promise<BuildResult> {
 build()
   .then((result) => {
     if (!result.success) {
-      console.error('❌ Build failed with errors:', result.errors);
+      scriptLogger.failure(`Build failed with errors: ${result.errors?.join(', ')}`);
       process.exit(1);
     }
     process.exit(0);
   })
   .catch((error) => {
-    console.error('Unexpected error during build:', error);
+    scriptLogger.error(
+      'Unexpected error during build:',
+      error instanceof Error ? error : new Error(String(error))
+    );
     process.exit(1);
   });
