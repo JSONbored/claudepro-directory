@@ -292,6 +292,44 @@ async function applyEndpointRateLimit(
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
+  // CRITICAL SECURITY: CVE-2025-29927 mitigation - detect middleware bypass attempts
+  // Check for suspicious headers that could bypass middleware execution
+  const suspiciousHeaders = [
+    'x-middleware-subrequest',    // CVE-2025-29927 exploit header
+    'x-middleware-rewrite',       // Related bypass headers
+    'x-middleware-next',
+    'x-middleware-invoke',
+    'x-invoke-path',             // Additional suspicious patterns
+    'x-vercel-invoke-path',
+  ];
+
+  for (const headerName of suspiciousHeaders) {
+    const headerValue = request.headers.get(headerName);
+    if (headerValue !== null) {
+      logger.error('CVE-2025-29927: Middleware bypass attempt detected', new Error('Suspicious header found'), {
+        header: headerName,
+        value: headerValue.substring(0, 100), // Limit logged value length
+        ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+        userAgent: request.headers.get('user-agent')?.substring(0, 100) || 'unknown',
+        path: sanitizePathForLogging(pathname),
+        method: request.method,
+        type: 'security_bypass_attempt',
+        severity: 'critical',
+        cve: 'CVE-2025-29927',
+      });
+
+      // Immediately block the request with security headers
+      return new NextResponse('Forbidden: Suspicious header detected', {
+        status: 403,
+        headers: {
+          'X-Security-Event': 'CVE-2025-29927-BLOCKED',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Content-Type': 'text/plain',
+        }
+      });
+    }
+  }
+
   // Validate the incoming request
   try {
     const requestValidation: RequestValidation = validateRequest({
