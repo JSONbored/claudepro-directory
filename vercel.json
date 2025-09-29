@@ -13,15 +13,6 @@
     },
     "app/page.tsx": {
       "maxDuration": 5
-    },
-    "app/opengraph-image.tsx": {
-      "maxDuration": 5
-    },
-    "app/agents/[slug]/opengraph-image.tsx": {
-      "maxDuration": 5
-    },
-    "app/mcp/[slug]/opengraph-image.tsx": {
-      "maxDuration": 5
     }
   },
   "crons": [

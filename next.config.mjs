@@ -5,25 +5,16 @@ import { dirname, resolve } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Only import bundle analyzer when needed
-const withBundleAnalyzer = process.env.ANALYZE === 'true'
-  ? (await import('@next/bundle-analyzer')).default
-  : (config) => config;
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Standard output for Vercel and traditional deployments
   // Uncomment for Docker/serverless: output: 'standalone',
 
-  // Disable powered by header for security and smaller response size
+  // Core optimizations
   poweredByHeader: false,
-
-  // Enable compression
   compress: true,
-
-  // Enable React strict mode for better development warnings
   reactStrictMode: true,
-  
+
   eslint: {
     // Disable ESLint during builds since we use Biome/Ultracite
     ignoreDuringBuilds: true,
@@ -32,6 +23,7 @@ const nextConfig = {
     // We handle TypeScript checking separately
     ignoreBuildErrors: false,
   },
+
   images: {
     // Image formats - AVIF first for better compression
     formats: ['image/avif', 'image/webp'],
@@ -68,11 +60,12 @@ const nextConfig = {
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  
-  // Turbopack-specific optimizations
+
+  // Turbopack-specific optimizations (modern approach)
   turbopack: {
     // Module resolution aliases for cleaner imports
     resolveAlias: {
+      '@': './',
       '@components': './components',
       '@lib': './lib',
       '@hooks': './hooks',
@@ -82,7 +75,7 @@ const nextConfig = {
       '@generated': './generated',
     },
   },
-  
+
   // File tracing optimization (stable in Next.js 15)
   outputFileTracingExcludes: {
     // Exclude cache and development files from all serverless functions
@@ -101,13 +94,16 @@ const nextConfig = {
   },
 
   experimental: {
-    // Note: optimizeCss disabled due to deprecated critters dependency in Next.js 15.5.x
-    // CSS optimization handled by TailwindCSS v4 and PostCSS instead
-    // optimizeCss: true,
-    // React Compiler enabled for better performance and automatic optimizations
+    // React Compiler (should work with simplified config)
     reactCompiler: true,
+
+    // Modern optimizations
+    cssChunking: 'strict',
+    scrollRestoration: true,
     webVitalsAttribution: ['CLS', 'FCP', 'FID', 'INP', 'LCP', 'TTFB'],
     gzipSize: true,
+
+    // Package optimization (keep existing - this is good)
     optimizePackageImports: [
       'lucide-react',
       '@radix-ui/react-icons',
@@ -159,8 +155,6 @@ const nextConfig = {
       '@radix-ui/react-toggle-group',
       '@radix-ui/react-tooltip',
     ],
-    scrollRestoration: true,
-    cssChunking: 'strict',
   },
 
   // SWC minification is now the default in Next.js 15
@@ -173,31 +167,13 @@ const nextConfig = {
     reactRemoveProperties: process.env.NODE_ENV === 'production' ? {
       properties: ['^data-test'],
     } : false,
-    // Note: Dead code elimination is handled by SWC by default in Next.js 15
   },
-  
-  // Advanced webpack optimizations for better Core Web Vitals
+
+  // Simplified webpack config - let Turbopack handle most optimization
   webpack: (config, { dev, isServer, webpack }) => {
-    // Add Radix UI tree-shaking alias optimization
-    if (!isServer) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        // Tree-shaking is now handled by optimizePackageImports in experimental config
-      };
-    }
-
-    // Fix webpack cache serialization warning for production builds
-    // Use memory cache to avoid serialization of large strings
-    if (config.cache && !dev) {
-      config.cache = Object.freeze({
-        type: 'memory',
-        maxGenerations: 1,
-      });
-    }
-
-    // Exclude template files from production builds
+    // Only keep essential overrides for compatibility
     if (!dev) {
-      // Use webpack's IgnorePlugin to completely exclude template files
+      // Keep template file exclusion (this is useful)
       config.plugins.push(
         new webpack.IgnorePlugin({
           resourceRegExp: /-template\.(json|mdx|ts|tsx)$/,
@@ -206,118 +182,7 @@ const nextConfig = {
       );
     }
 
-    // Optimize bundle splitting for better LCP
-    if (!dev && !isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          minSize: 20000,
-          // Remove maxSize to prevent excessive splitting
-          cacheGroups: {
-            // React and core libraries
-            react: {
-              test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
-              name: 'react',
-              priority: 20,
-              chunks: 'all',
-              enforce: true,
-            },
-            // Radix UI components - split into smaller chunks for better tree-shaking
-            radixCore: {
-              test: /[\\/]node_modules[\\/]@radix-ui[\\/](react-primitive|react-compose-refs|react-context|react-id|react-slot|react-use-.*|react-portal)[\\/]/,
-              name: 'radix-core',
-              priority: 19,
-              chunks: 'all',
-              enforce: true,
-            },
-            radixComponents: {
-              test: /[\\/]node_modules[\\/]@radix-ui[\\/](?!react-primitive|react-compose-refs|react-context|react-id|react-slot|react-use-|react-portal)/,
-              name: 'radix-components',
-              priority: 18,
-              chunks: 'all',
-            },
-            // Lucide icons (large icon library)
-            lucide: {
-              test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
-              name: 'lucide',
-              priority: 15,
-              chunks: 'all',
-            },
-            // Tremor charts (only loaded when needed)
-            tremor: {
-              test: /[\\/]node_modules[\\/]@tremor[\\/]/,
-              name: 'tremor',
-              priority: 12,
-              chunks: 'async',
-            },
-            // Vendor libraries - consolidate into single chunk
-            vendor: {
-              test: /[\\/]node_modules[\\/](?!react|react-dom|scheduler|@radix-ui|lucide-react)[\\/]/,
-              name: 'vendors',
-              priority: 10,
-              chunks: 'all',
-            },
-            // Application content chunks
-            content: {
-              test: /[\\/]generated[\\/]/,
-              name: 'content',
-              priority: 8,
-              chunks: 'all',
-            },
-            // Common application code - consolidate all shared code
-            common: {
-              name: 'common',
-              minChunks: 2,
-              priority: 5,
-              chunks: 'all',
-              reuseExistingChunk: true,
-              enforce: true, // Force into single chunk
-            },
-          },
-        },
-      };
-
-      // Enhanced tree shaking and optimization
-      config.optimization.usedExports = true;
-      config.optimization.sideEffects = false;
-      config.optimization.providedExports = true;
-      config.optimization.innerGraph = true;
-
-      // Aggressive module optimization for Radix UI
-      config.optimization.realContentHash = true;
-      config.optimization.moduleIds = 'deterministic';
-
-      // Minimize main thread blocking with improved runtime chunk handling
-      config.optimization.runtimeChunk = {
-        name: entrypoint => `runtime-${entrypoint.name}`,
-      };
-
-      // Improve module concatenation for smaller bundles
-      config.optimization.concatenateModules = true;
-
-      // Add tree-shaking hints for Radix UI
-      config.module.rules.push({
-        test: /node_modules\/@radix-ui/,
-        sideEffects: false,
-      });
-
-      // Add performance hints for production builds
-      config.performance = {
-        hints: 'warning',
-        maxEntrypointSize: 512000, // 500KB
-        maxAssetSize: 512000, // 500KB
-        assetFilter: (assetFilename) => {
-          // Only check JS and CSS files for performance
-          return /\.(js|css)$/.test(assetFilename);
-        },
-      };
-
-      // Bundle analyzer is handled by @next/bundle-analyzer wrapper
-      // No need for manual webpack plugin configuration
-    }
-
-    // Preload critical resources
+    // Essential alias only
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': resolve(__dirname, './'),
@@ -448,6 +313,10 @@ const nextConfig = {
   },
 };
 
+// Modern bundle analyzer setup (fixes the constructor error)
 export default process.env.ANALYZE === 'true'
-  ? withBundleAnalyzer({ enabled: true })(nextConfig)
+  ? (await import('@next/bundle-analyzer')).default({
+      enabled: true,
+      openAnalyzer: false, // Don't auto-open browser
+    })(nextConfig)
   : nextConfig;
