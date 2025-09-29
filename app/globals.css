@@ -12,6 +12,28 @@
 
 @theme {
   /* ========================================
+     TAILWIND V4 THEME CONFIGURATION
+     Pure CSS-First Approach - Auto-generates utilities
+     ======================================== */
+
+  /* Font Families - Auto-generates font-* utilities */
+  --font-sans: var(--font-inter, "Inter"), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Consolas, "Monaco", monospace;
+
+  /* Border Radius - Auto-generates rounded-* utilities */
+  --radius: 0.375rem;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+
+  /* Container Configuration */
+  --breakpoint-2xl: 1400px;
+
+  /* Animation Keyframes */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  /* ========================================
      COLOR DEFINITIONS - Both Themes
      ======================================== */
 
@@ -272,6 +294,14 @@
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* ========================================
+     TAILWIND LEGACY COLOR MAPPINGS
+     Maps to CSS variables for backward compatibility
+     ======================================== */
+
+  /* Note: These are mapped dynamically below via media queries and data-theme attributes.
+     The @theme block defines the namespace structure, actual values set in :root */
 }
 
 /* ========================================
@@ -902,7 +932,43 @@
   }
 }
 
-/* Animations */
+/* ========================================
+   CUSTOM UTILITIES - Tailwind v4 @utility
+   ======================================== */
+
+/* Container utility with custom centering and padding */
+@utility container {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 2rem;
+
+  @media (min-width: 1400px) {
+    max-width: 1400px;
+  }
+}
+
+/* ========================================
+   KEYFRAME ANIMATIONS
+   ======================================== */
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
