@@ -79,7 +79,7 @@ class ViewCountService {
       }
 
       // Fallback to deterministic view count
-      const deterministicViews = this.getDeterministicViewCount(request.slug);
+      const deterministicViews = await this.getDeterministicViewCount(request.slug);
       this.setCache(cacheKey, deterministicViews);
 
       return viewCountResponseSchema.parse({
@@ -164,7 +164,7 @@ class ViewCountService {
           // Fallback to deterministic for failed items
           for (const item of uncachedItems) {
             if (!result[item.key]) {
-              const deterministicViews = this.getDeterministicViewCount(item.slug);
+              const deterministicViews = await this.getDeterministicViewCount(item.slug);
               this.setCache(item.key, deterministicViews);
 
               result[item.key] = viewCountResponseSchema.parse({
@@ -178,7 +178,7 @@ class ViewCountService {
       } else {
         // Use deterministic for all uncached items
         for (const item of uncachedItems) {
-          const deterministicViews = this.getDeterministicViewCount(item.slug);
+          const deterministicViews = await this.getDeterministicViewCount(item.slug);
           this.setCache(item.key, deterministicViews);
 
           result[item.key] = viewCountResponseSchema.parse({
@@ -216,17 +216,35 @@ class ViewCountService {
   /**
    * Cryptographically secure deterministic view count generation
    */
-  private getDeterministicViewCount(slug: string): number {
+  private async getDeterministicViewCount(slug: string): Promise<number> {
     try {
-      // Use Node.js crypto for secure, deterministic hashing
-      const crypto = require('crypto');
-      const hash = crypto.createHmac('sha256', this.VIEW_COUNT_SALT).update(slug).digest('hex');
+      // Use Web Crypto API for secure, deterministic hashing
+      const encoder = new TextEncoder();
+      const keyData = encoder.encode(this.VIEW_COUNT_SALT);
+      const data = encoder.encode(slug);
 
-      // Convert hex to integer and normalize to view count range
-      const hashInt = Number.parseInt(hash.substring(0, 8), 16);
-      return (hashInt % 900) + 100; // 100-999 range
+      // Import key for HMAC
+      const key = await crypto.subtle.importKey(
+        'raw',
+        keyData,
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign']
+      );
+
+      // Generate HMAC
+      const signature = await crypto.subtle.sign('HMAC', key, data);
+      const hashArray = new Uint8Array(signature);
+
+      // Convert first 4 bytes to integer and normalize to view count range
+      const hashInt =
+        ((hashArray[0] ?? 0) << 24) |
+        ((hashArray[1] ?? 0) << 16) |
+        ((hashArray[2] ?? 0) << 8) |
+        (hashArray[3] ?? 0);
+      return (Math.abs(hashInt) % 900) + 100; // 100-999 range
     } catch (error) {
-      logger.warn('Crypto deterministic view count failed, using simple hash', {
+      logger.warn('Web Crypto API deterministic view count failed, using simple hash', {
         slug,
         error: error instanceof Error ? error.message : String(error),
       });

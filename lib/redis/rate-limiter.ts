@@ -242,16 +242,23 @@ export function createRateLimiter(config: RateLimitConfig): RateLimiter {
 /**
  * Utility function to extract client identifier from request
  */
-export function getClientIdentifier(ip?: string, userAgent?: string, userId?: string): string {
+export async function getClientIdentifier(
+  ip?: string,
+  userAgent?: string,
+  userId?: string
+): Promise<string> {
   if (userId) {
     return `user:${userId}`;
   }
 
   if (ip) {
-    // Hash IP for privacy while maintaining uniqueness
-    const hash = require('crypto').createHash('sha256');
-    hash.update(ip + (userAgent || ''));
-    return `ip:${hash.digest('hex').substring(0, 16)}`;
+    // Hash IP for privacy while maintaining uniqueness using Web Crypto API
+    const encoder = new TextEncoder();
+    const data = encoder.encode(ip + (userAgent || ''));
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    return `ip:${hashHex.substring(0, 16)}`;
   }
 
   return 'anonymous';

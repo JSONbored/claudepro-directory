@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { getMcpMetadataBySlug } from '@/generated/mcp-metadata';
 import { getDisplayTitle } from '@/lib/utils';
 
-export const runtime = 'edge';
 export const alt = 'Claude Pro Directory - MCP Server';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';

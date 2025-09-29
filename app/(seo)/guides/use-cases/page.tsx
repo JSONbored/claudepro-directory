@@ -6,7 +6,6 @@ import { APP_CONFIG } from '@/lib/constants';
 export const revalidate = 14400;
 
 // Use Edge Runtime for better performance and lower costs
-export const runtime = 'edge';
 
 const config = {
   type: 'use-cases',
