@@ -313,10 +313,5 @@ const nextConfig = {
   },
 };
 
-// Modern bundle analyzer setup (fixes the constructor error)
-export default process.env.ANALYZE === 'true'
-  ? (await import('@next/bundle-analyzer')).default({
-      enabled: true,
-      openAnalyzer: false, // Don't auto-open browser
-    })(nextConfig)
-  : nextConfig;
+// Export the configuration
+export default nextConfig;
