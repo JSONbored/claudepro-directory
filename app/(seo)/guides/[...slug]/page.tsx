@@ -1,4 +1,5 @@
-import { ArrowLeft, BookOpen, Calendar, FileText, Tag, Users, Zap } from 'lucide-react';
+// Optimized imports: Reduced from 7 to 3 essential icons for Edge Function
+import { ArrowLeft, BookOpen, Zap } from 'lucide-react';
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -7,9 +8,9 @@ import Script from 'next/script';
 import { z } from 'zod';
 import { ContentErrorBoundary } from '@/components/content-error-boundary';
 
-// Dynamically import MDXRenderer to reduce Edge Function bundle size
-const MDXRenderer = dynamic(
-  () => import('@/components/mdx-renderer').then((mod) => ({ default: mod.MDXRenderer })),
+// Edge-optimized imports for minimal bundle size
+const EdgeMDXRenderer = dynamic(
+  () => import('@/components/edge-mdx-renderer').then((mod) => ({ default: mod.EdgeMDXRenderer })),
   {
     ssr: true,
     loading: () => <div className="animate-pulse bg-muted/20 rounded-lg h-96" />,
@@ -20,14 +21,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
-// Dynamically import UnifiedSidebar to reduce Edge Function bundle size
-const UnifiedSidebar = dynamic(
-  () => import('@/components/unified-sidebar').then((mod) => ({ default: mod.UnifiedSidebar })),
-  {
-    ssr: true,
-    loading: () => <div className="animate-pulse bg-muted/20 rounded-lg h-96" />,
-  }
-);
+// Import Edge-optimized sidebar
+import { EdgeGuideSidebar } from '@/components/unified-sidebar';
 
 import { ViewTracker } from '@/components/view-tracker';
 import { APP_CONFIG } from '@/lib/constants';
@@ -298,10 +293,10 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
     const categoryIcons: Record<string, typeof Zap> = {
       'use-cases': Zap,
       tutorials: BookOpen,
-      collections: Users,
-      categories: FileText,
+      collections: BookOpen, // Consolidated from Users
+      categories: BookOpen, // Consolidated from FileText
       workflows: Zap,
-      comparisons: FileText,
+      comparisons: BookOpen, // Consolidated from FileText
       troubleshooting: Zap,
     };
 
@@ -431,7 +426,7 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
                   </Badge>
                   {data.dateUpdated && (
                     <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
+                      <span className="text-muted-foreground">•</span>
                       <span>Updated {formatDate(data.dateUpdated)}</span>
                     </div>
                   )}
@@ -442,8 +437,7 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
                   <div className="flex flex-wrap gap-2 mt-4">
                     {data.keywords.map((keyword: string) => (
                       <Badge key={keyword} variant="outline">
-                        <Tag className="h-3 w-3 mr-1" />
-                        {keyword}
+                        #{keyword}
                       </Badge>
                     ))}
                   </div>
@@ -459,7 +453,7 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
               <div className="lg:col-span-2 space-y-8">
                 <Card>
                   <CardContent className="pt-6">
-                    <MDXRenderer
+                    <EdgeMDXRenderer
                       source={data.content}
                       className=""
                       pathname={`/guides/${slug.join('/')}`}
@@ -473,8 +467,7 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
               </div>
 
               {/* Sidebar */}
-              <UnifiedSidebar
-                mode="content"
+              <EdgeGuideSidebar
                 contentData={{
                   title: data.title,
                   description: data.description,
@@ -484,6 +477,7 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
                   content: data.content,
                 }}
                 relatedGuides={relatedGuides}
+                currentCategory={category || ''}
               />
             </div>
           </div>

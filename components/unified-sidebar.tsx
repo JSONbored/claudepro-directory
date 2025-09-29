@@ -2,8 +2,11 @@
 
 import {
   BookOpen,
+  // Edge-optimized icons (aliases for minimal bundle)
+  BookOpen as BookOpenEdge,
   Clock,
   FileText,
+  FileText as FileTextEdge,
   Filter,
   Layers,
   Search,
@@ -12,6 +15,7 @@ import {
   Users,
   Workflow,
   Zap,
+  Zap as ZapEdge,
 } from 'lucide-react';
 import Link from 'next/link';
 import { memo, useEffect, useState } from 'react';
@@ -484,3 +488,195 @@ export const UnifiedSidebar = memo(UnifiedSidebarComponent, (prevProps, nextProp
     JSON.stringify(prevProps.relatedGuides) === JSON.stringify(nextProps.relatedGuides)
   );
 });
+
+// ============================================================================
+// EDGE-OPTIMIZED SERVER-SIDE SIDEBAR FOR EDGE FUNCTIONS
+// ============================================================================
+
+// Edge-optimized sidebar props (same interface for compatibility)
+export interface EdgeGuideSidebarProps {
+  contentData?: z.infer<typeof contentDataSchema>;
+  relatedGuides?: Array<z.infer<typeof relatedGuideSchema>>;
+  currentCategory?: string;
+}
+
+// Lightweight server-side sidebar component for Edge Functions
+// This component removes all client-side dependencies and heavy imports
+export function EdgeGuideSidebar({
+  contentData,
+  relatedGuides = [],
+  currentCategory,
+}: EdgeGuideSidebarProps) {
+  // Validate props with Zod schemas
+  const validatedContentData = contentData ? contentDataSchema.parse(contentData) : undefined;
+  const validatedRelatedGuides = z.array(relatedGuideSchema).parse(relatedGuides);
+
+  // Static category info with minimal icons
+  const edgeCategoryInfo = {
+    'use-cases': {
+      label: 'Use Cases',
+      icon: ZapEdge,
+      description: 'Practical guides for specific Claude AI use cases',
+      color: 'hover:text-blue-500 hover:bg-blue-500/10',
+      activeColor: 'text-blue-500 bg-blue-500/10',
+    },
+    tutorials: {
+      label: 'Tutorials',
+      icon: BookOpenEdge,
+      description: 'Step-by-step tutorials for Claude features',
+      color: 'hover:text-green-500 hover:bg-green-500/10',
+      activeColor: 'text-green-500 bg-green-500/10',
+    },
+    collections: {
+      label: 'Collections',
+      icon: FileTextEdge,
+      description: 'Curated collections of tools and agents',
+      color: 'hover:text-purple-500 hover:bg-purple-500/10',
+      activeColor: 'text-purple-500 bg-purple-500/10',
+    },
+    categories: {
+      label: 'Category Guides',
+      icon: FileTextEdge,
+      description: 'Comprehensive guides by category',
+      color: 'hover:text-orange-500 hover:bg-orange-500/10',
+      activeColor: 'text-orange-500 bg-orange-500/10',
+    },
+    workflows: {
+      label: 'Workflows',
+      icon: ZapEdge,
+      description: 'Complete workflow guides and strategies',
+      color: 'hover:text-pink-500 hover:bg-pink-500/10',
+      activeColor: 'text-pink-500 bg-pink-500/10',
+    },
+    comparisons: {
+      label: 'Comparisons',
+      icon: FileTextEdge,
+      description: 'Compare different approaches and tools',
+      color: 'hover:text-cyan-500 hover:bg-cyan-500/10',
+      activeColor: 'text-cyan-500 bg-cyan-500/10',
+    },
+    troubleshooting: {
+      label: 'Troubleshooting',
+      icon: ZapEdge,
+      description: 'Solve common issues and problems',
+      color: 'hover:text-red-500 hover:bg-red-500/10',
+      activeColor: 'text-red-500 bg-red-500/10',
+    },
+  };
+
+  return (
+    <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
+      <div className="space-y-3 pr-2 pb-4">
+        {/* Category Navigation - Simplified for Edge */}
+        <Card className="border-muted/40 shadow-sm">
+          <CardContent className="p-3">
+            <div className="flex items-center justify-between">
+              {Object.entries(edgeCategoryInfo).map(([key, info]) => {
+                const Icon = info.icon;
+                const isActive = currentCategory === key;
+
+                return (
+                  <Link
+                    key={key}
+                    href={`/guides/${key}`}
+                    className={`p-2 rounded-lg transition-all duration-200 ${
+                      isActive ? info.activeColor : `text-muted-foreground ${info.color}`
+                    }`}
+                    title={info.description}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </Link>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Table of Contents - Only show for content mode */}
+        {validatedContentData?.content &&
+          (() => {
+            const headings = validatedContentData.content.match(/^##\s+(.+)$/gm);
+            if (!headings || headings.length === 0) return null;
+
+            return (
+              <Card className="border-muted/40 shadow-sm">
+                <CardHeader className="pb-2 pt-3 px-3">
+                  <CardTitle className="text-xs font-medium text-muted-foreground">
+                    On this page
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pb-3 px-3">
+                  <nav className="space-y-0.5">
+                    {headings.slice(0, 5).map((heading) => {
+                      const title = heading.replace('## ', '');
+                      const id = title.toLowerCase().replace(/\s+/g, '-');
+                      return (
+                        <a
+                          key={id}
+                          href={`#${id}`}
+                          className="block text-[11px] text-muted-foreground hover:text-primary transition-colors py-0.5 pl-3 border-l-2 border-transparent hover:border-primary/50 truncate"
+                        >
+                          {title}
+                        </a>
+                      );
+                    })}
+                    {headings.length > 5 && (
+                      <span className="text-[10px] text-muted-foreground/60 pl-3 italic">
+                        +{headings.length - 5} more sections
+                      </span>
+                    )}
+                  </nav>
+                </CardContent>
+              </Card>
+            );
+          })()}
+
+        {/* Related Guides - Simplified for Edge */}
+        {validatedRelatedGuides && validatedRelatedGuides.length > 0 && (
+          <Card className="border-muted/40 shadow-sm">
+            <CardHeader className="pb-2 pt-3 px-3">
+              <CardTitle className="text-xs font-medium flex items-center gap-1.5">
+                <ZapEdge className="h-3 w-3 text-yellow-500" />
+                <span>Related Guides</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pb-3 px-3">
+              <div className="space-y-1">
+                {validatedRelatedGuides.slice(0, 3).map((guide) => (
+                  <Link key={guide.slug} href={guide.slug} className="block group">
+                    <div className="text-[11px] text-muted-foreground group-hover:text-primary transition-colors py-0.5 truncate">
+                      {guide.title}
+                    </div>
+                  </Link>
+                ))}
+                {validatedRelatedGuides.length > 3 && (
+                  <Link
+                    href="/guides"
+                    className="text-[10px] text-primary hover:underline inline-flex items-center gap-0.5 mt-1"
+                  >
+                    View all ({validatedRelatedGuides.length})
+                  </Link>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Quick Links */}
+        <div className="px-2 pt-1">
+          <div className="flex items-center justify-between text-[10px]">
+            <Link
+              href="/guides"
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              ← All Guides
+            </Link>
+            <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
+              Browse Directory →
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

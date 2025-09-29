@@ -272,6 +272,13 @@ async function applyEndpointRateLimit(
       case 'submit':
         return rateLimiters.submit.middleware(request);
       case 'api':
+        // New guides API routes - more generous for content delivery
+        if (pathname.match(/^\/api\/guides\/[^/]+\/[^/]+$/)) {
+          return rateLimiters.api.middleware(request); // Guide content delivery
+        }
+        if (pathname.match(/^\/api\/guides\/[^/]+\/[^/]+\/related$/)) {
+          return rateLimiters.api.middleware(request); // Related guides
+        }
         // Dynamic content type routes (e.g., /api/[contentType])
         if (pathname.match(/^\/api\/[^/]+\.json$/)) {
           return rateLimiters.api.middleware(request);
