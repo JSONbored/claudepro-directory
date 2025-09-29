@@ -1,8 +1,9 @@
 /**
  * Redis Cache Service
- * High-level caching interface with compression, validation, and fallback
+ * High-level caching interface with real compression, validation, and fallback
  */
 
+import { brotliCompressSync, brotliDecompressSync, gunzipSync, gzipSync } from 'node:zlib';
 import { z } from 'zod';
 import { logger } from '../logger';
 import {
@@ -14,14 +15,19 @@ import {
 } from '../schemas/cache.schema';
 import { redisClient } from './client';
 
+// Compression algorithms
+type CompressionAlgorithm = 'gzip' | 'brotli' | 'none';
+
 // Cache configuration schema
 const cacheConfigSchema = z.object({
   defaultTTL: z.number().int().min(60).max(86400).default(3600), // 1 hour default
   keyPrefix: z.string().min(1).max(20).default('cache'),
   compressionThreshold: z.number().int().min(100).max(10000).default(1000),
+  compressionAlgorithm: z.enum(['gzip', 'brotli', 'none']).default('brotli'),
   enableCompression: z.boolean().default(true),
   enableFallback: z.boolean().default(true),
   maxValueSize: z.number().int().min(1024).max(10485760).default(1048576), // 1MB default
+  maxMemoryMB: z.number().int().min(10).max(500).default(100), // Memory limit for fallback
   enableLogging: z.boolean().default(false),
 });
 
@@ -33,7 +39,8 @@ const cacheEntrySchema = z.object({
   timestamp: z.number().int().min(0),
   ttl: z.number().int().min(0),
   compressed: z.boolean().default(false),
-  version: z.string().default('1.0'),
+  algorithm: z.enum(['gzip', 'brotli', 'none']).default('none'),
+  version: z.string().default('2.0'), // Bumped to 2.0 for real compression
 });
 
 type CacheEntry = z.infer<typeof cacheEntrySchema>;
@@ -80,75 +87,124 @@ export class CacheService {
   }
 
   /**
-   * Compress data if it exceeds threshold
+   * Compress data using gzip or brotli if it exceeds threshold
    */
-  private compressData(data: string): { data: string; compressed: boolean } {
+  private compressData(data: string): {
+    data: string;
+    compressed: boolean;
+    algorithm: CompressionAlgorithm;
+  } {
     if (!this.config.enableCompression || data.length < this.config.compressionThreshold) {
-      return { data, compressed: false };
+      return { data, compressed: false, algorithm: 'none' };
     }
 
     try {
-      // Use JSON minification as compression for now
-      const parsed = JSON.parse(data);
-      const compressed = JSON.stringify(parsed);
+      const buffer = Buffer.from(data, 'utf8');
 
-      return {
-        data: compressed.length < data.length ? compressed : data,
-        compressed: compressed.length < data.length,
-      };
-    } catch {
-      return { data, compressed: false };
+      let compressedBuffer: Buffer;
+      const algorithm = this.config.compressionAlgorithm;
+
+      if (algorithm === 'brotli') {
+        compressedBuffer = brotliCompressSync(buffer, {
+          params: {
+            11: 4, // BROTLI_PARAM_QUALITY (4 = balanced speed/compression)
+          },
+        });
+      } else if (algorithm === 'gzip') {
+        compressedBuffer = gzipSync(buffer, { level: 6 }); // Level 6 = balanced
+      } else {
+        return { data, compressed: false, algorithm: 'none' };
+      }
+
+      // Only use compression if it actually reduces size
+      if (compressedBuffer.length < buffer.length) {
+        const compressedString = compressedBuffer.toString('base64');
+
+        if (this.config.enableLogging) {
+          const ratio = ((1 - compressedBuffer.length / buffer.length) * 100).toFixed(1);
+          logger.debug(
+            `Compressed data: ${buffer.length} → ${compressedBuffer.length} bytes (${ratio}% reduction)`
+          );
+        }
+
+        return {
+          data: compressedString,
+          compressed: true,
+          algorithm,
+        };
+      }
+
+      return { data, compressed: false, algorithm: 'none' };
+    } catch (error) {
+      logger.warn('Compression failed, storing uncompressed', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return { data, compressed: false, algorithm: 'none' };
     }
   }
 
   /**
-   * Decompress data if compressed
+   * Decompress data using the specified algorithm
    */
-  private decompressData(data: string, compressed: boolean): string {
-    if (!compressed) return data;
+  private decompressData(
+    data: string,
+    compressed: boolean,
+    algorithm: CompressionAlgorithm = 'brotli'
+  ): string {
+    if (!compressed || algorithm === 'none') return data;
 
     try {
-      // For JSON compression, just parse and stringify to validate
-      const parsed = JSON.parse(data);
-      return JSON.stringify(parsed);
-    } catch {
+      const buffer = Buffer.from(data, 'base64');
+
+      let decompressedBuffer: Buffer;
+
+      if (algorithm === 'brotli') {
+        decompressedBuffer = brotliDecompressSync(buffer);
+      } else if (algorithm === 'gzip') {
+        decompressedBuffer = gunzipSync(buffer);
+      } else {
+        return data;
+      }
+
+      return decompressedBuffer.toString('utf8');
+    } catch (error) {
+      logger.warn('Decompression failed, returning original data', {
+        error: error instanceof Error ? error.message : String(error),
+        algorithm,
+      });
       return data;
     }
   }
 
   /**
-   * Serialize cache entry
+   * Serialize cache entry with compression
    */
   private serializeEntry<T>(value: T, ttl: number): string {
-    const entry: CacheEntry = {
-      value,
-      timestamp: Date.now(),
-      ttl,
-      compressed: false,
-      version: '1.0',
-    };
+    const serialized = JSON.stringify(value);
 
-    const serialized = JSON.stringify(entry);
-
-    // Validate size
+    // Validate size before compression
     if (serialized.length > this.config.maxValueSize) {
       throw new Error(
         `Cache value too large: ${serialized.length} bytes (max: ${this.config.maxValueSize})`
       );
     }
 
-    const { data, compressed } = this.compressData(serialized);
+    const { data: compressedData, compressed, algorithm } = this.compressData(serialized);
 
-    if (compressed) {
-      const compressedEntry = { ...entry, compressed: true };
-      return JSON.stringify(compressedEntry);
-    }
+    const entry: CacheEntry = {
+      value: compressedData,
+      timestamp: Date.now(),
+      ttl,
+      compressed,
+      algorithm,
+      version: '2.0',
+    };
 
-    return data;
+    return JSON.stringify(entry);
   }
 
   /**
-   * Deserialize cache entry
+   * Deserialize cache entry with decompression
    */
   private deserializeEntry<T>(data: string): T | null {
     try {
@@ -159,7 +215,13 @@ export class CacheService {
         return null;
       }
 
-      const decompressed = this.decompressData(JSON.stringify(entry.value), entry.compressed);
+      // Decompress value if needed
+      const decompressed = this.decompressData(
+        String(entry.value),
+        entry.compressed,
+        entry.algorithm
+      );
+
       return JSON.parse(decompressed) as T;
     } catch (error) {
       if (this.config.enableLogging) {
@@ -340,47 +402,150 @@ export class CacheService {
   }
 
   /**
-   * Get multiple values from cache
+   * Get multiple values from cache using batch operations (auto-pipelining)
    */
   async getMany<T>(keys: string[]): Promise<Map<string, T | null>> {
     const results = new Map<string, T | null>();
 
-    // Process in parallel but with concurrency limit
-    const chunkSize = 10;
-    for (let i = 0; i < keys.length; i += chunkSize) {
-      const chunk = keys.slice(i, i + chunkSize);
-      const chunkPromises = chunk.map(async (key) => {
-        const value = await this.get<T>(key);
-        return { key, value };
+    if (keys.length === 0) return results;
+
+    try {
+      const fullKeys = keys.map((key) => this.generateKey(key));
+
+      // Use Promise.all to leverage auto-pipelining
+      const values = await redisClient.executeOperation(
+        async (redis) => {
+          // Make all calls in parallel - auto-pipelining will batch them
+          return Promise.all(fullKeys.map((fullKey) => redis.get(fullKey)));
+        },
+        async () => {
+          // Fallback operation
+          return Promise.all(fullKeys.map((fullKey) => redisClient.getFallback(fullKey)));
+        },
+        'cache_getMany'
+      );
+
+      // Deserialize results
+      values.forEach((value, index) => {
+        const key = keys[index];
+        if (!key) return; // Guard against undefined keys
+
+        if (value) {
+          const deserialized = this.deserializeEntry<T>(String(value));
+          if (deserialized !== null) {
+            this.stats.hits++;
+            results.set(key, deserialized);
+          } else {
+            this.stats.misses++;
+            results.set(key, null);
+          }
+        } else {
+          this.stats.misses++;
+          results.set(key, null);
+        }
       });
 
-      const chunkResults = await Promise.all(chunkPromises);
-      chunkResults.forEach(({ key, value }) => {
-        results.set(key, value);
-      });
+      if (this.config.enableLogging) {
+        logger.debug(`Cache getMany for ${keys.length} keys, ${results.size} hits`);
+      }
+    } catch (error) {
+      this.stats.errors++;
+      logger.error(
+        `Cache getMany failed for ${keys.length} keys`,
+        error instanceof Error ? error : new Error(String(error))
+      );
+
+      // Return empty results for all keys
+      for (const key of keys) {
+        results.set(key, null);
+      }
     }
 
     return results;
   }
 
   /**
-   * Set multiple values in cache
+   * Set multiple values in cache using batch operations (auto-pipelining)
    */
   async setMany<T>(
     entries: Array<{ key: string; value: T; ttl?: number }>
   ): Promise<CacheOperationResult[]> {
     const results: CacheOperationResult[] = [];
 
-    // Process in parallel but with concurrency limit
-    const chunkSize = 10;
-    for (let i = 0; i < entries.length; i += chunkSize) {
-      const chunk = entries.slice(i, i + chunkSize);
-      const chunkPromises = chunk.map(async ({ key, value, ttl }) => {
-        return this.set(key, value, ttl);
+    if (entries.length === 0) return results;
+
+    try {
+      // Serialize all entries first
+      const serializedEntries = entries.map(({ key, value, ttl }) => {
+        const fullKey = this.generateKey(key);
+        const validatedTTL = validateTTL(ttl || this.config.defaultTTL);
+        const serialized = this.serializeEntry(value, validatedTTL);
+        return { fullKey, key, serialized, ttl: validatedTTL, size: serialized.length };
       });
 
-      const chunkResults = await Promise.all(chunkPromises);
-      results.push(...chunkResults);
+      // Use Promise.all to leverage auto-pipelining
+      const setResults = await redisClient.executeOperation(
+        async (redis) => {
+          // Make all SET calls in parallel - auto-pipelining will batch them
+          const results = await Promise.all(
+            serializedEntries.map(({ fullKey, serialized, ttl }) =>
+              redis.set(fullKey, serialized, { ex: ttl })
+            )
+          );
+          return results;
+        },
+        async () => {
+          // Fallback operation
+          await Promise.all(
+            serializedEntries.map(({ fullKey, serialized, ttl }) =>
+              redisClient.setFallback(fullKey, serialized, ttl)
+            )
+          );
+          // Return array of undefined for fallback
+          return new Array(serializedEntries.length).fill(undefined) as (string | null)[];
+        },
+        'cache_setMany'
+      );
+
+      // Build results
+      serializedEntries.forEach(({ fullKey, size, ttl }, index) => {
+        const success =
+          setResults[index] === 'OK' ||
+          setResults[index] === null ||
+          setResults[index] === undefined;
+        this.stats.sets++;
+
+        results.push(
+          cacheOperationResultSchema.parse({
+            success,
+            key: fullKey,
+            operation: 'set',
+            size,
+            ttl,
+          })
+        );
+      });
+
+      if (this.config.enableLogging) {
+        logger.debug(`Cache setMany for ${entries.length} keys completed`);
+      }
+    } catch (error) {
+      this.stats.errors++;
+      logger.error(
+        `Cache setMany failed for ${entries.length} keys`,
+        error instanceof Error ? error : new Error(String(error))
+      );
+
+      // Return failed results
+      entries.forEach(({ key }) => {
+        results.push(
+          cacheOperationResultSchema.parse({
+            success: false,
+            key: this.generateKey(key),
+            operation: 'set',
+          })
+        );
+      });
     }
 
     return results;
@@ -493,48 +658,58 @@ export class CacheService {
 
 /**
  * Pre-configured cache services for different use cases
+ * Optimized with Brotli compression and memory management
  */
 export const CacheServices = {
   /**
-   * API response cache - 1 hour TTL with compression
+   * API response cache - 1 hour TTL with Brotli compression
    */
   api: new CacheService({
     keyPrefix: 'api',
     defaultTTL: 3600,
     enableCompression: true,
-    compressionThreshold: 500,
-    enableLogging: true,
+    compressionAlgorithm: 'brotli', // Better compression than gzip
+    compressionThreshold: 500, // Compress anything over 500 bytes
+    maxValueSize: 2097152, // 2MB max
+    maxMemoryMB: 50, // 50MB fallback memory limit
+    enableLogging: process.env.NODE_ENV === 'development',
   }),
 
   /**
-   * Session cache - 24 hours TTL
+   * Session cache - 24 hours TTL with gzip compression
    */
   session: new CacheService({
     keyPrefix: 'session',
     defaultTTL: 86400,
-    enableCompression: false,
+    enableCompression: true,
+    compressionAlgorithm: 'gzip', // Faster for smaller payloads
+    compressionThreshold: 1000,
+    maxMemoryMB: 30,
     enableLogging: false,
   }),
 
   /**
-   * Content cache - 6 hours TTL with high compression
+   * Content cache - 6 hours TTL with aggressive Brotli compression
    */
   content: new CacheService({
     keyPrefix: 'content',
     defaultTTL: 21600,
     enableCompression: true,
-    compressionThreshold: 200,
-    maxValueSize: 5242880, // 5MB
-    enableLogging: true,
+    compressionAlgorithm: 'brotli', // Best for large content
+    compressionThreshold: 200, // Compress aggressively
+    maxValueSize: 5242880, // 5MB max
+    maxMemoryMB: 100, // Larger memory pool for content
+    enableLogging: process.env.NODE_ENV === 'development',
   }),
 
   /**
-   * Temporary cache - 15 minutes TTL
+   * Temporary cache - 15 minutes TTL, no compression for speed
    */
   temp: new CacheService({
     keyPrefix: 'temp',
     defaultTTL: 900,
-    enableCompression: false,
+    enableCompression: false, // Speed over size
+    maxMemoryMB: 20,
     enableLogging: false,
   }),
 } as const;

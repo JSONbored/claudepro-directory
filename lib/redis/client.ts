@@ -47,9 +47,14 @@ export class RedisClientManager {
     failedOperations: 0,
   };
 
-  // In-memory fallback storage
-  private fallbackStorage = new Map<string, { value: string; expiry: number }>();
+  // In-memory fallback storage with LRU-like eviction
+  private fallbackStorage = new Map<
+    string,
+    { value: string; expiry: number; size: number; lastAccess: number }
+  >();
   private fallbackCleanupInterval: NodeJS.Timeout | null = null;
+  private fallbackMemoryBytes = 0;
+  private readonly MAX_FALLBACK_MEMORY_MB = 100; // 100MB limit for fallback storage
 
   constructor(config?: Partial<RedisClientConfig>) {
     this.config = redisClientConfigSchema.parse({
@@ -77,6 +82,8 @@ export class RedisClientManager {
         url: this.config.url,
         token: this.config.token,
         automaticDeserialization: false, // Handle serialization manually for security
+        enableAutoPipelining: true, // Enable auto-pipelining for batch operations
+        latencyLogging: process.env.NODE_ENV === 'development', // Log latency in dev
         retry: {
           retries: this.config.retryAttempts,
           backoff: (retryCount) => Math.min(this.config.retryDelay * 2 ** retryCount, 5000),
@@ -109,6 +116,39 @@ export class RedisClientManager {
   }
 
   /**
+   * Evict least recently used entries when memory limit is exceeded
+   */
+  private evictLRU(): void {
+    const maxBytes = this.MAX_FALLBACK_MEMORY_MB * 1024 * 1024;
+
+    if (this.fallbackMemoryBytes <= maxBytes) return;
+
+    // Sort entries by last access time (oldest first)
+    const entries = Array.from(this.fallbackStorage.entries()).sort(
+      (a, b) => a[1].lastAccess - b[1].lastAccess
+    );
+
+    let evicted = 0;
+    let bytesFreed = 0;
+
+    // Evict oldest entries until we're under the limit
+    for (const [key, data] of entries) {
+      if (this.fallbackMemoryBytes <= maxBytes * 0.8) break; // Stop at 80% capacity
+
+      this.fallbackStorage.delete(key);
+      this.fallbackMemoryBytes -= data.size;
+      bytesFreed += data.size;
+      evicted++;
+    }
+
+    if (evicted > 0) {
+      logger.info(
+        `Evicted ${evicted} entries from fallback storage (freed ${(bytesFreed / 1024 / 1024).toFixed(2)}MB)`
+      );
+    }
+  }
+
+  /**
    * Setup periodic cleanup for fallback storage
    */
   private setupFallbackCleanup(): void {
@@ -119,17 +159,25 @@ export class RedisClientManager {
     this.fallbackCleanupInterval = setInterval(() => {
       const now = Date.now();
       let cleaned = 0;
+      let bytesFreed = 0;
 
       for (const [key, data] of this.fallbackStorage.entries()) {
         if (data.expiry > 0 && now > data.expiry) {
           this.fallbackStorage.delete(key);
+          this.fallbackMemoryBytes -= data.size;
+          bytesFreed += data.size;
           cleaned++;
         }
       }
 
       if (cleaned > 0) {
-        logger.debug(`Cleaned ${cleaned} expired entries from fallback storage`);
+        logger.debug(
+          `Cleaned ${cleaned} expired entries from fallback storage (freed ${(bytesFreed / 1024).toFixed(1)}KB)`
+        );
       }
+
+      // Check memory usage and evict if needed
+      this.evictLRU();
     }, 60000); // Cleanup every minute
   }
 
@@ -227,11 +275,25 @@ export class RedisClientManager {
   }
 
   /**
-   * Fallback storage operations
+   * Fallback storage operations with memory management
    */
   async setFallback(key: string, value: string, ttlSeconds?: number): Promise<void> {
     const expiry = ttlSeconds ? Date.now() + ttlSeconds * 1000 : 0;
-    this.fallbackStorage.set(key, { value, expiry });
+    const size = Buffer.byteLength(value, 'utf8');
+    const now = Date.now();
+
+    // Remove old entry if exists
+    const oldData = this.fallbackStorage.get(key);
+    if (oldData) {
+      this.fallbackMemoryBytes -= oldData.size;
+    }
+
+    // Add new entry
+    this.fallbackStorage.set(key, { value, expiry, size, lastAccess: now });
+    this.fallbackMemoryBytes += size;
+
+    // Evict if over memory limit
+    this.evictLRU();
   }
 
   async getFallback(key: string): Promise<string | null> {
@@ -240,13 +302,21 @@ export class RedisClientManager {
 
     if (data.expiry > 0 && Date.now() > data.expiry) {
       this.fallbackStorage.delete(key);
+      this.fallbackMemoryBytes -= data.size;
       return null;
     }
+
+    // Update last access time for LRU
+    data.lastAccess = Date.now();
 
     return data.value;
   }
 
   async delFallback(key: string): Promise<void> {
+    const data = this.fallbackStorage.get(key);
+    if (data) {
+      this.fallbackMemoryBytes -= data.size;
+    }
     this.fallbackStorage.delete(key);
   }
 
@@ -255,14 +325,20 @@ export class RedisClientManager {
    */
   getStorageStats(): {
     fallbackKeys: number;
+    fallbackMemoryMB: number;
+    fallbackMemoryUsagePercent: number;
     redisConnected: boolean;
     totalOperations: number;
     failedOperations: number;
     successRate: number;
   } {
     const { totalOperations, failedOperations } = this.connectionStatus;
+    const maxBytes = this.MAX_FALLBACK_MEMORY_MB * 1024 * 1024;
+
     return {
       fallbackKeys: this.fallbackStorage.size,
+      fallbackMemoryMB: this.fallbackMemoryBytes / 1024 / 1024,
+      fallbackMemoryUsagePercent: (this.fallbackMemoryBytes / maxBytes) * 100,
       redisConnected: this.connectionStatus.isConnected && !this.connectionStatus.isFallback,
       totalOperations,
       failedOperations,
