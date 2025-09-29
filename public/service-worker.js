@@ -15,7 +15,7 @@ const API_CACHE = 'claudepro-api-v1.2';
 const urlsToCache = [
   '/',
   '/offline.html',
-  '/site.webmanifest',
+  '/manifest.webmanifest',
   '/icon-192.png',
   '/icon-512.png',
   '/favicon.ico',

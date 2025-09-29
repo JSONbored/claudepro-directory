@@ -97,7 +97,7 @@ export const metadata: Metadata = {
       },
     ],
   },
-  manifest: '/site.webmanifest',
+  manifest: '/manifest.webmanifest',
 };
 
 export default async function RootLayout({
@@ -120,7 +120,7 @@ export default async function RootLayout({
         />
 
         {/* PWA Manifest */}
-        <link rel="manifest" href="/site.webmanifest" />
+        <link rel="manifest" href="/manifest.webmanifest" />
 
         {/* iOS Safari PWA Support */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
