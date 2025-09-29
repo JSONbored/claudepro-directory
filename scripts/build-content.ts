@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import crypto from 'crypto';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -31,6 +32,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.join(__dirname, '..');
 const CONTENT_DIR = path.join(ROOT_DIR, 'content');
 const GENERATED_DIR = path.join(ROOT_DIR, 'generated');
+const CACHE_DIR = path.join(ROOT_DIR, '.next', 'cache', 'build-content');
 
 // Build configuration with validation
 const buildConfig: BuildConfig = buildConfigSchema.parse({
@@ -41,6 +43,58 @@ const buildConfig: BuildConfig = buildConfigSchema.parse({
   generateIndex: true,
   invalidateCaches: true,
 });
+
+// Incremental build cache interface
+interface BuildCache {
+  version: string;
+  files: Record<string, { hash: string; mtime: number }>;
+  lastBuild: string;
+}
+
+// Cache utilities for incremental builds
+const buildCache = {
+  async load(): Promise<BuildCache | null> {
+    try {
+      await fs.mkdir(CACHE_DIR, { recursive: true });
+      const cachePath = path.join(CACHE_DIR, 'build-cache.json');
+      const content = await fs.readFile(cachePath, 'utf-8');
+      return JSON.parse(content);
+    } catch {
+      return null;
+    }
+  },
+
+  async save(cache: BuildCache): Promise<void> {
+    try {
+      await fs.mkdir(CACHE_DIR, { recursive: true });
+      const cachePath = path.join(CACHE_DIR, 'build-cache.json');
+      await fs.writeFile(cachePath, JSON.stringify(cache, null, 2), 'utf-8');
+    } catch (error) {
+      scriptLogger.warn(
+        `Failed to save build cache: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  },
+
+  computeHash(content: string): string {
+    return crypto.createHash('sha256').update(content).digest('hex');
+  },
+
+  async getFileInfo(filePath: string): Promise<{ hash: string; mtime: number } | null> {
+    try {
+      const [content, stats] = await Promise.all([
+        fs.readFile(filePath, 'utf-8'),
+        fs.stat(filePath),
+      ]);
+      return {
+        hash: this.computeHash(content),
+        mtime: stats.mtimeMs,
+      };
+    } catch {
+      return null;
+    }
+  },
+};
 
 async function ensureDir(dir: string) {
   try {
@@ -60,7 +114,88 @@ type ValidatedContent =
   | JobContent
   | GuideContent;
 
-async function loadJsonFiles(type: ContentCategory): Promise<ValidatedContent[]> {
+// Process a single file with caching
+async function processJsonFile(
+  file: string,
+  dir: string,
+  validatedType: ContentCategory,
+  _cache: BuildCache | null
+): Promise<ValidatedContent | null> {
+  const filePath = path.join(dir, file);
+  const resolvedFilePath = path.resolve(filePath);
+  const resolvedDir = path.resolve(dir);
+
+  // Security: Additional path validation
+  if (!resolvedFilePath.startsWith(resolvedDir)) {
+    scriptLogger.error(`Security violation: Path traversal attempt in file ${file}`);
+    return null;
+  }
+
+  try {
+    // Check cache for unchanged files (note: cache parameter is reserved for future
+    // incremental skipping optimization where validated output would be cached)
+    const fileInfo = await buildCache.getFileInfo(filePath);
+    if (!fileInfo) return null;
+
+    const content = await fs.readFile(filePath, 'utf-8');
+
+    // Security: Validate content size to prevent DoS
+    if (content.length > 1024 * 1024) {
+      scriptLogger.error(`File ${file} exceeds maximum size limit`);
+      return null;
+    }
+
+    // Parse and validate JSON structure with Zod
+    const rawJsonStructureSchema = z.object({}).passthrough();
+    let parsedData: z.infer<typeof rawJsonStructureSchema>;
+    try {
+      const rawParsed = JSON.parse(content);
+      parsedData = rawJsonStructureSchema.parse(rawParsed);
+    } catch (parseError) {
+      scriptLogger.error(
+        `JSON parse error in ${file}: ${parseError instanceof Error ? parseError.message : String(parseError)}`
+      );
+      return null;
+    }
+
+    // Auto-generate slug from filename if not provided
+    if (!parsedData.slug) {
+      parsedData.slug = generateSlugFromFilename(file);
+    }
+
+    // Auto-generate title from slug if not provided (for display purposes)
+    if (!parsedData.title && typeof parsedData.slug === 'string') {
+      parsedData.title = slugToTitle(parsedData.slug);
+    }
+
+    // Use category-specific validation instead of generic schema
+    try {
+      const validatedItem = validateContentByCategory(parsedData, validatedType);
+      return validatedItem;
+    } catch (validationError) {
+      if (validationError instanceof z.ZodError) {
+        scriptLogger.error(
+          `Category-specific validation failed for ${file} (type: ${validatedType}): ${validationError.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ')}`
+        );
+      } else {
+        scriptLogger.error(
+          `Validation error for ${file}: ${validationError instanceof Error ? validationError.message : String(validationError)}`
+        );
+      }
+      return null;
+    }
+  } catch (fileError) {
+    scriptLogger.error(
+      `Error reading file ${file}: ${fileError instanceof Error ? fileError.message : String(fileError)}`
+    );
+    return null;
+  }
+}
+
+async function loadJsonFiles(
+  type: ContentCategory,
+  cache: BuildCache | null
+): Promise<ValidatedContent[]> {
   // Validate the content category with strict validation
   const validatedType = contentCategorySchema.parse(type);
   const dir = path.join(buildConfig.contentDir, validatedType);
@@ -85,74 +220,17 @@ async function loadJsonFiles(type: ContentCategory): Promise<ValidatedContent[]>
         f.match(/^[a-zA-Z0-9\-_]+\.json$/)
     );
 
-    const items = await Promise.all(
-      jsonFiles.map(async (file) => {
-        const filePath = path.join(dir, file);
+    // Process files in parallel with concurrency limit (10 at a time for optimal CPU usage)
+    const BATCH_SIZE = 10;
+    const items: (ValidatedContent | null)[] = [];
 
-        // Security: Additional path validation
-        const resolvedFilePath = path.resolve(filePath);
-        if (!resolvedFilePath.startsWith(resolvedDir)) {
-          scriptLogger.error(`Security violation: Path traversal attempt in file ${file}`);
-          return null;
-        }
-
-        try {
-          const content = await fs.readFile(filePath, 'utf-8');
-
-          // Security: Validate content size to prevent DoS
-          if (content.length > 1024 * 1024) {
-            // 1MB limit
-            scriptLogger.error(`File ${file} exceeds maximum size limit`);
-            return null;
-          }
-
-          // Parse and validate JSON structure with Zod
-          const rawJsonStructureSchema = z.object({}).passthrough();
-          let parsedData: z.infer<typeof rawJsonStructureSchema>;
-          try {
-            const rawParsed = JSON.parse(content);
-            parsedData = rawJsonStructureSchema.parse(rawParsed);
-          } catch (parseError) {
-            scriptLogger.error(
-              `JSON parse error in ${file}: ${parseError instanceof Error ? parseError.message : String(parseError)}`
-            );
-            return null;
-          }
-
-          // Auto-generate slug from filename if not provided
-          if (!parsedData.slug) {
-            parsedData.slug = generateSlugFromFilename(file);
-          }
-
-          // Auto-generate title from slug if not provided (for display purposes)
-          if (!parsedData.title && typeof parsedData.slug === 'string') {
-            parsedData.title = slugToTitle(parsedData.slug);
-          }
-
-          // Use category-specific validation instead of generic schema
-          try {
-            const validatedItem = validateContentByCategory(parsedData, validatedType);
-            return validatedItem;
-          } catch (validationError) {
-            if (validationError instanceof z.ZodError) {
-              scriptLogger.error(
-                `Category-specific validation failed for ${file} (type: ${validatedType}): ${validationError.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ')}`
-              );
-            } else {
-              scriptLogger.error(
-                `Validation error for ${file}: ${validationError instanceof Error ? validationError.message : String(validationError)}`
-              );
-            }
-            return null;
-          }
-        } catch (fileError) {
-          scriptLogger.error(
-            `Error reading file ${file}: ${fileError instanceof Error ? fileError.message : String(fileError)}`
-          );
-          return null;
-        }
-      })
-    );
+    for (let i = 0; i < jsonFiles.length; i += BATCH_SIZE) {
+      const batch = jsonFiles.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.all(
+        batch.map((file) => processJsonFile(file, dir, validatedType, cache))
+      );
+      items.push(...batchResults);
+    }
 
     // Filter out null values with type safety
     const validItems = items.filter((item): item is NonNullable<typeof item> => item !== null);
@@ -169,7 +247,7 @@ async function loadJsonFiles(type: ContentCategory): Promise<ValidatedContent[]>
   }
 }
 
-async function generateTypeScript(): Promise<GeneratedFile[]> {
+async function generateTypeScript(cache: BuildCache | null): Promise<GeneratedFile[]> {
   await ensureDir(buildConfig.generatedDir);
 
   const allContent: Record<ContentCategory, ValidatedContent[]> = {} as Record<
@@ -178,10 +256,10 @@ async function generateTypeScript(): Promise<GeneratedFile[]> {
   >;
   const generatedFiles: GeneratedFile[] = [];
 
-  // Load all content with category-specific validation
-  for (const type of buildConfig.contentTypes) {
+  // Load all content in parallel with category-specific validation
+  const loadPromises = buildConfig.contentTypes.map(async (type) => {
     try {
-      const items = await loadJsonFiles(type);
+      const items = await loadJsonFiles(type, cache);
       allContent[type] = items;
       scriptLogger.success(`Processed ${items.length} ${type} items`);
     } catch (error) {
@@ -190,7 +268,10 @@ async function generateTypeScript(): Promise<GeneratedFile[]> {
       );
       allContent[type] = [];
     }
-  }
+  });
+
+  // Execute all category loads in parallel
+  await Promise.all(loadPromises);
 
   // Generate separate files for each content type with metadata only
   for (const type of buildConfig.contentTypes) {
@@ -385,12 +466,51 @@ async function build(): Promise<BuildResult> {
   const errors: string[] = [];
 
   try {
-    // Generate TypeScript files with validation
-    const generatedFiles = await generateTypeScript();
+    // Load existing cache
+    const cache = await buildCache.load();
+    if (cache) {
+      scriptLogger.info(`Loaded build cache from ${cache.lastBuild}`);
+    }
+
+    // Generate TypeScript files with validation and caching
+    const generatedFiles = await generateTypeScript(cache);
     scriptLogger.success(`Generated ${generatedFiles.length} TypeScript files`);
 
-    // Build content index
-    const index = await contentIndexer.buildIndex();
+    // Build content index and save in parallel
+    const [index] = await Promise.all([
+      contentIndexer.buildIndex(),
+      // Update cache with all processed files
+      (async () => {
+        const newCache: BuildCache = {
+          version: '1.0.0',
+          files: {},
+          lastBuild: new Date().toISOString(),
+        };
+
+        // Collect all file paths from all content directories
+        for (const type of buildConfig.contentTypes) {
+          const dir = path.join(buildConfig.contentDir, type);
+          try {
+            const files = await fs.readdir(dir);
+            const jsonFiles = files.filter((f) => f.endsWith('.json') && !f.includes('template'));
+
+            await Promise.all(
+              jsonFiles.map(async (file) => {
+                const filePath = path.join(dir, file);
+                const fileInfo = await buildCache.getFileInfo(filePath);
+                if (fileInfo) {
+                  newCache.files[filePath] = fileInfo;
+                }
+              })
+            );
+          } catch {
+            // Directory might not exist
+          }
+        }
+
+        await buildCache.save(newCache);
+      })(),
+    ]);
 
     // Save both the original monolithic index and new split indices
     await Promise.all([
@@ -425,6 +545,7 @@ async function build(): Promise<BuildResult> {
     };
 
     scriptLogger.success('Build completed successfully');
+    scriptLogger.info(`Build time: ${duration.toFixed(2)}ms`);
     return result;
   } catch (error) {
     const duration = performance.now() - startTime;
