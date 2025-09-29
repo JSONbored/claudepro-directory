@@ -6,11 +6,12 @@
 import fs from 'fs/promises';
 import matter from 'gray-matter';
 import path from 'path';
+import { MAIN_CONTENT_CATEGORIES } from '@/lib/constants';
 import { logger } from '../logger';
 import type { ContentCategory } from '../schemas/components/content-item.schema';
 import { basicErrorSchema } from '../schemas/error.schema';
 import { logContextSchema } from '../schemas/logger.schema';
-import type { ContentIndex, ContentItem } from './service';
+import type { CategorizedContentIndex, ContentIndex, ContentItem } from './service';
 
 const CONTENT_DIRECTORIES = {
   // Main content
@@ -263,6 +264,99 @@ export class ContentIndexer {
     const outputPath = path.join(process.cwd(), 'generated', 'content-index.json');
 
     await fs.writeFile(outputPath, JSON.stringify(index, null, 2), 'utf-8');
+  }
+
+  /**
+   * Save split index files by category for better performance
+   * This reduces the monolithic 526KB file into smaller, category-specific files
+   * CONSOLIDATION: Accepts both ContentIndex and CategorizedContentIndex for flexibility
+   */
+  async saveSplitIndex(index: ContentIndex | CategorizedContentIndex): Promise<void> {
+    const generatedDir = path.join(process.cwd(), 'generated');
+
+    // CONSOLIDATION: Transform flat items into categorized structure if needed
+    let categories: Record<string, ContentItem[]>;
+    if ('categories' in index && index.categories) {
+      categories = index.categories as Record<string, ContentItem[]>;
+    } else {
+      // Transform flat items array into categorized structure
+      categories = index.items.reduce(
+        (acc, item) => {
+          if (!acc[item.category]) {
+            acc[item.category] = [];
+          }
+          acc[item.category]?.push(item);
+          return acc;
+        },
+        {} as Record<string, ContentItem[]>
+      );
+    }
+
+    // CONSOLIDATION: Use centralized category constants instead of hardcoded list
+    const mainCategories = MAIN_CONTENT_CATEGORIES;
+
+    // Save category-specific index files
+    const savePromises = mainCategories.map(async (category) => {
+      const categoryItems = categories[category] || [];
+      const categoryIndex = {
+        items: categoryItems,
+        category,
+        count: categoryItems.length,
+        generated: index.generated,
+        version: index.version,
+      };
+
+      const outputPath = path.join(generatedDir, `content-index-${category}.json`);
+      await fs.writeFile(outputPath, JSON.stringify(categoryIndex, null, 2), 'utf-8');
+
+      logger.info(`Generated ${category} index: ${categoryItems.length} items`, {
+        category,
+        count: categoryItems.length,
+        filePath: outputPath,
+      });
+    });
+
+    // Save remaining categories in a single "other" file
+    const otherCategories = Object.keys(categories).filter(
+      (cat) => !mainCategories.includes(cat as (typeof mainCategories)[number])
+    );
+
+    const otherItems = otherCategories.flatMap((cat) => categories[cat as ContentCategory] || []);
+    if (otherItems.length > 0) {
+      const otherIndex = {
+        items: otherItems,
+        categories: otherCategories,
+        count: otherItems.length,
+        generated: index.generated,
+        version: index.version,
+      };
+
+      const otherPath = path.join(generatedDir, 'content-index-other.json');
+      savePromises.push(fs.writeFile(otherPath, JSON.stringify(otherIndex, null, 2), 'utf-8'));
+    }
+
+    // Save a lightweight summary index for quick navigation
+    const summaryIndex = {
+      categories: Object.keys(categories).map((category) => ({
+        category,
+        count: categories[category as ContentCategory]?.length || 0,
+      })),
+      totalItems: index.items.length,
+      generated: index.generated,
+      version: index.version,
+    };
+
+    const summaryPath = path.join(generatedDir, 'content-index-summary.json');
+    savePromises.push(fs.writeFile(summaryPath, JSON.stringify(summaryIndex, null, 2), 'utf-8'));
+
+    // Execute all saves in parallel
+    await Promise.all(savePromises);
+
+    logger.info('Split content index generation completed', {
+      totalFiles: savePromises.length,
+      mainCategories: mainCategories.length,
+      otherCategories: otherCategories.length,
+    });
   }
 
   /**

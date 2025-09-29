@@ -111,21 +111,44 @@ export const CLAUDE_CONFIG = claudeConfigSchema.parse({
  */
 import { contentCategorySchema } from '@/lib/schemas/shared.schema';
 
-// Create an object with all valid categories
+// CONSOLIDATION: Use complete category list from centralized schema instead of partial list
+// This eliminates the type mismatch between constants and actual categories used
 export const CONTENT_CATEGORIES = {
+  // Core content types (have dedicated directories in /content)
   agents: 'agents',
   mcp: 'mcp',
   rules: 'rules',
   commands: 'commands',
   hooks: 'hooks',
+  // SEO content types (in /seo directory)
   guides: 'guides',
+  tutorials: 'tutorials',
+  comparisons: 'comparisons',
+  workflows: 'workflows',
+  'use-cases': 'use-cases',
+  troubleshooting: 'troubleshooting',
+  categories: 'categories',
+  collections: 'collections',
+  // Special types
   jobs: 'jobs',
 } as const;
 
-// Validate each category exists in the schema
+// Validate each category exists in the centralized schema
 Object.values(CONTENT_CATEGORIES).forEach((category) => {
   contentCategorySchema.parse(category);
 });
+
+// CONSOLIDATION: Export unified main content categories for splitting logic
+export const MAIN_CONTENT_CATEGORIES = ['hooks', 'mcp', 'commands', 'rules', 'agents'] as const;
+
+// CONSOLIDATION: Export SEO categories for better organization
+export const SEO_CATEGORIES = [
+  'tutorials',
+  'comparisons',
+  'workflows',
+  'use-cases',
+  'troubleshooting',
+] as const;
 
 /**
  * UI Constants

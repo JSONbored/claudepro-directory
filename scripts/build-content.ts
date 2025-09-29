@@ -362,7 +362,12 @@ async function build(): Promise<BuildResult> {
 
     // Build content index
     const index = await contentIndexer.buildIndex();
-    await contentIndexer.saveIndex(index);
+
+    // Save both the original monolithic index and new split indices
+    await Promise.all([
+      contentIndexer.saveIndex(index), // Keep original for backward compatibility
+      contentIndexer.saveSplitIndex(index), // New split files for performance
+    ]);
     console.log(`✅ Built content index with ${index.items.length} items`);
 
     // Invalidate caches after build

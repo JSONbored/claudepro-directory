@@ -43,6 +43,12 @@ const contentIndexSchema = z
   })
   .passthrough();
 
+// CONSOLIDATION: Extended schema for split index functionality
+// This supports both flat items array AND categorized structure
+const categorizedContentIndexSchema = contentIndexSchema.extend({
+  categories: z.record(z.string(), z.array(unifiedContentItemSchema)).optional(),
+});
+
 const relatedContentInputSchema = z.object({
   currentPath: z.string().default('/'),
   currentCategory: z.string().default('tutorials'),
@@ -110,6 +116,7 @@ const relatedContentViewEventSchema = z.object({
 // Type exports
 export type ContentItem = z.infer<typeof unifiedContentItemSchema>;
 export type ContentIndex = z.infer<typeof contentIndexSchema>;
+export type CategorizedContentIndex = z.infer<typeof categorizedContentIndexSchema>;
 export type RelatedContentInput = z.infer<typeof relatedContentInputSchema>;
 export type RelatedContentItem = z.infer<typeof relatedContentItemSchema>;
 export type RelatedContentResponse = z.infer<typeof relatedContentResponseSchema>;
