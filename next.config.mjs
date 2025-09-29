@@ -104,9 +104,8 @@ const nextConfig = {
     // Note: optimizeCss disabled due to deprecated critters dependency in Next.js 15.5.x
     // CSS optimization handled by TailwindCSS v4 and PostCSS instead
     // optimizeCss: true,
-    // React Compiler disabled - causes CSP eval() errors in production
-    // Not needed for content-heavy sites with limited interactivity
-    reactCompiler: false,
+    // React Compiler enabled for better performance and automatic optimizations
+    reactCompiler: true,
     webVitalsAttribution: ['CLS', 'FCP', 'FID', 'INP', 'LCP', 'TTFB'],
     gzipSize: true,
     optimizePackageImports: [
