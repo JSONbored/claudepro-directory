@@ -349,7 +349,40 @@ export default validation;
  * Provides secure sanitization for user input
  * Consolidated from lib/sanitizer.ts for better maintainability
  */
-import DOMPurify from 'isomorphic-dompurify';
+
+/**
+ * Lightweight HTML tag stripper
+ * Removes all HTML tags from a string without using heavy dependencies
+ */
+function stripHtmlTags(str: string): string {
+  // Remove script and style content entirely
+  let result = str.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  result = result.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+
+  // Remove all HTML tags
+  result = result.replace(/<[^>]*>/g, '');
+
+  // Decode HTML entities
+  const textarea = typeof document !== 'undefined' ? document.createElement('textarea') : null;
+  if (textarea) {
+    textarea.innerHTML = result;
+    result = textarea.value;
+  } else {
+    // Server-side fallback for common entities
+    result = result
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#039;/g, "'")
+      .replace(/&#x27;/g, "'")
+      .replace(/&#x2F;/g, '/')
+      .replace(/&#x5C;/g, '\\')
+      .replace(/&#96;/g, '`');
+  }
+
+  return result;
+}
 
 export const sanitizers = {
   /**
@@ -357,12 +390,8 @@ export const sanitizers = {
    * Allows only alphanumeric characters, spaces, hyphens, and underscores
    */
   sanitizeSearchQuery: (query: string): string => {
-    // First, use DOMPurify to remove any HTML/Script tags
-    const htmlSanitized = DOMPurify.sanitize(query, {
-      ALLOWED_TAGS: [],
-      ALLOWED_ATTR: [],
-      KEEP_CONTENT: true,
-    });
+    // First, remove any HTML/Script tags
+    const htmlSanitized = stripHtmlTags(query);
 
     // Then apply additional restrictions for search queries
     // Allow: letters, numbers, spaces, hyphens, underscores, dots, and common search operators
@@ -379,12 +408,7 @@ export const sanitizers = {
    * Strips all HTML and limits length
    */
   sanitizeFormInput: (input: string, maxLength = 500): string => {
-    const sanitized = DOMPurify.sanitize(input, {
-      ALLOWED_TAGS: [],
-      ALLOWED_ATTR: [],
-      KEEP_CONTENT: true,
-    });
-
+    const sanitized = stripHtmlTags(input);
     return sanitized.trim().substring(0, maxLength);
   },
 
@@ -447,10 +471,7 @@ export const sanitizers = {
    * Useful for meta descriptions and previews
    */
   createSafeExcerpt: (html: string, maxLength = 160): string => {
-    const textOnly = DOMPurify.sanitize(html, {
-      ALLOWED_TAGS: [],
-      KEEP_CONTENT: true,
-    });
+    const textOnly = stripHtmlTags(html);
 
     return textOnly
       .replace(/\s+/g, ' ') // Normalize whitespace

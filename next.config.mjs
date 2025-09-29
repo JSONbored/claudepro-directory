@@ -7,7 +7,7 @@ const __dirname = dirname(__filename);
 
 // Only import bundle analyzer when needed
 const withBundleAnalyzer = process.env.ANALYZE === 'true'
-  ? (await import('@next/bundle-analyzer')).default({ enabled: true })
+  ? (await import('@next/bundle-analyzer')).default
   : (config) => config;
 
 /** @type {import('next').NextConfig} */
@@ -113,6 +113,24 @@ const nextConfig = {
       'lucide-react',
       '@radix-ui/react-icons',
       'fuse.js',
+      'marked',
+      'react-window',
+      'embla-carousel-react',
+      'sonner',
+      'class-variance-authority',
+      'clsx',
+      'tailwind-merge',
+      '@vercel/analytics',
+      'web-vitals',
+      'zod',
+      'gray-matter',
+      'next-mdx-remote',
+      'next-themes',
+      'react-error-boundary',
+      'rehype-pretty-code',
+      'rehype-slug',
+      'remark-gfm',
+      'shiki',
       // Add all Radix UI packages for aggressive tree-shaking
       '@radix-ui/react-accordion',
       '@radix-ui/react-alert-dialog',
@@ -196,7 +214,7 @@ const nextConfig = {
         splitChunks: {
           chunks: 'all',
           minSize: 20000,
-          maxSize: 244000,
+          // Remove maxSize to prevent excessive splitting
           cacheGroups: {
             // React and core libraries
             react: {
@@ -216,28 +234,9 @@ const nextConfig = {
             },
             radixComponents: {
               test: /[\\/]node_modules[\\/]@radix-ui[\\/](?!react-primitive|react-compose-refs|react-context|react-id|react-slot|react-use-|react-portal)/,
-              name(module) {
-                // Create separate chunks for each Radix component for maximum tree-shaking
-                const match = module.context.match(/@radix-ui[\\/](react-[^\\/]+)/);
-                if (match) {
-                  const componentName = match[1].replace('react-', '');
-                  // Group related components together
-                  if (['dialog', 'alert-dialog', 'popover', 'hover-card'].includes(componentName)) {
-                    return 'radix-dialogs';
-                  }
-                  if (['dropdown-menu', 'context-menu', 'menubar', 'navigation-menu'].includes(componentName)) {
-                    return 'radix-menus';
-                  }
-                  if (['select', 'checkbox', 'radio-group', 'switch', 'slider'].includes(componentName)) {
-                    return 'radix-forms';
-                  }
-                  return `radix-${componentName}`;
-                }
-                return 'radix-misc';
-              },
+              name: 'radix-components',
               priority: 18,
-              chunks: 'async',
-              maxSize: 50000, // Keep Radix chunks small for better tree-shaking
+              chunks: 'all',
             },
             // Lucide icons (large icon library)
             lucide: {
@@ -253,20 +252,12 @@ const nextConfig = {
               priority: 12,
               chunks: 'async',
             },
-            // Vendor libraries
+            // Vendor libraries - consolidate into single chunk
             vendor: {
-              test: /[\\/]node_modules[\\/](?!react|react-dom|scheduler|@radix-ui|lucide-react|@tremor)[\\/]/,
-              name(module, chunks, cacheGroupKey) {
-                // Create separate chunks for large vendors
-                const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)?.[1];
-                if (packageName && ['next', 'framer-motion', '@vercel'].includes(packageName.split('/')[0])) {
-                  return `vendors-${packageName.split('/')[0]}`;
-                }
-                return 'vendors';
-              },
+              test: /[\\/]node_modules[\\/](?!react|react-dom|scheduler|@radix-ui|lucide-react)[\\/]/,
+              name: 'vendors',
               priority: 10,
               chunks: 'all',
-              maxSize: 200000,
             },
             // Application content chunks
             content: {
@@ -274,16 +265,15 @@ const nextConfig = {
               name: 'content',
               priority: 8,
               chunks: 'all',
-              maxSize: 150000, // Smaller content chunks for better caching
             },
-            // Common application code
+            // Common application code - consolidate all shared code
             common: {
               name: 'common',
               minChunks: 2,
               priority: 5,
               chunks: 'all',
               reuseExistingChunk: true,
-              maxSize: 200000,
+              enforce: true, // Force into single chunk
             },
           },
         },
@@ -324,19 +314,8 @@ const nextConfig = {
         },
       };
 
-      // Add bundle analyzer for ANALYZE builds
-      if (process.env.ANALYZE === 'true') {
-        const { BundleAnalyzerPlugin } = webpack;
-        config.plugins.push(
-          new BundleAnalyzerPlugin({
-            analyzerMode: 'static',
-            reportFilename: './analyze/client.html',
-            openAnalyzer: false,
-            generateStatsFile: true,
-            statsFilename: './analyze/stats.json',
-          })
-        );
-      }
+      // Bundle analyzer is handled by @next/bundle-analyzer wrapper
+      // No need for manual webpack plugin configuration
     }
 
     // Preload critical resources
@@ -470,4 +449,6 @@ const nextConfig = {
   },
 };
 
-export default withBundleAnalyzer(nextConfig);
+export default process.env.ANALYZE === 'true'
+  ? withBundleAnalyzer({ enabled: true })(nextConfig)
+  : nextConfig;

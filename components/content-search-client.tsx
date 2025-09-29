@@ -1,10 +1,19 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useCallback, useMemo, useState } from 'react';
 import { ConfigCard } from '@/components/config-card';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { InfiniteScrollContainer } from '@/components/infinite-scroll-container';
-import { UnifiedSearch } from '@/components/unified-search';
+
+const UnifiedSearch = dynamic(
+  () => import('@/components/unified-search').then((mod) => ({ default: mod.UnifiedSearch })),
+  {
+    ssr: false,
+    loading: () => <div className="h-14 bg-muted/50 rounded-lg animate-pulse" />,
+  }
+);
+
 import { sortAlphabetically } from '@/lib/content-sorting';
 import { getIconByName } from '@/lib/icons';
 import type { ContentSearchClientProps, FilterState } from '@/lib/schemas/component.schema';

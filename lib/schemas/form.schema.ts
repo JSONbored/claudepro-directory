@@ -3,8 +3,8 @@
  * Security-first approach to prevent injection attacks and data corruption
  */
 
-import DOMPurify from 'isomorphic-dompurify';
 import { z } from 'zod';
+import { DOMPurify } from '../sanitizer';
 import { VALIDATION_PATTERNS } from '../validation';
 
 // GitHub-related schemas for form submissions

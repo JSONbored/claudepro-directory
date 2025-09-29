@@ -1,34 +1,51 @@
 'use client';
 
 /**
- * MetricsDisplay - KPI metrics visualization using Tremor
- * Used in 2 MDX files across the codebase - Specialized component for business metrics
+ * MetricsDisplay - Lightweight KPI metrics visualization
+ * Replaces Tremor with custom components for better performance
  */
 
-import dynamic from 'next/dynamic';
+import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from 'lucide-react';
 import { type MetricsDisplayProps, metricsDisplayPropsSchema } from '@/lib/schemas/shared.schema';
+import { cn } from '@/lib/utils';
 
-// Dynamic imports for Tremor components to reduce bundle size
-// These are only loaded when MetricsDisplay component is used
-const BadgeDelta = dynamic(
-  () => import('@tremor/react').then((mod) => ({ default: mod.BadgeDelta })),
-  { ssr: false }
-);
-const Flex = dynamic(() => import('@tremor/react').then((mod) => ({ default: mod.Flex })), {
-  ssr: false,
-});
-const Grid = dynamic(() => import('@tremor/react').then((mod) => ({ default: mod.Grid })), {
-  ssr: false,
-});
-const Metric = dynamic(() => import('@tremor/react').then((mod) => ({ default: mod.Metric })), {
-  ssr: false,
-});
-const Text = dynamic(() => import('@tremor/react').then((mod) => ({ default: mod.Text })), {
-  ssr: false,
-});
-const TremorCard = dynamic(() => import('@tremor/react').then((mod) => ({ default: mod.Card })), {
-  ssr: false,
-});
+// Lightweight Badge component for delta display
+function BadgeDelta({
+  deltaType,
+  className,
+}: {
+  deltaType: 'increase' | 'decrease' | 'unchanged';
+  className?: string;
+}) {
+  const icon =
+    deltaType === 'increase' ? (
+      <ArrowUpIcon className="w-3 h-3" />
+    ) : deltaType === 'decrease' ? (
+      <ArrowDownIcon className="w-3 h-3" />
+    ) : (
+      <MinusIcon className="w-3 h-3" />
+    );
+
+  const colorClass =
+    deltaType === 'increase'
+      ? 'text-green-600 bg-green-100'
+      : deltaType === 'decrease'
+        ? 'text-red-600 bg-red-100'
+        : 'text-gray-600 bg-gray-100';
+
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs',
+        colorClass,
+        className
+      )}
+    >
+      {icon}
+      <span>{deltaType}</span>
+    </span>
+  );
+}
 
 export function MetricsDisplay(props: MetricsDisplayProps) {
   const validated = metricsDisplayPropsSchema.parse(props);
@@ -52,7 +69,8 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
         </div>
       )}
 
-      <Grid numItemsMd={2} numItemsLg={3} className="gap-6">
+      {/* Grid layout - responsive columns */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {validMetrics.map((metric, index) => {
           // Support both new and old formats
           const metricLabel = metric.label || metric.metric || `Metric ${index + 1}`;
@@ -70,26 +88,34 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
                 : 'from-gray-500/10 to-slate-500/10 border-gray-500/20 hover:border-gray-500/40';
 
           return (
-            <TremorCard
+            <div
               key={`${metricLabel}-${metricValue}`}
-              className={`bg-gradient-to-br ${gradientClass} border backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl`}
-            >
-              <Text className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                {metricLabel}
-              </Text>
-              <Metric className="mt-2 text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                {metricValue}
-              </Metric>
-              {metricChange && (
-                <Flex className="mt-4 items-center">
-                  <BadgeDelta deltaType={deltaType} className="font-semibold" />
-                  <Text className="ml-2 text-sm font-medium">{metricChange}</Text>
-                </Flex>
+              className={cn(
+                'rounded-lg p-6 bg-gradient-to-br border backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl',
+                gradientClass
               )}
-            </TremorCard>
+            >
+              {/* Metric Label */}
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                {metricLabel}
+              </p>
+
+              {/* Metric Value */}
+              <p className="mt-2 text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+                {metricValue}
+              </p>
+
+              {/* Change indicator */}
+              {metricChange && (
+                <div className="mt-4 flex items-center gap-2">
+                  <BadgeDelta deltaType={deltaType} className="font-semibold" />
+                  <span className="text-sm font-medium text-muted-foreground">{metricChange}</span>
+                </div>
+              )}
+            </div>
           );
         })}
-      </Grid>
+      </div>
     </section>
   );
 }

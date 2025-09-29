@@ -1,15 +1,23 @@
 'use client';
 
 import { Briefcase, ExternalLink, Search } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-
 import { ConfigCard } from '@/components/config-card';
 import { InfiniteScrollContainer } from '@/components/infinite-scroll-container';
 import { LazyConfigCard, LazyInfiniteScrollContainer } from '@/components/lazy-components';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UnifiedSearch } from '@/components/unified-search';
+
+const UnifiedSearch = dynamic(
+  () => import('@/components/unified-search').then((mod) => ({ default: mod.UnifiedSearch })),
+  {
+    ssr: false,
+    loading: () => <div className="h-14 bg-muted/50 rounded-lg animate-pulse" />,
+  }
+);
+
 import { useSearch } from '@/hooks/use-search';
 import type { HomePageClientProps, UnifiedContentItem } from '@/lib/schemas/component.schema';
 

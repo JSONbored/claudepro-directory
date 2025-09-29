@@ -3,9 +3,9 @@
  * Used for converting markdown to safe HTML in production
  */
 
-import DOMPurify from 'isomorphic-dompurify';
 import { marked } from 'marked';
 import { logger } from './logger';
+import { DOMPurify } from './sanitizer';
 import {
   type MarkdownContent,
   type MarkdownParseOptions,
