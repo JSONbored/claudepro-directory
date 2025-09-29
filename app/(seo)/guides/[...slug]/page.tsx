@@ -1,15 +1,34 @@
 import { ArrowLeft, BookOpen, Calendar, FileText, Tag, Users, Zap } from 'lucide-react';
 import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import { z } from 'zod';
 import { ContentErrorBoundary } from '@/components/content-error-boundary';
-import { MDXRenderer } from '@/components/mdx-renderer';
+
+// Dynamically import MDXRenderer to reduce Edge Function bundle size
+const MDXRenderer = dynamic(
+  () => import('@/components/mdx-renderer').then((mod) => ({ default: mod.MDXRenderer })),
+  {
+    ssr: true,
+    loading: () => <div className="animate-pulse bg-muted/20 rounded-lg h-96" />,
+  }
+);
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { UnifiedSidebar } from '@/components/unified-sidebar';
+
+// Dynamically import UnifiedSidebar to reduce Edge Function bundle size
+const UnifiedSidebar = dynamic(
+  () => import('@/components/unified-sidebar').then((mod) => ({ default: mod.UnifiedSidebar })),
+  {
+    ssr: true,
+    loading: () => <div className="animate-pulse bg-muted/20 rounded-lg h-96" />,
+  }
+);
+
 import { ViewTracker } from '@/components/view-tracker';
 import { APP_CONFIG } from '@/lib/constants';
 import { logger } from '@/lib/logger';
