@@ -184,7 +184,7 @@
   --shadow-xl: var(--dark-shadow-xl);
   --shadow-2xl: var(--dark-shadow-2xl);
 
-  /* Legacy Tailwind mappings */
+  /* Tailwind CSS variable mappings for shadcn/ui compatibility */
   --color-background: var(--color-bg-primary);
   --color-foreground: var(--color-text-primary);
   --color-card: var(--color-bg-secondary);
@@ -294,14 +294,6 @@
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-
-  /* ========================================
-     TAILWIND LEGACY COLOR MAPPINGS
-     Maps to CSS variables for backward compatibility
-     ======================================== */
-
-  /* Note: These are mapped dynamically below via media queries and data-theme attributes.
-     The @theme block defines the namespace structure, actual values set in :root */
 }
 
 /* ========================================
@@ -461,22 +453,22 @@
 
 @layer base {
   :root {
-    /* Custom CSS Variables for Gradients and Legacy Support */
+    /* Custom gradient variables */
     --gradient-primary: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
     --gradient-hero: linear-gradient(135deg, var(--color-bg-primary), var(--color-bg-secondary));
     --gradient-card: linear-gradient(145deg, var(--color-bg-secondary), var(--color-bg-tertiary));
     --gradient-border: linear-gradient(90deg, transparent, var(--color-accent) / 0.2, transparent);
 
-    /* Legacy Shadow Variables */
+    /* Shadow effects */
     --shadow-glow: 0 0 20px var(--color-accent) / 0.1;
     --shadow-orange: 0 0 20px var(--color-accent) / 0.3;
 
-    /* Legacy Animation Variables */
+    /* Transition presets */
     --transition-fast: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-normal: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
 
-    /* Legacy Font Variables */
+    /* Monospace font family */
     --font-mono: "JetBrains Mono", "SF Mono", Consolas, "Monaco", monospace;
   }
 

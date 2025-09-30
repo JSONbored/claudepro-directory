@@ -40,9 +40,6 @@ const SAFE_ERROR_MESSAGES = {
   default: 'An error occurred while processing your request',
 } as const;
 
-// Re-export types from schema for backward compatibility
-export type { ErrorSeverity } from '@/lib/schemas';
-
 /**
  * Error sanitization utility class
  */

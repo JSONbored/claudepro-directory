@@ -7,7 +7,7 @@ import { hooksMetadata } from '../generated/hooks-metadata.js';
 import { mcpMetadata } from '../generated/mcp-metadata.js';
 import { rulesMetadata } from '../generated/rules-metadata.js';
 import { APP_CONFIG } from '../lib/constants';
-import { scriptLogger } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
 import type { ContentItem } from '../lib/schemas/content';
 
 // Define SitemapUrl type locally
@@ -155,19 +155,19 @@ Crawl-delay: 1`;
 
 async function main() {
   try {
-    scriptLogger.progress('Generating sitemap...');
+    logger.progress('Generating sitemap...');
     const sitemap = await generateSitemap();
     writeFileSync('public/sitemap.xml', sitemap, 'utf-8');
-    scriptLogger.success('Sitemap generated successfully');
+    logger.success('Sitemap generated successfully');
 
-    scriptLogger.progress('Generating robots.txt...');
+    logger.progress('Generating robots.txt...');
     const robotsTxt = generateRobotsTxt();
     writeFileSync('public/robots.txt', robotsTxt, 'utf-8');
-    scriptLogger.success('Robots.txt generated successfully');
+    logger.success('Robots.txt generated successfully');
 
-    scriptLogger.log(`Generated ${sitemap.match(/<url>/g)?.length || 0} URLs in sitemap`);
+    logger.log(`Generated ${sitemap.match(/<url>/g)?.length || 0} URLs in sitemap`);
   } catch (error) {
-    scriptLogger.failure(
+    logger.failure(
       `Failed to generate sitemap/robots.txt: ${error instanceof Error ? error.message : String(error)}`
     );
     process.exit(1);

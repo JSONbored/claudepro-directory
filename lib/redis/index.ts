@@ -7,6 +7,7 @@
 export type {
   CacheInvalidationResult,
   RateLimitTracking,
+  RedisConnectionStatus,
 } from '../schemas/cache.schema';
 // Cache service
 export {
@@ -17,7 +18,7 @@ export {
   createCacheService,
 } from './cache';
 // Core Redis client
-export { isRedisHealthy, type RedisConnectionStatus, redisClient } from './client';
+export { isRedisHealthy, redisClient } from './client';
 // High-level rate limiting service
 export {
   createRateLimiter,

@@ -6,7 +6,7 @@
 
 import { readdirSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
-import { scriptLogger } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
 
 // =============================================================================
 // Content Types and Interfaces
@@ -151,7 +151,7 @@ export class ContentOptimizer {
           }
         }
       } catch (error) {
-        scriptLogger.error(
+        logger.error(
           `Error reading directory ${dir}: ${error instanceof Error ? error.message : String(error)}`
         );
       }
@@ -715,38 +715,38 @@ export async function optimizeContentCLI(filePath?: string): Promise<void> {
   if (filePath) {
     // Optimize single file
     const result = await optimizer.optimizeContent(filePath);
-    scriptLogger.log(`\n📊 Content Optimization Report: ${result.filePath}`);
-    scriptLogger.log(`📂 Type: ${result.contentType}`);
-    scriptLogger.log(`🔍 SEO Score: ${result.seoScore}/100`);
-    scriptLogger.log(`🤖 Citation Score: ${result.citationScore}/100`);
-    scriptLogger.log(`📅 Freshness Score: ${result.freshnessScore}/100`);
+    logger.log(`\n📊 Content Optimization Report: ${result.filePath}`);
+    logger.log(`📂 Type: ${result.contentType}`);
+    logger.log(`🔍 SEO Score: ${result.seoScore}/100`);
+    logger.log(`🤖 Citation Score: ${result.citationScore}/100`);
+    logger.log(`📅 Freshness Score: ${result.freshnessScore}/100`);
 
     if (result.validationErrors.length > 0) {
-      scriptLogger.log(`\n❌ Errors (${result.validationErrors.length}):`);
+      logger.log(`\n❌ Errors (${result.validationErrors.length}):`);
       for (const error of result.validationErrors) {
-        scriptLogger.log(`  • ${error}`);
+        logger.log(`  • ${error}`);
       }
     }
 
     if (result.validationWarnings.length > 0) {
-      scriptLogger.log(`\n⚠️  Warnings (${result.validationWarnings.length}):`);
+      logger.log(`\n⚠️  Warnings (${result.validationWarnings.length}):`);
       for (const warning of result.validationWarnings) {
-        scriptLogger.log(`  • ${warning}`);
+        logger.log(`  • ${warning}`);
       }
     }
 
     if (result.recommendations.length > 0) {
-      scriptLogger.log(`\n💡 Recommendations (${result.recommendations.length}):`);
+      logger.log(`\n💡 Recommendations (${result.recommendations.length}):`);
       for (const rec of result.recommendations) {
-        scriptLogger.log(`  • ${rec}`);
+        logger.log(`  • ${rec}`);
       }
     }
   } else {
     // Optimize all content
     const results = await optimizer.optimizeAllContent();
 
-    scriptLogger.log(`\n📊 Content Optimization Summary (${results.length} files)`);
-    scriptLogger.log('='.repeat(60));
+    logger.log(`\n📊 Content Optimization Summary (${results.length} files)`);
+    logger.log('='.repeat(60));
 
     const avgSEO = Math.round(results.reduce((sum, r) => sum + r.seoScore, 0) / results.length);
     const avgCitation = Math.round(
@@ -756,32 +756,32 @@ export async function optimizeContentCLI(filePath?: string): Promise<void> {
       results.reduce((sum, r) => sum + r.freshnessScore, 0) / results.length
     );
 
-    scriptLogger.log(`🔍 Average SEO Score: ${avgSEO}/100`);
-    scriptLogger.log(`🤖 Average Citation Score: ${avgCitation}/100`);
-    scriptLogger.log(`📅 Average Freshness Score: ${avgFreshness}/100`);
+    logger.log(`🔍 Average SEO Score: ${avgSEO}/100`);
+    logger.log(`🤖 Average Citation Score: ${avgCitation}/100`);
+    logger.log(`📅 Average Freshness Score: ${avgFreshness}/100`);
 
     const totalErrors = results.reduce((sum, r) => sum + r.validationErrors.length, 0);
     const totalWarnings = results.reduce((sum, r) => sum + r.validationWarnings.length, 0);
 
-    scriptLogger.log(`\n❌ Total Errors: ${totalErrors}`);
-    scriptLogger.log(`⚠️  Total Warnings: ${totalWarnings}`);
+    logger.log(`\n❌ Total Errors: ${totalErrors}`);
+    logger.log(`⚠️  Total Warnings: ${totalWarnings}`);
 
     // Show top issues
     if (totalErrors > 0) {
-      scriptLogger.log('\n🔥 Files with Errors:');
+      logger.log('\n🔥 Files with Errors:');
       const errorResults = results.filter((r) => r.validationErrors.length > 0).slice(0, 5);
       for (const r of errorResults) {
-        scriptLogger.log(`  • ${r.filePath} (${r.validationErrors.length} errors)`);
+        logger.log(`  • ${r.filePath} (${r.validationErrors.length} errors)`);
       }
     }
 
     // Show files needing attention
     const lowScoreFiles = results.filter((r) => r.seoScore < 70 || r.citationScore < 70);
     if (lowScoreFiles.length > 0) {
-      scriptLogger.log('\n📈 Files Needing Optimization:');
+      logger.log('\n📈 Files Needing Optimization:');
       const topLowScoreFiles = lowScoreFiles.slice(0, 5);
       for (const r of topLowScoreFiles) {
-        scriptLogger.log(`  • ${r.filePath} (SEO: ${r.seoScore}, Citation: ${r.citationScore})`);
+        logger.log(`  • ${r.filePath} (SEO: ${r.seoScore}, Citation: ${r.citationScore})`);
       }
     }
   }
@@ -791,7 +791,7 @@ export async function optimizeContentCLI(filePath?: string): Promise<void> {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const filePath = process.argv[2];
   optimizeContentCLI(filePath).catch((error) => {
-    scriptLogger.error(
+    logger.error(
       'Content optimization failed:',
       error instanceof Error ? error : new Error(String(error))
     );

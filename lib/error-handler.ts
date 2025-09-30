@@ -24,9 +24,6 @@ import {
 } from '@/lib/schemas';
 import { ValidationError } from '@/lib/security';
 
-// Re-export types for backward compatibility
-export type { ErrorHandlerConfig, ErrorResponse };
-
 /**
  * HTTP status code mapping for different error types
  */

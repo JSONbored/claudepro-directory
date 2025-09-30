@@ -7,9 +7,6 @@
 import { z } from 'zod';
 import { VALIDATION_PATTERNS } from './patterns';
 
-// Re-export patterns for backward compatibility
-export { VALIDATION_PATTERNS };
-
 /**
  * Custom Zod transformations for secure data handling
  */
@@ -437,13 +434,3 @@ export const sanitizers = {
       .substring(0, maxLength);
   },
 } as const;
-
-// Re-export individual functions for backward compatibility
-export const {
-  sanitizeSearchQuery,
-  sanitizeFormInput,
-  sanitizeURLParam,
-  sanitizeCategory,
-  sanitizeTags,
-  createSafeExcerpt,
-} = sanitizers;

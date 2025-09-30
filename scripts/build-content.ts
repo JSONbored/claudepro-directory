@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { z } from 'zod';
-import { scriptLogger } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
 // Content metadata schema import removed - using direct object destructuring
 import { onBuildComplete } from '../lib/related-content/cache-invalidation.js';
 import { contentIndexer } from '../lib/related-content/indexer.js';
@@ -14,7 +14,7 @@ import type {
   GuideContent,
   HookContent,
   JobContent,
-  MCPServerContent,
+  McpContent,
   RuleContent,
 } from '../lib/schemas/content/index.js';
 import { validateContentByCategory } from '../lib/schemas/content/index.js';
@@ -70,7 +70,7 @@ const buildCache = {
       const cachePath = path.join(CACHE_DIR, 'build-cache.json');
       await fs.writeFile(cachePath, JSON.stringify(cache, null, 2), 'utf-8');
     } catch (error) {
-      scriptLogger.warn(
+      logger.warn(
         `Failed to save build cache: ${error instanceof Error ? error.message : String(error)}`
       );
     }
@@ -107,7 +107,7 @@ async function ensureDir(dir: string) {
 // Define union type for all possible content types
 type ValidatedContent =
   | AgentContent
-  | MCPServerContent
+  | McpContent
   | HookContent
   | CommandContent
   | RuleContent
@@ -127,7 +127,7 @@ async function processJsonFile(
 
   // Security: Additional path validation
   if (!resolvedFilePath.startsWith(resolvedDir)) {
-    scriptLogger.error(`Security violation: Path traversal attempt in file ${file}`);
+    logger.error(`Security violation: Path traversal attempt in file ${file}`);
     return null;
   }
 
@@ -141,7 +141,7 @@ async function processJsonFile(
 
     // Security: Validate content size to prevent DoS
     if (content.length > 1024 * 1024) {
-      scriptLogger.error(`File ${file} exceeds maximum size limit`);
+      logger.error(`File ${file} exceeds maximum size limit`);
       return null;
     }
 
@@ -152,7 +152,7 @@ async function processJsonFile(
       const rawParsed = JSON.parse(content);
       parsedData = rawJsonStructureSchema.parse(rawParsed);
     } catch (parseError) {
-      scriptLogger.error(
+      logger.error(
         `JSON parse error in ${file}: ${parseError instanceof Error ? parseError.message : String(parseError)}`
       );
       return null;
@@ -178,18 +178,18 @@ async function processJsonFile(
       return validatedItem;
     } catch (validationError) {
       if (validationError instanceof z.ZodError) {
-        scriptLogger.error(
+        logger.error(
           `Category-specific validation failed for ${file} (type: ${validatedType}): ${validationError.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ')}`
         );
       } else {
-        scriptLogger.error(
+        logger.error(
           `Validation error for ${file}: ${validationError instanceof Error ? validationError.message : String(validationError)}`
         );
       }
       return null;
     }
   } catch (fileError) {
-    scriptLogger.error(
+    logger.error(
       `Error reading file ${file}: ${fileError instanceof Error ? fileError.message : String(fileError)}`
     );
     return null;
@@ -239,12 +239,10 @@ async function loadJsonFiles(
     // Filter out null values with type safety
     const validItems = items.filter((item): item is NonNullable<typeof item> => item !== null);
 
-    scriptLogger.success(
-      `Loaded ${validItems.length}/${jsonFiles.length} valid ${validatedType} files`
-    );
+    logger.success(`Loaded ${validItems.length}/${jsonFiles.length} valid ${validatedType} files`);
     return validItems;
   } catch (error) {
-    scriptLogger.error(
+    logger.error(
       `Failed to load JSON files from ${dir}: ${error instanceof Error ? error.message : String(error)}`
     );
     return [];
@@ -265,9 +263,9 @@ async function generateTypeScript(cache: BuildCache | null): Promise<GeneratedFi
     try {
       const items = await loadJsonFiles(type, cache);
       allContent[type] = items;
-      scriptLogger.success(`Processed ${items.length} ${type} items`);
+      logger.success(`Processed ${items.length} ${type} items`);
     } catch (error) {
-      scriptLogger.failure(
+      logger.failure(
         `Failed to load ${type} content: ${error instanceof Error ? error.message : String(error)}`
       );
       allContent[type] = [];
@@ -412,17 +410,6 @@ ${buildConfig.contentTypes
   })
   .join('\n\n')}
 
-// Legacy exports for backward compatibility (return promises)
-${buildConfig.contentTypes
-  .map((type) => {
-    const varName = type.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
-    const capitalizedName = varName.charAt(0).toUpperCase() + varName.slice(1);
-    return `export const ${varName}BySlug = get${capitalizedName}().then(data =>
-  Object.fromEntries((data as any[]).map(item => [item.slug, item]))
-);`;
-  })
-  .join('')}
-
 // Export lazy loaders for full content (used in detail pages)
 ${buildConfig.contentTypes
   .map((type) => {
@@ -473,12 +460,12 @@ async function build(): Promise<BuildResult> {
     // Load existing cache
     const cache = await buildCache.load();
     if (cache) {
-      scriptLogger.info(`Loaded build cache from ${cache.lastBuild}`);
+      logger.info(`Loaded build cache from ${cache.lastBuild}`);
     }
 
     // Generate TypeScript files with validation and caching
     const generatedFiles = await generateTypeScript(cache);
-    scriptLogger.success(`Generated ${generatedFiles.length} TypeScript files`);
+    logger.success(`Generated ${generatedFiles.length} TypeScript files`);
 
     // Build content index and save in parallel
     const [index] = await Promise.all([
@@ -521,12 +508,12 @@ async function build(): Promise<BuildResult> {
       contentIndexer.saveIndex(index), // Keep original for backward compatibility
       contentIndexer.saveSplitIndex(index), // New split files for performance
     ]);
-    scriptLogger.success(`Built content index with ${index.items.length} items`);
+    logger.success(`Built content index with ${index.items.length} items`);
 
     // Invalidate caches after build
     if (buildConfig.invalidateCaches) {
       await onBuildComplete();
-      scriptLogger.success('Invalidated content caches');
+      logger.success('Invalidated content caches');
     }
 
     const duration = performance.now() - startTime;
@@ -548,22 +535,19 @@ async function build(): Promise<BuildResult> {
       errors: errors.length > 0 ? errors : undefined,
     };
 
-    scriptLogger.success('Build completed successfully');
-    scriptLogger.info(`Build time: ${duration.toFixed(2)}ms`);
+    logger.success('Build completed successfully');
+    logger.info(`Build time: ${duration.toFixed(2)}ms`);
     return result;
   } catch (error) {
     const duration = performance.now() - startTime;
 
     if (error instanceof z.ZodError) {
-      scriptLogger.error(
+      logger.error(
         `Validation error during build: ${error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ')}`
       );
       errors.push(...error.issues.map((i) => `${i.path.join('.')}: ${i.message}`));
     } else {
-      scriptLogger.error(
-        'Build failed:',
-        error instanceof Error ? error : new Error(String(error))
-      );
+      logger.error('Build failed:', error instanceof Error ? error : new Error(String(error)));
       errors.push(String(error));
     }
 
@@ -577,7 +561,7 @@ async function build(): Promise<BuildResult> {
       errors,
     };
 
-    scriptLogger.error(`Build failed with result: ${JSON.stringify(result, null, 2)}`);
+    logger.error(`Build failed with result: ${JSON.stringify(result, null, 2)}`);
     process.exit(1);
   }
 }
@@ -586,13 +570,13 @@ async function build(): Promise<BuildResult> {
 build()
   .then((result) => {
     if (!result.success) {
-      scriptLogger.failure(`Build failed with errors: ${result.errors?.join(', ')}`);
+      logger.failure(`Build failed with errors: ${result.errors?.join(', ')}`);
       process.exit(1);
     }
     process.exit(0);
   })
   .catch((error) => {
-    scriptLogger.error(
+    logger.error(
       'Unexpected error during build:',
       error instanceof Error ? error : new Error(String(error))
     );

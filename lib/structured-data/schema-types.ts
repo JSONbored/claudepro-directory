@@ -12,24 +12,14 @@ import type {
 } from '@/lib/schemas/content';
 
 /**
- * Extended content types - direct aliases without additional fields
- * All required fields come from the base schemas
- */
-export type ExtendedAgentContent = AgentContent;
-export type ExtendedCommandContent = CommandContent;
-export type ExtendedHookContent = HookContent;
-export type ExtendedMcpContent = McpContent;
-export type ExtendedRuleContent = RuleContent;
-
-/**
  * Discriminated union for all content types
  */
 export type UnifiedContent =
-  | ({ category: 'agents' } & ExtendedAgentContent)
-  | ({ category: 'commands' } & ExtendedCommandContent)
-  | ({ category: 'hooks' } & ExtendedHookContent)
-  | ({ category: 'mcp' } & ExtendedMcpContent)
-  | ({ category: 'rules' } & ExtendedRuleContent);
+  | ({ category: 'agents' } & AgentContent)
+  | ({ category: 'commands' } & CommandContent)
+  | ({ category: 'hooks' } & HookContent)
+  | ({ category: 'mcp' } & McpContent)
+  | ({ category: 'rules' } & RuleContent);
 
 /**
  * Props for unified structured data component
@@ -43,31 +33,25 @@ export interface UnifiedStructuredDataProps {
  */
 export function isAgentContent(
   item: UnifiedContent
-): item is ExtendedAgentContent & { category: 'agents' } {
+): item is AgentContent & { category: 'agents' } {
   return item.category === 'agents';
 }
 
 export function isCommandContent(
   item: UnifiedContent
-): item is ExtendedCommandContent & { category: 'commands' } {
+): item is CommandContent & { category: 'commands' } {
   return item.category === 'commands';
 }
 
-export function isHookContent(
-  item: UnifiedContent
-): item is ExtendedHookContent & { category: 'hooks' } {
+export function isHookContent(item: UnifiedContent): item is HookContent & { category: 'hooks' } {
   return item.category === 'hooks';
 }
 
-export function isMcpContent(
-  item: UnifiedContent
-): item is ExtendedMcpContent & { category: 'mcp' } {
+export function isMcpContent(item: UnifiedContent): item is McpContent & { category: 'mcp' } {
   return item.category === 'mcp';
 }
 
-export function isRuleContent(
-  item: UnifiedContent
-): item is ExtendedRuleContent & { category: 'rules' } {
+export function isRuleContent(item: UnifiedContent): item is RuleContent & { category: 'rules' } {
   return item.category === 'rules';
 }
 

@@ -175,12 +175,9 @@ export function RelatedCarouselClient({
           const matchBadge = getMatchTypeBadge(item.matchType);
           const categoryStyles = getCategoryStyles(item.category);
 
-          // Ensure views are never displayed (temporary workaround)
-          const { views: _views, ...sanitizedItem } = item;
-
           return (
             <Card
-              key={`${sanitizedItem.category}-${sanitizedItem.slug}`}
+              key={`${item.category}-${item.slug}`}
               itemScope
               itemType="https://schema.org/ListItem"
               className={`group relative border-2 ${categoryStyles.border} bg-card hover:shadow-xl hover:shadow-current/5 transition-all duration-300 h-full overflow-hidden flex flex-col`}
@@ -191,8 +188,8 @@ export function RelatedCarouselClient({
               />
 
               <Link
-                href={`/${sanitizedItem.category}/${sanitizedItem.slug}`}
-                onClick={() => handleItemClick(sanitizedItem, index)}
+                href={`/${item.category}/${item.slug}`}
+                onClick={() => handleItemClick(item, index)}
                 className="block flex-1 p-4 sm:p-6 hover:bg-accent/20 transition-colors flex flex-col"
               >
                 <div className="flex items-start justify-between gap-2 mb-4">
@@ -200,7 +197,7 @@ export function RelatedCarouselClient({
                     className={`${categoryStyles.badge} font-medium px-2 sm:px-3 py-1 border text-xs sm:text-sm flex-shrink-0`}
                     variant="secondary"
                   >
-                    {sanitizedItem.category}
+                    {item.category}
                   </Badge>
                   <Badge
                     variant={matchBadge.variant}
@@ -216,42 +213,40 @@ export function RelatedCarouselClient({
                     className="text-base sm:text-lg font-bold leading-tight line-clamp-2 mb-3 group-hover:text-current transition-colors"
                     itemProp="name"
                   >
-                    {sanitizedItem.title}
+                    {item.title}
                   </h3>
 
                   <p
                     className="text-muted-foreground leading-relaxed line-clamp-2 sm:line-clamp-3 mb-4 text-xs sm:text-sm flex-1"
                     itemProp="description"
                   >
-                    {sanitizedItem.description}
+                    {item.description}
                   </p>
                 </div>
 
-                {sanitizedItem.matchDetails?.matchedTags &&
-                  sanitizedItem.matchDetails.matchedTags.length > 0 && (
-                    <div className="pt-3 border-t border-border/30 mt-auto">
-                      <div className="flex flex-wrap gap-1">
-                        {sanitizedItem.matchDetails.matchedTags.slice(0, 2).map((tag: string) => (
-                          <Badge
-                            key={tag}
-                            variant="outline"
-                            className="text-[10px] sm:text-xs bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 transition-colors px-1.5 sm:px-2 py-0.5"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
-                        {sanitizedItem.matchDetails.matchedTags.length > 2 && (
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] sm:text-xs bg-muted/50 text-muted-foreground border-muted px-1.5 sm:px-2 py-0.5"
-                          >
-                            +{sanitizedItem.matchDetails.matchedTags.length - 2}
-                          </Badge>
-                        )}
-                      </div>
-                      {/* View counter temporarily disabled - functionality still tracks views */}
+                {item.matchDetails?.matchedTags && item.matchDetails.matchedTags.length > 0 && (
+                  <div className="pt-3 border-t border-border/30 mt-auto">
+                    <div className="flex flex-wrap gap-1">
+                      {item.matchDetails.matchedTags.slice(0, 2).map((tag: string) => (
+                        <Badge
+                          key={tag}
+                          variant="outline"
+                          className="text-[10px] sm:text-xs bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 transition-colors px-1.5 sm:px-2 py-0.5"
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
+                      {item.matchDetails.matchedTags.length > 2 && (
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] sm:text-xs bg-muted/50 text-muted-foreground border-muted px-1.5 sm:px-2 py-0.5"
+                        >
+                          +{item.matchDetails.matchedTags.length - 2}
+                        </Badge>
+                      )}
                     </div>
-                  )}
+                  </div>
+                )}
               </Link>
             </Card>
           );

@@ -28,9 +28,6 @@ const redisClientConfigSchema = z.object({
 
 type RedisClientConfig = z.infer<typeof redisClientConfigSchema>;
 
-// Re-export type for backward compatibility
-export type { RedisConnectionStatus };
-
 /**
  * Redis Client Manager
  * Handles connection management, fallback logic, and operation retry

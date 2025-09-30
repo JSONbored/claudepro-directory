@@ -5,7 +5,7 @@ import { UnifiedDetailPage } from '@/components/unified-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { getRuleBySlug, getRuleFullContent, rules } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
-import { sortRules } from '@/lib/content-sorting';
+import { sortContent } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
 import type { PageProps } from '@/lib/schemas';
 import { slugParamsSchema } from '@/lib/schemas';
@@ -64,7 +64,7 @@ export async function generateStaticParams() {
     // Sort rules by popularity/trending for optimized static generation
     // Most popular items will be generated first, improving initial page loads
     const rulesData = await rules;
-    const sortedRules = await sortRules([...rulesData], 'popularity');
+    const sortedRules = await sortContent([...rulesData], 'rules', 'popularity');
 
     return sortedRules
       .map((rule) => {

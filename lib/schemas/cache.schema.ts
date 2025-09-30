@@ -28,8 +28,10 @@ const CACHE_LIMITS = {
  */
 import { cacheableCategorySchema } from './shared.schema';
 
-// Re-export with original name for backward compatibility
-// Adding 'all_content' as a special category for combined operations
+/**
+ * Cache category schema - extends cacheableCategorySchema with 'all_content'
+ * for combined cache operations across all categories
+ */
 export const cacheCategorySchema = z.union([cacheableCategorySchema, z.literal('all_content')]);
 
 /**

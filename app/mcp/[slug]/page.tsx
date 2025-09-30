@@ -5,7 +5,7 @@ import { UnifiedDetailPage } from '@/components/unified-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { getMcpBySlug, getMcpFullContent, mcp } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
-import { sortMcp } from '@/lib/content-sorting';
+import { sortContent } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
 import type { PageProps } from '@/lib/schemas';
 import { slugParamsSchema } from '@/lib/schemas';
@@ -65,7 +65,7 @@ export async function generateStaticParams() {
     // Sort MCP servers by popularity/trending for optimized static generation
     // Most popular items will be generated first, improving initial page loads
     const mcpData = await mcp;
-    const sortedMcp = await sortMcp([...mcpData], 'popularity');
+    const sortedMcp = await sortContent([...mcpData], 'mcp', 'popularity');
 
     return sortedMcp
       .map((mcpItem) => {

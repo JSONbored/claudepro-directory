@@ -14,10 +14,14 @@
  * - html-sanitizer.ts: HTML/XSS sanitization
  */
 
+// Import sanitizers first for re-export
+import { sanitizers as sanitizersObject } from './validators';
+
+// ErrorSeverity type comes from schemas
+export type { ErrorSeverity } from '@/lib/schemas';
 // Error sanitization (from error-sanitizer.ts)
 export {
   ErrorSanitizer,
-  type ErrorSeverity,
   errorSanitizer,
   isSanitizedError,
   sanitizeApiError,
@@ -40,9 +44,18 @@ export {
   baseSchemas,
   contentSchemas,
   sanitizers,
-  sanitizeSearchQuery,
   transforms,
   ValidationError,
   validation,
   validation as default,
 } from './validators';
+
+// Convenience re-export of sanitizers for direct access
+export const {
+  sanitizeSearchQuery,
+  sanitizeFormInput,
+  sanitizeURLParam,
+  sanitizeCategory,
+  sanitizeTags,
+  createSafeExcerpt,
+} = sanitizersObject;

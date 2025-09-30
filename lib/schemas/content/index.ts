@@ -32,7 +32,7 @@ import { agentContentSchema } from './agent.schema';
 import { commandContentSchema } from './command.schema';
 import { guideContentSchema } from './guide.schema';
 import { hookContentSchema } from './hook.schema';
-import { type McpContent as McpContentType, mcpContentSchema } from './mcp.schema';
+import { mcpContentSchema } from './mcp.schema';
 import { ruleContentSchema } from './rule.schema';
 
 /**
@@ -48,10 +48,6 @@ export const contentItemSchema = z.union([
 ]);
 
 export type ContentItem = z.infer<typeof contentItemSchema>;
-
-// Modernized type aliases
-export type ContentMetadata = ContentItem;
-export type MCPServerContent = McpContentType;
 
 // Note: ContentCategory removed - import from shared.schema directly
 // Use: import { type ContentCategory, contentCategorySchema } from '@/lib/schemas/shared.schema';

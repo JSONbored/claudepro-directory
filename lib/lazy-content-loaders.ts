@@ -7,14 +7,11 @@
 import { z } from 'zod';
 import { MAIN_CONTENT_CATEGORIES } from '@/lib/constants';
 import type { ContentItem } from '@/lib/related-content/service';
-import type { HookContent, MCPServerContent } from '@/lib/schemas/content';
+import type { HookContent, McpContent } from '@/lib/schemas/content';
 import { BatchLazyLoader, createLazyModule, PaginatedLazyLoader } from './lazy-loader';
 
 // Schema for metadata lookup
 const metadataLookupSchema = z.record(z.string(), z.any());
-
-// Type aliases for consistency
-export type McpContent = MCPServerContent;
 
 // Lazy load the full MCP content
 export const mcpFullLoader = createLazyModule<McpContent[]>(

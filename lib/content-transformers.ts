@@ -3,7 +3,7 @@ import type {
   CommandContent,
   ExportableItem,
   HookContent,
-  MCPServerContent,
+  McpContent,
   RuleContent,
 } from '@/lib/schemas/content';
 import { exportableItemSchema } from '@/lib/schemas/content';
@@ -85,7 +85,7 @@ export const githubUrlToApi = (url: string): string | null => {
 };
 
 export const toSearchDocument = (
-  item: AgentContent | MCPServerContent | CommandContent | HookContent | RuleContent,
+  item: AgentContent | McpContent | CommandContent | HookContent | RuleContent,
   type: SearchDocument['type']
 ): SearchDocument => {
   const itemWithOptionalName = item as typeof item & { name?: string };
@@ -219,7 +219,7 @@ export const markdownToPlainText = (markdown: string): string => {
 };
 
 export const toSocialShare = (
-  item: AgentContent | MCPServerContent | CommandContent | HookContent | RuleContent,
+  item: AgentContent | McpContent | CommandContent | HookContent | RuleContent,
   type: string,
   baseUrl: string
 ): SocialShareData => {
@@ -328,7 +328,7 @@ export const normalizeTags = (tags: string[]): string[] => {
  * Transform content for export
  */
 export const toExportFormat = (
-  items: Array<AgentContent | MCPServerContent | CommandContent | HookContent | RuleContent>,
+  items: Array<AgentContent | McpContent | CommandContent | HookContent | RuleContent>,
   format: 'json' | 'csv' | 'yaml'
 ): string => {
   // Parse items through schema for proper typing

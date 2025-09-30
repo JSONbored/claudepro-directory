@@ -5,7 +5,7 @@ import { UnifiedDetailPage } from '@/components/unified-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { agents, getAgentBySlug, getAgentFullContent } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
-import { sortAgents } from '@/lib/content-sorting';
+import { sortContent } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
 import type { PageProps } from '@/lib/schemas';
 import { slugParamsSchema } from '@/lib/schemas';
@@ -67,7 +67,7 @@ export async function generateStaticParams() {
     // Sort agents by popularity/trending for optimized static generation
     // Most popular items will be generated first, improving initial page loads
     const agentsData = await agents;
-    const sortedAgents = await sortAgents([...agentsData], 'popularity');
+    const sortedAgents = await sortContent([...agentsData], 'agents', 'popularity');
 
     return sortedAgents
       .map((agent) => {

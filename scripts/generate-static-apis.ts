@@ -18,7 +18,7 @@ import { hooksMetadata } from '../generated/hooks-metadata.js';
 import { mcpMetadata } from '../generated/mcp-metadata.js';
 import { rulesMetadata } from '../generated/rules-metadata.js';
 import { APP_CONFIG } from '../lib/constants';
-import { scriptLogger } from '../lib/logger.js';
+import { logger } from '../lib/logger.js';
 import { buildConfig, env } from '../lib/schemas/env.schema';
 import { nonNegativeInt, positiveInt } from '../lib/schemas/primitives/base-numbers';
 import {
@@ -260,7 +260,7 @@ async function generateContentTypeAPIs() {
     'rules.json': { data: rulesMetadata, type: 'rule' as AppContentType },
   };
 
-  scriptLogger.progress('Generating individual content type APIs...');
+  logger.progress('Generating individual content type APIs...');
 
   for (const [filename, { data, type }] of Object.entries(contentMap)) {
     const category = filename.replace('.json', '') as ContentCategory;
@@ -291,13 +291,13 @@ async function generateContentTypeAPIs() {
     const outputFile = join(OUTPUT_DIR, filename);
     await writeFile(outputFile, JSON.stringify(validatedResponse, null, 2));
 
-    scriptLogger.success(`Generated ${filename} (${transformedItems.length} items)`);
+    logger.success(`Generated ${filename} (${transformedItems.length} items)`);
   }
 }
 
 // Generate all configurations API
 async function generateAllConfigurationsAPI() {
-  scriptLogger.progress('Generating all-configurations API...');
+  logger.progress('Generating all-configurations API...');
 
   const transformedAgents = transformContent(agentsMetadata, 'agent' as AppContentType, 'agents');
   const transformedMcp = transformContent(mcpMetadata, 'mcp' as AppContentType, 'mcp');
@@ -352,14 +352,14 @@ async function generateAllConfigurationsAPI() {
   const outputFile = join(OUTPUT_DIR, 'all-configurations.json');
   await writeFile(outputFile, JSON.stringify(validatedConfigurations, null, 2));
 
-  scriptLogger.success(
+  logger.success(
     `Generated all-configurations.json (${validatedConfigurations.statistics.totalConfigurations} total items)`
   );
 }
 
 // Generate search indexes
 async function generateSearchIndexes() {
-  scriptLogger.progress('Generating search indexes...');
+  logger.progress('Generating search indexes...');
 
   // Create combined searchable dataset
   const allSearchableItems: StaticAPISearchableItem[] = [
@@ -399,7 +399,7 @@ async function generateSearchIndexes() {
     const outputFile = join(OUTPUT_DIR, 'search-indexes', `${category}.json`);
     await writeFile(outputFile, JSON.stringify(validatedIndex, null, 2));
 
-    scriptLogger.success(`Generated search index for ${category} (${categoryItems.length} items)`);
+    logger.success(`Generated search index for ${category} (${categoryItems.length} items)`);
   }
 
   // Generate combined search index
@@ -428,12 +428,12 @@ async function generateSearchIndexes() {
   const combinedOutputFile = join(OUTPUT_DIR, 'search-indexes', 'combined.json');
   await writeFile(combinedOutputFile, JSON.stringify(validatedCombinedIndex, null, 2));
 
-  scriptLogger.success(`Generated combined search index (${allSearchableItems.length} items)`);
+  logger.success(`Generated combined search index (${allSearchableItems.length} items)`);
 }
 
 // Generate health check endpoint
 async function generateHealthCheck() {
-  scriptLogger.progress('Generating health check endpoint...');
+  logger.progress('Generating health check endpoint...');
 
   const healthData: HealthCheckResponse = {
     status: 'healthy',
@@ -468,12 +468,12 @@ async function generateHealthCheck() {
   const outputFile = join(OUTPUT_DIR, 'health.json');
   await writeFile(outputFile, JSON.stringify(validatedHealth, null, 2));
 
-  scriptLogger.success('Generated health check endpoint');
+  logger.success('Generated health check endpoint');
 }
 
 // Main generation function
 async function generateStaticAPIs(): Promise<GenerationResult> {
-  scriptLogger.progress('Starting static API generation...');
+  logger.progress('Starting static API generation...');
   const startTime = performance.now();
   const filesGenerated: string[] = [];
   const errors: string[] = [];
@@ -512,9 +512,9 @@ async function generateStaticAPIs(): Promise<GenerationResult> {
       commandsMetadata.length +
       hooksMetadata.length;
 
-    scriptLogger.success('All static APIs generated successfully!');
-    scriptLogger.log(`Output directory: ${OUTPUT_DIR}`);
-    scriptLogger.log('APIs can now be served directly from CDN for maximum performance');
+    logger.success('All static APIs generated successfully!');
+    logger.log(`Output directory: ${OUTPUT_DIR}`);
+    logger.log('APIs can now be served directly from CDN for maximum performance');
 
     return {
       success: true,
@@ -526,12 +526,12 @@ async function generateStaticAPIs(): Promise<GenerationResult> {
     };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      scriptLogger.error(
+      logger.error(
         `Validation error during generation: ${error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ')}`
       );
       errors.push(...error.issues.map((i) => `${i.path.join('.')}: ${i.message}`));
     } else {
-      scriptLogger.failure(
+      logger.failure(
         `Failed to generate static APIs: ${error instanceof Error ? error.message : String(error)}`
       );
       errors.push(String(error));
@@ -551,7 +551,7 @@ if (import.meta.url.startsWith('file:')) {
     generateStaticAPIs()
       .then(() => process.exit(0))
       .catch((error) => {
-        scriptLogger.error(
+        logger.error(
           'Unexpected error:',
           error instanceof Error ? error : new Error(String(error))
         );

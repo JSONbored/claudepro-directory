@@ -251,11 +251,11 @@ export const relatedContentResponseSchema = z.object({
 export type RelatedContentResponse = z.infer<typeof relatedContentResponseSchema>;
 
 /**
- * Transform ContentMetadata to RelatedContentItem
+ * Transform ContentItem to RelatedContentItem
  * Provides proper type conversion for components expecting RelatedContentItem
  */
 export function transformToRelatedContentItem(
-  item: import('@/lib/schemas/content').ContentMetadata,
+  item: import('@/lib/schemas/content').ContentItem,
   options: {
     score?: number;
     matchType?: 'same_category' | 'tag_match' | 'keyword_match' | 'trending';
@@ -289,10 +289,10 @@ export function transformToRelatedContentItem(
 }
 
 /**
- * Transform array of ContentMetadata to RelatedContentItem array
+ * Transform array of ContentItem to RelatedContentItem array
  */
 export function transformToRelatedContentItems(
-  items: import('@/lib/schemas/content').ContentMetadata[],
+  items: import('@/lib/schemas/content').ContentItem[],
   options: {
     score?: number;
     matchType?: 'same_category' | 'tag_match' | 'keyword_match' | 'trending';

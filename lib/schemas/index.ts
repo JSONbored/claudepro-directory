@@ -27,11 +27,9 @@ export * from './component.schema';
 // Content schemas (most commonly used) - modernized to use content/ directory
 export type {
   ContentItem,
-  ContentMetadata,
   ContentStats,
   ExportableItem,
   JobContent,
-  MCPServerContent,
 } from './content';
 export {
   agentContentSchema,

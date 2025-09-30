@@ -4,15 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { logger } from '@/lib/logger';
 import type { FilterState, SearchOptions, UseSearchProps } from '@/lib/schemas';
 import { extractFilterOptions } from '@/lib/schemas';
-import type { ContentMetadata } from '@/lib/schemas/content';
+import type { ContentItem } from '@/lib/schemas/content';
 import { type SearchableItem, type SearchFilters, searchCache } from '@/lib/search-cache';
 import { getDisplayTitle } from '@/lib/utils';
 
-// Define ContentItem as ContentMetadata for this hook
-type ContentItem = ContentMetadata;
-
-// Convert ContentMetadata to SearchableItem for compatibility
-function convertToSearchableItem(item: ContentMetadata): SearchableItem {
+// Convert ContentItem to SearchableItem for compatibility
+function convertToSearchableItem(item: ContentItem): SearchableItem {
   return {
     id: item.slug, // Use slug as id since SearchableItem requires id
     title: getDisplayTitle(item),

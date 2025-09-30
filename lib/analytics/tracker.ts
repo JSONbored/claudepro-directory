@@ -419,6 +419,3 @@ export const navigation = {
     }
   },
 };
-
-// Export typed event tracking for components that want type safety
-export { trackEvent as trackTyped };

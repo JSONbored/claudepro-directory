@@ -12,9 +12,6 @@ import {
   validateLogContext,
 } from './schemas/logger.schema';
 
-// Re-export type for backward compatibility
-export type { LogEntry };
-
 class Logger {
   private isDevelopment = isDevelopment;
   private isProduction = isProduction;
@@ -445,53 +442,5 @@ class Logger {
 
 // Export singleton instance
 export const logger = new Logger();
-
-// Export convenience functions for backward compatibility
-export const log = {
-  debug: (
-    message: string,
-    context?: LogContext,
-    metadata?: Record<string, string | number | boolean>
-  ) => logger.debug(message, context, metadata),
-
-  info: (
-    message: string,
-    context?: LogContext,
-    metadata?: Record<string, string | number | boolean>
-  ) => logger.info(message, context, metadata),
-
-  warn: (
-    message: string,
-    context?: LogContext,
-    metadata?: Record<string, string | number | boolean>
-  ) => logger.warn(message, context, metadata),
-
-  error: (
-    message: string,
-    error?: Error | string,
-    context?: LogContext,
-    metadata?: Record<string, string | number | boolean>
-  ) => logger.error(message, error, context, metadata),
-
-  fatal: (
-    message: string,
-    error?: Error | string,
-    context?: LogContext,
-    metadata?: Record<string, string | number | boolean>
-  ) => logger.fatal(message, error, context, metadata),
-};
-
-// Export scriptLogger for backward compatibility with CLI scripts
-export const scriptLogger = {
-  log: (message: string, ...args: unknown[]) => logger.log(message, ...args),
-  info: (message: string, ..._args: unknown[]) => logger.info(message),
-  warn: (message: string, ..._args: unknown[]) => logger.warn(message),
-  error: (message: string, ...args: unknown[]) =>
-    logger.error(message, args[0] instanceof Error ? args[0] : undefined),
-  debug: (message: string) => logger.debug(message),
-  progress: (message: string) => logger.progress(message),
-  success: (message: string) => logger.success(message),
-  failure: (message: string) => logger.failure(message),
-};
 
 export default logger;

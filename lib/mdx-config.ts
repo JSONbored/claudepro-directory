@@ -5,9 +5,6 @@ import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import type { MDXFrontmatter } from '@/lib/schemas';
 
-// Re-export type for backward compatibility
-export type { MDXFrontmatter };
-
 // MDX node schema for type safety
 const mdxNodeChildSchema = z.object({
   type: z.string(),
