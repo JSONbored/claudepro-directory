@@ -43,7 +43,8 @@ export const shortDurationMs = z
   .number()
   .int()
   .min(0, 'Duration cannot be negative')
-  .max(DURATION_LIMITS.MAX_SHORT_DURATION, 'Duration exceeds 5 seconds');
+  .max(DURATION_LIMITS.MAX_SHORT_DURATION, 'Duration exceeds 5 seconds')
+  .describe('Short duration for quick operations and API calls (0-5 seconds)');
 
 /**
  * Medium duration validator (0-30 seconds)
@@ -54,7 +55,8 @@ export const mediumDurationMs = z
   .number()
   .int()
   .min(0, 'Duration cannot be negative')
-  .max(DURATION_LIMITS.MAX_MEDIUM_DURATION, 'Duration exceeds 30 seconds');
+  .max(DURATION_LIMITS.MAX_MEDIUM_DURATION, 'Duration exceeds 30 seconds')
+  .describe('Medium duration for page loads and data fetching (0-30 seconds)');
 
 /**
  * Long duration validator (0-1 hour)
@@ -65,14 +67,19 @@ export const longDurationMs = z
   .number()
   .int()
   .min(0, 'Duration cannot be negative')
-  .max(DURATION_LIMITS.MAX_LONG_DURATION, 'Duration exceeds 1 hour');
+  .max(DURATION_LIMITS.MAX_LONG_DURATION, 'Duration exceeds 1 hour')
+  .describe('Long duration for background jobs and batch processing (0-1 hour)');
 
 /**
  * Generic duration validator (any non-negative duration)
  * Used for: Flexible timing measurements
  * Common in: Performance monitoring, generic timers
  */
-export const durationMs = z.number().int().min(0, 'Duration cannot be negative');
+export const durationMs = z
+  .number()
+  .int()
+  .min(0, 'Duration cannot be negative')
+  .describe('Generic duration validator for flexible timing measurements');
 
 /**
  * ============================================================================
@@ -85,7 +92,11 @@ export const durationMs = z.number().int().min(0, 'Duration cannot be negative')
  * Used for: Event timestamps, analytics tracking
  * Common in: Analytics events, performance metrics, logging
  */
-export const timestampMillis = z.number().int().positive();
+export const timestampMillis = z
+  .number()
+  .int()
+  .positive()
+  .describe('Unix timestamp in milliseconds for event tracking');
 
 /**
  * Date timestamp with default current time
@@ -95,14 +106,20 @@ export const timestampMillis = z.number().int().positive();
 export const timestampDate = z
   .date()
   .optional()
-  .default(() => new Date());
+  .default(() => new Date())
+  .describe('Auto-timestamped Date object with current time default');
 
 /**
  * Optional timestamp milliseconds
  * Used for: Optional timing fields
  * Common in: Performance metrics, optional timing data
  */
-export const optionalTimestampMillis = z.number().int().positive().optional();
+export const optionalTimestampMillis = z
+  .number()
+  .int()
+  .positive()
+  .optional()
+  .describe('Optional Unix timestamp in milliseconds');
 
 /**
  * ============================================================================
@@ -118,7 +135,8 @@ export const optionalTimestampMillis = z.number().int().positive().optional();
  */
 export const metricName = nonEmptyString
   .max(50, 'Metric name too long')
-  .regex(/^[a-zA-Z][a-zA-Z0-9_]{0,49}$/, 'Invalid metric name format');
+  .regex(/^[a-zA-Z][a-zA-Z0-9_]{0,49}$/, 'Invalid metric name format')
+  .describe('Performance metric name starting with letter (alphanumeric + underscores)');
 
 /**
  * Event name validator (for analytics)
@@ -126,10 +144,9 @@ export const metricName = nonEmptyString
  * Pattern: Must start with letter, alphanumeric + underscores + hyphens
  * Common in: Analytics tracking, custom events
  */
-export const eventName = shortString.regex(
-  /^[a-zA-Z][a-zA-Z0-9_-]{0,99}$/,
-  'Invalid event name format'
-);
+export const eventName = shortString
+  .regex(/^[a-zA-Z][a-zA-Z0-9_-]{0,99}$/, 'Invalid event name format')
+  .describe('Analytics event name for tracking user actions and custom events');
 
 /**
  * ============================================================================
@@ -142,21 +159,31 @@ export const eventName = shortString.regex(
  * Used for: Core Web Vitals (LCP, FID, CLS, etc.)
  * Common in: Performance monitoring, web vitals tracking
  */
-export const webVitalMetric = z.number().positive();
+export const webVitalMetric = z
+  .number()
+  .positive()
+  .describe('Core Web Vitals metric value (LCP, FID, TTFB, etc.)');
 
 /**
  * Optional web vital metric
  * Used for: Optional Core Web Vitals measurements
  * Common in: Web vitals schemas where not all metrics are available
  */
-export const optionalWebVitalMetric = z.number().positive().optional();
+export const optionalWebVitalMetric = z
+  .number()
+  .positive()
+  .optional()
+  .describe('Optional Core Web Vitals metric for partial measurements');
 
 /**
  * Cumulative Layout Shift (CLS) validator
  * Used for: CLS web vital (can be 0)
  * Common in: Web vitals tracking
  */
-export const clsMetric = z.number().min(0);
+export const clsMetric = z
+  .number()
+  .min(0)
+  .describe('Cumulative Layout Shift (CLS) metric for visual stability tracking');
 
 /**
  * ============================================================================
@@ -169,14 +196,22 @@ export const clsMetric = z.number().min(0);
  * Used for: Lighthouse scores, performance ratings
  * Common in: Performance monitoring, quality metrics
  */
-export const performanceScore = z.number().min(0).max(100);
+export const performanceScore = z
+  .number()
+  .min(0)
+  .max(100)
+  .describe('Performance score from 0-100 for Lighthouse and quality metrics');
 
 /**
  * Success rate validator (0-1 or 0-100)
  * Used for: Success rates, completion rates
  * Common in: Analytics, performance metrics
  */
-export const successRate = z.number().min(0).max(1);
+export const successRate = z
+  .number()
+  .min(0)
+  .max(1)
+  .describe('Success rate as decimal from 0-1 for completion metrics');
 
 /**
  * ============================================================================
@@ -198,11 +233,9 @@ export const METRIC_LIMITS = {
  * Used for: Flexible metric metadata values
  * Common in: Performance metrics, analytics events
  */
-export const metricMetadataValue = z.union([
-  z.string().max(METRIC_LIMITS.MAX_STRING_VALUE_LENGTH),
-  z.number().finite(),
-  z.boolean(),
-]);
+export const metricMetadataValue = z
+  .union([z.string().max(METRIC_LIMITS.MAX_STRING_VALUE_LENGTH), z.number().finite(), z.boolean()])
+  .describe('Flexible metadata value (string, number, or boolean)');
 
 /**
  * Metric metadata object validator
@@ -216,7 +249,8 @@ export const metricMetadataSchema = z
     `Maximum ${METRIC_LIMITS.MAX_METADATA_PROPERTIES} metadata properties allowed`
   )
   .optional()
-  .default({});
+  .default({})
+  .describe('Metadata object with up to 15 properties for performance context');
 
 /**
  * ============================================================================
@@ -229,14 +263,20 @@ export const metricMetadataSchema = z
  * Used for: Error categorization, error tracking
  * Common in: Error monitoring, analytics
  */
-export const errorType = nonEmptyString.max(100).transform((val) => val.replace(/[^\w\s-]/g, ''));
+export const errorType = nonEmptyString
+  .max(100)
+  .transform((val) => val.replace(/[^\w\s-]/g, ''))
+  .describe('Error type identifier for categorization and tracking');
 
 /**
  * Error severity validator
  * Used for: Error priority, incident management
  * Common in: Error tracking, monitoring systems
  */
-export const errorSeverity = z.enum(['low', 'medium', 'high', 'critical']).default('medium');
+export const errorSeverity = z
+  .enum(['low', 'medium', 'high', 'critical'])
+  .default('medium')
+  .describe('Error severity level for incident priority management');
 
 /**
  * Stack trace length limit

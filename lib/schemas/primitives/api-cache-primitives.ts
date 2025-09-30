@@ -44,7 +44,8 @@ export const TTL_RANGES = {
  */
 export const shortTTL = positiveInt
   .min(TTL_RANGES.MIN_TTL, `TTL must be at least ${TTL_RANGES.MIN_TTL} seconds`)
-  .max(TTL_RANGES.SHORT_TTL_MAX, `TTL cannot exceed ${TTL_RANGES.SHORT_TTL_MAX} seconds (1 hour)`);
+  .max(TTL_RANGES.SHORT_TTL_MAX, `TTL cannot exceed ${TTL_RANGES.SHORT_TTL_MAX} seconds (1 hour)`)
+  .describe('Short-lived TTL for temporary cache (60s - 1 hour)');
 
 /**
  * Medium TTL validator (1 hour - 24 hours)
@@ -59,7 +60,8 @@ export const mediumTTL = positiveInt
   .max(
     TTL_RANGES.MEDIUM_TTL_MAX,
     `TTL cannot exceed ${TTL_RANGES.MEDIUM_TTL_MAX} seconds (24 hours)`
-  );
+  )
+  .describe('Standard TTL for API responses and daily cache (1 hour - 24 hours)');
 
 /**
  * Long TTL validator (24 hours - 30 days)
@@ -71,7 +73,8 @@ export const longTTL = positiveInt
     TTL_RANGES.MEDIUM_TTL_MAX,
     `TTL must be at least ${TTL_RANGES.MEDIUM_TTL_MAX} seconds (24 hours)`
   )
-  .max(TTL_RANGES.LONG_TTL_MAX, `TTL cannot exceed ${TTL_RANGES.LONG_TTL_MAX} seconds (30 days)`);
+  .max(TTL_RANGES.LONG_TTL_MAX, `TTL cannot exceed ${TTL_RANGES.LONG_TTL_MAX} seconds (30 days)`)
+  .describe('Long-lived TTL for static content (24 hours - 30 days)');
 
 /**
  * Flexible TTL validator (60s - 30 days)
@@ -80,7 +83,8 @@ export const longTTL = positiveInt
  */
 export const flexibleTTL = positiveInt
   .min(TTL_RANGES.MIN_TTL, `TTL must be at least ${TTL_RANGES.MIN_TTL} seconds`)
-  .max(TTL_RANGES.LONG_TTL_MAX, `TTL cannot exceed ${TTL_RANGES.LONG_TTL_MAX} seconds (30 days)`);
+  .max(TTL_RANGES.LONG_TTL_MAX, `TTL cannot exceed ${TTL_RANGES.LONG_TTL_MAX} seconds (30 days)`)
+  .describe('Flexible TTL for configurable cache expiration (60s - 30 days)');
 
 /**
  * Rate limit window validator (60s - 24 hours)
@@ -92,7 +96,8 @@ export const rateLimitWindow = positiveInt
   .max(
     TTL_RANGES.RATE_LIMIT_WINDOW_MAX,
     `Window cannot exceed ${TTL_RANGES.RATE_LIMIT_WINDOW_MAX}s`
-  );
+  )
+  .describe('Rate limiting time window for API throttling (60s - 24 hours)');
 
 /**
  * ============================================================================
@@ -129,7 +134,8 @@ export const KEY_LIMITS = {
 export const cacheKeyString = nonEmptyString
   .max(KEY_LIMITS.MAX_KEY_LENGTH, 'Cache key too long')
   .regex(KEY_PATTERNS.CACHE_KEY, 'Invalid cache key format')
-  .refine((key) => !key.includes('\0'), 'Null bytes not allowed in cache key');
+  .refine((key) => !key.includes('\0'), 'Null bytes not allowed in cache key')
+  .describe('Redis-compatible cache key with alphanumeric and safe special chars');
 
 /**
  * Category validator
@@ -139,7 +145,8 @@ export const cacheKeyString = nonEmptyString
  */
 export const categoryString = nonEmptyString
   .max(KEY_LIMITS.MAX_CATEGORY_LENGTH, 'Category name too long')
-  .regex(KEY_PATTERNS.CATEGORY, 'Invalid category format');
+  .regex(KEY_PATTERNS.CATEGORY, 'Invalid category format')
+  .describe('Content category identifier (alphanumeric with hyphens/underscores)');
 
 /**
  * Slug validator
@@ -150,7 +157,8 @@ export const categoryString = nonEmptyString
 export const slugString = nonEmptyString
   .max(KEY_LIMITS.MAX_SLUG_LENGTH, 'Slug too long')
   .regex(KEY_PATTERNS.SLUG, 'Invalid slug format')
-  .transform((val) => val.toLowerCase());
+  .transform((val) => val.toLowerCase())
+  .describe('URL-safe slug identifier (lowercase alphanumeric with hyphens)');
 
 /**
  * Path validator
@@ -163,7 +171,8 @@ export const pathString = nonEmptyString
   .regex(KEY_PATTERNS.PATH, 'Invalid path format')
   .refine((path) => !path.includes('..'), 'Path traversal detected')
   .refine((path) => !path.includes('\\'), 'Backslash not allowed in paths')
-  .refine((path) => !path.includes('\0'), 'Null bytes not allowed in paths');
+  .refine((path) => !path.includes('\0'), 'Null bytes not allowed in paths')
+  .describe('Secure file/URL path with traversal prevention');
 
 /**
  * ============================================================================
@@ -176,14 +185,20 @@ export const pathString = nonEmptyString
  * Used for: Cache hit/miss tracking in API responses
  * Common in: API response metadata, performance monitoring
  */
-export const cacheStatusEnum = z.enum(['HIT', 'MISS', 'BYPASS']);
+export const cacheStatusEnum = z
+  .enum(['HIT', 'MISS', 'BYPASS'])
+  .describe('Cache operation status for API response tracking');
 
 /**
  * Processing time validator (milliseconds)
  * Used for: API response timing, performance tracking
  * Common in: API metadata, performance monitoring
  */
-export const processingTimeMs = z.number().min(0).max(60000); // Max 60 seconds
+export const processingTimeMs = z
+  .number()
+  .min(0)
+  .max(60000)
+  .describe('API processing time in milliseconds (0-60s)'); // Max 60 seconds
 
 /**
  * API response metadata schema
@@ -197,21 +212,24 @@ export const apiResponseMetaSchema = z
     cache: cacheStatusEnum.optional(),
     processingTime: processingTimeMs.optional(),
   })
-  .optional();
+  .optional()
+  .describe('Standard API response metadata with timestamp and cache status');
 
 /**
  * Pagination metadata schema
  * Used for: Paginated API responses
  * Common in: List endpoints, search results
  */
-export const paginationMetaSchema = z.object({
-  total: nonNegativeInt,
-  page: positiveInt,
-  limit: positiveInt,
-  pages: nonNegativeInt,
-  hasNext: z.boolean(),
-  hasPrev: z.boolean(),
-});
+export const paginationMetaSchema = z
+  .object({
+    total: nonNegativeInt,
+    page: positiveInt,
+    limit: positiveInt,
+    pages: nonNegativeInt,
+    hasNext: z.boolean(),
+    hasPrev: z.boolean(),
+  })
+  .describe('Pagination metadata for list endpoints and search results');
 
 /**
  * ============================================================================
