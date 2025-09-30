@@ -1,25 +1,22 @@
+import { readFile } from 'fs/promises';
 import { Clock, Star, TrendingUp, Users } from 'lucide-react';
+import { join } from 'path';
 import { TrendingContent } from '@/components/trending-content';
 import { Badge } from '@/components/ui/badge';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
-import { sortByPopularity } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
-import { statsRedis } from '@/lib/redis';
 import type { PagePropsWithSearchParams } from '@/lib/schemas';
 import { parseSearchParams, type TrendingParams, trendingParamsSchema } from '@/lib/schemas';
-import type { ContentItem } from '@/lib/schemas/content';
 
 // ISR Configuration - Revalidate every 5 minutes for trending data
-// Balances freshness with performance: trending data updated hourly but cached for 5min
+// Static file provides instant load, ISR ensures freshness
 export const revalidate = 300; // 5 minutes in seconds
 export const dynamic = 'force-static'; // Enable ISR (Incremental Static Regeneration)
 
+// Load static trending data with fallback
 async function getTrendingData(params: TrendingParams) {
-  // Validate trending parameters for security
-  const validatedParams = Object.keys(params).length > 0 ? params : {};
-
   // Log trending data access for analytics
-  if (Object.keys(validatedParams).length > 0) {
+  if (Object.keys(params).length > 0) {
     logger.info('Trending data accessed with parameters', {
       period: params.period,
       metric: params.metric,
@@ -29,42 +26,31 @@ async function getTrendingData(params: TrendingParams) {
     });
   }
 
-  // Helper function to get mixed content from categories
-  const getMixedContent = (
-    categories: { items: ContentItem[]; type: string; count: number }[],
-    totalCount: number
-  ): Array<ContentItem & { type: string; viewCount?: number }> => {
-    const result: Array<ContentItem & { type: string; viewCount?: number }> = [];
-    let currentIndex = 0;
+  try {
+    // Try to load pre-generated static trending data (fastest path - 1-3ms)
+    const staticFilePath = join(process.cwd(), 'public', 'static-api', 'trending.json');
+    const fileContent = await readFile(staticFilePath, 'utf-8');
+    const staticData = JSON.parse(fileContent);
 
-    // Round-robin through categories to ensure variety
-    while (result.length < totalCount) {
-      for (const category of categories) {
-        if (category.items.length > currentIndex && result.length < totalCount) {
-          const baseItem = category.items[currentIndex];
-          if (baseItem) {
-            const item = {
-              ...baseItem,
-              type: category.type,
-            } as ContentItem & {
-              type: string;
-              viewCount?: number;
-            };
-            result.push(item);
-          }
-        }
-      }
-      currentIndex++;
-      // Break if we've exhausted all categories
-      if (categories.every((cat) => cat.items.length <= currentIndex)) break;
-    }
+    logger.info('Loaded trending data from static file', {
+      trendingCount: staticData.trending?.length ?? 0,
+      popularCount: staticData.popular?.length ?? 0,
+      recentCount: staticData.recent?.length ?? 0,
+      algorithm: staticData.metadata?.algorithm,
+    });
 
-    return result;
-  };
+    return {
+      trending: staticData.trending ?? [],
+      popular: staticData.popular ?? [],
+      recent: staticData.recent ?? [],
+    };
+  } catch (error) {
+    // Fallback: Generate data on-demand if static file not available
+    logger.warn('Static trending data not available, generating on-demand', {
+      error: error instanceof Error ? error.message : String(error),
+    });
 
-  if (!statsRedis.isEnabled()) {
-    // Fallback to static data if Redis is not available
-    // Await all content promises first
+    // Await all content promises
     const [rulesData, mcpData, agentsData, commandsData, hooksData] = await Promise.all([
       rules,
       mcp,
@@ -73,199 +59,129 @@ async function getTrendingData(params: TrendingParams) {
       hooks,
     ]);
 
-    // Sort each category by popularity - cast readonly tuple types to ContentItem arrays
-    const sortedRules = sortByPopularity(rulesData as readonly ContentItem[]);
-    const sortedMcp = sortByPopularity(mcpData as readonly ContentItem[]);
-    const sortedAgents = sortByPopularity(agentsData as readonly ContentItem[]);
-    const sortedCommands = sortByPopularity(commandsData as readonly ContentItem[]);
-    const sortedHooks = sortByPopularity(hooksData as readonly ContentItem[]);
+    // Simple popularity-based sorting fallback
+    const sortByPop = <T extends Record<string, unknown>>(items: readonly T[]): T[] =>
+      [...items].sort((a, b) => {
+        const aPop = typeof a.popularity === 'number' ? a.popularity : 0;
+        const bPop = typeof b.popularity === 'number' ? b.popularity : 0;
+        return bPop - aPop;
+      });
 
-    // Mix categories for trending (12 items total, ~2-3 per category)
-    const trending = getMixedContent(
-      [
-        { items: sortedRules, type: 'rules', count: 3 },
-        { items: sortedMcp, type: 'mcp', count: 3 },
-        { items: sortedAgents, type: 'agents', count: 2 },
-        { items: sortedCommands, type: 'commands', count: 2 },
-        { items: sortedHooks, type: 'hooks', count: 2 },
-      ],
-      12
-    );
+    const sortedRules = sortByPop(rulesData);
+    const sortedMcp = sortByPop(mcpData);
+    const sortedAgents = sortByPop(agentsData);
+    const sortedCommands = sortByPop(commandsData);
+    const sortedHooks = sortByPop(hooksData);
 
-    // Popular shows top items from each category (9 items)
-    const popular = getMixedContent(
-      [
-        { items: sortedRules, type: 'rules', count: 2 },
-        { items: sortedMcp, type: 'mcp', count: 2 },
-        { items: sortedAgents, type: 'agents', count: 2 },
-        { items: sortedCommands, type: 'commands', count: 2 },
-        { items: sortedHooks, type: 'hooks', count: 1 },
-      ],
-      9
-    );
-
-    // Recent shows newest from each category (simulate by reversing arrays)
-    const recent = getMixedContent(
-      [
-        { items: [...rulesData].reverse(), type: 'rules', count: 2 },
-        { items: [...mcpData].reverse(), type: 'mcp', count: 2 },
-        { items: [...agentsData].reverse(), type: 'agents', count: 2 },
-        { items: [...commandsData].reverse(), type: 'commands', count: 2 },
-        { items: [...hooksData].reverse(), type: 'hooks', count: 1 },
-      ],
-      9
-    );
-
-    return { trending, popular, recent };
-  }
-
-  try {
-    // Await all content promises first
-    const [agentsData, mcpData, rulesData, commandsData, hooksData] = await Promise.all([
-      agents,
-      mcp,
-      rules,
-      commands,
-      hooks,
-    ]);
-
-    // Fetch trending data from Redis for each category
-    const [trendingAgents, trendingMcp, trendingRules, trendingCommands, trendingHooks] =
-      await Promise.all([
-        statsRedis.getTrending('agents', 3),
-        statsRedis.getTrending('mcp', 3),
-        statsRedis.getTrending('rules', 3),
-        statsRedis.getTrending('commands', 3),
-        statsRedis.getTrending('hooks', 3),
-      ]);
-
-    // Fetch popular data from Redis (all-time views)
-    const [popularAgents, popularMcp, popularRules, popularCommands, popularHooks] =
-      await Promise.all([
-        statsRedis.getPopular('agents', 2),
-        statsRedis.getPopular('mcp', 2),
-        statsRedis.getPopular('rules', 2),
-        statsRedis.getPopular('commands', 2),
-        statsRedis.getPopular('hooks', 1),
-      ]);
-
-    // Map Redis IDs back to actual content items
-    const mapToContent = (
-      items: string[] | { slug: string; views?: number }[],
-      contentArray: readonly ContentItem[],
-      type: string
-    ): Array<ContentItem & { type: string; viewCount?: number }> => {
-      const result: Array<ContentItem & { type: string; viewCount?: number }> = [];
-
-      for (const item of items) {
-        const slug = typeof item === 'string' ? item : item.slug;
-        const views = typeof item === 'object' ? item.views : undefined;
-        const content = contentArray.find((c) => c.slug === slug);
-
-        if (content) {
-          result.push({
-            ...content,
-            type,
-            viewCount: views,
-          } as ContentItem & {
-            type: string;
-            viewCount?: number;
-          });
+    // Simple round-robin mixer
+    const mix = (
+      cats: Array<{ items: Record<string, unknown>[]; type: string; count: number }>,
+      total: number
+    ): Array<Record<string, unknown> & { type: string }> => {
+      const result: Array<Record<string, unknown> & { type: string }> = [];
+      let idx = 0;
+      while (result.length < total) {
+        for (const cat of cats) {
+          const item = cat.items[idx];
+          if (item && result.length < total) {
+            result.push({ ...item, type: cat.type });
+          }
         }
+        idx++;
+        if (cats.every((c) => c.items.length <= idx)) break;
       }
-
       return result;
     };
 
-    // Trending - mix from all categories (last 7 days)
-    const trending = [
-      ...mapToContent(trendingAgents, agentsData, 'agents'),
-      ...mapToContent(trendingMcp, mcpData, 'mcp'),
-      ...mapToContent(trendingRules, rulesData, 'rules'),
-      ...mapToContent(trendingCommands, commandsData, 'commands'),
-      ...mapToContent(trendingHooks, hooksData, 'hooks'),
-    ].slice(0, 12);
-
-    // Popular - all-time most viewed
-    const popular = [
-      ...mapToContent(popularAgents, agentsData, 'agents'),
-      ...mapToContent(popularMcp, mcpData, 'mcp'),
-      ...mapToContent(popularRules, rulesData, 'rules'),
-      ...mapToContent(popularCommands, commandsData, 'commands'),
-      ...mapToContent(popularHooks, hooksData, 'hooks'),
-    ].slice(0, 9);
-
-    // Recent - if we don't have enough data, use fallback mixing
-    const recentFallback = getMixedContent(
+    const trending = mix(
       [
-        { items: [...rulesData].reverse(), type: 'rules', count: 2 },
-        { items: [...mcpData].reverse(), type: 'mcp', count: 2 },
-        { items: [...agentsData].reverse(), type: 'agents', count: 2 },
-        { items: [...commandsData].reverse(), type: 'commands', count: 2 },
-        { items: [...hooksData].reverse(), type: 'hooks', count: 1 },
-      ],
-      9
-    );
-
-    return {
-      trending: trending.length > 0 ? trending : recentFallback,
-      popular: popular.length > 0 ? popular : recentFallback,
-      recent: recentFallback,
-    };
-  } catch (error) {
-    logger.error(
-      'Failed to fetch trending data on trending page',
-      error instanceof Error ? error : new Error(String(error)),
-      {
-        component: 'TrendingPage',
-      }
-    );
-    // Use same fallback as non-Redis case
-    // Await all content promises first
-    const [rulesData, mcpData, agentsData, commandsData, hooksData] = await Promise.all([
-      rules,
-      mcp,
-      agents,
-      commands,
-      hooks,
-    ]);
-
-    // Cast readonly tuple types to ContentItem arrays
-    const sortedRules = sortByPopularity(rulesData as readonly ContentItem[]);
-    const sortedMcp = sortByPopularity(mcpData as readonly ContentItem[]);
-    const sortedAgents = sortByPopularity(agentsData as readonly ContentItem[]);
-    const sortedCommands = sortByPopularity(commandsData as readonly ContentItem[]);
-    const sortedHooks = sortByPopularity(hooksData as readonly ContentItem[]);
-
-    const trending = getMixedContent(
-      [
-        { items: sortedRules, type: 'rules', count: 3 },
-        { items: sortedMcp, type: 'mcp', count: 3 },
-        { items: sortedAgents, type: 'agents', count: 2 },
-        { items: sortedCommands, type: 'commands', count: 2 },
-        { items: sortedHooks, type: 'hooks', count: 2 },
+        {
+          items: sortedRules.slice(0, 5) as unknown as Record<string, unknown>[],
+          type: 'rules',
+          count: 3,
+        },
+        {
+          items: sortedMcp.slice(0, 5) as unknown as Record<string, unknown>[],
+          type: 'mcp',
+          count: 3,
+        },
+        {
+          items: sortedAgents.slice(0, 4) as unknown as Record<string, unknown>[],
+          type: 'agents',
+          count: 2,
+        },
+        {
+          items: sortedCommands.slice(0, 4) as unknown as Record<string, unknown>[],
+          type: 'commands',
+          count: 2,
+        },
+        {
+          items: sortedHooks.slice(0, 4) as unknown as Record<string, unknown>[],
+          type: 'hooks',
+          count: 2,
+        },
       ],
       12
     );
 
-    const popular = getMixedContent(
+    const popular = mix(
       [
-        { items: sortedRules, type: 'rules', count: 2 },
-        { items: sortedMcp, type: 'mcp', count: 2 },
-        { items: sortedAgents, type: 'agents', count: 2 },
-        { items: sortedCommands, type: 'commands', count: 2 },
-        { items: sortedHooks, type: 'hooks', count: 1 },
+        {
+          items: sortedRules.slice(0, 4) as unknown as Record<string, unknown>[],
+          type: 'rules',
+          count: 2,
+        },
+        {
+          items: sortedMcp.slice(0, 4) as unknown as Record<string, unknown>[],
+          type: 'mcp',
+          count: 2,
+        },
+        {
+          items: sortedAgents.slice(0, 3) as unknown as Record<string, unknown>[],
+          type: 'agents',
+          count: 2,
+        },
+        {
+          items: sortedCommands.slice(0, 3) as unknown as Record<string, unknown>[],
+          type: 'commands',
+          count: 2,
+        },
+        {
+          items: sortedHooks.slice(0, 2) as unknown as Record<string, unknown>[],
+          type: 'hooks',
+          count: 1,
+        },
       ],
       9
     );
 
-    const recent = getMixedContent(
+    const recent = mix(
       [
-        { items: [...rulesData].reverse(), type: 'rules', count: 2 },
-        { items: [...mcpData].reverse(), type: 'mcp', count: 2 },
-        { items: [...agentsData].reverse(), type: 'agents', count: 2 },
-        { items: [...commandsData].reverse(), type: 'commands', count: 2 },
-        { items: [...hooksData].reverse(), type: 'hooks', count: 1 },
+        {
+          items: [...rulesData].reverse().slice(0, 4) as unknown as Record<string, unknown>[],
+          type: 'rules',
+          count: 2,
+        },
+        {
+          items: [...mcpData].reverse().slice(0, 4) as unknown as Record<string, unknown>[],
+          type: 'mcp',
+          count: 2,
+        },
+        {
+          items: [...agentsData].reverse().slice(0, 3) as unknown as Record<string, unknown>[],
+          type: 'agents',
+          count: 2,
+        },
+        {
+          items: [...commandsData].reverse().slice(0, 3) as unknown as Record<string, unknown>[],
+          type: 'commands',
+          count: 2,
+        },
+        {
+          items: [...hooksData].reverse().slice(0, 2) as unknown as Record<string, unknown>[],
+          type: 'hooks',
+          count: 1,
+        },
       ],
       9
     );

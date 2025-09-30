@@ -431,6 +431,79 @@ async function generateSearchIndexes() {
   logger.success(`Generated combined search index (${allSearchableItems.length} items)`);
 }
 
+// Generate static trending data
+async function generateTrendingData() {
+  logger.progress('Generating static trending data...');
+
+  try {
+    // Helper to sort by popularity
+    const byPopularity = <T extends Record<string, unknown>>(items: readonly T[]): T[] =>
+      [...items].sort((a, b) => {
+        const aPop = typeof a.popularity === 'number' ? a.popularity : 0;
+        const bPop = typeof b.popularity === 'number' ? b.popularity : 0;
+        return bPop - aPop;
+      });
+
+    // Sort all categories by popularity
+    const sortedAgents = byPopularity(agentsMetadata);
+    const sortedMcp = byPopularity(mcpMetadata);
+    const sortedRules = byPopularity(rulesMetadata);
+    const sortedCommands = byPopularity(commandsMetadata);
+    const sortedHooks = byPopularity(hooksMetadata);
+
+    // Build trending data with top items from each category
+    const trendingData = {
+      trending: [
+        ...sortedRules.slice(0, 3),
+        ...sortedMcp.slice(0, 3),
+        ...sortedAgents.slice(0, 2),
+        ...sortedCommands.slice(0, 2),
+        ...sortedHooks.slice(0, 2),
+      ].slice(0, 12),
+      popular: [
+        ...sortedRules.slice(0, 2),
+        ...sortedMcp.slice(0, 2),
+        ...sortedAgents.slice(0, 2),
+        ...sortedCommands.slice(0, 2),
+        ...sortedHooks.slice(0, 1),
+      ].slice(0, 9),
+      recent: [
+        ...[...rulesMetadata].reverse().slice(0, 2),
+        ...[...mcpMetadata].reverse().slice(0, 2),
+        ...[...agentsMetadata].reverse().slice(0, 2),
+        ...[...commandsMetadata].reverse().slice(0, 2),
+        ...[...hooksMetadata].reverse().slice(0, 1),
+      ].slice(0, 9),
+      metadata: {
+        totalItems:
+          agentsMetadata.length +
+          mcpMetadata.length +
+          rulesMetadata.length +
+          commandsMetadata.length +
+          hooksMetadata.length,
+        lastUpdated: new Date().toISOString(),
+        generated: 'static' as const,
+        algorithm: 'popularity-based' as const,
+        categories: ['agents', 'mcp', 'rules', 'commands', 'hooks'] as const,
+      },
+    };
+
+    await writeFile(join(OUTPUT_DIR, 'trending.json'), JSON.stringify(trendingData, null, 2));
+
+    logger.success(
+      `Generated trending.json (${trendingData.trending.length} trending, ${trendingData.popular.length} popular, ${trendingData.recent.length} recent)`
+    );
+
+    return trendingData;
+  } catch (error) {
+    logger.error(
+      'Failed to generate trending data',
+      error instanceof Error ? error : new Error(String(error))
+    );
+    throw error;
+  }
+}
+
 // Generate health check endpoint
 async function generateHealthCheck() {
   logger.progress('Generating health check endpoint...');
@@ -502,6 +575,9 @@ async function generateStaticAPIs(): Promise<GenerationResult> {
 
     await generateHealthCheck();
     filesGenerated.push('health.json');
+
+    await generateTrendingData();
+    filesGenerated.push('trending.json');
 
     const duration = performance.now() - startTime;
 
