@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: SEO_CONFIG.titleTemplate.replace('%s', SEO_CONFIG.defaultTitle),
     description: SEO_CONFIG.defaultDescription,
-    images: ['/twitter-image'],
+    // Next.js automatically uses opengraph-image if no twitter-image is specified
     creator: '@shadowbook',
   },
   robots: {

@@ -59,7 +59,14 @@ const mdxRendererPropsSchema = z.object({
 
 type MDXRendererProps = z.infer<typeof mdxRendererPropsSchema>;
 
-// Global variable to store pathname for MDX components
+/**
+ * Global variable to store pathname for MDX components
+ *
+ * NOTE: This is safe in Next.js App Router server components
+ * Each request gets its own execution context, so there's no
+ * cross-request state leakage. For client components, pathname
+ * is passed as a prop directly to avoid stale closures.
+ */
 let currentPathname = '';
 
 // Custom components for MDX

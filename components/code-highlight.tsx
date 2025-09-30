@@ -12,7 +12,7 @@
  */
 
 import { Check, Copy } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Button } from '@/components/ui/button';
 import { copyToClipboard } from '@/lib/clipboard-utils';
@@ -66,7 +66,13 @@ async function getHighlighter() {
 
 // CodeHighlightProps is now imported from component.schema.ts
 
-export const CodeHighlight = ({
+/**
+ * CodeHighlight Component (Memoized)
+ *
+ * Heavy component with expensive Shiki syntax highlighting.
+ * Memoized to prevent unnecessary re-renders when parent re-renders.
+ */
+const CodeHighlightComponent = ({
   code,
   language = 'typescript',
   title,
@@ -252,3 +258,6 @@ export const CodeHighlight = ({
     </ErrorBoundary>
   );
 };
+
+// Export memoized component to prevent unnecessary re-renders
+export const CodeHighlight = memo(CodeHighlightComponent);
