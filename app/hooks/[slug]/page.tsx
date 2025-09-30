@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { HookDetailPage } from '@/components/hook-detail-page';
 import { HookStructuredData } from '@/components/structured-data/hook-schema';
+import { UnifiedDetailPage } from '@/components/unified-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { getHookBySlug, getHookFullContent, hooks } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
@@ -153,7 +153,7 @@ export default async function HookPage({ params }: PageProps) {
     <>
       <ViewTracker category="hooks" slug={slug} />
       <HookStructuredData item={hook} />
-      <HookDetailPage item={hook} relatedItems={relatedHooks} />
+      <UnifiedDetailPage item={hook} relatedItems={relatedHooks} />
     </>
   );
 }

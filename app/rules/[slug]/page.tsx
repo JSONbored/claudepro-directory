@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { RuleDetailPage } from '@/components/rule-detail-page';
 import { RuleStructuredData } from '@/components/structured-data/rule-schema';
+import { UnifiedDetailPage } from '@/components/unified-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { getRuleBySlug, getRuleFullContent, rules } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
@@ -148,7 +148,7 @@ export default async function RulePage({ params }: PageProps) {
     <>
       <ViewTracker category="rules" slug={slug} />
       <RuleStructuredData item={rule} />
-      <RuleDetailPage item={rule} relatedItems={relatedRulesParsed} />
+      <UnifiedDetailPage item={rule} relatedItems={relatedRulesParsed} />
     </>
   );
 }

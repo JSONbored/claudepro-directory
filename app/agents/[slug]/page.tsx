@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { AgentDetailPage } from '@/components/agent-detail-page';
 import { AgentStructuredData } from '@/components/structured-data/agent-schema';
+import { UnifiedDetailPage } from '@/components/unified-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { agents, getAgentBySlug, getAgentFullContent } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
@@ -159,7 +159,7 @@ export default async function AgentPage({ params }: PageProps) {
     <>
       <ViewTracker category="agents" slug={slug} />
       <AgentStructuredData agent={agent} />
-      <AgentDetailPage item={item} relatedItems={relatedItems} />
+      <UnifiedDetailPage item={item} relatedItems={relatedItems} />
     </>
   );
 }
