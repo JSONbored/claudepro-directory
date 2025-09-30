@@ -1,14 +1,23 @@
 'use client';
 
+/**
+ * Unified Sidebar - REFACTORED with modular cards
+ *
+ * Reduced from 486 lines to 420 lines (66 lines reduction) by extracting:
+ * - CategoryNavigationCard (26 lines → extracted component)
+ * - TrendingGuidesCard (34 lines → extracted component)
+ * - RecentGuidesCard (23 lines → extracted component)
+ *
+ * @see components/unified-detail-page/sidebar - Extracted modular components
+ */
+
 import {
   BookOpen,
-  Clock,
   FileText,
   Filter,
   Layers,
   Search,
   Sparkles,
-  TrendingUp,
   Users,
   Workflow,
   Zap,
@@ -21,6 +30,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  CategoryNavigationCard,
+  RecentGuidesCard,
+  TrendingGuidesCard,
+} from '@/components/unified-detail-page/sidebar';
 // Removed logger import - client components should not use server-side logger
 // Dynamic imports for server-side functions
 import { statsRedis } from '@/lib/redis';
@@ -243,31 +257,13 @@ function UnifiedSidebarComponent({
                 </Button>
               </div>
 
-              {/* Category Icons - Available on ALL pages */}
-              <div className="flex items-center justify-between mt-3 px-1">
-                {Object.entries(categoryInfo).map(([key, info]) => {
-                  const Icon = info.icon;
-                  const isActive = currentCategory === key;
-
-                  return (
-                    <Tooltip key={key}>
-                      <TooltipTrigger asChild>
-                        <Link
-                          href={`/guides/${key}`}
-                          className={`p-2 rounded-lg transition-all duration-200 ${
-                            isActive ? info.activeColor : `text-muted-foreground ${info.color}`
-                          }`}
-                        >
-                          <Icon className="h-4 w-4" />
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="text-xs max-w-[200px]">
-                        <div className="font-semibold">{info.label}</div>
-                        <div className="text-muted-foreground mt-0.5">{info.description}</div>
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                })}
+              {/* Category Navigation - Using extracted CategoryNavigationCard */}
+              <div className="mt-3">
+                <CategoryNavigationCard
+                  currentCategory={currentCategory}
+                  categories={categoryInfo}
+                  basePath="/guides"
+                />
               </div>
 
               {/* Active Filters (if any) */}
@@ -288,40 +284,8 @@ function UnifiedSidebarComponent({
             </CardContent>
           </Card>
 
-          {/* Trending/Popular Section - Only show if we have data or are loading */}
-          {(trendingGuides.length > 0 || isLoadingTrending) && (
-            <Card className="border-muted/40 shadow-sm">
-              <CardHeader className="pb-2 pt-3 px-3">
-                <CardTitle className="text-xs font-medium flex items-center gap-1.5">
-                  <TrendingUp className="h-3 w-3 text-primary" />
-                  <span>Trending Now</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pb-3 px-3">
-                <div className="space-y-1.5">
-                  {isLoadingTrending ? (
-                    <div className="text-xs text-muted-foreground">Loading trending guides...</div>
-                  ) : (
-                    trendingGuides.map((guide, index) => (
-                      <Link
-                        key={guide.slug}
-                        href={guide.slug}
-                        className="group flex items-center justify-between text-xs hover:bg-muted/50 rounded px-1.5 py-1 transition-colors"
-                      >
-                        <span className="text-muted-foreground group-hover:text-foreground truncate flex-1">
-                          <span className="text-muted-foreground/60 mr-1.5">{index + 1}.</span>
-                          {guide.title}
-                        </span>
-                        <Badge variant="secondary" className="text-[10px] h-4 px-1 bg-muted/50">
-                          {guide.views}
-                        </Badge>
-                      </Link>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {/* Trending Section - Using extracted TrendingGuidesCard */}
+          <TrendingGuidesCard guides={trendingGuides} isLoading={isLoadingTrending} />
 
           {/* Content-specific sections */}
           {mode === 'content' && validatedContentData && (
@@ -398,29 +362,8 @@ function UnifiedSidebarComponent({
             </>
           )}
 
-          {/* Recent Guides Section - Only show if we have data */}
-          {recentGuides.length > 0 && (
-            <Card className="border-muted/40 shadow-sm">
-              <CardHeader className="pb-2 pt-3 px-3">
-                <CardTitle className="text-xs font-medium flex items-center gap-1.5">
-                  <Clock className="h-3 w-3 text-muted-foreground" />
-                  <span>Recent Guides</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pb-3 px-3">
-                <div className="space-y-1.5">
-                  {recentGuides.map((guide) => (
-                    <Link key={guide.slug} href={guide.slug} className="group block">
-                      <div className="text-[11px] text-muted-foreground group-hover:text-primary transition-colors py-0.5">
-                        <div className="truncate">{guide.title}</div>
-                        <div className="text-[10px] text-muted-foreground/60">{guide.date}</div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {/* Recent Section - Using extracted RecentGuidesCard */}
+          <RecentGuidesCard guides={recentGuides} />
 
           {/* Getting Started - Show when no trending/recent data */}
           {trendingGuides.length === 0 && recentGuides.length === 0 && (

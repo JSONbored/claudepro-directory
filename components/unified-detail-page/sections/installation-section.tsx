@@ -1,0 +1,146 @@
+'use client';
+
+/**
+ * InstallationSection - Installation steps and requirements section
+ *
+ * Consolidates installation rendering from unified-detail-page.tsx (lines 154-211)
+ * and custom-renderers.tsx (renderHookInstallation lines 237-310)
+ *
+ * Handles: claudeCode/claudeDesktop formats, config paths, requirements
+ *
+ * @see components/unified-detail-page.tsx - Original implementation
+ * @see lib/config/custom-renderers.tsx - Custom hook renderer
+ */
+
+import { Copy } from 'lucide-react';
+import { memo } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import type { UnifiedContentItem } from '@/lib/schemas';
+import type { InstallationSteps } from '@/lib/types/content-type-config';
+
+/**
+ * Props for InstallationSection
+ */
+export interface InstallationSectionProps {
+  installation: InstallationSteps;
+  item: UnifiedContentItem;
+  customRenderer?:
+    | ((item: UnifiedContentItem, installation: InstallationSteps) => React.ReactElement)
+    | undefined;
+}
+
+/**
+ * InstallationSection Component
+ *
+ * Renders installation instructions with steps, config paths, and requirements.
+ * Supports custom renderers for special cases (hooks, MCP, etc.)
+ */
+export const InstallationSection = memo(function InstallationSection({
+  installation,
+  item,
+  customRenderer,
+}: InstallationSectionProps) {
+  // Use custom renderer if provided
+  if (customRenderer) {
+    return customRenderer(item, installation);
+  }
+
+  // Default installation renderer
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Copy className="h-5 w-5" />
+          Installation
+        </CardTitle>
+        <CardDescription>Setup instructions and requirements</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {typeof installation === 'object' &&
+          'claudeCode' in installation &&
+          installation.claudeCode && (
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium mb-2">Claude Code Setup</h4>
+                <ol className="list-decimal list-inside space-y-1 text-sm">
+                  {installation.claudeCode.steps?.map((step: string) => (
+                    <li key={step.slice(0, 50)} className="leading-relaxed">
+                      {step}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              {installation.claudeCode.configPath && (
+                <div>
+                  <h4 className="font-medium mb-2">Configuration Paths</h4>
+                  <div className="space-y-1 text-sm">
+                    {Object.entries(installation.claudeCode.configPath).map(([location, path]) => (
+                      <div key={location} className="flex gap-2">
+                        <Badge variant="outline" className="capitalize">
+                          {location}
+                        </Badge>
+                        <code className="text-xs bg-muted px-1 py-0.5 rounded">{String(path)}</code>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+        {/* Claude Desktop installation (for MCP servers) */}
+        {typeof installation === 'object' &&
+          'claudeDesktop' in installation &&
+          installation.claudeDesktop && (
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium mb-2">Claude Desktop Setup</h4>
+                <ol className="list-decimal list-inside space-y-1 text-sm">
+                  {installation.claudeDesktop.steps?.map((step: string) => (
+                    <li key={step.slice(0, 50)} className="leading-relaxed">
+                      {step}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              {installation.claudeDesktop.configPath && (
+                <div>
+                  <h4 className="font-medium mb-2">Configuration Paths</h4>
+                  <div className="space-y-1 text-sm">
+                    {Object.entries(installation.claudeDesktop.configPath).map(
+                      ([platform, path]) => (
+                        <div key={platform} className="flex gap-2">
+                          <Badge variant="outline" className="capitalize">
+                            {platform}
+                          </Badge>
+                          <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                            {String(path)}
+                          </code>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+        {/* Requirements */}
+        {installation.requirements && installation.requirements.length > 0 && (
+          <div className="mt-4">
+            <h4 className="font-medium mb-2">Requirements</h4>
+            <ul className="space-y-2">
+              {installation.requirements.map((requirement: string) => (
+                <li key={requirement.slice(0, 50)} className="flex items-start gap-3">
+                  <div className="h-1.5 w-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
+                  <span className="text-sm leading-relaxed">{requirement}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+});

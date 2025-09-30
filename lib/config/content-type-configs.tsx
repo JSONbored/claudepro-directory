@@ -13,12 +13,6 @@ import { toast } from 'sonner';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import type { ContentTypeConfigRegistry } from '@/lib/types/content-type-config';
 import { getDisplayTitle } from '@/lib/utils';
-import {
-  renderHookConfiguration,
-  renderHookInstallation,
-  renderMCPConfiguration,
-} from './custom-renderers';
-import { renderAgentSidebar, renderMCPSidebar } from './custom-sidebars';
 
 /**
  * Agent Configuration
@@ -46,10 +40,6 @@ const agentConfig: ContentTypeConfigRegistry['agents'] = {
     security: false,
     troubleshooting: false,
     examples: false,
-  },
-
-  renderers: {
-    sidebarRenderer: renderAgentSidebar,
   },
 
   generators: {
@@ -240,11 +230,6 @@ const hookConfig: ContentTypeConfigRegistry['hooks'] = {
     examples: false,
   },
 
-  renderers: {
-    configRenderer: renderHookConfiguration,
-    installationRenderer: renderHookInstallation,
-  },
-
   generators: {
     installation: (item) => ({
       claudeCode: {
@@ -324,11 +309,6 @@ const mcpConfig: ContentTypeConfigRegistry['mcp'] = {
     security: true,
     troubleshooting: true,
     examples: true,
-  },
-
-  renderers: {
-    configRenderer: renderMCPConfiguration,
-    sidebarRenderer: renderMCPSidebar,
   },
 
   generators: {

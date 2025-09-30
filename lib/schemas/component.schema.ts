@@ -57,13 +57,6 @@ export interface ErrorFallbackProps {
   resetErrorBoundary: () => void;
 }
 
-// GuidesSidebar component props
-export interface GuidesSidebarProps {
-  currentCategory?: string;
-  guideCounts?: Record<string, number>;
-  showSearch?: boolean;
-}
-
 // JobCard component props
 export interface JobCardProps {
   job: import('@/lib/schemas/content').JobContent;
