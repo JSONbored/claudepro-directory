@@ -9,9 +9,10 @@ import type { PagePropsWithSearchParams } from '@/lib/schemas';
 import { parseSearchParams, type TrendingParams, trendingParamsSchema } from '@/lib/schemas';
 import type { ContentMetadata } from '@/lib/schemas/content';
 
-// Force dynamic rendering since we're fetching from Redis
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// ISR Configuration - Revalidate every 5 minutes for trending data
+// Balances freshness with performance: trending data updated hourly but cached for 5min
+export const revalidate = 300; // 5 minutes in seconds
+export const dynamic = 'force-static'; // Enable ISR (Incremental Static Regeneration)
 
 async function getTrendingData(params: TrendingParams) {
   // Validate trending parameters for security
