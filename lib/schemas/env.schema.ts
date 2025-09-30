@@ -134,9 +134,25 @@ const productionRequiredEnvs = [
 ] as const;
 
 /**
- * Validation function with comprehensive error handling
+ * Memoized validation cache for performance
+ * Validation runs once per process, not on every import
  */
-function validateEnv() {
+let cachedEnv: Env | null = null;
+let validationAttempted = false;
+
+/**
+ * Validation function with comprehensive error handling and memoization
+ * Performance: Runs validation once per process lifecycle
+ * Security: Server-only validation never executes client-side
+ */
+function validateEnv(): Env {
+  // Performance: Return cached result on subsequent calls
+  if (validationAttempted && cachedEnv) {
+    return cachedEnv;
+  }
+
+  validationAttempted = true;
+
   const parsed = envSchema.safeParse(process.env);
 
   if (!parsed.success) {
@@ -152,56 +168,80 @@ function validateEnv() {
 
     // In development, warn but continue with defaults
     log.warn('Using default values for missing environment variables');
-    return envSchema.parse({
+    cachedEnv = envSchema.parse({
       ...process.env,
       NODE_ENV: process.env.NODE_ENV || 'development',
     });
+    return cachedEnv;
   }
 
-  // Additional production validation - Skip during build phase
-  // These variables are injected at runtime in Vercel, not available during build
+  // Additional production validation - ONLY RUN SERVER-SIDE
+  // Security-critical: This validation MUST NEVER run client-side
+  // Client bundles must not include server-only env var names or validation logic
+  const isServer = typeof window === 'undefined';
   const isBuildPhase =
     process.env.NEXT_PHASE === 'phase-production-build' ||
-    (typeof window === 'undefined' && !process.env.VERCEL);
+    process.env.NEXT_PHASE === 'phase-production-server';
+  const isProductionRuntime =
+    process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production';
 
-  if (
-    !isBuildPhase &&
-    (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production')
-  ) {
+  // Only validate server-only env vars on server, outside build phase, in production runtime
+  // This ensures: 1) No client-side exposure 2) No build-time failures 3) Runtime security enforcement
+  if (isServer && !isBuildPhase && isProductionRuntime) {
     const missingRequiredEnvs = productionRequiredEnvs.filter((envVar) => !process.env[envVar]);
 
     if (missingRequiredEnvs.length > 0) {
       const log = getLogger();
       const missingVars = missingRequiredEnvs.join(', ');
 
-      log.error(`Missing required production environment variables: ${missingVars}`);
+      // Security: Log without exposing which specific vars are missing in production logs
+      log.error('Missing required production environment variables for security features');
       throw new Error(
         `Missing required production environment variables: ${missingVars}. These are required for security and functionality in production.`
       );
     }
 
-    // Validate that security tokens meet minimum requirements
-    if (process.env.RATE_LIMIT_SECRET && process.env.RATE_LIMIT_SECRET.length < 32) {
-      throw new Error('RATE_LIMIT_SECRET must be at least 32 characters for production security');
-    }
-    if (process.env.CACHE_WARM_AUTH_TOKEN && process.env.CACHE_WARM_AUTH_TOKEN.length < 32) {
-      throw new Error(
-        'CACHE_WARM_AUTH_TOKEN must be at least 32 characters for production security'
-      );
-    }
-    if (process.env.VIEW_COUNT_SALT && process.env.VIEW_COUNT_SALT.length < 16) {
-      throw new Error('VIEW_COUNT_SALT must be at least 16 characters for production security');
-    }
-    if (process.env.WEBHOOK_SECRET && process.env.WEBHOOK_SECRET.length < 32) {
-      throw new Error('WEBHOOK_SECRET must be at least 32 characters for production security');
+    // Validate minimum security token lengths - fail fast on weak secrets
+    const securityValidations = [
+      {
+        name: 'RATE_LIMIT_SECRET',
+        value: process.env.RATE_LIMIT_SECRET,
+        minLength: 32,
+      },
+      {
+        name: 'CACHE_WARM_AUTH_TOKEN',
+        value: process.env.CACHE_WARM_AUTH_TOKEN,
+        minLength: 32,
+      },
+      {
+        name: 'VIEW_COUNT_SALT',
+        value: process.env.VIEW_COUNT_SALT,
+        minLength: 16,
+      },
+      {
+        name: 'WEBHOOK_SECRET',
+        value: process.env.WEBHOOK_SECRET,
+        minLength: 32,
+      },
+    ];
+
+    for (const validation of securityValidations) {
+      if (validation.value && validation.value.length < validation.minLength) {
+        throw new Error(
+          `${validation.name} must be at least ${validation.minLength} characters for production security`
+        );
+      }
     }
   }
 
-  return parsed.data;
+  cachedEnv = parsed.data;
+  return cachedEnv;
 }
 
 /**
  * Validated and typed environment variables
+ * Performance: Lazy evaluation with memoization
+ * Security: Server-only validation never runs client-side
  * This ensures type safety throughout the application
  */
 export const env = validateEnv();

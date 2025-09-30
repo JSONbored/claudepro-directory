@@ -395,8 +395,10 @@ class Logger {
   log(message: string, ...args: unknown[]): void {
     const isProduction = process.env.NODE_ENV === 'production';
     const isVerbose = process.env.VERBOSE === 'true';
+    const isCI = process.env.CI === 'true' || process.env.VERCEL === '1';
 
-    if (!isProduction || isVerbose) {
+    // Always output in dev, verbose mode, or CI/build environments
+    if (!isProduction || isVerbose || isCI) {
       // biome-ignore lint/suspicious/noConsole: CLI output for scripts
       console.log(message, ...args);
     }
@@ -408,8 +410,9 @@ class Logger {
   progress(message: string): void {
     const isProduction = process.env.NODE_ENV === 'production';
     const isVerbose = process.env.VERBOSE === 'true';
-    const isCI = process.env.CI === 'true';
+    const isCI = process.env.CI === 'true' || process.env.VERCEL === '1';
 
+    // Always output in dev, verbose mode, or CI/build environments
     if (!isProduction || isVerbose || isCI) {
       // Use console.log for progress messages (Edge Runtime compatible)
       // biome-ignore lint/suspicious/noConsole: Progress logging
@@ -423,8 +426,10 @@ class Logger {
   success(message: string): void {
     const isProduction = process.env.NODE_ENV === 'production';
     const isVerbose = process.env.VERBOSE === 'true';
+    const isCI = process.env.CI === 'true' || process.env.VERCEL === '1';
 
-    if (!isProduction || isVerbose) {
+    // Always output in dev, verbose mode, or CI/build environments
+    if (!isProduction || isVerbose || isCI) {
       // biome-ignore lint/suspicious/noConsole: CLI output for scripts
       console.log(`✅ ${message}`);
     }
