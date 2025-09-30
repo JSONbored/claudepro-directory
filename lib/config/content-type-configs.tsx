@@ -9,7 +9,7 @@
  */
 
 import { BookOpen, Bot, Server, Terminal, Webhook } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import type { ContentTypeConfigRegistry } from '@/lib/types/content-type-config';
 import { getDisplayTitle } from '@/lib/utils';
@@ -32,8 +32,7 @@ const agentConfig: ContentTypeConfigRegistry['agents'] = {
     label: 'Deploy Agent',
     icon: <Bot className="h-4 w-4 mr-2" />,
     handler: () => {
-      toast({
-        title: 'Agent Deployment',
+      toast.success('Agent Deployment', {
         description: 'Copy the agent content and follow the installation instructions.',
       });
     },
@@ -126,8 +125,7 @@ const commandConfig: ContentTypeConfigRegistry['commands'] = {
         component: 'command-config',
         action: 'copy-content',
       });
-      toast({
-        title: 'Copied!',
+      toast.success('Copied!', {
         description: 'Command content has been copied to your clipboard.',
       });
     },
@@ -402,8 +400,7 @@ const ruleConfig: ContentTypeConfigRegistry['rules'] = {
     label: 'Use Rule',
     icon: <BookOpen className="h-4 w-4 mr-2" />,
     handler: () => {
-      toast({
-        title: 'Rule Integration',
+      toast.success('Rule Integration', {
         description: 'Copy the rule content and add it to your Claude configuration.',
       });
     },

@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { memo } from 'react';
 import { z } from 'zod';
@@ -28,7 +29,6 @@ import {
   ExternalLinkComponent,
   InternalLinkComponent,
 } from './mdx-components';
-import { OptimizedImage } from './optimized-image';
 import {
   SmartRelatedContentWithMetadata,
   setPageMetadata,
@@ -64,14 +64,13 @@ let currentPathname = '';
 const components = {
   // Enhanced image component
   img: ({ src, alt, width, height, className }: z.infer<typeof mdxImagePropsSchema>) => (
-    <OptimizedImage
+    <Image
       src={src}
       alt={alt}
-      width={width}
-      height={height}
+      width={width || 800}
+      height={height || 600}
       className={`my-8 ${className || ''}`}
       priority={false}
-      blurDataURL=""
     />
   ),
 

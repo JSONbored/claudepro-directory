@@ -2,8 +2,8 @@
 
 import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 
 type CopyButtonProps = {
@@ -27,14 +27,12 @@ export function CopyButton({
     const success = await copyToClipboard(text);
     if (success) {
       setIsCopied(true);
-      toast({
-        title: 'Copied!',
+      toast.success('Copied!', {
         description: 'Content copied to clipboard',
       });
       setTimeout(() => setIsCopied(false), 2000);
     } else {
-      toast({
-        title: 'Failed to copy',
+      toast.error('Failed to copy', {
         description: 'Please try again or copy manually',
       });
     }

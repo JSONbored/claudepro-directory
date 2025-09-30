@@ -13,10 +13,10 @@
 import { ArrowLeft, Calendar, Copy, ExternalLink, Github, Tag, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { lazy, Suspense, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import { getContentTypeConfig } from '@/lib/config/content-type-configs';
 import { formatDate } from '@/lib/date-utils';
@@ -139,13 +139,11 @@ export function UnifiedDetailPage({ item, relatedItems = [] }: UnifiedDetailPage
 
     setCopied(true);
     if (success) {
-      toast({
-        title: 'Copied!',
+      toast.success('Copied!', {
         description: `${config.typeName} content has been copied to your clipboard.`,
       });
     } else {
-      toast({
-        title: 'Copy failed',
+      toast.error('Copy failed', {
         description: 'Unable to copy content to clipboard.',
       });
     }

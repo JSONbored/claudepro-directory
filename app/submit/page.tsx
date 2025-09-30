@@ -2,6 +2,7 @@
 
 import { CheckCircle, ExternalLink, FileJson, Github, Loader2, Send } from 'lucide-react';
 import { useActionState, useId, useState } from 'react';
+import { toast } from 'sonner';
 import { z } from 'zod';
 import { submitConfiguration } from '@/app/actions/submit-config';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/hooks/use-toast';
 import { SOCIAL_LINKS } from '@/lib/constants';
 import { type ConfigSubmissionInput, configSubmissionSchema } from '@/lib/schemas/form.schema';
 
@@ -44,26 +44,20 @@ export default function SubmitPage() {
 
   // Show toast notifications based on server action state
   if (state?.success && !isPending) {
-    toast({
-      title: 'Configuration Submitted!',
+    toast.success('Configuration Submitted!', {
       description: 'Your configuration has been submitted for review.',
     });
   } else if (state?.error && !isPending) {
     if (state.fallback) {
-      toast({
-        title: 'Please use GitHub',
+      toast.error('Please use GitHub', {
         description: state.error,
-        action: (
-          <Button variant="outline" size="sm" asChild>
-            <a href={`${SOCIAL_LINKS.github}/issues/new`} target="_blank" rel="noopener noreferrer">
-              Open GitHub
-            </a>
-          </Button>
-        ),
+        action: {
+          label: 'Open GitHub',
+          onClick: () => window.open(`${SOCIAL_LINKS.github}/issues/new`, '_blank'),
+        },
       });
     } else {
-      toast({
-        title: 'Submission Failed',
+      toast.error('Submission Failed', {
         description: state.error,
       });
     }
@@ -137,8 +131,7 @@ export default function SubmitPage() {
 
     if (!isValid) {
       setIsValidating(false);
-      toast({
-        title: 'Validation Failed',
+      toast.error('Validation Failed', {
         description: 'Please fix the errors below before submitting.',
       });
       return;

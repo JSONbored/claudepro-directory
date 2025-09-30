@@ -3,12 +3,12 @@
 import { Check, Copy, ExternalLink, Github } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { memo, useState } from 'react';
+import { toast } from 'sonner';
 import { trackCopy } from '@/app/actions/track-view';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SourceBadge, TagBadge, TypeBadge } from '@/components/ui/config-badge';
-import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import type { ConfigCardProps } from '@/lib/schemas/component.schema';
 import { getDisplayTitle } from '@/lib/utils';
@@ -37,13 +37,11 @@ export const ConfigCard = memo(
           // Silent fail - don't break UX
         });
 
-        toast({
-          title: 'Link copied!',
+        toast.success('Link copied!', {
           description: 'The config link has been copied to your clipboard.',
         });
       } else {
-        toast({
-          title: 'Failed to copy',
+        toast.error('Failed to copy', {
           description: 'Could not copy the link to clipboard.',
         });
       }

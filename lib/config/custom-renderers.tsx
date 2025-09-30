@@ -10,10 +10,10 @@
 
 import { Copy } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import type { UnifiedContentItem } from '@/lib/schemas/components';
 import type { InstallationSteps } from '@/lib/types/content-type-config';
@@ -50,13 +50,11 @@ export function renderMCPConfiguration(item: UnifiedContentItem): React.ReactEle
 
     setCopied(true);
     if (success) {
-      toast({
-        title: 'Copied!',
+      toast.success('Copied!', {
         description: `${configType} configuration has been copied to your clipboard.`,
       });
     } else {
-      toast({
-        title: 'Copy failed',
+      toast.error('Copy failed', {
         description: 'Unable to copy configuration to clipboard.',
       });
     }
@@ -178,13 +176,11 @@ export function renderHookConfiguration(item: UnifiedContentItem): React.ReactEl
 
     setCopied(true);
     if (success) {
-      toast({
-        title: 'Copied!',
+      toast.success('Copied!', {
         description: 'Hook configuration has been copied to your clipboard.',
       });
     } else {
-      toast({
-        title: 'Copy failed',
+      toast.error('Copy failed', {
         description: 'Unable to copy configuration to clipboard.',
       });
     }
