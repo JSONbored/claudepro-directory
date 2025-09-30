@@ -62,9 +62,18 @@
     "Regular backups recommended for critical data"
   ],
   "troubleshooting": [
-    "Ensure pages are shared with the integration",
-    "Check workspace permissions for the connection",
-    "Verify OAuth connection status with /mcp command"
+    {
+      "issue": "Ensure pages are shared with the integration",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check workspace permissions for the connection",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify OAuth connection status with /mcp command",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Create a new page for today's meeting notes",

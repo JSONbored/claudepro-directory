@@ -62,9 +62,18 @@
     "Monitor transaction logs"
   ],
   "troubleshooting": [
-    "Check merchant account status",
-    "Verify location permissions",
-    "Test in sandbox mode before production"
+    {
+      "issue": "Check merchant account status",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify location permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Test in sandbox mode before production",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Process a $50 payment",

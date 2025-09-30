@@ -62,10 +62,22 @@
     "Check export quota restrictions"
   ],
   "troubleshooting": [
-    "Verify account tier limits",
-    "Check available storage space",
-    "Monitor rendering queue status",
-    "Ensure media format compatibility"
+    {
+      "issue": "Verify account tier limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check available storage space",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor rendering queue status",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure media format compatibility",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Create a 30-second product video",

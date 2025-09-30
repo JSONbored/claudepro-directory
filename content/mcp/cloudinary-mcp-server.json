@@ -73,10 +73,22 @@
     "Set transformation limits"
   ],
   "troubleshooting": [
-    "Check account storage limits",
-    "Verify transformation quotas",
-    "Monitor bandwidth usage",
-    "Test URL signing configuration"
+    {
+      "issue": "Check account storage limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify transformation quotas",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor bandwidth usage",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Test URL signing configuration",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Resize all product images to 800x600",

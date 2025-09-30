@@ -80,11 +80,26 @@
     "Network security controls"
   ],
   "troubleshooting": [
-    "Verify Redis server is running and accessible",
-    "Check Redis connection URL format",
-    "Ensure proper Redis ACL permissions",
-    "Confirm network connectivity to Redis instance",
-    "Validate SSL certificates if using TLS"
+    {
+      "issue": "Verify Redis server is running and accessible",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check Redis connection URL format",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure proper Redis ACL permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Confirm network connectivity to Redis instance",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Validate SSL certificates if using TLS",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Store and retrieve cached data with expiration",

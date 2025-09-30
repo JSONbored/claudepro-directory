@@ -1,7 +1,5 @@
 {
-  "// REQUIRED FIELDS": "All agents must include these fields",
   "slug": "your-agent-name-agent",
-  "// NOTE": "Title is auto-generated from slug with smart acronym capitalization (e.g., 'api-builder-agent' → 'API Builder Agent')",
   "description": "Brief description of what this agent specializes in and its expertise areas",
   "category": "agents",
   "author": "Your Name or GitHub Username",
@@ -14,8 +12,6 @@
     "systemPrompt": "You are an expert [ROLE] with deep knowledge of [DOMAIN]. Always prioritize [KEY_VALUES]."
   },
   "source": "community",
-
-  "// OPTIONAL FIELDS": "These will be auto-generated if not provided",
   "features": [
     "Key capability or expertise area 1",
     "Key capability or expertise area 2",
@@ -71,12 +67,5 @@
       "Basic understanding of YAML frontmatter and Markdown",
       "Node.js 18+ if using SDK integration"
     ]
-  },
-
-  "// AUTO-GENERATED SECTIONS": "These are automatically generated if optional fields are missing",
-  "// title": "Auto-generated from slug with smart acronym capitalization (API, UI, ML, AI, etc.)",
-  "// installation": "Generated from slug + agent type + standard Claude paths",
-  "// requirements": "Auto-detected from content and configuration + 'Claude Desktop or Claude Code'",
-  "// useCases": "Generated from tags + expertise analysis + fallback generic use cases",
-  "// features": "Could be auto-generated from content analysis and configuration parameters"
+  }
 }

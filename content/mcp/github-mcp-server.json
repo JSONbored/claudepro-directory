@@ -72,11 +72,26 @@
     "Built-in error handling for API issues"
   ],
   "troubleshooting": [
-    "Verify GitHub token has appropriate repository permissions",
-    "Check token validity and expiration date",
-    "Ensure repository access and correct spelling",
-    "Monitor API rate limits and usage",
-    "Restart Claude Desktop after configuration changes"
+    {
+      "issue": "Verify GitHub token has appropriate repository permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check token validity and expiration date",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure repository access and correct spelling",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor API rate limits and usage",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Restart Claude Desktop after configuration changes",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Show me the README from my main project repository",

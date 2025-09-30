@@ -62,9 +62,18 @@
     "Build hook security measures"
   ],
   "troubleshooting": [
-    "Check Netlify account status and limits",
-    "Verify site permissions",
-    "Monitor build minutes usage"
+    {
+      "issue": "Check Netlify account status and limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify site permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor build minutes usage",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Deploy my site to production",

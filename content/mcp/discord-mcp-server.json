@@ -72,10 +72,22 @@
     "Secure Discord API integration"
   ],
   "troubleshooting": [
-    "Verify Discord bot token is valid and active",
-    "Check bot permissions in Discord server",
-    "Ensure Java runtime is available",
-    "Confirm Discord guild ID is correct"
+    {
+      "issue": "Verify Discord bot token is valid and active",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check bot permissions in Discord server",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure Java runtime is available",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Confirm Discord guild ID is correct",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Get server information and member count",

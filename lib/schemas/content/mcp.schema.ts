@@ -9,6 +9,7 @@ import { z } from 'zod';
 import {
   baseContentMetadataSchema,
   baseInstallationSchema,
+  baseTroubleshootingSchema,
 } from '@/lib/schemas/content/base-content.schema';
 import { examplesArray, limitedMediumStringArray } from '@/lib/schemas/primitives/base-arrays';
 import {
@@ -165,7 +166,7 @@ export const mcpContentSchema = z.object({
   package: z.string().max(200).nullable().optional(),
   installation: baseInstallationSchema.optional(),
   security: limitedMediumStringArray.optional(),
-  troubleshooting: limitedMediumStringArray.optional(),
+  troubleshooting: z.array(baseTroubleshootingSchema).max(20).optional(), // Changed from string array to object array for consistency
   examples: examplesArray.optional(),
 
   // Authentication and permissions

@@ -62,10 +62,22 @@
     "Cache frequently accessed data"
   ],
   "troubleshooting": [
-    "Verify subscription level access",
-    "Check data availability for companies",
-    "Monitor API rate limits",
-    "Validate ticker symbols"
+    {
+      "issue": "Verify subscription level access",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check data availability for companies",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor API rate limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Validate ticker symbols",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Get Apple's latest 10-K filing data",

@@ -65,11 +65,26 @@
     "Safe exploration without data modification risks"
   ],
   "troubleshooting": [
-    "Verify connection string format and database accessibility",
-    "Check username/password in connection string",
-    "Add SSL mode if required by your database",
-    "Ensure database user has SELECT permissions",
-    "Test connection from command line first"
+    {
+      "issue": "Verify connection string format and database accessibility",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check username/password in connection string",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Add SSL mode if required by your database",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure database user has SELECT permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Test connection from command line first",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "What tables exist in my database?",

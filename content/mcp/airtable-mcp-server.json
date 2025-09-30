@@ -68,9 +68,18 @@
     "Monitor API usage through Airtable dashboard"
   ],
   "troubleshooting": [
-    "Ensure API key has necessary permissions for your operations",
-    "Check rate limits (5 requests/second) if experiencing throttling",
-    "Verify base and table IDs are correct in your requests"
+    {
+      "issue": "Ensure API key has necessary permissions for your operations",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check rate limits (5 requests/second) if experiencing throttling",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify base and table IDs are correct in your requests",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Read all records from the Projects table",

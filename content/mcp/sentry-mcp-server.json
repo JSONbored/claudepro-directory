@@ -62,9 +62,18 @@
     "Use read-only access when appropriate"
   ],
   "troubleshooting": [
-    "Verify Sentry project access permissions",
-    "Check OAuth token validity with /mcp",
-    "Ensure proper project selection in queries"
+    {
+      "issue": "Verify Sentry project access permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check OAuth token validity with /mcp",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure proper project selection in queries",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "What are the most common errors in the last 24 hours?",

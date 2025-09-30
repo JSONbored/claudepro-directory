@@ -62,10 +62,22 @@
     "Test recipes in sandbox environment"
   ],
   "troubleshooting": [
-    "Verify workspace permissions",
-    "Check recipe activation status",
-    "Monitor connection health",
-    "Review execution logs"
+    {
+      "issue": "Verify workspace permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check recipe activation status",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor connection health",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Review execution logs",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Sync Salesforce contacts to HubSpot",

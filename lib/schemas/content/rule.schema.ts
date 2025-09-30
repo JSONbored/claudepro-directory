@@ -15,6 +15,7 @@ import { z } from 'zod';
 import {
   baseConfigurationSchema,
   baseContentMetadataSchema,
+  baseTroubleshootingSchema,
 } from '@/lib/schemas/content/base-content.schema';
 import { limitedMediumStringArray } from '@/lib/schemas/primitives/base-arrays';
 import { codeString, mediumString } from '@/lib/schemas/primitives/base-strings';
@@ -32,20 +33,9 @@ const ruleExampleSchema = z.object({
   expectedOutcome: codeString,
 });
 
-/**
- * Rule Troubleshooting Schema
- *
- * Troubleshooting guidance can be either:
- * - Simple string for quick tips
- * - Structured object with issue and solution for complex scenarios
- */
-const ruleTroubleshootingSchema = z.union([
-  mediumString,
-  z.object({
-    issue: z.string().max(300),
-    solution: mediumString,
-  }),
-]);
+// Rule troubleshooting now uses baseTroubleshootingSchema from base-content.schema.ts
+// Removed local ruleTroubleshootingSchema definition to reduce duplication
+// Note: Previously supported union[string, object] but now standardized to object only
 
 /**
  * Rule content schema - matches actual production rule JSON structure
@@ -99,12 +89,12 @@ export const ruleContentSchema = z.object({
     .array(z.union([codeString, ruleExampleSchema]))
     .max(10)
     .optional(),
-  troubleshooting: z.array(ruleTroubleshootingSchema).max(20).optional(),
+  troubleshooting: z.array(baseTroubleshootingSchema).max(20).optional(),
 
   // Rule metadata for organization and discovery
   relatedRules: z.array(z.string()).max(20).optional(),
   expertiseAreas: z.array(z.string().max(200)).max(10).optional(),
-  difficultyLevel: z.enum(['Beginner', 'Intermediate', 'Advanced', 'Expert']).optional(),
+  // difficultyLevel removed - unused field (only in 1 content file + template)
 });
 
 export type RuleContent = z.infer<typeof ruleContentSchema>;

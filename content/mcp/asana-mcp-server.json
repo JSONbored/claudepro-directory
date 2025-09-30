@@ -62,9 +62,18 @@
     "Regular permission reviews recommended"
   ],
   "troubleshooting": [
-    "Check workspace access permissions",
-    "Verify OAuth connection with /mcp",
-    "Monitor API rate limits"
+    {
+      "issue": "Check workspace access permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify OAuth connection with /mcp",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor API rate limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Create a task for the new feature",

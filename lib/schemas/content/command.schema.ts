@@ -12,17 +12,10 @@ import {
   baseInstallationSchema,
 } from '@/lib/schemas/content/base-content.schema';
 import { examplesArray } from '@/lib/schemas/primitives/base-arrays';
-import { codeString, mediumString, shortString } from '@/lib/schemas/primitives/base-strings';
 
-// Argument type definition for commands
-const commandArgumentTypeSchema = z.object({
-  name: shortString,
-  description: mediumString,
-  example: codeString,
-});
-
-// Frontmatter options for command definition
-const commandFrontmatterOptionsSchema = z.record(z.string(), z.string());
+// argumentTypes and frontmatterOptions removed - unused fields (only in 1 content file + template)
+// Previously defined commandArgumentTypeSchema and commandFrontmatterOptionsSchema
+// These were never used in production content files
 
 /**
  * Command content schema - matches actual production command JSON structure
@@ -50,12 +43,10 @@ export const commandContentSchema = z.object({
   // Installation and setup
   installation: baseInstallationSchema.optional(),
 
-  // Command-specific metadata
-  argumentTypes: z.array(commandArgumentTypeSchema).max(20).optional(),
-  frontmatterOptions: commandFrontmatterOptionsSchema.optional(),
-
   // Examples
   examples: examplesArray.optional(),
+
+  // argumentTypes and frontmatterOptions removed - unused fields
 });
 
 export type CommandContent = z.infer<typeof commandContentSchema>;

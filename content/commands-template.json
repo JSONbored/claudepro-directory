@@ -1,7 +1,5 @@
 {
-  "// REQUIRED FIELDS": "All commands must include these fields",
   "slug": "your-command-name",
-  "// NOTE": "Title is auto-generated from slug with smart acronym capitalization and '/' prefix (e.g., 'review-code' → '/review-code')",
   "description": "Brief description of what this command does and its primary purpose",
   "category": "commands",
   "author": "Your Name or GitHub Username",
@@ -9,8 +7,6 @@
   "tags": ["primary-function", "secondary-feature", "technology-stack", "use-case"],
   "content": "---\nallowed-tools: Bash(git add:*), Bash(git status:*), Read, Write, Edit\nargument-hint: [required-arg] [optional-arg]\ndescription: Brief command description for help text\nmodel: claude-3-5-sonnet-20241022\n---\n\n## Context\n\n- Current project status: !`pwd && ls -la`\n- Git status: !`git status --short`\n- Recent activity: !`git log --oneline -3`\n\n## Your Task\n\nDescribe what this command should accomplish when executed.\n\n### Command Behavior\n1. Step 1: What the command does first\n2. Step 2: How it processes arguments\n3. Step 3: What output it generates\n\n### Arguments\n- `$1` - First argument description\n- `$2` - Second argument description  \n- `$ARGUMENTS` - All arguments as single string\n\n### Examples\n```bash\n# Basic usage\n/your-command\n\n# With arguments\n/your-command arg1 arg2\n\n# Advanced usage\n/your-command --option value\n```\n\n## Implementation\n\nProvide specific instructions for what Claude should do when this command is executed.",
   "source": "community",
-
-  "// OPTIONAL FIELDS": "These will be auto-generated if not provided",
   "features": [
     "Key capability or function 1",
     "Key capability or function 2",
@@ -62,31 +58,6 @@
       "Familiarity with bash commands if using !`command` syntax"
     ]
   },
-  "argumentTypes": [
-    {
-      "name": "$1, $2, $3...",
-      "description": "Positional arguments - access specific arguments by position",
-      "example": "echo 'Processing file $1 with option $2' > .claude/commands/process.md"
-    },
-    {
-      "name": "$ARGUMENTS",
-      "description": "All arguments as single string - useful for flexible input",
-      "example": "echo 'Fix issue #$ARGUMENTS following our standards' > .claude/commands/fix.md"
-    }
-  ],
-  "frontmatterOptions": {
-    "allowed-tools": "List of tools the command can use (e.g., 'Bash(git add:*), Read, Write, Edit')",
-    "argument-hint": "Hint text shown in command help (e.g., '[file] [options]')",
-    "description": "Short description for command discovery and help",
-    "model": "Specific Claude model to use (e.g., 'claude-3-5-sonnet-20241022')"
-  },
   "documentationUrl": "https://link-to-relevant-external-documentation.com",
-  "githubUrl": "https://github.com/relevant-project/repository",
-
-  "// AUTO-GENERATED SECTIONS": "These are automatically generated if optional fields are missing",
-  "// title": "Auto-generated from slug with smart acronym capitalization and '/' prefix (/AWS, /API, /CSS, /JSON, etc.)",
-  "// installation": "Generated from slug + command type + standard Claude paths",
-  "// requirements": "Auto-detected from frontmatter allowed-tools + 'Claude Code CLI'",
-  "// useCases": "Generated from tags + command analysis + fallback generic use cases",
-  "// features": "Could be auto-generated from content analysis and frontmatter parsing"
+  "githubUrl": "https://github.com/relevant-project/repository"
 }

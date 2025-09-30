@@ -1,7 +1,5 @@
 {
-  "// REQUIRED FIELDS": "All MCP servers must include these fields",
   "slug": "service-mcp-server",
-  "// NOTE": "Title is auto-generated from slug with smart acronym capitalization (e.g., 'postgresql-database' → 'PostgreSQL Database')",
   "description": "Brief description of what this MCP server provides and its capabilities",
   "category": "mcp",
   "author": "Your Name or GitHub Username",
@@ -51,8 +49,6 @@
   },
   "package": "@your-org/your-mcp-server",
   "source": "community",
-
-  "// OPTIONAL FIELDS": "These enhance the MCP server's functionality and display",
   "features": [
     "Key capability or data source 1",
     "Advanced functionality or integration 2",
@@ -147,8 +143,6 @@
     "Data sources or content types available",
     "Information Claude can retrieve or access"
   ],
-
-  "// MCP-SPECIFIC FIELDS": "These are unique to MCP servers based on the Model Context Protocol",
   "transport": {
     "stdio": {
       "command": "npx",
@@ -180,15 +174,5 @@
     "name": "your-mcp-server",
     "version": "1.0.0",
     "protocol_version": "2024-11-05"
-  },
-
-  "// AUTO-GENERATED SECTIONS": "These are automatically generated if optional fields are missing",
-  "// title": "Auto-generated from slug with smart acronym capitalization (API, DB, AWS, SQL, etc.)",
-  "// installation": "Generated from package + server type + standard MCP configuration paths",
-  "// requirements": "Auto-detected from configuration and transport type + 'Claude Desktop or Claude Code'",
-  "// troubleshooting": "Generated from server type, auth requirements, and common MCP issues",
-  "// useCases": "Generated from tags + MCP capabilities analysis + fallback generic use cases",
-  "// features": "Could be auto-generated from capabilities, tools, and resources analysis",
-  "// serverType": "Auto-detected from configuration (stdio/http/sse)",
-  "// authType": "Auto-detected from configuration and security requirements"
+  }
 }

@@ -62,10 +62,22 @@
     "Follow compliance requirements"
   ],
   "troubleshooting": [
-    "Check Plaid Dashboard access",
-    "Verify environment (development/production)",
-    "Monitor webhook status",
-    "Review error logs"
+    {
+      "issue": "Check Plaid Dashboard access",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify environment (development/production)",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor webhook status",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Review error logs",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Debug why account linking is failing",

@@ -62,10 +62,22 @@
     "Review changes before production deploys"
   ],
   "troubleshooting": [
-    "Check Vercel account permissions",
-    "Verify project access rights",
-    "Monitor build quota usage",
-    "Check domain verification status"
+    {
+      "issue": "Check Vercel account permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify project access rights",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor build quota usage",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check domain verification status",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Deploy the latest commit to production",

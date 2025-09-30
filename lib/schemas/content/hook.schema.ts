@@ -9,6 +9,7 @@ import { z } from 'zod';
 import {
   baseContentMetadataSchema,
   baseInstallationSchema,
+  baseTroubleshootingSchema,
 } from '@/lib/schemas/content/base-content.schema';
 import { limitedMediumStringArray } from '@/lib/schemas/primitives/base-arrays';
 import { timeoutMs } from '@/lib/schemas/primitives/base-numbers';
@@ -69,20 +70,8 @@ const fullHookConfigSchema = z.object({
   scriptContent: massiveString.optional(), // 1MB limit for script content
 });
 
-/**
- * Hook Troubleshooting Schema
- *
- * Individual troubleshooting entry for common hook issues.
- * Used in troubleshooting array to provide solutions for known problems.
- *
- * Fields:
- * - issue: Short description of the issue (max 300 characters)
- * - solution: Detailed solution or workaround (medium string)
- */
-const hookTroubleshootingSchema = z.object({
-  issue: z.string().max(300),
-  solution: mediumString,
-});
+// Hook troubleshooting now uses baseTroubleshootingSchema from base-content.schema.ts
+// Removed local hookTroubleshootingSchema definition to reduce duplication
 
 /**
  * Hook Content Schema
@@ -147,7 +136,7 @@ export const hookContentSchema = z.object({
 
   // Hook-specific optional fields
   installation: baseInstallationSchema.optional(),
-  troubleshooting: z.array(hookTroubleshootingSchema).max(20).optional(),
+  troubleshooting: z.array(baseTroubleshootingSchema).max(20).optional(),
   requirements: limitedMediumStringArray.optional(),
 });
 

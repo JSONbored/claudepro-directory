@@ -62,9 +62,18 @@
     "Regular asset backups recommended"
   ],
   "troubleshooting": [
-    "Check Canva Pro access requirements",
-    "Verify team permissions",
-    "Monitor storage limits"
+    {
+      "issue": "Check Canva Pro access requirements",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify team permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor storage limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Create an Instagram post about our product launch",

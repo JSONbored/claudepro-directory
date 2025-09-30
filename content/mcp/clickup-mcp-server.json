@@ -59,10 +59,22 @@
     "Monitor API usage for anomalies"
   ],
   "troubleshooting": [
-    "Verify API key permissions in ClickUp",
-    "Check Team ID accuracy in configuration",
-    "Ensure user has space access permissions",
-    "Monitor rate limits for API calls"
+    {
+      "issue": "Verify API key permissions in ClickUp",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check Team ID accuracy in configuration",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure user has space access permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor rate limits for API calls",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Create a new task in the Development space",

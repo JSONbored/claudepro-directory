@@ -71,9 +71,18 @@
     "Monitor API usage and rate limits"
   ],
   "troubleshooting": [
-    "Verify API token permissions",
-    "Check zone access rights",
-    "Monitor API quota usage"
+    {
+      "issue": "Verify API token permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check zone access rights",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor API quota usage",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Add DNS record for subdomain",

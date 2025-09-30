@@ -71,10 +71,22 @@
     "Cluster-scoped access controls"
   ],
   "troubleshooting": [
-    "Verify kubeconfig file is valid and accessible",
-    "Check kubectl connectivity to cluster",
-    "Ensure proper RBAC permissions",
-    "Confirm cluster is running and reachable"
+    {
+      "issue": "Verify kubeconfig file is valid and accessible",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check kubectl connectivity to cluster",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure proper RBAC permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Confirm cluster is running and reachable",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "List all pods in the default namespace",

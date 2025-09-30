@@ -62,10 +62,22 @@
     "Test Zaps before enabling"
   ],
   "troubleshooting": [
-    "Check Zap status (on/off)",
-    "Verify app connections",
-    "Monitor task usage limits",
-    "Review error logs"
+    {
+      "issue": "Check Zap status (on/off)",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify app connections",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor task usage limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Review error logs",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Trigger the new customer onboarding Zap",

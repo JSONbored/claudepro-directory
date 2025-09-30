@@ -62,9 +62,18 @@
     "Follow PCI compliance guidelines"
   ],
   "troubleshooting": [
-    "Verify Stripe account permissions",
-    "Check test vs live mode configuration",
-    "Ensure webhook endpoints are configured correctly"
+    {
+      "issue": "Verify Stripe account permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check test vs live mode configuration",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure webhook endpoints are configured correctly",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Refund order ord_abc123",

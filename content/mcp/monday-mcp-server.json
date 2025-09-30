@@ -62,9 +62,18 @@
     "Regular permission reviews recommended"
   ],
   "troubleshooting": [
-    "Verify workspace access rights",
-    "Check board permissions",
-    "Monitor API rate limits"
+    {
+      "issue": "Verify workspace access rights",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check board permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor API rate limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Create a new item in the Projects board",

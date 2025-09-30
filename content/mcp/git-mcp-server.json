@@ -65,10 +65,22 @@
     "Respects existing file permissions"
   ],
   "troubleshooting": [
-    "Ensure you're in a Git repository directory",
-    "Check that Claude has read access to repository files",
-    "Verify Git is installed and accessible from command line",
-    "Restart Claude Desktop after configuration changes"
+    {
+      "issue": "Ensure you're in a Git repository directory",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check that Claude has read access to repository files",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify Git is installed and accessible from command line",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Restart Claude Desktop after configuration changes",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Show me the recent commit history",

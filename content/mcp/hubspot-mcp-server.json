@@ -62,9 +62,18 @@
     "Regular data audits recommended"
   ],
   "troubleshooting": [
-    "Check HubSpot account permissions",
-    "Verify OAuth connection status",
-    "Monitor API rate limits"
+    {
+      "issue": "Check HubSpot account permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify OAuth connection status",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor API rate limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Create a new contact for John Doe",

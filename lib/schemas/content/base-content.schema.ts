@@ -137,8 +137,29 @@ export const baseInstallationSchema = z.object({
 });
 
 /**
+ * Base Troubleshooting Schema
+ *
+ * Standardized troubleshooting entry format used across:
+ * - hooks, rules, mcp servers
+ *
+ * Troubleshooting Fields:
+ * - issue: Description of the problem
+ * - solution: Step-by-step solution to fix the issue
+ *
+ * Usage:
+ * ```typescript
+ * const hookTroubleshootingField = z.array(baseTroubleshootingSchema).max(20).optional();
+ * ```
+ */
+export const baseTroubleshootingSchema = z.object({
+  issue: nonEmptyString.describe('Description of the problem or error'),
+  solution: mediumString.describe('Step-by-step solution to resolve the issue'),
+});
+
+/**
  * Type exports for external use
  */
 export type BaseContentMetadata = z.infer<typeof baseContentMetadataSchema>;
 export type BaseConfiguration = z.infer<typeof baseConfigurationSchema>;
 export type BaseInstallation = z.infer<typeof baseInstallationSchema>;
+export type BaseTroubleshooting = z.infer<typeof baseTroubleshootingSchema>;

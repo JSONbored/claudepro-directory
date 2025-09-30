@@ -85,12 +85,30 @@
     "VPC security groups and network ACLs"
   ],
   "troubleshooting": [
-    "Verify AWS credentials are properly configured",
-    "Check IAM permissions for required AWS services",
-    "Ensure AWS region is correctly set",
-    "Monitor AWS API rate limits and quotas",
-    "Validate CloudFormation template syntax",
-    "Check VPC and subnet configurations"
+    {
+      "issue": "Verify AWS credentials are properly configured",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check IAM permissions for required AWS services",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure AWS region is correctly set",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor AWS API rate limits and quotas",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Validate CloudFormation template syntax",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check VPC and subnet configurations",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Launch a new EC2 instance with custom tags",

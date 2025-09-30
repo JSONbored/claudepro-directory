@@ -62,9 +62,18 @@
     "Regular training updates recommended"
   ],
   "troubleshooting": [
-    "Check workspace access permissions",
-    "Verify team member permissions",
-    "Monitor API rate limits"
+    {
+      "issue": "Check workspace access permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify team member permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor API rate limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Show open conversations from today",

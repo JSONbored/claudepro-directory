@@ -62,10 +62,22 @@
     "Follow PCI compliance guidelines"
   ],
   "troubleshooting": [
-    "Verify account type (business/personal)",
-    "Check API permissions",
-    "Monitor rate limits",
-    "Test in sandbox environment first"
+    {
+      "issue": "Verify account type (business/personal)",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check API permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor rate limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Test in sandbox environment first",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Process a refund for transaction ID ABC123",

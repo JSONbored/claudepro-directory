@@ -65,10 +65,22 @@
     "Built-in protections against unauthorized access"
   ],
   "troubleshooting": [
-    "Verify Node.js is installed and accessible",
-    "Check Claude has read/write access to specified directories",
-    "Ensure directory paths exist and are correctly specified",
-    "Restart Claude Desktop after configuration changes"
+    {
+      "issue": "Verify Node.js is installed and accessible",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check Claude has read/write access to specified directories",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure directory paths exist and are correctly specified",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Restart Claude Desktop after configuration changes",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Read the contents of package.json",

@@ -42,18 +42,6 @@
     "Familiarity with Zod validation schemas",
     "Knowledge of OWASP security principles"
   ],
-  "argumentTypes": [
-    {
-      "name": "audit-type",
-      "description": "Type of audit to perform: full, security, duplication, or validation",
-      "example": "/audit-codebase security"
-    },
-    {
-      "name": "path",
-      "description": "Specific path or directory to audit (defaults to current directory)",
-      "example": "/audit-codebase full ./src"
-    }
-  ],
   "documentationUrl": "https://owasp.org/www-project-top-ten/",
   "githubUrl": "https://github.com/colinhacks/zod"
 }

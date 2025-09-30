@@ -60,57 +60,88 @@ content/
 ├── agents/       # AI agent configurations
 ├── commands/     # Automation commands
 ├── hooks/        # Event hooks
-├── mcp-servers/  # MCP server configs
+├── mcp/          # MCP server configs
 └── rules/        # System prompts
 ```
 
-### 2. Create Your JSON File
+### 2. Choose Your Template
 
-Copy the appropriate template and fill in your content:
+We provide two template options for each content type:
 
-### For Hooks (Slug-Only Approach)
+**Simple Templates** (Recommended for beginners)
+- Minimal fields and clear examples
+- Perfect for getting started quickly
+- Available: `*-template-simple.json`
+
+**Advanced Templates** (For experienced contributors)
+- Comprehensive field documentation
+- Optional features and customization
+- Available: `*-template.json`
+
+### 3. Create Your JSON File
+
+Copy the appropriate template from the `content/` directory and fill in your content:
+
+#### Simple Template Example (Recommended for Beginners)
+
+**Agent Example:**
 ```json
 {
-  "slug": "your-hook-name",
-  "description": "Brief description of what this hook does",
-  "category": "hooks",
-  "author": "your-github-username",
-  "dateAdded": "2025-01-20",
-  "tags": ["automation", "relevant", "tags"],
-  "hookType": "PostToolUse",
+  "slug": "my-agent-name",
+  "description": "A brief description of what your agent does",
+  "category": "agents",
+  "author": "YourName",
+  "dateAdded": "2025-01-15",
+  "tags": ["main-skill", "technology", "use-case"],
+  "content": "You are an expert in [YOUR DOMAIN]...",
   "configuration": {
-    "hookConfig": {
-      "hooks": {
-        "postToolUse": {
-          "script": "./.claude/hooks/your-hook-name.sh",
-          "matchers": ["write", "edit"]
-        }
-      }
-    },
-    "scriptContent": "#!/usr/bin/env bash\n\n# Your script content here"
-  }
+    "temperature": 0.3,
+    "maxTokens": 8000
+  },
+  "source": "community"
 }
 ```
 
-### For Other Content Types
+**Hook Example:**
 ```json
 {
-  "title": "Your Content Title",
-  "description": "Brief description of what this does",
-  "category": "development",
-  "author": "your-github-username",
-  "tags": ["relevant", "tags", "here"],
-  "content": "The main content/prompt/configuration goes here.\n\nSupports markdown formatting."
+  "slug": "my-hook",
+  "description": "A brief description of what this hook does",
+  "category": "hooks",
+  "author": "YourName",
+  "dateAdded": "2025-01-15",
+  "tags": ["event-type", "technology", "use-case"],
+  "content": "#!/usr/bin/env bash\n# Your script here",
+  "source": "community",
+  "hookType": "pre-tool-use",
+  "triggeredBy": ["tool-name"]
 }
 ```
+
+#### Advanced Template Features
+
+For experienced contributors, advanced templates include:
+- Detailed installation instructions
+- Troubleshooting guides
+- Usage examples with expected outcomes
+- Related content cross-references
+- Custom configuration options
 
 **Important Notes:**
-- **For hooks**: Use `slug` field only - titles are auto-generated with smart capitalization
-- **For other content**: Use `title` or `name` field - slugs are auto-generated  
+- All content types use `slug` field - titles are auto-generated with smart capitalization
 - "aws-api-validator" → "AWS API Validator" (auto-capitalized)
-- "UI/UX Expert" → URL: `/agents/uiux-expert`
+- Slugs should use kebab-case (lowercase with hyphens)
 
-### 3. Categories
+### 4. Template Locations
+
+Find templates in the `content/` directory:
+- `content/agents-template-simple.json` / `content/agents-template.json`
+- `content/commands-template-simple.json` / `content/commands-template.json`
+- `content/hooks-template-simple.json` / `content/hooks-template.json`
+- `content/mcp-template-simple.json` / `content/mcp-template.json`
+- `content/rules-template-simple.json` / `content/rules-template.json`
+
+### 5. Categories
 
 Use one of these standard categories:
 
@@ -131,7 +162,7 @@ Use one of these standard categories:
 - `file-system` - File operations
 - `other` - Other integrations
 
-### 4. File Naming
+### 6. File Naming
 
 Name your file descriptively using kebab-case:
 - ✅ `typescript-expert.json`
@@ -228,55 +259,27 @@ tag1, tag2, tag3
 - Report issues or improvements
 - Share knowledge and learn from others
 
-## 📚 Examples
+## 📚 Real-World Examples
 
-### Good Agent Example
-```json
-{
-  "title": "React Code Review Assistant",
-  "description": "Specialized in reviewing React code for best practices, performance, and accessibility",
-  "category": "development",
-  "author": "JSONbored",
-  "tags": ["react", "code-review", "javascript", "frontend"],
-  "content": "You are a React code review expert focused on...\n\n## Review Criteria\n- Component structure\n- Hook usage\n- Performance optimizations\n- Accessibility standards"
-}
-```
+Check the `content/` directories for production examples:
+- **Agents**: `content/agents/` - See professional agent configurations
+- **Commands**: `content/commands/` - Review working command implementations
+- **Hooks**: `content/hooks/` - Study event-driven automation examples
+- **MCP**: `content/mcp/` - Explore server integration patterns
+- **Rules**: `content/rules/` - Learn from expert system prompts
 
-### Good Hook Example
-```json
-{
-  "slug": "accessibility-checker",
-  "description": "Automated accessibility testing and compliance checking for web applications following WCAG guidelines",
-  "category": "hooks",
-  "author": "JSONbored",
-  "dateAdded": "2025-01-20",
-  "tags": ["accessibility", "a11y", "wcag", "testing"],
-  "hookType": "PostToolUse",
-  "configuration": {
-    "hookConfig": {
-      "hooks": {
-        "postToolUse": {
-          "script": "./.claude/hooks/accessibility-checker.sh",
-          "matchers": ["write", "edit"]
-        }
-      }
-    },
-    "scriptContent": "#!/usr/bin/env bash\n\n# Accessibility checking script\necho 'Running accessibility checks...'"
-  }
-}
-```
+### Quick Reference: Simple vs Advanced Templates
 
-### Good MCP Server Example
-```json
-{
-  "title": "PostgreSQL Database Server",
-  "description": "Connect Claude to PostgreSQL databases for querying and data analysis",
-  "category": "database",
-  "author": "JSONbored",
-  "tags": ["postgresql", "database", "sql", "data"],
-  "config": "{\n  \"command\": \"npx\",\n  \"args\": [\"@modelcontextprotocol/server-postgres\"]\n}"
-}
-```
+| Feature | Simple Template | Advanced Template |
+|---------|----------------|-------------------|
+| Required Fields Only | ✅ | ✅ |
+| Basic Examples | ✅ | ✅ |
+| Installation Guide | ❌ | ✅ |
+| Troubleshooting | ❌ | ✅ |
+| Usage Examples | ❌ | ✅ |
+| Configuration Options | Minimal | Comprehensive |
+| Comments & Documentation | Minimal | Detailed |
+| Best For | Quick contributions | Production-ready content |
 
 ## 🙋 Need Help?
 

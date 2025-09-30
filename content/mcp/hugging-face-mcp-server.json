@@ -62,9 +62,18 @@
     "Check compute resource limits"
   ],
   "troubleshooting": [
-    "Verify account access level",
-    "Check API token validity",
-    "Monitor rate limits"
+    {
+      "issue": "Verify account access level",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check API token validity",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor rate limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Find the best text generation model",

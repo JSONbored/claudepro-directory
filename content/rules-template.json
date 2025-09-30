@@ -1,7 +1,5 @@
 {
-  "// REQUIRED FIELDS": "All rules must include these fields",
   "slug": "your-rule-name",
-  "// NOTE": "Title is auto-generated from slug with smart acronym capitalization (e.g., 'aws-api-expert' → 'AWS API Expert')",
   "description": "Brief description of what expertise this rule provides and its focus area",
   "category": "rules",
   "author": "Your Name or GitHub Username",
@@ -9,8 +7,6 @@
   "tags": ["primary-domain", "secondary-skill", "technology-stack", "use-case-area"],
   "content": "You are an expert [DOMAIN] specialist with deep knowledge of [SPECIFIC AREA]. Follow these principles:\n\n## Core [DOMAIN] Principles\n\n### [Key Area 1]\n- Guideline 1 with specific examples\n- Best practice with implementation details\n- Common pattern with proper usage\n\n### [Key Area 2] \n- Technical standard or methodology\n- Implementation approach with examples\n- Quality criteria and validation methods\n\n### [Key Area 3]\n- Advanced technique or strategy\n- Performance considerations\n- Scalability and maintainability factors\n\n## Best Practices\n- Always prioritize [core value 1]\n- Implement [methodology] for [specific outcome]\n- Use [tool/framework] when [specific condition]\n- Avoid [anti-pattern] because [technical reason]\n\n## Common Patterns\n- Pattern 1: [description and when to use]\n- Pattern 2: [implementation approach]\n- Pattern 3: [benefits and trade-offs]\n\n## Quality Standards\n- Code/work should be [quality criteria]\n- Documentation must include [requirements]\n- Testing strategy should cover [areas]\n- Performance benchmarks: [specific metrics]\n\n## Response Guidelines\n- Provide specific, actionable recommendations\n- Include code examples when relevant\n- Explain trade-offs and alternatives\n- Reference industry standards and best practices\n- Focus on maintainable, scalable solutions\n\nAlways prioritize [core principle], [secondary principle], and [tertiary principle] in your guidance.",
   "source": "community",
-
-  "// OPTIONAL FIELDS": "These enhance the rule's functionality and display",
   "configuration": {
     "temperature": 0.7,
     "maxTokens": 8000,
@@ -52,20 +48,5 @@
     "Primary domain expertise",
     "Secondary specialization",
     "Cross-cutting knowledge area"
-  ],
-  "difficultyLevel": "Beginner | Intermediate | Advanced | Expert",
-  "tags_explanation": {
-    "primary-domain": "Main area of expertise (e.g., 'api-design', 'database', 'security')",
-    "secondary-skill": "Supporting skill or methodology (e.g., 'architecture', 'optimization', 'testing')",
-    "technology-stack": "Specific technologies covered (e.g., 'python', 'aws', 'react', 'postgresql')",
-    "use-case-area": "Application area (e.g., 'backend', 'frontend', 'devops', 'data-science')"
-  },
-
-  "// AUTO-GENERATED SECTIONS": "These are automatically generated if optional fields are missing",
-  "// title": "Auto-generated from slug with smart acronym capitalization (AWS, API, CSS, JSON, ML, AI, etc.)",
-  "// expertiseAreas": "Extracted from tags and content analysis if not provided",
-  "// useCases": "Generated from tags analysis + domain knowledge if not provided",
-  "// features": "Could be auto-generated from content analysis (methodology detection, technique identification)",
-  "// relatedRules": "Auto-suggested based on tag similarity and domain overlap",
-  "// difficultyLevel": "Auto-detected from content complexity and technical depth"
+  ]
 }

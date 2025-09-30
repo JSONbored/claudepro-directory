@@ -62,9 +62,18 @@
     "Review and apply suggested fixes"
   ],
   "troubleshooting": [
-    "Verify Socket account access",
-    "Check package manager support",
-    "Review scan permissions and scope"
+    {
+      "issue": "Verify Socket account access",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check package manager support",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Review scan permissions and scope",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Scan my package.json for vulnerabilities",

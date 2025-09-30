@@ -62,9 +62,18 @@
     "Regular backups recommended for critical data"
   ],
   "troubleshooting": [
-    "Verify site access permissions",
-    "Check OAuth token status with /mcp",
-    "Ensure project visibility settings"
+    {
+      "issue": "Verify site access permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check OAuth token status with /mcp",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure project visibility settings",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Create a Jira bug for the login issue",

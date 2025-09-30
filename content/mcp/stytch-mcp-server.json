@@ -62,10 +62,22 @@
     "Monitor failed authentication attempts"
   ],
   "troubleshooting": [
-    "Verify project access permissions",
-    "Check environment (test/live) configuration",
-    "Review redirect URL configuration",
-    "Monitor API rate limits"
+    {
+      "issue": "Verify project access permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check environment (test/live) configuration",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Review redirect URL configuration",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor API rate limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Add new redirect URL for production",

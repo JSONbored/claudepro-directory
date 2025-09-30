@@ -61,10 +61,22 @@
     "No external API keys or authentication needed"
   ],
   "troubleshooting": [
-    "Verify Figma Desktop is running before connecting",
-    "Check that Dev Mode is enabled in Figma",
-    "Ensure port 3845 is not blocked by firewall",
-    "Delete old SSE endpoints at port 3845 if they exist"
+    {
+      "issue": "Verify Figma Desktop is running before connecting",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check that Dev Mode is enabled in Figma",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure port 3845 is not blocked by firewall",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Delete old SSE endpoints at port 3845 if they exist",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Export all icons from the design system as SVG",
