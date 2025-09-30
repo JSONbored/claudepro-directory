@@ -1,16 +1,15 @@
-'use client';
-
 /**
- * DetailMetadata - Metadata display section for unified detail pages
+ * DetailMetadata - Server Component for metadata display
  *
- * Extracts metadata rendering logic from unified-detail-page.tsx (lines 547-573)
- * Handles: Author, date, tags display
+ * CONVERTED: Client → Server component (no interactivity needed)
+ * Pure rendering of author, date, and tags
+ *
+ * Performance: Eliminated from client bundle, server-rendered for instant display
  *
  * @see components/unified-detail-page.tsx - Original implementation
  */
 
 import { Calendar, Tag, User } from 'lucide-react';
-import { memo } from 'react';
 import { z } from 'zod';
 import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/lib/date-utils';
@@ -26,11 +25,12 @@ const detailMetadataPropsSchema = z.object({
 export type DetailMetadataProps = z.infer<typeof detailMetadataPropsSchema>;
 
 /**
- * DetailMetadata Component
+ * DetailMetadata Component (Server Component)
  *
  * Renders author, date, and tags metadata for a content item
+ * No React.memo needed - server components don't re-render
  */
-export const DetailMetadata = memo(function DetailMetadata({ item }: DetailMetadataProps) {
+export function DetailMetadata({ item }: DetailMetadataProps) {
   const hasMetadata = item.author || item.dateAdded;
   const hasTags = item.tags && item.tags.length > 0;
 
@@ -69,4 +69,4 @@ export const DetailMetadata = memo(function DetailMetadata({ item }: DetailMetad
       )}
     </div>
   );
-});
+}

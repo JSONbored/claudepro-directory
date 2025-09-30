@@ -1,4 +1,11 @@
-'use client';
+/**
+ * CategoryNavigationCard - Server Component for category navigation
+ *
+ * CONVERTED: Client → Server component (Link works in server components)
+ * Pure rendering of category navigation links
+ *
+ * Performance: Eliminated from client bundle, server-rendered
+ */
 
 /**
  * CategoryNavigationCard - Category navigation with icons
@@ -11,7 +18,6 @@
 
 import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
-import { memo } from 'react';
 import { z } from 'zod';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { nonEmptyString } from '@/lib/schemas/primitives';
@@ -39,12 +45,13 @@ const categoryNavigationCardPropsSchema = z.object({
 export type CategoryNavigationCardProps = z.infer<typeof categoryNavigationCardPropsSchema>;
 
 /**
- * CategoryNavigationCard Component
+ * CategoryNavigationCard Component (Server Component)
  *
  * Renders category navigation with icons and tooltips.
  * Supports active state highlighting and custom colors.
+ * No React.memo needed - server components don't re-render
  */
-export const CategoryNavigationCard = memo(function CategoryNavigationCard({
+export function CategoryNavigationCard({
   currentCategory,
   categories,
   basePath = '/guides',
@@ -87,4 +94,4 @@ export const CategoryNavigationCard = memo(function CategoryNavigationCard({
       </div>
     </TooltipProvider>
   );
-});
+}

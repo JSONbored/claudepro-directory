@@ -1,19 +1,20 @@
-'use client';
-
 /**
- * SidebarDetailsCard - Type-specific metadata sidebar card
+ * SidebarDetailsCard - Server Component for type-specific metadata
+ *
+ * CONVERTED: Client → Server component (no interactivity needed)
+ * Pure rendering of agent/MCP/content-specific metadata
  *
  * Consolidates type-specific metadata from:
  * - custom-sidebars.tsx (renderAgentSidebar lines 55-97)
  * - custom-sidebars.tsx (renderMCPSidebar lines 170-227)
  *
  * Handles: Agent details (temperature, tools), MCP details (package, auth, permissions)
+ * Performance: Eliminated from client bundle, server-rendered
  *
  * @see lib/config/custom-sidebars.tsx - Original implementations
  */
 
 import { Thermometer } from 'lucide-react';
-import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { UnifiedContentItem } from '@/lib/schemas';
@@ -27,15 +28,13 @@ export interface SidebarDetailsCardProps {
 }
 
 /**
- * SidebarDetailsCard Component
+ * SidebarDetailsCard Component (Server Component)
  *
  * Renders type-specific metadata based on content category.
  * Automatically detects and displays relevant fields (temperature, package, auth, etc.)
+ * No React.memo needed - server components don't re-render
  */
-export const SidebarDetailsCard = memo(function SidebarDetailsCard({
-  item,
-  title = 'Details',
-}: SidebarDetailsCardProps) {
+export function SidebarDetailsCard({ item, title = 'Details' }: SidebarDetailsCardProps) {
   // Check if there's any metadata to show
   const hasConfiguration = 'configuration' in item && typeof item.configuration === 'object';
   const hasPackage = 'package' in item && item.package;
@@ -140,4 +139,4 @@ export const SidebarDetailsCard = memo(function SidebarDetailsCard({
       </CardContent>
     </Card>
   );
-});
+}

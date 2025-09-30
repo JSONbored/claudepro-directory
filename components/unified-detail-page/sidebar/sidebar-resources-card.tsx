@@ -1,7 +1,8 @@
-'use client';
-
 /**
- * SidebarResourcesCard - Resources links sidebar card
+ * SidebarResourcesCard - Server Component for resources links
+ *
+ * CONVERTED: Client → Server component (no interactivity needed)
+ * Pure rendering of GitHub and documentation links
  *
  * Consolidates resources card rendering from:
  * - custom-sidebars.tsx (renderAgentSidebar lines 28-52)
@@ -9,12 +10,12 @@
  * - unified-detail-page.tsx (renderSidebar lines 444-470)
  *
  * Eliminates 160+ lines of duplication across 3 files
+ * Performance: Eliminated from client bundle, server-rendered
  *
  * @see lib/config/custom-sidebars.tsx - Original implementations
  */
 
 import { ExternalLink, Github } from 'lucide-react';
-import { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -30,12 +31,13 @@ export interface SidebarResourcesCardProps {
 }
 
 /**
- * SidebarResourcesCard Component
+ * SidebarResourcesCard Component (Server Component)
  *
  * Renders GitHub and documentation links in a sidebar card.
  * Used across all detail pages (agents, commands, hooks, mcp, rules)
+ * No React.memo needed - server components don't re-render
  */
-export const SidebarResourcesCard = memo(function SidebarResourcesCard({
+export function SidebarResourcesCard({
   githubPath,
   documentationUrl,
   slug,
@@ -76,4 +78,4 @@ export const SidebarResourcesCard = memo(function SidebarResourcesCard({
       </CardContent>
     </Card>
   );
-});
+}

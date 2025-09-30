@@ -1,17 +1,17 @@
-'use client';
-
 /**
- * RecentGuidesCard - Recent content display card
+ * RecentGuidesCard - Server Component for recent content
+ *
+ * CONVERTED: Client → Server component (Link works in server components)
+ * Pure rendering of recent guides with dates
  *
  * Extracted from unified-sidebar.tsx (lines 402-423)
- * Displays recently updated guides/content with dates
+ * Performance: Eliminated from client bundle, server-rendered
  *
  * @see components/unified-sidebar.tsx - Original implementation
  */
 
 import { Clock } from 'lucide-react';
 import Link from 'next/link';
-import { memo } from 'react';
 import { z } from 'zod';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { nonEmptyString } from '@/lib/schemas/primitives';
@@ -36,15 +36,13 @@ const recentGuidesCardPropsSchema = z.object({
 export type RecentGuidesCardProps = z.infer<typeof recentGuidesCardPropsSchema>;
 
 /**
- * RecentGuidesCard Component
+ * RecentGuidesCard Component (Server Component)
  *
  * Displays a list of recently updated guides with dates.
  * Simple display card with no loading states.
+ * No React.memo needed - server components don't re-render
  */
-export const RecentGuidesCard = memo(function RecentGuidesCard({
-  guides,
-  title = 'Recent Guides',
-}: RecentGuidesCardProps) {
+export function RecentGuidesCard({ guides, title = 'Recent Guides' }: RecentGuidesCardProps) {
   // Validate props
   const validated = recentGuidesCardPropsSchema.parse({ guides, title });
 
@@ -75,4 +73,4 @@ export const RecentGuidesCard = memo(function RecentGuidesCard({
       </CardContent>
     </Card>
   );
-});
+}

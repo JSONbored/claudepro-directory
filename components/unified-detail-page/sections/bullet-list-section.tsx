@@ -1,7 +1,8 @@
-'use client';
-
 /**
- * BulletListSection - Reusable bullet list section component
+ * BulletListSection - Server Component for bullet lists
+ *
+ * CONVERTED: Client → Server component (no interactivity needed)
+ * Pure rendering of features, use cases, requirements, security, examples
  *
  * Consolidates 5 duplicate render functions from unified-detail-page.tsx:
  * - renderFeatures() - 25 lines
@@ -11,12 +12,12 @@
  * - renderExamples() - 26 lines
  *
  * Total duplication eliminated: ~133 lines → 1 component (40 lines)
+ * Performance: Eliminated from client bundle, server-rendered
  *
  * @see components/unified-detail-page.tsx - Original implementation
  */
 
 import type { LucideIcon } from 'lucide-react';
-import { memo } from 'react';
 import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { componentDescriptionString, componentTitleString } from '@/lib/schemas/primitives';
@@ -53,12 +54,13 @@ const bulletColorMap = {
 } as const;
 
 /**
- * BulletListSection Component
+ * BulletListSection Component (Server Component)
  *
  * Renders a card with icon, title, description, and bulleted list items.
  * Supports different bullet colors and text variants (default or monospace).
+ * No React.memo needed - server components don't re-render
  */
-export const BulletListSection = memo(function BulletListSection({
+export function BulletListSection({
   title,
   description,
   items,
@@ -105,4 +107,4 @@ export const BulletListSection = memo(function BulletListSection({
       </CardContent>
     </Card>
   );
-});
+}

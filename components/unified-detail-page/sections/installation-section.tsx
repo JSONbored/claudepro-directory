@@ -1,19 +1,20 @@
-'use client';
-
 /**
- * InstallationSection - Installation steps and requirements section
+ * InstallationSection - Server Component for installation instructions
+ *
+ * CONVERTED: Client → Server component (no interactivity needed)
+ * Pure rendering of installation steps, config paths, and requirements
  *
  * Consolidates installation rendering from unified-detail-page.tsx (lines 154-211)
  * and custom-renderers.tsx (renderHookInstallation lines 237-310)
  *
  * Handles: claudeCode/claudeDesktop formats, config paths, requirements
+ * Performance: Eliminated from client bundle, server-rendered
  *
  * @see components/unified-detail-page.tsx - Original implementation
  * @see lib/config/custom-renderers.tsx - Custom hook renderer
  */
 
 import { Copy } from 'lucide-react';
-import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { UnifiedContentItem } from '@/lib/schemas';
@@ -31,12 +32,13 @@ export interface InstallationSectionProps {
 }
 
 /**
- * InstallationSection Component
+ * InstallationSection Component (Server Component)
  *
  * Renders installation instructions with steps, config paths, and requirements.
  * Supports custom renderers for special cases (hooks, MCP, etc.)
+ * No React.memo needed - server components don't re-render
  */
-export const InstallationSection = memo(function InstallationSection({
+export function InstallationSection({
   installation,
   item,
   customRenderer,
@@ -143,4 +145,4 @@ export const InstallationSection = memo(function InstallationSection({
       </CardContent>
     </Card>
   );
-});
+}

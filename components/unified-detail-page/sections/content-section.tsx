@@ -3,6 +3,11 @@
 /**
  * ContentSection - Code/content display section with syntax highlighting
  *
+ * REFACTORED: Removed lazy loading of CodeHighlight for better performance
+ * - Direct import instead of lazy() reduces bundle complexity
+ * - Removed Suspense boundary (no longer needed without lazy loading)
+ * - Client component remains for CodeHighlight interactivity
+ *
  * Consolidates content rendering from unified-detail-page.tsx (lines 621-666)
  * Handles: Code content, configuration content, with syntax highlighting
  *
@@ -10,18 +15,12 @@
  */
 
 import { Copy } from 'lucide-react';
-import { lazy, memo, Suspense, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { z } from 'zod';
+import { CodeHighlight } from '@/components/code-highlight';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { UnifiedContentItem } from '@/lib/schemas';
 import { componentTitleString } from '@/lib/schemas/primitives';
-
-// Lazy load CodeHighlight to split syntax-highlighter into its own chunk
-const CodeHighlight = lazy(() =>
-  import('@/components/code-highlight').then((module) => ({
-    default: module.CodeHighlight,
-  }))
-);
 
 /**
  * Schema for ContentSection props
@@ -82,9 +81,7 @@ export const ContentSection = memo(function ContentSection({
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        <Suspense fallback={<div className="animate-pulse bg-muted h-64 rounded-md" />}>
-          <CodeHighlight code={content} language={language} title={title} showCopy={true} />
-        </Suspense>
+        <CodeHighlight code={content} language={language} title={title} showCopy={true} />
       </CardContent>
     </Card>
   );

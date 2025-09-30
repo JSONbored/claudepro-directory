@@ -1,17 +1,17 @@
-'use client';
-
 /**
- * TrendingGuidesCard - Trending content display card
+ * TrendingGuidesCard - Server Component for trending content
+ *
+ * CONVERTED: Client → Server component (Link works in server components)
+ * Pure rendering of trending guides with view counts
  *
  * Extracted from unified-sidebar.tsx (lines 292-324)
- * Displays trending guides/content with view counts
+ * Performance: Eliminated from client bundle, server-rendered
  *
  * @see components/unified-sidebar.tsx - Original implementation
  */
 
 import { TrendingUp } from 'lucide-react';
 import Link from 'next/link';
-import { memo } from 'react';
 import { z } from 'zod';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -38,12 +38,13 @@ const trendingGuidesCardPropsSchema = z.object({
 export type TrendingGuidesCardProps = z.infer<typeof trendingGuidesCardPropsSchema>;
 
 /**
- * TrendingGuidesCard Component
+ * TrendingGuidesCard Component (Server Component)
  *
  * Displays a list of trending guides with view counts.
  * Shows loading state and numbered list of trending items.
+ * No React.memo needed - server components don't re-render
  */
-export const TrendingGuidesCard = memo(function TrendingGuidesCard({
+export function TrendingGuidesCard({
   guides,
   isLoading = false,
   title = 'Trending Now',
@@ -89,4 +90,4 @@ export const TrendingGuidesCard = memo(function TrendingGuidesCard({
       </CardContent>
     </Card>
   );
-});
+}

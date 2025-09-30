@@ -1,16 +1,17 @@
-'use client';
-
 /**
- * TroubleshootingSection - Troubleshooting guide section
+ * TroubleshootingSection - Server Component for troubleshooting
+ *
+ * CONVERTED: Client → Server component (no interactivity needed)
+ * Pure rendering of issues and solutions
  *
  * Consolidates troubleshooting rendering from unified-detail-page.tsx (lines 307-348)
  * Handles both string arrays and issue/solution object arrays
+ * Performance: Eliminated from client bundle, server-rendered
  *
  * @see components/unified-detail-page.tsx - Original implementation
  */
 
 import { Copy } from 'lucide-react';
-import { memo } from 'react';
 import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { componentDescriptionString } from '@/lib/schemas/primitives';
@@ -37,16 +38,14 @@ const troubleshootingSectionPropsSchema = z.object({
 export type TroubleshootingSectionProps = z.infer<typeof troubleshootingSectionPropsSchema>;
 
 /**
- * TroubleshootingSection Component
+ * TroubleshootingSection Component (Server Component)
  *
  * Renders common issues and solutions with two formats:
  * - Simple string array for basic troubleshooting tips
  * - Issue/solution objects for structured problem-solving
+ * No React.memo needed - server components don't re-render
  */
-export const TroubleshootingSection = memo(function TroubleshootingSection({
-  items,
-  description,
-}: TroubleshootingSectionProps) {
+export function TroubleshootingSection({ items, description }: TroubleshootingSectionProps) {
   // Validate props
   const validated = troubleshootingSectionPropsSchema.parse({ items, description });
 
@@ -93,4 +92,4 @@ export const TroubleshootingSection = memo(function TroubleshootingSection({
       </CardContent>
     </Card>
   );
-});
+}

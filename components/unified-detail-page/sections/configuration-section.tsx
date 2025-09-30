@@ -3,6 +3,11 @@
 /**
  * ConfigurationSection - Multi-format configuration display section
  *
+ * REFACTORED: Removed lazy loading of CodeHighlight for better performance
+ * - Direct import instead of lazy() reduces bundle complexity
+ * - Removed Suspense boundary (no longer needed without lazy loading)
+ * - Client component remains for copy button interactivity
+ *
  * Consolidates configuration rendering from:
  * - unified-detail-page.tsx (renderConfiguration lines 274-304)
  * - custom-renderers.tsx (renderMCPConfiguration lines 30-149)
@@ -15,19 +20,13 @@
  */
 
 import { Copy } from 'lucide-react';
-import { lazy, memo, Suspense, useState } from 'react';
+import { memo, useState } from 'react';
 import { toast } from 'sonner';
+import { CodeHighlight } from '@/components/code-highlight';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import type { UnifiedContentItem } from '@/lib/schemas';
-
-// Lazy load CodeHighlight to split syntax-highlighter into its own chunk
-const CodeHighlight = lazy(() =>
-  import('@/components/code-highlight').then((module) => ({
-    default: module.CodeHighlight,
-  }))
-);
 
 /**
  * Props for ConfigurationSection
@@ -193,13 +192,11 @@ export const ConfigurationSection = memo(function ConfigurationSection({
         <CardDescription>Configuration settings and parameters</CardDescription>
       </CardHeader>
       <CardContent>
-        <Suspense fallback={<div className="animate-pulse bg-muted h-32 rounded-md" />}>
-          <CodeHighlight
-            code={JSON.stringify(item.configuration, null, 2)}
-            language="json"
-            showCopy={true}
-          />
-        </Suspense>
+        <CodeHighlight
+          code={JSON.stringify(item.configuration, null, 2)}
+          language="json"
+          showCopy={true}
+        />
       </CardContent>
     </Card>
   );
