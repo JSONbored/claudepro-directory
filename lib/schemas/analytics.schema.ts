@@ -4,8 +4,20 @@
  */
 
 import { z } from 'zod';
-import { loadTime, nonNegativeInt, viewCount } from '@/lib/schemas/primitives/base-numbers';
+import { nonNegativeInt, viewCount } from '@/lib/schemas/primitives/base-numbers';
 import { nonEmptyString, shortString } from '@/lib/schemas/primitives/base-strings';
+import {
+  clsMetric,
+  errorSeverity,
+  errorType,
+  eventName,
+  longDurationMs,
+  metricMetadataSchema,
+  metricName,
+  optionalWebVitalMetric,
+  timestampDate,
+  timestampMillis,
+} from '@/lib/schemas/primitives/performance-primitives';
 import { type ContentCategory, contentCategorySchema } from './shared.schema';
 
 /**
@@ -39,10 +51,7 @@ export type UserId = z.infer<typeof userIdSchema>;
 export const trackViewSchema = z.object({
   category: contentCategorySchema,
   slug: contentSlugSchema,
-  timestamp: z
-    .date()
-    .optional()
-    .default(() => new Date()),
+  timestamp: timestampDate,
   userId: z.string().uuid().optional(),
   sessionId: z.string().optional(),
   referrer: z.string().url().optional(),
@@ -57,10 +66,7 @@ export type TrackViewEvent = z.infer<typeof trackViewSchema>;
 export const trackCopySchema = z.object({
   category: contentCategorySchema,
   slug: contentSlugSchema,
-  timestamp: z
-    .date()
-    .optional()
-    .default(() => new Date()),
+  timestamp: timestampDate,
   content: z.string().max(10000).optional(), // Optional snippet of what was copied
   userId: z.string().uuid().optional(),
   sessionId: z.string().optional(),
@@ -76,10 +82,7 @@ export const trackClickSchema = z.object({
   slug: contentSlugSchema,
   target: z.enum(['external', 'internal', 'download', 'github', 'docs']),
   url: z.string().url().optional(),
-  timestamp: z
-    .date()
-    .optional()
-    .default(() => new Date()),
+  timestamp: timestampDate,
   userId: z.string().uuid().optional(),
   sessionId: z.string().optional(),
 });
@@ -94,10 +97,7 @@ export const trackSearchSchema = z.object({
   category: z.enum(['all', 'agents', 'mcp', 'rules', 'commands', 'hooks', 'guides']).optional(),
   resultsCount: nonNegativeInt.optional(),
   clickedResult: z.string().optional(),
-  timestamp: z
-    .date()
-    .optional()
-    .default(() => new Date()),
+  timestamp: timestampDate,
   userId: z.string().uuid().optional(),
   sessionId: z.string().optional(),
 });
@@ -111,10 +111,7 @@ export const pageViewSchema = z.object({
   pathname: nonEmptyString.max(500, 'Pathname is too long'),
   title: z.string().max(200).optional(),
   referrer: z.string().url().optional(),
-  timestamp: z
-    .date()
-    .optional()
-    .default(() => new Date()),
+  timestamp: timestampDate,
   userId: z.string().uuid().optional(),
   sessionId: z.string().optional(),
   viewport: z
@@ -140,12 +137,9 @@ export const trackErrorSchema = z.object({
   message: nonEmptyString.max(1000, 'Message is too long'),
   stack: z.string().max(5000).optional(),
   category: z.enum(['client', 'server', 'api', 'validation', 'network']),
-  severity: z.enum(['low', 'medium', 'high', 'critical']).default('medium'),
+  severity: errorSeverity,
   pathname: z.string().optional(),
-  timestamp: z
-    .date()
-    .optional()
-    .default(() => new Date()),
+  timestamp: timestampDate,
   userId: z.string().uuid().optional(),
   sessionId: z.string().optional(),
   metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
@@ -158,17 +152,14 @@ export type TrackErrorEvent = z.infer<typeof trackErrorSchema>;
  */
 export const webVitalsMetricsSchema = z.object({
   pathname: nonEmptyString.max(500, 'Pathname is too long'),
-  ttfb: z.number().positive().optional(), // Time to First Byte
-  fcp: z.number().positive().optional(), // First Contentful Paint
-  lcp: z.number().positive().optional(), // Largest Contentful Paint
-  fid: z.number().positive().optional(), // First Input Delay
-  cls: loadTime.optional(), // Cumulative Layout Shift (min 0)
-  tbt: z.number().positive().optional(), // Total Blocking Time
-  tti: z.number().positive().optional(), // Time to Interactive
-  timestamp: z
-    .date()
-    .optional()
-    .default(() => new Date()),
+  ttfb: optionalWebVitalMetric, // Time to First Byte
+  fcp: optionalWebVitalMetric, // First Contentful Paint
+  lcp: optionalWebVitalMetric, // Largest Contentful Paint
+  fid: optionalWebVitalMetric, // First Input Delay
+  cls: clsMetric.optional(), // Cumulative Layout Shift (min 0)
+  tbt: optionalWebVitalMetric, // Total Blocking Time
+  tti: optionalWebVitalMetric, // Time to Interactive
+  timestamp: timestampDate,
   userId: z.string().uuid().optional(),
   sessionId: z.string().optional(),
 });
@@ -249,10 +240,7 @@ export const customEventSchema = z.object({
   label: z.string().max(200).optional(),
   value: z.number().optional(),
   metadata: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
-  timestamp: z
-    .date()
-    .optional()
-    .default(() => new Date()),
+  timestamp: timestampDate,
   userId: z.string().uuid().optional(),
   sessionId: z.string().optional(),
 });
@@ -295,13 +283,13 @@ export function validateTrackingParams(
 
 /**
  * Security limits to prevent abuse
+ * Note: Some limits imported from performance-primitives (METRIC_LIMITS)
  */
 const TRACKER_LIMITS = {
   MAX_EVENT_NAME_LENGTH: 100,
   MAX_STRING_VALUE_LENGTH: 500,
   MAX_PROPERTIES_COUNT: 20,
   MAX_TRAITS_COUNT: 10,
-  MAX_METADATA_COUNT: 15,
   MAX_CONTEXT_LENGTH: 200,
   MAX_STACK_TRACE_LENGTH: 5000,
 } as const;
@@ -329,7 +317,7 @@ export const trackingEventSchema = z.object({
     )
     .optional()
     .default({}),
-  timestamp: z.number().int().positive(),
+  timestamp: timestampMillis,
 });
 
 export type TrackingEvent = z.infer<typeof trackingEventSchema>;
@@ -363,27 +351,13 @@ export type UserIdentification = z.infer<typeof userIdentificationSchema>;
  * Performance metric schema for tracking operation timings
  */
 export const performanceMetricSchema = z.object({
-  eventName: shortString,
-  metric: nonEmptyString.max(50).regex(/^[a-zA-Z][a-zA-Z0-9_]{0,49}$/, 'Invalid metric name'),
-  duration_ms: z.number().int().min(0).max(3600000), // Max 1 hour
+  eventName: eventName,
+  metric: metricName,
+  duration_ms: longDurationMs,
   success: z.boolean(),
-  error_type: shortString.optional(),
-  metadata: z
-    .record(
-      z.string().max(50),
-      z.union([
-        z.string().max(TRACKER_LIMITS.MAX_STRING_VALUE_LENGTH),
-        z.number().finite(),
-        z.boolean(),
-      ])
-    )
-    .refine(
-      (meta) => Object.keys(meta).length <= TRACKER_LIMITS.MAX_METADATA_COUNT,
-      `Maximum ${TRACKER_LIMITS.MAX_METADATA_COUNT} metadata properties allowed`
-    )
-    .optional()
-    .default({}),
-  timestamp: z.number().int().positive(),
+  error_type: errorType.optional(),
+  metadata: metricMetadataSchema,
+  timestamp: timestampMillis,
 });
 
 export type PerformanceMetric = z.infer<typeof performanceMetricSchema>;
@@ -392,7 +366,7 @@ export type PerformanceMetric = z.infer<typeof performanceMetricSchema>;
  * Error tracking schema with security considerations
  */
 export const errorTrackingSchema = z.object({
-  error_type: nonEmptyString.max(100).transform((val) => val.replace(/[^\w\s-]/g, '')), // Sanitize
+  error_type: errorType,
   error_message: nonEmptyString
     .max(1000)
     .transform((val) => val.replace(/\b(?:password|token|key|secret)\b[^,\s]*/gi, '[REDACTED]')), // Remove sensitive patterns
@@ -410,7 +384,7 @@ export const errorTrackingSchema = z.object({
         .replace(/\/Users\/[a-zA-Z0-9_\-/.]+/gi, '[USER]');
     })
     .optional(),
-  timestamp: z.number().int().positive(),
+  timestamp: timestampMillis,
 });
 
 export type ErrorTracking = z.infer<typeof errorTrackingSchema>;
@@ -425,7 +399,7 @@ export const interactionEventSchema = z.object({
   slug: z.string().max(200).optional(),
   method: z.string().max(50).optional(),
   value: z.union([z.string().max(500), z.number().finite(), z.boolean()]).optional(),
-  timestamp: z.number().int().positive(),
+  timestamp: timestampMillis,
 });
 
 export type InteractionEvent = z.infer<typeof interactionEventSchema>;
@@ -452,7 +426,7 @@ export const navigationEventSchema = z.object({
   sort_field: z.string().max(50).optional(),
   sort_direction: z.enum(['asc', 'desc']).optional(),
   search_query: z.string().max(200).optional(),
-  timestamp: z.number().int().positive(),
+  timestamp: timestampMillis,
 });
 
 export type NavigationEvent = z.infer<typeof navigationEventSchema>;

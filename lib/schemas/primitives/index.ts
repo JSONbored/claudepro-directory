@@ -16,6 +16,40 @@
  * - Better TypeScript inference performance
  */
 
+// API & Cache primitives (Phase 4 - SHA-2060)
+export {
+  type ApiResponseMeta,
+  apiResponseMetaSchema,
+  type CacheKeyString,
+  type CacheStatus,
+  type CategoryString,
+  cacheKeyString,
+  cacheStatusEnum,
+  categoryString,
+  type FlexibleTTL,
+  flexibleTTL,
+  KEY_LIMITS,
+  KEY_PATTERNS,
+  type LongTTL,
+  longTTL,
+  type MediumTTL,
+  mediumTTL,
+  type PaginationMeta,
+  type PathString,
+  type ProcessingTimeMs,
+  paginationMetaSchema,
+  pathString,
+  processingTimeMs,
+  type RateLimitWindow,
+  rateLimitWindow,
+  type ShortTTL,
+  type SlugString,
+  shortTTL,
+  slugString,
+  TTL_RANGES,
+  validateCacheKey,
+  validateTTL,
+} from './api-cache-primitives';
 // Array primitives
 export {
   authorsArray,
@@ -38,7 +72,6 @@ export {
   tagArray,
   urlArray,
 } from './base-arrays';
-
 // Number primitives
 export {
   aiTemperature,
@@ -72,12 +105,55 @@ export {
   optionalUrlString,
   safeTextString,
   shortString,
-  slugString,
+  slugString as baseSlugString,
   ultraLongString,
   urlString,
   veryLongCodeString,
 } from './base-strings';
-
+// Performance & Timing primitives (Phase 4 - SHA-2061)
+export {
+  type ClsMetric,
+  clsMetric,
+  DURATION_LIMITS,
+  type DurationMs,
+  durationMs,
+  type ErrorSeverity,
+  type ErrorType,
+  type EventName,
+  errorSeverity,
+  errorType,
+  eventName,
+  type LongDurationMs,
+  longDurationMs,
+  MAX_STACK_TRACE_LENGTH,
+  METRIC_LIMITS,
+  type MediumDurationMs,
+  type MetricMetadata,
+  type MetricMetadataValue,
+  type MetricName,
+  mediumDurationMs,
+  metricMetadataSchema,
+  metricMetadataValue,
+  metricName,
+  type OptionalTimestampMillis,
+  type OptionalWebVitalMetric,
+  optionalTimestampMillis,
+  optionalWebVitalMetric,
+  type PerformanceScore,
+  performanceScore,
+  type ShortDurationMs,
+  type SuccessRate,
+  shortDurationMs,
+  successRate,
+  type TimestampDate,
+  type TimestampMillis,
+  timestampDate,
+  timestampMillis,
+  validateDuration,
+  validateMetricName,
+  type WebVitalMetric,
+  webVitalMetric,
+} from './performance-primitives';
 // SEO primitives
 export {
   HTML_TAG_REGEX,
@@ -113,7 +189,6 @@ export {
   twitterTitleSchema,
   URL_SAFE_CHARS_REGEX,
 } from './seo-primitives';
-
 // UI Component primitives
 export {
   type ComponentDescriptionString,

@@ -14,6 +14,11 @@ import {
   stringArray,
   urlString,
 } from '@/lib/schemas/primitives';
+import {
+  apiResponseMetaSchema,
+  processingTimeMs,
+  rateLimitWindow,
+} from '@/lib/schemas/primitives/api-cache-primitives';
 
 /**
  * Security-focused constants for API validation
@@ -27,8 +32,6 @@ const API_LIMITS = {
   MAX_URL_LENGTH: 2048,
   MAX_TAGS: 50,
   MAX_ARRAY_LENGTH: 1000,
-  MIN_RATE_LIMIT_WINDOW: 60, // seconds
-  MAX_RATE_LIMIT_WINDOW: 86400, // 24 hours
 } as const;
 
 /**
@@ -205,15 +208,7 @@ export const cacheWarmApiSchema = z.object({
  * Validates rate limit settings for API endpoints
  */
 export const apiRateLimitConfigSchema = z.object({
-  window: positiveInt
-    .min(
-      API_LIMITS.MIN_RATE_LIMIT_WINDOW,
-      `Window must be at least ${API_LIMITS.MIN_RATE_LIMIT_WINDOW}s`
-    )
-    .max(
-      API_LIMITS.MAX_RATE_LIMIT_WINDOW,
-      `Window cannot exceed ${API_LIMITS.MAX_RATE_LIMIT_WINDOW}s`
-    ),
+  window: rateLimitWindow,
   limit: positiveInt.max(10000, 'Limit cannot exceed 10000'),
   keyGenerator: z.enum(['ip', 'api-key', 'user-agent', 'combined']).optional().default('ip'),
   skipSuccessfulRequests: z.boolean().optional().default(false),
@@ -247,13 +242,7 @@ export const apiSuccessResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) 
   z.object({
     success: z.literal(true),
     data: dataSchema,
-    meta: z
-      .object({
-        timestamp: isoDatetimeString,
-        version: z.string().optional(),
-        cache: z.enum(['HIT', 'MISS', 'BYPASS']).optional(),
-      })
-      .optional(),
+    meta: apiResponseMetaSchema,
   });
 
 // Paginated response
@@ -271,8 +260,9 @@ export const paginatedResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =
     meta: z
       .object({
         timestamp: isoDatetimeString,
-        processingTime: z.number().min(0).optional(),
+        version: z.string().optional(),
         cache: z.enum(['HIT', 'MISS', 'BYPASS']).optional(),
+        processingTime: processingTimeMs.optional(),
       })
       .optional(),
   });

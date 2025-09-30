@@ -8,6 +8,13 @@ import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import type { ContentIndex, ContentItem } from '@/lib/related-content/service';
 import {
+  cacheKeyString,
+  flexibleTTL,
+  KEY_LIMITS,
+  pathString,
+  slugString,
+} from '@/lib/schemas/primitives/api-cache-primitives';
+import {
   nonNegativeInt,
   positiveInt,
   score,
@@ -17,29 +24,14 @@ import { isoDatetimeString, nonEmptyString } from '@/lib/schemas/primitives/base
 
 /**
  * Security constants for cache operations
+ * Note: KEY_PATTERNS and KEY_LIMITS imported from api-cache-primitives
  */
 const CACHE_LIMITS = {
-  MAX_KEY_LENGTH: 250,
-  MAX_CATEGORY_LENGTH: 50,
-  MAX_SLUG_LENGTH: 100,
-  MAX_PATH_LENGTH: 500,
   MAX_CONTENT_LENGTH: 10485760, // 10MB
-  MAX_TTL: 2592000, // 30 days in seconds
-  MIN_TTL: 60, // 1 minute
   MAX_VIEW_COUNT: 9999999999,
   MAX_BATCH_SIZE: 100,
   MAX_SCORE: 999999999999,
   MAX_MEMBERS: 1000,
-} as const;
-
-/**
- * Cache key patterns for validation
- */
-const KEY_PATTERNS = {
-  CACHE_KEY: /^[a-zA-Z0-9:_\-/.]{1,250}$/,
-  CATEGORY: /^[a-zA-Z0-9\-_]+$/,
-  SLUG: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-  PATH: /^[a-zA-Z0-9\-_/.]+$/,
 } as const;
 
 /**
@@ -57,10 +49,7 @@ export const cacheCategorySchema = z.union([cacheableCategorySchema, z.literal('
  */
 export const cacheKeyParamsSchema = z.object({
   category: cacheCategorySchema,
-  slug: nonEmptyString
-    .max(CACHE_LIMITS.MAX_SLUG_LENGTH)
-    .regex(KEY_PATTERNS.SLUG, 'Invalid slug format')
-    .transform((val) => val.toLowerCase()),
+  slug: slugString,
 });
 
 /**
@@ -68,9 +57,7 @@ export const cacheKeyParamsSchema = z.object({
  */
 export const viewTrackingSchema = z.object({
   category: cacheCategorySchema,
-  slug: nonEmptyString
-    .max(CACHE_LIMITS.MAX_SLUG_LENGTH)
-    .regex(KEY_PATTERNS.SLUG, 'Invalid slug format'),
+  slug: slugString,
   timestamp: nonNegativeInt.optional().default(() => Date.now()),
 });
 
@@ -106,25 +93,16 @@ export const popularItemsQuerySchema = z.object({
  * MDX cache schema
  */
 export const mdxCacheSchema = z.object({
-  path: nonEmptyString
-    .max(CACHE_LIMITS.MAX_PATH_LENGTH)
-    .regex(KEY_PATTERNS.PATH, 'Invalid path format')
-    .refine((path) => !path.includes('..'), 'Path traversal detected'),
+  path: pathString,
   content: nonEmptyString.max(CACHE_LIMITS.MAX_CONTENT_LENGTH, 'Content exceeds maximum size'),
-  ttl: positiveInt
-    .min(CACHE_LIMITS.MIN_TTL, `TTL must be at least ${CACHE_LIMITS.MIN_TTL} seconds`)
-    .max(CACHE_LIMITS.MAX_TTL, `TTL cannot exceed ${CACHE_LIMITS.MAX_TTL} seconds`)
-    .optional()
-    .default(86400), // 24 hours default
+  ttl: flexibleTTL.optional().default(86400), // 24 hours default
 });
 
 /**
  * API response cache schema
  */
 export const apiResponseCacheSchema = z.object({
-  key: nonEmptyString
-    .max(CACHE_LIMITS.MAX_KEY_LENGTH)
-    .regex(KEY_PATTERNS.CACHE_KEY, 'Invalid cache key format'),
+  key: cacheKeyString,
   data: z.union([
     z.string(),
     z.number(),
@@ -132,7 +110,7 @@ export const apiResponseCacheSchema = z.object({
     z.array(z.union([z.string(), z.number(), z.boolean()])),
     z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
   ]), // Will be JSON stringified
-  ttl: positiveInt.min(CACHE_LIMITS.MIN_TTL).max(CACHE_LIMITS.MAX_TTL).optional().default(3600), // 1 hour default
+  ttl: flexibleTTL.optional().default(3600), // 1 hour default
   tags: z.array(z.string().max(50)).max(20).optional(),
 });
 
@@ -144,7 +122,7 @@ export const batchOperationSchema = z.object({
     .array(
       z.object({
         type: z.enum(['set', 'get', 'del', 'incr', 'zadd']),
-        key: z.string().max(CACHE_LIMITS.MAX_KEY_LENGTH),
+        key: z.string().max(KEY_LIMITS.MAX_KEY_LENGTH),
         value: z
           .union([
             z.string(),
@@ -153,7 +131,7 @@ export const batchOperationSchema = z.object({
             z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
           ])
           .optional(),
-        ttl: nonNegativeInt.max(CACHE_LIMITS.MAX_TTL).optional(),
+        ttl: flexibleTTL.optional(),
         score: z.number().optional(),
         member: z.string().optional(),
       })
@@ -196,7 +174,7 @@ export const relatedItemsCacheSchema = z.object({
       })
     )
     .max(50),
-  ttl: positiveInt.min(CACHE_LIMITS.MIN_TTL).max(CACHE_LIMITS.MAX_TTL).optional(),
+  ttl: flexibleTTL.optional(),
 });
 
 /**
@@ -231,28 +209,18 @@ export const cleanupParamsSchema = z.object({
 
 /**
  * Helper function to validate cache key
+ * Re-exported from api-cache-primitives for backward compatibility
  */
 export function validateCacheKey(key: string | number): string {
-  const schema = nonEmptyString
-    .max(CACHE_LIMITS.MAX_KEY_LENGTH, 'Cache key too long')
-    .regex(KEY_PATTERNS.CACHE_KEY, 'Invalid cache key format')
-    .refine((key) => !key.includes('\0'), 'Null bytes not allowed in cache key');
-
-  return schema.parse(key);
+  return cacheKeyString.parse(key);
 }
 
 /**
  * Helper function to validate TTL
+ * Re-exported from api-cache-primitives for backward compatibility
  */
 export function validateTTL(ttl: string | number): number {
-  const schema = z.coerce
-    .number()
-    .int('TTL must be an integer')
-    .positive()
-    .min(CACHE_LIMITS.MIN_TTL, `TTL must be at least ${CACHE_LIMITS.MIN_TTL} seconds`)
-    .max(CACHE_LIMITS.MAX_TTL, `TTL cannot exceed ${CACHE_LIMITS.MAX_TTL} seconds`);
-
-  return schema.parse(ttl);
+  return flexibleTTL.parse(typeof ttl === 'string' ? Number(ttl) : ttl);
 }
 
 /**
@@ -365,7 +333,7 @@ export const redisZRangeResponseSchema = z.array(z.union([z.string(), z.number()
  * Popular items with scores schema
  */
 export const popularItemWithScoreSchema = z.object({
-  slug: nonEmptyString.max(CACHE_LIMITS.MAX_SLUG_LENGTH),
+  slug: nonEmptyString.max(KEY_LIMITS.MAX_SLUG_LENGTH),
   views: viewCount.max(CACHE_LIMITS.MAX_VIEW_COUNT),
 });
 
@@ -373,7 +341,7 @@ export const popularItemWithScoreSchema = z.object({
  * Batch increment operations schema
  */
 export const batchIncrementOperationSchema = z.object({
-  key: z.string().max(CACHE_LIMITS.MAX_KEY_LENGTH),
+  key: z.string().max(KEY_LIMITS.MAX_KEY_LENGTH),
   increment: positiveInt.max(1000).optional().default(1),
 });
 
@@ -404,7 +372,7 @@ export const redisScanResponseSchema = z.tuple([
     .string()
     .regex(/^\d+$/, 'Cursor must be numeric string'), // Next cursor
   z
-    .array(z.string().max(CACHE_LIMITS.MAX_KEY_LENGTH))
+    .array(z.string().max(KEY_LIMITS.MAX_KEY_LENGTH))
     .max(1000), // Keys array
 ]);
 
