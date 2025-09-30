@@ -32,21 +32,32 @@ async function getTrendingData(params: TrendingParams) {
     const fileContent = await readFile(staticFilePath, 'utf-8');
     const staticData = JSON.parse(fileContent);
 
+    // Basic validation - ensure required structure exists
+    if (
+      !staticData ||
+      typeof staticData !== 'object' ||
+      !Array.isArray(staticData.trending) ||
+      !Array.isArray(staticData.popular) ||
+      !Array.isArray(staticData.recent)
+    ) {
+      throw new Error('Invalid trending data structure');
+    }
+
     logger.info('Loaded trending data from static file', {
-      trendingCount: staticData.trending?.length ?? 0,
-      popularCount: staticData.popular?.length ?? 0,
-      recentCount: staticData.recent?.length ?? 0,
+      trendingCount: staticData.trending.length,
+      popularCount: staticData.popular.length,
+      recentCount: staticData.recent.length,
       algorithm: staticData.metadata?.algorithm,
     });
 
     return {
-      trending: staticData.trending ?? [],
-      popular: staticData.popular ?? [],
-      recent: staticData.recent ?? [],
+      trending: staticData.trending,
+      popular: staticData.popular,
+      recent: staticData.recent,
     };
   } catch (error) {
-    // Fallback: Generate data on-demand if static file not available
-    logger.warn('Static trending data not available, generating on-demand', {
+    // Fallback: Generate data on-demand if static file not available or invalid
+    logger.warn('Static trending data not available or invalid, generating on-demand', {
       error: error instanceof Error ? error.message : String(error),
     });
 

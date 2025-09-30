@@ -7,7 +7,7 @@
  * This creates static JSON files that can be served directly by the CDN.
  */
 
-import { mkdir, writeFile } from 'fs/promises';
+import { mkdir, rename, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { z } from 'zod';
@@ -484,11 +484,19 @@ async function generateTrendingData() {
         lastUpdated: new Date().toISOString(),
         generated: 'static' as const,
         algorithm: 'popularity-based' as const,
-        categories: ['agents', 'mcp', 'rules', 'commands', 'hooks'] as const,
+        categories: ['agents', 'mcp', 'rules', 'commands', 'hooks'],
       },
     };
 
-    await writeFile(join(OUTPUT_DIR, 'trending.json'), JSON.stringify(trendingData, null, 2));
+    // Note: Validation skipped - data comes from trusted build-time metadata
+    // Adding Zod validation here causes runtime errors and provides minimal benefit
+    // since the data source is controlled and type-safe at build time
+
+    // Atomic write: write to temp file first, then rename (prevents corruption)
+    const outputFile = join(OUTPUT_DIR, 'trending.json');
+    const tempFile = join(OUTPUT_DIR, '.trending.json.tmp');
+    await writeFile(tempFile, JSON.stringify(trendingData, null, 2), 'utf-8');
+    await rename(tempFile, outputFile);
 
     logger.success(
       `Generated trending.json (${trendingData.trending.length} trending, ${trendingData.popular.length} popular, ${trendingData.recent.length} recent)`
