@@ -30,11 +30,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  CategoryNavigationCard,
-  RecentGuidesCard,
-  TrendingGuidesCard,
-} from '@/components/unified-detail-page/sidebar';
+import { CategoryNavigationCard } from '@/components/unified-detail-page/sidebar/category-navigation-card';
+import { RecentGuidesCard } from '@/components/unified-detail-page/sidebar/recent-guides-card';
+import { TrendingGuidesCard } from '@/components/unified-detail-page/sidebar/trending-guides-card';
 // Removed logger import - client components should not use server-side logger
 // Dynamic imports for server-side functions
 import { statsRedis } from '@/lib/redis';

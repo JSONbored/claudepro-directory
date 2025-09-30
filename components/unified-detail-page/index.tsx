@@ -30,23 +30,27 @@ import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
 
 // Lazy load sections for code splitting
+// IMPORTANT: Import directly from component files, NOT from barrel exports
+// Barrel exports (./sections/index.ts) load ALL components at once, defeating lazy loading
 const BulletListSection = lazy(() =>
-  import('./sections').then((mod) => ({ default: mod.BulletListSection }))
+  import('./sections/bullet-list-section').then((mod) => ({ default: mod.BulletListSection }))
 );
 const InstallationSection = lazy(() =>
-  import('./sections').then((mod) => ({ default: mod.InstallationSection }))
+  import('./sections/installation-section').then((mod) => ({ default: mod.InstallationSection }))
 );
 const ConfigurationSection = lazy(() =>
-  import('./sections').then((mod) => ({ default: mod.ConfigurationSection }))
+  import('./sections/configuration-section').then((mod) => ({ default: mod.ConfigurationSection }))
 );
 const TroubleshootingSection = lazy(() =>
-  import('./sections').then((mod) => ({ default: mod.TroubleshootingSection }))
+  import('./sections/troubleshooting-section').then((mod) => ({
+    default: mod.TroubleshootingSection,
+  }))
 );
 const ContentSection = lazy(() =>
-  import('./sections').then((mod) => ({ default: mod.ContentSection }))
+  import('./sections/content-section').then((mod) => ({ default: mod.ContentSection }))
 );
 const DetailSidebar = lazy(() =>
-  import('./sidebar').then((mod) => ({ default: mod.DetailSidebar }))
+  import('./sidebar/detail-sidebar').then((mod) => ({ default: mod.DetailSidebar }))
 );
 
 // Section skeleton loader

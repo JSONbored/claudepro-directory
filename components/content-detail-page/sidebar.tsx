@@ -9,7 +9,7 @@
  * @see components/unified-detail-page/sidebar - Modular sidebar components
  */
 
-import { DetailSidebar } from '@/components/unified-detail-page/sidebar';
+import { DetailSidebar } from '@/components/unified-detail-page/sidebar/detail-sidebar';
 import { getContentTypeConfig } from '@/lib/config/content-type-configs';
 import type { UnifiedContentItem } from '@/lib/schemas';
 
