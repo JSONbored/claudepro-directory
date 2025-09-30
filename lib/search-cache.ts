@@ -11,11 +11,11 @@
 
 import { logger } from './logger';
 import { contentCache } from './redis';
-import type { FuseSearchableItem, SearchCacheKey, SearchFilters } from './schemas/search.schema';
+import type { SearchableItem, SearchCacheKey, SearchFilters } from './schemas/search.schema';
 import { searchWithFilters } from './search-adapters/fuzzysort-adapter';
 
-// Re-export types for backward compatibility
-export type { FuseSearchableItem as SearchableItem, SearchFilters, SearchCacheKey };
+// Re-export types
+export type { SearchableItem, SearchFilters, SearchCacheKey };
 
 // Generate a cache key from search parameters
 function generateSearchCacheKey(query: string, filters: SearchFilters): string {
@@ -36,7 +36,7 @@ function generateSearchCacheKey(query: string, filters: SearchFilters): string {
 // Main search cache class
 export class SearchCache {
   // Cached search function
-  async search<T extends FuseSearchableItem>(
+  async search<T extends SearchableItem>(
     items: T[],
     query: string,
     filters: SearchFilters = {
@@ -82,7 +82,7 @@ export class SearchCache {
   }
 
   // Perform the actual search with Fuzzysort
-  private async performSearch<T extends FuseSearchableItem>(
+  private async performSearch<T extends SearchableItem>(
     items: T[],
     query: string,
     filters: SearchFilters = {

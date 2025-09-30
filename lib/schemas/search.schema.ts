@@ -10,8 +10,9 @@ import { mediumString, nonEmptyString, shortString } from './primitives/base-str
 
 /**
  * Searchable item schema for search cache
+ * Used with Fuzzysort adapter for high-performance fuzzy search
  */
-export const fuseSearchableItemSchema = z.object({
+export const searchableItemSchema = z.object({
   title: nonEmptyString.max(200),
   name: z.string().optional(),
   description: mediumString,
@@ -22,7 +23,7 @@ export const fuseSearchableItemSchema = z.object({
   id: nonEmptyString.max(200),
 });
 
-export type FuseSearchableItem = z.infer<typeof fuseSearchableItemSchema>;
+export type SearchableItem = z.infer<typeof searchableItemSchema>;
 
 /**
  * Search filters schema for search cache

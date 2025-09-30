@@ -7,10 +7,15 @@
  * - Lazy-loaded for optimal initial page load
  * - Drop-in replacement with identical API surface
  *
+ * BUNDLE OPTIMIZATION:
+ * - Fuzzysort module lazy-loaded on first search (lines 18-34)
+ * - Prepared items cached with WeakMap for automatic GC
+ * - Compatible with existing Fuse.js API (threshold conversion)
+ *
  * @see https://github.com/farzher/fuzzysort
  */
 
-import type { FuseSearchableItem, SearchFilters } from '@/lib/schemas';
+import type { SearchableItem, SearchFilters } from '@/lib/schemas';
 import { sortAlphabetically, sortByNewest, sortByPopularity } from '../content-sorting';
 import { logger } from '../logger';
 
@@ -37,7 +42,7 @@ async function loadFuzzysort() {
 const preparedCache = new WeakMap<object, PreparedItem>();
 
 interface PreparedItem {
-  item: FuseSearchableItem;
+  item: SearchableItem;
   titlePrepared: Fuzzysort.Prepared | undefined;
   namePrepared: Fuzzysort.Prepared | undefined;
   descriptionPrepared: Fuzzysort.Prepared | undefined;
@@ -49,7 +54,7 @@ interface PreparedItem {
  * Prepare items for fast searching
  * Uses WeakMap for automatic garbage collection
  */
-async function prepareItems<T extends FuseSearchableItem>(items: T[]): Promise<PreparedItem[]> {
+async function prepareItems<T extends SearchableItem>(items: T[]): Promise<PreparedItem[]> {
   const fuzzysort = await loadFuzzysort();
 
   return items.map((item) => {
@@ -100,7 +105,7 @@ function convertThreshold(fuseThreshold: number): number {
  * @param options - Search options (Fuse.js compatible)
  * @returns Array of matching items sorted by relevance
  */
-export async function searchWithFuzzysort<T extends FuseSearchableItem>(
+export async function searchWithFuzzysort<T extends SearchableItem>(
   items: T[],
   query: string,
   options?: {
@@ -170,7 +175,7 @@ export async function searchWithFuzzysort<T extends FuseSearchableItem>(
 /**
  * Search with filters - combines fuzzysort with filter logic
  */
-export async function searchWithFilters<T extends FuseSearchableItem>(
+export async function searchWithFilters<T extends SearchableItem>(
   items: T[],
   query: string,
   filters: SearchFilters,
@@ -217,7 +222,7 @@ export async function searchWithFilters<T extends FuseSearchableItem>(
 /**
  * Apply sorting to search results using centralized sorting logic
  */
-function applySorting<T extends FuseSearchableItem>(items: T[], sort: string): T[] {
+function applySorting<T extends SearchableItem>(items: T[], sort: string): T[] {
   switch (sort) {
     case 'alphabetical':
       // biome-ignore lint/suspicious/noExplicitAny: Type assertion needed for generic sorting

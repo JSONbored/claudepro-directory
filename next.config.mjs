@@ -160,7 +160,7 @@ const nextConfig = {
     optimizePackageImports: [
       'lucide-react',
       '@radix-ui/react-icons',
-      'fuse.js',
+      'fuzzysort',
       'marked',
       'react-window',
       'embla-carousel-react',
