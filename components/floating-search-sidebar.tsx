@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { FloatingSearchSidebarProps } from '@/lib/schemas/component.schema';
-import type { ContentFilterOptions } from '@/lib/schemas/content-filter.schema';
+import type { ContentFilterOptions, FloatingSearchSidebarProps } from '@/lib/schemas';
 import { getDisplayTitle } from '@/lib/utils';
 
 // FloatingSearchSidebarProps and FilterOptions are now imported from component.schema.ts

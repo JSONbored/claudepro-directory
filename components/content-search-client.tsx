@@ -16,9 +16,7 @@ const UnifiedSearch = dynamic(
 
 import { sortAlphabetically } from '@/lib/content-sorting';
 import { getIconByName } from '@/lib/icons';
-import type { ContentSearchClientProps, FilterState } from '@/lib/schemas/component.schema';
-
-import type { UnifiedContentItem } from '@/lib/schemas/components';
+import type { ContentSearchClientProps, FilterState, UnifiedContentItem } from '@/lib/schemas';
 
 export function ContentSearchClient<T extends UnifiedContentItem>({
   items,

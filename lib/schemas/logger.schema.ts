@@ -5,7 +5,7 @@
  */
 
 import { z } from 'zod';
-import { isoDatetimeString, nonEmptyString } from '@/lib/schemas/primitives';
+import { isoDatetimeString, nonEmptyString } from '@/lib/schemas/primitives/base-strings';
 
 /**
  * Security constants for logging

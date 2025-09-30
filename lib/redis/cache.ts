@@ -10,9 +10,8 @@ import {
   type CacheInvalidationResult,
   cacheInvalidationResultSchema,
   cacheStatsSchema,
-  validateCacheKey,
-  validateTTL,
 } from '../schemas/cache.schema';
+import { validateCacheKey, validateTTL } from '../schemas/primitives/api-cache-primitives';
 import { redisClient } from './client';
 
 // Compression algorithms

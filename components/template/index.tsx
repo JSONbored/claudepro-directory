@@ -11,7 +11,7 @@ export type {
   ComparisonTableProps,
   GuideStep,
   StepByStepGuideProps,
-} from '@/lib/schemas/shared.schema';
+} from '@/lib/schemas';
 export { CodeGroup } from './code-group';
 export { ComparisonTable } from './comparison-table';
 export { StepByStepGuide } from './step-guide';

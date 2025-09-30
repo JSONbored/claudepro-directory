@@ -6,16 +6,16 @@
 import { headers } from 'next/headers';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { sanitizeApiError } from '@/lib/error-sanitizer';
 import { logger } from '@/lib/logger';
-import { redisClient } from '@/lib/redis/client';
-import { createRequestId } from '@/lib/schemas/branded-types.schema';
+import { redisClient } from '@/lib/redis';
 import {
+  createRequestId,
   ipAddressSchema,
   type MiddlewareRateLimitConfig,
   middlewareRateLimitConfigSchema,
   requestPathSchema,
-} from '@/lib/schemas/middleware.schema';
+} from '@/lib/schemas';
+import { sanitizeApiError } from '@/lib/security';
 
 // Use MiddlewareRateLimitConfig from middleware schema
 // Additional interface for extended functionality

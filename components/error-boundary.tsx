@@ -6,8 +6,8 @@ import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { createErrorBoundaryFallback } from '@/lib/error-handler';
-import { umamiEventDataSchema } from '@/lib/schemas/analytics.schema';
-import type { ErrorBoundaryProps, ErrorFallbackProps } from '@/lib/schemas/component.schema';
+import type { ErrorBoundaryProps, ErrorFallbackProps } from '@/lib/schemas';
+import { umamiEventDataSchema } from '@/lib/schemas';
 
 // Client-safe environment check - doesn't trigger server env validation
 const isDevelopment = process.env.NODE_ENV === 'development';

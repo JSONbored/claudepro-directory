@@ -7,22 +7,103 @@ import { z } from 'zod';
 import { metadataLoader } from '@/lib/lazy-content-loaders';
 import { contentIndexer } from '@/lib/related-content/indexer';
 import { relatedContentService } from '@/lib/related-content/service';
+import {
+  isoDatetimeString,
+  nonEmptyString,
+  nonNegativeInt,
+  positiveInt,
+  stringArray,
+} from '@/lib/schemas/primitives';
 import { logger } from './logger';
 import { contentCache, statsRedis } from './redis';
-import {
-  type CacheWarmingResult,
-  type CacheWarmingStatus,
-  cachedContentSchema,
-  cacheWarmerPopularItemSchema,
-  cacheWarmingResultSchema,
-  cacheWarmingStatusSchema,
-  categoryMetadataSchema,
-  commonQuerySchema,
-  relatedContentWarmingSchema,
-  type WarmableCategory,
-  warmableCategorySchema,
-} from './schemas/cache-warmer.schema';
 import { isProduction } from './schemas/env.schema';
+
+/**
+ * Cache Warmer Schemas (inlined - only used here)
+ */
+const CACHE_WARMER_LIMITS = {
+  MAX_ITEMS_PER_CATEGORY: 100,
+  MAX_CATEGORIES: 20,
+  MAX_QUERY_LENGTH: 100,
+  MAX_PATH_LENGTH: 500,
+  MAX_SLUG_LENGTH: 200,
+  MIN_TTL: 60,
+  MAX_TTL: 604800,
+  MAX_BATCH_SIZE: 50,
+  MAX_COMMON_QUERIES: 100,
+} as const;
+
+export const warmableCategorySchema = z.enum([
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'guides',
+  'jobs',
+]);
+
+export const cacheWarmerPopularItemSchema = z.object({
+  slug: nonEmptyString
+    .max(CACHE_WARMER_LIMITS.MAX_SLUG_LENGTH)
+    .regex(/^[a-zA-Z0-9\-_]+$/, 'Invalid slug format'),
+  views: nonNegativeInt,
+});
+
+export const categoryMetadataSchema = z.object({
+  name: warmableCategorySchema,
+  items: z
+    .array(
+      z.object({
+        slug: nonEmptyString,
+        title: nonEmptyString.optional(),
+        description: nonEmptyString.optional(),
+      })
+    )
+    .max(CACHE_WARMER_LIMITS.MAX_ITEMS_PER_CATEGORY),
+});
+
+export const relatedContentWarmingSchema = z.object({
+  path: nonEmptyString
+    .max(CACHE_WARMER_LIMITS.MAX_PATH_LENGTH)
+    .regex(/^\/[a-zA-Z0-9\-_/]*$/, 'Invalid path format')
+    .refine((path) => !path.includes('..'), 'Path traversal detected'),
+  category: warmableCategorySchema.default('agents'),
+  tags: stringArray.max(50).default([]),
+  keywords: stringArray.max(50).default([]),
+  limit: positiveInt.min(1).max(20).default(6),
+});
+
+export const commonQuerySchema = nonEmptyString.max(CACHE_WARMER_LIMITS.MAX_QUERY_LENGTH);
+
+export const cachedContentSchema = z.object({
+  content: z.unknown(),
+  cachedAt: isoDatetimeString,
+  ttl: positiveInt,
+});
+
+export const cacheWarmingStatusSchema = z.enum([
+  'idle',
+  'warming',
+  'completed',
+  'failed',
+  'partial',
+]);
+
+export const cacheWarmingResultSchema = z.object({
+  status: cacheWarmingStatusSchema,
+  success: z.boolean().optional(),
+  message: z.string().optional(),
+  itemsWarmed: nonNegativeInt,
+  errors: nonNegativeInt,
+  duration: nonNegativeInt,
+  timestamp: isoDatetimeString,
+  categories: z.array(warmableCategorySchema),
+});
+
+export type WarmableCategory = z.infer<typeof warmableCategorySchema>;
+export type CacheWarmingStatus = z.infer<typeof cacheWarmingStatusSchema>;
+export type CacheWarmingResult = z.infer<typeof cacheWarmingResultSchema>;
 
 export class CacheWarmer {
   private isWarming = false;

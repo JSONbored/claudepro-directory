@@ -7,7 +7,7 @@
 
 import { CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { type ComparisonTableProps, comparisonTablePropsSchema } from '@/lib/schemas/shared.schema';
+import { type ComparisonTableProps, comparisonTablePropsSchema } from '@/lib/schemas';
 
 export function ComparisonTable(props: ComparisonTableProps) {
   const validated = comparisonTablePropsSchema.parse(props);

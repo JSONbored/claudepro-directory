@@ -4,5 +4,5 @@
  */
 
 // Re-export types from shared schema
-export type { MetricData, MetricsDisplayProps } from '@/lib/schemas/shared.schema';
+export type { MetricData, MetricsDisplayProps } from '@/lib/schemas';
 export { MetricsDisplay } from './metrics-display';

@@ -11,24 +11,15 @@
  */
 
 import { z } from 'zod';
-import { stringArray } from '@/lib/schemas/primitives/base-arrays';
-import {
-  imageDimension,
-  loadTime,
-  nonNegativeInt,
-  percentage,
-} from '@/lib/schemas/primitives/base-numbers';
+import { imageDimension } from '@/lib/schemas/primitives/base-numbers';
 import {
   codeString,
   extraLongString,
-  isoDatetimeString,
   longString,
   mediumString,
-  nonEmptyString,
   optionalUrlString,
   shortString,
   ultraLongString,
-  urlString,
   veryLongCodeString,
 } from '@/lib/schemas/primitives/base-strings';
 import {
@@ -66,21 +57,6 @@ export const contentCategorySchema = z.enum([
   'jobs', // Has route but no content directory
 ]);
 
-// Subset schema for core content only (used in various places)
-export const coreContentCategorySchema = z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks']);
-
-// Subset schema for SEO content types
-export const seoContentCategorySchema = z.enum([
-  'guides',
-  'tutorials',
-  'comparisons',
-  'workflows',
-  'use-cases',
-  'troubleshooting',
-  'categories',
-  'collections',
-]);
-
 // Subset schema for cacheable categories (used by Redis caching)
 export const cacheableCategorySchema = z.enum([
   'agents',
@@ -104,18 +80,6 @@ export const appContentTypeSchema = z.enum(['agent', 'mcp', 'hook', 'command', '
 export type AppContentType = z.infer<typeof appContentTypeSchema>;
 
 /**
- * Pagination Parameters
- * Used across: api, search schemas
- */
-export const paginationParamsSchema = z.object({
-  page: z.number().int().min(1).default(1),
-  limit: z.number().int().min(1).max(100).default(20),
-  offset: nonNegativeInt.optional(),
-});
-
-export type PaginationParams = z.infer<typeof paginationParamsSchema>;
-
-/**
  * Rate Limit Configuration
  * Used across: api, middleware
  */
@@ -126,72 +90,6 @@ export const rateLimitConfigSchema = z.object({
 });
 
 export type RateLimitConfig = z.infer<typeof rateLimitConfigSchema>;
-
-/**
- * Popular Item
- * Used across: cache-warmer, related-content
- */
-export const popularItemSchema = z.object({
-  slug: z.string(),
-  score: z.number(),
-  category: contentCategorySchema,
-  lastUpdated: isoDatetimeString,
-});
-
-export type PopularItem = z.infer<typeof popularItemSchema>;
-
-/**
- * Trending Item
- * Used across: cache, related-content
- */
-export const trendingItemSchema = z.object({
-  slug: z.string(),
-  category: contentCategorySchema,
-  score: z.number(),
-  viewCount: z.number(),
-  lastViewed: isoDatetimeString,
-  trend: z.enum(['rising', 'stable', 'falling']).optional(),
-});
-
-export type TrendingItem = z.infer<typeof trendingItemSchema>;
-
-/**
- * Performance Metrics
- * Used across: analytics, related-content
- */
-export const performanceMetricsSchema = z.object({
-  loadTime,
-  renderTime: loadTime,
-  interactionTime: loadTime.optional(),
-  totalTime: loadTime,
-  resourceCount: nonNegativeInt.optional(),
-  errorCount: nonNegativeInt.default(0),
-});
-
-export type PerformanceMetrics = z.infer<typeof performanceMetricsSchema>;
-
-/**
- * Generic Content Metadata
- * Shared structure for content metadata across the application.
- *
- * NOTE: This is DIFFERENT from content/base-content.schema.ts baseContentMetadataSchema.
- * - This schema: Generic metadata for ANY content (analytics, cache, search)
- * - base-content.schema.ts: Specific to content FILES (agents, mcp, rules, commands, hooks)
- */
-export const genericContentMetadataSchema = z.object({
-  slug: nonEmptyString,
-  name: z.string().optional(),
-  title: z.string().optional(),
-  description: z.string(),
-  tags: stringArray.default([]),
-  category: contentCategorySchema.optional(),
-  author: z.string().optional(),
-  popularity: percentage.optional(),
-  dateAdded: z.string().optional(),
-  lastModified: z.string().optional(),
-});
-
-export type GenericContentMetadata = z.infer<typeof genericContentMetadataSchema>;
 
 /**
  * MDX Component Props
@@ -322,37 +220,6 @@ export const quickReferenceItemSchema = z
     value: data.value || '',
     description: data.description,
   }));
-
-/**
- * Search Document Schema
- * For content transformation and search indexing
- */
-export const searchDocumentSchema = z.object({
-  id: componentTitleString,
-  title: componentTitleString,
-  description: codeString,
-  content: ultraLongString,
-  category: componentValueString,
-  tags: z.array(componentValueString),
-  type: z.enum(['agent', 'mcp', 'command', 'hook', 'rule']),
-  url: mediumString,
-  score: percentage.optional(),
-});
-
-export type SearchDocument = z.infer<typeof searchDocumentSchema>;
-
-/**
- * Social Share Data Schema
- * For social media sharing metadata
- */
-export const socialShareDataSchema = z.object({
-  title: componentTitleString,
-  description: mediumString,
-  url: urlString.max(500),
-  hashtags: z.array(componentValueString),
-});
-
-export type SocialShareData = z.infer<typeof socialShareDataSchema>;
 
 export const expertQuotePropsSchema = z.object({
   quote: codeString,

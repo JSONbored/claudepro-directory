@@ -6,7 +6,7 @@
 import type {
   UmamiGlobal,
   UmamiEventData,
-} from '@/lib/schemas/analytics.schema';
+} from '@/lib/schemas';
 
 declare global {
   interface Window {

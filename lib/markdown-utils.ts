@@ -5,7 +5,6 @@
 
 import { marked } from 'marked';
 import { logger } from './logger';
-import { DOMPurify } from './sanitizer';
 import {
   type MarkdownContent,
   type MarkdownParseOptions,
@@ -17,6 +16,7 @@ import {
   type SanitizedHtml,
   sanitizationOptionsSchema,
 } from './schemas/markdown.schema';
+import { DOMPurify } from './security';
 
 // isomorphic-dompurify handles server/client compatibility automatically
 

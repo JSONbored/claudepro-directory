@@ -2,8 +2,8 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { cacheWarmer } from '@/lib/cache-warmer';
 import { handleApiError, handleValidationError } from '@/lib/error-handler';
 import { logger } from '@/lib/logger';
-import { errorInputSchema } from '@/lib/schemas/error.schema';
-import { apiSchemas, baseSchemas, ValidationError, validation } from '@/lib/validation';
+import { errorInputSchema } from '@/lib/schemas';
+import { apiSchemas, baseSchemas, ValidationError, validation } from '@/lib/security';
 
 /**
  * API endpoint to manually trigger cache warming
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       {
-        ...status,
+        ...(typeof status === 'object' && status !== null ? status : {}),
         currentTime: new Date().toISOString(),
         validated: true,
       },

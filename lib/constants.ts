@@ -109,7 +109,7 @@ export const CLAUDE_CONFIG = claudeConfigSchema.parse({
 /**
  * Content Categories Schema (leveraging existing schema)
  */
-import { contentCategorySchema } from '@/lib/schemas/shared.schema';
+import { contentCategorySchema } from '@/lib/schemas';
 
 // CONSOLIDATION: Use complete category list from centralized schema instead of partial list
 // This eliminates the type mismatch between constants and actual categories used

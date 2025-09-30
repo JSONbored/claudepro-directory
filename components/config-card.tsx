@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SourceBadge, TagBadge, TypeBadge } from '@/components/ui/config-badge';
 import { copyToClipboard } from '@/lib/clipboard-utils';
-import type { ConfigCardProps } from '@/lib/schemas/component.schema';
+import type { ConfigCardProps } from '@/lib/schemas';
 import { getDisplayTitle } from '@/lib/utils';
 
 export const ConfigCard = memo(

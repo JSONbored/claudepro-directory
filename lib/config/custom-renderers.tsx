@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { copyToClipboard } from '@/lib/clipboard-utils';
-import type { UnifiedContentItem } from '@/lib/schemas/components';
+import type { UnifiedContentItem } from '@/lib/schemas';
 import type { InstallationSteps } from '@/lib/types/content-type-config';
 
 /**

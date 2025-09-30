@@ -20,7 +20,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import { getContentTypeConfig } from '@/lib/config/content-type-configs';
 import { formatDate } from '@/lib/date-utils';
-import type { UnifiedContentItem } from '@/lib/schemas/components';
+import type { UnifiedContentItem } from '@/lib/schemas';
 import type { InstallationSteps } from '@/lib/types/content-type-config';
 import { getDisplayTitle } from '@/lib/utils';
 

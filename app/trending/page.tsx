@@ -5,13 +5,9 @@ import { agents, commands, hooks, mcp, rules } from '@/generated/content';
 import { sortByPopularity } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
 import { statsRedis } from '@/lib/redis';
-import type { PagePropsWithSearchParams } from '@/lib/schemas/app.schema';
-import type { ContentMetadata } from '@/lib/schemas/content.schema';
-import {
-  parseSearchParams,
-  type TrendingParams,
-  trendingParamsSchema,
-} from '@/lib/schemas/search.schema';
+import type { PagePropsWithSearchParams } from '@/lib/schemas';
+import { parseSearchParams, type TrendingParams, trendingParamsSchema } from '@/lib/schemas';
+import type { ContentMetadata } from '@/lib/schemas/content';
 
 // Force dynamic rendering since we're fetching from Redis
 export const dynamic = 'force-dynamic';

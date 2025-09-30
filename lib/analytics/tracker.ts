@@ -5,16 +5,18 @@
 
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
+import type { errorInputSchema } from '@/lib/schemas';
 import {
+  env,
   errorTrackingSchema,
   interactionEventSchema,
+  isDevelopment,
+  isProduction,
   navigationEventSchema,
   performanceMetricSchema,
   trackingEventSchema,
   userIdentificationSchema,
-} from '@/lib/schemas/analytics.schema';
-import { env, isDevelopment, isProduction } from '@/lib/schemas/env.schema';
-import type { errorInputSchema } from '@/lib/schemas/error.schema';
+} from '@/lib/schemas';
 import { EVENT_CONFIG, type EventName, type EventPayload } from './events.config';
 import { isUmamiAvailable } from './umami';
 

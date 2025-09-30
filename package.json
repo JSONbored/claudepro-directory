@@ -71,7 +71,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",
-    "fuse.js": "^7.1.0",
+    "fuzzysort": "^3.1.0",
     "gray-matter": "^4.0.3",
     "lucide-react": "^0.544.0",
     "marked": "^16.3.0",

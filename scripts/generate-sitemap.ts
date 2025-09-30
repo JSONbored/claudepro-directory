@@ -8,7 +8,7 @@ import { mcpMetadata } from '../generated/mcp-metadata.js';
 import { rulesMetadata } from '../generated/rules-metadata.js';
 import { APP_CONFIG } from '../lib/constants';
 import { scriptLogger } from '../lib/logger.js';
-import type { ContentItem } from '../lib/schemas/content.schema';
+import type { ContentItem } from '../lib/schemas/content';
 
 // Define SitemapUrl type locally
 interface SitemapUrl {

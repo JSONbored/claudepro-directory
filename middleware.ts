@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { isDevelopment, isProduction } from '@/lib/env-client';
 import { logger } from '@/lib/logger';
 import { rateLimiters } from '@/lib/rate-limiter';
-import { env, securityConfig } from '@/lib/schemas/env.schema';
+import { env, securityConfig } from '@/lib/schemas';
 import {
   type ApiEndpointType,
   type RequestValidation,
@@ -16,7 +16,7 @@ import {
   staticAssetSchema,
   validateRequest,
   validateSearchQuery,
-} from '@/lib/schemas/middleware.schema';
+} from '@/lib/schemas';
 
 // Initialize Arcjet with comprehensive security rules
 const aj = arcjet({

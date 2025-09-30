@@ -16,7 +16,7 @@ export const revalidate = 604800; // 7 days in seconds
 export const dynamic = 'force-static'; // Force static generation
 export const dynamicParams = true; // Allow new pages to be generated on-demand
 
-import type { ComparisonData } from '@/lib/schemas/app.schema';
+import type { ComparisonData } from '@/lib/schemas';
 
 async function getComparisonData(slug: string): Promise<ComparisonData | null> {
   try {

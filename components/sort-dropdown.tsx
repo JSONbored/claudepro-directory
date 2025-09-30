@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { SortDropdownProps, SortOption } from '@/lib/schemas/component.schema';
+import type { SortDropdownProps, SortOption } from '@/lib/schemas';
 
 export const SortDropdown = ({ sortBy, sortDirection, onSortChange }: SortDropdownProps) => {
   const sortDropdownId = useId();

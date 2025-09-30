@@ -17,9 +17,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import type { FilterState, UnifiedSearchProps } from '@/lib/schemas/component.schema';
+import type { FilterState, UnifiedSearchProps } from '@/lib/schemas';
+import { sanitizeSearchQuery } from '@/lib/security';
 import { cn } from '@/lib/utils';
-import { sanitizeSearchQuery } from '@/lib/validation';
 
 // FilterState and UnifiedSearchProps are now imported from component.schema.ts
 // This provides runtime validation and type safety

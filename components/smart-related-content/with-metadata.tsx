@@ -3,7 +3,7 @@
  * Used by MDXRenderer to pass frontmatter data to the component
  */
 
-import type { SmartRelatedContentWithMetadataProps } from '@/lib/schemas/related-content.schema';
+import type { SmartRelatedContentWithMetadataProps } from '@/lib/schemas';
 import { SmartRelatedContent } from './index';
 
 // This will be populated by MDXRenderer

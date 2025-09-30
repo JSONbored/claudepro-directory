@@ -12,7 +12,7 @@ export type {
   QuickReferenceItem,
   QuickReferenceProps,
   TabItem,
-} from '@/lib/schemas/shared.schema';
+} from '@/lib/schemas';
 export { Checklist } from './checklist';
 export { ContentTabs } from './content-tabs';
 export { ExpertQuote } from './expert-quote';

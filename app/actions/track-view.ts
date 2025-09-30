@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { statsRedis } from '@/lib/redis';
-import { type AnalyticsResponse, validateTrackingParams } from '@/lib/schemas/analytics.schema';
+import { type AnalyticsResponse, validateTrackingParams } from '@/lib/schemas';
 
 /**
  * Track a view event for content

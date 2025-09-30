@@ -17,7 +17,7 @@ export type {
   FeatureGridProps,
   InfoBoxProps,
   TLDRSummaryProps,
-} from '@/lib/schemas/shared.schema';
+} from '@/lib/schemas';
 export { Accordion } from './accordion';
 export { Callout } from './callout';
 export { CaseStudy } from './case-study';

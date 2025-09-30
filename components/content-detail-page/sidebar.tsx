@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import type { ContentSidebarProps } from '@/lib/schemas/component.schema';
-import type { UnifiedContentItem } from '@/lib/schemas/components';
+import type { ContentSidebarProps, UnifiedContentItem } from '@/lib/schemas';
 import { getDisplayTitle } from '@/lib/utils';
 
 export function ContentSidebar<T extends UnifiedContentItem>({

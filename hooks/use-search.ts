@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { logger } from '@/lib/logger';
-import type { FilterState, SearchOptions, UseSearchProps } from '@/lib/schemas/component.schema';
-import type { ContentMetadata } from '@/lib/schemas/content.schema';
-import { extractFilterOptions } from '@/lib/schemas/content-filter.schema';
+import type { FilterState, SearchOptions, UseSearchProps } from '@/lib/schemas';
+import { extractFilterOptions } from '@/lib/schemas';
+import type { ContentMetadata } from '@/lib/schemas/content';
 import { type SearchableItem, type SearchFilters, searchCache } from '@/lib/search-cache';
 import { getDisplayTitle } from '@/lib/utils';
 

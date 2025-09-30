@@ -8,7 +8,6 @@ import { scriptLogger } from '../lib/logger.js';
 // Content metadata schema import removed - using direct object destructuring
 import { onBuildComplete } from '../lib/related-content/cache-invalidation.js';
 import { contentIndexer } from '../lib/related-content/indexer.js';
-import { validateContentByCategory } from '../lib/schemas/content/index.js';
 import type {
   AgentContent,
   CommandContent,
@@ -17,7 +16,8 @@ import type {
   JobContent,
   MCPServerContent,
   RuleContent,
-} from '../lib/schemas/content.schema.js';
+} from '../lib/schemas/content/index.js';
+import { validateContentByCategory } from '../lib/schemas/content/index.js';
 import {
   type BuildConfig,
   type BuildResult,
@@ -316,7 +316,7 @@ async function generateTypeScript(cache: BuildCache | null): Promise<GeneratedFi
 // Generated at: ${new Date().toISOString()}
 // Content Type: ${type}
 
-import type { ${typeImport} } from '@/lib/schemas/content.schema';
+import type { ${typeImport} } from '@/lib/schemas/content';
 
 export const ${varName}Metadata: ${typeImport}[] = ${JSON.stringify(metadata, null, 2)};
 
@@ -347,7 +347,7 @@ export type ${capitalizedSingular}Metadata = typeof ${varName}Metadata[number];`
 // Generated at: ${new Date().toISOString()}
 // Content Type: ${type}
 
-import type { ${schemaImport} } from '@/lib/schemas/content.schema';
+import type { ${schemaImport} } from '@/lib/schemas/content';
 
 export const ${varName}Full: ${schemaImport}[] = ${JSON.stringify(allContent[type], null, 2)};
 
@@ -438,7 +438,7 @@ ${buildConfig.contentTypes
   .join('\n\n')}
 
 // Export counts for stats
-import type { ContentStats } from '../lib/schemas/content.schema';
+import type { ContentStats } from '../lib/schemas/content';
 
 export const contentStats: ContentStats = {
 ${buildConfig.contentTypes

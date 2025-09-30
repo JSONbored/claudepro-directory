@@ -7,7 +7,7 @@ import { headers } from 'next/headers';
 import { Suspense } from 'react';
 import { logger } from '@/lib/logger';
 import { relatedContentService } from '@/lib/related-content/service';
-import type { SmartRelatedContentProps } from '@/lib/schemas/related-content.schema';
+import type { SmartRelatedContentProps } from '@/lib/schemas';
 import { RelatedCarouselClient } from './carousel';
 
 // Loading skeleton

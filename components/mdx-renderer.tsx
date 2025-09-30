@@ -9,10 +9,8 @@ import type {
   mdxHeadingPropsSchema,
   mdxImagePropsSchema,
   mdxLinkPropsSchema,
-} from '@/lib/schemas/shared.schema';
-// Import analytics components
-import { MetricsDisplay } from './analytics';
-// Import extracted components from new locations
+} from '@/lib/schemas';
+// Import lightweight components (always loaded)
 import {
   Accordion,
   AIOptimizedFAQ,
@@ -23,19 +21,23 @@ import {
   TLDRSummary,
 } from './content';
 import { Checklist, ExpertQuote, QuickReference, ContentTabs as Tabs } from './interactive';
+// Import heavy components as lazy-loaded (Suspense boundaries)
+import {
+  ComparisonTable,
+  DiagnosticFlow,
+  ErrorTable,
+  MetricsDisplay,
+  SmartRelatedContent,
+  StepByStepGuide,
+} from './lazy-mdx-components';
 import {
   CopyableCodeBlock,
   CopyableHeading,
   ExternalLinkComponent,
   InternalLinkComponent,
 } from './mdx-components';
-import {
-  SmartRelatedContentWithMetadata,
-  setPageMetadata,
-} from './smart-related-content/with-metadata';
-import { CodeGroup, ComparisonTable, StepByStepGuide } from './template';
-// Import troubleshooting components
-import { DiagnosticFlow, ErrorTable } from './troubleshooting';
+import { setPageMetadata } from './smart-related-content/with-metadata';
+import { CodeGroup } from './template';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
@@ -191,9 +193,9 @@ const components = {
   InfoBox,
   MetricsDisplay,
   QuickReference,
-  SmartRelatedContent: (
-    props: Omit<Parameters<typeof SmartRelatedContentWithMetadata>[0], 'pathname'>
-  ) => <SmartRelatedContentWithMetadata {...props} pathname={currentPathname} />, // Use the wrapper component with pathname
+  SmartRelatedContent: (props: Parameters<typeof SmartRelatedContent>[0]) => (
+    <SmartRelatedContent {...props} pathname={currentPathname} />
+  ),
   StepByStepGuide,
   Tabs,
   TLDRSummary,

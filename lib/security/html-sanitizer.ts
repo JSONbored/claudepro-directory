@@ -1,7 +1,7 @@
 /**
- * Lightweight HTML Sanitizer
- * Replaces isomorphic-dompurify with a lightweight, secure implementation
- * Handles both tag stripping and selective HTML sanitization
+ * HTML Sanitizer
+ * Lightweight HTML sanitization to prevent XSS attacks
+ * Part of unified lib/security/ module
  */
 
 /**

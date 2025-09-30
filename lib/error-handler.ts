@@ -10,18 +10,19 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { isDevelopment, isProduction } from '@/lib/env-client';
 import { logger } from '@/lib/logger';
-import { createRequestId, type RequestId } from '@/lib/schemas/branded-types.schema';
 import {
+  createRequestId,
   determineErrorType,
   type ErrorContext,
   type ErrorHandlerConfig,
   type ErrorResponse,
   type ErrorType,
   errorInputSchema,
+  type RequestId,
   validateErrorContext,
   validateErrorInput,
-} from '@/lib/schemas/error.schema';
-import { ValidationError } from '@/lib/validation';
+} from '@/lib/schemas';
+import { ValidationError } from '@/lib/security';
 
 // Re-export types for backward compatibility
 export type { ErrorHandlerConfig, ErrorResponse };
@@ -211,7 +212,7 @@ export class ErrorHandler {
     const userMessage =
       config.customMessage ||
       (config.hideInternalErrors !== false && isProduction
-        ? USER_FRIENDLY_MESSAGES[errorType]
+        ? USER_FRIENDLY_MESSAGES[errorType] || error.message
         : error.message);
 
     const response: ErrorResponse = {

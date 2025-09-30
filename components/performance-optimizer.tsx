@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import type { Metric } from 'web-vitals';
 import { logger } from '@/lib/logger';
-import { gtagEventSchema } from '@/lib/schemas/analytics.schema';
+import { gtagEventSchema } from '@/lib/schemas';
 
 // Critical resource preloader for perfect Core Web Vitals
 export function PerformanceOptimizer() {

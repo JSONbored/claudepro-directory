@@ -11,8 +11,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import type { RelatedConfigsProps } from '@/lib/schemas/component.schema';
-import type { UnifiedContentItem } from '@/lib/schemas/components';
+import type { RelatedConfigsProps, UnifiedContentItem } from '@/lib/schemas';
 
 // RelatedConfigsProps is now imported from component.schema.ts
 

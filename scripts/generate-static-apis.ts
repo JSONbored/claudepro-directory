@@ -20,28 +20,186 @@ import { rulesMetadata } from '../generated/rules-metadata.js';
 import { APP_CONFIG } from '../lib/constants';
 import { scriptLogger } from '../lib/logger.js';
 import { buildConfig, env } from '../lib/schemas/env.schema';
+import { nonNegativeInt, positiveInt } from '../lib/schemas/primitives/base-numbers';
+import {
+  isoDatetimeString,
+  mediumString,
+  nonEmptyString,
+  urlString,
+} from '../lib/schemas/primitives/base-strings';
 import {
   type AppContentType,
+  appContentTypeSchema,
   type ContentCategory,
   contentCategorySchema,
 } from '../lib/schemas/shared.schema';
-import {
-  type AllConfigurationsResponse,
-  allConfigurationsResponseSchema,
-  type CategorySearchIndex,
-  type CombinedSearchIndex,
-  type ContentTypeApiResponse,
-  categorySearchIndexSchema,
-  combinedSearchIndexSchema,
-  contentTypeApiResponseSchema,
-  type GenerationResult,
-  type HealthCheckResponse,
-  healthCheckResponseSchema,
-  type StaticAPISearchableItem,
-  staticAPISearchableItemSchema,
-  type TransformedContentItem,
-  transformedContentItemSchema,
-} from '../lib/schemas/static-api.schema';
+
+/**
+ * Static API Generation Schemas (inlined - only used here)
+ */
+const STATIC_API_LIMITS = {
+  MAX_ITEMS_PER_CATEGORY: 10000,
+  MAX_TAG_LENGTH: 50,
+  MAX_TAGS: 100,
+  MAX_TITLE_LENGTH: 200,
+  MAX_DESCRIPTION_LENGTH: 1000,
+  MAX_URL_LENGTH: 2048,
+  MAX_SLUG_LENGTH: 200,
+  MAX_POPULAR_TAGS: 50,
+  MAX_CATEGORY_TAGS: 20,
+} as const;
+
+const baseContentItemSchema = z.object({
+  slug: nonEmptyString
+    .max(STATIC_API_LIMITS.MAX_SLUG_LENGTH)
+    .regex(/^[a-zA-Z0-9\-_]+$/, 'Invalid slug format'),
+  title: z.string().max(STATIC_API_LIMITS.MAX_TITLE_LENGTH).optional(),
+  name: z.string().max(STATIC_API_LIMITS.MAX_TITLE_LENGTH).optional(),
+  description: nonEmptyString.max(STATIC_API_LIMITS.MAX_DESCRIPTION_LENGTH),
+  tags: z
+    .array(
+      nonEmptyString
+        .max(STATIC_API_LIMITS.MAX_TAG_LENGTH)
+        .regex(/^[a-zA-Z0-9\-_]+$/, 'Invalid tag format')
+    )
+    .max(STATIC_API_LIMITS.MAX_TAGS)
+    .default([]),
+  category: z.string().optional(),
+});
+
+const transformedContentItemSchema = baseContentItemSchema.extend({
+  type: appContentTypeSchema,
+  url: urlString
+    .max(STATIC_API_LIMITS.MAX_URL_LENGTH)
+    .regex(/^https:\/\/claudepro\.directory\//, 'Invalid URL format'),
+});
+
+const staticAPISearchableItemSchema = z.object({
+  title: z.string().max(STATIC_API_LIMITS.MAX_TITLE_LENGTH),
+  name: z.string().max(STATIC_API_LIMITS.MAX_TITLE_LENGTH),
+  description: mediumString,
+  tags: z.array(z.string().max(STATIC_API_LIMITS.MAX_TAG_LENGTH)).max(STATIC_API_LIMITS.MAX_TAGS),
+  category: z.string(),
+  popularity: nonNegativeInt.default(0),
+  slug: z.string().max(STATIC_API_LIMITS.MAX_SLUG_LENGTH),
+});
+
+const contentTypeApiResponseSchema = z.object({
+  agents: z.array(transformedContentItemSchema).optional(),
+  mcp: z.array(transformedContentItemSchema).optional(),
+  hooks: z.array(transformedContentItemSchema).optional(),
+  commands: z.array(transformedContentItemSchema).optional(),
+  rules: z.array(transformedContentItemSchema).optional(),
+  count: nonNegativeInt.max(STATIC_API_LIMITS.MAX_ITEMS_PER_CATEGORY),
+  lastUpdated: isoDatetimeString,
+  generated: z.literal('static'),
+});
+
+const statisticsSchema = z.object({
+  totalConfigurations: nonNegativeInt,
+  agents: nonNegativeInt,
+  mcp: nonNegativeInt,
+  rules: nonNegativeInt,
+  commands: nonNegativeInt,
+  hooks: nonNegativeInt,
+});
+
+const endpointsSchema = z.object({
+  agents: urlString,
+  mcp: urlString,
+  rules: urlString,
+  commands: urlString,
+  hooks: urlString,
+});
+
+const allConfigurationsResponseSchema = z.object({
+  '@context': z.literal('https://schema.org'),
+  '@type': z.literal('Dataset'),
+  name: z.string(),
+  description: z.string(),
+  license: z.string(),
+  lastUpdated: isoDatetimeString,
+  generated: z.literal('static'),
+  statistics: statisticsSchema,
+  data: z.object({
+    agents: z.array(transformedContentItemSchema),
+    mcp: z.array(transformedContentItemSchema),
+    rules: z.array(transformedContentItemSchema),
+    commands: z.array(transformedContentItemSchema),
+    hooks: z.array(transformedContentItemSchema),
+  }),
+  endpoints: endpointsSchema,
+});
+
+const popularTagSchema = z.object({
+  tag: z.string().max(STATIC_API_LIMITS.MAX_TAG_LENGTH),
+  count: positiveInt,
+});
+
+const categoryCountSchema = z.object({
+  category: z.string(),
+  count: nonNegativeInt,
+});
+
+const categorySearchIndexSchema = z.object({
+  category: contentCategorySchema,
+  items: z.array(staticAPISearchableItemSchema).max(STATIC_API_LIMITS.MAX_ITEMS_PER_CATEGORY),
+  count: nonNegativeInt,
+  lastUpdated: isoDatetimeString,
+  generated: z.literal('static'),
+  tags: z.array(z.string()).max(STATIC_API_LIMITS.MAX_TAGS * 10),
+  popularTags: z.array(popularTagSchema).max(STATIC_API_LIMITS.MAX_CATEGORY_TAGS),
+});
+
+const combinedSearchIndexSchema = z.object({
+  items: z.array(staticAPISearchableItemSchema),
+  count: nonNegativeInt,
+  lastUpdated: isoDatetimeString,
+  generated: z.literal('static'),
+  categories: z.array(categoryCountSchema),
+  tags: z.array(z.string()),
+  popularTags: z.array(popularTagSchema).max(STATIC_API_LIMITS.MAX_POPULAR_TAGS),
+});
+
+const healthCheckResponseSchema = z.object({
+  status: z.enum(['healthy', 'degraded', 'unhealthy']),
+  timestamp: isoDatetimeString,
+  generated: z.literal('static'),
+  version: z.string(),
+  environment: z.string(),
+  counts: z.object({
+    agents: nonNegativeInt,
+    mcp: nonNegativeInt,
+    rules: nonNegativeInt,
+    commands: nonNegativeInt,
+    hooks: nonNegativeInt,
+    total: nonNegativeInt,
+  }),
+  features: z.object({
+    staticGeneration: z.boolean(),
+    searchIndexes: z.boolean(),
+    redisCache: z.boolean(),
+    rateLimit: z.boolean(),
+  }),
+});
+
+const generationResultSchema = z.object({
+  success: z.boolean(),
+  outputDir: z.string(),
+  filesGenerated: z.array(z.string()),
+  totalItems: nonNegativeInt,
+  duration: nonNegativeInt,
+  errors: z.array(z.string()).optional(),
+});
+
+type TransformedContentItem = z.infer<typeof transformedContentItemSchema>;
+type StaticAPISearchableItem = z.infer<typeof staticAPISearchableItemSchema>;
+type ContentTypeApiResponse = z.infer<typeof contentTypeApiResponseSchema>;
+type AllConfigurationsResponse = z.infer<typeof allConfigurationsResponseSchema>;
+type CategorySearchIndex = z.infer<typeof categorySearchIndexSchema>;
+type CombinedSearchIndex = z.infer<typeof combinedSearchIndexSchema>;
+type HealthCheckResponse = z.infer<typeof healthCheckResponseSchema>;
+type GenerationResult = z.infer<typeof generationResultSchema>;
 
 // Output directory for static APIs
 const OUTPUT_DIR = join(process.cwd(), 'public', 'static-api');

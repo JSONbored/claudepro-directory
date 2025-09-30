@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { handleApiError } from '@/lib/error-handler';
 import { logger } from '@/lib/logger';
 import { statsRedis } from '@/lib/redis';
-import { errorInputSchema } from '@/lib/schemas/error.schema';
+import { errorInputSchema } from '@/lib/schemas';
 import { viewCountService } from '@/lib/view-count.service';
 
 export const runtime = 'nodejs';

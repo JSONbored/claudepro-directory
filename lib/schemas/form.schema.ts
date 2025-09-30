@@ -1,19 +1,19 @@
 /**
  * Production-grade form validation schemas
  * Security-first approach to prevent injection attacks and data corruption
+ *
+ * CLEANED - Removed 32 unused exports (74% waste eliminated)
  */
 
 import { z } from 'zod';
-import { nonNegativeInt, positiveInt } from '@/lib/schemas/primitives/base-numbers';
+import { positiveInt } from '@/lib/schemas/primitives/base-numbers';
 import {
-  emailString,
   isoDatetimeString,
   nonEmptyString,
   shortString,
   urlString,
 } from '@/lib/schemas/primitives/base-strings';
-import { DOMPurify } from '../sanitizer';
-import { VALIDATION_PATTERNS } from '../validation';
+import { DOMPurify, VALIDATION_PATTERNS } from '../security';
 
 // GitHub-related schemas for form submissions
 export const gitHubConfigValidationSchema = z.object({
@@ -36,7 +36,7 @@ export const issueCreationResponseSchema = z.object({
 });
 
 export const githubApiRateLimitSchema = z.object({
-  remaining: nonNegativeInt,
+  remaining: z.number().min(0),
   resetTime: isoDatetimeString,
 });
 
@@ -45,13 +45,6 @@ export const githubHealthCheckResponseSchema = z.object({
   authenticated: z.boolean(),
   rateLimit: githubApiRateLimitSchema.optional(),
 });
-
-// GitHub-related type exports
-export type GitHubConfigValidation = z.infer<typeof gitHubConfigValidationSchema>;
-export type IssueCreationRequest = z.infer<typeof issueCreationRequestSchema>;
-export type IssueCreationResponse = z.infer<typeof issueCreationResponseSchema>;
-export type GitHubApiRateLimit = z.infer<typeof githubApiRateLimitSchema>;
-export type GitHubHealthCheckResponse = z.infer<typeof githubHealthCheckResponseSchema>;
 
 /**
  * Configuration submission form schema
@@ -181,219 +174,6 @@ export function parseConfigSubmissionForm(formData: FormData): ConfigSubmissionD
 }
 
 /**
- * Contact form schema
- */
-export const contactFormSchema = z.object({
-  name: z
-    .string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(100, 'Name must be less than 100 characters')
-    .regex(/^[a-zA-Z\s]+$/, 'Name can only contain letters and spaces'),
-
-  email: emailString.max(255, 'Email address is too long').toLowerCase(),
-
-  subject: z
-    .string()
-    .min(5, 'Subject must be at least 5 characters')
-    .max(200, 'Subject must be less than 200 characters'),
-
-  message: z
-    .string()
-    .min(20, 'Message must be at least 20 characters')
-    .max(5000, 'Message must be less than 5000 characters')
-    .refine(
-      (val) => !/<script|javascript:|data:|vbscript:|onclick|onerror|onload/i.test(val),
-      'Message contains potentially malicious content'
-    ),
-
-  // Honeypot field for bot detection
-  website: z.string().max(0, 'Bot detected').optional(),
-});
-
-export type ContactFormData = z.infer<typeof contactFormSchema>;
-
-/**
- * Newsletter subscription schema
- */
-export const newsletterSchema = z.object({
-  email: emailString
-    .max(255, 'Email address is too long')
-    .toLowerCase()
-    .refine(
-      (email) => !email.includes('+'),
-      'Plus addressing is not allowed for newsletter subscriptions'
-    ),
-
-  // GDPR consent
-  consent: z.literal(true),
-});
-
-export type NewsletterData = z.infer<typeof newsletterSchema>;
-
-/**
- * Search form schema
- */
-export const searchFormSchema = z.object({
-  query: nonEmptyString
-    .max(200, 'Search query is too long')
-    .transform((val) => val.trim())
-    .refine((val) => val.length >= 2, 'Search query must be at least 2 characters after trimming')
-    .transform((val) => {
-      // Sanitize search query
-      return val
-        .replace(/[<>'"&]/g, '') // Remove potential XSS characters
-        .replace(/\s+/g, ' '); // Normalize whitespace
-    }),
-
-  category: z
-    .enum(['all', 'agents', 'mcp', 'rules', 'commands', 'hooks', 'guides'])
-    .optional()
-    .default('all'),
-
-  sortBy: z.enum(['relevance', 'date', 'popularity']).optional().default('relevance'),
-
-  limit: z.number().int().min(1).max(100).optional().default(20),
-});
-
-export type SearchFormData = z.infer<typeof searchFormSchema>;
-
-/**
- * Feedback form schema
- */
-export const feedbackFormSchema = z.object({
-  rating: z.number().int().min(1).max(5),
-
-  feedback: z
-    .string()
-    .min(10, 'Feedback must be at least 10 characters')
-    .max(1000, 'Feedback must be less than 1000 characters')
-    .refine(
-      (val) => !/<script|javascript:|data:|vbscript:|onclick|onerror|onload/i.test(val),
-      'Feedback contains potentially malicious content'
-    ),
-
-  email: emailString.optional(),
-
-  // Anonymous submission option
-  anonymous: z.boolean().optional().default(false),
-});
-
-export type FeedbackFormData = z.infer<typeof feedbackFormSchema>;
-export type ConfigSubmission = z.infer<typeof configSubmissionSchema>;
-export type ContactForm = z.infer<typeof contactFormSchema>;
-export type Newsletter = z.infer<typeof newsletterSchema>;
-export type SearchForm = z.infer<typeof searchFormSchema>;
-export type FeedbackForm = z.infer<typeof feedbackFormSchema>;
-
-/**
- * Helper function to create safe FormData parser
- */
-export function createFormDataParser<T extends z.ZodType>(schema: T) {
-  return (formData: FormData): z.infer<T> => {
-    const data: Record<string, unknown> = {};
-
-    // Safely extract all form data
-    for (const [key, value] of formData.entries()) {
-      // Handle multiple values for the same key (e.g., checkboxes)
-      if (key in data) {
-        const existing = data[key];
-        if (Array.isArray(existing)) {
-          existing.push(value);
-        } else {
-          data[key] = [existing, value];
-        }
-      } else {
-        data[key] = value;
-      }
-    }
-
-    // Convert FormDataEntryValue to appropriate types
-    const processedData = Object.fromEntries(
-      Object.entries(data).map(([key, value]) => {
-        if (value === null || value === undefined) {
-          return [key, undefined];
-        }
-        if (Array.isArray(value)) {
-          return [key, value.map((v) => String(v))];
-        }
-        return [key, String(value)];
-      })
-    );
-
-    return schema.parse(processedData);
-  };
-}
-
-/**
- * Export all form parsers
- */
-export const formParsers = {
-  configSubmission: createFormDataParser(configSubmissionSchema),
-  contact: createFormDataParser(contactFormSchema),
-  newsletter: createFormDataParser(newsletterSchema),
-  search: createFormDataParser(searchFormSchema),
-  feedback: createFormDataParser(feedbackFormSchema),
-} as const;
-
-/**
- * HTML Sanitization Schemas for XSS Prevention
- * Comprehensive sanitization for different content contexts
- */
-
-/**
- * Sanitized HTML content schema
- * Removes dangerous elements while preserving safe formatting
- */
-export const sanitizedHtmlSchema = z.string().transform((html) => {
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: [
-      'p',
-      'br',
-      'strong',
-      'em',
-      'u',
-      'h1',
-      'h2',
-      'h3',
-      'h4',
-      'h5',
-      'h6',
-      'ul',
-      'ol',
-      'li',
-      'blockquote',
-      'a',
-      'code',
-      'pre',
-      'span',
-      'div',
-      'table',
-      'thead',
-      'tbody',
-      'tr',
-      'th',
-      'td',
-    ],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'title'],
-    FORBID_TAGS: ['script', 'style', 'iframe', 'form', 'input', 'object', 'embed'],
-    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur'],
-    KEEP_CONTENT: true,
-  });
-});
-
-/**
- * Strict text-only schema (no HTML allowed)
- * Use for contexts where HTML should never be present
- */
-export const textOnlySchema = z.string().transform((str) => {
-  return DOMPurify.sanitize(str, {
-    ALLOWED_TAGS: [],
-    ALLOWED_ATTR: [],
-    KEEP_CONTENT: true,
-  });
-});
-
-/**
  * JSON-LD structured data schema
  * Ensures no script injection in JSON content while supporting nested objects
  */
@@ -435,20 +215,6 @@ export const jsonLdSafeSchema = jsonLdValue.transform((data) => {
 });
 
 /**
- * Code block sanitization schema
- * Preserves code but ensures it can't execute
- */
-export const codeBlockSafeSchema = z.string().transform((code) => {
-  // Escape HTML entities to prevent execution
-  return code
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-});
-
-/**
  * Syntax-highlighted code schema
  * Validates that HTML comes from trusted syntax highlighter
  */
@@ -463,85 +229,3 @@ export const highlightedCodeSafeSchema = z.string().transform((html) => {
     ALLOW_DATA_ATTR: false,
   });
 });
-
-/**
- * Markdown-derived HTML schema
- * More permissive but still safe for user-generated content
- */
-export const markdownHtmlSafeSchema = z.string().transform((html) => {
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: [
-      'h1',
-      'h2',
-      'h3',
-      'h4',
-      'h5',
-      'h6',
-      'p',
-      'br',
-      'hr',
-      'strong',
-      'b',
-      'em',
-      'i',
-      'u',
-      's',
-      'del',
-      'ins',
-      'mark',
-      'ul',
-      'ol',
-      'li',
-      'blockquote',
-      'q',
-      'cite',
-      'a',
-      'code',
-      'pre',
-      'kbd',
-      'samp',
-      'var',
-      'table',
-      'thead',
-      'tbody',
-      'tfoot',
-      'tr',
-      'th',
-      'td',
-      'img',
-      'span',
-      'div',
-    ],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'title', 'src', 'alt', 'width', 'height', 'class'],
-    ALLOW_DATA_ATTR: false,
-    FORBID_TAGS: ['script', 'style', 'iframe', 'form', 'input', 'object', 'embed'],
-    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
-  });
-});
-
-/**
- * URL parameter sanitization schema
- * Prevents URL injection attacks
- */
-export const urlParamSafeSchema = z.string().transform((param) => {
-  // Remove potential injection characters
-  const cleaned = param
-    .replace(/[<>"'`]/g, '')
-    .replace(/javascript:/gi, '')
-    .replace(/data:/gi, '')
-    .trim();
-
-  // URL encode for safety
-  return encodeURIComponent(cleaned);
-});
-
-/**
- * Export type definitions for sanitization schemas
- */
-export type SanitizedHTML = z.infer<typeof sanitizedHtmlSchema>;
-export type TextOnly = z.infer<typeof textOnlySchema>;
-export type SafeJSONLD = z.infer<typeof jsonLdSafeSchema>;
-export type SafeCodeBlock = z.infer<typeof codeBlockSafeSchema>;
-export type SafeHighlightedCode = z.infer<typeof highlightedCodeSafeSchema>;
-export type SafeMarkdownHTML = z.infer<typeof markdownHtmlSafeSchema>;
-export type SafeURLParam = z.infer<typeof urlParamSafeSchema>;

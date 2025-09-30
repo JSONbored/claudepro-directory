@@ -7,9 +7,9 @@ import { getMcpBySlug, getMcpFullContent, mcp } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
 import { sortMcp } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
-import type { PageProps } from '@/lib/schemas/app.schema';
-import { slugParamsSchema } from '@/lib/schemas/app.schema';
-import { mcpServerContentSchema } from '@/lib/schemas/content.schema';
+import type { PageProps } from '@/lib/schemas';
+import { slugParamsSchema } from '@/lib/schemas';
+import { mcpContentSchema as mcpServerContentSchema } from '@/lib/schemas/content';
 import { transformForDetailPage } from '@/lib/transformers';
 import { getDisplayTitle } from '@/lib/utils';
 

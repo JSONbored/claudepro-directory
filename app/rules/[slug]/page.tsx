@@ -7,9 +7,9 @@ import { getRuleBySlug, getRuleFullContent, rules } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
 import { sortRules } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
-import type { PageProps } from '@/lib/schemas/app.schema';
-import { slugParamsSchema } from '@/lib/schemas/app.schema';
-import { ruleContentSchema } from '@/lib/schemas/content.schema';
+import type { PageProps } from '@/lib/schemas';
+import { slugParamsSchema } from '@/lib/schemas';
+import { ruleContentSchema } from '@/lib/schemas/content';
 import { getDisplayTitle } from '@/lib/utils';
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

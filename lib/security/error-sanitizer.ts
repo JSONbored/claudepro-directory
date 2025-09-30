@@ -1,81 +1,25 @@
 /**
+ * Error Sanitizer
  * Production-grade error sanitization for security-hardened responses
  * Removes sensitive information from error messages and stack traces
- * Designed for hostile environments where every error could be exploited
+ * Part of unified lib/security/ module
  */
 
 import { logger } from '@/lib/logger';
-import type { RequestId } from '@/lib/schemas/branded-types.schema';
-import { isProduction } from '@/lib/schemas/env.schema';
+import type { RequestId } from '@/lib/schemas';
 import {
   determineErrorType,
   type ErrorContext,
   type ErrorSeverity,
   errorSeveritySchema,
+  isProduction,
   type SanitizedError,
   validateErrorInput,
   validateSanitizedError,
-} from '@/lib/schemas/error.schema';
+} from '@/lib/schemas';
+import { SENSITIVE_PATTERNS } from './patterns';
 
-/**
- * Sensitive patterns that must be removed from error messages
- * These patterns could reveal system internals to attackers
- */
-const SENSITIVE_PATTERNS = [
-  // File system paths (absolute and relative)
-  /\/[a-zA-Z0-9_\-/.]+\.(ts|js|tsx|jsx|json|env|config|yaml|yml)/gi,
-  /\b[A-Z]:\\[a-zA-Z0-9_\-\\/.]+/gi,
-  /\.\.[/\\]([a-zA-Z0-9_\-/\\.])+/gi,
-  /\/home\/[a-zA-Z0-9_\-/.]+/gi,
-  /\/Users\/[a-zA-Z0-9_\-/.]+/gi,
-  /\/var\/[a-zA-Z0-9_\-/.]+/gi,
-  /\/tmp\/[a-zA-Z0-9_\-/.]+/gi,
-
-  // Database connection strings and credentials
-  /postgres:\/\/[^@]+@[^/]+\/[^?]+/gi,
-  /mysql:\/\/[^@]+@[^/]+\/[^?]+/gi,
-  /mongodb:\/\/[^@]+@[^/]+\/[^?]+/gi,
-  /redis:\/\/[^@]*@?[^/]+\/[0-9]+/gi,
-  /\b(user|username|password|passwd|pass|pwd|secret|key|token)[:=]\s*['"]*[a-zA-Z0-9_\-+/=]{4,}['"]*\b/gi,
-
-  // API keys and tokens
-  /\b[a-zA-Z0-9_]{32,}\b/g,
-  /\bsk-[a-zA-Z0-9]{48,}\b/gi,
-  /\bpk-[a-zA-Z0-9]{48,}\b/gi,
-  /\bBearer\s+[a-zA-Z0-9_\-+/=]{20,}\b/gi,
-  /\bApiKey\s+[a-zA-Z0-9_\-+/=]{20,}\b/gi,
-
-  // Environment variables and configuration
-  /process\.env\.[A-Z_]+/gi,
-  /\$\{[A-Z_]+\}/gi,
-  /\bNODE_ENV\b/gi,
-  /\bPORT\b/gi,
-  /\bDATABASE_URL\b/gi,
-
-  // Server internals and hostnames
-  /\b(?:localhost|127\.0\.0\.1|0\.0\.0\.0):\d+\b/gi,
-  /\b[a-zA-Z0-9.-]+\.(?:local|internal|dev|test|staging)\b/gi,
-  /\b[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}\b/gi,
-
-  // Stack trace information
-  /\s+at\s+[^\s]+\s+\([^)]+\)/gi,
-  /\s+at\s+[^\s]+:[0-9]+:[0-9]+/gi,
-  /\bin\s+file:\/\/[^\s]+/gi,
-
-  // Version information that could aid attackers
-  /\bversion\s*[:=]\s*['"]*[0-9]+\.[0-9]+\.[0-9]+[^'"]*['"]*\b/gi,
-  /\bv[0-9]+\.[0-9]+\.[0-9]+/gi,
-
-  // Memory addresses and system info
-  /\b0x[a-fA-F0-9]{8,16}\b/gi,
-  /\b[a-fA-F0-9]{32,64}\b/g,
-
-  // SQL fragments that could reveal schema
-  /\b(SELECT|INSERT|UPDATE|DELETE|FROM|WHERE|JOIN|TABLE)\b[^.]{0,100}/gi,
-
-  // Common sensitive configuration keys
-  /\b(jwt_secret|session_secret|encryption_key|private_key|client_secret)\b/gi,
-] as const;
+// Merge with extended patterns from original file
 
 /**
  * Generic safe error messages for different error types
@@ -97,7 +41,7 @@ const SAFE_ERROR_MESSAGES = {
 } as const;
 
 // Re-export types from schema for backward compatibility
-export type { ErrorSeverity } from '@/lib/schemas/error.schema';
+export type { ErrorSeverity } from '@/lib/schemas';
 
 /**
  * Error sanitization utility class

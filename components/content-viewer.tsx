@@ -1,7 +1,7 @@
 import { ChevronDown, ChevronUp, Maximize2, Minimize2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import type { ContentViewerProps } from '@/lib/schemas/component.schema';
+import type { ContentViewerProps } from '@/lib/schemas';
 import { cn } from '@/lib/utils';
 
 // ContentViewerProps is now imported from component.schema.ts

@@ -12,8 +12,8 @@ import {
   cacheKeyParamsSchema,
   parseRedisZRangeResponse,
   popularItemsQuerySchema,
-  validateCacheKey,
 } from './schemas/cache.schema';
+import { validateCacheKey } from './schemas/primitives/api-cache-primitives';
 
 const BATCH_SIZE = 50;
 const rateLimiter = RateLimiters.api('redis_ops');
@@ -126,10 +126,7 @@ export const statsRedis = {
       () => [],
       'getPopular'
     );
-    return parseRedisZRangeResponse(items || [], {
-      operation: 'getPopular',
-      key: `popular:${q.category}:all`,
-    });
+    return parseRedisZRangeResponse(items || []);
   },
 
   trackCopy: async (cat: string, slug: string) => {

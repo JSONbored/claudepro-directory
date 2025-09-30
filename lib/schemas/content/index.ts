@@ -9,10 +9,6 @@
  */
 
 import { z } from 'zod';
-import {
-  type ContentCategory as SharedContentCategory,
-  contentCategorySchema as sharedContentCategorySchema,
-} from '../shared.schema';
 
 // Export individual content schemas
 export { type AgentContent, agentContentSchema } from './agent.schema';
@@ -31,12 +27,12 @@ export { type HookContent, hookContentSchema } from './hook.schema';
 export { type McpContent, mcpContentSchema } from './mcp.schema';
 export { type RuleContent, ruleContentSchema } from './rule.schema';
 
-// Re-import for union creation
+// Re-import for union creation and type aliases
 import { agentContentSchema } from './agent.schema';
 import { commandContentSchema } from './command.schema';
 import { guideContentSchema } from './guide.schema';
 import { hookContentSchema } from './hook.schema';
-import { mcpContentSchema } from './mcp.schema';
+import { type McpContent as McpContentType, mcpContentSchema } from './mcp.schema';
 import { ruleContentSchema } from './rule.schema';
 
 /**
@@ -53,9 +49,12 @@ export const contentItemSchema = z.union([
 
 export type ContentItem = z.infer<typeof contentItemSchema>;
 
-// Re-export ContentCategory and schema for external use
-export type ContentCategory = SharedContentCategory;
-export const contentCategorySchema = sharedContentCategorySchema;
+// Modernized type aliases
+export type ContentMetadata = ContentItem;
+export type MCPServerContent = McpContentType;
+
+// Note: ContentCategory removed - import from shared.schema directly
+// Use: import { type ContentCategory, contentCategorySchema } from '@/lib/schemas/shared.schema';
 
 /**
  * Detailed content union (for complex content validation)
@@ -84,7 +83,7 @@ export type RelatedType = z.infer<typeof relatedTypeSchema>;
 /**
  * Helper function to validate content by category
  */
-export function validateContentByCategory(data: unknown, category: SharedContentCategory) {
+export function validateContentByCategory(data: unknown, category: string) {
   switch (category) {
     case 'agents':
       return agentContentSchema.parse(data);
@@ -112,3 +111,64 @@ export function createContentValidator<T extends z.ZodTypeAny>(schema: T) {
     return result.success ? result.data : null;
   };
 }
+
+/**
+ * Content statistics type
+ */
+export type ContentStats = {
+  agents: number;
+  mcp: number;
+  rules: number;
+  commands: number;
+  hooks: number;
+  guides: number;
+};
+
+/**
+ * Placeholder job type (jobs feature not implemented yet)
+ */
+export type JobContent = {
+  slug: string;
+  description: string;
+  category: string;
+  author: string;
+  dateAdded: string;
+  tags: string[];
+  title: string;
+  company: string;
+  location: string;
+  salary?: string;
+  type: string;
+  postedAt: string;
+  requirements: string[];
+  benefits: string[];
+  applyUrl: string;
+  contactEmail: string;
+  remote: boolean;
+  featured?: boolean;
+  companyLogo?: string;
+};
+
+/**
+ * Exportable item schema for content transformers
+ */
+import { stringArray } from '@/lib/schemas/primitives/base-arrays';
+import { nonEmptyString, optionalUrlString } from '@/lib/schemas/primitives/base-strings';
+
+export const exportableItemSchema = z.object({
+  slug: nonEmptyString,
+  name: nonEmptyString,
+  title: z.string().optional(),
+  description: nonEmptyString,
+  category: nonEmptyString,
+  tags: stringArray.optional(),
+  author: nonEmptyString,
+  dateAdded: nonEmptyString,
+  githubUrl: optionalUrlString,
+  source: z.string().optional(),
+  features: stringArray.optional(),
+  useCases: stringArray.optional(),
+  content: z.string().optional(),
+});
+
+export type ExportableItem = z.infer<typeof exportableItemSchema>;

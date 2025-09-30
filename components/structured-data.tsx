@@ -19,7 +19,7 @@ interface StructuredDataProps {
   breadcrumbs?: Array<{ name: string; url: string }>;
 }
 
-import { jsonLdSafeSchema } from '@/lib/schemas/form.schema';
+import { jsonLdSafeSchema } from '@/lib/schemas';
 
 export function StructuredData({
   type = 'website',

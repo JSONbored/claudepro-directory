@@ -5,12 +5,33 @@ import type {
   HookContent,
   MCPServerContent,
   RuleContent,
-} from '@/lib/schemas/content.schema';
-import { exportableItemSchema } from '@/lib/schemas/content.schema';
-import type { SearchDocument, SocialShareData } from '@/lib/schemas/shared.schema';
+} from '@/lib/schemas/content';
+import { exportableItemSchema } from '@/lib/schemas/content';
 
-// Re-export types for backward compatibility
-export type { SearchDocument, SocialShareData };
+/**
+ * Search Document type (inlined - only used here)
+ */
+export interface SearchDocument {
+  id: string;
+  title: string;
+  description: string;
+  content: string;
+  category: string;
+  tags: string[];
+  type: 'agent' | 'mcp' | 'command' | 'hook' | 'rule';
+  url: string;
+  score?: number;
+}
+
+/**
+ * Social Share Data type (inlined - only used here)
+ */
+export interface SocialShareData {
+  title: string;
+  description: string;
+  url: string;
+  hashtags: string[];
+}
 
 /**
  * Content Transformers Module

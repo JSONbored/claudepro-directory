@@ -3,11 +3,8 @@
 import fs from 'fs';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
-import {
-  type ContentCategory,
-  type contentItemSchema,
-  validateContentByCategory,
-} from '../lib/schemas/content/index';
+import { type contentItemSchema, validateContentByCategory } from '../lib/schemas/content/index';
+import type { ContentCategory } from '../lib/schemas/shared.schema';
 
 // Schema for raw JSON data validation
 const rawJsonSchema = z.record(z.string(), z.unknown());

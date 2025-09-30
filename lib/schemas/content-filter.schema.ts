@@ -6,7 +6,8 @@
 
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
-import { nonEmptyString, shortString, stringArray } from '@/lib/schemas/primitives';
+import { stringArray } from '@/lib/schemas/primitives/base-arrays';
+import { nonEmptyString, shortString } from '@/lib/schemas/primitives/base-strings';
 
 /**
  * UI Sort/Filter schemas (preserved from deprecated hooks)

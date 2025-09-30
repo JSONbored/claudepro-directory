@@ -7,7 +7,7 @@
 import { z } from 'zod';
 import { MAIN_CONTENT_CATEGORIES } from '@/lib/constants';
 import type { ContentItem } from '@/lib/related-content/service';
-import type { HookContent, MCPServerContent } from '@/lib/schemas/content.schema';
+import type { HookContent, MCPServerContent } from '@/lib/schemas/content';
 import { BatchLazyLoader, createLazyModule, PaginatedLazyLoader } from './lazy-loader';
 
 // Schema for metadata lookup

@@ -7,7 +7,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { type FeatureGridProps, featureGridPropsSchema } from '@/lib/schemas/shared.schema';
+import { type FeatureGridProps, featureGridPropsSchema } from '@/lib/schemas';
 
 export function FeatureGrid(props: FeatureGridProps) {
   const validated = featureGridPropsSchema.parse(props);

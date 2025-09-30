@@ -5,7 +5,8 @@
  */
 
 import { z } from 'zod';
-import { isoDatetimeString, nonEmptyString, nonNegativeInt } from '@/lib/schemas/primitives';
+import { nonNegativeInt } from '@/lib/schemas/primitives/base-numbers';
+import { isoDatetimeString, nonEmptyString } from '@/lib/schemas/primitives/base-strings';
 import { contentCategorySchema } from './shared.schema';
 
 /**

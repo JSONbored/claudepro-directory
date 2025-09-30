@@ -9,7 +9,7 @@ import { ExternalLink, Github, Thermometer } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { UnifiedContentItem } from '@/lib/schemas/components';
+import type { UnifiedContentItem } from '@/lib/schemas';
 import { getDisplayTitle } from '@/lib/utils';
 
 /**

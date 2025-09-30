@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { GuideItemWithCategory } from '@/lib/components/guide-page-factory';
-import type { EnhancedGuidesPageProps } from '@/lib/schemas/component.schema';
+import type { EnhancedGuidesPageProps } from '@/lib/schemas';
 
 const categoryInfo = {
   'use-cases': {

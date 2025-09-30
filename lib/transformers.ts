@@ -3,15 +3,16 @@
  * Converts strict content schema data to flexible component interfaces
  */
 
-import type { UnifiedContentItem } from '@/lib/schemas/components';
-
+import type { UnifiedContentItem } from '@/lib/schemas';
 // Import all content types
-import type { AgentContent } from '@/lib/schemas/content/agent.schema';
-import type { CommandContent } from '@/lib/schemas/content/command.schema';
-import type { GuideContent } from '@/lib/schemas/content/guide.schema';
-import type { HookContent } from '@/lib/schemas/content/hook.schema';
-import type { McpContent } from '@/lib/schemas/content/mcp.schema';
-import type { RuleContent } from '@/lib/schemas/content/rule.schema';
+import type {
+  AgentContent,
+  CommandContent,
+  GuideContent,
+  HookContent,
+  McpContent,
+  RuleContent,
+} from '@/lib/schemas/content';
 
 // Union type for all content
 type ContentItem =

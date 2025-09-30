@@ -9,7 +9,7 @@
 
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
-import type { UnifiedContentItem } from '@/lib/schemas/components';
+import type { UnifiedContentItem } from '@/lib/schemas';
 
 /**
  * Troubleshooting item structure

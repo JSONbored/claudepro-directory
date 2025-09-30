@@ -1,6 +1,6 @@
 import Script from 'next/script';
 import { APP_CONFIG } from '@/lib/constants';
-import { jsonLdSafeSchema } from '@/lib/schemas/form.schema';
+import { jsonLdSafeSchema } from '@/lib/schemas';
 
 /**
  * Generate organization structured data for the entire site

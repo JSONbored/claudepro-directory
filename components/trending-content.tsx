@@ -5,7 +5,7 @@ import { useId } from 'react';
 import { ConfigCard } from '@/components/config-card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { TrendingContentProps, UnifiedContentItem } from '@/lib/schemas/component.schema';
+import type { TrendingContentProps, UnifiedContentItem } from '@/lib/schemas';
 
 export function TrendingContent({ trending, popular, recent }: TrendingContentProps) {
   // Generate unique IDs for headings

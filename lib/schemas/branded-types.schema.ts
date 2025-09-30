@@ -5,7 +5,11 @@
  */
 
 import type { z } from 'zod';
-import { isoDatetimeString, nonEmptyString, urlString } from '@/lib/schemas/primitives';
+import {
+  isoDatetimeString,
+  nonEmptyString,
+  urlString,
+} from '@/lib/schemas/primitives/base-strings';
 
 /**
  * RequestId - Unique identifier for API requests

@@ -8,7 +8,7 @@
 import { AlertTriangle, Info } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { type ErrorTableProps, errorTablePropsSchema } from '@/lib/schemas/shared.schema';
+import { type ErrorTableProps, errorTablePropsSchema } from '@/lib/schemas';
 
 export function ErrorTable(props: ErrorTableProps) {
   const validated = errorTablePropsSchema.parse(props);

@@ -19,7 +19,7 @@ const UnifiedSearch = dynamic(
 );
 
 import { useSearch } from '@/hooks/use-search';
-import type { HomePageClientProps, UnifiedContentItem } from '@/lib/schemas/component.schema';
+import type { HomePageClientProps, UnifiedContentItem } from '@/lib/schemas';
 
 function HomePageClientComponent({ initialData }: HomePageClientProps) {
   const { rules, mcp, agents, commands, hooks, allConfigs } = initialData;

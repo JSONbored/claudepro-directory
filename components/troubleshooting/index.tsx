@@ -9,6 +9,6 @@ export type {
   DiagnosticStep,
   ErrorItem,
   ErrorTableProps,
-} from '@/lib/schemas/shared.schema';
+} from '@/lib/schemas';
 export { DiagnosticFlow } from './diagnostic-flow';
 export { ErrorTable } from './error-table';

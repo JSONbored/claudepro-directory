@@ -4,12 +4,12 @@
  */
 
 import { z } from 'zod';
+import { positiveInt } from '@/lib/schemas/primitives/base-numbers';
 import {
   nonEmptyString,
   optionalUrlString,
-  positiveInt,
   shortString,
-} from '@/lib/schemas/primitives';
+} from '@/lib/schemas/primitives/base-strings';
 
 /**
  * Next.js 15 compatible page props - EXACTLY matches Next.js generated types

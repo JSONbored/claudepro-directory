@@ -16,7 +16,7 @@ import { useId, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import type { GuidesSidebarProps } from '@/lib/schemas/component.schema';
+import type { GuidesSidebarProps } from '@/lib/schemas';
 
 const categoryInfo = {
   'use-cases': {

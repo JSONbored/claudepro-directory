@@ -2,12 +2,11 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
-import { sanitizeApiError } from '@/lib/error-sanitizer';
 import { logger } from '@/lib/logger';
 import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
 import { contentCache } from '@/lib/redis';
-import { createRequestId } from '@/lib/schemas/branded-types.schema';
-import { apiSchemas, ValidationError } from '@/lib/validation';
+import { createRequestId } from '@/lib/schemas';
+import { apiSchemas, sanitizeApiError, ValidationError } from '@/lib/security';
 
 export const runtime = 'nodejs';
 export const revalidate = 14400; // 4 hours

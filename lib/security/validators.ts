@@ -1,56 +1,14 @@
 /**
- * Production-grade input validation schemas with strict regex patterns
- * Designed for security-first validation against hostile input
+ * Input Validators
+ * Production-grade input validation schemas with strict security patterns
+ * Part of unified lib/security/ module
  */
 
 import { z } from 'zod';
+import { VALIDATION_PATTERNS } from './patterns';
 
-/**
- * Security-focused regex patterns for strict validation
- */
-export const VALIDATION_PATTERNS = {
-  // Alphanumeric with safe special characters only
-  SAFE_STRING: /^[a-zA-Z0-9\s\-_.,!?()[\]{}'"]+$/,
-
-  // Strict slug format (URL-safe)
-  SLUG: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-
-  // Content type validation (exact match)
-  CONTENT_TYPE: /^(agents|mcp|rules|commands|hooks)\.json$/,
-
-  // File extensions (security-focused)
-  SAFE_FILE_EXT: /^[a-zA-Z0-9_-]+\.(json|md|txt|yaml|yml)$/i,
-
-  // Version strings (semantic versioning)
-  VERSION:
-    /^v?(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*))?(?:\+([a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*))?$/,
-
-  // UUID format
-  UUID: /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
-
-  // Email (strict RFC 5322 subset)
-  EMAIL:
-    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
-
-  // URL (strict HTTP/HTTPS only)
-  URL: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
-
-  // GitHub URL specifically
-  GITHUB_URL: /^https:\/\/github\.com\/[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+(?:\/.*)?$/,
-
-  // IP address (IPv4 and IPv6)
-  IP_ADDRESS:
-    /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/,
-
-  // Safe search query (no SQL injection patterns)
-  SEARCH_QUERY: /^[a-zA-Z0-9\s\-_.,!?()[\]{}'"]*$/,
-
-  // Cache keys (Redis-safe)
-  CACHE_KEY: /^[a-zA-Z0-9:_-]{1,250}$/,
-
-  // Auth tokens (base64 format)
-  AUTH_TOKEN: /^[A-Za-z0-9+/=]{40,2048}$/,
-} as const;
+// Re-export patterns for backward compatibility
+export { VALIDATION_PATTERNS };
 
 /**
  * Custom Zod transformations for secure data handling
