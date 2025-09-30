@@ -1,16 +1,15 @@
 'use client';
 
 import { ArrowRight, Filter, Hash, Search, User, X } from 'lucide-react';
-import { useCallback, useEffect, useId, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { ContentFilterOptions, FloatingSearchSidebarProps } from '@/lib/schemas';
+import { useLocalSearch } from '@/hooks/use-search';
+import type { FloatingSearchSidebarProps } from '@/lib/schemas';
 import { getDisplayTitle } from '@/lib/utils';
-
-// FloatingSearchSidebarProps and FilterOptions are now imported from component.schema.ts
 
 export function FloatingSearchSidebar({
   isOpen,
@@ -19,7 +18,6 @@ export function FloatingSearchSidebar({
   onItemSelect,
   placeholder = 'Search content...',
 }: FloatingSearchSidebarProps) {
-  const [query, setQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedAuthor, setSelectedAuthor] = useState<string>('');
@@ -28,57 +26,22 @@ export function FloatingSearchSidebar({
   // Generate unique ID for the search input
   const searchInputId = useId();
 
-  // Extract filter options from items
-  const filterOptions: ContentFilterOptions = useMemo(() => {
-    const categories = [...new Set(items.map((item) => item.category).filter(Boolean))];
-    const tags = [...new Set(items.flatMap((item) => item.tags || []))];
-    const authors = [...new Set(items.map((item) => item.author).filter(Boolean))];
+  // Use consolidated search hook
+  const { query, filters, searchResults, filterOptions, handleSearch, handleFiltersChange } =
+    // biome-ignore lint/suspicious/noExplicitAny: Generic constraint too complex for FloatingSearchSidebarProps union
+    useLocalSearch(items as any);
 
-    return {
-      categories: categories.sort(),
-      tags: tags.sort(),
-      authors: authors.sort(),
-    };
-  }, [items]);
+  // Sync local filter state with hook
+  useEffect(() => {
+    const newFilters = { ...filters };
+    if (selectedCategory) newFilters.category = selectedCategory;
+    if (selectedAuthor) newFilters.author = selectedAuthor;
+    if (selectedTags.length > 0) newFilters.tags = selectedTags;
 
-  // Pre-computed search index for optimal performance
-  const searchIndex = useMemo(() => {
-    return items.map((item) => ({
-      item,
-      searchText: [
-        item.name || '',
-        item.description || '',
-        ...(item.tags || []),
-        item.category || '',
-        item.author || '',
-      ]
-        .join(' ')
-        .toLowerCase(),
-      tagsSet: new Set(item.tags || []),
-    }));
-  }, [items]);
+    handleFiltersChange(newFilters);
+  }, [selectedCategory, selectedAuthor, selectedTags, filters, handleFiltersChange]);
 
-  // Filter and search items - optimized with pre-computed index
-  const filteredItems = useMemo(() => {
-    return searchIndex
-      .filter(({ item, searchText, tagsSet }) => {
-        // Text search - single string comparison instead of multiple
-        const matchesSearch = !query || searchText.includes(query.toLowerCase());
-
-        // Category filter
-        const matchesCategory = !selectedCategory || item.category === selectedCategory;
-
-        // Author filter
-        const matchesAuthor = !selectedAuthor || item.author === selectedAuthor;
-
-        // Tags filter - using Set for O(1) lookups
-        const matchesTags =
-          selectedTags.length === 0 || selectedTags.every((tag) => tagsSet.has(tag));
-
-        return matchesSearch && matchesCategory && matchesAuthor && matchesTags;
-      })
-      .map(({ item }) => item);
-  }, [searchIndex, query, selectedCategory, selectedAuthor, selectedTags]);
+  const filteredItems = searchResults as (typeof items)[number][];
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -103,11 +66,11 @@ export function FloatingSearchSidebar({
 
   // Clear all filters
   const clearFilters = useCallback(() => {
-    setQuery('');
+    handleSearch('');
     setSelectedTags([]);
     setSelectedCategory('');
     setSelectedAuthor('');
-  }, []);
+  }, [handleSearch]);
 
   // Handle tag selection
   const toggleTag = useCallback((tag: string) => {
@@ -165,7 +128,7 @@ export function FloatingSearchSidebar({
                   id={searchInputId}
                   name="floatingSearchInput"
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => handleSearch(e.target.value)}
                   placeholder={placeholder}
                   className="pl-10"
                   autoFocus

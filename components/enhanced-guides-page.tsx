@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { createSearchIndex, performLocalSearch } from '@/hooks/use-search';
 import type { GuideItemWithCategory } from '@/lib/components/guide-page-factory';
 import type { EnhancedGuidesPageProps } from '@/lib/schemas';
 
@@ -83,61 +84,51 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
 
   const totalGuides = Object.values(guides).reduce((acc, cat) => acc + cat.length, 0);
 
-  // Pre-computed search index for optimal performance
-  const searchIndex = useMemo(() => {
-    const index: Record<string, Array<{ guide: GuideItemWithCategory; searchText: string }>> = {};
+  // Flatten guides for search, then re-group by category
+  const allGuides = useMemo(() => Object.values(guides).flat(), [guides]);
 
-    Object.entries(guides).forEach(([category, guideList]) => {
-      index[category] = guideList.map((guide) => ({
-        guide,
-        searchText: [guide.title, guide.description].join(' ').toLowerCase(),
-      }));
-    });
+  // Create search index once
+  const searchIndex = useMemo(
+    () => createSearchIndex<GuideItemWithCategory>(allGuides),
+    [allGuides]
+  );
 
-    return index;
-  }, [guides]);
-
-  // Filter and search guides - optimized with pre-computed search index
+  // Filter and search guides - using consolidated search logic
   const filteredGuides = useMemo(() => {
-    let result: Record<string, GuideItemWithCategory[]> = {};
-
-    // Apply category filter
-    if (selectedCategory !== 'all') {
-      result = { [selectedCategory]: guides[selectedCategory] || [] };
-    } else {
-      result = { ...guides };
-    }
-
-    // Apply search filter using pre-computed index
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      Object.keys(result).forEach((category) => {
-        const categoryIndex = searchIndex[category] || [];
-        result[category] = categoryIndex
-          .filter(({ searchText }) => searchText.includes(query))
-          .map(({ guide }) => guide);
-      });
-    }
+    // Perform search
+    const searchResults = performLocalSearch<GuideItemWithCategory>(
+      searchIndex,
+      searchQuery,
+      selectedCategory !== 'all' ? { category: selectedCategory } : undefined
+    );
 
     // Apply sorting
-    Object.keys(result).forEach((category) => {
-      result[category] = [...(result[category] || [])].sort((a, b) => {
-        switch (sortBy) {
-          case 'title':
-            return a.title.localeCompare(b.title);
-          case 'category':
-            return a.category.localeCompare(b.category);
-          case 'date':
-            if (!(a.dateUpdated && b.dateUpdated)) return 0;
-            return new Date(b.dateUpdated).getTime() - new Date(a.dateUpdated).getTime();
-          default:
-            return 0;
-        }
-      });
+    const sorted = [...searchResults].sort((a: GuideItemWithCategory, b: GuideItemWithCategory) => {
+      switch (sortBy) {
+        case 'title':
+          return a.title.localeCompare(b.title);
+        case 'category':
+          return a.category.localeCompare(b.category);
+        case 'date':
+          if (!(a.dateUpdated && b.dateUpdated)) return 0;
+          return new Date(b.dateUpdated).getTime() - new Date(a.dateUpdated).getTime();
+        default:
+          return 0;
+      }
+    });
+
+    // Re-group by category
+    const result: Record<string, GuideItemWithCategory[]> = {};
+    sorted.forEach((guide: GuideItemWithCategory) => {
+      const cat = guide.category;
+      if (!result[cat]) {
+        result[cat] = [];
+      }
+      result[cat]?.push(guide);
     });
 
     return result;
-  }, [guides, searchIndex, searchQuery, selectedCategory, sortBy]);
+  }, [searchIndex, searchQuery, selectedCategory, sortBy]);
 
   const filteredTotalGuides = Object.values(filteredGuides).reduce(
     (acc, cat) => acc + cat.length,

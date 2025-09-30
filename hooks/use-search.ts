@@ -115,6 +115,146 @@ function getDateThreshold(now: Date, dateRange: string): Date {
 // Export getDateThreshold for future date filtering features
 export { getDateThreshold };
 
+/**
+ * Create optimized search index for client-side searching
+ * Pre-computes searchable text and tag sets for O(1) lookups
+ *
+ * @param items - Array of items to index
+ * @returns Array of indexed items with pre-computed search fields
+ */
+export function createSearchIndex<
+  T extends {
+    title?: string;
+    name?: string;
+    description?: string;
+    tags?: readonly string[] | string[];
+    category?: string;
+    author?: string;
+    slug: string;
+  },
+>(items: readonly T[] | T[]) {
+  return [...items].map((item) => ({
+    item,
+    searchText: [
+      item.title || item.name || '',
+      item.description || '',
+      ...(item.tags || []),
+      item.category || '',
+      item.author || '',
+    ]
+      .join(' ')
+      .toLowerCase(),
+    tagsSet: new Set(item.tags || []),
+  }));
+}
+
+/**
+ * Perform local search without Redis caching
+ * Optimized for small to medium datasets (< 1000 items)
+ *
+ * @param searchIndex - Pre-computed search index
+ * @param query - Search query string
+ * @param filters - Optional filters to apply
+ * @returns Filtered array of items
+ */
+export function performLocalSearch<
+  T extends {
+    category?: string;
+    author?: string;
+    tags?: readonly string[] | string[];
+    slug: string;
+  },
+>(
+  searchIndex: Array<{ item: T; searchText: string; tagsSet: Set<string> }>,
+  query: string,
+  filters?: Partial<FilterState>
+): T[] {
+  return searchIndex
+    .filter(({ item, searchText, tagsSet }) => {
+      // Text search
+      const matchesQuery = !query.trim() || searchText.includes(query.toLowerCase());
+
+      // Category filter
+      const matchesCategory = !filters?.category || item.category === filters.category;
+
+      // Author filter
+      const matchesAuthor = !filters?.author || item.author === filters.author;
+
+      // Tags filter - using Set for O(1) lookups
+      const matchesTags = !filters?.tags?.length || filters.tags.every((tag) => tagsSet.has(tag));
+
+      return matchesQuery && matchesCategory && matchesAuthor && matchesTags;
+    })
+    .map(({ item }) => item);
+}
+
+/**
+ * Simplified local search hook for components that don't need Redis caching
+ * Perfect for FloatingSearchSidebar, ContentSearchClient, EnhancedGuidesPage
+ *
+ * @param items - Array of items to search
+ * @returns Search state and handlers
+ */
+export function useLocalSearch<
+  T extends {
+    title?: string;
+    name?: string;
+    description?: string;
+    tags?: readonly string[] | string[];
+    category?: string;
+    author?: string;
+    slug: string;
+  },
+>(items: readonly T[] | T[]) {
+  const [query, setQuery] = useState('');
+  const [filters, setFilters] = useState<FilterState>({
+    sort: 'trending',
+  });
+
+  // Create search index once
+  const searchIndex = useMemo(() => createSearchIndex(items), [items]);
+
+  // Compute filter options
+  const filterOptions = useMemo(() => {
+    const compatibleData = [...items].map((item) => ({
+      category: item.category || '',
+      author: item.author || '',
+      tags: [...(item.tags || [])] as string[],
+    }));
+    return extractFilterOptions(compatibleData);
+  }, [items]);
+
+  // Perform local search
+  const searchResults = useMemo(() => {
+    return performLocalSearch(searchIndex, query, filters);
+  }, [searchIndex, query, filters]);
+
+  // Stable callbacks
+  const handleSearch = useCallback((newQuery: string) => {
+    setQuery(newQuery);
+  }, []);
+
+  const handleFiltersChange = useCallback((newFilters: FilterState) => {
+    setFilters(newFilters);
+  }, []);
+
+  const clearSearch = useCallback(() => {
+    setQuery('');
+    setFilters({ sort: 'trending' });
+  }, []);
+
+  return {
+    query,
+    filters,
+    searchResults,
+    filterOptions,
+    handleSearch,
+    handleFiltersChange,
+    clearSearch,
+    isSearching: query.trim().length > 0 || hasActiveFilters(filters),
+  };
+}
+
 export function useSearch({ data, searchOptions }: UseSearchProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<FilterState>({
