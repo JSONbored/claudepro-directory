@@ -7,6 +7,9 @@ import { isDevelopment, isProduction } from '@/lib/env-client';
 import { logger } from '@/lib/logger';
 import { rateLimiters } from '@/lib/rate-limiter';
 import { env, securityConfig } from '@/lib/schemas';
+
+// Force Node.js runtime for middleware (Redis compression requires node:zlib)
+export const runtime = 'nodejs';
 import {
   type ApiEndpointType,
   type RequestValidation,
