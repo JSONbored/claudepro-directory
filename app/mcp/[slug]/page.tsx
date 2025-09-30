@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { MCPStructuredData } from '@/components/structured-data/mcp-schema';
+import { UnifiedStructuredData } from '@/components/structured-data/unified-structured-data';
 import { UnifiedDetailPage } from '@/components/unified-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { getMcpBySlug, getMcpFullContent, mcp } from '@/generated/content';
@@ -154,7 +154,7 @@ export default async function MCPPage({ params }: PageProps) {
   return (
     <>
       <ViewTracker category="mcp" slug={slug} />
-      <MCPStructuredData item={mcpServer} />
+      <UnifiedStructuredData item={{ ...mcpServer, category: 'mcp' as const }} />
       <UnifiedDetailPage item={transformedMCP} relatedItems={transformedRelatedMCPs} />
     </>
   );

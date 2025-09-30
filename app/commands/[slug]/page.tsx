@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { CommandStructuredData } from '@/components/structured-data/command-schema';
+import { UnifiedStructuredData } from '@/components/structured-data/unified-structured-data';
 import { UnifiedDetailPage } from '@/components/unified-detail-page';
 import { ViewTracker } from '@/components/view-tracker';
 import { commands, getCommandBySlug, getCommandFullContent } from '@/generated/content';
@@ -152,7 +152,7 @@ export default async function CommandPage({ params }: PageProps) {
   return (
     <>
       <ViewTracker category="commands" slug={slug} />
-      <CommandStructuredData item={command} />
+      <UnifiedStructuredData item={{ ...command, category: 'commands' as const }} />
       <UnifiedDetailPage item={command} relatedItems={relatedCommands} />
     </>
   );
