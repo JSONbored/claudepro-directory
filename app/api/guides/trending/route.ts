@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { CACHE_HEADERS, REVALIDATE_TIMES } from '@/lib/constants';
+import { CACHE_HEADERS } from '@/lib/constants';
 import { handleApiError } from '@/lib/error-handler';
 import { logger } from '@/lib/logger';
 import { statsRedis } from '@/lib/redis';
@@ -8,7 +8,7 @@ import { errorInputSchema } from '@/lib/schemas/error.schema';
 import { viewCountService } from '@/lib/view-count.service';
 
 export const runtime = 'nodejs';
-export const revalidate = REVALIDATE_TIMES.trending;
+export const revalidate = 3600; // 1 hour (from REVALIDATE_TIMES.trending)
 
 // Query parameters schema
 const querySchema = z.object({
