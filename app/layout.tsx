@@ -5,7 +5,7 @@ import { connection } from 'next/server';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { Toaster } from 'sonner';
-import { Navigation } from '@/components/navigation';
+import { Navigation } from '@/components/layout/navigation';
 import { ErrorBoundary } from '@/components/shared/error-boundary';
 import { PerformanceOptimizer } from '@/components/shared/performance-optimizer';
 import { StructuredData } from '@/components/shared/structured-data';

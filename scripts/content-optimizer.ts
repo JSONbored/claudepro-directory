@@ -6,6 +6,7 @@
 
 import { readdirSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
+import { CONTENT_PATHS } from '../lib/constants.js';
 import { logger } from '../lib/logger.js';
 
 // =============================================================================
@@ -135,7 +136,7 @@ export class ContentOptimizer {
    */
   async optimizeAllContent(): Promise<OptimizationResult[]> {
     const results: OptimizationResult[] = [];
-    const guidesDir = join(this.baseDir, 'content/guides');
+    const guidesDir = join(this.baseDir, CONTENT_PATHS.guides);
 
     // Get all MDX files in content/guides/
     const getAllMdxFiles = (dir: string): string[] => {

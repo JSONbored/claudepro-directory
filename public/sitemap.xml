@@ -7,7 +7,7 @@
     <priority>1</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/agents</loc>
+    <loc>https://claudepro.directory/hooks</loc>
     <lastmod>2025-10-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -19,19 +19,19 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/rules</loc>
-    <lastmod>2025-10-01</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://claudepro.directory/commands</loc>
     <lastmod>2025-10-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/hooks</loc>
+    <loc>https://claudepro.directory/rules</loc>
+    <lastmod>2025-10-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/agents</loc>
     <lastmod>2025-10-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>

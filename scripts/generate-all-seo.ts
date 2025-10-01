@@ -10,6 +10,7 @@ import { execSync } from 'child_process';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { CONTENT_PATHS } from '@/lib/constants';
 import { urls } from '@/lib/get-base-url';
 import { logger } from '@/lib/logger';
 
@@ -48,7 +49,7 @@ async function generateAllSEO(): Promise<void> {
   await runCommand('npm run generate:sitemap', 'Generating sitemap');
 
   // Step 3: Count guide content files
-  const seoDir = path.join(ROOT_DIR, 'content/guides');
+  const seoDir = path.join(ROOT_DIR, CONTENT_PATHS.guides);
   const categories = ['use-cases', 'tutorials', 'workflows', 'comparisons', 'troubleshooting'];
   let totalPages = 0;
 

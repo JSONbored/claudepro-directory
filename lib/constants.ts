@@ -339,6 +339,18 @@ export const SECURITY_CONFIG = {
 } as const;
 
 /**
+ * Time Constants
+ * Common time conversions for consistency across the codebase
+ */
+export const TIME_CONSTANTS = {
+  SECOND: 1000,
+  MINUTE: 60 * 1000,
+  HOUR: 60 * 60 * 1000,
+  DAY: 24 * 60 * 60 * 1000,
+  WEEK: 7 * 24 * 60 * 60 * 1000,
+} as const;
+
+/**
  * Cache Configuration
  */
 export const CACHE_CONFIG = {
@@ -357,4 +369,48 @@ export const CACHE_CONFIG = {
     api: 'api:',
     related: 'related:',
   },
+} as const;
+
+/**
+ * Cache Headers
+ * Standardized cache-control headers for different content types
+ */
+export const CACHE_HEADERS = {
+  LONG: 'public, max-age=31536000, immutable', // 1 year for immutable assets
+  MEDIUM: 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400', // 1 hour
+  SHORT: 'public, max-age=60, s-maxage=60, stale-while-revalidate=300', // 1 minute
+  STREAMING: 'public, max-age=0, must-revalidate', // For streaming/dynamic content
+  NO_CACHE: 'no-cache, no-store, must-revalidate', // No caching
+} as const;
+
+/**
+ * Revalidate Times (in seconds)
+ * ISR revalidation intervals for Next.js pages
+ */
+export const REVALIDATE_TIMES = {
+  homepage: 3600, // 1 hour
+  content: 14400, // 4 hours
+  static: 86400, // 24 hours
+  guides: 604800, // 1 week
+  trending: 3600, // 1 hour
+  api: 300, // 5 minutes
+} as const;
+
+/**
+ * OpenGraph Image Configuration
+ * Standard image dimensions for social media sharing
+ */
+export const OG_IMAGE_SIZE = {
+  width: 1200,
+  height: 630,
+} as const;
+
+/**
+ * Search Configuration
+ * Settings for search functionality
+ */
+export const SEARCH_CONFIG = {
+  debounceMs: 150, // Debounce delay for search input
+  threshold: 0.3, // Fuzzy search threshold (0-1, lower = more strict)
+  maxResults: 50, // Maximum search results to display
 } as const;

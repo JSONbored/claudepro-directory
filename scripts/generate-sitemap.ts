@@ -6,7 +6,7 @@ import { commandsMetadata } from '../generated/commands-metadata.js';
 import { hooksMetadata } from '../generated/hooks-metadata.js';
 import { mcpMetadata } from '../generated/mcp-metadata.js';
 import { rulesMetadata } from '../generated/rules-metadata.js';
-import { APP_CONFIG } from '../lib/constants';
+import { APP_CONFIG, CONTENT_PATHS, MAIN_CONTENT_CATEGORIES } from '../lib/constants';
 import { logger } from '../lib/logger.js';
 import type { ContentItem } from '../lib/schemas/content';
 
@@ -35,7 +35,7 @@ async function generateSitemap(): Promise<string> {
   });
 
   // Category pages
-  const categories = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
+  const categories = [...MAIN_CONTENT_CATEGORIES];
   categories.forEach((category) => {
     urls.push({
       loc: `${baseUrl || ''}/${category}`,
@@ -65,9 +65,9 @@ async function generateSitemap(): Promise<string> {
     'workflows',
     'comparisons',
     'troubleshooting',
-  ];
+  ] as const;
   seoCategories.forEach((category) => {
-    const seoDir = join('content/guides', category);
+    const seoDir = join(CONTENT_PATHS.guides, category);
     if (existsSync(seoDir)) {
       try {
         const files = readdirSync(seoDir).filter((f) => f.endsWith('.mdx'));

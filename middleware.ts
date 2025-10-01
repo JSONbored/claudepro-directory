@@ -236,6 +236,9 @@ async function applyEndpointRateLimit(
     // All configurations endpoint - heavy dataset (moderate restrictions)
     '/api/all-configurations.json': rateLimiters.heavyApi, // 50 requests per 15 minutes
 
+    // Trending guides endpoint - moderate usage (balanced restrictions)
+    '/api/guides/trending': rateLimiters.heavyApi, // 50 requests per 15 minutes
+
     // Individual content type APIs - standard usage (generous)
     '/api/agents.json': rateLimiters.api, // 1000 requests per hour
     '/api/mcp.json': rateLimiters.api,

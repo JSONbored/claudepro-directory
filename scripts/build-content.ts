@@ -4,6 +4,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { z } from 'zod';
+import { MAIN_CONTENT_CATEGORIES } from '../lib/constants.js';
 import { logger } from '../lib/logger.js';
 // Content metadata schema import removed - using direct object destructuring
 import { onBuildComplete } from '../lib/related-content/cache-invalidation.js';
@@ -38,7 +39,7 @@ const CACHE_DIR = path.join(ROOT_DIR, '.next', 'cache', 'build-content');
 const buildConfig: BuildConfig = buildConfigSchema.parse({
   contentDir: CONTENT_DIR,
   generatedDir: GENERATED_DIR,
-  contentTypes: ['agents', 'mcp', 'rules', 'commands', 'hooks'],
+  contentTypes: [...MAIN_CONTENT_CATEGORIES],
   generateTypeScript: true,
   generateIndex: true,
   invalidateCaches: true,

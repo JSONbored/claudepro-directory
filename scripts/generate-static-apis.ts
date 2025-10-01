@@ -17,7 +17,7 @@ import { commandsMetadata } from '../generated/commands-metadata.js';
 import { hooksMetadata } from '../generated/hooks-metadata.js';
 import { mcpMetadata } from '../generated/mcp-metadata.js';
 import { rulesMetadata } from '../generated/rules-metadata.js';
-import { APP_CONFIG } from '../lib/constants';
+import { APP_CONFIG, MAIN_CONTENT_CATEGORIES } from '../lib/constants';
 import { logger } from '../lib/logger.js';
 import { buildConfig, env } from '../lib/schemas/env.schema';
 import { nonNegativeInt, positiveInt } from '../lib/schemas/primitives/base-numbers';
@@ -371,7 +371,7 @@ async function generateSearchIndexes() {
   ];
 
   // Generate category-specific indexes
-  const categories: ContentCategory[] = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
+  const categories: ContentCategory[] = [...MAIN_CONTENT_CATEGORIES];
 
   for (const category of categories) {
     const categoryItems = allSearchableItems.filter((item) => item.category === category);
