@@ -65,7 +65,7 @@ export function CopyableHeading({
 // Schema for validating text content extraction
 const textContentSchema = z.string().min(0);
 
-// Client component for copyable code blocks
+// Client component for copyable code blocks (MDX/rehype-pretty-code)
 export function CopyableCodeBlock({ children, className, ...props }: MdxElementProps) {
   const { copied, copy } = useCopyToClipboard({
     context: {
@@ -97,23 +97,21 @@ export function CopyableCodeBlock({ children, className, ...props }: MdxElementP
   };
 
   return (
-    <div className="relative group my-6">
-      <pre
-        {...props}
-        className={`bg-zinc-900 border border-zinc-800 rounded-lg ${UI_CLASSES.P_4} overflow-x-auto text-sm font-mono text-zinc-300 ${className || ''}`}
-      >
+    <div className={UI_CLASSES.CODE_BLOCK_GROUP_WRAPPER}>
+      <pre {...props} className={`${UI_CLASSES.CODE_BLOCK_PRE} ${className || ''}`}>
         {children}
       </pre>
       <button
         type="button"
         onClick={handleCopy}
-        className={`absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity ${UI_CLASSES.P_2} hover:bg-zinc-800 rounded`}
+        className={UI_CLASSES.CODE_BLOCK_COPY_BUTTON_HEADER_FLOATING}
+        style={{ minWidth: '48px', minHeight: '48px' }}
         title="Copy code"
       >
         {copied ? (
           <CheckCircle className="h-4 w-4 text-green-500" />
         ) : (
-          <Copy className="h-4 w-4 text-zinc-400" />
+          <Copy className={`h-4 w-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`} />
         )}
       </button>
     </div>

@@ -19,14 +19,24 @@ import { Button } from '@/components/ui/button';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { ArrowLeft, Copy } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
-import type { ContentTypeConfig } from '@/lib/types/content-type-config';
 import { UI_CLASSES } from '@/lib/ui-constants';
+
+/**
+ * Serializable action data for client component
+ */
+export interface SerializableAction {
+  label: string;
+  type: string; // 'deploy', 'copy', 'view', etc.
+}
 
 export interface DetailHeaderActionsProps {
   item: UnifiedContentItem;
-  config: ContentTypeConfig;
+  typeName: string;
+  category: string;
   hasContent: boolean;
   displayTitle: string;
+  primaryAction: SerializableAction;
+  secondaryActions?: SerializableAction[];
   onCopyContent?: (() => Promise<void>) | undefined;
 }
 
@@ -40,16 +50,19 @@ export interface DetailHeaderActionsProps {
  */
 export function DetailHeaderActions({
   item,
-  config,
+  typeName,
+  category,
   hasContent,
   displayTitle,
+  primaryAction,
+  secondaryActions,
   onCopyContent,
 }: DetailHeaderActionsProps) {
   const router = useRouter();
   const { copied, copy } = useCopyToClipboard({
     onSuccess: () => {
       toast.success('Copied!', {
-        description: `${config.typeName} content has been copied to your clipboard.`,
+        description: `${typeName} content has been copied to your clipboard.`,
       });
     },
     onError: () => {
@@ -82,6 +95,14 @@ export function DetailHeaderActions({
     await copy(contentToCopy);
   };
 
+  // Handle action clicks based on type
+  const handleActionClick = (action: SerializableAction) => {
+    // Generic toast for all action types
+    toast.success(`${action.label}`, {
+      description: `Copy the ${typeName.toLowerCase()} content and follow the installation instructions.`,
+    });
+  };
+
   return (
     <>
       {/* Back navigation */}
@@ -103,10 +124,10 @@ export function DetailHeaderActions({
         <div className={UI_CLASSES.FLEX_1}>
           <div className={`flex items-center ${UI_CLASSES.GAP_3} ${UI_CLASSES.MB_4}`}>
             <Badge variant="secondary" className={`${UI_CLASSES.TEXT_XS} font-medium`}>
-              {config.typeName}
+              {typeName}
             </Badge>
             <Badge variant="outline" className={UI_CLASSES.TEXT_XS}>
-              {item.category}
+              {category}
             </Badge>
           </div>
 
@@ -123,9 +144,8 @@ export function DetailHeaderActions({
 
         {/* Action buttons */}
         <div className={`${UI_CLASSES.FLEX_COL} sm:flex-row ${UI_CLASSES.GAP_3}`}>
-          <Button onClick={() => config.primaryAction.handler(item)} className={UI_CLASSES.MIN_W_0}>
-            {config.primaryAction.icon}
-            {config.primaryAction.label}
+          <Button onClick={() => handleActionClick(primaryAction)} className={UI_CLASSES.MIN_W_0}>
+            {primaryAction.label}
           </Button>
 
           {hasContent && (
@@ -144,14 +164,13 @@ export function DetailHeaderActions({
             </Button>
           )}
 
-          {config.secondaryActions?.map((action) => (
+          {secondaryActions?.map((action) => (
             <Button
               key={action.label}
               variant="outline"
-              onClick={() => action.handler(item)}
+              onClick={() => handleActionClick(action)}
               className={UI_CLASSES.MIN_W_0}
             >
-              {action.icon}
               {action.label}
             </Button>
           ))}

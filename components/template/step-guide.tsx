@@ -1,21 +1,36 @@
-'use client';
-
 /**
- * StepByStepGuide - Tutorial step component with animated progression
- * Used in 24+ MDX files across the codebase
+ * StepByStepGuide - Tutorial step component with animated progression (SERVER COMPONENT)
+ *
+ * PRODUCTION-GRADE: Server-side Shiki syntax highlighting
+ * - Used in 24+ MDX files across the codebase
+ * - Zero client-side JavaScript for syntax highlighting
+ * - Secure: Uses trusted Shiki renderer
+ * - Performant: Pre-rendered on server
  */
 
 import { Callout } from '@/components/content/callout';
+import { ProductionCodeBlock } from '@/components/shared/production-code-block';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Zap } from '@/lib/icons';
 import { type StepByStepGuideProps, stepGuidePropsSchema } from '@/lib/schemas/shared.schema';
+import { highlightCode } from '@/lib/syntax-highlighting';
 import { UI_CLASSES } from '@/lib/ui-constants';
 
-export function StepByStepGuide(props: StepByStepGuideProps) {
+export async function StepByStepGuide(props: StepByStepGuideProps) {
   const validated = stepGuidePropsSchema.parse(props);
   const { steps, title, description, totalTime } = validated;
   const validSteps = steps;
+
+  // Pre-render all code blocks with Shiki on the server
+  const highlightedSteps = await Promise.all(
+    validSteps.map(async (step) => {
+      if (!step.code) return { ...step, highlightedHtml: null };
+
+      const html = await highlightCode(step.code, 'bash');
+      return { ...step, highlightedHtml: html };
+    })
+  );
 
   return (
     <section itemScope itemType="https://schema.org/HowTo" className="my-8">
@@ -39,8 +54,8 @@ export function StepByStepGuide(props: StepByStepGuideProps) {
       </div>
 
       <div className="space-y-8">
-        {validSteps.map((step, index) => {
-          const isLastStep = index === validSteps.length - 1;
+        {highlightedSteps.map((step, index) => {
+          const isLastStep = index === highlightedSteps.length - 1;
           return (
             <div key={step.title} className={UI_CLASSES.RELATIVE}>
               {/* Connecting line */}
@@ -90,29 +105,15 @@ export function StepByStepGuide(props: StepByStepGuideProps) {
                     {step.content || step.description}
                   </div>
 
-                  {step.code && (
+                  {step.highlightedHtml && (
                     <div className={UI_CLASSES.MB_6}>
-                      <div
-                        className={`rounded-xl ${UI_CLASSES.OVERFLOW_HIDDEN} shadow-xl bg-black border border-accent/20`}
-                      >
-                        <div
-                          className={`bg-zinc-900 px-4 ${UI_CLASSES.PY_2} ${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} border-b border-zinc-800`}
-                        >
-                          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                            <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
-                            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
-                            <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
-                          </div>
-                          <span className={`${UI_CLASSES.TEXT_XS} text-zinc-400 font-mono`}>
-                            step-{index + 1}.sh
-                          </span>
-                        </div>
-                        <pre
-                          className={`${UI_CLASSES.P_4} ${UI_CLASSES.OVERFLOW_X_AUTO} ${UI_CLASSES.TEXT_SM} font-mono text-zinc-300 leading-relaxed bg-black`}
-                        >
-                          <code>{step.code}</code>
-                        </pre>
-                      </div>
+                      <ProductionCodeBlock
+                        html={step.highlightedHtml}
+                        code={step.code!}
+                        language="bash"
+                        filename={`step-${index + 1}.sh`}
+                        maxLines={20}
+                      />
                     </div>
                   )}
 

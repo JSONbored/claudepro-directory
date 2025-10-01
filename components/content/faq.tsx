@@ -37,7 +37,7 @@ export function AIOptimizedFAQ(props: FAQProps) {
             key={faq.question}
             itemScope
             itemType="https://schema.org/Question"
-            className="border border-border/50 bg-card/30"
+            className="border border-border bg-code/50 backdrop-blur-sm"
           >
             <CardHeader>
               <CardTitle

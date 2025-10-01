@@ -682,6 +682,40 @@ export const UI_CLASSES = {
   WILL_CHANGE_SCROLL: 'will-change-scroll',
   WILL_CHANGE_CONTENTS: 'will-change-contents',
   WILL_CHANGE_TRANSFORM: 'will-change-transform',
+
+  /**
+   * Code Block Styles - Production-grade patterns
+   */
+  CODE_BLOCK_HEADER:
+    'flex items-center justify-between px-4 py-2 bg-code/30 border border-b-0 border-border rounded-t-lg backdrop-blur-sm',
+  CODE_BLOCK_PRE:
+    'overflow-x-auto text-sm leading-relaxed p-4 rounded-lg border border-border bg-code/50 backdrop-blur-sm',
+  CODE_BLOCK_FILENAME: 'text-sm font-mono text-muted-foreground',
+  CODE_BLOCK_LANGUAGE: 'text-xs font-mono text-muted-foreground uppercase',
+  CODE_BLOCK_COPY_BUTTON:
+    'flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-code/30',
+  CODE_BLOCK_COPY_BUTTON_FLOATING:
+    'absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-code/30 rounded-md',
+  CODE_BLOCK_COPY_BUTTON_HEADER_FLOATING:
+    'absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-code/30 rounded-md',
+  CODE_BLOCK_EXPAND_BUTTON:
+    'flex items-center justify-center gap-2 w-full py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors bg-code/50 backdrop-blur-sm border border-t-0 border-border/50 rounded-b-lg hover:bg-code/30',
+  CODE_BLOCK_TAB_CONTAINER: 'flex gap-2 overflow-x-auto scrollbar-hide border-b border-border/50',
+  CODE_BLOCK_TAB_ACTIVE: 'text-primary border-primary',
+  CODE_BLOCK_TAB_INACTIVE: 'text-muted-foreground border-transparent hover:text-foreground',
+  CODE_BLOCK_GROUP_WRAPPER: 'relative group my-6',
+
+  /**
+   * Code Block - Background Colors
+   */
+  BG_CODE_30: 'bg-code/30',
+  BG_CODE_50: 'bg-code/50',
+
+  /**
+   * Touch Targets (Mobile-optimized)
+   */
+  TOUCH_TARGET_48: 'min-w-[48px] min-h-[48px]',
+  TOUCH_TARGET_44: 'min-w-[44px] min-h-[44px]',
 } as const;
 
 /**

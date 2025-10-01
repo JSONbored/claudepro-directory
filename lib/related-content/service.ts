@@ -6,13 +6,17 @@
 import { z } from 'zod';
 import { CACHE_CONFIG } from '@/lib/constants';
 import { logger } from '@/lib/logger';
-import { unifiedContentItemSchema } from '@/lib/schemas/components/content-item.schema';
 import { isDevelopment } from '@/lib/schemas/env.schema';
+import {
+  type ContentIndex,
+  type ContentItem,
+  contentIndexSchema,
+} from '@/lib/schemas/related-content.schema';
 import { viewCountService } from '@/lib/view-count.service';
 
 // Clean, production Zod schemas
 
-// Schema for scored content items
+// Schema for scored content items (internal to service)
 const scoredItemSchema = z.object({
   item: z.object({
     slug: z.string(),
@@ -34,20 +38,6 @@ const scoredItemSchema = z.object({
 });
 
 type ScoredItem = z.infer<typeof scoredItemSchema>;
-
-const contentIndexSchema = z
-  .object({
-    items: z.array(unifiedContentItemSchema).max(10000).default([]),
-    generated: z.string().default(() => new Date().toISOString()),
-    version: z.string().default('1.0.0'),
-  })
-  .passthrough();
-
-// CONSOLIDATION: Extended schema for split index functionality
-// This supports both flat items array AND categorized structure
-const categorizedContentIndexSchema = contentIndexSchema.extend({
-  categories: z.record(z.string(), z.array(unifiedContentItemSchema)).optional(),
-});
 
 const relatedContentInputSchema = z.object({
   currentPath: z.string().default('/'),
@@ -114,9 +104,7 @@ const relatedContentViewEventSchema = z.object({
 });
 
 // Type exports
-export type ContentItem = z.infer<typeof unifiedContentItemSchema>;
-export type ContentIndex = z.infer<typeof contentIndexSchema>;
-export type CategorizedContentIndex = z.infer<typeof categorizedContentIndexSchema>;
+// Note: ContentItem, ContentIndex, and CategorizedContentIndex are now exported from @/lib/schemas/related-content.schema
 export type RelatedContentInput = z.infer<typeof relatedContentInputSchema>;
 export type RelatedContentItem = z.infer<typeof relatedContentItemSchema>;
 export type RelatedContentResponse = z.infer<typeof relatedContentResponseSchema>;
@@ -128,12 +116,8 @@ export type RelatedContentImpressionEvent = z.infer<typeof relatedContentImpress
 export type RelatedContentViewEvent = z.infer<typeof relatedContentViewEventSchema>;
 
 // Schema exports for validation
-export {
-  unifiedContentItemSchema,
-  contentIndexSchema,
-  relatedContentInputSchema,
-  relatedContentResponseSchema,
-};
+// Note: contentIndexSchema is now exported from @/lib/schemas/related-content.schema
+export { relatedContentInputSchema, relatedContentResponseSchema };
 
 // Simple in-memory cache
 let contentCache: ContentIndex | null = null;
@@ -270,7 +254,7 @@ class RelatedContentService {
       }
 
       // Tag matching (highest weight)
-      const tagMatches = (item.tags || []).filter((tag) =>
+      const tagMatches = (item.tags || []).filter((tag: string) =>
         config.currentTags.some(
           (currentTag) =>
             tag.toLowerCase().includes(currentTag.toLowerCase()) ||

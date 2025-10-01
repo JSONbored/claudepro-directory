@@ -36,16 +36,30 @@ export function DetailHeader({ displayTitle, item, config, onCopyContent }: Deta
       ('configuration' in item && (item as { configuration?: object }).configuration)
   );
 
+  // Extract serializable action data from config
+  const primaryAction = {
+    label: config.primaryAction.label,
+    type: 'deploy', // Generic type for all actions
+  };
+
+  const secondaryActions = config.secondaryActions?.map((action) => ({
+    label: action.label,
+    type: 'secondary',
+  }));
+
   return (
-    <div className={`${UI_CLASSES.BORDER_B} border-border/50 bg-card/30`}>
+    <div className={`${UI_CLASSES.BORDER_B} border-border bg-code/50 backdrop-blur-sm`}>
       <div className="container mx-auto px-4 py-8">
         {/* Client component for back button and actions */}
         <DetailHeaderActions
           item={item}
-          config={config}
+          typeName={config.typeName}
+          category={item.category}
           hasContent={hasContent}
           onCopyContent={onCopyContent}
           displayTitle={displayTitle}
+          primaryAction={primaryAction}
+          {...(secondaryActions && { secondaryActions })}
         />
       </div>
     </div>

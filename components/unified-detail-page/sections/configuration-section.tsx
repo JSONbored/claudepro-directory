@@ -1,32 +1,20 @@
-'use client';
-
 /**
- * ConfigurationSection - Multi-format configuration display section
+ * ConfigurationSection - Multi-format configuration display section (SERVER COMPONENT)
  *
- * REFACTORED: Removed lazy loading of CodeHighlight for better performance
- * - Direct import instead of lazy() reduces bundle complexity
- * - Removed Suspense boundary (no longer needed without lazy loading)
- * - Client component remains for copy button interactivity
- *
- * Consolidates configuration rendering from:
- * - unified-detail-page.tsx (renderConfiguration lines 274-304)
- * - custom-renderers.tsx (renderMCPConfiguration lines 30-149)
- * - custom-renderers.tsx (renderHookConfiguration lines 159-230)
+ * PRODUCTION-GRADE: Server-side Shiki syntax highlighting for all configurations
+ * - Zero client-side JavaScript for syntax highlighting
+ * - Consistent colored syntax across all formats
+ * - Secure: No manual HTML escaping, uses trusted Shiki renderer
+ * - Performant: Pre-rendered on server, cached
  *
  * Handles: JSON configs, multi-format MCP configs, hook configs
- *
- * @see components/unified-detail-page.tsx - Original implementation
- * @see lib/config/custom-renderers.tsx - Custom renderers
  */
 
-import { memo } from 'react';
-import { toast } from 'sonner';
-import { CodeHighlight } from '@/components/shared/code-highlight';
-import { Button } from '@/components/ui/button';
+import { ProductionCodeBlock } from '@/components/shared/production-code-block';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { Copy } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
+import { highlightCode } from '@/lib/syntax-highlighting';
 import { UI_CLASSES } from '@/lib/ui-constants';
 
 /**
@@ -36,38 +24,23 @@ export interface ConfigurationSectionProps {
   item: UnifiedContentItem;
   customRenderer?: ((item: UnifiedContentItem) => React.ReactElement | null) | undefined;
   format?: 'json' | 'multi' | 'hook';
+  preHighlightedConfigHtml?: string | undefined;
 }
 
 /**
- * ConfigurationSection Component
+ * ConfigurationSection - ASYNC SERVER COMPONENT
  *
- * Renders configuration with support for multiple formats:
- * - json: Simple JSON display (default, commands/agents/rules)
+ * Renders configuration with server-side Shiki syntax highlighting:
+ * - json: Simple JSON display (commands/agents/rules)
  * - multi: Multiple config sections (MCP: claudeDesktop, claudeCode, http, sse)
  * - hook: Hook-specific config (hookConfig + scriptContent)
  */
-export const ConfigurationSection = memo(function ConfigurationSection({
+export async function ConfigurationSection({
   item,
   customRenderer,
   format = 'json',
+  preHighlightedConfigHtml,
 }: ConfigurationSectionProps) {
-  const { copied, copy } = useCopyToClipboard({
-    onSuccess: () => {
-      toast.success('Copied!', {
-        description: 'Configuration has been copied to your clipboard.',
-      });
-    },
-    onError: () => {
-      toast.error('Copy failed', {
-        description: 'Unable to copy configuration to clipboard.',
-      });
-    },
-    context: {
-      component: 'configuration-section',
-      action: 'copy-config',
-    },
-  });
-
   // Use custom renderer if provided
   if (customRenderer) {
     return customRenderer(item);
@@ -76,15 +49,7 @@ export const ConfigurationSection = memo(function ConfigurationSection({
   // Check if configuration exists
   if (!('configuration' in item && item.configuration)) return null;
 
-  const handleCopyConfig = async (configSection?: unknown) => {
-    const contentToCopy = configSection
-      ? JSON.stringify(configSection, null, 2)
-      : JSON.stringify(item.configuration, null, 2);
-
-    await copy(contentToCopy);
-  };
-
-  // Multi-format configuration (MCP servers)
+  // Multi-format configuration (MCP servers) - SERVER-SIDE SHIKI
   if (format === 'multi') {
     const config = item.configuration as {
       claudeDesktop?: Record<string, unknown>;
@@ -92,6 +57,29 @@ export const ConfigurationSection = memo(function ConfigurationSection({
       http?: Record<string, unknown>;
       sse?: Record<string, unknown>;
     };
+
+    // Pre-render ALL configurations with Shiki on the server
+    const highlightedConfigs = await Promise.all(
+      Object.entries(config).map(async ([key, value]) => {
+        if (!value) return null;
+        const labels: Record<string, string> = {
+          claudeDesktop: 'Claude Desktop',
+          claudeCode: 'Claude Code',
+          http: 'HTTP Transport',
+          sse: 'SSE Transport',
+        };
+
+        const code = JSON.stringify(value, null, 2);
+        const html = await highlightCode(code, 'json');
+
+        return {
+          key,
+          html,
+          code,
+          filename: labels[key] || key,
+        };
+      })
+    );
 
     return (
       <Card data-section="configuration">
@@ -105,33 +93,17 @@ export const ConfigurationSection = memo(function ConfigurationSection({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {Object.entries(config).map(([key, value]) => {
-            if (!value) return null;
-            const labels: Record<string, string> = {
-              claudeDesktop: 'Claude Desktop',
-              claudeCode: 'Claude Code',
-              http: 'HTTP Transport',
-              sse: 'SSE Transport',
-            };
-
+          {highlightedConfigs.map((config) => {
+            if (!config) return null;
             return (
-              <div key={key}>
-                <div
-                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.MB_3}`}
-                >
-                  <h4 className={UI_CLASSES.FONT_MEDIUM}>{labels[key] || key}</h4>
-                  <Button size="sm" variant="outline" onClick={() => handleCopyConfig(value)}>
-                    <Copy className="h-4 w-4 mr-2" />
-                    {copied ? 'Copied!' : 'Copy'}
-                  </Button>
-                </div>
-                <div className={`max-h-[400px] ${UI_CLASSES.OVERFLOW_Y_AUTO} rounded-md border`}>
-                  <pre
-                    className={`${UI_CLASSES.P_4} ${UI_CLASSES.OVERFLOW_X_AUTO} ${UI_CLASSES.TEXT_SM} font-mono bg-black text-green-400 rounded-md`}
-                  >
-                    <code>{JSON.stringify(value, null, 2)}</code>
-                  </pre>
-                </div>
+              <div key={config.key}>
+                <ProductionCodeBlock
+                  html={config.html}
+                  code={config.code}
+                  language="json"
+                  filename={config.filename}
+                  maxLines={25}
+                />
               </div>
             );
           })}
@@ -140,59 +112,58 @@ export const ConfigurationSection = memo(function ConfigurationSection({
     );
   }
 
-  // Hook configuration format
+  // Hook configuration format - SERVER-SIDE SHIKI
   if (format === 'hook') {
     const config = item.configuration as {
       hookConfig?: { hooks?: Record<string, unknown> };
       scriptContent?: string;
     };
 
+    // Pre-render hook config and script with Shiki
+    const [highlightedHookConfig, highlightedScript] = await Promise.all([
+      config.hookConfig
+        ? highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json')
+        : Promise.resolve(null),
+      config.scriptContent ? highlightCode(config.scriptContent, 'bash') : Promise.resolve(null),
+    ]);
+
     return (
       <Card>
         <CardHeader>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
-            <div>
-              <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Copy className="h-5 w-5" />
-                Hook Configuration
-              </CardTitle>
-              <CardDescription className={UI_CLASSES.MT_2}>
-                Hook setup and script content
-              </CardDescription>
-            </div>
-            <Button size="sm" variant="outline" onClick={() => handleCopyConfig()}>
-              <Copy className="h-4 w-4 mr-2" />
-              {copied ? 'Copied!' : 'Copy Config'}
-            </Button>
-          </div>
+          <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+            <Copy className="h-5 w-5" />
+            Hook Configuration
+          </CardTitle>
+          <CardDescription>Hook setup and script content</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {config.hookConfig && (
-            <div>
-              <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_2}`}>Hook Configuration</h4>
-              <pre
-                className={`bg-muted ${UI_CLASSES.P_4} rounded-lg ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.OVERFLOW_X_AUTO}`}
-              >
-                {JSON.stringify(config.hookConfig, null, 2)}
-              </pre>
-            </div>
+          {highlightedHookConfig && (
+            <ProductionCodeBlock
+              html={highlightedHookConfig}
+              code={JSON.stringify(config.hookConfig, null, 2)}
+              language="json"
+              filename="Hook Configuration"
+              maxLines={20}
+            />
           )}
-          {config.scriptContent && (
-            <div>
-              <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_2}`}>Script Content</h4>
-              <pre
-                className={`bg-black text-green-400 ${UI_CLASSES.P_4} rounded-lg ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.OVERFLOW_X_AUTO} max-h-[400px]`}
-              >
-                {config.scriptContent}
-              </pre>
-            </div>
+          {highlightedScript && config.scriptContent && (
+            <ProductionCodeBlock
+              html={highlightedScript}
+              code={config.scriptContent}
+              language="bash"
+              filename="Script Content"
+              maxLines={25}
+            />
           )}
         </CardContent>
       </Card>
     );
   }
 
-  // Default JSON configuration
+  // Default JSON configuration - SERVER-SIDE SHIKI
+  const code = JSON.stringify(item.configuration, null, 2);
+  const html = preHighlightedConfigHtml || (await highlightCode(code, 'json'));
+
   return (
     <Card>
       <CardHeader>
@@ -203,12 +174,14 @@ export const ConfigurationSection = memo(function ConfigurationSection({
         <CardDescription>Configuration settings and parameters</CardDescription>
       </CardHeader>
       <CardContent>
-        <CodeHighlight
-          code={JSON.stringify(item.configuration, null, 2)}
+        <ProductionCodeBlock
+          html={html}
+          code={code}
           language="json"
-          showCopy={true}
+          filename="Configuration"
+          maxLines={25}
         />
       </CardContent>
     </Card>
   );
-});
+}

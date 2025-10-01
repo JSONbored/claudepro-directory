@@ -6,6 +6,10 @@
 
 import { z } from 'zod';
 import {
+  type UnifiedContentItem,
+  unifiedContentItemSchema,
+} from './components/content-item.schema';
+import {
   isoDatetimeString,
   mediumString,
   nonEmptyString,
@@ -15,6 +19,33 @@ import {
   shortString,
   stringArray,
 } from './primitives';
+
+// Type alias for backwards compatibility and convenience
+export type ContentItem = UnifiedContentItem;
+
+/**
+ * Content Index Schemas
+ * Used by indexer and service for content indexing and retrieval
+ */
+export const contentIndexSchema = z
+  .object({
+    items: z.array(unifiedContentItemSchema).max(10000).default([]),
+    generated: z.string().default(() => new Date().toISOString()),
+    version: z.string().default('1.0.0'),
+  })
+  .passthrough();
+
+/**
+ * Categorized Content Index Schema
+ * Extended schema for split index functionality
+ * Supports both flat items array AND categorized structure
+ */
+export const categorizedContentIndexSchema = contentIndexSchema.extend({
+  categories: z.record(z.string(), z.array(unifiedContentItemSchema)).optional(),
+});
+
+export type ContentIndex = z.infer<typeof contentIndexSchema>;
+export type CategorizedContentIndex = z.infer<typeof categorizedContentIndexSchema>;
 
 /**
  * Related Content Item Schema

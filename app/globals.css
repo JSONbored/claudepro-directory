@@ -920,6 +920,52 @@
     color: var(--color-accent-light);
   }
 
+  /* ========================================
+     CODE BLOCK ENHANCEMENTS
+     Phase 1: Unified styling + max-height
+     ======================================== */
+
+  /* Shiki syntax highlighting - line and word highlights */
+  .line--highlighted {
+    background-color: var(--color-accent-subtle);
+    border-left: 2px solid var(--color-accent);
+    padding-left: 0.75rem;
+    margin-left: -0.75rem;
+    display: block;
+  }
+
+  .word--highlighted {
+    background-color: var(--color-accent-subtle);
+    border-radius: 0.25rem;
+    padding: 0.125rem 0.25rem;
+    color: var(--color-accent-light);
+  }
+
+  /* Custom scrollbar for code blocks */
+  pre::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  pre::-webkit-scrollbar-track {
+    background: var(--color-bg-secondary);
+    border-radius: 4px;
+  }
+
+  pre::-webkit-scrollbar-thumb {
+    background: var(--color-border-medium);
+    border-radius: 4px;
+  }
+
+  pre::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent-muted);
+  }
+
+  /* Firefox scrollbar styling */
+  pre {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-medium) var(--color-bg-secondary);
+  }
+
   /* Claude Navigation */
   .claude-nav-item {
     padding: var(--spacing-2) var(--spacing-3);

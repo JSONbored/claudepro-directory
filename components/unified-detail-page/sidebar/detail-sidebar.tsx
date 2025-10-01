@@ -15,7 +15,6 @@
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
-import type { ContentTypeConfig } from '@/lib/types/content-type-config';
 import { UI_CLASSES } from '@/lib/ui-constants';
 import { SidebarDetailsCard } from './sidebar-details-card';
 import { SidebarRelatedItemsCard } from './sidebar-related-items-card';
@@ -27,7 +26,16 @@ import { SidebarResourcesCard } from './sidebar-resources-card';
 export interface DetailSidebarProps {
   item: UnifiedContentItem;
   relatedItems: UnifiedContentItem[];
-  config: ContentTypeConfig;
+  config: {
+    typeName: string;
+    metadata?:
+      | {
+          categoryLabel?: string;
+          showGitHubLink?: boolean;
+          githubPathPrefix?: string;
+        }
+      | undefined;
+  };
   customRenderer?:
     | ((
         item: UnifiedContentItem,

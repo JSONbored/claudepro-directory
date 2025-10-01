@@ -21,6 +21,7 @@
 
 import { getContentTypeConfig } from '@/lib/config/content-type-configs';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
+import { highlightCode } from '@/lib/syntax-highlighting';
 import type { InstallationSteps } from '@/lib/types/content-type-config';
 import { UI_CLASSES } from '@/lib/ui-constants';
 import { getDisplayTitle } from '@/lib/utils';
@@ -38,7 +39,7 @@ export interface UnifiedDetailPageProps {
   relatedItems?: UnifiedContentItem[];
 }
 
-export function UnifiedDetailPage({ item, relatedItems = [] }: UnifiedDetailPageProps) {
+export async function UnifiedDetailPage({ item, relatedItems = [] }: UnifiedDetailPageProps) {
   // Get configuration for this content type (Server Component - no hooks)
   const config = getContentTypeConfig(item.category);
 
@@ -87,6 +88,26 @@ export function UnifiedDetailPage({ item, relatedItems = [] }: UnifiedDetailPage
       item.requirements.length > 0
       ? item.requirements
       : config.generators.requirements?.(item) || [];
+  })();
+
+  // Pre-render configuration HTML for 'json' format (server-side syntax highlighting)
+  const preHighlightedConfigHtml = await (async () => {
+    // Only pre-render for 'json' format (rules, agents, commands)
+    // 'mcp' uses 'multi' format (plain pre blocks), 'hooks' uses 'hook' format (plain pre blocks)
+    if (
+      item.category !== 'mcp' &&
+      item.category !== 'hooks' &&
+      'configuration' in item &&
+      item.configuration
+    ) {
+      try {
+        return await highlightCode(JSON.stringify(item.configuration, null, 2), 'json');
+      } catch (_error) {
+        // Fallback to undefined if highlighting fails - ConfigurationSection will use plain pre
+        return undefined;
+      }
+    }
+    return undefined;
   })();
 
   // Handle case where config is not found - AFTER ALL HOOKS
@@ -140,13 +161,9 @@ export function UnifiedDetailPage({ item, relatedItems = [] }: UnifiedDetailPage
             )}
 
             {/* Installation Section */}
-            {config.sections.installation &&
-              installation &&
-              (config.renderers?.installationRenderer ? (
-                config.renderers.installationRenderer(item, installation)
-              ) : (
-                <InstallationSection installation={installation} item={item} />
-              ))}
+            {config.sections.installation && installation && (
+              <InstallationSection installation={installation} item={item} />
+            )}
 
             {/* Use Cases Section */}
             {config.sections.useCases && useCases.length > 0 && (
@@ -160,19 +177,15 @@ export function UnifiedDetailPage({ item, relatedItems = [] }: UnifiedDetailPage
             )}
 
             {/* Configuration Section */}
-            {config.sections.configuration &&
-              'configuration' in item &&
-              item.configuration &&
-              (config.renderers?.configRenderer ? (
-                config.renderers.configRenderer(item)
-              ) : (
-                <ConfigurationSection
-                  item={item}
-                  format={
-                    item.category === 'mcp' ? 'multi' : item.category === 'hooks' ? 'hook' : 'json'
-                  }
-                />
-              ))}
+            {config.sections.configuration && 'configuration' in item && item.configuration && (
+              <ConfigurationSection
+                item={item}
+                format={
+                  item.category === 'mcp' ? 'multi' : item.category === 'hooks' ? 'hook' : 'json'
+                }
+                preHighlightedConfigHtml={preHighlightedConfigHtml}
+              />
+            )}
 
             {/* Requirements Section */}
             {requirements.length > 0 && (
@@ -218,14 +231,16 @@ export function UnifiedDetailPage({ item, relatedItems = [] }: UnifiedDetailPage
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <aside className="lg:sticky lg:top-24 lg:self-start space-y-6">
             <DetailSidebar
               item={item}
               relatedItems={relatedItems}
-              config={config}
-              customRenderer={config.renderers?.sidebarRenderer ?? undefined}
+              config={{
+                typeName: config.typeName,
+                metadata: config.metadata,
+              }}
             />
-          </div>
+          </aside>
         </div>
       </div>
     </div>

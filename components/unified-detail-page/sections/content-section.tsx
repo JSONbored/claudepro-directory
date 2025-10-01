@@ -1,12 +1,11 @@
-'use client';
-
 /**
- * ContentSection - Code/content display section with syntax highlighting
+ * ContentSection - Server-side code/content display with syntax highlighting
  *
- * REFACTORED: Removed lazy loading of CodeHighlight for better performance
- * - Direct import instead of lazy() reduces bundle complexity
- * - Removed Suspense boundary (no longer needed without lazy loading)
- * - Client component remains for CodeHighlight interactivity
+ * OPTIMIZED: Uses server-side Shiki rendering (no client-side blocking)
+ * - Highlighting runs on the server
+ * - Pre-rendered HTML sent to browser instantly
+ * - Zero client JavaScript for syntax highlighting
+ * - Eliminates browser main thread freezes
  *
  * Consolidates content rendering from unified-detail-page.tsx (lines 621-666)
  * Handles: Code content, configuration content, with syntax highlighting
@@ -14,63 +13,47 @@
  * @see components/unified-detail-page.tsx - Original implementation
  */
 
-import { memo, useMemo } from 'react';
-import { z } from 'zod';
-import { CodeHighlight } from '@/components/shared/code-highlight';
+import { CodeBlockServer } from '@/components/shared/code-block-server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Copy } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
-import { componentTitleString } from '@/lib/schemas/primitives';
 import { UI_CLASSES } from '@/lib/ui-constants';
 
-/**
- * Schema for ContentSection props
- */
-const contentSectionPropsSchema = z.object({
-  item: z.custom<UnifiedContentItem>(),
-  title: componentTitleString.optional(),
-  description: z.string().optional(),
-});
-
-export type ContentSectionProps = z.infer<typeof contentSectionPropsSchema>;
+export interface ContentSectionProps {
+  item: UnifiedContentItem;
+  title?: string;
+  description?: string;
+}
 
 /**
- * ContentSection Component
+ * ContentSection - Async Server Component
  *
- * Renders code or configuration content with syntax highlighting.
- * Automatically detects content type and language.
+ * Renders code or configuration content with SERVER-SIDE syntax highlighting.
+ * No client-side JavaScript needed for highlighting.
  */
-export const ContentSection = memo(function ContentSection({
-  item,
-  title,
-  description,
-}: ContentSectionProps) {
-  // Extract content from item (either 'content' field or 'configuration' field)
-  // MEMOIZED to prevent infinite re-renders in CodeHighlight component
-  const content = useMemo(() => {
-    if ('content' in item && typeof (item as { content?: string }).content === 'string') {
-      return (item as { content: string }).content;
+export async function ContentSection({ item, title, description }: ContentSectionProps) {
+  // Extract content from item
+  let content = '';
+  if ('content' in item && typeof (item as { content?: string }).content === 'string') {
+    content = (item as { content: string }).content;
+  } else if (
+    'configuration' in item &&
+    (item as unknown as { configuration?: unknown }).configuration
+  ) {
+    const config = (item as unknown as { configuration?: unknown }).configuration;
+    if (typeof config === 'string') {
+      content = config;
+    } else {
+      content = JSON.stringify(config, null, 2);
     }
-
-    if ('configuration' in item && (item as unknown as { configuration?: unknown }).configuration) {
-      const config = (item as unknown as { configuration?: unknown }).configuration;
-      if (typeof config === 'string') {
-        return config;
-      }
-      return JSON.stringify(config, null, 2);
-    }
-
-    return '';
-  }, [item]);
-
-  // Detect language from item or default to 'text'
-  // MEMOIZED to prevent unnecessary re-renders
-  const language = useMemo(() => {
-    return ('language' in item ? (item as { language?: string }).language : undefined) ?? 'text';
-  }, [item]);
+  }
 
   // Don't render if no content
   if (!content) return null;
+
+  // Detect language from item or default to 'text'
+  const language =
+    ('language' in item ? (item as { language?: string }).language : undefined) ?? 'text';
 
   return (
     <Card>
@@ -82,8 +65,8 @@ export const ContentSection = memo(function ContentSection({
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        <CodeHighlight code={content} language={language} title={title} showCopy={true} />
+        <CodeBlockServer code={content} language={language} />
       </CardContent>
     </Card>
   );
-});
+}

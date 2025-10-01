@@ -6,8 +6,8 @@
 
 import { z } from 'zod';
 import { MAIN_CONTENT_CATEGORIES } from '@/lib/constants';
-import type { ContentItem } from '@/lib/related-content/service';
 import type { HookContent, McpContent } from '@/lib/schemas/content';
+import type { ContentItem } from '@/lib/schemas/related-content.schema';
 import { BatchLazyLoader, createLazyModule, PaginatedLazyLoader } from './lazy-loader';
 
 // Schema for metadata lookup
@@ -273,7 +273,7 @@ export const contentIndexHelpers = {
         (item) =>
           item.title?.toLowerCase().includes(query.toLowerCase()) ||
           item.description.toLowerCase().includes(query.toLowerCase()) ||
-          item.tags?.some((tag) => tag.toLowerCase().includes(query.toLowerCase()))
+          item.tags?.some((tag: string) => tag.toLowerCase().includes(query.toLowerCase()))
       );
     });
 
@@ -305,7 +305,7 @@ export const contentIndexHelpers = {
 
     // Tag matches
     const tagMatches =
-      item.tags?.filter((tag) => tag.toLowerCase().includes(lowerQuery)).length ?? 0;
+      item.tags?.filter((tag: string) => tag.toLowerCase().includes(lowerQuery)).length ?? 0;
     score += tagMatches * 3;
 
     // Featured boost

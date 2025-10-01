@@ -24,7 +24,7 @@ import { ContentTabs as Tabs } from '../interactive/content-tabs';
 import { ExpertQuote } from '../interactive/expert-quote';
 import { QuickReference } from '../interactive/quick-reference';
 import { setPageMetadata } from '../smart-related-content/with-metadata';
-import { CodeGroup } from '../template/code-group';
+import { CodeGroupServer as CodeGroup } from '../template/code-group-server';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';

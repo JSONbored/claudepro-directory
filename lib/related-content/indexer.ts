@@ -10,8 +10,12 @@ import { CONTENT_PATHS, MAIN_CONTENT_CATEGORIES } from '@/lib/constants';
 import { logger } from '../logger';
 import { basicErrorSchema } from '../schemas/error.schema';
 import { logContextSchema } from '../schemas/logger.schema';
+import type {
+  CategorizedContentIndex,
+  ContentIndex,
+  ContentItem,
+} from '../schemas/related-content.schema';
 import type { ContentCategory } from '../schemas/shared.schema';
-import type { CategorizedContentIndex, ContentIndex, ContentItem } from './service';
 
 const CONTENT_DIRECTORIES = {
   // Main content (JSON files)
