@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { nonNegativeInt, positiveInt, shortString } from '../primitives';
+import { nonNegativeInt, positiveInt } from '../primitives';
 import { unifiedContentItemSchema } from './content-item.schema';
 
 /**
@@ -18,13 +18,9 @@ export const pagePropsSchema = z.object({
 export type PageProps = z.infer<typeof pagePropsSchema>;
 
 /**
- * Slug params validation schema for detail pages
+ * SHA-2100: slugParamsSchema moved to app.schema.ts (canonical location)
+ * Import from @/lib/schemas/app.schema instead
  */
-export const slugParamsSchema = z.object({
-  slug: shortString.min(1, 'Slug is required'),
-});
-
-export type SlugParams = z.infer<typeof slugParamsSchema>;
 
 /**
  * Search params schema for list pages

@@ -135,18 +135,10 @@ export type MarkdownToHtmlRequest = z.infer<typeof markdownToHtmlRequestSchema>;
 export type MarkdownToHtmlResponse = z.infer<typeof markdownToHtmlResponseSchema>;
 
 /**
- * Helper to validate markdown content
+ * SHA-2100: Removed validateMarkdownContent() and validateSanitizedHtml()
+ * These wrapper functions added no value - schemas used directly in markdown-utils.ts
+ * Usage: markdownContentSchema.parse() and markdownSanitizedHtmlSchema.parse()
  */
-export function validateMarkdownContent(content: string): MarkdownContent {
-  return markdownContentSchema.parse(content);
-}
-
-/**
- * Helper to validate sanitized HTML
- */
-export function validateSanitizedHtml(html: string): SanitizedHtml {
-  return markdownSanitizedHtmlSchema.parse(html);
-}
 
 /**
  * MDX frontmatter schema

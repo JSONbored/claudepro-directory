@@ -105,15 +105,25 @@ export const isoDatetimeString = z
 
 /**
  * Slug string validator
- * Used for: URL-safe identifiers, route parameters
- * Pattern: lowercase letters, numbers, hyphens only
- * Common in: All content types (agents, mcp, rules, commands, hooks)
+ * SHA-2100: Re-exported from api-cache-primitives.ts for consistency
+ * The api-cache-primitives version has better validation:
+ * - Max length 100 characters
+ * - Prevents consecutive hyphens: /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+ * - Automatic lowercase transformation
+ * Note: Import from api-cache-primitives for the actual implementation
  */
 export const slugString = z
   .string()
-  .min(1)
-  .regex(/^[a-z0-9-]+$/)
-  .describe('URL-safe slug identifier (lowercase alphanumeric with hyphens)');
+  .min(1, 'Slug cannot be empty')
+  .max(100, 'Slug too long (max 100 characters)')
+  .regex(
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+    'Invalid slug: use lowercase letters, numbers, and single hyphens'
+  )
+  .transform((val) => val.toLowerCase())
+  .describe(
+    'URL-safe slug identifier (lowercase alphanumeric with hyphens, no consecutive hyphens)'
+  );
 
 /**
  * Safe text validator (no HTML tags)

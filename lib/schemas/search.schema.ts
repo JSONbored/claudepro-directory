@@ -6,7 +6,7 @@
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { nonNegativeInt, percentage, positiveInt } from './primitives/base-numbers';
-import { mediumString, nonEmptyString, shortString } from './primitives/base-strings';
+import { mediumString, nonEmptyString, shortString, slugString } from './primitives/base-strings';
 
 /**
  * Searchable item schema for search cache
@@ -262,20 +262,8 @@ export const trendingParamsSchema = searchPaginationSchema.merge(filterSchema).e
 
 export type TrendingParams = z.infer<typeof trendingParamsSchema>;
 
-/**
- * Slug parameter schema for dynamic routes
- */
-export const slugParamSchema = z.object({
-  slug: nonEmptyString
-    .max(200, 'Slug is too long')
-    .regex(/^[a-zA-Z0-9-_]+$/, 'Slug can only contain letters, numbers, hyphens, and underscores')
-    .transform((val) => val.toLowerCase()),
-});
-
 // Auto-generated type exports
 export type SearchPagination = z.infer<typeof searchPaginationSchema>;
-
-export type SlugParam = z.infer<typeof slugParamSchema>;
 export type Sort = z.infer<typeof sortSchema>;
 export type Filter = z.infer<typeof filterSchema>;
 
@@ -352,5 +340,5 @@ export const searchSchemas = {
   searchParams: searchAPIParamsSchema,
   jobsSearch: jobsSearchSchema,
   trending: trendingParamsSchema,
-  slug: slugParamSchema,
+  slug: z.object({ slug: slugString }),
 } as const;

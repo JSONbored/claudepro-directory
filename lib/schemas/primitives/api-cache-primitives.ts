@@ -150,15 +150,17 @@ export const categoryString = nonEmptyString
 
 /**
  * Slug validator
- * Used for: URL-safe identifiers, content slugs
- * Pattern: lowercase alphanumeric + hyphens
- * Common in: Content URLs, cache keys, routing
+ * SHA-2100: Now consistent with base-strings.ts implementation
+ * Pattern: lowercase alphanumeric + hyphens (no consecutive hyphens)
+ * Used for: URL-safe identifiers, content slugs, cache keys, routing
  */
 export const slugString = nonEmptyString
   .max(KEY_LIMITS.MAX_SLUG_LENGTH, 'Slug too long')
-  .regex(KEY_PATTERNS.SLUG, 'Invalid slug format')
+  .regex(KEY_PATTERNS.SLUG, 'Invalid slug: use lowercase letters, numbers, and single hyphens')
   .transform((val) => val.toLowerCase())
-  .describe('URL-safe slug identifier (lowercase alphanumeric with hyphens)');
+  .describe(
+    'URL-safe slug identifier (lowercase alphanumeric with hyphens, no consecutive hyphens)'
+  );
 
 /**
  * Path validator

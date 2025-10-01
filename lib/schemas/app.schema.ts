@@ -4,11 +4,11 @@
  */
 
 import { z } from 'zod';
-import { positiveInt } from '@/lib/schemas/primitives/base-numbers';
 import {
   nonEmptyString,
   optionalUrlString,
   shortString,
+  slugString,
 } from '@/lib/schemas/primitives/base-strings';
 
 /**
@@ -29,9 +29,10 @@ export type PagePropsWithSearchParams = {
 
 /**
  * Slug-specific params validation schema
+ * Canonical location for slug params - used across all [slug] pages
  */
 export const slugParamsSchema = z.object({
-  slug: nonEmptyString.max(200, 'Slug too long'),
+  slug: slugString, // Uses canonical slugString from primitives (max 100, strict validation)
 });
 
 export type SlugParams = z.infer<typeof slugParamsSchema>;
@@ -50,28 +51,24 @@ export const formStateSchema = z.object({
 export type FormState = z.infer<typeof formStateSchema>;
 
 /**
- * Lazy loader schemas for optimized data loading
+ * SHA-2100: Removed lazyLoadedDataSchema and lazyLoaderOptionsSchema
+ * These Zod schemas were never used for runtime validation in lazy-loader.ts
+ * Only the TypeScript types LazyLoadedData<T> and LazyLoaderOptions<T> were used
+ * Keeping types below for backward compatibility
  */
-export const lazyLoadedDataSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
-  z.object({
-    isLoaded: z.boolean(),
-    data: z.union([dataSchema, z.null()]),
-    loadPromise: z.union([z.promise(dataSchema), z.null()]),
-  });
 
+/**
+ * Type for lazy-loaded data wrapper
+ */
 export type LazyLoadedData<T> = {
   isLoaded: boolean;
   data: T | null;
   loadPromise: Promise<T> | null;
 };
 
-export const lazyLoaderOptionsSchema = z.object({
-  preload: z.boolean().optional(),
-  cacheTimeout: positiveInt.optional(),
-  onLoad: z.function().optional(),
-  onError: z.function().optional(),
-});
-
+/**
+ * Type for lazy loader configuration options
+ */
 export type LazyLoaderOptions<T> = {
   preload?: boolean;
   cacheTimeout?: number;

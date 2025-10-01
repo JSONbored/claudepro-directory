@@ -2,7 +2,8 @@
  * Component prop schemas for React components
  * Provides type-safe validation for component props
  *
- * CLEANED - Removed 28 unused exports (60% waste eliminated)
+ * SHA-2100: Removed ui-props.schema.ts (177 lines of unused runtime validation)
+ * Extracted only the ConfigCardProps type that's actually used
  */
 
 import { z } from 'zod';
@@ -12,17 +13,22 @@ import {
   unifiedContentItemSchema,
 } from './components/content-item.schema';
 import type { HomePageClientProps } from './components/page-props.schema';
-// Import schemas from specialized modules
-import type { ConfigCardProps } from './components/ui-props.schema';
 import type { SortOption } from './content-filter.schema';
 
+/**
+ * Config card component props (extracted from deleted ui-props.schema.ts)
+ * Used for displaying configuration cards in lists
+ */
+export interface ConfigCardProps {
+  item: UnifiedContentItem;
+  variant?: 'default' | 'detailed';
+  showCategory?: boolean;
+  showActions?: boolean;
+  className?: string;
+}
+
 // Re-export commonly used types from ./components
-export {
-  type ConfigCardProps,
-  type HomePageClientProps,
-  type UnifiedContentItem,
-  unifiedContentItemSchema,
-};
+export { type HomePageClientProps, type UnifiedContentItem, unifiedContentItemSchema };
 
 // ContentListWithLoadMore component props
 export interface ContentListWithLoadMoreProps {
