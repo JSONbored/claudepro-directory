@@ -19,7 +19,6 @@
  * @see components/unified-detail-page.tsx - Original 685-line implementation
  */
 
-import { useMemo } from 'react';
 import { getContentTypeConfig } from '@/lib/config/content-type-configs';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import type { InstallationSteps } from '@/lib/types/content-type-config';
@@ -39,14 +38,14 @@ export interface UnifiedDetailPageProps {
 }
 
 export function UnifiedDetailPage({ item, relatedItems = [] }: UnifiedDetailPageProps) {
-  // Get configuration for this content type
-  const config = useMemo(() => getContentTypeConfig(item.category), [item.category]);
+  // Get configuration for this content type (Server Component - no hooks)
+  const config = getContentTypeConfig(item.category);
 
-  // Generate display title
-  const displayTitle = useMemo(() => getDisplayTitle(item), [item]);
+  // Generate display title (Server Component - direct computation)
+  const displayTitle = getDisplayTitle(item);
 
-  // Generate content using generators (ALL HOOKS MUST BE CALLED BEFORE EARLY RETURN)
-  const installation = useMemo(() => {
+  // Generate content using generators (Server Component - direct computation)
+  const installation = (() => {
     if (!config) return undefined;
     if ('installation' in item && item.installation) {
       if (typeof item.installation === 'object' && !Array.isArray(item.installation)) {
@@ -54,40 +53,40 @@ export function UnifiedDetailPage({ item, relatedItems = [] }: UnifiedDetailPage
       }
     }
     return config.generators.installation?.(item);
-  }, [item, config]);
+  })();
 
-  const useCases = useMemo(() => {
+  const useCases = (() => {
     if (!config) return [];
     return 'useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0
       ? item.useCases
-      : // biome-ignore lint/correctness/useHookAtTopLevel: This is a generator function, not a React hook
+      : // biome-ignore lint/correctness/useHookAtTopLevel: config.generators.useCases is a generator function, not a React hook - false positive due to "use" in property name
         config.generators.useCases?.(item) || [];
-  }, [item, config]);
+  })();
 
-  const features = useMemo(() => {
+  const features = (() => {
     if (!config) return [];
     return 'features' in item && Array.isArray(item.features) && item.features.length > 0
       ? item.features
       : config.generators.features?.(item) || [];
-  }, [item, config]);
+  })();
 
-  const troubleshooting = useMemo(() => {
+  const troubleshooting = (() => {
     if (!config) return [];
     return 'troubleshooting' in item &&
       Array.isArray(item.troubleshooting) &&
       item.troubleshooting.length > 0
       ? item.troubleshooting
       : config.generators.troubleshooting?.(item) || [];
-  }, [item, config]);
+  })();
 
-  const requirements = useMemo(() => {
+  const requirements = (() => {
     if (!config) return [];
     return 'requirements' in item &&
       Array.isArray(item.requirements) &&
       item.requirements.length > 0
       ? item.requirements
       : config.generators.requirements?.(item) || [];
-  }, [item, config]);
+  })();
 
   // Handle case where config is not found - AFTER ALL HOOKS
   if (!config) {
