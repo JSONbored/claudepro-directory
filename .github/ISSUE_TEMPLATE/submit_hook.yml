@@ -1,0 +1,69 @@
+name: Submit Hook
+description: Share a Claude event hook
+title: "[Hook]: "
+labels: ["content-submission", "hook", "needs-review"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing your hook! 🪝
+
+  - type: input
+    id: name
+    attributes:
+      label: Hook Name
+      placeholder: e.g., "Pre-commit Formatter"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What does it do?
+      placeholder: Brief description (1-2 sentences)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: hook-type
+    attributes:
+      label: Hook Type
+      options:
+        - pre-commit
+        - post-commit
+        - pre-push
+        - user-prompt-submit
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: script
+    attributes:
+      label: Hook Script
+      description: Paste your hook script (bash/shell)
+      render: bash
+      placeholder: |
+        #!/bin/bash
+        # Your hook script here
+        echo "Running pre-commit hook..."
+    validations:
+      required: true
+
+  - type: input
+    id: tags
+    attributes:
+      label: Tags (optional)
+      placeholder: e.g., formatting, validation, automation
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Quick Check
+      options:
+        - label: I've tested this hook
+          required: true
+        - label: This doesn't contain sensitive information
+          required: true

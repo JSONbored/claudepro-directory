@@ -1,32 +1,31 @@
-## Description
-<!-- Provide a brief description of the changes in this PR -->
+## What are you submitting?
 
-## Type of Change
-- [ ] 📝 New content (agent, MCP server, rule, command, or hook)
-- [ ] 🐛 Bug fix
-- [ ] ✨ New feature
-- [ ] 🔧 Configuration change
-- [ ] 📚 Documentation update
-- [ ] ♻️ Code refactoring
-- [ ] 🎨 UI/UX improvement
+- [ ] **Content** (agent, MCP, command, hook, or rule)
+- [ ] Code change (bug fix, feature, refactor, etc.)
 
-## Content Submission Checklist (if adding new content)
-- [ ] Content follows the required JSON schema
-- [ ] All required fields are present (title, description, category, author, dateAdded)
-- [ ] Date format is YYYY-MM-DD
-- [ ] Category is valid (agents, mcp, rules, commands, or hooks)
-- [ ] Content is tested and working with Claude Code
-- [ ] No duplicate content exists
+---
 
-## General Checklist
-- [ ] Code follows the project style guidelines
-- [ ] Self-review of code completed
-- [ ] No console errors or warnings
-- [ ] Build completes successfully (`npm run build`)
-- [ ] All bundle chunks are under 500KB
+## For Content Submissions
 
-## Screenshots (if applicable)
-<!-- Add screenshots for UI changes -->
+**What does it do?** (1-2 sentences)
 
-## Additional Notes
-<!-- Any additional information that reviewers should know -->
+**Quick checklist:**
+- [ ] I tested this and it works
+- [ ] I removed any API keys/secrets
+- [ ] I added it to the correct `content/` folder
+
+**Need help?** Copy a template file from the `content/` folder to get started!
+
+---
+
+## For Code Changes
+
+**What changed?**
+
+**Checklist:**
+- [ ] Code follows project style
+- [ ] Build passes (`npm run build`)
+
+---
+
+<!-- 🤖 Our validation bot will automatically check your submission -->

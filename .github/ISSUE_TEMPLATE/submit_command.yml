@@ -1,0 +1,60 @@
+name: Submit Command
+description: Share a Claude CLI command
+title: "[Command]: "
+labels: ["content-submission", "command", "needs-review"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing your command! ⚡
+
+  - type: input
+    id: name
+    attributes:
+      label: Command Name
+      placeholder: e.g., "/test-coverage"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What does it do?
+      placeholder: Brief description (1-2 sentences)
+    validations:
+      required: true
+
+  - type: textarea
+    id: content
+    attributes:
+      label: Command Content (Markdown)
+      description: Paste your command markdown with YAML frontmatter
+      render: markdown
+      placeholder: |
+        ---
+        name: test-coverage
+        description: Generate test coverage report
+        allowed-tools: [Bash, Read, Write]
+        ---
+
+        Generate a comprehensive test coverage report for the project...
+    validations:
+      required: true
+
+  - type: input
+    id: tags
+    attributes:
+      label: Tags (optional)
+      placeholder: e.g., testing, coverage, development
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Quick Check
+      options:
+        - label: I've tested this command
+          required: true
+        - label: This doesn't contain sensitive information
+          required: true
