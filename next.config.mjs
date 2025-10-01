@@ -157,12 +157,12 @@ const nextConfig = {
     gzipSize: true,
 
     // Package optimization (keep existing - this is good)
+    // SHA-2091: Removed react-window and @radix-ui/react-navigation-menu (unused)
     optimizePackageImports: [
       'lucide-react',
       '@radix-ui/react-icons',
       'fuzzysort',
       'marked',
-      'react-window',
       'embla-carousel-react',
       'sonner',
       'class-variance-authority',
@@ -194,7 +194,6 @@ const nextConfig = {
       '@radix-ui/react-hover-card',
       '@radix-ui/react-label',
       '@radix-ui/react-menubar',
-      '@radix-ui/react-navigation-menu',
       '@radix-ui/react-popover',
       '@radix-ui/react-progress',
       '@radix-ui/react-radio-group',

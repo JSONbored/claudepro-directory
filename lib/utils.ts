@@ -6,6 +6,41 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Performs shallow equality comparison between two objects (SHA-2090)
+ * Optimized for React.memo comparison - faster than JSON.stringify
+ *
+ * @param objA - First object to compare
+ * @param objB - Second object to compare
+ * @returns true if objects are shallowly equal, false otherwise
+ */
+export function shallowEqual(objA: unknown, objB: unknown): boolean {
+  if (Object.is(objA, objB)) return true;
+
+  if (typeof objA !== 'object' || objA === null || typeof objB !== 'object' || objB === null) {
+    return false;
+  }
+
+  const keysA = Object.keys(objA);
+  const keysB = Object.keys(objB);
+
+  if (keysA.length !== keysB.length) return false;
+
+  // Test for A's keys different from B
+  for (const key of keysA) {
+    if (
+      !(
+        Object.hasOwn(objB, key) &&
+        Object.is((objA as Record<string, unknown>)[key], (objB as Record<string, unknown>)[key])
+      )
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
  * List of acronyms and tool names that should be fully capitalized
  */
 const ACRONYMS = [
