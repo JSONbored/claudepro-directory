@@ -170,7 +170,9 @@ const nextConfig = {
       'tailwind-merge',
       '@vercel/analytics',
       'web-vitals',
-      'zod',
+      // NOTE: 'zod' removed - optimizePackageImports causes Turbopack to evaluate schemas during static analysis
+      // This breaks Turbopack SSR with "Cannot read properties of undefined (reading '_string')" error
+      // Zod schemas should be lazily evaluated at runtime, not during build-time tree-shaking
       'gray-matter',
       'next-mdx-remote',
       'next-themes',
