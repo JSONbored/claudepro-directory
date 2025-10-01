@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   description:
     "Browse specialized AI agents designed for specific tasks and workflows using Claude's capabilities.",
   keywords: 'Claude agents, AI agents, specialized assistants, workflow automation, Claude AI',
+  alternates: {
+    canonical: `${APP_CONFIG.url}/agents`,
+  },
 };
 
 export default async function AgentsPage() {

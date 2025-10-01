@@ -15,6 +15,9 @@ export const metadata = {
   title: `Claude Guides & Tutorials - ${APP_CONFIG.name}`,
   description:
     'Comprehensive guides, tutorials, and workflows for Claude AI. Learn how to use MCP servers, agents, and more.',
+  alternates: {
+    canonical: `${APP_CONFIG.url}/guides`,
+  },
 };
 
 // Enable ISR - revalidate every 4 hours for guide list pages

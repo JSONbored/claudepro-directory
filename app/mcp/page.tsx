@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   description:
     "Discover powerful MCP servers to extend Claude's capabilities with external tools, data sources, and integrations.",
   keywords: 'MCP servers, Model Context Protocol, Claude integrations, AI tools, Claude extensions',
+  alternates: {
+    canonical: `${APP_CONFIG.url}/mcp`,
+  },
 };
 
 export default async function MCPPage() {

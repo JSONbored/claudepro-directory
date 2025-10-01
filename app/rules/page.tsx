@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   description:
     "Expert-crafted system prompts and configurations to enhance Claude's capabilities across different domains and use cases.",
   keywords: 'Claude rules, system prompts, AI configurations, prompt engineering, Claude AI',
+  alternates: {
+    canonical: `${APP_CONFIG.url}/rules`,
+  },
 };
 
 export default async function RulesPage() {

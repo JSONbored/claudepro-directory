@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   title: `Automation Hooks - Claude Event Hooks | ${APP_CONFIG.name}`,
   description: 'Discover automation hooks to trigger actions and workflows based on Claude events.',
   keywords: 'Claude hooks, automation, event triggers, workflow automation, Claude Pro',
+  alternates: {
+    canonical: `${APP_CONFIG.url}/hooks`,
+  },
 };
 
 export default async function HooksPage() {

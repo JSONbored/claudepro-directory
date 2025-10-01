@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   description:
     'Explore custom commands and shortcuts to enhance your Claude experience with powerful functionality.',
   keywords: 'Claude commands, CLI commands, shortcuts, productivity tools, Claude Pro',
+  alternates: {
+    canonical: `${APP_CONFIG.url}/commands`,
+  },
 };
 
 export default async function CommandsPage() {

@@ -57,12 +57,6 @@ export type ContentItem = z.infer<typeof contentItemSchema>;
  */
 
 /**
- * Related content type schema
- */
-export const relatedTypeSchema = z.enum(['rules', 'mcp', 'agents', 'commands', 'hooks', 'guides']);
-export type RelatedType = z.infer<typeof relatedTypeSchema>;
-
-/**
  * Helper function to validate content by category
  */
 export function validateContentByCategory(data: unknown, category: string) {
