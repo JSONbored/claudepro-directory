@@ -57,7 +57,7 @@ async function getGuides(): Promise<GuidesByCategory> {
     guides[category] = [];
 
     try {
-      const dir = path.join(process.cwd(), 'seo', category);
+      const dir = path.join(process.cwd(), 'content', 'guides', category);
       const files = await fs.readdir(dir);
 
       for (const file of files) {

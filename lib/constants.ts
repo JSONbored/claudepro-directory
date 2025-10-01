@@ -36,6 +36,7 @@ export const APP_CONFIG = appConfigSchema.parse({
  */
 const socialLinksSchema = z.object({
   github: z.string().url(),
+  authorProfile: z.string().url(),
   discord: z.string().url().optional(),
   twitter: z.string().url().optional(),
   email: z.string().email(),
@@ -46,7 +47,8 @@ const socialLinksSchema = z.object({
 });
 
 export const SOCIAL_LINKS = socialLinksSchema.parse({
-  github: 'https://github.com/shadowbook/claudepro-directory',
+  github: 'https://github.com/JSONbored/claudepro-directory',
+  authorProfile: 'https://github.com/JSONbored',
   discord: 'https://discord.gg/Ax3Py4YDrq',
   twitter: 'https://x.com/JSONbored',
   email: 'contact@claudepro.directory',
@@ -244,12 +246,12 @@ const dateConfigSchema = z.object({
 });
 
 export const DATE_CONFIG = dateConfigSchema.parse({
-  currentMonth: 'September',
+  currentMonth: 'October',
   currentYear: 2025,
-  currentDate: '2025-09-26',
-  lastReviewed: '2025-09-26',
+  currentDate: '2025-10-01',
+  lastReviewed: '2025-10-01',
   claudeModels: {
-    sonnet: 'Claude Sonnet 4',
+    sonnet: 'Claude Sonnet 4.5',
     opus: 'Claude Opus 4.1',
   },
 });
@@ -414,3 +416,82 @@ export const SEARCH_CONFIG = {
   threshold: 0.3, // Fuzzy search threshold (0-1, lower = more strict)
   maxResults: 50, // Maximum search results to display
 } as const;
+
+/**
+ * Common Acronyms for Text Transformation
+ * Used for proper capitalization of technical terms
+ */
+export const ACRONYMS = [
+  'API',
+  'AWS',
+  'CSS',
+  'JSON',
+  'SCSS',
+  'HTML',
+  'XML',
+  'HTTP',
+  'HTTPS',
+  'URL',
+  'URI',
+  'SQL',
+  'NoSQL',
+  'REST',
+  'GraphQL',
+  'JWT',
+  'SSH',
+  'FTP',
+  'SMTP',
+  'DNS',
+  'CDN',
+  'SDK',
+  'CLI',
+  'IDE',
+  'UI',
+  'UX',
+  'AI',
+  'ML',
+  'NPM',
+  'CI',
+  'CD',
+  'CI/CD',
+  'PDF',
+  'CSV',
+  'SVG',
+  'PNG',
+  'JPG',
+  'JPEG',
+  'GIF',
+  'TCP',
+  'UDP',
+  'IP',
+  'VPN',
+  'SSL',
+  'TLS',
+  'OAuth',
+  'SAML',
+  'LDAP',
+  'DB',
+  'CRUD',
+  'ORM',
+  'MVC',
+  'MVP',
+  'MVVM',
+  'SPA',
+  'PWA',
+  'SEO',
+  'CMS',
+  'CRM',
+  'SaaS',
+  'PaaS',
+  'IaaS',
+  'E2E',
+  'QA',
+  'TDD',
+  'BDD',
+  'CORS',
+  'CSRF',
+  'XSS',
+  'MCP',
+  'LLM',
+  'GPT',
+] as const;

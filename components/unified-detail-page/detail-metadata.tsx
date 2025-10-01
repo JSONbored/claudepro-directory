@@ -11,6 +11,7 @@
 
 import { z } from 'zod';
 import { Badge } from '@/components/ui/badge';
+import { SOCIAL_LINKS } from '@/lib/constants';
 import { formatDate } from '@/lib/date-utils';
 import { Calendar, Tag, User } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
@@ -45,7 +46,14 @@ export function DetailMetadata({ item }: DetailMetadataProps) {
           {item.author && (
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <User className="h-4 w-4" />
-              <span>{item.author}</span>
+              <a
+                href={SOCIAL_LINKS.authorProfile}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline hover:text-foreground transition-colors"
+              >
+                {item.author}
+              </a>
             </div>
           )}
           {item.dateAdded && (

@@ -19,18 +19,3 @@ export {
 } from './cache';
 // Core Redis client
 export { isRedisHealthy, redisClient } from './client';
-// High-level rate limiting service
-export {
-  createRateLimiter,
-  getClientIdentifier,
-  RateLimiter,
-  RateLimiters,
-  type RateLimitResult,
-  RateLimitTracker,
-} from './rate-limiter';
-// Token bucket rate limiting
-export {
-  createTokenBucket,
-  TokenBucket,
-  TokenBuckets,
-} from './token-bucket';

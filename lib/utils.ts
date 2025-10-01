@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { ACRONYMS } from './constants';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -39,84 +40,6 @@ export function shallowEqual(objA: unknown, objB: unknown): boolean {
 
   return true;
 }
-
-/**
- * List of acronyms and tool names that should be fully capitalized
- */
-const ACRONYMS = [
-  'API',
-  'AWS',
-  'CSS',
-  'JSON',
-  'SCSS',
-  'HTML',
-  'XML',
-  'HTTP',
-  'HTTPS',
-  'URL',
-  'URI',
-  'SQL',
-  'NoSQL',
-  'REST',
-  'GraphQL',
-  'JWT',
-  'SSH',
-  'FTP',
-  'SMTP',
-  'DNS',
-  'CDN',
-  'SDK',
-  'CLI',
-  'IDE',
-  'UI',
-  'UX',
-  'AI',
-  'ML',
-  'NPM',
-  'CI',
-  'CD',
-  'CI/CD',
-  'PDF',
-  'CSV',
-  'SVG',
-  'PNG',
-  'JPG',
-  'JPEG',
-  'GIF',
-  'TCP',
-  'UDP',
-  'IP',
-  'VPN',
-  'SSL',
-  'TLS',
-  'OAuth',
-  'SAML',
-  'LDAP',
-  'DB',
-  'CRUD',
-  'ORM',
-  'MVC',
-  'MVP',
-  'MVVM',
-  'SPA',
-  'PWA',
-  'SEO',
-  'CMS',
-  'CRM',
-  'SaaS',
-  'PaaS',
-  'IaaS',
-  'E2E',
-  'QA',
-  'TDD',
-  'BDD',
-  'CORS',
-  'CSRF',
-  'XSS',
-  'MCP',
-  'LLM',
-  'GPT',
-];
 
 /**
  * Capitalizes acronyms and tool names in a title

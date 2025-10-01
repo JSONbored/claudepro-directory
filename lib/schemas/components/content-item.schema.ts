@@ -182,10 +182,3 @@ export const unifiedContentItemSchema = z.object({
 });
 
 export type UnifiedContentItem = z.infer<typeof unifiedContentItemSchema>;
-
-/**
- * Content category enum for type safety
- */
-// Import the single source of truth for content categories
-import type { contentCategorySchema } from '../shared.schema';
-export type ContentCategory = z.infer<typeof contentCategorySchema>;

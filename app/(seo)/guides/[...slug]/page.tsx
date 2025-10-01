@@ -5,12 +5,14 @@ import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import path from 'path';
 import { z } from 'zod';
+import { CategoryGuidesPage } from '@/components/category-guides-page';
 import { UnifiedSidebar } from '@/components/layout/sidebar/unified-sidebar';
 import { MDXRenderer } from '@/components/shared/mdx-renderer';
 import { ViewTracker } from '@/components/shared/view-tracker';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import type { GuideItemWithCategory } from '@/lib/components/guide-page-factory';
 import { APP_CONFIG } from '@/lib/constants';
 import { ArrowLeft, BookOpen, Calendar, FileText, Tag, Users, Zap } from '@/lib/icons';
 import { logger } from '@/lib/logger';
@@ -69,7 +71,7 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
         const mappedPath = pathMap[category];
         if (!mappedPath) return null;
 
-        const filePath = path.join(process.cwd(), 'seo', mappedPath, filename);
+        const filePath = path.join(process.cwd(), 'content', 'guides', mappedPath, filename);
 
         // Check if file exists before attempting to read
         try {
@@ -102,6 +104,54 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
   );
 }
 
+async function getCategoryGuides(category: string): Promise<GuideItemWithCategory[]> {
+  const cacheKey = `category-guides:${category}`;
+
+  return await contentCache.cacheWithRefresh(
+    cacheKey,
+    async () => {
+      const guides: GuideItemWithCategory[] = [];
+
+      try {
+        const dir = path.join(process.cwd(), 'content', 'guides', category);
+
+        // Check if directory exists
+        try {
+          await fs.access(dir);
+        } catch {
+          return [];
+        }
+
+        const files = await fs.readdir(dir);
+
+        for (const file of files) {
+          if (file.endsWith('.mdx')) {
+            try {
+              const content = await fs.readFile(path.join(dir, file), 'utf-8');
+              const { frontmatter } = parseMDXFrontmatter(content);
+
+              guides.push({
+                title: frontmatter.title || file.replace('.mdx', ''),
+                description: frontmatter.description || '',
+                slug: `/guides/${category}/${file.replace('.mdx', '')}`,
+                category,
+                dateUpdated: frontmatter.dateUpdated || '',
+              });
+            } catch {
+              // Skip files that fail to parse
+            }
+          }
+        }
+      } catch {
+        // Directory doesn't exist
+      }
+
+      return guides;
+    },
+    4 * 60 * 60 // Cache for 4 hours
+  );
+}
+
 async function getRelatedGuides(currentSlug: string[], limit = 3): Promise<RelatedGuide[]> {
   const [currentCategory] = currentSlug;
   if (!currentCategory) return [];
@@ -115,7 +165,7 @@ async function getRelatedGuides(currentSlug: string[], limit = 3): Promise<Relat
       const relatedGuides: RelatedGuide[] = [];
 
       try {
-        const dir = path.join(process.cwd(), 'seo', currentCategory);
+        const dir = path.join(process.cwd(), 'content', 'guides', currentCategory);
 
         // Check if directory exists before attempting to read
         try {
@@ -153,7 +203,6 @@ async function getRelatedGuides(currentSlug: string[], limit = 3): Promise<Relat
 }
 
 export async function generateStaticParams() {
-  // Generate paths for all SEO pages
   const categories = [
     'use-cases',
     'tutorials',
@@ -166,8 +215,14 @@ export async function generateStaticParams() {
   const paths = [];
 
   for (const category of categories) {
+    // Add category listing page
+    paths.push({
+      slug: [category],
+    });
+
+    // Add individual guide pages
     try {
-      const dir = path.join(process.cwd(), 'seo', category);
+      const dir = path.join(process.cwd(), 'content', 'guides', category);
 
       // Check if directory exists before attempting to read
       try {
@@ -194,6 +249,26 @@ export async function generateStaticParams() {
   return paths;
 }
 
+const categoryLabels: Record<string, string> = {
+  'use-cases': 'Use Cases',
+  tutorials: 'Tutorials',
+  collections: 'Collections',
+  categories: 'Category Guides',
+  workflows: 'Workflows',
+  comparisons: 'Comparisons',
+  troubleshooting: 'Troubleshooting',
+};
+
+const categoryDescriptions: Record<string, string> = {
+  'use-cases': 'Practical guides for specific Claude AI use cases',
+  tutorials: 'Step-by-step tutorials for Claude features',
+  collections: 'Curated collections of tools and agents',
+  categories: 'Comprehensive guides by category',
+  workflows: 'Complete workflow guides and strategies',
+  comparisons: 'Compare Claude with other development tools',
+  troubleshooting: 'Solutions for common Claude AI issues',
+};
+
 export async function generateMetadata({
   params,
 }: {
@@ -216,6 +291,46 @@ export async function generateMetadata({
     }
 
     const { slug } = validationResult.data;
+    const baseUrl = APP_CONFIG.url;
+    const canonicalUrl = `${baseUrl}/guides/${slug.join('/')}`;
+
+    // Handle category listing pages (single segment)
+    if (slug.length === 1) {
+      const [category] = slug;
+      const categoryLabel = categoryLabels[category || ''] || category;
+      const categoryDescription =
+        categoryDescriptions[category || ''] || `Browse all ${category} guides`;
+
+      return {
+        title: `${categoryLabel} - Claude Guides`,
+        description: categoryDescription,
+        alternates: {
+          canonical: canonicalUrl,
+        },
+        openGraph: {
+          title: `${categoryLabel} - Claude Guides`,
+          description: categoryDescription,
+          type: 'website',
+          url: canonicalUrl,
+          siteName: APP_CONFIG.name,
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title: `${categoryLabel} - Claude Guides`,
+          description: categoryDescription,
+        },
+        robots: {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+          },
+        },
+      };
+    }
+
+    // Handle individual guide pages (multiple segments)
     const data = await getSEOPageData(slug);
 
     if (!data) {
@@ -224,9 +339,6 @@ export async function generateMetadata({
         description: 'The requested guide could not be found.',
       };
     }
-
-    const baseUrl = APP_CONFIG.url;
-    const canonicalUrl = `${baseUrl}/guides/${slug.join('/')}`;
 
     return {
       title: data.title,
@@ -305,6 +417,24 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
     }
 
     const { slug } = validationResult.data;
+
+    // Handle category listing pages (single segment)
+    if (slug.length === 1) {
+      const category = slug[0];
+      if (!category) {
+        notFound();
+      }
+
+      const guides = await getCategoryGuides(category);
+
+      if (guides.length === 0) {
+        notFound();
+      }
+
+      return <CategoryGuidesPage category={category} guides={guides} />;
+    }
+
+    // Handle individual guide pages (multiple segments)
     const data = await getSEOPageData(slug);
 
     if (!data) {

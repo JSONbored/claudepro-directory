@@ -2,7 +2,7 @@
   "slug": "production-codebase-auditor",
   "description": "Expert in comprehensive production codebase analysis with Zod validation enforcement, security vulnerability detection, and code consolidation strategies",
   "category": "rules",
-  "author": "shadowbook",
+  "author": "JSONbored",
   "dateAdded": "2025-09-26",
   "tags": [
     "zod",

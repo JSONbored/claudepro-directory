@@ -19,12 +19,12 @@
  * @see lib/config/custom-renderers.tsx - Custom renderers
  */
 
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { toast } from 'sonner';
 import { CodeHighlight } from '@/components/shared/code-highlight';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { copyToClipboard } from '@/lib/clipboard-utils';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { Copy } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/lib/ui-constants';
@@ -51,7 +51,22 @@ export const ConfigurationSection = memo(function ConfigurationSection({
   customRenderer,
   format = 'json',
 }: ConfigurationSectionProps) {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard({
+    onSuccess: () => {
+      toast.success('Copied!', {
+        description: 'Configuration has been copied to your clipboard.',
+      });
+    },
+    onError: () => {
+      toast.error('Copy failed', {
+        description: 'Unable to copy configuration to clipboard.',
+      });
+    },
+    context: {
+      component: 'configuration-section',
+      action: 'copy-config',
+    },
+  });
 
   // Use custom renderer if provided
   if (customRenderer) {
@@ -66,22 +81,7 @@ export const ConfigurationSection = memo(function ConfigurationSection({
       ? JSON.stringify(configSection, null, 2)
       : JSON.stringify(item.configuration, null, 2);
 
-    const success = await copyToClipboard(contentToCopy, {
-      component: 'configuration-section',
-      action: 'copy-config',
-    });
-
-    setCopied(true);
-    if (success) {
-      toast.success('Copied!', {
-        description: 'Configuration has been copied to your clipboard.',
-      });
-    } else {
-      toast.error('Copy failed', {
-        description: 'Unable to copy configuration to clipboard.',
-      });
-    }
-    setTimeout(() => setCopied(false), 2000);
+    await copy(contentToCopy);
   };
 
   // Multi-format configuration (MCP servers)

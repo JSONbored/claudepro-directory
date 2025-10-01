@@ -199,25 +199,6 @@ export const cliToConfig = (args: string): Record<string, unknown> => {
   return config;
 };
 
-/**
- * Transform markdown to plain text
- */
-export const markdownToPlainText = (markdown: string): string => {
-  return markdown
-    .replace(/#{1,6}\s+/g, '') // Remove headers
-    .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold
-    .replace(/\*([^*]+)\*/g, '$1') // Remove italic
-    .replace(/`([^`]+)`/g, '$1') // Remove inline code
-    .replace(/```[\s\S]*?```/g, '') // Remove code blocks
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links
-    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '') // Remove images
-    .replace(/^\s*[-*+]\s+/gm, '') // Remove list markers
-    .replace(/^\s*\d+\.\s+/gm, '') // Remove numbered list markers
-    .replace(/^\s*>\s+/gm, '') // Remove blockquotes
-    .replace(/\n{3,}/g, '\n\n') // Normalize multiple newlines
-    .trim();
-};
-
 export const toSocialShare = (
   item: AgentContent | McpContent | CommandContent | HookContent | RuleContent,
   type: string,

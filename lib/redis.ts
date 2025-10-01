@@ -77,7 +77,7 @@
 
 import { z } from 'zod';
 import { logger } from './logger';
-import { type CacheService, CacheServices, RateLimiters, redisClient } from './redis/index';
+import { type CacheService, CacheServices, redisClient } from './redis/index';
 import type { CacheInvalidationResult } from './schemas/cache.schema';
 import {
   cacheCategorySchema,
@@ -88,23 +88,9 @@ import {
 import { validateCacheKey } from './schemas/primitives/api-cache-primitives';
 
 const BATCH_SIZE = 50;
-const rateLimiter = RateLimiters.api('redis_ops');
 
-// Generic operation executor with rate limiting and logging
-const exec = async <T>(
-  fn: () => Promise<T>,
-  fallback: T,
-  op: string,
-  skipRateLimit = false
-): Promise<T> => {
-  if (!skipRateLimit) {
-    const { success } = await rateLimiter.checkRateLimit(1);
-    if (!success) {
-      logger.warn(`Rate limit: ${op}`);
-      return fallback;
-    }
-  }
-
+// Generic operation executor with error logging
+const exec = async <T>(fn: () => Promise<T>, fallback: T, op: string): Promise<T> => {
   try {
     return await fn();
   } catch (e) {
@@ -339,7 +325,6 @@ export const contentCache = {
  * Optimizer utilities
  */
 export const redisOptimizer = {
-  getRateLimitStats: () => rateLimiter.getStatus(),
   getConnectionStats: () => ({
     status: redisClient.getStatus(),
     storage: redisClient.getStorageStats(),
@@ -416,20 +401,17 @@ export const redisOptimizer = {
   },
 
   getOptimizationReport: async () => {
-    const [cacheStats, connectionStats, rateLimitStats] = await Promise.all([
+    const [cacheStats, connectionStats] = await Promise.all([
       Promise.resolve(CacheServices.api.getStats()),
       Promise.resolve(redisClient.getStorageStats()),
-      rateLimiter.getStatus(),
     ]);
 
     const suggestions: string[] = [];
     if (cacheStats.cacheHitRate && cacheStats.cacheHitRate < 70)
       suggestions.push('Increase cache TTL', 'Review key strategies');
-    if (rateLimitStats.utilizationPercent > 80)
-      suggestions.push('Add app-level caching', 'Increase batch sizes');
     suggestions.push('Use batch operations', 'Implement cache warming', 'Monitor hit rates');
 
-    return { cacheStats, connectionStats, rateLimitStats, optimizationSuggestions: suggestions };
+    return { cacheStats, connectionStats, optimizationSuggestions: suggestions };
   },
 };
 

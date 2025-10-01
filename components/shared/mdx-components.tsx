@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React from 'react';
 import { z } from 'zod';
-import { copyToClipboard } from '@/lib/clipboard-utils';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { CheckCircle, Copy, ExternalLink } from '@/lib/icons';
 import type { MdxElementProps, MdxHeadingProps, MdxLinkProps } from '@/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/lib/ui-constants';
@@ -16,13 +16,16 @@ export function CopyableHeading({
   className,
   ...props
 }: MdxHeadingProps & { level: 1 | 2 | 3 }) {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard({
+    context: {
+      component: 'CopyableHeading',
+      action: 'copy-heading-link',
+    },
+  });
 
   const handleCopy = () => {
     if (id) {
-      navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}#${id}`);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      copy(`${window.location.origin}${window.location.pathname}#${id}`);
     }
   };
 
@@ -64,7 +67,12 @@ const textContentSchema = z.string().min(0);
 
 // Client component for copyable code blocks
 export function CopyableCodeBlock({ children, className, ...props }: MdxElementProps) {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard({
+    context: {
+      component: 'CopyableCodeBlock',
+      action: 'copy-code',
+    },
+  });
 
   const handleCopy = async () => {
     // Extract text content from React children with proper validation
@@ -85,15 +93,7 @@ export function CopyableCodeBlock({ children, className, ...props }: MdxElementP
     const rawText = extractTextContent(children);
     const validatedText = textContentSchema.parse(rawText);
 
-    const success = await copyToClipboard(validatedText, {
-      component: 'CopyableCodeBlock',
-      action: 'copy-code',
-    });
-
-    if (success) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
+    await copy(validatedText);
   };
 
   return (

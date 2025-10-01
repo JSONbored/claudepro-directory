@@ -20,7 +20,7 @@ export const dynamicParams = true; // Allow new pages to be generated on-demand
 
 async function getComparisonData(slug: string): Promise<ComparisonData | null> {
   try {
-    const filePath = path.join(process.cwd(), 'seo', 'comparisons', `${slug}.mdx`);
+    const filePath = path.join(process.cwd(), 'content', 'guides', 'comparisons', `${slug}.mdx`);
     const fileContent = await fs.readFile(filePath, 'utf-8');
 
     // Parse frontmatter
@@ -60,7 +60,13 @@ async function getComparisonData(slug: string): Promise<ComparisonData | null> {
 
 export async function generateStaticParams() {
   try {
-    const metadataPath = path.join(process.cwd(), 'seo', 'comparisons', '_metadata.json');
+    const metadataPath = path.join(
+      process.cwd(),
+      'content',
+      'guides',
+      'comparisons',
+      '_metadata.json'
+    );
     const metadata = JSON.parse(await fs.readFile(metadataPath, 'utf-8'));
 
     return metadata.map((item: { slug: string }) => ({

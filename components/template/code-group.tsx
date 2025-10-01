@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { Check, Copy } from '@/lib/icons';
 import { type CodeGroupProps, codeGroupPropsSchema } from '@/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/lib/ui-constants';
@@ -17,10 +18,22 @@ export function CodeGroup(props: CodeGroupProps) {
   const [activeExample, setActiveExample] = React.useState(0);
   const [copiedIndex, setCopiedIndex] = React.useState<number | null>(null);
 
-  const handleCopy = (code: string, index: number) => {
-    navigator.clipboard.writeText(code);
-    setCopiedIndex(index);
-    setTimeout(() => setCopiedIndex(null), 2000);
+  const { copy } = useCopyToClipboard({
+    onSuccess: () => {
+      // copiedIndex is set before copy is called
+    },
+    context: {
+      component: 'CodeGroup',
+      action: 'copy-code',
+    },
+  });
+
+  const handleCopy = async (code: string, index: number) => {
+    const success = await copy(code);
+    if (success) {
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    }
   };
 
   if (validExamples.length === 0) {

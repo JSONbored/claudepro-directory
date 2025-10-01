@@ -13,11 +13,10 @@
  */
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { copyToClipboard } from '@/lib/clipboard-utils';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { ArrowLeft, Copy } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import type { ContentTypeConfig } from '@/lib/types/content-type-config';
@@ -47,7 +46,22 @@ export function DetailHeaderActions({
   onCopyContent,
 }: DetailHeaderActionsProps) {
   const router = useRouter();
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard({
+    onSuccess: () => {
+      toast.success('Copied!', {
+        description: `${config.typeName} content has been copied to your clipboard.`,
+      });
+    },
+    onError: () => {
+      toast.error('Copy failed', {
+        description: 'Unable to copy content to clipboard.',
+      });
+    },
+    context: {
+      component: 'detail-header-actions',
+      action: 'copy-content',
+    },
+  });
 
   const handleCopyContent = async () => {
     if (onCopyContent) {
@@ -65,22 +79,7 @@ export function DetailHeaderActions({
         : '') ??
       '';
 
-    const success = await copyToClipboard(contentToCopy, {
-      component: 'detail-header',
-      action: 'copy-content',
-    });
-
-    setCopied(true);
-    if (success) {
-      toast.success('Copied!', {
-        description: `${config.typeName} content has been copied to your clipboard.`,
-      });
-    } else {
-      toast.error('Copy failed', {
-        description: 'Unable to copy content to clipboard.',
-      });
-    }
-    setTimeout(() => setCopied(false), 2000);
+    await copy(contentToCopy);
   };
 
   return (

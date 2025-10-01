@@ -10,10 +10,10 @@ import { ErrorBoundary } from '@/components/shared/error-boundary';
 import { PerformanceOptimizer } from '@/components/shared/performance-optimizer';
 import { StructuredData } from '@/components/shared/structured-data';
 import { UmamiScript } from '@/components/shared/umami-script';
+import { WebVitals } from '@/components/shared/web-vitals';
 import { OrganizationStructuredData } from '@/components/structured-data/organization-schema';
 import { APP_CONFIG, SEO_CONFIG } from '@/lib/constants';
 import { UI_CLASSES } from '@/lib/ui-constants';
-import { WebVitals } from './components/web-vitals';
 
 // Configure Inter font with optimizations
 const inter = Inter({
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     title: SEO_CONFIG.titleTemplate.replace('%s', SEO_CONFIG.defaultTitle),
     description: SEO_CONFIG.defaultDescription,
     // Next.js automatically uses opengraph-image if no twitter-image is specified
-    creator: '@shadowbook',
+    creator: '@JSONbored',
   },
   robots: {
     index: true,

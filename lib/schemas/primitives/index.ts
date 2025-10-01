@@ -45,7 +45,6 @@ export {
   type ShortTTL,
   type SlugString,
   shortTTL,
-  slugString,
   TTL_RANGES,
   validateCacheKey,
   validateTTL,

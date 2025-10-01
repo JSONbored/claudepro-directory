@@ -1,6 +1,5 @@
 'use server';
 
-import { redirect } from 'next/navigation';
 import { ZodError } from 'zod';
 import { githubService } from '@/lib/github.service';
 import { logger } from '@/lib/logger';
@@ -113,8 +112,4 @@ export async function submitConfiguration(
       error: 'An unexpected error occurred. Please try again.',
     };
   }
-}
-
-export async function resetForm(): Promise<void> {
-  redirect('/submit');
 }

@@ -53,20 +53,6 @@ export type ContentItem = z.infer<typeof contentItemSchema>;
 // Use: import { type ContentCategory, contentCategorySchema } from '@/lib/schemas/shared.schema';
 
 /**
- * Detailed content union (for complex content validation)
- */
-export const detailedContentSchema = z.union([
-  agentContentSchema,
-  mcpContentSchema,
-  commandContentSchema,
-  hookContentSchema,
-  ruleContentSchema,
-  guideContentSchema,
-]);
-
-export type DetailedContent = z.infer<typeof detailedContentSchema>;
-
-/**
  * Content category literals for type safety - using shared schema
  */
 

@@ -1,14 +1,15 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { toast } from 'sonner';
 import { trackCopy } from '@/app/actions/track-view';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SourceBadge, TagBadge, TypeBadge } from '@/components/ui/config-badge';
-import { copyToClipboard } from '@/lib/clipboard-utils';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { SOCIAL_LINKS } from '@/lib/constants';
 import { Check, Copy, ExternalLink, Github } from '@/lib/icons';
 import type { ConfigCardProps } from '@/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/lib/ui-constants';
@@ -17,22 +18,13 @@ import { getDisplayTitle } from '@/lib/utils';
 export const ConfigCard = memo(
   ({ item, variant = 'default', showCategory = true, showActions = true }: ConfigCardProps) => {
     const router = useRouter();
-    const [copied, setCopied] = useState(false);
     const displayTitle = getDisplayTitle(item);
 
     // Map types to their actual route paths - fixed routing
     const targetPath = `/${item.category}/${item.slug}`;
 
-    const handleCopy = async (e: React.MouseEvent) => {
-      e.stopPropagation();
-
-      const success = await copyToClipboard(`${window.location.origin}${targetPath}`, {
-        component: 'config-card',
-        action: 'copy-link',
-      });
-
-      setCopied(true);
-      if (success) {
+    const { copied, copy } = useCopyToClipboard({
+      onSuccess: () => {
         // Track copy action for analytics (silent fail)
         trackCopy(item.category || '', item.slug).catch(() => {
           // Silent fail - don't break UX
@@ -41,12 +33,21 @@ export const ConfigCard = memo(
         toast.success('Link copied!', {
           description: 'The config link has been copied to your clipboard.',
         });
-      } else {
+      },
+      onError: () => {
         toast.error('Failed to copy', {
           description: 'Could not copy the link to clipboard.',
         });
-      }
-      setTimeout(() => setCopied(false), 2000);
+      },
+      context: {
+        component: 'config-card',
+        action: 'copy-link',
+      },
+    });
+
+    const handleCopy = async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      await copy(`${window.location.origin}${targetPath}`);
     };
 
     const handleViewConfig = (e: React.MouseEvent) => {
@@ -130,7 +131,18 @@ export const ConfigCard = memo(
             <div
               className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 ${UI_CLASSES.TEXT_XS} text-muted-foreground`}
             >
-              <span>by {item.author}</span>
+              <span>
+                by{' '}
+                <a
+                  href={SOCIAL_LINKS.authorProfile}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline hover:text-foreground transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {item.author}
+                </a>
+              </span>
               {item.popularity !== undefined && (
                 <>
                   <span>•</span>

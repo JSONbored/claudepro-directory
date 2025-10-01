@@ -14,7 +14,7 @@
 import { memo, useEffect, useState } from 'react';
 import { ErrorBoundary } from '@/components/shared/error-boundary';
 import { Button } from '@/components/ui/button';
-import { copyToClipboard } from '@/lib/clipboard-utils';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { Check, Copy } from '@/lib/icons';
 import { logger } from '@/lib/logger';
 import type { CodeHighlightProps } from '@/lib/schemas/component.schema';
@@ -79,7 +79,12 @@ const CodeHighlightComponent = ({
   title,
   showCopy = true,
 }: CodeHighlightProps) => {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard({
+    context: {
+      component: 'CodeHighlight',
+      action: 'copy-code',
+    },
+  });
   const [highlightedCode, setHighlightedCode] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -188,15 +193,7 @@ const CodeHighlightComponent = ({
   }, [code, language, title]);
 
   const handleCopyCode = async () => {
-    const success = await copyToClipboard(code, {
-      component: 'CodeHighlight',
-      action: 'copy-code',
-    });
-
-    if (success) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
+    await copy(code);
   };
 
   return (
