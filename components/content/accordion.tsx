@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { type AccordionProps, accordionPropsSchema } from '@/lib/schemas';
+import { type AccordionProps, accordionPropsSchema } from '@/lib/schemas/shared.schema';
 
 export function Accordion(props: AccordionProps) {
   const validated = accordionPropsSchema.parse(props);

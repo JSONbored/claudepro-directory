@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import type { FilterState, UnifiedSearchProps } from '@/lib/schemas';
+import type { FilterState, UnifiedSearchProps } from '@/lib/schemas/component.schema';
 import { sanitizeSearchQuery } from '@/lib/security';
 import { cn } from '@/lib/utils';
 

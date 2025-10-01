@@ -17,8 +17,8 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Button } from '@/components/ui/button';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import { logger } from '@/lib/logger';
-import type { CodeHighlightProps } from '@/lib/schemas';
-import { highlightedCodeSafeSchema } from '@/lib/schemas';
+import type { CodeHighlightProps } from '@/lib/schemas/component.schema';
+import { highlightedCodeSafeSchema } from '@/lib/schemas/form.schema';
 
 // Lazy-load Shiki with fine-grained bundles
 let highlighterPromise: Promise<Awaited<ReturnType<typeof createHighlighter>>> | null = null;

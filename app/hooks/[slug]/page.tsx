@@ -7,8 +7,8 @@ import { getHookBySlug, getHookFullContent, hooks } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
 import { sortContent } from '@/lib/content-sorting';
 import { logger } from '@/lib/logger';
-import type { PageProps } from '@/lib/schemas';
-import { slugParamsSchema } from '@/lib/schemas';
+import type { PageProps } from '@/lib/schemas/app.schema';
+import { slugParamsSchema } from '@/lib/schemas/app.schema';
 import { hookContentSchema } from '@/lib/schemas/content';
 import { getDisplayTitle } from '@/lib/utils';
 

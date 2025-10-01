@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { SOCIAL_LINKS } from '@/lib/constants';
-import { type ConfigSubmissionInput, configSubmissionSchema } from '@/lib/schemas';
+import { type ConfigSubmissionInput, configSubmissionSchema } from '@/lib/schemas/form.schema';
 
 export default function SubmitPage() {
   // Generate unique IDs for form elements

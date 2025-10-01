@@ -17,7 +17,7 @@
 import { Thermometer } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { UnifiedContentItem } from '@/lib/schemas';
+import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 
 /**
  * Props for SidebarDetailsCard

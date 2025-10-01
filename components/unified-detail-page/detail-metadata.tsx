@@ -13,7 +13,7 @@ import { Calendar, Tag, User } from 'lucide-react';
 import { z } from 'zod';
 import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/lib/date-utils';
-import type { UnifiedContentItem } from '@/lib/schemas';
+import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 
 /**
  * Schema for DetailMetadata props

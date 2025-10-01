@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { cacheWarmer } from '@/lib/cache-warmer';
 import { handleApiError, handleValidationError } from '@/lib/error-handler';
 import { logger } from '@/lib/logger';
-import { errorInputSchema } from '@/lib/schemas';
+import { errorInputSchema } from '@/lib/schemas/error.schema';
 import { apiSchemas, baseSchemas, ValidationError, validation } from '@/lib/security';
 
 /**

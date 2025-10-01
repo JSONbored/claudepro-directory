@@ -16,8 +16,12 @@ import {
 import { type Job, jobs } from '@/data/jobs';
 import { APP_CONFIG } from '@/lib/constants';
 import { logger } from '@/lib/logger';
-import type { PagePropsWithSearchParams } from '@/lib/schemas';
-import { type JobsSearchParams, jobsSearchSchema, parseSearchParams } from '@/lib/schemas';
+import type { PagePropsWithSearchParams } from '@/lib/schemas/app.schema';
+import {
+  type JobsSearchParams,
+  jobsSearchSchema,
+  parseSearchParams,
+} from '@/lib/schemas/search.schema';
 
 export async function generateMetadata({
   searchParams,

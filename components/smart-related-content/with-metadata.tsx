@@ -8,7 +8,7 @@
  * component tree without prop drilling.
  */
 
-import type { SmartRelatedContentWithMetadataProps } from '@/lib/schemas';
+import type { SmartRelatedContentWithMetadataProps } from '@/lib/schemas/related-content.schema';
 import { SmartRelatedContent } from './index';
 
 /**

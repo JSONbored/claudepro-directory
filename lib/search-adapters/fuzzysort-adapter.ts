@@ -15,7 +15,7 @@
  * @see https://github.com/farzher/fuzzysort
  */
 
-import type { SearchableItem, SearchFilters } from '@/lib/schemas';
+import type { SearchableItem, SearchFilters } from '@/lib/schemas/search.schema';
 import { sortAlphabetically, sortByNewest, sortByPopularity } from '../content-sorting';
 import { logger } from '../logger';
 

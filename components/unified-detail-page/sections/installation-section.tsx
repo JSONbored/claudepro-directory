@@ -17,7 +17,7 @@
 import { Copy } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import type { UnifiedContentItem } from '@/lib/schemas';
+import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import type { InstallationSteps } from '@/lib/types/content-type-config';
 
 /**

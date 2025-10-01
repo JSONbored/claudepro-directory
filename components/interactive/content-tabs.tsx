@@ -7,7 +7,7 @@
  */
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { type ContentTabsProps, contentTabsPropsSchema } from '@/lib/schemas';
+import { type ContentTabsProps, contentTabsPropsSchema } from '@/lib/schemas/shared.schema';
 
 export function ContentTabs(props: ContentTabsProps) {
   const validated = contentTabsPropsSchema.parse(props);

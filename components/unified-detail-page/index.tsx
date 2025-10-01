@@ -21,7 +21,7 @@
 
 import { useMemo } from 'react';
 import { getContentTypeConfig } from '@/lib/config/content-type-configs';
-import type { UnifiedContentItem } from '@/lib/schemas';
+import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import type { InstallationSteps } from '@/lib/types/content-type-config';
 import { getDisplayTitle } from '@/lib/utils';
 import { DetailHeader } from './detail-header';

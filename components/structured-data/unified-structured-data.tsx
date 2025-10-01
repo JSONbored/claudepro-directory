@@ -1,4 +1,5 @@
 import Script from 'next/script';
+import { serializeJsonLd } from '@/lib/schemas/form.schema';
 import {
   buildBreadcrumb,
   buildCreativeWork,
@@ -141,7 +142,7 @@ export function UnifiedStructuredData({ item }: UnifiedStructuredDataProps) {
             type="application/ld+json"
             // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data is generated from validated Zod schemas
             dangerouslySetInnerHTML={{
-              __html: JSON.stringify(schema),
+              __html: serializeJsonLd(schema),
             }}
             strategy="afterInteractive"
           />

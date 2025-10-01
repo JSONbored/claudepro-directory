@@ -9,18 +9,19 @@ import type {
   mdxHeadingPropsSchema,
   mdxImagePropsSchema,
   mdxLinkPropsSchema,
-} from '@/lib/schemas';
+} from '@/lib/schemas/shared.schema';
 // Import lightweight components (always loaded)
-import {
-  Accordion,
-  AIOptimizedFAQ,
-  Callout,
-  CaseStudy,
-  FeatureGrid,
-  InfoBox,
-  TLDRSummary,
-} from './content';
-import { Checklist, ExpertQuote, QuickReference, ContentTabs as Tabs } from './interactive';
+import { Accordion } from './content/accordion';
+import { Callout } from './content/callout';
+import { CaseStudy } from './content/case-study';
+import { AIOptimizedFAQ } from './content/faq';
+import { FeatureGrid } from './content/feature-grid';
+import { InfoBox } from './content/info-box';
+import { TLDRSummary } from './content/tldr-summary';
+import { Checklist } from './interactive/checklist';
+import { ContentTabs as Tabs } from './interactive/content-tabs';
+import { ExpertQuote } from './interactive/expert-quote';
+import { QuickReference } from './interactive/quick-reference';
 // Import heavy components as lazy-loaded (Suspense boundaries)
 import {
   ComparisonTable,
@@ -37,7 +38,7 @@ import {
   InternalLinkComponent,
 } from './mdx-components';
 import { setPageMetadata } from './smart-related-content/with-metadata';
-import { CodeGroup } from './template';
+import { CodeGroup } from './template/code-group';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';

@@ -17,7 +17,7 @@ import { ExternalLink } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { UnifiedContentItem } from '@/lib/schemas';
+import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import { getDisplayTitle } from '@/lib/utils';
 
 /**

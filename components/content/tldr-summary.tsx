@@ -8,7 +8,7 @@
 
 import { CheckCircle, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { type TLDRSummaryProps, tldrSummaryPropsSchema } from '@/lib/schemas';
+import { type TLDRSummaryProps, tldrSummaryPropsSchema } from '@/lib/schemas/shared.schema';
 
 export function TLDRSummary(props: TLDRSummaryProps) {
   const validated = tldrSummaryPropsSchema.parse(props);

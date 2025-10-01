@@ -18,7 +18,7 @@
 import { sanitizers as sanitizersObject } from './validators';
 
 // ErrorSeverity type comes from schemas
-export type { ErrorSeverity } from '@/lib/schemas';
+export type { ErrorSeverity } from '@/lib/schemas/error.schema';
 // Error sanitization (from error-sanitizer.ts)
 export {
   ErrorSanitizer,

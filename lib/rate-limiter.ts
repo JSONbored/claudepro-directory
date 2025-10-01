@@ -8,13 +8,13 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { redisClient } from '@/lib/redis';
+import { createRequestId } from '@/lib/schemas/branded-types.schema';
 import {
-  createRequestId,
   ipAddressSchema,
   type MiddlewareRateLimitConfig,
   middlewareRateLimitConfigSchema,
   requestPathSchema,
-} from '@/lib/schemas';
+} from '@/lib/schemas/middleware.schema';
 import { sanitizeApiError } from '@/lib/security';
 
 // Use MiddlewareRateLimitConfig from middleware schema

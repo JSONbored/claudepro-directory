@@ -70,7 +70,7 @@ const LazySmartRelatedContentWithMetadata = dynamic(
 );
 
 const LazyMetricsDisplay = dynamic(
-  () => import('./analytics').then((m) => ({ default: m.MetricsDisplay })),
+  () => import('./analytics/metrics-display').then((m) => ({ default: m.MetricsDisplay })),
   {
     loading: () => <MetricsSkeleton />,
     ssr: true,
@@ -78,7 +78,7 @@ const LazyMetricsDisplay = dynamic(
 );
 
 const LazyComparisonTable = dynamic(
-  () => import('./template').then((m) => ({ default: m.ComparisonTable })),
+  () => import('./template/comparison-table').then((m) => ({ default: m.ComparisonTable })),
   {
     loading: () => <ComparisonTableSkeleton />,
     ssr: true,
@@ -86,7 +86,7 @@ const LazyComparisonTable = dynamic(
 );
 
 const LazyDiagnosticFlow = dynamic(
-  () => import('./troubleshooting').then((m) => ({ default: m.DiagnosticFlow })),
+  () => import('./troubleshooting/diagnostic-flow').then((m) => ({ default: m.DiagnosticFlow })),
   {
     loading: () => <DiagnosticFlowSkeleton />,
     ssr: true,
@@ -94,7 +94,7 @@ const LazyDiagnosticFlow = dynamic(
 );
 
 const LazyStepByStepGuide = dynamic(
-  () => import('./template').then((m) => ({ default: m.StepByStepGuide })),
+  () => import('./template/step-guide').then((m) => ({ default: m.StepByStepGuide })),
   {
     loading: () => <ComparisonTableSkeleton />,
     ssr: true,
@@ -102,7 +102,7 @@ const LazyStepByStepGuide = dynamic(
 );
 
 const LazyErrorTable = dynamic(
-  () => import('./troubleshooting').then((m) => ({ default: m.ErrorTable })),
+  () => import('./troubleshooting/error-table').then((m) => ({ default: m.ErrorTable })),
   {
     loading: () => <ComparisonTableSkeleton />,
     ssr: true,

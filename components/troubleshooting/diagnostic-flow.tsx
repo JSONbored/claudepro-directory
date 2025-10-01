@@ -9,7 +9,7 @@ import { CheckCircle } from 'lucide-react';
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { type DiagnosticFlowProps, diagnosticFlowPropsSchema } from '@/lib/schemas';
+import { type DiagnosticFlowProps, diagnosticFlowPropsSchema } from '@/lib/schemas/shared.schema';
 
 export function DiagnosticFlow(props: DiagnosticFlowProps) {
   const validated = diagnosticFlowPropsSchema.parse(props);

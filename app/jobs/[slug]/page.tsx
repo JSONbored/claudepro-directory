@@ -16,8 +16,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { jobs } from '@/data/jobs';
 import { logger } from '@/lib/logger';
-import type { PageProps } from '@/lib/schemas';
-import { slugParamsSchema } from '@/lib/schemas';
+import type { PageProps } from '@/lib/schemas/app.schema';
+import { slugParamsSchema } from '@/lib/schemas/app.schema';
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   if (!params) {

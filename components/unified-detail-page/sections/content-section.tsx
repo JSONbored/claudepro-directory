@@ -19,7 +19,7 @@ import { memo, useMemo } from 'react';
 import { z } from 'zod';
 import { CodeHighlight } from '@/components/code-highlight';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import type { UnifiedContentItem } from '@/lib/schemas';
+import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import { componentTitleString } from '@/lib/schemas/primitives';
 
 /**

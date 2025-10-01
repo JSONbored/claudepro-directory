@@ -3,7 +3,7 @@ import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
-import type { MDXFrontmatter } from '@/lib/schemas';
+import type { MDXFrontmatter } from '@/lib/schemas/markdown.schema';
 
 // MDX node schema for type safety
 const mdxNodeChildSchema = z.object({

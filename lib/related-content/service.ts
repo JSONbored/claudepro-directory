@@ -6,7 +6,8 @@
 import { z } from 'zod';
 import { CACHE_CONFIG } from '@/lib/constants';
 import { logger } from '@/lib/logger';
-import { isDevelopment, unifiedContentItemSchema } from '@/lib/schemas';
+import { unifiedContentItemSchema } from '@/lib/schemas/components/content-item.schema';
+import { isDevelopment } from '@/lib/schemas/env.schema';
 import { viewCountService } from '@/lib/view-count.service';
 
 // Clean, production Zod schemas

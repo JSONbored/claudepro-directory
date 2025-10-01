@@ -9,7 +9,7 @@ import { AlertTriangle, BookOpen, CheckCircle } from 'lucide-react';
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { type ChecklistProps, checklistPropsSchema } from '@/lib/schemas';
+import { type ChecklistProps, checklistPropsSchema } from '@/lib/schemas/shared.schema';
 
 export function Checklist(props: ChecklistProps) {
   const validated = checklistPropsSchema.parse(props);

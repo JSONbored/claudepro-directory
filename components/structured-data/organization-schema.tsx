@@ -1,6 +1,6 @@
 import Script from 'next/script';
 import { APP_CONFIG } from '@/lib/constants';
-import { jsonLdSafeSchema } from '@/lib/schemas';
+import { serializeJsonLd } from '@/lib/schemas/form.schema';
 
 /**
  * Generate organization structured data for the entire site
@@ -258,19 +258,16 @@ export function OrganizationStructuredData() {
 
   const schemas = [organizationSchema, websiteSchema, collectionSchema, serviceSchema];
 
-  // Sanitize each schema through Zod to prevent XSS
-  const safeSchemas = schemas.map((schema) => jsonLdSafeSchema.parse(schema));
-
   return (
     <>
-      {safeSchemas.map((schema) => (
+      {schemas.map((schema) => (
         <Script
           key={`org-schema-${schema['@type']}`}
           id={`organization-structured-data-${schema['@type']}`}
           type="application/ld+json"
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data is sanitized via Zod schema
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD per Next.js official pattern with XSS escaping
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(schema),
+            __html: serializeJsonLd(schema),
           }}
           strategy="afterInteractive"
         />

@@ -6,7 +6,7 @@
  */
 
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from 'lucide-react';
-import { type MetricsDisplayProps, metricsDisplayPropsSchema } from '@/lib/schemas';
+import { type MetricsDisplayProps, metricsDisplayPropsSchema } from '@/lib/schemas/shared.schema';
 import { cn } from '@/lib/utils';
 
 // Lightweight Badge component for delta display

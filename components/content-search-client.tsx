@@ -16,7 +16,7 @@ const UnifiedSearch = dynamic(
 );
 
 import { getIconByName } from '@/lib/icons';
-import type { ContentSearchClientProps, UnifiedContentItem } from '@/lib/schemas';
+import type { ContentSearchClientProps, UnifiedContentItem } from '@/lib/schemas/component.schema';
 
 export function ContentSearchClient<T extends UnifiedContentItem>({
   items,

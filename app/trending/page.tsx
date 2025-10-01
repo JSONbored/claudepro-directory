@@ -5,8 +5,12 @@ import { TrendingContent } from '@/components/trending-content';
 import { Badge } from '@/components/ui/badge';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
 import { logger } from '@/lib/logger';
-import type { PagePropsWithSearchParams } from '@/lib/schemas';
-import { parseSearchParams, type TrendingParams, trendingParamsSchema } from '@/lib/schemas';
+import type { PagePropsWithSearchParams } from '@/lib/schemas/app.schema';
+import {
+  parseSearchParams,
+  type TrendingParams,
+  trendingParamsSchema,
+} from '@/lib/schemas/search.schema';
 
 // ISR Configuration - Revalidate every 5 minutes for trending data
 // Static file provides instant load, ISR ensures freshness

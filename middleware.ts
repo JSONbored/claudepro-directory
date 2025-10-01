@@ -4,9 +4,9 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { isDevelopment, isProduction } from '@/lib/env-client';
+import { env, securityConfig } from '@/lib/schemas/env.schema';
 import { logger } from '@/lib/logger';
 import { rateLimiters } from '@/lib/rate-limiter';
-import { env, securityConfig } from '@/lib/schemas';
 
 // Force Node.js runtime for middleware (Redis compression requires node:zlib)
 export const runtime = 'nodejs';
@@ -19,7 +19,7 @@ import {
   staticAssetSchema,
   validateRequest,
   validateSearchQuery,
-} from '@/lib/schemas';
+} from '@/lib/schemas/middleware.schema';
 
 // Initialize Arcjet with comprehensive security rules
 const aj = arcjet({

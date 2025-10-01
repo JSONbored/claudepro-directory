@@ -6,7 +6,7 @@
  */
 
 import { AlertTriangle, CheckCircle, Info, Star } from 'lucide-react';
-import { type InfoBoxProps, infoBoxPropsSchema } from '@/lib/schemas';
+import { type InfoBoxProps, infoBoxPropsSchema } from '@/lib/schemas/shared.schema';
 
 export function InfoBox(props: InfoBoxProps) {
   const validated = infoBoxPropsSchema.parse(props);

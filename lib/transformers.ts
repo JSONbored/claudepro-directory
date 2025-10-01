@@ -3,7 +3,7 @@
  * Converts strict content schema data to flexible component interfaces
  */
 
-import type { UnifiedContentItem } from '@/lib/schemas';
+import type { UnifiedContentItem } from '@/lib/schemas/components/content-item.schema';
 // Import all content types
 import type {
   AgentContent,

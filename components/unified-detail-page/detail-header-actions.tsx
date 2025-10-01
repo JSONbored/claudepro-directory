@@ -19,7 +19,7 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { copyToClipboard } from '@/lib/clipboard-utils';
-import type { UnifiedContentItem } from '@/lib/schemas';
+import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import type { ContentTypeConfig } from '@/lib/types/content-type-config';
 
 export interface DetailHeaderActionsProps {

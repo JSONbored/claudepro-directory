@@ -8,7 +8,7 @@
 
 import { AlertTriangle, CheckCircle, Info, Zap } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { type CalloutProps, calloutPropsSchema } from '@/lib/schemas';
+import { type CalloutProps, calloutPropsSchema } from '@/lib/schemas/shared.schema';
 
 export function Callout(props: CalloutProps) {
   const validated = calloutPropsSchema.parse(props);

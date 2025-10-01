@@ -26,7 +26,7 @@ import { CodeHighlight } from '@/components/code-highlight';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { copyToClipboard } from '@/lib/clipboard-utils';
-import type { UnifiedContentItem } from '@/lib/schemas';
+import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 
 /**
  * Props for ConfigurationSection

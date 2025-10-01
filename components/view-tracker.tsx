@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { trackView } from '@/app/actions/track-view';
-import type { ViewTrackerProps } from '@/lib/schemas';
+import type { ViewTrackerProps } from '@/lib/schemas/component.schema';
 
 export function ViewTracker({ category, slug }: ViewTrackerProps) {
   useEffect(() => {

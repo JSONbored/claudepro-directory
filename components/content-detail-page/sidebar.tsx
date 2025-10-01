@@ -11,7 +11,7 @@
 
 import { DetailSidebar } from '@/components/unified-detail-page/sidebar/detail-sidebar';
 import { getContentTypeConfig } from '@/lib/config/content-type-configs';
-import type { UnifiedContentItem } from '@/lib/schemas';
+import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 
 export interface ContentSidebarProps<T extends UnifiedContentItem> {
   item: T;

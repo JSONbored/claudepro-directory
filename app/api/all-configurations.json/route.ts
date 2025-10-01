@@ -5,7 +5,7 @@ import { APP_CONFIG } from '@/lib/constants';
 import { logger } from '@/lib/logger';
 import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
 import { contentCache } from '@/lib/redis';
-import { createRequestId } from '@/lib/schemas';
+import { createRequestId } from '@/lib/schemas/branded-types.schema';
 import { apiSchemas, sanitizeApiError, ValidationError } from '@/lib/security';
 
 export const runtime = 'nodejs';

@@ -6,16 +6,15 @@
 import { Octokit } from '@octokit/rest';
 import type { z } from 'zod';
 import { logger } from '@/lib/logger';
+import { githubConfig, hasGitHubConfig } from '@/lib/schemas/env.schema';
 import {
   type ConfigSubmissionData,
   gitHubConfigValidationSchema,
   githubApiRateLimitSchema,
-  githubConfig,
   githubHealthCheckResponseSchema,
-  hasGitHubConfig,
   issueCreationRequestSchema,
   issueCreationResponseSchema,
-} from '@/lib/schemas';
+} from '@/lib/schemas/form.schema';
 
 type IssueCreationRequest = z.infer<typeof issueCreationRequestSchema>;
 type IssueCreationResponse = z.infer<typeof issueCreationResponseSchema>;

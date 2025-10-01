@@ -4,7 +4,7 @@ import { handleApiError, handleValidationError } from '@/lib/error-handler';
 import { logger } from '@/lib/logger';
 import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
 import { contentCache } from '@/lib/redis';
-import { errorInputSchema } from '@/lib/schemas';
+import { errorInputSchema } from '@/lib/schemas/error.schema';
 import { apiSchemas, ValidationError, validation } from '@/lib/security';
 
 export const runtime = 'nodejs';

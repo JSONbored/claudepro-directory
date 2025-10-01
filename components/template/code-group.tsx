@@ -7,7 +7,7 @@
 
 import { Check, Copy } from 'lucide-react';
 import React from 'react';
-import { type CodeGroupProps, codeGroupPropsSchema } from '@/lib/schemas';
+import { type CodeGroupProps, codeGroupPropsSchema } from '@/lib/schemas/shared.schema';
 
 export function CodeGroup(props: CodeGroupProps) {
   const validated = codeGroupPropsSchema.parse(props);

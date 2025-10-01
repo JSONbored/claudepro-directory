@@ -11,7 +11,8 @@ import type {
   RelatedContentImpressionEvent,
   RelatedContentViewEvent,
 } from '@/lib/related-content/service';
-import { isDevelopment, type UmamiEventData, umamiEventDataSchema } from '@/lib/schemas';
+import { type UmamiEventData, umamiEventDataSchema } from '@/lib/schemas/analytics.schema';
+import { isDevelopment } from '@/lib/schemas/env.schema';
 
 /**
  * Security constants for analytics validation

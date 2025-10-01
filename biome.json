@@ -161,9 +161,9 @@
       },
       "performance": {
         "noAccumulatingSpread": "error",
-        "noBarrelFile": "off",
+        "noBarrelFile": "error",
         "noDelete": "error",
-        "noReExportAll": "off"
+        "noReExportAll": "error"
       },
       "style": {
         "noDefaultExport": "off",
@@ -249,6 +249,22 @@
     "useIgnoreFile": true
   },
   "overrides": [
+    {
+      "includes": [
+        "lib/redis.ts",
+        "lib/redis/index.ts",
+        "lib/schemas/content/index.ts",
+        "lib/schemas/primitives/index.ts",
+        "lib/security/index.ts"
+      ],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noBarrelFile": "off"
+          }
+        }
+      }
+    },
     {
       "includes": ["*.mdx"],
       "linter": {

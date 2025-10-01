@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalSearch } from '@/hooks/use-search';
-import type { FloatingSearchSidebarProps } from '@/lib/schemas';
+import type { FloatingSearchSidebarProps } from '@/lib/schemas/component.schema';
 import { getDisplayTitle } from '@/lib/utils';
 
 export function FloatingSearchSidebar({

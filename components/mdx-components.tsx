@@ -5,7 +5,7 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 import { z } from 'zod';
 import { copyToClipboard } from '@/lib/clipboard-utils';
-import type { MdxElementProps, MdxHeadingProps, MdxLinkProps } from '@/lib/schemas';
+import type { MdxElementProps, MdxHeadingProps, MdxLinkProps } from '@/lib/schemas/shared.schema';
 
 // Client component for copy-to-clipboard headings
 export function CopyableHeading({

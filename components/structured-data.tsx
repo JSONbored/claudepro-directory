@@ -1,5 +1,6 @@
 import Script from 'next/script';
 import { APP_CONFIG, SEO_CONFIG } from '@/lib/constants';
+import { serializeJsonLd } from '@/lib/schemas/form.schema';
 
 interface StructuredDataProps {
   type?: string;
@@ -18,8 +19,6 @@ interface StructuredDataProps {
   publishDate?: string;
   breadcrumbs?: Array<{ name: string; url: string }>;
 }
-
-import { jsonLdSafeSchema } from '@/lib/schemas';
 
 export function StructuredData({
   type = 'website',
@@ -135,18 +134,15 @@ export function StructuredData({
 
   if (!jsonLd) return null;
 
-  // Sanitize the JSON-LD data through our Zod schema to prevent XSS
-  const safeJsonLd = jsonLdSafeSchema.parse(jsonLd);
-
   return (
     <>
       {/* biome-ignore lint/correctness/useUniqueElementIds: Script tag needs consistent ID for Next.js */}
       <Script
         id="structured-data"
         type="application/ld+json"
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data is sanitized via Zod schema
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD per Next.js official pattern with XSS escaping
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(safeJsonLd),
+          __html: serializeJsonLd(jsonLd),
         }}
         strategy="afterInteractive"
       />

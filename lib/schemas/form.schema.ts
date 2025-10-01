@@ -174,51 +174,58 @@ export function parseConfigSubmissionForm(formData: FormData): ConfigSubmissionD
 }
 
 /**
- * JSON-LD structured data schema
- * Ensures no script injection in JSON content while supporting nested objects
+ * JSON-LD structured data validator
+ * Production-grade XSS prevention for SSR environments
+ *
+ * Security Strategy:
+ * - Validates JSON structure
+ * - Blocks script injection attempts
+ * - Escapes dangerous characters (< becomes \u003c per Next.js JSON-LD best practices)
+ * - Pure function for Turbopack/SSR compatibility (no Zod in SSR path)
+ *
+ * @see https://nextjs.org/docs/app/guides/json-ld
+ * @see https://www.rapid7.com/blog/post/2022/05/04/xss-in-json-old-school-attacks-for-modern-applications/
  */
-type JsonLdValue =
-  | string
-  | number
-  | boolean
-  | null
-  | JsonLdValue[]
-  | { [key: string]: JsonLdValue };
-
-const jsonLdValue: z.ZodType<JsonLdValue> = z.lazy(() =>
-  z.union([
-    z.string(),
-    z.number(),
-    z.boolean(),
-    z.null(),
-    z.array(jsonLdValue),
-    z.record(z.string(), jsonLdValue),
-  ])
-);
-
-export const jsonLdSafeSchema = jsonLdValue.transform((data) => {
-  // Convert to JSON string to ensure it's safe
+export function validateJsonLdSafe(data: unknown): unknown {
+  // Stringify with security validation
   const jsonString = JSON.stringify(data);
 
-  // Check for script tag injection attempts
+  // Security checks (multi-layered defense)
   if (/<script\b/i.test(jsonString)) {
     throw new Error('Script tags are not allowed in JSON-LD data');
   }
 
-  // Ensure no JavaScript protocol handlers
   if (/javascript:/i.test(jsonString)) {
     throw new Error('JavaScript protocol not allowed in JSON-LD data');
   }
 
-  // Parse back to ensure valid JSON
+  if (/<iframe\b/i.test(jsonString)) {
+    throw new Error('Iframe tags are not allowed in JSON-LD data');
+  }
+
+  // Parse to ensure valid JSON structure
   return JSON.parse(jsonString);
-});
+}
 
 /**
- * Syntax-highlighted code schema
- * Validates that HTML comes from trusted syntax highlighter
+ * Serialize JSON-LD safely for SSR rendering
+ * Escapes < characters to prevent XSS per security best practices
+ *
+ * Usage: dangerouslySetInnerHTML={{ __html: serializeJsonLd(data) }}
  */
-export const highlightedCodeSafeSchema = z.string().transform((html) => {
+export function serializeJsonLd(data: unknown): string {
+  const validated = validateJsonLdSafe(data);
+  // Escape < to \u003c to prevent XSS (industry standard for JSON in HTML)
+  return JSON.stringify(validated).replace(/</g, '\\u003c');
+}
+
+/**
+ * Syntax-highlighted code sanitizer
+ * Validates that HTML comes from trusted syntax highlighter
+ *
+ * Pure function for SSR compatibility
+ */
+export function sanitizeHighlightedCode(html: string): string {
   // Allow specific classes and elements used by syntax highlighters
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: ['pre', 'code', 'span', 'div'],
@@ -228,4 +235,7 @@ export const highlightedCodeSafeSchema = z.string().transform((html) => {
     // Allow style attribute but sanitize its content
     ALLOW_DATA_ATTR: false,
   });
-});
+}
+
+// Passthrough schema for Turbopack/SSR compatibility
+export const highlightedCodeSafeSchema = z.string().transform(sanitizeHighlightedCode);

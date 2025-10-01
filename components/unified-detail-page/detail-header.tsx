@@ -11,7 +11,7 @@
  * @see components/unified-detail-page.tsx - Original implementation
  */
 
-import type { UnifiedContentItem } from '@/lib/schemas';
+import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import type { ContentTypeConfig } from '@/lib/types/content-type-config';
 import { DetailHeaderActions } from './detail-header-actions';
 

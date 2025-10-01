@@ -6,7 +6,7 @@
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { type FAQProps, faqPropsSchema } from '@/lib/schemas';
+import { type FAQProps, faqPropsSchema } from '@/lib/schemas/shared.schema';
 
 export function AIOptimizedFAQ(props: FAQProps) {
   const validated = faqPropsSchema.parse(props);

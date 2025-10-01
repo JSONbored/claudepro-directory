@@ -6,17 +6,17 @@
  */
 
 import { logger } from '@/lib/logger';
-import type { RequestId } from '@/lib/schemas';
+import type { RequestId } from '@/lib/schemas/branded-types.schema';
+import { isProduction } from '@/lib/schemas/env.schema';
 import {
   determineErrorType,
   type ErrorContext,
   type ErrorSeverity,
   errorSeveritySchema,
-  isProduction,
   type SanitizedError,
   validateErrorInput,
   validateSanitizedError,
-} from '@/lib/schemas';
+} from '@/lib/schemas/error.schema';
 import { SENSITIVE_PATTERNS } from './patterns';
 
 // Merge with extended patterns from original file

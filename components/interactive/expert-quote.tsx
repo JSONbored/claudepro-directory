@@ -6,7 +6,7 @@
  */
 
 import Image from 'next/image';
-import { type ExpertQuoteProps, expertQuotePropsSchema } from '@/lib/schemas';
+import { type ExpertQuoteProps, expertQuotePropsSchema } from '@/lib/schemas/shared.schema';
 
 export function ExpertQuote(props: ExpertQuoteProps) {
   const validated = expertQuotePropsSchema.parse(props);

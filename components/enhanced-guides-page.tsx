@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/select';
 import { createSearchIndex, performLocalSearch } from '@/hooks/use-search';
 import type { GuideItemWithCategory } from '@/lib/components/guide-page-factory';
-import type { EnhancedGuidesPageProps } from '@/lib/schemas';
+import type { EnhancedGuidesPageProps } from '@/lib/schemas/component.schema';
 
 const categoryInfo = {
   'use-cases': {

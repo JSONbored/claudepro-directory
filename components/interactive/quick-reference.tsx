@@ -7,7 +7,7 @@
 
 import { BookOpen } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { type QuickReferenceProps, quickReferencePropsSchema } from '@/lib/schemas';
+import { type QuickReferenceProps, quickReferencePropsSchema } from '@/lib/schemas/shared.schema';
 
 export function QuickReference(props: QuickReferenceProps) {
   const validated = quickReferencePropsSchema.parse(props);

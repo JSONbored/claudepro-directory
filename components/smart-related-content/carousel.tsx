@@ -9,7 +9,10 @@ import {
   trackRelatedContentClick,
   trackRelatedContentView,
 } from '@/lib/analytics/events/related-content';
-import type { RelatedCarouselClientProps, RelatedContentItem } from '@/lib/schemas';
+import type {
+  RelatedCarouselClientProps,
+  RelatedContentItem,
+} from '@/lib/schemas/related-content.schema';
 
 export function RelatedCarouselClient({
   items,

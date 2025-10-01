@@ -7,14 +7,13 @@
 
 import { z } from 'zod';
 import { nonEmptyString } from '@/lib/schemas/primitives/base-strings';
-
-// Import schemas from specialized modules
 import {
-  type ConfigCardProps,
-  type HomePageClientProps,
   type UnifiedContentItem,
   unifiedContentItemSchema,
-} from './components';
+} from './components/content-item.schema';
+import type { HomePageClientProps } from './components/page-props.schema';
+// Import schemas from specialized modules
+import type { ConfigCardProps } from './components/ui-props.schema';
 import type { SortOption } from './content-filter.schema';
 
 // Re-export commonly used types from ./components

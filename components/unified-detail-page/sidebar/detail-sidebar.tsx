@@ -14,7 +14,7 @@
 
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
-import type { UnifiedContentItem } from '@/lib/schemas';
+import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import type { ContentTypeConfig } from '@/lib/types/content-type-config';
 import { SidebarDetailsCard } from './sidebar-details-card';
 import { SidebarRelatedItemsCard } from './sidebar-related-items-card';

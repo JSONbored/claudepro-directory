@@ -40,7 +40,7 @@ const guideParamsSchema = z.object({
     .max(5, 'Too many slug segments'),
 });
 
-import type { RelatedGuide, SEOPageData } from '@/lib/schemas';
+import type { RelatedGuide, SEOPageData } from '@/lib/schemas/app.schema';
 
 async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
   // Map URL paths to file locations

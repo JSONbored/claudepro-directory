@@ -5,7 +5,7 @@ import { ContentSearchClient } from '@/components/content-search-client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getIconByName } from '@/lib/icons';
-import type { ContentListServerProps, UnifiedContentItem } from '@/lib/schemas';
+import type { ContentListServerProps, UnifiedContentItem } from '@/lib/schemas/component.schema';
 
 function ContentHeroSection<T extends UnifiedContentItem>({
   title,
