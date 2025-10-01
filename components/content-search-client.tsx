@@ -24,7 +24,7 @@ export function ContentSearchClient<T extends UnifiedContentItem>({
   title,
   icon,
 }: ContentSearchClientProps<T>) {
-  const [displayedItems, setDisplayedItems] = useState<T[]>([...items].slice(0, 20));
+  const [displayedItems, setDisplayedItems] = useState<T[]>(items.slice(0, 20));
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20;
 

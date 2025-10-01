@@ -173,27 +173,27 @@ async function getTrendingData(params: TrendingParams) {
     const recent = mix(
       [
         {
-          items: [...rulesData].reverse().slice(0, 4) as unknown as Record<string, unknown>[],
+          items: rulesData.slice(-4).reverse() as unknown as Record<string, unknown>[],
           type: 'rules',
           count: 2,
         },
         {
-          items: [...mcpData].reverse().slice(0, 4) as unknown as Record<string, unknown>[],
+          items: mcpData.slice(-4).reverse() as unknown as Record<string, unknown>[],
           type: 'mcp',
           count: 2,
         },
         {
-          items: [...agentsData].reverse().slice(0, 3) as unknown as Record<string, unknown>[],
+          items: agentsData.slice(-3).reverse() as unknown as Record<string, unknown>[],
           type: 'agents',
           count: 2,
         },
         {
-          items: [...commandsData].reverse().slice(0, 3) as unknown as Record<string, unknown>[],
+          items: commandsData.slice(-3).reverse() as unknown as Record<string, unknown>[],
           type: 'commands',
           count: 2,
         },
         {
-          items: [...hooksData].reverse().slice(0, 2) as unknown as Record<string, unknown>[],
+          items: hooksData.slice(-2).reverse() as unknown as Record<string, unknown>[],
           type: 'hooks',
           count: 1,
         },
