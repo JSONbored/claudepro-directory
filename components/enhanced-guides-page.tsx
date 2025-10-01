@@ -82,7 +82,11 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
   const categorySelectId = useId();
   const sortSelectId = useId();
 
-  const totalGuides = Object.values(guides).reduce((acc, cat) => acc + cat.length, 0);
+  // Memoize totalGuides to prevent recalculation on every render
+  const totalGuides = useMemo(
+    () => Object.values(guides).reduce((acc, cat) => acc + cat.length, 0),
+    [guides]
+  );
 
   // Flatten guides for search, then re-group by category
   const allGuides = useMemo(() => Object.values(guides).flat(), [guides]);

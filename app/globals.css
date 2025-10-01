@@ -33,6 +33,20 @@
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
+  /* Performance Optimizations - GPU Acceleration & Paint Isolation */
+  /* will-change utilities for GPU acceleration */
+  --will-change-transform: transform;
+  --will-change-opacity: opacity;
+  --will-change-transform-opacity: transform, opacity;
+  --will-change-auto: auto;
+
+  /* contain utilities for animation isolation */
+  --contain-layout: layout;
+  --contain-paint: paint;
+  --contain-content: content;
+  --contain-strict: strict;
+  --contain-size: size;
+
   /* ========================================
      COLOR DEFINITIONS - Both Themes
      ======================================== */

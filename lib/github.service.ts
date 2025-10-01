@@ -1,9 +1,9 @@
 /**
  * Production-Grade GitHub Service
  * Handles GitHub API integration for issue creation and content submissions
+ * Uses native fetch API for minimal bundle size
  */
 
-import { Octokit } from '@octokit/rest';
 import type { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { githubConfig, hasGitHubConfig } from '@/lib/schemas/env.schema';
@@ -21,24 +21,29 @@ type IssueCreationResponse = z.infer<typeof issueCreationResponseSchema>;
 
 /**
  * GitHub Service for issue creation and content management
+ * Uses native fetch API instead of @octokit/rest for minimal bundle size
  */
 class GitHubService {
-  private octokit: Octokit | null = null;
+  private readonly baseUrl = 'https://api.github.com';
+  private readonly userAgent = 'claudepro-directory/1.0.0';
 
-  constructor() {
-    if (hasGitHubConfig()) {
-      this.octokit = new Octokit({
-        auth: githubConfig.token,
-        userAgent: 'claudepro-directory/1.0.0',
-      });
-    }
+  /**
+   * Create fetch headers for GitHub API requests
+   */
+  private getHeaders(): HeadersInit {
+    return {
+      Accept: 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json',
+      'User-Agent': this.userAgent,
+      ...(githubConfig.token && { Authorization: `Bearer ${githubConfig.token}` }),
+    };
   }
 
   /**
    * Check if GitHub is properly configured with Zod validation
    */
   isConfigured(): boolean {
-    if (!(hasGitHubConfig() && this.octokit)) {
+    if (!hasGitHubConfig()) {
       return false;
     }
 
@@ -77,20 +82,32 @@ class GitHubService {
       // Validate issue creation request
       const issueRequest = issueCreationRequestSchema.parse(issueContent);
 
-      // Create the issue using GitHub API
-      const response = await this.octokit!.rest.issues.create({
-        owner: githubConfig.owner!,
-        repo: githubConfig.repo!,
-        title: issueRequest.title,
-        body: issueRequest.body,
-        labels: issueRequest.labels,
-        assignees: issueRequest.assignees,
+      // Create the issue using GitHub REST API
+      const url = `${this.baseUrl}/repos/${githubConfig.owner}/${githubConfig.repo}/issues`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({
+          title: issueRequest.title,
+          body: issueRequest.body,
+          labels: issueRequest.labels,
+          assignees: issueRequest.assignees,
+        }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(
+          `GitHub API error: ${response.status} - ${errorData.message || response.statusText}`
+        );
+      }
+
+      const data = await response.json();
 
       // Validate and return response
       const issueResponse = issueCreationResponseSchema.parse({
-        issueNumber: response.data.number,
-        issueUrl: response.data.html_url,
+        issueNumber: data.number,
+        issueUrl: data.html_url,
         success: true,
       });
 
@@ -209,12 +226,22 @@ class GitHubService {
 
     try {
       // Test authentication and get rate limit info
-      const response = await this.octokit!.rest.rateLimit.get();
+      const url = `${this.baseUrl}/rate_limit`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.getHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`GitHub API error: ${response.status} - ${response.statusText}`);
+      }
+
+      const data = await response.json();
 
       // Validate GitHub API response structure
       const rateLimit = githubApiRateLimitSchema.parse({
-        remaining: response.data.rate.remaining,
-        resetTime: new Date(response.data.rate.reset * 1000).toISOString(),
+        remaining: data.rate.remaining,
+        resetTime: new Date(data.rate.reset * 1000).toISOString(),
       });
 
       return githubHealthCheckResponseSchema.parse({

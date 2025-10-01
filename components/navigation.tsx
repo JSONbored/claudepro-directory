@@ -13,8 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { APP_CONFIG } from '@/lib/constants';
-// SHA-2093: Centralized icon imports (42 lines removed, ~800 bytes saved)
+import { APP_CONFIG, SOCIAL_LINKS } from '@/lib/constants';
 import { ChevronDown, DiscordIcon, ExternalLink, Github, LogoIcon, Menu } from '@/lib/icons';
 
 interface NavLinkProps {
@@ -80,13 +79,13 @@ export const Navigation = () => {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300 ${
+      className={`sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300 will-change-transform contain-layout ${
         isScrolled ? 'shadow-sm' : ''
       }`}
     >
       <div className="container mx-auto px-4">
         <div
-          className={`flex items-center justify-between transition-all duration-300 ${
+          className={`flex items-center justify-between transition-all duration-300 will-change-transform ${
             isScrolled ? 'h-12' : 'h-16'
           }`}
         >
@@ -190,7 +189,7 @@ export const Navigation = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => window.open('{SOCIAL_LINKS.github}', '_blank')}
+              onClick={() => window.open(SOCIAL_LINKS.github, '_blank')}
               className="hidden sm:flex hover:bg-accent/10 hover:text-accent"
               aria-label="View source code on GitHub"
             >
@@ -362,7 +361,7 @@ export const Navigation = () => {
                         variant="outline"
                         size="lg"
                         className="w-16 h-16 rounded-2xl border-border/40 bg-card hover:bg-accent/10 hover:border-accent/30 transition-all duration-200 active:scale-[0.95]"
-                        onClick={() => window.open('{SOCIAL_LINKS.github}', '_blank')}
+                        onClick={() => window.open(SOCIAL_LINKS.github, '_blank')}
                         aria-label="View source code on GitHub"
                       >
                         <Github className="h-7 w-7" />
