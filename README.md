@@ -7,11 +7,11 @@
 [![CI](https://github.com/JSONbored/claudepro-directory/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/JSONbored/claudepro-directory/actions/workflows/ci.yml)
 [![Security](https://github.com/JSONbored/claudepro-directory/actions/workflows/security.yml/badge.svg?branch=main&event=push)](https://github.com/JSONbored/claudepro-directory/actions/workflows/security.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-blue)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-15.6-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5-black)](https://nextjs.org/)
 
 ### **Find the perfect Claude configuration in seconds**
-**129+ community configurations • MCP servers • Agents • Commands • Hooks**
+**130+ community configurations • 60 Hooks • 39 MCP Servers • 10 Agents**
 
 [🌐 **Browse Configurations**](https://claudepro.directory) • [📝 **Submit Yours**](https://claudepro.directory/submit) • [💬 **Join Discord**](https://discord.gg/Ax3Py4YDrq)
 
@@ -74,10 +74,12 @@ See our [Contributing Guide](.github/CONTRIBUTING.md) for details.
 
 ## 📦 What's Available
 
-- **129+** Configurations and growing
-- **10+** Categories covering all use cases
-- **50+** MCP server integrations
-- **20+** Custom hooks for automation
+- **132** Total configurations
+- **60** Custom hooks for automation
+- **39** MCP server integrations
+- **12** Commands for quick actions
+- **11** System rules and prompts
+- **10** Specialized AI agents
 - **Updated** weekly with new submissions
 
 ## 🛠 Tech Stack
@@ -86,9 +88,9 @@ See our [Contributing Guide](.github/CONTRIBUTING.md) for details.
 
 | Frontend | Backend | Infrastructure |
 |:---:|:---:|:---:|
-| Next.js 15.6 | Node.js | Vercel |
-| React 19 | TypeScript 5.9 | GitHub Actions |
-| Tailwind CSS | Turbopack | CodeQL Security |
+| Next.js 15.5 | Node.js 22 | Vercel |
+| React 19.1 | TypeScript 5.9 | GitHub Actions |
+| Tailwind CSS v4 | Turbopack | CodeQL Security |
 
 </div>
 
@@ -128,8 +130,8 @@ MIT © [JSONbored](https://github.com/JSONbored)
 <summary><b>For Developers (click to expand)</b></summary>
 
 ### Prerequisites
-- Node.js 20+
-- npm or yarn
+- Node.js 22+
+- npm 10+
 
 ### Setup
 ```bash

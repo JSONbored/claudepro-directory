@@ -1,4 +1,4 @@
-name: Validate Content
+name: Content Validation
 
 on:
   pull_request:
@@ -11,55 +11,54 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
-  validate:
-    name: Validate Content Changes
+  validate-and-label:
+    name: Validate Content & Auto-label
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
-        fetch-depth: 0  # Need full history for git diff
+        fetch-depth: 0
 
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
-        node-version: '20'
+        node-version: '22'
         cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci --ignore-scripts
+    - name: Install dependencies (production only)
+      run: npm ci --ignore-scripts --omit=dev
 
     - name: Get changed content files
       id: changed
-      run: |
-        echo "Getting changed files between origin/${{ github.base_ref }} and HEAD"
-        changed_files=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'content/**/*.json' | tr '\n' ' ')
-
-        if [ -z "$changed_files" ]; then
-          echo "No content files changed"
-          echo "files=" >> $GITHUB_OUTPUT
-          echo "has_changes=false" >> $GITHUB_OUTPUT
-        else
-          echo "Changed files: $changed_files"
-          echo "files=$changed_files" >> $GITHUB_OUTPUT
-          echo "has_changes=true" >> $GITHUB_OUTPUT
-        fi
+      uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47 (pinned for security)
+      with:
+        files: |
+          content/**/*.json
+          content/guides/**/*.mdx
 
     - name: Validate content schema
-      if: steps.changed.outputs.has_changes == 'true'
+      if: steps.changed.outputs.any_changed == 'true'
       run: |
         echo "Validating changed content files..."
-        for file in ${{ steps.changed.outputs.files }}; do
+        for file in ${{ steps.changed.outputs.all_changed_files }}; do
           echo "Validating $file"
           npx tsx scripts/validate-content.ts "$file"
         done
 
     - name: Check content metadata
-      if: steps.changed.outputs.has_changes == 'true'
+      if: steps.changed.outputs.any_changed == 'true'
       run: |
-        for file in ${{ steps.changed.outputs.files }}; do
+        for file in ${{ steps.changed.outputs.all_changed_files }}; do
+          # Skip non-JSON files
+          [[ "$file" != *.json ]] && continue
+
           echo "Checking metadata for $file..."
 
           # Check required fields based on category
@@ -104,28 +103,121 @@ jobs:
           echo "✓ $file passed validation"
         done
 
-    - name: Validate MDX frontmatter
-      if: steps.changed.outputs.has_changes == 'true'
-      run: |
-        for file in ${{ steps.changed.outputs.files }}; do
-          if [[ "$file" == *.mdx ]]; then
-            echo "Validating MDX frontmatter: $file"
-            npx tsx scripts/validate-content.ts "$file"
-          fi
-        done
-
     - name: Build content to verify generation
-      if: steps.changed.outputs.has_changes == 'true'
+      if: steps.changed.outputs.any_changed == 'true'
       run: npm run build:content
+
+    - name: Auto-label by content type
+      if: steps.changed.outputs.any_changed == 'true'
+      uses: actions/github-script@v8
+      with:
+        script: |
+          const fs = require('fs');
+          const changedFiles = '${{ steps.changed.outputs.all_changed_files }}'.split(' ').filter(f => f.trim());
+          const labels = new Set(['content-submission', 'needs-review']);
+          const contentTypes = new Set();
+
+          for (const file of changedFiles) {
+            // Detect content type from path
+            if (file.includes('/agents/')) {
+              labels.add('agent');
+              contentTypes.add('agent');
+            } else if (file.includes('/mcp/')) {
+              labels.add('mcp');
+              contentTypes.add('MCP server');
+            } else if (file.includes('/hooks/')) {
+              labels.add('hook');
+              contentTypes.add('hook');
+            } else if (file.includes('/commands/')) {
+              labels.add('command');
+              contentTypes.add('command');
+            } else if (file.includes('/rules/')) {
+              labels.add('rule');
+              contentTypes.add('rule');
+            } else if (file.includes('/guides/')) {
+              labels.add('guide');
+              contentTypes.add('guide');
+            }
+
+            // Try to read JSON files for category validation
+            if (file.endsWith('.json')) {
+              try {
+                const content = fs.readFileSync(file, 'utf8');
+                const data = JSON.parse(content);
+
+                if (data.category) {
+                  const categoryMap = {
+                    'agents': 'agent',
+                    'mcp': 'MCP server',
+                    'hooks': 'hook',
+                    'commands': 'command',
+                    'rules': 'rule',
+                    'guides': 'guide'
+                  };
+
+                  labels.add(data.category);
+                  if (categoryMap[data.category]) {
+                    contentTypes.add(categoryMap[data.category]);
+                  }
+                }
+              } catch (error) {
+                console.log(`Could not parse ${file}:`, error.message);
+              }
+            }
+          }
+
+          // Apply labels
+          if (labels.size > 0) {
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: Array.from(labels)
+            });
+            console.log(`Applied labels: ${Array.from(labels).join(', ')}`);
+          }
+
+          // Add helpful comment for first-time contributors
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number
+          });
+
+          const botComment = comments.find(c => c.user.type === 'Bot' && c.body.includes('Auto-validation'));
+
+          if (!botComment && contentTypes.size > 0) {
+            const typesList = Array.from(contentTypes).join(', ');
+            const message = [
+              '## 🤖 Auto-validation',
+              '',
+              `Thanks for your contribution! I've detected the following content type(s): **${typesList}**`,
+              '',
+              'The content validation workflow has checked your submission. Please make sure:',
+              '- ✅ All required fields are present',
+              '- ✅ No API keys or secrets are included',
+              '- ✅ The JSON/YAML is valid',
+              '- ✅ Dates are in YYYY-MM-DD format',
+              '',
+              `If you need help, check out the [contribution guide](https://github.com/${context.repo.owner}/${context.repo.repo}#contributing).`
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: message
+            });
+          }
 
     - name: Summary
       if: always()
       run: |
-        if [ "${{ steps.changed.outputs.has_changes }}" == "true" ]; then
+        if [ "${{ steps.changed.outputs.any_changed }}" == "true" ]; then
           echo "### ✅ Content Validation Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Validated files:" >> $GITHUB_STEP_SUMMARY
-          for file in ${{ steps.changed.outputs.files }}; do
+          for file in ${{ steps.changed.outputs.all_changed_files }}; do
             echo "- $file" >> $GITHUB_STEP_SUMMARY
           done
         else

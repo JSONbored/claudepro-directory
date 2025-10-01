@@ -14,7 +14,9 @@
 - [ ] I removed any API keys/secrets
 - [ ] I added it to the correct `content/` folder
 
-**Need help?** Copy a template file from the `content/` folder to get started!
+**Need help?**
+- Copy a template from [`templates/content/`](../tree/main/templates/content) to get started
+- Check existing files in [`content/`](../tree/main/content) for real-world examples
 
 ---
 

@@ -4,19 +4,16 @@ Thank you for your interest in contributing to ClaudePro Directory! This guide w
 
 ## 📋 Quick Start
 
+**Option 1: Use GitHub Issue Templates** (Recommended for non-developers)
+- [Submit via Issue Templates](../../issues/new/choose) - Structured forms guide you through submission
+
+**Option 2: Submit via Pull Request** (For developers)
 1. **Fork** the repository to your GitHub account
-2. **Clone** your fork locally
-3. **Create a feature branch** from `dev` branch
-4. **Add your content** as a JSON file
-5. **Test locally** with `npm run dev`
-6. **Submit a PR** targeting our `dev` branch
+2. **Clone** your fork locally and add your content as a JSON file
+3. **Test locally** with `npm run dev`
+4. **Submit a PR** using our [PR template](../pull_request_template.md)
 
 ## 🔄 Development Workflow
-
-### Branch Structure
-- `main` - Production branch (stable releases)
-- `dev` - Development branch (integration branch for new features)
-- Feature branches - Your contributions
 
 ### Contribution Process
 1. Fork the repository
@@ -25,10 +22,8 @@ Thank you for your interest in contributing to ClaudePro Directory! This guide w
    git clone https://github.com/YOUR_USERNAME/claudepro-directory.git
    cd claudepro-directory
    ```
-3. Create a feature branch from `dev`:
+3. Create a feature branch:
    ```bash
-   git checkout dev
-   git pull upstream dev  # If you've set up upstream
    git checkout -b feature/your-feature-name
    ```
 4. Make your changes
@@ -40,15 +35,17 @@ Thank you for your interest in contributing to ClaudePro Directory! This guide w
    ```bash
    git push origin feature/your-feature-name
    ```
-7. Open a Pull Request targeting our `dev` branch (not `main`!)
+7. Open a Pull Request targeting the `main` branch
 
 ## 🎯 Content Types We Accept
 
-- **Rules** - System prompts and configurations for Claude
-- **MCP Servers** - Model Context Protocol server configurations
-- **Agents** - Specialized AI agent configurations
-- **Commands** - Powerful automation commands
-- **Hooks** - Event-driven automation hooks
+| Type | Description | Submit via Issue | Example Files |
+|------|-------------|-----------------|---------------|
+| **Agents** | Specialized AI personas | [Submit Agent](../../issues/new?template=submit_agent.yml) | [View Examples](../../tree/main/content/agents) |
+| **Commands** | Quick automation actions | [Submit Command](../../issues/new?template=submit_command.yml) | [View Examples](../../tree/main/content/commands) |
+| **Hooks** | Event-driven automation | [Submit Hook](../../issues/new?template=submit_hook.yml) | [View Examples](../../tree/main/content/hooks) |
+| **MCP Servers** | Model Context Protocol | [Submit MCP](../../issues/new?template=submit_mcp.yml) | [View Examples](../../tree/main/content/mcp) |
+| **Rules** | System prompts | [Submit Rule](../../issues/new?template=submit_rule.yml) | [View Examples](../../tree/main/content/rules) |
 
 ## 📝 How to Add Content
 
@@ -64,84 +61,25 @@ content/
 └── rules/        # System prompts
 ```
 
-### 2. Choose Your Template
+### 2. Create Your JSON File
 
-We provide two template options for each content type:
+**Start with a template**, then customize it:
 
-**Simple Templates** (Recommended for beginners)
-- Minimal fields and clear examples
-- Perfect for getting started quickly
-- Available: `*-template-simple.json`
+#### Templates (Copy & Customize)
+- **Agent**: [`agents-template-simple.json`](../../blob/main/templates/content/agents-template-simple.json) | [Full template](../../blob/main/templates/content/agents-template.json)
+- **Command**: [`commands-template-simple.json`](../../blob/main/templates/content/commands-template-simple.json) | [Full template](../../blob/main/templates/content/commands-template.json)
+- **Hook**: [`hooks-template-simple.json`](../../blob/main/templates/content/hooks-template-simple.json) | [Full template](../../blob/main/templates/content/hooks-template.json)
+- **MCP**: [`mcp-template-simple.json`](../../blob/main/templates/content/mcp-template-simple.json) | [Full template](../../blob/main/templates/content/mcp-template.json)
+- **Rule**: [`rules-template-simple.json`](../../blob/main/templates/content/rules-template-simple.json) | [Full template](../../blob/main/templates/content/rules-template.json)
 
-**Advanced Templates** (For experienced contributors)
-- Comprehensive field documentation
-- Optional features and customization
-- Available: `*-template.json`
+#### Real-World Examples
+- **Agent**: [`code-reviewer-agent.json`](../../blob/main/content/agents/code-reviewer-agent.json)
+- **Command**: [`git-smart-commit.json`](../../blob/main/content/commands/git-smart-commit.json)
+- **Hook**: [`auto-code-formatter-hook.json`](../../blob/main/content/hooks/auto-code-formatter-hook.json)
+- **MCP**: [`github-mcp-server.json`](../../blob/main/content/mcp/github-mcp-server.json)
+- **Rule**: [`react-expert.json`](../../blob/main/content/rules/react-expert.json)
 
-### 3. Create Your JSON File
-
-Copy the appropriate template from the `content/` directory and fill in your content:
-
-#### Simple Template Example (Recommended for Beginners)
-
-**Agent Example:**
-```json
-{
-  "slug": "my-agent-name",
-  "description": "A brief description of what your agent does",
-  "category": "agents",
-  "author": "YourName",
-  "dateAdded": "2025-01-15",
-  "tags": ["main-skill", "technology", "use-case"],
-  "content": "You are an expert in [YOUR DOMAIN]...",
-  "configuration": {
-    "temperature": 0.3,
-    "maxTokens": 8000
-  },
-  "source": "community"
-}
-```
-
-**Hook Example:**
-```json
-{
-  "slug": "my-hook",
-  "description": "A brief description of what this hook does",
-  "category": "hooks",
-  "author": "YourName",
-  "dateAdded": "2025-01-15",
-  "tags": ["event-type", "technology", "use-case"],
-  "content": "#!/usr/bin/env bash\n# Your script here",
-  "source": "community",
-  "hookType": "pre-tool-use",
-  "triggeredBy": ["tool-name"]
-}
-```
-
-#### Advanced Template Features
-
-For experienced contributors, advanced templates include:
-- Detailed installation instructions
-- Troubleshooting guides
-- Usage examples with expected outcomes
-- Related content cross-references
-- Custom configuration options
-
-**Important Notes:**
-- All content types use `slug` field - titles are auto-generated with smart capitalization
-- "aws-api-validator" → "AWS API Validator" (auto-capitalized)
-- Slugs should use kebab-case (lowercase with hyphens)
-
-### 4. Template Locations
-
-Find templates in the `content/` directory:
-- `content/agents-template-simple.json` / `content/agents-template.json`
-- `content/commands-template-simple.json` / `content/commands-template.json`
-- `content/hooks-template-simple.json` / `content/hooks-template.json`
-- `content/mcp-template-simple.json` / `content/mcp-template.json`
-- `content/rules-template-simple.json` / `content/rules-template.json`
-
-### 5. Categories
+### 3. Categories
 
 Use one of these standard categories:
 
@@ -162,13 +100,9 @@ Use one of these standard categories:
 - `file-system` - File operations
 - `other` - Other integrations
 
-### 6. File Naming
+### 4. File Naming
 
-Name your file descriptively using kebab-case:
-- ✅ `typescript-expert.json`
-- ✅ `react-code-reviewer.json`
-- ❌ `my_agent.json`
-- ❌ `Agent1.json`
+Use kebab-case (lowercase with hyphens): `typescript-expert.json`, `react-code-reviewer.json`
 
 ## 🧪 Testing Your Contribution
 
@@ -194,6 +128,8 @@ Name your file descriptively using kebab-case:
 
 ## 📤 Submitting Your PR
 
+When opening a pull request, our [PR template](../pull_request_template.md) will guide you through the process.
+
 ### PR Title Format
 ```
 Add [Type]: [Your Content Title]
@@ -203,27 +139,6 @@ Examples:
 - `Add Agent: TypeScript Code Reviewer`
 - `Add MCP: PostgreSQL Server`
 - `Add Rule: React Best Practices`
-
-### PR Description Template
-```markdown
-## Content Type
-[Agent/Rule/MCP/Command/Hook]
-
-## Description
-Brief description of what this content does
-
-## Testing
-- [ ] Content displays correctly in list view
-- [ ] Detail page loads without errors
-- [ ] All links work properly
-- [ ] Tested locally with `npm run dev`
-
-## Category
-[development/productivity/creative/etc]
-
-## Tags
-tag1, tag2, tag3
-```
 
 ## ✅ Checklist Before Submitting
 
@@ -261,32 +176,18 @@ tag1, tag2, tag3
 
 ## 📚 Real-World Examples
 
-Check the `content/` directories for production examples:
-- **Agents**: `content/agents/` - See professional agent configurations
-- **Commands**: `content/commands/` - Review working command implementations
-- **Hooks**: `content/hooks/` - Study event-driven automation examples
-- **MCP**: `content/mcp/` - Explore server integration patterns
-- **Rules**: `content/rules/` - Learn from expert system prompts
-
-### Quick Reference: Simple vs Advanced Templates
-
-| Feature | Simple Template | Advanced Template |
-|---------|----------------|-------------------|
-| Required Fields Only | ✅ | ✅ |
-| Basic Examples | ✅ | ✅ |
-| Installation Guide | ❌ | ✅ |
-| Troubleshooting | ❌ | ✅ |
-| Usage Examples | ❌ | ✅ |
-| Configuration Options | Minimal | Comprehensive |
-| Comments & Documentation | Minimal | Detailed |
-| Best For | Quick contributions | Production-ready content |
+Browse production examples in our content directories:
+- **Agents**: [`content/agents/`](../../tree/main/content/agents)
+- **Commands**: [`content/commands/`](../../tree/main/content/commands)
+- **Hooks**: [`content/hooks/`](../../tree/main/content/hooks)
+- **MCP**: [`content/mcp/`](../../tree/main/content/mcp)
+- **Rules**: [`content/rules/`](../../tree/main/content/rules)
 
 ## 🙋 Need Help?
 
-- Check existing content for examples
-- Open an issue for questions
-- Join discussions in GitHub Issues
-- Review closed PRs for patterns
+- [Browse existing content](../../tree/main/content) for examples
+- [Open an issue](../../issues/new/choose) for questions
+- [Check closed PRs](../../pulls?q=is%3Apr+is%3Aclosed) for patterns
 
 ---
 

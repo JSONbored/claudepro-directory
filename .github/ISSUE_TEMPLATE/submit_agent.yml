@@ -10,6 +10,8 @@ body:
       value: |
         Thanks for sharing your agent! Just fill in the basics below. 🤖
 
+        **Need help?** Copy our [simple template](https://github.com/JSONbored/claudepro-directory/blob/main/templates/content/agents-template-simple.json) or [full template](https://github.com/JSONbored/claudepro-directory/blob/main/templates/content/agents-template.json) to get started!
+
   - type: input
     id: name
     attributes:

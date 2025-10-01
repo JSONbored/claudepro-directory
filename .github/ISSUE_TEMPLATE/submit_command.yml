@@ -10,6 +10,8 @@ body:
       value: |
         Thanks for sharing your command! ⚡
 
+        **Need help?** Copy our [simple template](https://github.com/JSONbored/claudepro-directory/blob/main/templates/content/commands-template-simple.json) or [full template](https://github.com/JSONbored/claudepro-directory/blob/main/templates/content/commands-template.json) to get started!
+
   - type: input
     id: name
     attributes:
