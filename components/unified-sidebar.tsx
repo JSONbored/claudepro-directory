@@ -311,14 +311,14 @@ function UnifiedSidebarComponent({
                               <a
                                 key={id}
                                 href={`#${id}`}
-                                className="block text-[11px] text-muted-foreground hover:text-primary transition-colors py-0.5 pl-3 border-l-2 border-transparent hover:border-primary/50 truncate"
+                                className="block text-3xs text-muted-foreground hover:text-primary transition-colors py-0.5 pl-3 border-l-2 border-transparent hover:border-primary/50 truncate"
                               >
                                 {title}
                               </a>
                             );
                           })}
                           {headings.length > 5 && (
-                            <span className="text-[10px] text-muted-foreground/60 pl-3 italic">
+                            <span className="text-2xs text-muted-foreground/60 pl-3 italic">
                               +{headings.length - 5} more sections
                             </span>
                           )}
@@ -341,7 +341,7 @@ function UnifiedSidebarComponent({
                     <div className="space-y-1">
                       {validatedRelatedGuides.slice(0, 3).map((guide) => (
                         <Link key={guide.slug} href={guide.slug} className="block group">
-                          <div className="text-[11px] text-muted-foreground group-hover:text-primary transition-colors py-0.5 truncate">
+                          <div className="text-3xs text-muted-foreground group-hover:text-primary transition-colors py-0.5 truncate">
                             {guide.title}
                           </div>
                         </Link>
@@ -349,7 +349,7 @@ function UnifiedSidebarComponent({
                       {validatedRelatedGuides.length > 3 && (
                         <Link
                           href="/guides"
-                          className="text-[10px] text-primary hover:underline inline-flex items-center gap-0.5 mt-1"
+                          className="text-2xs text-primary hover:underline inline-flex items-center gap-0.5 mt-1"
                         >
                           View all ({validatedRelatedGuides.length})
                         </Link>
@@ -374,7 +374,7 @@ function UnifiedSidebarComponent({
                 </CardTitle>
               </CardHeader>
               <CardContent className="pb-3 px-3">
-                <div className="text-[11px] text-muted-foreground space-y-1.5">
+                <div className="text-3xs text-muted-foreground space-y-1.5">
                   <p>New guides are being added regularly.</p>
                   <p>Check back soon for trending content and recent updates!</p>
                 </div>
@@ -386,7 +386,7 @@ function UnifiedSidebarComponent({
           {/* This section is reserved for future sponsored content */}
           <Card className="border-dashed border-muted/30 bg-muted/5">
             <CardContent className="p-3">
-              <div className="text-[10px] text-muted-foreground/50 text-center">
+              <div className="text-2xs text-muted-foreground/50 text-center">
                 {/* Reserved for sponsored content */}
                 <div className="flex items-center justify-center gap-1.5">
                   <Users className="h-3 w-3" />
@@ -398,7 +398,7 @@ function UnifiedSidebarComponent({
 
           {/* Quick Links */}
           <div className="px-2 pt-1">
-            <div className="flex items-center justify-between text-[10px]">
+            <div className="flex items-center justify-between text-2xs">
               <Link
                 href="/guides"
                 className="text-muted-foreground hover:text-primary transition-colors"

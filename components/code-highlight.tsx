@@ -132,7 +132,7 @@ const CodeHighlightComponent = ({
                   }
                   // Keywords
                   if (style.includes('color:#569CD6')) {
-                    style = style.replace('color:#569CD6', 'color:#ff8c00'); // Claude orange
+                    style = style.replace('color:#569CD6', 'color:var(--color-syntax-keyword)');
                   }
                   // Comments
                   if (style.includes('color:#6A9955')) {
@@ -140,11 +140,11 @@ const CodeHighlightComponent = ({
                   }
                   // Functions
                   if (style.includes('color:#DCDCAA')) {
-                    style = style.replace('color:#DCDCAA', 'color:#00bcd4');
+                    style = style.replace('color:#DCDCAA', 'color:var(--color-syntax-function)');
                   }
                   // Numbers
                   if (style.includes('color:#B5CEA8')) {
-                    style = style.replace('color:#B5CEA8', 'color:#4caf50');
+                    style = style.replace('color:#B5CEA8', 'color:var(--color-syntax-number)');
                   }
 
                   node.properties.style = style;

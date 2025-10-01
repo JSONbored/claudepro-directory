@@ -80,7 +80,7 @@ export function TrendingGuidesCard({
                   <span className="text-muted-foreground/60 mr-1.5">{index + 1}.</span>
                   {guide.title}
                 </span>
-                <Badge variant="secondary" className="text-[10px] h-4 px-1 bg-muted/50">
+                <Badge variant="secondary" className="text-2xs h-4 px-1 bg-muted/50">
                   {guide.views}
                 </Badge>
               </Link>

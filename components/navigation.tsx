@@ -350,11 +350,11 @@ export const Navigation = () => {
                       <Button
                         variant="outline"
                         size="lg"
-                        className="w-16 h-16 rounded-2xl border-border/40 bg-card hover:bg-[#5865F2]/10 hover:border-[#5865F2]/30 transition-all duration-200 active:scale-[0.95]"
+                        className="w-16 h-16 rounded-2xl border-border/40 bg-card hover:bg-discord/10 hover:border-discord/30 transition-all duration-200 active:scale-[0.95]"
                         onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
                         aria-label="Join our Discord community"
                       >
-                        <DiscordIcon className="h-7 w-7 text-[#5865F2]" />
+                        <DiscordIcon className="h-7 w-7 text-discord" />
                       </Button>
 
                       <Button

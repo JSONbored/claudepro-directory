@@ -9,12 +9,12 @@ import { cn } from '@/lib/utils';
 const configBadgeVariants = cva('text-xs font-medium border transition-colors', {
   variants: {
     type: {
-      rules: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
-      mcp: 'bg-purple-500/20 text-purple-500 border-purple-500/30',
-      agents: 'bg-green-500/20 text-green-500 border-green-500/30',
-      commands: 'bg-orange-500/20 text-orange-500 border-orange-500/30',
-      hooks: 'bg-pink-500/20 text-pink-500 border-pink-500/30',
-      guides: 'bg-indigo-500/20 text-indigo-500 border-indigo-500/30',
+      rules: 'badge-category-rules',
+      mcp: 'badge-category-mcp',
+      agents: 'badge-category-agents',
+      commands: 'badge-category-commands',
+      hooks: 'badge-category-hooks',
+      guides: 'badge-category-guides',
       default: 'bg-gray-500/20 text-gray-500 border-gray-500/30',
     },
     source: {

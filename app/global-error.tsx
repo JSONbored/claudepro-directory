@@ -10,52 +10,16 @@ export default function GlobalError({
   return (
     <html lang="en">
       <body>
-        <div
-          style={{
-            display: 'flex',
-            minHeight: '100vh',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-            fontFamily: 'system-ui, -apple-system, sans-serif',
-          }}
-        >
-          <div
-            style={{
-              maxWidth: '28rem',
-              padding: '2rem',
-              borderRadius: '0.5rem',
-              border: '1px solid #e5e7eb',
-              backgroundColor: '#ffffff',
-              textAlign: 'center',
-            }}
-          >
-            <h2
-              style={{
-                marginBottom: '1rem',
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                color: '#ef4444',
-              }}
-            >
-              Application Error
-            </h2>
-            <p style={{ marginBottom: '1.5rem', color: '#6b7280' }}>
+        <div className="flex min-h-screen flex-col items-center justify-center p-4 font-sans">
+          <div className="max-w-md p-8 rounded-lg border border-border bg-card text-center">
+            <h2 className="mb-4 text-2xl font-bold text-destructive">Application Error</h2>
+            <p className="mb-6 text-muted-foreground">
               A critical error occurred. Please refresh the page or try again later.
             </p>
             <button
               type="button"
               onClick={reset}
-              style={{
-                padding: '0.5rem 1rem',
-                borderRadius: '0.375rem',
-                backgroundColor: '#3b82f6',
-                color: '#ffffff',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '1rem',
-              }}
+              className="px-4 py-2 rounded-md bg-primary text-primary-foreground border-none cursor-pointer text-base hover:bg-primary/90 transition-colors"
             >
               Reset Application
             </button>

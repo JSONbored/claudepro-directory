@@ -148,6 +148,95 @@
   --light-shadow-2xl: 0 20px 30px oklch(0% 0 0 / 0.18);
 
   /* ========================================
+     BRAND & UTILITY COLORS - OKLCH
+     ======================================== */
+
+  /* Discord Brand Color */
+  --color-discord: oklch(58% 0.185 272); /* #5865F2 */
+  --color-discord-hover: oklch(58% 0.185 272 / 0.1);
+  --color-discord-border: oklch(58% 0.185 272 / 0.3);
+
+  /* Syntax Highlighting Colors */
+  --color-syntax-keyword: oklch(65% 0.17 45); /* #ff8c00 - Orange */
+  --color-syntax-function: oklch(68% 0.14 220); /* #00bcd4 - Cyan */
+  --color-syntax-number: oklch(64% 0.15 140); /* #4caf50 - Green */
+  --color-syntax-string: oklch(62% 0.155 42); /* Claude orange */
+  --color-syntax-comment: oklch(62% 0.01 60); /* Muted gray */
+
+  /* ========================================
+     CATEGORY COLOR SYSTEM - OKLCH
+     Consistent colors for content types
+     ======================================== */
+
+  /* Agents - Green */
+  --color-category-agents: oklch(64% 0.19 145);
+  --color-category-agents-bg: oklch(64% 0.19 145 / 0.2);
+  --color-category-agents-border: oklch(64% 0.19 145 / 0.3);
+  --color-category-agents-hover: oklch(64% 0.19 145 / 0.6);
+
+  /* MCP - Purple */
+  --color-category-mcp: oklch(58% 0.195 305);
+  --color-category-mcp-bg: oklch(58% 0.195 305 / 0.2);
+  --color-category-mcp-border: oklch(58% 0.195 305 / 0.3);
+  --color-category-mcp-hover: oklch(58% 0.195 305 / 0.6);
+
+  /* Rules - Blue */
+  --color-category-rules: oklch(58% 0.19 250);
+  --color-category-rules-bg: oklch(58% 0.19 250 / 0.2);
+  --color-category-rules-border: oklch(58% 0.19 250 / 0.3);
+  --color-category-rules-hover: oklch(58% 0.19 250 / 0.6);
+
+  /* Commands - Orange */
+  --color-category-commands: oklch(65% 0.17 45);
+  --color-category-commands-bg: oklch(65% 0.17 45 / 0.2);
+  --color-category-commands-border: oklch(65% 0.17 45 / 0.3);
+  --color-category-commands-hover: oklch(65% 0.17 45 / 0.6);
+
+  /* Hooks - Pink */
+  --color-category-hooks: oklch(65% 0.24 350);
+  --color-category-hooks-bg: oklch(65% 0.24 350 / 0.2);
+  --color-category-hooks-border: oklch(65% 0.24 350 / 0.3);
+  --color-category-hooks-hover: oklch(65% 0.24 350 / 0.6);
+
+  /* Guides - Indigo */
+  --color-category-guides: oklch(58% 0.19 280);
+  --color-category-guides-bg: oklch(58% 0.19 280 / 0.2);
+  --color-category-guides-border: oklch(58% 0.19 280 / 0.3);
+  --color-category-guides-hover: oklch(58% 0.19 280 / 0.6);
+
+  /* Tutorials - Green (same as agents) */
+  --color-category-tutorials: oklch(64% 0.19 145);
+  --color-category-tutorials-bg: oklch(64% 0.19 145 / 0.2);
+  --color-category-tutorials-border: oklch(64% 0.19 145 / 0.3);
+
+  /* Workflows - Pink (same as hooks) */
+  --color-category-workflows: oklch(65% 0.24 350);
+  --color-category-workflows-bg: oklch(65% 0.24 350 / 0.2);
+  --color-category-workflows-border: oklch(65% 0.24 350 / 0.3);
+
+  /* Use Cases - Blue (same as rules) */
+  --color-category-use-cases: oklch(58% 0.19 250);
+  --color-category-use-cases-bg: oklch(58% 0.19 250 / 0.2);
+  --color-category-use-cases-border: oklch(58% 0.19 250 / 0.3);
+
+  /* Troubleshooting - Red */
+  --color-category-troubleshooting: oklch(63% 0.195 25);
+  --color-category-troubleshooting-bg: oklch(63% 0.195 25 / 0.2);
+  --color-category-troubleshooting-border: oklch(63% 0.195 25 / 0.3);
+
+  /* Default/Fallback - Gray */
+  --color-category-default: oklch(60% 0.005 60);
+  --color-category-default-bg: oklch(60% 0.005 60 / 0.2);
+  --color-category-default-border: oklch(60% 0.005 60 / 0.3);
+
+  /* ========================================
+     MICRO TYPOGRAPHY
+     ======================================== */
+
+  --font-size-3xs: 0.6875rem; /* 11px */
+  --font-size-2xs: 0.625rem; /* 10px */
+
+  /* ========================================
      DEFAULT THEME (Dark)
      ======================================== */
 
@@ -879,6 +968,76 @@
     padding-left: calc(var(--spacing-4) - 2px);
   }
 
+  /* ========================================
+     SHA-2099: Custom Utility Classes
+     Brand colors, syntax highlighting, categories
+     ======================================== */
+
+  /* Discord Brand Utilities */
+  .bg-discord {
+    background-color: var(--color-discord);
+  }
+  .bg-discord\/10 {
+    background-color: var(--color-discord-hover);
+  }
+  .text-discord {
+    color: var(--color-discord);
+  }
+  .border-discord\/30 {
+    border-color: var(--color-discord-border);
+  }
+
+  /* Syntax Highlighting Utilities */
+  .text-syntax-keyword {
+    color: var(--color-syntax-keyword);
+  }
+  .text-syntax-function {
+    color: var(--color-syntax-function);
+  }
+  .text-syntax-number {
+    color: var(--color-syntax-number);
+  }
+
+  /* Category Badge Utilities */
+  .badge-category-agents {
+    background-color: var(--color-category-agents-bg);
+    color: var(--color-category-agents);
+    border-color: var(--color-category-agents-border);
+  }
+  .badge-category-mcp {
+    background-color: var(--color-category-mcp-bg);
+    color: var(--color-category-mcp);
+    border-color: var(--color-category-mcp-border);
+  }
+  .badge-category-rules {
+    background-color: var(--color-category-rules-bg);
+    color: var(--color-category-rules);
+    border-color: var(--color-category-rules-border);
+  }
+  .badge-category-commands {
+    background-color: var(--color-category-commands-bg);
+    color: var(--color-category-commands);
+    border-color: var(--color-category-commands-border);
+  }
+  .badge-category-hooks {
+    background-color: var(--color-category-hooks-bg);
+    color: var(--color-category-hooks);
+    border-color: var(--color-category-hooks-border);
+  }
+  .badge-category-guides {
+    background-color: var(--color-category-guides-bg);
+    color: var(--color-category-guides);
+    border-color: var(--color-category-guides-border);
+  }
+
+  /* Micro Font Sizes */
+  .text-3xs {
+    font-size: var(--font-size-3xs);
+  }
+  .text-2xs {
+    font-size: var(--font-size-2xs);
+  }
+
   /* Animations */
   .animate-fade-in {
     animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1044,15 +1203,6 @@
   100% {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
   }
 }
 

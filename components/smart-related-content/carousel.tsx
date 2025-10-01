@@ -78,34 +78,40 @@ export function RelatedCarouselClient({
   ): { badge: string; border: string; accent: string } => {
     const styles: Record<string, { badge: string; border: string; accent: string }> = {
       agents: {
-        badge: 'bg-green-500/20 text-green-500 border-green-500/30',
-        border: 'border-green-500/30 hover:border-green-500/60',
-        accent: 'from-green-500 to-green-600',
+        badge: 'badge-category-agents',
+        border:
+          'border-[var(--color-category-agents-border)] hover:border-[var(--color-category-agents-hover)]',
+        accent: 'from-[var(--color-category-agents)] to-[var(--color-category-agents)]',
       },
       mcp: {
-        badge: 'bg-purple-500/20 text-purple-500 border-purple-500/30',
-        border: 'border-purple-500/30 hover:border-purple-500/60',
-        accent: 'from-purple-500 to-purple-600',
+        badge: 'badge-category-mcp',
+        border:
+          'border-[var(--color-category-mcp-border)] hover:border-[var(--color-category-mcp-hover)]',
+        accent: 'from-[var(--color-category-mcp)] to-[var(--color-category-mcp)]',
       },
       rules: {
-        badge: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
-        border: 'border-blue-500/30 hover:border-blue-500/60',
-        accent: 'from-blue-500 to-blue-600',
+        badge: 'badge-category-rules',
+        border:
+          'border-[var(--color-category-rules-border)] hover:border-[var(--color-category-rules-hover)]',
+        accent: 'from-[var(--color-category-rules)] to-[var(--color-category-rules)]',
       },
       commands: {
-        badge: 'bg-orange-500/20 text-orange-500 border-orange-500/30',
-        border: 'border-orange-500/30 hover:border-orange-500/60',
-        accent: 'from-orange-500 to-orange-600',
+        badge: 'badge-category-commands',
+        border:
+          'border-[var(--color-category-commands-border)] hover:border-[var(--color-category-commands-hover)]',
+        accent: 'from-[var(--color-category-commands)] to-[var(--color-category-commands)]',
       },
       hooks: {
-        badge: 'bg-pink-500/20 text-pink-500 border-pink-500/30',
-        border: 'border-pink-500/30 hover:border-pink-500/60',
-        accent: 'from-pink-500 to-pink-600',
+        badge: 'badge-category-hooks',
+        border:
+          'border-[var(--color-category-hooks-border)] hover:border-[var(--color-category-hooks-hover)]',
+        accent: 'from-[var(--color-category-hooks)] to-[var(--color-category-hooks)]',
       },
       tutorials: {
-        badge: 'bg-green-500/20 text-green-500 border-green-500/30',
-        border: 'border-green-500/30 hover:border-green-500/60',
-        accent: 'from-green-500 to-green-600',
+        badge: 'badge-category-tutorials',
+        border:
+          'border-[var(--color-category-tutorials-border)] hover:border-[var(--color-category-tutorials-hover)]',
+        accent: 'from-[var(--color-category-tutorials)] to-[var(--color-category-tutorials)]',
       },
       comparisons: {
         badge: 'bg-primary/20 text-primary border-primary/30',
@@ -113,19 +119,23 @@ export function RelatedCarouselClient({
         accent: 'from-primary to-primary/80',
       },
       workflows: {
-        badge: 'bg-pink-500/20 text-pink-500 border-pink-500/30',
-        border: 'border-pink-500/30 hover:border-pink-500/60',
-        accent: 'from-pink-500 to-pink-600',
+        badge: 'badge-category-workflows',
+        border:
+          'border-[var(--color-category-workflows-border)] hover:border-[var(--color-category-workflows-hover)]',
+        accent: 'from-[var(--color-category-workflows)] to-[var(--color-category-workflows)]',
       },
       'use-cases': {
-        badge: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
-        border: 'border-blue-500/30 hover:border-blue-500/60',
-        accent: 'from-blue-500 to-blue-600',
+        badge: 'badge-category-use-cases',
+        border:
+          'border-[var(--color-category-use-cases-border)] hover:border-[var(--color-category-use-cases-hover)]',
+        accent: 'from-[var(--color-category-use-cases)] to-[var(--color-category-use-cases)]',
       },
       troubleshooting: {
-        badge: 'bg-red-500/20 text-red-500 border-red-500/30',
-        border: 'border-red-500/30 hover:border-red-500/60',
-        accent: 'from-red-500 to-red-600',
+        badge: 'badge-category-troubleshooting',
+        border:
+          'border-[var(--color-category-troubleshooting-border)] hover:border-[var(--color-category-troubleshooting-hover)]',
+        accent:
+          'from-[var(--color-category-troubleshooting)] to-[var(--color-category-troubleshooting)]',
       },
     };
 
@@ -204,7 +214,7 @@ export function RelatedCarouselClient({
                   </Badge>
                   <Badge
                     variant={matchBadge.variant}
-                    className="text-[10px] sm:text-xs font-medium border px-1.5 sm:px-2 py-1 group-hover:border-current/40 transition-colors flex-shrink-0"
+                    className="text-2xs sm:text-xs font-medium border px-1.5 sm:px-2 py-1 group-hover:border-current/40 transition-colors flex-shrink-0"
                     title={matchBadge.label === 'Keyword' ? 'Keyword Match' : matchBadge.label}
                   >
                     {matchBadge.label}
@@ -234,7 +244,7 @@ export function RelatedCarouselClient({
                         <Badge
                           key={tag}
                           variant="outline"
-                          className="text-[10px] sm:text-xs bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 transition-colors px-1.5 sm:px-2 py-0.5"
+                          className="text-2xs sm:text-xs bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 transition-colors px-1.5 sm:px-2 py-0.5"
                         >
                           {tag}
                         </Badge>
@@ -242,7 +252,7 @@ export function RelatedCarouselClient({
                       {item.matchDetails.matchedTags.length > 2 && (
                         <Badge
                           variant="outline"
-                          className="text-[10px] sm:text-xs bg-muted/50 text-muted-foreground border-muted px-1.5 sm:px-2 py-0.5"
+                          className="text-2xs sm:text-xs bg-muted/50 text-muted-foreground border-muted px-1.5 sm:px-2 py-0.5"
                         >
                           +{item.matchDetails.matchedTags.length - 2}
                         </Badge>

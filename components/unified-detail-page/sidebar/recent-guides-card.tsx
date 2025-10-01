@@ -63,9 +63,9 @@ export function RecentGuidesCard({ guides, title = 'Recent Guides' }: RecentGuid
         <div className="space-y-1.5">
           {validated.guides.map((guide) => (
             <Link key={guide.slug} href={guide.slug} className="group block">
-              <div className="text-[11px] text-muted-foreground group-hover:text-primary transition-colors py-0.5">
+              <div className="text-3xs text-muted-foreground group-hover:text-primary transition-colors py-0.5">
                 <div className="truncate">{guide.title}</div>
-                <div className="text-[10px] text-muted-foreground/60">{guide.date}</div>
+                <div className="text-2xs text-muted-foreground/60">{guide.date}</div>
               </div>
             </Link>
           ))}
