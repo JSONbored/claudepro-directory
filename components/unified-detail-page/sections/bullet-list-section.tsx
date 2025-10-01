@@ -21,6 +21,7 @@ import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { LucideIcon } from '@/lib/icons';
 import { componentDescriptionString, componentTitleString } from '@/lib/schemas/primitives';
+import { UI_CLASSES } from '@/lib/ui-constants';
 import { cn } from '@/lib/utils';
 
 /**
@@ -89,7 +90,7 @@ export function BulletListSection({
   return (
     <Card className={cn('', validated.className)}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
           <Icon className="h-5 w-5" />
           {validated.title}
         </CardTitle>
@@ -98,7 +99,7 @@ export function BulletListSection({
       <CardContent>
         <ul className="space-y-2">
           {validated.items.map((item) => (
-            <li key={item.slice(0, 50)} className="flex items-start gap-3">
+            <li key={item.slice(0, 50)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
               <div className={cn('h-1.5 w-1.5 rounded-full mt-2 flex-shrink-0', bulletClass)} />
               <span className={cn('leading-relaxed', textClass)}>{item}</span>
             </li>

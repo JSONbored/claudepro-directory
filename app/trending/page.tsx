@@ -11,6 +11,7 @@ import {
   type TrendingParams,
   trendingParamsSchema,
 } from '@/lib/schemas/search.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 // ISR Configuration - Revalidate every 5 minutes for trending data
 // Static file provides instant load, ISR ensures freshness
@@ -237,12 +238,18 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
   const pageTitleId = 'trending-page-title';
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
       {/* Hero Section */}
-      <section className="relative py-24 px-4 overflow-hidden" aria-labelledby={pageTitleId}>
-        <div className="container mx-auto text-center">
-          <div className="max-w-3xl mx-auto">
-            <Badge variant="outline" className="mb-6 border-accent/20 bg-accent/5 text-accent">
+      <section
+        className={`relative py-24 px-4 ${UI_CLASSES.OVERFLOW_HIDDEN}`}
+        aria-labelledby={pageTitleId}
+      >
+        <div className={`container ${UI_CLASSES.MX_AUTO} text-center`}>
+          <div className={`${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO}`}>
+            <Badge
+              variant="outline"
+              className={`mb-6 border-accent/20 ${UI_CLASSES.BG_ACCENT_5} text-accent`}
+            >
               <TrendingUp className="h-3 w-3 mr-1 text-accent" aria-hidden="true" />
               Trending
             </Badge>
@@ -251,12 +258,12 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
               Trending Configurations
             </h1>
 
-            <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+            <p className={UI_CLASSES.TEXT_HEADING_LARGE}>
               Discover the most popular and trending Claude configurations in our community. Stay up
               to date with what developers are using and loving.
             </p>
 
-            <ul className="flex flex-wrap gap-2 justify-center list-none">
+            <ul className={`${UI_CLASSES.FLEX_WRAP_GAP_2} ${UI_CLASSES.JUSTIFY_CENTER} list-none`}>
               <li>
                 <Badge variant="secondary">
                   <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
@@ -282,7 +289,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
 
       {/* Trending Content */}
       <section
-        className="container mx-auto px-4 py-16"
+        className={`container ${UI_CLASSES.MX_AUTO} px-4 py-16`}
         aria-label="Trending configurations content"
       >
         <TrendingContent trending={trending} popular={popular} recent={recent} />

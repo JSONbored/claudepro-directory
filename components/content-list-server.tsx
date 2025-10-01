@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, getIconByName } from '@/lib/icons';
 import type { ContentListServerProps, UnifiedContentItem } from '@/lib/schemas/component.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 function ContentHeroSection<T extends UnifiedContentItem>({
   title,
@@ -24,14 +25,14 @@ function ContentHeroSection<T extends UnifiedContentItem>({
         ];
 
   return (
-    <section
-      className="relative overflow-hidden border-b border-border/50 bg-card/30"
-      aria-labelledby={pageTitleId}
-    >
-      <div className="container mx-auto px-4 py-20">
-        <div className="text-center max-w-3xl mx-auto">
-          <div className="flex justify-center mb-6">
-            <div className="p-3 bg-accent/10 rounded-full" aria-hidden="true">
+    <section className={UI_CLASSES.CONTAINER_OVERFLOW_BORDER} aria-labelledby={pageTitleId}>
+      <div className={`container ${UI_CLASSES.MX_AUTO} px-4 py-20`}>
+        <div className={`text-center ${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO}`}>
+          <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.JUSTIFY_CENTER} mb-6`}>
+            <div
+              className={`p-3 ${UI_CLASSES.BG_ACCENT_10} ${UI_CLASSES.ROUNDED_FULL}`}
+              aria-hidden="true"
+            >
               {(() => {
                 const IconComponent = getIconByName(icon);
                 return <IconComponent className="h-8 w-8 text-primary" />;
@@ -39,13 +40,15 @@ function ContentHeroSection<T extends UnifiedContentItem>({
             </div>
           </div>
 
-          <h1 id={pageTitleId} className="text-4xl lg:text-6xl font-bold mb-6 text-foreground">
+          <h1 id={pageTitleId} className={UI_CLASSES.TEXT_HEADING_HERO}>
             {title}
           </h1>
 
-          <p className="text-lg text-muted-foreground mb-8 leading-relaxed">{description}</p>
+          <p className={UI_CLASSES.TEXT_HEADING_MEDIUM}>{description}</p>
 
-          <ul className="flex flex-wrap justify-center gap-2 mb-8 list-none">
+          <ul
+            className={`${UI_CLASSES.FLEX} flex-wrap ${UI_CLASSES.JUSTIFY_CENTER} gap-2 mb-8 list-none`}
+          >
             {displayBadges.map((badge, idx) => (
               <li key={badge.text || `badge-${idx}`}>
                 <Badge variant={idx === 0 ? 'secondary' : 'outline'}>
@@ -67,7 +70,7 @@ function ContentHeroSection<T extends UnifiedContentItem>({
           <Button variant="outline" size="sm" asChild>
             <Link
               href="/submit"
-              className="flex items-center gap-2"
+              className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
               aria-label={`Submit a new ${title.slice(0, -1).toLowerCase()}`}
             >
               <ExternalLink className="h-3 w-3" aria-hidden="true" />
@@ -82,11 +85,11 @@ function ContentHeroSection<T extends UnifiedContentItem>({
 
 function ContentSearchSkeleton() {
   return (
-    <div className="w-full space-y-4 animate-pulse">
-      <div className="h-12 bg-card/50 rounded-lg" />
-      <div className="flex gap-2 justify-end">
-        <div className="h-10 w-24 bg-card/50 rounded-lg" />
-        <div className="h-10 w-20 bg-card/50 rounded-lg" />
+    <div className={`${UI_CLASSES.W_FULL} space-y-4 animate-pulse`}>
+      <div className={`h-12 ${UI_CLASSES.BG_CARD_50} ${UI_CLASSES.ROUNDED_LG}`} />
+      <div className={`${UI_CLASSES.FLEX} gap-2 ${UI_CLASSES.JUSTIFY_END}`}>
+        <div className={`h-10 w-24 ${UI_CLASSES.BG_CARD_50} ${UI_CLASSES.ROUNDED_LG}`} />
+        <div className={`h-10 w-20 ${UI_CLASSES.BG_CARD_50} ${UI_CLASSES.ROUNDED_LG}`} />
       </div>
     </div>
   );
@@ -102,7 +105,7 @@ export function ContentListServer<T extends UnifiedContentItem>({
   badges = [],
 }: ContentListServerProps<T>) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
       {/* Hero Section - Rendered immediately on server */}
       <ContentHeroSection
         title={title}
@@ -112,7 +115,10 @@ export function ContentListServer<T extends UnifiedContentItem>({
         badges={badges}
       />
 
-      <section className="container mx-auto px-4 py-12" aria-label={`${title} content and search`}>
+      <section
+        className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}
+        aria-label={`${title} content and search`}
+      >
         <div className="space-y-8">
           {/* Search Component with Suspense boundary */}
           <Suspense fallback={<ContentSearchSkeleton />}>

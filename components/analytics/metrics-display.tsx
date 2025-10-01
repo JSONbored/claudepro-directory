@@ -7,6 +7,7 @@
 
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from '@/lib/icons';
 import { type MetricsDisplayProps, metricsDisplayPropsSchema } from '@/lib/schemas/shared.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 import { cn } from '@/lib/utils';
 
 // Lightweight Badge component for delta display
@@ -36,7 +37,7 @@ function BadgeDelta({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs',
+        `inline-flex ${UI_CLASSES.ITEMS_CENTER} gap-1 px-2 py-0.5 ${UI_CLASSES.ROUNDED_FULL} text-xs`,
         colorClass,
         className
       )}
@@ -57,12 +58,18 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
       {(title || description) && (
         <div className="mb-8 text-center">
           {title && (
-            <h3 className="text-xl font-semibold mb-3 text-foreground" itemProp="name">
+            <h3
+              className={`${UI_CLASSES.TEXT_XL} ${UI_CLASSES.FONT_SEMIBOLD} mb-3 text-foreground`}
+              itemProp="name"
+            >
               {title}
             </h3>
           )}
           {description && (
-            <p className="text-muted-foreground text-lg max-w-3xl mx-auto" itemProp="description">
+            <p
+              className={`text-muted-foreground ${UI_CLASSES.TEXT_LG} max-w-3xl mx-auto`}
+              itemProp="description"
+            >
               {description}
             </p>
           )}
@@ -91,7 +98,7 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
             <div
               key={`${metricLabel}-${metricValue}`}
               className={cn(
-                'rounded-lg p-6 bg-gradient-to-br border backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl',
+                `${UI_CLASSES.ROUNDED_LG} p-6 bg-gradient-to-br border backdrop-blur-sm transition-all duration-300 hover:${UI_CLASSES.SCALE_105} hover:shadow-xl`,
                 gradientClass
               )}
             >
@@ -101,14 +108,16 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
               </p>
 
               {/* Metric Value */}
-              <p className="mt-2 text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+              <p
+                className={`mt-2 text-3xl ${UI_CLASSES.FONT_BOLD} bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent`}
+              >
                 {metricValue}
               </p>
 
               {/* Change indicator */}
               {metricChange && (
-                <div className="mt-4 flex items-center gap-2">
-                  <BadgeDelta deltaType={deltaType} className="font-semibold" />
+                <div className={`mt-4 ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}>
+                  <BadgeDelta deltaType={deltaType} className={UI_CLASSES.FONT_SEMIBOLD} />
                   <span className="text-sm font-medium text-muted-foreground">{metricChange}</span>
                 </div>
               )}

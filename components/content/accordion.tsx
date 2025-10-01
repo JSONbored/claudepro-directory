@@ -8,6 +8,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { type AccordionProps, accordionPropsSchema } from '@/lib/schemas/shared.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 export function Accordion(props: AccordionProps) {
   const validated = accordionPropsSchema.parse(props);
@@ -35,8 +36,8 @@ export function Accordion(props: AccordionProps) {
   return (
     <section itemScope itemType="https://schema.org/FAQPage" className="my-8">
       {title && (
-        <div className="mb-6">
-          <h3 className="text-xl font-bold mb-2" itemProp="name">
+        <div className={UI_CLASSES.MB_6}>
+          <h3 className={`text-xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`} itemProp="name">
             {title}
           </h3>
           {description && (
@@ -58,11 +59,11 @@ export function Accordion(props: AccordionProps) {
             <button
               type="button"
               onClick={() => toggleItem(index)}
-              className="w-full text-left"
+              className={`${UI_CLASSES.W_FULL} text-left`}
               aria-expanded={openItems.has(index)}
             >
-              <CardHeader className="hover:bg-muted/30 transition-colors">
-                <CardTitle className="flex items-center justify-between" itemProp="name">
+              <CardHeader className={`hover:bg-muted/30 ${UI_CLASSES.TRANSITION_COLORS}`}>
+                <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} itemProp="name">
                   <span>{item.title}</span>
                   <div className="ml-4 flex-shrink-0">
                     {openItems.has(index) ? (

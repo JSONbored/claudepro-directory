@@ -18,6 +18,7 @@ import {
 import { logger } from '@/lib/logger';
 import type { PageProps } from '@/lib/schemas/app.schema';
 import { slugParamsSchema } from '@/lib/schemas/app.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   if (!params) {
@@ -110,54 +111,56 @@ export default async function JobPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
       {/* Header */}
-      <div className="border-b border-border/50 bg-card/30">
+      <div className={`${UI_CLASSES.BORDER_B} border-border/50 ${UI_CLASSES.BG_CARD}/30`}>
         <div className="container mx-auto px-4 py-8">
-          <Button variant="ghost" asChild className="mb-6">
+          <Button variant="ghost" asChild className={UI_CLASSES.MB_6}>
             <Link href="/jobs">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />
               Back to Jobs
             </Link>
           </Button>
 
-          <div className="max-w-4xl">
-            <div className="flex items-start gap-4 mb-6">
-              <div className="p-3 bg-accent/10 rounded-lg">
+          <div className={UI_CLASSES.MAX_W_4XL}>
+            <div className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} gap-4 mb-6`}>
+              <div className={`p-3 ${UI_CLASSES.BG_ACCENT_10} ${UI_CLASSES.ROUNDED_LG}`}>
                 <Building2 className="h-6 w-6 text-primary" />
               </div>
               <div className="flex-1">
                 <h1 className="text-3xl font-bold mb-2">{job.title}</h1>
-                <p className="text-xl text-muted-foreground">{job.company}</p>
+                <p className={`${UI_CLASSES.TEXT_XL} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                  {job.company}
+                </p>
               </div>
             </div>
 
             {/* Job Meta */}
-            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
-              <div className="flex items-center gap-1">
+            <div className={UI_CLASSES.FLEX_WRAP_MUTED}>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                 <MapPin className="h-4 w-4" />
                 <span>{job.location}</span>
               </div>
-              <div className="flex items-center gap-1">
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                 <DollarSign className="h-4 w-4" />
                 <span>{job.salary || 'Competitive'}</span>
               </div>
-              <div className="flex items-center gap-1">
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                 <Clock className="h-4 w-4" />
                 <span>{job.type}</span>
               </div>
-              <div className="flex items-center gap-1">
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                 <Users className="h-4 w-4" />
                 <span>{job.category}</span>
               </div>
-              <div className="flex items-center gap-1">
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                 <Calendar className="h-4 w-4" />
                 <span>Posted {job.postedAt}</span>
               </div>
             </div>
 
             {/* Tags */}
-            <div className="flex flex-wrap gap-2">
+            <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
               {job.tags.map((skill) => (
                 <Badge key={skill} variant="secondary">
                   {skill}
@@ -172,14 +175,14 @@ export default async function JobPage({ params }: PageProps) {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className={`lg:col-span-2 ${UI_CLASSES.SPACE_Y_8}`}>
             {/* Description */}
             <Card>
               <CardHeader>
                 <CardTitle>About this role</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">{job.description}</p>
+                <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>{job.description}</p>
               </CardContent>
             </Card>
 
@@ -189,9 +192,9 @@ export default async function JobPage({ params }: PageProps) {
                 <CardTitle>Requirements</CardTitle>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2">
+                <ul className={UI_CLASSES.SPACE_Y_2}>
                   {job.requirements.map((req) => (
-                    <li key={req} className="flex items-start gap-2">
+                    <li key={req} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                       <span className="text-accent mt-1">•</span>
                       <span>{req}</span>
                     </li>
@@ -207,9 +210,9 @@ export default async function JobPage({ params }: PageProps) {
                   <CardTitle>Benefits</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-2">
+                  <ul className={UI_CLASSES.SPACE_Y_2}>
                     {job.benefits.map((benefit) => (
-                      <li key={benefit} className="flex items-start gap-2">
+                      <li key={benefit} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                         <span className="text-green-500 mt-1">✓</span>
                         <span>{benefit}</span>
                       </li>
@@ -221,23 +224,23 @@ export default async function JobPage({ params }: PageProps) {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className={UI_CLASSES.SPACE_Y_6}>
             {/* Apply Actions */}
             <Card>
               <CardHeader>
                 <CardTitle>Apply for this position</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <Button className="w-full" asChild>
+              <CardContent className={UI_CLASSES.SPACE_Y_2}>
+                <Button className={UI_CLASSES.W_FULL} asChild>
                   <a href={job.applyUrl} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="h-4 w-4 mr-2" />
+                    <ExternalLink className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />
                     Apply Now
                   </a>
                 </Button>
                 {job.contactEmail && (
-                  <Button variant="outline" className="w-full" asChild>
+                  <Button variant="outline" className={UI_CLASSES.W_FULL} asChild>
                     <a href={`mailto:${job.contactEmail}`}>
-                      <Building2 className="h-4 w-4 mr-2" />
+                      <Building2 className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />
                       Contact Company
                     </a>
                   </Button>
@@ -250,17 +253,17 @@ export default async function JobPage({ params }: PageProps) {
               <CardHeader>
                 <CardTitle>Job Details</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
+              <CardContent className={UI_CLASSES.SPACE_Y_2}>
+                <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_SM}`}>
+                  <Clock className={`h-4 w-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`} />
                   <span>{job.type.charAt(0).toUpperCase() + job.type.slice(1)}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_SM}`}>
+                  <MapPin className={`h-4 w-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`} />
                   <span>{job.remote ? 'Remote Available' : 'On-site'}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_SM}`}>
+                  <Users className={`h-4 w-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`} />
                   <span>{job.category.charAt(0).toUpperCase() + job.category.slice(1)}</span>
                 </div>
               </CardContent>

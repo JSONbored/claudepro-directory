@@ -1,3 +1,5 @@
+import { UI_CLASSES } from '@/lib/ui-constants';
+
 ---
 # INSTRUCTIONS FOR CLAUDE DESKTOP:
 # 1. Research REAL resources, tools, and examples that actually exist
@@ -133,10 +135,10 @@ Understanding our selection process ensures you're getting the highest quality [
         <div>
           <p><strong>Category Overview:</strong> [RESEARCH: Category description from taxonomy] including [RESEARCH: resource characteristics from classification]. Perfect for [RESEARCH: target use case from application analysis].</p>
           
-          <div className="space-y-6 mt-6">
+          <div className={`space-y-6 ${UI_CLASSES.MT_6}`}>
             <Card className="border-l-4 border-primary">
               <CardHeader>
-                <div className="flex items-start justify-between">
+                <div className={`flex items-start ${UI_CLASSES.JUSTIFY_BETWEEN}`}>
                   <div>
                     <CardTitle className="text-lg">[RESEARCH: Resource 1 name from actual source]</CardTitle>
                     <CardDescription>[RESEARCH: Resource description from official source]</CardDescription>
@@ -146,13 +148,13 @@ Understanding our selection process ensures you're getting the highest quality [
                     <div className="flex items-center">
                       {/* Star rating based on actual reviews */}
                       <span className="text-yellow-500">★★★★★</span>
-                      <span className="ml-1 text-sm text-muted-foreground">[RESEARCH: Rating from reviews]/5</span>
+                      <span className={`ml-1 ${UI_CLASSES.TEXT_SM_MUTED}`}>[RESEARCH: Rating from reviews]/5</span>
                     </div>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className={UI_CLASSES.SPACE_Y_3}>
                   <div>
                     <strong>What it does:</strong> [RESEARCH: Functionality from official documentation]
                   </div>
@@ -183,22 +185,22 @@ Understanding our selection process ensures you're getting the highest quality [
 
             <Card className="border-l-4 border-secondary">
               <CardHeader>
-                <div className="flex items-start justify-between">
+                <div className={`flex ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN}`}>
                   <div>
                     <CardTitle className="text-lg">[RESEARCH: Resource 2 name from verified source]</CardTitle>
                     <CardDescription>[RESEARCH: Resource description from official documentation]</CardDescription>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className={`flex ${UI_CLASSES.ITEMS_CENTER} gap-2`}>
                     <Badge variant="secondary">[RESEARCH: Resource classification]</Badge>
-                    <div className="flex items-center">
+                    <div className={`flex ${UI_CLASSES.ITEMS_CENTER}`}>
                       <span className="text-yellow-500">★★★★☆</span>
-                      <span className="ml-1 text-sm text-muted-foreground">[RESEARCH: User rating]/5</span>
+                      <span className={`ml-1 ${UI_CLASSES.TEXT_SM_MUTED}`}>[RESEARCH: User rating]/5</span>
                     </div>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className={UI_CLASSES.SPACE_Y_3}>
                   <div>
                     <strong>Core Features:</strong> [RESEARCH: Feature list from official specs]
                   </div>
@@ -229,22 +231,22 @@ Understanding our selection process ensures you're getting the highest quality [
 
             <Card className="border-l-4 border-accent">
               <CardHeader>
-                <div className="flex items-start justify-between">
+                <div className={`flex ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN}`}>
                   <div>
                     <CardTitle className="text-lg">[RESEARCH: Resource 3 name from actual source]</CardTitle>
                     <CardDescription>[RESEARCH: Resource summary from verified description]</CardDescription>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className={`flex ${UI_CLASSES.ITEMS_CENTER} gap-2`}>
                     <Badge variant="secondary">[RESEARCH: Category classification]</Badge>
-                    <div className="flex items-center">
+                    <div className={`flex ${UI_CLASSES.ITEMS_CENTER}`}>
                       <span className="text-yellow-500">★★★★★</span>
-                      <span className="ml-1 text-sm text-muted-foreground">[RESEARCH: Review score]/5</span>
+                      <span className={`ml-1 ${UI_CLASSES.TEXT_SM_MUTED}`}>[RESEARCH: Review score]/5</span>
                     </div>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className={UI_CLASSES.SPACE_Y_3}>
                   <div>
                     <strong>Specialization:</strong> [RESEARCH: Specialized function from documentation]
                   </div>
@@ -284,25 +286,25 @@ Understanding our selection process ensures you're getting the highest quality [
           <p><strong>Category Focus:</strong> [RESEARCH: Category 2 description from classification system] featuring [RESEARCH: category characteristics from analysis]. Essential for [RESEARCH: use scenarios from verified applications].</p>
           
           {/* Similar card structure with different resources */}
-          <div className="space-y-6 mt-6">
+          <div className={`space-y-6 ${UI_CLASSES.MT_6}`}>
             <Card className="border-l-4 border-green-500">
               <CardHeader>
-                <div className="flex items-start justify-between">
+                <div className={`flex ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN}`}>
                   <div>
                     <CardTitle className="text-lg">[RESEARCH: Category 2 Resource 1 from actual source]</CardTitle>
                     <CardDescription>[RESEARCH: Resource function from official description]</CardDescription>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className={`flex ${UI_CLASSES.ITEMS_CENTER} gap-2`}>
                     <Badge variant="secondary">[RESEARCH: Type classification]</Badge>
-                    <div className="flex items-center">
+                    <div className={`flex ${UI_CLASSES.ITEMS_CENTER}`}>
                       <span className="text-yellow-500">★★★★☆</span>
-                      <span className="ml-1 text-sm text-muted-foreground">[RESEARCH: Rating score]/5</span>
+                      <span className={`ml-1 ${UI_CLASSES.TEXT_SM_MUTED}`}>[RESEARCH: Rating score]/5</span>
                     </div>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className={UI_CLASSES.SPACE_Y_3}>
                   <div>
                     <strong>Purpose:</strong> [RESEARCH: Main purpose from documentation]
                   </div>
@@ -339,7 +341,7 @@ Understanding our selection process ensures you're getting the highest quality [
           <p><strong>Advanced Resources:</strong> [RESEARCH: Category 3 description from expert classification] for [RESEARCH: advanced use cases from professional applications]. Recommended for [RESEARCH: skill level from user analysis].</p>
           
           {/* Advanced resource cards */}
-          <div className="space-y-6 mt-6">
+          <div className={`space-y-6 ${UI_CLASSES.MT_6}`}>
             <Callout type="tip" title="Advanced Resource Notice">
             These resources require [RESEARCH: prerequisites from documentation] and are designed for [RESEARCH: target expertise level from classification]. Consider starting with [RESEARCH: beginner alternatives from progression path] if you're new to [RESEARCH: domain area].
             </Callout>
@@ -411,7 +413,7 @@ Understanding our selection process ensures you're getting the highest quality [
         <div>
           <p><strong>Community Favorites:</strong> Based on [RESEARCH: feedback source and timeframe] from [RESEARCH: user count] community members.</p>
           
-          <ul className="space-y-2">
+          <ul className={UI_CLASSES.SPACE_Y_2}>
             <li><strong>[RESEARCH: Popular resource 1]:</strong> [RESEARCH: User feedback summary from reviews] - [RESEARCH: usage statistics from data]</li>
             <li><strong>[RESEARCH: Popular resource 2]:</strong> [RESEARCH: Community feedback from verified sources] - [RESEARCH: adoption metrics from analysis]</li>
             <li><strong>[RESEARCH: Popular resource 3]:</strong> [RESEARCH: User testimonial summary from feedback] - [RESEARCH: satisfaction metrics from surveys]</li>
@@ -428,15 +430,15 @@ Understanding our selection process ensures you're getting the highest quality [
         <div>
           <p><strong>Real Results:</strong> [RESEARCH: Success story summary from verified user experiences]</p>
           
-          <div className="space-y-4">
+          <div className={UI_CLASSES.SPACE_Y_4}>
             <div className="p-4 bg-muted/30 rounded-lg">
               <p><strong>[RESEARCH: User type from success story]:</strong> "[RESEARCH: Success story quote from verified testimonial]"</p>
-              <p className="text-sm text-muted-foreground mt-2">[RESEARCH: Result metric from success story] improvement using [RESEARCH: specific resource from story]</p>
+              <p className={`${UI_CLASSES.TEXT_SM_MUTED} ${UI_CLASSES.MT_2}`}>[RESEARCH: Result metric from success story] improvement using [RESEARCH: specific resource from story]</p>
             </div>
-            
+
             <div className="p-4 bg-muted/30 rounded-lg">
               <p><strong>[RESEARCH: Another user type]:</strong> "[RESEARCH: Different success story from verified source]"</p>
-              <p className="text-sm text-muted-foreground mt-2">[RESEARCH: Quantified outcome from testimonial]</p>
+              <p className={`${UI_CLASSES.TEXT_SM_MUTED} ${UI_CLASSES.MT_2}`}>[RESEARCH: Quantified outcome from testimonial]</p>
             </div>
           </div>
         </div>
@@ -448,7 +450,7 @@ Understanding our selection process ensures you're getting the highest quality [
         <div>
           <p><strong>Frequently Asked:</strong> [RESEARCH: Common questions from user forums and support]</p>
           
-          <ul className="space-y-3">
+          <ul className={UI_CLASSES.SPACE_Y_3}>
             <li>
               <strong>Q: [RESEARCH: Common question 1 from user forums]</strong><br/>
               A: [RESEARCH: Answer from expert response or documentation]

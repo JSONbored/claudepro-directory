@@ -7,6 +7,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { type FAQProps, faqPropsSchema } from '@/lib/schemas/shared.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 export function AIOptimizedFAQ(props: FAQProps) {
   const validated = faqPropsSchema.parse(props);
@@ -19,8 +20,8 @@ export function AIOptimizedFAQ(props: FAQProps) {
 
   return (
     <section itemScope itemType="https://schema.org/FAQPage" className="my-8 space-y-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2" itemProp="headline">
+      <div className={UI_CLASSES.MB_6}>
+        <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`} itemProp="headline">
           {title}
         </h2>
         {description && (
@@ -39,9 +40,14 @@ export function AIOptimizedFAQ(props: FAQProps) {
             className="border border-border/50 bg-card/30"
           >
             <CardHeader>
-              <CardTitle className="text-lg font-semibold flex items-start gap-3" itemProp="name">
-                <div className="flex-shrink-0 w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center mt-0.5">
-                  <span className="text-primary text-sm font-bold">Q</span>
+              <CardTitle
+                className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.FONT_SEMIBOLD} flex ${UI_CLASSES.ITEMS_START} gap-3`}
+                itemProp="name"
+              >
+                <div
+                  className={`flex-shrink-0 w-6 h-6 bg-primary/10 ${UI_CLASSES.ROUNDED_FULL} flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} mt-0.5`}
+                >
+                  <span className={`text-primary text-sm ${UI_CLASSES.FONT_BOLD}`}>Q</span>
                 </div>
                 {faq.question}
               </CardTitle>

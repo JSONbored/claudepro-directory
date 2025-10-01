@@ -1,5 +1,3 @@
-import { ConfigGridSkeleton } from '@/components/ui/loading-skeleton';
+import { CategoryLoading } from '@/lib/components/loading-factory';
 
-export default function Loading() {
-  return <ConfigGridSkeleton />;
-}
+export default CategoryLoading;

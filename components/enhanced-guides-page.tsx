@@ -26,6 +26,7 @@ import {
   Zap,
 } from '@/lib/icons';
 import type { EnhancedGuidesPageProps } from '@/lib/schemas/component.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 const categoryInfo = {
   'use-cases': {
@@ -140,15 +141,17 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">Guides & Tutorials</h1>
-          <p className="text-xl text-muted-foreground">
+        <div className={UI_CLASSES.MB_8}>
+          <h1 className={`text-4xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_4}`}>
+            Guides & Tutorials
+          </h1>
+          <p className={`${UI_CLASSES.TEXT_XL} text-muted-foreground`}>
             Learn how to use Claude AI effectively with our comprehensive guides
           </p>
-          <div className="mt-4 flex flex-wrap gap-4 items-center">
+          <div className={`mt-4 ${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.ITEMS_CENTER}`}>
             <Badge variant="secondary">
               {filteredTotalGuides} of {totalGuides} guides
               {searchQuery && ' matching your search'}
@@ -172,20 +175,20 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
         {/* Main Layout: Content + Persistent Sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content - Takes 2/3 width */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className={`lg:col-span-2 ${UI_CLASSES.SPACE_Y_8}`}>
             {/* Quick Stats */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className={UI_CLASSES.GRID_RESPONSIVE_4}>
               {Object.entries(categoryInfo).map(([key, info]) => {
                 const Icon = info.icon;
                 const count = guides[key]?.length || 0;
 
                 return (
-                  <Card key={key} className="p-4">
-                    <div className="flex items-center gap-3">
+                  <Card key={key} className={UI_CLASSES.P_4}>
+                    <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3`}>
                       <Icon className={`h-5 w-5 ${info.color}`} />
                       <div>
-                        <p className="font-semibold">{count}</p>
-                        <p className="text-sm text-muted-foreground">{info.label}</p>
+                        <p className={UI_CLASSES.FONT_SEMIBOLD}>{count}</p>
+                        <p className={UI_CLASSES.TEXT_SM_MUTED}>{info.label}</p>
                       </div>
                     </div>
                   </Card>
@@ -202,30 +205,40 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
               const Icon = info.icon;
 
               return (
-                <div key={category} className="mb-12">
-                  <div className="flex items-center gap-3 mb-4">
+                <div key={category} className={UI_CLASSES.MB_12}>
+                  <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3 mb-4`}>
                     <Icon className={`h-6 w-6 ${info.color}`} />
                     <div>
-                      <h2 className="text-2xl font-semibold">{info.label}</h2>
+                      <h2 className={`text-2xl ${UI_CLASSES.FONT_SEMIBOLD}`}>{info.label}</h2>
                       <p className="text-muted-foreground">{info.description}</p>
                     </div>
                   </div>
 
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+                  <div className={UI_CLASSES.GRID_RESPONSIVE_2}>
                     {categoryGuides.map((guide) => (
                       <Link key={guide.slug} href={guide.slug}>
-                        <Card className="p-6 h-full hover:bg-accent/10 transition-colors">
-                          <div className="flex flex-col h-full">
-                            <h3 className="font-semibold mb-2 line-clamp-2">{guide.title}</h3>
-                            <p className="text-sm text-muted-foreground mb-4 line-clamp-3 flex-grow">
+                        <Card
+                          className={`${UI_CLASSES.P_6} h-full ${UI_CLASSES.HOVER_BG_ACCENT_10} ${UI_CLASSES.TRANSITION_COLORS}`}
+                        >
+                          <div className={`${UI_CLASSES.FLEX_COL} h-full`}>
+                            <h3
+                              className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_2} ${UI_CLASSES.LINE_CLAMP_2}`}
+                            >
+                              {guide.title}
+                            </h3>
+                            <p
+                              className={`${UI_CLASSES.TEXT_SM_MUTED} mb-4 ${UI_CLASSES.LINE_CLAMP_3} ${UI_CLASSES.FLEX_GROW}`}
+                            >
                               {guide.description}
                             </p>
-                            <div className="flex items-center justify-between mt-auto">
-                              <Badge variant="outline" className="text-xs">
+                            <div
+                              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mt-auto`}
+                            >
+                              <Badge variant="outline" className={UI_CLASSES.TEXT_XS}>
                                 {info.label}
                               </Badge>
                               {guide.dateUpdated && (
-                                <span className="text-xs text-muted-foreground">
+                                <span className={UI_CLASSES.TEXT_XS_MUTED}>
                                   {new Date(guide.dateUpdated).toLocaleDateString()}
                                 </span>
                               )}
@@ -241,18 +254,20 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
           </div>
 
           {/* Persistent Search Sidebar - Takes 1/3 width */}
-          <div className="space-y-6">
-            <div className="sticky top-20 space-y-6">
+          <div className={UI_CLASSES.SPACE_Y_6}>
+            <div className={`sticky top-20 ${UI_CLASSES.SPACE_Y_6}`}>
               {/* Embedded Search */}
-              <Card className="p-4">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
+              <Card className={UI_CLASSES.P_4}>
+                <h3
+                  className={`${UI_CLASSES.FONT_SEMIBOLD} mb-4 ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2`}
+                >
                   <Search className="h-4 w-4" />
                   Search Guides
                 </h3>
 
                 {/* Search Input */}
                 <div className="relative mb-4">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Search className={UI_CLASSES.ICON_ABSOLUTE_LEFT} />
                   <Input
                     id={searchInputId}
                     name="guidesSearch"
@@ -264,10 +279,16 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
                 </div>
 
                 {/* Category Filter */}
-                <div className="space-y-2 mb-4">
-                  <span className="text-sm font-medium">Filter by Category</span>
+                <div className={`${UI_CLASSES.SPACE_Y_2} mb-4`}>
+                  <span className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>
+                    Filter by Category
+                  </span>
                   <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-full" id={categorySelectId} name="categoryFilter">
+                    <SelectTrigger
+                      className={UI_CLASSES.W_FULL}
+                      id={categorySelectId}
+                      name="categoryFilter"
+                    >
                       <SelectValue placeholder="All categories" />
                     </SelectTrigger>
                     <SelectContent>
@@ -282,13 +303,17 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
                 </div>
 
                 {/* Sort Options */}
-                <div className="space-y-2 mb-4">
-                  <span className="text-sm font-medium">Sort by</span>
+                <div className={`${UI_CLASSES.SPACE_Y_2} mb-4`}>
+                  <span className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Sort by</span>
                   <Select
                     value={sortBy}
                     onValueChange={(value: 'title' | 'category' | 'date') => setSortBy(value)}
                   >
-                    <SelectTrigger className="w-full" id={sortSelectId} name="sortFilter">
+                    <SelectTrigger
+                      className={UI_CLASSES.W_FULL}
+                      id={sortSelectId}
+                      name="sortFilter"
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -300,15 +325,17 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
                 </div>
 
                 {/* Quick Filter Tags */}
-                <div className="space-y-2">
-                  <span className="text-sm font-medium">Popular Tags</span>
-                  <div className="flex flex-wrap gap-1">
+                <div className={UI_CLASSES.SPACE_Y_2}>
+                  <span className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>
+                    Popular Tags
+                  </span>
+                  <div className={UI_CLASSES.FLEX_WRAP_GAP_1}>
                     {['automation', 'development', 'workflows', 'beginner', 'advanced'].map(
                       (tag) => (
                         <Badge
                           key={tag}
                           variant="outline"
-                          className="text-xs cursor-pointer hover:bg-accent"
+                          className={`text-xs cursor-pointer ${UI_CLASSES.HOVER_BG_ACCENT}`}
                           onClick={() => setSearchQuery(tag)}
                         >
                           #{tag}
@@ -320,9 +347,11 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
               </Card>
 
               {/* Categories */}
-              <Card className="p-4">
-                <h3 className="font-semibold mb-3">Browse by Category</h3>
-                <div className="space-y-2">
+              <Card className={UI_CLASSES.P_4}>
+                <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_3}`}>
+                  Browse by Category
+                </h3>
+                <div className={UI_CLASSES.SPACE_Y_2}>
                   {Object.entries(categoryInfo).map(([key, info]) => {
                     const Icon = info.icon;
                     const count = guides[key]?.length || 0;
@@ -333,11 +362,13 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
                       <Link
                         key={key}
                         href={`/guides/${key}`}
-                        className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors group"
+                        className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.P_2} ${UI_CLASSES.ROUNDED_LG} ${UI_CLASSES.HOVER_BG_MUTED_50} ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.GROUP}`}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                           <Icon className={`h-4 w-4 ${info.color}`} />
-                          <span className="text-sm font-medium group-hover:text-primary">
+                          <span
+                            className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.GROUP_HOVER_TEXT_PRIMARY}`}
+                          >
                             {info.label}
                           </span>
                         </div>
@@ -351,9 +382,9 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
               </Card>
 
               {/* Recent Guides */}
-              <Card className="p-4">
-                <h3 className="font-semibold mb-3">Recent Guides</h3>
-                <div className="space-y-2">
+              <Card className={UI_CLASSES.P_4}>
+                <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_3}`}>Recent Guides</h3>
+                <div className={UI_CLASSES.SPACE_Y_2}>
                   {Object.values(guides)
                     .flat()
                     .filter((guide) => guide.dateUpdated)
@@ -367,12 +398,14 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
                       <Link
                         key={guide.slug}
                         href={guide.slug}
-                        className="block p-2 rounded-lg hover:bg-muted/50 transition-colors group"
+                        className={`block ${UI_CLASSES.P_2} ${UI_CLASSES.ROUNDED_LG} ${UI_CLASSES.HOVER_BG_MUTED_50} ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.GROUP}`}
                       >
-                        <div className="text-sm font-medium group-hover:text-primary line-clamp-2 mb-1">
+                        <div
+                          className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.GROUP_HOVER_TEXT_PRIMARY} ${UI_CLASSES.LINE_CLAMP_2} mb-1`}
+                        >
                           {guide.title}
                         </div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className={UI_CLASSES.TEXT_XS_MUTED}>
                           {guide.dateUpdated && new Date(guide.dateUpdated).toLocaleDateString()}
                         </div>
                       </Link>
@@ -381,19 +414,13 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
               </Card>
 
               {/* Quick Actions */}
-              <Card className="p-4">
-                <h3 className="font-semibold mb-3">Quick Actions</h3>
-                <div className="space-y-2">
-                  <Link
-                    href="/"
-                    className="block w-full text-left p-2 text-sm rounded-lg hover:bg-muted/50 transition-colors"
-                  >
+              <Card className={UI_CLASSES.P_4}>
+                <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} mb-3`}>Quick Actions</h3>
+                <div className={UI_CLASSES.SPACE_Y_2}>
+                  <Link href="/" className={UI_CLASSES.LIST_ITEM_HOVER}>
                     Browse Directory
                   </Link>
-                  <Link
-                    href="/submit"
-                    className="block w-full text-left p-2 text-sm rounded-lg hover:bg-muted/50 transition-colors"
-                  >
+                  <Link href="/submit" className={UI_CLASSES.LIST_ITEM_HOVER}>
                     Submit Content
                   </Link>
                 </div>
@@ -404,15 +431,17 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
 
         {/* CTA */}
         <Card className="p-8 mt-12 text-center bg-accent/10">
-          <h2 className="text-2xl font-semibold mb-4">Can't find what you're looking for?</h2>
+          <h2 className={`text-2xl ${UI_CLASSES.FONT_SEMIBOLD} mb-4`}>
+            Can't find what you're looking for?
+          </h2>
           <p className="text-muted-foreground mb-6">
             Browse our complete directory or submit your own content
           </p>
-          <div className="flex gap-4 justify-center">
+          <div className={`${UI_CLASSES.FLEX} gap-4 ${UI_CLASSES.JUSTIFY_CENTER}`}>
             <Link href="/">
               <button
                 type="button"
-                className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+                className={`${UI_CLASSES.PX_6} py-2 bg-primary text-primary-foreground ${UI_CLASSES.ROUNDED_LG} hover:bg-primary/90`}
               >
                 Browse Directory
               </button>
@@ -420,7 +449,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
             <Link href="/submit">
               <button
                 type="button"
-                className="px-6 py-2 border border-border rounded-lg hover:bg-accent"
+                className={`${UI_CLASSES.PX_6} py-2 border border-border ${UI_CLASSES.ROUNDED_LG} ${UI_CLASSES.HOVER_BG_ACCENT}`}
               >
                 Submit Content
               </button>

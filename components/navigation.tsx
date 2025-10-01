@@ -15,6 +15,7 @@ import {
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/lib/constants';
 import { ChevronDown, DiscordIcon, ExternalLink, Github, LogoIcon, Menu } from '@/lib/icons';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 interface NavLinkProps {
   href: string;
@@ -30,7 +31,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   // Only spread onClick if it's defined to avoid exactOptionalPropertyTypes issues
   const linkProps = {
     href,
-    className: `${active ? 'ring-2 ring-accent/30 bg-accent/10 border-accent/50 text-primary' : ''} ${className}`,
+    className: `${active ? `ring-2 ring-accent/30 ${UI_CLASSES.BG_ACCENT_10} border-accent/50 text-primary` : ''} ${className}`,
     ...(onClick && { onClick }),
   };
 
@@ -79,29 +80,29 @@ export const Navigation = () => {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300 will-change-transform contain-layout ${
+      className={`sticky ${UI_CLASSES.TOP_0} ${UI_CLASSES.Z_50} ${UI_CLASSES.W_FULL} ${UI_CLASSES.BORDER_B} border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all ${UI_CLASSES.DURATION_300} will-change-transform contain-layout ${
         isScrolled ? 'shadow-sm' : ''
       }`}
     >
       <div className="container mx-auto px-4">
         <div
-          className={`flex items-center justify-between transition-all duration-300 will-change-transform ${
+          className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} transition-all ${UI_CLASSES.DURATION_300} will-change-transform ${
             isScrolled ? 'h-12' : 'h-16'
           }`}
         >
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 min-w-0 flex-shrink"
+            className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 ${UI_CLASSES.MIN_W_0} flex-shrink`}
             aria-label="Claude Pro Directory - Go to homepage"
           >
             <LogoIcon
-              className={`transition-all duration-300 flex-shrink-0 hidden xl:block ${
+              className={`transition-all ${UI_CLASSES.DURATION_300} flex-shrink-0 ${UI_CLASSES.HIDDEN} xl:${UI_CLASSES.BLOCK} ${
                 isScrolled ? 'h-6 w-6' : 'h-8 w-8'
               }`}
             />
             <span
-              className={`font-medium text-foreground transition-all duration-300 hidden xl:inline ${
+              className={`font-medium text-foreground transition-all ${UI_CLASSES.DURATION_300} ${UI_CLASSES.HIDDEN} xl:inline ${
                 isScrolled ? 'text-base' : 'text-lg'
               }`}
             >
@@ -110,7 +111,9 @@ export const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav
+            className={`${UI_CLASSES.HIDDEN} md:${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} space-x-6`}
+          >
             <NavLink href="/rules" isActive={isActive} onClick={() => setIsOpen(false)}>
               Rules
             </NavLink>
@@ -150,23 +153,32 @@ export const Navigation = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem>
-                  <Link href="/community" className="flex flex-col items-start space-y-1 w-full">
+                  <Link
+                    href="/community"
+                    className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
+                  >
                     <div>Community</div>
-                    <div className="text-xs text-muted-foreground">Join the Claude community</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Join the Claude community</div>
                   </Link>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem>
-                  <Link href="/submit" className="flex flex-col items-start space-y-1 w-full">
+                  <Link
+                    href="/submit"
+                    className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
+                  >
                     <div>Submit Config</div>
-                    <div className="text-xs text-muted-foreground">Share your configurations</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Share your configurations</div>
                   </Link>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem>
-                  <Link href="/partner" className="flex flex-col items-start space-y-1 w-full">
+                  <Link
+                    href="/partner"
+                    className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
+                  >
                     <div>Partner</div>
-                    <div className="text-xs text-muted-foreground">Post job listings & more</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Post job listings & more</div>
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -174,34 +186,34 @@ export const Navigation = () => {
           </nav>
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-3">
+          <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} space-x-3`}>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
-              className="hidden sm:flex hover:bg-accent/10 hover:text-accent"
+              className={`${UI_CLASSES.HIDDEN_SM_FLEX} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
               aria-label="Join our Discord community"
             >
               <DiscordIcon className="h-4 w-4 xl:mr-2" />
-              <span className="hidden xl:inline">Discord</span>
+              <span className={`${UI_CLASSES.HIDDEN} xl:inline`}>Discord</span>
             </Button>
 
             <Button
               variant="ghost"
               size="sm"
               onClick={() => window.open(SOCIAL_LINKS.github, '_blank')}
-              className="hidden sm:flex hover:bg-accent/10 hover:text-accent"
+              className={`${UI_CLASSES.HIDDEN_SM_FLEX} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
               aria-label="View source code on GitHub"
             >
               <Github className="h-4 w-4 xl:mr-2" />
-              <span className="hidden xl:inline">GitHub</span>
+              <span className={`${UI_CLASSES.HIDDEN} xl:inline`}>GitHub</span>
             </Button>
 
             <ThemeToggle />
 
             <Badge
               variant="outline"
-              className="hidden 2xl:flex border-accent/20 bg-accent/5 text-accent"
+              className={`${UI_CLASSES.HIDDEN} 2xl:flex border-accent/20 ${UI_CLASSES.BG_ACCENT_5} text-accent`}
             >
               <ExternalLink className="h-3 w-3 mr-1 text-accent" />
               Open Source
@@ -213,7 +225,7 @@ export const Navigation = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="md:hidden"
+                  className={`md:${UI_CLASSES.HIDDEN}`}
                   aria-label="Open mobile menu"
                 >
                   <Menu className="h-5 w-5" />
@@ -224,24 +236,26 @@ export const Navigation = () => {
                 className="w-[300px] sm:w-[380px] border-l border-border/50"
               >
                 <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                <div className="flex flex-col h-full">
+                <div className={`${UI_CLASSES.FLEX_COL} h-full`}>
                   {/* Header */}
-                  <div className="flex items-center gap-3 pt-6 pb-8 px-1">
+                  <div
+                    className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3 ${UI_CLASSES.PT_6} ${UI_CLASSES.PB_8} px-1`}
+                  >
                     <LogoIcon className="h-8 w-8 flex-shrink-0" />
-                    <span className="font-semibold text-lg text-foreground">
+                    <span className={`font-semibold ${UI_CLASSES.TEXT_LG} text-foreground`}>
                       {APP_CONFIG.domain}
                     </span>
                   </div>
 
                   {/* Main Navigation */}
-                  <div className="flex-1 overflow-y-auto">
-                    <nav className="space-y-4 px-3">
-                      <div className="space-y-3">
+                  <div className={`flex-1 ${UI_CLASSES.OVERFLOW_Y_AUTO}`}>
+                    <nav className={`${UI_CLASSES.SPACE_Y_4} ${UI_CLASSES.PX_3}`}>
+                      <div className={UI_CLASSES.SPACE_Y_3}>
                         <NavLink
                           href="/rules"
                           isActive={isActive}
                           onClick={() => setIsOpen(false)}
-                          className="flex items-center w-full px-6 py-6 text-lg font-semibold rounded-2xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
                         >
                           Rules
                         </NavLink>
@@ -250,7 +264,7 @@ export const Navigation = () => {
                           href="/mcp"
                           isActive={isActive}
                           onClick={() => setIsOpen(false)}
-                          className="flex items-center w-full px-6 py-6 text-lg font-semibold rounded-2xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
                         >
                           MCP
                         </NavLink>
@@ -259,7 +273,7 @@ export const Navigation = () => {
                           href="/agents"
                           isActive={isActive}
                           onClick={() => setIsOpen(false)}
-                          className="flex items-center w-full px-6 py-6 text-lg font-semibold rounded-2xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
                         >
                           Agents
                         </NavLink>
@@ -268,7 +282,7 @@ export const Navigation = () => {
                           href="/commands"
                           isActive={isActive}
                           onClick={() => setIsOpen(false)}
-                          className="flex items-center w-full px-6 py-6 text-lg font-semibold rounded-2xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
                         >
                           Commands
                         </NavLink>
@@ -277,7 +291,7 @@ export const Navigation = () => {
                           href="/hooks"
                           isActive={isActive}
                           onClick={() => setIsOpen(false)}
-                          className="flex items-center w-full px-6 py-6 text-lg font-semibold rounded-2xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
                         >
                           Hooks
                         </NavLink>
@@ -286,7 +300,7 @@ export const Navigation = () => {
                           href="/jobs"
                           isActive={isActive}
                           onClick={() => setIsOpen(false)}
-                          className="flex items-center w-full px-6 py-6 text-lg font-semibold rounded-2xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
                         >
                           Jobs
                         </NavLink>
@@ -295,7 +309,7 @@ export const Navigation = () => {
                           href="/trending"
                           isActive={isActive}
                           onClick={() => setIsOpen(false)}
-                          className="flex items-center w-full px-6 py-6 text-lg font-semibold rounded-2xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
                         >
                           Trending
                         </NavLink>
@@ -304,20 +318,22 @@ export const Navigation = () => {
                           href="/guides"
                           isActive={isActive}
                           onClick={() => setIsOpen(false)}
-                          className="flex items-center w-full px-6 py-6 text-lg font-semibold rounded-2xl bg-card border border-border hover:bg-accent/10 hover:border-accent/50 active:scale-[0.97] transition-all duration-200"
+                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
                         >
                           Guides
                         </NavLink>
                       </div>
 
                       {/* Secondary Navigation */}
-                      <div className="pt-6 mt-4 border-t border-border/30">
-                        <div className="space-y-3">
+                      <div
+                        className={`${UI_CLASSES.PT_6} mt-4 ${UI_CLASSES.BORDER_T} border-border/30`}
+                      >
+                        <div className={UI_CLASSES.SPACE_Y_3}>
                           <NavLink
                             href="/community"
                             isActive={isActive}
                             onClick={() => setIsOpen(false)}
-                            className="flex items-center w-full px-6 py-5 text-base font-medium text-muted-foreground rounded-xl bg-card/50 border border-border/40 hover:bg-accent/5 hover:text-foreground hover:border-accent/30 transition-all duration-200 active:scale-[0.98]"
+                            className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
                           >
                             Community
                           </NavLink>
@@ -326,7 +342,7 @@ export const Navigation = () => {
                             href="/submit"
                             isActive={isActive}
                             onClick={() => setIsOpen(false)}
-                            className="flex items-center w-full px-6 py-5 text-base font-medium text-muted-foreground rounded-xl bg-card/50 border border-border/40 hover:bg-accent/5 hover:text-foreground hover:border-accent/30 transition-all duration-200 active:scale-[0.98]"
+                            className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
                           >
                             Submit Config
                           </NavLink>
@@ -335,7 +351,7 @@ export const Navigation = () => {
                             href="/partner"
                             isActive={isActive}
                             onClick={() => setIsOpen(false)}
-                            className="flex items-center w-full px-6 py-5 text-base font-medium text-muted-foreground rounded-xl bg-card/50 border border-border/40 hover:bg-accent/5 hover:text-foreground hover:border-accent/30 transition-all duration-200 active:scale-[0.98]"
+                            className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
                           >
                             Partner
                           </NavLink>
@@ -345,12 +361,16 @@ export const Navigation = () => {
                   </div>
 
                   {/* Footer Actions */}
-                  <div className="border-t border-border/30 pt-6 pb-6 px-6">
-                    <div className="flex items-center justify-center gap-6">
+                  <div
+                    className={`${UI_CLASSES.BORDER_T} border-border/30 ${UI_CLASSES.PT_6} pb-6 ${UI_CLASSES.PX_6}`}
+                  >
+                    <div
+                      className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} gap-6`}
+                    >
                       <Button
                         variant="outline"
                         size="lg"
-                        className="w-16 h-16 rounded-2xl border-border/40 bg-card hover:bg-discord/10 hover:border-discord/30 transition-all duration-200 active:scale-[0.95]"
+                        className={`w-16 h-16 ${UI_CLASSES.ROUNDED_2XL} border-border/40 ${UI_CLASSES.BG_CARD} hover:bg-discord/10 hover:border-discord/30 transition-all duration-200 active:scale-[0.95]`}
                         onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
                         aria-label="Join our Discord community"
                       >
@@ -360,14 +380,16 @@ export const Navigation = () => {
                       <Button
                         variant="outline"
                         size="lg"
-                        className="w-16 h-16 rounded-2xl border-border/40 bg-card hover:bg-accent/10 hover:border-accent/30 transition-all duration-200 active:scale-[0.95]"
+                        className={`w-16 h-16 ${UI_CLASSES.ROUNDED_2XL} border-border/40 ${UI_CLASSES.BG_CARD} ${UI_CLASSES.HOVER_BG_ACCENT_10} hover:border-accent/30 transition-all duration-200 active:scale-[0.95]`}
                         onClick={() => window.open(SOCIAL_LINKS.github, '_blank')}
                         aria-label="View source code on GitHub"
                       >
                         <Github className="h-7 w-7" />
                       </Button>
 
-                      <div className="w-16 h-16 flex items-center justify-center rounded-2xl border border-border/40 bg-card">
+                      <div
+                        className={`w-16 h-16 ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.ROUNDED_2XL} border border-border/40 ${UI_CLASSES.BG_CARD}`}
+                      >
                         <ThemeToggle />
                       </div>
                     </div>

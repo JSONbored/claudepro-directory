@@ -11,6 +11,7 @@ import { SourceBadge, TagBadge, TypeBadge } from '@/components/ui/config-badge';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import { Check, Copy, ExternalLink, Github } from '@/lib/icons';
 import type { ConfigCardProps } from '@/lib/schemas/component.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 import { getDisplayTitle } from '@/lib/utils';
 
 export const ConfigCard = memo(
@@ -59,9 +60,7 @@ export const ConfigCard = memo(
 
     return (
       <Card
-        className={`group hover:glow-effect hover-lift transition-smooth cursor-pointer card-gradient border-border/50 hover:border-accent/20 ${
-          variant === 'detailed' ? 'p-6' : ''
-        }`}
+        className={`${UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? 'p-6' : ''}`}
         onClick={handleCardClick}
         role="article"
         aria-label={`${displayTitle} - ${item.category} by ${item.author}`}
@@ -74,10 +73,12 @@ export const ConfigCard = memo(
         }}
       >
         <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
+          <div
+            className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN}`}
+          >
+            <div className={UI_CLASSES.FLEX_1}>
               {showCategory && (
-                <div className="flex items-center gap-2 mb-1">
+                <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 mb-1`}>
                   <TypeBadge
                     type={
                       (item.category || 'agents') as
@@ -91,15 +92,19 @@ export const ConfigCard = memo(
                   />
                 </div>
               )}
-              <CardTitle className="text-lg font-semibold text-foreground group-hover:text-accent transition-colors-smooth">
+              <CardTitle
+                className={`${UI_CLASSES.TEXT_LG} font-semibold text-foreground ${UI_CLASSES.HOVER_TEXT_ACCENT}`}
+              >
                 {displayTitle}
               </CardTitle>
-              <CardDescription className="text-sm text-muted-foreground mt-1 line-clamp-2">
+              <CardDescription
+                className={`text-sm text-muted-foreground mt-1 ${UI_CLASSES.LINE_CLAMP_2}`}
+              >
                 {item.description}
               </CardDescription>
             </div>
             {item.source && (
-              <div className="flex items-center gap-1 ml-2">
+              <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-1 ml-2`}>
                 <SourceBadge source={item.source} />
               </div>
             )}
@@ -107,22 +112,24 @@ export const ConfigCard = memo(
         </CardHeader>
 
         <CardContent className="pt-0">
-          <div className="flex flex-wrap gap-1 mb-4">
+          <div className={`${UI_CLASSES.FLEX_WRAP_GAP_1} ${UI_CLASSES.MB_4}`}>
             {item.tags?.slice(0, 4).map((tag: string) => (
               <TagBadge key={tag} tag={tag} />
             ))}
             {item.tags && item.tags.length > 4 && (
               <Badge
                 variant="outline"
-                className="text-xs border-muted-foreground/20 text-muted-foreground"
+                className={`${UI_CLASSES.TEXT_XS} border-muted-foreground/20 text-muted-foreground`}
               >
                 +{item.tags.length - 4}
               </Badge>
             )}
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+            <div
+              className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 ${UI_CLASSES.TEXT_XS} text-muted-foreground`}
+            >
               <span>by {item.author}</span>
               {item.popularity !== undefined && (
                 <>
@@ -133,12 +140,12 @@ export const ConfigCard = memo(
             </div>
 
             {showActions && (
-              <div className="flex items-center gap-1">
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                 {item.repository && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 w-7 p-0 hover:bg-accent/10 hover:text-accent"
+                    className={`h-7 w-7 p-0 ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       window.open(item.repository, '_blank');
@@ -153,7 +160,7 @@ export const ConfigCard = memo(
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 w-7 p-0 hover:bg-accent/10 hover:text-accent"
+                    className={`h-7 w-7 p-0 ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       window.open(item.documentationUrl, '_blank');
@@ -167,7 +174,7 @@ export const ConfigCard = memo(
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 w-7 p-0 hover:bg-accent/10 hover:text-accent"
+                  className={`h-7 w-7 p-0 ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                   onClick={handleCopy}
                   aria-label={copied ? 'Link copied to clipboard' : `Copy link to ${displayTitle}`}
                 >
@@ -181,7 +188,7 @@ export const ConfigCard = memo(
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 px-2 text-xs hover:bg-accent/10 hover:text-accent"
+                  className={`h-7 px-2 ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
                   onClick={handleViewConfig}
                   aria-label={`View details for ${displayTitle}`}
                 >

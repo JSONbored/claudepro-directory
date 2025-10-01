@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { SOCIAL_LINKS } from '@/lib/constants';
 import { CheckCircle, ExternalLink, FileJson, Github, Loader2, Send } from '@/lib/icons';
 import { type ConfigSubmissionInput, configSubmissionSchema } from '@/lib/schemas/form.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 export default function SubmitPage() {
   // Generate unique IDs for form elements
@@ -145,27 +146,36 @@ export default function SubmitPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
       {/* Header */}
-      <div className="max-w-3xl mx-auto text-center mb-12">
+      <div
+        className={`${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.TEXT_CENTER} ${UI_CLASSES.MB_12}`}
+      >
         <h1 className="text-4xl font-bold mb-4">Submit Your Configuration</h1>
-        <p className="text-lg text-muted-foreground">
+        <p className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
           Share your Claude configurations with the community
         </p>
       </div>
 
       {/* Success Message */}
       {state?.success && state.issueUrl && (
-        <Card className="max-w-2xl mx-auto mb-8 border-green-500/20 bg-green-500/5">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3">
+        <Card
+          className={`${UI_CLASSES.MAX_W_2XL} ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.MB_8} border-green-500/20 bg-green-500/5`}
+        >
+          <CardContent className={UI_CLASSES.PT_6}>
+            <div className={`flex ${UI_CLASSES.ITEMS_START} gap-3`}>
               <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
               <div className="flex-1">
-                <p className="font-medium">Successfully submitted!</p>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className={UI_CLASSES.FONT_MEDIUM}>Successfully submitted!</p>
+                <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
                   Your configuration has been submitted for review.
                 </p>
-                <Button variant="link" size="sm" asChild className="mt-2 p-0 h-auto">
+                <Button
+                  variant="link"
+                  size="sm"
+                  asChild
+                  className={`${UI_CLASSES.MT_2} p-0 h-auto`}
+                >
                   <a href={state.issueUrl} target="_blank" rel="noopener noreferrer">
                     View submission on GitHub
                     <ExternalLink className="h-3 w-3 ml-1" />
@@ -178,7 +188,9 @@ export default function SubmitPage() {
       )}
 
       {/* Form and Instructions */}
-      <div className="grid gap-8 lg:grid-cols-3 max-w-6xl mx-auto">
+      <div
+        className={`${UI_CLASSES.GRID_RESPONSIVE_3_GAP_8} ${UI_CLASSES.MAX_W_6XL} ${UI_CLASSES.MX_AUTO}`}
+      >
         {/* Submission Form - Takes up 2 columns */}
         <Card className="lg:col-span-2">
           <CardHeader>
@@ -188,10 +200,10 @@ export default function SubmitPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleFormSubmit} className="space-y-6">
+            <form onSubmit={handleFormSubmit} className={UI_CLASSES.SPACE_Y_6}>
               {/* Type and Category Row */}
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
+              <div className={UI_CLASSES.GRID_RESPONSIVE_2}>
+                <div className={UI_CLASSES.SPACE_Y_2}>
                   <Label htmlFor={typeId}>
                     Configuration Type <span className="text-red-500">*</span>
                   </Label>
@@ -202,7 +214,7 @@ export default function SubmitPage() {
                     onChange={(e) => handleSelectChange('type', e.target.value)}
                     disabled={isPending}
                     autoComplete="off"
-                    className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.type ? 'border-red-500' : ''}`}
+                    className={`flex h-10 w-full rounded-md border border-input bg-background ${UI_CLASSES.PX_3} ${UI_CLASSES.PY_2} ${UI_CLASSES.TEXT_SM} ring-offset-background file:border-0 file:bg-transparent file:${UI_CLASSES.TEXT_SM} file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.type ? 'border-red-500' : ''}`}
                   >
                     <option value="">Select type</option>
                     <option value="agents">AI Agent</option>
@@ -211,10 +223,12 @@ export default function SubmitPage() {
                     <option value="commands">Command</option>
                     <option value="hooks">Hook</option>
                   </select>
-                  {errors.type && <p className="text-sm text-red-500">{errors.type}</p>}
+                  {errors.type && (
+                    <p className={`${UI_CLASSES.TEXT_SM} text-red-500`}>{errors.type}</p>
+                  )}
                 </div>
 
-                <div className="space-y-2">
+                <div className={UI_CLASSES.SPACE_Y_2}>
                   <Label htmlFor={categoryId}>
                     Category <span className="text-red-500">*</span>
                   </Label>
@@ -225,7 +239,7 @@ export default function SubmitPage() {
                     onChange={(e) => handleSelectChange('category', e.target.value)}
                     disabled={isPending}
                     autoComplete="off"
-                    className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.category ? 'border-red-500' : ''}`}
+                    className={`flex h-10 w-full rounded-md border border-input bg-background ${UI_CLASSES.PX_3} ${UI_CLASSES.PY_2} ${UI_CLASSES.TEXT_SM} ring-offset-background file:border-0 file:bg-transparent file:${UI_CLASSES.TEXT_SM} file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.category ? 'border-red-500' : ''}`}
                   >
                     <option value="">Select category</option>
                     <option value="development">Development</option>
@@ -236,12 +250,14 @@ export default function SubmitPage() {
                     <option value="productivity">Productivity</option>
                     <option value="other">Other</option>
                   </select>
-                  {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
+                  {errors.category && (
+                    <p className={`${UI_CLASSES.TEXT_SM} text-red-500`}>{errors.category}</p>
+                  )}
                 </div>
               </div>
 
               {/* Name */}
-              <div className="space-y-2">
+              <div className={UI_CLASSES.SPACE_Y_2}>
                 <Label htmlFor={nameId}>
                   Name <span className="text-red-500">*</span>
                 </Label>
@@ -255,11 +271,13 @@ export default function SubmitPage() {
                   autoComplete="off"
                   className={errors.name ? 'border-red-500' : ''}
                 />
-                {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+                {errors.name && (
+                  <p className={`${UI_CLASSES.TEXT_SM} text-red-500`}>{errors.name}</p>
+                )}
               </div>
 
               {/* Description */}
-              <div className="space-y-2">
+              <div className={UI_CLASSES.SPACE_Y_2}>
                 <Label htmlFor={descriptionId}>
                   Description <span className="text-red-500">*</span>
                 </Label>
@@ -274,12 +292,14 @@ export default function SubmitPage() {
                   autoComplete="off"
                   className={errors.description ? 'border-red-500' : ''}
                 />
-                {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
+                {errors.description && (
+                  <p className={`${UI_CLASSES.TEXT_SM} text-red-500`}>{errors.description}</p>
+                )}
               </div>
 
               {/* Author and GitHub Row */}
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
+              <div className={UI_CLASSES.GRID_RESPONSIVE_2}>
+                <div className={UI_CLASSES.SPACE_Y_2}>
                   <Label htmlFor={authorId}>
                     Your Name <span className="text-red-500">*</span>
                   </Label>
@@ -293,10 +313,12 @@ export default function SubmitPage() {
                     autoComplete="name"
                     className={errors.author ? 'border-red-500' : ''}
                   />
-                  {errors.author && <p className="text-sm text-red-500">{errors.author}</p>}
+                  {errors.author && (
+                    <p className={`${UI_CLASSES.TEXT_SM} text-red-500`}>{errors.author}</p>
+                  )}
                 </div>
 
-                <div className="space-y-2">
+                <div className={UI_CLASSES.SPACE_Y_2}>
                   <Label htmlFor={githubId}>GitHub Username</Label>
                   <Input
                     id={githubId}
@@ -307,12 +329,12 @@ export default function SubmitPage() {
                     disabled={isPending}
                     autoComplete="username"
                   />
-                  <p className="text-xs text-muted-foreground">Optional</p>
+                  <p className={UI_CLASSES.TEXT_XS_MUTED}>Optional</p>
                 </div>
               </div>
 
               {/* Configuration Content */}
-              <div className="space-y-2">
+              <div className={UI_CLASSES.SPACE_Y_2}>
                 <Label htmlFor={contentId}>
                   Configuration Content (JSON) <span className="text-red-500">*</span>
                 </Label>
@@ -323,15 +345,17 @@ export default function SubmitPage() {
                   onChange={handleInputChange}
                   placeholder={'{\n  "name": "Your Config",\n  "description": "...",\n  ...\n}'}
                   rows={8}
-                  className={`font-mono text-sm ${errors.content ? 'border-red-500' : ''}`}
+                  className={`font-mono ${UI_CLASSES.TEXT_SM} ${errors.content ? 'border-red-500' : ''}`}
                   disabled={isPending}
                   autoComplete="off"
                 />
-                {errors.content && <p className="text-sm text-red-500">{errors.content}</p>}
+                {errors.content && (
+                  <p className={`${UI_CLASSES.TEXT_SM} text-red-500`}>{errors.content}</p>
+                )}
               </div>
 
               {/* Tags */}
-              <div className="space-y-2">
+              <div className={UI_CLASSES.SPACE_Y_2}>
                 <Label htmlFor={tagsId}>Tags</Label>
                 <Input
                   id={tagsId}
@@ -342,7 +366,7 @@ export default function SubmitPage() {
                   disabled={isPending}
                   autoComplete="off"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className={UI_CLASSES.TEXT_XS_MUTED}>
                   Optional - Help others find your configuration
                 </p>
               </div>
@@ -350,23 +374,23 @@ export default function SubmitPage() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full"
+                className={UI_CLASSES.W_FULL}
                 disabled={isPending || isValidating}
                 size="lg"
               >
                 {isPending ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className={`h-4 w-4 ${UI_CLASSES.MR_2} animate-spin`} />
                     Submitting...
                   </>
                 ) : isValidating ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className={`h-4 w-4 ${UI_CLASSES.MR_2} animate-spin`} />
                     Validating...
                   </>
                 ) : (
                   <>
-                    <Send className="h-4 w-4 mr-2" />
+                    <Send className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />
                     Submit Configuration
                   </>
                 )}
@@ -376,39 +400,41 @@ export default function SubmitPage() {
         </Card>
 
         {/* Right Column - Instructions */}
-        <div className="space-y-6">
+        <div className={UI_CLASSES.SPACE_Y_6}>
           {/* GitHub Alternative */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
+              <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_LG}`}>
                 <Github className="h-5 w-5" />
                 Prefer GitHub?
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">
+            <CardContent className={UI_CLASSES.SPACE_Y_3}>
+              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
                 You can also submit directly via GitHub:
               </p>
-              <ol className="space-y-2 text-sm">
-                <li className="flex gap-2">
-                  <span className="text-primary font-semibold">1.</span>
+              <ol className={`${UI_CLASSES.SPACE_Y_2} ${UI_CLASSES.TEXT_SM}`}>
+                <li className={UI_CLASSES.FLEX_GAP_2}>
+                  <span className={`text-primary ${UI_CLASSES.FONT_SEMIBOLD}`}>1.</span>
                   <span>Fork the repository</span>
                 </li>
-                <li className="flex gap-2">
-                  <span className="text-primary font-semibold">2.</span>
+                <li className={UI_CLASSES.FLEX_GAP_2}>
+                  <span className={`text-primary ${UI_CLASSES.FONT_SEMIBOLD}`}>2.</span>
                   <span>
                     Add your JSON file to{' '}
-                    <code className="text-xs bg-muted px-1 py-0.5 rounded">content/[type]</code>
+                    <code className="text-xs bg-muted px-1 ${UI_CLASSES.PY_1} rounded">
+                      content/[type]
+                    </code>
                   </span>
                 </li>
-                <li className="flex gap-2">
-                  <span className="text-primary font-semibold">3.</span>
+                <li className={UI_CLASSES.FLEX_GAP_2}>
+                  <span className={`text-primary ${UI_CLASSES.FONT_SEMIBOLD}`}>3.</span>
                   <span>Submit a pull request</span>
                 </li>
               </ol>
-              <Button variant="outline" size="sm" asChild className="w-full">
+              <Button variant="outline" size="sm" asChild className={UI_CLASSES.W_FULL}>
                 <a href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer">
-                  <Github className="h-4 w-4 mr-2" />
+                  <Github className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />
                   View Repository
                 </a>
               </Button>
@@ -418,14 +444,18 @@ export default function SubmitPage() {
           {/* JSON Format Guide */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
+              <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_LG}`}>
                 <FileJson className="h-5 w-5" />
                 JSON Format
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-3">Example format:</p>
-              <pre className="bg-muted p-3 rounded-lg text-xs overflow-x-auto">
+              <p
+                className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MB_3}`}
+              >
+                Example format:
+              </p>
+              <pre className={`bg-muted p-3 rounded-lg text-xs ${UI_CLASSES.OVERFLOW_X_AUTO}`}>
                 {`{
   "name": "Config Name",
   "description": "What it does",
@@ -441,27 +471,33 @@ export default function SubmitPage() {
           {/* Review Process */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
+              <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_LG}`}>
                 <CheckCircle className="h-5 w-5 text-green-500" />
                 Review Process
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div className="flex gap-2">
+            <CardContent className={`${UI_CLASSES.SPACE_Y_2} ${UI_CLASSES.TEXT_SM}`}>
+              <div className={UI_CLASSES.FLEX_GAP_2}>
                 <span className="text-green-500">✓</span>
-                <span className="text-muted-foreground">Reviewed within 24-48 hours</span>
+                <span className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+                  Reviewed within 24-48 hours
+                </span>
               </div>
-              <div className="flex gap-2">
+              <div className={UI_CLASSES.FLEX_GAP_2}>
                 <span className="text-green-500">✓</span>
-                <span className="text-muted-foreground">Quality and originality check</span>
+                <span className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+                  Quality and originality check
+                </span>
               </div>
-              <div className="flex gap-2">
+              <div className={UI_CLASSES.FLEX_GAP_2}>
                 <span className="text-green-500">✓</span>
-                <span className="text-muted-foreground">Added to directory if approved</span>
+                <span className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+                  Added to directory if approved
+                </span>
               </div>
-              <div className="flex gap-2">
+              <div className={UI_CLASSES.FLEX_GAP_2}>
                 <span className="text-green-500">✓</span>
-                <span className="text-muted-foreground">Full credit to authors</span>
+                <span className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>Full credit to authors</span>
               </div>
             </CardContent>
           </Card>

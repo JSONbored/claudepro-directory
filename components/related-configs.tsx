@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/carousel';
 import { Lightbulb } from '@/lib/icons';
 import type { RelatedConfigsProps, UnifiedContentItem } from '@/lib/schemas/component.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 // RelatedConfigsProps is now imported from component.schema.ts
 
@@ -25,7 +26,7 @@ const RelatedConfigsComponent = <T extends UnifiedContentItem = UnifiedContentIt
     <section className="space-y-6">
       <div className="flex items-center gap-3">
         <Lightbulb className="h-6 w-6 text-primary" />
-        <h2 className="text-2xl font-bold text-foreground">{title}</h2>
+        <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD} text-foreground`}>{title}</h2>
         <Badge variant="outline" className="border-accent/20 bg-accent/5 text-accent">
           AI Recommended
         </Badge>
@@ -36,7 +37,7 @@ const RelatedConfigsComponent = <T extends UnifiedContentItem = UnifiedContentIt
           align: 'start',
           loop: false,
         }}
-        className="w-full max-w-full"
+        className={`${UI_CLASSES.W_FULL} max-w-full`}
       >
         <CarouselContent className="-ml-2 md:-ml-4">
           {configs.map((config) => (
@@ -44,7 +45,7 @@ const RelatedConfigsComponent = <T extends UnifiedContentItem = UnifiedContentIt
               <div className="relative">
                 {typeof (config as { similarity?: number }).similarity === 'number' &&
                   (config as { similarity?: number }).similarity! > 0.7 && (
-                    <div className="absolute -top-3 -right-3 z-20">
+                    <div className={`absolute -top-3 -right-3 ${UI_CLASSES.Z_20}`}>
                       <Badge
                         variant="default"
                         className="bg-accent text-accent-foreground text-xs shadow-sm"
@@ -53,7 +54,7 @@ const RelatedConfigsComponent = <T extends UnifiedContentItem = UnifiedContentIt
                       </Badge>
                     </div>
                   )}
-                <div className="h-full">
+                <div className={UI_CLASSES.H_FULL}>
                   <ConfigCard
                     item={config}
                     variant="default"

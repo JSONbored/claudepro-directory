@@ -2,7 +2,7 @@
 
 import { cva, type VariantProps } from 'class-variance-authority';
 import type * as React from 'react';
-
+import { UI_CLASSES } from '@/lib/ui-constants';
 import { cn } from '@/lib/utils';
 
 const skeletonVariants = cva('animate-pulse bg-muted rounded', {
@@ -65,7 +65,7 @@ function Skeleton({ className, variant, size, width, rounded, ...props }: Skelet
 
 function LoadingSkeleton() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className={`flex ${UI_CLASSES.MIN_H_SCREEN} items-center justify-center`}>
       <div className="flex flex-col items-center gap-4">
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <p className="text-muted-foreground">Loading...</p>
@@ -76,8 +76,8 @@ function LoadingSkeleton() {
 
 function PageHeaderSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('mb-8 animate-pulse', className)} {...props}>
-      <Skeleton size="lg" width="lg" className="mb-4" />
+    <div className={cn(`${UI_CLASSES.MB_8} animate-pulse`, className)} {...props}>
+      <Skeleton size="lg" width="lg" className={UI_CLASSES.MB_4} />
       <Skeleton size="sm" width="2xl" />
     </div>
   );
@@ -86,10 +86,10 @@ function PageHeaderSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDi
 function ConfigCardSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn('rounded-lg border bg-card p-6 animate-pulse', className)} {...props}>
-      <Skeleton size="md" width="3/4" className="mb-3" />
-      <Skeleton size="sm" width="3xl" className="mb-2" />
-      <Skeleton size="sm" width="5/6" className="mb-4" />
-      <div className="flex gap-2">
+      <Skeleton size="md" width="3/4" className={UI_CLASSES.MB_3} />
+      <Skeleton size="sm" width="3xl" className={UI_CLASSES.MB_2} />
+      <Skeleton size="sm" width="5/6" className={UI_CLASSES.MB_4} />
+      <div className={UI_CLASSES.FLEX_GAP_2}>
         <Skeleton size="sm" width="xs" rounded="full" />
         <Skeleton size="sm" width="xs" rounded="full" />
       </div>
@@ -107,7 +107,7 @@ function ConfigGridSkeleton({
   return (
     <div className={cn('container mx-auto px-4 py-8', className)} {...props}>
       <PageHeaderSkeleton />
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      <div className={UI_CLASSES.GRID_RESPONSIVE_3_TIGHT}>
         {[...Array(count)].map((_, i) => (
           <ConfigCardSkeleton key={`config-skeleton-${i + 1}`} />
         ))}
@@ -127,14 +127,16 @@ function ContentListSkeleton({
     <div className={cn('space-y-4', className)} {...props}>
       {[...Array(count)].map((_, i) => (
         <div key={`content-skeleton-${i + 1}`} className="border rounded-lg p-4 animate-pulse">
-          <div className="flex items-start justify-between mb-3">
+          <div
+            className={`flex ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN} ${UI_CLASSES.MB_3}`}
+          >
             <div className="flex-1">
-              <Skeleton size="md" width="2/3" className="mb-2" />
+              <Skeleton size="md" width="2/3" className={UI_CLASSES.MB_2} />
               <Skeleton size="sm" width="3xl" />
             </div>
             <Skeleton size="sm" width="xs" rounded="full" />
           </div>
-          <div className="flex gap-2">
+          <div className={UI_CLASSES.FLEX_GAP_2}>
             <Skeleton size="xs" width="xs" rounded="full" />
             <Skeleton size="xs" width="xs" rounded="full" />
             <Skeleton size="xs" width="xs" rounded="full" />
@@ -163,7 +165,7 @@ function FilterBarSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDiv
       )}
       {...props}
     >
-      <div className="flex items-center justify-between">
+      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <Skeleton size="md" width="lg" />
         <Skeleton size="sm" width="sm" />
       </div>
@@ -175,7 +177,7 @@ function FilterBarSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDiv
           </div>
         ))}
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
         {[...Array(8)].map((_, i) => (
           <Skeleton key={`tag-skeleton-${i + 1}`} size="sm" width="xs" rounded="full" />
         ))}
@@ -196,7 +198,10 @@ function TableSkeleton({
   return (
     <div className={cn('border rounded-lg animate-pulse', className)} {...props}>
       <div className="border-b p-4">
-        <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+        <div
+          className={UI_CLASSES.GRID_GAP_4}
+          style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
+        >
           {[...Array(columns)].map((_, i) => (
             <Skeleton key={`header-${i + 1}`} size="sm" width="sm" />
           ))}
@@ -204,7 +209,10 @@ function TableSkeleton({
       </div>
       {[...Array(rows)].map((_, rowIndex) => (
         <div key={`row-${rowIndex + 1}`} className="border-b p-4 last:border-b-0">
-          <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+          <div
+            className={UI_CLASSES.GRID_GAP_4}
+            style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
+          >
             {[...Array(columns)].map((_, colIndex) => (
               <Skeleton key={`cell-${rowIndex + 1}-${colIndex + 1}`} size="sm" width="md" />
             ))}

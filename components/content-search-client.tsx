@@ -6,12 +6,13 @@ import { ConfigCard } from '@/components/config-card';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { InfiniteScrollContainer } from '@/components/infinite-scroll-container';
 import { useLocalSearch } from '@/hooks/use-search';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 const UnifiedSearch = dynamic(
   () => import('@/components/unified-search').then((mod) => ({ default: mod.UnifiedSearch })),
   {
     ssr: false,
-    loading: () => <div className="h-14 bg-muted/50 rounded-lg animate-pulse" />,
+    loading: () => <div className={`h-14 bg-muted/50 ${UI_CLASSES.ROUNDED_LG} animate-pulse`} />,
   }
 );
 
@@ -83,13 +84,13 @@ export function ContentSearchClient<T extends UnifiedContentItem>({
             loadMore={loadMore}
             hasMore={hasMore}
             pageSize={20}
-            gridClassName="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+            gridClassName={UI_CLASSES.GRID_RESPONSIVE_3}
             emptyMessage={`No ${title.toLowerCase()} found`}
             keyExtractor={(item) => item.slug}
           />
         </ErrorBoundary>
       ) : (
-        <output className="text-center py-12 block">
+        <output className={`text-center py-12 ${UI_CLASSES.BLOCK}`}>
           {(() => {
             const IconComponent = getIconByName(icon);
             return (

@@ -21,6 +21,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Copy } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import { componentTitleString } from '@/lib/schemas/primitives';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 /**
  * Schema for ContentSection props
@@ -74,7 +75,7 @@ export const ContentSection = memo(function ContentSection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
           <Copy className="h-5 w-5" />
           {title || 'Content'}
         </CardTitle>

@@ -16,6 +16,7 @@ import { ArrowLeft, BookOpen, Calendar, FileText, Tag, Users, Zap } from '@/lib/
 import { logger } from '@/lib/logger';
 import { parseMDXFrontmatter } from '@/lib/mdx-config';
 import { contentCache } from '@/lib/redis';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 // ISR Configuration - Revalidate weekly for SEO pages
 export const revalidate = 604800; // 7 days
@@ -420,12 +421,12 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
         <Script id={articleId} type="application/ld+json" strategy="afterInteractive">
           {JSON.stringify(articleData)}
         </Script>
-        <div className="min-h-screen bg-background">
+        <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
           {/* Header - matches content pages */}
-          <div className="border-b border-border/50 bg-card/30">
+          <div className={`${UI_CLASSES.BORDER_B} border-border/50 ${UI_CLASSES.BG_CARD}/30`}>
             <div className="container mx-auto px-4 py-8">
               {/* Modern back navigation */}
-              <div className="mb-6">
+              <div className={UI_CLASSES.MB_6}>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -439,24 +440,24 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
                 </Button>
               </div>
 
-              <div className="max-w-4xl">
-                <div className="flex items-start gap-4 mb-6">
-                  <div className="p-3 bg-accent/10 rounded-lg">
+              <div className={UI_CLASSES.MAX_W_4XL}>
+                <div className={`flex ${UI_CLASSES.ITEMS_START} gap-4 ${UI_CLASSES.MB_6}`}>
+                  <div className={`p-3 ${UI_CLASSES.BG_ACCENT_10} rounded-lg`}>
                     <Icon className="h-6 w-6 text-primary" />
                   </div>
-                  <div className="flex-1">
-                    <h1 className="text-3xl font-bold mb-2">{data.title}</h1>
+                  <div className={UI_CLASSES.FLEX_1}>
+                    <h1 className={`text-3xl font-bold ${UI_CLASSES.MB_2}`}>{data.title}</h1>
                     <p className="text-lg text-muted-foreground">{data.description}</p>
                   </div>
                 </div>
 
                 {/* Metadata */}
-                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                <div className={`${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.TEXT_SM_MUTED}`}>
                   <Badge variant="secondary">
                     {category ? categoryLabels[category] || category : 'Guide'}
                   </Badge>
                   {data.dateUpdated && (
-                    <div className="flex items-center gap-1">
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                       <Calendar className="h-4 w-4" />
                       <span>Updated {formatDate(data.dateUpdated)}</span>
                     </div>
@@ -465,7 +466,7 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
 
                 {/* Tags/Keywords */}
                 {data.keywords && data.keywords.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-4">
+                  <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-4`}>
                     {data.keywords.map((keyword: string) => (
                       <Badge key={keyword} variant="outline">
                         <Tag className="h-3 w-3 mr-1" />

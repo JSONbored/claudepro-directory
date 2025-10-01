@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, Info } from '@/lib/icons';
 import { type ErrorTableProps, errorTablePropsSchema } from '@/lib/schemas/shared.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 export function ErrorTable(props: ErrorTableProps) {
   const validated = errorTablePropsSchema.parse(props);
@@ -34,14 +35,30 @@ export function ErrorTable(props: ErrorTableProps) {
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className={UI_CLASSES.OVERFLOW_X_AUTO}>
+          <table className={UI_CLASSES.W_FULL}>
             <thead className="border-b bg-muted/30">
               <tr>
-                <th className="text-left p-4 font-medium">Error Code</th>
-                <th className="text-left p-4 font-medium">Severity</th>
-                <th className="text-left p-4 font-medium">Message</th>
-                <th className="text-left p-4 font-medium">Solution</th>
+                <th
+                  className={`${UI_CLASSES.TEXT_LEFT} ${UI_CLASSES.P_4} ${UI_CLASSES.FONT_MEDIUM}`}
+                >
+                  Error Code
+                </th>
+                <th
+                  className={`${UI_CLASSES.TEXT_LEFT} ${UI_CLASSES.P_4} ${UI_CLASSES.FONT_MEDIUM}`}
+                >
+                  Severity
+                </th>
+                <th
+                  className={`${UI_CLASSES.TEXT_LEFT} ${UI_CLASSES.P_4} ${UI_CLASSES.FONT_MEDIUM}`}
+                >
+                  Message
+                </th>
+                <th
+                  className={`${UI_CLASSES.TEXT_LEFT} ${UI_CLASSES.P_4} ${UI_CLASSES.FONT_MEDIUM}`}
+                >
+                  Solution
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -50,17 +67,21 @@ export function ErrorTable(props: ErrorTableProps) {
                   key={error.code}
                   className={`border-b last:border-0 ${index % 2 === 0 ? 'bg-muted/10' : ''}`}
                 >
-                  <td className="p-4 font-mono text-sm">{error.code}</td>
-                  <td className="p-4">
+                  <td className={`${UI_CLASSES.P_4} font-mono ${UI_CLASSES.TEXT_SM}`}>
+                    {error.code}
+                  </td>
+                  <td className={UI_CLASSES.P_4}>
                     <Badge className={severityColors[error.severity]} variant="secondary">
-                      <span className="flex items-center gap-1">
+                      <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                         {severityIcons[error.severity]}
                         {error.severity}
                       </span>
                     </Badge>
                   </td>
-                  <td className="p-4 text-sm">{error.message}</td>
-                  <td className="p-4 text-sm text-muted-foreground">{error.solution}</td>
+                  <td className={`${UI_CLASSES.P_4} ${UI_CLASSES.TEXT_SM}`}>{error.message}</td>
+                  <td className={`${UI_CLASSES.P_4} ${UI_CLASSES.TEXT_SM} text-muted-foreground`}>
+                    {error.solution}
+                  </td>
                 </tr>
               ))}
             </tbody>

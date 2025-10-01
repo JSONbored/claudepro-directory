@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun } from '@/lib/icons';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 const themeSchema = z.enum(['light', 'dark']);
 
@@ -41,7 +42,7 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       variant="ghost"
       size="sm"
-      className="hover:bg-accent/10 hover:text-accent"
+      className={UI_CLASSES.BUTTON_GHOST_ICON}
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
     >
       {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}

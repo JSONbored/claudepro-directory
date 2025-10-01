@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Zap } from '@/lib/icons';
 import { type StepByStepGuideProps, stepGuidePropsSchema } from '@/lib/schemas/shared.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 export function StepByStepGuide(props: StepByStepGuideProps) {
   const validated = stepGuidePropsSchema.parse(props);
@@ -18,17 +19,19 @@ export function StepByStepGuide(props: StepByStepGuideProps) {
 
   return (
     <section itemScope itemType="https://schema.org/HowTo" className="my-8">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2" itemProp="name">
+      <div className={UI_CLASSES.MB_6}>
+        <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`} itemProp="name">
           {title}
         </h2>
         {description && (
-          <p className="text-muted-foreground mb-4" itemProp="description">
+          <p className={`text-muted-foreground ${UI_CLASSES.MB_4}`} itemProp="description">
             {description}
           </p>
         )}
         {totalTime && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div
+            className={`flex items-center ${UI_CLASSES.GAP_2} ${UI_CLASSES.TEXT_SM} text-muted-foreground`}
+          >
             <Zap className="h-4 w-4" />
             <span itemProp="totalTime">Total time: {totalTime}</span>
           </div>
@@ -39,10 +42,12 @@ export function StepByStepGuide(props: StepByStepGuideProps) {
         {validSteps.map((step, index) => {
           const isLastStep = index === validSteps.length - 1;
           return (
-            <div key={step.title} className="relative">
+            <div key={step.title} className={UI_CLASSES.RELATIVE}>
               {/* Connecting line */}
               {!isLastStep && (
-                <div className="absolute left-5 top-14 bottom-0 w-0.5 bg-gradient-to-b from-primary/50 to-primary/10" />
+                <div
+                  className={`${UI_CLASSES.ABSOLUTE} left-5 top-14 ${UI_CLASSES.BOTTOM_0} w-0.5 bg-gradient-to-b from-primary/50 to-primary/10`}
+                />
               )}
 
               <Card
@@ -52,15 +57,21 @@ export function StepByStepGuide(props: StepByStepGuideProps) {
               >
                 <CardHeader>
                   <CardTitle className="flex items-center gap-4" itemProp="name">
-                    <div className="relative">
-                      <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center shadow-lg">
-                        <span className="text-primary-foreground text-base font-bold">
+                    <div className={UI_CLASSES.RELATIVE}>
+                      <div
+                        className={`flex-shrink-0 w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-full flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} shadow-lg`}
+                      >
+                        <span
+                          className={`text-primary-foreground ${UI_CLASSES.TEXT_BASE} ${UI_CLASSES.FONT_BOLD}`}
+                        >
                           {index + 1}
                         </span>
                       </div>
-                      <div className="absolute inset-0 animate-ping rounded-full bg-primary opacity-20" />
+                      <div
+                        className={`${UI_CLASSES.ABSOLUTE} ${UI_CLASSES.INSET_0} animate-ping rounded-full bg-primary opacity-20`}
+                      />
                     </div>
-                    <span className="text-xl font-bold">{step.title}</span>
+                    <span className={`text-xl ${UI_CLASSES.FONT_BOLD}`}>{step.title}</span>
                     {step.time && (
                       <Badge
                         variant="secondary"
@@ -72,24 +83,33 @@ export function StepByStepGuide(props: StepByStepGuideProps) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pl-14">
-                  <div itemProp="text" className="text-base mb-6 leading-relaxed">
+                  <div
+                    itemProp="text"
+                    className={`${UI_CLASSES.TEXT_BASE} ${UI_CLASSES.MB_6} leading-relaxed`}
+                  >
                     {step.content || step.description}
                   </div>
 
                   {step.code && (
-                    <div className="mb-6">
-                      <div className="rounded-xl overflow-hidden shadow-xl bg-black border border-accent/20">
-                        <div className="bg-zinc-900 px-4 py-2 flex items-center justify-between border-b border-zinc-800">
-                          <div className="flex items-center gap-2">
+                    <div className={UI_CLASSES.MB_6}>
+                      <div
+                        className={`rounded-xl ${UI_CLASSES.OVERFLOW_HIDDEN} shadow-xl bg-black border border-accent/20`}
+                      >
+                        <div
+                          className={`bg-zinc-900 px-4 ${UI_CLASSES.PY_2} ${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} border-b border-zinc-800`}
+                        >
+                          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                             <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
                             <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
                             <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
                           </div>
-                          <span className="text-xs text-zinc-400 font-mono">
+                          <span className={`${UI_CLASSES.TEXT_XS} text-zinc-400 font-mono`}>
                             step-{index + 1}.sh
                           </span>
                         </div>
-                        <pre className="p-4 overflow-x-auto text-sm font-mono text-zinc-300 leading-relaxed bg-black">
+                        <pre
+                          className={`${UI_CLASSES.P_4} ${UI_CLASSES.OVERFLOW_X_AUTO} ${UI_CLASSES.TEXT_SM} font-mono text-zinc-300 leading-relaxed bg-black`}
+                        >
                           <code>{step.code}</code>
                         </pre>
                       </div>

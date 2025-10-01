@@ -5,6 +5,7 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from '@/lib/icons';
 import { logger } from '@/lib/logger';
+import { UI_CLASSES } from '@/lib/ui-constants';
 import { cn } from '@/lib/utils';
 
 export interface VirtualizedInfiniteScrollProps<T> {
@@ -31,7 +32,7 @@ export function VirtualizedInfiniteScroll<T>({
   hasMore,
   pageSize = 20,
   className,
-  gridClassName = 'grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+  gridClassName = UI_CLASSES.GRID_RESPONSIVE_3_TIGHT,
   loadingClassName,
   showLoadMoreButton = true,
   emptyMessage = 'No items found',
@@ -201,8 +202,8 @@ export function VirtualizedInfiniteScroll<T>({
 
   if (allItems.length === 0 && !loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <p className="text-muted-foreground text-lg">{emptyMessage}</p>
+      <div className={UI_CLASSES.CONTAINER_CENTER}>
+        <p className={`text-muted-foreground ${UI_CLASSES.TEXT_LG}`}>{emptyMessage}</p>
       </div>
     );
   }
@@ -245,7 +246,7 @@ export function VirtualizedInfiniteScroll<T>({
 
       {/* Error Message */}
       {error && (
-        <div className="flex flex-col items-center justify-center py-8">
+        <div className={`${UI_CLASSES.FLEX_COL_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} py-8`}>
           <p className="text-destructive text-sm mb-4">{error}</p>
           <Button onClick={handleLoadMore} variant="outline" size="sm">
             Try Again
@@ -255,7 +256,12 @@ export function VirtualizedInfiniteScroll<T>({
 
       {/* Loading Indicator */}
       {loading && (
-        <div className={cn('flex items-center justify-center py-8', loadingClassName)}>
+        <div
+          className={cn(
+            `flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} py-8`,
+            loadingClassName
+          )}
+        >
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <span className="ml-3 text-muted-foreground">Loading more...</span>
         </div>
@@ -263,12 +269,12 @@ export function VirtualizedInfiniteScroll<T>({
 
       {/* Infinite Scroll Trigger */}
       {!loading && localHasMore && (
-        <div ref={loadMoreRef} className="h-4 w-full" aria-hidden="true" />
+        <div ref={loadMoreRef} className={`h-4 ${UI_CLASSES.W_FULL}`} aria-hidden="true" />
       )}
 
       {/* Manual Load More Button (Optional) */}
       {!loading && localHasMore && showLoadMoreButton && (
-        <div className="flex justify-center pt-4 pb-8">
+        <div className={`flex ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.PT_4} ${UI_CLASSES.PB_8}`}>
           <Button onClick={handleLoadMore} variant="outline" size="lg" className="min-w-[200px]">
             Load More
           </Button>
@@ -277,7 +283,7 @@ export function VirtualizedInfiniteScroll<T>({
 
       {/* End of List Message */}
       {!localHasMore && allItems.length > 0 && (
-        <div className="flex justify-center py-8">
+        <div className={`flex ${UI_CLASSES.JUSTIFY_CENTER} py-8`}>
           <p className="text-muted-foreground text-sm">
             You've reached the end • {allItems.length} total items
           </p>

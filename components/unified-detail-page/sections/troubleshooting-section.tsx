@@ -15,6 +15,7 @@ import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Copy } from '@/lib/icons';
 import { componentDescriptionString } from '@/lib/schemas/primitives';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 /**
  * Troubleshooting item can be either a string or an issue/solution pair
@@ -54,19 +55,19 @@ export function TroubleshootingSection({ items, description }: TroubleshootingSe
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
           <Copy className="h-5 w-5" />
           Troubleshooting
         </CardTitle>
         {validated.description && <CardDescription>{validated.description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        <ul className="space-y-4">
+        <ul className={UI_CLASSES.SPACE_Y_4}>
           {validated.items.map((trouble) => {
             // Simple string format
             if (typeof trouble === 'string') {
               return (
-                <li key={trouble.slice(0, 50)} className="flex items-start gap-3">
+                <li key={trouble.slice(0, 50)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                   <div className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
                   <span className="text-sm leading-relaxed">{trouble}</span>
                 </li>
@@ -75,10 +76,10 @@ export function TroubleshootingSection({ items, description }: TroubleshootingSe
 
             // Issue/solution object format
             return (
-              <li key={trouble.issue.slice(0, 50)} className="space-y-2">
-                <div className="flex items-start gap-3">
+              <li key={trouble.issue.slice(0, 50)} className={UI_CLASSES.SPACE_Y_2}>
+                <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                   <div className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
-                  <div className="space-y-1">
+                  <div className={UI_CLASSES.SPACE_Y_1}>
                     <p className="text-sm font-medium text-foreground">{trouble.issue}</p>
                     <p className="text-sm text-muted-foreground leading-relaxed">
                       {trouble.solution}

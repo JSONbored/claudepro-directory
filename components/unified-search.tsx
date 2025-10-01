@@ -29,6 +29,7 @@ import { useUnifiedSearch } from '@/hooks/use-unified-search';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/lib/schemas/component.schema';
 import { sanitizeSearchQuery } from '@/lib/security';
+import { UI_CLASSES } from '@/lib/ui-constants';
 import { cn } from '@/lib/utils';
 
 // Re-export FilterState for backward compatibility
@@ -100,14 +101,11 @@ export function UnifiedSearch({
 
   return (
     <ErrorBoundary fallback={SearchErrorFallback}>
-      <search className={cn('w-full space-y-4', className)}>
+      <search className={cn(`w-full ${UI_CLASSES.SPACE_Y_4}`, className)}>
         {/* Search Bar */}
-        <div className="space-y-3">
+        <div className={UI_CLASSES.SPACE_Y_3}>
           <div className="relative">
-            <Search
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4"
-              aria-hidden="true"
-            />
+            <Search className={UI_CLASSES.ICON_ABSOLUTE_LEFT} aria-hidden="true" />
             <Input
               id={searchInputId}
               name="search"
@@ -115,7 +113,7 @@ export function UnifiedSearch({
               value={localSearchQuery}
               onChange={(e) => setLocalSearchQuery(e.target.value)}
               placeholder={placeholder}
-              className="pl-10 pr-4 h-12 text-base bg-card/50 backdrop-blur-sm border-border/50 focus:border-primary/50 focus:bg-card transition-smooth w-full"
+              className={`pl-10 pr-4 h-12 text-base ${UI_CLASSES.BG_CARD_50} backdrop-blur-sm border-border/50 focus:border-primary/50 focus:${UI_CLASSES.BG_CARD} transition-smooth w-full`}
               aria-label="Search configurations"
               aria-describedby={resultCount > 0 && localSearchQuery ? searchResultsId : undefined}
               autoComplete="search"
@@ -123,7 +121,7 @@ export function UnifiedSearch({
           </div>
 
           {/* Sort and Filter Controls */}
-          <div className="flex gap-2 justify-end">
+          <div className={`flex gap-2 ${UI_CLASSES.JUSTIFY_END}`}>
             {/* Sort Dropdown styled as button */}
             <Select
               value={filters.sort || 'trending'}
@@ -132,7 +130,7 @@ export function UnifiedSearch({
             >
               <SelectTrigger
                 id={sortSelectId}
-                className="w-auto h-10 px-4 bg-background border-border hover:bg-accent/10 transition-smooth"
+                className={`w-auto h-10 px-4 bg-background border-border ${UI_CLASSES.HOVER_BG_ACCENT_10} transition-smooth`}
                 aria-label="Sort configurations"
               >
                 <span className="text-sm">Sort: </span>
@@ -152,7 +150,7 @@ export function UnifiedSearch({
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               className={cn(
                 'h-10 px-4 gap-2 transition-smooth',
-                isFilterOpen && 'bg-accent/10 border-accent'
+                isFilterOpen && `${UI_CLASSES.BG_ACCENT_10} border-accent`
               )}
               aria-expanded={isFilterOpen}
               aria-controls={filterPanelId}
@@ -180,7 +178,11 @@ export function UnifiedSearch({
 
         {/* Result Count */}
         {resultCount > 0 && localSearchQuery && (
-          <div className="text-sm text-muted-foreground" id={searchResultsId} aria-live="polite">
+          <div
+            className={`${UI_CLASSES.TEXT_SM} text-muted-foreground`}
+            id={searchResultsId}
+            aria-live="polite"
+          >
             {resultCount} {resultCount === 1 ? 'result' : 'results'} found
           </div>
         )}

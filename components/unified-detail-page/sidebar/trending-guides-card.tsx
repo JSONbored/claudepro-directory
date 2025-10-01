@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp } from '@/lib/icons';
 import { nonEmptyString } from '@/lib/schemas/primitives';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 /**
  * Schema for trending guide item
@@ -68,15 +69,17 @@ export function TrendingGuidesCard({
       <CardContent className="pb-3 px-3">
         <div className="space-y-1.5">
           {validated.isLoading ? (
-            <div className="text-xs text-muted-foreground">Loading trending guides...</div>
+            <div className={UI_CLASSES.TEXT_XS_MUTED}>Loading trending guides...</div>
           ) : (
             validated.guides.map((guide, index) => (
               <Link
                 key={guide.slug}
                 href={guide.slug}
-                className="group flex items-center justify-between text-xs hover:bg-muted/50 rounded px-1.5 py-1 transition-colors"
+                className={`${UI_CLASSES.GROUP} ${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-xs ${UI_CLASSES.HOVER_BG_MUTED_50} rounded px-1.5 ${UI_CLASSES.PY_1} ${UI_CLASSES.TRANSITION_COLORS}`}
               >
-                <span className="text-muted-foreground group-hover:text-foreground truncate flex-1">
+                <span
+                  className={`text-muted-foreground group-hover:text-foreground truncate ${UI_CLASSES.FLEX_1}`}
+                >
                   <span className="text-muted-foreground/60 mr-1.5">{index + 1}.</span>
                   {guide.title}
                 </span>

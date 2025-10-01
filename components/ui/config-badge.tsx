@@ -4,6 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import type * as React from 'react';
 
 import { Badge } from '@/components/ui/badge';
+import { UI_CLASSES } from '@/lib/ui-constants';
 import { cn } from '@/lib/utils';
 
 const configBadgeVariants = cva('text-xs font-medium border transition-colors', {
@@ -172,7 +173,7 @@ export function TagBadge({
     <Badge
       variant="outline"
       className={cn(
-        'cursor-pointer transition-all duration-200 hover:bg-accent/10 hover:border-accent/30 border-muted-foreground/20 text-muted-foreground hover:text-accent',
+        `cursor-pointer transition-all duration-200 ${UI_CLASSES.HOVER_BG_ACCENT_10} hover:border-accent/30 border-muted-foreground/20 text-muted-foreground hover:text-accent`,
         className
       )}
       onClick={handleClick}

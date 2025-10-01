@@ -1,5 +1,3 @@
-import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
+import { DefaultLoading } from '@/lib/components/loading-factory';
 
-export default function Loading() {
-  return <LoadingSkeleton />;
-}
+export default DefaultLoading;

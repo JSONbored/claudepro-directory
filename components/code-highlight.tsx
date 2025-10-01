@@ -19,6 +19,7 @@ import { Check, Copy } from '@/lib/icons';
 import { logger } from '@/lib/logger';
 import type { CodeHighlightProps } from '@/lib/schemas/component.schema';
 import { highlightedCodeSafeSchema } from '@/lib/schemas/form.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 // Lazy-load Shiki with fine-grained bundles
 let highlighterPromise: Promise<Awaited<ReturnType<typeof createHighlighter>>> | null = null;
@@ -200,9 +201,11 @@ const CodeHighlightComponent = ({
 
   return (
     <ErrorBoundary>
-      <div className="relative group">
+      <div className={`${UI_CLASSES.RELATIVE} ${UI_CLASSES.GROUP}`}>
         {title && (
-          <div className="flex items-center justify-between bg-card/50 border-x border-t border-border rounded-t-lg px-4 py-2">
+          <div
+            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} bg-card/50 border-x border-t border-border rounded-t-lg px-4 py-2`}
+          >
             <span className="text-sm font-medium text-muted-foreground">{title}</span>
             {showCopy && (
               <Button
@@ -222,7 +225,7 @@ const CodeHighlightComponent = ({
           </div>
         )}
 
-        <div className="relative">
+        <div className={UI_CLASSES.RELATIVE}>
           {isLoading ? (
             <div
               className="animate-pulse bg-card border border-border rounded-lg p-4"
@@ -248,7 +251,7 @@ const CodeHighlightComponent = ({
               variant="ghost"
               size="sm"
               onClick={handleCopyCode}
-              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm"
+              className={`${UI_CLASSES.ABSOLUTE} top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 backdrop-blur-sm`}
             >
               {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
             </Button>

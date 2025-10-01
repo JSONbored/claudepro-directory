@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import { BookOpen, Bot, Server, Terminal, Webhook } from '@/lib/icons';
 import type { ContentTypeConfigRegistry } from '@/lib/types/content-type-config';
+import { UI_CLASSES } from '@/lib/ui-constants';
 import { getDisplayTitle } from '@/lib/utils';
 
 /**
@@ -24,7 +25,7 @@ const agentConfig: ContentTypeConfigRegistry['agents'] = {
 
   primaryAction: {
     label: 'Deploy Agent',
-    icon: <Bot className="h-4 w-4 mr-2" />,
+    icon: <Bot className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
     handler: () => {
       toast.success('Agent Deployment', {
         description: 'Copy the agent content and follow the installation instructions.',
@@ -107,7 +108,7 @@ const commandConfig: ContentTypeConfigRegistry['commands'] = {
 
   primaryAction: {
     label: 'Copy Command',
-    icon: <Terminal className="h-4 w-4 mr-2" />,
+    icon: <Terminal className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
     handler: async (item) => {
       const contentToCopy =
         'content' in item && typeof item.content === 'string' ? item.content : '';
@@ -209,7 +210,7 @@ const hookConfig: ContentTypeConfigRegistry['hooks'] = {
 
   primaryAction: {
     label: 'View on GitHub',
-    icon: <Webhook className="h-4 w-4 mr-2" />,
+    icon: <Webhook className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
     handler: (item) => {
       if ('slug' in item && item.slug) {
         window.open(
@@ -294,7 +295,7 @@ const mcpConfig: ContentTypeConfigRegistry['mcp'] = {
 
   primaryAction: {
     label: 'View Configuration',
-    icon: <Server className="h-4 w-4 mr-2" />,
+    icon: <Server className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
     handler: () => {
       const configSection = document.querySelector('[data-section="configuration"]');
       configSection?.scrollIntoView({ behavior: 'smooth' });
@@ -378,7 +379,7 @@ const ruleConfig: ContentTypeConfigRegistry['rules'] = {
 
   primaryAction: {
     label: 'Use Rule',
-    icon: <BookOpen className="h-4 w-4 mr-2" />,
+    icon: <BookOpen className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
     handler: () => {
       toast.success('Rule Integration', {
         description: 'Copy the rule content and add it to your Claude configuration.',

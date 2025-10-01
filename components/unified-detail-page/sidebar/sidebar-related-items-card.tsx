@@ -18,6 +18,7 @@ import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ExternalLink } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 import { getDisplayTitle } from '@/lib/utils';
 
 /**
@@ -59,10 +60,10 @@ export const SidebarRelatedItemsCard = memo(function SidebarRelatedItemsCard({
           <button
             key={relatedItem.slug}
             type="button"
-            className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer w-full text-left"
+            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} p-3 rounded-lg border border-border ${UI_CLASSES.HOVER_BG_MUTED_50} ${UI_CLASSES.TRANSITION_COLORS} cursor-pointer w-full text-left`}
             onClick={() => router.push(`/${category}/${relatedItem.slug}`)}
           >
-            <div className="flex-1 min-w-0">
+            <div className={`${UI_CLASSES.FLEX_1} ${UI_CLASSES.MIN_W_0}`}>
               <h4 className="font-medium text-sm truncate">{getDisplayTitle(relatedItem)}</h4>
               <p className="text-xs text-muted-foreground truncate">{relatedItem.description}</p>
             </div>

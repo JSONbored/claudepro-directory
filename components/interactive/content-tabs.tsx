@@ -8,6 +8,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { type ContentTabsProps, contentTabsPropsSchema } from '@/lib/schemas/shared.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 export function ContentTabs(props: ContentTabsProps) {
   const validated = contentTabsPropsSchema.parse(props);
@@ -23,8 +24,11 @@ export function ContentTabs(props: ContentTabsProps) {
   return (
     <section itemScope itemType="https://schema.org/ItemList" className="my-8">
       {title && (
-        <div className="mb-6">
-          <h3 className="text-xl font-bold mb-2" itemProp="name">
+        <div className={UI_CLASSES.MB_6}>
+          <h3
+            className={`${UI_CLASSES.TEXT_XL} ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`}
+            itemProp="name"
+          >
             {title}
           </h3>
           {description && (
@@ -35,8 +39,10 @@ export function ContentTabs(props: ContentTabsProps) {
         </div>
       )}
 
-      <Tabs defaultValue={firstValue} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 h-auto p-1">
+      <Tabs defaultValue={firstValue} className={UI_CLASSES.W_FULL}>
+        <TabsList
+          className={`${UI_CLASSES.GRID} ${UI_CLASSES.W_FULL} grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 h-auto p-1`}
+        >
           {validItems.map((item) => (
             <TabsTrigger
               key={item.value}
@@ -52,7 +58,7 @@ export function ContentTabs(props: ContentTabsProps) {
           <TabsContent
             key={item.value}
             value={item.value}
-            className="mt-6"
+            className={UI_CLASSES.MT_4}
             itemScope
             itemType="https://schema.org/ListItem"
           >

@@ -21,6 +21,7 @@ import { z } from 'zod';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { LucideIcon } from '@/lib/icons';
 import { nonEmptyString } from '@/lib/schemas/primitives';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 /**
  * Schema for category info
@@ -65,7 +66,7 @@ export function CategoryNavigationCard({
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="flex items-center justify-between px-1">
+      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} px-1`}>
         {Object.entries(validatedProps.categories).map(([key, info]) => {
           const Icon = info.icon;
           const isActive = validatedProps.currentCategory === key;
@@ -78,7 +79,7 @@ export function CategoryNavigationCard({
                   className={`p-2 rounded-lg transition-all duration-200 ${
                     isActive
                       ? info.activeColor || 'text-primary bg-primary/10'
-                      : `text-muted-foreground ${info.color || 'hover:text-primary hover:bg-muted/50'}`
+                      : `text-muted-foreground ${info.color || `${UI_CLASSES.HOVER_TEXT_PRIMARY} ${UI_CLASSES.HOVER_BG_MUTED_50}`}`
                   }`}
                 >
                   <Icon className="h-4 w-4" />

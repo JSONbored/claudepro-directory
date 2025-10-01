@@ -12,6 +12,7 @@ import { StructuredData } from '@/components/structured-data';
 import { OrganizationStructuredData } from '@/components/structured-data/organization-schema';
 import { UmamiScript } from '@/components/umami-script';
 import { APP_CONFIG, SEO_CONFIG } from '@/lib/constants';
+import { UI_CLASSES } from '@/lib/ui-constants';
 import { WebVitals } from './components/web-vitals';
 
 // Configure Inter font with optimizations
@@ -149,11 +150,11 @@ export default async function RootLayout({
           <ErrorBoundary>
             <a
               href="#main-content"
-              className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md"
+              className={`sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:${UI_CLASSES.Z_50} focus:px-4 focus:${UI_CLASSES.PY_2} focus:bg-primary focus:text-primary-foreground ${UI_CLASSES.ROUNDED_MD}`}
             >
               Skip to main content
             </a>
-            <div className="min-h-screen bg-background">
+            <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
               <Navigation />
               {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
               <main id="main-content">{children}</main>

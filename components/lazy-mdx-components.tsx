@@ -11,13 +11,14 @@
 
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
+import { UI_CLASSES } from '@/lib/ui-constants';
 import { ConfigCardSkeleton, Skeleton, TableSkeleton } from './ui/loading-skeleton';
 
 // Loading Skeletons using centralized skeleton components
 const RelatedContentSkeleton = () => (
-  <div className="space-y-4 my-8">
+  <div className={`${UI_CLASSES.SPACE_Y_4} my-8`}>
     <Skeleton size="md" width="lg" />
-    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+    <div className={UI_CLASSES.GRID_RESPONSIVE_3_TIGHT}>
       {[1, 2, 3].map((i) => (
         <ConfigCardSkeleton key={i} />
       ))}
@@ -26,11 +27,11 @@ const RelatedContentSkeleton = () => (
 );
 
 const MetricsSkeleton = () => (
-  <div className="space-y-3 my-6">
+  <div className={`${UI_CLASSES.SPACE_Y_3} my-6`}>
     <Skeleton size="md" width="sm" />
-    <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+    <div className={`grid-cols-2 ${UI_CLASSES.GRID_RESPONSIVE_4_GAP_4}`}>
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="bg-card/50 rounded-lg p-4 space-y-2 animate-pulse">
+        <div key={i} className={`bg-card/50 rounded-lg p-4 ${UI_CLASSES.SPACE_Y_2} animate-pulse`}>
           <Skeleton size="lg" width="1/2" />
           <Skeleton size="sm" width="3xl" />
         </div>
@@ -40,16 +41,16 @@ const MetricsSkeleton = () => (
 );
 
 const ComparisonTableSkeleton = () => (
-  <div className="space-y-3 my-6">
+  <div className={`${UI_CLASSES.SPACE_Y_3} my-6`}>
     <Skeleton size="md" width="lg" />
     <TableSkeleton rows={3} columns={2} />
   </div>
 );
 
 const DiagnosticFlowSkeleton = () => (
-  <div className="space-y-4 my-6">
+  <div className={`${UI_CLASSES.SPACE_Y_4} my-6`}>
     <Skeleton size="md" width="sm" />
-    <div className="space-y-3">
+    <div className={UI_CLASSES.SPACE_Y_3}>
       {[1, 2, 3].map((i) => (
         <ConfigCardSkeleton key={i} />
       ))}

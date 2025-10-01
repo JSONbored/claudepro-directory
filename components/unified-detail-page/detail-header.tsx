@@ -13,6 +13,7 @@
 
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import type { ContentTypeConfig } from '@/lib/types/content-type-config';
+import { UI_CLASSES } from '@/lib/ui-constants';
 import { DetailHeaderActions } from './detail-header-actions';
 
 export interface DetailHeaderProps {
@@ -36,7 +37,7 @@ export function DetailHeader({ displayTitle, item, config, onCopyContent }: Deta
   );
 
   return (
-    <div className="border-b border-border/50 bg-card/30">
+    <div className={`${UI_CLASSES.BORDER_B} border-border/50 bg-card/30`}>
       <div className="container mx-auto px-4 py-8">
         {/* Client component for back button and actions */}
         <DetailHeaderActions

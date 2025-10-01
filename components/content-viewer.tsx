@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp, Maximize2, Minimize2 } from '@/lib/icons';
 import type { ContentViewerProps } from '@/lib/schemas/component.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 import { cn } from '@/lib/utils';
 
 // ContentViewerProps is now imported from component.schema.ts
@@ -73,22 +74,25 @@ export const ContentViewer = ({
     <div
       ref={containerRef}
       className={cn(
-        'relative rounded-lg border border-border bg-card container-card contain-content',
-        isFullscreen && 'fixed inset-0 z-50 bg-background p-4',
+        `relative ${UI_CLASSES.ROUNDED_LG} border border-border bg-card container-card contain-content`,
+        isFullscreen &&
+          `fixed ${UI_CLASSES.INSET_0} ${UI_CLASSES.Z_50} bg-background ${UI_CLASSES.P_4}`,
         className
       )}
     >
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card/95 backdrop-blur p-2">
-        <span className="text-sm font-medium text-muted-foreground px-2">
+      <div
+        className={`sticky ${UI_CLASSES.TOP_0} ${UI_CLASSES.Z_10} ${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.BORDER_B} border-border bg-card/95 backdrop-blur ${UI_CLASSES.P_2}`}
+      >
+        <span className={`text-sm font-medium text-muted-foreground ${UI_CLASSES.PX_2}`}>
           {language.toUpperCase()}
         </span>
-        <div className="flex items-center gap-2">
+        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
           {showExpandButton && !isFullscreen && (
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="h-7 px-2"
+              className={`h-7 ${UI_CLASSES.PX_2}`}
             >
               {isExpanded ? (
                 <>
@@ -103,7 +107,12 @@ export const ContentViewer = ({
               )}
             </Button>
           )}
-          <Button variant="ghost" size="sm" onClick={toggleFullscreen} className="h-7 px-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleFullscreen}
+            className={`h-7 ${UI_CLASSES.PX_2}`}
+          >
             {isFullscreen ? (
               <>
                 <Minimize2 className="h-4 w-4 mr-1" />
@@ -133,16 +142,18 @@ export const ContentViewer = ({
       >
         <pre
           className={cn(
-            'p-4 text-sm font-mono whitespace-pre-wrap break-words overflow-wrap-anywhere',
+            `${UI_CLASSES.P_4} text-sm font-mono ${UI_CLASSES.WHITESPACE_PRE_WRAP} break-words overflow-wrap-anywhere`,
             'selection:bg-accent/20'
           )}
         >
-          <code className="block w-full">{displayContent}</code>
+          <code className={`${UI_CLASSES.BLOCK} ${UI_CLASSES.W_FULL}`}>{displayContent}</code>
         </pre>
       </div>
 
       {showExpandButton && !isExpanded && !isFullscreen && (
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-card via-card/80 to-transparent pointer-events-none rounded-b-lg" />
+        <div
+          className={`${UI_CLASSES.ABSOLUTE} ${UI_CLASSES.BOTTOM_0} ${UI_CLASSES.LEFT_0} ${UI_CLASSES.RIGHT_0} h-24 bg-gradient-to-t from-card via-card/80 to-transparent ${UI_CLASSES.POINTER_EVENTS_NONE} rounded-b-lg`}
+        />
       )}
     </div>
   );

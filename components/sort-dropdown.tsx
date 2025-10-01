@@ -12,6 +12,7 @@ import {
 import { ArrowDown, ArrowUp } from '@/lib/icons';
 import type { SortDropdownProps } from '@/lib/schemas/component.schema';
 import type { SortOption } from '@/lib/schemas/content-filter.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 export const SortDropdown = ({ sortBy, sortDirection, onSortChange }: SortDropdownProps) => {
   const sortDropdownId = useId();
@@ -38,8 +39,8 @@ export const SortDropdown = ({ sortBy, sortDirection, onSortChange }: SortDropdo
   }, [onSortChange, sortBy]);
 
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-sm text-muted-foreground">Sort by:</span>
+    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+      <span className={UI_CLASSES.TEXT_SM_MUTED}>Sort by:</span>
       <Select value={sortBy} onValueChange={handleSortValueChange}>
         <SelectTrigger
           id={sortDropdownId}
@@ -62,7 +63,7 @@ export const SortDropdown = ({ sortBy, sortDirection, onSortChange }: SortDropdo
         variant="ghost"
         size="sm"
         onClick={handleDirectionToggle}
-        className="p-2 hover:bg-accent/10"
+        className={`p-2 ${UI_CLASSES.HOVER_BG_ACCENT_10}`}
       >
         {sortDirection === 'asc' ? (
           <ArrowUp className="h-4 w-4" />

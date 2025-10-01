@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import { CheckCircle, Copy, ExternalLink } from '@/lib/icons';
 import type { MdxElementProps, MdxHeadingProps, MdxLinkProps } from '@/lib/schemas/shared.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 // Client component for copy-to-clipboard headings
 export function CopyableHeading({
@@ -26,9 +27,9 @@ export function CopyableHeading({
   };
 
   const sizeClasses = {
-    1: 'text-3xl font-bold mt-8 mb-6',
-    2: 'text-2xl font-bold mt-8 mb-4',
-    3: 'text-xl font-semibold mt-6 mb-3',
+    1: `text-3xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MT_8} mb-6`,
+    2: `text-2xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MT_8} mb-4`,
+    3: `text-xl ${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MT_6} mb-3`,
   };
 
   const Tag = `h${level}` as 'h1' | 'h2' | 'h3';
@@ -37,14 +38,14 @@ export function CopyableHeading({
     <Tag
       id={id}
       {...props}
-      className={`${sizeClasses[level]} scroll-mt-16 group flex items-center gap-2 ${className || ''}`}
+      className={`${sizeClasses[level]} scroll-mt-16 ${UI_CLASSES.GROUP} flex items-center gap-2 ${className || ''}`}
     >
       {children}
       {id && (
         <button
           type="button"
           onClick={handleCopy}
-          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-accent rounded"
+          className={`opacity-0 group-hover:opacity-100 transition-opacity p-1 ${UI_CLASSES.HOVER_BG_ACCENT} rounded`}
           title="Copy link to heading"
         >
           {copied ? (
@@ -99,14 +100,14 @@ export function CopyableCodeBlock({ children, className, ...props }: MdxElementP
     <div className="relative group my-6">
       <pre
         {...props}
-        className={`bg-zinc-900 border border-zinc-800 rounded-lg p-4 overflow-x-auto text-sm font-mono text-zinc-300 ${className || ''}`}
+        className={`bg-zinc-900 border border-zinc-800 rounded-lg ${UI_CLASSES.P_4} overflow-x-auto text-sm font-mono text-zinc-300 ${className || ''}`}
       >
         {children}
       </pre>
       <button
         type="button"
         onClick={handleCopy}
-        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-zinc-800 rounded"
+        className={`absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity ${UI_CLASSES.P_2} hover:bg-zinc-800 rounded`}
         title="Copy code"
       >
         {copied ? (
@@ -127,7 +128,7 @@ export function ExternalLinkComponent({ href, children, className, ...props }: M
       target="_blank"
       rel="noopener noreferrer"
       {...props}
-      className={`text-primary hover:underline transition-colors inline-flex items-center gap-1 ${className || ''}`}
+      className={`text-primary hover:underline ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.INLINE_FLEX} items-center gap-1 ${className || ''}`}
     >
       {children}
       <ExternalLink className="h-3 w-3" />
@@ -141,7 +142,7 @@ export function InternalLinkComponent({ href, children, className, ...props }: M
     <Link
       href={href}
       {...props}
-      className={`text-primary hover:underline transition-colors ${className || ''}`}
+      className={`text-primary hover:underline ${UI_CLASSES.TRANSITION_COLORS} ${className || ''}`}
     >
       {children}
     </Link>

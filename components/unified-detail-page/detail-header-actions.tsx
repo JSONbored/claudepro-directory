@@ -21,6 +21,7 @@ import { copyToClipboard } from '@/lib/clipboard-utils';
 import { ArrowLeft, Copy } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import type { ContentTypeConfig } from '@/lib/types/content-type-config';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 export interface DetailHeaderActionsProps {
   item: UnifiedContentItem;
@@ -85,7 +86,7 @@ export function DetailHeaderActions({
   return (
     <>
       {/* Back navigation */}
-      <div className="mb-6">
+      <div className={UI_CLASSES.MB_6}>
         <Button
           variant="ghost"
           onClick={() => router.back()}
@@ -97,33 +98,39 @@ export function DetailHeaderActions({
       </div>
 
       {/* Main content header */}
-      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-4">
-            <Badge variant="secondary" className="text-xs font-medium">
+      <div
+        className={`${UI_CLASSES.FLEX_COL} lg:flex-row lg:${UI_CLASSES.ITEMS_START} lg:${UI_CLASSES.JUSTIFY_BETWEEN} ${UI_CLASSES.GAP_6}`}
+      >
+        <div className={UI_CLASSES.FLEX_1}>
+          <div className={`flex items-center ${UI_CLASSES.GAP_3} ${UI_CLASSES.MB_4}`}>
+            <Badge variant="secondary" className={`${UI_CLASSES.TEXT_XS} font-medium`}>
               {config.typeName}
             </Badge>
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className={UI_CLASSES.TEXT_XS}>
               {item.category}
             </Badge>
           </div>
 
-          <h1 className="text-4xl font-bold tracking-tight mb-4">{displayTitle}</h1>
+          <h1 className={`text-4xl ${UI_CLASSES.FONT_BOLD} tracking-tight ${UI_CLASSES.MB_4}`}>
+            {displayTitle}
+          </h1>
 
           {item.description && (
-            <p className="text-xl text-muted-foreground mb-6 leading-relaxed">{item.description}</p>
+            <p className={`text-xl text-muted-foreground ${UI_CLASSES.MB_6} leading-relaxed`}>
+              {item.description}
+            </p>
           )}
         </div>
 
         {/* Action buttons */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button onClick={() => config.primaryAction.handler(item)} className="min-w-0">
+        <div className={`${UI_CLASSES.FLEX_COL} sm:flex-row ${UI_CLASSES.GAP_3}`}>
+          <Button onClick={() => config.primaryAction.handler(item)} className={UI_CLASSES.MIN_W_0}>
             {config.primaryAction.icon}
             {config.primaryAction.label}
           </Button>
 
           {hasContent && (
-            <Button variant="outline" onClick={handleCopyContent} className="min-w-0">
+            <Button variant="outline" onClick={handleCopyContent} className={UI_CLASSES.MIN_W_0}>
               {copied ? (
                 <>
                   <Copy className="h-4 w-4 mr-2" />
@@ -143,7 +150,7 @@ export function DetailHeaderActions({
               key={action.label}
               variant="outline"
               onClick={() => action.handler(item)}
-              className="min-w-0"
+              className={UI_CLASSES.MIN_W_0}
             >
               {action.icon}
               {action.label}

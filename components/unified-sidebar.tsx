@@ -36,6 +36,7 @@ import {
 // Removed logger import - client components should not use server-side logger
 // Dynamic imports for server-side functions
 import { statsRedis } from '@/lib/redis';
+import { UI_CLASSES } from '@/lib/ui-constants';
 import { shallowEqual } from '@/lib/utils';
 import { viewCountService } from '@/lib/view-count.service';
 
@@ -216,40 +217,42 @@ function UnifiedSidebarComponent({
   return (
     <TooltipProvider delayDuration={300}>
       <div
-        className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto"
+        className={`sticky top-20 max-h-[calc(100vh-6rem)] ${UI_CLASSES.OVERFLOW_Y_AUTO}`}
         style={{
           scrollbarWidth: 'thin',
           scrollbarColor: 'rgba(156, 163, 175, 0.3) transparent',
         }}
       >
-        <div className="space-y-3 pr-2 pb-4">
+        <div className={`${UI_CLASSES.SPACE_Y_3} pr-2 ${UI_CLASSES.PB_4}`}>
           {/* Search & Category Navigation - Available on ALL guide pages */}
           <Card className="border-muted/40 shadow-sm">
-            <CardContent className="p-3">
+            <CardContent className={UI_CLASSES.P_3}>
               {/* Search Bar */}
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <div className={UI_CLASSES.RELATIVE}>
+                <Search
+                  className={`${UI_CLASSES.ABSOLUTE} left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground`}
+                />
                 <Input
                   id={searchInputId}
                   name="guidesSearch"
                   placeholder="Search guides..."
-                  className="h-8 pl-8 pr-8 text-xs bg-muted/30 border-muted/50 focus:bg-background transition-colors"
+                  className={`h-8 pl-8 pr-8 ${UI_CLASSES.TEXT_XS} bg-muted/30 border-muted/50 focus:bg-background ${UI_CLASSES.TRANSITION_COLORS}`}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-0 top-0 h-8 w-8 hover:bg-transparent"
+                  className={`${UI_CLASSES.ABSOLUTE} ${UI_CLASSES.RIGHT_0} ${UI_CLASSES.TOP_0} h-8 w-8 hover:bg-transparent`}
                   onClick={() => setShowFilters(!showFilters)}
                 >
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Filter
-                        className={`h-3.5 w-3.5 transition-colors ${showFilters ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                        className={`h-3.5 w-3.5 ${UI_CLASSES.TRANSITION_COLORS} ${showFilters ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                       />
                     </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-xs">
+                    <TooltipContent side="bottom" className={UI_CLASSES.TEXT_XS}>
                       Filter by category
                     </TooltipContent>
                   </Tooltip>
@@ -257,7 +260,7 @@ function UnifiedSidebarComponent({
               </div>
 
               {/* Category Navigation - Using extracted CategoryNavigationCard */}
-              <div className="mt-3">
+              <div className={UI_CLASSES.MT_2}>
                 <CategoryNavigationCard
                   currentCategory={currentCategory}
                   categories={categoryInfo}
@@ -267,8 +270,8 @@ function UnifiedSidebarComponent({
 
               {/* Active Filters (if any) */}
               {showFilters && searchQuery && (
-                <div className="mt-2 flex flex-wrap gap-1">
-                  <Badge variant="secondary" className="text-xs h-5">
+                <div className={`${UI_CLASSES.MT_2} ${UI_CLASSES.FLEX_WRAP_GAP_1}`}>
+                  <Badge variant="secondary" className={`${UI_CLASSES.TEXT_XS} h-5`}>
                     {searchQuery}
                     <button
                       type="button"
@@ -297,13 +300,15 @@ function UnifiedSidebarComponent({
 
                   return (
                     <Card className="border-muted/40 shadow-sm">
-                      <CardHeader className="pb-2 pt-3 px-3">
-                        <CardTitle className="text-xs font-medium text-muted-foreground">
+                      <CardHeader className={`${UI_CLASSES.PB_2} pt-3 ${UI_CLASSES.PX_3}`}>
+                        <CardTitle
+                          className={`${UI_CLASSES.TEXT_XS} font-medium text-muted-foreground`}
+                        >
                           On this page
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="pb-3 px-3">
-                        <nav className="space-y-0.5">
+                      <CardContent className={`pb-3 ${UI_CLASSES.PX_3}`}>
+                        <nav className={UI_CLASSES.SPACE_Y_TIGHT}>
                           {headings.slice(0, 5).map((heading) => {
                             const title = heading.replace('## ', '');
                             const id = title.toLowerCase().replace(/\s+/g, '-');
@@ -311,7 +316,7 @@ function UnifiedSidebarComponent({
                               <a
                                 key={id}
                                 href={`#${id}`}
-                                className="block text-3xs text-muted-foreground hover:text-primary transition-colors py-0.5 pl-3 border-l-2 border-transparent hover:border-primary/50 truncate"
+                                className={`block text-3xs text-muted-foreground ${UI_CLASSES.HOVER_TEXT_PRIMARY} ${UI_CLASSES.TRANSITION_COLORS} py-0.5 pl-3 border-l-2 border-transparent hover:border-primary/50 truncate`}
                               >
                                 {title}
                               </a>
@@ -331,17 +336,21 @@ function UnifiedSidebarComponent({
               {/* Related Guides - Only on content pages */}
               {validatedRelatedGuides && validatedRelatedGuides.length > 0 && (
                 <Card className="border-muted/40 shadow-sm">
-                  <CardHeader className="pb-2 pt-3 px-3">
-                    <CardTitle className="text-xs font-medium flex items-center gap-1.5">
+                  <CardHeader className={`${UI_CLASSES.PB_2} pt-3 ${UI_CLASSES.PX_3}`}>
+                    <CardTitle
+                      className={`${UI_CLASSES.TEXT_XS} font-medium ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-1.5`}
+                    >
                       <Sparkles className="h-3 w-3 text-yellow-500" />
                       <span>Related Guides</span>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="pb-3 px-3">
-                    <div className="space-y-1">
+                  <CardContent className={`pb-3 ${UI_CLASSES.PX_3}`}>
+                    <div className={UI_CLASSES.SPACE_Y_1}>
                       {validatedRelatedGuides.slice(0, 3).map((guide) => (
                         <Link key={guide.slug} href={guide.slug} className="block group">
-                          <div className="text-3xs text-muted-foreground group-hover:text-primary transition-colors py-0.5 truncate">
+                          <div
+                            className={`text-3xs text-muted-foreground ${UI_CLASSES.GROUP_HOVER_TEXT_PRIMARY} ${UI_CLASSES.TRANSITION_COLORS} py-0.5 truncate`}
+                          >
                             {guide.title}
                           </div>
                         </Link>
@@ -349,7 +358,7 @@ function UnifiedSidebarComponent({
                       {validatedRelatedGuides.length > 3 && (
                         <Link
                           href="/guides"
-                          className="text-2xs text-primary hover:underline inline-flex items-center gap-0.5 mt-1"
+                          className={`text-2xs text-primary hover:underline inline-flex ${UI_CLASSES.ITEMS_CENTER} gap-0.5 mt-1`}
                         >
                           View all ({validatedRelatedGuides.length})
                         </Link>
@@ -367,14 +376,16 @@ function UnifiedSidebarComponent({
           {/* Getting Started - Show when no trending/recent data */}
           {trendingGuides.length === 0 && recentGuides.length === 0 && (
             <Card className="border-muted/40 shadow-sm">
-              <CardHeader className="pb-2 pt-3 px-3">
-                <CardTitle className="text-xs font-medium flex items-center gap-1.5">
+              <CardHeader className={`${UI_CLASSES.PB_2} pt-3 ${UI_CLASSES.PX_3}`}>
+                <CardTitle
+                  className={`${UI_CLASSES.TEXT_XS} font-medium ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-1.5`}
+                >
                   <Sparkles className="h-3 w-3 text-yellow-500" />
                   <span>Getting Started</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pb-3 px-3">
-                <div className="text-3xs text-muted-foreground space-y-1.5">
+              <CardContent className={`pb-3 ${UI_CLASSES.PX_3}`}>
+                <div className={`text-3xs text-muted-foreground ${UI_CLASSES.SPACE_Y_TIGHT_PLUS}`}>
                   <p>New guides are being added regularly.</p>
                   <p>Check back soon for trending content and recent updates!</p>
                 </div>
@@ -385,10 +396,12 @@ function UnifiedSidebarComponent({
           {/* Future Sponsored Placement */}
           {/* This section is reserved for future sponsored content */}
           <Card className="border-dashed border-muted/30 bg-muted/5">
-            <CardContent className="p-3">
+            <CardContent className={UI_CLASSES.P_3}>
               <div className="text-2xs text-muted-foreground/50 text-center">
                 {/* Reserved for sponsored content */}
-                <div className="flex items-center justify-center gap-1.5">
+                <div
+                  className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} gap-1.5`}
+                >
                   <Users className="h-3 w-3" />
                   <span>Community Resources</span>
                 </div>
@@ -397,15 +410,18 @@ function UnifiedSidebarComponent({
           </Card>
 
           {/* Quick Links */}
-          <div className="px-2 pt-1">
-            <div className="flex items-center justify-between text-2xs">
+          <div className={`${UI_CLASSES.PX_2} pt-1`}>
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-2xs`}>
               <Link
                 href="/guides"
-                className="text-muted-foreground hover:text-primary transition-colors"
+                className={`text-muted-foreground ${UI_CLASSES.HOVER_TEXT_PRIMARY} ${UI_CLASSES.TRANSITION_COLORS}`}
               >
                 ← All Guides
               </Link>
-              <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link
+                href="/"
+                className={`text-muted-foreground ${UI_CLASSES.HOVER_TEXT_PRIMARY} ${UI_CLASSES.TRANSITION_COLORS}`}
+              >
                 Browse Directory →
               </Link>
             </div>

@@ -29,9 +29,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { logger } from '@/lib/logger';
 import type { FilterState, SearchOptions, UseSearchProps } from '@/lib/schemas/component.schema';
 import type { ContentItem } from '@/lib/schemas/content';
-import { extractFilterOptions } from '@/lib/schemas/content-filter.schema';
 import { type SearchableItem, type SearchFilters, searchCache } from '@/lib/search-cache';
 import { getDisplayTitle } from '@/lib/utils';
+import {
+  hasActiveFilters,
+  useCombinedSearchState,
+  useFilterOptions,
+} from './use-search-primitives';
 
 // Convert ContentItem to SearchableItem for compatibility
 function convertToSearchableItem(item: ContentItem): SearchableItem {
@@ -106,15 +110,7 @@ async function performCachedSearch(
   });
 }
 
-function hasActiveFilters(filters: FilterState): boolean {
-  return !!(
-    filters.category ||
-    filters.author ||
-    filters.dateRange ||
-    (filters.tags && filters.tags.length > 0) ||
-    (filters.popularity && (filters.popularity[0] > 0 || filters.popularity[1] < 100))
-  );
-}
+// hasActiveFilters moved to use-search-primitives.ts
 
 // Date threshold helper for future date filtering features
 function getDateThreshold(now: Date, dateRange: string): Date {
@@ -235,42 +231,20 @@ export function useLocalSearch<
     slug: string;
   },
 >(items: readonly T[] | T[]) {
-  const [query, setQuery] = useState('');
-  const [filters, setFilters] = useState<FilterState>({
-    sort: 'trending',
-  });
+  // Use primitives for state management
+  const { query, filters, handleSearch, handleFiltersChange, clearSearch, isSearching } =
+    useCombinedSearchState('trending');
 
   // Create search index once
   const searchIndex = useMemo(() => createSearchIndex(items), [items]);
 
-  // Compute filter options
-  const filterOptions = useMemo(() => {
-    const compatibleData = [...items].map((item) => ({
-      category: item.category || '',
-      author: item.author || '',
-      tags: [...(item.tags || [])] as string[],
-    }));
-    return extractFilterOptions(compatibleData);
-  }, [items]);
+  // Compute filter options using primitive
+  const filterOptions = useFilterOptions(items);
 
   // Perform local search
   const searchResults = useMemo(() => {
     return performLocalSearch(searchIndex, query, filters);
   }, [searchIndex, query, filters]);
-
-  // Stable callbacks
-  const handleSearch = useCallback((newQuery: string) => {
-    setQuery(newQuery);
-  }, []);
-
-  const handleFiltersChange = useCallback((newFilters: FilterState) => {
-    setFilters(newFilters);
-  }, []);
-
-  const clearSearch = useCallback(() => {
-    setQuery('');
-    setFilters({ sort: 'trending' });
-  }, []);
 
   return {
     query,
@@ -280,37 +254,25 @@ export function useLocalSearch<
     handleSearch,
     handleFiltersChange,
     clearSearch,
-    isSearching: query.trim().length > 0 || hasActiveFilters(filters),
+    isSearching,
   };
 }
 
 export function useSearch({ data, searchOptions }: UseSearchProps) {
+  // PERFORMANCE: Create stable reference for data array to prevent unnecessary re-renders
+  const stableData = useMemo(() => data as ContentItem[], [data]);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<FilterState>({
     sort: 'trending',
   });
-
-  // PERFORMANCE: Create stable reference for data array to prevent unnecessary re-renders
-  // This prevents creating new array instances on every render, which would:
-  // 1. Trigger unnecessary useEffect runs (line 279-298)
-  // 2. Cause memory churn from repeated array allocations
-  // 3. Break React's referential equality checks for dependencies
-  const stableData = useMemo(() => data as ContentItem[], [data]);
-
   const [searchResults, setSearchResults] = useState<ContentItem[]>(stableData);
 
   // Memoize search options to prevent unnecessary re-renders
   const memoizedSearchOptions = useMemo(() => searchOptions || {}, [searchOptions]);
 
-  // Memoize filter options with safe extraction
-  const filterOptions = useMemo(() => {
-    const compatibleData = stableData.map((item) => ({
-      category: item.category,
-      author: item.author,
-      tags: [...(item.tags || [])] as string[],
-    }));
-    return extractFilterOptions(compatibleData);
-  }, [stableData]);
+  // Compute filter options using primitive
+  const filterOptions = useFilterOptions(stableData);
 
   // Update search results when data, query, or filters change
   useEffect(() => {

@@ -22,6 +22,7 @@
 import { getContentTypeConfig } from '@/lib/config/content-type-configs';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import type { InstallationSteps } from '@/lib/types/content-type-config';
+import { UI_CLASSES } from '@/lib/ui-constants';
 import { getDisplayTitle } from '@/lib/utils';
 import { DetailHeader } from './detail-header';
 import { DetailMetadata } from './detail-metadata';
@@ -91,7 +92,7 @@ export function UnifiedDetailPage({ item, relatedItems = [] }: UnifiedDetailPage
   // Handle case where config is not found - AFTER ALL HOOKS
   if (!config) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">Configuration Not Found</h1>
@@ -105,7 +106,7 @@ export function UnifiedDetailPage({ item, relatedItems = [] }: UnifiedDetailPage
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
       {/* Header - Client component for interactivity */}
       <DetailHeader displayTitle={displayTitle} item={item} config={config} />
 

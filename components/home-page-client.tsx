@@ -29,12 +29,15 @@ const UnifiedSearch = dynamic(
   () => import('@/components/unified-search').then((mod) => ({ default: mod.UnifiedSearch })),
   {
     ssr: false,
-    loading: () => <div className="h-14 bg-muted/50 rounded-lg animate-pulse" />,
+    loading: () => (
+      <div className={`h-14 ${UI_CLASSES.BG_MUTED_50} ${UI_CLASSES.ROUNDED_LG} animate-pulse`} />
+    ),
   }
 );
 
 import { useSearch } from '@/hooks/use-search';
 import type { HomePageClientProps, UnifiedContentItem } from '@/lib/schemas/component.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 /**
  * Memoized Featured Section Component (SHA-2086 Fix)
@@ -60,13 +63,13 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
 
     return (
       <div>
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold">{title}</h2>
-          <Link href={href} className="text-accent hover:underline flex items-center gap-2">
+        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.MB_8}`}>
+          <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD}`}>{title}</h2>
+          <Link href={href} className={UI_CLASSES.LINK_ACCENT_UNDERLINE}>
             View all <ExternalLink className="h-4 w-4" />
           </Link>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
           {featuredItems.map((item) => (
             <LazyConfigCard
               key={item.slug}
@@ -164,8 +167,8 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
   return (
     <>
       {/* Search Section */}
-      <section className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-8`}>
+        <div className={`${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
           <UnifiedSearch
             placeholder="Search for rules, MCP servers, agents, commands, and more..."
             onSearch={handleSearch}
@@ -179,14 +182,16 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
         </div>
       </section>
 
-      <section className="container mx-auto px-4 pb-16">
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 pb-16`}>
         {/* Search Results - Show when user searches */}
         {isSearching && (
           <div className="mb-16">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold">
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.MB_8}`}>
+              <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD}`}>
                 Search Results
-                <span className="text-muted-foreground ml-2">({filteredResults.length} found)</span>
+                <span className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} ml-2`}>
+                  ({filteredResults.length} found)
+                </span>
               </h2>
               <Button variant="outline" onClick={handleClearSearch} className="text-sm">
                 Clear Search
@@ -208,15 +213,19 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
                 loadMore={loadMore}
                 hasMore={hasMore}
                 pageSize={20}
-                gridClassName="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                gridClassName={UI_CLASSES.GRID_RESPONSIVE_3}
                 emptyMessage="No results found"
                 keyExtractor={(item) => item.slug}
               />
             ) : (
-              <div className="text-center py-12 bg-card/50 rounded-xl border border-border/50">
-                <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                <h3 className="text-lg font-semibold mb-2">No results found</h3>
-                <p className="text-muted-foreground">
+              <div className={UI_CLASSES.CONTAINER_CARD_MUTED}>
+                <Search
+                  className={`h-12 w-12 ${UI_CLASSES.MX_AUTO} mb-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}/50`}
+                />
+                <h3 className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.FONT_SEMIBOLD} mb-2`}>
+                  No results found
+                </h3>
+                <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
                   Try different keywords or browse our featured content below
                 </p>
               </div>
@@ -227,7 +236,7 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
         {/* Featured Content - Only show when not searching */}
         {/* SHA-2086 FIX: Use memoized FeaturedSection to prevent 30 card re-renders */}
         {!isSearching && (
-          <div className="space-y-16 mb-16">
+          <div className={`${UI_CLASSES.SPACE_Y_16} mb-16`}>
             <FeaturedSection title="Featured Rules" href="/rules" items={rules} />
             <FeaturedSection title="Featured MCPs" href="/mcp" items={mcp} />
             <FeaturedSection title="Featured Agents" href="/agents" items={agents} />
@@ -236,16 +245,22 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
 
             {/* Featured Jobs */}
             <div>
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold">Featured Jobs</h2>
-                <Link href="/jobs" className="text-accent hover:underline flex items-center gap-2">
+              <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.MB_8}`}>
+                <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD}`}>Featured Jobs</h2>
+                <Link href="/jobs" className={UI_CLASSES.LINK_ACCENT_UNDERLINE}>
                   View all <ExternalLink className="h-4 w-4" />
                 </Link>
               </div>
-              <div className="text-center py-12 bg-card/50 rounded-xl border border-border/50">
-                <Briefcase className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                <h3 className="text-lg font-semibold mb-2">Find Your Next AI Role</h3>
-                <p className="text-muted-foreground mb-6">
+              <div className={UI_CLASSES.CONTAINER_CARD_MUTED}>
+                <Briefcase
+                  className={`h-12 w-12 ${UI_CLASSES.MX_AUTO} mb-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}/50`}
+                />
+                <h3
+                  className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_2}`}
+                >
+                  Find Your Next AI Role
+                </h3>
+                <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MB_6}`}>
                   Discover opportunities with companies building the future of AI
                 </p>
                 <Button asChild>
@@ -258,34 +273,34 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
 
         {/* Advanced Tabs with Infinite Scroll - Only show when not searching */}
         {!isSearching && (
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
-            <TabsList className="grid w-full lg:w-auto grid-cols-7">
-              <TabsTrigger value="all" className="text-sm">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className={UI_CLASSES.SPACE_Y_8}>
+            <TabsList className={`grid ${UI_CLASSES.W_FULL} lg:w-auto grid-cols-7`}>
+              <TabsTrigger value="all" className={UI_CLASSES.TEXT_SM}>
                 All
               </TabsTrigger>
-              <TabsTrigger value="rules" className="text-sm">
+              <TabsTrigger value="rules" className={UI_CLASSES.TEXT_SM}>
                 Rules
               </TabsTrigger>
-              <TabsTrigger value="mcp" className="text-sm">
+              <TabsTrigger value="mcp" className={UI_CLASSES.TEXT_SM}>
                 MCP
               </TabsTrigger>
-              <TabsTrigger value="agents" className="text-sm">
+              <TabsTrigger value="agents" className={UI_CLASSES.TEXT_SM}>
                 Agents
               </TabsTrigger>
-              <TabsTrigger value="commands" className="text-sm">
+              <TabsTrigger value="commands" className={UI_CLASSES.TEXT_SM}>
                 Commands
               </TabsTrigger>
-              <TabsTrigger value="hooks" className="text-sm">
+              <TabsTrigger value="hooks" className={UI_CLASSES.TEXT_SM}>
                 Hooks
               </TabsTrigger>
-              <TabsTrigger value="community" className="text-sm">
+              <TabsTrigger value="community" className={UI_CLASSES.TEXT_SM}>
                 Community
               </TabsTrigger>
             </TabsList>
 
             {/* Tab content for all tabs except community */}
             {['all', 'rules', 'mcp', 'agents', 'commands', 'hooks'].map((tab) => (
-              <TabsContent key={tab} value={tab} className="space-y-6">
+              <TabsContent key={tab} value={tab} className={UI_CLASSES.SPACE_Y_6}>
                 {filteredResults.length > 0 ? (
                   <LazyInfiniteScrollContainer<UnifiedContentItem>
                     items={displayedItems}
@@ -301,16 +316,16 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
                     loadMore={loadMore}
                     hasMore={hasMore}
                     pageSize={20}
-                    gridClassName="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                    gridClassName={UI_CLASSES.GRID_RESPONSIVE_3}
                     emptyMessage={`No ${tab === 'all' ? 'configurations' : tab} found`}
                     keyExtractor={(item: UnifiedContentItem, _index: number) => item.slug}
                   />
                 ) : (
-                  <div className="text-center py-12">
-                    <p className="text-lg text-muted-foreground">
+                  <div className={`${UI_CLASSES.TEXT_CENTER} py-12`}>
+                    <p className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
                       No {tab === 'all' ? 'configurations' : tab} found
                     </p>
-                    <p className="text-sm text-muted-foreground mt-2">
+                    <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
                       Try adjusting your filters.
                     </p>
                   </div>
@@ -318,21 +333,25 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
               </TabsContent>
             ))}
 
-            <TabsContent value="community" className="space-y-6">
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold mb-2">Featured Contributors</h3>
-                <p className="text-muted-foreground">
+            <TabsContent value="community" className={UI_CLASSES.SPACE_Y_6}>
+              <div className={`${UI_CLASSES.TEXT_CENTER} ${UI_CLASSES.MB_8}`}>
+                <h3 className={`text-2xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`}>
+                  Featured Contributors
+                </h3>
+                <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
                   Meet the experts creating amazing Claude configurations
                 </p>
               </div>
 
-              <div className="text-center">
-                <p className="text-lg text-muted-foreground mb-6">
+              <div className={UI_CLASSES.TEXT_CENTER}>
+                <p
+                  className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MB_6}`}
+                >
                   Coming soon! Featured contributors who create amazing Claude configurations.
                 </p>
               </div>
 
-              <div className="text-center pt-8">
+              <div className={`${UI_CLASSES.TEXT_CENTER} pt-8`}>
                 <Button variant="outline" asChild>
                   <Link href="/community">View All Contributors</Link>
                 </Button>

@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation';
 import { memo } from 'react';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import type { ContentTypeConfig } from '@/lib/types/content-type-config';
+import { UI_CLASSES } from '@/lib/ui-constants';
 import { SidebarDetailsCard } from './sidebar-details-card';
 import { SidebarRelatedItemsCard } from './sidebar-related-items-card';
 import { SidebarResourcesCard } from './sidebar-resources-card';
@@ -52,12 +53,12 @@ export const DetailSidebar = memo(function DetailSidebar({
 
   // Use custom renderer if provided
   if (customRenderer) {
-    return <div className="space-y-6">{customRenderer(item, relatedItems, router)}</div>;
+    return <div className={UI_CLASSES.SPACE_Y_6}>{customRenderer(item, relatedItems, router)}</div>;
   }
 
   // Default sidebar using composable cards
   return (
-    <div className="space-y-6">
+    <div className={UI_CLASSES.SPACE_Y_6}>
       {/* Resources Card */}
       <SidebarResourcesCard
         githubPath={config.metadata?.githubPathPrefix}

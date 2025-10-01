@@ -15,6 +15,7 @@ import { z } from 'zod';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock } from '@/lib/icons';
 import { nonEmptyString } from '@/lib/schemas/primitives';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 /**
  * Schema for recent guide item
@@ -62,8 +63,14 @@ export function RecentGuidesCard({ guides, title = 'Recent Guides' }: RecentGuid
       <CardContent className="pb-3 px-3">
         <div className="space-y-1.5">
           {validated.guides.map((guide) => (
-            <Link key={guide.slug} href={guide.slug} className="group block">
-              <div className="text-3xs text-muted-foreground group-hover:text-primary transition-colors py-0.5">
+            <Link
+              key={guide.slug}
+              href={guide.slug}
+              className={`${UI_CLASSES.GROUP} ${UI_CLASSES.BLOCK}`}
+            >
+              <div
+                className={`text-3xs text-muted-foreground ${UI_CLASSES.GROUP_HOVER_TEXT_PRIMARY} ${UI_CLASSES.TRANSITION_COLORS} py-0.5`}
+              >
                 <div className="truncate">{guide.title}</div>
                 <div className="text-2xs text-muted-foreground/60">{guide.date}</div>
               </div>

@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import type { FilterState } from '@/lib/schemas/component.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 export interface SearchFilterPanelProps {
   filters: FilterState;
@@ -61,14 +62,16 @@ export function SearchFilterPanel({
   const dateRangeSelectId = useId();
 
   return (
-    <section className="bg-card/30 border border-border/50 rounded-lg p-4 md:p-6 space-y-4 md:space-y-6">
+    <section
+      className={`bg-card/30 border border-border/50 rounded-lg ${UI_CLASSES.P_4} md:${UI_CLASSES.P_6} ${UI_CLASSES.SPACE_Y_4} md:${UI_CLASSES.SPACE_Y_6}`}
+    >
       {/* Main Filters */}
       <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         <legend className="sr-only">Filter by category, author, and date range</legend>
 
         {/* Category Filter */}
         {availableCategories.length > 0 && (
-          <div className="space-y-2">
+          <div className={UI_CLASSES.SPACE_Y_2}>
             <Label htmlFor={categorySelectId}>Category</Label>
             <Select
               value={filters.category || 'all'}
@@ -98,7 +101,7 @@ export function SearchFilterPanel({
 
         {/* Author Filter */}
         {availableAuthors.length > 0 && (
-          <div className="space-y-2">
+          <div className={UI_CLASSES.SPACE_Y_2}>
             <Label htmlFor={authorSelectId}>Author</Label>
             <Select
               value={filters.author || 'all'}
@@ -127,7 +130,7 @@ export function SearchFilterPanel({
         )}
 
         {/* Date Range */}
-        <div className="space-y-2">
+        <div className={UI_CLASSES.SPACE_Y_2}>
           <Label htmlFor={dateRangeSelectId}>Date Range</Label>
           <Select
             value={filters.dateRange || 'all'}
@@ -154,7 +157,7 @@ export function SearchFilterPanel({
       </fieldset>
 
       {/* Popularity Slider */}
-      <fieldset className="space-y-2">
+      <fieldset className={UI_CLASSES.SPACE_Y_2}>
         <legend className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
           Popularity Range ({filters.popularity?.[0] || 0} - {filters.popularity?.[1] || 100})
         </legend>
@@ -165,7 +168,7 @@ export function SearchFilterPanel({
             min={0}
             max={100}
             step={1}
-            className="w-full"
+            className={UI_CLASSES.W_FULL}
             name="popularity-range"
             aria-label="Set popularity range"
             aria-valuetext={`Popularity range from ${filters.popularity?.[0] || 0} to ${filters.popularity?.[1] || 100}`}
@@ -175,10 +178,10 @@ export function SearchFilterPanel({
 
       {/* Tags - Organized in Scrollable Area */}
       {availableTags.length > 0 && (
-        <fieldset className="space-y-3">
-          <div className="border-t border-border/50 pt-3" />
+        <fieldset className={UI_CLASSES.SPACE_Y_3}>
+          <div className={`${UI_CLASSES.BORDER_T} border-border/50 pt-3`} />
           <div>
-            <div className="flex items-center justify-between mb-3">
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-3`}>
               <legend className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Tags
               </legend>
@@ -194,15 +197,15 @@ export function SearchFilterPanel({
               )}
             </div>
             <ScrollArea
-              className="h-40 md:h-48 w-full rounded-md border border-border/50 p-4"
+              className={`h-40 md:h-48 ${UI_CLASSES.W_FULL} rounded-md border border-border/50 ${UI_CLASSES.P_4}`}
               aria-label="Select tags to filter by"
             >
-              <div className="flex flex-wrap gap-2">
+              <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
                 {availableTags.map((tag) => (
                   <Badge
                     key={tag}
                     variant={filters.tags?.includes(tag) ? 'default' : 'outline'}
-                    className="cursor-pointer transition-all duration-200 hover:bg-accent/10"
+                    className={`cursor-pointer transition-all duration-200 ${UI_CLASSES.HOVER_BG_ACCENT_10}`}
                     onClick={() => onToggleTag(tag)}
                     role="button"
                     tabIndex={0}
@@ -226,7 +229,9 @@ export function SearchFilterPanel({
 
       {/* Action Buttons */}
       {showActions && (
-        <fieldset className="flex justify-between items-center border-t border-border/50 pt-6">
+        <fieldset
+          className={`flex ${UI_CLASSES.JUSTIFY_BETWEEN} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.BORDER_T} border-border/50 ${UI_CLASSES.PT_6}`}
+        >
           <legend className="sr-only">Filter actions</legend>
           <Button
             variant="ghost"
@@ -236,7 +241,7 @@ export function SearchFilterPanel({
           >
             Clear All Filters
           </Button>
-          <div className="flex gap-2">
+          <div className={UI_CLASSES.FLEX_GAP_2}>
             {onCancel && (
               <Button
                 variant="outline"

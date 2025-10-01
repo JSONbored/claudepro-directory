@@ -27,6 +27,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { copyToClipboard } from '@/lib/clipboard-utils';
 import { Copy } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 /**
  * Props for ConfigurationSection
@@ -95,7 +96,7 @@ export const ConfigurationSection = memo(function ConfigurationSection({
     return (
       <Card data-section="configuration">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <Copy className="h-5 w-5" />
             Configuration
           </CardTitle>
@@ -115,15 +116,19 @@ export const ConfigurationSection = memo(function ConfigurationSection({
 
             return (
               <div key={key}>
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-medium">{labels[key] || key}</h4>
+                <div
+                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.MB_3}`}
+                >
+                  <h4 className={UI_CLASSES.FONT_MEDIUM}>{labels[key] || key}</h4>
                   <Button size="sm" variant="outline" onClick={() => handleCopyConfig(value)}>
                     <Copy className="h-4 w-4 mr-2" />
                     {copied ? 'Copied!' : 'Copy'}
                   </Button>
                 </div>
-                <div className="max-h-[400px] overflow-y-auto rounded-md border">
-                  <pre className="p-4 overflow-x-auto text-sm font-mono bg-black text-green-400 rounded-md">
+                <div className={`max-h-[400px] ${UI_CLASSES.OVERFLOW_Y_AUTO} rounded-md border`}>
+                  <pre
+                    className={`${UI_CLASSES.P_4} ${UI_CLASSES.OVERFLOW_X_AUTO} ${UI_CLASSES.TEXT_SM} font-mono bg-black text-green-400 rounded-md`}
+                  >
                     <code>{JSON.stringify(value, null, 2)}</code>
                   </pre>
                 </div>
@@ -145,13 +150,15 @@ export const ConfigurationSection = memo(function ConfigurationSection({
     return (
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <div>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Copy className="h-5 w-5" />
                 Hook Configuration
               </CardTitle>
-              <CardDescription className="mt-2">Hook setup and script content</CardDescription>
+              <CardDescription className={UI_CLASSES.MT_2}>
+                Hook setup and script content
+              </CardDescription>
             </div>
             <Button size="sm" variant="outline" onClick={() => handleCopyConfig()}>
               <Copy className="h-4 w-4 mr-2" />
@@ -162,16 +169,20 @@ export const ConfigurationSection = memo(function ConfigurationSection({
         <CardContent className="space-y-4">
           {config.hookConfig && (
             <div>
-              <h4 className="font-medium mb-2">Hook Configuration</h4>
-              <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto">
+              <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_2}`}>Hook Configuration</h4>
+              <pre
+                className={`bg-muted ${UI_CLASSES.P_4} rounded-lg ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.OVERFLOW_X_AUTO}`}
+              >
                 {JSON.stringify(config.hookConfig, null, 2)}
               </pre>
             </div>
           )}
           {config.scriptContent && (
             <div>
-              <h4 className="font-medium mb-2">Script Content</h4>
-              <pre className="bg-black text-green-400 p-4 rounded-lg text-sm overflow-x-auto max-h-[400px]">
+              <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_2}`}>Script Content</h4>
+              <pre
+                className={`bg-black text-green-400 ${UI_CLASSES.P_4} rounded-lg ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.OVERFLOW_X_AUTO} max-h-[400px]`}
+              >
                 {config.scriptContent}
               </pre>
             </div>
@@ -185,7 +196,7 @@ export const ConfigurationSection = memo(function ConfigurationSection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
           <Copy className="h-5 w-5" />
           Configuration
         </CardTitle>

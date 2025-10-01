@@ -13,6 +13,7 @@ import type {
   RelatedCarouselClientProps,
   RelatedContentItem,
 } from '@/lib/schemas/related-content.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 export function RelatedCarouselClient({
   items,
@@ -158,24 +159,35 @@ export function RelatedCarouselClient({
       className={`my-12 ${className}`}
     >
       {showTitle && (
-        <div className="mb-8 p-4 sm:p-6 bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-xl">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
+        <div
+          className={`${UI_CLASSES.MB_8} ${UI_CLASSES.P_4} sm:${UI_CLASSES.P_6} bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 ${UI_CLASSES.ROUNDED_XL}`}
+        >
+          <div
+            className={`${UI_CLASSES.FLEX_COL} sm:flex-row ${UI_CLASSES.ITEMS_START} sm:items-center ${UI_CLASSES.JUSTIFY_BETWEEN} gap-4`}
+          >
+            <div className={`${UI_CLASSES.FLEX} items-center gap-3 sm:gap-4`}>
+              <div
+                className={`${UI_CLASSES.P_2} bg-primary/10 ${UI_CLASSES.ROUNDED_LG} ${UI_CLASSES.FLEX_SHRINK_0}`}
+              >
                 <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               </div>
-              <div className="min-w-0">
-                <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1" itemProp="name">
+              <div className={UI_CLASSES.MIN_W_0}>
+                <h2
+                  className={`text-xl sm:text-2xl ${UI_CLASSES.FONT_BOLD} text-foreground ${UI_CLASSES.MB_1}`}
+                  itemProp="name"
+                >
                   {title}
                 </h2>
-                <p className="text-xs sm:text-sm text-muted-foreground">
+                <p
+                  className={`${UI_CLASSES.TEXT_XS} sm:${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
+                >
                   Intelligently curated based on your current content
                 </p>
               </div>
             </div>
             <Badge
               variant="secondary"
-              className="bg-primary/10 text-primary border-primary/30 font-medium px-2 sm:px-3 py-1 text-xs sm:text-sm flex-shrink-0"
+              className={`bg-primary/10 text-primary border-primary/30 ${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.PX_2} sm:${UI_CLASSES.PX_3} ${UI_CLASSES.PY_1} ${UI_CLASSES.TEXT_XS} sm:${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FLEX_SHRINK_0}`}
             >
               AI Powered
             </Badge>
@@ -193,44 +205,46 @@ export function RelatedCarouselClient({
               key={`${item.category}-${item.slug}`}
               itemScope
               itemType="https://schema.org/ListItem"
-              className={`group relative border-2 ${categoryStyles.border} bg-card hover:shadow-xl hover:shadow-current/5 transition-all duration-300 h-full overflow-hidden flex flex-col`}
+              className={`${UI_CLASSES.GROUP} relative border-2 ${categoryStyles.border} bg-card hover:shadow-xl hover:shadow-current/5 transition-all duration-300 h-full overflow-hidden ${UI_CLASSES.FLEX_COL}`}
             >
               {/* Colored gradient accent line based on category */}
               <div
-                className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${categoryStyles.accent} opacity-70 group-hover:opacity-100 transition-opacity`}
+                className={`${UI_CLASSES.ABSOLUTE} ${UI_CLASSES.TOP_0} ${UI_CLASSES.LEFT_0} ${UI_CLASSES.RIGHT_0} h-1 bg-gradient-to-r ${categoryStyles.accent} opacity-70 group-hover:opacity-100 transition-opacity`}
               />
 
               <Link
                 href={`/${item.category}/${item.slug}`}
                 onClick={() => handleItemClick(item, index)}
-                className="block flex-1 p-4 sm:p-6 hover:bg-accent/20 transition-colors flex flex-col"
+                className={`block ${UI_CLASSES.FLEX_1} ${UI_CLASSES.P_4} sm:${UI_CLASSES.P_6} hover:bg-accent/20 ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.FLEX_COL}`}
               >
-                <div className="flex items-start justify-between gap-2 mb-4">
+                <div
+                  className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN} gap-2 mb-4`}
+                >
                   <Badge
-                    className={`${categoryStyles.badge} font-medium px-2 sm:px-3 py-1 border text-xs sm:text-sm flex-shrink-0`}
+                    className={`${categoryStyles.badge} ${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.PX_2} sm:${UI_CLASSES.PX_3} ${UI_CLASSES.PY_1} border ${UI_CLASSES.TEXT_XS} sm:${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FLEX_SHRINK_0}`}
                     variant="secondary"
                   >
                     {item.category}
                   </Badge>
                   <Badge
                     variant={matchBadge.variant}
-                    className="text-2xs sm:text-xs font-medium border px-1.5 sm:px-2 py-1 group-hover:border-current/40 transition-colors flex-shrink-0"
+                    className={`text-2xs sm:${UI_CLASSES.TEXT_XS} ${UI_CLASSES.FONT_MEDIUM} border px-1.5 sm:${UI_CLASSES.PX_2} ${UI_CLASSES.PY_1} group-hover:border-current/40 ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.FLEX_SHRINK_0}`}
                     title={matchBadge.label === 'Keyword' ? 'Keyword Match' : matchBadge.label}
                   >
                     {matchBadge.label}
                   </Badge>
                 </div>
 
-                <div className="flex-1 flex flex-col">
+                <div className={`${UI_CLASSES.FLEX_1} ${UI_CLASSES.FLEX_COL}`}>
                   <h3
-                    className="text-base sm:text-lg font-bold leading-tight line-clamp-2 mb-3 group-hover:text-current transition-colors"
+                    className={`text-base sm:${UI_CLASSES.TEXT_LG} ${UI_CLASSES.FONT_BOLD} leading-tight ${UI_CLASSES.LINE_CLAMP_2} ${UI_CLASSES.MB_3} group-hover:text-current ${UI_CLASSES.TRANSITION_COLORS}`}
                     itemProp="name"
                   >
                     {item.title}
                   </h3>
 
                   <p
-                    className="text-muted-foreground leading-relaxed line-clamp-2 sm:line-clamp-3 mb-4 text-xs sm:text-sm flex-1"
+                    className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} leading-relaxed ${UI_CLASSES.LINE_CLAMP_2} sm:${UI_CLASSES.LINE_CLAMP_3} mb-4 ${UI_CLASSES.TEXT_XS} sm:${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FLEX_1}`}
                     itemProp="description"
                   >
                     {item.description}
@@ -238,13 +252,13 @@ export function RelatedCarouselClient({
                 </div>
 
                 {item.matchDetails?.matchedTags && item.matchDetails.matchedTags.length > 0 && (
-                  <div className="pt-3 border-t border-border/30 mt-auto">
-                    <div className="flex flex-wrap gap-1">
+                  <div className={`pt-3 ${UI_CLASSES.BORDER_T} border-border/30 mt-auto`}>
+                    <div className={UI_CLASSES.FLEX_WRAP_GAP_1}>
                       {item.matchDetails.matchedTags.slice(0, 2).map((tag: string) => (
                         <Badge
                           key={tag}
                           variant="outline"
-                          className="text-2xs sm:text-xs bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 transition-colors px-1.5 sm:px-2 py-0.5"
+                          className={`text-2xs sm:${UI_CLASSES.TEXT_XS} bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 ${UI_CLASSES.TRANSITION_COLORS} px-1.5 sm:${UI_CLASSES.PX_2} ${UI_CLASSES.PY_1}`}
                         >
                           {tag}
                         </Badge>
@@ -252,7 +266,7 @@ export function RelatedCarouselClient({
                       {item.matchDetails.matchedTags.length > 2 && (
                         <Badge
                           variant="outline"
-                          className="text-2xs sm:text-xs bg-muted/50 text-muted-foreground border-muted px-1.5 sm:px-2 py-0.5"
+                          className={`text-2xs sm:${UI_CLASSES.TEXT_XS} bg-muted/50 ${UI_CLASSES.TEXT_MUTED_FOREGROUND} border-muted px-1.5 sm:${UI_CLASSES.PX_2} ${UI_CLASSES.PY_1}`}
                         >
                           +{item.matchDetails.matchedTags.length - 2}
                         </Badge>

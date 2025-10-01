@@ -11,6 +11,7 @@ import { ArrowLeft, Tags } from '@/lib/icons';
 import { logger } from '@/lib/logger';
 import { markdownToSafeHtml } from '@/lib/markdown-utils';
 import type { ComparisonData } from '@/lib/schemas/app.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 // ISR Configuration - Revalidate every 7 days for SEO pages
 export const revalidate = 604800; // 7 days in seconds
@@ -163,14 +164,14 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
 
     // Add Tailwind classes to the sanitized HTML for proper styling
     htmlContent = htmlContent
-      .replace(/<h1>/g, '<h1 class="text-3xl font-bold mt-8 mb-4">')
-      .replace(/<h2>/g, '<h2 class="text-2xl font-semibold mt-6 mb-3">')
-      .replace(/<h3>/g, '<h3 class="text-xl font-medium mt-4 mb-2">')
+      .replace(/<h1>/g, `<h1 class="text-3xl font-bold ${UI_CLASSES.MT_8} mb-4">`)
+      .replace(/<h2>/g, `<h2 class="text-2xl font-semibold ${UI_CLASSES.MT_6} mb-3">`)
+      .replace(/<h3>/g, `<h3 class="text-xl font-medium ${UI_CLASSES.MT_4} mb-2">`)
       .replace(/<a /g, '<a class="text-primary hover:underline" ')
       .replace(/<li>/g, '<li class="ml-6 list-disc">')
       .replace(/<table>/g, '<table class="w-full border-collapse my-4">')
       .replace(/<tr>/g, '<tr class="border-b">')
-      .replace(/<td>/g, '<td class="p-2">')
+      .replace(/<td>/g, `<td class="${UI_CLASSES.P_2}">`)
       .replace(/<p>/g, '<p class="mb-4">');
   } catch (error) {
     logger.error(
@@ -186,15 +187,17 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
+      <div className={`container mx-auto px-4 py-8 ${UI_CLASSES.MAX_W_4XL}`}>
         {/* Breadcrumb */}
-        <nav className="flex items-center space-x-2 text-sm text-muted-foreground mb-6">
-          <Link href="/" className="hover:text-primary">
+        <nav
+          className={`flex items-center space-x-2 text-sm text-muted-foreground ${UI_CLASSES.MB_6}`}
+        >
+          <Link href="/" className={UI_CLASSES.HOVER_TEXT_PRIMARY}>
             Home
           </Link>
           <span>/</span>
-          <Link href="/compare" className="hover:text-primary">
+          <Link href="/compare" className={UI_CLASSES.HOVER_TEXT_PRIMARY}>
             Compare
           </Link>
           <span>/</span>
@@ -203,21 +206,21 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
 
         {/* Back Button */}
         <Link href="/">
-          <Button variant="ghost" size="sm" className="mb-6">
+          <Button variant="ghost" size="sm" className={UI_CLASSES.MB_6}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Directory
           </Button>
         </Link>
 
         {/* Category Badges */}
-        <div className="flex gap-2 mb-6">
+        <div className={`flex gap-2 ${UI_CLASSES.MB_6}`}>
           <Badge variant="outline">{data.category1}</Badge>
           {data.category1 !== data.category2 && <Badge variant="outline">{data.category2}</Badge>}
           <Badge variant="secondary">Comparison</Badge>
         </div>
 
         {/* Main Content */}
-        <Card className="p-8">
+        <Card className={UI_CLASSES.P_8}>
           <article
             className="prose prose-invert max-w-none"
             // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized using DOMPurify
@@ -226,12 +229,14 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
         </Card>
 
         {/* Footer CTA */}
-        <div className="mt-8 p-6 bg-accent/10 rounded-lg">
-          <h3 className="text-lg font-semibold mb-2">Explore More Claude Tools</h3>
+        <div
+          className={`${UI_CLASSES.MT_8} ${UI_CLASSES.P_6} ${UI_CLASSES.BG_ACCENT_10} rounded-lg`}
+        >
+          <h3 className={`text-lg font-semibold ${UI_CLASSES.MB_2}`}>Explore More Claude Tools</h3>
           <p className="text-muted-foreground mb-4">
             Discover more configurations and tools for Claude AI in our community directory.
           </p>
-          <div className="flex gap-3">
+          <div className={UI_CLASSES.FLEX_GAP_3}>
             <Link href={`/${data.category1}`}>
               <Button variant="outline" size="sm">
                 <Tags className="mr-2 h-4 w-4" />

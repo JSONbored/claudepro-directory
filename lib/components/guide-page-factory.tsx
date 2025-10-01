@@ -13,6 +13,7 @@ import { Card } from '@/components/ui/card';
 import { UnifiedSidebar } from '@/components/unified-sidebar';
 import type { LucideIcon } from '@/lib/icons';
 import { logger } from '@/lib/logger';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 // Define schemas locally since they're not exported from component.schema
 const guidePageConfigSchema = z.object({
@@ -229,16 +230,16 @@ export async function GuidePageFactory({ config }: GuidePageFactoryProps) {
   const Icon = validatedConfig.icon as LucideIcon;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
+        <div className={UI_CLASSES.MB_8}>
+          <div className={`${UI_CLASSES.FLEX} items-center ${UI_CLASSES.GAP_3} ${UI_CLASSES.MB_4}`}>
             <Icon className={`h-8 w-8 ${validatedConfig.iconColor}`} />
             <h1 className="text-4xl font-bold">{validatedConfig.title}</h1>
           </div>
           <p className="text-xl text-muted-foreground">{validatedConfig.description}</p>
-          <div className="mt-4">
+          <div className={UI_CLASSES.MT_4}>
             <Badge variant="secondary">
               {guides.length} {validatedConfig.type} guides available
             </Badge>
@@ -246,7 +247,7 @@ export async function GuidePageFactory({ config }: GuidePageFactoryProps) {
         </div>
 
         {/* Breadcrumb */}
-        <div className="mb-6">
+        <div className={UI_CLASSES.MB_6}>
           <nav className="flex" aria-label="Breadcrumb">
             <ol className="flex items-center space-x-2">
               <li>
@@ -261,26 +262,36 @@ export async function GuidePageFactory({ config }: GuidePageFactoryProps) {
         </div>
 
         {/* Main Layout: Content + Sidebar */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className={`${UI_CLASSES.GRID} grid-cols-1 lg:grid-cols-3 ${UI_CLASSES.GAP_8}`}>
           {/* Main Content - Takes 2/3 width */}
           <div className="lg:col-span-2 space-y-8">
             {/* Guides Grid */}
             {guides.length > 0 ? (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+              <div
+                className={`${UI_CLASSES.GRID} ${UI_CLASSES.GAP_6} md:grid-cols-2 lg:grid-cols-2`}
+              >
                 {guides.map((guide) => (
                   <Link key={guide.slug} href={guide.slug}>
-                    <Card className="p-6 h-full hover:bg-accent/10 transition-colors">
-                      <div className="flex flex-col h-full">
-                        <h3 className="font-semibold mb-2 line-clamp-2">{guide.title}</h3>
-                        <p className="text-sm text-muted-foreground mb-4 line-clamp-3 flex-grow">
+                    <Card
+                      className={`${UI_CLASSES.P_6} h-full ${UI_CLASSES.HOVER_BG_ACCENT_10} ${UI_CLASSES.TRANSITION_COLORS}`}
+                    >
+                      <div className={`${UI_CLASSES.FLEX_COL} h-full`}>
+                        <h3
+                          className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_2} ${UI_CLASSES.LINE_CLAMP_2}`}
+                        >
+                          {guide.title}
+                        </h3>
+                        <p
+                          className={`${UI_CLASSES.TEXT_SM} text-muted-foreground ${UI_CLASSES.MB_4} ${UI_CLASSES.LINE_CLAMP_3} ${UI_CLASSES.FLEX_GROW}`}
+                        >
                           {guide.description}
                         </p>
-                        <div className="flex items-center justify-between mt-auto">
-                          <Badge variant="outline" className="text-xs">
+                        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mt-auto`}>
+                          <Badge variant="outline" className={UI_CLASSES.TEXT_XS}>
                             {validatedConfig.badgeLabel}
                           </Badge>
                           {guide.dateUpdated && (
-                            <span className="text-xs text-muted-foreground">
+                            <span className={UI_CLASSES.TEXT_XS_MUTED}>
                               {new Date(guide.dateUpdated).toLocaleDateString()}
                             </span>
                           )}
@@ -291,9 +302,11 @@ export async function GuidePageFactory({ config }: GuidePageFactoryProps) {
                 ))}
               </div>
             ) : (
-              <Card className="p-8 text-center">
+              <Card className={`${UI_CLASSES.P_8} text-center`}>
                 <Icon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h2 className="text-xl font-semibold mb-2">No {validatedConfig.type} guides yet</h2>
+                <h2 className={`text-xl ${UI_CLASSES.FONT_SEMIBOLD} mb-2`}>
+                  No {validatedConfig.type} guides yet
+                </h2>
                 <p className="text-muted-foreground">
                   {validatedConfig.breadcrumbText} guides are coming soon. Check back later for
                   comprehensive guides.
@@ -302,16 +315,18 @@ export async function GuidePageFactory({ config }: GuidePageFactoryProps) {
             )}
 
             {/* CTA */}
-            <Card className="p-8 text-center bg-accent/10">
-              <h2 className="text-2xl font-semibold mb-4">Contribute a guide</h2>
+            <Card className={`${UI_CLASSES.P_8} text-center bg-accent/10`}>
+              <h2 className={`text-2xl ${UI_CLASSES.FONT_SEMIBOLD} mb-4`}>Contribute a guide</h2>
               <p className="text-muted-foreground mb-6">
                 Help others by creating comprehensive {validatedConfig.type} guides for Claude AI
               </p>
-              <div className="flex gap-4 justify-center">
+              <div
+                className={`${UI_CLASSES.FLEX} ${UI_CLASSES.GAP_4} ${UI_CLASSES.JUSTIFY_CENTER}`}
+              >
                 <Link href="/guides">
                   <button
                     type="button"
-                    className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+                    className={`${UI_CLASSES.PX_6} ${UI_CLASSES.PY_2} bg-primary text-primary-foreground ${UI_CLASSES.ROUNDED_LG} hover:bg-primary/90`}
                   >
                     All Guides
                   </button>
@@ -319,7 +334,7 @@ export async function GuidePageFactory({ config }: GuidePageFactoryProps) {
                 <Link href="/submit">
                   <button
                     type="button"
-                    className="px-6 py-2 border border-border rounded-lg hover:bg-accent"
+                    className={`${UI_CLASSES.PX_6} ${UI_CLASSES.PY_2} border border-border ${UI_CLASSES.ROUNDED_LG} ${UI_CLASSES.HOVER_BG_ACCENT}`}
                   >
                     Submit Guide
                   </button>

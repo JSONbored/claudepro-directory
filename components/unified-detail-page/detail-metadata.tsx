@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/lib/date-utils';
 import { Calendar, Tag, User } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 
 /**
  * Schema for DetailMetadata props
@@ -40,15 +41,15 @@ export function DetailMetadata({ item }: DetailMetadataProps) {
     <div className="container mx-auto px-4">
       {/* Author & Date Metadata */}
       {hasMetadata && (
-        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
+        <div className={UI_CLASSES.FLEX_WRAP_MUTED}>
           {item.author && (
-            <div className="flex items-center gap-2">
+            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <User className="h-4 w-4" />
               <span>{item.author}</span>
             </div>
           )}
           {item.dateAdded && (
-            <div className="flex items-center gap-2">
+            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Calendar className="h-4 w-4" />
               <span>{formatDate(item.dateAdded)}</span>
             </div>
@@ -58,10 +59,10 @@ export function DetailMetadata({ item }: DetailMetadataProps) {
 
       {/* Tags */}
       {hasTags && item.tags && (
-        <div className="flex flex-wrap gap-2">
+        <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
           <Tag className="h-4 w-4 text-muted-foreground" />
           {item.tags.map((tag) => (
-            <Badge key={tag} variant="outline" className="text-xs">
+            <Badge key={tag} variant="outline" className={UI_CLASSES.TEXT_XS}>
               {tag}
             </Badge>
           ))}
