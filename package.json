@@ -34,14 +34,6 @@
     "lint": "ultracite check",
     "format": "ultracite fix",
     "validate:content": "tsx scripts/validate-content.ts",
-    "ai:optimize": "tsx scripts/seo/shared/ai-format-optimizer.ts optimize",
-    "ai:optimize:write": "tsx scripts/seo/shared/ai-format-optimizer.ts optimize --write",
-    "ai:validate": "tsx scripts/seo/shared/ai-format-optimizer.ts validate",
-    "ai:convert": "tsx scripts/seo/shared/ai-format-optimizer.ts convert",
-    "ai:citation": "tsx scripts/seo/shared/ai-format-optimizer.ts citation",
-    "freshness:report": "tsx scripts/seo/shared/content-freshness.ts report",
-    "freshness:update": "tsx scripts/seo/shared/content-freshness.ts update",
-    "freshness:queue": "tsx scripts/seo/shared/content-freshness.ts queue",
     "prepare": "command -v lefthook >/dev/null 2>&1 && lefthook install || echo 'Skipping lefthook install (not available)'"
   },
   "dependencies": {

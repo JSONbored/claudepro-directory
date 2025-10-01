@@ -135,9 +135,9 @@ export class ContentOptimizer {
    */
   async optimizeAllContent(): Promise<OptimizationResult[]> {
     const results: OptimizationResult[] = [];
-    const seoDir = join(this.baseDir, 'seo');
+    const guidesDir = join(this.baseDir, 'content/guides');
 
-    // Get all subdirectories in seo/
+    // Get all MDX files in content/guides/
     const getAllMdxFiles = (dir: string): string[] => {
       const files: string[] = [];
       try {
@@ -158,7 +158,7 @@ export class ContentOptimizer {
       return files;
     };
 
-    const contentFiles = getAllMdxFiles(seoDir);
+    const contentFiles = getAllMdxFiles(guidesDir);
 
     for (const file of contentFiles) {
       try {

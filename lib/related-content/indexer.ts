@@ -6,7 +6,7 @@
 import fs from 'fs/promises';
 import matter from 'gray-matter';
 import path from 'path';
-import { MAIN_CONTENT_CATEGORIES } from '@/lib/constants';
+import { CONTENT_PATHS, MAIN_CONTENT_CATEGORIES } from '@/lib/constants';
 import { logger } from '../logger';
 import type { ContentCategory } from '../schemas/components/content-item.schema';
 import { basicErrorSchema } from '../schemas/error.schema';
@@ -14,19 +14,19 @@ import { logContextSchema } from '../schemas/logger.schema';
 import type { CategorizedContentIndex, ContentIndex, ContentItem } from './service';
 
 const CONTENT_DIRECTORIES = {
-  // Main content
-  agents: 'content/agents',
-  mcp: 'content/mcp',
-  rules: 'content/rules',
-  commands: 'content/commands',
-  hooks: 'content/hooks',
+  // Main content (JSON files)
+  agents: CONTENT_PATHS.agents,
+  mcp: CONTENT_PATHS.mcp,
+  rules: CONTENT_PATHS.rules,
+  commands: CONTENT_PATHS.commands,
+  hooks: CONTENT_PATHS.hooks,
 
-  // SEO content
-  tutorials: 'seo/tutorials',
-  comparisons: 'seo/comparisons',
-  workflows: 'seo/workflows',
-  'use-cases': 'seo/use-cases',
-  troubleshooting: 'seo/troubleshooting',
+  // Guide content (MDX files)
+  tutorials: CONTENT_PATHS.tutorials,
+  comparisons: CONTENT_PATHS.comparisons,
+  workflows: CONTENT_PATHS.workflows,
+  'use-cases': CONTENT_PATHS['use-cases'],
+  troubleshooting: CONTENT_PATHS.troubleshooting,
 };
 
 export class ContentIndexer {

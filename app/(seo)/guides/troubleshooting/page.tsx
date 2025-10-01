@@ -1,5 +1,5 @@
 import { GuidePageFactory, generateGuideMetadata } from '@/lib/components/guide-page-factory';
-import { APP_CONFIG } from '@/lib/constants';
+import { APP_CONFIG, GUIDE_CATEGORIES } from '@/lib/constants';
 import { AlertTriangle } from '@/lib/icons';
 
 // Enable ISR - revalidate every 4 hours
@@ -9,7 +9,7 @@ export const revalidate = 14400;
 
 const config = {
   type: 'troubleshooting',
-  directory: 'seo/troubleshooting',
+  directory: GUIDE_CATEGORIES.troubleshooting,
   icon: AlertTriangle as React.ComponentType,
   iconColor: 'text-yellow-500',
   title: 'Troubleshooting',

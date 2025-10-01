@@ -1,5 +1,5 @@
 import { GuidePageFactory, generateGuideMetadata } from '@/lib/components/guide-page-factory';
-import { APP_CONFIG } from '@/lib/constants';
+import { APP_CONFIG, GUIDE_CATEGORIES } from '@/lib/constants';
 import { FileText } from '@/lib/icons';
 
 // Enable ISR - revalidate every 4 hours
@@ -9,7 +9,7 @@ export const revalidate = 14400;
 
 const config = {
   type: 'categories',
-  directory: 'seo/categories',
+  directory: GUIDE_CATEGORIES.categories,
   icon: FileText as React.ComponentType,
   iconColor: 'text-orange-500',
   title: 'Category Guides',

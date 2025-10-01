@@ -151,6 +151,62 @@ export const SEO_CATEGORIES = [
 ] as const;
 
 /**
+ * Content Directory Paths Schema
+ * Centralized content paths for consistency and maintainability
+ */
+const contentPathsSchema = z.object({
+  // JSON content types (existing structure)
+  agents: z.string().startsWith('content/'),
+  mcp: z.string().startsWith('content/'),
+  rules: z.string().startsWith('content/'),
+  commands: z.string().startsWith('content/'),
+  hooks: z.string().startsWith('content/'),
+
+  // MDX guide content types (new structure)
+  guides: z.string().startsWith('content/'),
+  tutorials: z.string().startsWith('content/guides/'),
+  comparisons: z.string().startsWith('content/guides/'),
+  workflows: z.string().startsWith('content/guides/'),
+  'use-cases': z.string().startsWith('content/guides/'),
+  troubleshooting: z.string().startsWith('content/guides/'),
+  categories: z.string().startsWith('content/guides/'),
+  collections: z.string().startsWith('content/guides/'),
+});
+
+export const CONTENT_PATHS = contentPathsSchema.parse({
+  // JSON content (existing structure)
+  agents: 'content/agents',
+  mcp: 'content/mcp',
+  rules: 'content/rules',
+  commands: 'content/commands',
+  hooks: 'content/hooks',
+
+  // MDX guide content (new structure)
+  guides: 'content/guides',
+  tutorials: 'content/guides/tutorials',
+  comparisons: 'content/guides/comparisons',
+  workflows: 'content/guides/workflows',
+  'use-cases': 'content/guides/use-cases',
+  troubleshooting: 'content/guides/troubleshooting',
+  categories: 'content/guides/categories',
+  collections: 'content/guides/collections',
+});
+
+/**
+ * Guide Category Mappings
+ * Maps guide types to their filesystem paths for easy reference
+ */
+export const GUIDE_CATEGORIES = {
+  tutorials: CONTENT_PATHS.tutorials,
+  comparisons: CONTENT_PATHS.comparisons,
+  workflows: CONTENT_PATHS.workflows,
+  'use-cases': CONTENT_PATHS['use-cases'],
+  troubleshooting: CONTENT_PATHS.troubleshooting,
+  categories: CONTENT_PATHS.categories,
+  collections: CONTENT_PATHS.collections,
+} as const;
+
+/**
  * UI Constants
  */
 export const UI_CONFIG = {

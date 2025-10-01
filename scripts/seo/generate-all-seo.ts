@@ -37,7 +37,7 @@ async function generateAllSEO(): Promise<void> {
   logger.log('2. Update sitemap with all pages');
   logger.log('3. Validate guide content structure\n');
   logger.log('📝 Note: Main category SEO (agents, mcp, etc.) now handled by ISR');
-  logger.log('📝 Guide content (/seo/*.mdx) already optimized with ISR + AI search\n');
+  logger.log('📝 Guide content (/content/guides/*.mdx) already optimized with ISR + AI search\n');
 
   const startTime = Date.now();
 
@@ -48,7 +48,7 @@ async function generateAllSEO(): Promise<void> {
   await runCommand('npm run generate:sitemap', 'Generating sitemap');
 
   // Step 3: Count guide content files
-  const seoDir = path.join(ROOT_DIR, 'seo');
+  const seoDir = path.join(ROOT_DIR, 'content/guides');
   const categories = ['use-cases', 'tutorials', 'workflows', 'comparisons', 'troubleshooting'];
   let totalPages = 0;
 

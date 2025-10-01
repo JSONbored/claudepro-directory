@@ -1,5 +1,5 @@
 import { GuidePageFactory, generateGuideMetadata } from '@/lib/components/guide-page-factory';
-import { APP_CONFIG } from '@/lib/constants';
+import { APP_CONFIG, GUIDE_CATEGORIES } from '@/lib/constants';
 import { BookOpen } from '@/lib/icons';
 
 // Enable ISR - revalidate every 4 hours
@@ -9,7 +9,7 @@ export const revalidate = 14400;
 
 const config = {
   type: 'tutorials',
-  directory: 'seo/tutorials',
+  directory: GUIDE_CATEGORIES.tutorials,
   icon: BookOpen as React.ComponentType,
   iconColor: 'text-green-500',
   title: 'Tutorials',

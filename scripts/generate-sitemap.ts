@@ -56,7 +56,7 @@ async function generateSitemap(): Promise<string> {
     });
   });
 
-  // SEO Guide pages from seo/ directory
+  // Guide pages from content/guides/ directory
   const seoCategories = [
     'use-cases',
     'tutorials',
@@ -67,7 +67,7 @@ async function generateSitemap(): Promise<string> {
     'troubleshooting',
   ];
   seoCategories.forEach((category) => {
-    const seoDir = join('seo', category);
+    const seoDir = join('content/guides', category);
     if (existsSync(seoDir)) {
       try {
         const files = readdirSync(seoDir).filter((f) => f.endsWith('.mdx'));

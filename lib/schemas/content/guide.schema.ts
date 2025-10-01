@@ -17,7 +17,7 @@ import {
 /**
  * Guide Content Schema
  *
- * Matches MDX files with frontmatter in seo/ directory.
+ * Matches MDX files with frontmatter in content/guides/ directory.
  * Uses Zod v4 shape destructuring pattern for composition with base content schema.
  *
  * Inherited Fields from baseContentMetadataSchema:

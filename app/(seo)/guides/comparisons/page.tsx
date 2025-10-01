@@ -1,5 +1,5 @@
 import { GuidePageFactory, generateGuideMetadata } from '@/lib/components/guide-page-factory';
-import { APP_CONFIG } from '@/lib/constants';
+import { APP_CONFIG, GUIDE_CATEGORIES } from '@/lib/constants';
 import { GitCompare } from '@/lib/icons';
 
 // Enable ISR - revalidate every 4 hours
@@ -9,7 +9,7 @@ export const revalidate = 14400;
 
 const config = {
   type: 'comparisons',
-  directory: 'seo/comparisons',
+  directory: GUIDE_CATEGORIES.comparisons,
   icon: GitCompare as React.ComponentType,
   iconColor: 'text-red-500',
   title: 'Comparisons',

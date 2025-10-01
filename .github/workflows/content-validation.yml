@@ -4,7 +4,8 @@ on:
   pull_request:
     paths:
       - 'content/**/*.json'
-      - 'scripts/validate-content.js'
+      - 'content/guides/**/*.mdx'
+      - 'scripts/validate-content.ts'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -52,7 +53,7 @@ jobs:
         echo "Validating changed content files..."
         for file in ${{ steps.changed.outputs.files }}; do
           echo "Validating $file"
-          node scripts/validate-content.js "$file"
+          npx tsx scripts/validate-content.ts "$file"
         done
 
     - name: Check content metadata
@@ -95,12 +96,22 @@ jobs:
           fi
 
           # Validate category is valid
-          if [[ ! "$category" =~ ^(agents|mcp|rules|commands|hooks)$ ]]; then
+          if [[ ! "$category" =~ ^(agents|mcp|rules|commands|hooks|guides|tutorials|comparisons|workflows|use-cases|troubleshooting|categories|collections)$ ]]; then
             echo "ERROR: Invalid category '$category' in $file"
             exit 1
           fi
 
           echo "✓ $file passed validation"
+        done
+
+    - name: Validate MDX frontmatter
+      if: steps.changed.outputs.has_changes == 'true'
+      run: |
+        for file in ${{ steps.changed.outputs.files }}; do
+          if [[ "$file" == *.mdx ]]; then
+            echo "Validating MDX frontmatter: $file"
+            npx tsx scripts/validate-content.ts "$file"
+          fi
         done
 
     - name: Build content to verify generation
