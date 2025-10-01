@@ -4,19 +4,132 @@
  */
 
 import { marked } from 'marked';
+import { z } from 'zod';
 import { logger } from './logger';
-import {
-  type MarkdownContent,
-  type MarkdownParseOptions,
-  type MarkdownToHtmlResponse,
-  markdownContentSchema,
-  markdownParseOptionsSchema,
-  markdownSanitizedHtmlSchema,
-  type SanitizationOptions,
-  type SanitizedHtml,
-  sanitizationOptionsSchema,
-} from './schemas/markdown.schema';
+import { nonNegativeInt } from './schemas/primitives/base-numbers';
 import { DOMPurify } from './security';
+
+/**
+ * Internal Markdown Schemas
+ * These are only used within this file for markdown-to-HTML conversion
+ * Moved from lib/schemas/markdown.schema.ts for better encapsulation
+ */
+
+/**
+ * Allowed HTML tags for sanitized content
+ * Based on security requirements for public-facing content
+ */
+const ALLOWED_HTML_TAGS = [
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'p',
+  'br',
+  'hr',
+  'ul',
+  'ol',
+  'li',
+  'strong',
+  'b',
+  'em',
+  'i',
+  'code',
+  'pre',
+  'blockquote',
+  'a',
+  'span',
+  'div',
+  'table',
+  'thead',
+  'tbody',
+  'tr',
+  'th',
+  'td',
+] as const;
+
+/**
+ * Allowed HTML attributes for sanitized content
+ */
+const ALLOWED_HTML_ATTRS = [
+  'class',
+  'id',
+  'href', // for links
+  'target', // for links
+  'rel', // for links
+  'title',
+  'alt',
+] as const;
+
+/**
+ * Schema for raw markdown content
+ */
+const markdownContentSchema = z.string().min(1).max(500000); // Max 500KB
+
+/**
+ * Schema for sanitization options
+ */
+const sanitizationOptionsSchema = z.object({
+  allowedTags: z.array(z.enum(ALLOWED_HTML_TAGS)).default([...ALLOWED_HTML_TAGS]),
+  allowedAttributes: z.array(z.enum(ALLOWED_HTML_ATTRS)).default([...ALLOWED_HTML_ATTRS]),
+  allowDataAttributes: z.boolean().default(false),
+  enforceNoFollow: z.boolean().default(true), // Add rel="nofollow" to external links
+  enforceNoOpener: z.boolean().default(true), // Add rel="noopener" to external links
+  stripDangerous: z.boolean().default(true), // Remove dangerous elements like scripts
+});
+
+/**
+ * Schema for markdown parsing options
+ */
+const markdownParseOptionsSchema = z.object({
+  gfm: z.boolean().default(true), // GitHub Flavored Markdown
+  breaks: z.boolean().default(false), // Convert \n to <br>
+  pedantic: z.boolean().default(false),
+  silent: z.boolean().default(false),
+});
+
+/**
+ * Schema for sanitized HTML output
+ */
+const markdownSanitizedHtmlSchema = z.string().refine(
+  (html) => {
+    // Ensure no script tags or event handlers
+    const dangerousPatterns = [
+      /<script/i,
+      /javascript:/i,
+      /on\w+\s*=/i, // onclick, onload, etc.
+      /data:text\/html/i,
+      /vbscript:/i,
+    ];
+    return !dangerousPatterns.some((pattern) => pattern.test(html));
+  },
+  {
+    message: 'HTML contains potentially dangerous content',
+  }
+);
+
+/**
+ * Schema for markdown to HTML conversion response
+ */
+const markdownToHtmlResponseSchema = z.object({
+  html: markdownSanitizedHtmlSchema,
+  wordCount: nonNegativeInt,
+  readingTime: nonNegativeInt, // in minutes
+  hasCodeBlocks: z.boolean(),
+  hasLinks: z.boolean(),
+  hasImages: z.boolean(),
+});
+
+/**
+ * Type exports for internal use
+ */
+type MarkdownContent = z.infer<typeof markdownContentSchema>;
+type SanitizationOptions = z.infer<typeof sanitizationOptionsSchema>;
+type MarkdownParseOptions = z.infer<typeof markdownParseOptionsSchema>;
+type SanitizedHtml = z.infer<typeof markdownSanitizedHtmlSchema>;
+type MarkdownToHtmlResponse = z.infer<typeof markdownToHtmlResponseSchema>;
 
 // isomorphic-dompurify handles server/client compatibility automatically
 
