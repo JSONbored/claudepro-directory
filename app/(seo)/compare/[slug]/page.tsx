@@ -1,5 +1,4 @@
 import fs from 'fs/promises';
-import { ArrowLeft, Tags } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -8,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { APP_CONFIG } from '@/lib/constants';
+import { ArrowLeft, Tags } from '@/lib/icons';
 import { logger } from '@/lib/logger';
 import { markdownToSafeHtml } from '@/lib/markdown-utils';
 import type { ComparisonData } from '@/lib/schemas/app.schema';

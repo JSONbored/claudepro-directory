@@ -11,7 +11,6 @@
  * Current: 180 lines (57% reduction)
  */
 
-import { ChevronDown, ChevronUp, Filter, Search } from 'lucide-react';
 import { useCallback, useEffect, useId, useState } from 'react';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { SearchFilterPanel } from '@/components/search-filter-panel';
@@ -27,6 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useUnifiedSearch } from '@/hooks/use-unified-search';
+import { ChevronDown, ChevronUp, Filter, Search } from '@/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/lib/schemas/component.schema';
 import { sanitizeSearchQuery } from '@/lib/security';
 import { cn } from '@/lib/utils';

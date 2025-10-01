@@ -14,7 +14,6 @@
  * 5. ✅ Proper memo wrapping for all sub-components
  */
 
-import { Briefcase, ExternalLink, Search } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import type { FC } from 'react';
@@ -24,6 +23,7 @@ import { InfiniteScrollContainer } from '@/components/infinite-scroll-container'
 import { LazyConfigCard, LazyInfiniteScrollContainer } from '@/components/lazy-components';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Briefcase, ExternalLink, Search } from '@/lib/icons';
 
 const UnifiedSearch = dynamic(
   () => import('@/components/unified-search').then((mod) => ({ default: mod.UnifiedSearch })),

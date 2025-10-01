@@ -1,10 +1,10 @@
-import { Github, MessageCircle, MessageSquare, Twitter, Users } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/lib/constants';
+import { Github, MessageCircle, MessageSquare, Twitter, Users } from '@/lib/icons';
 
 export const metadata: Metadata = {
   title: `Community - ${APP_CONFIG.name}`,

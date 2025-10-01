@@ -1,7 +1,6 @@
-import { BookOpen, Server, Sparkles } from 'lucide-react';
-
 import HomePageClient from '@/components/home-page-client';
 import { lazyContentLoaders } from '@/components/lazy-components';
+import { BookOpen, Server, Sparkles } from '@/lib/icons';
 import { transformForHomePage } from '@/lib/transformers';
 
 // Enable ISR - revalidate every hour

@@ -1,10 +1,10 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Button } from '@/components/ui/button';
 import { useInfiniteScroll } from '@/hooks/use-infinite-scroll';
+import { Loader2 } from '@/lib/icons';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 

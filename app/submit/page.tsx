@@ -1,6 +1,5 @@
 'use client';
 
-import { CheckCircle, ExternalLink, FileJson, Github, Loader2, Send } from 'lucide-react';
 import { useActionState, useId, useState } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -11,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { SOCIAL_LINKS } from '@/lib/constants';
+import { CheckCircle, ExternalLink, FileJson, Github, Loader2, Send } from '@/lib/icons';
 import { type ConfigSubmissionInput, configSubmissionSchema } from '@/lib/schemas/form.schema';
 
 export default function SubmitPage() {

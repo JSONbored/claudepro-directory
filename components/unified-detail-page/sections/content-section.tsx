@@ -14,11 +14,11 @@
  * @see components/unified-detail-page.tsx - Original implementation
  */
 
-import { Copy } from 'lucide-react';
 import { memo, useMemo } from 'react';
 import { z } from 'zod';
 import { CodeHighlight } from '@/components/code-highlight';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Copy } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import { componentTitleString } from '@/lib/schemas/primitives';
 

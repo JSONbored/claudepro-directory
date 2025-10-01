@@ -5,13 +5,13 @@
  */
 
 import fs from 'fs/promises';
-import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import path from 'path';
 import { z } from 'zod';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { UnifiedSidebar } from '@/components/unified-sidebar';
+import type { LucideIcon } from '@/lib/icons';
 import { logger } from '@/lib/logger';
 
 // Define schemas locally since they're not exported from component.schema

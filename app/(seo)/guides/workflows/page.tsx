@@ -1,6 +1,6 @@
-import { Workflow } from 'lucide-react';
 import { GuidePageFactory, generateGuideMetadata } from '@/lib/components/guide-page-factory';
 import { APP_CONFIG } from '@/lib/constants';
+import { Workflow } from '@/lib/icons';
 
 // Enable ISR - revalidate every 4 hours
 export const revalidate = 14400;

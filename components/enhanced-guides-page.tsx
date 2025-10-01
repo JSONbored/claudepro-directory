@@ -1,15 +1,5 @@
 'use client';
 
-import {
-  AlertTriangle,
-  BookOpen,
-  FileText,
-  GitCompare,
-  Search,
-  Users,
-  Workflow,
-  Zap,
-} from 'lucide-react';
 import Link from 'next/link';
 import { useId, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +15,16 @@ import {
 } from '@/components/ui/select';
 import { createSearchIndex, performLocalSearch } from '@/hooks/use-search';
 import type { GuideItemWithCategory } from '@/lib/components/guide-page-factory';
+import {
+  AlertTriangle,
+  BookOpen,
+  FileText,
+  GitCompare,
+  Search,
+  Users,
+  Workflow,
+  Zap,
+} from '@/lib/icons';
 import type { EnhancedGuidesPageProps } from '@/lib/schemas/component.schema';
 
 const categoryInfo = {

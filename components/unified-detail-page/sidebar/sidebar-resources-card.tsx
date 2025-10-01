@@ -15,9 +15,9 @@
  * @see lib/config/custom-sidebars.tsx - Original implementations
  */
 
-import { ExternalLink, Github } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ExternalLink, Github } from '@/lib/icons';
 
 /**
  * Props for SidebarResourcesCard

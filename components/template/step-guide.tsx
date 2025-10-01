@@ -5,10 +5,10 @@
  * Used in 24+ MDX files across the codebase
  */
 
-import { Zap } from 'lucide-react';
 import { Callout } from '@/components/content/callout';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Zap } from '@/lib/icons';
 import { type StepByStepGuideProps, stepGuidePropsSchema } from '@/lib/schemas/shared.schema';
 
 export function StepByStepGuide(props: StepByStepGuideProps) {

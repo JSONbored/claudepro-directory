@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown, ExternalLink, Github, Menu } from 'lucide-react';
+import { ChevronDown, ExternalLink, Github, Menu } from '@/lib/icons';
 
 const DiscordIcon = ({ className }: { className?: string }) => (
   <svg

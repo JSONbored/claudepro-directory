@@ -5,10 +5,10 @@
  * Used in 7+ MDX files across the codebase
  */
 
-import { AlertTriangle, BookOpen, CheckCircle } from 'lucide-react';
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertTriangle, BookOpen, CheckCircle } from '@/lib/icons';
 import { type ChecklistProps, checklistPropsSchema } from '@/lib/schemas/shared.schema';
 
 export function Checklist(props: ChecklistProps) {

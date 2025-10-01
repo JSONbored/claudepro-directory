@@ -5,8 +5,8 @@
  * Used in 17+ MDX files across the codebase
  */
 
-import { BookOpen } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { BookOpen } from '@/lib/icons';
 import { type QuickReferenceProps, quickReferencePropsSchema } from '@/lib/schemas/shared.schema';
 
 export function QuickReference(props: QuickReferenceProps) {

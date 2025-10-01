@@ -1,6 +1,5 @@
 'use client';
 
-import { Lightbulb } from 'lucide-react';
 import { memo } from 'react';
 import { ConfigCard } from '@/components/config-card';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +10,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
+import { Lightbulb } from '@/lib/icons';
 import type { RelatedConfigsProps, UnifiedContentItem } from '@/lib/schemas/component.schema';
 
 // RelatedConfigsProps is now imported from component.schema.ts

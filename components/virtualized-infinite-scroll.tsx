@@ -1,9 +1,9 @@
 'use client';
 
-import { Loader2 } from 'lucide-react';
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Button } from '@/components/ui/button';
+import { Loader2 } from '@/lib/icons';
 import { logger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 

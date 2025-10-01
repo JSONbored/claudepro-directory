@@ -5,7 +5,7 @@
  * Replaces Tremor with custom components for better performance
  */
 
-import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from 'lucide-react';
+import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from '@/lib/icons';
 import { type MetricsDisplayProps, metricsDisplayPropsSchema } from '@/lib/schemas/shared.schema';
 import { cn } from '@/lib/utils';
 

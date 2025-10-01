@@ -5,8 +5,8 @@
  * Used in 19+ MDX files across the codebase
  */
 
-import { Check, Copy } from 'lucide-react';
 import React from 'react';
+import { Check, Copy } from '@/lib/icons';
 import { type CodeGroupProps, codeGroupPropsSchema } from '@/lib/schemas/shared.schema';
 
 export function CodeGroup(props: CodeGroupProps) {

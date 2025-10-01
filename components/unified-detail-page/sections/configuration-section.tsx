@@ -19,13 +19,13 @@
  * @see lib/config/custom-renderers.tsx - Custom renderers
  */
 
-import { Copy } from 'lucide-react';
 import { memo, useState } from 'react';
 import { toast } from 'sonner';
 import { CodeHighlight } from '@/components/code-highlight';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { copyToClipboard } from '@/lib/clipboard-utils';
+import { Copy } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 
 /**

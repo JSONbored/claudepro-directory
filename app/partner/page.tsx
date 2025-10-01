@@ -1,3 +1,8 @@
+import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SOCIAL_LINKS } from '@/lib/constants';
 import {
   ArrowRight,
   Briefcase,
@@ -11,12 +16,7 @@ import {
   TrendingUp,
   Users,
   Zap,
-} from 'lucide-react';
-import Link from 'next/link';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { SOCIAL_LINKS } from '@/lib/constants';
+} from '@/lib/icons';
 
 // Enable ISR - revalidate every 24 hours for static marketing pages
 export const revalidate = 86400;

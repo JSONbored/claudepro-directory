@@ -1,5 +1,4 @@
 import fs from 'fs/promises';
-import { ArrowLeft, BookOpen, Calendar, FileText, Tag, Users, Zap } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -13,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { UnifiedSidebar } from '@/components/unified-sidebar';
 import { ViewTracker } from '@/components/view-tracker';
 import { APP_CONFIG } from '@/lib/constants';
+import { ArrowLeft, BookOpen, Calendar, FileText, Tag, Users, Zap } from '@/lib/icons';
 import { logger } from '@/lib/logger';
 import { parseMDXFrontmatter } from '@/lib/mdx-config';
 import { contentCache } from '@/lib/redis';

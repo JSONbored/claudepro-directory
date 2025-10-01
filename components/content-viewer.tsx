@@ -1,6 +1,6 @@
-import { ChevronDown, ChevronUp, Maximize2, Minimize2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { ChevronDown, ChevronUp, Maximize2, Minimize2 } from '@/lib/icons';
 import type { ContentViewerProps } from '@/lib/schemas/component.schema';
 import { cn } from '@/lib/utils';
 

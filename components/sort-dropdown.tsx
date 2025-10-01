@@ -1,6 +1,5 @@
 'use client';
 
-import { ArrowDown, ArrowUp } from 'lucide-react';
 import { useCallback, useId, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ArrowDown, ArrowUp } from '@/lib/icons';
 import type { SortDropdownProps } from '@/lib/schemas/component.schema';
 import type { SortOption } from '@/lib/schemas/content-filter.schema';
 

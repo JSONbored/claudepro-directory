@@ -5,8 +5,8 @@
  * Used in 16+ MDX files across the codebase
  */
 
-import { CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle } from '@/lib/icons';
 import { type ComparisonTableProps, comparisonTablePropsSchema } from '@/lib/schemas/shared.schema';
 
 export function ComparisonTable(props: ComparisonTableProps) {

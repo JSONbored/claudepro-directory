@@ -10,10 +10,10 @@
  * @see components/unified-sidebar.tsx - Original implementation
  */
 
-import { Clock } from 'lucide-react';
 import Link from 'next/link';
 import { z } from 'zod';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Clock } from '@/lib/icons';
 import { nonEmptyString } from '@/lib/schemas/primitives';
 
 /**

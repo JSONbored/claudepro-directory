@@ -1,4 +1,3 @@
-import { Briefcase, Clock, Filter, MapPin, Plus, Search } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { JobCard } from '@/components/job-card';
@@ -15,6 +14,7 @@ import {
 } from '@/components/ui/select';
 import { type Job, jobs } from '@/data/jobs';
 import { APP_CONFIG } from '@/lib/constants';
+import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@/lib/icons';
 import { logger } from '@/lib/logger';
 import type { PagePropsWithSearchParams } from '@/lib/schemas/app.schema';
 import {

@@ -1,9 +1,9 @@
 import { readFile } from 'fs/promises';
-import { Clock, Star, TrendingUp, Users } from 'lucide-react';
 import { join } from 'path';
 import { TrendingContent } from '@/components/trending-content';
 import { Badge } from '@/components/ui/badge';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
+import { Clock, Star, TrendingUp, Users } from '@/lib/icons';
 import { logger } from '@/lib/logger';
 import type { PagePropsWithSearchParams } from '@/lib/schemas/app.schema';
 import {

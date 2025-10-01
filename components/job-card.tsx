@@ -1,6 +1,5 @@
 'use client';
 
-import { Building, Clock, DollarSign, ExternalLink, MapPin, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';
@@ -8,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatRelativeDate } from '@/lib/date-utils';
+import { Building, Clock, DollarSign, ExternalLink, MapPin, Star } from '@/lib/icons';
 import type { JobCardProps } from '@/lib/schemas/component.schema';
 
 export const JobCard = memo(({ job }: JobCardProps) => {

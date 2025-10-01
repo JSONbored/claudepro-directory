@@ -17,9 +17,9 @@
  * @see components/unified-detail-page.tsx - Original implementation
  */
 
-import type { LucideIcon } from 'lucide-react';
 import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import type { LucideIcon } from '@/lib/icons';
 import { componentDescriptionString, componentTitleString } from '@/lib/schemas/primitives';
 import { cn } from '@/lib/utils';
 

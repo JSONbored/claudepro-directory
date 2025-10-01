@@ -1,7 +1,7 @@
 'use client';
 
-import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Search } from '@/lib/icons';
 
 interface SearchTriggerProps {
   onClick?: () => void;

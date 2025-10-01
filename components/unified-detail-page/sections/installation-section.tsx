@@ -14,9 +14,9 @@
  * @see lib/config/custom-renderers.tsx - Custom hook renderer
  */
 
-import { Copy } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Copy } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import type { InstallationSteps } from '@/lib/types/content-type-config';
 

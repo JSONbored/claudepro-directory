@@ -11,17 +11,6 @@
  * @see components/unified-detail-page/sidebar - Extracted modular components
  */
 
-import {
-  BookOpen,
-  FileText,
-  Filter,
-  Layers,
-  Search,
-  Sparkles,
-  Users,
-  Workflow,
-  Zap,
-} from 'lucide-react';
 import Link from 'next/link';
 import { memo, useEffect, useState } from 'react';
 import { z } from 'zod';
@@ -33,6 +22,17 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { CategoryNavigationCard } from '@/components/unified-detail-page/sidebar/category-navigation-card';
 import { RecentGuidesCard } from '@/components/unified-detail-page/sidebar/recent-guides-card';
 import { TrendingGuidesCard } from '@/components/unified-detail-page/sidebar/trending-guides-card';
+import {
+  BookOpen,
+  FileText,
+  Filter,
+  Layers,
+  Search,
+  Sparkles,
+  Users,
+  Workflow,
+  Zap,
+} from '@/lib/icons';
 // Removed logger import - client components should not use server-side logger
 // Dynamic imports for server-side functions
 import { statsRedis } from '@/lib/redis';

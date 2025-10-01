@@ -13,10 +13,10 @@
  * @see lib/config/custom-sidebars.tsx - Original implementations
  */
 
-import { ExternalLink } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ExternalLink } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import { getDisplayTitle } from '@/lib/utils';
 

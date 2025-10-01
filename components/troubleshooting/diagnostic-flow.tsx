@@ -5,10 +5,10 @@
  * Used in 1 MDX file across the codebase - Specialized for troubleshooting workflows
  */
 
-import { CheckCircle } from 'lucide-react';
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle } from '@/lib/icons';
 import { type DiagnosticFlowProps, diagnosticFlowPropsSchema } from '@/lib/schemas/shared.schema';
 
 export function DiagnosticFlow(props: DiagnosticFlowProps) {

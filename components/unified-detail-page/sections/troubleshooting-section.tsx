@@ -11,9 +11,9 @@
  * @see components/unified-detail-page.tsx - Original implementation
  */
 
-import { Copy } from 'lucide-react';
 import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Copy } from '@/lib/icons';
 import { componentDescriptionString } from '@/lib/schemas/primitives';
 
 /**

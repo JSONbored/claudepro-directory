@@ -1,10 +1,10 @@
 'use client';
 
-import { CheckCircle, Copy, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState } from 'react';
 import { z } from 'zod';
 import { copyToClipboard } from '@/lib/clipboard-utils';
+import { CheckCircle, Copy, ExternalLink } from '@/lib/icons';
 import type { MdxElementProps, MdxHeadingProps, MdxLinkProps } from '@/lib/schemas/shared.schema';
 
 // Client component for copy-to-clipboard headings

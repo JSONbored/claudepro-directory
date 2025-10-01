@@ -11,11 +11,11 @@
  * @see https://shiki.style/guide/best-performance
  */
 
-import { Check, Copy } from 'lucide-react';
 import { memo, useEffect, useState } from 'react';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Button } from '@/components/ui/button';
 import { copyToClipboard } from '@/lib/clipboard-utils';
+import { Check, Copy } from '@/lib/icons';
 import { logger } from '@/lib/logger';
 import type { CodeHighlightProps } from '@/lib/schemas/component.schema';
 import { highlightedCodeSafeSchema } from '@/lib/schemas/form.schema';

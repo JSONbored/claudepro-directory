@@ -1,3 +1,10 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { jobs } from '@/data/jobs';
 import {
   ArrowLeft,
   Building2,
@@ -7,14 +14,7 @@ import {
   ExternalLink,
   MapPin,
   Users,
-} from 'lucide-react';
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { jobs } from '@/data/jobs';
+} from '@/lib/icons';
 import { logger } from '@/lib/logger';
 import type { PageProps } from '@/lib/schemas/app.schema';
 import { slugParamsSchema } from '@/lib/schemas/app.schema';

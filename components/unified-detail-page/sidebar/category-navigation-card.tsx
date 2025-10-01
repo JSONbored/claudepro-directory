@@ -16,10 +16,10 @@
  * @see components/unified-sidebar.tsx - Original implementation
  */
 
-import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { z } from 'zod';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import type { LucideIcon } from '@/lib/icons';
 import { nonEmptyString } from '@/lib/schemas/primitives';
 
 /**

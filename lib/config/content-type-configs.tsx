@@ -8,9 +8,9 @@
  * @see components/unified-detail-page.tsx - Component consumer
  */
 
-import { BookOpen, Bot, Server, Terminal, Webhook } from 'lucide-react';
 import { toast } from 'sonner';
 import { copyToClipboard } from '@/lib/clipboard-utils';
+import { BookOpen, Bot, Server, Terminal, Webhook } from '@/lib/icons';
 import type { ContentTypeConfigRegistry } from '@/lib/types/content-type-config';
 import { getDisplayTitle } from '@/lib/utils';
 

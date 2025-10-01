@@ -6,8 +6,8 @@
  * Used in 27+ MDX files across the codebase
  */
 
-import { CheckCircle, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle, Zap } from '@/lib/icons';
 import { type TLDRSummaryProps, tldrSummaryPropsSchema } from '@/lib/schemas/shared.schema';
 
 export function TLDRSummary(props: TLDRSummaryProps) {

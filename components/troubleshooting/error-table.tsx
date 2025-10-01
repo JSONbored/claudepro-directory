@@ -5,9 +5,9 @@
  * Used in 1 MDX file across the codebase - Specialized for troubleshooting documentation
  */
 
-import { AlertTriangle, Info } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertTriangle, Info } from '@/lib/icons';
 import { type ErrorTableProps, errorTablePropsSchema } from '@/lib/schemas/shared.schema';
 
 export function ErrorTable(props: ErrorTableProps) {

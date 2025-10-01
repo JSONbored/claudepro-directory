@@ -11,7 +11,6 @@
  * Current: ~290 lines (13% reduction from deduplication)
  */
 
-import { Hash, Search, User, X } from 'lucide-react';
 import { useCallback, useEffect, useId } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalSearch } from '@/hooks/use-search';
 import { useUnifiedSearch } from '@/hooks/use-unified-search';
+import { Hash, Search, User, X } from '@/lib/icons';
 import type { FloatingSearchSidebarProps } from '@/lib/schemas/component.schema';
 import { getDisplayTitle } from '@/lib/utils';
 

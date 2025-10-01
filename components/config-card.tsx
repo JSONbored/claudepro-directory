@@ -1,6 +1,5 @@
 'use client';
 
-import { Check, Copy, ExternalLink, Github } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { memo, useState } from 'react';
 import { toast } from 'sonner';
@@ -10,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SourceBadge, TagBadge, TypeBadge } from '@/components/ui/config-badge';
 import { copyToClipboard } from '@/lib/clipboard-utils';
+import { Check, Copy, ExternalLink, Github } from '@/lib/icons';
 import type { ConfigCardProps } from '@/lib/schemas/component.schema';
 import { getDisplayTitle } from '@/lib/utils';
 

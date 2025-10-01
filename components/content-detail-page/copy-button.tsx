@@ -1,10 +1,10 @@
 'use client';
 
-import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { copyToClipboard } from '@/lib/clipboard-utils';
+import { Check, Copy } from '@/lib/icons';
 
 type CopyButtonProps = {
   text: string;
