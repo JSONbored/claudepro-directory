@@ -1,6 +1,6 @@
 import { readFile } from 'fs/promises';
 import { join } from 'path';
-import { TrendingContent } from '@/components/trending-content';
+import { TrendingContent } from '@/components/shared/trending-content';
 import { Badge } from '@/components/ui/badge';
 import { agents, commands, hooks, mcp, rules } from '@/generated/content';
 import { Clock, Star, TrendingUp, Users } from '@/lib/icons';

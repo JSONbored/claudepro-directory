@@ -12,8 +12,8 @@
  */
 
 import { useCallback, useEffect, useId, useState } from 'react';
-import { ErrorBoundary } from '@/components/error-boundary';
-import { SearchFilterPanel } from '@/components/search-filter-panel';
+import { SearchFilterPanel } from '@/components/features/search/search-filter-panel';
+import { ErrorBoundary } from '@/components/shared/error-boundary';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';

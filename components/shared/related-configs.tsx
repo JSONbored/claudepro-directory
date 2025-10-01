@@ -1,7 +1,7 @@
 'use client';
 
 import { memo } from 'react';
-import { ConfigCard } from '@/components/config-card';
+import { ConfigCard } from '@/components/features/content/config-card';
 import { Badge } from '@/components/ui/badge';
 import {
   Carousel,

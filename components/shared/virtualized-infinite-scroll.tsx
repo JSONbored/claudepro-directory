@@ -1,7 +1,7 @@
 'use client';
 
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ErrorBoundary } from '@/components/error-boundary';
+import { ErrorBoundary } from '@/components/shared/error-boundary';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from '@/lib/icons';
 import { logger } from '@/lib/logger';

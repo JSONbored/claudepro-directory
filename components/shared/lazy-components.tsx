@@ -7,7 +7,7 @@ const generateSkeletonKeys = () => Array.from({ length: 6 }, () => crypto.random
 
 // Lazy load heavy components with proper loading states
 export const LazyUnifiedSearch = dynamic(
-  () => import('./unified-search').then((mod) => ({ default: mod.UnifiedSearch })),
+  () => import('../features/search/unified-search').then((mod) => ({ default: mod.UnifiedSearch })),
   {
     loading: () => (
       <div className={`w-full h-12 bg-card/50 ${UI_CLASSES.ROUNDED_LG} animate-pulse`} />
@@ -40,7 +40,7 @@ export const LazyInfiniteScrollContainer = dynamic(
 ) => React.JSX.Element;
 
 export const LazyConfigCard = dynamic(
-  () => import('./config-card').then((mod) => ({ default: mod.ConfigCard })),
+  () => import('../features/content/config-card').then((mod) => ({ default: mod.ConfigCard })),
   {
     loading: () => (
       <div
@@ -55,7 +55,7 @@ export const LazyConfigCard = dynamic(
 );
 
 export const LazyContentSearchClient = dynamic(
-  () => import('./content-search-client').then((mod) => ({ default: mod.ContentSearchClient })),
+  () => import('../content-search-client').then((mod) => ({ default: mod.ContentSearchClient })),
   {
     loading: () => (
       <div className={`${UI_CLASSES.W_FULL} ${UI_CLASSES.SPACE_Y_4} animate-pulse`}>
@@ -71,11 +71,11 @@ export const LazyContentSearchClient = dynamic(
 
 // Chunk heavy data imports by category
 export const lazyContentLoaders = {
-  agents: () => import('../generated/agents-metadata').then((m) => m.agentsMetadata),
-  mcp: () => import('../generated/mcp-metadata').then((m) => m.mcpMetadata),
-  rules: () => import('../generated/rules-metadata').then((m) => m.rulesMetadata),
-  commands: () => import('../generated/commands-metadata').then((m) => m.commandsMetadata),
-  hooks: () => import('../generated/hooks-metadata').then((m) => m.hooksMetadata),
+  agents: () => import('../../generated/agents-metadata').then((m) => m.agentsMetadata),
+  mcp: () => import('../../generated/mcp-metadata').then((m) => m.mcpMetadata),
+  rules: () => import('../../generated/rules-metadata').then((m) => m.rulesMetadata),
+  commands: () => import('../../generated/commands-metadata').then((m) => m.commandsMetadata),
+  hooks: () => import('../../generated/hooks-metadata').then((m) => m.hooksMetadata),
 };
 
 // Create lazy-loaded content chunks for better performance

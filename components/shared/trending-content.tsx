@@ -1,7 +1,7 @@
 'use client';
 
 import { useId } from 'react';
-import { ConfigCard } from '@/components/config-card';
+import { ConfigCard } from '@/components/features/content/config-card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Clock, Star, TrendingUp } from '@/lib/icons';

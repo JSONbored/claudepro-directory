@@ -2,7 +2,7 @@ import Image from 'next/image';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { memo } from 'react';
 import { z } from 'zod';
-import { ErrorBoundary } from '@/components/error-boundary';
+import { ErrorBoundary } from '@/components/shared/error-boundary';
 import { mdxOptions } from '@/lib/mdx-config';
 import type {
   mdxElementPropsSchema,
@@ -12,17 +12,23 @@ import type {
 } from '@/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/lib/ui-constants';
 // Import lightweight components (always loaded)
-import { Accordion } from './content/accordion';
-import { Callout } from './content/callout';
-import { CaseStudy } from './content/case-study';
-import { AIOptimizedFAQ } from './content/faq';
-import { FeatureGrid } from './content/feature-grid';
-import { InfoBox } from './content/info-box';
-import { TLDRSummary } from './content/tldr-summary';
-import { Checklist } from './interactive/checklist';
-import { ContentTabs as Tabs } from './interactive/content-tabs';
-import { ExpertQuote } from './interactive/expert-quote';
-import { QuickReference } from './interactive/quick-reference';
+import { Accordion } from '../content/accordion';
+import { Callout } from '../content/callout';
+import { CaseStudy } from '../content/case-study';
+import { AIOptimizedFAQ } from '../content/faq';
+import { FeatureGrid } from '../content/feature-grid';
+import { InfoBox } from '../content/info-box';
+import { TLDRSummary } from '../content/tldr-summary';
+import { Checklist } from '../interactive/checklist';
+import { ContentTabs as Tabs } from '../interactive/content-tabs';
+import { ExpertQuote } from '../interactive/expert-quote';
+import { QuickReference } from '../interactive/quick-reference';
+import { setPageMetadata } from '../smart-related-content/with-metadata';
+import { CodeGroup } from '../template/code-group';
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 // Import heavy components as lazy-loaded (Suspense boundaries)
 import {
   ComparisonTable,
@@ -38,12 +44,6 @@ import {
   ExternalLinkComponent,
   InternalLinkComponent,
 } from './mdx-components';
-import { setPageMetadata } from './smart-related-content/with-metadata';
-import { CodeGroup } from './template/code-group';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Badge } from './ui/badge';
-import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 
 // Props schemas for MDX components are imported from shared.schema
 

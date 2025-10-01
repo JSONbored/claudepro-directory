@@ -2,14 +2,17 @@
 
 import dynamic from 'next/dynamic';
 import { useCallback, useState } from 'react';
-import { ConfigCard } from '@/components/config-card';
-import { ErrorBoundary } from '@/components/error-boundary';
-import { InfiniteScrollContainer } from '@/components/infinite-scroll-container';
+import { ConfigCard } from '@/components/features/content/config-card';
+import { ErrorBoundary } from '@/components/shared/error-boundary';
+import { InfiniteScrollContainer } from '@/components/shared/infinite-scroll-container';
 import { useLocalSearch } from '@/hooks/use-search';
 import { UI_CLASSES } from '@/lib/ui-constants';
 
 const UnifiedSearch = dynamic(
-  () => import('@/components/unified-search').then((mod) => ({ default: mod.UnifiedSearch })),
+  () =>
+    import('@/components/features/search/unified-search').then((mod) => ({
+      default: mod.UnifiedSearch,
+    })),
   {
     ssr: false,
     loading: () => <div className={`h-14 bg-muted/50 ${UI_CLASSES.ROUNDED_LG} animate-pulse`} />,

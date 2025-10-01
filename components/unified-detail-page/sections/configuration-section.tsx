@@ -21,7 +21,7 @@
 
 import { memo, useState } from 'react';
 import { toast } from 'sonner';
-import { CodeHighlight } from '@/components/code-highlight';
+import { CodeHighlight } from '@/components/shared/code-highlight';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { copyToClipboard } from '@/lib/clipboard-utils';

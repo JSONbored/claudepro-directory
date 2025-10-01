@@ -17,6 +17,9 @@ export const metadata: Metadata = {
 // Enable ISR - revalidate every 24 hours for community page
 export const revalidate = 86400;
 
+// Use Edge Runtime for faster global response times
+export const runtime = 'edge';
+
 export default function CommunityPage() {
   return (
     <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
