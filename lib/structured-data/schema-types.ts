@@ -9,6 +9,7 @@ import type {
   HookContent,
   McpContent,
   RuleContent,
+  StatuslineContent,
 } from '@/lib/schemas/content';
 
 /**
@@ -19,7 +20,8 @@ export type UnifiedContent =
   | ({ category: 'commands' } & CommandContent)
   | ({ category: 'hooks' } & HookContent)
   | ({ category: 'mcp' } & McpContent)
-  | ({ category: 'rules' } & RuleContent);
+  | ({ category: 'rules' } & RuleContent)
+  | ({ category: 'statuslines' } & StatuslineContent);
 
 /**
  * Props for unified structured data component
@@ -53,6 +55,12 @@ export function isMcpContent(item: UnifiedContent): item is McpContent & { categ
 
 export function isRuleContent(item: UnifiedContent): item is RuleContent & { category: 'rules' } {
   return item.category === 'rules';
+}
+
+export function isStatuslineContent(
+  item: UnifiedContent
+): item is StatuslineContent & { category: 'statuslines' } {
+  return item.category === 'statuslines';
 }
 
 /**
@@ -113,5 +121,14 @@ export const SCHEMA_CONFIGS: Record<UnifiedContent['category'], SchemaGeneration
     generateFAQ: false,
     generateBreadcrumb: true,
     generateSpeakable: true,
+  },
+  statuslines: {
+    generateApplication: true,
+    generateSourceCode: true,
+    generateHowTo: true,
+    generateCreativeWork: false,
+    generateFAQ: false,
+    generateBreadcrumb: true,
+    generateSpeakable: false,
   },
 };

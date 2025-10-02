@@ -122,6 +122,7 @@ export const CONTENT_CATEGORIES = {
   rules: 'rules',
   commands: 'commands',
   hooks: 'hooks',
+  statuslines: 'statuslines',
   // SEO content types (in /seo directory)
   guides: 'guides',
   tutorials: 'tutorials',
@@ -141,7 +142,14 @@ Object.values(CONTENT_CATEGORIES).forEach((category) => {
 });
 
 // CONSOLIDATION: Export unified main content categories for splitting logic
-export const MAIN_CONTENT_CATEGORIES = ['hooks', 'mcp', 'commands', 'rules', 'agents'] as const;
+export const MAIN_CONTENT_CATEGORIES = [
+  'hooks',
+  'mcp',
+  'commands',
+  'rules',
+  'agents',
+  'statuslines',
+] as const;
 
 // CONSOLIDATION: Export SEO categories for better organization
 export const SEO_CATEGORIES = [
@@ -163,6 +171,7 @@ const contentPathsSchema = z.object({
   rules: z.string().startsWith('content/'),
   commands: z.string().startsWith('content/'),
   hooks: z.string().startsWith('content/'),
+  statuslines: z.string().startsWith('content/'),
 
   // MDX guide content types (new structure)
   guides: z.string().startsWith('content/'),
@@ -182,6 +191,7 @@ export const CONTENT_PATHS = contentPathsSchema.parse({
   rules: 'content/rules',
   commands: 'content/commands',
   hooks: 'content/hooks',
+  statuslines: 'content/statuslines',
 
   // MDX guide content (new structure)
   guides: 'content/guides',

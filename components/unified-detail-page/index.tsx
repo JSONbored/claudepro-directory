@@ -160,20 +160,20 @@ export async function UnifiedDetailPage({ item, relatedItems = [] }: UnifiedDeta
               />
             )}
 
+            {/* Requirements Section */}
+            {requirements.length > 0 && (
+              <BulletListSection
+                title="Requirements"
+                description="Prerequisites and dependencies"
+                items={requirements}
+                icon={config.icon}
+                bulletColor="orange"
+              />
+            )}
+
             {/* Installation Section */}
             {config.sections.installation && installation && (
               <InstallationSection installation={installation} item={item} />
-            )}
-
-            {/* Use Cases Section */}
-            {config.sections.useCases && useCases.length > 0 && (
-              <BulletListSection
-                title="Use Cases"
-                description="Common scenarios and applications"
-                items={useCases}
-                icon={config.icon}
-                bulletColor="accent"
-              />
             )}
 
             {/* Configuration Section */}
@@ -187,14 +187,14 @@ export async function UnifiedDetailPage({ item, relatedItems = [] }: UnifiedDeta
               />
             )}
 
-            {/* Requirements Section */}
-            {requirements.length > 0 && (
+            {/* Use Cases Section */}
+            {config.sections.useCases && useCases.length > 0 && (
               <BulletListSection
-                title="Requirements"
-                description="Prerequisites and dependencies"
-                items={requirements}
+                title="Use Cases"
+                description="Common scenarios and applications"
+                items={useCases}
                 icon={config.icon}
-                bulletColor="orange"
+                bulletColor="accent"
               />
             )}
 

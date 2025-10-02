@@ -35,7 +35,7 @@ export async function getContentByCategory(category: string): Promise<UnifiedCon
       commands: contentModule.getCommands,
       rules: contentModule.getRules,
       hooks: contentModule.getHooks,
-      // statuslines: contentModule.getStatuslines, // Will be added in Phase 4
+      statuslines: contentModule.getStatuslines,
     };
 
     const loader = loaderMap[category];
@@ -78,7 +78,7 @@ export async function getContentBySlug(
       commands: contentModule.getCommandBySlug,
       rules: contentModule.getRuleBySlug,
       hooks: contentModule.getHookBySlug,
-      // statuslines: contentModule.getStatuslineBySlug, // Will be added in Phase 4
+      statuslines: contentModule.getStatuslineBySlug,
     };
 
     const loader = bySlugMap[category];
@@ -128,7 +128,7 @@ export async function getFullContentBySlug(
       commands: contentModule.getCommandFullContent,
       rules: contentModule.getRuleFullContent,
       hooks: contentModule.getHookFullContent,
-      // statuslines: contentModule.getStatuslineFullContent, // Will be added in Phase 4
+      statuslines: contentModule.getStatuslineFullContent,
     };
 
     const loader = fullContentMap[category];

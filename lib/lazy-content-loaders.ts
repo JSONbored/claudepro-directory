@@ -39,6 +39,8 @@ export const metadataLoader = new BatchLazyLoader(
     agentsMetadata: () => import('@/generated/agents-metadata').then((m) => m.agentsMetadata),
     commandsMetadata: () => import('@/generated/commands-metadata').then((m) => m.commandsMetadata),
     rulesMetadata: () => import('@/generated/rules-metadata').then((m) => m.rulesMetadata),
+    statuslinesMetadata: () =>
+      import('@/generated/statuslines-metadata').then((m) => m.statuslinesMetadata),
   },
   {
     preloadKeys: [], // Don't preload any by default

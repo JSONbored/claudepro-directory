@@ -17,6 +17,7 @@ import { commandsMetadata } from '../generated/commands-metadata.js';
 import { hooksMetadata } from '../generated/hooks-metadata.js';
 import { mcpMetadata } from '../generated/mcp-metadata.js';
 import { rulesMetadata } from '../generated/rules-metadata.js';
+import { statuslinesMetadata } from '../generated/statuslines-metadata.js';
 import { APP_CONFIG, MAIN_CONTENT_CATEGORIES } from '../lib/constants';
 import { logger } from '../lib/logger.js';
 import { buildConfig, env } from '../lib/schemas/env.schema';
@@ -102,6 +103,7 @@ const statisticsSchema = z.object({
   rules: nonNegativeInt,
   commands: nonNegativeInt,
   hooks: nonNegativeInt,
+  statuslines: nonNegativeInt,
 });
 
 const endpointsSchema = z.object({
@@ -110,6 +112,7 @@ const endpointsSchema = z.object({
   rules: urlString,
   commands: urlString,
   hooks: urlString,
+  statuslines: urlString,
 });
 
 const allConfigurationsResponseSchema = z.object({
@@ -127,6 +130,7 @@ const allConfigurationsResponseSchema = z.object({
     rules: z.array(transformedContentItemSchema),
     commands: z.array(transformedContentItemSchema),
     hooks: z.array(transformedContentItemSchema),
+    statuslines: z.array(transformedContentItemSchema),
   }),
   endpoints: endpointsSchema,
 });
@@ -173,6 +177,7 @@ const healthCheckResponseSchema = z.object({
     rules: nonNegativeInt,
     commands: nonNegativeInt,
     hooks: nonNegativeInt,
+    statuslines: nonNegativeInt,
     total: nonNegativeInt,
   }),
   features: z.object({
@@ -258,6 +263,7 @@ async function generateContentTypeAPIs() {
     'hooks.json': { data: hooksMetadata, type: 'hook' as AppContentType },
     'commands.json': { data: commandsMetadata, type: 'command' as AppContentType },
     'rules.json': { data: rulesMetadata, type: 'rule' as AppContentType },
+    'statuslines.json': { data: statuslinesMetadata, type: 'statusline' as AppContentType },
   };
 
   logger.progress('Generating individual content type APIs...');
@@ -308,6 +314,11 @@ async function generateAllConfigurationsAPI() {
     'commands'
   );
   const transformedHooks = transformContent(hooksMetadata, 'hook' as AppContentType, 'hooks');
+  const transformedStatuslines = transformContent(
+    statuslinesMetadata,
+    'statusline' as AppContentType,
+    'statuslines'
+  );
 
   const allConfigurations: AllConfigurationsResponse = {
     '@context': 'https://schema.org',
@@ -323,12 +334,14 @@ async function generateAllConfigurationsAPI() {
         transformedMcp.length +
         transformedRules.length +
         transformedCommands.length +
-        transformedHooks.length,
+        transformedHooks.length +
+        transformedStatuslines.length,
       agents: transformedAgents.length,
       mcp: transformedMcp.length,
       rules: transformedRules.length,
       commands: transformedCommands.length,
       hooks: transformedHooks.length,
+      statuslines: transformedStatuslines.length,
     },
     data: {
       agents: transformedAgents,
@@ -336,6 +349,7 @@ async function generateAllConfigurationsAPI() {
       rules: transformedRules,
       commands: transformedCommands,
       hooks: transformedHooks,
+      statuslines: transformedStatuslines,
     },
     endpoints: {
       agents: `${APP_CONFIG.url}/api/agents.json`,
@@ -343,6 +357,7 @@ async function generateAllConfigurationsAPI() {
       rules: `${APP_CONFIG.url}/api/rules.json`,
       commands: `${APP_CONFIG.url}/api/commands.json`,
       hooks: `${APP_CONFIG.url}/api/hooks.json`,
+      statuslines: `${APP_CONFIG.url}/api/statuslines.json`,
     },
   };
 
@@ -368,6 +383,7 @@ async function generateSearchIndexes() {
     ...toSearchableItems([...rulesMetadata], 'rules'),
     ...toSearchableItems([...commandsMetadata], 'commands'),
     ...toSearchableItems([...hooksMetadata], 'hooks'),
+    ...toSearchableItems([...statuslinesMetadata], 'statuslines'),
   ];
 
   // Generate category-specific indexes
@@ -528,12 +544,14 @@ async function generateHealthCheck() {
       rules: rulesMetadata.length,
       commands: commandsMetadata.length,
       hooks: hooksMetadata.length,
+      statuslines: statuslinesMetadata.length,
       total:
         agentsMetadata.length +
         mcpMetadata.length +
         rulesMetadata.length +
         commandsMetadata.length +
-        hooksMetadata.length,
+        hooksMetadata.length +
+        statuslinesMetadata.length,
     },
     features: {
       staticGeneration: true,

@@ -17,6 +17,7 @@ import {
   isHookContent,
   isMcpContent,
   isRuleContent,
+  isStatuslineContent,
   SCHEMA_CONFIGS,
   type UnifiedContent,
   type UnifiedStructuredDataProps,
@@ -160,6 +161,7 @@ function getApplicationSubCategory(item: UnifiedContent): string {
   if (isHookContent(item)) return `${item.hookType || 'Hook'} - Claude Hook`;
   if (isMcpContent(item)) return 'MCP Server';
   if (isRuleContent(item)) return 'Development Rule';
+  if (isStatuslineContent(item)) return `${item.statuslineType || 'Statusline'} - CLI Statusline`;
   return 'Claude Configuration';
 }
 
@@ -184,6 +186,9 @@ function getKeywords(item: UnifiedContent): string[] {
   if (isRuleContent(item)) {
     return ['Development Rule', 'Code Standards', 'Best Practices', ...baseKeywords];
   }
+  if (isStatuslineContent(item)) {
+    return ['Claude Statusline', 'CLI Statusline', 'Terminal Customization', ...baseKeywords];
+  }
 
   return baseKeywords;
 }
@@ -202,6 +207,10 @@ function getRequirements(item: UnifiedContent): string[] {
     return [...baseRequirements, ...item.installation.requirements];
   }
 
+  if (isStatuslineContent(item) && item.requirements) {
+    return [...baseRequirements, ...item.requirements];
+  }
+
   return baseRequirements;
 }
 
@@ -212,6 +221,7 @@ function getConfiguration(item: UnifiedContent): unknown {
   if (isAgentContent(item)) return item.configuration;
   if (isHookContent(item)) return item.configuration;
   if (isMcpContent(item)) return item.configuration;
+  if (isStatuslineContent(item)) return item.configuration;
   return undefined;
 }
 
@@ -327,6 +337,24 @@ function getSourceCodeSchemas(item: UnifiedContent): SchemaObject[] {
     }
   }
 
+  // Statusline script (stored in top-level content field)
+  if (isStatuslineContent(item) && item.content) {
+    schemas.push(
+      buildSoftwareSourceCode({
+        slug: item.slug,
+        category: item.category,
+        name: `${displayName} - Script`,
+        description: `${item.statuslineType || 'Statusline'} script for Claude Code`,
+        programmingLanguage: item.configuration?.format === 'python' ? 'Python' : 'Shell Script',
+        code: item.content,
+        encodingFormat:
+          item.configuration?.format === 'python' ? 'text/x-python' : 'text/x-shellscript',
+        githubUrl: itemGithubUrl,
+        fragmentId: 'script',
+      })
+    );
+  }
+
   return schemas;
 }
 
@@ -406,6 +434,7 @@ function getCategoryName(category: string): string {
     hooks: 'Hooks',
     mcp: 'MCP Servers',
     rules: 'Rules',
+    statuslines: 'Statuslines',
   };
   return names[category] || category;
 }

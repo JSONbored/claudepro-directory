@@ -25,6 +25,7 @@ export const unifiedContentItemSchema = z.object({
     'hooks',
     'guides',
     'jobs',
+    'statuslines',
     // Guide subcategories from guide.schema.ts
     'tutorials',
     'comparisons',
@@ -73,6 +74,10 @@ export const unifiedContentItemSchema = z.object({
       'SubagentStop',
     ])
     .optional(),
+
+  // Statusline-specific properties
+  statuslineType: z.enum(['minimal', 'powerline', 'custom', 'rich', 'simple']).optional(),
+  preview: z.string().optional(), // Example output or preview text
 
   // Installation information
   installation: z

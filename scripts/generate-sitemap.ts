@@ -6,6 +6,7 @@ import { commandsMetadata } from '../generated/commands-metadata.js';
 import { hooksMetadata } from '../generated/hooks-metadata.js';
 import { mcpMetadata } from '../generated/mcp-metadata.js';
 import { rulesMetadata } from '../generated/rules-metadata.js';
+import { statuslinesMetadata } from '../generated/statuslines-metadata.js';
 import { APP_CONFIG, CONTENT_PATHS, MAIN_CONTENT_CATEGORIES } from '../lib/constants';
 import { logger } from '../lib/logger.js';
 import type { ContentItem } from '../lib/schemas/content';
@@ -93,6 +94,7 @@ async function generateSitemap(): Promise<string> {
     ...agentsMetadata,
     ...commandsMetadata,
     ...hooksMetadata,
+    ...statuslinesMetadata,
   ];
 
   allContent.forEach((item) => {
@@ -135,6 +137,7 @@ Allow: /mcp*
 Allow: /rules*
 Allow: /commands*
 Allow: /hooks*
+Allow: /statuslines*
 Allow: /guides*
 
 # API endpoints (allow for better indexing of JSON-LD structured data)

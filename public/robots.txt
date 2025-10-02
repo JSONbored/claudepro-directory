@@ -10,6 +10,7 @@ Allow: /mcp*
 Allow: /rules*
 Allow: /commands*
 Allow: /hooks*
+Allow: /statuslines*
 Allow: /guides*
 
 # API endpoints (allow for better indexing of JSON-LD structured data)

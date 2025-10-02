@@ -17,6 +17,7 @@ import type {
   JobContent,
   McpContent,
   RuleContent,
+  StatuslineContent,
 } from '../lib/schemas/content/index.js';
 import { validateContentByCategory } from '../lib/schemas/content/index.js';
 import {
@@ -113,7 +114,8 @@ type ValidatedContent =
   | CommandContent
   | RuleContent
   | JobContent
-  | GuideContent;
+  | GuideContent
+  | StatuslineContent;
 
 // Process a single file with caching
 async function processJsonFile(
@@ -308,8 +310,9 @@ async function generateTypeScript(cache: BuildCache | null): Promise<GeneratedFi
       hooks: 'HookContent',
       commands: 'CommandContent',
       rules: 'RuleContent',
+      statuslines: 'StatuslineContent',
     };
-    const typeImport = typeImportMap[type as keyof typeof typeImportMap] || 'ContentMetadata';
+    const typeImport = typeImportMap[type as keyof typeof typeImportMap] || 'BaseContentMetadata';
 
     const metadataContent = `// Auto-generated metadata file - DO NOT EDIT
 // Generated at: ${new Date().toISOString()}
@@ -340,7 +343,7 @@ export type ${capitalizedSingular}Metadata = typeof ${varName}Metadata[number];`
     });
 
     // Generate full content file with proper schema imports
-    const schemaImport = typeImportMap[type as keyof typeof typeImportMap] || 'ContentMetadata';
+    const schemaImport = typeImportMap[type as keyof typeof typeImportMap] || 'BaseContentMetadata';
 
     const fullContent = `// Auto-generated full content file - DO NOT EDIT
 // Generated at: ${new Date().toISOString()}

@@ -24,6 +24,7 @@ const CONTENT_DIRECTORIES = {
   rules: CONTENT_PATHS.rules,
   commands: CONTENT_PATHS.commands,
   hooks: CONTENT_PATHS.hooks,
+  statuslines: CONTENT_PATHS.statuslines,
 
   // Guide content (MDX files)
   tutorials: CONTENT_PATHS.tutorials,
@@ -46,6 +47,7 @@ export class ContentIndexer {
       rules: [],
       commands: [],
       hooks: [],
+      statuslines: [],
       guides: [],
       jobs: [],
       tutorials: [],

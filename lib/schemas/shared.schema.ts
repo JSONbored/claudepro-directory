@@ -42,6 +42,7 @@ export const contentCategorySchema = z.enum([
   'rules',
   'commands',
   'hooks',
+  'statuslines',
 
   // SEO content types (in /seo directory)
   'guides',
@@ -64,6 +65,7 @@ export const cacheableCategorySchema = z.enum([
   'rules',
   'commands',
   'hooks',
+  'statuslines',
   'guides',
   'jobs',
   // Note: SEO content doesn't need Redis caching
@@ -75,7 +77,15 @@ export type ContentCategory = z.infer<typeof contentCategorySchema>;
  * Content Types
  * Used across: middleware, static-api
  */
-export const appContentTypeSchema = z.enum(['agent', 'mcp', 'hook', 'command', 'rule', 'job']);
+export const appContentTypeSchema = z.enum([
+  'agent',
+  'mcp',
+  'hook',
+  'command',
+  'rule',
+  'statusline',
+  'job',
+]);
 
 export type AppContentType = z.infer<typeof appContentTypeSchema>;
 

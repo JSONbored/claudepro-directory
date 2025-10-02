@@ -440,6 +440,126 @@ const ruleConfig: ContentTypeConfigRegistry['rules'] = {
 };
 
 /**
+ * Statusline Configuration
+ */
+const statuslineConfig: ContentTypeConfigRegistry['statuslines'] = {
+  typeName: 'Statusline',
+  icon: Terminal,
+  colorScheme: 'cyan-500',
+
+  primaryAction: {
+    label: 'Copy Script',
+    icon: <Terminal className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
+    handler: async (item) => {
+      const scriptContent =
+        'configuration' in item &&
+        typeof item.configuration === 'object' &&
+        item.configuration &&
+        'scriptContent' in item.configuration &&
+        typeof item.configuration.scriptContent === 'string'
+          ? item.configuration.scriptContent
+          : '';
+      await copyToClipboard(scriptContent, {
+        component: 'statusline-config',
+        action: 'copy-script',
+      });
+      toast.success('Copied!', {
+        description: 'Statusline script has been copied to your clipboard.',
+      });
+    },
+  },
+
+  sections: {
+    features: true,
+    installation: true,
+    useCases: true,
+    configuration: true,
+    security: false,
+    troubleshooting: true,
+    examples: false,
+  },
+
+  generators: {
+    installation: (_item) => ({
+      claudeCode: {
+        steps: [
+          'Save the statusline script to ~/.claude/statusline.sh (or your preferred location)',
+          'Make the script executable: chmod +x ~/.claude/statusline.sh',
+          'Open ~/.claude/settings.json in your text editor',
+          'Add the statusLine configuration (see example below)',
+          'Restart Claude Code to activate your new statusline',
+        ],
+        configFormat: 'JSON configuration in .claude/settings.json',
+        configPath: {
+          macOS: '~/.claude/settings.json',
+          windows: '%USERPROFILE%\\.claude\\settings.json',
+          linux: '~/.claude/settings.json',
+        },
+        configExample: {
+          statusLine: {
+            type: 'command',
+            command: '~/.claude/statusline.sh',
+            padding: 0,
+          },
+        },
+      },
+      requirements: ['Claude Code CLI', 'Bash shell', 'Terminal with color support'],
+    }),
+
+    useCases: (item) => {
+      if ('useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0) {
+        return item.useCases;
+      }
+      return [
+        'Display real-time session information in CLI',
+        'Customize terminal appearance and branding',
+        'Show project context and status at a glance',
+      ];
+    },
+
+    requirements: (item) => {
+      const baseRequirements = ['Claude Code CLI', 'Bash shell'];
+      const detectedRequirements: string[] = [];
+
+      if ('configuration' in item && typeof item.configuration === 'object' && item.configuration) {
+        const config = item.configuration as Record<string, unknown>;
+        if (config?.format === 'python') {
+          detectedRequirements.push('Python 3.6+');
+        } else if (config?.format === 'javascript') {
+          detectedRequirements.push('Node.js 18+');
+        }
+        if (config?.colorScheme) {
+          detectedRequirements.push('Terminal with color support (256 colors or truecolor)');
+        }
+      }
+
+      return [...baseRequirements, ...detectedRequirements];
+    },
+
+    troubleshooting: (_item) => {
+      return [
+        {
+          issue: 'Statusline not displaying or showing incorrect output',
+          solution:
+            'Verify script has executable permissions and test it independently. Check Claude Code config path is correct.',
+        },
+        {
+          issue: 'Colors not rendering correctly',
+          solution:
+            'Ensure your terminal supports color codes. Try setting TERM=xterm-256color environment variable.',
+        },
+      ];
+    },
+  },
+
+  metadata: {
+    categoryLabel: 'Statusline',
+    showGitHubLink: true,
+    githubPathPrefix: 'content/statuslines',
+  },
+};
+
+/**
  * Content Type Configuration Registry
  *
  * Central registry of all content type configurations.
@@ -451,6 +571,7 @@ export const contentTypeConfigs: ContentTypeConfigRegistry = {
   hooks: hookConfig,
   mcp: mcpConfig,
   rules: ruleConfig,
+  statuslines: statuslineConfig,
   guides: ruleConfig, // Guides use same config as rules for now
 };
 

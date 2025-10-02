@@ -1,0 +1,54 @@
+{
+  "slug": "minimal-powerline",
+  "description": "Clean, performance-optimized statusline with Powerline glyphs showing model, directory, and token count",
+  "category": "statuslines",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-01",
+  "tags": ["powerline", "minimal", "performance", "bash", "lightweight"],
+  "statuslineType": "powerline",
+  "content": "#!/usr/bin/env bash\n\n# Minimal Powerline Statusline for Claude Code\n# Displays: Model | Directory | Token Count\n\n# Read JSON from stdin\nread -r input\n\n# Extract values using jq\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"')\ndir=$(echo \"$input\" | jq -r '.workspace.path // \"~\"' | sed \"s|$HOME|~|\")\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\n\n# Powerline separators\nSEP=\"\\ue0b0\"\n\n# Color codes (256-color palette)\nMODEL_BG=\"\\033[48;5;111m\"  # Light blue background\nMODEL_FG=\"\\033[38;5;111m\"  # Light blue foreground\nDIR_BG=\"\\033[48;5;246m\"    # Gray background\nDIR_FG=\"\\033[38;5;246m\"    # Gray foreground\nTOKEN_BG=\"\\033[48;5;214m\"  # Orange background\nTOKEN_FG=\"\\033[38;5;214m\"  # Orange foreground\nRESET=\"\\033[0m\"\n\n# Build statusline with Powerline glyphs\necho -e \"${MODEL_BG} ${model} ${RESET}${MODEL_FG}${SEP}${RESET} ${DIR_BG} ${dir} ${RESET}${DIR_FG}${SEP}${RESET} ${TOKEN_BG} ${tokens} ${RESET}${TOKEN_FG}${SEP}${RESET}\"",
+  "features": [
+    "Powerline-style separators and glyphs",
+    "Displays current AI model in use",
+    "Shows workspace directory with home shortening",
+    "Real-time token count tracking",
+    "Low performance impact with minimal processing",
+    "256-color terminal support",
+    "Requires jq for JSON parsing"
+  ],
+  "configuration": {
+    "format": "bash",
+    "refreshInterval": 500,
+    "position": "left",
+    "colorScheme": "powerline-default"
+  },
+  "useCases": [
+    "Quick overview of current session context",
+    "Minimal distraction with essential information only",
+    "Performance-conscious users with slow terminals",
+    "Teams standardizing on Powerline aesthetic"
+  ],
+  "requirements": [
+    "Bash shell",
+    "jq JSON processor",
+    "Terminal with 256-color support",
+    "Powerline-compatible font (Nerd Fonts recommended)"
+  ],
+  "preview": " claude-sonnet-4.5  ~/projects/my-app   1,234 ",
+  "troubleshooting": [
+    {
+      "issue": "Powerline separators showing as boxes or question marks",
+      "solution": "Install a Nerd Font (e.g., FiraCode Nerd Font) and configure your terminal to use it. Verify with: echo -e '\\ue0b0'"
+    },
+    {
+      "issue": "Colors not displaying correctly",
+      "solution": "Ensure terminal supports 256 colors. Test with: tput colors (should return 256). Set TERM=xterm-256color if needed."
+    },
+    {
+      "issue": "jq command not found error",
+      "solution": "Install jq: brew install jq (macOS), apt install jq (Linux), or download from https://jqlang.github.io/jq/"
+    }
+  ],
+  "documentationUrl": "https://github.com/powerline/powerline",
+  "source": "community"
+}

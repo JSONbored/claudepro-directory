@@ -1,0 +1,51 @@
+{
+  "slug": "simple-text-statusline",
+  "description": "Ultra-lightweight plain text statusline with no colors or special characters for maximum compatibility and minimal overhead",
+  "category": "statuslines",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-01",
+  "tags": ["simple", "plain-text", "minimal", "bash", "lightweight", "no-dependencies"],
+  "statuslineType": "simple",
+  "content": "#!/usr/bin/env bash\n\n# Simple Text Statusline for Claude Code\n# Plain text only - maximum compatibility\n\n# Read JSON from stdin\nread -r input\n\n# Extract values using bash built-ins (no jq required)\nmodel=$(echo \"$input\" | grep -o '\"model\":\"[^\"]*\"' | cut -d'\"' -f4)\ndir=$(echo \"$input\" | grep -o '\"path\":\"[^\"]*\"' | cut -d'\"' -f4 | sed \"s|$HOME|~|\")\ntokens=$(echo \"$input\" | grep -o '\"totalTokens\":[0-9]*' | cut -d':' -f2)\n\n# Default values if extraction fails\nmodel=${model:-\"unknown\"}\ndir=${dir:-\"~\"}\ntokens=${tokens:-\"0\"}\n\n# Build simple plain text status\necho \"[Model: $model] [Dir: $dir] [Tokens: $tokens]\"\n",
+  "features": [
+    "Zero dependencies - pure bash implementation",
+    "No color codes or special characters",
+    "Works on any terminal including basic TTY",
+    "Extremely fast execution (<5ms)",
+    "Compatible with screen readers",
+    "No jq or external tools required",
+    "Perfect for SSH sessions or slow connections"
+  ],
+  "configuration": {
+    "format": "bash",
+    "refreshInterval": 300,
+    "position": "left"
+  },
+  "useCases": [
+    "SSH sessions over slow or unreliable connections",
+    "Legacy terminals without color support",
+    "Screen reader accessibility requirements",
+    "Embedded systems or resource-constrained environments",
+    "Debugging when color codes cause issues"
+  ],
+  "requirements": [
+    "Bash shell (any version)",
+    "Basic grep and cut utilities (pre-installed on all Unix systems)"
+  ],
+  "preview": "[Model: claude-sonnet-4.5] [Dir: ~/projects/my-app] [Tokens: 1234]",
+  "troubleshooting": [
+    {
+      "issue": "Values showing as empty or 'unknown'",
+      "solution": "JSON parsing relies on specific format. Ensure Claude Code is outputting standard JSON. Test with: echo '$input' to see raw JSON."
+    },
+    {
+      "issue": "Home directory not shortened to ~",
+      "solution": "Check that $HOME environment variable is set correctly: echo $HOME. If using sudo, HOME may not be preserved."
+    },
+    {
+      "issue": "grep or cut command not found",
+      "solution": "These are standard POSIX utilities. Install coreutils package: apt install coreutils (Linux) or ensure busybox is installed (embedded systems)."
+    }
+  ],
+  "source": "community"
+}
