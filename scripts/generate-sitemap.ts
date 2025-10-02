@@ -143,7 +143,6 @@ ${urls
 function generateRobotsTxt(): string {
   const robotsTxt = `# Robots.txt for ${APP_CONFIG.name}
 # ${APP_CONFIG.url}/robots.txt
-# Generated: ${new Date().toISOString()}
 
 # ============================================================================
 # AI CRAWLER CONFIGURATION (OpenAI GPTBot, Perplexity, Claude, etc.)
