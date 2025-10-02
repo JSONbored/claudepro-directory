@@ -34,9 +34,9 @@
     "lint": "ultracite check",
     "format": "ultracite fix",
     "validate:content": "tsx scripts/validate-content.ts",
-    "prepare": "command -v lefthook >/dev/null 2>&1 && lefthook install || echo 'Skipping lefthook install (not available)'",
+    "prepare": "command -v lefthook >/dev/null 2>&1 && lefthook install --config .config/lefthook.yml || echo 'Skipping lefthook install (not available)'",
     "analyze:architecture": "npx skott --displayMode=webapp",
-    "analyze:unused": "npx knip",
+    "analyze:unused": "npx knip -c .config/knip.json",
     "analyze:circular": "npx madge --circular --extensions ts,tsx src/ app/ components/",
     "analyze:circular-graph": "npx madge --circular --extensions ts,tsx --image circular-deps.svg src/ app/ components/",
     "analyze:all": "npm run analyze:unused && npm run analyze:circular"
@@ -82,7 +82,6 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.13",
-    "tailwindcss-animate": "^1.0.7",
     "tsx": "^4.20.5",
     "typescript": "5.9.3",
     "web-vitals": "^5.1.0",
@@ -91,14 +90,10 @@
   "devDependencies": {
     "@asteasolutions/zod-to-openapi": "^8.1.0",
     "@biomejs/biome": "2.2.5",
-    "@next/bundle-analyzer": "^15.5.4",
     "@playwright/test": "^1.55.1",
     "@size-limit/preset-app": "^11.2.0",
-    "@welldone-software/why-did-you-render": "^10.0.1",
-    "dependency-cruiser": "^17.0.1",
     "knip": "^5.64.1",
     "lefthook": "^1.13.5",
-    "playwright": "^1.55.1",
     "size-limit": "^11.2.0",
     "ultracite": "^5.4.6"
   }

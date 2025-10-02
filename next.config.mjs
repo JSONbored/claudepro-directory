@@ -5,6 +5,9 @@ import { dirname, resolve } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Set browserslist config path
+process.env.BROWSERSLIST_CONFIG = resolve(__dirname, '.config/browserslist');
+
 /**
  * Next.js 15.5.4 Configuration (2025 Best Practices)
  *
