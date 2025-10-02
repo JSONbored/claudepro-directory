@@ -60,24 +60,28 @@ const aj = arcjet({
 
 
 // Nosecone security headers configuration
-// IMPORTANT: We're using 'unsafe-inline' for scripts because:
-// 1. Using nonces would require making ALL pages dynamic (no static generation)
-// 2. This would significantly impact performance for a content-heavy site
-// 3. We still have other security layers (Arcjet WAF, rate limiting, etc.)
+// PRODUCTION CSP STRATEGY (2025 Best Practices):
+// - Static generation requires 'unsafe-inline' for scripts (no nonces possible)
+// - Compensating controls: Arcjet WAF + Shield, rate limiting, bot detection
+// - Defense in depth: Multiple security layers vs strict CSP alone
+//
+// DEVELOPMENT CSP STRATEGY:
+// - Enable relaxed CSP with 'unsafe-eval' for HMR/hot reload
+// - Catches CSP violations during development
+// - Better security testing before production deployment
 const noseconeConfig = {
   ...nosecone.defaults,
   // Custom CSP configuration that allows necessary resources
-  contentSecurityPolicy: isDevelopment ? false : {
+  contentSecurityPolicy: {
     directives: {
       // Start with Nosecone's secure defaults
       ...nosecone.defaults.contentSecurityPolicy.directives,
 
-      // Override scriptSrc to allow inline scripts (required for static pages)
-      // Remove 'unsafe-eval' in production for better security
+      // Override scriptSrc with environment-specific policies
       scriptSrc: [
         "'self'",
         "'unsafe-inline'", // Required for Next.js with static generation
-        ...(isDevelopment ? ["'unsafe-eval'"] : []), // Only in development
+        ...(isDevelopment ? ["'unsafe-eval'"] : []), // HMR/hot reload in development only
         "https://umami.claudepro.directory", // Umami analytics
         "https://*.vercel-scripts.com", // Vercel analytics
         "https://vercel.live", // Vercel toolbar

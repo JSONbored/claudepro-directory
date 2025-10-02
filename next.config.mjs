@@ -92,11 +92,12 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     // Disable static imports for smaller bundle
     disableStaticImages: false,
-    // Content Security Policy
+    // Content Security Policy for SVG images served through Next.js Image Optimization
     contentDispositionType: 'inline',
-    // Danger: allow SVG (we trust our sources)
+    // Danger: allow SVG (we trust our sources - GitHub, our own domain)
     dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // CSP for image optimization API - allows images but no scripts/objects
+    contentSecurityPolicy: "default-src 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline';",
   },
 
   // Turbopack-specific optimizations (modern approach)
@@ -211,6 +212,10 @@ const nextConfig = {
       '@radix-ui/react-toggle',
       '@radix-ui/react-toggle-group',
       '@radix-ui/react-tooltip',
+      // Fumadocs packages for API documentation
+      'fumadocs-ui',
+      'fumadocs-core',
+      'fumadocs-openapi',
     ],
   },
 
@@ -246,16 +251,6 @@ const nextConfig = {
     };
 
     return config;
-  },
-
-  // URL rewrites for clean API documentation access
-  async rewrites() {
-    return [
-      {
-        source: '/api-docs',
-        destination: '/api-docs-static.html'
-      }
-    ];
   },
 
   // Headers for caching only - security headers handled by Nosecone in middleware.ts
