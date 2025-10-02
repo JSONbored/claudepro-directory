@@ -3,14 +3,14 @@
 import { useRouter } from 'next/navigation';
 import { memo } from 'react';
 import { toast } from 'sonner';
-import { trackCopy } from '@/app/actions/track-view';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SourceBadge, TagBadge, TypeBadge } from '@/components/ui/config-badge';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { trackCopy } from '@/lib/actions/track-view';
 import { SOCIAL_LINKS } from '@/lib/constants';
-import { Check, Copy, ExternalLink, Github } from '@/lib/icons';
+import { Check, Copy, ExternalLink, Eye, Github } from '@/lib/icons';
 import type { ConfigCardProps } from '@/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/lib/ui-constants';
 import { getDisplayTitle } from '@/lib/utils';
@@ -143,11 +143,22 @@ export const ConfigCard = memo(
                   {item.author}
                 </a>
               </span>
-              {item.popularity !== undefined && (
+              {/* Show view count if available (from Redis), otherwise show static popularity */}
+              {(item as { viewCount?: number }).viewCount !== undefined ? (
                 <>
                   <span>•</span>
-                  <span>{item.popularity}% popular</span>
+                  <span className="flex items-center gap-1">
+                    <Eye className="h-3 w-3" aria-hidden="true" />
+                    {(item as { viewCount?: number }).viewCount} views
+                  </span>
                 </>
+              ) : (
+                item.popularity !== undefined && (
+                  <>
+                    <span>•</span>
+                    <span>{item.popularity}% popular</span>
+                  </>
+                )
               )}
             </div>
 

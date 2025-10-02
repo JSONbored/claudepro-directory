@@ -1,8 +1,6 @@
-import { readFile } from 'fs/promises';
-import { join } from 'path';
 import { TrendingContent } from '@/components/shared/trending-content';
 import { Badge } from '@/components/ui/badge';
-import { agents, commands, hooks, mcp, rules } from '@/generated/content';
+import { agents, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
 import { Clock, Star, TrendingUp, Users } from '@/lib/icons';
 import { logger } from '@/lib/logger';
 import type { PagePropsWithSearchParams } from '@/lib/schemas/app.schema';
@@ -11,14 +9,20 @@ import {
   type TrendingParams,
   trendingParamsSchema,
 } from '@/lib/schemas/search.schema';
+import { getBatchTrendingData } from '@/lib/trending/calculator';
 import { UI_CLASSES } from '@/lib/ui-constants';
 
-// ISR Configuration - Revalidate every 5 minutes for trending data
-// Static file provides instant load, ISR ensures freshness
+// ISR Configuration - Revalidate every 5 minutes for real-time Redis data
 export const revalidate = 300; // 5 minutes in seconds
 export const dynamic = 'force-static'; // Enable ISR (Incremental Static Regeneration)
 
-// Load static trending data with fallback
+/**
+ * Load trending data using Redis-based view counts
+ *
+ * @description Queries Redis for real-time view counts and calculates trending content
+ * based on actual user engagement. Automatically falls back to static popularity field
+ * if Redis is unavailable.
+ */
 async function getTrendingData(params: TrendingParams) {
   // Log trending data access for analytics
   if (Object.keys(params).length > 0) {
@@ -32,177 +36,45 @@ async function getTrendingData(params: TrendingParams) {
   }
 
   try {
-    // Try to load pre-generated static trending data (fastest path - 1-3ms)
-    const staticFilePath = join(process.cwd(), 'public', 'static-api', 'trending.json');
-    const fileContent = await readFile(staticFilePath, 'utf-8');
-    const staticData = JSON.parse(fileContent);
+    // Await all content promises
+    const [rulesData, mcpData, agentsData, commandsData, hooksData, statuslinesData] =
+      await Promise.all([rules, mcp, agents, commands, hooks, statuslines]);
 
-    // Basic validation - ensure required structure exists
-    if (
-      !staticData ||
-      typeof staticData !== 'object' ||
-      !Array.isArray(staticData.trending) ||
-      !Array.isArray(staticData.popular) ||
-      !Array.isArray(staticData.recent)
-    ) {
-      throw new Error('Invalid trending data structure');
-    }
+    // Use Redis-based trending calculator
+    const trendingData = await getBatchTrendingData({
+      agents: agentsData.map((item) => ({ ...item, category: 'agents' as const })),
+      mcp: mcpData.map((item) => ({ ...item, category: 'mcp' as const })),
+      rules: rulesData.map((item) => ({ ...item, category: 'rules' as const })),
+      commands: commandsData.map((item) => ({ ...item, category: 'commands' as const })),
+      hooks: hooksData.map((item) => ({ ...item, category: 'hooks' as const })),
+      statuslines: statuslinesData.map((item) => ({ ...item, category: 'statuslines' as const })),
+    });
 
-    logger.info('Loaded trending data from static file', {
-      trendingCount: staticData.trending.length,
-      popularCount: staticData.popular.length,
-      recentCount: staticData.recent.length,
-      algorithm: staticData.metadata?.algorithm,
+    const algorithm = trendingData.metadata.redisEnabled ? 'redis-views' : 'popularity-fallback';
+    logger.info(`Loaded trending data using ${algorithm}`, {
+      trendingCount: trendingData.trending.length,
+      popularCount: trendingData.popular.length,
+      recentCount: trendingData.recent.length,
+      redisEnabled: trendingData.metadata.redisEnabled,
     });
 
     return {
-      trending: staticData.trending,
-      popular: staticData.popular,
-      recent: staticData.recent,
+      trending: trendingData.trending,
+      popular: trendingData.popular,
+      recent: trendingData.recent,
     };
   } catch (error) {
-    // Fallback: Generate data on-demand if static file not available or invalid
-    logger.warn('Static trending data not available or invalid, generating on-demand', {
-      error: error instanceof Error ? error.message : String(error),
-    });
+    logger.error(
+      'Failed to load trending data',
+      error instanceof Error ? error : new Error(String(error))
+    );
 
-    // Await all content promises
-    const [rulesData, mcpData, agentsData, commandsData, hooksData] = await Promise.all([
-      rules,
-      mcp,
-      agents,
-      commands,
-      hooks,
-    ]);
-
-    // Simple popularity-based sorting fallback
-    const sortByPop = <T extends Record<string, unknown>>(items: readonly T[]): T[] =>
-      [...items].sort((a, b) => {
-        const aPop = typeof a.popularity === 'number' ? a.popularity : 0;
-        const bPop = typeof b.popularity === 'number' ? b.popularity : 0;
-        return bPop - aPop;
-      });
-
-    const sortedRules = sortByPop(rulesData);
-    const sortedMcp = sortByPop(mcpData);
-    const sortedAgents = sortByPop(agentsData);
-    const sortedCommands = sortByPop(commandsData);
-    const sortedHooks = sortByPop(hooksData);
-
-    // Simple round-robin mixer
-    const mix = (
-      cats: Array<{ items: Record<string, unknown>[]; type: string; count: number }>,
-      total: number
-    ): Array<Record<string, unknown> & { type: string }> => {
-      const result: Array<Record<string, unknown> & { type: string }> = [];
-      let idx = 0;
-      while (result.length < total) {
-        for (const cat of cats) {
-          const item = cat.items[idx];
-          if (item && result.length < total) {
-            result.push({ ...item, type: cat.type });
-          }
-        }
-        idx++;
-        if (cats.every((c) => c.items.length <= idx)) break;
-      }
-      return result;
+    // Ultimate fallback - return empty arrays
+    return {
+      trending: [],
+      popular: [],
+      recent: [],
     };
-
-    const trending = mix(
-      [
-        {
-          items: sortedRules.slice(0, 5) as unknown as Record<string, unknown>[],
-          type: 'rules',
-          count: 3,
-        },
-        {
-          items: sortedMcp.slice(0, 5) as unknown as Record<string, unknown>[],
-          type: 'mcp',
-          count: 3,
-        },
-        {
-          items: sortedAgents.slice(0, 4) as unknown as Record<string, unknown>[],
-          type: 'agents',
-          count: 2,
-        },
-        {
-          items: sortedCommands.slice(0, 4) as unknown as Record<string, unknown>[],
-          type: 'commands',
-          count: 2,
-        },
-        {
-          items: sortedHooks.slice(0, 4) as unknown as Record<string, unknown>[],
-          type: 'hooks',
-          count: 2,
-        },
-      ],
-      12
-    );
-
-    const popular = mix(
-      [
-        {
-          items: sortedRules.slice(0, 4) as unknown as Record<string, unknown>[],
-          type: 'rules',
-          count: 2,
-        },
-        {
-          items: sortedMcp.slice(0, 4) as unknown as Record<string, unknown>[],
-          type: 'mcp',
-          count: 2,
-        },
-        {
-          items: sortedAgents.slice(0, 3) as unknown as Record<string, unknown>[],
-          type: 'agents',
-          count: 2,
-        },
-        {
-          items: sortedCommands.slice(0, 3) as unknown as Record<string, unknown>[],
-          type: 'commands',
-          count: 2,
-        },
-        {
-          items: sortedHooks.slice(0, 2) as unknown as Record<string, unknown>[],
-          type: 'hooks',
-          count: 1,
-        },
-      ],
-      9
-    );
-
-    const recent = mix(
-      [
-        {
-          items: rulesData.slice(-4).reverse() as unknown as Record<string, unknown>[],
-          type: 'rules',
-          count: 2,
-        },
-        {
-          items: mcpData.slice(-4).reverse() as unknown as Record<string, unknown>[],
-          type: 'mcp',
-          count: 2,
-        },
-        {
-          items: agentsData.slice(-3).reverse() as unknown as Record<string, unknown>[],
-          type: 'agents',
-          count: 2,
-        },
-        {
-          items: commandsData.slice(-3).reverse() as unknown as Record<string, unknown>[],
-          type: 'commands',
-          count: 2,
-        },
-        {
-          items: hooksData.slice(-2).reverse() as unknown as Record<string, unknown>[],
-          type: 'hooks',
-          count: 1,
-        },
-      ],
-      9
-    );
-
-    return { trending, popular, recent };
   }
 }
 
@@ -267,13 +139,13 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
               <li>
                 <Badge variant="secondary">
                   <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
-                  Updated hourly
+                  Real-time updates
                 </Badge>
               </li>
               <li>
                 <Badge variant="secondary">
                   <Star className="h-3 w-3 mr-1" aria-hidden="true" />
-                  Community curated
+                  Based on views
                 </Badge>
               </li>
               <li>

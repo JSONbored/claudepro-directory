@@ -34,6 +34,7 @@ import {
   type ContentCategory,
   contentCategorySchema,
 } from '../lib/schemas/shared.schema';
+import { getBatchTrendingData } from '../lib/trending/calculator.js';
 
 /**
  * Static API Generation Schemas (inlined - only used here)
@@ -447,66 +448,32 @@ async function generateSearchIndexes() {
   logger.success(`Generated combined search index (${allSearchableItems.length} items)`);
 }
 
-// Generate static trending data
+/**
+ * Generate trending data using Redis-based view counts
+ *
+ * @description This function queries Redis for real-time view counts and generates
+ * trending content based on actual user engagement. Falls back to static popularity
+ * field if Redis is unavailable.
+ */
 async function generateTrendingData() {
-  logger.progress('Generating static trending data...');
+  logger.progress('Generating trending data from Redis view counts...');
 
   try {
-    // Helper to sort by popularity
-    const byPopularity = <T extends Record<string, unknown>>(items: readonly T[]): T[] =>
-      [...items].sort((a, b) => {
-        const aPop = typeof a.popularity === 'number' ? a.popularity : 0;
-        const bPop = typeof b.popularity === 'number' ? b.popularity : 0;
-        return bPop - aPop;
-      });
+    // Use the Redis-based trending calculator
+    const trendingData = await getBatchTrendingData({
+      agents: agentsMetadata.map((item) => ({ ...item, category: 'agents' as const })),
+      mcp: mcpMetadata.map((item) => ({ ...item, category: 'mcp' as const })),
+      rules: rulesMetadata.map((item) => ({ ...item, category: 'rules' as const })),
+      commands: commandsMetadata.map((item) => ({ ...item, category: 'commands' as const })),
+      hooks: hooksMetadata.map((item) => ({ ...item, category: 'hooks' as const })),
+      statuslines: statuslinesMetadata.map((item) => ({
+        ...item,
+        category: 'statuslines' as const,
+      })),
+    });
 
-    // Sort all categories by popularity
-    const sortedAgents = byPopularity(agentsMetadata);
-    const sortedMcp = byPopularity(mcpMetadata);
-    const sortedRules = byPopularity(rulesMetadata);
-    const sortedCommands = byPopularity(commandsMetadata);
-    const sortedHooks = byPopularity(hooksMetadata);
-
-    // Build trending data with top items from each category
-    const trendingData = {
-      trending: [
-        ...sortedRules.slice(0, 3),
-        ...sortedMcp.slice(0, 3),
-        ...sortedAgents.slice(0, 2),
-        ...sortedCommands.slice(0, 2),
-        ...sortedHooks.slice(0, 2),
-      ].slice(0, 12),
-      popular: [
-        ...sortedRules.slice(0, 2),
-        ...sortedMcp.slice(0, 2),
-        ...sortedAgents.slice(0, 2),
-        ...sortedCommands.slice(0, 2),
-        ...sortedHooks.slice(0, 1),
-      ].slice(0, 9),
-      recent: [
-        ...[...rulesMetadata].reverse().slice(0, 2),
-        ...[...mcpMetadata].reverse().slice(0, 2),
-        ...[...agentsMetadata].reverse().slice(0, 2),
-        ...[...commandsMetadata].reverse().slice(0, 2),
-        ...[...hooksMetadata].reverse().slice(0, 1),
-      ].slice(0, 9),
-      metadata: {
-        totalItems:
-          agentsMetadata.length +
-          mcpMetadata.length +
-          rulesMetadata.length +
-          commandsMetadata.length +
-          hooksMetadata.length,
-        lastUpdated: new Date().toISOString(),
-        generated: 'static' as const,
-        algorithm: 'popularity-based' as const,
-        categories: ['agents', 'mcp', 'rules', 'commands', 'hooks'],
-      },
-    };
-
-    // Note: Validation skipped - data comes from trusted build-time metadata
-    // Adding Zod validation here causes runtime errors and provides minimal benefit
-    // since the data source is controlled and type-safe at build time
+    // Note: Validation skipped - data comes from trusted calculator with Zod schemas
+    // The calculator already validates data structure and provides fallbacks
 
     // Atomic write: write to temp file first, then rename (prevents corruption)
     const outputFile = join(OUTPUT_DIR, 'trending.json');
@@ -514,8 +481,9 @@ async function generateTrendingData() {
     await writeFile(tempFile, JSON.stringify(trendingData, null, 2), 'utf-8');
     await rename(tempFile, outputFile);
 
+    const algorithm = trendingData.metadata.redisEnabled ? 'redis-views' : 'popularity-fallback';
     logger.success(
-      `Generated trending.json (${trendingData.trending.length} trending, ${trendingData.popular.length} popular, ${trendingData.recent.length} recent)`
+      `Generated trending.json using ${algorithm} (${trendingData.trending.length} trending, ${trendingData.popular.length} popular, ${trendingData.recent.length} recent)`
     );
 
     return trendingData;

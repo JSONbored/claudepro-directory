@@ -48,6 +48,7 @@ import {
   Database,
   DollarSign,
   ExternalLink,
+  Eye,
   FileJson,
   FileText,
   Filter,
@@ -202,6 +203,7 @@ export {
   CheckCircle, // 8 uses
   Clock, // 5 uses
   Copy, // 10 uses - most used
+  Eye, // View counts
   ExternalLink, // 9 uses
   Github, // 5 uses
   Search, // 5 uses

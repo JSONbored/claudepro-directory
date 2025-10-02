@@ -19,7 +19,7 @@
   ],
   "type": "module",
   "engines": {
-    "node": "^22.0.0",
+    "node": ">=22.0.0",
     "npm": ">=10.0.0"
   },
   "scripts": {
@@ -63,8 +63,6 @@
     "babel-plugin-react-compiler": "^19.1.0-rc.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "embla-carousel": "^8.6.0",
-    "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.22",
     "fuzzysort": "^3.1.0",
     "gray-matter": "^4.0.3",
@@ -92,11 +90,13 @@
   },
   "devDependencies": {
     "@asteasolutions/zod-to-openapi": "^8.1.0",
+    "@biomejs/biome": "2.2.5",
     "@next/bundle-analyzer": "^15.5.4",
     "@playwright/test": "^1.55.1",
     "@size-limit/preset-app": "^11.2.0",
     "@welldone-software/why-did-you-render": "^10.0.1",
     "dependency-cruiser": "^17.0.1",
+    "knip": "^5.64.1",
     "lefthook": "^1.13.5",
     "playwright": "^1.55.1",
     "size-limit": "^11.2.0",

@@ -150,12 +150,18 @@ export const apiSchemas = {
     .describe('Search API query parameters with filtering, pagination, and sorting'),
 
   // Cache warming parameters
-  cacheWarmParams: z.object({
-    types: z
-      .array(z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines']))
-      .optional(),
-    force: z.boolean().default(false),
-  }),
+  cacheWarmParams: z
+    .object({
+      types: z
+        .array(z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines']))
+        .optional()
+        .describe('Array of content types to warm cache for (omit for all types)'),
+      force: z
+        .boolean()
+        .default(false)
+        .describe('Force cache refresh even if cache is warm (default: false)'),
+    })
+    .describe('Cache warming API parameters for pre-loading content into Redis'),
 
   // Pagination query parameters
   paginationQuery: z.object({
