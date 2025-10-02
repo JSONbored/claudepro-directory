@@ -1,5 +1,5 @@
 import { HomePageClient } from '@/components/features/home';
-import { lazyContentLoaders } from '@/components/shared/lazy-components';
+import { lazyContentLoaders } from '@/components/shared/lazy-content-loaders';
 import { BookOpen, Server, Sparkles } from '@/lib/icons';
 import { transformForHomePage } from '@/lib/transformers';
 import { UI_CLASSES } from '@/lib/ui-constants';

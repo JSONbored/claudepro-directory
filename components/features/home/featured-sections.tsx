@@ -9,7 +9,7 @@
 
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
-import { LazyConfigCard } from '@/components/shared/lazy-components';
+import { LazyConfigCard } from '@/components/shared/lazy-config-card';
 import { Button } from '@/components/ui/button';
 import { Briefcase, ExternalLink } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';

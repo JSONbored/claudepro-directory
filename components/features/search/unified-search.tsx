@@ -11,6 +11,7 @@
  * Current: 180 lines (57% reduction)
  */
 
+import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useId, useState } from 'react';
 import { SearchFilterPanel } from '@/components/features/search/search-filter-panel';
 import { ErrorBoundary } from '@/components/shared/error-boundary';
@@ -26,6 +27,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useUnifiedSearch } from '@/hooks/use-unified-search';
+import { EVENTS } from '@/lib/analytics/events.config';
+import { trackEvent } from '@/lib/analytics/tracker';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/lib/schemas/component.schema';
 import { sanitizeSearchQuery } from '@/lib/security';
@@ -52,6 +55,7 @@ export function UnifiedSearch({
   className,
 }: UnifiedSearchProps) {
   const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const pathname = usePathname();
 
   // Use consolidated search hook
   const {
@@ -74,15 +78,28 @@ export function UnifiedSearch({
   const filterPanelId = useId();
   const sortSelectId = useId();
 
-  // Debounced search with sanitization
+  // Debounced search with sanitization and analytics tracking
   useEffect(() => {
     const timer = setTimeout(() => {
       const sanitized = sanitizeSearchQuery(localSearchQuery);
       onSearch(sanitized);
+
+      // Track search event (only for non-empty queries)
+      if (sanitized && sanitized.length > 0) {
+        const category = pathname?.split('/')[1] || 'unknown';
+
+        trackEvent(EVENTS.SEARCH_PERFORMED, {
+          query: sanitized.substring(0, 100), // Truncate for privacy
+          results_count: resultCount,
+          category,
+          filters_applied: activeFilterCount > 0 ? 'yes' : 'no',
+          time_to_results: 0, // Could add performance timing if needed
+        });
+      }
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [localSearchQuery, onSearch]);
+  }, [localSearchQuery, onSearch, resultCount, pathname, activeFilterCount]);
 
   // Apply filters and close panel
   const applyFilters = useCallback(() => {

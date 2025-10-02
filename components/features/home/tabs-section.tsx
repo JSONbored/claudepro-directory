@@ -9,7 +9,8 @@
 
 import Link from 'next/link';
 import { type FC, memo } from 'react';
-import { LazyConfigCard, LazyInfiniteScrollContainer } from '@/components/shared/lazy-components';
+import { LazyConfigCard } from '@/components/shared/lazy-config-card';
+import { LazyInfiniteScrollContainer } from '@/components/shared/lazy-infinite-scroll';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';

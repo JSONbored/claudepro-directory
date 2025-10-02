@@ -16,8 +16,11 @@
  */
 
 import { AnimatePresence, motion } from 'framer-motion';
+import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { EVENTS } from '@/lib/analytics/events.config';
+import { trackEvent } from '@/lib/analytics/tracker';
 import { Check, ChevronDown, Copy } from '@/lib/icons';
 import { UI_CLASSES } from '@/lib/ui-constants';
 
@@ -51,6 +54,7 @@ export function ProductionCodeBlock({
   const [isCopied, setIsCopied] = useState(false);
   const [needsCollapse, setNeedsCollapse] = useState(false);
   const preRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   // Check if content exceeds maxLines
   useEffect(() => {
@@ -69,6 +73,18 @@ export function ProductionCodeBlock({
       setIsCopied(true);
       toast.success('Code copied to clipboard!');
       setTimeout(() => setIsCopied(false), 2000);
+
+      // Track copy event with analytics
+      const pathParts = pathname?.split('/').filter(Boolean) || [];
+      const category = pathParts[0] || 'unknown';
+      const slug = pathParts[1] || 'unknown';
+
+      trackEvent(EVENTS.COPY_CODE, {
+        content_type: 'code',
+        content_category: category,
+        content_slug: slug,
+        content_length: code.length,
+      });
     } catch (_err) {
       toast.error('Failed to copy code');
     }

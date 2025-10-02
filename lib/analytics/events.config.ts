@@ -10,6 +10,9 @@
 
 // Event names as const for type safety
 export const EVENTS = {
+  // Content View Events
+  CONTENT_VIEW: 'content_view',
+
   // Related Content Events
   RELATED_CONTENT_VIEW: 'related_content_view',
   RELATED_CONTENT_CLICK: 'related_content_click',
@@ -62,6 +65,13 @@ export type EventName = (typeof EVENTS)[keyof typeof EVENTS];
 
 // Event payload definitions
 export interface EventPayloads {
+  [EVENTS.CONTENT_VIEW]: {
+    category: string;
+    slug: string;
+    page: string;
+    source?: string;
+  };
+
   [EVENTS.RELATED_CONTENT_VIEW]: {
     source_page: string;
     source_category: string;
@@ -272,6 +282,7 @@ export interface EventPayloads {
 // Event categories for grouping and permissions
 export const EVENT_CATEGORIES = {
   CONTENT: [
+    EVENTS.CONTENT_VIEW,
     EVENTS.RELATED_CONTENT_VIEW,
     EVENTS.RELATED_CONTENT_CLICK,
     EVENTS.RELATED_CONTENT_IMPRESSION,
@@ -317,6 +328,11 @@ export const EVENT_CONFIG: Record<
     debugOnly?: boolean; // Only track in development
   }
 > = {
+  [EVENTS.CONTENT_VIEW]: {
+    description: 'User views content detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
   [EVENTS.RELATED_CONTENT_VIEW]: {
     description: 'User views related content section',
     category: 'CONTENT',

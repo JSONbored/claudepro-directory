@@ -59,6 +59,7 @@
 
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { PageViewTracker } from '@/components/shared/page-view-tracker';
 import { ViewTracker } from '@/components/shared/view-tracker';
 import { UnifiedStructuredData } from '@/components/structured-data/unified-structured-data';
 import { UnifiedDetailPage } from '@/components/unified-detail-page';
@@ -300,6 +301,7 @@ export default async function DetailPage({
         category={category as 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides'}
         slug={slug}
       />
+      <PageViewTracker category={category} slug={slug} />
       <UnifiedStructuredData
         item={itemData as Parameters<typeof UnifiedStructuredData>[0]['item']}
       />
