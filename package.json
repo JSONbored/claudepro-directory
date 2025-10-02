@@ -88,12 +88,12 @@
     "tsx": "^4.20.5",
     "typescript": "5.9.3",
     "web-vitals": "^5.1.0",
-    "zod": "^4.1.11"
+    "zod": "^4.1.11",
+    "@redocly/cli": "^2.2.3"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.5",
     "@playwright/test": "^1.55.1",
-    "@redocly/cli": "^2.2.3",
     "@size-limit/preset-app": "^11.2.0",
     "knip": "^5.64.1",
     "lefthook": "^1.13.5",
