@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { agents, commands, hooks, mcp, rules } from '@/generated/content';
+import { agents, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
 import { handleApiError, handleValidationError } from '@/lib/error-handler';
 import { logger } from '@/lib/logger';
 import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
@@ -17,6 +17,7 @@ const contentMap = {
   'hooks.json': { getData: () => hooks, type: 'hook' },
   'commands.json': { getData: () => commands, type: 'command' },
   'rules.json': { getData: () => rules, type: 'rule' },
+  'statuslines.json': { getData: () => statuslines, type: 'statusline' },
 } as const;
 
 async function handleGET(

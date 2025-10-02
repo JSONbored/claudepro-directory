@@ -91,6 +91,7 @@
     "zod": "^4.1.11"
   },
   "devDependencies": {
+    "@asteasolutions/zod-to-openapi": "^8.1.0",
     "@next/bundle-analyzer": "^15.5.4",
     "@playwright/test": "^1.55.1",
     "@size-limit/preset-app": "^11.2.0",

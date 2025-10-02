@@ -69,7 +69,10 @@ export const baseSchemas = {
     .max(200, 'Search query too long')
     .regex(VALIDATION_PATTERNS.SEARCH_QUERY, 'Search query contains invalid characters')
     .transform(transforms.sanitizeSearch)
-    .optional(),
+    .optional()
+    .describe(
+      'Search query string for filtering content (max 200 chars, auto-sanitized for security)'
+    ),
 
   // Pagination parameters
   page: z.coerce
@@ -77,14 +80,16 @@ export const baseSchemas = {
     .int('Page must be an integer')
     .min(1, 'Page must be at least 1')
     .max(10000, 'Page number too large')
-    .default(1),
+    .default(1)
+    .describe('Page number for pagination (1-based index, max 10,000)'),
 
   limit: z.coerce
     .number()
     .int('Limit must be an integer')
     .min(1, 'Limit must be at least 1')
     .max(1000, 'Limit too large')
-    .default(50),
+    .default(50)
+    .describe('Number of items per page (1-1000, default 50)'),
 
   // UUID validation
   uuid: z.string().regex(VALIDATION_PATTERNS.UUID, 'Invalid UUID format'),
@@ -124,18 +129,31 @@ export const apiSchemas = {
   }),
 
   // Search parameters
-  searchParams: z.object({
-    q: baseSchemas.searchQuery,
-    category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks']).optional(),
-    page: baseSchemas.page,
-    limit: baseSchemas.limit,
-    sortBy: z.enum(['relevance', 'date', 'name', 'popularity']).default('relevance'),
-    sortOrder: z.enum(['asc', 'desc']).default('desc'),
-  }),
+  searchParams: z
+    .object({
+      q: baseSchemas.searchQuery,
+      category: z
+        .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'])
+        .optional()
+        .describe('Filter search results by content category'),
+      page: baseSchemas.page,
+      limit: baseSchemas.limit,
+      sortBy: z
+        .enum(['relevance', 'date', 'name', 'popularity'])
+        .default('relevance')
+        .describe('Field to sort results by (relevance, date, name, or popularity)'),
+      sortOrder: z
+        .enum(['asc', 'desc'])
+        .default('desc')
+        .describe('Sort direction: ascending (asc) or descending (desc)'),
+    })
+    .describe('Search API query parameters with filtering, pagination, and sorting'),
 
   // Cache warming parameters
   cacheWarmParams: z.object({
-    types: z.array(z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks'])).optional(),
+    types: z
+      .array(z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines']))
+      .optional(),
     force: z.boolean().default(false),
   }),
 
