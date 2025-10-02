@@ -4,6 +4,11 @@ import { getContentBySlug } from '@/lib/content-loaders';
 import { logger } from '@/lib/logger';
 import { getDisplayTitle } from '@/lib/utils';
 
+// Route segment configuration
+export const runtime = 'nodejs';
+export const maxDuration = 10;
+
+// OG image metadata
 export const alt = 'Claude Pro Directory';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';

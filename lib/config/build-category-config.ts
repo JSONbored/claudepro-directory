@@ -115,6 +115,7 @@ export const BUILD_CATEGORY_CONFIGS = {
       'tags',
       'category',
       'dateAdded',
+      'source',
     ] as const,
     buildConfig: {
       batchSize: 10,
@@ -142,6 +143,7 @@ export const BUILD_CATEGORY_CONFIGS = {
       'tags',
       'category',
       'dateAdded',
+      'source',
     ] as const,
     buildConfig: {
       batchSize: 10,
@@ -169,6 +171,7 @@ export const BUILD_CATEGORY_CONFIGS = {
       'tags',
       'category',
       'dateAdded',
+      'source',
     ] as const,
     buildConfig: {
       batchSize: 10,
@@ -196,6 +199,7 @@ export const BUILD_CATEGORY_CONFIGS = {
       'tags',
       'category',
       'dateAdded',
+      'source',
     ] as const,
     buildConfig: {
       batchSize: 10,
@@ -223,6 +227,7 @@ export const BUILD_CATEGORY_CONFIGS = {
       'tags',
       'category',
       'dateAdded',
+      'source',
     ] as const,
     buildConfig: {
       batchSize: 10,
@@ -250,6 +255,7 @@ export const BUILD_CATEGORY_CONFIGS = {
       'tags',
       'category',
       'dateAdded',
+      'source',
     ] as const,
     buildConfig: {
       batchSize: 10,

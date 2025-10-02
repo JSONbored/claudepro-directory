@@ -27,7 +27,7 @@
     "build": "npm run build:content && npm run generate:sitemap && npm run generate:static-apis && npm run generate:openapi && npm run build:api-docs && next build --turbopack",
     "build:analyze": "TURBOPACK_STATS=1 npm run build",
     "build:content": "tsx scripts/build-content.ts",
-    "build:api-docs": "redocly build-docs public/openapi.json --output=public/api-docs-static.html",
+    "build:api-docs": "redocly build-docs public/openapi.json --output=public/api-docs-static.html --config=.config/redocly.yaml",
     "generate:sitemap": "tsx scripts/generate-sitemap.ts",
     "generate:static-apis": "tsx scripts/generate-static-apis.ts",
     "generate:openapi": "tsx scripts/generate-openapi.ts",

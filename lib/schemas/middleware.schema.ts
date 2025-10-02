@@ -46,14 +46,18 @@ export const ipAddressSchema = z
   .string()
   .max(MIDDLEWARE_LIMITS.MAX_IP_ADDRESS_LENGTH)
   .refine((ip) => {
-    // Basic IPv4/IPv6 format check
+    // Basic IPv4/IPv6 format check with IPv6 compressed notation support
     const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
-    const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
+    // IPv6 regex supporting compressed notation (::)
+    const ipv6Regex =
+      /^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|::([fF]{4}(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/;
     const localhost = ['127.0.0.1', '::1', 'localhost'];
 
     return ipv4Regex.test(ip) || ipv6Regex.test(ip) || localhost.includes(ip);
   }, 'Invalid IP address format')
-  .describe('Valid IPv4, IPv6, or localhost address format with length limits');
+  .describe(
+    'Valid IPv4, IPv6 (with compressed notation), or localhost address format with length limits'
+  );
 
 /**
  * User agent validation

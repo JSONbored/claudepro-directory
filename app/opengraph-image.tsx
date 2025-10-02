@@ -1,6 +1,11 @@
 import { ImageResponse } from 'next/og';
 import { APP_CONFIG, SEO_CONFIG } from '@/lib/constants';
 
+// Route segment configuration
+export const runtime = 'nodejs';
+export const maxDuration = 10;
+
+// OG image metadata
 export const alt = `${APP_CONFIG.name} - Your Essential AI Toolkit`;
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';

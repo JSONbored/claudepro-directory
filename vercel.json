@@ -13,12 +13,6 @@
     },
     "app/page.tsx": {
       "maxDuration": 5
-    },
-    "app/**/opengraph-image": {
-      "maxDuration": 10
-    },
-    "app/manifest": {
-      "maxDuration": 5
     }
   },
   "crons": [

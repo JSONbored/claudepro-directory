@@ -1,6 +1,10 @@
 import type { MetadataRoute } from 'next';
 import { APP_CONFIG, SEO_CONFIG } from '@/lib/constants';
 
+// Route segment configuration
+export const runtime = 'nodejs';
+export const maxDuration = 5;
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: APP_CONFIG.name,
@@ -52,22 +56,6 @@ export default function manifest(): MetadataRoute.Manifest {
         sizes: '180x180',
         type: 'image/png',
         purpose: 'any',
-      },
-    ],
-    screenshots: [
-      {
-        src: '/screenshot-desktop.png',
-        sizes: '1920x1080',
-        type: 'image/png',
-        form_factor: 'wide',
-        label: 'Claude Pro Directory - Desktop View',
-      },
-      {
-        src: '/screenshot-mobile.png',
-        sizes: '390x844',
-        type: 'image/png',
-        form_factor: 'narrow',
-        label: 'Claude Pro Directory - Mobile View',
       },
     ],
   };

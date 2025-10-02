@@ -248,6 +248,16 @@ const nextConfig = {
     return config;
   },
 
+  // URL rewrites for clean API documentation access
+  async rewrites() {
+    return [
+      {
+        source: '/api-docs',
+        destination: '/api-docs-static.html'
+      }
+    ];
+  },
+
   // Headers for caching only - security headers handled by Nosecone in middleware.ts
   async headers() {
     return [
