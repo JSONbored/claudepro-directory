@@ -12,6 +12,11 @@
 
 import { ProductionCodeBlock } from '@/components/shared/production-code-block';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  generateFilename,
+  generateHookFilename,
+  generateMultiFormatFilename,
+} from '@/lib/filename-generator';
 import { Copy } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import { highlightCode } from '@/lib/syntax-highlighting';
@@ -62,21 +67,16 @@ export async function ConfigurationSection({
     const highlightedConfigs = await Promise.all(
       Object.entries(config).map(async ([key, value]) => {
         if (!value) return null;
-        const labels: Record<string, string> = {
-          claudeDesktop: 'Claude Desktop',
-          claudeCode: 'Claude Code',
-          http: 'HTTP Transport',
-          sse: 'SSE Transport',
-        };
 
         const code = JSON.stringify(value, null, 2);
         const html = await highlightCode(code, 'json');
+        const filename = generateMultiFormatFilename(item, key, 'json');
 
         return {
           key,
           html,
           code,
-          filename: labels[key] || key,
+          filename,
         };
       })
     );
@@ -142,7 +142,7 @@ export async function ConfigurationSection({
               html={highlightedHookConfig}
               code={JSON.stringify(config.hookConfig, null, 2)}
               language="json"
-              filename="Hook Configuration"
+              filename={generateHookFilename(item, 'hookConfig', 'json')}
               maxLines={20}
             />
           )}
@@ -151,7 +151,7 @@ export async function ConfigurationSection({
               html={highlightedScript}
               code={config.scriptContent}
               language="bash"
-              filename="Script Content"
+              filename={generateHookFilename(item, 'scriptContent', 'bash')}
               maxLines={25}
             />
           )}
@@ -178,7 +178,7 @@ export async function ConfigurationSection({
           html={html}
           code={code}
           language="json"
-          filename="Configuration"
+          filename={generateFilename({ item, language: 'json' })}
           maxLines={25}
         />
       </CardContent>

@@ -15,6 +15,7 @@
 
 import { CodeBlockServer } from '@/components/shared/code-block-server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { generateFilename } from '@/lib/filename-generator';
 import { Copy } from '@/lib/icons';
 import { detectLanguage } from '@/lib/language-detection';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
@@ -57,45 +58,7 @@ export async function ContentSection({ item, title, description }: ContentSectio
   const language = await detectLanguage(content, languageHint);
 
   // Generate intelligent filename based on content type and category
-  const generateFilename = (): string => {
-    const category = item.category;
-    const name = 'name' in item ? (item as { name?: string }).name : undefined;
-    const slug = 'slug' in item ? (item as { slug?: string }).slug : undefined;
-
-    // Extension mapping
-    const extensions: Record<string, string> = {
-      json: 'json',
-      javascript: 'js',
-      typescript: 'ts',
-      python: 'py',
-      bash: 'sh',
-      yaml: 'yml',
-      markdown: 'md',
-    };
-    const ext = extensions[language] || 'txt';
-
-    // Generate contextual filename
-    if (category === 'mcp') {
-      return `${slug || name || 'mcp-server'}-config.${ext}`;
-    }
-    if (category === 'agents') {
-      return `${slug || name || 'agent'}-config.${ext}`;
-    }
-    if (category === 'commands') {
-      return `${slug || name || 'command'}-config.${ext}`;
-    }
-    if (category === 'rules') {
-      return `${slug || name || 'rule'}-config.${ext}`;
-    }
-    if (category === 'hooks') {
-      return `${slug || name || 'hook'}.${ext}`;
-    }
-
-    // Fallback to language-based filename
-    return `example.${ext}`;
-  };
-
-  const filename = generateFilename();
+  const filename = generateFilename({ item, language });
 
   return (
     <Card>

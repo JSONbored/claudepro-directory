@@ -961,42 +961,32 @@
 
   /* ========================================
      PRODUCTION-GRADE CUSTOM SCROLLBARS
-     Claude Orange Theme - Outline Style
      ======================================== */
 
   /* Horizontal & vertical scrollbar for code blocks */
   pre::-webkit-scrollbar {
-    height: 8px;
-    width: 8px;
+    height: 10px;
+    width: 10px;
   }
 
   pre::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--color-bg-muted);
+    border-radius: 999px;
     margin: 0.25rem;
   }
 
   pre::-webkit-scrollbar-thumb {
-    border: 2px solid var(--color-border-medium);
+    background: var(--color-border);
     border-radius: 999px;
-    background-color: transparent;
-    background-clip: content-box;
-    transition: all 200ms ease-in-out;
+    transition: background 200ms ease-in-out;
   }
 
   pre::-webkit-scrollbar-thumb:hover {
-    border-color: var(--color-accent);
-    background-color: var(--color-accent);
-    background-clip: padding-box;
+    background: var(--color-border-medium);
   }
 
-  pre::-webkit-scrollbar-thumb:active {
-    border-color: var(--color-accent-hover);
-    background-color: var(--color-accent-hover);
-  }
-
-  /* Corner styling when both scrollbars appear */
   pre::-webkit-scrollbar-corner {
-    background: transparent;
+    background: var(--color-bg-muted);
   }
 
   /* Firefox scrollbar styling */
