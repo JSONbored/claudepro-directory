@@ -941,29 +941,102 @@
     color: var(--color-accent-light);
   }
 
-  /* Custom scrollbar for code blocks */
+  /* Line numbers for code blocks using data-line attribute */
+  .line-number::before {
+    content: attr(data-line);
+    display: inline-block;
+    width: 2rem;
+    margin-right: 1.5rem;
+    padding-right: 0.5rem;
+    text-align: right;
+    color: var(--color-text-tertiary);
+    opacity: 0.6;
+    user-select: none;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .line-number {
+    display: block;
+  }
+
+  /* ========================================
+     PRODUCTION-GRADE CUSTOM SCROLLBARS
+     Claude Orange Theme - Outline Style
+     ======================================== */
+
+  /* Horizontal & vertical scrollbar for code blocks */
   pre::-webkit-scrollbar {
     height: 8px;
+    width: 8px;
   }
 
   pre::-webkit-scrollbar-track {
-    background: var(--color-bg-secondary);
-    border-radius: 4px;
+    background: transparent;
+    margin: 0.25rem;
   }
 
   pre::-webkit-scrollbar-thumb {
-    background: var(--color-border-medium);
-    border-radius: 4px;
+    border: 2px solid var(--color-border-medium);
+    border-radius: 999px;
+    background-color: transparent;
+    background-clip: content-box;
+    transition: all 200ms ease-in-out;
   }
 
   pre::-webkit-scrollbar-thumb:hover {
-    background: var(--color-accent-muted);
+    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+    background-clip: padding-box;
+  }
+
+  pre::-webkit-scrollbar-thumb:active {
+    border-color: var(--color-accent-hover);
+    background-color: var(--color-accent-hover);
+  }
+
+  /* Corner styling when both scrollbars appear */
+  pre::-webkit-scrollbar-corner {
+    background: transparent;
   }
 
   /* Firefox scrollbar styling */
   pre {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-border-medium) var(--color-bg-secondary);
+    scrollbar-color: var(--color-border-medium) transparent;
+    scrollbar-gutter: stable;
+  }
+
+  /* General scrollbar styling for containers */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    border: 2px solid var(--color-border-medium);
+    border-radius: 999px;
+    background-color: transparent;
+    background-clip: content-box;
+    transition: all 200ms ease-in-out;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+    background-clip: padding-box;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-medium) transparent;
   }
 
   /* Claude Navigation */

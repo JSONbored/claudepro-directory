@@ -65,6 +65,7 @@
     "clsx": "^2.1.1",
     "embla-carousel": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
+    "framer-motion": "^12.23.22",
     "fuzzysort": "^3.1.0",
     "gray-matter": "^4.0.3",
     "lucide-react": "^0.544.0",
@@ -91,10 +92,12 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^15.5.4",
+    "@playwright/test": "^1.55.1",
     "@size-limit/preset-app": "^11.2.0",
     "@welldone-software/why-did-you-render": "^10.0.1",
     "dependency-cruiser": "^17.0.1",
     "lefthook": "^1.13.5",
+    "playwright": "^1.55.1",
     "size-limit": "^11.2.0",
     "ultracite": "^5.4.6"
   }

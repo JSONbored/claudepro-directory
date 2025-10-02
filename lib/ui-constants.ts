@@ -89,6 +89,17 @@ export const UI_CLASSES = {
   EASE_IN_OUT: 'ease-in-out',
 
   /**
+   * Framer Motion Animation Constants
+   * Production-grade spring physics for natural, fluid motion
+   */
+  SPRING_SMOOTH: { type: 'spring' as const, stiffness: 300, damping: 30, mass: 0.8 },
+  SPRING_BOUNCY: { type: 'spring' as const, stiffness: 400, damping: 25 },
+  SPRING_GENTLE: { type: 'spring' as const, stiffness: 200, damping: 20 },
+  FADE_IN_OUT: { duration: 0.3 },
+  SCALE_TAP: { scale: 0.98 },
+  SCALE_HOVER: { scale: 1.02 },
+
+  /**
    * Container Styles
    */
   CONTAINER_MX_AUTO: 'container mx-auto',

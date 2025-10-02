@@ -5,19 +5,20 @@
  *
  * Unified code block with:
  * - Max-height constraint (32rem / 20 lines)
- * - Expand/collapse with CSS Grid animation
+ * - Smooth expand/collapse with Framer Motion
  * - 1-click copy with Sonner toast
  * - Mobile-optimized (48px touch targets)
- * - Custom scrollbar styling
+ * - Custom Claude orange scrollbar styling
  * - Optional line numbers
  * - Optional filename display
  *
  * Server-rendered HTML from Shiki, client interactivity for UX
  */
 
+import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { Check, ChevronDown, ChevronUp, Copy } from '@/lib/icons';
+import { Check, ChevronDown, Copy } from '@/lib/icons';
 import { UI_CLASSES } from '@/lib/ui-constants';
 
 export interface ProductionCodeBlockProps {
@@ -77,54 +78,72 @@ export function ProductionCodeBlock({
 
   return (
     <div className={`${UI_CLASSES.CODE_BLOCK_GROUP_WRAPPER} ${className}`}>
-      {/* Header with filename and copy button */}
-      {(filename || language) && (
+      {/* Header with filename, language badge, and copy button */}
+      {filename && (
         <div className={UI_CLASSES.CODE_BLOCK_HEADER}>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            {filename && <span className={UI_CLASSES.CODE_BLOCK_FILENAME}>{filename}</span>}
-            {!filename && language && (
-              <span className={UI_CLASSES.CODE_BLOCK_LANGUAGE}>{language}</span>
+          <span className={UI_CLASSES.CODE_BLOCK_FILENAME}>{filename}</span>
+          <div className="flex items-center gap-2">
+            {/* Language badge pill */}
+            {language && language !== 'text' && (
+              <span className="px-2 py-0.5 text-2xs font-medium uppercase tracking-wider rounded-full bg-accent/10 text-accent border border-accent/20">
+                {language}
+              </span>
             )}
+            {/* Copy button */}
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-code/30"
+              title="Copy code"
+            >
+              {isCopied ? (
+                <>
+                  <Check className="h-3.5 w-3.5 text-green-500" />
+                  <span>Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Copy</span>
+                </>
+              )}
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={handleCopy}
-            className={UI_CLASSES.CODE_BLOCK_COPY_BUTTON}
-            style={{ minWidth: '48px', minHeight: '48px' }}
-            title="Copy code"
-          >
-            {isCopied ? (
-              <>
-                <Check className="h-4 w-4 text-green-500" />
-                <span className={UI_CLASSES.TEXT_XS}>Copied!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="h-4 w-4" />
-                <span className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.HIDDEN_SM_FLEX}`}>Copy</span>
-              </>
-            )}
-          </button>
         </div>
       )}
 
-      {/* Code block container with optional collapse */}
-      <div
+      {/* Code block container with Framer Motion smooth animations */}
+      <motion.div
         ref={preRef}
-        className="relative overflow-hidden transition-all duration-300 ease-out"
-        style={{
-          maxHeight: needsCollapse && !isExpanded ? maxHeight : 'none',
+        className="relative overflow-hidden"
+        initial={false}
+        animate={{
+          height: needsCollapse && !isExpanded ? maxHeight : 'auto',
         }}
+        transition={UI_CLASSES.SPRING_SMOOTH}
       >
-        {/* Gradient fade when collapsed */}
-        {needsCollapse && !isExpanded && (
-          <div
-            className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
-            style={{
-              background: 'linear-gradient(to bottom, transparent, var(--color-bg-card))',
-            }}
-          />
+        {/* Language badge - top right corner */}
+        {language && language !== 'text' && !filename && (
+          <div className="absolute top-3 right-3 z-20 px-2 py-1 text-2xs font-medium uppercase tracking-wide rounded-md bg-accent/10 text-accent border border-accent/20 backdrop-blur-sm">
+            {language}
+          </div>
         )}
+
+        {/* Gradient fade when collapsed - with smooth opacity transition */}
+        <AnimatePresence>
+          {needsCollapse && !isExpanded && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={UI_CLASSES.FADE_IN_OUT}
+              className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none z-10"
+              style={{
+                background: 'linear-gradient(to bottom, transparent 0%, var(--color-bg-code) 90%)',
+              }}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Server-rendered Shiki HTML */}
         <div
@@ -132,28 +151,32 @@ export function ProductionCodeBlock({
           // biome-ignore lint/security/noDangerouslySetInnerHtml: Server-side Shiki generates trusted HTML
           dangerouslySetInnerHTML={{ __html: html }}
         />
-      </div>
+      </motion.div>
 
-      {/* Expand/collapse button */}
+      {/* Expand/collapse button - shows on hover when collapsed, always visible when expanded */}
       {needsCollapse && (
-        <button
+        <motion.button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className={UI_CLASSES.CODE_BLOCK_EXPAND_BUTTON}
-          style={{ minHeight: '48px' }}
+          className={`flex items-center justify-center gap-2 w-full py-2 text-sm font-medium transition-all bg-code/30 backdrop-blur-sm border-t border-border/50 ${
+            isExpanded
+              ? 'opacity-100 text-foreground'
+              : 'opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground'
+          }`}
+          whileHover={UI_CLASSES.SCALE_HOVER}
+          whileTap={UI_CLASSES.SCALE_TAP}
+          transition={UI_CLASSES.SPRING_BOUNCY}
         >
-          {isExpanded ? (
-            <>
-              <ChevronUp className="h-4 w-4" />
-              <span>Collapse code</span>
-            </>
-          ) : (
-            <>
-              <ChevronDown className="h-4 w-4" />
-              <span>Expand to view all {code.split('\n').length} lines</span>
-            </>
-          )}
-        </button>
+          <motion.div
+            animate={{ rotate: isExpanded ? 180 : 0 }}
+            transition={UI_CLASSES.SPRING_GENTLE}
+          >
+            <ChevronDown className="h-4 w-4" />
+          </motion.div>
+          <span className="text-xs">
+            {isExpanded ? 'Collapse' : `Expand ${code.split('\n').length} lines`}
+          </span>
+        </motion.button>
       )}
 
       {/* Copy button (floating, for blocks without filename) */}

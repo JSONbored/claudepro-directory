@@ -70,10 +70,14 @@ async function getHighlighter() {
 }
 
 /**
- * Highlight code on the server
+ * Highlight code on the server with optional line numbers
  * Returns pre-rendered HTML string ready for dangerouslySetInnerHTML
  */
-export async function highlightCode(code: string, language: string = 'text'): Promise<string> {
+export async function highlightCode(
+  code: string,
+  language: string = 'text',
+  showLineNumbers: boolean = true
+): Promise<string> {
   try {
     const highlighter = await getHighlighter();
 
@@ -86,17 +90,24 @@ export async function highlightCode(code: string, language: string = 'text'): Pr
       defaultColor: 'dark',
       transformers: [
         {
+          name: 'line-numbers',
           pre(node) {
-            // Remove inline styles - use Tailwind classes instead
             node.properties.style = undefined;
             node.properties.class =
               'overflow-x-auto text-sm leading-relaxed p-4 rounded-lg border border-border bg-code/50 backdrop-blur-sm';
           },
           code(node) {
-            node.properties.style = `
-              background: transparent;
-              display: block;
-            `;
+            if (showLineNumbers) {
+              node.properties.style = 'display: grid; background: transparent;';
+            } else {
+              node.properties.style = 'display: block; background: transparent;';
+            }
+          },
+          line(node, line) {
+            if (showLineNumbers) {
+              node.properties['data-line'] = line;
+              node.properties.class = 'line-number';
+            }
           },
         },
       ],

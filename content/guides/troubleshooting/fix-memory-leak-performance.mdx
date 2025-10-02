@@ -251,27 +251,30 @@ Claude 4 provides a massive 1 million token context. This equals 750,000 words o
           
           <p>CLAUDE.md files provide persistent project context. Keep files under 500 lines for efficiency. Include architectural decisions and coding standards. Add frequently used commands and workflows. This auto-loads essential context every session.</p>
           
-          <CodeGroup title="CLAUDE.md">
-```markdown
-# CLAUDE.md Example
+          <CodeGroup
+  title="CLAUDE.md Example"
+  examples={[{
+    language: "markdown",
+    filename: "CLAUDE.md",
+    code: `# CLAUDE.md Example
 ## Project Architecture
 - Next.js 14 with App Router
 - PostgreSQL with Prisma ORM
 - Authentication via NextAuth.js
 
 ## Development Commands
-```bash
+\`\`\`bash
 npm run dev     # Start development
 npm run build   # Production build
 npm test        # Run test suite
-```
+\`\`\`
 
 ## Coding Standards
 - Use TypeScript strict mode
 - Implement error boundaries
-- Write tests for critical paths
-```
-          </CodeGroup>
+- Write tests for critical paths`
+  }]}
+/>
           
           <p><strong>Impact:</strong> Reduces repeated context loading by 60-80%</p>
         </div>
