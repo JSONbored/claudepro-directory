@@ -22,9 +22,6 @@ import { UI_CLASSES } from '@/lib/ui-constants';
 // Enable ISR - revalidate every 24 hours for static marketing pages
 export const revalidate = 86400;
 
-// Use Edge Runtime for faster global response times
-export const runtime = 'edge';
-
 export default function PartnerPage() {
   return (
     <div className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>

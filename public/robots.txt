@@ -1,6 +1,5 @@
 # Robots.txt for Claude Pro Directory
 # https://claudepro.directory/robots.txt
-# Generated: 2025-10-02T22:10:33.210Z
 
 # ============================================================================
 # AI CRAWLER CONFIGURATION (OpenAI GPTBot, Perplexity, Claude, etc.)
