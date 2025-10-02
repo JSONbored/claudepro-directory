@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { SearchTrigger } from '@/components/features/search/search-trigger';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { useSearchShortcut } from '@/hooks/use-search-shortcut';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/lib/constants';
 import { ChevronDown, DiscordIcon, ExternalLink, Github, LogoIcon, Menu } from '@/lib/icons';
 import { UI_CLASSES } from '@/lib/ui-constants';
@@ -42,6 +44,9 @@ export const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
+
+  // Global search keyboard shortcut (⌘K / Ctrl+K)
+  useSearchShortcut();
 
   // SHA-2088: Optimized scroll handler with threshold check and rAF debouncing
   // Only updates state when crossing 20px threshold (prevents 98% of unnecessary re-renders)
@@ -187,6 +192,23 @@ export const Navigation = () => {
 
           {/* Right Side Actions */}
           <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} space-x-3`}>
+            {/* Global Search Trigger */}
+            <div className={`${UI_CLASSES.HIDDEN} lg:${UI_CLASSES.BLOCK}`}>
+              <SearchTrigger
+                variant="ghost"
+                size="sm"
+                showShortcut={!isScrolled}
+                onClick={() => {
+                  // Trigger same behavior as ⌘K shortcut
+                  const searchInput = document.querySelector<HTMLInputElement>(
+                    'input[name="search"], input[type="search"]'
+                  );
+                  searchInput?.focus();
+                  searchInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}
+              />
+            </div>
+
             <Button
               variant="ghost"
               size="sm"

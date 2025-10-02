@@ -13,9 +13,11 @@
  * - ~120 lines of duplicated code eliminated
  * - Consistent behavior across all search interfaces
  * - Easier to maintain and test
+ * - User preferences persisted via localStorage
  */
 
 import { useCallback, useState } from 'react';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import type { FilterState } from '@/lib/schemas/component.schema';
 
 export interface UseUnifiedSearchOptions {
@@ -49,9 +51,16 @@ export function useUnifiedSearch({
 }: UseUnifiedSearchOptions = {}): UseUnifiedSearchReturn {
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [filters, setFilters] = useState<FilterState>({
-    sort: initialSort,
+
+  // Persist sort preference in localStorage
+  const { value: savedSort, setValue: setSavedSort } = useLocalStorage<string>('user-pref-sort', {
+    defaultValue: initialSort,
+    syncAcrossTabs: true,
   });
+
+  const [filters, setFilters] = useState<FilterState>(() => ({
+    sort: savedSort,
+  }));
 
   // Calculate active filter count
   const activeFilterCount = (() => {
@@ -77,9 +86,13 @@ export function useUnifiedSearch({
   const handleFiltersChange = useCallback(
     (newFilters: FilterState) => {
       setFilters(newFilters);
+      // Persist sort preference
+      if (newFilters.sort) {
+        setSavedSort(newFilters.sort);
+      }
       onFiltersChange?.(newFilters);
     },
-    [onFiltersChange]
+    [onFiltersChange, setSavedSort]
   );
 
   // Handle individual filter field change
@@ -87,9 +100,13 @@ export function useUnifiedSearch({
     (key: keyof FilterState, value: FilterState[keyof FilterState]) => {
       const newFilters = { ...filters, [key]: value };
       setFilters(newFilters);
+      // Persist sort preference
+      if (key === 'sort' && typeof value === 'string') {
+        setSavedSort(value);
+      }
       onFiltersChange?.(newFilters);
     },
-    [filters, onFiltersChange]
+    [filters, onFiltersChange, setSavedSort]
   );
 
   // Toggle tag selection
