@@ -281,6 +281,12 @@ async function main(): Promise<void> {
     const contentIndex = await contentIndexer.buildIndex();
     logger.success(`✓ Built content index with ${contentIndex.totalItems} items`);
 
+    // Save the main index
+    await contentIndexer.saveIndex(contentIndex);
+
+    // Save split index files for lazy loading
+    await contentIndexer.saveSplitIndex(contentIndex);
+
     // Save updated cache
     const newCache = {
       version: '1.0.0',
