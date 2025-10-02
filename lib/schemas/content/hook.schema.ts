@@ -27,12 +27,17 @@ import { massiveString, mediumString, shortString } from '@/lib/schemas/primitiv
  * - timeout: Optional timeout in milliseconds for hook execution
  * - description: Optional description of the hook's purpose
  */
-const hookConfigSchema = z.object({
-  script: mediumString,
-  matchers: z.array(shortString).optional(),
-  timeout: timeoutMs.optional(),
-  description: mediumString.optional(),
-});
+const hookConfigSchema = z
+  .object({
+    script: mediumString.describe('Hook script content to execute'),
+    matchers: z
+      .array(shortString)
+      .optional()
+      .describe('Optional array of matcher patterns to filter when hook executes'),
+    timeout: timeoutMs.optional().describe('Optional timeout in milliseconds for hook execution'),
+    description: mediumString.optional().describe("Optional description of the hook's purpose"),
+  })
+  .describe('Individual hook configuration with script, matchers, timeout, and description.');
 
 /**
  * Hook Configuration Array Schema
@@ -45,13 +50,24 @@ const hookConfigSchema = z.object({
  * - description: Optional description
  * - timeout: Optional timeout in milliseconds
  */
-const hookConfigArraySchema = z.array(
-  z.object({
-    matchers: z.array(shortString).optional(),
-    description: mediumString.optional(),
-    timeout: timeoutMs.optional(),
-  })
-);
+const hookConfigArraySchema = z
+  .array(
+    z
+      .object({
+        matchers: z
+          .array(shortString)
+          .optional()
+          .describe('Optional array of matcher patterns for this hook configuration'),
+        description: mediumString
+          .optional()
+          .describe('Optional description of this hook configuration'),
+        timeout: timeoutMs
+          .optional()
+          .describe('Optional timeout in milliseconds for this hook execution'),
+      })
+      .describe('Single hook configuration entry in array')
+  )
+  .describe('Array of multiple hook configurations that execute sequentially.');
 
 /**
  * Full Hook Configuration Schema
@@ -63,12 +79,23 @@ const hookConfigArraySchema = z.array(
  * Supports both single and array-based hook configurations for flexibility.
  * Used in the main hook content schema as the configuration field.
  */
-const fullHookConfigSchema = z.object({
-  hookConfig: z.object({
-    hooks: z.record(z.string(), z.union([hookConfigSchema, hookConfigArraySchema])).optional(),
-  }),
-  scriptContent: massiveString.optional(), // 1MB limit for script content
-});
+const fullHookConfigSchema = z
+  .object({
+    hookConfig: z
+      .object({
+        hooks: z
+          .record(z.string(), z.union([hookConfigSchema, hookConfigArraySchema]))
+          .optional()
+          .describe('Record of hook types mapped to their configurations (single or array)'),
+      })
+      .describe('Hook configuration object containing hook definitions'),
+    scriptContent: massiveString
+      .optional()
+      .describe('Optional external script content (1MB limit)'), // 1MB limit for script content
+  })
+  .describe(
+    'Complete hook configuration with hookConfig record and optional external script content. Supports both single and array-based hook configurations.'
+  );
 
 // Hook troubleshooting now uses baseTroubleshootingSchema from base-content.schema.ts
 // Removed local hookTroubleshootingSchema definition to reduce duplication
@@ -113,31 +140,51 @@ const fullHookConfigSchema = z.object({
  * - Stop: Runs when execution stops
  * - SubagentStop: Runs when a subagent stops
  */
-export const hookContentSchema = z.object({
-  // Inherit all base content metadata fields using shape destructuring (Zod v4 best practice)
-  ...baseContentMetadataSchema.shape,
+export const hookContentSchema = z
+  .object({
+    // Inherit all base content metadata fields using shape destructuring (Zod v4 best practice)
+    ...baseContentMetadataSchema.shape,
 
-  // Hook-specific required fields
-  category: z.literal('hooks'),
-  hookType: z.enum([
-    'PostToolUse',
-    'PreToolUse',
-    'SessionStart',
-    'SessionEnd',
-    'UserPromptSubmit',
-    'Notification',
-    'PreCompact',
-    'Stop',
-    'SubagentStop',
-  ]),
+    // Hook-specific required fields
+    category: z.literal('hooks').describe('Content category literal identifier: "hooks"'),
+    hookType: z
+      .enum([
+        'PostToolUse',
+        'PreToolUse',
+        'SessionStart',
+        'SessionEnd',
+        'UserPromptSubmit',
+        'Notification',
+        'PreCompact',
+        'Stop',
+        'SubagentStop',
+      ])
+      .describe(
+        'Type of hook determining when it executes: PostToolUse (after tool), PreToolUse (before tool), SessionStart/End, UserPromptSubmit, Notification, PreCompact (before context compaction), Stop, SubagentStop'
+      ),
 
-  // Hook configuration (complex hook setup)
-  configuration: fullHookConfigSchema,
+    // Hook configuration (complex hook setup)
+    configuration: fullHookConfigSchema.describe(
+      'Hook configuration with scripts, matchers, timeouts, and settings'
+    ),
 
-  // Hook-specific optional fields
-  installation: baseInstallationSchema.optional(),
-  troubleshooting: z.array(baseTroubleshootingSchema).max(20).optional(),
-  requirements: limitedMediumStringArray.optional(),
-});
+    // Hook-specific optional fields
+    installation: baseInstallationSchema
+      .optional()
+      .describe('Optional platform-specific installation instructions'),
+    troubleshooting: z
+      .array(baseTroubleshootingSchema)
+      .max(20)
+      .optional()
+      .describe('Optional array of common issues and solutions (max 20)'),
+    requirements: limitedMediumStringArray
+      .optional()
+      .describe(
+        'Optional list of requirements for the hook (e.g., dependencies, environment variables)'
+      ),
+  })
+  .describe(
+    'Hook content schema for Claude Code lifecycle hooks. Inherits base content metadata and adds hook-specific fields including hook type, configuration, installation, troubleshooting, and requirements.'
+  );
 
 export type HookContent = z.infer<typeof hookContentSchema>;

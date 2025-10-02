@@ -12,8 +12,16 @@ export const revalidate = 3600; // 1 hour (from REVALIDATE_TIMES.trending)
 
 // Query parameters schema
 const querySchema = z.object({
-  category: z.enum(['guides', 'tutorials', 'use-cases', 'workflows', 'comparisons']).optional(),
-  limit: z.coerce.number().min(1).max(50).default(10),
+  category: z
+    .enum(['guides', 'tutorials', 'use-cases', 'workflows', 'comparisons'])
+    .optional()
+    .describe('Content category filter for trending guides'),
+  limit: z.coerce
+    .number()
+    .min(1)
+    .max(50)
+    .default(10)
+    .describe('Maximum number of trending items to return (1-50)'),
 });
 
 export async function GET(request: NextRequest) {

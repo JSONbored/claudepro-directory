@@ -42,12 +42,30 @@ async function getTrendingData(params: TrendingParams) {
 
     // Use Redis-based trending calculator
     const trendingData = await getBatchTrendingData({
-      agents: agentsData.map((item) => ({ ...item, category: 'agents' as const })),
-      mcp: mcpData.map((item) => ({ ...item, category: 'mcp' as const })),
-      rules: rulesData.map((item) => ({ ...item, category: 'rules' as const })),
-      commands: commandsData.map((item) => ({ ...item, category: 'commands' as const })),
-      hooks: hooksData.map((item) => ({ ...item, category: 'hooks' as const })),
-      statuslines: statuslinesData.map((item) => ({ ...item, category: 'statuslines' as const })),
+      agents: agentsData.map((item: { [key: string]: unknown }) => ({
+        ...item,
+        category: 'agents' as const,
+      })),
+      mcp: mcpData.map((item: { [key: string]: unknown }) => ({
+        ...item,
+        category: 'mcp' as const,
+      })),
+      rules: rulesData.map((item: { [key: string]: unknown }) => ({
+        ...item,
+        category: 'rules' as const,
+      })),
+      commands: commandsData.map((item: { [key: string]: unknown }) => ({
+        ...item,
+        category: 'commands' as const,
+      })),
+      hooks: hooksData.map((item: { [key: string]: unknown }) => ({
+        ...item,
+        category: 'hooks' as const,
+      })),
+      statuslines: statuslinesData.map((item: { [key: string]: unknown }) => ({
+        ...item,
+        category: 'statuslines' as const,
+      })),
     });
 
     const algorithm = trendingData.metadata.redisEnabled ? 'redis-views' : 'popularity-fallback';

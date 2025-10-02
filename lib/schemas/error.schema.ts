@@ -25,96 +25,144 @@ const ERROR_LIMITS = {
 /**
  * Error severity levels
  */
-export const errorSeveritySchema = z.enum(['low', 'medium', 'high', 'critical']);
+export const errorSeveritySchema = z
+  .enum(['low', 'medium', 'high', 'critical'])
+  .describe('Categorizes the severity level of an error for prioritization and alerting');
 
 /**
  * Error type classification
  */
-export const errorTypeSchema = z.enum([
-  'ValidationError',
-  'DatabaseError',
-  'AuthenticationError',
-  'AuthorizationError',
-  'NotFoundError',
-  'RateLimitError',
-  'NetworkError',
-  'FileSystemError',
-  'ConfigurationError',
-  'TimeoutError',
-  'ServiceUnavailableError',
-  'InternalServerError',
-]);
+export const errorTypeSchema = z
+  .enum([
+    'ValidationError',
+    'DatabaseError',
+    'AuthenticationError',
+    'AuthorizationError',
+    'NotFoundError',
+    'RateLimitError',
+    'NetworkError',
+    'FileSystemError',
+    'ConfigurationError',
+    'TimeoutError',
+    'ServiceUnavailableError',
+    'InternalServerError',
+  ])
+  .describe('Classifies errors by their root cause for proper handling and routing');
 
 /**
  * Error context validation schema
  */
 export const errorContextSchema = z
   .record(
-    z.string().max(50, 'Context key too long'),
-    z.union([
-      z.string().max(ERROR_LIMITS.MAX_CONTEXT_VALUE_LENGTH),
-      z.number().finite(),
-      z.boolean(),
-    ])
+    z.string().max(50, 'Context key too long').describe('Context key identifier'),
+    z
+      .union([
+        z.string().max(ERROR_LIMITS.MAX_CONTEXT_VALUE_LENGTH).describe('String context value'),
+        z.number().finite().describe('Numeric context value'),
+        z.boolean().describe('Boolean context value'),
+      ])
+      .describe('Supported context value types: string, number, or boolean')
   )
   .refine(
     (context) => Object.keys(context).length <= ERROR_LIMITS.MAX_CONTEXT_KEYS,
     `Maximum ${ERROR_LIMITS.MAX_CONTEXT_KEYS} context keys allowed`
-  );
+  )
+  .describe('Additional metadata and diagnostic information associated with an error');
 
 /**
  * Basic error object validation
  */
-export const basicErrorSchema = z.object({
-  name: z.string().max(ERROR_LIMITS.MAX_ERROR_NAME_LENGTH).optional(),
-  message: nonEmptyString.max(ERROR_LIMITS.MAX_MESSAGE_LENGTH),
-  stack: z.string().max(ERROR_LIMITS.MAX_STACK_TRACE_LENGTH).optional(),
-});
+export const basicErrorSchema = z
+  .object({
+    name: z
+      .string()
+      .max(ERROR_LIMITS.MAX_ERROR_NAME_LENGTH)
+      .optional()
+      .describe('Error class name or type identifier'),
+    message: nonEmptyString
+      .max(ERROR_LIMITS.MAX_MESSAGE_LENGTH)
+      .describe('Human-readable error message describing what went wrong'),
+    stack: z
+      .string()
+      .max(ERROR_LIMITS.MAX_STACK_TRACE_LENGTH)
+      .optional()
+      .describe('Stack trace showing the execution path leading to the error'),
+  })
+  .describe('Standard JavaScript Error object structure with security limits');
 
 /**
  * Production error input validation - strict type safety
  */
-export const errorInputSchema = z.union([
-  basicErrorSchema,
-  z.string().max(ERROR_LIMITS.MAX_MESSAGE_LENGTH, 'Error message is too long'),
-  z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
-]);
+export const errorInputSchema = z
+  .union([
+    basicErrorSchema,
+    z
+      .string()
+      .max(ERROR_LIMITS.MAX_MESSAGE_LENGTH, 'Error message is too long')
+      .describe('Simple string error message'),
+    z
+      .record(
+        z.string().describe('Property key'),
+        z
+          .union([
+            z.string().describe('String property value'),
+            z.number().describe('Numeric property value'),
+            z.boolean().describe('Boolean property value'),
+          ])
+          .describe('Property value of any supported type')
+      )
+      .describe('Error-like object with arbitrary properties'),
+  ])
+  .describe('Flexible error input accepting Error objects, strings, or error-like objects');
 
 /**
  * Sanitized error response schema
  */
-export const sanitizedErrorSchema = z.object({
-  error: nonEmptyString.max(200),
-  message: z.string().max(200),
-  code: z.string().regex(/^[A-Z]{3}_[A-Z0-9]{8,12}$/, 'Invalid error code format'),
-  timestamp: isoDatetimeString,
-  requestId: requestIdSchema,
-  severity: errorSeveritySchema,
-});
+export const sanitizedErrorSchema = z
+  .object({
+    error: nonEmptyString.max(200).describe('Short error identifier or category name'),
+    message: z.string().max(200).describe('User-facing error message, sanitized for security'),
+    code: z
+      .string()
+      .regex(/^[A-Z]{3}_[A-Z0-9]{8,12}$/, 'Invalid error code format')
+      .describe('Unique error code for tracking and debugging (e.g., ERR_VALIDATION01)'),
+    timestamp: isoDatetimeString.describe('ISO 8601 timestamp when the error occurred'),
+    requestId: requestIdSchema.describe('Unique request identifier for correlation'),
+    severity: errorSeveritySchema.describe('Error severity level'),
+  })
+  .describe('Production-safe error response with sanitized fields and tracking metadata');
 
 /**
  * Error validation result schema - discriminated union for type safety
  */
-export const errorValidationResultSchema = z.discriminatedUnion('isValid', [
-  z.object({
-    isValid: z.literal(true),
-    type: z.literal('error'),
-    error: basicErrorSchema,
-    fallback: z.never().optional(),
-  }),
-  z.object({
-    isValid: z.literal(true),
-    type: z.literal('string'),
-    error: z.never().optional(),
-    fallback: z.string(),
-  }),
-  z.object({
-    isValid: z.literal(false),
-    type: z.literal('invalid'),
-    error: z.never().optional(),
-    fallback: z.string(),
-  }),
-]);
+export const errorValidationResultSchema = z
+  .discriminatedUnion('isValid', [
+    z
+      .object({
+        isValid: z.literal(true).describe('Validation succeeded'),
+        type: z.literal('error').describe('Input was a valid Error object'),
+        error: basicErrorSchema.describe('Validated error object'),
+        fallback: z.never().optional().describe('Not used for valid Error objects'),
+      })
+      .describe('Successful validation result for Error objects'),
+    z
+      .object({
+        isValid: z.literal(true).describe('Validation succeeded'),
+        type: z.literal('string').describe('Input was a valid string'),
+        error: z.never().optional().describe('Not used for string inputs'),
+        fallback: z.string().describe('Validated string message'),
+      })
+      .describe('Successful validation result for string messages'),
+    z
+      .object({
+        isValid: z.literal(false).describe('Validation failed'),
+        type: z.literal('invalid').describe('Input was invalid or unsupported'),
+        error: z.never().optional().describe('Not used for invalid inputs'),
+        fallback: z.string().describe('Default fallback error message'),
+      })
+      .describe('Failed validation result with fallback message'),
+  ])
+  .describe('Type-safe discriminated union representing error validation outcomes');
 
 export type ErrorValidationResult = z.infer<typeof errorValidationResultSchema>;
 
@@ -295,51 +343,105 @@ export function determineErrorType(error: unknown): z.infer<typeof errorTypeSche
 /**
  * Error handler configuration schema
  */
-export const errorHandlerConfigSchema = z.object({
-  // Context information
-  route: z.string().max(500).optional(),
-  operation: z.string().max(100).optional(),
-  method: z.string().max(10).optional(),
-  userId: z.string().max(100).optional(),
-  requestId: requestIdSchema.optional(),
+export const errorHandlerConfigSchema = z
+  .object({
+    // Context information
+    route: z
+      .string()
+      .max(500)
+      .optional()
+      .describe('API route or endpoint path where error occurred'),
+    operation: z.string().max(100).optional().describe('Operation or function name being executed'),
+    method: z.string().max(10).optional().describe('HTTP method (GET, POST, etc.)'),
+    userId: z
+      .string()
+      .max(100)
+      .optional()
+      .describe('Identifier of the user who triggered the error'),
+    requestId: requestIdSchema.optional().describe('Unique request identifier'),
 
-  // Response configuration
-  includeStack: z.boolean().optional(),
-  includeDetails: z.boolean().optional(),
-  customMessage: z.string().max(500).optional(),
+    // Response configuration
+    includeStack: z
+      .boolean()
+      .optional()
+      .describe('Whether to include stack trace in response (development only)'),
+    includeDetails: z
+      .boolean()
+      .optional()
+      .describe('Whether to include detailed error information in response'),
+    customMessage: z
+      .string()
+      .max(500)
+      .optional()
+      .describe('Override default error message with custom text'),
 
-  // Logging configuration
-  logLevel: z.enum(['debug', 'info', 'warn', 'error', 'fatal']).optional(),
-  logContext: z.record(nonEmptyString, z.union([z.string(), z.number(), z.boolean()])).optional(),
+    // Logging configuration
+    logLevel: z
+      .enum(['debug', 'info', 'warn', 'error', 'fatal'])
+      .optional()
+      .describe('Logging severity level for this error'),
+    logContext: z
+      .record(
+        nonEmptyString.describe('Context key'),
+        z
+          .union([
+            z.string().describe('String value'),
+            z.number().describe('Numeric value'),
+            z.boolean().describe('Boolean value'),
+          ])
+          .describe('Context value')
+      )
+      .optional()
+      .describe('Additional context data to include in logs'),
 
-  // Security configuration
-  sanitizeResponse: z.boolean().optional(),
-  hideInternalErrors: z.boolean().optional(),
-});
+    // Security configuration
+    sanitizeResponse: z
+      .boolean()
+      .optional()
+      .describe('Whether to sanitize error response to remove sensitive information'),
+    hideInternalErrors: z
+      .boolean()
+      .optional()
+      .describe('Whether to hide internal error details from external clients'),
+  })
+  .describe('Configuration options for error handling, logging, and response formatting');
 
 /**
  * Standardized error response schema
  */
-export const errorResponseSchema = z.object({
-  success: z.literal(false),
-  error: nonEmptyString.max(200),
-  message: nonEmptyString.max(1000),
-  code: nonEmptyString.max(50),
-  timestamp: isoDatetimeString,
-  requestId: requestIdSchema.optional(),
-  details: z
-    .array(
-      z.object({
-        field: z.string().max(100).optional(),
-        message: z.string().max(500),
-        code: z.string().max(50).optional(),
-      })
-    )
-    .optional(),
-  stack: z.string().max(ERROR_LIMITS.MAX_STACK_TRACE_LENGTH).optional(),
-  severity: errorSeveritySchema.optional(),
-  type: errorTypeSchema.optional(),
-});
+export const errorResponseSchema = z
+  .object({
+    success: z.literal(false).describe('Always false for error responses'),
+    error: nonEmptyString.max(200).describe('Error type or category identifier'),
+    message: nonEmptyString.max(1000).describe('Detailed error message for the client'),
+    code: nonEmptyString.max(50).describe('Machine-readable error code'),
+    timestamp: isoDatetimeString.describe('ISO 8601 timestamp of when the error occurred'),
+    requestId: requestIdSchema.optional().describe('Request identifier for tracing'),
+    details: z
+      .array(
+        z
+          .object({
+            field: z
+              .string()
+              .max(100)
+              .optional()
+              .describe('Field name that caused the validation error'),
+            message: z.string().max(500).describe('Specific error message for this detail'),
+            code: z.string().max(50).optional().describe('Error code specific to this detail'),
+          })
+          .describe('Individual error detail item')
+      )
+      .optional()
+      .describe('Array of granular error details, typically for validation errors'),
+    stack: z
+      .string()
+      .max(ERROR_LIMITS.MAX_STACK_TRACE_LENGTH)
+      .optional()
+      .describe('Stack trace (only in development environments)'),
+    severity: errorSeveritySchema.optional().describe('Error severity classification'),
+    type: errorTypeSchema.optional().describe('Error type classification'),
+  })
+  .describe('Standardized API error response structure with comprehensive metadata');
 
 /**
  * Type exports

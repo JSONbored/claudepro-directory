@@ -17,9 +17,18 @@ const streamingQuerySchema = z
     stream: z
       .enum(['true', 'false'])
       .default('false')
-      .transform((val) => val === 'true'),
-    format: z.enum(['json', 'ndjson']).default('json'),
-    batchSize: z.coerce.number().min(10).max(100).default(50),
+      .transform((val) => val === 'true')
+      .describe('Enable streaming response for large datasets'),
+    format: z
+      .enum(['json', 'ndjson'])
+      .default('json')
+      .describe('Response format: standard JSON or newline-delimited JSON (NDJSON)'),
+    batchSize: z.coerce
+      .number()
+      .min(10)
+      .max(100)
+      .default(50)
+      .describe('Number of items per batch in streaming mode (10-100)'),
   })
   .merge(apiSchemas.paginationQuery.partial());
 

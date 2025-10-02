@@ -292,7 +292,7 @@ class RelatedContentService {
       score += scoringItem.priority * 0.1;
 
       // Main categories boost (ensure visibility)
-      const mainCategories = ['agents', 'mcp', 'rules', 'commands', 'hooks'];
+      const mainCategories = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'];
       if (mainCategories.includes(item.category)) {
         score += 0.2;
       }

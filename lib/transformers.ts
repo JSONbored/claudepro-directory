@@ -12,16 +12,24 @@ import type {
   HookContent,
   McpContent,
   RuleContent,
+  StatuslineContent,
 } from '@/lib/schemas/content';
 
 // Union type for all content
-type ContentItem =
+export type ContentItem =
   | AgentContent
   | McpContent
   | RuleContent
   | CommandContent
   | HookContent
-  | GuideContent;
+  | GuideContent
+  | StatuslineContent;
+
+// Metadata-only type (subset of full content)
+export type ContentMetadata = Pick<
+  ContentItem,
+  'slug' | 'title' | 'description' | 'author' | 'tags' | 'category' | 'dateAdded'
+>;
 
 /**
  * Transform any content item to unified component interface
@@ -93,28 +101,32 @@ export function transformForDetailPage(
 
 /**
  * Transform for home page props
+ * Accepts both full content and metadata-only arrays
  */
 export function transformForHomePage(data: {
-  rules: readonly ContentItem[];
-  mcp: readonly ContentItem[];
-  agents: readonly ContentItem[];
-  commands: readonly ContentItem[];
-  hooks: readonly ContentItem[];
-  allConfigs: readonly ContentItem[];
+  rules: readonly (ContentItem | ContentMetadata)[];
+  mcp: readonly (ContentItem | ContentMetadata)[];
+  agents: readonly (ContentItem | ContentMetadata)[];
+  commands: readonly (ContentItem | ContentMetadata)[];
+  hooks: readonly (ContentItem | ContentMetadata)[];
+  statuslines: readonly (ContentItem | ContentMetadata)[];
+  allConfigs: readonly (ContentItem | ContentMetadata)[];
 }): {
   rules: UnifiedContentItem[];
   mcp: UnifiedContentItem[];
   agents: UnifiedContentItem[];
   commands: UnifiedContentItem[];
   hooks: UnifiedContentItem[];
+  statuslines: UnifiedContentItem[];
   allConfigs: UnifiedContentItem[];
 } {
   return {
-    rules: transformContentArray(data.rules),
-    mcp: transformContentArray(data.mcp),
-    agents: transformContentArray(data.agents),
-    commands: transformContentArray(data.commands),
-    hooks: transformContentArray(data.hooks),
-    allConfigs: transformContentArray(data.allConfigs),
+    rules: transformContentArray(data.rules as readonly ContentItem[]),
+    mcp: transformContentArray(data.mcp as readonly ContentItem[]),
+    agents: transformContentArray(data.agents as readonly ContentItem[]),
+    commands: transformContentArray(data.commands as readonly ContentItem[]),
+    hooks: transformContentArray(data.hooks as readonly ContentItem[]),
+    statuslines: transformContentArray(data.statuslines as readonly ContentItem[]),
+    allConfigs: transformContentArray(data.allConfigs as readonly ContentItem[]),
   };
 }

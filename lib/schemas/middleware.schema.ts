@@ -22,15 +22,9 @@ const MIDDLEWARE_LIMITS = {
 /**
  * Valid HTTP methods
  */
-export const httpMethodSchema = z.enum([
-  'GET',
-  'POST',
-  'PUT',
-  'DELETE',
-  'PATCH',
-  'HEAD',
-  'OPTIONS',
-]);
+export const httpMethodSchema = z
+  .enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'])
+  .describe('Standard HTTP methods allowed in middleware operations');
 
 /**
  * Valid request paths (with security checks)
@@ -40,7 +34,10 @@ export const requestPathSchema = nonEmptyString
   .refine((path) => path.startsWith('/'), 'Path must start with /')
   .refine((path) => !path.includes('..'), 'Path traversal detected')
   .refine((path) => !path.includes('\\'), 'Backslash not allowed in paths')
-  .refine((path) => !path.includes('\0'), 'Null bytes not allowed in paths');
+  .refine((path) => !path.includes('\0'), 'Null bytes not allowed in paths')
+  .describe(
+    'Validated request path with security checks against path traversal and malicious patterns'
+  );
 
 /**
  * IP address validation
@@ -55,7 +52,8 @@ export const ipAddressSchema = z
     const localhost = ['127.0.0.1', '::1', 'localhost'];
 
     return ipv4Regex.test(ip) || ipv6Regex.test(ip) || localhost.includes(ip);
-  }, 'Invalid IP address format');
+  }, 'Invalid IP address format')
+  .describe('Valid IPv4, IPv6, or localhost address format with length limits');
 
 /**
  * User agent validation
@@ -73,7 +71,8 @@ export const userAgentSchema = z
     }
     cleaned = cleaned.replace(new RegExp(String.fromCharCode(127), 'g'), '');
     return cleaned;
-  });
+  })
+  .describe('Browser user agent string sanitized by removing control characters');
 
 /**
  * Content type validation
@@ -96,7 +95,8 @@ export const httpContentTypeSchema = z
         'application/x-vercel-request-body',
       ].includes(value),
     'Invalid content type'
-  );
+  )
+  .describe('Valid HTTP content type header normalized to lowercase without charset parameters');
 
 /**
  * Static asset paths
@@ -117,91 +117,143 @@ export const staticAssetSchema = z
       path === '/offline.html' ||
       /\.(png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)$/.test(path),
     'Not a valid static asset path'
-  );
+  )
+  .describe('Path to static assets including Next.js resources, images, and common web files');
 
 /**
  * Rate limit configuration
  */
-export const middlewareRateLimitConfigSchema = z.object({
-  windowMs: positiveInt.min(1000).max(3600000), // 1 second to 1 hour
-  maxRequests: positiveInt.max(10000),
-  skipFailedRequests: z.boolean().optional(),
-  skipSuccessfulRequests: z.boolean().optional(),
-});
+export const middlewareRateLimitConfigSchema = z
+  .object({
+    windowMs: positiveInt
+      .min(1000)
+      .max(3600000)
+      .describe('Time window in milliseconds for rate limiting (1 second to 1 hour)'), // 1 second to 1 hour
+    maxRequests: positiveInt
+      .max(10000)
+      .describe('Maximum number of requests allowed within the time window'),
+    skipFailedRequests: z
+      .boolean()
+      .optional()
+      .describe('Whether to exclude failed requests from rate limit count'),
+    skipSuccessfulRequests: z
+      .boolean()
+      .optional()
+      .describe('Whether to exclude successful requests from rate limit count'),
+  })
+  .describe('Configuration options for rate limiting middleware behavior');
 
 /**
  * Arcjet decision types
  */
-export const arcjetDecisionSchema = z.object({
-  isDenied: z.function(),
-  isAllowed: z.function(),
-  ip: z.string(),
-  reason: z.object({
-    isRateLimit: z.function(),
-    isBot: z.function(),
-    isShield: z.function(),
-  }),
-  conclusion: z.enum(['ALLOW', 'DENY']),
-});
+export const arcjetDecisionSchema = z
+  .object({
+    isDenied: z.function().describe('Function to check if the request was denied by Arcjet'),
+    isAllowed: z.function().describe('Function to check if the request was allowed by Arcjet'),
+    ip: z.string().describe('IP address that made the request'),
+    reason: z
+      .object({
+        isRateLimit: z.function().describe('Function to check if denial was due to rate limiting'),
+        isBot: z.function().describe('Function to check if denial was due to bot detection'),
+        isShield: z.function().describe('Function to check if denial was due to shield protection'),
+      })
+      .describe('Detailed reason information for the Arcjet decision'),
+    conclusion: z
+      .enum(['ALLOW', 'DENY'])
+      .describe('Final decision outcome from Arcjet security analysis'),
+  })
+  .describe('Arcjet security decision object containing authorization status and denial reasons');
 
 /**
  * Request validation schema
  */
-export const requestValidationSchema = z.object({
-  method: httpMethodSchema,
-  path: requestPathSchema,
-  userAgent: userAgentSchema.optional(),
-  ip: ipAddressSchema.optional(),
-  contentType: httpContentTypeSchema.optional(),
-  contentLength: nonNegativeInt.max(MIDDLEWARE_LIMITS.MAX_FORM_DATA_SIZE).optional(),
-});
+export const requestValidationSchema = z
+  .object({
+    method: httpMethodSchema.describe('HTTP method used for the request'),
+    path: requestPathSchema.describe('URL path being requested'),
+    userAgent: userAgentSchema.optional().describe('Browser or client user agent string'),
+    ip: ipAddressSchema.optional().describe('Client IP address from headers or connection'),
+    contentType: httpContentTypeSchema.optional().describe('Content type of the request body'),
+    contentLength: nonNegativeInt
+      .max(MIDDLEWARE_LIMITS.MAX_FORM_DATA_SIZE)
+      .optional()
+      .describe('Size of request body in bytes (max 1MB)'),
+  })
+  .describe(
+    'Complete HTTP request validation including method, path, headers, and security checks'
+  );
 
 /**
  * Search query validation
  */
-export const searchQueryValidationSchema = z.object({
-  q: z
-    .string()
-    .max(MIDDLEWARE_LIMITS.MAX_SEARCH_QUERY_LENGTH)
-    .regex(/^[a-zA-Z0-9\s\-_]+$/, 'Invalid search query format')
-    .optional(),
-  category: z.enum(['all', 'agents', 'mcp', 'rules', 'commands', 'hooks', 'guides']).optional(),
-  page: positiveInt.max(1000).optional(),
-  limit: positiveInt.max(100).optional(),
-});
+export const searchQueryValidationSchema = z
+  .object({
+    q: z
+      .string()
+      .max(MIDDLEWARE_LIMITS.MAX_SEARCH_QUERY_LENGTH)
+      .regex(/^[a-zA-Z0-9\s\-_]+$/, 'Invalid search query format')
+      .optional()
+      .describe('Search query string with alphanumeric and basic punctuation only (max 500 chars)'),
+    category: z
+      .enum(['all', 'agents', 'mcp', 'rules', 'commands', 'hooks', 'guides'])
+      .optional()
+      .describe('Content category to filter search results'),
+    page: positiveInt
+      .max(1000)
+      .optional()
+      .describe('Page number for paginated search results (max 1000)'),
+    limit: positiveInt.max(100).optional().describe('Number of results per page (max 100)'),
+  })
+  .describe('Search query parameters with validation for query string, category, and pagination');
 
 /**
  * API endpoint classification
  */
-export const apiEndpointTypeSchema = z.enum([
-  'admin',
-  'heavy_api',
-  'search',
-  'submit',
-  'api',
-  'static',
-]);
+export const apiEndpointTypeSchema = z
+  .enum(['admin', 'heavy_api', 'search', 'submit', 'api', 'static'])
+  .describe('Classification of API endpoint type for rate limiting and security policies');
 
 /**
  * Middleware response schema
  */
-export const middlewareResponseSchema = z.object({
-  status: positiveInt.min(100).max(599),
-  headers: z.record(z.string(), z.string()),
-  body: z.string().optional(),
-});
+export const middlewareResponseSchema = z
+  .object({
+    status: positiveInt.min(100).max(599).describe('HTTP status code for the response (100-599)'),
+    headers: z
+      .record(z.string().describe('Header name'), z.string().describe('Header value'))
+      .describe('Response headers as key-value pairs'),
+    body: z.string().optional().describe('Optional response body content'),
+  })
+  .describe('HTTP response structure for middleware including status, headers, and body');
 
 /**
  * Security headers validation
  */
-export const securityHeadersSchema = z.object({
-  'content-security-policy': z.string().optional(),
-  'strict-transport-security': z.string().optional(),
-  'x-frame-options': z.string().optional(),
-  'x-content-type-options': z.string().optional(),
-  'x-xss-protection': z.string().optional(),
-  'referrer-policy': z.string().optional(),
-});
+export const securityHeadersSchema = z
+  .object({
+    'content-security-policy': z
+      .string()
+      .optional()
+      .describe('CSP header to prevent XSS and injection attacks'),
+    'strict-transport-security': z
+      .string()
+      .optional()
+      .describe('HSTS header to enforce HTTPS connections'),
+    'x-frame-options': z.string().optional().describe('Header to prevent clickjacking attacks'),
+    'x-content-type-options': z
+      .string()
+      .optional()
+      .describe('Header to prevent MIME type sniffing'),
+    'x-xss-protection': z
+      .string()
+      .optional()
+      .describe('Legacy XSS protection header for older browsers'),
+    'referrer-policy': z
+      .string()
+      .optional()
+      .describe('Header to control referrer information sent with requests'),
+  })
+  .describe('Collection of security-related HTTP headers for web application hardening');
 
 /**
  * Helper to validate request data

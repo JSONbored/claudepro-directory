@@ -39,6 +39,7 @@ export const warmableCategorySchema = z.enum([
   'rules',
   'commands',
   'hooks',
+  'statuslines',
   'guides',
   'jobs',
 ]);
@@ -127,14 +128,21 @@ export class CacheWarmer {
       logger.info('Starting cache warming for popular content');
 
       // Lazy load metadata only when needed
-      const [agentsMetadata, mcpMetadata, rulesMetadata, commandsMetadata, hooksMetadata] =
-        await Promise.all([
-          metadataLoader.get('agentsMetadata'),
-          metadataLoader.get('mcpMetadata'),
-          metadataLoader.get('rulesMetadata'),
-          metadataLoader.get('commandsMetadata'),
-          metadataLoader.get('hooksMetadata'),
-        ]);
+      const [
+        agentsMetadata,
+        mcpMetadata,
+        rulesMetadata,
+        commandsMetadata,
+        hooksMetadata,
+        statuslinesMetadata,
+      ] = await Promise.all([
+        metadataLoader.get('agentsMetadata'),
+        metadataLoader.get('mcpMetadata'),
+        metadataLoader.get('rulesMetadata'),
+        metadataLoader.get('commandsMetadata'),
+        metadataLoader.get('hooksMetadata'),
+        metadataLoader.get('statuslinesMetadata'),
+      ]);
 
       // Get popular items from each category
       const categories = [
@@ -143,6 +151,7 @@ export class CacheWarmer {
         { name: 'rules' as WarmableCategory, items: rulesMetadata },
         { name: 'commands' as WarmableCategory, items: commandsMetadata },
         { name: 'hooks' as WarmableCategory, items: hooksMetadata },
+        { name: 'statuslines' as WarmableCategory, items: statuslinesMetadata },
       ];
 
       // Validate categories
@@ -255,6 +264,7 @@ export class CacheWarmer {
         { path: '/rules', category: 'rules' as WarmableCategory },
         { path: '/commands', category: 'commands' as WarmableCategory },
         { path: '/hooks', category: 'hooks' as WarmableCategory },
+        { path: '/statuslines', category: 'statuslines' as WarmableCategory },
       ];
 
       // Validate pages

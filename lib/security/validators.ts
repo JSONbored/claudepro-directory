@@ -50,7 +50,10 @@ export const baseSchemas = {
       .min(min, `Must be at least ${min} characters`)
       .max(max, `Must be no more than ${max} characters`)
       .regex(VALIDATION_PATTERNS.SAFE_STRING, 'Contains invalid characters')
-      .transform(transforms.sanitizeString),
+      .transform(transforms.sanitizeString)
+      .describe(
+        `Sanitized string with configurable length limits (min: ${min}, max: ${max}). Auto-removes control characters and validates against safe character set.`
+      ),
 
   // Strict slug validation
   slug: z
@@ -58,10 +61,18 @@ export const baseSchemas = {
     .min(1, 'Slug is required')
     .max(100, 'Slug too long')
     .regex(VALIDATION_PATTERNS.SLUG, 'Invalid slug format')
-    .transform(transforms.normalizeSlug),
+    .transform(transforms.normalizeSlug)
+    .describe(
+      'URL-safe slug identifier (1-100 chars). Auto-normalized to lowercase with hyphens, allowing only alphanumeric characters and hyphens.'
+    ),
 
   // Content type validation
-  contentType: z.string().regex(VALIDATION_PATTERNS.CONTENT_TYPE, 'Invalid content type'),
+  contentType: z
+    .string()
+    .regex(VALIDATION_PATTERNS.CONTENT_TYPE, 'Invalid content type')
+    .describe(
+      'Content category identifier. Valid values: agents, mcp, rules, commands, hooks, statuslines.'
+    ),
 
   // Search query with sanitization
   searchQuery: z
@@ -92,31 +103,61 @@ export const baseSchemas = {
     .describe('Number of items per page (1-1000, default 50)'),
 
   // UUID validation
-  uuid: z.string().regex(VALIDATION_PATTERNS.UUID, 'Invalid UUID format'),
+  uuid: z
+    .string()
+    .regex(VALIDATION_PATTERNS.UUID, 'Invalid UUID format')
+    .describe('RFC 4122 compliant UUID (versions 1-5). Format: 8-4-4-4-12 hexadecimal characters.'),
 
   // Email validation
   email: z
     .string()
     .regex(VALIDATION_PATTERNS.EMAIL, 'Invalid email format')
-    .max(254, 'Email too long'),
+    .max(254, 'Email too long')
+    .describe(
+      'RFC 5322 compliant email address (max 254 chars). Format: local-part@domain with proper email syntax validation.'
+    ),
 
   // URL validation
-  url: z.string().regex(VALIDATION_PATTERNS.URL, 'Invalid URL format').max(2048, 'URL too long'),
+  url: z
+    .string()
+    .regex(VALIDATION_PATTERNS.URL, 'Invalid URL format')
+    .max(2048, 'URL too long')
+    .describe(
+      'Valid HTTP/HTTPS URL (max 2048 chars). Supports standard URL format with protocol, domain, path, and query parameters.'
+    ),
 
   // GitHub URL validation
   githubUrl: z
     .string()
     .regex(VALIDATION_PATTERNS.GITHUB_URL, 'Invalid GitHub URL')
-    .max(500, 'GitHub URL too long'),
+    .max(500, 'GitHub URL too long')
+    .describe(
+      'Valid GitHub repository URL (max 500 chars). Format: https://github.com/owner/repo or github.com/owner/repo.'
+    ),
 
   // IP address validation
-  ipAddress: z.string().regex(VALIDATION_PATTERNS.IP_ADDRESS, 'Invalid IP address'),
+  ipAddress: z
+    .string()
+    .regex(VALIDATION_PATTERNS.IP_ADDRESS, 'Invalid IP address')
+    .describe(
+      'Valid IPv4 or IPv6 address. Supports standard IP address formats for client identification.'
+    ),
 
   // Cache key validation
-  cacheKey: z.string().regex(VALIDATION_PATTERNS.CACHE_KEY, 'Invalid cache key format'),
+  cacheKey: z
+    .string()
+    .regex(VALIDATION_PATTERNS.CACHE_KEY, 'Invalid cache key format')
+    .describe(
+      'Redis-compatible cache key. Alphanumeric with colons, hyphens, and underscores for namespace separation.'
+    ),
 
   // Auth token validation
-  authToken: z.string().regex(VALIDATION_PATTERNS.AUTH_TOKEN, 'Invalid authentication token'),
+  authToken: z
+    .string()
+    .regex(VALIDATION_PATTERNS.AUTH_TOKEN, 'Invalid authentication token')
+    .describe(
+      'Bearer authentication token. Base64-encoded string (min 32 chars) for API authentication and authorization.'
+    ),
 } as const;
 
 /**
@@ -124,9 +165,13 @@ export const baseSchemas = {
  */
 export const apiSchemas = {
   // Content API parameters
-  contentTypeParams: z.object({
-    contentType: baseSchemas.contentType,
-  }),
+  contentTypeParams: z
+    .object({
+      contentType: baseSchemas.contentType,
+    })
+    .describe(
+      'Content type route parameters for dynamic category pages. Used to validate [category] route segments.'
+    ),
 
   // Search parameters
   searchParams: z
@@ -164,23 +209,31 @@ export const apiSchemas = {
     .describe('Cache warming API parameters for pre-loading content into Redis'),
 
   // Pagination query parameters
-  paginationQuery: z.object({
-    page: baseSchemas.page,
-    limit: baseSchemas.limit,
-    offset: z.coerce.number().int().min(0).max(100000).optional(),
-  }),
+  paginationQuery: z
+    .object({
+      page: baseSchemas.page,
+      limit: baseSchemas.limit,
+      offset: z.coerce.number().int().min(0).max(100000).optional(),
+    })
+    .describe(
+      'Pagination query parameters for list endpoints. Supports page-based (page/limit) or offset-based (offset/limit) pagination.'
+    ),
 
   // Request headers validation
-  requestHeaders: z.object({
-    'user-agent': z.string().max(500).optional(),
-    accept: z.string().max(200).optional(),
-    'accept-language': z.string().max(100).optional(),
-    'cache-control': z.string().max(100).optional(),
-    'if-none-match': z.string().max(200).optional(),
-    'x-forwarded-for': baseSchemas.ipAddress.optional(),
-    'cf-connecting-ip': baseSchemas.ipAddress.optional(),
-    authorization: z.string().max(2048).optional(),
-  }),
+  requestHeaders: z
+    .object({
+      'user-agent': z.string().max(500).optional(),
+      accept: z.string().max(200).optional(),
+      'accept-language': z.string().max(100).optional(),
+      'cache-control': z.string().max(100).optional(),
+      'if-none-match': z.string().max(200).optional(),
+      'x-forwarded-for': baseSchemas.ipAddress.optional(),
+      'cf-connecting-ip': baseSchemas.ipAddress.optional(),
+      authorization: z.string().max(2048).optional(),
+    })
+    .describe(
+      'Standard HTTP request headers validation. Includes client info (user-agent), content negotiation (accept), caching (if-none-match), client IP (x-forwarded-for, cf-connecting-ip), and auth (authorization).'
+    ),
 } as const;
 
 /**
@@ -188,63 +241,99 @@ export const apiSchemas = {
  */
 export const contentSchemas = {
   // Agent configuration validation
-  agent: z.object({
-    name: baseSchemas.safeString(2, 200),
-    description: baseSchemas.safeString(10, 2000),
-    slug: baseSchemas.slug,
-    author: baseSchemas.safeString(1, 100),
-    version: z.string().regex(VALIDATION_PATTERNS.VERSION, 'Invalid version format').optional(),
-    tags: z.array(baseSchemas.safeString(1, 50)).max(20, 'Too many tags'),
-    githubUrl: baseSchemas.githubUrl.optional(),
-    documentation: baseSchemas.url.optional(),
-    license: z.enum(['MIT', 'Apache-2.0', 'GPL-3.0', 'BSD-3-Clause', 'ISC']).optional(),
-  }),
+  agent: z
+    .object({
+      name: baseSchemas.safeString(2, 200),
+      description: baseSchemas.safeString(10, 2000),
+      slug: baseSchemas.slug,
+      author: baseSchemas.safeString(1, 100),
+      version: z.string().regex(VALIDATION_PATTERNS.VERSION, 'Invalid version format').optional(),
+      tags: z.array(baseSchemas.safeString(1, 50)).max(20, 'Too many tags'),
+      githubUrl: baseSchemas.githubUrl.optional(),
+      documentation: baseSchemas.url.optional(),
+      license: z.enum(['MIT', 'Apache-2.0', 'GPL-3.0', 'BSD-3-Clause', 'ISC']).optional(),
+    })
+    .describe(
+      'Claude agent configuration schema. Defines agent metadata including name, description, author, version (semver), tags (max 20), GitHub URL, documentation URL, and open-source license.'
+    ),
 
   // MCP server validation
-  mcp: z.object({
-    name: baseSchemas.safeString(2, 200),
-    description: baseSchemas.safeString(10, 2000),
-    slug: baseSchemas.slug,
-    npmPackage: z
-      .string()
-      .regex(/^[@a-z0-9][@a-z0-9-_]*\/[a-z0-9-_]+$|^[a-z0-9-_]+$/, 'Invalid npm package name')
-      .optional(),
-    githubUrl: baseSchemas.githubUrl.optional(),
-    capabilities: z
-      .array(z.enum(['tools', 'resources', 'prompts']))
-      .min(1, 'At least one capability required'),
-    category: z.enum(['productivity', 'development', 'ai', 'utilities', 'integration']),
-  }),
+  mcp: z
+    .object({
+      name: baseSchemas.safeString(2, 200),
+      description: baseSchemas.safeString(10, 2000),
+      slug: baseSchemas.slug,
+      npmPackage: z
+        .string()
+        .regex(/^[@a-z0-9][@a-z0-9-_]*\/[a-z0-9-_]+$|^[a-z0-9-_]+$/, 'Invalid npm package name')
+        .optional(),
+      githubUrl: baseSchemas.githubUrl.optional(),
+      capabilities: z
+        .array(z.enum(['tools', 'resources', 'prompts']))
+        .min(1, 'At least one capability required'),
+      category: z.enum(['productivity', 'development', 'ai', 'utilities', 'integration']),
+    })
+    .describe(
+      'Model Context Protocol (MCP) server configuration schema. Defines MCP server metadata including name, description, npm package (scoped or unscoped), GitHub URL, capabilities (tools/resources/prompts - min 1), and category (productivity/development/ai/utilities/integration).'
+    ),
 
   // Rule validation
-  rule: z.object({
-    name: baseSchemas.safeString(2, 200),
-    description: baseSchemas.safeString(10, 1000),
-    slug: baseSchemas.slug,
-    category: z.enum(['formatting', 'behavior', 'security', 'performance', 'accessibility']),
-    priority: z.enum(['low', 'medium', 'high', 'critical']),
-    applicability: z.array(z.enum(['chat', 'code', 'analysis', 'writing'])).min(1),
-  }),
+  rule: z
+    .object({
+      name: baseSchemas.safeString(2, 200),
+      description: baseSchemas.safeString(10, 1000),
+      slug: baseSchemas.slug,
+      category: z.enum(['formatting', 'behavior', 'security', 'performance', 'accessibility']),
+      priority: z.enum(['low', 'medium', 'high', 'critical']),
+      applicability: z.array(z.enum(['chat', 'code', 'analysis', 'writing'])).min(1),
+    })
+    .describe(
+      'Claude custom rules schema. Defines behavioral rules with name, description, category (formatting/behavior/security/performance/accessibility), priority level (low/medium/high/critical), and applicability contexts (chat/code/analysis/writing - min 1).'
+    ),
 
   // Command validation
-  command: z.object({
-    name: baseSchemas.safeString(2, 200),
-    description: baseSchemas.safeString(10, 1000),
-    slug: baseSchemas.slug,
-    syntax: baseSchemas.safeString(1, 500),
-    platform: z.enum(['claude', 'cursor', 'vscode', 'terminal', 'universal']),
-    category: z.enum(['navigation', 'editing', 'analysis', 'generation', 'utility']),
-  }),
+  command: z
+    .object({
+      name: baseSchemas.safeString(2, 200),
+      description: baseSchemas.safeString(10, 1000),
+      slug: baseSchemas.slug,
+      syntax: baseSchemas.safeString(1, 500),
+      platform: z.enum(['claude', 'cursor', 'vscode', 'terminal', 'universal']),
+      category: z.enum(['navigation', 'editing', 'analysis', 'generation', 'utility']),
+    })
+    .describe(
+      'Claude slash commands schema. Defines custom commands with name, description, syntax (max 500 chars), target platform (claude/cursor/vscode/terminal/universal), and category (navigation/editing/analysis/generation/utility).'
+    ),
 
   // Hook validation
-  hook: z.object({
-    name: baseSchemas.safeString(2, 200),
-    description: baseSchemas.safeString(10, 1000),
-    slug: baseSchemas.slug,
-    event: z.enum(['pre-request', 'post-request', 'pre-response', 'post-response', 'error']),
-    language: z.enum(['javascript', 'typescript', 'python', 'bash', 'powershell']),
-    framework: z.enum(['express', 'fastapi', 'django', 'nextjs', 'generic']).optional(),
-  }),
+  hook: z
+    .object({
+      name: baseSchemas.safeString(2, 200),
+      description: baseSchemas.safeString(10, 1000),
+      slug: baseSchemas.slug,
+      event: z.enum(['pre-request', 'post-request', 'pre-response', 'post-response', 'error']),
+      language: z.enum(['javascript', 'typescript', 'python', 'bash', 'powershell']),
+      framework: z.enum(['express', 'fastapi', 'django', 'nextjs', 'generic']).optional(),
+    })
+    .describe(
+      'Claude lifecycle hooks schema. Defines event-driven hooks with name, description, trigger event (pre-request/post-request/pre-response/post-response/error), implementation language (javascript/typescript/python/bash/powershell), and optional framework (express/fastapi/django/nextjs/generic).'
+    ),
+
+  // Statusline validation
+  statusline: z
+    .object({
+      name: baseSchemas.safeString(2, 200),
+      description: baseSchemas.safeString(10, 1000),
+      slug: baseSchemas.slug,
+      statuslineType: z.enum(['minimal', 'powerline', 'custom', 'rich', 'simple']),
+      format: z.enum(['bash', 'python', 'javascript']).optional(),
+      refreshInterval: z.number().int().min(100).max(60000).optional(),
+      position: z.enum(['left', 'center', 'right']).optional(),
+      colorScheme: baseSchemas.safeString(1, 100).optional(),
+    })
+    .describe(
+      'Claude Code statusline configurations schema. Defines CLI status bar customizations with name, description, statusline type (minimal/powerline/custom/rich/simple), script format (bash/python/javascript), refresh interval (100ms-60s), position (left/center/right), and optional color scheme.'
+    ),
 } as const;
 
 /**

@@ -64,8 +64,8 @@ jobs:
           # Check required fields based on category
           category=$(jq -r '.category' "$file" 2>/dev/null || echo "")
 
-          # For hooks, agents, rules, and commands, check slug instead of title
-          if [[ "$category" == "hooks" || "$category" == "agents" || "$category" == "rules" || "$category" == "commands" ]]; then
+          # For hooks, agents, rules, commands, and statuslines, check slug instead of title
+          if [[ "$category" == "hooks" || "$category" == "agents" || "$category" == "rules" || "$category" == "commands" || "$category" == "statuslines" ]]; then
             if ! jq -e '.slug' "$file" > /dev/null; then
               echo "ERROR: Missing slug in $category file $file"
               exit 1
@@ -95,7 +95,7 @@ jobs:
           fi
 
           # Validate category is valid
-          if [[ ! "$category" =~ ^(agents|mcp|rules|commands|hooks|guides|tutorials|comparisons|workflows|use-cases|troubleshooting|categories|collections)$ ]]; then
+          if [[ ! "$category" =~ ^(agents|mcp|rules|commands|hooks|statuslines|guides|tutorials|comparisons|workflows|use-cases|troubleshooting|categories|collections)$ ]]; then
             echo "ERROR: Invalid category '$category' in $file"
             exit 1
           fi
@@ -134,6 +134,9 @@ jobs:
             } else if (file.includes('/rules/')) {
               labels.add('rule');
               contentTypes.add('rule');
+            } else if (file.includes('/statuslines/')) {
+              labels.add('statusline');
+              contentTypes.add('statusline');
             } else if (file.includes('/guides/')) {
               labels.add('guide');
               contentTypes.add('guide');
@@ -152,6 +155,7 @@ jobs:
                     'hooks': 'hook',
                     'commands': 'command',
                     'rules': 'rule',
+                    'statuslines': 'statusline',
                     'guides': 'guide'
                   };
 

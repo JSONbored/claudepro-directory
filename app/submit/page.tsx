@@ -222,6 +222,7 @@ export default function SubmitPage() {
                     <option value="rules">Rule</option>
                     <option value="commands">Command</option>
                     <option value="hooks">Hook</option>
+                    <option value="statuslines">Statusline</option>
                   </select>
                   {errors.type && (
                     <p className={`${UI_CLASSES.TEXT_SM} text-red-500`}>{errors.type}</p>

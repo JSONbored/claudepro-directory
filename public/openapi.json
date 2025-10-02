@@ -1,0 +1,1643 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ClaudePro Directory API",
+    "version": "1.0.0",
+    "description": "# ClaudePro Directory API Documentation\n\nA comprehensive API for accessing Claude configurations including agents, MCP servers, rules, commands, hooks, and statuslines.\n\n## Features\n\n- **Content Discovery**: Browse and search Claude configurations by category\n- **Full-Text Search**: Search across all content with advanced filtering\n- **Trending Analytics**: Discover popular and trending content\n- **Performance Optimized**: Redis-backed caching with ISR revalidation\n- **Type-Safe**: Full TypeScript support with Zod validation\n\n## Base URL\n\n- **Production**: `https://claudepro.directory`\n- **API Base Path**: `/api`\n\n## Rate Limiting\n\nAll endpoints are rate-limited to prevent abuse:\n- **Authenticated requests**: 1000 requests/hour\n- **Anonymous requests**: 100 requests/hour\n\n## Content Categories\n\nThe API supports the following content categories:\n\n- `agents`: Claude agent configurations\n- `mcp`: Model Context Protocol (MCP) servers\n- `rules`: Custom behavior rules for Claude\n- `commands`: Slash commands for Claude Code CLI\n- `hooks`: Lifecycle hooks for Claude integrations\n- `statuslines`: Status bar customizations for Claude Code CLI\n\n## Response Format\n\nAll responses follow a consistent JSON format:\n\n```json\n{\n  \"success\": true,\n  \"data\": { ... },\n  \"timestamp\": \"2025-01-15T10:30:00.000Z\"\n}\n```\n\nError responses include detailed error information:\n\n```json\n{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"ERROR_CODE\",\n    \"message\": \"Human-readable error message\",\n    \"details\": { ... }\n  },\n  \"timestamp\": \"2025-01-15T10:30:00.000Z\"\n}\n```",
+    "contact": {
+      "name": "ClaudePro Directory",
+      "url": "https://claudepro.directory",
+      "email": "support@claudepro.directory"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://claudepro.directory",
+      "description": "Production server"
+    },
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Content",
+      "description": "Endpoints for browsing and retrieving content by category"
+    },
+    {
+      "name": "Search",
+      "description": "Full-text search across all content categories"
+    },
+    {
+      "name": "Analytics",
+      "description": "Trending content and analytics endpoints"
+    }
+  ],
+  "security": [],
+  "components": {
+    "schemas": {},
+    "parameters": {}
+  },
+  "paths": {
+    "/api/{category}.json": {
+      "get": {
+        "summary": "Get content items by category",
+        "description": "Retrieve a paginated list of content items for a specific category (agents, mcp, rules, commands, hooks, statuslines)",
+        "tags": [
+          "Content"
+        ],
+        "operationId": "getContentByCategory",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "agents",
+                "mcp",
+                "rules",
+                "commands",
+                "hooks",
+                "statuslines"
+              ],
+              "description": "Content category identifier",
+              "example": "agents"
+            },
+            "required": true,
+            "description": "Content category identifier",
+            "name": "category",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1,
+              "description": "Page number for pagination (1-based)",
+              "example": 1
+            },
+            "required": false,
+            "description": "Page number for pagination (1-based)",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 50,
+              "description": "Number of items per page",
+              "example": 50
+            },
+            "required": false,
+            "description": "Number of items per page",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with content list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ],
+                      "description": "Request succeeded"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {},
+                          "description": "Array of content items"
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Total number of items",
+                          "example": 42
+                        },
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 10000,
+                          "default": 1,
+                          "description": "Page number for pagination (1-based)",
+                          "example": 1
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 1000,
+                          "default": 50,
+                          "description": "Number of items per page",
+                          "example": 50
+                        },
+                        "category": {
+                          "type": "string",
+                          "enum": [
+                            "agents",
+                            "mcp",
+                            "rules",
+                            "commands",
+                            "hooks",
+                            "statuslines"
+                          ],
+                          "description": "Content category identifier",
+                          "example": "agents"
+                        }
+                      },
+                      "required": [
+                        "items",
+                        "total",
+                        "category"
+                      ]
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "Request failed"
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "description": "Error code",
+                          "example": "VALIDATION_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Error message",
+                          "example": "Invalid category parameter"
+                        },
+                        "details": {
+                          "description": "Optional error details"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ]
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Category not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "Request failed"
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "description": "Error code",
+                          "example": "VALIDATION_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Error message",
+                          "example": "Invalid category parameter"
+                        },
+                        "details": {
+                          "description": "Optional error details"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ]
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/{category}/{slug}.json": {
+      "get": {
+        "summary": "Get content item by slug",
+        "description": "Retrieve full details for a single content item by category and slug identifier",
+        "tags": [
+          "Content"
+        ],
+        "operationId": "getContentBySlug",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "agents",
+                "mcp",
+                "rules",
+                "commands",
+                "hooks",
+                "statuslines"
+              ],
+              "description": "Content category identifier",
+              "example": "agents"
+            },
+            "required": true,
+            "description": "Content category identifier",
+            "name": "category",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+              "description": "URL-safe slug identifier",
+              "example": "my-custom-agent"
+            },
+            "required": true,
+            "description": "URL-safe slug identifier",
+            "name": "slug",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with content details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ],
+                      "description": "Request succeeded"
+                    },
+                    "data": {
+                      "description": "Content item with full details"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "Request failed"
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "description": "Error code",
+                          "example": "VALIDATION_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Error message",
+                          "example": "Invalid category parameter"
+                        },
+                        "details": {
+                          "description": "Optional error details"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ]
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Content item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "Request failed"
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "description": "Error code",
+                          "example": "VALIDATION_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Error message",
+                          "example": "Invalid category parameter"
+                        },
+                        "details": {
+                          "description": "Optional error details"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ]
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/search.json": {
+      "get": {
+        "summary": "Search all content",
+        "description": "Full-text search across all content categories with filtering, sorting, and pagination",
+        "tags": [
+          "Search"
+        ],
+        "operationId": "searchContent",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 200,
+              "description": "Search query string (max 200 chars)",
+              "example": "productivity agent"
+            },
+            "required": false,
+            "description": "Search query string (max 200 chars)",
+            "name": "q",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "agents",
+                "mcp",
+                "rules",
+                "commands",
+                "hooks",
+                "statuslines"
+              ],
+              "description": "Content category identifier",
+              "example": "agents"
+            },
+            "required": false,
+            "description": "Content category identifier",
+            "name": "category",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1,
+              "description": "Page number for pagination (1-based)",
+              "example": 1
+            },
+            "required": false,
+            "description": "Page number for pagination (1-based)",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 50,
+              "description": "Number of items per page",
+              "example": 50
+            },
+            "required": false,
+            "description": "Number of items per page",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "relevance",
+                "date",
+                "name",
+                "popularity"
+              ],
+              "default": "relevance",
+              "description": "Field to sort results by",
+              "example": "relevance"
+            },
+            "required": false,
+            "description": "Field to sort results by",
+            "name": "sortBy",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc",
+              "description": "Sort direction",
+              "example": "desc"
+            },
+            "required": false,
+            "description": "Sort direction",
+            "name": "sortOrder",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful search response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ],
+                      "description": "Request succeeded"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "results": {
+                          "type": "array",
+                          "items": {},
+                          "description": "Array of search results"
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Total matching results",
+                          "example": 15
+                        },
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 10000,
+                          "default": 1,
+                          "description": "Page number for pagination (1-based)",
+                          "example": 1
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 1000,
+                          "default": 50,
+                          "description": "Number of items per page",
+                          "example": 50
+                        },
+                        "query": {
+                          "type": "string",
+                          "maxLength": 200,
+                          "description": "Search query string (max 200 chars)",
+                          "example": "productivity agent"
+                        },
+                        "filters": {
+                          "type": "object",
+                          "properties": {},
+                          "additionalProperties": {},
+                          "description": "Applied filters"
+                        }
+                      },
+                      "required": [
+                        "results",
+                        "total"
+                      ]
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid search parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "Request failed"
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "description": "Error code",
+                          "example": "VALIDATION_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Error message",
+                          "example": "Invalid category parameter"
+                        },
+                        "details": {
+                          "description": "Optional error details"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ]
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/trending.json": {
+      "get": {
+        "summary": "Get trending content",
+        "description": "Retrieve currently trending content items based on view counts and engagement metrics",
+        "tags": [
+          "Analytics"
+        ],
+        "operationId": "getTrendingContent",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "trending",
+                "popular",
+                "recent"
+              ],
+              "default": "trending",
+              "description": "Trending algorithm to use",
+              "example": "trending"
+            },
+            "required": false,
+            "description": "Trending algorithm to use",
+            "name": "algorithm",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "day",
+                "week",
+                "month",
+                "all"
+              ],
+              "default": "week",
+              "description": "Time period for trending calculation",
+              "example": "week"
+            },
+            "required": false,
+            "description": "Time period for trending calculation",
+            "name": "period",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 20,
+              "description": "Number of items per page",
+              "example": 50
+            },
+            "required": false,
+            "description": "Number of items per page",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful trending response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ],
+                      "description": "Request succeeded"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "trending": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "category": {
+                                "type": "string",
+                                "enum": [
+                                  "agents",
+                                  "mcp",
+                                  "rules",
+                                  "commands",
+                                  "hooks",
+                                  "statuslines"
+                                ],
+                                "description": "Content category identifier",
+                                "example": "agents"
+                              },
+                              "slug": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 100,
+                                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                                "description": "URL-safe slug identifier",
+                                "example": "my-custom-agent"
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "Content title",
+                                "example": "Awesome Agent"
+                              },
+                              "views": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "Total views",
+                                "example": 1234
+                              },
+                              "viewsToday": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "Views in last 24h",
+                                "example": 42
+                              },
+                              "viewsThisWeek": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "Views in last 7 days",
+                                "example": 156
+                              }
+                            },
+                            "required": [
+                              "category",
+                              "slug",
+                              "title",
+                              "views"
+                            ]
+                          },
+                          "description": "Trending content items"
+                        },
+                        "algorithm": {
+                          "type": "string",
+                          "enum": [
+                            "trending",
+                            "popular",
+                            "recent"
+                          ],
+                          "description": "Algorithm used",
+                          "example": "trending"
+                        },
+                        "period": {
+                          "type": "string",
+                          "enum": [
+                            "day",
+                            "week",
+                            "month",
+                            "all"
+                          ],
+                          "description": "Time period",
+                          "example": "week"
+                        }
+                      },
+                      "required": [
+                        "trending",
+                        "algorithm"
+                      ]
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "Request failed"
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "description": "Error code",
+                          "example": "VALIDATION_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Error message",
+                          "example": "Invalid category parameter"
+                        },
+                        "details": {
+                          "description": "Optional error details"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ]
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cache/warm": {
+      "post": {
+        "summary": "Trigger cache warming",
+        "description": "Manually trigger cache warming to pre-load popular content into cache. Rate limited to 10 requests per hour.",
+        "tags": [
+          "Cache"
+        ],
+        "operationId": "triggerCacheWarming",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "types": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "agents",
+                        "mcp",
+                        "rules",
+                        "commands",
+                        "hooks",
+                        "statuslines"
+                      ]
+                    },
+                    "description": "Array of content types to warm cache for (omit for all types)",
+                    "example": [
+                      "agents",
+                      "mcp"
+                    ]
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Force cache refresh even if cache is warm",
+                    "example": false
+                  }
+                },
+                "description": "Optional parameters for cache warming"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cache warming triggered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether cache warming succeeded"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Status message",
+                      "example": "Cache warming completed successfully"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "Request failed"
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "description": "Error code",
+                          "example": "VALIDATION_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Error message",
+                          "example": "Invalid category parameter"
+                        },
+                        "details": {
+                          "description": "Optional error details"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ]
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - cache warming already in progress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether cache warming succeeded"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Status message",
+                      "example": "Cache warming completed successfully"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get cache warming status",
+        "description": "Retrieve current cache warming status and statistics",
+        "tags": [
+          "Cache"
+        ],
+        "operationId": "getCacheStatus",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 50,
+              "description": "Number of items per page",
+              "example": 50
+            },
+            "required": false,
+            "description": "Number of items per page",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cache status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "Current cache status",
+                      "example": "idle"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Status message"
+                    },
+                    "currentTime": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    },
+                    "validated": {
+                      "type": "boolean",
+                      "description": "Whether response was validated"
+                    }
+                  },
+                  "required": [
+                    "currentTime",
+                    "validated"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "Request failed"
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "description": "Error code",
+                          "example": "VALIDATION_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Error message",
+                          "example": "Invalid category parameter"
+                        },
+                        "details": {
+                          "description": "Optional error details"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ]
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/guides/trending": {
+      "get": {
+        "summary": "Get trending guides",
+        "description": "Retrieve currently trending guides filtered by category with view counts and rankings",
+        "tags": [
+          "Analytics"
+        ],
+        "operationId": "getTrendingGuides",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "guides",
+                "tutorials",
+                "use-cases",
+                "workflows",
+                "comparisons"
+              ],
+              "description": "Content category filter for trending guides",
+              "example": "guides"
+            },
+            "required": false,
+            "description": "Content category filter for trending guides",
+            "name": "category",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10,
+              "description": "Maximum number of trending items to return (1-50)",
+              "example": 10
+            },
+            "required": false,
+            "description": "Maximum number of trending items to return (1-50)",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful trending guides response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "guides": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "slug": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                            "description": "URL-safe slug identifier",
+                            "example": "my-custom-agent"
+                          },
+                          "title": {
+                            "type": "string",
+                            "description": "Guide title",
+                            "example": "Getting Started with Claude"
+                          },
+                          "url": {
+                            "type": "string",
+                            "description": "Relative URL to guide",
+                            "example": "/guides/guides/getting-started"
+                          },
+                          "views": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "Total views",
+                            "example": 542
+                          },
+                          "rank": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "description": "Trending rank position",
+                            "example": 1
+                          }
+                        },
+                        "required": [
+                          "slug",
+                          "title",
+                          "url",
+                          "views",
+                          "rank"
+                        ]
+                      },
+                      "description": "Trending guides list"
+                    },
+                    "category": {
+                      "type": "string",
+                      "description": "Category filter applied",
+                      "example": "guides"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Number of results returned",
+                      "example": 10
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "guides",
+                    "category",
+                    "count",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "Request failed"
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "description": "Error code",
+                          "example": "VALIDATION_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Error message",
+                          "example": "Invalid category parameter"
+                        },
+                        "details": {
+                          "description": "Optional error details"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ]
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/all-configurations.json": {
+      "get": {
+        "summary": "Get all configurations",
+        "description": "Retrieve all content configurations across all categories with optional streaming support for large datasets. Supports both standard JSON and NDJSON formats.",
+        "tags": [
+          "Content"
+        ],
+        "operationId": "getAllConfigurations",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "false",
+              "description": "Enable streaming response for large datasets",
+              "example": "false"
+            },
+            "required": false,
+            "description": "Enable streaming response for large datasets",
+            "name": "stream",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "ndjson"
+              ],
+              "default": "json",
+              "description": "Response format: standard JSON or newline-delimited JSON (NDJSON)",
+              "example": "json"
+            },
+            "required": false,
+            "description": "Response format: standard JSON or newline-delimited JSON (NDJSON)",
+            "name": "format",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "number",
+              "minimum": 10,
+              "maximum": 100,
+              "default": 50,
+              "description": "Number of items per batch in streaming mode (10-100)",
+              "example": 50
+            },
+            "required": false,
+            "description": "Number of items per batch in streaming mode (10-100)",
+            "name": "batchSize",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1,
+              "description": "Page number for pagination (1-based)",
+              "example": 1
+            },
+            "required": false,
+            "description": "Page number for pagination (1-based)",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 50,
+              "description": "Number of items per page",
+              "example": 50
+            },
+            "required": false,
+            "description": "Number of items per page",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with all configurations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "@context": {
+                      "type": "string",
+                      "description": "JSON-LD context",
+                      "example": "https://schema.org"
+                    },
+                    "@type": {
+                      "type": "string",
+                      "description": "Schema.org type",
+                      "example": "Dataset"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Dataset name"
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Dataset description"
+                    },
+                    "license": {
+                      "type": "string",
+                      "description": "License URL"
+                    },
+                    "lastUpdated": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp"
+                    },
+                    "statistics": {
+                      "type": "object",
+                      "properties": {
+                        "totalConfigurations": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Total number of configurations"
+                        },
+                        "agents": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Number of agents"
+                        },
+                        "mcp": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Number of MCP servers"
+                        },
+                        "rules": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Number of rules"
+                        },
+                        "commands": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Number of commands"
+                        },
+                        "hooks": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Number of hooks"
+                        },
+                        "statuslines": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Number of statuslines"
+                        }
+                      },
+                      "required": [
+                        "totalConfigurations",
+                        "agents",
+                        "mcp",
+                        "rules",
+                        "commands",
+                        "hooks",
+                        "statuslines"
+                      ]
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "Configuration data by category"
+                    },
+                    "endpoints": {
+                      "type": "object",
+                      "properties": {},
+                      "additionalProperties": {},
+                      "description": "API endpoints by category"
+                    }
+                  },
+                  "required": [
+                    "@context",
+                    "@type",
+                    "name",
+                    "description",
+                    "license",
+                    "lastUpdated",
+                    "statistics",
+                    "data",
+                    "endpoints"
+                  ]
+                }
+              },
+              "application/x-ndjson": {
+                "schema": {
+                  "type": "string",
+                  "description": "Newline-delimited JSON stream of configuration data"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ],
+                      "description": "Request failed"
+                    },
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "description": "Error code",
+                          "example": "VALIDATION_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "description": "Error message",
+                          "example": "Invalid category parameter"
+                        },
+                        "details": {
+                          "description": "Optional error details"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ]
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "description": "ISO 8601 timestamp",
+                      "example": "2025-01-15T10:30:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "error",
+                    "timestamp"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}

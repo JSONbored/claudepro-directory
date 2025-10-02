@@ -29,7 +29,7 @@ export const lazyContentLoaders = {
  * - Promise deduplication to prevent concurrent loads
  * - Graceful error handling with fallback value
  *
- * @template T - Type of data being loaded
+ * @typeParam T - Type of data being loaded
  * @param loader - Async function that loads the data
  * @param fallback - Fallback value if load fails
  * @returns Memoized loader function

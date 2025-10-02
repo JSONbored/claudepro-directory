@@ -6,7 +6,7 @@ import { logger } from '@/lib/logger';
 /**
  * Options for configuring the localStorage hook behavior
  *
- * @template T - Type of the stored value
+ * @typeParam T - Type of the stored value
  * @property {T} [defaultValue] - Default value if no stored value exists
  * @property {boolean} [syncAcrossTabs=true] - Whether to sync value across browser tabs
  * @property {(value: T) => string} [serialize] - Custom serialization function
@@ -22,7 +22,7 @@ export interface UseLocalStorageOptions<T> {
 /**
  * Return type for useLocalStorage hook
  *
- * @template T - Type of the stored value
+ * @typeParam T - Type of the stored value
  * @property {T} value - Current stored value
  * @property {(value: T | ((prev: T) => T)) => void} setValue - Function to update stored value
  * @property {() => void} removeValue - Function to remove stored value
@@ -42,7 +42,7 @@ export interface UseLocalStorageReturn<T> {
  * deserialization, and synchronization across browser tabs. It handles SSR gracefully
  * and includes comprehensive error handling.
  *
- * @template T - Type of the value to store
+ * @typeParam T - Type of the value to store
  * @param {string} key - localStorage key to use for storage
  * @param {UseLocalStorageOptions<T>} [options] - Configuration options
  * @param {T} [options.defaultValue] - Default value if no stored value exists

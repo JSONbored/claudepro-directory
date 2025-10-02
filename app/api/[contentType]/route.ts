@@ -78,7 +78,7 @@ async function handleGET(
     const contentCategory = contentType.replace('.json', '');
 
     const responseData = {
-      [contentCategory]: data.map((item) => ({
+      [contentCategory]: data.map((item: { slug: string; [key: string]: unknown }) => ({
         ...item,
         type,
         url: `https://claudepro.directory/${contentCategory}/${item.slug}`,

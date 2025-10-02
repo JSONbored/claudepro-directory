@@ -25,28 +25,40 @@ import { examplesArray } from '@/lib/schemas/primitives/base-arrays';
  * - Inherits configuration from baseConfigurationSchema
  * - Adds command-specific fields
  */
-export const commandContentSchema = z.object({
-  ...baseContentMetadataSchema.shape,
-  category: z.literal('commands'),
+export const commandContentSchema = z
+  .object({
+    ...baseContentMetadataSchema.shape,
+    category: z.literal('commands').describe('Content category literal identifier: "commands"'),
 
-  // Command-specific fields
-  name: z.string().optional(), // display name for components
-  configuration: baseConfigurationSchema.optional(),
+    // Command-specific fields
+    name: z
+      .string()
+      .optional()
+      .describe('Optional display name for the command (used in UI components)'), // display name for components
+    configuration: baseConfigurationSchema
+      .optional()
+      .describe('Optional AI model configuration settings (temperature, maxTokens, systemPrompt)'),
 
-  // GitHub URL with validation
-  githubUrl: z
-    .string()
-    .url()
-    .refine((url) => url.includes('github.com'), { message: 'Must be a GitHub URL' })
-    .optional(),
+    // GitHub URL with validation
+    githubUrl: z
+      .string()
+      .url()
+      .refine((url) => url.includes('github.com'), { message: 'Must be a GitHub URL' })
+      .optional()
+      .describe('Optional GitHub repository URL for command source code'),
 
-  // Installation and setup
-  installation: baseInstallationSchema.optional(),
+    // Installation and setup
+    installation: baseInstallationSchema
+      .optional()
+      .describe('Optional platform-specific installation instructions'),
 
-  // Examples
-  examples: examplesArray.optional(),
+    // Examples
+    examples: examplesArray.optional().describe('Optional usage examples for the command'),
 
-  // argumentTypes and frontmatterOptions removed - unused fields
-});
+    // argumentTypes and frontmatterOptions removed - unused fields
+  })
+  .describe(
+    'Command content schema for Claude Code slash commands. Inherits base content metadata and adds command-specific fields including configuration, installation, and examples.'
+  );
 
 export type CommandContent = z.infer<typeof commandContentSchema>;

@@ -28,6 +28,7 @@ const CONTENT_ROUTES = [
   '/rules',
   '/commands',
   '/hooks',
+  '/statuslines',
   '/guides'
 ];
 
@@ -102,7 +103,7 @@ self.addEventListener('fetch', (event) => {
     // Static assets: Cache first
     event.respondWith(cacheFirstStrategy(request, STATIC_CACHE));
   } else if (CONTENT_ROUTES.some(route => url.pathname.startsWith(route)) ||
-             url.pathname.match(/\/(agents|mcp|rules|commands|hooks|guides)\/[^/]+$/)) {
+             url.pathname.match(/\/(agents|mcp|rules|commands|hooks|statuslines|guides)\/[^/]+$/)) {
     // Content pages: Stale while revalidate for fresh content
     event.respondWith(staleWhileRevalidateStrategy(request, DYNAMIC_CACHE));
   } else if (url.pathname === '/' || request.destination === 'document') {

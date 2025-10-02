@@ -24,11 +24,12 @@
   },
   "scripts": {
     "dev": "npm run build:content && next dev --turbopack",
-    "build": "npm run build:content && npm run generate:sitemap && npm run generate:static-apis && next build --turbopack",
+    "build": "npm run build:content && npm run generate:sitemap && npm run generate:static-apis && npm run generate:openapi && next build --turbopack",
     "build:analyze": "TURBOPACK_STATS=1 npm run build",
     "build:content": "tsx scripts/build-content.ts",
     "generate:sitemap": "tsx scripts/generate-sitemap.ts",
     "generate:static-apis": "tsx scripts/generate-static-apis.ts",
+    "generate:openapi": "tsx scripts/generate-openapi.ts",
     "start": "next start",
     "type-check": "tsc --noEmit",
     "lint": "ultracite check",

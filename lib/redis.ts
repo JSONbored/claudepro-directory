@@ -204,7 +204,7 @@ export const statsRedis = {
   cleanupOldTrending: () =>
     redis(
       async (c) => {
-        const cats = ['agents', 'mcp', 'rules', 'commands', 'hooks'] as const;
+        const cats = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'] as const;
         await Promise.all(
           cats.map((cat) =>
             c.zremrangebyscore(

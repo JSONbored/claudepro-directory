@@ -10,24 +10,27 @@ export const revalidate = 3600;
 // Server component that loads data
 export default async function HomePage() {
   // Load all content server-side for better SEO and initial page load
-  const [rules, mcp, agents, commands, hooks] = await Promise.all([
+  const [rules, mcp, agents, commands, hooks, statuslines] = await Promise.all([
     lazyContentLoaders.rules(),
     lazyContentLoaders.mcp(),
     lazyContentLoaders.agents(),
     lazyContentLoaders.commands(),
     lazyContentLoaders.hooks(),
+    lazyContentLoaders.statuslines(),
   ]);
 
   // Create stable allConfigs array to prevent infinite re-renders
-  const allConfigs = [...rules, ...mcp, ...agents, ...commands, ...hooks];
+  const allConfigs = [...rules, ...mcp, ...agents, ...commands, ...hooks, ...statuslines];
 
   // Transform data using transform functions to convert readonly arrays to mutable
+  // Metadata arrays contain the core fields needed for display
   const initialData = transformForHomePage({
     rules,
     mcp,
     agents,
     commands,
     hooks,
+    statuslines,
     allConfigs,
   });
 
@@ -75,6 +78,10 @@ export default async function HomePage() {
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Sparkles className="h-4 w-4" />
                 {hooks.length} Automation Hooks
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Sparkles className="h-4 w-4" />
+                {statuslines.length} Statuslines
               </div>
             </div>
           </div>
