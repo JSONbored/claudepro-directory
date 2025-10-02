@@ -159,6 +159,16 @@ export const Navigation = () => {
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem>
                   <Link
+                    href="/api-docs"
+                    className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
+                  >
+                    <div>API Docs</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>REST API documentation</div>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem>
+                  <Link
                     href="/community"
                     className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
                   >
@@ -351,6 +361,15 @@ export const Navigation = () => {
                         className={`${UI_CLASSES.PT_6} mt-4 ${UI_CLASSES.BORDER_T} border-border/30`}
                       >
                         <div className={UI_CLASSES.SPACE_Y_3}>
+                          <NavLink
+                            href="/api-docs"
+                            isActive={isActive}
+                            onClick={() => setIsOpen(false)}
+                            className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                          >
+                            API Docs
+                          </NavLink>
+
                           <NavLink
                             href="/community"
                             isActive={isActive}

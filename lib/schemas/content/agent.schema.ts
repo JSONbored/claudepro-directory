@@ -37,9 +37,10 @@ export const agentContentSchema = z
       .optional()
       .describe('Optional AI model configuration settings (temperature, maxTokens, systemPrompt)'),
     installation: z
-      .record(z.string(), z.any())
+      .object({})
+      .passthrough()
       .optional()
-      .describe('Optional complex installation object with platform-specific setup instructions'), // Complex installation object
+      .describe('Optional complex installation object with platform-specific setup instructions'), // Complex installation object - allows any properties while maintaining type safety
   })
   .describe(
     'Agent content schema for AI assistant configurations. Inherits base content metadata and adds agent-specific fields including AI model settings and installation instructions.'

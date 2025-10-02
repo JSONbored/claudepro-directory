@@ -24,9 +24,10 @@
   },
   "scripts": {
     "dev": "npm run build:content && next dev --turbopack",
-    "build": "npm run build:content && npm run generate:sitemap && npm run generate:static-apis && npm run generate:openapi && next build --turbopack",
+    "build": "npm run build:content && npm run generate:sitemap && npm run generate:static-apis && npm run generate:openapi && npm run build:api-docs && next build --turbopack",
     "build:analyze": "TURBOPACK_STATS=1 npm run build",
     "build:content": "tsx scripts/build-content.ts",
+    "build:api-docs": "redocly build-docs public/openapi.json --output=public/api-docs-static.html",
     "generate:sitemap": "tsx scripts/generate-sitemap.ts",
     "generate:static-apis": "tsx scripts/generate-static-apis.ts",
     "generate:openapi": "tsx scripts/generate-openapi.ts",
@@ -44,6 +45,7 @@
   },
   "dependencies": {
     "@arcjet/next": "^1.0.0-beta.12",
+    "@asteasolutions/zod-to-openapi": "^8.1.0",
     "@nosecone/next": "^1.0.0-beta.12",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -89,9 +91,9 @@
     "zod": "^4.1.11"
   },
   "devDependencies": {
-    "@asteasolutions/zod-to-openapi": "^8.1.0",
     "@biomejs/biome": "2.2.5",
     "@playwright/test": "^1.55.1",
+    "@redocly/cli": "^2.2.3",
     "@size-limit/preset-app": "^11.2.0",
     "knip": "^5.64.1",
     "lefthook": "^1.13.5",

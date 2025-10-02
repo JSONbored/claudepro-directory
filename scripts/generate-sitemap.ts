@@ -47,13 +47,13 @@ async function generateSitemap(): Promise<string> {
   });
 
   // Static pages
-  const staticPages = ['jobs', 'community', 'trending', 'submit', 'guides'];
+  const staticPages = ['jobs', 'community', 'trending', 'submit', 'guides', 'api-docs'];
   staticPages.forEach((page) => {
     urls.push({
       loc: `${baseUrl || ''}/${page}`,
       lastmod: new Date().toISOString().split('T')[0] || '',
       changefreq: 'weekly',
-      priority: 0.6,
+      priority: page === 'api-docs' ? 0.9 : 0.6, // High priority for API docs (AI discoverability)
     });
   });
 
@@ -124,14 +124,84 @@ ${urls
   return xml;
 }
 
+/**
+ * Generate production-optimized robots.txt with AI crawler support
+ *
+ * Modern 2025 Implementation:
+ * - Explicit allowlists for AI crawlers (GPTBot, PerplexityBot, ClaudeBot)
+ * - RFC 9727 api-catalog discovery enabled
+ * - OpenAPI 3.1.0 spec indexed
+ * - Respects crawler best practices (crawl-delay, clear directives)
+ *
+ * AI Crawler Strategy:
+ * - GPTBot (OpenAI): No JavaScript execution, needs static HTML
+ * - PerplexityBot: Own index, follows robots.txt strictly
+ * - ClaudeBot (Anthropic): Similar to GPTBot, static content only
+ *
+ * @returns Production-ready robots.txt content
+ */
 function generateRobotsTxt(): string {
   const robotsTxt = `# Robots.txt for ${APP_CONFIG.name}
 # ${APP_CONFIG.url}/robots.txt
+# Generated: ${new Date().toISOString()}
+
+# ============================================================================
+# AI CRAWLER CONFIGURATION (OpenAI GPTBot, Perplexity, Claude, etc.)
+# ============================================================================
+
+# OpenAI GPTBot - ChatGPT Search & Training Data Collection
+User-agent: GPTBot
+Allow: /
+Allow: /api-docs
+Allow: /openapi.json
+Allow: /.well-known/api-catalog
+Crawl-delay: 2
+
+# OpenAI SearchBot - ChatGPT Browse Feature
+User-agent: OAI-SearchBot
+Allow: /
+Allow: /api-docs
+Allow: /openapi.json
+Crawl-delay: 2
+
+# ChatGPT User - Direct ChatGPT User Queries
+User-agent: ChatGPT-User
+Allow: /
+Allow: /api-docs
+Allow: /openapi.json
+Crawl-delay: 2
+
+# Perplexity AI - Perplexity Search Engine
+User-agent: PerplexityBot
+Allow: /
+Allow: /api-docs
+Allow: /openapi.json
+Allow: /.well-known/api-catalog
+Crawl-delay: 2
+
+# Anthropic Claude - ClaudeBot Crawler
+User-agent: ClaudeBot
+Allow: /
+Allow: /api-docs
+Allow: /openapi.json
+Allow: /.well-known/api-catalog
+Crawl-delay: 2
+
+# Google Gemini - Google AI Crawler
+User-agent: Google-Extended
+Allow: /
+Allow: /api-docs
+Allow: /openapi.json
+Crawl-delay: 2
+
+# ============================================================================
+# GENERAL CRAWLERS (Search Engines, Social Media, etc.)
+# ============================================================================
 
 User-agent: *
 Allow: /
 
-# Important pages
+# Important content pages
 Allow: /agents*
 Allow: /mcp*
 Allow: /rules*
@@ -139,18 +209,27 @@ Allow: /commands*
 Allow: /hooks*
 Allow: /statuslines*
 Allow: /guides*
+Allow: /trending*
+Allow: /community*
+Allow: /jobs*
+
+# API Documentation & Discovery (RFC 9727, OpenAPI 3.1)
+Allow: /api-docs*
+Allow: /api-docs-static.html
+Allow: /openapi.json
+Allow: /.well-known/api-catalog
 
 # API endpoints (allow for better indexing of JSON-LD structured data)
 Allow: /api/*
 
 # Block admin areas if they exist
 Disallow: /admin*
-Disallow: /.well-known*
+Disallow: /private*
 
 # Sitemap location
 Sitemap: ${baseUrl}/sitemap.xml
 
-# Crawl delay (be respectful)
+# Crawl delay (be respectful to server resources)
 Crawl-delay: 1`;
 
   return robotsTxt;
