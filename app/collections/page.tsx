@@ -22,6 +22,7 @@
  */
 
 import type { Metadata } from 'next';
+// biome-ignore lint/nursery/noUnresolvedImports: React export exists (verified)
 import { Suspense } from 'react';
 import { CollectionCard } from '@/components/features/content/collection-card';
 import { Badge } from '@/components/ui/badge';

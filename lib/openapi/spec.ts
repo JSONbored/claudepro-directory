@@ -186,12 +186,3 @@ Error responses include detailed error information:
     security: [], // No global security requirement - applied per-endpoint
   });
 }
-
-/**
- * Export OpenAPI spec as JSON string
- * Used by build script to write public/openapi.json
- */
-export function generateOpenAPISpecJSON(): string {
-  const spec = generateOpenAPISpec();
-  return JSON.stringify(spec, null, 2);
-}

@@ -712,13 +712,3 @@ export const CacheServices = {
     enableLogging: false,
   }),
 } as const;
-
-/**
- * Create a custom cache service
- */
-export function createCacheService(config?: Partial<CacheConfig>): CacheService {
-  return new CacheService(config);
-}
-
-// Default cache service instance
-export const cacheService = CacheServices.api;

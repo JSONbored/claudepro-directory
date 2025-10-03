@@ -7,7 +7,7 @@ import { logger } from '@/lib/logger';
 import { contentCache } from '@/lib/redis';
 import type { ContentCategory } from '@/lib/schemas/shared.schema';
 
-export class CacheInvalidationService {
+class CacheInvalidationService {
   /**
    * Invalidate caches when content is updated
    */
@@ -177,12 +177,7 @@ export class CacheInvalidationService {
 }
 
 // Export singleton instance
-export const cacheInvalidation = new CacheInvalidationService();
-
-// Content update hook
-export async function onContentUpdate(category: ContentCategory, slug: string): Promise<void> {
-  await cacheInvalidation.invalidateContentCaches(category, slug);
-}
+const cacheInvalidation = new CacheInvalidationService();
 
 // Build hook
 export async function onBuildComplete(): Promise<void> {

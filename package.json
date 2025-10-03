@@ -39,8 +39,8 @@
     "prepare": "command -v lefthook >/dev/null 2>&1 && lefthook install --config .config/lefthook.yml || echo 'Skipping lefthook install (not available)'",
     "analyze:architecture": "npx skott --displayMode=webapp",
     "analyze:unused": "npx knip -c .config/knip.json",
-    "analyze:circular": "npx madge --circular --extensions ts,tsx src/ app/ components/",
-    "analyze:circular-graph": "npx madge --circular --extensions ts,tsx --image circular-deps.svg src/ app/ components/",
+    "analyze:circular": "npx madge --circular --extensions ts,tsx app/ components/ lib/",
+    "analyze:circular-graph": "npx madge --circular --extensions ts,tsx --image circular-deps.svg app/ components/ lib/",
     "analyze:all": "npm run analyze:unused && npm run analyze:circular"
   },
   "dependencies": {
@@ -67,7 +67,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.22",
-    "fumadocs-core": "^15.8.2",
     "fumadocs-openapi": "^9.4.0",
     "fumadocs-ui": "^15.8.2",
     "fuzzysort": "^3.1.0",
@@ -96,10 +95,8 @@
   "devDependencies": {
     "@biomejs/biome": "2.2.5",
     "@playwright/test": "^1.55.1",
-    "@size-limit/preset-app": "^11.2.0",
     "knip": "^5.64.1",
     "lefthook": "^1.13.5",
-    "size-limit": "^11.2.0",
     "ultracite": "^5.4.6"
   }
 }

@@ -35,7 +35,7 @@ type RedisClientConfig = z.infer<typeof redisClientConfigSchema>;
  * Redis Client Manager
  * Handles connection management, fallback logic, and operation retry
  */
-export class RedisClientManager {
+class RedisClientManager {
   private redis: Redis | null = null;
   private config: RedisClientConfig;
   private connectionStatus: RedisConnectionStatus = {
@@ -498,10 +498,3 @@ export class RedisClientManager {
 
 // Global Redis client instance
 export const redisClient = new RedisClientManager();
-
-// Health check function
-export const isRedisHealthy = async (): Promise<boolean> => {
-  return redisClient.testConnection();
-};
-
-export default redisClient;

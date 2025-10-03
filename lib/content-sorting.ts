@@ -2,7 +2,6 @@ import { z } from 'zod';
 import type { ContentItem } from '@/lib/schemas/content/content-item-union.schema';
 import { logger } from './logger';
 import { contentCache, statsRedis } from './redis';
-import { cacheCategorySchema } from './schemas/cache.schema';
 import { getDisplayTitle } from './utils';
 
 // Production-grade sort option validation schema
@@ -172,39 +171,6 @@ async function performSort<T extends ContentItem>(
   }
 
   return sortFunction(items, viewData) as T[];
-}
-
-// Generic content sorting function - consolidates all duplicate sorting logic
-export async function sortContent(
-  items: ContentItem[],
-  category: string,
-  sort: SortOption = 'trending'
-): Promise<ContentItem[]> {
-  // Validate inputs using existing schemas for production safety
-  const validatedCategory = cacheCategorySchema.parse(category);
-  const validatedSort = sortOptionSchema.parse(sort);
-  return sortContentWithCache(items, {
-    sort: validatedSort,
-    category: validatedCategory,
-    useViewData: true,
-  });
-}
-
-// Clear sorting cache for a specific category
-export async function clearSortingCache(category?: string): Promise<void> {
-  try {
-    const pattern = category != null ? `sort:*:*"category":"${category}"*` : 'sort:*';
-    await contentCache.invalidatePattern(pattern);
-  } catch (error) {
-    logger.error(
-      'Failed to clear sorting cache',
-      error instanceof Error ? error : new Error(String(error)),
-      {
-        category: category ?? 'none',
-        pattern: category != null ? `sort:*:*"category":"${category}"*` : 'sort:*',
-      }
-    );
-  }
 }
 
 // Simple synchronous sorting functions for backward compatibility

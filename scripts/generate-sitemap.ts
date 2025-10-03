@@ -1,4 +1,6 @@
+// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module
 import { existsSync, readdirSync, writeFileSync } from 'fs';
+// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module
 import { join } from 'path';
 // Import directly from metadata files for build-time usage (not runtime lazy loaders)
 import { agentsMetadata } from '../generated/agents-metadata.js';
@@ -10,7 +12,7 @@ import { rulesMetadata } from '../generated/rules-metadata.js';
 import { statuslinesMetadata } from '../generated/statuslines-metadata.js';
 import { APP_CONFIG, CONTENT_PATHS, MAIN_CONTENT_CATEGORIES } from '../lib/constants';
 import { logger } from '../lib/logger.js';
-import type { ContentItem } from '../lib/schemas/content';
+import type { ContentItem } from '../lib/schemas/content/content-item-union.schema';
 
 // Define SitemapUrl type locally
 interface SitemapUrl {

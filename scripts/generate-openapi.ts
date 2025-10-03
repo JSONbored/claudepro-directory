@@ -20,8 +20,11 @@
  *   - Atomic write (temp file + rename) for safety
  */
 
+// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module with node: prefix
 import { mkdir, writeFile } from 'node:fs/promises';
+// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module with node: prefix
 import { dirname, resolve } from 'node:path';
+// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module with node: prefix
 import { fileURLToPath } from 'node:url';
 import { generateOpenAPISpec, type OpenAPISpec } from '../lib/openapi/spec';
 

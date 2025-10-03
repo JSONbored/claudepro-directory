@@ -1,10 +1,12 @@
 #!/usr/bin/env tsx
 
+// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module
 import fs from 'fs';
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
-import { type contentItemSchema, validateContentByCategory } from '../lib/schemas/content/index';
+import type { contentItemSchema } from '../lib/schemas/content/content-item-union.schema';
 import type { ContentCategory } from '../lib/schemas/shared.schema';
+import { validateContentByCategory } from '../lib/validation/content-validator';
 
 // Schema for raw JSON data validation
 const rawJsonSchema = z.record(z.string(), z.unknown());

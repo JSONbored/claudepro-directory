@@ -88,8 +88,6 @@ import {
 } from './schemas/cache.schema';
 import { validateCacheKey } from './schemas/primitives/api-cache-primitives';
 
-const BATCH_SIZE = 50;
-
 // Generic operation executor with error logging
 const exec = async <T>(fn: () => Promise<T>, fallback: T, op: string): Promise<T> => {
   try {
@@ -322,99 +320,4 @@ export const contentCache = {
   },
 };
 
-/**
- * Optimizer utilities
- */
-export const redisOptimizer = {
-  getConnectionStats: () => ({
-    status: redisClient.getStatus(),
-    storage: redisClient.getStorageStats(),
-  }),
-
-  batchIncrements: async (ops: Array<{ key: string; increment?: number }>): Promise<number[]> => {
-    if (!ops.length) return [];
-
-    const results: number[] = [];
-    for (let i = 0; i < ops.length; i += BATCH_SIZE) {
-      const batch = ops.slice(i, i + BATCH_SIZE);
-      const batchResults = await redis(
-        async (c) => {
-          const p = c.pipeline();
-          batch.forEach((o) => {
-            const k = validateCacheKey(o.key);
-            o.increment !== 1 ? p.incrby(k, o.increment ?? 1) : p.incr(k);
-          });
-          return await p.exec();
-        },
-        () => new Array(batch.length).fill(0),
-        'batchIncrements'
-      );
-      results.push(...(batchResults as number[]));
-    }
-    return results;
-  },
-
-  /**
-   * Smart batch get - automatically chooses optimal method
-   *
-   * Uses MGET for small batches (≤50 keys) of pure string reads - fastest option
-   * Uses pipeline for larger batches - better for bulk operations
-   *
-   * @param keys - Array of Redis keys to fetch
-   * @param options - Configuration options
-   * @returns Map of key -> value (null if key doesn't exist)
-   */
-  smartBatchGet: async <T = string>(
-    keys: string[],
-    options: { preferMget?: boolean; batchSize?: number } = {}
-  ): Promise<Map<string, T | null>> => {
-    if (!keys.length) return new Map();
-
-    const { preferMget = true, batchSize = BATCH_SIZE } = options;
-    const validatedKeys = keys.map(validateCacheKey);
-
-    // Use MGET for small batches (faster, atomic)
-    if (preferMget && validatedKeys.length <= 50) {
-      return redisClient.getBatchMget<T>(validatedKeys);
-    }
-
-    // Use pipeline for larger batches (chunked for safety)
-    return redisClient.getBatchPipeline<T>(validatedKeys, { batchSize });
-  },
-
-  /**
-   * Legacy batch get using cache service
-   * @deprecated Use smartBatchGet for better performance
-   */
-  batchGet: async <T>(keys: string[]): Promise<Record<string, T | null>> => {
-    if (!keys.length) return {};
-    const vKeys = keys.map(validateCacheKey);
-    const map = await CacheServices.api.getMany<T>(vKeys);
-    return Object.fromEntries(map.entries());
-  },
-
-  cleanupExpiredKeys: async () => {
-    await Promise.all(
-      ['mdx:*', 'content:*', 'api:*', 'trending:*', 'popular:*'].map((p) =>
-        CacheServices.content.invalidatePattern(p)
-      )
-    ).catch((e) => logger.error('Cleanup failed', e instanceof Error ? e : new Error(String(e))));
-  },
-
-  getOptimizationReport: async () => {
-    const [cacheStats, connectionStats] = await Promise.all([
-      Promise.resolve(CacheServices.api.getStats()),
-      Promise.resolve(redisClient.getStorageStats()),
-    ]);
-
-    const suggestions: string[] = [];
-    if (cacheStats.cacheHitRate && cacheStats.cacheHitRate < 70)
-      suggestions.push('Increase cache TTL', 'Review key strategies');
-    suggestions.push('Use batch operations', 'Implement cache warming', 'Monitor hit rates');
-
-    return { cacheStats, connectionStats, optimizationSuggestions: suggestions };
-  },
-};
-
 export { type Redis, redisClient } from './redis/client';
-export default redisClient;

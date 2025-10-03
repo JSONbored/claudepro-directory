@@ -232,6 +232,14 @@
       "security": {
         "noDangerouslySetInnerHtml": "error",
         "noDangerouslySetInnerHtmlWithChildren": "error"
+      },
+      "nursery": {
+        "noFloatingPromises": "error",
+        "noMisusedPromises": "error",
+        "noUnresolvedImports": "error",
+        "noDuplicateDependencies": "error",
+        "noImportCycles": "error",
+        "noReactForwardRef": "warn"
       }
     }
   },
@@ -250,13 +258,7 @@
   },
   "overrides": [
     {
-      "includes": [
-        "lib/redis.ts",
-        "lib/redis/index.ts",
-        "lib/schemas/content/index.ts",
-        "lib/schemas/primitives/index.ts",
-        "lib/security/index.ts"
-      ],
+      "includes": ["lib/redis.ts"],
       "linter": {
         "rules": {
           "performance": {

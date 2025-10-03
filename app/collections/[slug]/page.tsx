@@ -24,6 +24,7 @@
 
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+// biome-ignore lint/nursery/noUnresolvedImports: React export exists (verified)
 import { Suspense } from 'react';
 import { ConfigCard } from '@/components/features/content/config-card';
 import { Badge } from '@/components/ui/badge';

@@ -1,8 +1,10 @@
+// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module
 import fs from 'fs/promises';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Script from 'next/script';
+// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module
 import path from 'path';
 import { z } from 'zod';
 import { CategoryGuidesPage } from '@/components/category-guides-page';
@@ -12,13 +14,13 @@ import { ViewTracker } from '@/components/shared/view-tracker';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import type { GuideItemWithCategory } from '@/lib/components/guide-page-factory';
 import { APP_CONFIG } from '@/lib/constants';
 import { ArrowLeft, BookOpen, Calendar, FileText, Tag, Users, Zap } from '@/lib/icons';
 import { logger } from '@/lib/logger';
 import { parseMDXFrontmatter } from '@/lib/mdx-config';
 import { contentCache } from '@/lib/redis';
 import { UI_CLASSES } from '@/lib/ui-constants';
+import type { GuideItemWithCategory } from '@/lib/utils/guide-helpers';
 
 // ISR Configuration - Revalidate weekly for SEO pages
 export const revalidate = 604800; // 7 days

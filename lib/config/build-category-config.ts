@@ -328,14 +328,6 @@ export function getAllBuildCategoryConfigs(): Array<BuildCategoryConfig> {
 }
 
 /**
- * Type guard for build category IDs
- * Security: Validates category IDs at runtime
- */
-export function isBuildCategoryId(value: unknown): value is BuildCategoryId {
-  return typeof value === 'string' && Object.hasOwn(BUILD_CATEGORY_CONFIGS, value);
-}
-
-/**
  * Extract metadata from content item
  * Modern approach: Runtime-safe field extraction with type widening
  *

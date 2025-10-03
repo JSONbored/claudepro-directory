@@ -1,3 +1,4 @@
+// biome-ignore lint/nursery/noUnresolvedImports: Next.js server exports exist (verified)
 import { type NextRequest, NextResponse } from 'next/server';
 import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
 import { handleApiError, handleValidationError } from '@/lib/error-handler';

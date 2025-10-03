@@ -1,4 +1,5 @@
 import Link from 'next/link';
+// biome-ignore lint/nursery/noUnresolvedImports: React exports exist (verified)
 import { Suspense, useId } from 'react';
 import { ContentSearchClient } from '@/components/content-search-client';
 import { Badge } from '@/components/ui/badge';

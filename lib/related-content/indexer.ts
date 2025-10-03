@@ -35,7 +35,7 @@ const CONTENT_DIRECTORIES = {
   troubleshooting: CONTENT_PATHS.troubleshooting,
 };
 
-export class ContentIndexer {
+class ContentIndexer {
   /**
    * Build complete content index
    */

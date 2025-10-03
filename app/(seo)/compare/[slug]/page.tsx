@@ -1,7 +1,9 @@
+// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module
 import fs from 'fs/promises';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module
 import path from 'path';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

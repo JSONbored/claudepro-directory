@@ -171,30 +171,3 @@ export async function detectLanguage(code: string, hint?: string): Promise<strin
 
   return detected;
 }
-
-/**
- * Detect language synchronously (for edge cases where async not possible)
- * Uses only heuristic detection without Shiki
- */
-export function detectLanguageSync(code: string, hint?: string): string {
-  if (hint && hint !== 'text') {
-    return hint;
-  }
-
-  const cacheKey = hashContent(code);
-  const cached = languageCache.get(cacheKey);
-  if (cached) {
-    return cached;
-  }
-
-  const detected = heuristicDetection(code);
-  languageCache.set(cacheKey, detected);
-  return detected;
-}
-
-/**
- * Clear the language detection cache (useful for testing)
- */
-export function clearLanguageCache(): void {
-  languageCache.clear();
-}

@@ -14,7 +14,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { createSearchIndex, performLocalSearch } from '@/hooks/use-search';
-import type { GuideItemWithCategory } from '@/lib/components/guide-page-factory';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -27,6 +26,7 @@ import {
   Zap,
 } from '@/lib/icons';
 import { UI_CLASSES } from '@/lib/ui-constants';
+import type { GuideItemWithCategory } from '@/lib/utils/guide-helpers';
 
 const categoryInfo = {
   'use-cases': {

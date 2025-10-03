@@ -405,17 +405,6 @@ export const handleApiError = (
   });
 };
 
-export const handleZodError = (
-  zodError: z.ZodError,
-  config: ErrorHandlerConfig = {}
-): NextResponse => {
-  return errorHandler.createNextResponse(zodError, {
-    includeDetails: true,
-    logLevel: 'warn',
-    ...config,
-  });
-};
-
 export const handleValidationError = (
   validationError: ValidationError,
   config: ErrorHandlerConfig = {}
@@ -425,26 +414,6 @@ export const handleValidationError = (
     logLevel: 'warn',
     ...config,
   });
-};
-
-// Middleware helper for consistent error handling
-export const withErrorHandling = (
-  handler: (request: NextRequest) => Promise<NextResponse | Response>
-) => {
-  return async (request: NextRequest): Promise<NextResponse> => {
-    try {
-      const response = await handler(request);
-      return response instanceof NextResponse
-        ? response
-        : new NextResponse(response.body, response);
-    } catch (error) {
-      const validatedError = errorInputSchema.safeParse(error);
-      return errorHandler.handleMiddlewareError(
-        validatedError.success ? validatedError.data : { message: 'Unknown middleware error' },
-        request
-      );
-    }
-  };
 };
 
 // React component error boundary helper
@@ -464,5 +433,3 @@ export const createErrorBoundaryFallback = (
 
   return errorResponse;
 };
-
-export default errorHandler;

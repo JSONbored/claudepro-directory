@@ -262,5 +262,3 @@ export function sanitizeApiError(
 export function isSanitizedError(obj: unknown): obj is SanitizedError {
   return validateSanitizedError(obj) !== null;
 }
-
-export default ErrorSanitizer;

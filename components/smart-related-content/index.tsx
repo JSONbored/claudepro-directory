@@ -4,6 +4,7 @@
  */
 
 import { headers } from 'next/headers';
+// biome-ignore lint/nursery/noUnresolvedImports: React export exists (verified)
 import { Suspense } from 'react';
 import { logger } from '@/lib/logger';
 import { relatedContentService } from '@/lib/related-content/service';

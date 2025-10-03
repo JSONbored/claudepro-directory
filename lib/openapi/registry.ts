@@ -579,8 +579,3 @@ export const endpointRegistry = {
     },
   },
 } as const;
-
-/**
- * Export endpoint paths for use in spec generator
- */
-export const endpointPaths = Object.keys(endpointRegistry);

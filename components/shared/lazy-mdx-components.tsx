@@ -10,6 +10,7 @@
  */
 
 import dynamic from 'next/dynamic';
+// biome-ignore lint/nursery/noUnresolvedImports: React export exists (verified)
 import { Suspense } from 'react';
 import { UI_CLASSES } from '@/lib/ui-constants';
 import { ConfigCardSkeleton, Skeleton, TableSkeleton } from '../ui/loading-skeleton';

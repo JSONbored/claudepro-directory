@@ -397,30 +397,3 @@ export async function withRateLimit<T extends unknown[]>(
 
   return newResponse;
 }
-
-/**
- * Rate limit decorator for API route handlers
- */
-export function rateLimit(limiter: RateLimiter) {
-  return <T extends (...args: [NextRequest, ...Parameters<T>]) => Promise<Response>>(
-    descriptor: TypedPropertyDescriptor<T>
-  ) => {
-    const originalMethod = descriptor.value;
-
-    if (!originalMethod) {
-      throw new Error('Rate limit decorator can only be applied to methods');
-    }
-
-    descriptor.value = async function (
-      this: Record<string, never>,
-      request: NextRequest,
-      ...args: Parameters<T>
-    ) {
-      return withRateLimit(request, limiter, originalMethod.bind(this), ...args);
-    } as T;
-
-    return descriptor;
-  };
-}
-
-export default RateLimiter;

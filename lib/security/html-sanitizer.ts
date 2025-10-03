@@ -361,6 +361,3 @@ export const DOMPurify = {
     return sanitizeHtml(html, sanitizerConfig);
   },
 };
-
-// Export as default for drop-in replacement
-export default DOMPurify;

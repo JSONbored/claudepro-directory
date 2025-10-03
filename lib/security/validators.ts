@@ -410,8 +410,6 @@ export const validation = {
   },
 } as const;
 
-export default validation;
-
 /**
  * XSS Sanitization Utilities
  * Provides secure sanitization for user input

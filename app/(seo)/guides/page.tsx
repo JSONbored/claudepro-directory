@@ -1,15 +1,17 @@
+// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module
 import fs from 'fs/promises';
+// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module
 import path from 'path';
 import { z } from 'zod';
 import { EnhancedGuidesPage } from '@/components/enhanced-guides-page';
+import { APP_CONFIG } from '@/lib/constants';
+import { logger } from '@/lib/logger';
 import {
   type GuideItemWithCategory,
   type GuidesByCategory,
   guideItemWithCategorySchema,
   parseFrontmatter,
-} from '@/lib/components/guide-page-factory';
-import { APP_CONFIG } from '@/lib/constants';
-import { logger } from '@/lib/logger';
+} from '@/lib/utils/guide-helpers';
 
 export const metadata = {
   title: `Claude Guides & Tutorials - ${APP_CONFIG.name}`,

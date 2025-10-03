@@ -38,8 +38,11 @@
  * @see lib/config/build-category-config.ts - Category configuration
  */
 
+// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module with node: prefix
 import { mkdir, rename, writeFile } from 'node:fs/promises';
+// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module with node: prefix
 import { join } from 'node:path';
+// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module with node: prefix
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
 import { getAllBuildCategoryConfigs } from '../lib/config/build-category-config.js';

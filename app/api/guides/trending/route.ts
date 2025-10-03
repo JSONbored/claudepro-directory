@@ -1,3 +1,4 @@
+// biome-ignore lint/nursery/noUnresolvedImports: Next.js server exports exist (verified)
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { CACHE_HEADERS } from '@/lib/constants';

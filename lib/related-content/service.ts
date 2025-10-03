@@ -115,10 +115,6 @@ export type RelatedContentClickEvent = z.infer<typeof relatedContentClickEventSc
 export type RelatedContentImpressionEvent = z.infer<typeof relatedContentImpressionEventSchema>;
 export type RelatedContentViewEvent = z.infer<typeof relatedContentViewEventSchema>;
 
-// Schema exports for validation
-// Note: contentIndexSchema is now exported from @/lib/schemas/related-content.schema
-export { relatedContentInputSchema, relatedContentResponseSchema };
-
 // Simple in-memory cache
 let contentCache: ContentIndex | null = null;
 let lastLoaded = 0;

@@ -1,6 +1,8 @@
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
+// biome-ignore lint/nursery/noUnresolvedImports: Next.js font export exists (verified)
 import { Inter } from 'next/font/google';
+// biome-ignore lint/nursery/noUnresolvedImports: Next.js server export exists (verified)
 import { connection } from 'next/server';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
