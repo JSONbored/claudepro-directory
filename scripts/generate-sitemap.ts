@@ -1,6 +1,4 @@
-// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module
 import { existsSync, readdirSync, writeFileSync } from 'fs';
-// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module
 import { join } from 'path';
 // Import directly from metadata files for build-time usage (not runtime lazy loaders)
 import { agentsMetadata } from '../generated/agents-metadata.js';
@@ -10,9 +8,9 @@ import { hooksMetadata } from '../generated/hooks-metadata.js';
 import { mcpMetadata } from '../generated/mcp-metadata.js';
 import { rulesMetadata } from '../generated/rules-metadata.js';
 import { statuslinesMetadata } from '../generated/statuslines-metadata.js';
-import { APP_CONFIG, CONTENT_PATHS, MAIN_CONTENT_CATEGORIES } from '../lib/constants';
-import { logger } from '../lib/logger.js';
-import type { ContentItem } from '../lib/schemas/content/content-item-union.schema';
+import { APP_CONFIG, CONTENT_PATHS, MAIN_CONTENT_CATEGORIES } from '../src/lib/constants';
+import { logger } from '../src/lib/logger.js';
+import type { ContentItem } from '../src/lib/schemas/content/content-item-union.schema';
 
 // Define SitemapUrl type locally
 interface SitemapUrl {
@@ -260,6 +258,9 @@ async function main() {
 }
 
 // Run if this file is executed directly
-main();
+main().catch((error: unknown) => {
+  console.error('Failed to generate sitemap:', error);
+  process.exit(1);
+});
 
 export { generateSitemap };

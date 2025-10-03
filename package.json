@@ -36,11 +36,11 @@
     "lint": "ultracite check",
     "format": "ultracite fix",
     "validate:content": "tsx scripts/validate-content.ts",
-    "prepare": "command -v lefthook >/dev/null 2>&1 && lefthook install --config .config/lefthook.yml || echo 'Skipping lefthook install (not available)'",
+    "prepare": "LEFTHOOK_CONFIG=config/tools/lefthook.yml lefthook install || echo 'Skipping lefthook install (not available)'",
     "analyze:architecture": "npx skott --displayMode=webapp",
-    "analyze:unused": "npx knip -c .config/knip.json",
-    "analyze:circular": "npx madge --circular --extensions ts,tsx app/ components/ lib/",
-    "analyze:circular-graph": "npx madge --circular --extensions ts,tsx --image circular-deps.svg app/ components/ lib/",
+    "analyze:unused": "npx knip -c config/tools/knip.json",
+    "analyze:circular": "npx madge --circular --extensions ts,tsx src/",
+    "analyze:circular-graph": "npx madge --circular --extensions ts,tsx --image circular-deps.svg src/",
     "analyze:all": "npm run analyze:unused && npm run analyze:circular"
   },
   "dependencies": {

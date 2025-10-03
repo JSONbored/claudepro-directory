@@ -36,7 +36,6 @@ lerna-debug.log*
 .claude/
 src/generated/
 generated/
-assets/
 
 # Build-generated API files
 public/static-api/
@@ -67,3 +66,4 @@ stats.html
 Thumbs.db
 
 SEO-WORKFLOW.md
+tsconfig.tsbuildinfo

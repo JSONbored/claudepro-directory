@@ -25,16 +25,16 @@ import {
   loadBuildCache,
   saveBuildCache,
   writeBuildOutput,
-} from '../lib/build/category-processor.js';
+} from '../src/lib/build/category-processor.js';
 import {
   BUILD_CATEGORY_CONFIGS,
   type BuildCategoryId,
   getAllBuildCategoryConfigs,
-} from '../lib/config/build-category-config.js';
-import { logger } from '../lib/logger.js';
-import { onBuildComplete } from '../lib/related-content/cache-invalidation.js';
-import { contentIndexer } from '../lib/related-content/indexer.js';
-import type { ContentStats } from '../lib/schemas/content/content-types.js';
+} from '../src/lib/config/build-category-config.js';
+import { logger } from '../src/lib/logger.js';
+import { onBuildComplete } from '../src/lib/related-content/cache-invalidation.js';
+import { contentIndexer } from '../src/lib/related-content/indexer.js';
+import type { ContentStats } from '../src/lib/schemas/content/content-types.js';
 
 // Paths
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
@@ -96,7 +96,7 @@ function generateMetadataFile(categoryId: BuildCategoryId, metadata: readonly un
  * @see scripts/build-content.ts
  */
 
-import type { ${config.typeName} } from '@/lib/schemas/content/${getSchemaPathFromTypeName(config.typeName)}';
+import type { ${config.typeName} } from '@/src/lib/schemas/content/${getSchemaPathFromTypeName(config.typeName)}';
 
 export type ${capitalizedSingular}Metadata = Pick<${config.typeName}, ${metadataFieldsStr}>;
 
@@ -133,7 +133,7 @@ function generateFullContentFile(categoryId: BuildCategoryId, items: readonly un
  * @see scripts/build-content.ts
  */
 
-import type { ${config.typeName} } from '@/lib/schemas/content/${getSchemaPathFromTypeName(config.typeName)}';
+import type { ${config.typeName} } from '@/src/lib/schemas/content/${getSchemaPathFromTypeName(config.typeName)}';
 
 export const ${varName}Full: ${config.typeName}[] = ${JSON.stringify(items, null, 2)};
 
@@ -170,8 +170,8 @@ function generateIndexFile(contentStats: ContentStats): string {
  * @see scripts/build-content.ts
  */
 
-import { metadataLoader } from '@/lib/content/lazy-content-loaders';
-import type { ContentStats } from '../lib/schemas/content/content-types';
+import { metadataLoader } from '@/src/lib/content/lazy-content-loaders';
+import type { ContentStats } from '../src/lib/schemas/content/content-types';
 
 // Lazy metadata getters
 ${categories
@@ -350,5 +350,8 @@ async function main(): Promise<void> {
   }
 }
 
-// Run the build
-main();
+// Run the build - handle promise to avoid floating promise warning
+main().catch((error: unknown) => {
+  logger.error('Build failed:', { error });
+  process.exit(1);
+});

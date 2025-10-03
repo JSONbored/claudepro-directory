@@ -1,17 +1,7 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.2.5/schema.json",
   "files": {
-    "includes": [
-      "app/**/*",
-      "components/**/*",
-      "lib/**/*",
-      "hooks/**/*",
-      "scripts/**/*",
-      "types/**/*",
-      "data/**/*",
-      "content/**/*",
-      "test/**/*"
-    ],
+    "includes": ["src/**/*", "scripts/**/*", "content/**/*", "config/**/*"],
     "experimentalScannerIgnores": [
       ".next/**/*",
       "out/**/*",
@@ -236,7 +226,7 @@
       "nursery": {
         "noFloatingPromises": "error",
         "noMisusedPromises": "error",
-        "noUnresolvedImports": "error",
+        "noUnresolvedImports": "off",
         "noDuplicateDependencies": "error",
         "noImportCycles": "error",
         "noReactForwardRef": "warn"
@@ -258,7 +248,7 @@
   },
   "overrides": [
     {
-      "includes": ["lib/redis.ts"],
+      "includes": ["src/lib/redis.ts"],
       "linter": {
         "rules": {
           "performance": {
@@ -281,7 +271,7 @@
       }
     },
     {
-      "includes": ["app/actions/**/*.ts"],
+      "includes": ["src/app/actions/**/*.ts"],
       "linter": {
         "rules": {
           "complexity": {

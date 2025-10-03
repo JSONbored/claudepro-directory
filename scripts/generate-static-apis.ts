@@ -38,16 +38,13 @@
  * @see lib/config/build-category-config.ts - Category configuration
  */
 
-// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module with node: prefix
 import { mkdir, rename, writeFile } from 'node:fs/promises';
-// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module with node: prefix
 import { join } from 'node:path';
-// biome-ignore lint/nursery/noUnresolvedImports: Node.js built-in module with node: prefix
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
-import { getAllBuildCategoryConfigs } from '../lib/config/build-category-config.js';
-import { APP_CONFIG, MAIN_CONTENT_CATEGORIES } from '../lib/constants';
-import { logger } from '../lib/logger.js';
+import { getAllBuildCategoryConfigs } from '../src/lib/config/build-category-config.js';
+import { APP_CONFIG, MAIN_CONTENT_CATEGORIES } from '../src/lib/constants';
+import { logger } from '../src/lib/logger.js';
 import {
   type AllConfigurationsResponse,
   allConfigurationsResponseSchema,
@@ -68,10 +65,10 @@ import {
   staticAPISearchableItemSchema,
   type TransformedContentItem,
   transformedContentItemSchema,
-} from '../lib/schemas/api/static-api-response.schema.js';
-import { buildConfig, env } from '../lib/schemas/env.schema';
-import { type ContentCategory, contentCategorySchema } from '../lib/schemas/shared.schema';
-import { getBatchTrendingData } from '../lib/trending/calculator.js';
+} from '../src/lib/schemas/api/static-api-response.schema.js';
+import { buildConfig, env } from '../src/lib/schemas/env.schema';
+import { type ContentCategory, contentCategorySchema } from '../src/lib/schemas/shared.schema';
+import { getBatchTrendingData } from '../src/lib/trending/calculator.js';
 
 /**
  * Output directory for static APIs

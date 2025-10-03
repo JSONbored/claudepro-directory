@@ -22,7 +22,7 @@
  */
 
 import { generateFiles } from 'fumadocs-openapi';
-import { logger } from '../lib/logger.js';
+import { logger } from '../src/lib/logger.js';
 
 /**
  * Generate API documentation from OpenAPI spec
@@ -101,6 +101,9 @@ async function generateAPIDocs(): Promise<void> {
 }
 
 // Execute immediately
-generateAPIDocs();
+generateAPIDocs().catch((error: unknown) => {
+  console.error('Failed to generate API docs:', error);
+  process.exit(1);
+});
 
 export { generateAPIDocs };

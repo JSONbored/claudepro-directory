@@ -1,0 +1,4 @@
+{
+  "ignores": ["@tailwindcss/postcss", "autoprefixer", "postcss", "beasties"],
+  "ignore-patterns": ["dist", "build", ".next", "node_modules"]
+}
