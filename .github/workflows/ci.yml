@@ -3,6 +3,18 @@ name: CI
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'content/**/*.json'
+      - 'content/guides/**/*.mdx'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/pull_request_template.md'
+      - '.github/FUNDING.yml'
+      - '.github/dependabot.yml'
+      - 'templates/**'
+      - '**.md'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.gitattributes'
   pull_request:
     branches: [ main ]
     paths-ignore:
@@ -10,8 +22,13 @@ on:
       - 'content/guides/**/*.mdx'
       - '.github/ISSUE_TEMPLATE/**'
       - '.github/pull_request_template.md'
+      - '.github/FUNDING.yml'
+      - '.github/dependabot.yml'
+      - 'templates/**'
       - '**.md'
       - 'LICENSE'
+      - '.gitignore'
+      - '.gitattributes'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
