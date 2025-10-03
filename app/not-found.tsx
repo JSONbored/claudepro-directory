@@ -66,6 +66,10 @@ export default function NotFound() {
             <Link href="/hooks" className={UI_CLASSES.HOVER_TEXT_PRIMARY}>
               Hooks
             </Link>
+            <span>•</span>
+            <Link href="/statuslines" className={UI_CLASSES.HOVER_TEXT_PRIMARY}>
+              Statuslines
+            </Link>
           </div>
         </div>
       </Card>
