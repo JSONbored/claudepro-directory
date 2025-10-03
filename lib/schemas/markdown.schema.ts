@@ -13,7 +13,7 @@ import { nonEmptyString, shortString } from './primitives/base-strings';
 /**
  * MDX frontmatter schema
  */
-export const mdxFrontmatterSchema = z
+const mdxFrontmatterSchema = z
   .object({
     title: nonEmptyString.max(200).describe('Content title (max 200 characters)'),
     description: nonEmptyString.max(500).describe('Content description (max 500 characters)'),

@@ -30,7 +30,7 @@ import { isoDatetimeString, nonEmptyString } from './base-strings';
 /**
  * TTL Ranges based on common cache patterns
  */
-export const TTL_RANGES = {
+const TTL_RANGES = {
   MIN_TTL: 60, // 1 minute
   SHORT_TTL_MAX: 3600, // 1 hour
   MEDIUM_TTL_MAX: 86400, // 24 hours
@@ -43,7 +43,7 @@ export const TTL_RANGES = {
  * Used for: Temporary cache, short-lived data, quick expiration
  * Common in: Session cache, temporary API responses, rate limit windows
  */
-export const shortTTL = positiveInt
+const shortTTL = positiveInt
   .min(TTL_RANGES.MIN_TTL, `TTL must be at least ${TTL_RANGES.MIN_TTL} seconds`)
   .max(TTL_RANGES.SHORT_TTL_MAX, `TTL cannot exceed ${TTL_RANGES.SHORT_TTL_MAX} seconds (1 hour)`)
   .describe('Short-lived TTL for temporary cache (60s - 1 hour)');
@@ -53,7 +53,7 @@ export const shortTTL = positiveInt
  * Used for: Standard cache, API responses, daily data
  * Common in: API response cache, MDX cache, content cache
  */
-export const mediumTTL = positiveInt
+const mediumTTL = positiveInt
   .min(
     TTL_RANGES.SHORT_TTL_MAX,
     `TTL must be at least ${TTL_RANGES.SHORT_TTL_MAX} seconds (1 hour)`
@@ -69,7 +69,7 @@ export const mediumTTL = positiveInt
  * Used for: Long-lived cache, static content, infrequent updates
  * Common in: Static content cache, rarely updated data
  */
-export const longTTL = positiveInt
+const longTTL = positiveInt
   .min(
     TTL_RANGES.MEDIUM_TTL_MAX,
     `TTL must be at least ${TTL_RANGES.MEDIUM_TTL_MAX} seconds (24 hours)`
@@ -82,7 +82,7 @@ export const longTTL = positiveInt
  * Used for: Any cache operation with standard TTL range
  * Common in: Generic cache operations, configurable expiration
  */
-export const flexibleTTL = positiveInt
+const flexibleTTL = positiveInt
   .min(TTL_RANGES.MIN_TTL, `TTL must be at least ${TTL_RANGES.MIN_TTL} seconds`)
   .max(TTL_RANGES.LONG_TTL_MAX, `TTL cannot exceed ${TTL_RANGES.LONG_TTL_MAX} seconds (30 days)`)
   .describe('Flexible TTL for configurable cache expiration (60s - 30 days)');
@@ -92,7 +92,7 @@ export const flexibleTTL = positiveInt
  * Used for: API rate limiting, request throttling
  * Common in: Arcjet rate limits, API endpoint protection
  */
-export const rateLimitWindow = positiveInt
+const rateLimitWindow = positiveInt
   .min(TTL_RANGES.MIN_TTL, `Window must be at least ${TTL_RANGES.MIN_TTL}s`)
   .max(
     TTL_RANGES.RATE_LIMIT_WINDOW_MAX,
@@ -109,7 +109,7 @@ export const rateLimitWindow = positiveInt
 /**
  * Key validation regex patterns
  */
-export const KEY_PATTERNS = {
+const KEY_PATTERNS = {
   CACHE_KEY: /^[a-zA-Z0-9:_\-/.]{1,250}$/,
   CATEGORY: /^[a-zA-Z0-9\-_]+$/,
   SLUG: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
@@ -144,7 +144,7 @@ export const cacheKeyString = nonEmptyString
  * Pattern: alphanumeric + - _
  * Common in: Content categorization, cache namespacing
  */
-export const categoryString = nonEmptyString
+const categoryString = nonEmptyString
   .max(KEY_LIMITS.MAX_CATEGORY_LENGTH, 'Category name too long')
   .regex(KEY_PATTERNS.CATEGORY, 'Invalid category format')
   .describe('Content category identifier (alphanumeric with hyphens/underscores)');
@@ -162,7 +162,7 @@ export const categoryString = nonEmptyString
  * Pattern: alphanumeric + - _ / .
  * Common in: MDX cache, file operations
  */
-export const pathString = nonEmptyString
+const pathString = nonEmptyString
   .max(KEY_LIMITS.MAX_PATH_LENGTH, 'Path too long')
   .regex(KEY_PATTERNS.PATH, 'Invalid path format')
   .refine((path) => !path.includes('..'), 'Path traversal detected')
@@ -181,7 +181,7 @@ export const pathString = nonEmptyString
  * Used for: Cache hit/miss tracking in API responses
  * Common in: API response metadata, performance monitoring
  */
-export const cacheStatusEnum = z
+const cacheStatusEnum = z
   .enum(['HIT', 'MISS', 'BYPASS'])
   .describe('Cache operation status for API response tracking');
 
@@ -201,7 +201,7 @@ export const processingTimeMs = z
  * Used for: Standard API response metadata structure
  * Common in: All API responses, paginated responses
  */
-export const apiResponseMetaSchema = z
+const apiResponseMetaSchema = z
   .object({
     timestamp: isoDatetimeString,
     version: z.string().optional(),
@@ -216,7 +216,7 @@ export const apiResponseMetaSchema = z
  * Used for: Paginated API responses
  * Common in: List endpoints, search results
  */
-export const paginationMetaSchema = z
+const paginationMetaSchema = z
   .object({
     total: nonNegativeInt,
     page: positiveInt,

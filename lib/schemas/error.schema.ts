@@ -135,7 +135,7 @@ export const sanitizedErrorSchema = z
 /**
  * Error validation result schema - discriminated union for type safety
  */
-export const errorValidationResultSchema = z
+const errorValidationResultSchema = z
   .discriminatedUnion('isValid', [
     z
       .object({
@@ -257,31 +257,6 @@ export function validateErrorContext(
 }
 
 /**
- * Safe sanitized error validation helper
- */
-export function validateSanitizedError(
-  error: unknown
-): z.infer<typeof sanitizedErrorSchema> | null {
-  try {
-    return sanitizedErrorSchema.parse(error);
-  } catch (validationError) {
-    logger.error(
-      'Sanitized Error Validation: Failed to validate sanitized error',
-      validationError instanceof Error ? validationError : new Error(String(validationError)),
-      {
-        error:
-          validationError instanceof z.ZodError
-            ? validationError.issues.join(', ')
-            : String(validationError),
-        errorKeys: typeof error === 'object' && error ? Object.keys(error).length : 0,
-        errorType: typeof error,
-      }
-    );
-    return null;
-  }
-}
-
-/**
  * Error type determination helper with validation
  */
 export function determineErrorType(error: unknown): z.infer<typeof errorTypeSchema> {
@@ -341,9 +316,9 @@ export function determineErrorType(error: unknown): z.infer<typeof errorTypeSche
 }
 
 /**
- * Error handler configuration schema
+ * Error handler configuration schema (unused - removed export)
  */
-export const errorHandlerConfigSchema = z
+const errorHandlerConfigSchema = z
   .object({
     // Context information
     route: z
@@ -407,9 +382,9 @@ export const errorHandlerConfigSchema = z
   .describe('Configuration options for error handling, logging, and response formatting');
 
 /**
- * Standardized error response schema
+ * Standardized error response schema (unused - removed export)
  */
-export const errorResponseSchema = z
+const errorResponseSchema = z
   .object({
     success: z.literal(false).describe('Always false for error responses'),
     error: nonEmptyString.max(200).describe('Error type or category identifier'),

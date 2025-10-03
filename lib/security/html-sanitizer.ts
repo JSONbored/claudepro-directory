@@ -171,7 +171,7 @@ function decodeHtmlEntities(str: string): string {
 /**
  * Strip all HTML tags from a string
  */
-export function stripHtmlTags(str: string): string {
+function stripHtmlTags(str: string): string {
   // Remove dangerous content first
   let result = str;
   for (const pattern of DANGEROUS_PATTERNS) {
@@ -193,7 +193,7 @@ export function stripHtmlTags(str: string): string {
 /**
  * Sanitize HTML with allowed tags and attributes
  */
-export function sanitizeHtml(html: string, config: SanitizerConfig = {}): string {
+function sanitizeHtml(html: string, config: SanitizerConfig = {}): string {
   // If stripAll is true, just strip all tags
   if (config.stripAll) {
     return stripHtmlTags(html);

@@ -230,6 +230,7 @@ export function parseConfigSubmissionForm(formData: FormData): ConfigSubmissionD
  * - Escapes dangerous characters (< becomes \u003c per Next.js JSON-LD best practices)
  * - Pure function for Turbopack/SSR compatibility (no Zod in SSR path)
  *
+ * @public - knip ignore tag (used by structured data components)
  * @see https://nextjs.org/docs/app/guides/json-ld
  * @see https://www.rapid7.com/blog/post/2022/05/04/xss-in-json-old-school-attacks-for-modern-applications/
  */
@@ -271,6 +272,7 @@ export function serializeJsonLd(data: unknown): string {
  * Validates that HTML comes from trusted syntax highlighter
  *
  * Pure function for SSR compatibility
+ * @public - knip ignore tag (used via highlightedCodeSafeSchema transform)
  */
 export function sanitizeHighlightedCode(html: string): string {
   // Allow specific classes and elements used by syntax highlighters
@@ -284,7 +286,10 @@ export function sanitizeHighlightedCode(html: string): string {
   });
 }
 
-// Passthrough schema for Turbopack/SSR compatibility
+/**
+ * Passthrough schema for Turbopack/SSR compatibility
+ * @public - knip ignore tag (used in code highlighting components)
+ */
 export const highlightedCodeSafeSchema = z
   .string()
   .describe('Raw HTML string containing syntax-highlighted code')

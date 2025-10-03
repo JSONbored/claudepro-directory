@@ -20,7 +20,7 @@ import { endpointRegistry } from './registry';
  * Create OpenAPI Registry
  * Registers all endpoints with their schemas and metadata
  */
-export function createOpenAPIRegistry(): OpenAPIRegistry {
+function createOpenAPIRegistry(): OpenAPIRegistry {
   const registry = new OpenAPIRegistry();
 
   // Register each endpoint from the registry

@@ -33,7 +33,7 @@ export interface ExtendedRateLimitConfig extends Omit<MiddlewareRateLimitConfig,
 /**
  * Rate limit information schema
  */
-export const rateLimitInfoSchema = z.object({
+const rateLimitInfoSchema = z.object({
   limit: z.number().int().min(1).max(100000),
   remaining: z.number().int().min(0),
   resetTime: z.number().int().min(0),
@@ -43,7 +43,7 @@ export const rateLimitInfoSchema = z.object({
 /**
  * Rate limit result schema
  */
-export const rateLimitResultSchema = z.object({
+const rateLimitResultSchema = z.object({
   success: z.boolean(),
   limit: z.number().int().min(1).max(100000),
   remaining: z.number().int().min(0),
@@ -54,7 +54,7 @@ export const rateLimitResultSchema = z.object({
 /**
  * Rate limit key components schema
  */
-export const rateLimitKeySchema = z.object({
+const rateLimitKeySchema = z.object({
   prefix: z
     .string()
     .min(1)
@@ -77,7 +77,7 @@ export type RateLimitKey = z.infer<typeof rateLimitKeySchema>;
  * Default rate limit configurations for different endpoint types
  * All configurations are validated using Zod schemas
  */
-export const RATE_LIMIT_CONFIGS = {
+const RATE_LIMIT_CONFIGS = {
   // Public API endpoints - generous but protected
   api: middlewareRateLimitConfigSchema.parse({
     maxRequests: 1000,

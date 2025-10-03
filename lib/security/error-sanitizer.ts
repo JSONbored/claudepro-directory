@@ -15,7 +15,6 @@ import {
   errorSeveritySchema,
   type SanitizedError,
   validateErrorInput,
-  validateSanitizedError,
 } from '@/lib/schemas/error.schema';
 import { SENSITIVE_PATTERNS } from './patterns';
 
@@ -243,7 +242,7 @@ export class ErrorSanitizer {
 /**
  * Convenience function to get sanitizer instance
  */
-export const errorSanitizer = ErrorSanitizer.getInstance();
+const errorSanitizer = ErrorSanitizer.getInstance();
 
 /**
  * Helper function for sanitizing errors in API routes
@@ -254,11 +253,4 @@ export function sanitizeApiError(
   context: ErrorContext = {}
 ): SanitizedError {
   return errorSanitizer.sanitizeError(error, requestId, context);
-}
-
-/**
- * Type guard to check if error is a sanitized error using Zod validation
- */
-export function isSanitizedError(obj: unknown): obj is SanitizedError {
-  return validateSanitizedError(obj) !== null;
 }

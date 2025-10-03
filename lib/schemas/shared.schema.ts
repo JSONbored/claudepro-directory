@@ -92,7 +92,7 @@ export type AppContentType = z.infer<typeof appContentTypeSchema>;
  * Rate Limit Configuration
  * Used across: api, middleware
  */
-export const rateLimitConfigSchema = z
+const rateLimitConfigSchema = z
   .object({
     maxRequests: z
       .number()
@@ -113,7 +113,7 @@ export type RateLimitConfig = z.infer<typeof rateLimitConfigSchema>;
  * MDX Component Props
  * Used for type-safe MDX component props
  */
-export const mdxBasePropsSchema = z
+const mdxBasePropsSchema = z
   .object({
     className: z.string().default('').describe('CSS class names for styling'),
     style: z
@@ -186,7 +186,7 @@ export type MdxImageProps = z.infer<typeof mdxImagePropsSchema>;
  */
 
 // Core Components
-export const featureSchema = z
+const featureSchema = z
   .object({
     title: shortString.describe('Feature title or name'),
     description: mediumString.describe('Feature description explaining its purpose'),
@@ -194,7 +194,7 @@ export const featureSchema = z
   })
   .describe('Individual feature item with title, description, and optional badge');
 
-export const accordionItemSchema = z
+const accordionItemSchema = z
   .object({
     title: componentTitleString.describe('Accordion item title shown in header'),
     content: z.custom<React.ReactNode>().describe('Accordion item content shown when expanded'),
@@ -231,7 +231,7 @@ export const tldrSummaryPropsSchema = z
   .describe('TL;DR summary component with content and key points');
 
 // Template Components
-export const guideStepSchema = z
+const guideStepSchema = z
   .object({
     title: shortString.describe('Step title or heading'),
     description: longString.optional().describe('Detailed step description'),
@@ -243,7 +243,7 @@ export const guideStepSchema = z
   })
   .describe('Individual step in a step-by-step guide with code and timing');
 
-export const codeExampleSchema = z
+const codeExampleSchema = z
   .object({
     language: componentLabelString.describe('Programming language for syntax highlighting'),
     filename: shortString.optional().describe('Optional filename to display'),
@@ -251,7 +251,7 @@ export const codeExampleSchema = z
   })
   .describe('Code example with language and optional filename');
 
-export const comparisonItemSchema = z
+const comparisonItemSchema = z
   .object({
     feature: shortString.describe('Feature name being compared'),
     option1: z
@@ -271,7 +271,7 @@ export const comparisonItemSchema = z
   .describe('Single row in a comparison table showing feature support across options');
 
 // Interactive Components
-export const tabItemSchema = z
+const tabItemSchema = z
   .object({
     label: componentLabelString.describe('Tab label displayed in tab button'),
     value: componentLabelString.describe('Unique identifier value for the tab'),
@@ -279,7 +279,7 @@ export const tabItemSchema = z
   })
   .describe('Individual tab item with label and content');
 
-export const quickReferenceItemSchema = z
+const quickReferenceItemSchema = z
   .object({
     label: shortString.optional().describe('Reference item label or key'),
     value: mediumString.optional().describe('Reference item value or content'),
@@ -348,7 +348,7 @@ export const stepGuidePropsSchema = z
   })
   .describe('Step-by-step guide component with timing information');
 
-export const codeGroupPropsSchema = z
+const codeGroupPropsSchema = z
   .object({
     examples: z
       .array(codeExampleSchema.describe('Individual code example'))
@@ -407,7 +407,7 @@ export const quickReferencePropsSchema = z
   .describe('Quick reference component for displaying key-value pairs');
 
 // FAQ Component Schemas
-export const faqItemSchema = z
+const faqItemSchema = z
   .object({
     question: mediumString.describe('FAQ question text'),
     answer: extraLongString.describe('Detailed answer to the question'),
@@ -428,7 +428,7 @@ export const faqPropsSchema = z
   .describe('FAQ component displaying questions and answers');
 
 // Metrics Component Schemas
-export const metricDataSchema = z
+const metricDataSchema = z
   .object({
     label: shortString.optional().describe('Metric label or name'),
     value: componentValueString.describe('Current metric value'),
@@ -458,7 +458,7 @@ export const metricsDisplayPropsSchema = z
   .describe('Metrics display component showing performance or business metrics');
 
 // Checklist Component Schemas
-export const checklistItemSchema = z
+const checklistItemSchema = z
   .object({
     task: componentTitleString.describe('Task title or description'),
     description: mediumString.optional().describe('Optional detailed task description'),
@@ -487,7 +487,7 @@ export const checklistPropsSchema = z
   .describe('Checklist component for task tracking and prerequisites');
 
 // CaseStudy Component Schemas
-export const caseStudyMetricSchema = z
+const caseStudyMetricSchema = z
   .object({
     label: shortString.describe('Metric label or name'),
     value: componentValueString.describe('Metric value or result'),
@@ -498,7 +498,7 @@ export const caseStudyMetricSchema = z
   })
   .describe('Case study metric showing business impact or results');
 
-export const caseStudyTestimonialSchema = z
+const caseStudyTestimonialSchema = z
   .object({
     quote: codeString.describe('Testimonial quote text'),
     author: shortString.describe('Testimonial author name'),

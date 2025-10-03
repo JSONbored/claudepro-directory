@@ -50,7 +50,7 @@ type StaticAPICategory = (typeof MAIN_CONTENT_CATEGORIES)[number];
  * Static API generation limits
  * Modern constants pattern with const assertion
  */
-export const STATIC_API_LIMITS = {
+const STATIC_API_LIMITS = {
   MAX_ITEMS_PER_CATEGORY: 10000,
   MAX_TAG_LENGTH: 50,
   MAX_TAGS: 100,
@@ -79,7 +79,7 @@ export const STATIC_API_LIMITS = {
  * 3. All schemas auto-update (no manual changes needed)
  * 4. Compile-time validation ensures completeness
  */
-export const CATEGORY_METADATA = {
+const CATEGORY_METADATA = {
   agents: {
     singular: 'agent' as const,
     description: 'Agent configurations',
@@ -160,7 +160,7 @@ export interface MetadataItem {
  * Base content item schema for static APIs
  * Security: Strict validation with regex patterns and max lengths
  */
-export const baseContentItemSchema = z
+const baseContentItemSchema = z
   .object({
     slug: nonEmptyString
       .max(STATIC_API_LIMITS.MAX_SLUG_LENGTH)
@@ -263,14 +263,14 @@ const statisticsFields = Object.fromEntries(
   ])
 );
 
-export const statisticsSchema = z
+const statisticsSchema = z
   .object({
     totalConfigurations: nonNegativeInt.describe('Total configuration count'),
     ...statisticsFields,
   })
   .describe('Content statistics across all categories');
 
-export type Statistics = z.infer<typeof statisticsSchema>;
+type Statistics = z.infer<typeof statisticsSchema>;
 
 /**
  * Endpoints Schema
@@ -285,9 +285,7 @@ const endpointFields = Object.fromEntries(
   ])
 );
 
-export const endpointsSchema = z.object(endpointFields).describe('API endpoint URLs');
-
-export type Endpoints = z.infer<typeof endpointsSchema>;
+const endpointsSchema = z.object(endpointFields).describe('API endpoint URLs');
 
 /**
  * All Configurations Response Schema
@@ -323,27 +321,23 @@ export type AllConfigurationsResponse = z.infer<typeof allConfigurationsResponse
  * Popular tag schema with usage count
  * Used in search indexes for tag clouds
  */
-export const popularTagSchema = z
+const popularTagSchema = z
   .object({
     tag: z.string().max(STATIC_API_LIMITS.MAX_TAG_LENGTH).describe('Tag name'),
     count: positiveInt.describe('Usage count'),
   })
   .describe('Popular tag with usage count');
 
-export type PopularTag = z.infer<typeof popularTagSchema>;
-
 /**
  * Category count schema
  * Used in combined search index
  */
-export const categoryCountSchema = z
+const categoryCountSchema = z
   .object({
     category: z.string().describe('Category name'),
     count: nonNegativeInt.describe('Item count'),
   })
   .describe('Category with item count');
-
-export type CategoryCount = z.infer<typeof categoryCountSchema>;
 
 /**
  * Category-specific search index schema
@@ -431,23 +425,6 @@ export const healthCheckResponseSchema = z
   .describe('Health check API response');
 
 export type HealthCheckResponse = z.infer<typeof healthCheckResponseSchema>;
-
-/**
- * Generation result schema
- * Used for logging and error tracking
- */
-export const generationResultSchema = z
-  .object({
-    success: z.boolean().describe('Generation success status'),
-    outputDir: z.string().describe('Output directory path'),
-    filesGenerated: z.array(z.string()).describe('Generated file paths'),
-    totalItems: nonNegativeInt.describe('Total items processed'),
-    duration: nonNegativeInt.describe('Generation duration in milliseconds'),
-    errors: z.array(z.string()).optional().describe('Error messages if any'),
-  })
-  .describe('Generation result summary');
-
-export type GenerationResult = z.infer<typeof generationResultSchema>;
 
 /**
  * Helper function to generate endpoint URLs

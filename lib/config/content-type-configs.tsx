@@ -610,9 +610,9 @@ const collectionConfig: ContentTypeConfigRegistry['collections'] = {
  * Content Type Configuration Registry
  *
  * Central registry of all content type configurations.
- * Export this to access configs in unified-detail-page.tsx
+ * Used internally by getContentTypeConfig function
  */
-export const contentTypeConfigs: ContentTypeConfigRegistry = {
+const contentTypeConfigs: ContentTypeConfigRegistry = {
   agents: agentConfig,
   commands: commandConfig,
   hooks: hookConfig,

@@ -325,16 +325,6 @@ export const env = validateEnv();
  */
 export const isDevelopment = env.NODE_ENV === 'development';
 export const isProduction = env.NODE_ENV === 'production';
-export const isVercel = env.VERCEL === '1';
-
-/**
- * Redis configuration with fallback
- */
-export const redisConfig = {
-  url: env.KV_REST_API_URL,
-  token: env.KV_REST_API_TOKEN,
-  isConfigured: !!(env.KV_REST_API_URL && env.KV_REST_API_TOKEN),
-} as const;
 
 /**
  * Security configuration
@@ -344,28 +334,6 @@ export const securityConfig = {
   rateLimitSecret: env.RATE_LIMIT_SECRET,
   cacheWarmToken: env.CACHE_WARM_AUTH_TOKEN,
   isSecured: !!(env.ARCJET_KEY && env.RATE_LIMIT_SECRET),
-} as const;
-
-/**
- * Analytics configuration
- */
-export const analyticsConfig = {
-  umamiWebsiteId: env.NEXT_PUBLIC_UMAMI_WEBSITE_ID,
-  umamiScriptUrl: env.NEXT_PUBLIC_UMAMI_SCRIPT_URL,
-  debugEnabled: env.NEXT_PUBLIC_DEBUG_ANALYTICS === 'true',
-  isConfigured: !!(env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && env.NEXT_PUBLIC_UMAMI_SCRIPT_URL),
-} as const;
-
-/**
- * Site configuration
- */
-export const siteConfig = {
-  url:
-    env.NEXT_PUBLIC_SITE_URL ||
-    (isProduction ? 'https://claudepro.directory' : `http://localhost:${env.PORT}`),
-  apiUrl: env.NEXT_PUBLIC_API_URL || '/api',
-  isPWAEnabled: env.NEXT_PUBLIC_ENABLE_PWA === 'true',
-  bypassCache: env.BYPASS_RELATED_CACHE === 'true',
 } as const;
 
 /**
@@ -387,37 +355,8 @@ export const githubConfig = {
 } as const;
 
 /**
- * Webhook configuration
- */
-export const webhookConfig = {
-  secret: env.WEBHOOK_SECRET,
-  isConfigured: !!env.WEBHOOK_SECRET,
-} as const;
-
-/**
- * Export the schema for use in other files
- */
-export { envSchema, serverEnvSchema, clientEnvSchema, buildEnvSchema };
-
-/**
  * Type guard functions for runtime checks
  */
-export function hasRedisConfig(): boolean {
-  return redisConfig.isConfigured;
-}
-
-export function hasSecurityConfig(): boolean {
-  return securityConfig.isSecured;
-}
-
-export function hasAnalyticsConfig(): boolean {
-  return analyticsConfig.isConfigured;
-}
-
 export function hasGitHubConfig(): boolean {
   return githubConfig.isConfigured;
-}
-
-export function hasWebhookConfig(): boolean {
-  return webhookConfig.isConfigured;
 }

@@ -6,13 +6,13 @@
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
 import { nonNegativeInt, percentage, positiveInt } from './primitives/base-numbers';
-import { mediumString, nonEmptyString, shortString, slugString } from './primitives/base-strings';
+import { mediumString, nonEmptyString, shortString } from './primitives/base-strings';
 
 /**
  * Searchable item schema for search cache
  * Used with Fuzzysort adapter for high-performance fuzzy search
  */
-export const searchableItemSchema = z
+const searchableItemSchema = z
   .object({
     title: nonEmptyString
       .max(200)
@@ -34,7 +34,7 @@ export type SearchableItem = z.infer<typeof searchableItemSchema>;
 /**
  * Search filters schema for search cache
  */
-export const searchFiltersSchema = z
+const searchFiltersSchema = z
   .object({
     categories: z
       .array(z.string().max(50).describe('Category name, max 50 characters'))
@@ -57,7 +57,7 @@ export type SearchFilters = z.infer<typeof searchFiltersSchema>;
 /**
  * Search cache key schema
  */
-export const searchCacheKeySchema = z
+const searchCacheKeySchema = z
   .object({
     query: mediumString.describe('Search query string for cache key generation'),
     filters: searchFiltersSchema.describe('Active search filters for cache key generation'),
@@ -69,7 +69,7 @@ export type SearchCacheKey = z.infer<typeof searchCacheKeySchema>;
 /**
  * Search pagination schema
  */
-export const searchPaginationSchema = z
+const searchPaginationSchema = z
   .object({
     page: z
       .union([
@@ -110,7 +110,7 @@ export type SearchPaginationParams = z.infer<typeof searchPaginationSchema>;
 /**
  * Search query schema with sanitization
  */
-export const searchQuerySchema = z
+const searchQuerySchema = z
   .object({
     q: z
       .string()
@@ -166,7 +166,7 @@ export type SearchQuery = z.infer<typeof searchQuerySchema>;
 /**
  * Sort parameters schema
  */
-export const sortSchema = z
+const sortSchema = z
   .object({
     sort: z
       .enum(['relevance', 'date', 'popularity', 'name', 'updated', 'created', 'views', 'trending'])
@@ -194,7 +194,7 @@ export type SortParams = z.infer<typeof sortSchema>;
 /**
  * Filter parameters schema
  */
-export const filterSchema = z
+const filterSchema = z
   .object({
     category: z
       .union([
@@ -339,7 +339,7 @@ export type FilterParams = z.infer<typeof filterSchema>;
 /**
  * Combined search parameters schema
  */
-export const searchAPIParamsSchema = searchPaginationSchema
+const searchAPIParamsSchema = searchPaginationSchema
   .merge(searchQuerySchema)
   .merge(sortSchema)
   .merge(filterSchema)
@@ -453,44 +453,3 @@ export function parseSearchParams<T extends z.ZodType>(
     throw error;
   }
 }
-
-/**
- * Helper function to convert validated params back to URLSearchParams
- */
-export function toURLSearchParams(
-  params: Record<string, string | number | boolean | string[]>
-): URLSearchParams {
-  const searchParams = new URLSearchParams();
-
-  Object.entries(params).forEach(([key, value]) => {
-    if (value === '' || value === false) {
-      return;
-    }
-
-    if (Array.isArray(value)) {
-      value.forEach((v) => {
-        searchParams.append(key, String(v));
-      });
-    } else {
-      searchParams.set(key, String(value));
-    }
-  });
-
-  return searchParams;
-}
-
-/**
- * Export all schemas for centralized access
- */
-export const searchSchemas = {
-  pagination: searchPaginationSchema,
-  searchQuery: searchQuerySchema,
-  sort: sortSchema,
-  filter: filterSchema,
-  searchParams: searchAPIParamsSchema,
-  jobsSearch: jobsSearchSchema,
-  trending: trendingParamsSchema,
-  slug: z
-    .object({ slug: slugString.describe('URL-safe slug identifier') })
-    .describe('Schema for slug-based routing parameters'),
-} as const;

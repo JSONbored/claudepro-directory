@@ -32,7 +32,7 @@ export type ContentMetadata = Pick<
 /**
  * Transform any content item to unified component interface
  */
-export function transformToUnifiedContent(item: ContentItem): UnifiedContentItem {
+function transformToUnifiedContent(item: ContentItem): UnifiedContentItem {
   // Base transformation - copy all properties and convert readonly arrays to mutable
   const transformed = {
     ...item,
@@ -58,7 +58,7 @@ export function transformToUnifiedContent(item: ContentItem): UnifiedContentItem
 /**
  * Transform array of content items
  */
-export function transformContentArray(items: readonly ContentItem[]): UnifiedContentItem[] {
+function transformContentArray(items: readonly ContentItem[]): UnifiedContentItem[] {
   return items.map(transformToUnifiedContent);
 }
 

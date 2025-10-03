@@ -77,16 +77,6 @@ export const extraLongString = z
 export const urlString = z.string().url().describe('Valid URL string for links and resources');
 
 /**
- * Email string validator
- * Used for: Email addresses, contact information
- * Common in: User schemas, contact forms
- */
-export const emailString = z
-  .string()
-  .email()
-  .describe('Valid email address for contact information');
-
-/**
  * ISO date string validator
  * Used for: Date fields (dateAdded, dateModified, lastUpdated, etc.)
  * Common in: All content schemas, timestamps, metadata
@@ -121,29 +111,6 @@ export const slugString = z
   .describe(
     'URL-safe slug identifier (lowercase alphanumeric with hyphens, no consecutive hyphens)'
   );
-
-/**
- * Safe text validator (no HTML tags)
- * Used for: User-provided text where XSS prevention is critical
- * Common in: SEO metadata, social sharing, form inputs
- */
-export const safeTextString = z
-  .string()
-  .min(1)
-  .regex(/^[^<>]*$/, 'HTML tags not allowed')
-  .transform((text) => text.trim())
-  .describe('XSS-safe text field with HTML tag prevention');
-
-/**
- * Optional non-empty string
- * Used for: Optional fields that should be non-empty if provided
- * Common in: Metadata, configuration, optional descriptions
- */
-export const optionalNonEmptyString = z
-  .string()
-  .min(1)
-  .optional()
-  .describe('Optional non-empty text field');
 
 /**
  * Optional URL string

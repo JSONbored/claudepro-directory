@@ -8,12 +8,12 @@ import { APP_CONFIG } from '@/lib/constants';
 /**
  * Base schema context
  */
-export const SCHEMA_CONTEXT = 'https://schema.org' as const;
+const SCHEMA_CONTEXT = 'https://schema.org' as const;
 
 /**
  * Build author/organization schema
  */
-export function buildAuthor(
+function buildAuthor(
   authorName?: string,
   githubUrl?: string
 ): { '@type': 'Person' | 'Organization'; name: string; url?: string; sameAs?: string } {

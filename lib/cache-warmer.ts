@@ -29,7 +29,7 @@ const CACHE_WARMER_LIMITS = {
   MAX_COMMON_QUERIES: 100,
 } as const;
 
-export const warmableCategorySchema = z.enum([
+const warmableCategorySchema = z.enum([
   'agents',
   'mcp',
   'rules',
@@ -41,14 +41,14 @@ export const warmableCategorySchema = z.enum([
   'jobs',
 ]);
 
-export const cacheWarmerPopularItemSchema = z.object({
+const cacheWarmerPopularItemSchema = z.object({
   slug: nonEmptyString
     .max(CACHE_WARMER_LIMITS.MAX_SLUG_LENGTH)
     .regex(/^[a-zA-Z0-9\-_]+$/, 'Invalid slug format'),
   views: nonNegativeInt,
 });
 
-export const categoryMetadataSchema = z.object({
+const categoryMetadataSchema = z.object({
   name: warmableCategorySchema,
   items: z
     .array(
@@ -61,7 +61,7 @@ export const categoryMetadataSchema = z.object({
     .max(CACHE_WARMER_LIMITS.MAX_ITEMS_PER_CATEGORY),
 });
 
-export const relatedContentWarmingSchema = z.object({
+const relatedContentWarmingSchema = z.object({
   path: nonEmptyString
     .max(CACHE_WARMER_LIMITS.MAX_PATH_LENGTH)
     .regex(/^\/[a-zA-Z0-9\-_/]*$/, 'Invalid path format')
@@ -72,23 +72,17 @@ export const relatedContentWarmingSchema = z.object({
   limit: positiveInt.min(1).max(20).default(6),
 });
 
-export const commonQuerySchema = nonEmptyString.max(CACHE_WARMER_LIMITS.MAX_QUERY_LENGTH);
+const commonQuerySchema = nonEmptyString.max(CACHE_WARMER_LIMITS.MAX_QUERY_LENGTH);
 
-export const cachedContentSchema = z.object({
+const cachedContentSchema = z.object({
   content: z.unknown(),
   cachedAt: isoDatetimeString,
   ttl: positiveInt,
 });
 
-export const cacheWarmingStatusSchema = z.enum([
-  'idle',
-  'warming',
-  'completed',
-  'failed',
-  'partial',
-]);
+const cacheWarmingStatusSchema = z.enum(['idle', 'warming', 'completed', 'failed', 'partial']);
 
-export const cacheWarmingResultSchema = z.object({
+const cacheWarmingResultSchema = z.object({
   status: cacheWarmingStatusSchema,
   success: z.boolean().optional(),
   message: z.string().optional(),
@@ -103,7 +97,7 @@ export type WarmableCategory = z.infer<typeof warmableCategorySchema>;
 export type CacheWarmingStatus = z.infer<typeof cacheWarmingStatusSchema>;
 export type CacheWarmingResult = z.infer<typeof cacheWarmingResultSchema>;
 
-export class CacheWarmer {
+class CacheWarmer {
   private isWarming = false;
 
   /**

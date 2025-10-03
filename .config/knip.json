@@ -10,7 +10,6 @@
   "ignoreExportsUsedInFile": true,
   "ignore": [
     "components/ui/**",
-    "lib/schemas/**",
     "lib/analytics/**",
     "lib/structured-data/**",
     "lib/constants.ts",

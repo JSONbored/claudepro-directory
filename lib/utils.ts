@@ -116,7 +116,7 @@ export function slugToTitle(slug: string): string {
 /**
  * Formats a title for display with proper capitalization
  */
-export function formatTitle(title: string): string {
+function formatTitle(title: string): string {
   return capitalizeAcronyms(title);
 }
 

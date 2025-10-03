@@ -45,7 +45,7 @@ export interface TrendingOptions {
  * Get trending content based on view growth rate
  * Uses Redis view counts to calculate trending score
  */
-export async function getTrendingContent(
+async function getTrendingContent(
   allContent: UnifiedContentItem[],
   options: TrendingOptions = {}
 ): Promise<TrendingContentItem[]> {
@@ -111,7 +111,7 @@ export async function getTrendingContent(
 /**
  * Get popular content based on all-time Redis view counts
  */
-export async function getPopularContent(
+async function getPopularContent(
   allContent: UnifiedContentItem[],
   options: TrendingOptions = {}
 ): Promise<TrendingContentItem[]> {
@@ -176,7 +176,7 @@ export async function getPopularContent(
  * Get recent content based on dateAdded field
  * No Redis dependency - pure metadata sorting
  */
-export async function getRecentContent(
+async function getRecentContent(
   allContent: UnifiedContentItem[],
   options: TrendingOptions = {}
 ): Promise<TrendingContentItem[]> {

@@ -61,7 +61,7 @@ export interface FileProcessResult<T extends ContentType> {
  * @param allowedDir - Allowed parent directory
  * @throws {Error} If path traversal detected
  */
-export function validateSecurePath(filePath: string, allowedDir: string): void {
+function validateSecurePath(filePath: string, allowedDir: string): void {
   const resolvedPath = resolve(filePath);
   const resolvedAllowed = resolve(allowedDir);
 
@@ -79,7 +79,7 @@ export function validateSecurePath(filePath: string, allowedDir: string): void {
  * @param content - Content to hash
  * @returns SHA-256 hash hex string
  */
-export function computeContentHash(content: string): string {
+function computeContentHash(content: string): string {
   return crypto.createHash('sha256').update(content, 'utf-8').digest('hex');
 }
 
@@ -141,7 +141,7 @@ export async function saveBuildCache(cacheDir: string, cache: BuildCache): Promi
  * @param cache - Optional build cache for incremental builds
  * @returns Processing result with content or error
  */
-export async function processContentFile<T extends ContentType>(
+async function processContentFile<T extends ContentType>(
   file: string,
   contentDir: string,
   config: BuildCategoryConfig<T>,
@@ -251,7 +251,7 @@ export async function processContentFile<T extends ContentType>(
  * @param cache - Optional build cache
  * @returns Array of all successfully processed content items
  */
-export async function processCategoryFiles<T extends ContentType>(
+async function processCategoryFiles<T extends ContentType>(
   contentDir: string,
   config: BuildCategoryConfig<T>,
   cache: BuildCache | null

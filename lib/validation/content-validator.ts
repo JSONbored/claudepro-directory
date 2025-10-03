@@ -7,7 +7,6 @@
  * @see lib/schemas/content/*.schema.ts - Individual content schemas
  */
 
-import type { z } from 'zod';
 import { agentContentSchema } from '@/lib/schemas/content/agent.schema';
 import { collectionContentSchema } from '@/lib/schemas/content/collection.schema';
 import { commandContentSchema } from '@/lib/schemas/content/command.schema';
@@ -46,23 +45,4 @@ export function validateContentByCategory(data: unknown, category: string) {
     default:
       throw new Error(`Unknown content category: ${category}`);
   }
-}
-
-/**
- * Create a safe content validator that returns null on failure
- *
- * @param schema - Zod schema to use for validation
- * @returns Validator function that returns data or null
- *
- * @example
- * ```ts
- * const validateAgent = createContentValidator(agentContentSchema);
- * const agent = validateAgent(unknownData); // AgentContent | null
- * ```
- */
-export function createContentValidator<T extends z.ZodTypeAny>(schema: T) {
-  return (data: unknown): z.infer<T> | null => {
-    const result = schema.safeParse(data);
-    return result.success ? result.data : null;
-  };
 }

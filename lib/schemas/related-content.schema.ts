@@ -46,7 +46,7 @@ export const contentIndexSchema = z
  * Extended schema for split index functionality
  * Supports both flat items array AND categorized structure
  */
-export const categorizedContentIndexSchema = contentIndexSchema
+const categorizedContentIndexSchema = contentIndexSchema
   .extend({
     categories: z
       .record(
@@ -66,7 +66,7 @@ export type CategorizedContentIndex = z.infer<typeof categorizedContentIndexSche
  * Used for displaying related items in carousels and lists
  * Based on actual ContentMetadata structure
  */
-export const relatedContentItemSchema = z
+const relatedContentItemSchema = z
   .object({
     slug: nonEmptyString.max(200).describe('Unique identifier for the content item'),
     description: mediumString.describe('Brief description of the content'),
@@ -105,7 +105,7 @@ export type RelatedContentItem = z.infer<typeof relatedContentItemSchema>;
  * Smart Related Content Props Schema
  * Props for the main SmartRelatedContent component
  */
-export const smartRelatedContentPropsSchema = z
+const smartRelatedContentPropsSchema = z
   .object({
     featured: z
       .array(z.string().max(200).describe('Slug of featured content item'))
@@ -147,7 +147,7 @@ export type SmartRelatedContentProps = z.infer<typeof smartRelatedContentPropsSc
  * Smart Related Content With Metadata Props Schema
  * Props for the wrapper component that provides metadata
  */
-export const smartRelatedContentWithMetadataPropsSchema = smartRelatedContentPropsSchema
+const smartRelatedContentWithMetadataPropsSchema = smartRelatedContentPropsSchema
   .omit({ currentTags: true, currentKeywords: true })
   .extend({
     pathname: mediumString.optional().describe('Current page pathname for context'), // Allow pathname to be passed explicitly
@@ -161,7 +161,7 @@ export type SmartRelatedContentWithMetadataProps = z.infer<
 /**
  * Related Content Performance Metrics Schema
  */
-export const relatedContentPerformanceSchema = z
+const relatedContentPerformanceSchema = z
   .object({
     fetchTime: nonNegativeInt.describe('Time taken to fetch related content in milliseconds'),
     cacheHit: z.boolean().describe('Whether the result was served from cache'),
@@ -178,7 +178,7 @@ export type RelatedContentPerformance = z.infer<typeof relatedContentPerformance
  * Related Carousel Client Props Schema
  * Props for the client-side carousel component
  */
-export const relatedCarouselClientPropsSchema = z
+const relatedCarouselClientPropsSchema = z
   .object({
     items: z
       .array(relatedContentItemSchema)
@@ -207,7 +207,7 @@ export type RelatedCarouselClientProps = z.infer<typeof relatedCarouselClientPro
  * Related Content View Event Schema
  * For analytics tracking
  */
-export const relatedContentViewEventSchema = z
+const relatedContentViewEventSchema = z
   .object({
     eventType: z
       .literal('related_content_view')
@@ -228,7 +228,7 @@ export type RelatedContentViewEvent = z.infer<typeof relatedContentViewEventSche
 /**
  * Related Content Click Event Schema
  */
-export const relatedContentClickEventSchema = z
+const relatedContentClickEventSchema = z
   .object({
     eventType: z
       .literal('related_content_click')
@@ -260,7 +260,7 @@ export type RelatedContentClickEvent = z.infer<typeof relatedContentClickEventSc
 /**
  * Related Content Impression Event Schema
  */
-export const relatedContentImpressionEventSchema = z
+const relatedContentImpressionEventSchema = z
   .object({
     eventType: z
       .literal('related_content_impression')
@@ -289,7 +289,7 @@ export type RelatedContentImpressionEvent = z.infer<typeof relatedContentImpress
 /**
  * Carousel Navigation Event Schema
  */
-export const carouselNavigationEventSchema = z
+const carouselNavigationEventSchema = z
   .object({
     eventType: z
       .literal('carousel_navigation')
@@ -308,7 +308,7 @@ export type CarouselNavigationEvent = z.infer<typeof carouselNavigationEventSche
 /**
  * Related Content Configuration Schema
  */
-export const relatedContentConfigSchema = z
+const relatedContentConfigSchema = z
   .object({
     enabled: z.boolean().default(true).describe('Whether related content functionality is enabled'),
     algorithm: z
@@ -384,7 +384,7 @@ export type RelatedContentConfig = z.infer<typeof relatedContentConfigSchema>;
  * Related Content Request Schema
  * For API endpoints
  */
-export const relatedContentRequestSchema = z
+const relatedContentRequestSchema = z
   .object({
     slug: nonEmptyString
       .max(200)
@@ -408,7 +408,7 @@ export type RelatedContentRequest = z.infer<typeof relatedContentRequestSchema>;
 /**
  * Related Content Response Schema
  */
-export const relatedContentResponseSchema = z
+const relatedContentResponseSchema = z
   .object({
     items: z
       .array(relatedContentItemSchema)
@@ -433,62 +433,6 @@ export const relatedContentResponseSchema = z
   .describe('Response schema for API endpoints returning related content');
 
 export type RelatedContentResponse = z.infer<typeof relatedContentResponseSchema>;
-
-/**
- * Transform ContentItem to RelatedContentItem
- * Provides proper type conversion for components expecting RelatedContentItem
- */
-export function transformToRelatedContentItem(
-  item: import('@/lib/schemas/content/content-item-union.schema').ContentItem,
-  options: {
-    score?: number;
-    matchType?: 'same_category' | 'tag_match' | 'keyword_match' | 'trending';
-    views?: number;
-    matchDetails?: {
-      matchedTags: string[];
-      matchedKeywords: string[];
-    };
-  } = {}
-): RelatedContentItem {
-  return relatedContentItemSchema.parse({
-    slug: item.slug,
-    description: item.description,
-    category: item.category,
-    author: item.author,
-    dateAdded: item.dateAdded,
-    tags: item.tags,
-    source: item.source,
-    // Optional fields from item
-    name: 'name' in item ? item.name : undefined,
-    title: 'title' in item ? item.title : undefined,
-    githubUsername: 'githubUsername' in item ? item.githubUsername : undefined,
-    githubUrl: 'githubUrl' in item ? item.githubUrl : undefined,
-    documentationUrl: 'documentationUrl' in item ? item.documentationUrl : undefined,
-    // Related content specific fields with defaults
-    score: options.score ?? 75,
-    matchType: options.matchType ?? 'same_category',
-    views: options.views,
-    matchDetails: options.matchDetails,
-  });
-}
-
-/**
- * Transform array of ContentItem to RelatedContentItem array
- */
-export function transformToRelatedContentItems(
-  items: import('@/lib/schemas/content/content-item-union.schema').ContentItem[],
-  options: {
-    score?: number;
-    matchType?: 'same_category' | 'tag_match' | 'keyword_match' | 'trending';
-  } = {}
-): RelatedContentItem[] {
-  return items.map((item, index) =>
-    transformToRelatedContentItem(item, {
-      ...options,
-      score: options.score ?? Math.max(90 - index * 10, 50), // Decreasing scores
-    })
-  );
-}
 
 /**
  * Export all schemas for centralized access

@@ -96,7 +96,7 @@ export const cacheStatsSchema = z
 /**
  * Redis ZRANGE response validation (array with scores)
  */
-export const redisZRangeResponseSchema = z
+const redisZRangeResponseSchema = z
   .array(
     z
       .union([
@@ -110,7 +110,7 @@ export const redisZRangeResponseSchema = z
 /**
  * Popular items with scores schema
  */
-export const popularItemWithScoreSchema = z
+const popularItemWithScoreSchema = z
   .object({
     slug: cacheKeyString
       .max(KEY_LIMITS.MAX_SLUG_LENGTH)
@@ -139,7 +139,7 @@ export const cacheInvalidationResultSchema = z
 /**
  * Rate limit tracking schema for production monitoring
  */
-export const rateLimitTrackingSchema = z
+const rateLimitTrackingSchema = z
   .object({
     commandCount: nonNegativeInt.describe('Current number of commands executed in time window'),
     limitPerSecond: positiveInt.describe('Maximum commands allowed per second'),
@@ -184,7 +184,7 @@ export function parseRedisZRangeResponse(items: unknown[]): Array<{ slug: string
 /**
  * Redis connection status schema
  */
-export const redisConnectionStatusSchema = z
+const redisConnectionStatusSchema = z
   .object({
     isConnected: z.boolean().describe('Whether Redis is currently connected'),
     isFallback: z.boolean().describe('Whether using fallback mode (in-memory cache)'),

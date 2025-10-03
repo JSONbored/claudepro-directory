@@ -3,10 +3,7 @@
  * Functions for parsing and loading guide content
  */
 
-import fs from 'fs/promises';
-import path from 'path';
 import { z } from 'zod';
-import { logger } from '@/lib/logger';
 
 /**
  * Schema for guide frontmatter metadata
@@ -23,7 +20,7 @@ const guideFrontmatterSchema = z.object({
 /**
  * Schema for guide item
  */
-export const guideItemSchema = z.object({
+const guideItemSchema = z.object({
   title: z.string(),
   description: z.string(),
   slug: z.string(),
@@ -40,7 +37,7 @@ export const guideItemWithCategorySchema = guideItemSchema.extend({
 /**
  * Schema for guides by category
  */
-export const guidesByCategorySchema = z.record(z.string(), z.array(guideItemWithCategorySchema));
+const guidesByCategorySchema = z.record(z.string(), z.array(guideItemWithCategorySchema));
 
 export type GuideFrontmatter = z.infer<typeof guideFrontmatterSchema>;
 export type GuideItem = z.infer<typeof guideItemSchema>;
@@ -137,54 +134,4 @@ export function parseFrontmatter(content: string): GuideFrontmatter | null {
     // Don't log errors - frontmatter parsing is best-effort
     return null;
   }
-}
-
-/**
- * Load guides from directory with validation
- */
-export async function loadGuides(directory: string, type: string): Promise<GuideItem[]> {
-  const guides: GuideItem[] = [];
-
-  try {
-    const dir = path.join(process.cwd(), directory);
-    const files = await fs.readdir(dir);
-
-    for (const file of files) {
-      if (file.endsWith('.mdx')) {
-        try {
-          const content = await fs.readFile(path.join(dir, file), 'utf-8');
-          const metadata = parseFrontmatter(content);
-
-          const guideItem: GuideItem = {
-            title: metadata?.title || file.replace('.mdx', ''),
-            description: metadata?.description || '',
-            slug: `/guides/${type}/${file.replace('.mdx', '')}`,
-            dateUpdated: metadata?.dateUpdated || '',
-          };
-
-          const validation = guideItemSchema.safeParse(guideItem);
-          if (validation.success) {
-            guides.push(validation.data);
-          } else {
-            logger.error('Invalid guide item', new Error(validation.error.issues.join(', ')), {
-              file,
-              directory,
-            });
-          }
-        } catch (fileError) {
-          logger.error('Failed to load guide', fileError as Error, {
-            file,
-            directory,
-          });
-        }
-      }
-    }
-  } catch (dirError) {
-    logger.warn('Guide directory not found', {
-      directory,
-      error: String(dirError),
-    });
-  }
-
-  return guides.sort((a, b) => a.title.localeCompare(b.title));
 }

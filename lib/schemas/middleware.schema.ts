@@ -23,7 +23,7 @@ const MIDDLEWARE_LIMITS = {
 /**
  * Valid HTTP methods
  */
-export const httpMethodSchema = z
+const httpMethodSchema = z
   .enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'])
   .describe('Standard HTTP methods allowed in middleware operations');
 
@@ -64,7 +64,7 @@ export const ipAddressSchema = z
  * User agent validation
  * Allow all characters except control characters for modern browsers
  */
-export const userAgentSchema = z
+const userAgentSchema = z
   .string()
   .max(MIDDLEWARE_LIMITS.MAX_USER_AGENT_LENGTH)
   .transform((ua) => {
@@ -84,7 +84,7 @@ export const userAgentSchema = z
  * More flexible to handle charset parameters (e.g., text/plain;charset=UTF-8)
  * Includes Next.js server action content types
  */
-export const httpContentTypeSchema = z
+const httpContentTypeSchema = z
   .string()
   .transform((value) => value?.split(';')[0]?.trim().toLowerCase() || '')
   .refine(
@@ -151,7 +151,7 @@ export const middlewareRateLimitConfigSchema = z
 /**
  * Arcjet decision types
  */
-export const arcjetDecisionSchema = z
+const arcjetDecisionSchema = z
   .object({
     isDenied: z.function().describe('Function to check if the request was denied by Arcjet'),
     isAllowed: z.function().describe('Function to check if the request was allowed by Arcjet'),
@@ -221,7 +221,7 @@ export const apiEndpointTypeSchema = z
 /**
  * Middleware response schema
  */
-export const middlewareResponseSchema = z
+const middlewareResponseSchema = z
   .object({
     status: positiveInt.min(100).max(599).describe('HTTP status code for the response (100-599)'),
     headers: z
@@ -234,7 +234,7 @@ export const middlewareResponseSchema = z
 /**
  * Security headers validation
  */
-export const securityHeadersSchema = z
+const securityHeadersSchema = z
   .object({
     'content-security-policy': z
       .string()

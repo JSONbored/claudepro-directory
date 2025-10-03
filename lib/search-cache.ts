@@ -34,7 +34,7 @@ function generateSearchCacheKey(query: string, filters: SearchFilters): string {
 // Note: Filter and sort functions are now handled by fuzzysort-adapter.ts
 
 // Main search cache class
-export class SearchCache {
+class SearchCache {
   // Cached search function
   async search<T extends SearchableItem>(
     items: T[],

@@ -20,7 +20,7 @@ import { mediumString, shortString } from '@/lib/schemas/primitives/base-strings
  * References a specific content item by category and slug.
  * Build-time validation ensures all referenced items exist.
  */
-export const collectionItemReferenceSchema = z
+const collectionItemReferenceSchema = z
   .object({
     category: z
       .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'])
@@ -36,12 +36,14 @@ export const collectionItemReferenceSchema = z
     'Reference to a content item included in the collection. Build-time validation ensures item exists.'
   );
 
+export type CollectionItemReference = z.infer<typeof collectionItemReferenceSchema>;
+
 /**
  * Collection Compatibility Schema
  *
  * Defines which Claude platforms this collection supports.
  */
-export const collectionCompatibilitySchema = z
+const collectionCompatibilitySchema = z
   .object({
     claudeDesktop: z
       .boolean()
@@ -53,6 +55,8 @@ export const collectionCompatibilitySchema = z
       .describe('Whether collection is compatible with Claude Code CLI'),
   })
   .describe('Platform compatibility information for the collection');
+
+export type CollectionCompatibility = z.infer<typeof collectionCompatibilitySchema>;
 
 /**
  * Collection content schema - organized bundles of related configurations
@@ -130,5 +134,3 @@ export const collectionContentSchema = z
   );
 
 export type CollectionContent = z.infer<typeof collectionContentSchema>;
-export type CollectionItemReference = z.infer<typeof collectionItemReferenceSchema>;
-export type CollectionCompatibility = z.infer<typeof collectionCompatibilitySchema>;

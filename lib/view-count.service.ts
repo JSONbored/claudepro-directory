@@ -315,6 +315,3 @@ export const viewCountService = new ViewCountService();
 
 // Export types for external use
 export type { ViewCountRequest, ViewCountResponse, BatchViewCountRequest };
-
-// Export schemas for validation
-export { viewCountRequestSchema, viewCountResponseSchema, batchViewCountRequestSchema };

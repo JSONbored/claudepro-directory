@@ -105,7 +105,7 @@ function convertThreshold(fuseThreshold: number): number {
  * @param options - Search options (Fuse.js compatible)
  * @returns Array of matching items sorted by relevance
  */
-export async function searchWithFuzzysort<T extends SearchableItem>(
+async function searchWithFuzzysort<T extends SearchableItem>(
   items: T[],
   query: string,
   options?: {

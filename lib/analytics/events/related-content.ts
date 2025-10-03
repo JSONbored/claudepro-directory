@@ -33,17 +33,3 @@ export const trackRelatedContentClick = (
     });
   }
 };
-
-export const trackCarouselNavigation = (
-  action: 'next' | 'previous',
-  currentSlide: number,
-  totalSlides: number
-): void => {
-  if (window?.umami) {
-    window.umami.track('carousel_nav', {
-      action,
-      current: currentSlide,
-      total: totalSlides,
-    });
-  }
-};

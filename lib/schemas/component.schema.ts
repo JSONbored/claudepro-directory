@@ -8,10 +8,7 @@
 
 import { z } from 'zod';
 import { nonEmptyString } from '@/lib/schemas/primitives/base-strings';
-import {
-  type UnifiedContentItem,
-  unifiedContentItemSchema,
-} from './components/content-item.schema';
+import type { UnifiedContentItem } from './components/content-item.schema';
 import type { HomePageClientProps } from './components/page-props.schema';
 import type { SortOption } from './content-filter.schema';
 
@@ -28,7 +25,7 @@ export interface ConfigCardProps {
 }
 
 // Re-export commonly used types from ./components
-export { type HomePageClientProps, type UnifiedContentItem, unifiedContentItemSchema };
+export type { HomePageClientProps, UnifiedContentItem };
 
 // ContentListWithLoadMore component props
 export interface ContentListWithLoadMoreProps {
@@ -99,7 +96,7 @@ export interface TrendingContentProps {
 /**
  * View tracker props
  */
-export const viewTrackerPropsSchema = z.object({
+const viewTrackerPropsSchema = z.object({
   category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'guides']),
   slug: nonEmptyString.max(200),
 });
@@ -178,7 +175,7 @@ export type SortDropdownProps = {
 /**
  * Code highlight props schema
  */
-export const codeHighlightPropsSchema = z.object({
+const codeHighlightPropsSchema = z.object({
   code: nonEmptyString,
   language: nonEmptyString.default('typescript'),
   title: nonEmptyString.optional(),

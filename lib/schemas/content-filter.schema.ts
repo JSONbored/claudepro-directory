@@ -6,34 +6,23 @@
 
 import { z } from 'zod';
 import { logger } from '@/lib/logger';
-import { stringArray } from '@/lib/schemas/primitives/base-arrays';
 import { nonEmptyString, shortString } from '@/lib/schemas/primitives/base-strings';
 
 /**
- * UI Sort/Filter schemas (preserved from deprecated hooks)
+ * UI Sort/Filter types (preserved from deprecated hooks)
+ * Schemas removed - only types used in component.schema.ts
  */
 
 // UI Sort options for sort-dropdown component
-export const uiSortOptionSchema = z.enum(['popularity', 'date', 'name', 'author']);
-export type SortOption = z.infer<typeof uiSortOptionSchema>;
+export type SortOption = 'popularity' | 'date' | 'name' | 'author';
 
-export const sortDirectionSchema = z.enum(['asc', 'desc']);
-export type SortDirection = z.infer<typeof sortDirectionSchema>;
-
-// UI Filter options for filter-bar component
-export const uiFilterOptionsSchema = z.object({
-  category: nonEmptyString,
-  tags: stringArray,
-  author: nonEmptyString,
-  popularityRange: z.tuple([z.number(), z.number()]),
-  dateRange: z.enum(['all', 'week', 'month', 'year']),
-});
-export type FilterOptions = z.infer<typeof uiFilterOptionsSchema>;
+export type SortDirection = 'asc' | 'desc';
 
 /**
  * Helper to safely extract string arrays from content data
+ * Used internally by extractFilterOptions
  */
-export function extractStringArray(
+function extractStringArray(
   values: unknown[],
   fieldName: string,
   maxLength: number = 100

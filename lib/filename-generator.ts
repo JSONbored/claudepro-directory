@@ -172,7 +172,7 @@ function convertHookTypeToKebab(hookType: string): string {
  * @param language - Detected language from language-detection.ts
  * @returns File extension (without dot)
  */
-export function getExtensionFromLanguage(language: string): string {
+function getExtensionFromLanguage(language: string): string {
   const normalized = language.toLowerCase().trim();
   return LANGUAGE_EXTENSIONS[normalized as keyof typeof LANGUAGE_EXTENSIONS] || 'txt';
 }

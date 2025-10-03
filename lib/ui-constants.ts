@@ -733,10 +733,3 @@ export const UI_CLASSES = {
  * Type-safe UI class constant keys
  */
 export type UIClassKey = keyof typeof UI_CLASSES;
-
-/**
- * Helper to combine UI constants with additional classes
- */
-export function combineClasses(...classes: (string | undefined | false | null)[]): string {
-  return classes.filter(Boolean).join(' ');
-}

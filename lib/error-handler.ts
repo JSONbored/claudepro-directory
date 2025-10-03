@@ -389,8 +389,8 @@ export class ErrorHandler {
   }
 }
 
-// Export singleton instance
-export const errorHandler = ErrorHandler.getInstance();
+// Singleton instance
+const errorHandler = ErrorHandler.getInstance();
 
 // Convenience functions for common use cases
 export const handleApiError = (

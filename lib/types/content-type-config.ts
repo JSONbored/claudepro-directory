@@ -123,16 +123,6 @@ export interface ContentTypeConfig {
 }
 
 /**
- * Type guard to check if item has specific properties
- */
-export function hasProperty<T extends UnifiedContentItem, K extends keyof T>(
-  item: T,
-  property: K
-): item is T & Required<Pick<T, K>> {
-  return property in item && item[property] !== undefined && item[property] !== null;
-}
-
-/**
  * Type-safe content type discriminator
  * Re-exported from canonical schema definition
  */

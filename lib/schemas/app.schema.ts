@@ -40,7 +40,7 @@ export type SlugParams = z.infer<typeof slugParamsSchema>;
 /**
  * Form state schema for server actions
  */
-export const formStateSchema = z.object({
+const formStateSchema = z.object({
   success: z.boolean().optional(),
   error: z.string().optional(),
   errors: z.record(z.string(), z.array(z.string())).optional(),
@@ -79,7 +79,7 @@ export type LazyLoaderOptions<T> = {
 /**
  * SEO page data schema
  */
-export const seoPageDataSchema = z.object({
+const seoPageDataSchema = z.object({
   title: nonEmptyString.max(200),
   description: nonEmptyString.max(500),
   keywords: z.array(shortString.max(50)).max(20),
@@ -96,7 +96,7 @@ export type SEOPageData = z.infer<typeof seoPageDataSchema>;
 /**
  * Related guide schema
  */
-export const relatedGuideSchema = z.object({
+const relatedGuideSchema = z.object({
   title: nonEmptyString.max(200),
   slug: nonEmptyString.max(200),
   category: nonEmptyString.max(100),
@@ -107,7 +107,7 @@ export type RelatedGuide = z.infer<typeof relatedGuideSchema>;
 /**
  * Comparison data schema for SEO comparison pages
  */
-export const comparisonDataSchema = z.object({
+const comparisonDataSchema = z.object({
   title: nonEmptyString.max(200),
   description: nonEmptyString.max(500),
   content: nonEmptyString,
@@ -119,14 +119,3 @@ export const comparisonDataSchema = z.object({
 });
 
 export type ComparisonData = z.infer<typeof comparisonDataSchema>;
-
-/**
- * Export all app schemas for centralized access
- */
-export const appSchemas = {
-  slugParams: slugParamsSchema,
-  formState: formStateSchema,
-  seoPageData: seoPageDataSchema,
-  relatedGuide: relatedGuideSchema,
-  comparisonData: comparisonDataSchema,
-} as const;

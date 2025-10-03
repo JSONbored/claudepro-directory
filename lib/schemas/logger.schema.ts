@@ -22,7 +22,7 @@ const LOGGER_LIMITS = {
 /**
  * Log level validation
  */
-export const logLevelSchema = z
+const logLevelSchema = z
   .enum(['debug', 'info', 'warn', 'error', 'fatal'])
   .describe('Log severity level for structured logging operations');
 
@@ -55,7 +55,7 @@ export const logContextSchema = z
 /**
  * Log entry schema for structured logging
  */
-export const logEntrySchema = z
+const logEntrySchema = z
   .object({
     level: logLevelSchema.describe('Severity level of the log entry'),
     message: nonEmptyString
@@ -90,7 +90,7 @@ export type LogEntry = z.infer<typeof logEntrySchema>;
 /**
  * Error object validation
  */
-export const logErrorSchema = z
+const logErrorSchema = z
   .object({
     name: nonEmptyString
       .max(LOGGER_LIMITS.MAX_ERROR_NAME_LENGTH)
@@ -109,7 +109,7 @@ export const logErrorSchema = z
 /**
  * Complete log object validation
  */
-export const logObjectSchema = z
+const logObjectSchema = z
   .object({
     timestamp: isoDatetimeString.describe('ISO 8601 timestamp when the log was created'),
     level: logLevelSchema.describe('Log severity level'),
@@ -124,7 +124,7 @@ export const logObjectSchema = z
 /**
  * Development log format components validation
  */
-export const developmentLogComponentsSchema = z
+const developmentLogComponentsSchema = z
   .object({
     timestamp: isoDatetimeString.describe('ISO 8601 timestamp of the log event'),
     level: logLevelSchema.describe('Log severity level'),
@@ -141,7 +141,7 @@ export const developmentLogComponentsSchema = z
 /**
  * Request context validation for HTTP logging
  */
-export const requestContextSchema = z
+const requestContextSchema = z
   .object({
     method: nonEmptyString
       .max(10)
@@ -185,7 +185,7 @@ export const requestContextSchema = z
 /**
  * Performance timing metadata validation
  */
-export const performanceMetadataSchema = z
+const performanceMetadataSchema = z
   .object({
     duration: z
       .string()
@@ -194,20 +194,6 @@ export const performanceMetadataSchema = z
     success: z.boolean().describe('Whether the operation completed successfully'),
   })
   .describe('Performance metrics for operation timing and success tracking');
-
-/**
- * Safe log object parser with validation
- */
-export function parseLogObject(
-  logObject: Record<string, unknown>
-): { success: true; data: z.infer<typeof logObjectSchema> } | { success: false; error: string } {
-  try {
-    const parsed = logObjectSchema.parse(logObject);
-    return { success: true, data: parsed };
-  } catch {
-    return { success: false, error: 'Validation failed' };
-  }
-}
 
 /**
  * Safe development log components parser
