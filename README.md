@@ -19,9 +19,11 @@
 
 <div align="center">
 
-[![Browse Configurations](https://img.shields.io/badge/🌐_Browse_Configurations-Visit_Site-CC785C?style=for-the-badge)](https://claudepro.directory)
-[![Submit Content](https://img.shields.io/badge/📝_Submit_Yours-Contribute-4CAF50?style=for-the-badge)](https://claudepro.directory/submit)
-[![Join Discord](https://img.shields.io/badge/Discord-Join_Community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/Ax3Py4YDrq)
+[![Browse](https://img.shields.io/badge/🌐_Browse-Visit_Site-CC785C?style=for-the-badge)](https://claudepro.directory)
+[![Submit Content](https://img.shields.io/badge/📝_Submit-Coming_Soon-gray?style=for-the-badge)](https://github.com/JSONbored/claudepro-directory/issues/new/choose)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/Ax3Py4YDrq)
+[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/JSONbored/claudepro-directory/discussions)
+[![Twitter](https://img.shields.io/badge/Twitter-@JSONbored-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://x.com/JSONbored)
 
 </div>
 
@@ -49,8 +51,8 @@ No account needed. No downloads. Just better AI conversations.
 
 Want to share your Claude configurations with the community?
 
-1. **[Visit claudepro.directory/submit](https://claudepro.directory/submit)** or use GitHub issue templates
-2. **Add** your configuration via web form or PR
+1. **Use [GitHub issue templates](https://github.com/JSONbored/claudepro-directory/issues/new/choose)** (web submit form coming soon)
+2. **Add** your configuration via issue template or PR
 3. **Help** others work smarter with Claude
 
 See our [Contributing Guide](.github/CONTRIBUTING.md) for detailed instructions.
@@ -69,15 +71,6 @@ See our [Contributing Guide](.github/CONTRIBUTING.md) for detailed instructions.
 
 </div>
 
-## 🤝 Community
-
-<div align="center">
-
-[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/Ax3Py4YDrq)
-[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/JSONbored/claudepro-directory/discussions)
-[![Twitter](https://img.shields.io/badge/Twitter-@JSONbored-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://x.com/JSONbored)
-
-</div>
 
 ## 📈 Activity
 
