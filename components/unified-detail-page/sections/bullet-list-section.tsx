@@ -20,7 +20,10 @@
 import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { LucideIcon } from '@/lib/icons';
-import { componentDescriptionString, componentTitleString } from '@/lib/schemas/primitives';
+import {
+  componentDescriptionString,
+  componentTitleString,
+} from '@/lib/schemas/primitives/ui-component-primitives';
 import { UI_CLASSES } from '@/lib/ui-constants';
 import { cn } from '@/lib/utils';
 

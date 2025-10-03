@@ -20,7 +20,7 @@ import Link from 'next/link';
 import { z } from 'zod';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { LucideIcon } from '@/lib/icons';
-import { nonEmptyString } from '@/lib/schemas/primitives';
+import { nonEmptyString } from '@/lib/schemas/primitives/base-strings';
 import { UI_CLASSES } from '@/lib/ui-constants';
 
 /**

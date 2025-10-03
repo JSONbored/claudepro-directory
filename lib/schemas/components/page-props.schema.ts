@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { nonNegativeInt, positiveInt } from '../primitives';
+import { nonNegativeInt, positiveInt } from '../primitives/base-numbers';
 import { unifiedContentItemSchema } from './content-item.schema';
 
 /**

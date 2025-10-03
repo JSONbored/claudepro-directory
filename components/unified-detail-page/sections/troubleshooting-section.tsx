@@ -14,7 +14,7 @@
 import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Copy } from '@/lib/icons';
-import { componentDescriptionString } from '@/lib/schemas/primitives';
+import { componentDescriptionString } from '@/lib/schemas/primitives/ui-component-primitives';
 import { UI_CLASSES } from '@/lib/ui-constants';
 
 /**

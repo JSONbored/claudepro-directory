@@ -83,7 +83,7 @@ export type ContentCategory = z.infer<typeof contentCategorySchema>;
  * Used across: middleware, static-api
  */
 export const appContentTypeSchema = z
-  .enum(['agent', 'mcp', 'hook', 'command', 'rule', 'statusline', 'job'])
+  .enum(['agent', 'mcp', 'hook', 'command', 'rule', 'statusline', 'collection', 'job'])
   .describe('Application content types for routing and middleware processing');
 
 export type AppContentType = z.infer<typeof appContentTypeSchema>;

@@ -14,7 +14,7 @@ import Link from 'next/link';
 import { z } from 'zod';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock } from '@/lib/icons';
-import { nonEmptyString } from '@/lib/schemas/primitives';
+import { nonEmptyString } from '@/lib/schemas/primitives/base-strings';
 import { UI_CLASSES } from '@/lib/ui-constants';
 
 /**

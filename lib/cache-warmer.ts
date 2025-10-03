@@ -7,13 +7,9 @@ import { z } from 'zod';
 import { metadataLoader } from '@/lib/lazy-content-loaders';
 import { contentIndexer } from '@/lib/related-content/indexer';
 import { relatedContentService } from '@/lib/related-content/service';
-import {
-  isoDatetimeString,
-  nonEmptyString,
-  nonNegativeInt,
-  positiveInt,
-  stringArray,
-} from '@/lib/schemas/primitives';
+import { stringArray } from '@/lib/schemas/primitives/base-arrays';
+import { nonNegativeInt, positiveInt } from '@/lib/schemas/primitives/base-numbers';
+import { isoDatetimeString, nonEmptyString } from '@/lib/schemas/primitives/base-strings';
 import { logger } from './logger';
 import { contentCache, statsRedis } from './redis';
 import { isProduction } from './schemas/env.schema';

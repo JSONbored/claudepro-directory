@@ -15,7 +15,7 @@ import { z } from 'zod';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp } from '@/lib/icons';
-import { nonEmptyString } from '@/lib/schemas/primitives';
+import { nonEmptyString } from '@/lib/schemas/primitives/base-strings';
 import { UI_CLASSES } from '@/lib/ui-constants';
 
 /**

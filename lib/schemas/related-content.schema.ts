@@ -9,16 +9,14 @@ import {
   type UnifiedContentItem,
   unifiedContentItemSchema,
 } from './components/content-item.schema';
+import { stringArray } from './primitives/base-arrays';
+import { nonNegativeInt, percentage, positiveInt } from './primitives/base-numbers';
 import {
   isoDatetimeString,
   mediumString,
   nonEmptyString,
-  nonNegativeInt,
-  percentage,
-  positiveInt,
   shortString,
-  stringArray,
-} from './primitives';
+} from './primitives/base-strings';
 
 // Type alias for backwards compatibility and convenience
 export type ContentItem = UnifiedContentItem;

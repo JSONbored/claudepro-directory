@@ -5,7 +5,8 @@
  */
 
 import { z } from 'zod';
-import { nonEmptyString, nonNegativeInt, positiveInt } from './primitives';
+import { nonNegativeInt, positiveInt } from './primitives/base-numbers';
+import { nonEmptyString } from './primitives/base-strings';
 
 /**
  * Security constants for middleware

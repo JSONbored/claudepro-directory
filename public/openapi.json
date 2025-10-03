@@ -62,7 +62,8 @@
                 "rules",
                 "commands",
                 "hooks",
-                "statuslines"
+                "statuslines",
+                "collections"
               ],
               "description": "Content category identifier",
               "example": "agents"
@@ -154,7 +155,8 @@
                             "rules",
                             "commands",
                             "hooks",
-                            "statuslines"
+                            "statuslines",
+                            "collections"
                           ],
                           "description": "Content category identifier",
                           "example": "agents"
@@ -304,7 +306,8 @@
                 "rules",
                 "commands",
                 "hooks",
-                "statuslines"
+                "statuslines",
+                "collections"
               ],
               "description": "Content category identifier",
               "example": "agents"
@@ -496,7 +499,8 @@
                 "rules",
                 "commands",
                 "hooks",
-                "statuslines"
+                "statuslines",
+                "collections"
               ],
               "description": "Content category identifier",
               "example": "agents"
@@ -791,7 +795,8 @@
                                   "rules",
                                   "commands",
                                   "hooks",
-                                  "statuslines"
+                                  "statuslines",
+                                  "collections"
                                 ],
                                 "description": "Content category identifier",
                                 "example": "agents"
