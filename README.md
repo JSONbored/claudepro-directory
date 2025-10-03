@@ -10,14 +10,20 @@
 [![Security](https://github.com/JSONbored/claudepro-directory/actions/workflows/security.yml/badge.svg?branch=main&event=push)](https://github.com/JSONbored/claudepro-directory/actions/workflows/security.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](https://opensource.org/licenses/MIT)
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.5-black?logo=next.js&logoColor=white)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.1-61DAFB?logo=react&logoColor=white)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4.1-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5-black?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.1-61DAFB?style=flat-square&logo=react&logoColor=white)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4.1-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 
 ### **Find the perfect Claude configuration in seconds**
 
-[🌐 **Browse Configurations**](https://claudepro.directory) • [📝 **Submit Yours**](https://claudepro.directory/submit) • [💬 **Join Discord**](https://discord.gg/Ax3Py4YDrq)
+<div align="center">
+
+[![Browse Configurations](https://img.shields.io/badge/🌐_Browse_Configurations-Visit_Site-CC785C?style=for-the-badge)](https://claudepro.directory)
+[![Submit Content](https://img.shields.io/badge/📝_Submit_Yours-Contribute-4CAF50?style=for-the-badge)](https://claudepro.directory/submit)
+[![Join Discord](https://img.shields.io/badge/Discord-Join_Community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/Ax3Py4YDrq)
+
+</div>
 
 </div>
 
@@ -93,62 +99,12 @@ Thanks to everyone who has contributed to making Claude better for everyone!
   <img src="https://contrib.rocks/image?repo=JSONbored/claudepro-directory" />
 </a>
 
-## 📄 License
 
-MIT © [JSONbored](https://github.com/JSONbored)
-
-## 🚧 Development
-
-<details>
-<summary><b>For Developers (click to expand)</b></summary>
-
-### Prerequisites
-- Node.js 22+
-- npm 10+
-
-### Setup
-```bash
-# Clone the repository
-git clone https://github.com/JSONbored/claudepro-directory.git
-cd claudepro-directory
-
-# Install dependencies
-npm install
-
-# Run development server
-npm run dev
-```
-
-### Scripts
-```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run lint         # Run linting
-npm run type-check   # Check TypeScript
-```
-
-### Project Structure
-```
-claudepro-directory/
-├── src/
-│   ├── app/           # Next.js app router pages
-│   ├── components/    # React components
-│   └── lib/           # Utilities & services
-├── content/           # Configuration JSONs
-├── generated/         # Build artifacts
-└── public/            # Static assets
-```
-
-See [Contributing Guide](.github/CONTRIBUTING.md) for more details.
-
-</details>
-
----
 
 <div align="center">
 
 **Built with ❤️ by [@JSONbored](https://github.com/JSONbored)**
 
-[Website](https://claudepro.directory) • [GitHub](https://github.com/JSONbored/claudepro-directory) • [Discord](https://discord.gg/Ax3Py4YDrq)
+[Website](https://claudepro.directory) • [GitHub](https://github.com/JSONbored/claudepro-directory) • [Discord](https://discord.gg/Ax3Py4YDrq) • [License](LICENSE)
 
 </div>
