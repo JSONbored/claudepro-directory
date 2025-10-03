@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Vercel",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "deployment",
-    "vercel",
-    "hosting",
-    "devops",
-    "infrastructure"
-  ],
+  "tags": ["deployment", "vercel", "hosting", "devops", "infrastructure"],
   "content": "Control Vercel deployments and infrastructure through Claude for seamless deployment management.",
   "features": [
     "Search and navigate Vercel documentation",
@@ -68,10 +62,22 @@
     "Review changes before production deploys"
   ],
   "troubleshooting": [
-    "Check Vercel account permissions",
-    "Verify project access rights",
-    "Monitor build quota usage",
-    "Check domain verification status"
+    {
+      "issue": "Check Vercel account permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify project access rights",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor build quota usage",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check domain verification status",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Deploy the latest commit to production",
@@ -80,11 +86,7 @@
     "List all recent deployments"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "deploy"
-  ],
+  "permissions": ["read", "write", "deploy"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://vercel.com/docs/mcp/vercel-mcp"
 }

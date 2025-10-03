@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Fireflies",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "meetings",
-    "fireflies",
-    "transcription",
-    "notes",
-    "ai-assistant"
-  ],
+  "tags": ["meetings", "fireflies", "transcription", "notes", "ai-assistant"],
   "content": "Access and analyze meeting transcripts and insights through Fireflies.ai's meeting intelligence platform.",
   "features": [
     "Access meeting transcripts and recordings",
@@ -68,10 +62,22 @@
     "Regular data audits recommended"
   ],
   "troubleshooting": [
-    "Check workspace permissions",
-    "Verify meeting access rights",
-    "Monitor storage limits",
-    "Test transcript quality"
+    {
+      "issue": "Check workspace permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify meeting access rights",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor storage limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Test transcript quality",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Get action items from today's standup",
@@ -80,10 +86,7 @@
     "Find all mentions of budget in recent meetings"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "search"
-  ],
+  "permissions": ["read", "search"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol"
 }

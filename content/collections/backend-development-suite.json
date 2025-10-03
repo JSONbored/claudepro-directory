@@ -1,0 +1,63 @@
+{
+  "slug": "backend-development-suite",
+  "title": "Backend Development Suite",
+  "description": "Full-featured backend development environment combining architecture planning, database design, and cloud services integration. Perfect for building scalable server-side applications.",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-02",
+  "tags": ["backend", "architecture", "database", "cloud", "aws", "infrastructure"],
+  "source": "community",
+  "category": "collections",
+  "collectionType": "use-case",
+  "difficulty": "advanced",
+  "estimatedSetupTime": "30 minutes",
+  "features": [
+    "Architecture design and planning",
+    "Database schema design and optimization",
+    "Cloud services integration (AWS)",
+    "API development and documentation"
+  ],
+  "useCases": [
+    "Building new backend services from scratch",
+    "Migrating applications to cloud infrastructure",
+    "Designing scalable database architectures",
+    "Implementing microservices patterns"
+  ],
+  "items": [
+    {
+      "category": "agents",
+      "slug": "backend-architect-agent",
+      "reason": "Designs scalable backend architectures and system designs"
+    },
+    {
+      "category": "agents",
+      "slug": "database-specialist-agent",
+      "reason": "Provides expert database design and optimization guidance"
+    },
+    {
+      "category": "agents",
+      "slug": "api-builder-agent",
+      "reason": "Helps build robust RESTful APIs"
+    },
+    {
+      "category": "mcp",
+      "slug": "aws-services-mcp-server",
+      "reason": "Integrates AWS cloud services for infrastructure management"
+    }
+  ],
+  "installationOrder": [
+    "backend-architect-agent",
+    "database-specialist-agent",
+    "aws-services-mcp-server",
+    "api-builder-agent"
+  ],
+  "prerequisites": [
+    "Node.js 18 or higher",
+    "AWS account (for AWS MCP server)",
+    "Understanding of backend development concepts",
+    "Database knowledge (SQL or NoSQL)"
+  ],
+  "compatibility": {
+    "claudeDesktop": true,
+    "claudeCode": true
+  }
+}

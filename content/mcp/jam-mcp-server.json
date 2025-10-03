@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Jam",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "debugging",
-    "jam",
-    "testing",
-    "bug-tracking",
-    "developer-tools"
-  ],
+  "tags": ["debugging", "jam", "testing", "bug-tracking", "developer-tools"],
   "content": "Access Jam bug recordings and debug information to troubleshoot issues more efficiently.",
   "features": [
     "Access bug video recordings",
@@ -68,10 +62,22 @@
     "Regular cleanup of old recordings"
   ],
   "troubleshooting": [
-    "Verify workspace access rights",
-    "Check recording permissions",
-    "Monitor storage usage",
-    "Test playback functionality"
+    {
+      "issue": "Verify workspace access rights",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check recording permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor storage usage",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Test playback functionality",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Show the console errors from bug JAM-123",
@@ -80,10 +86,7 @@
     "Find all JavaScript errors from today"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "analyze"
-  ],
+  "permissions": ["read", "analyze"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://jam.dev/docs/debug-a-jam/mcp"
 }

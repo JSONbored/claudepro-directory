@@ -1,0 +1,10 @@
+{
+  "slug": "my-command",
+  "description": "A brief description of what this command does",
+  "category": "commands",
+  "author": "YourName",
+  "dateAdded": "2025-01-15",
+  "tags": ["function", "technology", "use-case"],
+  "content": "---\nallowed-tools: Read, Write, Edit, Bash(git:*)\nargument-hint: [optional-arg]\ndescription: Brief command description\nmodel: claude-3-5-sonnet-20241022\n---\n\n## What This Command Does\n\nDescribe the main purpose of your command.\n\n## How To Use\n\n```bash\n/my-command\n/my-command arg1\n```\n\n## Arguments\n\n- `$1` - First argument (optional): What it does\n\n## What Happens\n\n1. Step 1: What the command does first\n2. Step 2: What happens next\n3. Step 3: Final result\n\nProvide clear output about what was done.",
+  "source": "community"
+}

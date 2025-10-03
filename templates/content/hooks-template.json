@@ -1,0 +1,58 @@
+{
+  "slug": "your-hook-name",
+  "description": "Brief description of what this hook does and its purpose",
+  "category": "hooks",
+  "author": "Your Name or GitHub Username",
+  "dateAdded": "YYYY-MM-DD",
+  "tags": ["primary-functionality", "secondary-feature", "tool-name", "use-case"],
+  "hookType": "PostToolUse | PreToolUse | SessionStart | SessionEnd | UserPromptSubmit | Notification | PreCompact | Stop | SubagentStop",
+  "configuration": {
+    "hookConfig": {
+      "hooks": {
+        "postToolUse": {
+          "script": "./.claude/hooks/your-hook-name.sh",
+          "matchers": ["write", "edit", "multiedit"]
+        }
+      }
+    },
+    "scriptContent": "#!/usr/bin/env bash\n\n# Your shell script content here\n# This script will be executed when the hook triggers\n\necho 'Hook executed successfully'"
+  },
+  "source": "community",
+  "features": [
+    "Key feature or capability 1",
+    "Key feature or capability 2",
+    "Key feature or capability 3"
+  ],
+  "useCases": [
+    "Common use case scenario 1",
+    "Common use case scenario 2",
+    "Common use case scenario 3"
+  ],
+  "documentationUrl": "https://link-to-external-documentation.com",
+  "requirements": ["Custom requirement not auto-detected", "Special dependency or tool"],
+  "troubleshooting": [
+    {
+      "issue": "Description of a potential issue",
+      "solution": "Step-by-step solution to resolve the issue"
+    },
+    {
+      "issue": "Another common problem",
+      "solution": "How to fix this specific problem"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Custom installation step 1",
+        "Custom installation step 2",
+        "Custom installation step 3"
+      ],
+      "configPath": {
+        "macOS": "~/.claude/config.json",
+        "windows": "%APPDATA%\\Claude\\config.json",
+        "linux": "~/.config/claude/config.json"
+      }
+    },
+    "requirements": ["Custom installation requirements"]
+  }
+}

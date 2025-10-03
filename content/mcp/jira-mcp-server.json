@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Atlassian",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "jira",
-    "confluence",
-    "atlassian",
-    "project-management",
-    "documentation"
-  ],
+  "tags": ["jira", "confluence", "atlassian", "project-management", "documentation"],
   "content": "Access Jira and Confluence through a unified Atlassian MCP interface for project and documentation management.",
   "features": [
     "Create and update Jira issues with custom fields",
@@ -68,9 +62,18 @@
     "Regular backups recommended for critical data"
   ],
   "troubleshooting": [
-    "Verify site access permissions",
-    "Check OAuth token status with /mcp",
-    "Ensure project visibility settings"
+    {
+      "issue": "Verify site access permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check OAuth token status with /mcp",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure project visibility settings",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Create a Jira bug for the login issue",
@@ -79,11 +82,7 @@
     "Generate a sprint report"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "admin"
-  ],
+  "permissions": ["read", "write", "admin"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://www.atlassian.com/platform/remote-mcp-server"
 }

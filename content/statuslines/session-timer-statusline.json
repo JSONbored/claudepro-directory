@@ -1,0 +1,57 @@
+{
+  "slug": "session-timer-statusline",
+  "description": "Time-tracking statusline showing elapsed session duration, tokens per minute rate, and estimated cost with productivity metrics",
+  "category": "statuslines",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-01",
+  "tags": ["timer", "productivity", "metrics", "bash", "time-tracking", "analytics"],
+  "statuslineType": "custom",
+  "content": "#!/usr/bin/env bash\n\n# Session Timer Statusline for Claude Code\n# Tracks session duration and productivity metrics\n\n# Read JSON from stdin\nread -r input\n\n# Extract session data\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"' | sed 's/claude-//')\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\ncost=$(echo \"$input\" | jq -r '.session.estimatedCost // 0' | awk '{printf \"%.3f\", $0}')\nsession_start=$(echo \"$input\" | jq -r '.session.startTime // \"\"')\n\n# Calculate session duration\nif [ -n \"$session_start\" ]; then\n  start_epoch=$(date -j -f \"%Y-%m-%dT%H:%M:%S\" \"${session_start%.*}\" \"+%s\" 2>/dev/null || echo \"0\")\n  current_epoch=$(date +%s)\n  duration=$((current_epoch - start_epoch))\n  \n  # Format duration as HH:MM:SS\n  hours=$((duration / 3600))\n  minutes=$(((duration % 3600) / 60))\n  seconds=$((duration % 60))\n  formatted_time=$(printf \"%02d:%02d:%02d\" $hours $minutes $seconds)\n  \n  # Calculate tokens per minute\n  if [ $duration -gt 0 ]; then\n    tokens_per_min=$((tokens * 60 / duration))\n    \n    # Productivity rating\n    if [ $tokens_per_min -gt 500 ]; then\n      prod_color=\"\\033[32m\"  # Green - high productivity\n      prod_indicator=\"🔥\"\n    elif [ $tokens_per_min -gt 200 ]; then\n      prod_color=\"\\033[33m\"  # Yellow - medium productivity\n      prod_indicator=\"⚡\"\n    else\n      prod_color=\"\\033[36m\"  # Cyan - normal\n      prod_indicator=\"💭\"\n    fi\n  else\n    tokens_per_min=0\n    prod_color=\"\\033[36m\"\n    prod_indicator=\"💭\"\n  fi\n  \n  # Calculate cost per hour\n  if [ $duration -gt 0 ]; then\n    cost_per_hour=$(echo \"$cost * 3600 / $duration\" | bc -l | awk '{printf \"%.2f\", $0}')\n  else\n    cost_per_hour=\"0.00\"\n  fi\nelse\n  formatted_time=\"00:00:00\"\n  tokens_per_min=0\n  cost_per_hour=\"0.00\"\n  prod_indicator=\"💭\"\nfi\n\n# Build statusline\necho -e \"\\033[35m⏱  ${formatted_time}\\033[0m │ \\033[36m${model}\\033[0m │ ${prod_color}${prod_indicator} ${tokens_per_min}/min\\033[0m │ \\033[33m\\$${cost_per_hour}/hr\\033[0m\"\n",
+  "features": [
+    "Elapsed session time in HH:MM:SS format",
+    "Real-time tokens per minute calculation",
+    "Cost per hour estimation",
+    "Session start time display",
+    "Productivity metrics (tokens/min indicator)",
+    "Color-coded efficiency ratings",
+    "Persistent timing across statusline refreshes"
+  ],
+  "configuration": {
+    "format": "bash",
+    "refreshInterval": 1000,
+    "position": "left",
+    "colorScheme": "productivity-metrics"
+  },
+  "useCases": [
+    "Track billable hours for client work",
+    "Monitor session productivity and efficiency",
+    "Budget management for API cost control",
+    "Time-boxed development sessions (Pomodoro technique)",
+    "Performance benchmarking across different models"
+  ],
+  "requirements": [
+    "Bash shell with bc calculator",
+    "jq JSON processor",
+    "date command with -j flag (macOS) or --date (Linux)"
+  ],
+  "preview": "⏱  01:23:45 │ sonnet-4.5 │ 🔥 524/min │ $1.23/hr",
+  "troubleshooting": [
+    {
+      "issue": "Timer showing 00:00:00 or not incrementing",
+      "solution": "Ensure Claude Code is providing session.startTime in JSON. Check with: echo \"$input\" | jq '.session.startTime'. May require Claude Code update."
+    },
+    {
+      "issue": "date command error: illegal time format",
+      "solution": "macOS uses 'date -j', Linux uses 'date -d'. Script may need adjustment for your OS. For Linux, replace '-j -f' with '-d'."
+    },
+    {
+      "issue": "bc: command not found",
+      "solution": "Install bc calculator: brew install bc (macOS), apt install bc (Linux). Required for cost calculations."
+    },
+    {
+      "issue": "Tokens per minute showing unrealistic values",
+      "solution": "This is normal at session start. Metric stabilizes after 2-3 minutes of usage. Very high values indicate batch processing."
+    }
+  ],
+  "source": "community"
+}

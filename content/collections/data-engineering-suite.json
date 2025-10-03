@@ -1,0 +1,74 @@
+{
+  "slug": "data-engineering-suite",
+  "title": "Data Engineering Suite",
+  "description": "Comprehensive toolkit for data engineers working with databases, ETL pipelines, and data infrastructure. Includes database design, optimization, and cloud services integration.",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-02",
+  "tags": ["data", "database", "etl", "sql", "cloud", "engineering"],
+  "source": "community",
+  "category": "collections",
+  "collectionType": "use-case",
+  "difficulty": "intermediate",
+  "estimatedSetupTime": "30 minutes",
+  "features": [
+    "Database design and optimization tools",
+    "Cloud data services integration",
+    "SQL query optimization and debugging",
+    "Data pipeline automation"
+  ],
+  "useCases": [
+    "Building and optimizing data pipelines",
+    "Managing cloud-based data infrastructure",
+    "Database performance tuning",
+    "Migrating data systems to the cloud"
+  ],
+  "items": [
+    {
+      "category": "agents",
+      "slug": "database-specialist-agent",
+      "reason": "Expert guidance for database design, optimization, and troubleshooting"
+    },
+    {
+      "category": "mcp",
+      "slug": "aws-services-mcp-server",
+      "reason": "Integrates AWS data services like RDS, DynamoDB, and S3"
+    },
+    {
+      "category": "mcp",
+      "slug": "airtable-mcp-server",
+      "reason": "Connects to Airtable for flexible data management and workflows"
+    },
+    {
+      "category": "rules",
+      "slug": "database-expert",
+      "reason": "Provides database best practices and optimization rules"
+    },
+    {
+      "category": "commands",
+      "slug": "optimize",
+      "reason": "Optimizes SQL queries and database schemas"
+    },
+    {
+      "category": "commands",
+      "slug": "debug",
+      "reason": "Helps debug data pipeline issues and query performance problems"
+    }
+  ],
+  "installationOrder": [
+    "database-specialist-agent",
+    "database-expert",
+    "aws-services-mcp-server",
+    "airtable-mcp-server",
+    "optimize",
+    "debug"
+  ],
+  "prerequisites": [
+    "Basic SQL knowledge",
+    "AWS account (for AWS services integration)",
+    "Understanding of database concepts"
+  ],
+  "compatibility": {
+    "claudeDesktop": true,
+    "claudeCode": true
+  }
+}

@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Socket",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "security",
-    "dependencies",
-    "vulnerability-scanning",
-    "npm",
-    "supply-chain"
-  ],
+  "tags": ["security", "dependencies", "vulnerability-scanning", "npm", "supply-chain"],
   "content": "Analyze dependency security and supply chain risks with Socket's comprehensive vulnerability detection.",
   "features": [
     "Scan dependencies for known vulnerabilities",
@@ -68,9 +62,18 @@
     "Review and apply suggested fixes"
   ],
   "troubleshooting": [
-    "Verify Socket account access",
-    "Check package manager support",
-    "Review scan permissions and scope"
+    {
+      "issue": "Verify Socket account access",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check package manager support",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Review scan permissions and scope",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Scan my package.json for vulnerabilities",
@@ -79,10 +82,7 @@
     "Generate a security report"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "scan"
-  ],
+  "permissions": ["read", "scan"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://github.com/SocketDev/socket-mcp"
 }

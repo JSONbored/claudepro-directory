@@ -1,0 +1,102 @@
+name: Submit Collection
+description: Share a curated collection of configurations
+title: "[Collection]: "
+labels: ["content-submission", "collection", "needs-review"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing your collection! 📦
+
+        **Need help?** Copy our [simple template](https://github.com/JSONbored/claudepro-directory/blob/main/templates/content/collections-template-simple.json) or [full template](https://github.com/JSONbored/claudepro-directory/blob/main/templates/content/collections-template.json) to get started!
+
+  - type: input
+    id: name
+    attributes:
+      label: Collection Name
+      placeholder: e.g., "Developer Productivity Booster"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What does this collection provide?
+      placeholder: Brief description of what problem this collection solves and what's included (2-3 sentences)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: collection-type
+    attributes:
+      label: Collection Type
+      options:
+        - workflow
+        - toolkit
+        - starter-kit
+        - productivity
+        - development
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: difficulty
+    attributes:
+      label: Difficulty Level
+      options:
+        - beginner
+        - intermediate
+        - advanced
+    validations:
+      required: true
+
+  - type: textarea
+    id: items
+    attributes:
+      label: Included Items
+      description: List the items in your collection (one per line, format: "category/slug - reason")
+      placeholder: |
+        hooks/auto-code-formatter-hook - Automatically formats code to maintain consistency
+        statuslines/git-status-statusline - Shows git branch and status at a glance
+        commands/git-smart-commit - Creates intelligent, well-formatted git commits
+    validations:
+      required: true
+
+  - type: input
+    id: estimated-setup-time
+    attributes:
+      label: Estimated Setup Time
+      placeholder: e.g., "15 minutes", "30 minutes", "1 hour"
+    validations:
+      required: true
+
+  - type: input
+    id: tags
+    attributes:
+      label: Tags (optional)
+      placeholder: e.g., productivity, automation, workflow, developer-tools
+
+  - type: textarea
+    id: prerequisites
+    attributes:
+      label: Prerequisites (optional)
+      description: What's required before using this collection?
+      placeholder: |
+        - Git repository initialized
+        - Node.js 18+ installed
+        - Basic terminal knowledge
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Quick Check
+      options:
+        - label: I've verified all items in the collection exist
+          required: true
+        - label: I've tested this collection together
+          required: true
+        - label: This doesn't contain sensitive information
+          required: true

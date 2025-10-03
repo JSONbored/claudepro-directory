@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "bundle-size",
-    "performance",
-    "stop-hook",
-    "optimization",
-    "reporting"
-  ],
+  "tags": ["bundle-size", "performance", "stop-hook", "optimization", "reporting"],
   "hookType": "Stop",
   "features": [
     "Comprehensive bundle size analysis for multiple build tools",

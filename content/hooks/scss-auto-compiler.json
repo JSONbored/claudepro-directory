@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "scss",
-    "sass",
-    "css",
-    "styling",
-    "compilation"
-  ],
+  "tags": ["scss", "sass", "css", "styling", "compilation"],
   "hookType": "PostToolUse",
   "features": [
     "Automatic SCSS/Sass compilation to CSS",
@@ -35,10 +29,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/scss-auto-compiler.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },

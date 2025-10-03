@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Anthropic",
   "dateAdded": "2025-09-16",
-  "tags": [
-    "git",
-    "version-control",
-    "repositories",
-    "official",
-    "anthropic"
-  ],
+  "tags": ["git", "version-control", "repositories", "official", "anthropic"],
   "content": "The official Git MCP Server from Anthropic provides comprehensive tools to read, search, and manipulate Git repositories through Claude.",
   "features": [
     "Access commit history, branch information, and repository status",
@@ -40,10 +34,7 @@
       "mcpServers": {
         "git": {
           "command": "npx",
-          "args": [
-            "-y",
-            "@modelcontextprotocol/server-git"
-          ]
+          "args": ["-y", "@modelcontextprotocol/server-git"]
         }
       }
     },
@@ -51,10 +42,7 @@
       "mcpServers": {
         "git": {
           "command": "npx",
-          "args": [
-            "-y",
-            "@modelcontextprotocol/server-git"
-          ]
+          "args": ["-y", "@modelcontextprotocol/server-git"]
         }
       }
     }
@@ -77,10 +65,22 @@
     "Respects existing file permissions"
   ],
   "troubleshooting": [
-    "Ensure you're in a Git repository directory",
-    "Check that Claude has read access to repository files",
-    "Verify Git is installed and accessible from command line",
-    "Restart Claude Desktop after configuration changes"
+    {
+      "issue": "Ensure you're in a Git repository directory",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check that Claude has read access to repository files",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify Git is installed and accessible from command line",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Restart Claude Desktop after configuration changes",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Show me the recent commit history",
@@ -90,10 +90,7 @@
     "Compare this file between two commits"
   ],
   "requiresAuth": false,
-  "permissions": [
-    "git",
-    "filesystem"
-  ],
+  "permissions": ["git", "filesystem"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://modelcontextprotocol.io/examples"
 }
