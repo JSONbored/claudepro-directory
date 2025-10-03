@@ -4,14 +4,6 @@
   "outputDirectory": ".next",
   "framework": "nextjs",
   "regions": ["iad1"],
-  "functions": {
-    "src/app/api/**/*": {
-      "maxDuration": 5
-    },
-    "src/app/**/*": {
-      "maxDuration": 5
-    }
-  },
   "crons": [
     {
       "path": "/api/cache/warm",
