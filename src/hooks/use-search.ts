@@ -73,6 +73,8 @@ async function performCachedSearch(
   filters: FilterState,
   options: SearchOptions = {}
 ): Promise<ContentItem[]> {
+  // CRITICAL: Early return BEFORE cache lookup when no search/filters active
+  // This prevents returning stale cached results when user isn't actually searching
   if (!(query.trim() || hasActiveFilters(filters))) {
     return data;
   }
@@ -270,7 +272,8 @@ export function useSearch({ data, searchOptions }: UseSearchProps) {
   const [filters, setFilters] = useState<FilterState>({
     sort: 'trending',
   });
-  const [searchResults, setSearchResults] = useState<ContentItem[]>(stableData);
+  // Initialize with full dataset - will be updated by useEffect if needed
+  const [searchResults, setSearchResults] = useState<ContentItem[]>(() => stableData);
 
   // Memoize search options to prevent unnecessary re-renders
   const memoizedSearchOptions = useMemo(() => searchOptions || {}, [searchOptions]);

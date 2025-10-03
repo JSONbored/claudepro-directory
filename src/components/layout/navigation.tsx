@@ -33,7 +33,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   // Only spread onClick if it's defined to avoid exactOptionalPropertyTypes issues
   const linkProps = {
     href,
-    className: `${active ? `ring-2 ring-accent/30 ${UI_CLASSES.BG_ACCENT_10} border-accent/50 text-primary` : ''} ${className}`,
+    className: `${active ? `ring-2 ring-accent/30 ${UI_CLASSES.BG_ACCENT_10} border-accent/50 text-primary` : 'text-muted-foreground hover:text-foreground'} transition-colors ${UI_CLASSES.DURATION_200} ${className}`,
     ...(onClick && { onClick }),
   };
 
@@ -116,15 +116,7 @@ export const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav
-            className={`${UI_CLASSES.HIDDEN} md:${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} space-x-6`}
-          >
-            <NavLink href="/rules" isActive={isActive} onClick={() => setIsOpen(false)}>
-              Rules
-            </NavLink>
-            <NavLink href="/mcp" isActive={isActive} onClick={() => setIsOpen(false)}>
-              MCP
-            </NavLink>
+          <nav className="hidden md:flex items-center gap-2 md:gap-3 lg:gap-4 xl:gap-5 2xl:gap-6 text-sm lg:text-base">
             <NavLink href="/agents" isActive={isActive} onClick={() => setIsOpen(false)}>
               Agents
             </NavLink>
@@ -134,17 +126,17 @@ export const Navigation = () => {
             <NavLink href="/hooks" isActive={isActive} onClick={() => setIsOpen(false)}>
               Hooks
             </NavLink>
+            <NavLink href="/mcp" isActive={isActive} onClick={() => setIsOpen(false)}>
+              MCP
+            </NavLink>
+            <NavLink href="/rules" isActive={isActive} onClick={() => setIsOpen(false)}>
+              Rules
+            </NavLink>
             <NavLink href="/statuslines" isActive={isActive} onClick={() => setIsOpen(false)}>
               Statuslines
             </NavLink>
             <NavLink href="/collections" isActive={isActive} onClick={() => setIsOpen(false)}>
               Collections
-            </NavLink>
-            <NavLink href="/jobs" isActive={isActive} onClick={() => setIsOpen(false)}>
-              Jobs
-            </NavLink>
-            <NavLink href="/trending" isActive={isActive} onClick={() => setIsOpen(false)}>
-              Trending
             </NavLink>
             <NavLink href="/guides" isActive={isActive} onClick={() => setIsOpen(false)}>
               Guides
@@ -155,21 +147,31 @@ export const Navigation = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-muted-foreground hover:text-accent"
+                  className="text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors"
                   aria-label="Open additional navigation menu"
                 >
                   More
                   <ChevronDown className="ml-1 h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-52 md:w-56">
                 <DropdownMenuItem>
                   <Link
-                    href="/api-docs"
+                    href="/trending"
                     className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
                   >
-                    <div>API Docs</div>
-                    <div className={UI_CLASSES.TEXT_XS_MUTED}>REST API documentation</div>
+                    <div>Trending</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Popular configurations</div>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem>
+                  <Link
+                    href="/jobs"
+                    className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
+                  >
+                    <div>Jobs</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Find opportunities</div>
                   </Link>
                 </DropdownMenuItem>
 
@@ -185,16 +187,6 @@ export const Navigation = () => {
 
                 <DropdownMenuItem>
                   <Link
-                    href="/submit"
-                    className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
-                  >
-                    <div>Submit Config</div>
-                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Share your configurations</div>
-                  </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem>
-                  <Link
                     href="/partner"
                     className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
                   >
@@ -202,12 +194,22 @@ export const Navigation = () => {
                     <div className={UI_CLASSES.TEXT_XS_MUTED}>Post job listings & more</div>
                   </Link>
                 </DropdownMenuItem>
+
+                <DropdownMenuItem>
+                  <Link
+                    href="/submit"
+                    className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
+                  >
+                    <div>Submit Config</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Share your configurations</div>
+                  </Link>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </nav>
 
           {/* Right Side Actions */}
-          <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} space-x-3`}>
+          <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 md:gap-3`}>
             {/* Global Search Trigger */}
             <div className={`${UI_CLASSES.HIDDEN} lg:${UI_CLASSES.BLOCK}`}>
               <SearchTrigger
@@ -263,7 +265,7 @@ export const Navigation = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`md:${UI_CLASSES.HIDDEN}`}
+                  className="md:hidden"
                   aria-label="Open mobile menu"
                 >
                   <Menu className="h-5 w-5" />
@@ -289,24 +291,6 @@ export const Navigation = () => {
                   <div className={`flex-1 ${UI_CLASSES.OVERFLOW_Y_AUTO}`}>
                     <nav className={`${UI_CLASSES.SPACE_Y_4} ${UI_CLASSES.PX_3}`}>
                       <div className={UI_CLASSES.SPACE_Y_3}>
-                        <NavLink
-                          href="/rules"
-                          isActive={isActive}
-                          onClick={() => setIsOpen(false)}
-                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
-                        >
-                          Rules
-                        </NavLink>
-
-                        <NavLink
-                          href="/mcp"
-                          isActive={isActive}
-                          onClick={() => setIsOpen(false)}
-                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
-                        >
-                          MCP
-                        </NavLink>
-
                         <NavLink
                           href="/agents"
                           isActive={isActive}
@@ -335,6 +319,24 @@ export const Navigation = () => {
                         </NavLink>
 
                         <NavLink
+                          href="/mcp"
+                          isActive={isActive}
+                          onClick={() => setIsOpen(false)}
+                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
+                        >
+                          MCP
+                        </NavLink>
+
+                        <NavLink
+                          href="/rules"
+                          isActive={isActive}
+                          onClick={() => setIsOpen(false)}
+                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
+                        >
+                          Rules
+                        </NavLink>
+
+                        <NavLink
                           href="/statuslines"
                           isActive={isActive}
                           onClick={() => setIsOpen(false)}
@@ -353,24 +355,6 @@ export const Navigation = () => {
                         </NavLink>
 
                         <NavLink
-                          href="/jobs"
-                          isActive={isActive}
-                          onClick={() => setIsOpen(false)}
-                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
-                        >
-                          Jobs
-                        </NavLink>
-
-                        <NavLink
-                          href="/trending"
-                          isActive={isActive}
-                          onClick={() => setIsOpen(false)}
-                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
-                        >
-                          Trending
-                        </NavLink>
-
-                        <NavLink
                           href="/guides"
                           isActive={isActive}
                           onClick={() => setIsOpen(false)}
@@ -386,12 +370,21 @@ export const Navigation = () => {
                       >
                         <div className={UI_CLASSES.SPACE_Y_3}>
                           <NavLink
-                            href="/api-docs"
+                            href="/trending"
                             isActive={isActive}
                             onClick={() => setIsOpen(false)}
                             className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
                           >
-                            API Docs
+                            Trending
+                          </NavLink>
+
+                          <NavLink
+                            href="/jobs"
+                            isActive={isActive}
+                            onClick={() => setIsOpen(false)}
+                            className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                          >
+                            Jobs
                           </NavLink>
 
                           <NavLink
@@ -404,21 +397,21 @@ export const Navigation = () => {
                           </NavLink>
 
                           <NavLink
-                            href="/submit"
-                            isActive={isActive}
-                            onClick={() => setIsOpen(false)}
-                            className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
-                          >
-                            Submit Config
-                          </NavLink>
-
-                          <NavLink
                             href="/partner"
                             isActive={isActive}
                             onClick={() => setIsOpen(false)}
                             className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
                           >
                             Partner
+                          </NavLink>
+
+                          <NavLink
+                            href="/submit"
+                            isActive={isActive}
+                            onClick={() => setIsOpen(false)}
+                            className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                          >
+                            Submit Config
                           </NavLink>
                         </div>
                       </div>

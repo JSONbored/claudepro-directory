@@ -1,6 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "./config/build/tsconfig.json",
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
   "include": [
     "config/build/../../src/**/*.ts",
     "config/build/../../src/**/*.tsx",

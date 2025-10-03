@@ -47,8 +47,10 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
   const { allConfigs } = initialData;
 
   const [activeTab, setActiveTab] = useState('all');
-  const [displayedItems, setDisplayedItems] = useState<UnifiedContentItem[]>([]);
   const pageSize = 20;
+
+  // Don't pre-initialize displayedItems - let useEffect handle it based on filteredResults
+  const [displayedItems, setDisplayedItems] = useState<UnifiedContentItem[]>([]);
 
   // Memoize search options to prevent infinite re-renders
   const searchOptions = useMemo(
@@ -82,14 +84,18 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
   }, [initialData]);
 
   // Filter search results by active tab - optimized with Set lookups
+  // When not searching, use the full dataset (allConfigs) instead of searchResults
   const filteredResults = useMemo(() => {
+    // Use allConfigs when not searching, searchResults when searching
+    const dataSource = isSearching ? searchResults : allConfigs;
+
     if (activeTab === 'all' || activeTab === 'community') {
-      return searchResults;
+      return dataSource;
     }
 
     const lookupSet = slugLookupMaps[activeTab as keyof typeof slugLookupMaps];
-    return lookupSet ? searchResults.filter((item) => lookupSet.has(item.slug)) : searchResults;
-  }, [searchResults, activeTab, slugLookupMaps]);
+    return lookupSet ? dataSource.filter((item) => lookupSet.has(item.slug)) : dataSource;
+  }, [searchResults, allConfigs, activeTab, slugLookupMaps, isSearching]);
 
   // Use ref to track filtered results for stable pagination
   const filteredResultsRef = useRef(filteredResults);
@@ -113,18 +119,16 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
     const endIndex = startIndex + pageSize;
     const nextItems = filteredResultsRef.current.slice(startIndex, endIndex);
 
-    setDisplayedItems((prev) => {
-      // Deduplicate to prevent duplicate keys
-      const prevSlugs = new Set(prev.map((item) => item.slug));
-      const uniqueNextItems = nextItems.filter((item) => !prevSlugs.has(item.slug));
-      return [...prev, ...uniqueNextItems] as UnifiedContentItem[];
-    });
+    // Deduplicate to prevent duplicate keys
+    const prevSlugs = new Set(displayedItems.map((item) => item.slug));
+    const uniqueNextItems = nextItems.filter((item) => !prevSlugs.has(item.slug));
 
+    setDisplayedItems((prev) => [...prev, ...uniqueNextItems] as UnifiedContentItem[]);
     currentPageRef.current = nextPage;
 
-    // Return empty array to satisfy type (actual items are set via state)
-    return [] as UnifiedContentItem[];
-  }, []);
+    // Return the new items so infinite scroll knows items were loaded
+    return uniqueNextItems as UnifiedContentItem[];
+  }, [displayedItems]);
 
   const hasMore = displayedItems.length < filteredResults.length;
 

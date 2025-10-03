@@ -83,24 +83,24 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.ico' },
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/assets/icons/claudepro-directory-icon.ico' },
+      { url: '/assets/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/assets/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
     ],
-    shortcut: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
+    shortcut: '/assets/icons/claudepro-directory-icon.ico',
+    apple: '/assets/icons/apple-touch-icon.png',
     other: [
       {
         rel: 'icon',
         type: 'image/png',
         sizes: '192x192',
-        url: '/icon-192.png',
+        url: '/assets/icons/icon-192.png',
       },
       {
         rel: 'icon',
         type: 'image/png',
         sizes: '512x512',
-        url: '/icon-512.png',
+        url: '/assets/icons/icon-512.png',
       },
     ],
   },
@@ -133,7 +133,7 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="ClaudePro" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png" />
 
         {/* Theme Color for Mobile Browsers */}
         <meta name="theme-color" content="#000000" />

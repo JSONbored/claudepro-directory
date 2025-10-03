@@ -36,9 +36,6 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   loadMore,
   onTabChange,
 }) => {
-  // Calculate grid columns dynamically based on number of tabs
-  const gridCols = useMemo(() => `grid-cols-${HOMEPAGE_TAB_CATEGORIES.length}`, []);
-
   // Get content tabs (exclude 'community' which has custom content)
   const contentTabs = useMemo(
     () => HOMEPAGE_TAB_CATEGORIES.filter((tab) => tab !== 'community'),
@@ -47,7 +44,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
 
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className={UI_CLASSES.SPACE_Y_8}>
-      <TabsList className={`grid ${UI_CLASSES.W_FULL} lg:w-auto ${gridCols}`}>
+      <TabsList className="grid w-full lg:w-auto lg:grid-flow-col lg:auto-cols-fr gap-1">
         {HOMEPAGE_TAB_CATEGORIES.map((tab) => {
           // Get display name from category config, or use tab name
           let displayName = tab.charAt(0).toUpperCase() + tab.slice(1);
