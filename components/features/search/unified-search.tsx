@@ -31,7 +31,10 @@ import { EVENTS } from '@/lib/analytics/events.config';
 import { trackEvent } from '@/lib/analytics/tracker';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/lib/schemas/component.schema';
-import { sanitizeSearchQuery } from '@/lib/security';
+import { sanitizers } from '@/lib/security/validators';
+
+const { sanitizeSearchQuery } = sanitizers;
+
 import { UI_CLASSES } from '@/lib/ui-constants';
 import { cn } from '@/lib/utils';
 

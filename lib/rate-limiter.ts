@@ -15,7 +15,7 @@ import {
   middlewareRateLimitConfigSchema,
   requestPathSchema,
 } from '@/lib/schemas/middleware.schema';
-import { sanitizeApiError } from '@/lib/security';
+import { sanitizeApiError } from '@/lib/security/error-sanitizer';
 
 // Use MiddlewareRateLimitConfig from middleware schema
 // Additional interface for extended functionality

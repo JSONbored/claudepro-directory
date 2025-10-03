@@ -21,7 +21,7 @@ import {
   validateErrorContext,
   validateErrorInput,
 } from '@/lib/schemas/error.schema';
-import { ValidationError } from '@/lib/security';
+import { ValidationError } from '@/lib/security/validators';
 
 /**
  * HTTP status code mapping for different error types

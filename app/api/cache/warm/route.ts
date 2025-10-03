@@ -3,7 +3,7 @@ import { cacheWarmer } from '@/lib/cache-warmer';
 import { handleApiError, handleValidationError } from '@/lib/error-handler';
 import { logger } from '@/lib/logger';
 import { errorInputSchema } from '@/lib/schemas/error.schema';
-import { apiSchemas, baseSchemas, ValidationError, validation } from '@/lib/security';
+import { apiSchemas, baseSchemas, ValidationError, validation } from '@/lib/security/validators';
 
 /**
  * API endpoint to manually trigger cache warming

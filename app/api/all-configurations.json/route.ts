@@ -6,7 +6,8 @@ import { logger } from '@/lib/logger';
 import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
 import { contentCache } from '@/lib/redis';
 import { createRequestId } from '@/lib/schemas/branded-types.schema';
-import { apiSchemas, sanitizeApiError, ValidationError } from '@/lib/security';
+import { sanitizeApiError } from '@/lib/security/error-sanitizer';
+import { apiSchemas, ValidationError } from '@/lib/security/validators';
 
 export const runtime = 'nodejs';
 export const revalidate = 14400; // 4 hours

@@ -13,7 +13,8 @@ import {
   shortString,
   urlString,
 } from '@/lib/schemas/primitives/base-strings';
-import { DOMPurify, VALIDATION_PATTERNS } from '../security';
+import { DOMPurify } from '../security/html-sanitizer';
+import { VALIDATION_PATTERNS } from '../security/patterns';
 
 // GitHub-related schemas for form submissions
 export const gitHubConfigValidationSchema = z

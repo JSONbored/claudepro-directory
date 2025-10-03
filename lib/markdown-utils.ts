@@ -7,7 +7,7 @@ import { marked } from 'marked';
 import { z } from 'zod';
 import { logger } from './logger';
 import { nonNegativeInt } from './schemas/primitives/base-numbers';
-import { DOMPurify } from './security';
+import { DOMPurify } from './security/html-sanitizer';
 
 /**
  * Internal Markdown Schemas
