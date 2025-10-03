@@ -8,22 +8,7 @@
     "src/app/api/**/*": {
       "maxDuration": 5
     },
-    "src/app/(agents|commands|hooks|mcp|rules|trending|submit|partner|community|jobs|collections|guides|statuslines)/**/*": {
-      "maxDuration": 5
-    },
-    "src/app/[category]/[slug]/**/*": {
-      "maxDuration": 5
-    },
-    "src/app/page.tsx": {
-      "maxDuration": 5
-    },
-    "src/app/opengraph-image/route": {
-      "maxDuration": 5
-    },
-    "src/app/[category]/[slug]/opengraph-image/route": {
-      "maxDuration": 5
-    },
-    "src/app/manifest.webmanifest/route": {
+    "src/app/**/*": {
       "maxDuration": 5
     }
   },
