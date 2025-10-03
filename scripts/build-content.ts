@@ -292,7 +292,7 @@ async function main(): Promise<void> {
 
     logger.info('\n📊 Building content index...');
     const contentIndex = await contentIndexer.buildIndex();
-    logger.success(`✓ Built content index with ${contentIndex.totalItems} items`);
+    logger.success(`✓ Built content index with ${contentIndex.items.length} items`);
 
     // Save the main index
     await contentIndexer.saveIndex(contentIndex);

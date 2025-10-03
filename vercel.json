@@ -17,10 +17,13 @@
     "src/app/page.tsx": {
       "maxDuration": 5
     },
-    "src/app/opengraph-image.tsx": {
+    "src/app/opengraph-image/route": {
       "maxDuration": 5
     },
-    "src/app/manifest.ts": {
+    "src/app/[category]/[slug]/opengraph-image/route": {
+      "maxDuration": 5
+    },
+    "src/app/manifest.webmanifest/route": {
       "maxDuration": 5
     }
   },
