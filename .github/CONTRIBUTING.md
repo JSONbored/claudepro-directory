@@ -46,6 +46,8 @@ Thank you for your interest in contributing to ClaudePro Directory! This guide w
 | **Hooks** | Event-driven automation | [Submit Hook](../../issues/new?template=submit_hook.yml) | [View Examples](../../tree/main/content/hooks) |
 | **MCP Servers** | Model Context Protocol | [Submit MCP](../../issues/new?template=submit_mcp.yml) | [View Examples](../../tree/main/content/mcp) |
 | **Rules** | System prompts | [Submit Rule](../../issues/new?template=submit_rule.yml) | [View Examples](../../tree/main/content/rules) |
+| **Statuslines** | Custom status displays | [Submit Statusline](../../issues/new?template=submit_statusline.yml) | [View Examples](../../tree/main/content/statuslines) |
+| **Collections** | Curated configuration bundles | [Submit Collection](../../issues/new?template=submit_collection.yml) | [View Examples](../../tree/main/content/collections) |
 
 ## 📝 How to Add Content
 
@@ -58,7 +60,9 @@ content/
 ├── commands/     # Automation commands
 ├── hooks/        # Event hooks
 ├── mcp/          # MCP server configs
-└── rules/        # System prompts
+├── rules/        # System prompts
+├── statuslines/  # Custom status displays
+└── collections/  # Curated configuration bundles
 ```
 
 ### 2. Create Your JSON File
@@ -71,6 +75,8 @@ content/
 - **Hook**: [`hooks-template-simple.json`](../../blob/main/templates/content/hooks-template-simple.json) | [Full template](../../blob/main/templates/content/hooks-template.json)
 - **MCP**: [`mcp-template-simple.json`](../../blob/main/templates/content/mcp-template-simple.json) | [Full template](../../blob/main/templates/content/mcp-template.json)
 - **Rule**: [`rules-template-simple.json`](../../blob/main/templates/content/rules-template-simple.json) | [Full template](../../blob/main/templates/content/rules-template.json)
+- **Statusline**: [`statuslines-template-simple.json`](../../blob/main/templates/content/statuslines-template-simple.json) | [Full template](../../blob/main/templates/content/statuslines-template.json)
+- **Collection**: [`collections-template-simple.json`](../../blob/main/templates/content/collections-template-simple.json) | [Full template](../../blob/main/templates/content/collections-template.json)
 
 #### Real-World Examples
 - **Agent**: [`code-reviewer-agent.json`](../../blob/main/content/agents/code-reviewer-agent.json)
@@ -78,6 +84,8 @@ content/
 - **Hook**: [`auto-code-formatter-hook.json`](../../blob/main/content/hooks/auto-code-formatter-hook.json)
 - **MCP**: [`github-mcp-server.json`](../../blob/main/content/mcp/github-mcp-server.json)
 - **Rule**: [`react-expert.json`](../../blob/main/content/rules/react-expert.json)
+- **Statusline**: [`git-status-statusline.json`](../../blob/main/content/statuslines/git-status-statusline.json)
+- **Collection**: [`developer-productivity-booster.json`](../../blob/main/content/collections/developer-productivity-booster.json)
 
 ### 3. Categories
 
@@ -182,6 +190,8 @@ Browse production examples in our content directories:
 - **Hooks**: [`content/hooks/`](../../tree/main/content/hooks)
 - **MCP**: [`content/mcp/`](../../tree/main/content/mcp)
 - **Rules**: [`content/rules/`](../../tree/main/content/rules)
+- **Statuslines**: [`content/statuslines/`](../../tree/main/content/statuslines)
+- **Collections**: [`content/collections/`](../../tree/main/content/collections)
 
 ## 🙋 Need Help?
 

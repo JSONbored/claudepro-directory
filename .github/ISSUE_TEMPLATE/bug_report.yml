@@ -61,6 +61,8 @@ body:
         - Rules
         - Commands
         - Hooks
+        - Statuslines
+        - Collections
         - Guides
         - Other/Multiple
     validations:

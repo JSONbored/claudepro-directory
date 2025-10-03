@@ -29,57 +29,16 @@ body:
       required: true
 
   - type: textarea
-    id: alternatives
-    attributes:
-      label: Alternatives Considered
-      description: Describe alternatives you've considered
-      placeholder: Alternative approaches could be...
-    validations:
-      required: false
-
-  - type: dropdown
-    id: feature-type
-    attributes:
-      label: Feature Type
-      description: What type of feature is this?
-      options:
-        - New Content Category
-        - UI/UX Improvement
-        - Performance Enhancement
-        - Developer Experience
-        - Documentation
-        - Integration
-        - Other
-    validations:
-      required: true
-
-  - type: dropdown
-    id: priority
-    attributes:
-      label: Priority
-      description: How important is this feature to you?
-      options:
-        - Low - Nice to have
-        - Medium - Would improve workflow
-        - High - Critical for my use case
-    validations:
-      required: false
-
-  - type: textarea
     id: use-case
     attributes:
-      label: Use Case
-      description: Describe your specific use case for this feature
-      placeholder: I want to use this for...
+      label: Use Case & Examples
+      description: Describe your specific use case and add any mockups, screenshots, or examples
+      placeholder: |
+        I want to use this for...
+
+        (Optional: Add screenshots or links to similar features)
     validations:
       required: false
-
-  - type: textarea
-    id: mockups
-    attributes:
-      label: Mockups/Examples
-      description: If applicable, add mockups, screenshots, or examples
-      placeholder: Drag and drop images or links here
 
   - type: textarea
     id: additional
