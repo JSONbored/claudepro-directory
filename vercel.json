@@ -5,13 +5,22 @@
   "framework": "nextjs",
   "regions": ["iad1"],
   "functions": {
-    "app/api/*": {
+    "src/app/api/**/*": {
       "maxDuration": 5
     },
-    "app/(agents|commands|hooks|mcp|rules|trending|submit|partner|community|jobs)/**.tsx": {
+    "src/app/(agents|commands|hooks|mcp|rules|trending|submit|partner|community|jobs|collections|guides|statuslines)/**/*": {
       "maxDuration": 5
     },
-    "app/page.tsx": {
+    "src/app/[category]/[slug]/**/*": {
+      "maxDuration": 5
+    },
+    "src/app/page.tsx": {
+      "maxDuration": 5
+    },
+    "src/app/opengraph-image.tsx": {
+      "maxDuration": 5
+    },
+    "src/app/manifest.ts": {
       "maxDuration": 5
     }
   },

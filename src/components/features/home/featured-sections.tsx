@@ -3,14 +3,17 @@
 /**
  * FeaturedSections Component
  * SHA-2102: Extracted from home-page-client.tsx for better modularity
+ * SHA-XXXX: Made dynamic using HOMEPAGE_FEATURED_CATEGORIES
  *
- * Displays featured content sections (Rules, MCPs, Agents, Commands, Hooks, Jobs)
+ * Displays featured content sections dynamically based on category config
+ * Adding a new featured category now only requires updating HOMEPAGE_FEATURED_CATEGORIES
  */
 
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
 import { LazyConfigCard } from '@/src/components/shared/lazy-config-card';
 import { Button } from '@/src/components/ui/button';
+import { CATEGORY_CONFIGS, HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
 import { Briefcase, ExternalLink } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -63,28 +66,36 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
 
 FeaturedSection.displayName = 'FeaturedSection';
 
+/**
+ * Props now accept a dynamic record of categories to content items
+ * This allows any number of categories without hardcoding
+ */
 interface FeaturedSectionsProps {
-  rules: readonly UnifiedContentItem[];
-  mcp: readonly UnifiedContentItem[];
-  agents: readonly UnifiedContentItem[];
-  commands: readonly UnifiedContentItem[];
-  hooks: readonly UnifiedContentItem[];
+  categories: Record<string, readonly UnifiedContentItem[]>;
 }
 
-const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
-  rules,
-  mcp,
-  agents,
-  commands,
-  hooks,
-}) => {
+const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories }) => {
   return (
     <div className={`${UI_CLASSES.SPACE_Y_16} mb-16`}>
-      <FeaturedSection title="Featured Rules" href="/rules" items={rules} />
-      <FeaturedSection title="Featured MCPs" href="/mcp" items={mcp} />
-      <FeaturedSection title="Featured Agents" href="/agents" items={agents} />
-      <FeaturedSection title="Featured Commands" href="/commands" items={commands} />
-      <FeaturedSection title="Featured Hooks" href="/hooks" items={hooks} />
+      {/* Dynamically render featured sections based on HOMEPAGE_FEATURED_CATEGORIES */}
+      {HOMEPAGE_FEATURED_CATEGORIES.map((categorySlug) => {
+        const items = categories[categorySlug];
+        const config = CATEGORY_CONFIGS[categorySlug];
+
+        // Skip if no config or no items for this category
+        if (!(config && items)) {
+          return null;
+        }
+
+        return (
+          <FeaturedSection
+            key={categorySlug}
+            title={`Featured ${config.pluralTitle}`}
+            href={`/${config.urlSlug}`}
+            items={items}
+          />
+        );
+      })}
 
       {/* Featured Jobs */}
       <div>

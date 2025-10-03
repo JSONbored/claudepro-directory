@@ -277,6 +277,35 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
 export const VALID_CATEGORIES = Object.keys(CATEGORY_CONFIGS);
 
 /**
+ * Homepage-specific category configurations
+ * These determine which categories appear on the homepage
+ */
+export const HOMEPAGE_FEATURED_CATEGORIES = [
+  'rules',
+  'mcp',
+  'agents',
+  'commands',
+  'hooks',
+  'statuslines',
+  'collections',
+] as const;
+
+export const HOMEPAGE_TAB_CATEGORIES = [
+  'all',
+  'rules',
+  'mcp',
+  'agents',
+  'commands',
+  'hooks',
+  'statuslines',
+  'collections',
+  'community',
+] as const;
+
+export type HomepageFeaturedCategory = (typeof HOMEPAGE_FEATURED_CATEGORIES)[number];
+export type HomepageTabCategory = (typeof HOMEPAGE_TAB_CATEGORIES)[number];
+
+/**
  * Get category config by URL slug
  */
 export function getCategoryConfig(slug: string): CategoryConfig | null {

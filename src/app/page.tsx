@@ -21,7 +21,8 @@ export default async function HomePage() {
   ]);
 
   // Create stable allConfigs array to prevent infinite re-renders
-  const allConfigs = [
+  // Deduplicate by slug to prevent duplicate keys in React rendering
+  const allConfigsWithDuplicates = [
     ...rules,
     ...mcp,
     ...agents,
@@ -30,6 +31,10 @@ export default async function HomePage() {
     ...statuslines,
     ...collections,
   ];
+
+  // Use Map to deduplicate by slug (last occurrence wins)
+  const allConfigsMap = new Map(allConfigsWithDuplicates.map((item) => [item.slug, item]));
+  const allConfigs = Array.from(allConfigsMap.values());
 
   // Transform data using transform functions to convert readonly arrays to mutable
   // Metadata arrays contain the core fields needed for display

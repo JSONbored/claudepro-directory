@@ -3,16 +3,19 @@
 /**
  * TabsSection Component
  * SHA-2102: Extracted from home-page-client.tsx for better modularity
+ * SHA-XXXX: Made dynamic using HOMEPAGE_TAB_CATEGORIES
  *
  * Handles tabbed content navigation with infinite scroll
+ * Adding a new tab now only requires updating HOMEPAGE_TAB_CATEGORIES
  */
 
 import Link from 'next/link';
-import { type FC, memo } from 'react';
+import { type FC, memo, useMemo } from 'react';
 import { LazyConfigCard } from '@/src/components/shared/lazy-config-card';
 import { LazyInfiniteScrollContainer } from '@/src/components/shared/lazy-infinite-scroll';
 import { Button } from '@/src/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
+import { CATEGORY_CONFIGS, HOMEPAGE_TAB_CATEGORIES } from '@/src/lib/config/category-config';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -33,67 +36,80 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
   loadMore,
   onTabChange,
 }) => {
+  // Calculate grid columns dynamically based on number of tabs
+  const gridCols = useMemo(() => `grid-cols-${HOMEPAGE_TAB_CATEGORIES.length}`, []);
+
+  // Get content tabs (exclude 'community' which has custom content)
+  const contentTabs = useMemo(
+    () => HOMEPAGE_TAB_CATEGORIES.filter((tab) => tab !== 'community'),
+    []
+  );
+
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className={UI_CLASSES.SPACE_Y_8}>
-      <TabsList className={`grid ${UI_CLASSES.W_FULL} lg:w-auto grid-cols-7`}>
-        <TabsTrigger value="all" className={UI_CLASSES.TEXT_SM}>
-          All
-        </TabsTrigger>
-        <TabsTrigger value="rules" className={UI_CLASSES.TEXT_SM}>
-          Rules
-        </TabsTrigger>
-        <TabsTrigger value="mcp" className={UI_CLASSES.TEXT_SM}>
-          MCP
-        </TabsTrigger>
-        <TabsTrigger value="agents" className={UI_CLASSES.TEXT_SM}>
-          Agents
-        </TabsTrigger>
-        <TabsTrigger value="commands" className={UI_CLASSES.TEXT_SM}>
-          Commands
-        </TabsTrigger>
-        <TabsTrigger value="hooks" className={UI_CLASSES.TEXT_SM}>
-          Hooks
-        </TabsTrigger>
-        <TabsTrigger value="community" className={UI_CLASSES.TEXT_SM}>
-          Community
-        </TabsTrigger>
+      <TabsList className={`grid ${UI_CLASSES.W_FULL} lg:w-auto ${gridCols}`}>
+        {HOMEPAGE_TAB_CATEGORIES.map((tab) => {
+          // Get display name from category config, or use tab name
+          let displayName = tab.charAt(0).toUpperCase() + tab.slice(1);
+
+          if (tab !== 'all' && tab !== 'community') {
+            const config = CATEGORY_CONFIGS[tab];
+            if (config) {
+              displayName = config.pluralTitle;
+            }
+          }
+
+          return (
+            <TabsTrigger key={tab} value={tab} className={UI_CLASSES.TEXT_SM}>
+              {displayName}
+            </TabsTrigger>
+          );
+        })}
       </TabsList>
 
-      {/* Tab content for all tabs except community */}
-      {['all', 'rules', 'mcp', 'agents', 'commands', 'hooks'].map((tab) => (
-        <TabsContent key={tab} value={tab} className={UI_CLASSES.SPACE_Y_6}>
-          {filteredResults.length > 0 ? (
-            <LazyInfiniteScrollContainer<UnifiedContentItem>
-              items={displayedItems}
-              renderItem={(item: UnifiedContentItem, _index: number) => (
-                <LazyConfigCard
-                  key={item.slug}
-                  item={item}
-                  variant="default"
-                  showCategory={true}
-                  showActions={true}
-                />
-              )}
-              loadMore={loadMore}
-              hasMore={hasMore}
-              pageSize={20}
-              gridClassName={UI_CLASSES.GRID_RESPONSIVE_3}
-              emptyMessage={`No ${tab === 'all' ? 'configurations' : tab} found`}
-              keyExtractor={(item: UnifiedContentItem, _index: number) => item.slug}
-            />
-          ) : (
-            <div className={`${UI_CLASSES.TEXT_CENTER} py-12`}>
-              <p className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-                No {tab === 'all' ? 'configurations' : tab} found
-              </p>
-              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
-                Try adjusting your filters.
-              </p>
-            </div>
-          )}
-        </TabsContent>
-      ))}
+      {/* Tab content for all content tabs */}
+      {contentTabs.map((tab) => {
+        const categoryName =
+          tab === 'all'
+            ? 'configurations'
+            : CATEGORY_CONFIGS[tab]?.pluralTitle?.toLowerCase() || tab;
 
+        return (
+          <TabsContent key={tab} value={tab} className={UI_CLASSES.SPACE_Y_6}>
+            {filteredResults.length > 0 ? (
+              <LazyInfiniteScrollContainer<UnifiedContentItem>
+                items={displayedItems}
+                renderItem={(item: UnifiedContentItem, _index: number) => (
+                  <LazyConfigCard
+                    key={item.slug}
+                    item={item}
+                    variant="default"
+                    showCategory={true}
+                    showActions={true}
+                  />
+                )}
+                loadMore={loadMore}
+                hasMore={hasMore}
+                pageSize={20}
+                gridClassName={UI_CLASSES.GRID_RESPONSIVE_3}
+                emptyMessage={`No ${categoryName} found`}
+                keyExtractor={(item: UnifiedContentItem, _index: number) => item.slug}
+              />
+            ) : (
+              <div className={`${UI_CLASSES.TEXT_CENTER} py-12`}>
+                <p className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                  No {categoryName} found
+                </p>
+                <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
+                  Try adjusting your filters.
+                </p>
+              </div>
+            )}
+          </TabsContent>
+        );
+      })}
+
+      {/* Community tab with custom content */}
       <TabsContent value="community" className={UI_CLASSES.SPACE_Y_6}>
         <div className={`${UI_CLASSES.TEXT_CENTER} ${UI_CLASSES.MB_8}`}>
           <h3 className={`text-2xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`}>

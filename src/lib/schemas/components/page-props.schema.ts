@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod';
+import { HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
 import { unifiedContentItemSchema } from './content-item.schema';
 
 /**
@@ -12,15 +13,18 @@ import { unifiedContentItemSchema } from './content-item.schema';
  */
 
 /**
- * Home page props schema
+ * Home page props schema - dynamically generated from HOMEPAGE_FEATURED_CATEGORIES
+ * This ensures adding a new category to the homepage only requires updating category-config.ts
  */
 const homePagePropsSchema = z
   .object({
-    rules: z.array(unifiedContentItemSchema).describe('Collection of rule content items'),
-    mcp: z.array(unifiedContentItemSchema).describe('Collection of MCP server content items'),
-    agents: z.array(unifiedContentItemSchema).describe('Collection of agent content items'),
-    commands: z.array(unifiedContentItemSchema).describe('Collection of command content items'),
-    hooks: z.array(unifiedContentItemSchema).describe('Collection of hook content items'),
+    // Dynamically add each featured category
+    ...Object.fromEntries(
+      HOMEPAGE_FEATURED_CATEGORIES.map((category) => [
+        category,
+        z.array(unifiedContentItemSchema).describe(`Collection of ${category} content items`),
+      ])
+    ),
     allConfigs: z
       .array(unifiedContentItemSchema)
       .describe('Combined collection of all configuration content'),

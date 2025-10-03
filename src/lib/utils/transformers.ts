@@ -6,6 +6,7 @@
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 // Import all content types
 import type { AgentContent } from '@/src/lib/schemas/content/agent.schema';
+import type { CollectionContent } from '@/src/lib/schemas/content/collection.schema';
 import type { CommandContent } from '@/src/lib/schemas/content/command.schema';
 import type { GuideContent } from '@/src/lib/schemas/content/guide.schema';
 import type { HookContent } from '@/src/lib/schemas/content/hook.schema';
@@ -21,7 +22,8 @@ export type ContentItem =
   | CommandContent
   | HookContent
   | GuideContent
-  | StatuslineContent;
+  | StatuslineContent
+  | CollectionContent;
 
 // Metadata-only type (subset of full content)
 export type ContentMetadata = Pick<
