@@ -71,7 +71,7 @@ export const baseSchemas = {
     .string()
     .regex(VALIDATION_PATTERNS.CONTENT_TYPE, 'Invalid content type')
     .describe(
-      'Content category identifier. Valid values: agents, mcp, rules, commands, hooks, statuslines.'
+      'Content category identifier. Valid values: agents, mcp, rules, commands, hooks, statuslines, collections.'
     ),
 
   // Search query with sanitization
@@ -507,6 +507,8 @@ export const sanitizers = {
       'rules',
       'commands',
       'hooks',
+      'statuslines',
+      'collections',
       'tutorials',
       'comparisons',
       'workflows',

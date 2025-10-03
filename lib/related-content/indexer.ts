@@ -25,6 +25,7 @@ const CONTENT_DIRECTORIES = {
   commands: CONTENT_PATHS.commands,
   hooks: CONTENT_PATHS.hooks,
   statuslines: CONTENT_PATHS.statuslines,
+  collections: CONTENT_PATHS.collections,
 
   // Guide content (MDX files)
   tutorials: CONTENT_PATHS.tutorials,

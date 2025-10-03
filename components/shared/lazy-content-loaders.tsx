@@ -19,6 +19,8 @@ export const lazyContentLoaders = {
   hooks: () => import('../../generated/hooks-metadata').then((m) => m.hooksMetadata),
   statuslines: () =>
     import('../../generated/statuslines-metadata').then((m) => m.statuslinesMetadata),
+  collections: () =>
+    import('../../generated/collections-metadata').then((m) => m.collectionsMetadata),
 };
 
 /**

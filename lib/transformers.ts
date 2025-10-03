@@ -110,6 +110,7 @@ export function transformForHomePage(data: {
   commands: readonly (ContentItem | ContentMetadata)[];
   hooks: readonly (ContentItem | ContentMetadata)[];
   statuslines: readonly (ContentItem | ContentMetadata)[];
+  collections: readonly (ContentItem | ContentMetadata)[];
   allConfigs: readonly (ContentItem | ContentMetadata)[];
 }): {
   rules: UnifiedContentItem[];
@@ -118,6 +119,7 @@ export function transformForHomePage(data: {
   commands: UnifiedContentItem[];
   hooks: UnifiedContentItem[];
   statuslines: UnifiedContentItem[];
+  collections: UnifiedContentItem[];
   allConfigs: UnifiedContentItem[];
 } {
   return {
@@ -127,6 +129,7 @@ export function transformForHomePage(data: {
     commands: transformContentArray(data.commands as readonly ContentItem[]),
     hooks: transformContentArray(data.hooks as readonly ContentItem[]),
     statuslines: transformContentArray(data.statuslines as readonly ContentItem[]),
+    collections: transformContentArray(data.collections as readonly ContentItem[]),
     allConfigs: transformContentArray(data.allConfigs as readonly ContentItem[]),
   };
 }

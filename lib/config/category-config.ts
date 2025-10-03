@@ -14,7 +14,7 @@
  */
 
 import type { LucideIcon } from 'lucide-react';
-import { BookOpen, Code, Sparkles, Terminal, Webhook } from '@/lib/icons';
+import { BookOpen, Code, Layers, Sparkles, Terminal, Webhook } from '@/lib/icons';
 
 /**
  * Category metadata and display configuration
@@ -234,6 +234,40 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
 
     urlSlug: 'statuslines',
     contentLoader: 'statuslines',
+  },
+
+  collections: {
+    title: 'Collection',
+    pluralTitle: 'Collections',
+    description:
+      'Curated bundles of related content items organized by theme, use case, or workflow for easy discovery.',
+    icon: Layers,
+    keywords: 'Claude collections, starter kits, workflows, bundles, curated content',
+    metaDescription:
+      'Curated bundles of related content items organized by theme, use case, or workflow for easy discovery.',
+
+    listPage: {
+      searchPlaceholder: 'Search collections...',
+      badges: [
+        { icon: 'layers', text: (count) => `${count} Collections Available` },
+        { text: 'Curated Bundles' },
+        { text: 'Ready to Use' },
+      ],
+    },
+
+    detailPage: {
+      displayConfig: false,
+      configFormat: 'json',
+      sections: [
+        { id: 'items', title: "What's Included", order: 1 },
+        { id: 'prerequisites', title: 'Prerequisites', order: 2 },
+        { id: 'installation', title: 'Installation Order', order: 3 },
+        { id: 'compatibility', title: 'Compatibility', order: 4 },
+      ],
+    },
+
+    urlSlug: 'collections',
+    contentLoader: 'collections',
   },
 };
 

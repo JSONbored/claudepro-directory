@@ -1,0 +1,69 @@
+{
+  "slug": "aws-cloud-infrastructure-bundle",
+  "title": "AWS Cloud Infrastructure Bundle",
+  "description": "Complete AWS infrastructure management toolkit combining cloud architecture expertise, CloudFormation validation, and AWS services integration. Perfect for teams building and maintaining cloud-native applications on AWS.",
+  "author": "JSONbored",
+  "dateAdded": "2025-01-15",
+  "tags": ["aws", "cloud", "infrastructure", "devops", "cloudformation", "serverless"],
+  "source": "official",
+  "category": "collections",
+  "collectionType": "use-case",
+  "difficulty": "advanced",
+  "estimatedSetupTime": "40 minutes",
+  "features": [
+    "AWS architecture design and planning",
+    "CloudFormation template validation",
+    "Multi-service AWS integration",
+    "DevOps and SRE best practices"
+  ],
+  "useCases": [
+    "Building cloud-native applications on AWS",
+    "Managing AWS infrastructure as code",
+    "Migrating applications to AWS",
+    "Implementing DevOps practices on AWS"
+  ],
+  "items": [
+    {
+      "category": "rules",
+      "slug": "aws-cloud-architect",
+      "reason": "Expert guidance for AWS architecture and design patterns"
+    },
+    {
+      "category": "rules",
+      "slug": "devops-sre-expert",
+      "reason": "DevOps and SRE best practices for cloud operations"
+    },
+    {
+      "category": "mcp",
+      "slug": "aws-services-mcp-server",
+      "reason": "Direct integration with AWS services and APIs"
+    },
+    {
+      "category": "hooks",
+      "slug": "aws-cloudformation-validator",
+      "reason": "Validates CloudFormation templates before deployment"
+    },
+    {
+      "category": "agents",
+      "slug": "backend-architect-agent",
+      "reason": "Designs scalable backend architectures for cloud deployment"
+    }
+  ],
+  "installationOrder": [
+    "aws-cloud-architect",
+    "devops-sre-expert",
+    "backend-architect-agent",
+    "aws-services-mcp-server",
+    "aws-cloudformation-validator"
+  ],
+  "prerequisites": [
+    "AWS account with appropriate permissions",
+    "Basic understanding of cloud computing concepts",
+    "AWS CLI configured locally",
+    "CloudFormation or infrastructure-as-code experience"
+  ],
+  "compatibility": {
+    "claudeDesktop": true,
+    "claudeCode": true
+  }
+}

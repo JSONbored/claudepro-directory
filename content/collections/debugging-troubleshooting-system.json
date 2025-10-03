@@ -1,0 +1,52 @@
+{
+  "slug": "debugging-troubleshooting-system",
+  "title": "Debugging & Troubleshooting System",
+  "description": "Complete debugging toolkit for identifying, analyzing, and resolving complex software issues. Combines AI-assisted debugging with powerful diagnostic commands.",
+  "author": "JSONbored",
+  "dateAdded": "2025-01-15",
+  "tags": ["debugging", "troubleshooting", "error-handling", "diagnostics", "problem-solving"],
+  "source": "official",
+  "category": "collections",
+  "collectionType": "advanced-system",
+  "difficulty": "intermediate",
+  "estimatedSetupTime": "10 minutes",
+  "features": [
+    "AI-powered error analysis and resolution",
+    "Step-by-step debugging guidance",
+    "Root cause identification",
+    "Code explanation for complex bugs"
+  ],
+  "useCases": [
+    "Resolving production bugs quickly",
+    "Understanding unfamiliar codebase issues",
+    "Debugging complex asynchronous code",
+    "Training junior developers on debugging techniques"
+  ],
+  "items": [
+    {
+      "category": "agents",
+      "slug": "debugging-assistant-agent",
+      "reason": "Provides expert debugging assistance and error analysis"
+    },
+    {
+      "category": "commands",
+      "slug": "debug",
+      "reason": "Interactive debugging command with step-by-step guidance"
+    },
+    {
+      "category": "commands",
+      "slug": "explain",
+      "reason": "Explains complex code behavior causing bugs"
+    }
+  ],
+  "installationOrder": ["debugging-assistant-agent", "debug", "explain"],
+  "prerequisites": [
+    "Basic debugging knowledge",
+    "Access to application logs",
+    "Development environment setup"
+  ],
+  "compatibility": {
+    "claudeDesktop": true,
+    "claudeCode": true
+  }
+}

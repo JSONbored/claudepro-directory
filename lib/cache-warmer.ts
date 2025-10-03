@@ -40,6 +40,7 @@ export const warmableCategorySchema = z.enum([
   'commands',
   'hooks',
   'statuslines',
+  'collections',
   'guides',
   'jobs',
 ]);
@@ -135,6 +136,7 @@ export class CacheWarmer {
         commandsMetadata,
         hooksMetadata,
         statuslinesMetadata,
+        collectionsMetadata,
       ] = await Promise.all([
         metadataLoader.get('agentsMetadata'),
         metadataLoader.get('mcpMetadata'),
@@ -142,6 +144,7 @@ export class CacheWarmer {
         metadataLoader.get('commandsMetadata'),
         metadataLoader.get('hooksMetadata'),
         metadataLoader.get('statuslinesMetadata'),
+        metadataLoader.get('collectionsMetadata'),
       ]);
 
       // Get popular items from each category
@@ -152,6 +155,7 @@ export class CacheWarmer {
         { name: 'commands' as WarmableCategory, items: commandsMetadata },
         { name: 'hooks' as WarmableCategory, items: hooksMetadata },
         { name: 'statuslines' as WarmableCategory, items: statuslinesMetadata },
+        { name: 'collections' as WarmableCategory, items: collectionsMetadata },
       ];
 
       // Validate categories
@@ -265,6 +269,7 @@ export class CacheWarmer {
         { path: '/commands', category: 'commands' as WarmableCategory },
         { path: '/hooks', category: 'hooks' as WarmableCategory },
         { path: '/statuslines', category: 'statuslines' as WarmableCategory },
+        { path: '/collections', category: 'collections' as WarmableCategory },
       ];
 
       // Validate pages

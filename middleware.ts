@@ -249,6 +249,8 @@ async function applyEndpointRateLimit(
     '/api/rules.json': rateLimiters.api,
     '/api/commands.json': rateLimiters.api,
     '/api/hooks.json': rateLimiters.api,
+    '/api/statuslines.json': rateLimiters.api,
+    '/api/collections.json': rateLimiters.api,
   };
 
   // Check for exact path matches first

@@ -199,14 +199,34 @@ export const filterSchema = z
     category: z
       .union([
         z
-          .enum(['all', 'agents', 'mcp', 'rules', 'commands', 'hooks', 'guides'])
+          .enum([
+            'all',
+            'agents',
+            'mcp',
+            'rules',
+            'commands',
+            'hooks',
+            'statuslines',
+            'collections',
+            'guides',
+          ])
           .describe('Predefined category value'),
         z
           .string()
           .transform((val) => {
             const normalized = val.toLowerCase().trim();
             if (
-              ['all', 'agents', 'mcp', 'rules', 'commands', 'hooks', 'guides'].includes(normalized)
+              [
+                'all',
+                'agents',
+                'mcp',
+                'rules',
+                'commands',
+                'hooks',
+                'statuslines',
+                'collections',
+                'guides',
+              ].includes(normalized)
             ) {
               return normalized as
                 | 'all'
@@ -215,6 +235,8 @@ export const filterSchema = z
                 | 'rules'
                 | 'commands'
                 | 'hooks'
+                | 'statuslines'
+                | 'collections'
                 | 'guides';
             }
             return 'all';

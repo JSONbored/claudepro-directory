@@ -255,6 +255,7 @@ export async function getBatchTrendingData(contentByCategory: {
   commands: UnifiedContentItem[];
   hooks: UnifiedContentItem[];
   statuslines?: UnifiedContentItem[];
+  collections?: UnifiedContentItem[];
 }) {
   // Combine all content for batch Redis query
   const allContent = [
@@ -264,6 +265,7 @@ export async function getBatchTrendingData(contentByCategory: {
     ...contentByCategory.commands,
     ...contentByCategory.hooks,
     ...(contentByCategory.statuslines || []),
+    ...(contentByCategory.collections || []),
   ];
 
   // Run all calculations in parallel

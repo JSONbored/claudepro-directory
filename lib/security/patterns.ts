@@ -15,7 +15,7 @@ export const VALIDATION_PATTERNS = {
   SLUG: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
 
   // Content type validation (exact match)
-  CONTENT_TYPE: /^(agents|mcp|rules|commands|hooks|statuslines)\.json$/,
+  CONTENT_TYPE: /^(agents|mcp|rules|commands|hooks|statuslines|collections)\.json$/,
 
   // File extensions (security-focused)
   SAFE_FILE_EXT: /^[a-zA-Z0-9_-]+\.(json|md|txt|yaml|yml)$/i,

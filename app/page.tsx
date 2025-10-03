@@ -1,6 +1,6 @@
 import { HomePageClient } from '@/components/features/home';
 import { lazyContentLoaders } from '@/components/shared/lazy-content-loaders';
-import { BookOpen, Server, Sparkles } from '@/lib/icons';
+import { BookOpen, Layers, Server, Sparkles } from '@/lib/icons';
 import { transformForHomePage } from '@/lib/transformers';
 import { UI_CLASSES } from '@/lib/ui-constants';
 
@@ -10,17 +10,26 @@ export const revalidate = 3600;
 // Server component that loads data
 export default async function HomePage() {
   // Load all content server-side for better SEO and initial page load
-  const [rules, mcp, agents, commands, hooks, statuslines] = await Promise.all([
+  const [rules, mcp, agents, commands, hooks, statuslines, collections] = await Promise.all([
     lazyContentLoaders.rules(),
     lazyContentLoaders.mcp(),
     lazyContentLoaders.agents(),
     lazyContentLoaders.commands(),
     lazyContentLoaders.hooks(),
     lazyContentLoaders.statuslines(),
+    lazyContentLoaders.collections(),
   ]);
 
   // Create stable allConfigs array to prevent infinite re-renders
-  const allConfigs = [...rules, ...mcp, ...agents, ...commands, ...hooks, ...statuslines];
+  const allConfigs = [
+    ...rules,
+    ...mcp,
+    ...agents,
+    ...commands,
+    ...hooks,
+    ...statuslines,
+    ...collections,
+  ];
 
   // Transform data using transform functions to convert readonly arrays to mutable
   // Metadata arrays contain the core fields needed for display
@@ -31,6 +40,7 @@ export default async function HomePage() {
     commands,
     hooks,
     statuslines,
+    collections,
     allConfigs,
   });
 
@@ -82,6 +92,10 @@ export default async function HomePage() {
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Sparkles className="h-4 w-4" />
                 {statuslines.length} Statuslines
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Layers className="h-4 w-4" />
+                {collections.length} Collections
               </div>
             </div>
           </div>

@@ -68,6 +68,7 @@ export async function getContentByCategory(category: string): Promise<UnifiedCon
       rules: contentModule.getRules,
       hooks: contentModule.getHooks,
       statuslines: contentModule.getStatuslines,
+      collections: contentModule.getCollections,
     };
 
     const loader = loaderMap[category];
@@ -140,6 +141,7 @@ export async function getContentBySlug(
       rules: contentModule.getRuleBySlug,
       hooks: contentModule.getHookBySlug,
       statuslines: contentModule.getStatuslineBySlug,
+      collections: contentModule.getCollectionBySlug,
     };
 
     const loader = bySlugMap[category];
@@ -203,6 +205,7 @@ export async function getFullContentBySlug(
       rules: contentModule.getRuleFullContent,
       hooks: contentModule.getHookFullContent,
       statuslines: contentModule.getStatuslineFullContent,
+      collections: contentModule.getCollectionFullContent,
     };
 
     const loader = fullContentMap[category];

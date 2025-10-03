@@ -13,6 +13,8 @@ const configBadgeVariants = cva('text-xs font-medium border transition-colors', 
       agents: 'badge-category-agents',
       commands: 'badge-category-commands',
       hooks: 'badge-category-hooks',
+      statuslines: 'badge-category-statuslines',
+      collections: 'badge-category-collections',
       guides: 'badge-category-guides',
       default: 'bg-gray-500/20 text-gray-500 border-gray-500/30',
     },
@@ -40,7 +42,16 @@ const configBadgeVariants = cva('text-xs font-medium border transition-colors', 
 export interface ConfigBadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof configBadgeVariants> {
-  type?: 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks' | 'guides' | 'default';
+  type?:
+    | 'rules'
+    | 'mcp'
+    | 'agents'
+    | 'commands'
+    | 'hooks'
+    | 'statuslines'
+    | 'collections'
+    | 'guides'
+    | 'default';
   source?: 'official' | 'partner' | 'community' | 'verified' | 'experimental' | 'other';
   status?: 'active' | 'trending' | 'new' | 'updated' | 'deprecated';
 }
@@ -82,10 +93,17 @@ export function TypeBadge({
   type,
   className,
   ...props
-}: { type: 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks' | 'guides' } & Omit<
-  ConfigBadgeProps,
-  'type'
->) {
+}: {
+  type:
+    | 'rules'
+    | 'mcp'
+    | 'agents'
+    | 'commands'
+    | 'hooks'
+    | 'statuslines'
+    | 'collections'
+    | 'guides';
+} & Omit<ConfigBadgeProps, 'type'>) {
   const displayText =
     type === 'mcp'
       ? 'MCP'
@@ -97,7 +115,11 @@ export function TypeBadge({
             ? 'Command'
             : type === 'hooks'
               ? 'Hook'
-              : 'Guide';
+              : type === 'statuslines'
+                ? 'Statusline'
+                : type === 'collections'
+                  ? 'Collection'
+                  : 'Guide';
 
   return (
     <ConfigBadge type={type} className={className} {...props}>

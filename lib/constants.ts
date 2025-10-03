@@ -149,6 +149,7 @@ export const MAIN_CONTENT_CATEGORIES = [
   'rules',
   'agents',
   'statuslines',
+  'collections',
 ] as const;
 
 // CONSOLIDATION: Export SEO categories for better organization
@@ -172,6 +173,7 @@ const contentPathsSchema = z.object({
   commands: z.string().startsWith('content/'),
   hooks: z.string().startsWith('content/'),
   statuslines: z.string().startsWith('content/'),
+  collections: z.string().startsWith('content/'),
 
   // MDX guide content types (new structure)
   guides: z.string().startsWith('content/'),
@@ -181,7 +183,6 @@ const contentPathsSchema = z.object({
   'use-cases': z.string().startsWith('content/guides/'),
   troubleshooting: z.string().startsWith('content/guides/'),
   categories: z.string().startsWith('content/guides/'),
-  collections: z.string().startsWith('content/guides/'),
 });
 
 export const CONTENT_PATHS = contentPathsSchema.parse({
@@ -192,6 +193,7 @@ export const CONTENT_PATHS = contentPathsSchema.parse({
   commands: 'content/commands',
   hooks: 'content/hooks',
   statuslines: 'content/statuslines',
+  collections: 'content/collections',
 
   // MDX guide content (new structure)
   guides: 'content/guides',
@@ -201,7 +203,6 @@ export const CONTENT_PATHS = contentPathsSchema.parse({
   'use-cases': 'content/guides/use-cases',
   troubleshooting: 'content/guides/troubleshooting',
   categories: 'content/guides/categories',
-  collections: 'content/guides/collections',
 });
 
 /**
@@ -215,7 +216,6 @@ export const GUIDE_CATEGORIES = {
   'use-cases': CONTENT_PATHS['use-cases'],
   troubleshooting: CONTENT_PATHS.troubleshooting,
   categories: CONTENT_PATHS.categories,
-  collections: CONTENT_PATHS.collections,
 } as const;
 
 /**

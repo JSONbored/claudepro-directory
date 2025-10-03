@@ -1,6 +1,6 @@
 import { TrendingContent } from '@/components/shared/trending-content';
 import { Badge } from '@/components/ui/badge';
-import { agents, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
+import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
 import { Clock, Star, TrendingUp, Users } from '@/lib/icons';
 import { logger } from '@/lib/logger';
 import type { PagePropsWithSearchParams } from '@/lib/schemas/app.schema';
@@ -37,8 +37,15 @@ async function getTrendingData(params: TrendingParams) {
 
   try {
     // Await all content promises
-    const [rulesData, mcpData, agentsData, commandsData, hooksData, statuslinesData] =
-      await Promise.all([rules, mcp, agents, commands, hooks, statuslines]);
+    const [
+      rulesData,
+      mcpData,
+      agentsData,
+      commandsData,
+      hooksData,
+      statuslinesData,
+      collectionsData,
+    ] = await Promise.all([rules, mcp, agents, commands, hooks, statuslines, collections]);
 
     // Use Redis-based trending calculator
     const trendingData = await getBatchTrendingData({
@@ -65,6 +72,10 @@ async function getTrendingData(params: TrendingParams) {
       statuslines: statuslinesData.map((item: { [key: string]: unknown }) => ({
         ...item,
         category: 'statuslines' as const,
+      })),
+      collections: collectionsData.map((item: { [key: string]: unknown }) => ({
+        ...item,
+        category: 'collections' as const,
       })),
     });
 
@@ -114,15 +125,23 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
   const { trending, popular, recent } = await getTrendingData(params);
 
   // Await all content promises to calculate total count
-  const [rulesData, mcpData, agentsData, commandsData, hooksData] = await Promise.all([
-    rules,
-    mcp,
-    agents,
-    commands,
-    hooks,
-  ]);
+  const [
+    rulesData,
+    mcpData,
+    agentsData,
+    commandsData,
+    hooksData,
+    statuslinesData,
+    collectionsData,
+  ] = await Promise.all([rules, mcp, agents, commands, hooks, statuslines, collections]);
   const totalCount =
-    rulesData.length + mcpData.length + agentsData.length + commandsData.length + hooksData.length;
+    rulesData.length +
+    mcpData.length +
+    agentsData.length +
+    commandsData.length +
+    hooksData.length +
+    statuslinesData.length +
+    collectionsData.length;
 
   // This is a server component, so we'll use a static ID
   const pageTitleId = 'trending-page-title';

@@ -18,6 +18,7 @@
 import type { z } from 'zod';
 import type {
   AgentContent,
+  CollectionContent,
   CommandContent,
   HookContent,
   McpContent,
@@ -26,6 +27,7 @@ import type {
 } from '@/lib/schemas/content';
 import {
   agentContentSchema,
+  collectionContentSchema,
   commandContentSchema,
   hookContentSchema,
   mcpContentSchema,
@@ -44,7 +46,8 @@ export type ContentType =
   | HookContent
   | CommandContent
   | RuleContent
-  | StatuslineContent;
+  | StatuslineContent
+  | CollectionContent;
 
 /**
  * Build-time category configuration
@@ -67,7 +70,7 @@ export interface BuildCategoryConfig<T extends ContentType = ContentType> {
   readonly generateFullContent: boolean;
 
   /** Metadata field mapping for optimized exports */
-  readonly metadataFields: ReadonlyArray<keyof T>;
+  readonly metadataFields: ReadonlyArray<string>;
 
   /** Build performance configuration */
   readonly buildConfig: {
@@ -261,6 +264,37 @@ export const BUILD_CATEGORY_CONFIGS = {
       batchSize: 10,
       enableCache: true,
       cacheTTL: 5 * 60 * 1000,
+    },
+    apiConfig: {
+      generateStaticAPI: true,
+      includeTrending: true,
+      maxItemsPerResponse: 1000,
+    },
+  },
+
+  collections: {
+    id: 'collections',
+    name: 'Collections',
+    schema: collectionContentSchema,
+    typeName: 'CollectionContent',
+    generateFullContent: true,
+    metadataFields: [
+      'slug',
+      'title',
+      'description',
+      'author',
+      'tags',
+      'category',
+      'dateAdded',
+      'source',
+      'collectionType',
+      'difficulty',
+      'estimatedSetupTime',
+    ] as const,
+    buildConfig: {
+      batchSize: 10,
+      enableCache: true,
+      cacheTTL: 5 * 60 * 1000, // 5 minutes
     },
     apiConfig: {
       generateStaticAPI: true,

@@ -70,6 +70,7 @@ export const cacheableCategorySchema = z
     'hooks',
     'statuslines',
     'guides',
+    'collections',
     'jobs',
     // Note: SEO content doesn't need Redis caching
   ])

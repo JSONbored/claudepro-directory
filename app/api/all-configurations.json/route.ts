@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { agents, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
+import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
 import { APP_CONFIG } from '@/lib/constants';
 import { logger } from '@/lib/logger';
 import { rateLimiters, withRateLimit } from '@/lib/rate-limiter';
@@ -50,14 +50,22 @@ async function* createStreamingResponse(
   batchSize: number,
   format: 'json' | 'ndjson'
 ): AsyncGenerator<string, void, unknown> {
-  const [agentsData, mcpData, rulesData, commandsData, hooksData, statuslinesData] =
-    await Promise.all([agents, mcp, rules, commands, hooks, statuslines]);
+  const [
+    agentsData,
+    mcpData,
+    rulesData,
+    commandsData,
+    hooksData,
+    statuslinesData,
+    collectionsData,
+  ] = await Promise.all([agents, mcp, rules, commands, hooks, statuslines, collections]);
   const transformedAgents = transformContent(agentsData, 'agent', 'agents');
   const transformedMcp = transformContent(mcpData, 'mcp', 'mcp');
   const transformedRules = transformContent(rulesData, 'rule', 'rules');
   const transformedCommands = transformContent(commandsData, 'command', 'commands');
   const transformedHooks = transformContent(hooksData, 'hook', 'hooks');
   const transformedStatuslines = transformContent(statuslinesData, 'statusline', 'statuslines');
+  const transformedCollections = transformContent(collectionsData, 'collection', 'collections');
 
   const metadata = {
     '@context': 'https://schema.org',
@@ -73,13 +81,15 @@ async function* createStreamingResponse(
         transformedRules.length +
         transformedCommands.length +
         transformedHooks.length +
-        transformedStatuslines.length,
+        transformedStatuslines.length +
+        transformedCollections.length,
       agents: transformedAgents.length,
       mcp: transformedMcp.length,
       rules: transformedRules.length,
       commands: transformedCommands.length,
       hooks: transformedHooks.length,
       statuslines: transformedStatuslines.length,
+      collections: transformedCollections.length,
     },
     endpoints: {
       agents: `${APP_CONFIG.url}/api/agents.json`,
@@ -88,6 +98,7 @@ async function* createStreamingResponse(
       commands: `${APP_CONFIG.url}/api/commands.json`,
       hooks: `${APP_CONFIG.url}/api/hooks.json`,
       statuslines: `${APP_CONFIG.url}/api/statuslines.json`,
+      collections: `${APP_CONFIG.url}/api/collections.json`,
     },
   };
 
@@ -103,6 +114,7 @@ async function* createStreamingResponse(
       { name: 'commands', data: transformedCommands },
       { name: 'hooks', data: transformedHooks },
       { name: 'statuslines', data: transformedStatuslines },
+      { name: 'collections', data: transformedCollections },
     ];
 
     for (const category of categories) {
@@ -124,6 +136,7 @@ async function* createStreamingResponse(
       { name: 'commands', data: transformedCommands },
       { name: 'hooks', data: transformedHooks },
       { name: 'statuslines', data: transformedStatuslines },
+      { name: 'collections', data: transformedCollections },
     ];
 
     for (let categoryIndex = 0; categoryIndex < categories.length; categoryIndex++) {
@@ -229,14 +242,22 @@ async function handleGET(request: NextRequest) {
         },
       });
     }
-    const [agentsData, mcpData, rulesData, commandsData, hooksData, statuslinesData] =
-      await Promise.all([agents, mcp, rules, commands, hooks, statuslines]);
+    const [
+      agentsData,
+      mcpData,
+      rulesData,
+      commandsData,
+      hooksData,
+      statuslinesData,
+      collectionsData,
+    ] = await Promise.all([agents, mcp, rules, commands, hooks, statuslines, collections]);
     const transformedAgents = transformContent(agentsData, 'agent', 'agents');
     const transformedMcp = transformContent(mcpData, 'mcp', 'mcp');
     const transformedRules = transformContent(rulesData, 'rule', 'rules');
     const transformedCommands = transformContent(commandsData, 'command', 'commands');
     const transformedHooks = transformContent(hooksData, 'hook', 'hooks');
     const transformedStatuslines = transformContent(statuslinesData, 'statusline', 'statuslines');
+    const transformedCollections = transformContent(collectionsData, 'collection', 'collections');
 
     const allConfigurations = {
       '@context': 'https://schema.org',
@@ -252,13 +273,15 @@ async function handleGET(request: NextRequest) {
           transformedRules.length +
           transformedCommands.length +
           transformedHooks.length +
-          transformedStatuslines.length,
+          transformedStatuslines.length +
+          transformedCollections.length,
         agents: transformedAgents.length,
         mcp: transformedMcp.length,
         rules: transformedRules.length,
         commands: transformedCommands.length,
         hooks: transformedHooks.length,
         statuslines: transformedStatuslines.length,
+        collections: transformedCollections.length,
       },
       data: {
         agents: transformedAgents,
@@ -267,6 +290,7 @@ async function handleGET(request: NextRequest) {
         commands: transformedCommands,
         hooks: transformedHooks,
         statuslines: transformedStatuslines,
+        collections: transformedCollections,
       },
       endpoints: {
         agents: `${APP_CONFIG.url}/api/agents.json`,
@@ -275,6 +299,7 @@ async function handleGET(request: NextRequest) {
         commands: `${APP_CONFIG.url}/api/commands.json`,
         hooks: `${APP_CONFIG.url}/api/hooks.json`,
         statuslines: `${APP_CONFIG.url}/api/statuslines.json`,
+        collections: `${APP_CONFIG.url}/api/collections.json`,
       },
     };
 

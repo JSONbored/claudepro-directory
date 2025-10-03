@@ -198,6 +198,18 @@
   --color-category-hooks-border: oklch(65% 0.24 350 / 0.3);
   --color-category-hooks-hover: oklch(65% 0.24 350 / 0.6);
 
+  /* Statuslines - Purple */
+  --color-category-statuslines: oklch(60% 0.2 290);
+  --color-category-statuslines-bg: oklch(60% 0.2 290 / 0.2);
+  --color-category-statuslines-border: oklch(60% 0.2 290 / 0.3);
+  --color-category-statuslines-hover: oklch(60% 0.2 290 / 0.6);
+
+  /* Collections - Indigo */
+  --color-category-collections: oklch(58% 0.19 270);
+  --color-category-collections-bg: oklch(58% 0.19 270 / 0.2);
+  --color-category-collections-border: oklch(58% 0.19 270 / 0.3);
+  --color-category-collections-hover: oklch(58% 0.19 270 / 0.6);
+
   /* Guides - Indigo */
   --color-category-guides: oklch(58% 0.19 280);
   --color-category-guides-bg: oklch(58% 0.19 280 / 0.2);
@@ -1132,6 +1144,16 @@
     background-color: var(--color-category-hooks-bg);
     color: var(--color-category-hooks);
     border-color: var(--color-category-hooks-border);
+  }
+  .badge-category-statuslines {
+    background-color: var(--color-category-statuslines-bg);
+    color: var(--color-category-statuslines);
+    border-color: var(--color-category-statuslines-border);
+  }
+  .badge-category-collections {
+    background-color: var(--color-category-collections-bg);
+    color: var(--color-category-collections);
+    border-color: var(--color-category-collections-border);
   }
   .badge-category-guides {
     background-color: var(--color-category-guides-bg);

@@ -1,0 +1,52 @@
+{
+  "slug": "code-quality-toolkit",
+  "title": "Code Quality & Review Toolkit",
+  "description": "Comprehensive suite of tools for maintaining high code quality through automated reviews, testing, and best practice enforcement. Essential for teams focused on code excellence.",
+  "author": "JSONbored",
+  "dateAdded": "2025-01-15",
+  "tags": ["code-quality", "review", "testing", "best-practices", "refactoring"],
+  "source": "official",
+  "category": "collections",
+  "collectionType": "workflow",
+  "difficulty": "intermediate",
+  "estimatedSetupTime": "15 minutes",
+  "features": [
+    "Automated code review and suggestions",
+    "Test generation and coverage analysis",
+    "Code refactoring assistance",
+    "Best practice enforcement"
+  ],
+  "useCases": [
+    "Performing comprehensive code reviews",
+    "Improving test coverage across projects",
+    "Refactoring legacy code safely",
+    "Enforcing team coding standards"
+  ],
+  "items": [
+    {
+      "category": "agents",
+      "slug": "code-reviewer-agent",
+      "reason": "Performs in-depth code reviews with actionable suggestions"
+    },
+    {
+      "category": "commands",
+      "slug": "generate-tests",
+      "reason": "Automatically generates unit and integration tests"
+    },
+    {
+      "category": "commands",
+      "slug": "explain",
+      "reason": "Explains complex code sections for better understanding"
+    }
+  ],
+  "installationOrder": ["code-reviewer-agent", "generate-tests", "explain"],
+  "prerequisites": [
+    "Existing codebase to review",
+    "Understanding of testing frameworks",
+    "Git repository setup"
+  ],
+  "compatibility": {
+    "claudeDesktop": true,
+    "claudeCode": true
+  }
+}

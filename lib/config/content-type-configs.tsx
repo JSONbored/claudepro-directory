@@ -10,7 +10,7 @@
 
 import { toast } from 'sonner';
 import { copyToClipboard } from '@/lib/clipboard-utils';
-import { BookOpen, Bot, Server, Terminal, Webhook } from '@/lib/icons';
+import { BookOpen, Bot, Layers, Server, Terminal, Webhook } from '@/lib/icons';
 import type { ContentTypeConfigRegistry } from '@/lib/types/content-type-config';
 import { UI_CLASSES } from '@/lib/ui-constants';
 import { getDisplayTitle } from '@/lib/utils';
@@ -560,6 +560,53 @@ const statuslineConfig: ContentTypeConfigRegistry['statuslines'] = {
 };
 
 /**
+ * Collection Configuration
+ */
+const collectionConfig: ContentTypeConfigRegistry['collections'] = {
+  typeName: 'Collection',
+  icon: Layers,
+  colorScheme: 'indigo-500',
+
+  primaryAction: {
+    label: 'View Collection',
+    icon: <Layers className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
+    handler: () => {
+      const itemsSection = document.querySelector('[data-section="items"]');
+      itemsSection?.scrollIntoView({ behavior: 'smooth' });
+    },
+  },
+
+  sections: {
+    features: false,
+    installation: false,
+    useCases: true,
+    configuration: false,
+    security: false,
+    troubleshooting: false,
+    examples: false,
+  },
+
+  generators: {
+    useCases: (item) => {
+      if ('useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0) {
+        return item.useCases;
+      }
+      return [
+        'Quick start with pre-configured bundles',
+        'Explore curated workflows and best practices',
+        'Discover related content organized by theme',
+      ];
+    },
+  },
+
+  metadata: {
+    categoryLabel: 'Collection',
+    showGitHubLink: true,
+    githubPathPrefix: 'content/collections',
+  },
+};
+
+/**
  * Content Type Configuration Registry
  *
  * Central registry of all content type configurations.
@@ -572,6 +619,7 @@ export const contentTypeConfigs: ContentTypeConfigRegistry = {
   mcp: mcpConfig,
   rules: ruleConfig,
   statuslines: statuslineConfig,
+  collections: collectionConfig,
   guides: ruleConfig, // Guides use same config as rules for now
 };
 

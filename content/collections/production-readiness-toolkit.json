@@ -1,0 +1,75 @@
+{
+  "slug": "production-readiness-toolkit",
+  "title": "Production Readiness Toolkit",
+  "description": "Comprehensive system for ensuring code quality, security, and compliance before production deployment. Includes automated code reviews, complexity monitoring, backup strategies, and production-grade rules for professional development teams.",
+  "author": "JSONbored",
+  "dateAdded": "2025-01-15",
+  "tags": ["production", "code-quality", "security", "compliance", "deployment", "best-practices"],
+  "source": "official",
+  "category": "collections",
+  "collectionType": "advanced-system",
+  "difficulty": "advanced",
+  "estimatedSetupTime": "45 minutes",
+  "features": [
+    "Automated code review and complexity monitoring",
+    "Production-grade codebase auditing",
+    "Automatic backup and safety hooks",
+    "Security and compliance checking"
+  ],
+  "useCases": [
+    "Preparing code for production deployment",
+    "Implementing team code quality standards",
+    "Preventing production bugs and security issues",
+    "Enterprise-grade development workflows"
+  ],
+  "items": [
+    {
+      "category": "rules",
+      "slug": "production-codebase-auditor",
+      "reason": "Enforces production-grade code standards and best practices"
+    },
+    {
+      "category": "rules",
+      "slug": "code-review-expert",
+      "reason": "Provides expert-level code review guidance"
+    },
+    {
+      "category": "hooks",
+      "slug": "code-complexity-alert-monitor",
+      "reason": "Monitors and alerts on code complexity metrics"
+    },
+    {
+      "category": "hooks",
+      "slug": "auto-save-backup",
+      "reason": "Automatically backs up work to prevent data loss"
+    },
+    {
+      "category": "agents",
+      "slug": "code-reviewer-agent",
+      "reason": "AI-powered comprehensive code review"
+    },
+    {
+      "category": "commands",
+      "slug": "generate-tests",
+      "reason": "Ensures adequate test coverage before deployment"
+    }
+  ],
+  "installationOrder": [
+    "production-codebase-auditor",
+    "code-review-expert",
+    "code-complexity-alert-monitor",
+    "auto-save-backup",
+    "code-reviewer-agent",
+    "generate-tests"
+  ],
+  "prerequisites": [
+    "Existing codebase with CI/CD pipeline",
+    "Understanding of production deployment processes",
+    "Team buy-in for code quality standards",
+    "Access to version control system"
+  ],
+  "compatibility": {
+    "claudeDesktop": true,
+    "claudeCode": true
+  }
+}

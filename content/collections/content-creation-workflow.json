@@ -1,0 +1,68 @@
+{
+  "slug": "content-creation-workflow",
+  "title": "Content Creation Workflow",
+  "description": "Streamlined workflow for content creators and marketers. Manage projects across multiple platforms, design graphics, and automate content distribution with integrated tools.",
+  "author": "JSONbored",
+  "dateAdded": "2025-01-15",
+  "tags": ["content", "marketing", "design", "workflow", "automation", "social-media"],
+  "source": "official",
+  "category": "collections",
+  "collectionType": "workflow",
+  "difficulty": "beginner",
+  "estimatedSetupTime": "25 minutes",
+  "features": [
+    "Multi-platform project management",
+    "Visual content creation tools",
+    "Content distribution automation",
+    "Team collaboration features"
+  ],
+  "useCases": [
+    "Managing content calendars and campaigns",
+    "Creating social media graphics and assets",
+    "Coordinating content across multiple platforms",
+    "Streamlining content approval workflows"
+  ],
+  "items": [
+    {
+      "category": "mcp",
+      "slug": "asana-mcp-server",
+      "reason": "Manage content projects, tasks, and deadlines in Asana"
+    },
+    {
+      "category": "mcp",
+      "slug": "clickup-mcp-server",
+      "reason": "Alternative project management with powerful automation features"
+    },
+    {
+      "category": "mcp",
+      "slug": "canva-mcp-server",
+      "reason": "Create and edit visual content directly from Claude"
+    },
+    {
+      "category": "mcp",
+      "slug": "cloudinary-mcp-server",
+      "reason": "Manage and optimize media assets for content distribution"
+    },
+    {
+      "category": "commands",
+      "slug": "docs",
+      "reason": "Generate content briefs, documentation, and style guides"
+    }
+  ],
+  "installationOrder": [
+    "asana-mcp-server",
+    "clickup-mcp-server",
+    "canva-mcp-server",
+    "cloudinary-mcp-server",
+    "docs"
+  ],
+  "prerequisites": [
+    "Asana or ClickUp account",
+    "Canva account (free or Pro)",
+    "Cloudinary account (optional, for advanced media management)"
+  ],
+  "compatibility": {
+    "claudeDesktop": true,
+    "claudeCode": false
+  }
+}

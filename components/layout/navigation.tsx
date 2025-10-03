@@ -134,6 +134,12 @@ export const Navigation = () => {
             <NavLink href="/hooks" isActive={isActive} onClick={() => setIsOpen(false)}>
               Hooks
             </NavLink>
+            <NavLink href="/statuslines" isActive={isActive} onClick={() => setIsOpen(false)}>
+              Statuslines
+            </NavLink>
+            <NavLink href="/collections" isActive={isActive} onClick={() => setIsOpen(false)}>
+              Collections
+            </NavLink>
             <NavLink href="/jobs" isActive={isActive} onClick={() => setIsOpen(false)}>
               Jobs
             </NavLink>
@@ -326,6 +332,24 @@ export const Navigation = () => {
                           className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
                         >
                           Hooks
+                        </NavLink>
+
+                        <NavLink
+                          href="/statuslines"
+                          isActive={isActive}
+                          onClick={() => setIsOpen(false)}
+                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
+                        >
+                          Statuslines
+                        </NavLink>
+
+                        <NavLink
+                          href="/collections"
+                          isActive={isActive}
+                          onClick={() => setIsOpen(false)}
+                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
+                        >
+                          Collections
                         </NavLink>
 
                         <NavLink

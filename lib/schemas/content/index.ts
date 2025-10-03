@@ -21,6 +21,11 @@ export {
   baseContentMetadataSchema,
   baseInstallationSchema,
 } from './base-content.schema';
+export {
+  type CollectionContent,
+  type CollectionItemReference,
+  collectionContentSchema,
+} from './collection.schema';
 export { type CommandContent, commandContentSchema } from './command.schema';
 export { type GuideContent, guideContentSchema } from './guide.schema';
 export { type HookContent, hookContentSchema } from './hook.schema';
@@ -30,6 +35,7 @@ export { type StatuslineContent, statuslineContentSchema } from './statusline.sc
 
 // Re-import for union creation and type aliases
 import { agentContentSchema } from './agent.schema';
+import { collectionContentSchema } from './collection.schema';
 import { commandContentSchema } from './command.schema';
 import { guideContentSchema } from './guide.schema';
 import { hookContentSchema } from './hook.schema';
@@ -48,6 +54,7 @@ export const contentItemSchema = z.union([
   hookContentSchema,
   guideContentSchema,
   statuslineContentSchema,
+  collectionContentSchema,
 ]);
 
 export type ContentItem = z.infer<typeof contentItemSchema>;
@@ -78,6 +85,8 @@ export function validateContentByCategory(data: unknown, category: string) {
       return guideContentSchema.parse(data);
     case 'statuslines':
       return statuslineContentSchema.parse(data);
+    case 'collections':
+      return collectionContentSchema.parse(data);
     default:
       throw new Error(`Unknown content category: ${category}`);
   }
@@ -104,6 +113,7 @@ export type ContentStats = {
   hooks: number;
   guides: number;
   statuslines: number;
+  collections: number;
 };
 
 /**

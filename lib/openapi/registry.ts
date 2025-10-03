@@ -24,7 +24,7 @@ extendZodWithOpenApi(z);
 
 // Base schemas with OpenAPI metadata
 export const contentTypeSchema = z
-  .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'])
+  .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'])
   .openapi({
     description: 'Content category identifier',
     example: 'agents',

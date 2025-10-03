@@ -2,6 +2,7 @@ import { existsSync, readdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 // Import directly from metadata files for build-time usage (not runtime lazy loaders)
 import { agentsMetadata } from '../generated/agents-metadata.js';
+import { collectionsMetadata } from '../generated/collections-metadata.js';
 import { commandsMetadata } from '../generated/commands-metadata.js';
 import { hooksMetadata } from '../generated/hooks-metadata.js';
 import { mcpMetadata } from '../generated/mcp-metadata.js';
@@ -95,6 +96,7 @@ async function generateSitemap(): Promise<string> {
     ...commandsMetadata,
     ...hooksMetadata,
     ...statuslinesMetadata,
+    ...collectionsMetadata,
   ];
 
   allContent.forEach((item) => {
