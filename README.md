@@ -17,14 +17,6 @@
 
 ### **Find the perfect Claude configuration in seconds**
 
-<div align="center">
-
-| 🪝 **60** Hooks | ⚙️ **39** MCP | 🔧 **12** Commands | 📜 **11** Rules |
-|:---:|:---:|:---:|:---:|
-| 🤖 **10** Agents | 📦 **9** Collections | 💻 **6** Statuslines | 🎯 **147** Total |
-
-</div>
-
 [🌐 **Browse Configurations**](https://claudepro.directory) • [📝 **Submit Yours**](https://claudepro.directory/submit) • [💬 **Join Discord**](https://discord.gg/Ax3Py4YDrq)
 
 </div>
@@ -71,10 +63,6 @@ See our [Contributing Guide](.github/CONTRIBUTING.md) for detailed instructions.
 
 </div>
 
-## 📈 Activity
-
-![RepoBeats Analytics](https://repobeats.axiom.co/api/embed/c2b1b7e36103fba7a650c6d7f2777cba7338a1f7.svg "Repobeats analytics image")
-
 ## 🤝 Community
 
 <div align="center">
@@ -84,6 +72,10 @@ See our [Contributing Guide](.github/CONTRIBUTING.md) for detailed instructions.
 [![Twitter](https://img.shields.io/badge/Twitter-@JSONbored-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://x.com/JSONbored)
 
 </div>
+
+## 📈 Activity
+
+![RepoBeats Analytics](https://repobeats.axiom.co/api/embed/c2b1b7e36103fba7a650c6d7f2777cba7338a1f7.svg "Repobeats analytics image")
 
 ## 👥 Contributors
 
@@ -155,7 +147,7 @@ See [Contributing Guide](.github/CONTRIBUTING.md) for more details.
 
 <div align="center">
 
-**Built with ❤️ by the Claude community**
+**Built with ❤️ by [@JSONbored](https://github.com/JSONbored)**
 
 [Website](https://claudepro.directory) • [GitHub](https://github.com/JSONbored/claudepro-directory) • [Discord](https://discord.gg/Ax3Py4YDrq)
 
