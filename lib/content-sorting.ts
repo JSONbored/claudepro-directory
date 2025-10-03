@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { ContentItem } from '@/lib/schemas/content';
+import type { ContentItem } from '@/lib/schemas/content/content-item-union.schema';
 import { logger } from './logger';
 import { contentCache, statsRedis } from './redis';
 import { cacheCategorySchema } from './schemas/cache.schema';

@@ -16,24 +16,19 @@
  */
 
 import type { z } from 'zod';
-import type {
-  AgentContent,
-  CollectionContent,
-  CommandContent,
-  HookContent,
-  McpContent,
-  RuleContent,
-  StatuslineContent,
-} from '@/lib/schemas/content';
+import { type AgentContent, agentContentSchema } from '@/lib/schemas/content/agent.schema';
 import {
-  agentContentSchema,
+  type CollectionContent,
   collectionContentSchema,
-  commandContentSchema,
-  hookContentSchema,
-  mcpContentSchema,
-  ruleContentSchema,
+} from '@/lib/schemas/content/collection.schema';
+import { type CommandContent, commandContentSchema } from '@/lib/schemas/content/command.schema';
+import { type HookContent, hookContentSchema } from '@/lib/schemas/content/hook.schema';
+import { type McpContent, mcpContentSchema } from '@/lib/schemas/content/mcp.schema';
+import { type RuleContent, ruleContentSchema } from '@/lib/schemas/content/rule.schema';
+import {
+  type StatuslineContent,
   statuslineContentSchema,
-} from '@/lib/schemas/content';
+} from '@/lib/schemas/content/statusline.schema';
 import type { ContentCategory } from '@/lib/schemas/shared.schema';
 
 /**

@@ -26,7 +26,7 @@ import { SourceBadge, TagBadge } from '@/components/ui/config-badge';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { trackCopy } from '@/lib/actions/track-view';
 import { Check, Clock, Copy, Layers } from '@/lib/icons';
-import type { CollectionContent } from '@/lib/schemas/content';
+import type { CollectionContent } from '@/lib/schemas/content/collection.schema';
 import { UI_CLASSES } from '@/lib/ui-constants';
 import { getDisplayTitle } from '@/lib/utils';
 

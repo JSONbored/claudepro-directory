@@ -439,7 +439,7 @@ export type RelatedContentResponse = z.infer<typeof relatedContentResponseSchema
  * Provides proper type conversion for components expecting RelatedContentItem
  */
 export function transformToRelatedContentItem(
-  item: import('@/lib/schemas/content').ContentItem,
+  item: import('@/lib/schemas/content/content-item-union.schema').ContentItem,
   options: {
     score?: number;
     matchType?: 'same_category' | 'tag_match' | 'keyword_match' | 'trending';
@@ -476,7 +476,7 @@ export function transformToRelatedContentItem(
  * Transform array of ContentItem to RelatedContentItem array
  */
 export function transformToRelatedContentItems(
-  items: import('@/lib/schemas/content').ContentItem[],
+  items: import('@/lib/schemas/content/content-item-union.schema').ContentItem[],
   options: {
     score?: number;
     matchType?: 'same_category' | 'tag_match' | 'keyword_match' | 'trending';

@@ -5,15 +5,13 @@
 
 import type { UnifiedContentItem } from '@/lib/schemas/components/content-item.schema';
 // Import all content types
-import type {
-  AgentContent,
-  CommandContent,
-  GuideContent,
-  HookContent,
-  McpContent,
-  RuleContent,
-  StatuslineContent,
-} from '@/lib/schemas/content';
+import type { AgentContent } from '@/lib/schemas/content/agent.schema';
+import type { CommandContent } from '@/lib/schemas/content/command.schema';
+import type { GuideContent } from '@/lib/schemas/content/guide.schema';
+import type { HookContent } from '@/lib/schemas/content/hook.schema';
+import type { McpContent } from '@/lib/schemas/content/mcp.schema';
+import type { RuleContent } from '@/lib/schemas/content/rule.schema';
+import type { StatuslineContent } from '@/lib/schemas/content/statusline.schema';
 
 // Union type for all content
 export type ContentItem =

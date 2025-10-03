@@ -17,8 +17,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { logger } from '@/lib/logger';
-import type { CollectionItemReference } from '@/lib/schemas/content';
-import { collectionContentSchema } from '@/lib/schemas/content';
+import {
+  type CollectionItemReference,
+  collectionContentSchema,
+} from '@/lib/schemas/content/collection.schema';
 
 /**
  * Validation result with detailed diagnostics

@@ -34,7 +34,7 @@ import {
 import { logger } from '../lib/logger.js';
 import { onBuildComplete } from '../lib/related-content/cache-invalidation.js';
 import { contentIndexer } from '../lib/related-content/indexer.js';
-import type { ContentStats } from '../lib/schemas/content/index.js';
+import type { ContentStats } from '../lib/schemas/content/content-types.js';
 
 // Paths
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
@@ -55,6 +55,19 @@ interface BuildStats {
   readonly buildTimeMs: number;
   readonly cacheHitRate: number;
   readonly peakMemoryMB: number;
+}
+
+/**
+ * Get schema file path from type name
+ * Maps content type names to their schema file paths
+ *
+ * @param typeName - Type name from config (e.g., "AgentContent", "McpContent")
+ * @returns Schema file path (e.g., "agent.schema", "mcp.schema")
+ */
+function getSchemaPathFromTypeName(typeName: string): string {
+  // Remove "Content" suffix and convert to lowercase
+  const baseName = typeName.replace(/Content$/, '').toLowerCase();
+  return `${baseName}.schema`;
 }
 
 /**
@@ -83,7 +96,7 @@ function generateMetadataFile(categoryId: BuildCategoryId, metadata: readonly un
  * @see scripts/build-content.ts
  */
 
-import type { ${config.typeName} } from '@/lib/schemas/content';
+import type { ${config.typeName} } from '@/lib/schemas/content/${getSchemaPathFromTypeName(config.typeName)}';
 
 export type ${capitalizedSingular}Metadata = Pick<${config.typeName}, ${metadataFieldsStr}>;
 
@@ -120,7 +133,7 @@ function generateFullContentFile(categoryId: BuildCategoryId, items: readonly un
  * @see scripts/build-content.ts
  */
 
-import type { ${config.typeName} } from '@/lib/schemas/content';
+import type { ${config.typeName} } from '@/lib/schemas/content/${getSchemaPathFromTypeName(config.typeName)}';
 
 export const ${varName}Full: ${config.typeName}[] = ${JSON.stringify(items, null, 2)};
 
@@ -158,7 +171,7 @@ function generateIndexFile(contentStats: ContentStats): string {
  */
 
 import { metadataLoader } from '@/lib/lazy-content-loaders';
-import type { ContentStats } from '../lib/schemas/content';
+import type { ContentStats } from '../lib/schemas/content/content-types';
 
 // Lazy metadata getters
 ${categories

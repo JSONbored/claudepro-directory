@@ -64,7 +64,7 @@ export interface ErrorFallbackProps {
 
 // JobCard component props
 export interface JobCardProps {
-  job: import('@/lib/schemas/content').JobContent;
+  job: import('@/lib/schemas/content/content-types').JobContent;
 }
 
 // UnifiedSearch component props
