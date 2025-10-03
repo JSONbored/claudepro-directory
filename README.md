@@ -6,9 +6,9 @@
 
 [![Mentioned in Awesome Claude Code](https://awesome.re/mentioned-badge.svg)](https://github.com/hesreallyhim/awesome-claude-code)
 
-[![CI](https://github.com/JSONbored/claudepro-directory/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/JSONbored/claudepro-directory/actions/workflows/ci.yml)
-[![Security](https://github.com/JSONbored/claudepro-directory/actions/workflows/security.yml/badge.svg?branch=main&event=push)](https://github.com/JSONbored/claudepro-directory/actions/workflows/security.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/JSONbored/claudepro-directory/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/JSONbored/claudepro-directory/actions/workflows/ci.yml)
+[![Security](https://github.com/JSONbored/claudepro-directory/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/JSONbored/claudepro-directory/actions/workflows/security.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.5-black?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.1-61DAFB?style=flat-square&logo=react&logoColor=white)](https://react.dev/)
@@ -19,8 +19,6 @@
 
 <div align="center">
 
-[![Browse](https://img.shields.io/badge/🌐_Browse-Visit_Site-CC785C?style=for-the-badge)](https://claudepro.directory)
-[![Submit Content](https://img.shields.io/badge/📝_Submit-Coming_Soon-gray?style=for-the-badge)](https://github.com/JSONbored/claudepro-directory/issues/new/choose)
 [![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/Ax3Py4YDrq)
 [![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/JSONbored/claudepro-directory/discussions)
 [![Twitter](https://img.shields.io/badge/Twitter-@JSONbored-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://x.com/JSONbored)
