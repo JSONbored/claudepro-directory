@@ -77,7 +77,8 @@
 
 import { z } from 'zod';
 import { logger } from './logger';
-import { type CacheService, CacheServices, redisClient } from './redis/index';
+import { type CacheService, CacheServices } from './redis/cache';
+import { redisClient } from './redis/client';
 import type { CacheInvalidationResult } from './schemas/cache.schema';
 import {
   cacheCategorySchema,
@@ -415,5 +416,5 @@ export const redisOptimizer = {
   },
 };
 
-export { redisClient } from './redis/index';
+export { type Redis, redisClient } from './redis/client';
 export default redisClient;

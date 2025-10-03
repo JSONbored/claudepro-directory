@@ -8,6 +8,9 @@ import { z } from 'zod';
 import { logger } from '../logger';
 import type { RedisConnectionStatus } from '../schemas/cache.schema';
 
+// Re-export Redis type for consumers
+export type { Redis };
+
 // Client-safe Redis config
 const redisConfig = {
   url: process.env.KV_REST_API_URL,
