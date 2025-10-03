@@ -1,10 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { APP_CONFIG, SEO_CONFIG } from '@/src/lib/constants';
 
-// Route segment configuration
-export const runtime = 'nodejs';
-export const maxDuration = 5;
-
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: APP_CONFIG.name,
