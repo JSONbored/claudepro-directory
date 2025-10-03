@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Workato",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "automation",
-    "workato",
-    "integration",
-    "workflow",
-    "iPaaS"
-  ],
+  "tags": ["automation", "workato", "integration", "workflow", "iPaaS"],
   "content": "Connect to hundreds of applications through Workato's enterprise automation and integration platform.",
   "features": [
     "Execute recipes (workflows) on demand",
@@ -39,7 +33,7 @@
       "mcpServers": {
         "workato": {
           "transport": "http",
-          "url": "YOUR_GENERATED_WORKATO_URL"
+          "url": "https://your-workspace.workato.com/mcp"
         }
       }
     },
@@ -47,7 +41,7 @@
       "mcpServers": {
         "workato": {
           "transport": "http",
-          "url": "YOUR_GENERATED_WORKATO_URL"
+          "url": "https://your-workspace.workato.com/mcp"
         }
       }
     }
@@ -68,10 +62,22 @@
     "Test recipes in sandbox environment"
   ],
   "troubleshooting": [
-    "Verify workspace permissions",
-    "Check recipe activation status",
-    "Monitor connection health",
-    "Review execution logs"
+    {
+      "issue": "Verify workspace permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check recipe activation status",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor connection health",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Review execution logs",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Sync Salesforce contacts to HubSpot",
@@ -80,11 +86,7 @@
     "Trigger customer onboarding recipe"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "execute"
-  ],
+  "permissions": ["read", "write", "execute"],
   "configLocation": "custom_generated",
   "documentationUrl": "https://docs.workato.com/mcp.html"
 }

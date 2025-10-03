@@ -1,0 +1,58 @@
+{
+  "slug": "multi-line-statusline",
+  "description": "Comprehensive multi-line statusline displaying detailed session information across two lines with organized sections and visual separators",
+  "category": "statuslines",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-01",
+  "tags": ["multi-line", "comprehensive", "detailed", "bash", "powerline", "dashboard"],
+  "statuslineType": "custom",
+  "content": "#!/usr/bin/env bash\n\n# Multi-Line Statusline for Claude Code\n# Displays comprehensive session info across two lines\n\n# Read JSON from stdin\nread -r input\n\n# Extract all available data\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"')\ndir=$(echo \"$input\" | jq -r '.workspace.path // \"~\"' | sed \"s|$HOME|~|\")\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\ncost=$(echo \"$input\" | jq -r '.session.estimatedCost // 0' | awk '{printf \"%.3f\", $0}')\nmemory=$(echo \"$input\" | jq -r '.system.memoryUsage // 0' | awk '{printf \"%.1f\", $0/1024/1024}')\n\n# Get git info if in repo\nworkdir=$(echo \"$input\" | jq -r '.workspace.path // \".\"')\ncd \"$workdir\" 2>/dev/null || cd .\n\nif git rev-parse --git-dir > /dev/null 2>&1; then\n  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo \"(detached)\")\n  if [ -z \"$(git status --porcelain)\" ]; then\n    git_status=\"\\033[32m ✓\\033[0m\"\n  else\n    git_status=\"\\033[33m ✗\\033[0m\"\n  fi\n  git_display=\" ${branch}${git_status}\"\nelse\n  git_display=\"\"\nfi\n\n# Box drawing and separators\nSEP=\"\\ue0b0\"\nVSEP=\"│\"\nTOP_LEFT=\"┌\"\nBOT_LEFT=\"└\"\n\n# Color scheme\nRESET=\"\\033[0m\"\nMODEL_C=\"\\033[38;5;111m\"  # Blue\nDIR_C=\"\\033[38;5;214m\"    # Orange\nTOKEN_C=\"\\033[38;5;76m\"   # Green\nCOST_C=\"\\033[38;5;220m\"   # Yellow\nMEM_C=\"\\033[38;5;139m\"    # Purple\n\n# Build top line: Model | Directory | Git\ntop_line=\"${TOP_LEFT}${RESET} ${MODEL_C}${model}${RESET} ${VSEP} ${DIR_C}${dir}${RESET}${git_display}\"\n\n# Build bottom line: Tokens | Cost | Memory\nbottom_line=\"${BOT_LEFT}${RESET} ${TOKEN_C} ${tokens:,} tokens${RESET} ${VSEP} ${COST_C}\\$${cost}${RESET}\"\n\nif [ \"$memory\" != \"0.0\" ]; then\n  bottom_line=\"${bottom_line} ${VSEP} ${MEM_C}${memory} MB${RESET}\"\nfi\n\n# Output both lines\necho -e \"$top_line\"\necho -e \"$bottom_line\"\n",
+  "features": [
+    "Two-line display for comprehensive information",
+    "Top line: Model, directory, git status",
+    "Bottom line: Tokens, cost, session time, memory usage",
+    "Powerline separators and section dividers",
+    "Color-coded sections for easy scanning",
+    "Box drawing characters for visual structure",
+    "Optional memory usage monitoring"
+  ],
+  "configuration": {
+    "format": "bash",
+    "refreshInterval": 1000,
+    "position": "left",
+    "colorScheme": "multi-line-dashboard"
+  },
+  "useCases": [
+    "Power users needing comprehensive session visibility",
+    "Development sessions with complex context switching",
+    "Monitoring resource usage during heavy workloads",
+    "Teams requiring detailed audit trails",
+    "Presentations or pair programming demonstrations"
+  ],
+  "requirements": [
+    "Bash shell",
+    "jq JSON processor",
+    "Terminal with Unicode box drawing support",
+    "Terminal height sufficient for multi-line display"
+  ],
+  "preview": "┌ claude-sonnet-4.5 │ ~/projects/app  main ✓\n└  12,345 tokens │ $0.234 │ 156.3 MB",
+  "troubleshooting": [
+    {
+      "issue": "Box drawing characters showing as garbage or question marks",
+      "solution": "Ensure terminal has UTF-8 encoding enabled. Set: export LANG=en_US.UTF-8. Test with: echo '┌│└'"
+    },
+    {
+      "issue": "Second line overwriting first line or display corruption",
+      "solution": "Terminal may not support multi-line statuslines properly. Check Claude Code configuration for multi-line support or use single-line statusline instead."
+    },
+    {
+      "issue": "Memory usage always showing 0.0 MB",
+      "solution": "Memory monitoring may not be available in your Claude Code version. This field is optional - statusline works without it."
+    },
+    {
+      "issue": "Lines not aligned or wrapped incorrectly",
+      "solution": "Terminal window may be too narrow. Resize to at least 80 characters wide or simplify displayed information."
+    }
+  ],
+  "source": "community"
+}

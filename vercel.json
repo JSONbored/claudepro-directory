@@ -1,18 +1,13 @@
 {
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude)content/'",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude).github/' ':(exclude)templates/' ':(exclude)*.md' ':(exclude)LICENSE' ':(exclude).gitignore' ':(exclude)content/guides/'",
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "regions": ["iad1"],
-  "functions": {
-    "app/api/*": {
-      "maxDuration": 5
-    },
-    "app/(agents|commands|hooks|mcp|rules|trending|submit|partner|community|jobs)/**.tsx": {
-      "maxDuration": 5
-    },
-    "app/page.tsx": {
-      "maxDuration": 5
+  "crons": [
+    {
+      "path": "/api/cache/warm",
+      "schedule": "0 3 * * *"
     }
-  }
+  ]
 }

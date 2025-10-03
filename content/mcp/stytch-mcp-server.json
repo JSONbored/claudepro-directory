@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Stytch",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "authentication",
-    "stytch",
-    "identity",
-    "security",
-    "auth"
-  ],
+  "tags": ["authentication", "stytch", "identity", "security", "auth"],
   "content": "Manage Stytch authentication configurations and workspace settings for identity management.",
   "features": [
     "Configure authentication methods and flows",
@@ -68,10 +62,22 @@
     "Monitor failed authentication attempts"
   ],
   "troubleshooting": [
-    "Verify project access permissions",
-    "Check environment (test/live) configuration",
-    "Review redirect URL configuration",
-    "Monitor API rate limits"
+    {
+      "issue": "Verify project access permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check environment (test/live) configuration",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Review redirect URL configuration",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor API rate limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Add new redirect URL for production",
@@ -80,11 +86,7 @@
     "Show authentication metrics for this week"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "configure"
-  ],
+  "permissions": ["read", "write", "configure"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://stytch.com/docs/workspace-management/stytch-mcp"
 }

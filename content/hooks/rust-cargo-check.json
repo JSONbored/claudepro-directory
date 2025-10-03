@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "rust",
-    "cargo",
-    "clippy",
-    "linting",
-    "compilation"
-  ],
+  "tags": ["rust", "cargo", "clippy", "linting", "compilation"],
   "hookType": "PostToolUse",
   "features": [
     "Fast compilation checking with cargo check",
@@ -35,10 +29,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/rust-cargo-check.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },

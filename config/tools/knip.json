@@ -1,0 +1,27 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignoreDependencies": [
+    "sharp",
+    "tailwindcss",
+    "@biomejs/biome",
+    "@asteasolutions/zod-to-openapi",
+    "postcss"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "ignore": [
+    "src/components/ui/**",
+    "src/lib/analytics/**",
+    "src/lib/structured-data/**",
+    "src/lib/constants.ts",
+    "src/lib/icons.tsx",
+    "src/lib/ui-constants.ts",
+    "src/lib/data/jobs.ts",
+    "src/components/ui/sonner.tsx",
+    "public/scripts/offline.js",
+    "public/scripts/service-worker-init.js",
+    "public/service-worker.js"
+  ],
+  "ignoreBinaries": ["skott", "madge"],
+  "entry": ["src/app/**/*.{ts,tsx}", "src/middleware.ts", "scripts/**/*.ts"],
+  "project": ["**/*.{ts,tsx}"]
+}

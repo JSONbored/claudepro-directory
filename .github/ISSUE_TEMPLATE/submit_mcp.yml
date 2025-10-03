@@ -1,0 +1,72 @@
+name: Submit MCP Server
+description: Share an MCP server configuration
+title: "[MCP]: "
+labels: ["content-submission", "mcp", "needs-review"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing this MCP server! 🚀
+
+        **Need help?** Copy our [simple template](https://github.com/JSONbored/claudepro-directory/blob/main/templates/content/mcp-template-simple.json) or [full template](https://github.com/JSONbored/claudepro-directory/blob/main/templates/content/mcp-template.json) to get started!
+
+  - type: input
+    id: name
+    attributes:
+      label: MCP Server Name
+      placeholder: e.g., "GitHub Integration"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What does it do?
+      placeholder: Brief description (1-2 sentences)
+    validations:
+      required: true
+
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Configuration (JSON)
+      description: Paste your MCP server config for claude_desktop_config.json
+      render: json
+      placeholder: |
+        {
+          "mcpServers": {
+            "github": {
+              "command": "npx",
+              "args": ["-y", "@modelcontextprotocol/server-github"],
+              "env": {
+                "GITHUB_TOKEN": "<your_token_here>"
+              }
+            }
+          }
+        }
+    validations:
+      required: true
+
+  - type: input
+    id: npm-package
+    attributes:
+      label: NPM Package (if applicable)
+      placeholder: e.g., @modelcontextprotocol/server-github
+
+  - type: input
+    id: tags
+    attributes:
+      label: Tags (optional)
+      placeholder: e.g., github, integration, development
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Quick Check
+      options:
+        - label: I've tested this and it works
+          required: true
+        - label: I've removed actual API keys/tokens from the config
+          required: true

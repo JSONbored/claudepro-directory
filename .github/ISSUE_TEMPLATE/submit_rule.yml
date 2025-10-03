@@ -1,0 +1,62 @@
+name: Submit Rule
+description: Share a Claude system rule/prompt
+title: "[Rule]: "
+labels: ["content-submission", "rule", "needs-review"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing your rule! 📏
+
+        **Need help?** Copy our [simple template](https://github.com/JSONbored/claudepro-directory/blob/main/templates/content/rules-template-simple.json) or [full template](https://github.com/JSONbored/claudepro-directory/blob/main/templates/content/rules-template.json) to get started!
+
+  - type: input
+    id: name
+    attributes:
+      label: Rule Name
+      placeholder: e.g., "Production Code Standards"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What does it do?
+      placeholder: Brief description (1-2 sentences)
+    validations:
+      required: true
+
+  - type: textarea
+    id: content
+    attributes:
+      label: Rule Content
+      description: Paste your system rule/prompt
+      render: markdown
+      placeholder: |
+        You are an expert in production-grade code.
+
+        Always follow these principles:
+        - Write type-safe code
+        - Include error handling
+        - Add comprehensive tests
+        ...
+    validations:
+      required: true
+
+  - type: input
+    id: tags
+    attributes:
+      label: Tags (optional)
+      placeholder: e.g., coding, best-practices, security
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Quick Check
+      options:
+        - label: I've used this rule successfully
+          required: true
+        - label: This doesn't contain sensitive information
+          required: true

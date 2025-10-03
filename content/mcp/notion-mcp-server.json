@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Notion",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "documentation",
-    "notion",
-    "wiki",
-    "notes",
-    "knowledge-base"
-  ],
+  "tags": ["documentation", "notion", "wiki", "notes", "knowledge-base"],
   "content": "Access and manage your Notion workspace directly from Claude for documentation and knowledge management.",
   "features": [
     "Read and update Notion pages with rich content",
@@ -68,9 +62,18 @@
     "Regular backups recommended for critical data"
   ],
   "troubleshooting": [
-    "Ensure pages are shared with the integration",
-    "Check workspace permissions for the connection",
-    "Verify OAuth connection status with /mcp command"
+    {
+      "issue": "Ensure pages are shared with the integration",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check workspace permissions for the connection",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify OAuth connection status with /mcp command",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Create a new page for today's meeting notes",
@@ -79,11 +82,7 @@
     "Add this conversation summary to Notion"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "create"
-  ],
+  "permissions": ["read", "write", "create"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://developers.notion.com/docs/mcp"
 }

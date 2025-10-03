@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "errors",
-    "monitoring",
-    "notification",
-    "debugging",
-    "alerts"
-  ],
+  "tags": ["errors", "monitoring", "notification", "debugging", "alerts"],
   "hookType": "Notification",
   "features": [
     "Real-time error pattern detection in log files",

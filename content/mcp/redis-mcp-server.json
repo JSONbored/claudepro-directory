@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Redis",
   "dateAdded": "2025-09-20",
-  "tags": [
-    "redis",
-    "cache",
-    "database",
-    "nosql",
-    "official"
-  ],
+  "tags": ["redis", "cache", "database", "nosql", "official"],
   "content": "The official Redis MCP Server provides a natural language interface for AI agents to manage and search data in Redis, supporting various data structures and integrations.",
   "features": [
     "String operations with TTL support",
@@ -86,11 +80,26 @@
     "Network security controls"
   ],
   "troubleshooting": [
-    "Verify Redis server is running and accessible",
-    "Check Redis connection URL format",
-    "Ensure proper Redis ACL permissions",
-    "Confirm network connectivity to Redis instance",
-    "Validate SSL certificates if using TLS"
+    {
+      "issue": "Verify Redis server is running and accessible",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check Redis connection URL format",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure proper Redis ACL permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Confirm network connectivity to Redis instance",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Validate SSL certificates if using TLS",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Store and retrieve cached data with expiration",
@@ -100,11 +109,7 @@
     "Process events using Redis streams"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "admin"
-  ],
+  "permissions": ["read", "write", "admin"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://github.com/redis/mcp-redis"
 }

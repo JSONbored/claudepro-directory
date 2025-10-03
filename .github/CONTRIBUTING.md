@@ -4,19 +4,16 @@ Thank you for your interest in contributing to ClaudePro Directory! This guide w
 
 ## 📋 Quick Start
 
+**Option 1: Use GitHub Issue Templates** (Recommended for non-developers)
+- [Submit via Issue Templates](../../issues/new/choose) - Structured forms guide you through submission
+
+**Option 2: Submit via Pull Request** (For developers)
 1. **Fork** the repository to your GitHub account
-2. **Clone** your fork locally
-3. **Create a feature branch** from `dev` branch
-4. **Add your content** as a JSON file
-5. **Test locally** with `npm run dev`
-6. **Submit a PR** targeting our `dev` branch
+2. **Clone** your fork locally and add your content as a JSON file
+3. **Test locally** with `npm run dev`
+4. **Submit a PR** using our [PR template](../pull_request_template.md)
 
 ## 🔄 Development Workflow
-
-### Branch Structure
-- `main` - Production branch (stable releases)
-- `dev` - Development branch (integration branch for new features)
-- Feature branches - Your contributions
 
 ### Contribution Process
 1. Fork the repository
@@ -25,10 +22,8 @@ Thank you for your interest in contributing to ClaudePro Directory! This guide w
    git clone https://github.com/YOUR_USERNAME/claudepro-directory.git
    cd claudepro-directory
    ```
-3. Create a feature branch from `dev`:
+3. Create a feature branch:
    ```bash
-   git checkout dev
-   git pull upstream dev  # If you've set up upstream
    git checkout -b feature/your-feature-name
    ```
 4. Make your changes
@@ -40,15 +35,19 @@ Thank you for your interest in contributing to ClaudePro Directory! This guide w
    ```bash
    git push origin feature/your-feature-name
    ```
-7. Open a Pull Request targeting our `dev` branch (not `main`!)
+7. Open a Pull Request targeting the `main` branch
 
 ## 🎯 Content Types We Accept
 
-- **Rules** - System prompts and configurations for Claude
-- **MCP Servers** - Model Context Protocol server configurations
-- **Agents** - Specialized AI agent configurations
-- **Commands** - Powerful automation commands
-- **Hooks** - Event-driven automation hooks
+| Type | Description | Submit via Issue | Example Files |
+|------|-------------|-----------------|---------------|
+| **Agents** | Specialized AI personas | [Submit Agent](../../issues/new?template=submit_agent.yml) | [View Examples](../../tree/main/content/agents) |
+| **Commands** | Quick automation actions | [Submit Command](../../issues/new?template=submit_command.yml) | [View Examples](../../tree/main/content/commands) |
+| **Hooks** | Event-driven automation | [Submit Hook](../../issues/new?template=submit_hook.yml) | [View Examples](../../tree/main/content/hooks) |
+| **MCP Servers** | Model Context Protocol | [Submit MCP](../../issues/new?template=submit_mcp.yml) | [View Examples](../../tree/main/content/mcp) |
+| **Rules** | System prompts | [Submit Rule](../../issues/new?template=submit_rule.yml) | [View Examples](../../tree/main/content/rules) |
+| **Statuslines** | Custom status displays | [Submit Statusline](../../issues/new?template=submit_statusline.yml) | [View Examples](../../tree/main/content/statuslines) |
+| **Collections** | Curated configuration bundles | [Submit Collection](../../issues/new?template=submit_collection.yml) | [View Examples](../../tree/main/content/collections) |
 
 ## 📝 How to Add Content
 
@@ -60,55 +59,33 @@ content/
 ├── agents/       # AI agent configurations
 ├── commands/     # Automation commands
 ├── hooks/        # Event hooks
-├── mcp-servers/  # MCP server configs
-└── rules/        # System prompts
+├── mcp/          # MCP server configs
+├── rules/        # System prompts
+├── statuslines/  # Custom status displays
+└── collections/  # Curated configuration bundles
 ```
 
 ### 2. Create Your JSON File
 
-Copy the appropriate template and fill in your content:
+**Start with a template**, then customize it:
 
-### For Hooks (Slug-Only Approach)
-```json
-{
-  "slug": "your-hook-name",
-  "description": "Brief description of what this hook does",
-  "category": "hooks",
-  "author": "your-github-username",
-  "dateAdded": "2025-01-20",
-  "tags": ["automation", "relevant", "tags"],
-  "hookType": "PostToolUse",
-  "configuration": {
-    "hookConfig": {
-      "hooks": {
-        "postToolUse": {
-          "script": "./.claude/hooks/your-hook-name.sh",
-          "matchers": ["write", "edit"]
-        }
-      }
-    },
-    "scriptContent": "#!/usr/bin/env bash\n\n# Your script content here"
-  }
-}
-```
+#### Templates (Copy & Customize)
+- **Agent**: [`agents-template-simple.json`](../../blob/main/templates/content/agents-template-simple.json) | [Full template](../../blob/main/templates/content/agents-template.json)
+- **Command**: [`commands-template-simple.json`](../../blob/main/templates/content/commands-template-simple.json) | [Full template](../../blob/main/templates/content/commands-template.json)
+- **Hook**: [`hooks-template-simple.json`](../../blob/main/templates/content/hooks-template-simple.json) | [Full template](../../blob/main/templates/content/hooks-template.json)
+- **MCP**: [`mcp-template-simple.json`](../../blob/main/templates/content/mcp-template-simple.json) | [Full template](../../blob/main/templates/content/mcp-template.json)
+- **Rule**: [`rules-template-simple.json`](../../blob/main/templates/content/rules-template-simple.json) | [Full template](../../blob/main/templates/content/rules-template.json)
+- **Statusline**: [`statuslines-template-simple.json`](../../blob/main/templates/content/statuslines-template-simple.json) | [Full template](../../blob/main/templates/content/statuslines-template.json)
+- **Collection**: [`collections-template-simple.json`](../../blob/main/templates/content/collections-template-simple.json) | [Full template](../../blob/main/templates/content/collections-template.json)
 
-### For Other Content Types
-```json
-{
-  "title": "Your Content Title",
-  "description": "Brief description of what this does",
-  "category": "development",
-  "author": "your-github-username",
-  "tags": ["relevant", "tags", "here"],
-  "content": "The main content/prompt/configuration goes here.\n\nSupports markdown formatting."
-}
-```
-
-**Important Notes:**
-- **For hooks**: Use `slug` field only - titles are auto-generated with smart capitalization
-- **For other content**: Use `title` or `name` field - slugs are auto-generated  
-- "aws-api-validator" → "AWS API Validator" (auto-capitalized)
-- "UI/UX Expert" → URL: `/agents/uiux-expert`
+#### Real-World Examples
+- **Agent**: [`code-reviewer-agent.json`](../../blob/main/content/agents/code-reviewer-agent.json)
+- **Command**: [`git-smart-commit.json`](../../blob/main/content/commands/git-smart-commit.json)
+- **Hook**: [`auto-code-formatter-hook.json`](../../blob/main/content/hooks/auto-code-formatter-hook.json)
+- **MCP**: [`github-mcp-server.json`](../../blob/main/content/mcp/github-mcp-server.json)
+- **Rule**: [`react-expert.json`](../../blob/main/content/rules/react-expert.json)
+- **Statusline**: [`git-status-statusline.json`](../../blob/main/content/statuslines/git-status-statusline.json)
+- **Collection**: [`developer-productivity-booster.json`](../../blob/main/content/collections/developer-productivity-booster.json)
 
 ### 3. Categories
 
@@ -133,11 +110,7 @@ Use one of these standard categories:
 
 ### 4. File Naming
 
-Name your file descriptively using kebab-case:
-- ✅ `typescript-expert.json`
-- ✅ `react-code-reviewer.json`
-- ❌ `my_agent.json`
-- ❌ `Agent1.json`
+Use kebab-case (lowercase with hyphens): `typescript-expert.json`, `react-code-reviewer.json`
 
 ## 🧪 Testing Your Contribution
 
@@ -163,6 +136,8 @@ Name your file descriptively using kebab-case:
 
 ## 📤 Submitting Your PR
 
+When opening a pull request, our [PR template](../pull_request_template.md) will guide you through the process.
+
 ### PR Title Format
 ```
 Add [Type]: [Your Content Title]
@@ -172,27 +147,6 @@ Examples:
 - `Add Agent: TypeScript Code Reviewer`
 - `Add MCP: PostgreSQL Server`
 - `Add Rule: React Best Practices`
-
-### PR Description Template
-```markdown
-## Content Type
-[Agent/Rule/MCP/Command/Hook]
-
-## Description
-Brief description of what this content does
-
-## Testing
-- [ ] Content displays correctly in list view
-- [ ] Detail page loads without errors
-- [ ] All links work properly
-- [ ] Tested locally with `npm run dev`
-
-## Category
-[development/productivity/creative/etc]
-
-## Tags
-tag1, tag2, tag3
-```
 
 ## ✅ Checklist Before Submitting
 
@@ -228,62 +182,22 @@ tag1, tag2, tag3
 - Report issues or improvements
 - Share knowledge and learn from others
 
-## 📚 Examples
+## 📚 Real-World Examples
 
-### Good Agent Example
-```json
-{
-  "title": "React Code Review Assistant",
-  "description": "Specialized in reviewing React code for best practices, performance, and accessibility",
-  "category": "development",
-  "author": "JSONbored",
-  "tags": ["react", "code-review", "javascript", "frontend"],
-  "content": "You are a React code review expert focused on...\n\n## Review Criteria\n- Component structure\n- Hook usage\n- Performance optimizations\n- Accessibility standards"
-}
-```
-
-### Good Hook Example
-```json
-{
-  "slug": "accessibility-checker",
-  "description": "Automated accessibility testing and compliance checking for web applications following WCAG guidelines",
-  "category": "hooks",
-  "author": "JSONbored",
-  "dateAdded": "2025-01-20",
-  "tags": ["accessibility", "a11y", "wcag", "testing"],
-  "hookType": "PostToolUse",
-  "configuration": {
-    "hookConfig": {
-      "hooks": {
-        "postToolUse": {
-          "script": "./.claude/hooks/accessibility-checker.sh",
-          "matchers": ["write", "edit"]
-        }
-      }
-    },
-    "scriptContent": "#!/usr/bin/env bash\n\n# Accessibility checking script\necho 'Running accessibility checks...'"
-  }
-}
-```
-
-### Good MCP Server Example
-```json
-{
-  "title": "PostgreSQL Database Server",
-  "description": "Connect Claude to PostgreSQL databases for querying and data analysis",
-  "category": "database",
-  "author": "JSONbored",
-  "tags": ["postgresql", "database", "sql", "data"],
-  "config": "{\n  \"command\": \"npx\",\n  \"args\": [\"@modelcontextprotocol/server-postgres\"]\n}"
-}
-```
+Browse production examples in our content directories:
+- **Agents**: [`content/agents/`](../../tree/main/content/agents)
+- **Commands**: [`content/commands/`](../../tree/main/content/commands)
+- **Hooks**: [`content/hooks/`](../../tree/main/content/hooks)
+- **MCP**: [`content/mcp/`](../../tree/main/content/mcp)
+- **Rules**: [`content/rules/`](../../tree/main/content/rules)
+- **Statuslines**: [`content/statuslines/`](../../tree/main/content/statuslines)
+- **Collections**: [`content/collections/`](../../tree/main/content/collections)
 
 ## 🙋 Need Help?
 
-- Check existing content for examples
-- Open an issue for questions
-- Join discussions in GitHub Issues
-- Review closed PRs for patterns
+- [Browse existing content](../../tree/main/content) for examples
+- [Open an issue](../../issues/new/choose) for questions
+- [Check closed PRs](../../pulls?q=is%3Apr+is%3Aclosed) for patterns
 
 ---
 

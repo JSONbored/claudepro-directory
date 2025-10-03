@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-16",
-  "tags": [
-    "environment",
-    "configuration",
-    "validation",
-    "deployment",
-    "security"
-  ],
+  "tags": ["environment", "configuration", "validation", "deployment", "security"],
   "hookType": "PostToolUse",
   "features": [
     "Automatic validation when .env files are modified",
@@ -27,10 +21,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/environment-variable-validator.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },

@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "database",
-    "cleanup",
-    "stop-hook",
-    "connections",
-    "resources"
-  ],
+  "tags": ["database", "cleanup", "stop-hook", "connections", "resources"],
   "hookType": "Stop",
   "features": [
     "Automatic database connection cleanup on session end",

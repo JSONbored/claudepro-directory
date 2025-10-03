@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Linear",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "project-management",
-    "linear",
-    "issues",
-    "tasks",
-    "agile"
-  ],
+  "tags": ["project-management", "linear", "issues", "tasks", "agile"],
   "content": "Connect Claude to Linear for comprehensive project management, issue tracking, and team collaboration.",
   "features": [
     "Create and update issues with full metadata",
@@ -68,9 +62,18 @@
     "All actions are audited in Linear"
   ],
   "troubleshooting": [
-    "Use /mcp command to re-authenticate if needed",
-    "Check Linear workspace permissions for your account",
-    "Verify network connectivity to Linear servers"
+    {
+      "issue": "Use /mcp command to re-authenticate if needed",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check Linear workspace permissions for your account",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify network connectivity to Linear servers",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Create a new bug issue for the login problem",
@@ -79,11 +82,7 @@
     "List all issues in the current sprint"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "admin"
-  ],
+  "permissions": ["read", "write", "admin"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://linear.app/docs/mcp"
 }

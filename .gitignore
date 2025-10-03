@@ -36,7 +36,12 @@ lerna-debug.log*
 .claude/
 src/generated/
 generated/
-assets/
+
+# Build-generated API files
+public/static-api/
+
+# Fumadocs generated API documentation (regenerated at build time)
+content/api-docs/*.mdx
 
 # Cache files
 .eslintcache
@@ -61,3 +66,4 @@ stats.html
 Thumbs.db
 
 SEO-WORKFLOW.md
+tsconfig.tsbuildinfo

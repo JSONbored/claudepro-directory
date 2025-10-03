@@ -29,7 +29,10 @@ vitest.config.ts
 jest.config.js
 
 # Build artifacts (Vercel generates these)
-.next/
+# CRITICAL: Exclude webpack cache (599MB causing function size issues)
+.next/cache/
+.next/trace
+.next/standalone/
 .turbo/
 out/
 dist/

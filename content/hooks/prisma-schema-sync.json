@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "prisma",
-    "database",
-    "orm",
-    "schema",
-    "migrations"
-  ],
+  "tags": ["prisma", "database", "orm", "schema", "migrations"],
   "hookType": "PostToolUse",
   "features": [
     "Automatic Prisma client generation",
@@ -35,10 +29,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/prisma-schema-sync.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },
