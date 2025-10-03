@@ -16,7 +16,7 @@
 
 import type { BuildCategoryId } from '@/lib/config/build-category-config';
 import { getAllBuildCategoryConfigs } from '@/lib/config/build-category-config';
-import { BatchLazyLoader } from './lazy-loader';
+import { BatchLazyLoader } from '@/lib/utils/lazy-loader';
 
 /**
  * Factory function to create metadata loaders dynamically

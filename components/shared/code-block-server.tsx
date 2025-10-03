@@ -11,7 +11,7 @@
  * ```
  */
 
-import { highlightCode } from '@/lib/syntax-highlighting';
+import { highlightCode } from '@/lib/content/syntax-highlighting';
 import { ProductionCodeBlock } from './production-code-block';
 
 export interface CodeBlockServerProps {

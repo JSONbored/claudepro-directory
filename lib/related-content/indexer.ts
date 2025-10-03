@@ -7,15 +7,15 @@ import fs from 'fs/promises';
 import matter from 'gray-matter';
 import path from 'path';
 import { CONTENT_PATHS, MAIN_CONTENT_CATEGORIES } from '@/lib/constants';
-import { logger } from '../logger';
-import { basicErrorSchema } from '../schemas/error.schema';
-import { logContextSchema } from '../schemas/logger.schema';
+import { logger } from '@/lib/logger';
+import { basicErrorSchema } from '@/lib/schemas/error.schema';
+import { logContextSchema } from '@/lib/schemas/logger.schema';
 import type {
   CategorizedContentIndex,
   ContentIndex,
   ContentItem,
-} from '../schemas/related-content.schema';
-import type { ContentCategory } from '../schemas/shared.schema';
+} from '@/lib/schemas/related-content.schema';
+import type { ContentCategory } from '@/lib/schemas/shared.schema';
 
 const CONTENT_DIRECTORIES = {
   // Main content (JSON files)

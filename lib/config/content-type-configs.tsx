@@ -9,11 +9,11 @@
  */
 
 import { toast } from 'sonner';
-import { copyToClipboard } from '@/lib/clipboard-utils';
 import { BookOpen, Bot, Layers, Server, Terminal, Webhook } from '@/lib/icons';
 import type { ContentTypeConfigRegistry } from '@/lib/types/content-type-config';
 import { UI_CLASSES } from '@/lib/ui-constants';
 import { getDisplayTitle } from '@/lib/utils';
+import { copyToClipboard } from '@/lib/utils/clipboard-utils';
 
 /**
  * Agent Configuration

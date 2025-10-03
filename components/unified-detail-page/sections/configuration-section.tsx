@@ -12,15 +12,15 @@
 
 import { ProductionCodeBlock } from '@/components/shared/production-code-block';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { highlightCode } from '@/lib/content/syntax-highlighting';
+import { Copy } from '@/lib/icons';
+import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
+import { UI_CLASSES } from '@/lib/ui-constants';
 import {
   generateFilename,
   generateHookFilename,
   generateMultiFormatFilename,
-} from '@/lib/filename-generator';
-import { Copy } from '@/lib/icons';
-import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
-import { highlightCode } from '@/lib/syntax-highlighting';
-import { UI_CLASSES } from '@/lib/ui-constants';
+} from '@/lib/utils/filename-generator';
 
 /**
  * Props for ConfigurationSection

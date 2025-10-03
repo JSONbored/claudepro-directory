@@ -12,10 +12,10 @@
 import { z } from 'zod';
 import { Badge } from '@/components/ui/badge';
 import { SOCIAL_LINKS } from '@/lib/constants';
-import { formatDate } from '@/lib/date-utils';
 import { Calendar, Tag, User } from '@/lib/icons';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/lib/ui-constants';
+import { formatDate } from '@/lib/utils/date-utils';
 
 /**
  * Schema for DetailMetadata props

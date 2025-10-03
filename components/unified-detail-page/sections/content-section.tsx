@@ -15,11 +15,11 @@
 
 import { CodeBlockServer } from '@/components/shared/code-block-server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { generateFilename } from '@/lib/filename-generator';
+import { detectLanguage } from '@/lib/content/language-detection';
 import { Copy } from '@/lib/icons';
-import { detectLanguage } from '@/lib/language-detection';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/lib/ui-constants';
+import { generateFilename } from '@/lib/utils/filename-generator';
 
 export interface ContentSectionProps {
   item: UnifiedContentItem;

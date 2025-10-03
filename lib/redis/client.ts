@@ -5,8 +5,9 @@
 
 import { Redis } from '@upstash/redis';
 import { z } from 'zod';
-import { logger } from '../logger';
-import type { RedisConnectionStatus } from '../schemas/cache.schema';
+import { logger } from '@/lib/logger';
+import type { RedisConnectionStatus } from '@/lib/schemas/cache.schema';
+import { ParseStrategy, safeParse } from '@/lib/utils/safe-json';
 
 // Re-export Redis type for consumers
 export type { Redis };
@@ -375,7 +376,11 @@ class RedisClientManager {
             if (rawValue !== null && rawValue !== undefined) {
               if (deserialize) {
                 try {
-                  value = JSON.parse(rawValue) as T;
+                  value = safeParse<T>(rawValue, undefined, {
+                    strategy: ParseStrategy.DEVALUE,
+                    fallbackStrategy: ParseStrategy.UNSAFE_JSON,
+                    enableLogging: false,
+                  });
                 } catch {
                   value = rawValue as T;
                 }
@@ -398,7 +403,11 @@ class RedisClientManager {
             if (fallbackValue !== null) {
               if (deserialize) {
                 try {
-                  value = JSON.parse(fallbackValue) as T;
+                  value = safeParse<T>(fallbackValue, undefined, {
+                    strategy: ParseStrategy.DEVALUE,
+                    fallbackStrategy: ParseStrategy.UNSAFE_JSON,
+                    enableLogging: false,
+                  });
                 } catch {
                   value = fallbackValue as T;
                 }

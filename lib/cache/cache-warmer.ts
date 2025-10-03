@@ -4,15 +4,15 @@
  */
 
 import { z } from 'zod';
-import { metadataLoader } from '@/lib/lazy-content-loaders';
+import { metadataLoader } from '@/lib/content/lazy-content-loaders';
+import { logger } from '@/lib/logger';
+import { contentCache, statsRedis } from '@/lib/redis';
 import { contentIndexer } from '@/lib/related-content/indexer';
 import { relatedContentService } from '@/lib/related-content/service';
+import { isProduction } from '@/lib/schemas/env.schema';
 import { stringArray } from '@/lib/schemas/primitives/base-arrays';
 import { nonNegativeInt, positiveInt } from '@/lib/schemas/primitives/base-numbers';
 import { isoDatetimeString, nonEmptyString } from '@/lib/schemas/primitives/base-strings';
-import { logger } from './logger';
-import { contentCache, statsRedis } from './redis';
-import { isProduction } from './schemas/env.schema';
 
 /**
  * Cache Warmer Schemas (inlined - only used here)

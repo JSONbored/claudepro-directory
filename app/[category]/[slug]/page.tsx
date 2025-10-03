@@ -70,10 +70,10 @@ import {
   getContentBySlug,
   getFullContentBySlug,
   getRelatedContent,
-} from '@/lib/content-loaders';
+} from '@/lib/content/content-loaders';
 import { logger } from '@/lib/logger';
-import { transformForDetailPage } from '@/lib/transformers';
 import { getDisplayTitle } from '@/lib/utils';
+import { transformForDetailPage } from '@/lib/utils/transformers';
 
 /**
  * ISR revalidation interval in seconds (4 hours)

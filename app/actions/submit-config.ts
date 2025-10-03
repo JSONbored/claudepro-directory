@@ -1,10 +1,10 @@
 'use server';
 
 import { ZodError } from 'zod';
-import { githubService } from '@/lib/github.service';
 import { logger } from '@/lib/logger';
 import type { FormState } from '@/lib/schemas/app.schema';
 import { type ConfigSubmissionData, parseConfigSubmissionForm } from '@/lib/schemas/form.schema';
+import { githubService } from '@/lib/services/github.service';
 
 export async function submitConfiguration(
   _prevState: FormState | null,

@@ -33,7 +33,7 @@ import { SourceBadge, TagBadge } from '@/components/ui/config-badge';
 import { getCollectionFullContent, getCollections } from '@/generated/content';
 import { trackView } from '@/lib/actions/track-view';
 import { APP_CONFIG } from '@/lib/constants';
-import { getContentBySlug } from '@/lib/content-loaders';
+import { getContentBySlug } from '@/lib/content/content-loaders';
 import { AlertTriangle, CheckCircle, Clock, Layers } from '@/lib/icons';
 import { logger } from '@/lib/logger';
 import type { ContentCategory } from '@/lib/schemas/shared.schema';

@@ -20,8 +20,8 @@
  */
 
 import { getContentTypeConfig } from '@/lib/config/content-type-configs';
+import { highlightCode } from '@/lib/content/syntax-highlighting';
 import type { UnifiedContentItem } from '@/lib/schemas/component.schema';
-import { highlightCode } from '@/lib/syntax-highlighting';
 import type { InstallationSteps } from '@/lib/types/content-type-config';
 import { UI_CLASSES } from '@/lib/ui-constants';
 import { getDisplayTitle } from '@/lib/utils';

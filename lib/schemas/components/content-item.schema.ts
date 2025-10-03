@@ -5,8 +5,8 @@
  */
 
 import { z } from 'zod';
-import { stringArray } from '../primitives/base-arrays';
-import { optionalUrlString } from '../primitives/base-strings';
+import { stringArray } from '@/lib/schemas/primitives/base-arrays';
+import { optionalUrlString } from '@/lib/schemas/primitives/base-strings';
 
 /**
  * Unified content item schema for components

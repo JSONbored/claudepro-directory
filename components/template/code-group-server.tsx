@@ -7,8 +7,8 @@
  * - Optimal performance: Highlighting happens once on server
  */
 
+import { highlightCode } from '@/lib/content/syntax-highlighting';
 import type { CodeGroupProps } from '@/lib/schemas/shared.schema';
-import { highlightCode } from '@/lib/syntax-highlighting';
 import { CodeGroup } from './code-group';
 
 export async function CodeGroupServer(props: CodeGroupProps) {

@@ -6,7 +6,7 @@ import { handleApiError } from '@/lib/error-handler';
 import { logger } from '@/lib/logger';
 import { statsRedis } from '@/lib/redis';
 import { errorInputSchema } from '@/lib/schemas/error.schema';
-import { viewCountService } from '@/lib/view-count.service';
+import { viewCountService } from '@/lib/services/view-count.service';
 
 export const runtime = 'nodejs';
 export const revalidate = 3600; // 1 hour (from REVALIDATE_TIMES.trending)

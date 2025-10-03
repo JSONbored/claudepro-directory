@@ -6,10 +6,10 @@ import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatRelativeDate } from '@/lib/date-utils';
 import { Building, Clock, DollarSign, ExternalLink, MapPin, Star } from '@/lib/icons';
 import type { JobCardProps } from '@/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/lib/ui-constants';
+import { formatRelativeDate } from '@/lib/utils/date-utils';
 
 export const JobCard = memo(({ job }: JobCardProps) => {
   const getTypeColor = (type: string) => {

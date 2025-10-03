@@ -1,63 +1,24 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { memo } from 'react';
-import { toast } from 'sonner';
+import { CardCopyAction } from '@/components/shared/card-copy-action';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SourceBadge, TagBadge, TypeBadge } from '@/components/ui/config-badge';
-import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
-import { trackCopy } from '@/lib/actions/track-view';
+import { useCardNavigation } from '@/hooks/use-card-navigation';
 import { SOCIAL_LINKS } from '@/lib/constants';
-import { Check, Copy, ExternalLink, Eye, Github } from '@/lib/icons';
+import { ExternalLink, Eye, Github } from '@/lib/icons';
 import type { ConfigCardProps } from '@/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/lib/ui-constants';
 import { getDisplayTitle } from '@/lib/utils';
 
 export const ConfigCard = memo(
   ({ item, variant = 'default', showCategory = true, showActions = true }: ConfigCardProps) => {
-    const router = useRouter();
     const displayTitle = getDisplayTitle(item);
-
-    // Map types to their actual route paths - fixed routing
     const targetPath = `/${item.category}/${item.slug}`;
 
-    const { copied, copy } = useCopyToClipboard({
-      onSuccess: () => {
-        // Track copy action for analytics (silent fail)
-        trackCopy(item.category || '', item.slug).catch(() => {
-          // Silent fail - don't break UX
-        });
-
-        toast.success('Link copied!', {
-          description: 'The config link has been copied to your clipboard.',
-        });
-      },
-      onError: () => {
-        toast.error('Failed to copy', {
-          description: 'Could not copy the link to clipboard.',
-        });
-      },
-      context: {
-        component: 'config-card',
-        action: 'copy-link',
-      },
-    });
-
-    const handleCopy = async (e: React.MouseEvent) => {
-      e.stopPropagation();
-      await copy(`${window.location.origin}${targetPath}`);
-    };
-
-    const handleViewConfig = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      router.push(targetPath);
-    };
-
-    const handleCardClick = () => {
-      router.push(targetPath);
-    };
+    const { handleCardClick, handleKeyDown, handleActionClick } = useCardNavigation(targetPath);
 
     return (
       <Card
@@ -66,12 +27,7 @@ export const ConfigCard = memo(
         role="article"
         aria-label={`${displayTitle} - ${item.category} by ${item.author}`}
         tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleCardClick();
-          }
-        }}
+        onKeyDown={handleKeyDown}
       >
         <CardHeader className="pb-3">
           <div
@@ -194,25 +150,19 @@ export const ConfigCard = memo(
                   </Button>
                 )}
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`h-7 w-7 p-0 ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-                  onClick={handleCopy}
-                  aria-label={copied ? 'Link copied to clipboard' : `Copy link to ${displayTitle}`}
-                >
-                  {copied ? (
-                    <Check className="h-3 w-3 text-green-500" aria-hidden="true" />
-                  ) : (
-                    <Copy className="h-3 w-3" aria-hidden="true" />
-                  )}
-                </Button>
+                <CardCopyAction
+                  url={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
+                  category={item.category || ''}
+                  slug={item.slug}
+                  title={displayTitle}
+                  componentName="config-card"
+                />
 
                 <Button
                   variant="ghost"
                   size="sm"
                   className={`h-7 px-2 ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-                  onClick={handleViewConfig}
+                  onClick={handleActionClick}
                   aria-label={`View details for ${displayTitle}`}
                 >
                   View

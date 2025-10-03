@@ -9,10 +9,10 @@
  * @see lib/search-adapters/fuzzysort-adapter.ts
  */
 
-import { logger } from './logger';
-import { contentCache } from './redis';
-import type { SearchableItem, SearchCacheKey, SearchFilters } from './schemas/search.schema';
-import { searchWithFilters } from './search-adapters/fuzzysort-adapter';
+import { logger } from '@/lib/logger';
+import { contentCache } from '@/lib/redis';
+import type { SearchableItem, SearchCacheKey, SearchFilters } from '@/lib/schemas/search.schema';
+import { searchWithFilters } from '@/lib/search-adapters/fuzzysort-adapter';
 
 // Re-export types
 export type { SearchableItem, SearchFilters, SearchCacheKey };

@@ -66,6 +66,7 @@
     "babel-plugin-react-compiler": "^19.1.0-rc.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "devalue": "^5.3.2",
     "framer-motion": "^12.23.22",
     "fumadocs-openapi": "^9.4.0",
     "fumadocs-ui": "^15.8.2",
@@ -94,7 +95,6 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.5",
-    "@playwright/test": "^1.55.1",
     "knip": "^5.64.1",
     "lefthook": "^1.13.5",
     "ultracite": "^5.4.6"

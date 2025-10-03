@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { getCategoryConfig, isValidCategory } from '@/lib/config/category-config';
-import { getContentBySlug } from '@/lib/content-loaders';
+import { getContentBySlug } from '@/lib/content/content-loaders';
 import { logger } from '@/lib/logger';
 import { getDisplayTitle } from '@/lib/utils';
 

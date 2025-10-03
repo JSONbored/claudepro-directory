@@ -181,7 +181,12 @@ export default async function RootLayout({
         {/* Umami Analytics - Privacy-focused analytics (production only) */}
         <UmamiScript />
         {/* Service Worker Registration for PWA Support */}
-        <script src="/scripts/service-worker-init.js" defer />
+        <script
+          src="/scripts/service-worker-init.js"
+          integrity="sha384-0tKKFTk8IlkGOHQjqC00b0Xn/MEUQcn73JljDRsW34lCFxSqKEUZwBNKSp9N/AM/"
+          crossOrigin="anonymous"
+          defer
+        />
       </body>
     </html>
   );

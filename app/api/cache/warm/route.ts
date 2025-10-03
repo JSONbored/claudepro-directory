@@ -1,6 +1,6 @@
 // biome-ignore lint/nursery/noUnresolvedImports: Next.js server exports exist (verified)
 import { type NextRequest, NextResponse } from 'next/server';
-import { cacheWarmer } from '@/lib/cache-warmer';
+import { cacheWarmer } from '@/lib/cache/cache-warmer';
 import { handleApiError, handleValidationError } from '@/lib/error-handler';
 import { logger } from '@/lib/logger';
 import { errorInputSchema } from '@/lib/schemas/error.schema';

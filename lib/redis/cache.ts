@@ -5,13 +5,14 @@
 
 import { brotliCompressSync, brotliDecompressSync, gunzipSync, gzipSync } from 'node:zlib';
 import { z } from 'zod';
-import { logger } from '../logger';
+import { logger } from '@/lib/logger';
 import {
   type CacheInvalidationResult,
   cacheInvalidationResultSchema,
   cacheStatsSchema,
-} from '../schemas/cache.schema';
-import { validateCacheKey, validateTTL } from '../schemas/primitives/api-cache-primitives';
+} from '@/lib/schemas/cache.schema';
+import { validateCacheKey, validateTTL } from '@/lib/schemas/primitives/api-cache-primitives';
+import { ParseStrategy, safeParse, safeStringify } from '@/lib/utils/safe-json';
 import { redisClient } from './client';
 
 // Compression algorithms
@@ -199,15 +200,23 @@ export class CacheService {
       version: '2.0',
     };
 
-    return JSON.stringify(entry);
+    return safeStringify(entry, {
+      strategy: ParseStrategy.DEVALUE,
+      enableLogging: this.config.enableLogging,
+    });
   }
 
   /**
    * Deserialize cache entry with decompression
+   * Uses devalue for XSS-safe, type-preserving deserialization
    */
   private deserializeEntry<T>(data: string): T | null {
     try {
-      const entry = cacheEntrySchema.parse(JSON.parse(data));
+      // Parse cache entry structure with validation
+      const entry = safeParse(data, cacheEntrySchema, {
+        strategy: ParseStrategy.VALIDATED_JSON,
+        fallbackStrategy: ParseStrategy.DEVALUE,
+      });
 
       // Check if entry is expired
       if (entry.ttl > 0 && Date.now() > entry.timestamp + entry.ttl * 1000) {
@@ -221,7 +230,12 @@ export class CacheService {
         entry.algorithm
       );
 
-      return JSON.parse(decompressed) as T;
+      // Parse cached value with type preservation
+      return safeParse<T>(decompressed, undefined, {
+        strategy: ParseStrategy.DEVALUE,
+        fallbackStrategy: ParseStrategy.UNSAFE_JSON,
+        enableLogging: this.config.enableLogging,
+      });
     } catch (error) {
       if (this.config.enableLogging) {
         logger.warn('Failed to deserialize cache entry', {

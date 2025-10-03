@@ -1,8 +1,8 @@
 import { HomePageClient } from '@/components/features/home';
 import { lazyContentLoaders } from '@/components/shared/lazy-content-loaders';
 import { BookOpen, Layers, Server, Sparkles } from '@/lib/icons';
-import { transformForHomePage } from '@/lib/transformers';
 import { UI_CLASSES } from '@/lib/ui-constants';
+import { transformForHomePage } from '@/lib/utils/transformers';
 
 // Enable ISR - revalidate every hour
 export const revalidate = 3600;

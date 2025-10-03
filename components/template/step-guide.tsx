@@ -12,9 +12,9 @@ import { Callout } from '@/components/content/callout';
 import { ProductionCodeBlock } from '@/components/shared/production-code-block';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { highlightCode } from '@/lib/content/syntax-highlighting';
 import { Zap } from '@/lib/icons';
 import { type StepByStepGuideProps, stepGuidePropsSchema } from '@/lib/schemas/shared.schema';
-import { highlightCode } from '@/lib/syntax-highlighting';
 import { UI_CLASSES } from '@/lib/ui-constants';
 
 export async function StepByStepGuide(props: StepByStepGuideProps) {

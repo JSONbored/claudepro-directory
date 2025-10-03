@@ -15,9 +15,9 @@
  * @see https://github.com/farzher/fuzzysort
  */
 
+import { sortAlphabetically, sortByNewest, sortByPopularity } from '@/lib/content/content-sorting';
+import { logger } from '@/lib/logger';
 import type { SearchableItem, SearchFilters } from '@/lib/schemas/search.schema';
-import { sortAlphabetically, sortByNewest, sortByPopularity } from '../content-sorting';
-import { logger } from '../logger';
 
 // Lazy-load fuzzysort module
 let fuzzysortModule: typeof import('fuzzysort') | null = null;

@@ -3,7 +3,7 @@ import { MDXRemote } from 'next-mdx-remote/rsc';
 import { memo } from 'react';
 import { z } from 'zod';
 import { ErrorBoundary } from '@/components/shared/error-boundary';
-import { mdxOptions } from '@/lib/mdx-config';
+import { mdxOptions } from '@/lib/content/mdx-config';
 import type {
   mdxElementPropsSchema,
   mdxHeadingPropsSchema,

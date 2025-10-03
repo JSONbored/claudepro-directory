@@ -36,9 +36,9 @@ import {
 // Removed logger import - client components should not use server-side logger
 // Dynamic imports for server-side functions
 import { statsRedis } from '@/lib/redis';
+import { viewCountService } from '@/lib/services/view-count.service';
 import { UI_CLASSES } from '@/lib/ui-constants';
-import { shallowEqual } from '@/lib/utils';
-import { viewCountService } from '@/lib/view-count.service';
+import { shallowEqual, slugToTitle } from '@/lib/utils';
 
 // Zod schemas for type safety and validation
 const contentDataSchema = z.object({
@@ -162,7 +162,7 @@ function UnifiedSidebarComponent({
           const viewCount = viewData?.views || 0;
 
           return {
-            title: `Guide: ${slug.replace(/[-_]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}`,
+            title: `Guide: ${slugToTitle(slug)}`,
             slug: `/guides/${slug}`,
             views: `${viewCount.toLocaleString()} views`,
           };

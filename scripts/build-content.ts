@@ -170,7 +170,7 @@ function generateIndexFile(contentStats: ContentStats): string {
  * @see scripts/build-content.ts
  */
 
-import { metadataLoader } from '@/lib/lazy-content-loaders';
+import { metadataLoader } from '@/lib/content/lazy-content-loaders';
 import type { ContentStats } from '../lib/schemas/content/content-types';
 
 // Lazy metadata getters

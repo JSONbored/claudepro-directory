@@ -3,8 +3,8 @@
  * Optimizes memory usage by loading data only when needed
  */
 
-import { logger } from './logger';
-import type { LazyLoadedData, LazyLoaderOptions } from './schemas/app.schema';
+import { logger } from '@/lib/logger';
+import type { LazyLoadedData, LazyLoaderOptions } from '@/lib/schemas/app.schema';
 
 /**
  * Creates a lazy-loaded data wrapper that loads data only when accessed

@@ -43,7 +43,7 @@ import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/components/content-list-server';
 import { getCategoryConfig, isValidCategory } from '@/lib/config/category-config';
 import { APP_CONFIG } from '@/lib/constants';
-import { getContentByCategory } from '@/lib/content-loaders';
+import { getContentByCategory } from '@/lib/content/content-loaders';
 import { logger } from '@/lib/logger';
 
 /**

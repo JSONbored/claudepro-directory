@@ -26,10 +26,10 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { type SearchableItem, type SearchFilters, searchCache } from '@/lib/cache/search-cache';
 import { logger } from '@/lib/logger';
 import type { FilterState, SearchOptions, UseSearchProps } from '@/lib/schemas/component.schema';
 import type { ContentItem } from '@/lib/schemas/content/content-item-union.schema';
-import { type SearchableItem, type SearchFilters, searchCache } from '@/lib/search-cache';
 import { getDisplayTitle } from '@/lib/utils';
 import {
   hasActiveFilters,

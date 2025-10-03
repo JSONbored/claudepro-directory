@@ -16,16 +16,14 @@
  * @see components/features/content/config-card.tsx - Base card pattern
  */
 
-import { useRouter } from 'next/navigation';
 import { memo } from 'react';
-import { toast } from 'sonner';
+import { CardCopyAction } from '@/components/shared/card-copy-action';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SourceBadge, TagBadge } from '@/components/ui/config-badge';
-import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
-import { trackCopy } from '@/lib/actions/track-view';
-import { Check, Clock, Copy, Layers } from '@/lib/icons';
+import { useCardNavigation } from '@/hooks/use-card-navigation';
+import { Clock, Layers } from '@/lib/icons';
 import type { CollectionContent } from '@/lib/schemas/content/collection.schema';
 import { UI_CLASSES } from '@/lib/ui-constants';
 import { getDisplayTitle } from '@/lib/utils';
@@ -74,46 +72,11 @@ const COLLECTION_TYPE_LABELS = {
  */
 export const CollectionCard = memo(
   ({ item, variant = 'default', showActions = true }: CollectionCardProps) => {
-    const router = useRouter();
     const displayTitle = getDisplayTitle(item);
     const targetPath = `/collections/${item.slug}`;
     const itemCount = item.items?.length || 0;
 
-    const { copied, copy } = useCopyToClipboard({
-      onSuccess: () => {
-        // Track copy action for analytics
-        trackCopy('collections', item.slug).catch(() => {
-          // Silent fail - don't break UX
-        });
-
-        toast.success('Link copied!', {
-          description: 'The collection link has been copied to your clipboard.',
-        });
-      },
-      onError: () => {
-        toast.error('Failed to copy', {
-          description: 'Could not copy the link to clipboard.',
-        });
-      },
-      context: {
-        component: 'collection-card',
-        action: 'copy-link',
-      },
-    });
-
-    const handleCopy = async (e: React.MouseEvent) => {
-      e.stopPropagation();
-      await copy(`${window.location.origin}${targetPath}`);
-    };
-
-    const handleViewCollection = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      router.push(targetPath);
-    };
-
-    const handleCardClick = () => {
-      router.push(targetPath);
-    };
+    const { handleCardClick, handleKeyDown, handleActionClick } = useCardNavigation(targetPath);
 
     return (
       <Card
@@ -122,12 +85,7 @@ export const CollectionCard = memo(
         role="article"
         aria-label={`${displayTitle} - ${COLLECTION_TYPE_LABELS[item.collectionType]} collection by ${item.author}`}
         tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleCardClick();
-          }
-        }}
+        onKeyDown={handleKeyDown}
       >
         <CardHeader className="pb-3">
           <div
@@ -211,25 +169,19 @@ export const CollectionCard = memo(
 
             {showActions && (
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`h-7 w-7 p-0 ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-                  onClick={handleCopy}
-                  aria-label={copied ? 'Link copied to clipboard' : `Copy link to ${displayTitle}`}
-                >
-                  {copied ? (
-                    <Check className="h-3 w-3 text-green-500" aria-hidden="true" />
-                  ) : (
-                    <Copy className="h-3 w-3" aria-hidden="true" />
-                  )}
-                </Button>
+                <CardCopyAction
+                  url={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
+                  category="collections"
+                  slug={item.slug}
+                  title={displayTitle}
+                  componentName="collection-card"
+                />
 
                 <Button
                   variant="ghost"
                   size="sm"
                   className={`h-7 px-2 ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-                  onClick={handleViewCollection}
+                  onClick={handleActionClick}
                   aria-label={`View collection details for ${displayTitle}`}
                 >
                   View Collection

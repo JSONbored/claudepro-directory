@@ -9,9 +9,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { APP_CONFIG } from '@/lib/constants';
+import { markdownToSafeHtml } from '@/lib/content/markdown-utils';
 import { ArrowLeft, Tags } from '@/lib/icons';
 import { logger } from '@/lib/logger';
-import { markdownToSafeHtml } from '@/lib/markdown-utils';
 import type { ComparisonData } from '@/lib/schemas/app.schema';
 import { UI_CLASSES } from '@/lib/ui-constants';
 

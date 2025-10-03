@@ -5,9 +5,9 @@
 
 import { marked } from 'marked';
 import { z } from 'zod';
-import { logger } from './logger';
-import { nonNegativeInt } from './schemas/primitives/base-numbers';
-import { DOMPurify } from './security/html-sanitizer';
+import { logger } from '@/lib/logger';
+import { nonNegativeInt } from '@/lib/schemas/primitives/base-numbers';
+import { DOMPurify } from '@/lib/security/html-sanitizer';
 
 /**
  * Internal Markdown Schemas

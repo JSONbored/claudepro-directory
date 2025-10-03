@@ -12,7 +12,7 @@ import {
   type ContentItem,
   contentIndexSchema,
 } from '@/lib/schemas/related-content.schema';
-import { viewCountService } from '@/lib/view-count.service';
+import { viewCountService } from '@/lib/services/view-count.service';
 
 // Clean, production Zod schemas
 
