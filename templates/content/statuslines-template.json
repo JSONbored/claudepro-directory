@@ -1,0 +1,77 @@
+{
+  "slug": "your-statusline-name",
+  "description": "Detailed description of what this statusline displays and how it helps users",
+  "category": "statuslines",
+  "author": "Your Name or GitHub Username",
+  "dateAdded": "YYYY-MM-DD",
+  "tags": ["statusline-type", "feature", "technology", "use-case"],
+  "statuslineType": "minimal | powerline | custom | rich | simple",
+  "content": "#!/usr/bin/env bash\n\n# Statusline Script for Claude Code\n# Receives JSON via stdin with session data\n\n# Read JSON from stdin\nread -r input\n\n# Available data fields:\n# - .model: Current AI model (e.g., 'claude-sonnet-4.5')\n# - .workspace.path: Current directory path\n# - .session.totalTokens: Total tokens used in session\n# - .session.estimatedCost: Estimated cost in USD\n# - .system.memoryUsage: Memory usage in bytes\n\n# Extract data using jq\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"')\ndir=$(echo \"$input\" | jq -r '.workspace.path // \"~\"' | sed \"s|$HOME|~|\")\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\ncost=$(echo \"$input\" | jq -r '.session.estimatedCost // 0' | awk '{printf \"%.3f\", $0}')\n\n# ANSI color codes (optional)\nRESET=\"\\033[0m\"\nBLUE=\"\\033[38;5;111m\"\nORANGE=\"\\033[38;5;214m\"\nGREEN=\"\\033[38;5;76m\"\n\n# Format and output statusline\necho -e \"${BLUE}${model}${RESET} | ${ORANGE}${dir}${RESET} | ${GREEN}${tokens} tokens${RESET} | \\$${cost}\"\n",
+  "configuration": {
+    "format": "bash",
+    "refreshInterval": 1000,
+    "position": "left",
+    "colorScheme": "custom-theme-name"
+  },
+  "source": "community",
+  "features": [
+    "Displays current AI model being used",
+    "Shows working directory with home shortening",
+    "Token count tracking for budget awareness",
+    "Cost estimation in real-time",
+    "Color-coded sections for easy scanning"
+  ],
+  "useCases": [
+    "Monitor session resource usage during development",
+    "Track costs across multiple Claude Code sessions",
+    "Quick visual confirmation of current context",
+    "Professional appearance for demos and presentations"
+  ],
+  "requirements": [
+    "Claude Code CLI",
+    "Bash shell",
+    "jq JSON processor",
+    "Terminal with ANSI color support"
+  ],
+  "preview": "claude-sonnet-4.5 | ~/projects/app | 1,234 tokens | $0.123",
+  "troubleshooting": [
+    {
+      "issue": "Statusline not displaying or showing blank",
+      "solution": "Verify script has executable permissions (chmod +x ~/.claude/statusline.sh) and check Claude Code config path is correct in settings.json"
+    },
+    {
+      "issue": "Colors not rendering correctly or showing escape codes",
+      "solution": "Ensure your terminal supports ANSI colors. Try setting TERM=xterm-256color environment variable. Test with: echo -e '\\033[38;5;111mBlue Text\\033[0m'"
+    },
+    {
+      "issue": "jq command not found error",
+      "solution": "Install jq JSON processor: macOS: brew install jq | Linux: apt-get install jq or yum install jq | Windows: Download from https://stedolan.github.io/jq/download/"
+    }
+  ],
+  "installation": {
+    "claudeCode": {
+      "steps": [
+        "Save the statusline script to ~/.claude/statusline.sh (or your preferred location)",
+        "Make the script executable: chmod +x ~/.claude/statusline.sh",
+        "Open ~/.claude/settings.json in your text editor",
+        "Add or update the statusLine configuration (see example below)",
+        "Restart Claude Code to activate your new statusline"
+      ],
+      "configFormat": "JSON configuration in .claude/settings.json",
+      "configPath": {
+        "macOS": "~/.claude/settings.json",
+        "windows": "%USERPROFILE%\\.claude\\settings.json",
+        "linux": "~/.claude/settings.json"
+      },
+      "configExample": {
+        "statusLine": {
+          "type": "command",
+          "command": "~/.claude/statusline.sh",
+          "padding": 0
+        }
+      }
+    },
+    "requirements": ["Claude Code CLI", "Bash shell", "jq JSON processor"]
+  },
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline"
+}

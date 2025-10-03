@@ -1,0 +1,127 @@
+/**
+ * API Documentation Layout
+ *
+ * Fumadocs-powered layout for OpenAPI 3.1.0 documentation.
+ * Provides a professional docs UI with sidebar navigation, search, and theme support.
+ *
+ * Features:
+ * - Fumadocs DocsLayout with sidebar navigation
+ * - Inherits dark theme from globals.css (Claude Orange OKLCH colors)
+ * - RootProvider for Fumadocs context
+ * - Collapsible sidebar for mobile responsiveness
+ * - SEO-optimized metadata
+ *
+ * Theme:
+ * - Automatically uses app/globals.css OKLCH color system
+ * - Claude Orange primary: oklch(62% 0.155 42)
+ * - Dark mode default with light mode support
+ *
+ * @module app/api-docs/layout
+ * @see {@link https://fumadocs.dev/docs/ui/layouts/docs Fumadocs DocsLayout Documentation}
+ */
+
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { RootProvider } from 'fumadocs-ui/provider';
+import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
+import { APP_CONFIG } from '@/src/lib/constants';
+
+/**
+ * Metadata for API documentation section
+ *
+ * SEO Configuration:
+ * - Title template for dynamic page titles
+ * - Default title for root /api-docs page
+ * - Comprehensive description for search engines
+ * - Inherits OpenGraph/Twitter metadata from root layout
+ *
+ * @type {Metadata}
+ */
+export const metadata: Metadata = {
+  title: {
+    template: `%s | ${APP_CONFIG.name} API`,
+    default: 'API Documentation',
+  },
+  description:
+    'Comprehensive REST API documentation for ClaudePro Directory. Browse and search 8 endpoints for content discovery, analytics, and caching with full request/response examples.',
+};
+
+/**
+ * Layout component props
+ *
+ * @interface LayoutProps
+ * @property {ReactNode} children - Page content (API docs pages)
+ */
+interface LayoutProps {
+  /** Child components to render within the layout */
+  children: ReactNode;
+}
+
+/**
+ * API Documentation Layout Component
+ *
+ * Wraps API documentation pages with Fumadocs UI layout.
+ * Provides consistent navigation, sidebar, and theme across all API docs.
+ *
+ * Layout Structure:
+ * - RootProvider: Fumadocs context provider
+ *   - DocsLayout: Main docs layout with sidebar
+ *     - Navigation header with app name
+ *     - Collapsible sidebar (auto-generated from page tree)
+ *     - Main content area (children)
+ *
+ * Configuration:
+ * - tree: Page tree for sidebar (empty for now, will be populated by generateFiles)
+ * - nav.title: Custom branded navigation title
+ * - sidebar.enabled: Enable sidebar navigation
+ * - sidebar.collapsible: Allow sidebar collapse on mobile
+ * - search.enabled: Disabled (can enable with Orama integration)
+ *
+ * @param {LayoutProps} props - Component props
+ * @param {ReactNode} props.children - API documentation page content
+ * @returns {JSX.Element} Rendered layout with children
+ *
+ * @example
+ * ```tsx
+ * // Automatically wraps all pages in app/api-docs/
+ * // app/api-docs/page.tsx
+ * export default function APIDocsPage() {
+ *   return <div>API documentation content</div>;
+ * }
+ * ```
+ */
+export default function APIDocsLayout({ children }: LayoutProps) {
+  return (
+    <RootProvider
+      search={{
+        // Disable built-in search for now
+        // Can enable later with Orama Cloud integration for indexed search
+        enabled: false,
+      }}
+    >
+      <DocsLayout
+        tree={{
+          name: 'API Documentation',
+          children: [],
+        }}
+        nav={{
+          // Custom navigation title
+          title: (
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">{APP_CONFIG.name}</span>
+              <span className="text-fd-muted-foreground">API</span>
+            </div>
+          ),
+        }}
+        sidebar={{
+          // Enable sidebar with endpoint navigation
+          enabled: true,
+          // Allow collapsing on mobile for better UX
+          collapsible: true,
+        }}
+      >
+        {children}
+      </DocsLayout>
+    </RootProvider>
+  );
+}

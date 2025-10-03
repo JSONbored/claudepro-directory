@@ -1,0 +1,81 @@
+name: Submit Statusline
+description: Share a Claude statusline configuration
+title: "[Statusline]: "
+labels: ["content-submission", "statusline", "needs-review"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing your statusline! 💻
+
+        **Need help?** Copy our [simple template](https://github.com/JSONbored/claudepro-directory/blob/main/templates/content/statuslines-template-simple.json) or [full template](https://github.com/JSONbored/claudepro-directory/blob/main/templates/content/statuslines-template.json) to get started!
+
+  - type: input
+    id: name
+    attributes:
+      label: Statusline Name
+      placeholder: e.g., "Git Status Display"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What does it display?
+      placeholder: Brief description of what information this statusline shows (1-2 sentences)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: statusline-type
+    attributes:
+      label: Statusline Type
+      options:
+        - minimal
+        - powerline
+        - custom
+        - rich
+        - simple
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: script
+    attributes:
+      label: Statusline Script
+      description: Paste your statusline script (bash/shell)
+      render: bash
+      placeholder: |
+        #!/usr/bin/env bash
+        # Your statusline script here
+        read -r input
+        model=$(echo "$input" | jq -r '.model // "unknown"')
+        echo -e "${model}"
+    validations:
+      required: true
+
+  - type: input
+    id: tags
+    attributes:
+      label: Tags (optional)
+      placeholder: e.g., git, minimal, productivity, custom
+
+  - type: input
+    id: preview
+    attributes:
+      label: Preview Text (optional)
+      description: Example output of your statusline
+      placeholder: e.g., "claude-sonnet-4.5 | ~/projects/app | 1,234 tokens | $0.123"
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Quick Check
+      options:
+        - label: I've tested this statusline
+          required: true
+        - label: This doesn't contain sensitive information
+          required: true

@@ -1,0 +1,17 @@
+{
+  "slug": "my-statusline",
+  "description": "A brief description of what this statusline displays",
+  "category": "statuslines",
+  "author": "YourName",
+  "dateAdded": "2025-01-15",
+  "tags": ["minimal", "custom", "bash"],
+  "statuslineType": "custom",
+  "content": "#!/usr/bin/env bash\n\n# Read JSON from stdin\nread -r input\n\n# Extract data (available: model, workspace.path, session.totalTokens, session.estimatedCost)\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"')\ndir=$(echo \"$input\" | jq -r '.workspace.path // \"~\"' | sed \"s|$HOME|~|\")\n\n# Output formatted statusline\necho \"$model | $dir\"",
+  "configuration": {
+    "format": "bash",
+    "refreshInterval": 1000,
+    "position": "left",
+    "colorScheme": "default"
+  },
+  "source": "community"
+}

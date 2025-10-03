@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Square",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "payments",
-    "square",
-    "pos",
-    "inventory",
-    "commerce"
-  ],
+  "tags": ["payments", "square", "pos", "inventory", "commerce"],
   "content": "Integrate Square's commerce platform with Claude for payment processing and business management.",
   "features": [
     "Process payments and refunds",
@@ -68,9 +62,18 @@
     "Monitor transaction logs"
   ],
   "troubleshooting": [
-    "Check merchant account status",
-    "Verify location permissions",
-    "Test in sandbox mode before production"
+    {
+      "issue": "Check merchant account status",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify location permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Test in sandbox mode before production",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Process a $50 payment",
@@ -79,11 +82,7 @@
     "Generate today's sales report"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "payments"
-  ],
+  "permissions": ["read", "write", "payments"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://developer.squareup.com/docs/mcp"
 }

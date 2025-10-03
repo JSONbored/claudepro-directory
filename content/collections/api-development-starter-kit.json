@@ -1,0 +1,57 @@
+{
+  "slug": "api-development-starter-kit",
+  "title": "API Development Starter Kit",
+  "description": "Complete toolkit for building and documenting RESTful APIs with automated testing and documentation generation. Perfect for backend developers starting new API projects.",
+  "author": "JSONbored",
+  "dateAdded": "2025-10-02",
+  "tags": ["api", "backend", "rest", "development", "documentation", "testing"],
+  "source": "community",
+  "category": "collections",
+  "collectionType": "starter-kit",
+  "difficulty": "beginner",
+  "estimatedSetupTime": "20 minutes",
+  "features": [
+    "Complete API development workflow",
+    "Automated documentation generation",
+    "Built-in testing and debugging tools",
+    "REST API design best practices"
+  ],
+  "useCases": [
+    "Building new REST APIs from scratch",
+    "Standardizing API development across teams",
+    "Learning API development best practices",
+    "Rapid prototyping of API endpoints"
+  ],
+  "items": [
+    {
+      "category": "agents",
+      "slug": "api-builder-agent",
+      "reason": "Helps design and build RESTful API endpoints following best practices"
+    },
+    {
+      "category": "commands",
+      "slug": "docs",
+      "reason": "Generates comprehensive API documentation automatically"
+    },
+    {
+      "category": "commands",
+      "slug": "generate-tests",
+      "reason": "Creates unit and integration tests for API endpoints"
+    },
+    {
+      "category": "commands",
+      "slug": "debug",
+      "reason": "Helps debug API issues and trace request/response flows"
+    }
+  ],
+  "installationOrder": ["api-builder-agent", "docs", "generate-tests", "debug"],
+  "prerequisites": [
+    "Node.js 18 or higher",
+    "Basic understanding of REST API concepts",
+    "Code editor with Claude integration"
+  ],
+  "compatibility": {
+    "claudeDesktop": true,
+    "claudeCode": true
+  }
+}

@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "monitoring",
-    "logging",
-    "notification",
-    "real-time",
-    "debugging"
-  ],
+  "tags": ["monitoring", "logging", "notification", "real-time", "debugging"],
   "hookType": "Notification",
   "features": [
     "Real-time activity logging",
@@ -35,9 +29,7 @@
       "hooks": {
         "notification": {
           "script": "./.claude/hooks/real-time-activity-tracker.sh",
-          "matchers": [
-            "*"
-          ]
+          "matchers": ["*"]
         }
       }
     },

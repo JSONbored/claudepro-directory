@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "JSONbored",
   "dateAdded": "2025-09-16",
-  "tags": [
-    "docker",
-    "containers",
-    "devops",
-    "orchestration",
-    "deployment"
-  ],
+  "tags": ["docker", "containers", "devops", "orchestration", "deployment"],
   "content": "Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration.",
   "features": [
     "Container lifecycle management (start, stop, restart)",
@@ -79,11 +73,26 @@
     "Network security controls"
   ],
   "troubleshooting": [
-    "Verify Docker daemon is running and accessible",
-    "Check Docker socket permissions (/var/run/docker.sock)",
-    "Ensure Docker API version compatibility",
-    "Validate registry credentials and network access",
-    "Monitor container resource usage and limits"
+    {
+      "issue": "Verify Docker daemon is running and accessible",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check Docker socket permissions (/var/run/docker.sock)",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure Docker API version compatibility",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Validate registry credentials and network access",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor container resource usage and limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "List all running containers and their status",
@@ -93,12 +102,7 @@
     "Deploy a multi-service application using Docker Compose"
   ],
   "requiresAuth": false,
-  "permissions": [
-    "containers",
-    "images",
-    "volumes",
-    "networks"
-  ],
+  "permissions": ["containers", "images", "volumes", "networks"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://docs.docker.com/engine/api/"
 }

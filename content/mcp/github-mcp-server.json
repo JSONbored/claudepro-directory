@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "GitHub",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "github",
-    "git",
-    "repositories",
-    "api",
-    "official"
-  ],
+  "tags": ["github", "git", "repositories", "api", "official"],
   "content": "Access the GitHub API through Claude for comprehensive repository management, file operations, and search functionality.",
   "features": [
     "Create, read, update, and delete files across repositories",
@@ -41,10 +35,7 @@
       "mcpServers": {
         "github": {
           "command": "npx",
-          "args": [
-            "-y",
-            "@modelcontextprotocol/server-github"
-          ],
+          "args": ["-y", "@modelcontextprotocol/server-github"],
           "env": {
             "GITHUB_PERSONAL_ACCESS_TOKEN": "your_github_token_here"
           }
@@ -55,10 +46,7 @@
       "mcpServers": {
         "github": {
           "command": "npx",
-          "args": [
-            "-y",
-            "@modelcontextprotocol/server-github"
-          ],
+          "args": ["-y", "@modelcontextprotocol/server-github"],
           "env": {
             "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
           }
@@ -84,11 +72,26 @@
     "Built-in error handling for API issues"
   ],
   "troubleshooting": [
-    "Verify GitHub token has appropriate repository permissions",
-    "Check token validity and expiration date",
-    "Ensure repository access and correct spelling",
-    "Monitor API rate limits and usage",
-    "Restart Claude Desktop after configuration changes"
+    {
+      "issue": "Verify GitHub token has appropriate repository permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check token validity and expiration date",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure repository access and correct spelling",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor API rate limits and usage",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Restart Claude Desktop after configuration changes",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Show me the README from my main project repository",
@@ -98,11 +101,7 @@
     "Find all open issues with the bug label"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "repo",
-    "public_repo",
-    "read:user"
-  ],
+  "permissions": ["repo", "public_repo", "read:user"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://www.npmjs.com/package/@modelcontextprotocol/server-github"
 }

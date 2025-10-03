@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "PayPal",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "payments",
-    "paypal",
-    "commerce",
-    "transactions",
-    "financial"
-  ],
+  "tags": ["payments", "paypal", "commerce", "transactions", "financial"],
   "content": "Connect Claude to PayPal for comprehensive payment processing and financial operations.",
   "features": [
     "Process payments and refunds",
@@ -68,10 +62,22 @@
     "Follow PCI compliance guidelines"
   ],
   "troubleshooting": [
-    "Verify account type (business/personal)",
-    "Check API permissions",
-    "Monitor rate limits",
-    "Test in sandbox environment first"
+    {
+      "issue": "Verify account type (business/personal)",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check API permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor rate limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Test in sandbox environment first",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Process a refund for transaction ID ABC123",
@@ -80,11 +86,7 @@
     "Check account balance"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "refund"
-  ],
+  "permissions": ["read", "write", "refund"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://www.paypal.ai/"
 }

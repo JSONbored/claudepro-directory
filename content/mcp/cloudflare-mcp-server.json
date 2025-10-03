@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Cloudflare",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "cloudflare",
-    "cdn",
-    "security",
-    "dns",
-    "infrastructure"
-  ],
+  "tags": ["cloudflare", "cdn", "security", "dns", "infrastructure"],
   "content": "Manage Cloudflare services and configurations through Claude for comprehensive infrastructure control.",
   "features": [
     "Configure DNS settings and records",
@@ -77,9 +71,18 @@
     "Monitor API usage and rate limits"
   ],
   "troubleshooting": [
-    "Verify API token permissions",
-    "Check zone access rights",
-    "Monitor API quota usage"
+    {
+      "issue": "Verify API token permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check zone access rights",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor API quota usage",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Add DNS record for subdomain",
@@ -88,11 +91,7 @@
     "Configure firewall rule"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "deploy"
-  ],
+  "permissions": ["read", "write", "deploy"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://developers.cloudflare.com/agents/model-context-protocol/mcp-servers-for-cloudflare/"
 }

@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Monday.com",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "monday",
-    "project-management",
-    "crm",
-    "workflow",
-    "team-management"
-  ],
+  "tags": ["monday", "project-management", "crm", "workflow", "team-management"],
   "content": "Control monday.com boards and workflows through Claude for visual project management.",
   "features": [
     "Create and update board items",
@@ -68,9 +62,18 @@
     "Regular permission reviews recommended"
   ],
   "troubleshooting": [
-    "Verify workspace access rights",
-    "Check board permissions",
-    "Monitor API rate limits"
+    {
+      "issue": "Verify workspace access rights",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check board permissions",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor API rate limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Create a new item in the Projects board",
@@ -79,11 +82,7 @@
     "Add CRM activity for client meeting"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "create"
-  ],
+  "permissions": ["read", "write", "create"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://developer.monday.com/apps/docs/mondaycom-mcp-integration"
 }

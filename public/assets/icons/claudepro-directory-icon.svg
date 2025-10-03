@@ -1,0 +1,18 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background matching exact Claude icon color -->
+  <rect width="512" height="512" rx="96" fill="#CC785C"/>
+  
+  <!-- Asterisk-like star shape similar to Claude -->
+  <g transform="translate(64, 64)">
+    <!-- Scale up the 24x24 viewBox to 384x384 (16x scale) -->
+    <g transform="scale(16)">
+      <!-- 8-pointed star/asterisk rays -->
+      <path d="M12 2 L12 8 M12 16 L12 22 M4 12 L8 12 M16 12 L20 12 M6.5 6.5 L9 9 M15 15 L17.5 17.5 M17.5 6.5 L15 9 M9 15 L6.5 17.5" 
+            stroke="white" 
+            stroke-width="2.5" 
+            stroke-linecap="round"/>
+      <!-- Center dot -->
+      <circle cx="12" cy="12" r="1.5" fill="white"/>
+    </g>
+  </g>
+</svg>

@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "testing",
-    "coverage",
-    "stop-hook",
-    "reporting",
-    "quality"
-  ],
+  "tags": ["testing", "coverage", "stop-hook", "reporting", "quality"],
   "hookType": "Stop",
   "features": [
     "Comprehensive test coverage analysis",
@@ -35,9 +29,7 @@
       "hooks": {
         "stop": {
           "script": "./.claude/hooks/test-coverage-final-report.sh",
-          "matchers": [
-            "*"
-          ]
+          "matchers": ["*"]
         }
       }
     },

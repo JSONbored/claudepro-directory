@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Hugging Face",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "ai",
-    "hugging-face",
-    "machine-learning",
-    "models",
-    "datasets"
-  ],
+  "tags": ["ai", "hugging-face", "machine-learning", "models", "datasets"],
   "content": "Connect to Hugging Face Hub for AI models, datasets, and Gradio application access.",
   "features": [
     "Access model information and metrics",
@@ -68,9 +62,18 @@
     "Check compute resource limits"
   ],
   "troubleshooting": [
-    "Verify account access level",
-    "Check API token validity",
-    "Monitor rate limits"
+    {
+      "issue": "Verify account access level",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check API token validity",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor rate limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Find the best text generation model",
@@ -79,10 +82,7 @@
     "Compare BERT model variants"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "run"
-  ],
+  "permissions": ["read", "run"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://huggingface.co/settings/mcp"
 }
