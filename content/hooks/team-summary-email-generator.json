@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "email",
-    "team",
-    "stop-hook",
-    "summary",
-    "communication"
-  ],
+  "tags": ["email", "team", "stop-hook", "summary", "communication"],
   "hookType": "Stop",
   "features": [
     "Comprehensive session summary generation",
@@ -35,9 +29,7 @@
       "hooks": {
         "stop": {
           "script": "./.claude/hooks/team-summary-email-generator.sh",
-          "matchers": [
-            "*"
-          ]
+          "matchers": ["*"]
         }
       }
     },

@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "webpack",
-    "bundle",
-    "performance",
-    "optimization",
-    "analysis"
-  ],
+  "tags": ["webpack", "bundle", "performance", "optimization", "analysis"],
   "hookType": "PostToolUse",
   "features": [
     "Interactive bundle size visualization and analysis",
@@ -35,10 +29,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/webpack-bundle-analyzer.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },

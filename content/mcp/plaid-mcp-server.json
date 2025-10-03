@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Plaid",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "banking",
-    "plaid",
-    "fintech",
-    "financial-data",
-    "account-linking"
-  ],
+  "tags": ["banking", "plaid", "fintech", "financial-data", "account-linking"],
   "content": "Connect Claude to Plaid for banking data integration and financial services troubleshooting.",
   "features": [
     "Link financial accounts securely",
@@ -68,10 +62,22 @@
     "Follow compliance requirements"
   ],
   "troubleshooting": [
-    "Check Plaid Dashboard access",
-    "Verify environment (development/production)",
-    "Monitor webhook status",
-    "Review error logs"
+    {
+      "issue": "Check Plaid Dashboard access",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify environment (development/production)",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor webhook status",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Review error logs",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Debug why account linking is failing",
@@ -80,11 +86,7 @@
     "Check transaction categorization accuracy"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "debug",
-    "test"
-  ],
+  "permissions": ["read", "debug", "test"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://plaid.com/blog/plaid-mcp-ai-assistant-claude/"
 }

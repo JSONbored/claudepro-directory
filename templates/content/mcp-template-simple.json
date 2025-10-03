@@ -1,0 +1,34 @@
+{
+  "slug": "my-mcp-server",
+  "description": "A brief description of what capabilities this MCP server provides",
+  "category": "mcp",
+  "author": "YourName",
+  "dateAdded": "2025-01-15",
+  "tags": ["capability-type", "technology", "use-case"],
+  "npmPackage": "@company/my-mcp-server",
+  "serverType": "stdio",
+  "source": "community",
+  "tools": [
+    {
+      "name": "my_tool",
+      "description": "What this tool does",
+      "parameters": {
+        "param1": {
+          "type": "string",
+          "description": "What this parameter is for",
+          "required": true
+        }
+      }
+    }
+  ],
+  "installation": {
+    "npm": "npm install -g @company/my-mcp-server",
+    "configuration": {
+      "command": "my-mcp-server",
+      "args": [],
+      "env": {
+        "API_KEY": "your-api-key-here"
+      }
+    }
+  }
+}

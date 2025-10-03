@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "playwright",
-    "e2e",
-    "testing",
-    "automation",
-    "browser-testing"
-  ],
+  "tags": ["playwright", "e2e", "testing", "automation", "browser-testing"],
   "hookType": "PostToolUse",
   "features": [
     "Automatic test execution on file changes",
@@ -35,10 +29,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/playwright-test-runner.sh",
-          "matchers": [
-            "write",
-            "edit"
-          ]
+          "matchers": ["write", "edit"]
         }
       }
     },

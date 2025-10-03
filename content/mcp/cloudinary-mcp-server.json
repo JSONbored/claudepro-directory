@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Cloudinary",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "media",
-    "cloudinary",
-    "images",
-    "video",
-    "asset-management"
-  ],
+  "tags": ["media", "cloudinary", "images", "video", "asset-management"],
   "content": "Manage and transform media assets through Cloudinary's comprehensive cloud-based media platform.",
   "features": [
     "Upload and store media assets securely",
@@ -79,10 +73,22 @@
     "Set transformation limits"
   ],
   "troubleshooting": [
-    "Check account storage limits",
-    "Verify transformation quotas",
-    "Monitor bandwidth usage",
-    "Test URL signing configuration"
+    {
+      "issue": "Check account storage limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Verify transformation quotas",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor bandwidth usage",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Test URL signing configuration",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Resize all product images to 800x600",
@@ -91,12 +97,7 @@
     "Optimize images for web delivery"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "transform",
-    "delete"
-  ],
+  "permissions": ["read", "write", "transform", "delete"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://cloudinary.com/documentation/cloudinary_llm_mcp#mcp_servers"
 }

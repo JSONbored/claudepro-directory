@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "metrics",
-    "analytics",
-    "stop-hook",
-    "performance",
-    "statistics"
-  ],
+  "tags": ["metrics", "analytics", "stop-hook", "performance", "statistics"],
   "hookType": "Stop",
   "features": [
     "Comprehensive session analytics",
@@ -35,9 +29,7 @@
       "hooks": {
         "stop": {
           "script": "./.claude/hooks/session-metrics-collector.sh",
-          "matchers": [
-            "*"
-          ]
+          "matchers": ["*"]
         }
       }
     },

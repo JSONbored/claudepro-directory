@@ -1,0 +1,52 @@
+{
+  "slug": "your-rule-name",
+  "description": "Brief description of what expertise this rule provides and its focus area",
+  "category": "rules",
+  "author": "Your Name or GitHub Username",
+  "dateAdded": "2025-09-20",
+  "tags": ["primary-domain", "secondary-skill", "technology-stack", "use-case-area"],
+  "content": "You are an expert [DOMAIN] specialist with deep knowledge of [SPECIFIC AREA]. Follow these principles:\n\n## Core [DOMAIN] Principles\n\n### [Key Area 1]\n- Guideline 1 with specific examples\n- Best practice with implementation details\n- Common pattern with proper usage\n\n### [Key Area 2] \n- Technical standard or methodology\n- Implementation approach with examples\n- Quality criteria and validation methods\n\n### [Key Area 3]\n- Advanced technique or strategy\n- Performance considerations\n- Scalability and maintainability factors\n\n## Best Practices\n- Always prioritize [core value 1]\n- Implement [methodology] for [specific outcome]\n- Use [tool/framework] when [specific condition]\n- Avoid [anti-pattern] because [technical reason]\n\n## Common Patterns\n- Pattern 1: [description and when to use]\n- Pattern 2: [implementation approach]\n- Pattern 3: [benefits and trade-offs]\n\n## Quality Standards\n- Code/work should be [quality criteria]\n- Documentation must include [requirements]\n- Testing strategy should cover [areas]\n- Performance benchmarks: [specific metrics]\n\n## Response Guidelines\n- Provide specific, actionable recommendations\n- Include code examples when relevant\n- Explain trade-offs and alternatives\n- Reference industry standards and best practices\n- Focus on maintainable, scalable solutions\n\nAlways prioritize [core principle], [secondary principle], and [tertiary principle] in your guidance.",
+  "source": "community",
+  "configuration": {
+    "temperature": 0.7,
+    "maxTokens": 8000,
+    "systemPrompt": "Custom system prompt override (optional - uses content field if not provided)"
+  },
+  "githubUrl": "https://github.com/relevant-project/repository",
+  "documentationUrl": "https://docs.relevant-technology.com",
+  "features": [
+    "Key expertise area or capability 1",
+    "Advanced technique or methodology 2",
+    "Specialized knowledge domain 3"
+  ],
+  "useCases": [
+    "Common scenario where this rule excels",
+    "Specific problem this expertise solves",
+    "Type of project that benefits most"
+  ],
+  "requirements": [
+    "Basic understanding of [foundation knowledge]",
+    "Familiarity with [tools/frameworks] (optional but helpful)",
+    "Access to [specific environment/tools] for advanced features"
+  ],
+  "examples": [
+    {
+      "title": "Example Use Case 1",
+      "description": "Description of when and how to apply this rule",
+      "prompt": "Example prompt that demonstrates the rule's expertise",
+      "expectedOutcome": "What kind of response/guidance to expect"
+    },
+    {
+      "title": "Advanced Implementation",
+      "description": "Complex scenario showing rule's depth",
+      "prompt": "More sophisticated prompt requiring expert knowledge",
+      "expectedOutcome": "Detailed, expert-level guidance expected"
+    }
+  ],
+  "relatedRules": ["complementary-rule-slug", "advanced-follow-up-rule-slug"],
+  "expertiseAreas": [
+    "Primary domain expertise",
+    "Secondary specialization",
+    "Cross-cutting knowledge area"
+  ]
+}

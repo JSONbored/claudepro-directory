@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-16",
-  "tags": [
-    "security",
-    "vulnerability",
-    "scanning",
-    "automation",
-    "compliance"
-  ],
+  "tags": ["security", "vulnerability", "scanning", "automation", "compliance"],
   "hookType": "PostToolUse",
   "features": [
     "Comprehensive security vulnerability scanning",
@@ -27,11 +21,7 @@
       "hooks": {
         "postToolUse": {
           "script": "./.claude/hooks/security-scanner-hook.sh",
-          "matchers": [
-            "write",
-            "edit",
-            "multiedit"
-          ]
+          "matchers": ["write", "edit", "multiedit"]
         }
       }
     },

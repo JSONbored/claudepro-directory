@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "invideo",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "video",
-    "invideo",
-    "media",
-    "content-creation",
-    "ai-video"
-  ],
+  "tags": ["video", "invideo", "media", "content-creation", "ai-video"],
   "content": "Create and edit videos through Claude using invideo's AI-powered video creation platform.",
   "features": [
     "Generate videos from text prompts",
@@ -68,10 +62,22 @@
     "Check export quota restrictions"
   ],
   "troubleshooting": [
-    "Verify account tier limits",
-    "Check available storage space",
-    "Monitor rendering queue status",
-    "Ensure media format compatibility"
+    {
+      "issue": "Verify account tier limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Check available storage space",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Monitor rendering queue status",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Ensure media format compatibility",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "Create a 30-second product video",
@@ -80,12 +86,7 @@
     "Export video in 1080p MP4"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "create",
-    "export"
-  ],
+  "permissions": ["read", "write", "create", "export"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://invideo.io/ai/mcp"
 }
