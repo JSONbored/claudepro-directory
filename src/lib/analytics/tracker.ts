@@ -78,7 +78,8 @@ export function trackEvent<T extends EventName>(eventName: T, payload?: EventPay
   try {
     if (isUmamiAvailable()) {
       // Production tracking with Umami
-      window.umami?.track(eventName, sanitizePayload(payload) || {});
+      const sanitizedPayload = sanitizePayload(payload);
+      window.umami?.track(eventName, sanitizedPayload);
     } else if (IS_DEVELOPMENT && ENABLE_DEBUG) {
       // Development logging
       logger.debug('[Analytics Dev]', {

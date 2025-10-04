@@ -72,13 +72,8 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
 
         const filePath = path.join(process.cwd(), 'content', 'guides', mappedPath, filename);
 
-        // Check if file exists before attempting to read
-        try {
-          await fs.access(filePath);
-        } catch {
-          return null;
-        }
-
+        // Read file directly - this avoids TOCTOU race condition
+        // If file doesn't exist or can't be read, catch block will handle it
         const fileContent = await fs.readFile(filePath, 'utf-8');
 
         // Parse frontmatter using our MDX parser
@@ -114,13 +109,7 @@ async function getCategoryGuides(category: string): Promise<GuideItemWithCategor
       try {
         const dir = path.join(process.cwd(), 'content', 'guides', category);
 
-        // Check if directory exists
-        try {
-          await fs.access(dir);
-        } catch {
-          return [];
-        }
-
+        // Read directory directly - catch will handle if it doesn't exist
         const files = await fs.readdir(dir);
 
         for (const file of files) {
@@ -166,13 +155,7 @@ async function getRelatedGuides(currentSlug: string[], limit = 3): Promise<Relat
       try {
         const dir = path.join(process.cwd(), 'content', 'guides', currentCategory);
 
-        // Check if directory exists before attempting to read
-        try {
-          await fs.access(dir);
-        } catch {
-          return [];
-        }
-
+        // Read directory directly - catch will handle if it doesn't exist
         const files = await fs.readdir(dir);
 
         for (const file of files) {
@@ -223,13 +206,7 @@ export async function generateStaticParams() {
     try {
       const dir = path.join(process.cwd(), 'content', 'guides', category);
 
-      // Check if directory exists before attempting to read
-      try {
-        await fs.access(dir);
-      } catch {
-        continue; // Skip non-existent directories
-      }
-
+      // Read directory directly - catch will handle if it doesn't exist
       const files = await fs.readdir(dir);
 
       for (const file of files) {

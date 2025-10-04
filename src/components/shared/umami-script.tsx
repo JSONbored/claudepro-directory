@@ -28,7 +28,7 @@ export async function UmamiScript() {
       defer
       src="https://umami.claudepro.directory/script.js"
       data-website-id="b734c138-2949-4527-9160-7fe5d0e81121"
-      integrity="sha384-PFqUEdHVrSOSpICvHVdlcWE6pKB/vTQI0WLgkDWMdsDJDsIuRuK0hDO54xvpXSaT"
+      integrity="sha384-gW+82edTiLqRoEvPbT3xKDCYZ5M02YXbW4tA3gbojZWiiMYNJZb4YneJrS4ri3Rn"
       crossOrigin="anonymous"
       nonce={nonce}
     />

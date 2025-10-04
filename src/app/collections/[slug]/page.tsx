@@ -144,7 +144,7 @@ export default async function CollectionDetailPage({
   }
 
   // Track view (async, don't await)
-  trackView('collections', slug).catch(() => {
+  trackView({ category: 'collections', slug }).catch(() => {
     // Silent fail
   });
 
