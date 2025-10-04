@@ -8,7 +8,7 @@ export function ViewTracker({ category, slug }: ViewTrackerProps) {
   useEffect(() => {
     // Track view after a short delay to ensure the page has loaded
     const timer = setTimeout(() => {
-      trackView(category, slug).catch(() => {
+      trackView({ category, slug }).catch(() => {
         // Silently fail in client component - errors are handled server-side
         // No client-side logging to prevent browser console exposure
       });

@@ -319,33 +319,38 @@ export const validation = {
 /**
  * Lightweight HTML tag stripper
  * Removes all HTML tags from a string without using heavy dependencies
+ * Uses secure patterns to prevent injection attacks
  */
 function stripHtmlTags(str: string): string {
-  // Remove script and style content entirely
-  let result = str.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  result = result.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+  let result = str;
 
-  // Remove all HTML tags
+  // Step 1: Remove dangerous tags FIRST, before entity decoding
+  // This prevents &lt;script&gt; from becoming an executable <script> tag
+  result = result.replace(/<script\b[^<]*(?:(?!<\/script\s*>)<[^<]*)*<\/script\s*>/gi, '');
+  result = result.replace(/<style\b[^<]*(?:(?!<\/style\s*>)<[^<]*)*<\/style\s*>/gi, '');
+
+  // Step 2: Remove all HTML tags (before entity decoding to prevent bypasses)
   result = result.replace(/<[^>]*>/g, '');
 
-  // Decode HTML entities
-  const textarea = typeof document !== 'undefined' ? document.createElement('textarea') : null;
-  if (textarea) {
-    textarea.innerHTML = result;
-    result = textarea.value;
-  } else {
-    // Server-side fallback for common entities
-    result = result
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#039;/g, "'")
-      .replace(/&#x27;/g, "'")
-      .replace(/&#x2F;/g, '/')
-      .replace(/&#x5C;/g, '\\')
-      .replace(/&#96;/g, '`');
-  }
+  // Step 3: NOW decode HTML entities (safe because tags are already removed)
+  // Server-side: Decode entities in safe order to prevent double-unescaping
+  // Use a temporary placeholder to prevent &amp;lt; from becoming <
+  const TEMP_AMP = '\x00AMP\x00';
+  result = result
+    .replace(/&amp;/g, TEMP_AMP) // Store &amp; temporarily
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/&#x2F;/g, '/')
+    .replace(/&#x5C;/g, '\\')
+    .replace(/&#96;/g, '`')
+    .replace(/&nbsp;/g, ' ')
+    .replace(new RegExp(TEMP_AMP, 'g'), '&'); // Restore & at the end
+
+  // Step 4: Final safety - remove any remaining angle brackets
+  result = result.replace(/[<>]/g, '');
 
   return result;
 }
@@ -387,6 +392,7 @@ export const sanitizers = {
     const sanitized = param
       .replace(/[<>"'`]/g, '') // Remove HTML/JS injection characters
       .replace(/javascript:/gi, '') // Remove javascript: protocol
+      .replace(/vbscript:/gi, '') // Remove vbscript: protocol
       .replace(/data:/gi, '') // Remove data: protocol
       .trim();
 

@@ -14,13 +14,14 @@ import { Button } from '@/src/components/ui/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { trackCopy } from '@/src/lib/actions/track-view';
 import { Check, Copy } from '@/src/lib/icons';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export interface CardCopyActionProps {
   /** Full URL to copy to clipboard */
   url: string;
   /** Content category for analytics tracking */
-  category: string;
+  category: ContentCategory;
   /** Content slug for analytics tracking */
   slug: string;
   /** Display title for aria-label */
@@ -33,7 +34,7 @@ export function CardCopyAction({ url, category, slug, title, componentName }: Ca
   const { copied, copy } = useCopyToClipboard({
     onSuccess: () => {
       // Track copy action for analytics (silent fail)
-      trackCopy(category, slug).catch(() => {
+      trackCopy({ category, slug }).catch(() => {
         // Silent fail - don't break UX
       });
 

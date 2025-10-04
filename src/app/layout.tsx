@@ -124,14 +124,6 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} font-sans`}>
       <head>
-        {/* Critical Resource Preloading for optimal network chain */}
-        <link
-          rel="preload"
-          href="/_next/static/css/app/layout.css"
-          as="style"
-          crossOrigin="anonymous"
-        />
-
         {/* PWA Manifest */}
         <link rel="manifest" href="/manifest.webmanifest" />
 
@@ -163,7 +155,13 @@ export default async function RootLayout({
       <body className="font-sans">
         <StructuredData type="website" />
         <OrganizationStructuredData />
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+          {...(nonce ? { nonce } : {})}
+        >
           <ErrorBoundary>
             <a
               href="#main-content"

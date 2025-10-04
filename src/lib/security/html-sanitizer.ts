@@ -82,20 +82,21 @@ const DEFAULT_ALLOWED_ATTRIBUTES = [
 
 /**
  * Dangerous patterns to always remove
+ * Updated to handle whitespace in closing tags (e.g., </script >, </script  >)
  */
 const DANGEROUS_PATTERNS = [
-  /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-  /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi,
-  /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi,
-  /<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi,
+  /<script\b[^<]*(?:(?!<\/script\s*>)<[^<]*)*<\/script\s*>/gi,
+  /<style\b[^<]*(?:(?!<\/style\s*>)<[^<]*)*<\/style\s*>/gi,
+  /<iframe\b[^<]*(?:(?!<\/iframe\s*>)<[^<]*)*<\/iframe\s*>/gi,
+  /<object\b[^<]*(?:(?!<\/object\s*>)<[^<]*)*<\/object\s*>/gi,
   /<embed\b[^>]*>/gi,
-  /<applet\b[^<]*(?:(?!<\/applet>)<[^<]*)*<\/applet>/gi,
-  /<form\b[^<]*(?:(?!<\/form>)<[^<]*)*<\/form>/gi,
+  /<applet\b[^<]*(?:(?!<\/applet\s*>)<[^<]*)*<\/applet\s*>/gi,
+  /<form\b[^<]*(?:(?!<\/form\s*>)<[^<]*)*<\/form\s*>/gi,
   /<input\b[^>]*>/gi,
-  /<textarea\b[^<]*(?:(?!<\/textarea>)<[^<]*)*<\/textarea>/gi,
-  /<button\b[^<]*(?:(?!<\/button>)<[^<]*)*<\/button>/gi,
-  /<select\b[^<]*(?:(?!<\/select>)<[^<]*)*<\/select>/gi,
-  /<option\b[^<]*(?:(?!<\/option>)<[^<]*)*<\/option>/gi,
+  /<textarea\b[^<]*(?:(?!<\/textarea\s*>)<[^<]*)*<\/textarea\s*>/gi,
+  /<button\b[^<]*(?:(?!<\/button\s*>)<[^<]*)*<\/button\s*>/gi,
+  /<select\b[^<]*(?:(?!<\/select\s*>)<[^<]*)*<\/select\s*>/gi,
+  /<option\b[^<]*(?:(?!<\/option\s*>)<[^<]*)*<\/option\s*>/gi,
   /<link\b[^>]*>/gi,
   /<meta\b[^>]*>/gi,
   /<base\b[^>]*>/gi,
@@ -142,7 +143,8 @@ const EVENT_HANDLERS = [
 ];
 
 /**
- * Decode HTML entities
+ * Decode HTML entities safely
+ * Prevents double-unescaping attacks by processing &amp; last
  */
 function decodeHtmlEntities(str: string): string {
   if (typeof document !== 'undefined') {
@@ -151,9 +153,11 @@ function decodeHtmlEntities(str: string): string {
     return textarea.value;
   }
 
-  // Server-side fallback for common entities
+  // Server-side: Decode entities in safe order to prevent double-unescaping
+  // Use a temporary placeholder to prevent &amp;lt; from becoming <
+  const TEMP_AMP = '\x00AMP\x00';
   return str
-    .replace(/&amp;/g, '&')
+    .replace(/&amp;/g, TEMP_AMP) // Store &amp; temporarily
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
@@ -165,15 +169,20 @@ function decodeHtmlEntities(str: string): string {
     .replace(/&nbsp;/g, ' ')
     .replace(/&copy;/g, '©')
     .replace(/&reg;/g, '®')
-    .replace(/&euro;/g, '€');
+    .replace(/&euro;/g, '€')
+    .replace(new RegExp(TEMP_AMP, 'g'), '&'); // Restore & at the end
 }
 
 /**
  * Strip all HTML tags from a string
+ * Uses secure ordering: decode entities first, then remove tags, then sanitize
  */
 function stripHtmlTags(str: string): string {
-  // Remove dangerous content first
-  let result = str;
+  // First, decode HTML entities BEFORE tag removal to prevent bypasses
+  // This prevents patterns like &lt;script&gt; from becoming <script> after tag removal
+  let result = decodeHtmlEntities(str);
+
+  // Remove dangerous content
   for (const pattern of DANGEROUS_PATTERNS) {
     result = result.replace(pattern, '');
   }
@@ -181,8 +190,8 @@ function stripHtmlTags(str: string): string {
   // Remove all remaining HTML tags
   result = result.replace(/<[^>]*>/g, '');
 
-  // Decode HTML entities
-  result = decodeHtmlEntities(result);
+  // Additional safety: remove any remaining < or > that could be injection attempts
+  result = result.replace(/[<>]/g, '');
 
   // Normalize whitespace
   result = result.replace(/\s+/g, ' ').trim();
@@ -209,8 +218,9 @@ function sanitizeHtml(html: string, config: SanitizerConfig = {}): string {
     sanitized = sanitized.replace(pattern, '');
   }
 
-  // Remove javascript: and data: protocols
+  // Remove javascript:, vbscript:, and data: protocols (allow data:image/ only)
   sanitized = sanitized.replace(/javascript:/gi, '');
+  sanitized = sanitized.replace(/vbscript:/gi, '');
   sanitized = sanitized.replace(/data:(?!image\/)/gi, '');
 
   // Parse and filter tags
@@ -261,10 +271,12 @@ function sanitizeHtml(html: string, config: SanitizerConfig = {}): string {
 
       // Special handling for href and src
       if ((attrName === 'href' || attrName === 'src') && attrValue) {
-        // Remove javascript: and data: protocols
+        const lowerValue = attrValue.toLowerCase();
+        // Block dangerous protocols (allow data:image/ for images)
         if (
-          attrValue.toLowerCase().startsWith('javascript:') ||
-          attrValue.toLowerCase().startsWith('data:')
+          lowerValue.startsWith('javascript:') ||
+          lowerValue.startsWith('vbscript:') ||
+          (lowerValue.startsWith('data:') && !lowerValue.startsWith('data:image/'))
         ) {
           continue;
         }

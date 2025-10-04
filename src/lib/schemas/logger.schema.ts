@@ -233,7 +233,8 @@ export function sanitizeLogMessage(message: unknown): string {
 
   return sanitized
     .replace(/\${.*?}/g, '[TEMPLATE]') // Remove template literals
-    .replace(/<script.*?<\/script>/gi, '[SCRIPT]') // Remove script tags
+    .replace(/<script\b[^<]*(?:(?!<\/script\s*>)<[^<]*)*<\/script\s*>/gi, '[SCRIPT]') // Remove script tags (whitespace-tolerant)
+    .replace(/[<>]/g, '') // Remove any remaining angle brackets for safety
     .slice(0, LOGGER_LIMITS.MAX_MESSAGE_LENGTH);
 }
 
