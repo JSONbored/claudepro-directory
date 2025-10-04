@@ -28,6 +28,9 @@ jobs:
         check: [lint, type-check]
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
       - uses: ./.github/actions/setup-node-deps
 
       - name: Run ${{ matrix.check }}
@@ -40,6 +43,9 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
       - uses: ./.github/actions/setup-node-deps
 
       - name: Cache Next.js build
