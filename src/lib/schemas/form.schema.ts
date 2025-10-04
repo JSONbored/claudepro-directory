@@ -6,75 +6,8 @@
  */
 
 import { z } from 'zod';
-import { positiveInt } from '@/src/lib/schemas/primitives/base-numbers';
-import {
-  isoDatetimeString,
-  nonEmptyString,
-  shortString,
-  urlString,
-} from '@/src/lib/schemas/primitives/base-strings';
 import { DOMPurify } from '@/src/lib/security/html-sanitizer';
 import { VALIDATION_PATTERNS } from '@/src/lib/security/patterns';
-
-// GitHub-related schemas for form submissions
-export const gitHubConfigValidationSchema = z
-  .object({
-    token: nonEmptyString.describe('GitHub personal access token for API authentication'),
-    owner: shortString.describe('GitHub repository owner username or organization name'),
-    repo: shortString.describe('GitHub repository name'),
-  })
-  .describe('GitHub API configuration for repository operations');
-
-export const issueCreationRequestSchema = z
-  .object({
-    title: z
-      .string()
-      .min(1, 'Issue title is required')
-      .max(200, 'Title too long')
-      .describe('Issue title (1-200 characters)'),
-    body: z
-      .string()
-      .min(1, 'Issue body is required')
-      .max(50000, 'Body too long')
-      .describe('Issue body content in markdown format (1-50000 characters)'),
-    labels: z
-      .array(shortString.describe('Label name'))
-      .max(10, 'Too many labels')
-      .default([])
-      .describe('Array of label names to apply to the issue (max 10)'),
-    assignees: z
-      .array(shortString.describe('GitHub username'))
-      .max(10, 'Too many assignees')
-      .default([])
-      .describe('Array of GitHub usernames to assign to the issue (max 10)'),
-  })
-  .describe('Request payload for creating a new GitHub issue');
-
-export const issueCreationResponseSchema = z
-  .object({
-    issueNumber: positiveInt.describe('Created issue number from GitHub API'),
-    issueUrl: urlString.describe('Full URL to the created GitHub issue'),
-    success: z.boolean().describe('Whether the issue was created successfully'),
-  })
-  .describe('Response payload after creating a GitHub issue');
-
-export const githubApiRateLimitSchema = z
-  .object({
-    remaining: z
-      .number()
-      .min(0)
-      .describe('Number of API requests remaining in current rate limit window'),
-    resetTime: isoDatetimeString.describe('ISO 8601 timestamp when rate limit resets'),
-  })
-  .describe('GitHub API rate limit information');
-
-export const githubHealthCheckResponseSchema = z
-  .object({
-    configured: z.boolean().describe('Whether GitHub API credentials are configured'),
-    authenticated: z.boolean().describe('Whether authentication with GitHub API is successful'),
-    rateLimit: githubApiRateLimitSchema.optional().describe('Current rate limit status (optional)'),
-  })
-  .describe('GitHub API health check response with configuration and authentication status');
 
 /**
  * Configuration submission form schema
@@ -82,9 +15,9 @@ export const githubHealthCheckResponseSchema = z
  */
 export const configSubmissionSchema = z
   .object({
-    // Content type selection
+    // Content type selection (main content categories only, excludes guides)
     type: z
-      .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'guides'])
+      .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'])
       .describe('Type of configuration content being submitted'),
 
     // Basic information

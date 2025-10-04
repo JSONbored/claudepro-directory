@@ -21,7 +21,6 @@ export const metadata = {
 };
 
 // Enable ISR - revalidate every 4 hours for guide list pages
-export const revalidate = 14400;
 
 // Use Edge Runtime for better performance and lower costs
 

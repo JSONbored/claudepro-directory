@@ -134,7 +134,8 @@ const nextConfig = {
 
   experimental: {
     // React Compiler (automatic React optimization)
-    reactCompiler: true,
+    // Disabled: Causes eval() CSP violations in production with strict-dynamic
+    reactCompiler: false,
 
     // ✨ Turbopack Persistent Caching (requires next@canary - disabled for stable)
     // turbopackPersistentCaching: true,

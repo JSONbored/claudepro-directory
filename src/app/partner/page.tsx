@@ -26,7 +26,6 @@ import {
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // Enable ISR - revalidate every 24 hours for static marketing pages
-export const revalidate = 86400;
 
 export default function PartnerPage() {
   return (

@@ -1,0 +1,81 @@
+name: Bundle Analysis
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/**/*.{ts,tsx,js,jsx}'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'next.config.mjs'
+      - 'tailwind.config.ts'
+    paths-ignore:
+      - 'content/**/*.json'
+      - 'templates/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  analyze:
+    name: Analyze Bundle Size
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v5
+
+      - uses: ./.github/actions/setup-node-deps
+
+      - name: Build PR version
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Analyze bundle (PR)
+        run: npx -y nextjs-bundle-analysis@0.8.0
+        env:
+          BUNDLE_ANALYSIS_COMMENT: true
+
+      - name: Upload bundle analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-analysis-pr
+          path: .next/analyze/__bundle_analysis.json
+          retention-days: 7
+
+      - name: Checkout base branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.base_ref }}
+
+      - uses: ./.github/actions/setup-node-deps
+
+      - name: Build base version
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Analyze bundle (base)
+        run: npx -y nextjs-bundle-analysis@0.8.0
+
+      - name: Upload base bundle analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-analysis-base
+          path: .next/analyze/__bundle_analysis.json
+          retention-days: 7
+
+      - name: Compare bundle sizes
+        uses: hashicorp/nextjs-bundle-analysis@v0.3.0
+        with:
+          base-branch: ${{ github.base_ref }}
+          pr-number: ${{ github.event.pull_request.number }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}

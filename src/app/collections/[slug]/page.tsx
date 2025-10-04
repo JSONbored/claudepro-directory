@@ -40,7 +40,6 @@ import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 /**
  * ISR revalidation (4 hours)
  */
-export const revalidate = 14400;
 
 /**
  * Difficulty colors
@@ -145,7 +144,7 @@ export default async function CollectionDetailPage({
   }
 
   // Track view (async, don't await)
-  trackView('collections', slug).catch(() => {
+  trackView({ category: 'collections', slug }).catch(() => {
     // Silent fail
   });
 

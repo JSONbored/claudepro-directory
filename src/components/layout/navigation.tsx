@@ -116,7 +116,7 @@ export const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-2 md:gap-3 lg:gap-4 xl:gap-5 2xl:gap-6 text-sm lg:text-base">
+          <nav className="hidden md:flex items-center gap-2 md:gap-3 lg:gap-4 text-sm lg:text-base">
             <NavLink href="/agents" isActive={isActive} onClick={() => setIsOpen(false)}>
               Agents
             </NavLink>

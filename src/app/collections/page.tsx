@@ -34,7 +34,6 @@ import { logger } from '@/src/lib/logger';
 /**
  * ISR revalidation interval (4 hours)
  */
-export const revalidate = 14400;
 
 /**
  * Page metadata for SEO

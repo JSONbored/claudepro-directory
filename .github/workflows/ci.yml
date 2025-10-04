@@ -3,11 +3,15 @@ name: CI
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'content/**/*.json'
+      - 'templates/**'
   pull_request:
     branches: [ main ]
     paths-ignore:
       - 'content/**/*.json'
       - 'content/guides/**/*.mdx'
+      - 'templates/**'
       - '.github/ISSUE_TEMPLATE/**'
       - '.github/pull_request_template.md'
       - '**.md'
@@ -28,6 +32,9 @@ jobs:
         check: [lint, type-check]
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
       - uses: ./.github/actions/setup-node-deps
 
       - name: Run ${{ matrix.check }}
@@ -40,6 +47,9 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
       - uses: ./.github/actions/setup-node-deps
 
       - name: Cache Next.js build
