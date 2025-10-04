@@ -6,6 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2025-10-04 - Submit Form Refactor & Code Cleanup
+
+### Changed
+- **Submit Form:** Completely refactored submission flow to use GitHub URL pre-filling instead of GitHub API
+- **Architecture:** Eliminated all GitHub API authentication requirements (zero secrets, zero env vars, zero rate limits)
+- **UX:** Users now fill form → redirect to GitHub with pre-filled issue → review/edit → submit
+- **Schema:** Updated form content types to exclude 'guides', now only accepts: agents, mcp, rules, commands, hooks, statuslines
+
+### Added
+- **Utility:** New `/src/lib/utils/github-issue-url.ts` - Production-grade URL generator for GitHub issue creation
+- **Security:** Hardcoded repository configuration to prevent tampering
+- **Validation:** Client-side form validation with Zod schemas
+- **Fallback:** Popup blocker detection with manual fallback link
+
+### Removed
+- **Dead Code:** Removed 416 lines of unused GitHub API integration code:
+  - Deleted `/src/lib/services/github.service.ts` (275 lines)
+  - Deleted `/src/app/actions/submit-config.ts` (66 lines)
+  - Removed 5 unused GitHub API schemas from `form.schema.ts` (~60 lines)
+  - Removed GitHub environment variables from `env.schema.ts` (GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO)
+  - Removed `githubConfig` export and `hasGitHubConfig()` function
+
+### Fixed
+- **TypeScript:** Fixed unused import errors after schema cleanup
+- **Build:** Verified production build compiles successfully (200 static pages)
+
+---
+
 ## 2025-10-04 - GitHub Actions Automation & Optimization
 
 ### Added
