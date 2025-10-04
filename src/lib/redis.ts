@@ -118,12 +118,20 @@ export const statsRedis = {
         redis(
           async (c) => {
             const key = `views:${cat}:${slug}`;
-            const [count] = await Promise.all([
-              c.incr(key),
-              c.zadd(`trending:${cat}:weekly`, { score: Date.now(), member: slug }),
-              c.zincrby(`popular:${cat}:all`, 1, slug),
-            ]);
-            return count;
+            // SECURITY: Use UTC to prevent timezone inconsistencies
+            const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD UTC
+            const dailyKey = `views:daily:${cat}:${slug}:${today}`;
+
+            // PERFORMANCE: Use pipeline for atomic operations
+            const pipeline = c.pipeline();
+            pipeline.incr(key); // Total all-time views
+            pipeline.incr(dailyKey); // Today's views (for growth calculation)
+            pipeline.expire(dailyKey, 604800, 'NX'); // Only set TTL if key doesn't have one
+            pipeline.zadd(`trending:${cat}:weekly`, { score: Date.now(), member: slug });
+            pipeline.zincrby(`popular:${cat}:all`, 1, slug);
+
+            const results = await pipeline.exec();
+            return results?.[0] as number | null; // Return total view count
           },
           () => null,
           'incrementView'
@@ -147,6 +155,35 @@ export const statsRedis = {
       () => new Array(items.length).fill(0) as (number | null)[],
       'getViewCounts'
     );
+    return items.reduce(
+      (acc, item, i) => {
+        acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+  },
+
+  /**
+   * Get daily view counts for multiple items (optimized MGET batch operation)
+   * @param items - Array of category/slug pairs
+   * @param date - Date string (YYYY-MM-DD), defaults to today
+   * @returns Map of "category:slug" to daily view count
+   */
+  getDailyViewCounts: async (
+    items: Array<{ category: string; slug: string }>,
+    date?: string
+  ): Promise<Record<string, number>> => {
+    if (!items.length) return {};
+    const targetDate = date || new Date().toISOString().split('T')[0];
+    const keys = items.map((i) => `views:daily:${i.category}:${i.slug}:${targetDate}`);
+
+    const counts = await redis(
+      async (c) => await c.mget<(number | null)[]>(...keys),
+      () => new Array(items.length).fill(0) as (number | null)[],
+      'getDailyViewCounts'
+    );
+
     return items.reduce(
       (acc, item, i) => {
         acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
