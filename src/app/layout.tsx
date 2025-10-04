@@ -177,7 +177,7 @@ export default async function RootLayout({
         <Analytics />
         <WebVitals />
         {/* Umami Analytics - Privacy-focused analytics (production only) */}
-        <UmamiScript />
+        {await UmamiScript()}
         {/* Service Worker Registration for PWA Support */}
         <script
           src="/scripts/service-worker-init.js"
