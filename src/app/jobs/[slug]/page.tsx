@@ -73,7 +73,6 @@ export async function generateStaticParams() {
 }
 
 // Enable ISR - revalidate every 4 hours
-export const revalidate = 14400;
 
 export default async function JobPage({ params }: PageProps) {
   if (!params) {

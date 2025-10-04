@@ -4,6 +4,8 @@
 
 # Claude Pro Directory
 
+### **Find the perfect Claude configuration in seconds**
+
 [![Mentioned in Awesome Claude Code](https://awesome.re/mentioned-badge.svg)](https://github.com/hesreallyhim/awesome-claude-code)
 
 [![CI](https://github.com/JSONbored/claudepro-directory/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/JSONbored/claudepro-directory/actions/workflows/ci.yml)
@@ -15,7 +17,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4.1-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 
-### **Find the perfect Claude configuration in seconds**
+
 
 <div align="center">
 

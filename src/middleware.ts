@@ -60,53 +60,48 @@ const aj = arcjet({
 });
 
 // Nosecone security headers configuration
-// PRODUCTION CSP STRATEGY (2025 Best Practices):
-// - Static generation requires 'unsafe-inline' for scripts (no nonces possible)
-// - Compensating controls: Arcjet WAF + Shield, rate limiting, bot detection
-// - Defense in depth: Multiple security layers vs strict CSP alone
+// PRODUCTION CSP STRATEGY (2025 Best Practices with Nonces):
+// - Dynamic rendering (connection() in layout.tsx) enables per-request nonces
+// - Nosecone's built-in nonce() function generates unique nonces per request
+// - strict-dynamic automatically trusts dynamically loaded scripts (fixes eval CSP violations)
+// - Defense in depth: Arcjet WAF + Shield + nonce-based CSP + rate limiting + bot detection
 //
 // DEVELOPMENT CSP STRATEGY:
-// - Enable relaxed CSP with 'unsafe-eval' for HMR/hot reload
+// - Same nonce-based approach (consistent across environments)
+// - 'unsafe-eval' added for HMR/hot reload compatibility
 // - Catches CSP violations during development
-// - Better security testing before production deployment
 const noseconeConfig = {
   ...nosecone.defaults,
-  // Custom CSP configuration that allows necessary resources
+  // Extend Nosecone defaults with our trusted sources
+  // Note: Nosecone defaults already include nonce() for scriptSrc with strict-dynamic
   contentSecurityPolicy: {
     directives: {
-      // Start with Nosecone's secure defaults
+      // Start with Nosecone's secure defaults (includes nonce support)
       ...nosecone.defaults.contentSecurityPolicy.directives,
 
-      // Override scriptSrc with environment-specific policies
+      // Extend scriptSrc to add our trusted sources while keeping nonce + strict-dynamic
+      // Nosecone's defaults include: nonce(), 'strict-dynamic'
+      // We're adding our analytics and development tools
       scriptSrc: [
-        "'self'",
-        "'unsafe-inline'", // Required for Next.js with static generation
+        ...(nosecone.defaults.contentSecurityPolicy.directives.scriptSrc || []),
         ...(isDevelopment ? (["'unsafe-eval'"] as const) : []), // HMR/hot reload in development only
         'https://umami.claudepro.directory', // Umami analytics
         'https://*.vercel-scripts.com', // Vercel analytics
         'https://vercel.live', // Vercel toolbar
       ],
 
-      // Styles already include 'unsafe-inline' in defaults
-      styleSrc: ["'self'", "'unsafe-inline'"],
-
-      // Images - extend defaults with GitHub and our domains
+      // Extend imgSrc with our domains
       imgSrc: [
-        "'self'",
-        'data:',
-        'blob:',
+        ...(nosecone.defaults.contentSecurityPolicy.directives.imgSrc || []),
         'https://github.com',
         'https://*.githubusercontent.com',
         'https://claudepro.directory',
         'https://www.claudepro.directory',
       ],
 
-      // Fonts - extend defaults
-      fontSrc: ["'self'", 'data:'],
-
-      // Connect sources - with conditional preview WebSocket support
+      // Extend connectSrc for analytics and APIs
       connectSrc: [
-        "'self'",
+        ...(nosecone.defaults.contentSecurityPolicy.directives.connectSrc || []),
         'wss://*.vercel.app', // WebSocket for HMR in preview
         'wss://*.vercel-scripts.com', // Vercel live reload
         'https://umami.claudepro.directory', // Umami analytics
@@ -122,72 +117,52 @@ const noseconeConfig = {
           : []),
       ],
 
-      // Only override what we need to change from defaults
-      // Nosecone already sets secure defaults for:
-      // - frameAncestors: ['none']
-      // - objectSrc: ['none']
-      // - baseUri: ['none']
-      // - formAction: ['self']
-      // - workerSrc: ['self']
-      // - childSrc: ['none']
-
-      // Upgrade insecure requests in production (not in defaults)
+      // Upgrade insecure requests in production
       upgradeInsecureRequests: isProduction,
     },
   },
 
-  // Cross-Origin Embedder Policy - credentialless for compatibility with external resources
+  // Keep other security headers from our custom config
   crossOriginEmbedderPolicy: {
     policy: 'credentialless',
   },
 
-  // Cross-Origin Opener Policy - allow popups for OAuth flows
   crossOriginOpenerPolicy: {
     policy: 'same-origin-allow-popups',
   },
 
-  // Cross-Origin Resource Policy - cross-origin for GitHub images and CDN resources
   crossOriginResourcePolicy: {
     policy: 'cross-origin',
   },
 
-  // Origin Agent Cluster - isolate origin
   originAgentCluster: true,
 
-  // Referrer Policy - no-referrer for privacy
   referrerPolicy: {
     policy: ['no-referrer'],
   },
 
-  // Strict Transport Security - force HTTPS with preload
   strictTransportSecurity: {
     maxAge: 63072000, // 2 years
     includeSubDomains: true,
     preload: true,
   },
 
-  // X-Content-Type-Options - prevent MIME sniffing
   xContentTypeOptions: true,
 
-  // X-DNS-Prefetch-Control - disable for privacy
   xDnsPrefetchControl: {
     allow: false,
   },
 
-  // X-Download-Options - prevent IE downloads
   xDownloadOptions: true,
 
-  // X-Frame-Options - prevent clickjacking
   xFrameOptions: {
     action: 'deny',
   },
 
-  // X-Permitted-Cross-Domain-Policies - none for security
   xPermittedCrossDomainPolicies: {
     permittedPolicies: 'none',
   },
 
-  // X-XSS-Protection - disable (can cause vulnerabilities in old browsers)
   xXssProtection: true,
 };
 

@@ -13,8 +13,10 @@ export default function ErrorBoundary({
 }) {
   useEffect(() => {
     // Log error with structured logging for better Vercel observability
+    // The digest is critical for finding Server Component errors in Vercel logs
     logger.error('Application error boundary triggered', error, {
-      errorDigest: error.digest || '',
+      errorDigest: error.digest || 'no-digest',
+      digestAvailable: Boolean(error.digest),
       userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent || '' : '',
       url: typeof window !== 'undefined' ? window.location?.href || '' : '',
       timestamp: new Date().toISOString(),
