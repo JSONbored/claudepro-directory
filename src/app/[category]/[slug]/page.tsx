@@ -80,16 +80,15 @@ import { getDisplayTitle } from '@/src/lib/utils';
 import { transformForDetailPage } from '@/src/lib/utils/transformers';
 
 /**
- * ISR revalidation interval in seconds (4 hours)
+ * Dynamic Rendering (No ISR)
  *
  * @description
- * Revalidate every 4 hours (14400 seconds) to pick up content updates.
- * Same interval as list pages for consistency. Detail pages benefit from longer
- * cache periods since individual content changes less frequently than lists.
+ * This page uses dynamic rendering because the root layout has `await connection()`,
+ * which opts out of static generation. This enables per-request nonces for strict CSP.
+ * All pages are rendered on-demand with Redis caching for performance.
  *
- * @constant {number}
+ * @see {@link file://./../../layout.tsx} - Root layout with connection()
  */
-export const revalidate = 14400;
 
 /**
  * Generate static params for all category/slug combinations

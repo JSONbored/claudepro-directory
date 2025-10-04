@@ -5,7 +5,6 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { transformForHomePage } from '@/src/lib/utils/transformers';
 
 // Enable ISR - revalidate every hour
-export const revalidate = 3600;
 
 // Server component that loads data
 export default async function HomePage() {
