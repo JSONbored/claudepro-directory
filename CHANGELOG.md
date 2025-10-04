@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2025-10-04 - GitHub Actions Automation & Optimization
+
+### Added
+- **Automation:** Bundle Analysis workflow with HashiCorp's nextjs-bundle-analysis for tracking bundle size regressions
+- **Automation:** Lighthouse CI workflow for automated Core Web Vitals monitoring (homepage, /agents, /mcp routes)
+- **Automation:** PR Labeler workflow with 19 intelligent labels including 7 community contribution types
+- **Community:** Auto-labeling for community contributions (`community-mcp`, `community-hooks`, `community-agents`, `community-commands`, `community-rules`, `community-statuslines`, `community-collections`)
+- **Config:** Lighthouse performance thresholds (90+ performance, 95+ accessibility/SEO)
+
+### Changed
+- **Optimization:** CI, Security, Lighthouse, and Bundle Analysis workflows now skip on community content PRs (`content/**/*.json`)
+- **Performance:** Community contributors trigger only 2 workflows (labeler + validation) instead of 10 jobs, saving ~10-15 minutes per PR
+- **Organization:** Moved `.lighthouserc.json` to `config/tools/lighthouserc.json` for cleaner root directory
+
+### Fixed
+- **CI:** Fixed "Can't find action.yml" errors by adding explicit `actions/checkout@v5` before composite action usage in 4 workflow jobs
+- **Workflows:** CI and Security workflows now properly check out repository before using local composite actions
+
+---
+
 ## 2025-10-04 - Umami Analytics Fix
 
 ### Fixed

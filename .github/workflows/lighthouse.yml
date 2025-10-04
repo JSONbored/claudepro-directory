@@ -1,0 +1,67 @@
+name: Lighthouse CI
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/**/*.{ts,tsx,js,jsx}'
+      - 'public/**'
+      - 'package.json'
+      - 'next.config.mjs'
+      - 'tailwind.config.ts'
+    paths-ignore:
+      - 'content/**/*.json'
+      - 'templates/**'
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'content/**/*.json'
+      - 'templates/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  lighthouse:
+    name: Lighthouse Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - uses: ./.github/actions/setup-node-deps
+
+      - name: Build application
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          urls: |
+            http://localhost:3000/
+            http://localhost:3000/agents
+            http://localhost:3000/mcp
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          runs: 3
+          configPath: ./config/tools/lighthouserc.json
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Lighthouse results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-results
+          path: .lighthouseci
+          retention-days: 30
