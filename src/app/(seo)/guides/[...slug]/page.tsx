@@ -21,7 +21,6 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { GuideItemWithCategory } from '@/src/lib/utils/guide-helpers';
 
 // ISR Configuration - Revalidate weekly for SEO pages
-export const revalidate = 604800; // 7 days
 export const dynamic = 'force-static';
 export const dynamicParams = true;
 

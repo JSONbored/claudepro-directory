@@ -56,7 +56,6 @@ import { logger } from '@/src/lib/logger';
  *
  * @constant {number}
  */
-export const revalidate = 14400;
 
 /**
  * Generate static params for all valid categories

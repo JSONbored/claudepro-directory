@@ -14,7 +14,6 @@ import type { ComparisonData } from '@/src/lib/schemas/app.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // ISR Configuration - Revalidate every 7 days for SEO pages
-export const revalidate = 604800; // 7 days in seconds
 export const dynamic = 'force-static'; // Force static generation
 export const dynamicParams = true; // Allow new pages to be generated on-demand
 

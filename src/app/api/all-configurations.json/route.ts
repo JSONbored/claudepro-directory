@@ -10,7 +10,6 @@ import { sanitizeApiError } from '@/src/lib/security/error-sanitizer';
 import { apiSchemas, ValidationError } from '@/src/lib/security/validators';
 
 export const runtime = 'nodejs';
-export const revalidate = 14400; // 4 hours
 
 // Streaming query parameters validation schema
 const streamingQuerySchema = z

@@ -1,14 +1,27 @@
 'use client';
 
+import { useEffect } from 'react';
+import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export default function GlobalError({
-  error: _error,
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    // Log critical global errors with digest for Vercel observability
+    logger.fatal('Global error boundary triggered', error, {
+      errorDigest: error.digest || 'no-digest',
+      digestAvailable: Boolean(error.digest),
+      userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent || '' : '',
+      url: typeof window !== 'undefined' ? window.location?.href || '' : '',
+      timestamp: new Date().toISOString(),
+      global: true,
+    });
+  }, [error]);
   return (
     <html lang="en">
       <body>

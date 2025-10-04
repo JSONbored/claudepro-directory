@@ -8,7 +8,6 @@ import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 import { viewCountService } from '@/src/lib/services/view-count.service';
 
 export const runtime = 'nodejs';
-export const revalidate = 3600; // 1 hour (from REVALIDATE_TIMES.trending)
 
 // Query parameters schema
 const querySchema = z.object({
