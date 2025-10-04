@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2025-10-04 - Umami Analytics Fix
+
+### Fixed
+- **Analytics:** Fixed Umami analytics script not loading due to missing CSP nonce with `strict-dynamic`
+- UmamiScript component now extracts nonce from CSP header and applies it to the external script tag
+- Changed script loading strategy from `lazyOnload` to `afterInteractive` for better nonce compatibility
+
+---
+
 ## 2025-10-03 - Security & Performance Improvements
 
 ### Added
