@@ -52,9 +52,9 @@ async function getTrendingContent(
   const { limit = 12, fallbackToPopularity = true } = options;
 
   try {
-    // Check if Redis is available
-    if (!statsRedis.isEnabled()) {
-      logger.warn('Redis not available for trending calculation, using fallback');
+    // Check Redis availability - only use Redis if actually connected (not fallback mode)
+    if (!statsRedis.isConnected()) {
+      logger.warn('Redis not connected for trending calculation, using fallback');
       return getFallbackTrending(allContent, limit);
     }
 
@@ -78,7 +78,7 @@ async function getTrendingContent(
       };
     });
 
-    // For now, sort by view count descending (with popularity fallback)
+    // Sort by hybrid score combining view count and popularity
     // TODO: Implement growth rate calculation with historical data
     // This requires storing daily view snapshots in Redis
     const sorted = contentWithViews
@@ -89,9 +89,10 @@ async function getTrendingContent(
         return hasViews || hasPopularity;
       })
       .sort((a, b) => {
-        // Prefer view count if available, otherwise use popularity
-        const aScore = (a.viewCount || 0) > 0 ? a.viewCount || 0 : a.popularity || 0;
-        const bScore = (b.viewCount || 0) > 0 ? b.viewCount || 0 : b.popularity || 0;
+        // Hybrid scoring: use view count if available, add normalized popularity bonus
+        // View count is primary metric, popularity (0-100) is secondary
+        const aScore = (a.viewCount || 0) + (a.popularity || 0) / 100;
+        const bScore = (b.viewCount || 0) + (b.popularity || 0) / 100;
         return bScore - aScore;
       })
       .slice(0, limit);
@@ -128,9 +129,9 @@ async function getPopularContent(
   const { limit = 12, fallbackToPopularity = true } = options;
 
   try {
-    // Check if Redis is available
-    if (!statsRedis.isEnabled()) {
-      logger.warn('Redis not available for popular calculation, using fallback');
+    // Check Redis availability - only use Redis if actually connected (not fallback mode)
+    if (!statsRedis.isConnected()) {
+      logger.warn('Redis not connected for popular calculation, using fallback');
       return getFallbackPopular(allContent, limit);
     }
 
@@ -154,7 +155,7 @@ async function getPopularContent(
       };
     });
 
-    // Sort by total view count descending (with popularity fallback)
+    // Sort by hybrid score combining view count and popularity
     const sorted = contentWithViews
       .filter((item) => {
         // Include items with views OR popularity score (hybrid approach)
@@ -163,9 +164,10 @@ async function getPopularContent(
         return hasViews || hasPopularity;
       })
       .sort((a, b) => {
-        // Prefer view count if available, otherwise use popularity
-        const aScore = (a.viewCount || 0) > 0 ? a.viewCount || 0 : a.popularity || 0;
-        const bScore = (b.viewCount || 0) > 0 ? b.viewCount || 0 : b.popularity || 0;
+        // Hybrid scoring: use view count if available, add normalized popularity bonus
+        // View count is primary metric, popularity (0-100) is secondary
+        const aScore = (a.viewCount || 0) + (a.popularity || 0) / 100;
+        const bScore = (b.viewCount || 0) + (b.popularity || 0) / 100;
         return bScore - aScore;
       })
       .slice(0, limit);

@@ -38,7 +38,7 @@
  * @see lib/config/build-category-config.ts - Category configuration
  */
 
-import { mkdir, rename, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
@@ -68,7 +68,6 @@ import {
 } from '../src/lib/schemas/api/static-api-response.schema.js';
 import { buildConfig, env } from '../src/lib/schemas/env.schema';
 import { type ContentCategory, contentCategorySchema } from '../src/lib/schemas/shared.schema';
-import { getBatchTrendingData } from '../src/lib/trending/calculator.js';
 
 /**
  * Output directory for static APIs
@@ -384,52 +383,6 @@ async function generateSearchIndexes(
 }
 
 /**
- * Generate trending data using Redis-based view counts
- * Modern approach with atomic writes
- *
- * Performance: Uses Redis for real-time view tracking
- * Security: Validated input/output with Zod
- *
- * @param metadataByCategory - Map of category ID to metadata items
- */
-async function generateTrendingData(
-  metadataByCategory: Map<string, readonly unknown[]>
-): Promise<void> {
-  logger.progress('Generating trending data from Redis view counts...');
-
-  try {
-    // Prepare data for trending calculator
-    const trendingInput: Record<string, Array<MetadataItem & { category: string }>> = {};
-
-    for (const [categoryId, metadata] of metadataByCategory.entries()) {
-      trendingInput[categoryId] = (metadata as MetadataItem[]).map((item) => ({
-        ...item,
-        category: categoryId,
-      }));
-    }
-
-    const trendingData = await getBatchTrendingData(trendingInput);
-
-    // Atomic write: temp file first, then rename
-    const outputFile = join(OUTPUT_DIR, 'trending.json');
-    const tempFile = join(OUTPUT_DIR, '.trending.json.tmp');
-    await writeFile(tempFile, JSON.stringify(trendingData, null, 2), 'utf-8');
-    await rename(tempFile, outputFile);
-
-    const algorithm = trendingData.metadata.redisEnabled ? 'redis-views' : 'popularity-fallback';
-    logger.success(
-      `Generated trending.json using ${algorithm} (${trendingData.trending.length} trending, ${trendingData.popular.length} popular, ${trendingData.recent.length} recent)`
-    );
-  } catch (error) {
-    logger.error(
-      'Failed to generate trending data',
-      error instanceof Error ? error : new Error(String(error))
-    );
-    throw error;
-  }
-}
-
-/**
  * Generate health check endpoint
  * Modern approach with dynamic count aggregation
  *
@@ -524,9 +477,6 @@ async function generateStaticAPIs(): Promise<GenerationResult> {
 
     await generateHealthCheck(metadataByCategory);
     filesGenerated.push('health.json');
-
-    await generateTrendingData(metadataByCategory);
-    filesGenerated.push('trending.json');
 
     const duration = performance.now() - startTime;
     const totalItems = Array.from(metadataByCategory.values()).reduce(

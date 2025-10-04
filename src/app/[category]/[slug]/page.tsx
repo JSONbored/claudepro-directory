@@ -76,6 +76,7 @@ import {
   getRelatedContent,
 } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
+import { statsRedis } from '@/src/lib/redis';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { transformForDetailPage } from '@/src/lib/utils/transformers';
 
@@ -291,6 +292,9 @@ export default async function DetailPage({
   // Load related items (same category, different slug)
   const relatedItemsData = await getRelatedContent(category, slug, 3);
 
+  // Fetch view count from Redis
+  const viewCount = await statsRedis.getViewCount(category, slug);
+
   // Transform for component interface
   // Type assertion needed because runtime validation ensures type safety
   const { item, relatedItems } = transformForDetailPage(
@@ -310,7 +314,7 @@ export default async function DetailPage({
           item: itemData as Parameters<typeof UnifiedStructuredData>[0]['item'],
         })
       }
-      <UnifiedDetailPage item={item} relatedItems={relatedItems} />
+      <UnifiedDetailPage item={item} relatedItems={relatedItems} viewCount={viewCount} />
     </>
   );
 }

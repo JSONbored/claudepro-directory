@@ -18,6 +18,7 @@ import { ExternalLink, Eye, Github } from '@/src/lib/icons';
 import type { ConfigCardProps } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
+import { formatViewCount } from '@/src/lib/utils/transformers';
 
 export const ConfigCard = memo(
   ({ item, variant = 'default', showCategory = true, showActions = true }: ConfigCardProps) => {
@@ -111,7 +112,7 @@ export const ConfigCard = memo(
                   <span>•</span>
                   <span className="flex items-center gap-1">
                     <Eye className="h-3 w-3" aria-hidden="true" />
-                    {(item as { viewCount?: number }).viewCount} views
+                    {formatViewCount((item as { viewCount?: number }).viewCount!)} views
                   </span>
                 </>
               ) : (

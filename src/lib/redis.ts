@@ -110,6 +110,7 @@ const redis = <T>(
  */
 export const statsRedis = {
   isEnabled: () => redisClient.getStatus().isConnected || redisClient.getStatus().isFallback,
+  isConnected: () => redisClient.getStatus().isConnected,
 
   incrementView: (cat: string, slug: string) =>
     exec(

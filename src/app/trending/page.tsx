@@ -12,15 +12,15 @@ import {
 import { getBatchTrendingData } from '@/src/lib/trending/calculator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-// ISR Configuration - Revalidate every 5 minutes for real-time Redis data
-export const dynamic = 'force-static'; // Enable ISR (Incremental Static Regeneration)
+// ISR Configuration - Revalidate every 5 minutes for fresh Redis view counts
+export const revalidate = 300; // 5 minutes - Updates trending data while keeping static content
 
 /**
  * Load trending data using Redis-based view counts
  *
  * @description Queries Redis for real-time view counts and calculates trending content
  * based on actual user engagement. Automatically falls back to static popularity field
- * if Redis is unavailable.
+ * if Redis is unavailable. Also returns total count to avoid duplicate content fetching.
  */
 async function getTrendingData(params: TrendingParams) {
   // Log trending data access for analytics
@@ -35,7 +35,7 @@ async function getTrendingData(params: TrendingParams) {
   }
 
   try {
-    // Await all content promises
+    // Await all content promises (single fetch for both trending data and total count)
     const [
       rulesData,
       mcpData,
@@ -45,6 +45,16 @@ async function getTrendingData(params: TrendingParams) {
       statuslinesData,
       collectionsData,
     ] = await Promise.all([rules, mcp, agents, commands, hooks, statuslines, collections]);
+
+    // Calculate total count
+    const totalCount =
+      rulesData.length +
+      mcpData.length +
+      agentsData.length +
+      commandsData.length +
+      hooksData.length +
+      statuslinesData.length +
+      collectionsData.length;
 
     // Use Redis-based trending calculator
     const trendingData = await getBatchTrendingData({
@@ -84,12 +94,14 @@ async function getTrendingData(params: TrendingParams) {
       popularCount: trendingData.popular.length,
       recentCount: trendingData.recent.length,
       redisEnabled: trendingData.metadata.redisEnabled,
+      totalCount,
     });
 
     return {
       trending: trendingData.trending,
       popular: trendingData.popular,
       recent: trendingData.recent,
+      totalCount,
     };
   } catch (error) {
     logger.error(
@@ -102,6 +114,7 @@ async function getTrendingData(params: TrendingParams) {
       trending: [],
       popular: [],
       recent: [],
+      totalCount: 0,
     };
   }
 }
@@ -121,26 +134,7 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
     limit: params.limit,
   });
 
-  const { trending, popular, recent } = await getTrendingData(params);
-
-  // Await all content promises to calculate total count
-  const [
-    rulesData,
-    mcpData,
-    agentsData,
-    commandsData,
-    hooksData,
-    statuslinesData,
-    collectionsData,
-  ] = await Promise.all([rules, mcp, agents, commands, hooks, statuslines, collections]);
-  const totalCount =
-    rulesData.length +
-    mcpData.length +
-    agentsData.length +
-    commandsData.length +
-    hooksData.length +
-    statuslinesData.length +
-    collectionsData.length;
+  const { trending, popular, recent, totalCount } = await getTrendingData(params);
 
   // This is a server component, so we'll use a static ID
   const pageTitleId = 'trending-page-title';

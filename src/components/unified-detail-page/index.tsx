@@ -37,9 +37,14 @@ import { DetailSidebar } from './sidebar/detail-sidebar';
 export interface UnifiedDetailPageProps {
   item: UnifiedContentItem;
   relatedItems?: UnifiedContentItem[];
+  viewCount?: number;
 }
 
-export async function UnifiedDetailPage({ item, relatedItems = [] }: UnifiedDetailPageProps) {
+export async function UnifiedDetailPage({
+  item,
+  relatedItems = [],
+  viewCount,
+}: UnifiedDetailPageProps) {
   // Get configuration for this content type (Server Component - no hooks)
   const config = getContentTypeConfig(item.category);
 
@@ -132,7 +137,7 @@ export async function UnifiedDetailPage({ item, relatedItems = [] }: UnifiedDeta
       <DetailHeader displayTitle={displayTitle} item={item} config={config} />
 
       {/* Metadata - Server rendered */}
-      <DetailMetadata item={item} />
+      <DetailMetadata item={item} viewCount={viewCount} />
 
       {/* Main content */}
       <div className="container mx-auto px-4 py-8">

@@ -6,25 +6,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## 2025-10-04 - CSP & Trending Page Fixes
+## 2025-10-04 - Trending Page & View Counter Fixes
 
 ### Fixed
+- **Trending Page:** Fixed infinite loading state by changing from `force-static` to ISR with 5-minute revalidation (`revalidate = 300`)
+- **Trending Page:** Fixed empty tabs by correcting Redis availability check (`isConnected()` instead of `isEnabled()`)
+- **Trending Algorithm:** Fixed hybrid scoring to use additive formula (`viewCount + popularity/100`) instead of exclusive filtering
+- **Performance:** Removed duplicate content fetching in trending page (consolidated to single fetch with totalCount)
+- **View Counters:** Added formatted view count display to config cards and detail pages with Eye icon (e.g., "1.2K views")
 - **CSP:** Added `'strict-dynamic'` directive to Content Security Policy - enables React hydration and client-side JavaScript execution
 - **CSP:** Fixed misleading comments claiming Nosecone includes `strict-dynamic` by default (it doesn't - only includes nonce)
-- **Trending Page:** Updated calculator filter logic to use static `popularity` field as fallback when Redis view counts are zero
-- **Trending Page:** Tabs now show content immediately using popularity scores until real traffic accumulates view data
-- **UX:** Added empty state UI to all three trending tabs (Trending, Popular, Recent) for better user feedback
+
+### Added
+- **Utilities:** Added `formatViewCount()` formatter with K/M notation (1234 → "1.2K", 1500000 → "1.5M")
+- **UI:** Created `/trending/loading.tsx` using CategoryLoading factory pattern for consistency
+- **API:** Added `viewCount` prop to UnifiedDetailPage and DetailMetadata components
+- **Types:** Updated `TrendingContentProps` to use proper `TrendingContentItem[]` type with viewCount field
 
 ### Changed
 - **Analytics:** View tracking now works correctly - CSP no longer blocks `trackView()` server actions
-- **Trending Algorithm:** Hybrid scoring system - prefers real view counts when available, falls back to static popularity scores
+- **Trending Algorithm:** Hybrid scoring system properly combines real view counts with static popularity scores
 - **Security:** CSP now properly allows nonce-based scripts to dynamically load additional scripts via `strict-dynamic`
-- **SEO:** All JSON-LD structured data components now include CSP nonces for compliance (organization-schema.tsx, unified-structured-data.tsx, structured-data.tsx)
+- **SEO:** All JSON-LD structured data components now include CSP nonces for compliance
+
+### Removed
+- **Build:** Removed unused `trending.json` static API generation from build process
+- **Components:** Removed duplicate trending-specific error/loading components in favor of root-level cascade
 
 ### Technical Details
-- Root cause: Missing `'strict-dynamic'` CSP directive prevented React from hydrating client components
-- Impact: Server actions (including `trackView`) were blocked by CSP, resulting in zero Redis view counts
-- Solution: Added `'strict-dynamic'` to middleware.ts scriptSrc array + updated trending calculator filters
+- Root cause: ISR misconfiguration froze trending data at build time when Redis was empty; `isEnabled()` bug prevented fallback
+- Solution: Enabled ISR with 5-minute refresh + fixed Redis connection check + implemented proper additive hybrid scoring
+- Impact: Trending page now displays real-time Redis view data with proper fallback to popularity scores
 
 ---
 
