@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "karanb192",
   "dateAdded": "2025-09-27",
-  "tags": [
-    "reddit",
-    "social-media",
-    "search",
-    "analytics",
-    "community"
-  ],
+  "tags": ["reddit", "social-media", "search", "analytics", "community"],
   "content": "Access Reddit content through Claude for browsing subreddits, searching posts, analyzing comments, and tracking user activity. Works instantly with zero setup.",
   "features": [
     "Browse any subreddit with sorting options (hot, new, top, rising)",
@@ -85,10 +79,22 @@
     "Read-only access - no posting capabilities"
   ],
   "troubleshooting": [
-    "Rate limit errors: Add Reddit credentials for higher limits",
-    "Subreddit not found: Check spelling (case-insensitive)",
-    "Private subreddits require authentication",
-    "Restart Claude Desktop after config changes"
+    {
+      "issue": "Rate limit errors: Add Reddit credentials for higher limits",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Subreddit not found: Check spelling (case-insensitive)",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Private subreddits require authentication",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    },
+    {
+      "issue": "Restart Claude Desktop after config changes",
+      "solution": "Check the documentation for detailed troubleshooting steps."
+    }
   ],
   "examples": [
     "What's trending in r/technology today?",
@@ -100,9 +106,7 @@
     "Show me the comments on this Reddit URL"
   ],
   "requiresAuth": false,
-  "permissions": [
-    "read"
-  ],
+  "permissions": ["read"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://github.com/karanb192/reddit-mcp-buddy"
 }

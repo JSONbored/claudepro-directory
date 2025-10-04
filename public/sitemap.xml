@@ -451,6 +451,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/mcp/reddit-mcp-buddy</loc>
+    <lastmod>2025-09-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/mcp/redis-mcp-server</loc>
     <lastmod>2025-09-20</lastmod>
     <changefreq>weekly</changefreq>
