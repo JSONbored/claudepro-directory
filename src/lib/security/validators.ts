@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { DOMPurify } from './html-sanitizer';
 import { VALIDATION_PATTERNS } from './patterns';
 
 /**
@@ -314,45 +315,28 @@ export const validation = {
  * XSS Sanitization Utilities
  * Provides secure sanitization for user input
  * Consolidated from lib/sanitizer.ts for better maintainability
+ *
+ * Security: Uses DOMPurify for HTML sanitization instead of regex patterns
+ * which are vulnerable to bypasses and edge cases.
  */
 
 /**
- * Lightweight HTML tag stripper
- * Removes all HTML tags from a string without using heavy dependencies
- * Uses secure patterns to prevent injection attacks
+ * Secure HTML tag stripper using DOMPurify
+ * Removes all HTML tags from a string using battle-tested library
+ *
+ * Security benefits over regex:
+ * - Handles all HTML/XSS edge cases (e.g., </script\t\n bar>)
+ * - Prevents multi-character sanitization bypasses (e.g., <scr<script>ipt>)
+ * - Actively maintained and used by major companies
+ * - No performance issues with complex patterns
  */
 function stripHtmlTags(str: string): string {
-  let result = str;
-
-  // Step 1: Remove dangerous tags FIRST, before entity decoding
-  // This prevents &lt;script&gt; from becoming an executable <script> tag
-  result = result.replace(/<script\b[^<]*(?:(?!<\/script\s*>)<[^<]*)*<\/script\s*>/gi, '');
-  result = result.replace(/<style\b[^<]*(?:(?!<\/style\s*>)<[^<]*)*<\/style\s*>/gi, '');
-
-  // Step 2: Remove all HTML tags (before entity decoding to prevent bypasses)
-  result = result.replace(/<[^>]*>/g, '');
-
-  // Step 3: NOW decode HTML entities (safe because tags are already removed)
-  // Server-side: Decode entities in safe order to prevent double-unescaping
-  // Use a temporary placeholder to prevent &amp;lt; from becoming <
-  const TEMP_AMP = '\x00AMP\x00';
-  result = result
-    .replace(/&amp;/g, TEMP_AMP) // Store &amp; temporarily
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#039;/g, "'")
-    .replace(/&#x27;/g, "'")
-    .replace(/&#x2F;/g, '/')
-    .replace(/&#x5C;/g, '\\')
-    .replace(/&#96;/g, '`')
-    .replace(/&nbsp;/g, ' ')
-    .replace(new RegExp(TEMP_AMP, 'g'), '&'); // Restore & at the end
-
-  // Step 4: Final safety - remove any remaining angle brackets
-  result = result.replace(/[<>]/g, '');
-
-  return result;
+  // Use DOMPurify to strip all HTML tags while keeping text content
+  return DOMPurify.sanitize(str, {
+    ALLOWED_TAGS: [], // Strip all HTML tags
+    ALLOWED_ATTR: [], // Strip all attributes
+    KEEP_CONTENT: true, // Keep text content between tags
+  });
 }
 
 export const sanitizers = {

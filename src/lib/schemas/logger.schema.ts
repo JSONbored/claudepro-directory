@@ -231,10 +231,15 @@ export function sanitizeLogMessage(message: unknown): string {
     sanitized += message[i];
   }
 
+  // Additional validation: reject if contains dangerous patterns
+  // (Don't try to fix with regex - just reject)
+  if (/<script|<\/script|javascript:|data:/i.test(sanitized)) {
+    return '[BLOCKED: Potentially dangerous content]';
+  }
+
   return sanitized
     .replace(/\${.*?}/g, '[TEMPLATE]') // Remove template literals
-    .replace(/<script\b[^<]*(?:(?!<\/script\s*>)<[^<]*)*<\/script\s*>/gi, '[SCRIPT]') // Remove script tags (whitespace-tolerant)
-    .replace(/[<>]/g, '') // Remove any remaining angle brackets for safety
+    .replace(/[<>]/g, '') // Remove angle brackets (simpler, more secure)
     .slice(0, LOGGER_LIMITS.MAX_MESSAGE_LENGTH);
 }
 
