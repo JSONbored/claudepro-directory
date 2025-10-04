@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2025-10-04 - CSP & Trending Page Fixes
+
+### Fixed
+- **CSP:** Added `'strict-dynamic'` directive to Content Security Policy - enables React hydration and client-side JavaScript execution
+- **CSP:** Fixed misleading comments claiming Nosecone includes `strict-dynamic` by default (it doesn't - only includes nonce)
+- **Trending Page:** Updated calculator filter logic to use static `popularity` field as fallback when Redis view counts are zero
+- **Trending Page:** Tabs now show content immediately using popularity scores until real traffic accumulates view data
+- **UX:** Added empty state UI to all three trending tabs (Trending, Popular, Recent) for better user feedback
+
+### Changed
+- **Analytics:** View tracking now works correctly - CSP no longer blocks `trackView()` server actions
+- **Trending Algorithm:** Hybrid scoring system - prefers real view counts when available, falls back to static popularity scores
+- **Security:** CSP now properly allows nonce-based scripts to dynamically load additional scripts via `strict-dynamic`
+- **SEO:** All JSON-LD structured data components now include CSP nonces for compliance (organization-schema.tsx, unified-structured-data.tsx, structured-data.tsx)
+
+### Technical Details
+- Root cause: Missing `'strict-dynamic'` CSP directive prevented React from hydrating client components
+- Impact: Server actions (including `trackView`) were blocked by CSP, resulting in zero Redis view counts
+- Solution: Added `'strict-dynamic'` to middleware.ts scriptSrc array + updated trending calculator filters
+
+---
+
 ## 2025-10-04 - Reddit MCP Buddy Schema Fix
 
 ### Added

@@ -153,8 +153,8 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
       </head>
       <body className="font-sans">
-        <StructuredData type="website" />
-        <OrganizationStructuredData />
+        {await StructuredData({ type: 'website' })}
+        {await OrganizationStructuredData()}
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

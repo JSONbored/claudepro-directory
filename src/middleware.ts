@@ -63,7 +63,7 @@ const aj = arcjet({
 // PRODUCTION CSP STRATEGY (2025 Best Practices with Nonces):
 // - Dynamic rendering (connection() in layout.tsx) enables per-request nonces
 // - Nosecone's built-in nonce() function generates unique nonces per request
-// - strict-dynamic automatically trusts dynamically loaded scripts (fixes eval CSP violations)
+// - strict-dynamic added manually (not in Nosecone defaults) - allows nonce-based scripts to load additional scripts
 // - Defense in depth: Arcjet WAF + Shield + nonce-based CSP + rate limiting + bot detection
 //
 // DEVELOPMENT CSP STRATEGY:
@@ -73,17 +73,18 @@ const aj = arcjet({
 const noseconeConfig = {
   ...nosecone.defaults,
   // Extend Nosecone defaults with our trusted sources
-  // Note: Nosecone defaults already include nonce() for scriptSrc with strict-dynamic
+  // Note: Nosecone defaults include nonce() for scriptSrc (strict-dynamic added manually in scriptSrc array)
   contentSecurityPolicy: {
     directives: {
       // Start with Nosecone's secure defaults (includes nonce support)
       ...nosecone.defaults.contentSecurityPolicy.directives,
 
       // Extend scriptSrc to add our trusted sources while keeping nonce + strict-dynamic
-      // Nosecone's defaults include: nonce(), 'strict-dynamic'
+      // Nosecone's defaults include: nonce() only (strict-dynamic added manually above)
       // We're adding our analytics and development tools
       scriptSrc: [
         ...(nosecone.defaults.contentSecurityPolicy.directives.scriptSrc || []),
+        "'strict-dynamic'", // Allow nonce-based scripts to load additional scripts
         ...(isDevelopment ? (["'unsafe-eval'"] as const) : []), // HMR/hot reload in development only
         'https://umami.claudepro.directory', // Umami analytics
         'https://*.vercel-scripts.com', // Vercel analytics

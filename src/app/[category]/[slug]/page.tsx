@@ -305,9 +305,11 @@ export default async function DetailPage({
         slug={slug}
       />
       <PageViewTracker category={category} slug={slug} />
-      <UnifiedStructuredData
-        item={itemData as Parameters<typeof UnifiedStructuredData>[0]['item']}
-      />
+      {
+        await UnifiedStructuredData({
+          item: itemData as Parameters<typeof UnifiedStructuredData>[0]['item'],
+        })
+      }
       <UnifiedDetailPage item={item} relatedItems={relatedItems} />
     </>
   );

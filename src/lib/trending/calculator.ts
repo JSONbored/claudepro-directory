@@ -78,12 +78,22 @@ async function getTrendingContent(
       };
     });
 
-    // For now, sort by view count descending
+    // For now, sort by view count descending (with popularity fallback)
     // TODO: Implement growth rate calculation with historical data
     // This requires storing daily view snapshots in Redis
     const sorted = contentWithViews
-      .filter((item) => (item.viewCount || 0) > 0) // Only include items with views
-      .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
+      .filter((item) => {
+        // Include items with views OR popularity score (hybrid approach)
+        const hasViews = (item.viewCount || 0) > 0;
+        const hasPopularity = (item.popularity || 0) > 0;
+        return hasViews || hasPopularity;
+      })
+      .sort((a, b) => {
+        // Prefer view count if available, otherwise use popularity
+        const aScore = (a.viewCount || 0) > 0 ? a.viewCount || 0 : a.popularity || 0;
+        const bScore = (b.viewCount || 0) > 0 ? b.viewCount || 0 : b.popularity || 0;
+        return bScore - aScore;
+      })
       .slice(0, limit);
 
     logger.info('Trending content calculated from Redis', {
@@ -144,10 +154,20 @@ async function getPopularContent(
       };
     });
 
-    // Sort by total view count descending
+    // Sort by total view count descending (with popularity fallback)
     const sorted = contentWithViews
-      .filter((item) => (item.viewCount || 0) > 0) // Only include items with views
-      .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
+      .filter((item) => {
+        // Include items with views OR popularity score (hybrid approach)
+        const hasViews = (item.viewCount || 0) > 0;
+        const hasPopularity = (item.popularity || 0) > 0;
+        return hasViews || hasPopularity;
+      })
+      .sort((a, b) => {
+        // Prefer view count if available, otherwise use popularity
+        const aScore = (a.viewCount || 0) > 0 ? a.viewCount || 0 : a.popularity || 0;
+        const bScore = (b.viewCount || 0) > 0 ? b.viewCount || 0 : b.popularity || 0;
+        return bScore - aScore;
+      })
       .slice(0, limit);
 
     logger.info('Popular content calculated from Redis', {
