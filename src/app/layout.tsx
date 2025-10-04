@@ -1,7 +1,8 @@
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { connection, headers } from 'next/server';
+import { headers } from 'next/headers';
+import { connection } from 'next/server';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { Toaster } from 'sonner';
