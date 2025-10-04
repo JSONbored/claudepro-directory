@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## 2025-10-04 - Reddit MCP Buddy Schema Fix
+
+### Added
+- **MCP Server:** [reddit-mcp-buddy](content/mcp/reddit-mcp-buddy.json) - Browse Reddit, search posts, and analyze user activity directly from Claude with zero API keys required
+  - Thanks to @karanb192 for the contribution!
+
+### Fixed
+- **Content:** Updated reddit-mcp-buddy.json troubleshooting field to match MCP schema (object array with issue/solution properties)
+
+---
+
 ## 2025-10-04 - Submit Form Refactor & Code Cleanup
 
 ### Changed
