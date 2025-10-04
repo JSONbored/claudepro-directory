@@ -64,8 +64,8 @@ jobs:
           # Check required fields based on category
           category=$(jq -r '.category' "$file" 2>/dev/null || echo "")
 
-          # For hooks, agents, rules, commands, statuslines, and collections, check slug instead of title
-          if [[ "$category" == "hooks" || "$category" == "agents" || "$category" == "rules" || "$category" == "commands" || "$category" == "statuslines" || "$category" == "collections" ]]; then
+          # For hooks, agents, rules, commands, statuslines, collections, and mcp, check slug instead of title
+          if [[ "$category" == "hooks" || "$category" == "agents" || "$category" == "rules" || "$category" == "commands" || "$category" == "statuslines" || "$category" == "collections" || "$category" == "mcp" ]]; then
             if ! jq -e '.slug' "$file" > /dev/null; then
               echo "ERROR: Missing slug in $category file $file"
               exit 1
