@@ -1,7 +1,7 @@
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { connection } from 'next/server';
+import { connection, headers } from 'next/server';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { Toaster } from 'sonner';
@@ -115,6 +115,11 @@ export default async function RootLayout({
   // Opt-out of static generation for every page so the CSP nonce can be applied
   await connection();
 
+  // Get CSP nonce for inline scripts
+  const headersList = await headers();
+  const cspHeader = headersList.get('content-security-policy');
+  const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
+
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} font-sans`}>
       <head>
@@ -183,6 +188,7 @@ export default async function RootLayout({
           src="/scripts/service-worker-init.js"
           integrity="sha384-0tKKFTk8IlkGOHQjqC00b0Xn/MEUQcn73JljDRsW34lCFxSqKEUZwBNKSp9N/AM/"
           crossOrigin="anonymous"
+          nonce={nonce}
           defer
         />
       </body>
