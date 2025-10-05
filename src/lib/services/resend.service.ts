@@ -16,12 +16,11 @@ import { env } from '@/src/lib/schemas/env.schema';
 
 /**
  * Resend API response schemas for type safety
+ * Based on official API docs: https://resend.com/docs/api-reference/contacts/create-contact
  */
 const resendContactSchema = z.object({
+  object: z.literal('contact'),
   id: z.string(),
-  email: z.string().email(),
-  created_at: z.string(),
-  unsubscribed: z.boolean(),
 });
 
 const resendErrorSchema = z.object({
@@ -121,7 +120,6 @@ class ResendService {
 
       if (contact.success) {
         logger.info('Newsletter subscription successful', {
-          email,
           contactId: contact.data.id,
           ...(metadata?.source && { source: metadata.source }),
           ...(metadata?.referrer && { referrer: metadata.referrer }),
