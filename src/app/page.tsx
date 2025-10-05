@@ -1,4 +1,5 @@
 import { HomePageClient } from '@/src/components/features/home';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 import { BookOpen, Layers, Server, Sparkles } from '@/src/lib/icons';
 import { statsRedis } from '@/src/lib/redis';
@@ -137,6 +138,16 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Email CTA - Hero variant */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <InlineEmailCTA
+          variant="hero"
+          context="homepage"
+          headline="Join 1,000+ Claude Power Users"
+          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+        />
       </section>
 
       {/* Client Component for Interactive Features */}

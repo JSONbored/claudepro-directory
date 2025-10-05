@@ -19,6 +19,7 @@
  * @see components/unified-detail-page.tsx - Original 685-line implementation
  */
 
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
@@ -233,6 +234,9 @@ export async function UnifiedDetailPage({
                 variant="mono"
               />
             )}
+
+            {/* Email CTA - Inline variant */}
+            <InlineEmailCTA variant="inline" context="content-detail" category={item.category} />
           </div>
 
           {/* Sidebar */}

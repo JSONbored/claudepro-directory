@@ -1,4 +1,5 @@
 import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { TrendingContent } from '@/src/components/shared/trending-content';
 import { Badge } from '@/src/components/ui/badge';
 import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
@@ -191,6 +192,16 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
             </ul>
           </div>
         </div>
+      </section>
+
+      {/* Email CTA */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-8`}>
+        <InlineEmailCTA
+          variant="minimal"
+          context="trending-page"
+          headline="Never Miss Trending Tools"
+          description="Get weekly updates on what's hot in the Claude community."
+        />
       </section>
 
       {/* Trending Content */}

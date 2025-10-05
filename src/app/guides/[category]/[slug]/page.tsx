@@ -8,6 +8,7 @@ import { z } from 'zod';
 // Removed unused import: CategoryGuidesPage
 import { UnifiedSidebar } from '@/src/components/layout/sidebar/unified-sidebar';
 import { MDXContentProvider } from '@/src/components/providers/mdx-content-provider';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { MDXRenderer } from '@/src/components/shared/mdx-renderer';
 import { ViewTracker } from '@/src/components/shared/view-tracker';
 import { Badge } from '@/src/components/ui/badge';
@@ -546,6 +547,9 @@ export default async function SEOGuidePage({
                     </MDXContentProvider>
                   </CardContent>
                 </Card>
+
+                {/* Email CTA - End of guide */}
+                <InlineEmailCTA variant="inline" context="guide-end" category="guides" />
               </div>
 
               {/* Sidebar */}
