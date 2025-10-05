@@ -123,6 +123,10 @@ const serverEnvSchema = z
     RESEND_AUDIENCE_ID: nonEmptyString
       .optional()
       .describe('Resend Audience ID for newsletter contact management'),
+
+    RESEND_WEBHOOK_SECRET: nonEmptyString
+      .optional()
+      .describe('Resend webhook signing secret (from Svix) for verifying webhook authenticity'),
   })
   .describe(
     'Server-side environment variables containing sensitive data only accessible on the server'
