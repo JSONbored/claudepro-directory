@@ -9,6 +9,7 @@ import { Toaster } from 'sonner';
 import { Footer } from '@/src/components/layout/footer';
 import { Navigation } from '@/src/components/layout/navigation';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
+import { FooterNewsletterBar } from '@/src/components/shared/footer-newsletter-bar';
 import { PerformanceOptimizer } from '@/src/components/shared/performance-optimizer';
 import { StructuredData } from '@/src/components/shared/structured-data';
 import { UmamiScript } from '@/src/components/shared/umami-script';
@@ -168,6 +169,7 @@ export default async function RootLayout({
             </div>
           </ErrorBoundary>
           <Toaster />
+          <FooterNewsletterBar />
         </ThemeProvider>
         <PerformanceOptimizer />
         <Analytics />

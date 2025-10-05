@@ -114,6 +114,15 @@ const serverEnvSchema = z
       .min(32)
       .optional()
       .describe('Secret key for webhook signature validation (minimum 32 characters)'),
+
+    // Email provider (Resend)
+    RESEND_API_KEY: nonEmptyString
+      .optional()
+      .describe('Resend API key for transactional email and newsletter subscriptions'),
+
+    RESEND_AUDIENCE_ID: nonEmptyString
+      .optional()
+      .describe('Resend Audience ID for newsletter contact management'),
   })
   .describe(
     'Server-side environment variables containing sensitive data only accessible on the server'

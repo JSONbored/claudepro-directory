@@ -37,7 +37,6 @@ export function InfiniteScrollContainer<T>({
   keyExtractor,
 }: InfiniteScrollContainerProps<T>) {
   const [loading, setLoading] = useState(false);
-  const [allItems, setAllItems] = useState<T[]>(items);
   const [localHasMore, setLocalHasMore] = useState(hasMore);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,13 +51,9 @@ export function InfiniteScrollContainer<T>({
 
       if (newItems.length === 0) {
         setLocalHasMore(false);
-      } else {
-        setAllItems((prev) => [...prev, ...newItems]);
-
-        // Check if we got fewer items than expected
-        if (newItems.length < pageSize) {
-          setLocalHasMore(false);
-        }
+      } else if (newItems.length < pageSize) {
+        // Parent component manages state, we just check completion
+        setLocalHasMore(false);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load more items';
@@ -68,7 +63,7 @@ export function InfiniteScrollContainer<T>({
         'Infinite scroll failed to load more items',
         err instanceof Error ? err : new Error(String(err)),
         {
-          currentItemCount: allItems.length,
+          currentItemCount: items.length,
           pageSize,
           hasMore: localHasMore,
           component: 'InfiniteScrollContainer',
@@ -77,7 +72,7 @@ export function InfiniteScrollContainer<T>({
     } finally {
       setLoading(false);
     }
-  }, [loading, localHasMore, loadMore, pageSize, allItems.length]);
+  }, [loading, localHasMore, loadMore, pageSize, items.length]);
 
   // Use infinite scroll hook
   const observerTarget = useInfiniteScroll(handleLoadMore, {
@@ -94,17 +89,12 @@ export function InfiniteScrollContainer<T>({
     });
   }, [handleLoadMore]);
 
-  // Update items when props change
-  useEffect(() => {
-    setAllItems(items);
-  }, [items]);
-
   // Update hasMore when prop changes
   useEffect(() => {
     setLocalHasMore(hasMore);
   }, [hasMore]);
 
-  if (allItems.length === 0 && !loading) {
+  if (items.length === 0 && !loading) {
     return (
       <div className={UI_CLASSES.CONTAINER_CENTER}>
         <p className={`text-muted-foreground ${UI_CLASSES.TEXT_LG}`}>{emptyMessage}</p>
@@ -116,7 +106,7 @@ export function InfiniteScrollContainer<T>({
     <div className={cn('space-y-8', className)}>
       {/* Items Grid */}
       <div className={gridClassName}>
-        {allItems.map((item, index) => {
+        {items.map((item, index) => {
           const key = keyExtractor ? keyExtractor(item, index) : `item-${index}`;
           return (
             <div key={key}>
@@ -169,10 +159,10 @@ export function InfiniteScrollContainer<T>({
       )}
 
       {/* End of List Message */}
-      {!localHasMore && allItems.length > 0 && (
+      {!localHasMore && items.length > 0 && (
         <div className={`flex ${UI_CLASSES.JUSTIFY_CENTER} py-8`}>
           <p className="text-muted-foreground text-sm">
-            You've reached the end • {allItems.length} total items
+            You've reached the end • {items.length} total items
           </p>
         </div>
       )}
