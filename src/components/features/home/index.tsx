@@ -105,11 +105,14 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
     filteredResultsRef.current = filteredResults;
   }, [filteredResults]);
 
-  // Update displayed items when filtered results change
+  // Update displayed items only when tab or search changes (not on every filteredResults reference change)
+  // Using activeTab and isSearching as dependencies instead of filteredResults to avoid resetting
+  // pagination when the same data is re-filtered (which creates a new array reference)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Intentionally using activeTab/isSearching to avoid pagination reset on re-renders
   useEffect(() => {
     setDisplayedItems(filteredResults.slice(0, pageSize) as UnifiedContentItem[]);
     currentPageRef.current = 1;
-  }, [filteredResults]);
+  }, [activeTab, isSearching]);
 
   // Load more function for infinite scroll
   // Uses refs to avoid stale closures when filteredResults changes

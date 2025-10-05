@@ -7,11 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## Quick Navigation
 
 **Latest Features:**
+- [Newsletter Integration](#2025-10-05---resend-newsletter-integration-with-sticky-footer-bar) - Email newsletter signups via Resend
+- [Infinite Scroll Fix](#2025-10-05---homepage-infinite-scroll-bug-fix) - Fixed 60-item limit on homepage
 - [LLMs.txt AI Optimization](#2025-10-04---llmstxt-complete-content-generation-for-ai-discovery) - Complete page content for AI/LLM consumption
 - [SEO Title Optimization](#2025-10-04---seo-title-optimization-system-with-automated-enhancement) - Automated title enhancement for 168+ pages
 - [Trending Algorithm](#2025-10-04---production-hardened-trending-algorithm-with-security--performance-optimizations) - Real-time growth velocity tracking
-- [View Counters](#2025-10-04---view-counter-ui-redesign-with-prominent-badge-display) - Eye-catching badge display on all pages
-- [Content Security Policy](#2025-10-04---content-security-policy-strict-dynamic-implementation) - Enhanced security with strict-dynamic
 
 **Platform Improvements:**
 - [Trending Page Fix](#2025-10-04---trending-page-infinite-loading-fix-with-isr) - ISR configuration fixes
@@ -21,7 +21,156 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 **Community:**
 - [Reddit MCP Server](#2025-10-04---reddit-mcp-server-community-contribution) - Browse Reddit from Claude
 
-[View All Updates ↓](#2025-10-04---llmstxt-complete-content-generation-for-ai-discovery)
+[View All Updates ↓](#2025-10-05---resend-newsletter-integration-with-sticky-footer-bar)
+
+---
+
+## 2025-10-05 - Resend Newsletter Integration with Sticky Footer Bar
+
+**TL;DR:** Implemented production-ready email newsletter subscription system using Resend API with rate-limited server actions, sticky footer bar (3s delay, localStorage dismissal), and automatic infinite scroll on homepage.
+
+### What Changed
+
+Added complete newsletter subscription infrastructure with Resend integration, featuring a non-intrusive sticky footer bar that appears after 3 seconds, rate-limited signup actions (5 requests per 5 minutes), and fixed homepage infinite scroll bug that was capping at 60 items.
+
+### Added
+
+- **Resend Email Service** (`src/lib/services/resend.service.ts`)
+  - Type-safe Resend API integration with `resend` npm package
+  - Graceful degradation when API keys missing (logs warnings)
+  - Idempotent operations (duplicate signups return success)
+  - Production error handling with structured logging
+  - Environment validation for `RESEND_API_KEY` and `RESEND_AUDIENCE_ID`
+
+- **Newsletter Server Action** (`src/lib/actions/newsletter-signup.ts`)
+  - Rate limited: 5 signups per 5 minutes per IP (prevents spam)
+  - Zod schema validation with RFC 5322 email format
+  - Source tracking (footer, homepage, modal, content_page, inline)
+  - Referrer tracking for analytics
+  - Built on `next-safe-action` with centralized error handling
+
+- **Newsletter Form Component** (`src/components/shared/newsletter-form.tsx`)
+  - Reusable form with React 19 useTransition for pending states
+  - Sonner toast notifications for success/error feedback
+  - Accessible with ARIA labels
+  - Email validation and error handling
+  - Progressive enhancement (works without JS)
+
+- **Sticky Footer Newsletter Bar** (`src/components/shared/footer-newsletter-bar.tsx`)
+  - Appears after 3-second delay (non-intrusive UX)
+  - localStorage persistence for dismissal state
+  - Glassmorphism design: `bg-black/80 backdrop-blur-xl`
+  - Responsive layouts (desktop/mobile optimized)
+  - Slide-up animation on mount
+  - Fully accessible with keyboard navigation
+
+- **Newsletter Schema** (`src/lib/schemas/newsletter.schema.ts`)
+  - RFC 5322 compliant email validation
+  - Source tracking enum (5 sources)
+  - Referrer URL validation (max 500 chars)
+  - Auto-lowercase and trim transformation
+
+### Fixed
+
+- **Homepage Infinite Scroll Bug**
+  - Fixed 60-item cap caused by dual state management in `InfiniteScrollContainer`
+  - Removed local `allItems` state - component now fully controlled by parent
+  - Fixed useEffect dependency array causing pagination resets
+  - Now properly loads all content items with automatic infinite scroll
+  - Removed "Load More" button in favor of seamless scroll loading
+
+### Changed
+
+- **Environment Configuration**
+  - Added `RESEND_API_KEY` to server env schema
+  - Added `RESEND_AUDIENCE_ID` to server env schema
+  - Both optional in development, required in production for newsletter features
+
+- **Infinite Scroll Container** (`src/components/shared/infinite-scroll-container.tsx`)
+  - Removed stateful `allItems` - now pure presentational component
+  - Fixed race condition between `loadMore` and `useEffect`
+  - Improved performance by eliminating unnecessary state updates
+  - Better separation of concerns (parent manages state)
+
+- **Homepage Component** (`src/components/features/home/index.tsx`)
+  - Fixed useEffect to only reset pagination on tab/search changes
+  - Added biome-ignore for intentional dependency optimization
+  - Prevents pagination reset on every render (performance improvement)
+
+### Technical Details
+
+**Email Infrastructure:**
+- **Domain:** `mail.claudepro.directory` (subdomain for deliverability)
+- **Integration:** Resend <> Vercel Marketplace direct integration
+- **DNS:** Managed via Resend <> Cloudflare integration
+- **From Address:** `hello@mail.claudepro.directory`
+
+**Rate Limiting:**
+- Newsletter signups: 5 requests per 300 seconds (5 minutes) per IP
+- Stricter than default (100 req/60s) to prevent newsletter spam
+- Allows legitimate retries while blocking abuse
+
+**Dependencies Added:**
+- `resend` - Official Resend SDK for email API
+- `@react-email/render` - Email template rendering (Resend dependency)
+
+**Files Modified:**
+- `src/app/layout.tsx` - Added FooterNewsletterBar component
+- `src/components/features/home/tabs-section.tsx` - Set `showLoadMoreButton={false}`
+- `src/components/shared/infinite-scroll-container.tsx` - Removed dual state management
+- `src/components/features/home/index.tsx` - Fixed useEffect dependencies
+- `src/lib/schemas/env.schema.ts` - Added Resend env vars
+
+**Files Created:**
+- `src/lib/schemas/newsletter.schema.ts`
+- `src/lib/services/resend.service.ts`
+- `src/lib/actions/newsletter-signup.ts`
+- `src/components/shared/newsletter-form.tsx`
+- `src/components/shared/footer-newsletter-bar.tsx`
+
+---
+
+## 2025-10-05 - Homepage Infinite Scroll Bug Fix
+
+**TL;DR:** Fixed critical bug where homepage "All" section stopped loading after 60 items due to state synchronization issues between parent and InfiniteScrollContainer component.
+
+### Fixed
+
+- **60-Item Pagination Cap**
+  - Root cause: Dual state management creating race condition
+  - InfiniteScrollContainer maintained local `allItems` state
+  - Parent's useEffect was resetting state on every `filteredResults` reference change
+  - Solution: Made InfiniteScrollContainer fully controlled (stateless)
+
+- **State Synchronization**
+  - Removed `allItems` state from InfiniteScrollContainer
+  - Component now uses `items` prop directly (single source of truth)
+  - Eliminated useEffect that was overwriting accumulated items
+  - Fixed race condition between `loadMore` and `useEffect`
+
+- **Pagination Reset Loop**
+  - Changed useEffect dependency from `filteredResults` to `[activeTab, isSearching]`
+  - Prevents reset when same data is re-filtered (array reference changes)
+  - Only resets pagination when user actually changes tabs or search state
+  - Added biome-ignore with detailed explanation for linter
+
+### Changed
+
+- **InfiniteScrollContainer Architecture**
+  - Converted from stateful to fully controlled component
+  - Parent component (`home/index.tsx`) now manages all state
+  - Infinite scroll container just renders + triggers loading
+  - Better separation of concerns and predictable behavior
+
+- **Load More Button**
+  - Set `showLoadMoreButton={false}` for seamless infinite scroll
+  - Users now get automatic loading as they scroll
+  - More modern UX (no manual clicking required)
+
+**Files Modified:**
+- `src/components/shared/infinite-scroll-container.tsx`
+- `src/components/features/home/index.tsx`
+- `src/components/features/home/tabs-section.tsx`
 
 ---
 
