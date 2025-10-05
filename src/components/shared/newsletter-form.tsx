@@ -55,8 +55,11 @@ export function NewsletterForm({
         });
         setEmail(''); // Reset form on success
       } else {
+        // Show specific error message from server or fallback
+        const errorMessage =
+          result?.data?.message || result?.serverError || 'Please try again later.';
         toast.error('Subscription failed', {
-          description: result?.serverError || 'Please try again later.',
+          description: errorMessage,
         });
       }
     });
