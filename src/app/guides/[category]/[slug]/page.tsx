@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import path from 'path';
 import { z } from 'zod';
-import { CategoryGuidesPage } from '@/src/components/category-guides-page';
+// Removed unused import: CategoryGuidesPage
 import { UnifiedSidebar } from '@/src/components/layout/sidebar/unified-sidebar';
 import { MDXRenderer } from '@/src/components/shared/mdx-renderer';
 import { ViewTracker } from '@/src/components/shared/view-tracker';
@@ -27,25 +27,26 @@ export const dynamicParams = true;
 
 // Validation schema for guide parameters
 const guideParamsSchema = z.object({
-  slug: z
-    .array(
-      z
-        .string()
-        .min(1, 'Slug segment cannot be empty')
-        .max(100, 'Slug segment too long')
-        .regex(
-          /^[a-zA-Z0-9-_]+$/,
-          'Slug can only contain letters, numbers, hyphens, and underscores'
-        )
-        .transform((val) => val.toLowerCase().trim())
+  category: z
+    .string()
+    .min(1, 'Category cannot be empty')
+    .max(100, 'Category too long')
+    .regex(
+      /^[a-zA-Z0-9-_]+$/,
+      'Category can only contain letters, numbers, hyphens, and underscores'
     )
-    .min(1, 'At least one slug segment required')
-    .max(5, 'Too many slug segments'),
+    .transform((val) => val.toLowerCase().trim()),
+  slug: z
+    .string()
+    .min(1, 'Slug cannot be empty')
+    .max(200, 'Slug too long')
+    .regex(/^[a-zA-Z0-9-_]+$/, 'Slug can only contain letters, numbers, hyphens, and underscores')
+    .transform((val) => val.toLowerCase().trim()),
 });
 
 import type { RelatedGuide, SEOPageData } from '@/src/lib/schemas/app.schema';
 
-async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
+async function getSEOPageData(category: string, slug: string): Promise<SEOPageData | null> {
   // Map URL paths to file locations
   const pathMap: Record<string, string> = {
     'use-cases': 'use-cases',
@@ -57,12 +58,11 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
     troubleshooting: 'troubleshooting',
   };
 
-  const [category, ...restSlug] = slug;
-  const filename = `${restSlug.join('-')}.mdx`;
+  const filename = `${slug}.mdx`;
 
-  if (!(category && pathMap[category])) return null;
+  if (!pathMap[category]) return null;
 
-  const cacheKey = `guide:${category}:${restSlug.join('-')}`;
+  const cacheKey = `guide:${category}:${slug}`;
 
   return await contentCache.cacheWithRefresh(
     cacheKey,
@@ -100,7 +100,9 @@ async function getSEOPageData(slug: string[]): Promise<SEOPageData | null> {
   );
 }
 
-async function getCategoryGuides(category: string): Promise<GuideItemWithCategory[]> {
+// Unused function - kept for future potential use
+// @ts-expect-error - Function intentionally unused, kept for future use
+async function _getCategoryGuides(category: string): Promise<GuideItemWithCategory[]> {
   const cacheKey = `category-guides:${category}`;
 
   const guides = await contentCache.cacheWithRefresh(
@@ -158,12 +160,14 @@ async function getCategoryGuides(category: string): Promise<GuideItemWithCategor
   }));
 }
 
-async function getRelatedGuides(currentSlug: string[], limit = 3): Promise<RelatedGuide[]> {
-  const [currentCategory] = currentSlug;
+async function getRelatedGuides(
+  currentCategory: string,
+  currentSlug: string,
+  limit = 3
+): Promise<RelatedGuide[]> {
   if (!currentCategory) return [];
 
-  const currentFilename = currentSlug.slice(1).join('-');
-  const cacheKey = `related:${currentCategory}:${currentFilename}:${limit}`;
+  const cacheKey = `related:${currentCategory}:${currentSlug}:${limit}`;
 
   return await contentCache.cacheWithRefresh(
     cacheKey,
@@ -177,14 +181,15 @@ async function getRelatedGuides(currentSlug: string[], limit = 3): Promise<Relat
         const files = await fs.readdir(dir);
 
         for (const file of files) {
-          if (file.endsWith('.mdx') && !file.includes(currentFilename)) {
+          const fileSlug = file.replace('.mdx', '');
+          if (file.endsWith('.mdx') && fileSlug !== currentSlug) {
             const content = await fs.readFile(path.join(dir, file), 'utf-8');
             const titleMatch = content.match(/title:\s*["']([^"']+)["']/);
 
             if (titleMatch?.[1]) {
               relatedGuides.push({
                 title: titleMatch[1],
-                slug: `/guides/${currentCategory}/${file.replace('.mdx', '')}`,
+                slug: `/guides/${currentCategory}/${fileSlug}`,
                 category: currentCategory,
               });
             }
@@ -215,12 +220,7 @@ export async function generateStaticParams() {
   const paths = [];
 
   for (const category of categories) {
-    // Add category listing page
-    paths.push({
-      slug: [category],
-    });
-
-    // Add individual guide pages
+    // Add individual guide pages only (category pages handled by [category]/page.tsx)
     try {
       const dir = path.join(process.cwd(), 'content', 'guides', category);
 
@@ -231,7 +231,8 @@ export async function generateStaticParams() {
         if (file.endsWith('.mdx')) {
           const slug = file.replace('.mdx', '');
           paths.push({
-            slug: [category, slug],
+            category,
+            slug,
           });
         }
       }
@@ -246,15 +247,16 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string[] }>;
+  params: Promise<{ category: string; slug: string }>;
 }): Promise<Metadata> {
   try {
     const rawParams = await params;
     const validationResult = guideParamsSchema.safeParse(rawParams);
 
     if (!validationResult.success) {
-      logger.warn('Invalid guide slug parameters for metadata', {
-        slug: rawParams.slug?.join('/') || 'unknown',
+      logger.warn('Invalid guide parameters for metadata', {
+        category: rawParams.category || 'unknown',
+        slug: rawParams.slug || 'unknown',
         errorCount: validationResult.error.issues.length,
         firstError: validationResult.error.issues[0]?.message || 'Unknown error',
       });
@@ -264,20 +266,9 @@ export async function generateMetadata({
       };
     }
 
-    const { slug } = validationResult.data;
+    const { category, slug } = validationResult.data;
 
-    // Handle category listing pages (single segment)
-    if (slug.length === 1) {
-      const [category] = slug;
-
-      // Use centralized metadata system for guide category pages
-      return await generatePageMetadata('/guides/:category', {
-        params: { category: category || '' },
-      });
-    }
-
-    // Handle individual guide pages (multiple segments)
-    const data = await getSEOPageData(slug);
+    const data = await getSEOPageData(category, slug);
 
     if (!data) {
       return {
@@ -286,14 +277,12 @@ export async function generateMetadata({
       };
     }
 
-    const [category] = slug;
-
     // Use centralized metadata system with AI citation optimization
     // This route uses Article schema + recency signals for better AI citations
     return await generatePageMetadata('/guides/:category/:slug', {
       params: {
         category: category || '',
-        slug: slug.slice(1).join('-'),
+        slug: slug || '',
       },
       item: {
         title: data.title,
@@ -320,49 +309,35 @@ export async function generateMetadata({
   }
 }
 
-export default async function SEOGuidePage({ params }: { params: Promise<{ slug: string[] }> }) {
+export default async function SEOGuidePage({
+  params,
+}: {
+  params: Promise<{ category: string; slug: string }>;
+}) {
   try {
     const rawParams = await params;
     const validationResult = guideParamsSchema.safeParse(rawParams);
 
     if (!validationResult.success) {
       logger.error(
-        'Invalid guide slug parameters',
+        'Invalid guide parameters',
         new Error(validationResult.error.issues[0]?.message || 'Invalid guide parameters'),
         {
-          slug: rawParams.slug?.join('/') || 'unknown',
+          category: rawParams.category || 'unknown',
+          slug: rawParams.slug || 'unknown',
           errorCount: validationResult.error.issues.length,
         }
       );
       notFound();
     }
 
-    const { slug } = validationResult.data;
+    const { category, slug } = validationResult.data;
 
-    // Handle category listing pages (single segment)
-    if (slug.length === 1) {
-      const category = slug[0];
-      if (!category) {
-        notFound();
-      }
-
-      const guides = await getCategoryGuides(category);
-
-      if (guides.length === 0) {
-        notFound();
-      }
-
-      return <CategoryGuidesPage category={category} guides={guides} />;
-    }
-
-    // Handle individual guide pages (multiple segments)
-    const data = await getSEOPageData(slug);
+    const data = await getSEOPageData(category, slug);
 
     if (!data) {
       notFound();
     }
-
-    const [category] = slug;
     const categoryLabels: Record<string, string> = {
       'use-cases': 'Use Case',
       tutorials: 'Tutorial',
@@ -384,10 +359,10 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
     };
 
     const Icon = (category && categoryIcons[category]) || BookOpen;
-    const relatedGuides = await getRelatedGuides(slug);
+    const relatedGuides = await getRelatedGuides(category, slug);
 
     // Fetch view count for this guide from Redis
-    const guideSlug = slug.join('/'); // e.g., "tutorials/desktop-mcp-setup"
+    const guideSlug = `${category}/${slug}`; // e.g., "tutorials/desktop-mcp-setup"
     const viewCount = await statsRedis.getViewCount('guides', guideSlug);
 
     // Format date if available
@@ -437,7 +412,7 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
           '@type': 'ListItem',
           position: 4,
           name: data.title,
-          item: `${APP_CONFIG.url}/guides/${slug.join('/')}`,
+          item: `${APP_CONFIG.url}/guides/${category}/${slug}`,
         },
       ],
     };
@@ -465,14 +440,14 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
       },
       mainEntityOfPage: {
         '@type': 'WebPage',
-        '@id': `${APP_CONFIG.url}/guides/${slug.join('/')}`,
+        '@id': `${APP_CONFIG.url}/guides/${category}/${slug}`,
       },
       articleSection: categoryLabels[category || ''] || 'Guide',
       wordCount: data.content.split(/\s+/).length,
     };
 
     // Generate unique IDs based on the page slug to avoid conflicts
-    const pageId = slug.join('-');
+    const pageId = `${category}-${slug}`;
     const breadcrumbId = `breadcrumb-${pageId}`;
     const articleId = `article-${pageId}`;
     return (
@@ -560,7 +535,7 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
                     <MDXRenderer
                       source={data.content}
                       className=""
-                      pathname={`/guides/${slug.join('/')}`}
+                      pathname={`/guides/${category}/${slug}`}
                       metadata={{
                         tags: data.keywords || [], // Note: SEO pages use keywords field
                         keywords: data.keywords || [],
@@ -588,7 +563,7 @@ export default async function SEOGuidePage({ params }: { params: Promise<{ slug:
         </div>
 
         {/* Track guide views for trending analytics */}
-        <ViewTracker category="guides" slug={slug.join('/')} />
+        <ViewTracker category="guides" slug={guideSlug} />
       </>
     );
   } catch (error: unknown) {

@@ -98,6 +98,11 @@ const RATE_LIMIT_CONFIGS = {
     maxRequests: 10000,
     windowMs: 3600000, // 1 hour in ms
   }),
+  // LLMs.txt endpoints - moderate limit to prevent scraping abuse
+  llmstxt: middlewareRateLimitConfigSchema.parse({
+    maxRequests: 100,
+    windowMs: 3600000, // 1 hour in ms (100 requests per hour per IP)
+  }),
   // Heavy API endpoints (large datasets) - reasonable for data access
   heavyApi: middlewareRateLimitConfigSchema.parse({
     maxRequests: 100, // Increased from 50 for legitimate data operations
@@ -363,6 +368,7 @@ export const rateLimiters = {
   heavyApi: new RateLimiter(RATE_LIMIT_CONFIGS.heavyApi),
   admin: new RateLimiter(RATE_LIMIT_CONFIGS.admin),
   bulk: new RateLimiter(RATE_LIMIT_CONFIGS.bulk),
+  llmstxt: new RateLimiter(RATE_LIMIT_CONFIGS.llmstxt),
 };
 
 /**

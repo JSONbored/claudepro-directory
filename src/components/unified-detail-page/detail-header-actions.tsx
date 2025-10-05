@@ -14,6 +14,7 @@
 
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { CopyLLMsButton } from '@/src/components/shared/copy-llms-button';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
@@ -163,6 +164,14 @@ export function DetailHeaderActions({
               )}
             </Button>
           )}
+
+          {/* Copy for AI button */}
+          <CopyLLMsButton
+            llmsTxtUrl={`/${category}/${item.slug}/llms.txt`}
+            variant="outline"
+            size="default"
+            className={UI_CLASSES.MIN_W_0}
+          />
 
           {secondaryActions?.map((action) => (
             <Button

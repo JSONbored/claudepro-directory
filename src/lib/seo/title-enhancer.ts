@@ -3,7 +3,6 @@
  * Smart SEO title optimization using existing metadata
  */
 
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import {
   MAX_BASE_TITLE_LENGTH,
   MAX_TITLE_LENGTH,
@@ -11,6 +10,7 @@ import {
   OPTIMAL_MIN,
   SUFFIX_LENGTHS,
 } from '@/src/lib/config/seo-config';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 
 export interface ContentItem {
   title?: string;
@@ -57,23 +57,38 @@ function capitalize(str: string): string {
 function slugToTitle(slug: string): string {
   return slug
     .split('-')
-    .map(word => {
+    .map((word) => {
       // Handle common acronyms/brands
       const upper = word.toUpperCase();
-      if (['API', 'REST', 'HTTP', 'CLI', 'MCP', 'AWS', 'GCP', 'SQL', 'CSS', 'HTML', 'JSON', 'XML'].includes(upper)) {
+      if (
+        [
+          'API',
+          'REST',
+          'HTTP',
+          'CLI',
+          'MCP',
+          'AWS',
+          'GCP',
+          'SQL',
+          'CSS',
+          'HTML',
+          'JSON',
+          'XML',
+        ].includes(upper)
+      ) {
         return upper;
       }
       // Handle common brand names
       const brands: Record<string, string> = {
-        'github': 'GitHub',
-        'gitlab': 'GitLab',
-        'nodejs': 'Node.js',
-        'javascript': 'JavaScript',
-        'typescript': 'TypeScript',
-        'postgresql': 'PostgreSQL',
-        'mongodb': 'MongoDB',
-        'redis': 'Redis',
-        'graphql': 'GraphQL',
+        github: 'GitHub',
+        gitlab: 'GitLab',
+        nodejs: 'Node.js',
+        javascript: 'JavaScript',
+        typescript: 'TypeScript',
+        postgresql: 'PostgreSQL',
+        mongodb: 'MongoDB',
+        redis: 'Redis',
+        graphql: 'GraphQL',
       };
       if (brands[word.toLowerCase()]) {
         return brands[word.toLowerCase()];
@@ -94,7 +109,7 @@ const strategies: EnhancementStrategy[] = [
     apply: (item, available) => {
       // Get base title - convert slug to human-readable if no title exists
       const rawTitle = item.title || item.name || item.slug;
-      const baseTitle = (item.title || item.name) ? rawTitle : slugToTitle(item.slug);
+      const baseTitle = item.title || item.name ? rawTitle : slugToTitle(item.slug);
 
       const addition = ' for Claude';
       if (addition.length <= available) {

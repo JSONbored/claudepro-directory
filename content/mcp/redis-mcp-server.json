@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Redis",
   "dateAdded": "2025-09-20",
-  "tags": [
-    "redis",
-    "cache",
-    "database",
-    "nosql",
-    "official"
-  ],
+  "tags": ["redis", "cache", "database", "nosql", "official"],
   "content": "The official Redis MCP Server provides a natural language interface for AI agents to manage and search data in Redis, supporting various data structures and integrations.",
   "features": [
     "String operations with TTL support",
@@ -115,11 +109,7 @@
     "Process events using Redis streams"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "admin"
-  ],
+  "permissions": ["read", "write", "admin"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://github.com/redis/mcp-redis",
   "seoTitle": "Redis MCP Server for Claude"

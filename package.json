@@ -39,6 +39,7 @@
     "optimize:titles": "tsx scripts/optimize-titles.ts",
     "optimize:titles:dry": "tsx scripts/optimize-titles.ts --dry-run",
     "validate:titles": "tsx scripts/verify-all-titles.ts",
+    "validate:llmstxt": "tsx scripts/validate-llmstxt.ts",
     "prepare": "command -v lefthook >/dev/null 2>&1 && LEFTHOOK_CONFIG=config/tools/lefthook.yml lefthook install || echo 'Skipping lefthook install (not available)'",
     "analyze:architecture": "npx skott --displayMode=webapp",
     "analyze:unused": "npx knip -c config/tools/knip.json",

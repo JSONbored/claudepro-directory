@@ -241,6 +241,11 @@ async function applyEndpointRateLimit(
     return limiter.middleware(request);
   }
 
+  // LLMs.txt routes - moderate rate limiting to prevent scraping abuse
+  if (pathname === '/llms.txt' || pathname.endsWith('/llms.txt')) {
+    return rateLimiters.llmstxt.middleware(request);
+  }
+
   // Pattern-based matching using classified endpoint type
   if (pathname.startsWith('/api/')) {
     // Use endpoint classification for rate limiting
