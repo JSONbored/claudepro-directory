@@ -1,5 +1,6 @@
 {
   "slug": "dependency-security-audit-on-stop",
+  "seoTitle": "Dependency Security Audit",
   "description": "Performs a comprehensive security audit of all dependencies when session ends",
   "category": "hooks",
   "author": "JSONbored",

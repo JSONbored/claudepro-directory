@@ -255,6 +255,42 @@ export const statsRedis = {
       () => undefined,
       'cleanupOldTrending'
     ),
+
+  /**
+   * Enrich content items with Redis view counts
+   *
+   * @param items - Array of content items (must have category and slug)
+   * @returns Same array with viewCount property added to each item
+   *
+   * @example
+   * ```typescript
+   * const enriched = await statsRedis.enrichWithViewCounts(agents);
+   * // Returns: [{ ...agent1, viewCount: 123 }, { ...agent2, viewCount: 456 }]
+   * ```
+   */
+  enrichWithViewCounts: async <T extends { category: string; slug: string }>(
+    items: T[]
+  ): Promise<(T & { viewCount: number })[]> => {
+    if (!items.length) return [];
+
+    try {
+      // Batch fetch view counts
+      const viewCounts = await statsRedis.getViewCounts(items);
+
+      // Merge view counts with items
+      return items.map((item) => ({
+        ...item,
+        viewCount: viewCounts[`${item.category}:${item.slug}`] || 0,
+      }));
+    } catch (error) {
+      logger.error(
+        'Failed to enrich with view counts',
+        error instanceof Error ? error : new Error(String(error))
+      );
+      // Return items without view counts on error
+      return items.map((item) => ({ ...item, viewCount: 0 }));
+    }
+  },
 };
 
 /**

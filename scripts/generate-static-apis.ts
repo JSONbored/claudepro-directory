@@ -108,12 +108,14 @@ async function loadCategoryMetadata(categoryId: string): Promise<readonly unknow
  * Performance: Single-pass transformation with validation
  * Security: Zod parse ensures all constraints enforced
  *
+ * Note: Preserves seoTitle field when present for SEO optimization
+ *
  * @param content - Raw content items
  * @param type - Content type discriminator
  * @param category - Category identifier for URL generation
  * @returns Validated transformed content items
  */
-function transformContent<T extends { slug: string }>(
+function transformContent<T extends { slug: string; seoTitle?: string }>(
   content: readonly T[],
   type: string,
   category: string

@@ -4,7 +4,13 @@
   "category": "mcp",
   "author": "Canva",
   "dateAdded": "2025-09-18",
-  "tags": ["design", "canva", "graphics", "templates", "creative"],
+  "tags": [
+    "design",
+    "canva",
+    "graphics",
+    "templates",
+    "creative"
+  ],
   "content": "Create and manage Canva designs through Claude for automated design generation.",
   "features": [
     "Browse design templates and assets",
@@ -82,7 +88,13 @@
     "Update brand colors in templates"
   ],
   "requiresAuth": true,
-  "permissions": ["read", "write", "create", "export"],
+  "permissions": [
+    "read",
+    "write",
+    "create",
+    "export"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://www.canva.dev/docs/connect/canva-mcp-server-setup/"
+  "documentationUrl": "https://www.canva.dev/docs/connect/canva-mcp-server-setup/",
+  "seoTitle": "Canva MCP Server for Claude"
 }

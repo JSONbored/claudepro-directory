@@ -1,15 +1,25 @@
 import { HomePageClient } from '@/src/components/features/home';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 import { BookOpen, Layers, Server, Sparkles } from '@/src/lib/icons';
+import { statsRedis } from '@/src/lib/redis';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { transformForHomePage } from '@/src/lib/utils/transformers';
 
-// Enable ISR - revalidate every hour
+// Enable ISR - revalidate every 5 minutes for fresh view counts
+export const revalidate = 300;
 
 // Server component that loads data
 export default async function HomePage() {
   // Load all content server-side for better SEO and initial page load
-  const [rules, mcp, agents, commands, hooks, statuslines, collections] = await Promise.all([
+  const [
+    rulesData,
+    mcpData,
+    agentsData,
+    commandsData,
+    hooksData,
+    statuslinesData,
+    collectionsData,
+  ] = await Promise.all([
     lazyContentLoaders.rules(),
     lazyContentLoaders.mcp(),
     lazyContentLoaders.agents(),
@@ -17,6 +27,29 @@ export default async function HomePage() {
     lazyContentLoaders.hooks(),
     lazyContentLoaders.statuslines(),
     lazyContentLoaders.collections(),
+  ]);
+
+  // Enrich with view counts from Redis
+  const [rules, mcp, agents, commands, hooks, statuslines, collections] = await Promise.all([
+    statsRedis.enrichWithViewCounts(
+      rulesData.map((item) => ({ ...item, category: 'rules' as const }))
+    ),
+    statsRedis.enrichWithViewCounts(mcpData.map((item) => ({ ...item, category: 'mcp' as const }))),
+    statsRedis.enrichWithViewCounts(
+      agentsData.map((item) => ({ ...item, category: 'agents' as const }))
+    ),
+    statsRedis.enrichWithViewCounts(
+      commandsData.map((item) => ({ ...item, category: 'commands' as const }))
+    ),
+    statsRedis.enrichWithViewCounts(
+      hooksData.map((item) => ({ ...item, category: 'hooks' as const }))
+    ),
+    statsRedis.enrichWithViewCounts(
+      statuslinesData.map((item) => ({ ...item, category: 'statuslines' as const }))
+    ),
+    statsRedis.enrichWithViewCounts(
+      collectionsData.map((item) => ({ ...item, category: 'collections' as const }))
+    ),
   ]);
 
   // Create stable allConfigs array to prevent infinite re-renders

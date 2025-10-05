@@ -4,7 +4,13 @@
   "category": "mcp",
   "author": "Vercel",
   "dateAdded": "2025-09-18",
-  "tags": ["deployment", "vercel", "hosting", "devops", "infrastructure"],
+  "tags": [
+    "deployment",
+    "vercel",
+    "hosting",
+    "devops",
+    "infrastructure"
+  ],
   "content": "Control Vercel deployments and infrastructure through Claude for seamless deployment management.",
   "features": [
     "Search and navigate Vercel documentation",
@@ -86,7 +92,12 @@
     "List all recent deployments"
   ],
   "requiresAuth": true,
-  "permissions": ["read", "write", "deploy"],
+  "permissions": [
+    "read",
+    "write",
+    "deploy"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://vercel.com/docs/mcp/vercel-mcp"
+  "documentationUrl": "https://vercel.com/docs/mcp/vercel-mcp",
+  "seoTitle": "Vercel MCP Server for Claude"
 }

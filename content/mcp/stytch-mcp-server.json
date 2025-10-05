@@ -4,7 +4,13 @@
   "category": "mcp",
   "author": "Stytch",
   "dateAdded": "2025-09-18",
-  "tags": ["authentication", "stytch", "identity", "security", "auth"],
+  "tags": [
+    "authentication",
+    "stytch",
+    "identity",
+    "security",
+    "auth"
+  ],
   "content": "Manage Stytch authentication configurations and workspace settings for identity management.",
   "features": [
     "Configure authentication methods and flows",
@@ -86,7 +92,12 @@
     "Show authentication metrics for this week"
   ],
   "requiresAuth": true,
-  "permissions": ["read", "write", "configure"],
+  "permissions": [
+    "read",
+    "write",
+    "configure"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://stytch.com/docs/workspace-management/stytch-mcp"
+  "documentationUrl": "https://stytch.com/docs/workspace-management/stytch-mcp",
+  "seoTitle": "Stytch MCP Server for Claude"
 }

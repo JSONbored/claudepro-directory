@@ -4,7 +4,13 @@
   "category": "mcp",
   "author": "invideo",
   "dateAdded": "2025-09-18",
-  "tags": ["video", "invideo", "media", "content-creation", "ai-video"],
+  "tags": [
+    "video",
+    "invideo",
+    "media",
+    "content-creation",
+    "ai-video"
+  ],
   "content": "Create and edit videos through Claude using invideo's AI-powered video creation platform.",
   "features": [
     "Generate videos from text prompts",
@@ -86,7 +92,13 @@
     "Export video in 1080p MP4"
   ],
   "requiresAuth": true,
-  "permissions": ["read", "write", "create", "export"],
+  "permissions": [
+    "read",
+    "write",
+    "create",
+    "export"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://invideo.io/ai/mcp"
+  "documentationUrl": "https://invideo.io/ai/mcp",
+  "seoTitle": "Invideo MCP Server for Claude"
 }

@@ -2,8 +2,9 @@ import fs from 'fs/promises';
 import path from 'path';
 import { z } from 'zod';
 import { EnhancedGuidesPage } from '@/src/components/enhanced-guides-page';
-import { APP_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
+import { statsRedis } from '@/src/lib/redis';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import {
   type GuideItemWithCategory,
   type GuidesByCategory,
@@ -11,18 +12,10 @@ import {
   parseFrontmatter,
 } from '@/src/lib/utils/guide-helpers';
 
-export const metadata = {
-  title: `Claude Guides & Tutorials - ${APP_CONFIG.name}`,
-  description:
-    'Comprehensive guides, tutorials, and workflows for Claude AI. Learn how to use MCP servers, agents, and more.',
-  alternates: {
-    canonical: `${APP_CONFIG.url}/guides`,
-  },
-};
+export const metadata = await generatePageMetadata('/guides');
 
-// Enable ISR - revalidate every 4 hours for guide list pages
-
-// Use Edge Runtime for better performance and lower costs
+// Enable ISR - revalidate every 5 minutes for fresh view counts
+export const revalidate = 300;
 
 /**
  * Schema for valid guide categories
@@ -113,5 +106,28 @@ async function getGuides(): Promise<GuidesByCategory> {
 
 export default async function GuidesPage() {
   const guides = await getGuides();
-  return <EnhancedGuidesPage guides={guides} />;
+
+  // Enrich all guides with view counts from Redis
+  const enrichedGuides: GuidesByCategory = {};
+
+  for (const [category, categoryGuides] of Object.entries(guides)) {
+    // Map guide slugs to Redis format: remove /guides/ prefix
+    const guidesForEnrichment = categoryGuides.map((guide) => ({
+      ...guide,
+      category: 'guides' as const,
+      slug: guide.slug.replace('/guides/', ''), // e.g., "tutorials/desktop-mcp-setup"
+    }));
+
+    // Batch fetch view counts
+    const enriched = await statsRedis.enrichWithViewCounts(guidesForEnrichment);
+
+    // Restore original category field and slug format
+    enrichedGuides[category] = enriched.map((guide, index) => ({
+      ...guide,
+      category,
+      slug: categoryGuides[index]?.slug || guide.slug,
+    }));
+  }
+
+  return <EnhancedGuidesPage guides={enrichedGuides} />;
 }

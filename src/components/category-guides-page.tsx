@@ -18,6 +18,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   BookOpen,
+  Eye,
   FileText,
   GitCompare,
   Search,
@@ -87,6 +88,13 @@ export function CategoryGuidesPage({ category, guides }: CategoryGuidesPageProps
 
   const info = categoryInfo[category as keyof typeof categoryInfo];
   const Icon = info?.icon || BookOpen;
+
+  // Format view count helper (same as other components)
+  const formatViewCount = (count: number): string => {
+    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return count.toString();
+  };
 
   // Create search index
   const searchIndex = useMemo(() => createSearchIndex<GuideItemWithCategory>(guides), [guides]);
@@ -171,13 +179,22 @@ export function CategoryGuidesPage({ category, guides }: CategoryGuidesPageProps
                       >
                         {guide.description}
                       </p>
-                      {guide.dateUpdated && (
-                        <div className="mt-auto">
+                      <div className="mt-auto flex items-center justify-between gap-2">
+                        {guide.dateUpdated && (
                           <span className={UI_CLASSES.TEXT_XS_MUTED}>
                             Updated {new Date(guide.dateUpdated).toLocaleDateString()}
                           </span>
-                        </div>
-                      )}
+                        )}
+                        {guide.viewCount !== undefined && guide.viewCount > 0 && (
+                          <Badge
+                            variant="secondary"
+                            className="h-6 px-2 gap-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors font-medium"
+                          >
+                            <Eye className="h-3 w-3" aria-hidden="true" />
+                            <span className="text-xs">{formatViewCount(guide.viewCount)}</span>
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </Card>
                 </Link>

@@ -38,13 +38,16 @@
  * @see {@link file://../../lib/content-loaders.ts} - Content loading with caching
  */
 
-import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content-list-server';
 import { getCategoryConfig, isValidCategory } from '@/src/lib/config/category-config';
-import { APP_CONFIG } from '@/src/lib/constants';
 import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
+import { statsRedis } from '@/src/lib/redis';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+
+// ISR - revalidate every 5 minutes for fresh view counts
+export const revalidate = 300;
 
 /**
  * ISR revalidation interval in seconds (4 hours)
@@ -106,11 +109,7 @@ export async function generateStaticParams() {
  * //   twitter: { ... }
  * // }
  */
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ category: string }>;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params;
 
   // Validate category
@@ -129,26 +128,13 @@ export async function generateMetadata({
     };
   }
 
-  return {
-    title: `${config.pluralTitle} - ${APP_CONFIG.name}`,
-    description: config.metaDescription,
-    keywords: config.keywords,
-    alternates: {
-      canonical: `${APP_CONFIG.url}/${category}`,
-    },
-    openGraph: {
-      title: `${config.pluralTitle} - ${APP_CONFIG.name}`,
-      description: config.metaDescription,
-      type: 'website',
-      url: `${APP_CONFIG.url}/${category}`,
-      siteName: APP_CONFIG.name,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: `${config.pluralTitle} - ${APP_CONFIG.name}`,
-      description: config.metaDescription,
-    },
-  };
+  // Use centralized metadata with category context
+  // Explicit context construction for exactOptionalPropertyTypes compatibility
+  return await generatePageMetadata('/:category', {
+    params: { category },
+    category,
+    categoryConfig: config,
+  });
 }
 
 /**
@@ -188,7 +174,12 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   }
 
   // Load content for this category
-  const items = await getContentByCategory(category);
+  const itemsData = await getContentByCategory(category);
+
+  // Enrich with view counts from Redis
+  const items = await statsRedis.enrichWithViewCounts(
+    itemsData.map((item) => ({ ...item, category: category as typeof item.category }))
+  );
 
   // Process badges (handle dynamic count badges)
   const badges = config.listPage.badges.map((badge) => ({

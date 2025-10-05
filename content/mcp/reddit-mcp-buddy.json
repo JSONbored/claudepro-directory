@@ -4,7 +4,13 @@
   "category": "mcp",
   "author": "karanb192",
   "dateAdded": "2025-09-27",
-  "tags": ["reddit", "social-media", "search", "analytics", "community"],
+  "tags": [
+    "reddit",
+    "social-media",
+    "search",
+    "analytics",
+    "community"
+  ],
   "content": "Access Reddit content through Claude for browsing subreddits, searching posts, analyzing comments, and tracking user activity. Works instantly with zero setup.",
   "features": [
     "Browse any subreddit with sorting options (hot, new, top, rising)",
@@ -35,7 +41,9 @@
       "mcpServers": {
         "reddit": {
           "command": "npx",
-          "args": ["reddit-mcp-buddy"]
+          "args": [
+            "reddit-mcp-buddy"
+          ]
         }
       }
     },
@@ -43,7 +51,9 @@
       "mcpServers": {
         "reddit": {
           "command": "npx",
-          "args": ["reddit-mcp-buddy"]
+          "args": [
+            "reddit-mcp-buddy"
+          ]
         }
       }
     },
@@ -51,7 +61,9 @@
       "mcpServers": {
         "reddit": {
           "command": "npx",
-          "args": ["reddit-mcp-buddy"],
+          "args": [
+            "reddit-mcp-buddy"
+          ],
           "env": {
             "REDDIT_CLIENT_ID": "your_client_id",
             "REDDIT_CLIENT_SECRET": "your_client_secret",
@@ -106,7 +118,10 @@
     "Show me the comments on this Reddit URL"
   ],
   "requiresAuth": false,
-  "permissions": ["read"],
+  "permissions": [
+    "read"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://github.com/karanb192/reddit-mcp-buddy"
+  "documentationUrl": "https://github.com/karanb192/reddit-mcp-buddy",
+  "seoTitle": "Reddit MCP Buddy for Claude"
 }

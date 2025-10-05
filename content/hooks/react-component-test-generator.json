@@ -1,5 +1,6 @@
 {
   "slug": "react-component-test-generator",
+  "seoTitle": "React Test Generator",
   "description": "Automatically creates or updates test files when React components are modified",
   "category": "hooks",
   "author": "JSONbored",

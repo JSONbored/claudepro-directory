@@ -4,7 +4,13 @@
   "category": "mcp",
   "author": "hauptsacheNet",
   "dateAdded": "2025-09-18",
-  "tags": ["project-management", "clickup", "tasks", "productivity", "team-collaboration"],
+  "tags": [
+    "project-management",
+    "clickup",
+    "tasks",
+    "productivity",
+    "team-collaboration"
+  ],
   "content": "Manage ClickUp tasks and projects directly through Claude for comprehensive project management.",
   "features": [
     "Create and update tasks with custom fields",
@@ -34,7 +40,10 @@
       "mcpServers": {
         "clickup": {
           "command": "npx",
-          "args": ["-y", "@hauptsache.net/clickup-mcp"],
+          "args": [
+            "-y",
+            "@hauptsache.net/clickup-mcp"
+          ],
           "env": {
             "CLICKUP_API_KEY": "your_api_key",
             "CLICKUP_TEAM_ID": "your_team_id"
@@ -83,7 +92,12 @@
     "Add time entry to current task"
   ],
   "requiresAuth": true,
-  "permissions": ["read", "write", "delete"],
+  "permissions": [
+    "read",
+    "write",
+    "delete"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://github.com/hauptsacheNet/clickup-mcp"
+  "documentationUrl": "https://github.com/hauptsacheNet/clickup-mcp",
+  "seoTitle": "Clickup MCP Server for Claude"
 }

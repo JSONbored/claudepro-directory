@@ -18,6 +18,11 @@ import { BookOpen, Code, Layers, Sparkles, Terminal, Webhook } from '@/src/lib/i
 
 /**
  * Category metadata and display configuration
+ *
+ * Production Standards:
+ * - Index signature allows type compatibility with MetadataContext
+ * - All properties remain strongly typed
+ * - Used by metadata-registry.ts for centralized SEO metadata
  */
 export interface CategoryConfig {
   // Display properties
@@ -57,6 +62,9 @@ export interface CategoryConfig {
 
   // Data loading
   contentLoader: string;
+
+  // Index signature for compatibility with MetadataContext
+  [key: string]: unknown;
 }
 
 /**
@@ -71,7 +79,7 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
     icon: Sparkles,
     keywords: 'Claude agents, AI agents, specialized assistants, workflow automation, Claude AI',
     metaDescription:
-      "Browse specialized AI agents designed for specific tasks and workflows using Claude's capabilities.",
+      'Specialized Claude AI agents for coding, writing, research, and workflow automation. Community-contributed configurations with copy-paste setup for Claude Desktop and Code.',
 
     listPage: {
       searchPlaceholder: 'Search AI agents...',
@@ -103,7 +111,7 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
     icon: Code,
     keywords: 'MCP servers, Model Context Protocol, Claude tools, API integration',
     metaDescription:
-      "Model Context Protocol servers that extend Claude's capabilities with external tools and data sources.",
+      'Ever-growing collection of Model Context Protocol servers extending Claude with GitHub, databases, APIs, and file systems. Official MCP integrations with setup guides.',
 
     listPage: {
       searchPlaceholder: 'Search MCP servers...',
@@ -131,7 +139,7 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
     icon: Terminal,
     keywords: 'Claude commands, slash commands, CLI tools, workflow automation',
     metaDescription:
-      'Custom slash commands to enhance your Claude Code workflow with reusable prompts and actions.',
+      'Custom Claude Code slash commands for workflow automation, code review, testing, and documentation. Community-built reusable prompts ready to enhance your development.',
 
     listPage: {
       searchPlaceholder: 'Search commands...',
@@ -157,7 +165,8 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
     description: "Custom rules to guide Claude's behavior and responses in your projects.",
     icon: BookOpen,
     keywords: 'Claude rules, AI guidelines, project rules, behavior customization',
-    metaDescription: "Custom rules to guide Claude's behavior and responses in your projects.",
+    metaDescription:
+      'Project-specific rules controlling Claude AI behavior for coding standards, security, testing, and documentation. Community-curated guidelines for better AI assistance.',
 
     listPage: {
       searchPlaceholder: 'Search rules...',
@@ -183,7 +192,8 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
     description: 'Event-driven automation hooks that trigger during Claude Code operations.',
     icon: Webhook,
     keywords: 'Claude hooks, automation, webhooks, event triggers, CI/CD',
-    metaDescription: 'Event-driven automation hooks that trigger during Claude Code operations.',
+    metaDescription:
+      'Event-driven Claude Code automation hooks for git commits, testing, linting, and CI/CD integration. Ever-growing library of shell scripts for development workflows.',
 
     listPage: {
       searchPlaceholder: 'Search hooks...',
@@ -211,7 +221,7 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
     icon: Terminal,
     keywords: 'Claude statuslines, CLI customization, terminal themes, status bar',
     metaDescription:
-      'Customizable status line configurations for Claude Code CLI with real-time session information.',
+      'Beautiful Claude Code CLI statusline themes displaying git info, project details, and session stats. Customize your terminal with community-designed status bars.',
 
     listPage: {
       searchPlaceholder: 'Search statuslines...',
@@ -244,7 +254,7 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
     icon: Layers,
     keywords: 'Claude collections, starter kits, workflows, bundles, curated content',
     metaDescription:
-      'Curated bundles of related content items organized by theme, use case, or workflow for easy discovery.',
+      'Curated Claude AI starter kits bundling agents, MCP servers, commands, and rules by use case. Complete workflow collections for web development and automation.',
 
     listPage: {
       searchPlaceholder: 'Search collections...',

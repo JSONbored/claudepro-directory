@@ -4,7 +4,13 @@
   "category": "mcp",
   "author": "Figma",
   "dateAdded": "2025-09-18",
-  "tags": ["design", "figma", "ui-ux", "assets", "graphics"],
+  "tags": [
+    "design",
+    "figma",
+    "ui-ux",
+    "assets",
+    "graphics"
+  ],
   "content": "Connect Claude to Figma Desktop for design operations, asset extraction, and design system management.",
   "features": [
     "Access and browse Figma designs in real-time",
@@ -85,7 +91,11 @@
     "List all text styles used in the design"
   ],
   "requiresAuth": false,
-  "permissions": ["read", "export"],
+  "permissions": [
+    "read",
+    "export"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://help.figma.com/hc/en-us/articles/32132100833559"
+  "documentationUrl": "https://help.figma.com/hc/en-us/articles/32132100833559",
+  "seoTitle": "Figma MCP Server for Claude"
 }

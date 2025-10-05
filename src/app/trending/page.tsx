@@ -9,8 +9,12 @@ import {
   type TrendingParams,
   trendingParamsSchema,
 } from '@/src/lib/schemas/search.schema';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { getBatchTrendingData } from '@/src/lib/trending/calculator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+
+// Generate metadata from centralized registry
+export const metadata = await generatePageMetadata('/trending');
 
 // ISR Configuration - Revalidate every 5 minutes for fresh Redis view counts
 export const revalidate = 300; // 5 minutes - Updates trending data while keeping static content

@@ -11,6 +11,7 @@ import { markdownToSafeHtml } from '@/src/lib/content/markdown-utils';
 import { ArrowLeft, Tags } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { ComparisonData } from '@/src/lib/schemas/app.schema';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // ISR Configuration - Revalidate every 7 days for SEO pages
@@ -92,25 +93,18 @@ export async function generateMetadata({
     };
   }
 
-  return {
-    title: data.title,
-    description: data.description,
-    openGraph: {
+  // Use centralized metadata system with AI citation optimization
+  // Comparison route uses Article schema for better AI indexing
+  return await generatePageMetadata('/compare/:slug', {
+    params: { slug: resolvedParams.slug },
+    item: {
       title: data.title,
       description: data.description,
-      type: 'article',
-      publishedTime: data.lastUpdated,
-      authors: [APP_CONFIG.author],
+      dateAdded: data.lastUpdated,
+      lastModified: data.lastUpdated,
+      author: APP_CONFIG.author,
     },
-    twitter: {
-      card: 'summary_large_image',
-      title: data.title,
-      description: data.description,
-    },
-    alternates: {
-      canonical: `/compare/${resolvedParams.slug}`,
-    },
-  };
+  });
 }
 
 export default async function ComparisonPage({ params }: { params: Promise<{ slug: string }> }) {

@@ -57,7 +57,6 @@
  * @see {@link file://../../../components/unified-detail-page/index.tsx} - Detail page component
  */
 
-import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { PageViewTracker } from '@/src/components/shared/page-view-tracker';
 import { ViewTracker } from '@/src/components/shared/view-tracker';
@@ -68,7 +67,6 @@ import {
   isValidCategory,
   VALID_CATEGORIES,
 } from '@/src/lib/config/category-config';
-import { APP_CONFIG } from '@/src/lib/constants';
 import {
   getContentByCategory,
   getContentBySlug,
@@ -77,7 +75,7 @@ import {
 } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
 import { statsRedis } from '@/src/lib/redis';
-import { getDisplayTitle } from '@/src/lib/utils';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { transformForDetailPage } from '@/src/lib/utils/transformers';
 
 /**
@@ -158,7 +156,7 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ category: string; slug: string }>;
-}): Promise<Metadata> {
+}) {
   const { category, slug } = await params;
 
   // Validate category
@@ -187,28 +185,15 @@ export async function generateMetadata({
     };
   }
 
-  const displayTitle = getDisplayTitle(item);
-
-  return {
-    title: `${displayTitle} - ${config.title} | ${APP_CONFIG.name}`,
-    description: item.description,
-    keywords: item.tags?.join(', '),
-    alternates: {
-      canonical: `${APP_CONFIG.url}/${category}/${slug}`,
-    },
-    openGraph: {
-      title: displayTitle,
-      description: item.description,
-      type: 'article',
-      url: `${APP_CONFIG.url}/${category}/${slug}`,
-      siteName: APP_CONFIG.name,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: displayTitle,
-      description: item.description,
-    },
-  };
+  // Use centralized metadata with content detail context
+  // Explicit context construction for exactOptionalPropertyTypes compatibility
+  return await generatePageMetadata('/:category/:slug', {
+    params: { category, slug },
+    category,
+    slug,
+    item,
+    categoryConfig: config,
+  });
 }
 
 /**

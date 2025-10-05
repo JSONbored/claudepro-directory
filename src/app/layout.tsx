@@ -13,7 +13,8 @@ import { StructuredData } from '@/src/components/shared/structured-data';
 import { UmamiScript } from '@/src/components/shared/umami-script';
 import { WebVitals } from '@/src/components/shared/web-vitals';
 import { OrganizationStructuredData } from '@/src/components/structured-data/organization-schema';
-import { APP_CONFIG, SEO_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG } from '@/src/lib/constants';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // Configure Inter font with optimizations
@@ -33,80 +34,65 @@ const inter = Inter({
   ],
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(APP_CONFIG.url),
-  title: SEO_CONFIG.titleTemplate.replace('%s', SEO_CONFIG.defaultTitle),
-  description: SEO_CONFIG.defaultDescription,
-  keywords: SEO_CONFIG.keywords.join(', '),
-  authors: [{ name: APP_CONFIG.author, url: `${APP_CONFIG.url}/about` }],
-  openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: `${APP_CONFIG.url}/`,
-    siteName: APP_CONFIG.name,
-    title: SEO_CONFIG.titleTemplate.replace('%s', SEO_CONFIG.defaultTitle),
-    description: SEO_CONFIG.defaultDescription,
-    images: [
-      {
-        url: '/opengraph-image',
-        width: 1200,
-        height: 630,
-        alt: `${APP_CONFIG.name} - Community Configurations`,
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: SEO_CONFIG.titleTemplate.replace('%s', SEO_CONFIG.defaultTitle),
-    description: SEO_CONFIG.defaultDescription,
-    // Next.js automatically uses opengraph-image if no twitter-image is specified
-    creator: '@JSONbored',
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+// Generate homepage metadata from centralized registry
+export async function generateMetadata(): Promise<Metadata> {
+  const homeMetadata = await generatePageMetadata('/');
+
+  return {
+    ...homeMetadata,
+    metadataBase: new URL(APP_CONFIG.url),
+    authors: [{ name: APP_CONFIG.author, url: `${APP_CONFIG.url}/about` }],
+    openGraph: {
+      ...homeMetadata.openGraph,
+      locale: 'en_US',
+      images: [
+        {
+          url: '/opengraph-image',
+          width: 1200,
+          height: 630,
+          alt: `${APP_CONFIG.name} - Community Configurations`,
+        },
+      ],
     },
-  },
-  alternates: {
-    canonical: `${APP_CONFIG.url}/`,
-    types: {
-      // OpenAPI 3.1.0 Specification for AI Discovery (RFC 9727)
-      'application/openapi+json': '/openapi.json',
-      // API Catalog for RFC 9727 Compliant Discovery
-      'application/json': '/.well-known/api-catalog',
+    twitter: {
+      ...homeMetadata.twitter,
+      creator: '@JSONbored',
     },
-  },
-  icons: {
-    icon: [
-      { url: '/assets/icons/claudepro-directory-icon.ico' },
-      { url: '/assets/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/assets/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-    ],
-    shortcut: '/assets/icons/claudepro-directory-icon.ico',
-    apple: '/assets/icons/apple-touch-icon.png',
-    other: [
-      {
-        rel: 'icon',
-        type: 'image/png',
-        sizes: '192x192',
-        url: '/assets/icons/icon-192.png',
+    alternates: {
+      ...homeMetadata.alternates,
+      types: {
+        // OpenAPI 3.1.0 Specification for AI Discovery (RFC 9727)
+        'application/openapi+json': '/openapi.json',
+        // API Catalog for RFC 9727 Compliant Discovery
+        'application/json': '/.well-known/api-catalog',
       },
-      {
-        rel: 'icon',
-        type: 'image/png',
-        sizes: '512x512',
-        url: '/assets/icons/icon-512.png',
-      },
-    ],
-  },
-  manifest: '/manifest.webmanifest',
-};
+    },
+    icons: {
+      icon: [
+        { url: '/assets/icons/claudepro-directory-icon.ico' },
+        { url: '/assets/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+        { url: '/assets/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      ],
+      shortcut: '/assets/icons/claudepro-directory-icon.ico',
+      apple: '/assets/icons/apple-touch-icon.png',
+      other: [
+        {
+          rel: 'icon',
+          type: 'image/png',
+          sizes: '192x192',
+          url: '/assets/icons/icon-192.png',
+        },
+        {
+          rel: 'icon',
+          type: 'image/png',
+          sizes: '512x512',
+          url: '/assets/icons/icon-512.png',
+        },
+      ],
+    },
+    manifest: '/manifest.webmanifest',
+  };
+}
 
 export default async function RootLayout({
   children,

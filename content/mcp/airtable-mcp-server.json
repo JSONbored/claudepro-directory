@@ -4,7 +4,13 @@
   "category": "mcp",
   "author": "domdomegg",
   "dateAdded": "2025-09-18",
-  "tags": ["database", "airtable", "data-management", "crud", "tables"],
+  "tags": [
+    "database",
+    "airtable",
+    "data-management",
+    "crud",
+    "tables"
+  ],
   "content": "Connect Claude to Airtable databases for seamless data management and automation of your bases and tables.",
   "features": [
     "Read and write records in Airtable bases",
@@ -33,7 +39,10 @@
       "mcpServers": {
         "airtable": {
           "command": "npx",
-          "args": ["-y", "airtable-mcp-server"],
+          "args": [
+            "-y",
+            "airtable-mcp-server"
+          ],
           "env": {
             "AIRTABLE_API_KEY": "your_api_key_here"
           }
@@ -44,7 +53,10 @@
       "mcpServers": {
         "airtable": {
           "command": "npx",
-          "args": ["-y", "airtable-mcp-server"],
+          "args": [
+            "-y",
+            "airtable-mcp-server"
+          ],
           "env": {
             "AIRTABLE_API_KEY": "${AIRTABLE_API_KEY}"
           }
@@ -88,7 +100,12 @@
     "Filter records where status='active' AND priority='high'"
   ],
   "requiresAuth": true,
-  "permissions": ["read", "write", "schema"],
+  "permissions": [
+    "read",
+    "write",
+    "schema"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://github.com/domdomegg/airtable-mcp-server"
+  "documentationUrl": "https://github.com/domdomegg/airtable-mcp-server",
+  "seoTitle": "Airtable MCP Server for Claude"
 }

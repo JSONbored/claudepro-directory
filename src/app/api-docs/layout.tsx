@@ -25,6 +25,7 @@ import { RootProvider } from 'fumadocs-ui/provider';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { buildPageTitle } from '@/src/lib/seo/title-builder';
 
 /**
  * Metadata for API documentation section
@@ -39,8 +40,8 @@ import { APP_CONFIG } from '@/src/lib/constants';
  */
 export const metadata: Metadata = {
   title: {
-    template: `%s | ${APP_CONFIG.name} API`,
-    default: 'API Documentation',
+    template: buildPageTitle({ tier: 'section', title: '%s' }),
+    default: buildPageTitle({ tier: 'section', title: 'API Documentation' }),
   },
   description:
     'Comprehensive REST API documentation for ClaudePro Directory. Browse and search 8 endpoints for content discovery, analytics, and caching with full request/response examples.',

@@ -31,7 +31,7 @@ import { APP_CONFIG } from '@/src/lib/constants';
 export const metadata: Metadata = {
   title: 'Overview',
   description:
-    'ClaudePro Directory REST API provides 8 endpoints for content discovery, search, analytics, and caching. Free tier with rate limiting.',
+    'Claude Pro Directory REST API: Access 150+ open-source configurations via JSON endpoints. Includes agents, MCP servers, commands, hooks, search, and analytics with CORS.',
 };
 
 /**

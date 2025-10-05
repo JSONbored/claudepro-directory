@@ -4,7 +4,13 @@
   "category": "mcp",
   "author": "Plaid",
   "dateAdded": "2025-09-18",
-  "tags": ["banking", "plaid", "fintech", "financial-data", "account-linking"],
+  "tags": [
+    "banking",
+    "plaid",
+    "fintech",
+    "financial-data",
+    "account-linking"
+  ],
   "content": "Connect Claude to Plaid for banking data integration and financial services troubleshooting.",
   "features": [
     "Link financial accounts securely",
@@ -86,7 +92,12 @@
     "Check transaction categorization accuracy"
   ],
   "requiresAuth": true,
-  "permissions": ["read", "debug", "test"],
+  "permissions": [
+    "read",
+    "debug",
+    "test"
+  ],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://plaid.com/blog/plaid-mcp-ai-assistant-claude/"
+  "documentationUrl": "https://plaid.com/blog/plaid-mcp-ai-assistant-claude/",
+  "seoTitle": "Plaid MCP Server for Claude"
 }

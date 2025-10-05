@@ -4,6 +4,94 @@ All notable changes to Claude Pro Directory will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Quick Navigation
+
+**Latest Features:**
+- [SEO Title Optimization](#2025-10-04---seo-title-optimization-system-with-automated-enhancement) - Automated title enhancement for 168+ pages
+- [Trending Algorithm](#2025-10-04---production-hardened-trending-algorithm-with-security--performance-optimizations) - Real-time growth velocity tracking
+- [View Counters](#2025-10-04---view-counter-ui-redesign-with-prominent-badge-display) - Eye-catching badge display on all pages
+- [Content Security Policy](#2025-10-04---content-security-policy-strict-dynamic-implementation) - Enhanced security with strict-dynamic
+
+**Platform Improvements:**
+- [Trending Page Fix](#2025-10-04---trending-page-infinite-loading-fix-with-isr) - ISR configuration fixes
+- [Submit Form](#2025-10-04---submit-form-github-api-elimination) - Zero-API GitHub integration
+- [CI Optimization](#2025-10-04---github-actions-ci-optimization-for-community-contributors) - Faster community PRs
+
+**Community:**
+- [Reddit MCP Server](#2025-10-04---reddit-mcp-server-community-contribution) - Browse Reddit from Claude
+
+[View All Updates ↓](#2025-10-04---seo-title-optimization-system-with-automated-enhancement)
+
+---
+
+## 2025-10-04 - SEO Title Optimization System with Automated Enhancement
+
+**TL;DR:** Optimized 59 page titles with automated "for Claude" branding while staying under 60-character SEO limits. Added validation tools and developer utilities for ongoing title management.
+
+### What Changed
+
+Implemented dual-title metadata system allowing separate SEO-optimized titles (`seoTitle`) and user-facing headings (`title`). Created automated enhancement utilities that intelligently add "for Claude" branding while respecting category-specific character budgets (23-31 available chars depending on suffix length).
+
+### Added
+
+- `seoTitle` optional field to all content schemas (agents, mcp, rules, commands, hooks, statuslines, collections, guides)
+- Build pipeline support: `seoTitle` flows from source files → static API → page metadata
+- Developer utilities:
+  - `npm run validate:titles` - Check all page titles against 60-char limit
+  - `npm run optimize:titles:dry` - Preview automated enhancements
+  - `npm run optimize:titles` - Apply enhancements to source files
+- `src/lib/seo/title-enhancer.ts` - Smart slug-to-title conversion with acronym/brand handling
+- `src/lib/config/seo-config.ts` - Centralized SEO constants and character budgets
+
+### Changed
+
+- Enhanced 59 content files (35.1% of catalog) with optimized `seoTitle` fields:
+  - MCP servers: 34/40 (85%) - "GitHub MCP Server for Claude"
+  - Commands: 12/12 (100%) - "Debug Command for Claude"
+  - Rules: 6/11 (54.5%)
+  - Hooks: 6/60 (10%)
+  - Agents: 1/10 (10%)
+- Updated `scripts/verify-all-titles.ts` to single-line compact output format
+- Added `seoTitle` to metadata extraction in `build-category-config.ts`
+
+### Technical Implementation
+
+**Character Budget per Category**:
+- Agents: 28 chars | MCP: 31 chars (most space) | Rules: 29 chars
+- Commands: 26 chars | Hooks: 29 chars | Statuslines: 23 chars | Collections: 23 chars
+
+**Enhancement Logic**:
+```typescript
+// Automated "for Claude" suffix with slug fallback
+const baseTitle = item.title || item.name || slugToTitle(item.slug);
+if (' for Claude'.length <= availableSpace) {
+  return `${baseTitle} for Claude`;
+}
+```
+
+**Slug Normalization** - Handles acronyms (API, MCP, AWS, SQL) and brand names (GitHub, PostgreSQL, MongoDB)
+
+### Impact
+
+- **Search Visibility**: 59 pages now have keyword-rich titles optimized for Google/AI search
+- **Brand Consistency**: Unified "for Claude" pattern across MCP servers and commands
+- **Developer Experience**: On-demand validation and enhancement tools reduce manual work
+- **Quality Assurance**: All 168 pages verified under 60-character limit
+
+### For Contributors
+
+When adding new content, optionally include `seoTitle` for SEO optimization:
+
+```json
+{
+  "slug": "example-server",
+  "title": "Example Server - Long Descriptive Name",
+  "seoTitle": "Example Server for Claude"
+}
+```
+
+Run `npm run validate:titles` before submitting to verify character limits.
+
 ---
 
 ## 2025-10-04 - Production-Hardened Trending Algorithm with Security & Performance Optimizations
@@ -58,7 +146,7 @@ pipeline.expire(dailyKey, 604800, 'NX'); // Only set if key doesn't have TTL
 - **Security**: No timezone-based data corruption across global edge deployments
 - **Reliability**: Input validation prevents invalid Redis data from breaking calculations
 - **Performance**: <100ms Redis queries for 200+ items with atomic operations
-- **Users**: Discover new popular content within 24 hours with accurate growth metrics
+- **Users**: Discover new popular content on [trending page](https://claudepro.directory/trending) within 24 hours with accurate growth metrics
 
 ### Added
 
@@ -80,6 +168,22 @@ pipeline.expire(dailyKey, 604800, 'NX'); // Only set if key doesn't have TTL
 - **Timezone bug**: Date calculations now use UTC to prevent inconsistencies across regions
 - **Race condition**: Daily key TTL only set once using `EXPIRE NX` flag
 - **Invalid data**: All Redis responses validated before calculations
+
+### Site-Wide Implementation
+
+- **Homepage enrichment**: All 7 content categories (agents, mcp, rules, commands, hooks, statuslines, collections) enriched with Redis view counts
+- **Category pages**: Dynamic `[category]` route enriches items before rendering
+- **Guides pages**: MDX-based guides (/guides/tutorials, etc.) now display view counters with compound slug handling
+- **ISR revalidation**: 5-minute cache (`revalidate = 300`) for fresh view counts across all pages
+- **Helper function**: `statsRedis.enrichWithViewCounts()` for reusable batch view count merging
+- **Performance**: 7 parallel MGET calls on homepage (~15-25ms), 1 MGET per category page (~10-15ms)
+
+### Guides Integration
+
+- Extended view counters to all guides pages (/guides, /guides/tutorials, detail pages)
+- Handles compound slugs (`tutorials/desktop-mcp-setup`) with prefix stripping for Redis compatibility
+- Components updated: EnhancedGuidesPage, CategoryGuidesPage with Eye icon badges
+- Schema: Added `viewCount` to guideItemWithCategorySchema
 
 ### Related Changes
 
@@ -124,9 +228,13 @@ Redesigned the view counter display to be more prominent and visually appealing.
 - Moved view counter from inline text to standalone badge component
 - Falls back to "X% popular" text when Redis data unavailable
 
+### For Users
+
+See view counts displayed prominently on all config cards across [AI Agents](https://claudepro.directory/agents), [MCP Servers](https://claudepro.directory/mcp), and other category pages.
+
 ### Related Changes
 
-- [Growth-Based Trending Algorithm](#2025-10-04---growth-based-trending-algorithm-with-24-hour-momentum-tracking)
+- [Production-Hardened Trending Algorithm](#2025-10-04---production-hardened-trending-algorithm-with-security--performance-optimizations)
 
 ---
 
@@ -177,9 +285,13 @@ if (!statsRedis.isEnabled()) { /* fallback */ }
 if (!statsRedis.isConnected()) { /* fallback */ }
 ```
 
+### For Users
+
+The [trending page](https://claudepro.directory/trending) now loads instantly with accurate data refreshed every 5 minutes.
+
 ### Related Changes
 
-- [Growth-Based Trending Algorithm](#2025-10-04---growth-based-trending-algorithm-with-24-hour-momentum-tracking)
+- [Production-Hardened Trending Algorithm](#2025-10-04---production-hardened-trending-algorithm-with-security--performance-optimizations)
 
 ---
 
@@ -217,7 +329,7 @@ Added `'strict-dynamic'` directive to Content Security Policy configuration. Thi
 Content-Security-Policy: script-src 'nonce-xyz123' 'strict-dynamic'
 ```
 
-**Impact**: View tracking analytics now work correctly across the site.
+**Impact**: View tracking analytics now work correctly across the site. See live stats on the [trending page](https://claudepro.directory/trending).
 
 ---
 
@@ -227,7 +339,7 @@ Content-Security-Policy: script-src 'nonce-xyz123' 'strict-dynamic'
 
 ### Added
 
-- **MCP Server**: [reddit-mcp-buddy](content/mcp/reddit-mcp-buddy.json)
+- **MCP Server**: reddit-mcp-buddy
   - Browse Reddit posts and comments
   - Search posts by keyword
   - Analyze user activity
@@ -238,6 +350,10 @@ Content-Security-Policy: script-src 'nonce-xyz123' 'strict-dynamic'
 
 - Updated troubleshooting field to match MCP schema (object array with issue/solution properties)
 
+### For Users
+
+Browse and discover [MCP Servers](https://claudepro.directory/mcp) including the new Reddit integration for Claude Desktop.
+
 ---
 
 ## 2025-10-04 - Submit Form GitHub API Elimination
@@ -246,7 +362,7 @@ Content-Security-Policy: script-src 'nonce-xyz123' 'strict-dynamic'
 
 ### What Changed
 
-Completely refactored the submission flow to eliminate all GitHub API dependencies. Users now fill the form and get redirected to GitHub with a pre-filled issue they can review before submitting.
+Completely refactored the [submission flow](https://claudepro.directory/submit) to eliminate all GitHub API dependencies. Users now fill the form and get redirected to GitHub with a pre-filled issue they can review before submitting.
 
 ### Architecture Improvements
 
@@ -285,6 +401,10 @@ window.open(url.toString(), '_blank');
 ### Changed
 
 - Form content types now exclude 'guides': `agents | mcp | rules | commands | hooks | statuslines`
+
+### For Users
+
+[Submit your configurations](https://claudepro.directory/submit) faster with simplified GitHub integration - no account required until final submission.
 
 ---
 

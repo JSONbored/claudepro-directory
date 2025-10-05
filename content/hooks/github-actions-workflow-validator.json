@@ -1,5 +1,6 @@
 {
   "slug": "github-actions-workflow-validator",
+  "seoTitle": "GitHub Actions Validator",
   "description": "Validates GitHub Actions workflow files for syntax errors and best practices",
   "category": "hooks",
   "author": "JSONbored",
