@@ -32,7 +32,7 @@ export const newsletterSignupSchema = z.object({
 
   // Optional: Signup source for analytics
   source: z
-    .enum(['footer', 'homepage', 'modal', 'content_page', 'inline'])
+    .enum(['footer', 'homepage', 'modal', 'content_page', 'inline', 'post_copy'])
     .optional()
     .describe('Signup source location for tracking conversion attribution'),
 

@@ -1,16 +1,19 @@
 /**
  * Production-Grade Resend Email Service
- * Handles newsletter subscriptions and contact management via Resend API
+ * Handles newsletter subscriptions, contact management, and email sending via Resend API
  *
  * Features:
  * - Type-safe API integration
+ * - React Email template support
  * - Error handling and logging
  * - Graceful degradation when API key missing
  * - Production-ready with comprehensive error messages
  */
 
+import type { ReactElement } from 'react';
 import { Resend } from 'resend';
 import { z } from 'zod';
+import { renderEmail } from '@/src/emails/utils/render';
 import { logger } from '@/src/lib/logger';
 import { env } from '@/src/lib/schemas/env.schema';
 
@@ -38,6 +41,16 @@ export interface SubscribeResponse {
   contactId?: string;
   message: string;
   error?: string;
+}
+
+/**
+ * Email sending result
+ */
+export interface EmailSendResult {
+  success: boolean;
+  emailId?: string;
+  error?: string;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -228,6 +241,118 @@ class ResendService {
       enabled: this.isEnabled(),
       fromEmail: this.FROM_EMAIL,
     };
+  }
+
+  /**
+   * Send email using React Email template
+   *
+   * @param to - Recipient email address(es)
+   * @param subject - Email subject line
+   * @param template - React Email component
+   * @param options - Additional email options
+   * @returns Email send result
+   *
+   * @example
+   * ```ts
+   * import { NewsletterWelcome } from '@/src/emails/templates/newsletter-welcome';
+   *
+   * const result = await resendService.sendEmail(
+   *   'user@example.com',
+   *   'Welcome to ClaudePro Directory!',
+   *   <NewsletterWelcome email="user@example.com" source="signup" />
+   * );
+   * ```
+   */
+  async sendEmail(
+    to: string | string[],
+    subject: string,
+    template: ReactElement,
+    options?: {
+      from?: string;
+      replyTo?: string;
+      tags?: Array<{ name: string; value: string }>;
+    }
+  ): Promise<EmailSendResult> {
+    // Check if service is enabled
+    if (!this.client) {
+      logger.error('Resend service not initialized - missing API key');
+      return {
+        success: false,
+        error: 'Email service is not configured',
+      };
+    }
+
+    try {
+      // Render React template to HTML
+      const rendered = await renderEmail(template, { plainText: true });
+
+      if (!(rendered.success && rendered.html)) {
+        logger.error('Failed to render email template', undefined, {
+          ...(rendered.error && { error: rendered.error }),
+        });
+
+        return {
+          success: false,
+          error: rendered.error || 'Failed to render email template',
+        };
+      }
+
+      // Send email via Resend
+      const response = await this.client.emails.send({
+        from: options?.from || this.FROM_EMAIL,
+        to: Array.isArray(to) ? to : [to],
+        subject,
+        html: rendered.html,
+        ...(rendered.text && { text: rendered.text }),
+        ...(options?.replyTo && { replyTo: options.replyTo }),
+        ...(options?.tags && { tags: options.tags }),
+      });
+
+      // Check for API errors
+      if (response.error) {
+        logger.error('Failed to send email via Resend', undefined, {
+          errorName: response.error.name || 'ResendError',
+          errorMessage: response.error.message || String(response.error),
+          recipients: Array.isArray(to) ? to.join(', ') : to,
+          subject,
+        });
+
+        return {
+          success: false,
+          error: response.error.message || String(response.error),
+        };
+      }
+
+      // Success
+      logger.info('Email sent successfully', {
+        emailId: response.data?.id,
+        recipients: Array.isArray(to) ? to.join(', ') : to,
+        subject,
+      });
+
+      return {
+        success: true,
+        emailId: response.data?.id,
+        metadata: {
+          recipients: to,
+          subject,
+        },
+      };
+    } catch (error) {
+      const errorDetails = this.parseError(error);
+
+      logger.error('Email sending failed', error instanceof Error ? error : undefined, {
+        errorName: errorDetails.name,
+        errorMessage: errorDetails.message,
+        recipients: Array.isArray(to) ? to.join(', ') : to,
+        subject,
+      });
+
+      return {
+        success: false,
+        error: errorDetails.message,
+      };
+    }
   }
 
   /**

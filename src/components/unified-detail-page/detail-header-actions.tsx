@@ -19,7 +19,7 @@ import { CopyMarkdownButton } from '@/src/components/shared/copy-markdown-button
 import { DownloadMarkdownButton } from '@/src/components/shared/download-markdown-button';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
-import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
+import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { ArrowLeft, Copy } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

@@ -8,6 +8,7 @@ import './globals.css';
 import { Toaster } from 'sonner';
 import { Footer } from '@/src/components/layout/footer';
 import { Navigation } from '@/src/components/layout/navigation';
+import { PostCopyEmailProvider } from '@/src/components/providers/post-copy-email-provider';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import { FooterNewsletterBar } from '@/src/components/shared/footer-newsletter-bar';
 import { PerformanceOptimizer } from '@/src/components/shared/performance-optimizer';
@@ -152,24 +153,26 @@ export default async function RootLayout({
           disableTransitionOnChange
           {...(nonce ? { nonce } : {})}
         >
-          <ErrorBoundary>
-            <a
-              href="#main-content"
-              className={`sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:${UI_CLASSES.Z_50} focus:px-4 focus:${UI_CLASSES.PY_2} focus:bg-primary focus:text-primary-foreground ${UI_CLASSES.ROUNDED_MD}`}
-            >
-              Skip to main content
-            </a>
-            <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background flex flex-col`}>
-              <Navigation />
-              {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
-              <main id="main-content" className="flex-1">
-                {children}
-              </main>
-              <Footer />
-            </div>
-          </ErrorBoundary>
-          <Toaster />
-          <FooterNewsletterBar />
+          <PostCopyEmailProvider>
+            <ErrorBoundary>
+              <a
+                href="#main-content"
+                className={`sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:${UI_CLASSES.Z_50} focus:px-4 focus:${UI_CLASSES.PY_2} focus:bg-primary focus:text-primary-foreground ${UI_CLASSES.ROUNDED_MD}`}
+              >
+                Skip to main content
+              </a>
+              <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background flex flex-col`}>
+                <Navigation />
+                {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
+                <main id="main-content" className="flex-1">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+            </ErrorBoundary>
+            <Toaster />
+            <FooterNewsletterBar />
+          </PostCopyEmailProvider>
         </ThemeProvider>
         <PerformanceOptimizer />
         <Analytics />

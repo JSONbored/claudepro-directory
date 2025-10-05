@@ -1,6 +1,8 @@
 'use server';
 
+import { NewsletterWelcome } from '@/src/emails/templates/newsletter-welcome';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { logger } from '@/src/lib/logger';
 import { newsletterSignupSchema } from '@/src/lib/schemas/newsletter.schema';
 import { resendService } from '@/src/lib/services/resend.service';
 
@@ -58,8 +60,44 @@ export const subscribeToNewsletter = rateLimitedAction
 
     const result = await resendService.subscribe(email, metadata);
 
-    // Return structured response
+    // If subscription successful, send welcome email
     if (result.success) {
+      // Send welcome email asynchronously (don't block on email send)
+      // If email fails, subscription still succeeded
+      resendService
+        .sendEmail(
+          email,
+          'Welcome to ClaudePro Directory! 🎉',
+          NewsletterWelcome({ email, ...(source && { source }) }),
+          {
+            tags: [
+              { name: 'template', value: 'newsletter_welcome' },
+              { name: 'source', value: source || 'unknown' },
+            ],
+          }
+        )
+        .then((emailResult) => {
+          if (emailResult.success) {
+            logger.info('Welcome email sent successfully', {
+              email,
+              ...(emailResult.emailId && { emailId: emailResult.emailId }),
+              ...(source && { source }),
+            });
+          } else {
+            logger.error('Failed to send welcome email', undefined, {
+              email,
+              ...(emailResult.error && { error: emailResult.error }),
+              ...(source && { source }),
+            });
+          }
+        })
+        .catch((error) => {
+          logger.error('Welcome email send error', error instanceof Error ? error : undefined, {
+            email,
+            ...(source && { source }),
+          });
+        });
+
       return {
         success: true,
         message: result.message,

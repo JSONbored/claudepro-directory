@@ -43,6 +43,11 @@ export const EVENTS = {
   SHARE_CONTENT: 'share_content',
   FEEDBACK_SUBMITTED: 'feedback_submitted',
 
+  // Email Capture Events
+  EMAIL_CAPTURED: 'email_captured',
+  EMAIL_MODAL_SHOWN: 'email_modal_shown',
+  EMAIL_MODAL_DISMISSED: 'email_modal_dismissed',
+
   // Error Events
   ERROR_OCCURRED: 'error_occurred',
   NOT_FOUND: 'not_found',
@@ -222,6 +227,25 @@ export interface EventPayloads {
     category?: string;
   };
 
+  [EVENTS.EMAIL_CAPTURED]: {
+    trigger_source: 'post_copy' | 'cta' | 'footer' | 'modal';
+    copy_type?: 'llmstxt' | 'markdown' | 'code' | 'link';
+    content_category?: string;
+    content_slug?: string;
+  };
+
+  [EVENTS.EMAIL_MODAL_SHOWN]: {
+    trigger_source: string;
+    copy_type?: string;
+    session_copy_count: number;
+  };
+
+  [EVENTS.EMAIL_MODAL_DISMISSED]: {
+    trigger_source: string;
+    dismissal_method: 'close_button' | 'overlay_click' | 'maybe_later';
+    time_shown_ms: number;
+  };
+
   [EVENTS.ERROR_OCCURRED]: {
     error_type: string;
     error_code?: string;
@@ -319,6 +343,9 @@ export const EVENT_CATEGORIES = {
     EVENTS.DOWNLOAD_MARKDOWN,
     EVENTS.SHARE_CONTENT,
     EVENTS.FEEDBACK_SUBMITTED,
+    EVENTS.EMAIL_CAPTURED,
+    EVENTS.EMAIL_MODAL_SHOWN,
+    EVENTS.EMAIL_MODAL_DISMISSED,
   ],
   ERROR: [EVENTS.ERROR_OCCURRED, EVENTS.NOT_FOUND, EVENTS.API_ERROR],
   FEATURE: [
@@ -514,6 +541,21 @@ export const EVENT_CONFIG: Record<
   [EVENTS.PAGINATION_CLICKED]: {
     description: 'Pagination used',
     category: 'NAVIGATION',
+    enabled: true,
+  },
+  [EVENTS.EMAIL_CAPTURED]: {
+    description: 'User email captured for newsletter',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.EMAIL_MODAL_SHOWN]: {
+    description: 'Email capture modal displayed to user',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.EMAIL_MODAL_DISMISSED]: {
+    description: 'User dismissed email capture modal',
+    category: 'INTERACTION',
     enabled: true,
   },
 };

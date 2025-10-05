@@ -20,7 +20,7 @@ import { useAction } from 'next-safe-action/hooks';
 import { useState } from 'react';
 import { Button } from '@/src/components/ui/button';
 import { toast } from '@/src/components/ui/sonner';
-import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
+import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { copyMarkdownAction } from '@/src/lib/actions/markdown-actions';
 import { EVENTS } from '@/src/lib/analytics/events.config';
 import { trackEvent } from '@/src/lib/analytics/tracker';
@@ -115,7 +115,13 @@ export function CopyMarkdownButton({
 }: CopyMarkdownButtonProps) {
   const [isExecuting, setIsExecuting] = useState(false);
 
-  const { copied, copy } = useCopyToClipboard({
+  const { copied, copy } = useCopyWithEmailCapture({
+    emailContext: {
+      copyType: 'markdown',
+      category,
+      slug,
+      referrer: typeof window !== 'undefined' ? window.location.pathname : undefined,
+    },
     onSuccess: () => {
       toast.success('Copied to clipboard!', {
         description: 'Markdown content ready to paste',
@@ -247,7 +253,13 @@ export function CopyMarkdownButtonIcon({
 }: Omit<CopyMarkdownButtonProps, 'label' | 'size' | 'showIcon'>) {
   const [isExecuting, setIsExecuting] = useState(false);
 
-  const { copied, copy } = useCopyToClipboard({
+  const { copied, copy } = useCopyWithEmailCapture({
+    emailContext: {
+      copyType: 'markdown',
+      category,
+      slug,
+      referrer: typeof window !== 'undefined' ? window.location.pathname : undefined,
+    },
     onSuccess: () => {
       toast.success('Copied as Markdown!');
     },
