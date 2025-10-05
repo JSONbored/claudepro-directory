@@ -356,6 +356,193 @@ class ResendService {
   }
 
   /**
+   * Get all contacts from audience
+   *
+   * @param audienceId - Optional audience ID (defaults to configured audience)
+   * @returns Array of contact email addresses
+   *
+   * @example
+   * ```ts
+   * const subscribers = await resendService.getAllContacts();
+   * console.log(`${subscribers.length} subscribers`);
+   * ```
+   */
+  async getAllContacts(audienceId?: string): Promise<string[]> {
+    // Check if service is enabled
+    if (!this.client) {
+      logger.error('Resend service not initialized - missing API key');
+      return [];
+    }
+
+    const targetAudienceId = audienceId || this.AUDIENCE_ID;
+
+    if (!targetAudienceId) {
+      logger.error('Audience ID not provided or configured');
+      return [];
+    }
+
+    try {
+      const contacts: string[] = [];
+      let hasMore = true;
+      let cursor: string | undefined;
+
+      // Paginate through all contacts
+      while (hasMore) {
+        const response = await this.client.contacts.list({
+          audienceId: targetAudienceId,
+          ...(cursor && { cursor }),
+        });
+
+        if (response.error) {
+          logger.error('Failed to fetch contacts from Resend', undefined, {
+            errorName: response.error.name || 'ResendError',
+            errorMessage: response.error.message || String(response.error),
+            audienceId: targetAudienceId,
+          });
+          break;
+        }
+
+        if (response.data?.data) {
+          // Extract email addresses
+          const emails = response.data.data
+            .map((contact) => contact.email)
+            .filter((email): email is string => typeof email === 'string');
+          contacts.push(...emails);
+
+          // Check for next page
+          hasMore = !!response.data.next_cursor;
+          cursor = response.data.next_cursor || undefined;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      logger.info('Retrieved contacts from audience', {
+        audienceId: targetAudienceId,
+        count: contacts.length,
+      });
+
+      return contacts;
+    } catch (error) {
+      const errorDetails = this.parseError(error);
+      logger.error('Failed to get contacts', error instanceof Error ? error : undefined, {
+        errorName: errorDetails.name,
+        errorMessage: errorDetails.message,
+        audienceId: targetAudienceId,
+      });
+      return [];
+    }
+  }
+
+  /**
+   * Send batch emails with rate limiting
+   *
+   * Chunks recipients and adds delays to respect Resend rate limits.
+   * Resend allows 50 recipients per request.
+   *
+   * @param recipients - Array of email addresses
+   * @param subject - Email subject line
+   * @param template - React Email component
+   * @param options - Additional email options
+   * @returns Batch send results
+   *
+   * @example
+   * ```ts
+   * const results = await resendService.sendBatchEmails(
+   *   subscribers,
+   *   'Weekly Digest',
+   *   <WeeklyDigest {...data} />,
+   *   { tags: [{ name: 'type', value: 'digest' }] }
+   * );
+   * console.log(`Sent: ${results.success}, Failed: ${results.failed}`);
+   * ```
+   */
+  async sendBatchEmails(
+    recipients: string[],
+    subject: string,
+    template: ReactElement,
+    options?: {
+      from?: string;
+      replyTo?: string;
+      tags?: Array<{ name: string; value: string }>;
+      delayMs?: number; // Delay between batches (default: 1000ms)
+    }
+  ): Promise<{ success: number; failed: number; errors: string[] }> {
+    const results = {
+      success: 0,
+      failed: 0,
+      errors: [] as string[],
+    };
+
+    // Check if service is enabled
+    if (!this.client) {
+      logger.error('Resend service not initialized - missing API key');
+      return results;
+    }
+
+    const batchSize = 50; // Resend limit
+    const delayMs = options?.delayMs || 1000;
+
+    logger.info('Starting batch email send', {
+      totalRecipients: recipients.length,
+      batches: Math.ceil(recipients.length / batchSize),
+    });
+
+    // Process in chunks
+    for (let i = 0; i < recipients.length; i += batchSize) {
+      const batch = recipients.slice(i, i + batchSize);
+      const batchNumber = Math.floor(i / batchSize) + 1;
+      const totalBatches = Math.ceil(recipients.length / batchSize);
+
+      logger.info(`Processing batch ${batchNumber}/${totalBatches}`, {
+        batchSize: batch.length,
+      });
+
+      // Send emails in batch
+      const batchResults = await Promise.allSettled(
+        batch.map((email) =>
+          this.sendEmail(email, subject, template, {
+            from: options?.from,
+            replyTo: options?.replyTo,
+            tags: options?.tags,
+          })
+        )
+      );
+
+      // Count results
+      for (let j = 0; j < batchResults.length; j++) {
+        const result = batchResults[j];
+        const email = batch[j];
+
+        if (result.status === 'fulfilled' && result.value.success) {
+          results.success++;
+        } else {
+          results.failed++;
+          const errorMsg =
+            result.status === 'rejected'
+              ? result.reason
+              : result.value.error || 'Unknown error';
+          results.errors.push(`${email}: ${errorMsg}`);
+        }
+      }
+
+      // Rate limit: delay between batches (except for last batch)
+      if (i + batchSize < recipients.length) {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+    }
+
+    logger.info('Batch email send completed', {
+      success: results.success,
+      failed: results.failed,
+      total: recipients.length,
+      successRate: `${((results.success / recipients.length) * 100).toFixed(1)}%`,
+    });
+
+    return results;
+  }
+
+  /**
    * Parse Resend API errors into structured format
    */
   private parseError(error: unknown): ResendError {
