@@ -72,7 +72,9 @@ export function FooterNewsletterBar() {
         {/* Desktop layout */}
         <div className="hidden md:flex items-center justify-between gap-4">
           <p className="text-sm font-medium text-primary">
-            Get weekly updates on <span className="text-[var(--color-accent-light)]">new tools & guides</span> — no spam, unsubscribe anytime
+            Get weekly updates on{' '}
+            <span className="text-[var(--color-accent-light)]">new tools & guides</span> — no spam,
+            unsubscribe anytime
           </p>
           <div className="flex items-center gap-3">
             <NewsletterForm source="footer" className="w-[400px]" />
