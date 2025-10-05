@@ -74,12 +74,13 @@ export function DetailHeaderActions({
   onCopyContent,
 }: DetailHeaderActionsProps) {
   const router = useRouter();
+  const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
   const { copied, copy } = useCopyWithEmailCapture({
     emailContext: {
       copyType: determineCopyType(item),
       category,
       slug: item.slug,
-      referrer: typeof window !== 'undefined' ? window.location.pathname : undefined,
+      ...(referrer && { referrer }),
     },
     onSuccess: () => {
       toast.success('Copied!', {

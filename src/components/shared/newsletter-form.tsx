@@ -43,10 +43,11 @@ export function NewsletterForm({
     }
 
     startTransition(async () => {
+      const referrer = typeof window !== 'undefined' ? window.location.href : undefined;
       const result = await subscribeToNewsletter({
         email,
         source,
-        referrer: typeof window !== 'undefined' ? window.location.href : undefined,
+        ...(referrer && { referrer }),
       });
 
       if (result?.data?.success) {

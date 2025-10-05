@@ -115,12 +115,13 @@ export function CopyMarkdownButton({
 }: CopyMarkdownButtonProps) {
   const [isExecuting, setIsExecuting] = useState(false);
 
+  const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
   const { copied, copy } = useCopyWithEmailCapture({
     emailContext: {
       copyType: 'markdown',
       category,
       slug,
-      referrer: typeof window !== 'undefined' ? window.location.pathname : undefined,
+      ...(referrer && { referrer }),
     },
     onSuccess: () => {
       toast.success('Copied to clipboard!', {
@@ -253,12 +254,13 @@ export function CopyMarkdownButtonIcon({
 }: Omit<CopyMarkdownButtonProps, 'label' | 'size' | 'showIcon'>) {
   const [isExecuting, setIsExecuting] = useState(false);
 
+  const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
   const { copied, copy } = useCopyWithEmailCapture({
     emailContext: {
       copyType: 'markdown',
       category,
       slug,
-      referrer: typeof window !== 'undefined' ? window.location.pathname : undefined,
+      ...(referrer && { referrer }),
     },
     onSuccess: () => {
       toast.success('Copied as Markdown!');

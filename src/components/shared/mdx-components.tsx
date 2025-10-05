@@ -23,6 +23,7 @@ export function CopyableHeading({
 }: MdxHeadingProps & { level: 1 | 2 | 3 }) {
   const mdxContext = useMDXContent();
 
+  const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
   const { copied, copy } = useCopyWithEmailCapture({
     emailContext: {
       copyType: 'link',
@@ -30,7 +31,7 @@ export function CopyableHeading({
         category: mdxContext.category,
         slug: mdxContext.slug,
       }),
-      referrer: typeof window !== 'undefined' ? window.location.pathname : undefined,
+      ...(referrer && { referrer }),
     },
     context: {
       component: 'CopyableHeading',
@@ -84,6 +85,7 @@ const textContentSchema = z.string().min(0);
 export function CopyableCodeBlock({ children, className, ...props }: MdxElementProps) {
   const mdxContext = useMDXContent();
 
+  const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
   const { copied, copy } = useCopyWithEmailCapture({
     emailContext: {
       copyType: 'code',
@@ -91,7 +93,7 @@ export function CopyableCodeBlock({ children, className, ...props }: MdxElementP
         category: mdxContext.category,
         slug: mdxContext.slug,
       }),
-      referrer: typeof window !== 'undefined' ? window.location.pathname : undefined,
+      ...(referrer && { referrer }),
     },
     context: {
       component: 'CopyableCodeBlock',
