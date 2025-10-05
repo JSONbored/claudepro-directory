@@ -31,12 +31,13 @@ export interface CardCopyActionProps {
 }
 
 export function CardCopyAction({ url, category, slug, title, componentName }: CardCopyActionProps) {
+  const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
   const { copied, copy } = useCopyWithEmailCapture({
     emailContext: {
       copyType: 'link',
       category,
       slug,
-      referrer: typeof window !== 'undefined' ? window.location.pathname : undefined,
+      ...(referrer && { referrer }),
     },
     onSuccess: () => {
       // Track copy action for analytics (silent fail)

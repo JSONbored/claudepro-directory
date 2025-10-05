@@ -16,6 +16,7 @@
  * - email.delivery_delayed: Monitoring
  */
 
+import { type NextRequest, NextResponse } from 'next/server';
 import { Webhook } from 'svix';
 import { logger } from '@/src/lib/logger';
 import { rateLimiters } from '@/src/lib/rate-limiter';
@@ -30,7 +31,7 @@ export const runtime = 'nodejs';
  * POST /api/webhooks/resend
  * Receives and processes webhook events from Resend
  */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   // Extract webhook signature headers
   const svixId = request.headers.get('svix-id');
   const svixTimestamp = request.headers.get('svix-timestamp');
@@ -121,7 +122,7 @@ export async function POST(request: Request) {
   });
 
   // Return success immediately
-  return Response.json({
+  return NextResponse.json({
     received: true,
     eventType: event.type,
     timestamp: new Date().toISOString(),
