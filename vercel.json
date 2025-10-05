@@ -8,6 +8,14 @@
     {
       "path": "/api/cache/warm",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/send-weekly-digest",
+      "schedule": "0 14 * * 1"
+    },
+    {
+      "path": "/api/cron/process-email-sequences",
+      "schedule": "0 */4 * * *"
     }
   ]
 }
