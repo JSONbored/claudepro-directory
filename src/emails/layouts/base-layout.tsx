@@ -100,11 +100,11 @@ export function BaseLayout({
                     .
                   </Text>
                   <Text style={footerTextStyle}>
-                    <Link href="https://claudepro.directory/unsubscribe" style={footerLinkStyle}>
+                    <Link href="{{unsubscribe_url}}" style={footerLinkStyle}>
                       Unsubscribe
                     </Link>
                     {' · '}
-                    <Link href="https://claudepro.directory/preferences" style={footerLinkStyle}>
+                    <Link href="{{preferences_url}}" style={footerLinkStyle}>
                       Email Preferences
                     </Link>
                     {' · '}
