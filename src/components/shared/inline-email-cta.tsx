@@ -63,7 +63,7 @@ export interface InlineEmailCTAProps {
  * Get contextual messaging based on category
  */
 function getContextualMessage(category?: string): { headline: string; description: string } {
-  const messages: Record<string, { headline: string; description: string }> = {
+  const messages = {
     agents: {
       headline: 'Get New AI Agents Weekly',
       description: 'Discover powerful Claude agents delivered to your inbox every week.',
@@ -92,10 +92,13 @@ function getContextualMessage(category?: string): { headline: string; descriptio
       headline: 'Stay Updated with ClaudePro',
       description: 'Get weekly updates on new tools, guides, and community highlights.',
     },
-  };
+  } as const satisfies Record<string, { headline: string; description: string }>;
 
-  const key = (category || 'default') as keyof typeof messages;
-  return messages[key] ?? messages.default;
+  if (!category || !(category in messages)) {
+    return messages.default;
+  }
+  
+  return messages[category as keyof typeof messages] as { headline: string; description: string };
 }
 
 /**

@@ -121,7 +121,7 @@ export function CopyMarkdownButton({
       copyType: 'markdown',
       category,
       slug,
-      ...(referrer && { referrer }),
+      ...(referrer ? { referrer } : {}),
     },
     onSuccess: () => {
       toast.success('Copied to clipboard!', {
@@ -260,7 +260,7 @@ export function CopyMarkdownButtonIcon({
       copyType: 'markdown',
       category,
       slug,
-      ...(referrer && { referrer }),
+      ...(referrer ? { referrer } : {}),
     },
     onSuccess: () => {
       toast.success('Copied as Markdown!');
