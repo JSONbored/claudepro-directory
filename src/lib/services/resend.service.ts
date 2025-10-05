@@ -115,13 +115,37 @@ class ResendService {
         audienceId: this.AUDIENCE_ID,
       });
 
-      // Debug: Log the raw response structure
-      logger.info('Resend API raw response received', {
-        hasData: !!response.data,
-        dataType: typeof response.data,
-        responseKeys: response.data ? Object.keys(response.data).join(', ') : 'none',
-        fullResponse: JSON.stringify(response),
-      });
+      // Check for API errors first (Resend SDK returns either {data, error: null} or {data: null, error})
+      if (response.error) {
+        logger.error('Resend API returned error', undefined, {
+          errorName: response.error.name || 'ResendError',
+          errorMessage: response.error.message || String(response.error),
+        });
+
+        // Handle specific error cases
+        const errorMessage = response.error.message || String(response.error);
+
+        if (errorMessage.includes('already exists')) {
+          return {
+            success: true, // Treat duplicate as success (idempotent)
+            message: 'Email already subscribed',
+          };
+        }
+
+        if (errorMessage.includes('invalid email') || errorMessage.includes('validation')) {
+          return {
+            success: false,
+            message: 'Invalid email address',
+            error: 'Email validation failed',
+          };
+        }
+
+        return {
+          success: false,
+          message: 'Subscription failed - please try again',
+          error: errorMessage,
+        };
+      }
 
       // Type-safe response parsing
       const contact = resendContactSchema.safeParse(response.data);
