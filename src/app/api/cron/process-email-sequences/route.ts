@@ -50,9 +50,10 @@ export async function GET(_request: Request) {
       sent: results.sent,
       failed: results.failed,
       total: results.sent + results.failed,
-      successRate: results.sent > 0 
-        ? `${((results.sent / (results.sent + results.failed)) * 100).toFixed(1)}%`
-        : '0%',
+      successRate:
+        results.sent > 0
+          ? `${((results.sent / (results.sent + results.failed)) * 100).toFixed(1)}%`
+          : '0%',
     });
 
     return NextResponse.json({
@@ -60,9 +61,10 @@ export async function GET(_request: Request) {
       sent: results.sent,
       failed: results.failed,
       total: results.sent + results.failed,
-      successRate: results.sent > 0
-        ? `${((results.sent / (results.sent + results.failed)) * 100).toFixed(1)}%`
-        : '0%',
+      successRate:
+        results.sent > 0
+          ? `${((results.sent / (results.sent + results.failed)) * 100).toFixed(1)}%`
+          : '0%',
     });
   } catch (error) {
     logger.error(

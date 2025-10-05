@@ -519,9 +519,7 @@ class ResendService {
         } else {
           results.failed++;
           const errorMsg =
-            result.status === 'rejected'
-              ? result.reason
-              : result.value.error || 'Unknown error';
+            result.status === 'rejected' ? result.reason : result.value.error || 'Unknown error';
           results.errors.push(`${email}: ${errorMsg}`);
         }
       }

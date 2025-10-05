@@ -72,12 +72,7 @@ export interface WeeklyDigestProps {
  * />
  * ```
  */
-export function WeeklyDigest({
-  email,
-  weekOf,
-  newContent,
-  trendingContent,
-}: WeeklyDigestProps) {
+export function WeeklyDigest({ email, weekOf, newContent, trendingContent }: WeeklyDigestProps) {
   return (
     <BaseLayout preview={`This Week in Claude - ${weekOf} | New tools, trending content, and more`}>
       {/* Hero section */}
@@ -101,8 +96,8 @@ export function WeeklyDigest({
               Fresh tools and configurations added to the directory:
             </Text>
 
-            {newContent.map((item, index) => (
-              <Section key={index} style={itemCardStyle}>
+            {newContent.map((item) => (
+              <Section key={`${item.category}-${item.slug}`} style={itemCardStyle}>
                 <Text style={itemCategoryStyle}>{item.category.toUpperCase()}</Text>
                 <Text style={itemTitleStyle}>{item.title}</Text>
                 <Text style={itemDescriptionStyle}>{item.description}</Text>
@@ -124,8 +119,8 @@ export function WeeklyDigest({
             <Text style={sectionTitleStyle}>🔥 Trending This Week</Text>
             <Text style={paragraphStyle}>Most popular tools from the community:</Text>
 
-            {trendingContent.map((item, index) => (
-              <Section key={index} style={itemCardStyle}>
+            {trendingContent.map((item) => (
+              <Section key={`trending-${item.category}-${item.slug}`} style={itemCardStyle}>
                 <div style={trendingHeaderStyle}>
                   <Text style={itemCategoryStyle}>{item.category.toUpperCase()}</Text>
                   <Text style={viewCountStyle}>👁️ {formatViewCount(item.viewCount)} views</Text>

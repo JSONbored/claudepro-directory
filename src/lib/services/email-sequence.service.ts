@@ -170,7 +170,9 @@ class EmailSequenceService {
               async (redis) => {
                 await redis.zrem(dueKey, email);
               },
-              () => {},
+              () => {
+                // Silent fallback - already logged in main error handler
+              },
               'email_sequence_remove_due'
             );
 
@@ -238,7 +240,12 @@ class EmailSequenceService {
 
     // Load template dynamically
     const templateModule = await templateLoader();
-    const Template = templateModule.default || templateModule.OnboardingGettingStarted || templateModule.OnboardingPowerTips || templateModule.OnboardingCommunity || templateModule.OnboardingStayEngaged;
+    const Template =
+      templateModule.default ||
+      templateModule.OnboardingGettingStarted ||
+      templateModule.OnboardingPowerTips ||
+      templateModule.OnboardingCommunity ||
+      templateModule.OnboardingStayEngaged;
 
     if (!Template) {
       throw new Error(`Template not found for step: ${step}`);
@@ -249,17 +256,12 @@ class EmailSequenceService {
 
     // Send email
     const subjectKey = `step${step}` as keyof typeof STEP_SUBJECTS;
-    const result = await resendService.sendEmail(
-      email,
-      STEP_SUBJECTS[subjectKey],
-      element,
-      {
-        tags: [
-          { name: 'template', value: 'onboarding_sequence' },
-          { name: 'step', value: step.toString() },
-        ],
-      }
-    );
+    const result = await resendService.sendEmail(email, STEP_SUBJECTS[subjectKey], element, {
+      tags: [
+        { name: 'template', value: 'onboarding_sequence' },
+        { name: 'step', value: step.toString() },
+      ],
+    });
 
     if (!result.success) {
       throw new Error(result.error || 'Email send failed');

@@ -103,8 +103,8 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
         <Section style={stepCard}>
           <Text style={stepNumberStyle}>3</Text>
           <Text style={stepDescStyle}>
-            <strong style={strongStyle}>Submit via GitHub:</strong> Open a pull request or create
-            an issue with your configuration
+            <strong style={strongStyle}>Submit via GitHub:</strong> Open a pull request or create an
+            issue with your configuration
           </Text>
         </Section>
 
@@ -152,7 +152,10 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
         </Text>
 
         <div style={connectLinksStyle}>
-          <Button href="https://github.com/yourusername/claudepro-directory" style={linkButtonStyle}>
+          <Button
+            href="https://github.com/yourusername/claudepro-directory"
+            style={linkButtonStyle}
+          >
             GitHub
           </Button>
           <Button href="https://twitter.com/claudeprodirectory" style={linkButtonStyle}>

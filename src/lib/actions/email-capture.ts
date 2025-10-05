@@ -99,9 +99,13 @@ export const postCopyEmailCaptureAction = rateLimitedAction
 
               // Enroll in onboarding sequence (async, don't block)
               emailSequenceService.enrollInSequence(email).catch((seqError) => {
-                logger.error('Failed to enroll in sequence (post-copy)', seqError instanceof Error ? seqError : undefined, {
-                  email,
-                });
+                logger.error(
+                  'Failed to enroll in sequence (post-copy)',
+                  seqError instanceof Error ? seqError : undefined,
+                  {
+                    email,
+                  }
+                );
               });
             } else {
               logger.error('Failed to send welcome email (post-copy)', undefined, {

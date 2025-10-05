@@ -80,9 +80,7 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
       {/* Featured Content */}
       <Section style={contentSection}>
         <Text style={sectionTitleStyle}>🌟 Start With These</Text>
-        <Text style={paragraphStyle}>
-          Our community's most loved configurations for beginners:
-        </Text>
+        <Text style={paragraphStyle}>Our community's most loved configurations for beginners:</Text>
 
         <ul style={listStyle}>
           <li style={listItemStyle}>
@@ -90,8 +88,8 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
             practices
           </li>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>Code Reviewer</strong> - Automated code review with
-            security checks
+            <strong style={strongStyle}>Code Reviewer</strong> - Automated code review with security
+            checks
           </li>
           <li style={listItemStyle}>
             <strong style={strongStyle}>Database Specialist</strong> - SQL optimization and schema

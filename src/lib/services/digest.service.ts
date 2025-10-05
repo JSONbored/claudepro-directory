@@ -13,11 +13,11 @@
  * @module lib/services/digest.service
  */
 
+import type { DigestContentItem, DigestTrendingItem } from '@/src/emails/templates/weekly-digest';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { getAllContent } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
 import { contentCache, statsRedis } from '@/src/lib/redis';
-import type { DigestContentItem, DigestTrendingItem } from '@/src/emails/templates/weekly-digest';
 
 /**
  * Digest data for a specific week
@@ -81,11 +81,11 @@ class DigestService {
   /**
    * Get trending content by view counts
    *
-   * @param since - Start date for trending period
+   * @param _since - Start date for trending period (reserved for future filtering)
    * @param limit - Maximum items to return
    * @returns Array of trending content items with view counts
    */
-  async getTrendingContent(since: Date, limit = 3): Promise<DigestTrendingItem[]> {
+  async getTrendingContent(_since: Date, limit = 3): Promise<DigestTrendingItem[]> {
     try {
       // Get all content
       const allContent = await getAllContent();
@@ -167,12 +167,6 @@ class DigestService {
    * @returns Formatted string (e.g., "December 2-8, 2025")
    */
   private formatWeekRange(start: Date, end: Date): string {
-    const options: Intl.DateTimeFormatOptions = {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    };
-
     const startMonth = start.toLocaleDateString('en-US', { month: 'long' });
     const startDay = start.getDate();
     const endDay = end.getDate();

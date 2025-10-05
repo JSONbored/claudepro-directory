@@ -27,9 +27,7 @@ export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
       {/* Hero section */}
       <Section style={heroSection}>
         <Text style={headingStyle}>You're All Set! 🎉</Text>
-        <Text style={subheadingStyle}>
-          Two weeks in - let's keep the momentum going
-        </Text>
+        <Text style={subheadingStyle}>Two weeks in - let's keep the momentum going</Text>
       </Section>
 
       <Hr style={dividerStyle} />
@@ -37,9 +35,7 @@ export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
       {/* Journey Recap */}
       <Section style={recapSection}>
         <Text style={sectionTitleStyle}>Your Journey So Far</Text>
-        <Text style={paragraphStyle}>
-          Over the past two weeks, you've discovered:
-        </Text>
+        <Text style={paragraphStyle}>Over the past two weeks, you've discovered:</Text>
 
         <div style={checklistStyle}>
           <div style={checkItemStyle}>
@@ -140,9 +136,7 @@ export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
           We're grateful to have you in the ClaudePro community. Whether you're just browsing or
           actively contributing, you're helping make Claude more powerful for everyone.
         </Text>
-        <Text style={thankYouTextStyle}>
-          Keep building amazing things with Claude!
-        </Text>
+        <Text style={thankYouTextStyle}>Keep building amazing things with Claude!</Text>
       </Section>
 
       {/* Footer note */}

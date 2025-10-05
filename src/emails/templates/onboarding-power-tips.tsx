@@ -137,9 +137,7 @@ export function OnboardingPowerTips({ email }: OnboardingPowerTipsProps) {
         <Text style={footerNoteStyle}>
           📧 <strong style={strongStyle}>{email}</strong>
         </Text>
-        <Text style={footerNoteStyle}>
-          This is part 3 of your 5-email onboarding series.
-        </Text>
+        <Text style={footerNoteStyle}>This is part 3 of your 5-email onboarding series.</Text>
       </Section>
     </BaseLayout>
   );
