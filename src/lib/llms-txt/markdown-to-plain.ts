@@ -4,8 +4,13 @@
  *
  * @module llms-txt/markdown-to-plain
  * @see {@link https://llmstxt.org} - LLMs.txt specification
+ *
+ * @security Uses DOMPurify for HTML sanitization (prevents XSS, script injection)
+ * @security Uses 'he' library for proper HTML entity decoding (prevents double-unescaping)
  */
 
+import { decode } from 'he';
+import DOMPurify from 'isomorphic-dompurify';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
 
@@ -147,20 +152,31 @@ function convertListItem(line: string): string {
 }
 
 /**
- * Remove HTML tags from text
+ * Remove HTML tags from text with secure sanitization
  * @param text - Text potentially containing HTML
- * @returns Text with all HTML tags removed
+ * @returns Text with all HTML tags removed and entities properly decoded
+ *
+ * @security Uses DOMPurify to safely sanitize HTML (removes scripts, events, dangerous attrs)
+ * @security Uses 'he' library for one-pass HTML entity decoding (prevents double-unescaping vulnerabilities)
+ *
+ * @example
+ * ```ts
+ * stripHtmlTags('<script>alert(1)</script >Hello') // "Hello" (script removed)
+ * stripHtmlTags('&amp;lt;script&amp;gt;') // "&lt;script&gt;" (safely decoded once)
+ * stripHtmlTags('<p>Text</p>') // "Text" (tags stripped)
+ * ```
  */
 function stripHtmlTags(text: string): string {
-  return text
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove script tags first
-    .replace(/<[^>]+>/g, '') // Remove all other tags
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
+  // Step 1: Sanitize HTML with DOMPurify (removes ALL scripts, events, dangerous attributes)
+  // ALLOWED_TAGS: [] strips ALL tags while KEEP_CONTENT: true preserves text content
+  const sanitized = DOMPurify.sanitize(text, {
+    ALLOWED_TAGS: [], // Strip ALL HTML tags (including <script>, <img>, <iframe>, etc.)
+    KEEP_CONTENT: true, // Keep text content only
+  });
+
+  // Step 2: Decode HTML entities properly (one-pass decode prevents double-unescaping)
+  // decode() safely handles: &nbsp; &amp; &lt; &gt; &quot; &#39; and all other entities
+  return decode(sanitized);
 }
 
 /**

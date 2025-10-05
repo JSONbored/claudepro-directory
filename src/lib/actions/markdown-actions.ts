@@ -86,7 +86,9 @@ function generateMarkdownContent(
       sections.push(`seoTitle: "${item.seoTitle}"`);
     }
     if (item.description) {
-      sections.push(`description: "${item.description.replace(/"/g, '\\"')}"`);
+      // Security: Escape backslashes FIRST, then quotes (order matters for YAML injection prevention)
+      const escapedDesc = item.description.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      sections.push(`description: "${escapedDesc}"`);
     }
     sections.push(`category: ${item.category}`);
     sections.push(`slug: ${item.slug}`);
