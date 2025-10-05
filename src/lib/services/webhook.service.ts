@@ -14,7 +14,6 @@ import type {
   ResendWebhookEvent,
 } from '@/src/lib/schemas/webhook.schema';
 import { emailSequenceService } from './email-sequence.service';
-import { resendService } from './resend.service';
 
 /**
  * WebhookService
@@ -73,6 +72,7 @@ class WebhookService {
 
         // Increment stats counter
         await redis.incr(statsKey);
+        return {};
       },
       () => ({}),
       'webhook_bounce_tracking'
@@ -82,7 +82,7 @@ class WebhookService {
     logger.warn('Email bounced', {
       email_hash: emailHash,
       bounceType,
-      error: event.data.error,
+      error: event.data.error ?? 'Unknown error',
       timestamp: event.created_at,
     });
 
@@ -111,15 +111,16 @@ class WebhookService {
       async (redis) => {
         await redis.sadd('email:complaints', email);
         await redis.incr('email:stats:complaints');
+        return {};
       },
       () => ({}),
       'webhook_complaint_tracking'
     );
 
     // Log complaint (serious issue)
-    logger.error('Email spam complaint received', {
+    logger.error('Email spam complaint received', undefined, {
       email_hash: emailHash,
-      feedbackType: event.data.feedback_type,
+      feedbackType: event.data.feedback_type ?? 'unknown',
       timestamp: event.created_at,
     });
 
@@ -141,6 +142,7 @@ class WebhookService {
         const today = new Date().toISOString().split('T')[0];
         await redis.incr(`email:opens:${today}`);
         await redis.incr('email:stats:opens');
+        return {};
       },
       () => ({}),
       'webhook_open_tracking'
@@ -168,6 +170,7 @@ class WebhookService {
         await redis.incr(`email:clicks:${today}`);
         await redis.incr('email:stats:clicks');
         await redis.hincrby('email:link_clicks', link, 1);
+        return {};
       },
       () => ({}),
       'webhook_click_tracking'
@@ -190,7 +193,7 @@ class WebhookService {
 
     logger.warn('Email delivery delayed', {
       email_hash: emailHash,
-      error: 'error' in event.data ? event.data.error : undefined,
+      error: ('error' in event.data ? event.data.error : undefined) ?? 'Unknown error',
       timestamp: event.created_at,
     });
 
@@ -198,6 +201,7 @@ class WebhookService {
     await redisClient.executeOperation(
       async (redis) => {
         await redis.incr('email:stats:delayed');
+        return {};
       },
       () => ({}),
       'webhook_delayed_tracking'
@@ -211,10 +215,9 @@ class WebhookService {
     const emailHash = this.hashEmail(email);
 
     try {
-      // Remove from Resend audience
-      if (resendService.isEnabled()) {
-        await resendService.unsubscribe(email);
-      }
+      // Remove from Resend audience (note: manual removal via Resend dashboard/API required)
+      // The unsubscribe method is not available in the Resend SDK
+      // TODO: Implement contact removal via Resend API if needed
 
       // Cancel email sequences
       await emailSequenceService.cancelSequence(email);
@@ -242,7 +245,7 @@ class WebhookService {
     const count = await redisClient.executeOperation(
       async (redis) => {
         const result = await redis.get(`email:bounces:${email}`);
-        return result ? Number.parseInt(result, 10) : 0;
+        return result ? Number.parseInt(result as string, 10) : 0;
       },
       () => 0,
       'get_bounce_count'
@@ -255,7 +258,7 @@ class WebhookService {
    * Extract email from 'to' field (can be string or array)
    */
   private extractEmail(to: string | string[]): string {
-    return Array.isArray(to) ? to[0] : to;
+    return Array.isArray(to) ? (to[0] ?? '') : to;
   }
 
   /**

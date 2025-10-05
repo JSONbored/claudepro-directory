@@ -29,6 +29,17 @@ export interface WeeklyDigestData {
 }
 
 /**
+ * Type for content items from generated files
+ */
+type ContentItem = Record<string, unknown> & {
+  slug: string;
+  title: string;
+  description?: string;
+  dateAdded?: string;
+  category?: string;
+};
+
+/**
  * DigestService class for content aggregation
  *
  * Singleton service for generating weekly digest content.
@@ -55,13 +66,34 @@ class DigestService {
       ] = await Promise.all([agents, mcp, rules, commands, hooks, statuslines, collections]);
 
       const allContent = [
-        ...agentsData.map((item) => ({ ...item, category: 'agents' as const })),
-        ...mcpData.map((item) => ({ ...item, category: 'mcp' as const })),
-        ...rulesData.map((item) => ({ ...item, category: 'rules' as const })),
-        ...commandsData.map((item) => ({ ...item, category: 'commands' as const })),
-        ...hooksData.map((item) => ({ ...item, category: 'hooks' as const })),
-        ...statuslinesData.map((item) => ({ ...item, category: 'statuslines' as const })),
-        ...collectionsData.map((item) => ({ ...item, category: 'collections' as const })),
+        ...(agentsData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'agents' as const,
+        })),
+        ...(mcpData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'mcp' as const,
+        })),
+        ...(rulesData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'rules' as const,
+        })),
+        ...(commandsData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'commands' as const,
+        })),
+        ...(hooksData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'hooks' as const,
+        })),
+        ...(statuslinesData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'statuslines' as const,
+        })),
+        ...(collectionsData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'collections' as const,
+        })),
       ];
 
       // Filter by dateAdded, sort by date DESC
@@ -117,13 +149,34 @@ class DigestService {
       ] = await Promise.all([agents, mcp, rules, commands, hooks, statuslines, collections]);
 
       const allContent = [
-        ...agentsData.map((item) => ({ ...item, category: 'agents' as const })),
-        ...mcpData.map((item) => ({ ...item, category: 'mcp' as const })),
-        ...rulesData.map((item) => ({ ...item, category: 'rules' as const })),
-        ...commandsData.map((item) => ({ ...item, category: 'commands' as const })),
-        ...hooksData.map((item) => ({ ...item, category: 'hooks' as const })),
-        ...statuslinesData.map((item) => ({ ...item, category: 'statuslines' as const })),
-        ...collectionsData.map((item) => ({ ...item, category: 'collections' as const })),
+        ...(agentsData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'agents' as const,
+        })),
+        ...(mcpData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'mcp' as const,
+        })),
+        ...(rulesData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'rules' as const,
+        })),
+        ...(commandsData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'commands' as const,
+        })),
+        ...(hooksData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'hooks' as const,
+        })),
+        ...(statuslinesData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'statuslines' as const,
+        })),
+        ...(collectionsData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'collections' as const,
+        })),
       ];
 
       // Enrich with view counts

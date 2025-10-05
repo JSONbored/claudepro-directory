@@ -240,19 +240,16 @@ class EmailSequenceService {
 
     // Load template dynamically
     const templateModule = await templateLoader();
-    const Template =
-      templateModule.default ||
-      templateModule.OnboardingGettingStarted ||
-      templateModule.OnboardingPowerTips ||
-      templateModule.OnboardingCommunity ||
-      templateModule.OnboardingStayEngaged;
+    const Template = templateModule.default as
+      | ((props: { email: string }) => ReactElement)
+      | undefined;
 
     if (!Template) {
       throw new Error(`Template not found for step: ${step}`);
     }
 
     // Create React element
-    const element = Template({ email }) as ReactElement;
+    const element = Template({ email });
 
     // Send email
     const subjectKey = `step${step}` as keyof typeof STEP_SUBJECTS;
@@ -303,7 +300,7 @@ class EmailSequenceService {
     logger.info('Sequence email sent', {
       email,
       step,
-      emailId: result.emailId,
+      emailId: result.emailId ?? 'unknown',
       sequenceId: this.SEQUENCE_ID,
     });
   }

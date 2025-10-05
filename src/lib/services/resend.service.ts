@@ -410,8 +410,9 @@ class ResendService {
           contacts.push(...emails);
 
           // Check for next page
-          hasMore = !!response.data.next_cursor;
-          cursor = response.data.next_cursor || undefined;
+          const responseData = response.data as unknown as Record<string, unknown>;
+          hasMore = !!responseData.next_cursor;
+          cursor = (responseData.next_cursor as string | undefined) || undefined;
         } else {
           hasMore = false;
         }
@@ -500,19 +501,25 @@ class ResendService {
 
       // Send emails in batch
       const batchResults = await Promise.allSettled(
-        batch.map((email) =>
-          this.sendEmail(email, subject, template, {
-            from: options?.from,
-            replyTo: options?.replyTo,
-            tags: options?.tags,
-          })
-        )
+        batch.map((email) => {
+          const emailOptions: {
+            from?: string;
+            replyTo?: string;
+            tags?: Array<{ name: string; value: string }>;
+          } = {};
+          if (options?.from) emailOptions.from = options.from;
+          if (options?.replyTo) emailOptions.replyTo = options.replyTo;
+          if (options?.tags) emailOptions.tags = options.tags;
+          return this.sendEmail(email, subject, template, emailOptions);
+        })
       );
 
       // Count results
       for (let j = 0; j < batchResults.length; j++) {
         const result = batchResults[j];
         const email = batch[j];
+
+        if (!(result && email)) continue;
 
         if (result.status === 'fulfilled' && result.value.success) {
           results.success++;
