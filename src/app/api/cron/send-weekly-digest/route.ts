@@ -31,7 +31,7 @@ export const dynamic = 'force-dynamic';
  * @param request - Next.js request object
  * @returns JSON response with send results
  */
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   try {
     logger.info('Weekly digest cron job started');
 

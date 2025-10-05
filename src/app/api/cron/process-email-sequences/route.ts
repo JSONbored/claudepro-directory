@@ -28,7 +28,7 @@ export const dynamic = 'force-dynamic';
  * @param request - Next.js request object
  * @returns JSON response with processing results
  */
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   try {
     logger.info('Email sequence cron job started');
 
