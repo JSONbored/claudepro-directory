@@ -4,6 +4,7 @@ import { NewsletterWelcome } from '@/src/emails/templates/newsletter-welcome';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
 import { newsletterSignupSchema } from '@/src/lib/schemas/newsletter.schema';
+import { emailSequenceService } from '@/src/lib/services/email-sequence.service';
 import { resendService } from '@/src/lib/services/resend.service';
 
 /**
@@ -60,7 +61,7 @@ export const subscribeToNewsletter = rateLimitedAction
 
     const result = await resendService.subscribe(email, metadata);
 
-    // If subscription successful, send welcome email
+    // If subscription successful, send welcome email and enroll in sequence
     if (result.success) {
       // Send welcome email asynchronously (don't block on email send)
       // If email fails, subscription still succeeded
@@ -82,6 +83,13 @@ export const subscribeToNewsletter = rateLimitedAction
               email,
               ...(emailResult.emailId && { emailId: emailResult.emailId }),
               ...(source && { source }),
+            });
+
+            // Enroll in onboarding sequence (async, don't block)
+            emailSequenceService.enrollInSequence(email).catch((seqError) => {
+              logger.error('Failed to enroll in sequence', seqError instanceof Error ? seqError : undefined, {
+                email,
+              });
             });
           } else {
             logger.error('Failed to send welcome email', undefined, {

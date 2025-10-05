@@ -5,6 +5,7 @@ import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { EVENTS } from '@/src/lib/analytics/events.config';
 import { logger } from '@/src/lib/logger';
 import { postCopyEmailCaptureSchema } from '@/src/lib/schemas/email-capture.schema';
+import { emailSequenceService } from '@/src/lib/services/email-sequence.service';
 import { resendService } from '@/src/lib/services/resend.service';
 
 /**
@@ -71,7 +72,7 @@ export const postCopyEmailCaptureAction = rateLimitedAction
 
       const result = await resendService.subscribe(email, metadata);
 
-      // If subscription successful, send welcome email
+      // If subscription successful, send welcome email and enroll in sequence
       if (result.success) {
         // Send welcome email asynchronously (don't block on email send)
         resendService
@@ -94,6 +95,13 @@ export const postCopyEmailCaptureAction = rateLimitedAction
                 ...(emailResult.emailId && { emailId: emailResult.emailId }),
                 ...(source && { source }),
                 ...(copyType && { copyType }),
+              });
+
+              // Enroll in onboarding sequence (async, don't block)
+              emailSequenceService.enrollInSequence(email).catch((seqError) => {
+                logger.error('Failed to enroll in sequence (post-copy)', seqError instanceof Error ? seqError : undefined, {
+                  email,
+                });
               });
             } else {
               logger.error('Failed to send welcome email (post-copy)', undefined, {

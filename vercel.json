@@ -15,7 +15,7 @@
     },
     {
       "path": "/api/cron/process-email-sequences",
-      "schedule": "0 */4 * * *"
+      "schedule": "0 10 * * *"
     }
   ]
 }
