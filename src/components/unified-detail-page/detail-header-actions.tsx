@@ -20,9 +20,21 @@ import { DownloadMarkdownButton } from '@/src/components/shared/download-markdow
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
+import type { CopyType } from '@/src/components/shared/post-copy-email-modal';
 import { ArrowLeft, Copy } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+
+/**
+ * Determine copy type based on content item structure
+ */
+function determineCopyType(item: UnifiedContentItem): CopyType {
+  // Check if item has content or configuration (indicates code/config copy)
+  if ('content' in item && item.content) return 'code';
+  if ('configuration' in item && item.configuration) return 'code';
+  // Default to link for other types
+  return 'link';
+}
 
 /**
  * Serializable action data for client component
@@ -62,7 +74,13 @@ export function DetailHeaderActions({
   onCopyContent,
 }: DetailHeaderActionsProps) {
   const router = useRouter();
-  const { copied, copy } = useCopyToClipboard({
+  const { copied, copy } = useCopyWithEmailCapture({
+    emailContext: {
+      copyType: determineCopyType(item),
+      category,
+      slug: item.slug,
+      referrer: typeof window !== 'undefined' ? window.location.pathname : undefined,
+    },
     onSuccess: () => {
       toast.success('Copied!', {
         description: `${typeName} content has been copied to your clipboard.`,
