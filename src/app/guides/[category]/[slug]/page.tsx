@@ -7,6 +7,7 @@ import path from 'path';
 import { z } from 'zod';
 // Removed unused import: CategoryGuidesPage
 import { UnifiedSidebar } from '@/src/components/layout/sidebar/unified-sidebar';
+import { MDXContentProvider } from '@/src/components/providers/mdx-content-provider';
 import { MDXRenderer } from '@/src/components/shared/mdx-renderer';
 import { ViewTracker } from '@/src/components/shared/view-tracker';
 import { Badge } from '@/src/components/ui/badge';
