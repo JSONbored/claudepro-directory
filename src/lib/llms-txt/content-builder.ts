@@ -5,8 +5,12 @@
  * @module llms-txt/content-builder
  * @security Type-safe extraction based on actual content schemas
  * @performance Optimized for production with minimal overhead
+ *
+ * CRITICAL: Uses content-type-configs generators to provide missing fields (features, useCases, requirements)
+ * This ensures llms.txt content matches UnifiedDetailPage rendering EXACTLY for optimal LLM citation accuracy
  */
 
+import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
 import type { AgentContent } from '@/src/lib/schemas/content/agent.schema';
 import type { CommandContent } from '@/src/lib/schemas/content/command.schema';
 import type { HookContent } from '@/src/lib/schemas/content/hook.schema';
@@ -29,59 +33,128 @@ export type ContentItem =
  * Build complete rich content string from any content item
  * Extracts ALL available fields based on content type
  *
+ * CRITICAL: Section order MUST match UnifiedDetailPage rendering exactly for consistency
+ * @see src/components/unified-detail-page/index.tsx lines 146-235
+ *
  * @param item - Content item (mcp, agent, hook, command, rule, statusline)
  * @returns Complete formatted content string for llms.txt
  *
  * @remarks
  * Each content type has different fields - this function handles all types safely
+ * Section order mirrors the page rendering for optimal LLM citation accuracy
+ * Uses generators from content-type-configs to fill missing fields (matches UnifiedDetailPage exactly)
  */
 export function buildRichContent(item: ContentItem): string {
   const sections: string[] = [];
 
-  // 1. FEATURES SECTION
-  if ('features' in item && item.features && item.features.length > 0) {
-    sections.push(formatBulletList('KEY FEATURES', item.features));
+  // Get content type config for generators (matches UnifiedDetailPage line 49)
+  const config = getContentTypeConfig(item.category);
+
+  // Generate dynamic fields using config generators (matches UnifiedDetailPage lines 54-96)
+  // Extract generator functions first to avoid conditional calls
+  const genFeatures = config?.generators.features;
+  const genRequirements = config?.generators.requirements;
+  const genUseCases = config?.generators.useCases;
+  const genTroubleshooting = config?.generators.troubleshooting;
+
+  const features =
+    'features' in item && Array.isArray(item.features) && item.features.length > 0
+      ? item.features
+      : genFeatures?.(item) || [];
+
+  const requirements =
+    'requirements' in item && Array.isArray(item.requirements) && item.requirements.length > 0
+      ? item.requirements
+      : genRequirements?.(item) || [];
+
+  const useCases =
+    'useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0
+      ? item.useCases
+      : genUseCases?.(item) || [];
+
+  const troubleshooting =
+    'troubleshooting' in item &&
+    Array.isArray(item.troubleshooting) &&
+    item.troubleshooting.length > 0
+      ? item.troubleshooting
+      : genTroubleshooting?.(item) || [];
+
+  // Handle installation: prefer schema field, fallback to generator
+  const installation = (() => {
+    if ('installation' in item && item.installation) {
+      return item.installation;
+    }
+    return config?.generators.installation?.(item);
+  })();
+
+  // 1. MAIN CONTENT SECTION (matches UnifiedDetailPage lines 148-155)
+  // The primary content field - agents, commands, rules have markdown content
+  // NOTE: Do NOT add "CONTENT" header here - generator.ts adds it when converting to plain text
+  // We pass the raw content and buildRichContent() output to generator as the 'content' field
+  // Generator will add: "CONTENT\n-------\n" + markdownToPlainText(content)
+  if ('content' in item && typeof item.content === 'string' && item.content.trim().length > 0) {
+    sections.push(item.content.trim());
   }
 
-  // 2. USE CASES SECTION
-  if ('useCases' in item && item.useCases && item.useCases.length > 0) {
-    sections.push(formatBulletList('USE CASES', item.useCases));
+  // 2. FEATURES SECTION (matches UnifiedDetailPage lines 157-166)
+  // Uses generated features if not in schema
+  if (config?.sections.features && features.length > 0) {
+    sections.push(formatBulletList('KEY FEATURES', features));
   }
 
-  // 3. INSTALLATION SECTION
-  if ('installation' in item && item.installation) {
-    sections.push(formatInstallation(item.installation));
+  // 3. REQUIREMENTS SECTION (matches UnifiedDetailPage lines 168-177)
+  // Uses generated requirements if not in schema
+  if (requirements.length > 0) {
+    sections.push(formatBulletList('REQUIREMENTS', requirements));
   }
 
-  // 4. REQUIREMENTS SECTION (hooks, rules, statuslines)
-  if ('requirements' in item && item.requirements && item.requirements.length > 0) {
-    sections.push(formatBulletList('REQUIREMENTS', item.requirements));
+  // 4. INSTALLATION SECTION (matches UnifiedDetailPage lines 179-182)
+  // Uses generated installation if not in schema
+  if (config?.sections.installation && installation) {
+    sections.push(formatInstallation(installation));
   }
 
-  // 5. CONFIGURATION SECTION
-  if ('configuration' in item && item.configuration) {
+  // 5. CONFIGURATION SECTION (matches UnifiedDetailPage lines 184-193)
+  if (config?.sections.configuration && 'configuration' in item && item.configuration) {
     sections.push(formatConfiguration(item.configuration, item.category));
   }
 
-  // 6. SECURITY SECTION (MCP-specific)
-  if (item.category === 'mcp' && 'security' in item && item.security && item.security.length > 0) {
+  // 6. USE CASES SECTION (matches UnifiedDetailPage lines 195-204)
+  // Uses generated useCases if not in schema
+  if (config?.sections.useCases && useCases.length > 0) {
+    sections.push(formatBulletList('USE CASES', useCases));
+  }
+
+  // 7. SECURITY SECTION (MCP-specific, matches UnifiedDetailPage lines 206-215)
+  if (
+    config?.sections.security &&
+    'security' in item &&
+    Array.isArray(item.security) &&
+    item.security.length > 0
+  ) {
     sections.push(formatBulletList('SECURITY BEST PRACTICES', item.security));
   }
 
-  // 7. TROUBLESHOOTING SECTION (mcp, hooks, rules, statuslines)
-  if ('troubleshooting' in item && item.troubleshooting && item.troubleshooting.length > 0) {
-    sections.push(formatTroubleshooting(item.troubleshooting));
+  // 8. TROUBLESHOOTING SECTION (matches UnifiedDetailPage lines 217-223)
+  // Uses generated troubleshooting if not in schema
+  if (config?.sections.troubleshooting && troubleshooting.length > 0) {
+    sections.push(formatTroubleshooting(troubleshooting));
   }
 
-  // 8. EXAMPLES SECTION (mcp, commands, rules)
-  if ('examples' in item && item.examples && item.examples.length > 0) {
+  // 9. EXAMPLES SECTION (MCP-specific, matches UnifiedDetailPage lines 225-235)
+  if (
+    config?.sections.examples &&
+    'examples' in item &&
+    Array.isArray(item.examples) &&
+    item.examples.length > 0
+  ) {
     sections.push(formatExamples(item.examples, item.category));
   }
 
-  // 9. TECHNICAL DETAILS SECTION
+  // 10. TECHNICAL DETAILS SECTION (sidebar content - metadata, links, etc.)
   sections.push(buildTechnicalDetails(item));
 
-  // 10. PREVIEW SECTION (statuslines only)
+  // 11. PREVIEW SECTION (statuslines only - rendered above content in actual page)
   if (item.category === 'statuslines' && 'preview' in item && item.preview) {
     sections.push(`PREVIEW\n-------\n\n${item.preview}`);
   }
@@ -104,11 +177,16 @@ function formatBulletList(title: string, items: string[]): string {
 /**
  * Format installation instructions
  */
-function formatInstallation(installation: Record<string, unknown>): string {
+function formatInstallation(installation: Record<string, unknown> | unknown): string {
+  // Type guard: ensure installation is an object
+  if (typeof installation !== 'object' || installation === null || Array.isArray(installation)) {
+    return '';
+  }
+
+  const inst = installation as Record<string, unknown>;
   const lines = ['INSTALLATION', '------------', ''];
 
   // Claude Desktop installation
-  const inst: Record<string, unknown> = installation;
   const claudeDesktop = inst.claudeDesktop as Record<string, unknown> | undefined;
   if (claudeDesktop) {
     lines.push('CLAUDE DESKTOP:', '');

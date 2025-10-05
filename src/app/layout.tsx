@@ -175,12 +175,14 @@ export default async function RootLayout({
         {/* Umami Analytics - Privacy-focused analytics (production only) */}
         {await UmamiScript()}
         {/* Service Worker Registration for PWA Support */}
+        {/* suppressHydrationWarning: Browsers remove nonce attribute after execution (security feature), causing harmless hydration warning */}
         <script
           src="/scripts/service-worker-init.js"
           integrity="sha384-0tKKFTk8IlkGOHQjqC00b0Xn/MEUQcn73JljDRsW34lCFxSqKEUZwBNKSp9N/AM/"
           crossOrigin="anonymous"
           nonce={nonce}
           defer
+          suppressHydrationWarning
         />
       </body>
     </html>
