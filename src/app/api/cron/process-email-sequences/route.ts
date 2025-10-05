@@ -10,8 +10,6 @@
  * @module app/api/cron/process-email-sequences
  */
 
-'use server';
-
 import { NextResponse } from 'next/server';
 import { logger } from '@/src/lib/logger';
 import { emailSequenceService } from '@/src/lib/services/email-sequence.service';

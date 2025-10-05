@@ -10,8 +10,6 @@
  * @module app/api/cron/send-weekly-digest
  */
 
-'use server';
-
 import { NextResponse } from 'next/server';
 import { WeeklyDigest } from '@/src/emails/templates/weekly-digest';
 import { logger } from '@/src/lib/logger';
@@ -97,8 +95,11 @@ export async function GET(_request: Request) {
     if (results.errors.length > 0) {
       logger.error('Some digest emails failed to send', undefined, {
         failedCount: results.failed,
-        // Only log first 10 errors to avoid huge log entries
-        sampleErrors: results.errors.slice(0, 10),
+        errorCount: results.errors.length,
+        // Log first 3 errors as samples
+        sampleError1: results.errors[0] || 'none',
+        sampleError2: results.errors[1] || 'none',
+        sampleError3: results.errors[2] || 'none',
       });
     }
 

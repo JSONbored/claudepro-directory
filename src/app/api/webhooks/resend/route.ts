@@ -79,8 +79,7 @@ export async function POST(request: Request) {
   // Parse and validate webhook payload
   const validatedEvent = resendWebhookEventSchema.safeParse(payload);
   if (!validatedEvent.success) {
-    logger.error('Invalid webhook payload schema', new Error('Validation failed'), {
-      errors: validatedEvent.error.errors,
+    logger.error('Invalid webhook payload schema', validatedEvent.error, {
       svixId,
     });
     return new Response('Bad Request: Invalid payload', { status: 400 });

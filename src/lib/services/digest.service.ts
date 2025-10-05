@@ -13,9 +13,9 @@
  * @module lib/services/digest.service
  */
 
+import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
 import type { DigestContentItem, DigestTrendingItem } from '@/src/emails/templates/weekly-digest';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { getAllContent } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
 import { contentCache, statsRedis } from '@/src/lib/redis';
 
@@ -44,7 +44,25 @@ class DigestService {
   async getNewContent(since: Date, limit = 5): Promise<DigestContentItem[]> {
     try {
       // Get all content from all categories
-      const allContent = await getAllContent();
+      const [
+        agentsData,
+        mcpData,
+        rulesData,
+        commandsData,
+        hooksData,
+        statuslinesData,
+        collectionsData,
+      ] = await Promise.all([agents, mcp, rules, commands, hooks, statuslines, collections]);
+
+      const allContent = [
+        ...agentsData.map((item) => ({ ...item, category: 'agents' as const })),
+        ...mcpData.map((item) => ({ ...item, category: 'mcp' as const })),
+        ...rulesData.map((item) => ({ ...item, category: 'rules' as const })),
+        ...commandsData.map((item) => ({ ...item, category: 'commands' as const })),
+        ...hooksData.map((item) => ({ ...item, category: 'hooks' as const })),
+        ...statuslinesData.map((item) => ({ ...item, category: 'statuslines' as const })),
+        ...collectionsData.map((item) => ({ ...item, category: 'collections' as const })),
+      ];
 
       // Filter by dateAdded, sort by date DESC
       const newItems = allContent
@@ -88,7 +106,25 @@ class DigestService {
   async getTrendingContent(_since: Date, limit = 3): Promise<DigestTrendingItem[]> {
     try {
       // Get all content
-      const allContent = await getAllContent();
+      const [
+        agentsData,
+        mcpData,
+        rulesData,
+        commandsData,
+        hooksData,
+        statuslinesData,
+        collectionsData,
+      ] = await Promise.all([agents, mcp, rules, commands, hooks, statuslines, collections]);
+
+      const allContent = [
+        ...agentsData.map((item) => ({ ...item, category: 'agents' as const })),
+        ...mcpData.map((item) => ({ ...item, category: 'mcp' as const })),
+        ...rulesData.map((item) => ({ ...item, category: 'rules' as const })),
+        ...commandsData.map((item) => ({ ...item, category: 'commands' as const })),
+        ...hooksData.map((item) => ({ ...item, category: 'hooks' as const })),
+        ...statuslinesData.map((item) => ({ ...item, category: 'statuslines' as const })),
+        ...collectionsData.map((item) => ({ ...item, category: 'collections' as const })),
+      ];
 
       // Enrich with view counts
       const enriched = await statsRedis.enrichWithViewCounts(allContent);
