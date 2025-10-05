@@ -37,7 +37,9 @@ export const EVENTS = {
 
   // Interaction Events
   COPY_CODE: 'copy_code',
+  COPY_MARKDOWN: 'copy_markdown',
   DOWNLOAD_RESOURCE: 'download_resource',
+  DOWNLOAD_MARKDOWN: 'download_markdown',
   SHARE_CONTENT: 'share_content',
   FEEDBACK_SUBMITTED: 'feedback_submitted',
 
@@ -186,11 +188,26 @@ export interface EventPayloads {
     content_length: number;
   };
 
+  [EVENTS.COPY_MARKDOWN]: {
+    content_category: string;
+    content_slug: string;
+    include_metadata: boolean;
+    include_footer: boolean;
+    content_length: number;
+  };
+
   [EVENTS.DOWNLOAD_RESOURCE]: {
     resource_type: string;
     resource_name: string;
     file_size?: number;
     page: string;
+  };
+
+  [EVENTS.DOWNLOAD_MARKDOWN]: {
+    content_category: string;
+    content_slug: string;
+    filename: string;
+    file_size: number;
   };
 
   [EVENTS.SHARE_CONTENT]: {
@@ -297,7 +314,9 @@ export const EVENT_CATEGORIES = {
   ],
   INTERACTION: [
     EVENTS.COPY_CODE,
+    EVENTS.COPY_MARKDOWN,
     EVENTS.DOWNLOAD_RESOURCE,
+    EVENTS.DOWNLOAD_MARKDOWN,
     EVENTS.SHARE_CONTENT,
     EVENTS.FEEDBACK_SUBMITTED,
   ],
@@ -412,8 +431,18 @@ export const EVENT_CONFIG: Record<
     category: 'INTERACTION',
     enabled: true,
   },
+  [EVENTS.COPY_MARKDOWN]: {
+    description: 'User copies content as markdown',
+    category: 'INTERACTION',
+    enabled: true,
+  },
   [EVENTS.DOWNLOAD_RESOURCE]: {
     description: 'User downloads resource',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.DOWNLOAD_MARKDOWN]: {
+    description: 'User downloads content as markdown file',
     category: 'INTERACTION',
     enabled: true,
   },

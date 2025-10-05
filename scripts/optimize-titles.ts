@@ -12,9 +12,9 @@
 import { existsSync } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
-import { enhanceTitle, type ContentItem } from '../src/lib/seo/title-enhancer.js';
-import type { ContentCategory } from '../src/lib/schemas/shared.schema.js';
 import { logger } from '../src/lib/logger.js';
+import type { ContentCategory } from '../src/lib/schemas/shared.schema.js';
+import { type ContentItem, enhanceTitle } from '../src/lib/seo/title-enhancer.js';
 
 const DRY_RUN = process.argv.includes('--dry-run');
 
@@ -28,10 +28,7 @@ interface OptimizationStats {
 /**
  * Update seoTitle in JSON file
  */
-async function updateJsonFile(
-  filePath: string,
-  seoTitle: string
-): Promise<void> {
+async function updateJsonFile(filePath: string, seoTitle: string): Promise<void> {
   const content = await fs.readFile(filePath, 'utf-8');
   const data = JSON.parse(content);
 
@@ -39,7 +36,7 @@ async function updateJsonFile(
   if (!data.seoTitle) {
     // Parse and rebuild to insert seoTitle in correct position
     const lines = content.split('\n');
-    const titleIndex = lines.findIndex(line => line.includes('"title":'));
+    const titleIndex = lines.findIndex((line) => line.includes('"title":'));
 
     if (titleIndex !== -1) {
       lines.splice(titleIndex + 1, 0, `  "seoTitle": "${seoTitle}",`);
@@ -47,22 +44,19 @@ async function updateJsonFile(
     } else {
       // Fallback: just add it
       data.seoTitle = seoTitle;
-      await fs.writeFile(filePath, JSON.stringify(data, null, 2) + '\n', 'utf-8');
+      await fs.writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8');
     }
   } else {
     // Update existing seoTitle
     data.seoTitle = seoTitle;
-    await fs.writeFile(filePath, JSON.stringify(data, null, 2) + '\n', 'utf-8');
+    await fs.writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8');
   }
 }
 
 /**
  * Update seoTitle in MDX frontmatter
  */
-async function updateMdxFile(
-  filePath: string,
-  seoTitle: string
-): Promise<void> {
+async function updateMdxFile(filePath: string, seoTitle: string): Promise<void> {
   const content = await fs.readFile(filePath, 'utf-8');
   const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
 
@@ -76,14 +70,11 @@ async function updateMdxFile(
   let newFrontmatter: string;
   if (hasSeoTitle) {
     // Update existing seoTitle
-    newFrontmatter = frontmatter.replace(
-      /seoTitle:\s*["'].*["']/,
-      `seoTitle: "${seoTitle}"`
-    );
+    newFrontmatter = frontmatter.replace(/seoTitle:\s*["'].*["']/, `seoTitle: "${seoTitle}"`);
   } else {
     // Add seoTitle after title
     const lines = frontmatter.split('\n');
-    const titleIndex = lines.findIndex(line => line.startsWith('title:'));
+    const titleIndex = lines.findIndex((line) => line.startsWith('title:'));
     if (titleIndex !== -1) {
       lines.splice(titleIndex + 1, 0, `seoTitle: "${seoTitle}"`);
       newFrontmatter = lines.join('\n');
@@ -92,10 +83,7 @@ async function updateMdxFile(
     }
   }
 
-  const newContent = content.replace(
-    /^---\n[\s\S]*?\n---/,
-    `---\n${newFrontmatter}\n---`
-  );
+  const newContent = content.replace(/^---\n[\s\S]*?\n---/, `---\n${newFrontmatter}\n---`);
 
   await fs.writeFile(filePath, newContent, 'utf-8');
 }
@@ -116,7 +104,7 @@ async function optimizeJsonContent(
   }
 
   const files = await fs.readdir(categoryDir);
-  const jsonFiles = files.filter(f => f.endsWith('.json'));
+  const jsonFiles = files.filter((f) => f.endsWith('.json'));
 
   for (const file of jsonFiles) {
     const filePath = path.join(categoryDir, file);
@@ -133,7 +121,9 @@ async function optimizeJsonContent(
         if (DRY_RUN) {
           logger.info(`[DRY RUN] ${file}:`);
           logger.info(`  ${result.originalTitle} → ${result.enhancedTitle}`);
-          logger.info(`  Strategy: ${result.strategy}, Gain: +${result.gain} chars (${result.finalLength} total)`);
+          logger.info(
+            `  Strategy: ${result.strategy}, Gain: +${result.gain} chars (${result.finalLength} total)`
+          );
         } else {
           await updateJsonFile(filePath, result.enhancedTitle);
           logger.success(`✅ ${file}: ${result.originalTitle} → ${result.enhancedTitle}`);
@@ -143,7 +133,10 @@ async function optimizeJsonContent(
         stats.skipped++;
       }
     } catch (error) {
-      logger.error(`Failed to process ${file}:`, error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        `Failed to process ${file}:`,
+        error instanceof Error ? error : new Error(String(error))
+      );
       stats.failed++;
     }
   }
@@ -172,7 +165,7 @@ async function optimizeGuides(contentDir: string): Promise<OptimizationStats> {
     if (!stat.isDirectory()) continue;
 
     const files = await fs.readdir(categoryPath);
-    const mdxFiles = files.filter(f => f.endsWith('.mdx'));
+    const mdxFiles = files.filter((f) => f.endsWith('.mdx'));
 
     for (const file of mdxFiles) {
       const filePath = path.join(categoryPath, file);
@@ -211,7 +204,9 @@ async function optimizeGuides(contentDir: string): Promise<OptimizationStats> {
           if (DRY_RUN) {
             logger.info(`[DRY RUN] ${file}:`);
             logger.info(`  ${result.originalTitle} → ${result.enhancedTitle}`);
-            logger.info(`  Strategy: ${result.strategy}, Gain: +${result.gain} chars (${result.finalLength} total)`);
+            logger.info(
+              `  Strategy: ${result.strategy}, Gain: +${result.gain} chars (${result.finalLength} total)`
+            );
           } else {
             await updateMdxFile(filePath, result.enhancedTitle);
             logger.success(`✅ ${file}: ${result.originalTitle} → ${result.enhancedTitle}`);
@@ -221,7 +216,10 @@ async function optimizeGuides(contentDir: string): Promise<OptimizationStats> {
           stats.skipped++;
         }
       } catch (error) {
-        logger.error(`Failed to process ${file}:`, error instanceof Error ? error : new Error(String(error)));
+        logger.error(
+          `Failed to process ${file}:`,
+          error instanceof Error ? error : new Error(String(error))
+        );
         stats.failed++;
       }
     }
@@ -264,7 +262,9 @@ async function main(): Promise<void> {
     allStats.failed += stats.failed;
 
     if (stats.total > 0) {
-      console.log(`   Total: ${stats.total} | Enhanced: ${stats.enhanced} | Skipped: ${stats.skipped} | Failed: ${stats.failed}`);
+      console.log(
+        `   Total: ${stats.total} | Enhanced: ${stats.enhanced} | Skipped: ${stats.skipped} | Failed: ${stats.failed}`
+      );
     }
   }
 
@@ -277,14 +277,18 @@ async function main(): Promise<void> {
   allStats.failed += guideStats.failed;
 
   if (guideStats.total > 0) {
-    console.log(`   Total: ${guideStats.total} | Enhanced: ${guideStats.enhanced} | Skipped: ${guideStats.skipped} | Failed: ${guideStats.failed}`);
+    console.log(
+      `   Total: ${guideStats.total} | Enhanced: ${guideStats.enhanced} | Skipped: ${guideStats.skipped} | Failed: ${guideStats.failed}`
+    );
   }
 
   // Final summary
-  console.log('\n' + '='.repeat(80));
+  console.log(`\n${'='.repeat(80)}`);
   console.log('📊 OPTIMIZATION SUMMARY\n');
   console.log(`Total files processed: ${allStats.total}`);
-  console.log(`✅ Enhanced: ${allStats.enhanced} (${((allStats.enhanced / allStats.total) * 100).toFixed(1)}%)`);
+  console.log(
+    `✅ Enhanced: ${allStats.enhanced} (${((allStats.enhanced / allStats.total) * 100).toFixed(1)}%)`
+  );
   console.log(`⏭️  Skipped: ${allStats.skipped} (already optimal)`);
   console.log(`❌ Failed: ${allStats.failed}`);
 

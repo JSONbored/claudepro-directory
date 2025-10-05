@@ -119,16 +119,22 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
     const endIndex = startIndex + pageSize;
     const nextItems = filteredResultsRef.current.slice(startIndex, endIndex);
 
-    // Deduplicate to prevent duplicate keys
-    const prevSlugs = new Set(displayedItems.map((item) => item.slug));
-    const uniqueNextItems = nextItems.filter((item) => !prevSlugs.has(item.slug));
+    let uniqueNextItems: UnifiedContentItem[] = [];
 
-    setDisplayedItems((prev) => [...prev, ...uniqueNextItems] as UnifiedContentItem[]);
+    // Deduplicate using functional setState to get latest state
+    setDisplayedItems((prev) => {
+      const prevSlugs = new Set(prev.map((item) => item.slug));
+      uniqueNextItems = nextItems.filter(
+        (item) => !prevSlugs.has(item.slug)
+      ) as UnifiedContentItem[];
+      return [...prev, ...uniqueNextItems] as UnifiedContentItem[];
+    });
+
     currentPageRef.current = nextPage;
 
     // Return the new items so infinite scroll knows items were loaded
-    return uniqueNextItems as UnifiedContentItem[];
-  }, [displayedItems]);
+    return uniqueNextItems;
+  }, []);
 
   const hasMore = displayedItems.length < filteredResults.length;
 

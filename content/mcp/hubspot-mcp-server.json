@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "HubSpot",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "crm",
-    "hubspot",
-    "sales",
-    "marketing",
-    "customer-data"
-  ],
+  "tags": ["crm", "hubspot", "sales", "marketing", "customer-data"],
   "content": "Integrate HubSpot CRM capabilities directly into Claude for customer relationship management.",
   "features": [
     "Fetch and update contact records",
@@ -88,11 +82,7 @@
     "Generate pipeline report"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "create"
-  ],
+  "permissions": ["read", "write", "create"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://developers.hubspot.com/mcp",
   "seoTitle": "Hubspot MCP Server for Claude"

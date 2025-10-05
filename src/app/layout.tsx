@@ -6,6 +6,7 @@ import { connection } from 'next/server';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { Toaster } from 'sonner';
+import { Footer } from '@/src/components/layout/footer';
 import { Navigation } from '@/src/components/layout/navigation';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import { PerformanceOptimizer } from '@/src/components/shared/performance-optimizer';
@@ -20,7 +21,7 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 // Configure Inter font with optimizations
 const inter = Inter({
   subsets: ['latin'],
-  display: 'swap',
+  display: 'optional', // Changed from 'swap' to 'optional' for better performance (zero layout shifts)
   variable: '--font-inter',
   preload: true,
   fallback: [
@@ -65,6 +66,8 @@ export async function generateMetadata(): Promise<Metadata> {
         'application/openapi+json': '/openapi.json',
         // API Catalog for RFC 9727 Compliant Discovery
         'application/json': '/.well-known/api-catalog',
+        // LLMs.txt for AI-Optimized Plain Text Content (llmstxt.org)
+        'text/plain': '/llms.txt',
       },
     },
     icons: {
@@ -155,10 +158,13 @@ export default async function RootLayout({
             >
               Skip to main content
             </a>
-            <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
+            <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background flex flex-col`}>
               <Navigation />
               {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
-              <main id="main-content">{children}</main>
+              <main id="main-content" className="flex-1">
+                {children}
+              </main>
+              <Footer />
             </div>
           </ErrorBoundary>
           <Toaster />

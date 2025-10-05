@@ -1,6 +1,7 @@
 {
   "name": "claudepro-directory",
   "private": true,
+  "sideEffects": false,
   "version": "1.0.0",
   "description": "A community-driven directory of Claude configurations including agents, MCP servers, rules, commands, and hooks",
   "author": "JSONbored",
@@ -39,6 +40,7 @@
     "optimize:titles": "tsx scripts/optimize-titles.ts",
     "optimize:titles:dry": "tsx scripts/optimize-titles.ts --dry-run",
     "validate:titles": "tsx scripts/verify-all-titles.ts",
+    "validate:llmstxt": "tsx scripts/validate-llmstxt.ts",
     "prepare": "command -v lefthook >/dev/null 2>&1 && LEFTHOOK_CONFIG=config/tools/lefthook.yml lefthook install || echo 'Skipping lefthook install (not available)'",
     "analyze:architecture": "npx skott --displayMode=webapp",
     "analyze:unused": "npx knip -c config/tools/knip.json",
@@ -100,6 +102,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.5",
+    "@next/bundle-analyzer": "^15.5.4",
     "knip": "^5.64.1",
     "lefthook": "^1.13.5",
     "ultracite": "^5.4.6"

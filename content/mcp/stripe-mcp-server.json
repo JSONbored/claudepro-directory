@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Stripe",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "payments",
-    "stripe",
-    "billing",
-    "subscriptions",
-    "commerce"
-  ],
+  "tags": ["payments", "stripe", "billing", "subscriptions", "commerce"],
   "content": "Integrate Stripe payment capabilities directly into Claude for payment processing and financial operations.",
   "features": [
     "Process payments and refunds programmatically",
@@ -88,11 +82,7 @@
     "Create an invoice for customer cus_xyz"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read",
-    "write",
-    "refund"
-  ],
+  "permissions": ["read", "write", "refund"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://docs.stripe.com/mcp",
   "seoTitle": "Stripe MCP Server for Claude"

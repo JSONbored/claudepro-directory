@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Daloopa",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "finance",
-    "daloopa",
-    "sec-filings",
-    "financial-data",
-    "investor-relations"
-  ],
+  "tags": ["finance", "daloopa", "sec-filings", "financial-data", "investor-relations"],
   "content": "Access comprehensive financial data and SEC filing information through Daloopa's curated database.",
   "features": [
     "Access SEC filing data and documents",
@@ -92,9 +86,7 @@
     "Show historical EBITDA margins"
   ],
   "requiresAuth": true,
-  "permissions": [
-    "read"
-  ],
+  "permissions": ["read"],
   "configLocation": "claude_desktop_config.json",
   "documentationUrl": "https://docs.daloopa.com/docs/daloopa-mcp",
   "seoTitle": "Daloopa MCP Server for Claude"
