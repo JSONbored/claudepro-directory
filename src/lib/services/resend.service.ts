@@ -115,6 +115,14 @@ class ResendService {
         audienceId: this.AUDIENCE_ID,
       });
 
+      // Debug: Log the raw response structure
+      logger.info('Resend API raw response received', {
+        hasData: !!response.data,
+        dataType: typeof response.data,
+        responseKeys: response.data ? Object.keys(response.data).join(', ') : 'none',
+        fullResponse: JSON.stringify(response),
+      });
+
       // Type-safe response parsing
       const contact = resendContactSchema.safeParse(response.data);
 
@@ -132,10 +140,11 @@ class ResendService {
         };
       }
 
-      // Response doesn't match expected schema
-      logger.warn('Unexpected Resend API response format', {
-        email,
-        ...(response.data && { response: String(response.data) }),
+      // Response doesn't match expected schema - log detailed error
+      logger.error('Resend API response schema validation failed', undefined, {
+        responseData: JSON.stringify(response.data),
+        zodErrors: contact.error ? JSON.stringify(contact.error.format()) : 'No validation errors',
+        expectedSchema: 'object: contact, id: string',
       });
 
       return {
@@ -147,7 +156,11 @@ class ResendService {
       // Handle Resend API errors
       const errorDetails = this.parseError(error);
 
-      logger.error('Newsletter subscription failed', errorDetails.message, {
+      logger.error('Newsletter subscription failed', error instanceof Error ? error : undefined, {
+        errorName: errorDetails.name,
+        errorMessage: errorDetails.message,
+        errorType: typeof error,
+        errorString: String(error),
         ...(metadata?.source && { source: metadata.source }),
       });
 
