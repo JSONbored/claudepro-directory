@@ -140,7 +140,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Email CTA - Hero variant */}
+      {/* Client Component for Interactive Features */}
+      <HomePageClient initialData={initialData} />
+
+      {/* Email CTA - Moved to bottom of page */}
       <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
         <InlineEmailCTA
           variant="hero"
@@ -149,9 +152,6 @@ export default async function HomePage() {
           description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
         />
       </section>
-
-      {/* Client Component for Interactive Features */}
-      <HomePageClient initialData={initialData} />
     </div>
   );
 }
