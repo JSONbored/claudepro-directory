@@ -91,7 +91,7 @@ export async function POST(request: Request) {
   const isAnalyticsEvent = event.type === 'email.opened' || event.type === 'email.clicked';
   const limiter = isAnalyticsEvent ? rateLimiters.webhookAnalytics : rateLimiters.webhookBounce;
 
-  const rateLimitCheck = await limiter.check(request);
+  const rateLimitCheck = await limiter.checkLimit(request);
   if (!rateLimitCheck.success) {
     logger.warn('Webhook rate limit exceeded', {
       eventType: event.type,
