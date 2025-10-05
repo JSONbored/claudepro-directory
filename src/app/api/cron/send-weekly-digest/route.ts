@@ -33,27 +33,6 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: Request) {
   try {
-    // Verify cron secret
-    const authHeader = request.headers.get('authorization');
-    const cronSecret = env.CRON_SECRET;
-
-    if (!cronSecret) {
-      logger.error('CRON_SECRET not configured');
-      return NextResponse.json(
-        { error: 'Cron configuration error' },
-        { status: 500 }
-      );
-    }
-
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      logger.warn('Unauthorized cron request', {
-        path: '/api/cron/send-weekly-digest',
-        ip: request.headers.get('x-forwarded-for'),
-        authProvided: !!authHeader,
-      });
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     logger.info('Weekly digest cron job started');
 
     // Generate digest content for previous week
