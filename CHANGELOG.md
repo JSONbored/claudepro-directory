@@ -54,6 +54,19 @@ Implemented production-grade llms.txt generation system following the [llmstxt.o
   - Whitelists example domains (example.com, localhost, 127.0.0.1)
   - Fixed regex global flag bug causing alternating detection results
 
+- **Markdown Export Features** (`src/lib/actions/markdown-actions.ts`)
+  - Copy as Markdown: One-click clipboard copy with YAML frontmatter
+  - Download Markdown: File download with full metadata and attribution
+  - Rate limiting: 50 req/min (copy), 30 req/min (download)
+  - Redis caching with 1-hour TTL for performance
+  - Type-safe server actions with Zod validation
+
+- **Analytics Integration** (`src/lib/analytics/events.config.ts`)
+  - `COPY_MARKDOWN` event tracking with content metadata
+  - `DOWNLOAD_MARKDOWN` event tracking with file size metrics
+  - Integrated into CopyMarkdownButton and DownloadMarkdownButton components
+  - Umami analytics for user interaction insights
+
 ### Changed
 
 - **Removed ALL truncation** from llms.txt schema and routes
@@ -97,11 +110,18 @@ export function buildRichContent(item: ContentItem): string {
 - ISR revalidation every 600 seconds for content updates
 - Production-optimized with Next.js 15.5.4 App Router
 
+**Validation & Quality Assurance**:
+- Automated validation script (`scripts/validate-llmstxt.ts`) checks all 26+ llms.txt routes
+- Validates markdown headers (`# Title`), metadata fields (`Title:`, `URL:`), category markers
+- Cache versioning (v2) for breaking changes to ensure fresh content delivery
+- All routes passing with 0 errors, 0 warnings
+
 ### Impact
 
 - **AI Tool Discovery**: Claude Code, AI search engines, and LLM tools can now discover and understand ALL content
 - **SEO Enhancement**: Full-text indexing by AI search engines (Perplexity, ChatGPT Search, Google AI Overview)
 - **Developer Experience**: Complete installation/configuration examples immediately accessible to AI assistants
+- **Content Portability**: One-click markdown export (copy & download) for offline use and documentation
 - **Citation Quality**: AI tools can cite specific features, troubleshooting steps, and usage examples
 - **Production-Ready**: Type-safe, PII-protected, properly formatted for LLM consumption
 

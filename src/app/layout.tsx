@@ -21,7 +21,7 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 // Configure Inter font with optimizations
 const inter = Inter({
   subsets: ['latin'],
-  display: 'swap',
+  display: 'optional', // Changed from 'swap' to 'optional' for better performance (zero layout shifts)
   variable: '--font-inter',
   preload: true,
   fallback: [
@@ -66,6 +66,8 @@ export async function generateMetadata(): Promise<Metadata> {
         'application/openapi+json': '/openapi.json',
         // API Catalog for RFC 9727 Compliant Discovery
         'application/json': '/.well-known/api-catalog',
+        // LLMs.txt for AI-Optimized Plain Text Content (llmstxt.org)
+        'text/plain': '/llms.txt',
       },
     },
     icons: {

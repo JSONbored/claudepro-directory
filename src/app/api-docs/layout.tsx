@@ -20,12 +20,22 @@
  * @see {@link https://fumadocs.dev/docs/ui/layouts/docs Fumadocs DocsLayout Documentation}
  */
 
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { RootProvider } from 'fumadocs-ui/provider';
 import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { buildPageTitle } from '@/src/lib/seo/title-builder';
+
+// Dynamic imports for Fumadocs components (only loads on /api-docs routes for better performance)
+const DocsLayout = dynamic(
+  () => import('fumadocs-ui/layouts/docs').then((mod) => ({ default: mod.DocsLayout })),
+  { ssr: true }
+);
+
+const RootProvider = dynamic(
+  () => import('fumadocs-ui/provider').then((mod) => ({ default: mod.RootProvider })),
+  { ssr: true }
+);
 
 /**
  * Metadata for API documentation section

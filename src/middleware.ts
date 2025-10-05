@@ -400,6 +400,22 @@ export async function middleware(request: NextRequest) {
     );
   }
 
+  // Skip Arcjet for Next.js RSC prefetch requests (legitimate browser behavior)
+  const isRSCRequest = pathname.includes('_rsc=') || request.headers.get('rsc') === '1';
+  if (isRSCRequest) {
+    const noseconeResponse = await noseconeMiddleware();
+
+    if (isDevelopment) {
+      const duration = performance.now() - startTime;
+      logger.debug('Middleware execution (RSC prefetch)', {
+        path: sanitizePathForLogging(pathname),
+        duration: `${duration.toFixed(2)}ms`,
+      });
+    }
+
+    return noseconeResponse;
+  }
+
   // Skip Arcjet protection for static assets and Next.js internals
   const isStaticAsset = staticAssetSchema.safeParse(pathname).success;
 
@@ -581,9 +597,10 @@ export const config = {
      * - manifest.json (PWA manifest)
      * - .well-known (well-known files for verification)
      * - /js/ (public JavaScript files)
+     * - /scripts/ (public script files - service workers, etc.)
      * - /css/ (public CSS files)
      * - *.png, *.jpg, *.jpeg, *.gif, *.webp, *.svg, *.ico (image files)
      */
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.json|\\.well-known|js/|css/|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.json|\\.well-known|js/|scripts/|css/|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
   ],
 };

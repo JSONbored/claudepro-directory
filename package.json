@@ -1,6 +1,7 @@
 {
   "name": "claudepro-directory",
   "private": true,
+  "sideEffects": false,
   "version": "1.0.0",
   "description": "A community-driven directory of Claude configurations including agents, MCP servers, rules, commands, and hooks",
   "author": "JSONbored",
@@ -101,6 +102,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.5",
+    "@next/bundle-analyzer": "^15.5.4",
     "knip": "^5.64.1",
     "lefthook": "^1.13.5",
     "ultracite": "^5.4.6"

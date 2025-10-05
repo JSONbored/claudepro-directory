@@ -87,7 +87,7 @@ export async function GET(
     }
 
     const filename = `${slug}.mdx`;
-    const cacheKey = `guide-llmstxt:${category}:${slug}`;
+    const cacheKey = `guide-llmstxt:v2:${category}:${slug}`; // v2: added Title field to metadata
 
     // Try cache first using cacheWithRefresh
     try {

@@ -91,6 +91,15 @@ export async function generatePageMetadata(
     keywords: keywords?.join(', '),
     alternates: {
       canonical: canonicalUrl,
+      types:
+        route === '/:category/:slug' && context?.params?.category && context?.params?.slug
+          ? {
+              // Add llms.txt alternate link for content detail pages (AI-optimized plain text)
+              'text/plain': `/${context.params.category}/${context.params.slug}/llms.txt`,
+              // Note: Markdown export is available via server action, not as alternate link
+              // to avoid duplicate content penalties and maintain SEO best practices
+            }
+          : undefined,
     },
     openGraph: {
       title: ogTitle,

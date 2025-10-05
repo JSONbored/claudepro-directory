@@ -91,7 +91,7 @@ function formatDate(dateStr: string): string {
  * @internal
  */
 function generateHeader(title: string, description: string): string {
-  return `${title.toUpperCase()}
+  return `# ${title}
 
 ${description}
 
@@ -164,6 +164,9 @@ export async function generateLLMsTxt(
 
       metadata.push('METADATA');
       metadata.push('--------');
+
+      // Add Title field for validation compatibility
+      metadata.push(`Title: ${validatedItem.title}`);
 
       if (validatedItem.category) {
         metadata.push(`Category: ${validatedItem.category}`);
@@ -266,8 +269,10 @@ export async function generateCategoryLLMsTxt(
 
     const sections: string[] = [];
 
-    // Header
-    sections.push(generateHeader(categoryName, categoryDescription));
+    // Header with category marker for validation
+    sections.push(`# Category: ${categoryName}\n`);
+    sections.push(categoryDescription);
+    sections.push('\n---\n');
 
     // Index section
     sections.push('INDEX');

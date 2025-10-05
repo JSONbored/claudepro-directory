@@ -15,6 +15,8 @@
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { CopyLLMsButton } from '@/src/components/shared/copy-llms-button';
+import { CopyMarkdownButton } from '@/src/components/shared/copy-markdown-button';
+import { DownloadMarkdownButton } from '@/src/components/shared/download-markdown-button';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
@@ -168,6 +170,24 @@ export function DetailHeaderActions({
           {/* Copy for AI button */}
           <CopyLLMsButton
             llmsTxtUrl={`/${category}/${item.slug}/llms.txt`}
+            variant="outline"
+            size="default"
+            className={UI_CLASSES.MIN_W_0}
+          />
+
+          {/* Copy as Markdown button */}
+          <CopyMarkdownButton
+            category={category}
+            slug={item.slug}
+            variant="outline"
+            size="default"
+            className={UI_CLASSES.MIN_W_0}
+          />
+
+          {/* Download Markdown button */}
+          <DownloadMarkdownButton
+            category={category}
+            slug={item.slug}
             variant="outline"
             size="default"
             className={UI_CLASSES.MIN_W_0}
