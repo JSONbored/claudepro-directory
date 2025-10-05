@@ -82,7 +82,17 @@ const textContentSchema = z.string().min(0);
 
 // Client component for copyable code blocks (MDX/rehype-pretty-code)
 export function CopyableCodeBlock({ children, className, ...props }: MdxElementProps) {
-  const { copied, copy } = useCopyToClipboard({
+  const mdxContext = useMDXContent();
+
+  const { copied, copy } = useCopyWithEmailCapture({
+    emailContext: {
+      copyType: 'code',
+      ...(mdxContext && {
+        category: mdxContext.category,
+        slug: mdxContext.slug,
+      }),
+      referrer: typeof window !== 'undefined' ? window.location.pathname : undefined,
+    },
     context: {
       component: 'CopyableCodeBlock',
       action: 'copy-code',
