@@ -94,7 +94,8 @@ function getContextualMessage(category?: string): { headline: string; descriptio
     },
   };
 
-  return messages[category || 'default'] || messages.default;
+  const key = (category || 'default') as keyof typeof messages;
+  return messages[key] ?? messages.default;
 }
 
 /**
