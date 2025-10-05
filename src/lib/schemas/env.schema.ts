@@ -115,6 +115,13 @@ const serverEnvSchema = z
       .optional()
       .describe('Secret key for webhook signature validation (minimum 32 characters)'),
 
+    // Cron job authorization
+    CRON_SECRET: z
+      .string()
+      .min(32)
+      .optional()
+      .describe('Secret key for cron job authentication (minimum 32 characters)'),
+
     // Email provider (Resend)
     RESEND_API_KEY: nonEmptyString
       .optional()
