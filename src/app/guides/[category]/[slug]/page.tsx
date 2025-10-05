@@ -533,15 +533,17 @@ export default async function SEOGuidePage({
               <div className="lg:col-span-2 space-y-8">
                 <Card>
                   <CardContent className="pt-6">
-                    <MDXRenderer
-                      source={data.content}
-                      className=""
-                      pathname={`/guides/${category}/${slug}`}
-                      metadata={{
-                        tags: data.keywords || [], // Note: SEO pages use keywords field
-                        keywords: data.keywords || [],
-                      }}
-                    />
+                    <MDXContentProvider category={category} slug={slug}>
+                      <MDXRenderer
+                        source={data.content}
+                        className=""
+                        pathname={`/guides/${category}/${slug}`}
+                        metadata={{
+                          tags: data.keywords || [], // Note: SEO pages use keywords field
+                          keywords: data.keywords || [],
+                        }}
+                      />
+                    </MDXContentProvider>
                   </CardContent>
                 </Card>
               </div>
