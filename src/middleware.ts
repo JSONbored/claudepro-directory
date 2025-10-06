@@ -439,7 +439,9 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/account')) {
     const { createClient } = await import('@/src/lib/supabase/server');
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       // Not authenticated - redirect to login

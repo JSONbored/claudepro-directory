@@ -1,9 +1,15 @@
-import { createClient } from '@/src/lib/supabase/server';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Badge } from '@/src/components/ui/badge';
-import { Bookmark, Calendar } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Metadata } from 'next';
+import { Badge } from '@/src/components/ui/badge';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
+import { Bookmark, Calendar } from '@/src/lib/icons';
+import { createClient } from '@/src/lib/supabase/server';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
   title: 'Account Dashboard - ClaudePro Directory',
@@ -12,7 +18,9 @@ export const metadata: Metadata = {
 
 export default async function AccountDashboard() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) return null;
 
@@ -23,13 +31,9 @@ export default async function AccountDashboard() {
     .eq('user_id', user.id);
 
   // Get user profile
-  const { data: profile } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+  const { data: profile } = await supabase.from('users').select('*').eq('id', user.id).single();
 
-  const accountAge = profile?.created_at 
+  const accountAge = profile?.created_at
     ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / (1000 * 60 * 60 * 24))
     : 0;
 
@@ -37,9 +41,7 @@ export default async function AccountDashboard() {
     <div className={UI_CLASSES.SPACE_Y_6}>
       <div>
         <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-        <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
-          Welcome back, {profile?.name || 'User'}!
-        </p>
+        <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>Welcome back, {profile?.name || 'User'}!</p>
       </div>
 
       {/* Stats cards */}
@@ -97,13 +99,23 @@ export default async function AccountDashboard() {
         </CardHeader>
         <CardContent className={UI_CLASSES.SPACE_Y_2}>
           <p className={UI_CLASSES.TEXT_SM}>
-            • Browse the <a href="/" className="text-primary hover:underline">directory</a> and bookmark your favorite configurations
+            • Browse the{' '}
+            <a href="/" className="text-primary hover:underline">
+              directory
+            </a>{' '}
+            and bookmark your favorite configurations
           </p>
           <p className={UI_CLASSES.TEXT_SM}>
-            • View your <a href="/account/bookmarks" className="text-primary hover:underline">saved bookmarks</a>
+            • View your{' '}
+            <a href="/account/bookmarks" className="text-primary hover:underline">
+              saved bookmarks
+            </a>
           </p>
           <p className={UI_CLASSES.TEXT_SM}>
-            • Update your profile in <a href="/account/settings" className="text-primary hover:underline">settings</a>
+            • Update your profile in{' '}
+            <a href="/account/settings" className="text-primary hover:underline">
+              settings
+            </a>
           </p>
         </CardContent>
       </Card>

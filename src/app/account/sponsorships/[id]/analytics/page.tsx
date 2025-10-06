@@ -1,11 +1,17 @@
-import { createClient } from '@/src/lib/supabase/server';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Badge } from '@/src/components/ui/badge';
-import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
-import { Eye, MousePointer, BarChart, TrendingUp } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { Badge } from '@/src/components/ui/badge';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
+import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
+import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
+import { createClient } from '@/src/lib/supabase/server';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
   title: 'Sponsorship Analytics - ClaudePro Directory',
@@ -19,7 +25,9 @@ interface AnalyticsPageProps {
 export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPageProps) {
   const { id } = params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) return null;
 
@@ -55,27 +63,27 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   const impressionsMap = new Map<string, number>();
   const clicksMap = new Map<string, number>();
 
-  impressionsByDay?.forEach(imp => {
+  impressionsByDay?.forEach((imp) => {
     const day = new Date(imp.created_at).toISOString().split('T')[0]!;
     impressionsMap.set(day, (impressionsMap.get(day) || 0) + 1);
   });
 
-  clicksByDay?.forEach(click => {
+  clicksByDay?.forEach((click) => {
     const day = new Date(click.created_at).toISOString().split('T')[0]!;
     clicksMap.set(day, (clicksMap.get(day) || 0) + 1);
   });
 
-  const ctr = sponsorship.impression_count > 0
-    ? ((sponsorship.click_count / sponsorship.impression_count) * 100).toFixed(2)
-    : '0.00';
+  const ctr =
+    sponsorship.impression_count > 0
+      ? ((sponsorship.click_count / sponsorship.impression_count) * 100).toFixed(2)
+      : '0.00';
 
   const daysActive = Math.floor(
-    (new Date().getTime() - new Date(sponsorship.start_date).getTime()) / (1000 * 60 * 60 * 24)
+    (Date.now() - new Date(sponsorship.start_date).getTime()) / (1000 * 60 * 60 * 24)
   );
 
-  const avgImpressionsPerDay = daysActive > 0
-    ? (sponsorship.impression_count / daysActive).toFixed(0)
-    : '0';
+  const avgImpressionsPerDay =
+    daysActive > 0 ? (sponsorship.impression_count / daysActive).toFixed(0) : '0';
 
   return (
     <div className={UI_CLASSES.SPACE_Y_6}>
@@ -99,7 +107,9 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Eye className="h-5 w-5 text-primary" />
-              <span className="text-3xl font-bold">{sponsorship.impression_count.toLocaleString()}</span>
+              <span className="text-3xl font-bold">
+                {sponsorship.impression_count.toLocaleString()}
+              </span>
             </div>
             {sponsorship.impression_limit && (
               <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
@@ -164,33 +174,33 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
         <CardContent className={UI_CLASSES.SPACE_Y_4}>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Content Type</label>
+              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Content Type</p>
               <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>{sponsorship.content_type}</p>
             </div>
 
             <div>
-              <label className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Content ID</label>
+              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Content ID</p>
               <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} font-mono ${UI_CLASSES.TEXT_XS}`}>
                 {sponsorship.content_id}
               </p>
             </div>
 
             <div>
-              <label className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Start Date</label>
+              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Start Date</p>
               <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
                 {new Date(sponsorship.start_date).toLocaleDateString()}
               </p>
             </div>
 
             <div>
-              <label className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>End Date</label>
+              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>End Date</p>
               <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
                 {new Date(sponsorship.end_date).toLocaleDateString()}
               </p>
             </div>
 
             <div>
-              <label className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Status</label>
+              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Status</p>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Badge variant={sponsorship.active ? 'default' : 'outline'}>
                   {sponsorship.active ? 'Active' : 'Inactive'}
@@ -199,7 +209,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             </div>
 
             <div>
-              <label className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Tier</label>
+              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Tier</p>
               <div>
                 <SponsoredBadge tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'} />
               </div>

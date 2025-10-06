@@ -3,7 +3,7 @@
 /**
  * Sponsored Content Actions
  * Server actions for tracking sponsored impressions and clicks
- * 
+ *
  * Similar pattern to track-view.ts but for sponsored content
  */
 
@@ -34,19 +34,19 @@ export const trackSponsoredImpression = rateLimitedAction
   .schema(trackImpressionSchema)
   .action(async ({ parsedInput: { sponsored_id, page_url, position } }) => {
     const supabase = await createClient();
-    
+
     // Get current user (optional - track anonymous too)
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     // Insert impression
-    const { error } = await supabase
-      .from('sponsored_impressions')
-      .insert({
-        sponsored_id,
-        user_id: user?.id || null,
-        page_url: page_url || null,
-        position: position || null,
-      });
+    const { error } = await supabase.from('sponsored_impressions').insert({
+      sponsored_id,
+      user_id: user?.id || null,
+      page_url: page_url || null,
+      position: position || null,
+    });
 
     if (error) {
       // Don't throw - impressions are best-effort
@@ -75,17 +75,17 @@ export const trackSponsoredClick = rateLimitedAction
   .schema(trackClickSchema)
   .action(async ({ parsedInput: { sponsored_id, target_url } }) => {
     const supabase = await createClient();
-    
-    const { data: { user } } = await supabase.auth.getUser();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     // Insert click
-    const { error } = await supabase
-      .from('sponsored_clicks')
-      .insert({
-        sponsored_id,
-        user_id: user?.id || null,
-        target_url,
-      });
+    const { error } = await supabase.from('sponsored_clicks').insert({
+      sponsored_id,
+      user_id: user?.id || null,
+      target_url,
+    });
 
     if (error) {
       return { success: false };
@@ -106,9 +106,9 @@ export const trackSponsoredClick = rateLimitedAction
  */
 export async function getActiveSponsoredContent(limit = 5) {
   const supabase = await createClient();
-  
+
   const now = new Date().toISOString();
-  
+
   const { data, error } = await supabase
     .from('sponsored_content')
     .select('*')
@@ -123,7 +123,7 @@ export async function getActiveSponsoredContent(limit = 5) {
   }
 
   // Filter out items that hit impression limit
-  return (data || []).filter(item => {
+  return (data || []).filter((item) => {
     if (item.impression_limit && item.impression_count >= item.impression_limit) {
       return false;
     }

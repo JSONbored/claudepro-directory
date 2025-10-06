@@ -1,11 +1,17 @@
-import { getUserSubmissions } from '@/src/lib/actions/submission-actions';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
+import type { Metadata } from 'next';
+import Link from 'next/link';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
-import { Send, ExternalLink, Clock, CheckCircle, XCircle, GitPullRequest } from '@/src/lib/icons';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
+import { getUserSubmissions } from '@/src/lib/actions/submission-actions';
+import { CheckCircle, Clock, ExternalLink, GitPullRequest, Send, XCircle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import Link from 'next/link';
-import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'My Submissions - ClaudePro Directory',
@@ -121,9 +127,7 @@ export default async function SubmissionsPage() {
                 <div
                   className={`${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.MB_4} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
                 >
-                  <div>
-                    Submitted {new Date(submission.created_at).toLocaleDateString()}
-                  </div>
+                  <div>Submitted {new Date(submission.created_at).toLocaleDateString()}</div>
                   {submission.merged_at && (
                     <>
                       <span>•</span>
@@ -140,7 +144,9 @@ export default async function SubmissionsPage() {
 
                 {submission.status === 'rejected' && submission.rejection_reason && (
                   <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded">
-                    <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} text-red-400 mb-1`}>
+                    <p
+                      className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} text-red-400 mb-1`}
+                    >
                       Rejection Reason:
                     </p>
                     <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>

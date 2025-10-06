@@ -193,7 +193,8 @@ export default async function CollectionDetailPage({
                 className="text-sm border-blue-500/20 bg-blue-500/10 text-blue-400"
               >
                 <Layers className="h-3 w-3 mr-1" />
-                {(COLLECTION_TYPE_LABELS as any)[collection.collectionType] || collection.collectionType}
+                {(COLLECTION_TYPE_LABELS as any)[collection.collectionType] ||
+                  collection.collectionType}
               </Badge>
               <Badge
                 variant="outline"

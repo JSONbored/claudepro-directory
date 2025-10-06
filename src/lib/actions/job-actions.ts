@@ -3,24 +3,24 @@
 /**
  * Job Actions
  * Server actions for job listing CRUD operations
- * 
+ *
  * Security: Rate limited, auth required, RLS enforced
  * Follows patterns from bookmark-actions.ts
  */
 
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { createClient } from '@/src/lib/supabase/server';
-import { 
-  createJobSchema, 
-  updateJobSchema, 
+import {
+  createJobSchema,
   toggleJobStatusSchema,
+  updateJobSchema,
 } from '@/src/lib/schemas/content/job.schema';
-import { revalidatePath } from 'next/cache';
+import { createClient } from '@/src/lib/supabase/server';
 
 /**
  * Create a new job listing
- * 
+ *
  * Flow:
  * 1. Validate input
  * 2. Check user auth
@@ -35,10 +35,12 @@ export const createJob = rateLimitedAction
   .schema(createJobSchema)
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
-    
+
     // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       throw new Error('You must be signed in to create a job listing');
     }
@@ -54,9 +56,10 @@ export const createJob = rateLimitedAction
         status: parsedInput.plan === 'standard' ? 'active' : 'draft',
         posted_at: parsedInput.plan === 'standard' ? new Date().toISOString() : null,
         // Set expiry to 30 days for standard, null for paid (manual activation)
-        expires_at: parsedInput.plan === 'standard' 
-          ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-          : null,
+        expires_at:
+          parsedInput.plan === 'standard'
+            ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            : null,
       })
       .select()
       .single();
@@ -89,10 +92,12 @@ export const updateJob = rateLimitedAction
   .schema(updateJobSchema)
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
-    
+
     // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       throw new Error('You must be signed in to update jobs');
     }
@@ -134,9 +139,11 @@ export const toggleJobStatus = rateLimitedAction
   .schema(toggleJobStatusSchema)
   .action(async ({ parsedInput: { id, status } }) => {
     const supabase = await createClient();
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       throw new Error('You must be signed in to manage jobs');
     }
@@ -144,7 +151,7 @@ export const toggleJobStatus = rateLimitedAction
     // Update status
     const { data, error } = await supabase
       .from('jobs')
-      .update({ 
+      .update({
         status,
         // If activating, set posted_at if not already set
         ...(status === 'active' ? { posted_at: new Date().toISOString() } : {}),
@@ -178,9 +185,11 @@ export const deleteJob = rateLimitedAction
   .schema(z.object({ id: z.string().uuid() }))
   .action(async ({ parsedInput: { id } }) => {
     const supabase = await createClient();
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       throw new Error('You must be signed in to delete jobs');
     }
@@ -210,9 +219,11 @@ export const deleteJob = rateLimitedAction
  */
 export async function getUserJobs() {
   const supabase = await createClient();
-  
-  const { data: { user } } = await supabase.auth.getUser();
-  
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (!user) {
     return [];
   }

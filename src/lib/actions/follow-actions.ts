@@ -5,10 +5,10 @@
  * Server actions for following/unfollowing users
  */
 
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { createClient } from '@/src/lib/supabase/server';
-import { revalidatePath } from 'next/cache';
 
 const followSchema = z.object({
   action: z.enum(['follow', 'unfollow']),
@@ -27,9 +27,11 @@ export const toggleFollow = rateLimitedAction
   .schema(followSchema)
   .action(async ({ parsedInput: { action, user_id, slug } }) => {
     const supabase = await createClient();
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       throw new Error('You must be signed in to follow users');
     }
@@ -40,12 +42,10 @@ export const toggleFollow = rateLimitedAction
     }
 
     if (action === 'follow') {
-      const { error } = await supabase
-        .from('followers')
-        .insert({
-          follower_id: user.id,
-          following_id: user_id,
-        });
+      const { error } = await supabase.from('followers').insert({
+        follower_id: user.id,
+        following_id: user_id,
+      });
 
       if (error) {
         if (error.code === '23505') {
@@ -82,9 +82,11 @@ export const toggleFollow = rateLimitedAction
  */
 export async function isFollowing(user_id: string): Promise<boolean> {
   const supabase = await createClient();
-  
-  const { data: { user } } = await supabase.auth.getUser();
-  
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (!user) {
     return false;
   }

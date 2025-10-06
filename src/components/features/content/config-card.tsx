@@ -1,8 +1,8 @@
 'use client';
 
 import { memo } from 'react';
-import { CardCopyAction } from '@/src/components/shared/card-copy-action';
 import { BookmarkButton } from '@/src/components/shared/bookmark-button';
+import { CardCopyAction } from '@/src/components/shared/card-copy-action';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -164,10 +164,7 @@ export const ConfigCard = memo(
                     </Button>
                   )}
 
-                  <BookmarkButton
-                    contentType={item.category || 'agents'}
-                    contentSlug={item.slug}
-                  />
+                  <BookmarkButton contentType={item.category || 'agents'} contentSlug={item.slug} />
 
                   <CardCopyAction
                     url={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}

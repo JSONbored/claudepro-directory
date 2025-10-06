@@ -34,7 +34,9 @@ export default async function HomePage() {
     statsRedis.enrichWithViewCounts(
       rulesData.map((item: any) => ({ ...item, category: 'rules' as const }))
     ),
-    statsRedis.enrichWithViewCounts(mcpData.map((item: any) => ({ ...item, category: 'mcp' as const }))),
+    statsRedis.enrichWithViewCounts(
+      mcpData.map((item: any) => ({ ...item, category: 'mcp' as const }))
+    ),
     statsRedis.enrichWithViewCounts(
       agentsData.map((item: any) => ({ ...item, category: 'agents' as const }))
     ),

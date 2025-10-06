@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AlertTriangle } from '@/src/lib/icons';
 import { Alert, AlertDescription, AlertTitle } from '@/src/components/ui/alert';
+import { AlertTriangle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface DuplicateWarningProps {
@@ -29,10 +29,10 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-export function DuplicateWarning({ contentType, name }: DuplicateWarningProps) {
+export function DuplicateWarning({ contentType: _contentType, name }: DuplicateWarningProps) {
   const [checking, setChecking] = useState(false);
   const [warning, setWarning] = useState<string | null>(null);
-  
+
   // Debounce name input (500ms)
   const debouncedName = useDebounce(name, 500);
 
@@ -47,12 +47,22 @@ export function DuplicateWarning({ contentType, name }: DuplicateWarningProps) {
     // Simple client-side duplicate detection
     // Check if name is too generic
     const genericNames = [
-      'test', 'example', 'demo', 'sample', 'default',
-      'new', 'my', 'untitled', 'temp', 'temporary'
+      'test',
+      'example',
+      'demo',
+      'sample',
+      'default',
+      'new',
+      'my',
+      'untitled',
+      'temp',
+      'temporary',
     ];
-    
+
     const lowerName = debouncedName.toLowerCase();
-    const isGeneric = genericNames.some(generic => lowerName === generic || lowerName.startsWith(generic + ' '));
+    const isGeneric = genericNames.some(
+      (generic) => lowerName === generic || lowerName.startsWith(`${generic} `)
+    );
 
     if (isGeneric) {
       setWarning('This name seems generic. Consider a more specific, descriptive name.');
@@ -61,7 +71,7 @@ export function DuplicateWarning({ contentType, name }: DuplicateWarningProps) {
     }
 
     setChecking(false);
-  }, [debouncedName, contentType]);
+  }, [debouncedName]);
 
   if (checking) {
     return (
@@ -80,9 +90,7 @@ export function DuplicateWarning({ contentType, name }: DuplicateWarningProps) {
       <AlertTriangle className="h-4 w-4 text-yellow-400" />
       <AlertTitle className="text-yellow-400">Suggestion</AlertTitle>
       <AlertDescription>
-        <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-          {warning}
-        </p>
+        <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>{warning}</p>
       </AlertDescription>
     </Alert>
   );

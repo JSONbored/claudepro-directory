@@ -3,26 +3,26 @@
 /**
  * Submission Stats Actions
  * Server actions for submit page sidebar using next-safe-action
- * 
+ *
  * PERFORMANCE:
  * - Next.js caching (5-10 min TTL)
  * - Parallel queries
  * - Minimal data transfer
  */
 
+import { unstable_cache } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { createClient } from '@/src/lib/supabase/server';
 import { logger } from '@/src/lib/logger';
-import { unstable_cache } from 'next/cache';
-import {
-  submissionStatsSchema,
-  recentMergedSchema,
-  topContributorSchema,
-  type RecentMerged,
-  type TopContributor,
-} from '@/src/lib/schemas/submission-stats.schema';
 import { nonNegativeInt } from '@/src/lib/schemas/primitives/base-numbers';
+import {
+  type RecentMerged,
+  recentMergedSchema,
+  submissionStatsSchema,
+  type TopContributor,
+  topContributorSchema,
+} from '@/src/lib/schemas/submission-stats.schema';
+import { createClient } from '@/src/lib/supabase/server';
 
 /**
  * Get submission statistics
@@ -68,7 +68,10 @@ export const getSubmissionStats = rateLimitedAction
             mergedThisWeek: mergedWeekResult.count || 0,
           };
         } catch (error) {
-          logger.error('Failed to fetch submission stats', error instanceof Error ? error : new Error(String(error)));
+          logger.error(
+            'Failed to fetch submission stats',
+            error instanceof Error ? error : new Error(String(error))
+          );
           return { total: 0, pending: 0, mergedThisWeek: 0 };
         }
       },
@@ -91,9 +94,11 @@ export const getRecentMerged = rateLimitedAction
     actionName: 'getRecentMerged',
     category: 'analytics',
   })
-  .schema(z.object({
-    limit: nonNegativeInt.min(1).max(10).default(5),
-  }))
+  .schema(
+    z.object({
+      limit: nonNegativeInt.min(1).max(10).default(5),
+    })
+  )
   .outputSchema(z.array(recentMergedSchema))
   .action(async ({ parsedInput }: { parsedInput: { limit: number } }) => {
     const cachedMerged = await unstable_cache(
@@ -127,15 +132,20 @@ export const getRecentMerged = rateLimitedAction
             content_name: item.content_name,
             content_type: item.content_type,
             merged_at: item.merged_at,
-            user: item.users ? {
-              name: item.users.name,
-              slug: item.users.slug,
-            } : null,
+            user: item.users
+              ? {
+                  name: item.users.name,
+                  slug: item.users.slug,
+                }
+              : null,
           }));
 
           return transformed;
         } catch (error) {
-          logger.error('Failed to fetch recent merged', error instanceof Error ? error : new Error(String(error)));
+          logger.error(
+            'Failed to fetch recent merged',
+            error instanceof Error ? error : new Error(String(error))
+          );
           return [];
         }
       },
@@ -158,9 +168,11 @@ export const getTopContributors = rateLimitedAction
     actionName: 'getTopContributors',
     category: 'analytics',
   })
-  .schema(z.object({
-    limit: nonNegativeInt.min(1).max(10).default(5),
-  }))
+  .schema(
+    z.object({
+      limit: nonNegativeInt.min(1).max(10).default(5),
+    })
+  )
   .outputSchema(z.array(topContributorSchema))
   .action(async ({ parsedInput }: { parsedInput: { limit: number } }) => {
     const cachedContributors = await unstable_cache(
@@ -178,12 +190,16 @@ export const getTopContributors = rateLimitedAction
 
           // Group by user and count
           const userCounts = new Map<string, { name: string; slug: string; count: number }>();
-          
+
           for (const submission of data || []) {
             const user = (submission as any).users;
             if (!user) continue;
-            
-            const existing = userCounts.get(user.slug) || { name: user.name, slug: user.slug, count: 0 };
+
+            const existing = userCounts.get(user.slug) || {
+              name: user.name,
+              slug: user.slug,
+              count: 0,
+            };
             existing.count++;
             userCounts.set(user.slug, existing);
           }
@@ -203,7 +219,10 @@ export const getTopContributors = rateLimitedAction
 
           return contributors;
         } catch (error) {
-          logger.error('Failed to fetch top contributors', error instanceof Error ? error : new Error(String(error)));
+          logger.error(
+            'Failed to fetch top contributors',
+            error instanceof Error ? error : new Error(String(error))
+          );
           return [];
         }
       },

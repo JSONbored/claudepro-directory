@@ -3,16 +3,16 @@
 /**
  * Bookmark Button Component
  * Toggle bookmark on/off for any content
- * 
+ *
  * Follows existing patterns from card-copy-action.tsx
  */
 
+import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { Bookmark, BookmarkCheck } from '@/src/lib/icons';
+import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
 import { addBookmark, removeBookmark } from '@/src/lib/actions/bookmark-actions';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { Bookmark, BookmarkCheck } from '@/src/lib/icons';
 
 interface BookmarkButtonProps {
   contentType: string;
@@ -95,11 +95,7 @@ export function BookmarkButton({
       ) : (
         <Bookmark className="h-3 w-3" aria-hidden="true" />
       )}
-      {showLabel && (
-        <span className="ml-1 text-xs">
-          {isBookmarked ? 'Saved' : 'Save'}
-        </span>
-      )}
+      {showLabel && <span className="ml-1 text-xs">{isBookmarked ? 'Saved' : 'Save'}</span>}
     </Button>
   );
 }

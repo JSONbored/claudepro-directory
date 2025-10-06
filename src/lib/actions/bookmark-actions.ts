@@ -3,16 +3,16 @@
 /**
  * Bookmark Actions
  * Server actions for managing user bookmarks
- * 
+ *
  * Follows existing pattern from email-capture.ts and track-view.ts
  */
 
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { createClient } from '@/src/lib/supabase/server';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
-import { revalidatePath } from 'next/cache';
+import { createClient } from '@/src/lib/supabase/server';
 
 // Bookmark schema
 const bookmarkSchema = z.object({
@@ -38,10 +38,12 @@ export const addBookmark = rateLimitedAction
   .schema(bookmarkSchema)
   .action(async ({ parsedInput: { content_type, content_slug, notes } }) => {
     const supabase = await createClient();
-    
+
     // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       throw new Error('You must be signed in to bookmark content');
     }
@@ -92,10 +94,12 @@ export const removeBookmark = rateLimitedAction
   )
   .action(async ({ parsedInput: { content_type, content_slug } }) => {
     const supabase = await createClient();
-    
+
     // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       throw new Error('You must be signed in to remove bookmarks');
     }
@@ -127,10 +131,12 @@ export const removeBookmark = rateLimitedAction
  */
 export async function isBookmarked(content_type: string, content_slug: string): Promise<boolean> {
   const supabase = await createClient();
-  
+
   // Get current user
-  const { data: { user } } = await supabase.auth.getUser();
-  
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (!user) {
     return false;
   }

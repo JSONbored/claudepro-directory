@@ -1,7 +1,7 @@
 /**
  * Production-grade form validation schemas
  * Type-specific schemas for plaintext content submission
- * 
+ *
  * NO JSON REQUIRED - Users submit plaintext, we build JSON server-side
  */
 
@@ -68,12 +68,12 @@ const baseSubmissionFields = {
 export const agentSubmissionSchema = z.object({
   type: z.literal('agents'),
   ...baseSubmissionFields,
-  
+
   // Plaintext system prompt (NO JSON!)
   systemPrompt: nonEmptyString
     .min(50, 'System prompt must be at least 50 characters')
     .max(10000, 'System prompt is too long'),
-  
+
   temperature: z.coerce.number().min(0).max(1).default(0.7),
   maxTokens: z.coerce.number().min(100).max(200000).default(8000),
 });
@@ -84,12 +84,12 @@ export const agentSubmissionSchema = z.object({
 export const rulesSubmissionSchema = z.object({
   type: z.literal('rules'),
   ...baseSubmissionFields,
-  
+
   // Plaintext Claude rules content (NO JSON!)
   rulesContent: nonEmptyString
     .min(50, 'Claude rules content must be at least 50 characters')
     .max(10000, 'Claude rules content is too long'),
-  
+
   temperature: z.coerce.number().min(0).max(1).default(0.7),
   maxTokens: z.coerce.number().min(100).max(200000).default(8000),
 });
@@ -100,7 +100,7 @@ export const rulesSubmissionSchema = z.object({
 export const commandsSubmissionSchema = z.object({
   type: z.literal('commands'),
   ...baseSubmissionFields,
-  
+
   // Plaintext command content with frontmatter (NO JSON!)
   commandContent: nonEmptyString
     .min(50, 'Command content must be at least 50 characters')
@@ -113,19 +113,22 @@ export const commandsSubmissionSchema = z.object({
 export const hooksSubmissionSchema = z.object({
   type: z.literal('hooks'),
   ...baseSubmissionFields,
-  
+
   // Plaintext bash script (NO JSON!)
   hookScript: nonEmptyString
     .min(20, 'Hook script must be at least 20 characters')
     .max(5000, 'Hook script is too long'),
-  
+
   hookType: z.enum(['pre-tool-use', 'post-tool-use', 'pre-command', 'post-command']),
   triggeredBy: z
     .string()
     .optional()
     .transform((val) => {
       if (!val) return [];
-      return val.split(',').map((t) => t.trim()).filter(Boolean);
+      return val
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean);
     }),
 });
 
@@ -135,12 +138,12 @@ export const hooksSubmissionSchema = z.object({
 export const statuslinesSubmissionSchema = z.object({
   type: z.literal('statuslines'),
   ...baseSubmissionFields,
-  
+
   // Plaintext bash script (NO JSON!)
   statuslineScript: nonEmptyString
     .min(20, 'Statusline script must be at least 20 characters')
     .max(5000, 'Statusline script is too long'),
-  
+
   statuslineType: z.enum(['custom', 'minimal', 'extended']).default('custom'),
   refreshInterval: z.coerce.number().min(100).max(10000).default(1000),
   position: z.enum(['left', 'right']).default('left'),
@@ -152,18 +155,18 @@ export const statuslinesSubmissionSchema = z.object({
 export const mcpSubmissionSchema = z.object({
   type: z.literal('mcp'),
   ...baseSubmissionFields,
-  
+
   npmPackage: nonEmptyString.max(200),
   serverType: z.enum(['stdio', 'sse', 'websocket']).default('stdio'),
   installCommand: nonEmptyString.max(500),
   configCommand: nonEmptyString.max(200),
-  
+
   // Simplified - users describe tools in plaintext
   toolsDescription: z
     .string()
     .optional()
     .describe('Describe what tools/capabilities this server provides (plaintext)'),
-  
+
   // Simplified - KEY=value format
   envVars: z
     .string()
@@ -191,15 +194,15 @@ export type ConfigSubmissionData = z.output<typeof configSubmissionSchema>;
  */
 export function validateJsonLdSafe(data: unknown): unknown {
   const jsonString = JSON.stringify(data);
-  
+
   if (/<script\b/i.test(jsonString)) {
     throw new Error('Script tags are not allowed in JSON-LD data');
   }
-  
+
   if (/javascript:/i.test(jsonString)) {
     throw new Error('JavaScript protocol not allowed in JSON-LD data');
   }
-  
+
   return JSON.parse(jsonString);
 }
 

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { TrendingUp, Clock, CheckCircle } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { CheckCircle, Clock, TrendingUp } from '@/src/lib/icons';
 import type { SubmissionStats } from '@/src/lib/schemas/submission-stats.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface SubmitStatsCardProps {
   stats: SubmissionStats;
@@ -23,9 +23,7 @@ export function SubmitStatsCard({ stats }: SubmitStatsCardProps) {
               Total Configs
             </span>
           </div>
-          <span className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.FONT_SEMIBOLD}`}>
-            {stats.total}
-          </span>
+          <span className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.FONT_SEMIBOLD}`}>{stats.total}</span>
         </div>
 
         <div className="flex items-center justify-between">

@@ -3,24 +3,30 @@
 /**
  * Post Actions (Community Board)
  * Server actions for creating, voting, and managing posts
- * 
+ *
  * Similar to Hacker News - users can post links, text, or both
  */
 
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { createClient } from '@/src/lib/supabase/server';
 import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives/base-strings';
-import { revalidatePath } from 'next/cache';
+import { createClient } from '@/src/lib/supabase/server';
 
 // Post schema
-const createPostSchema = z.object({
-  title: nonEmptyString.min(3).max(300, 'Title must be less than 300 characters'),
-  content: z.string().max(5000, 'Content must be less than 5000 characters').nullable().optional(),
-  url: urlString.nullable().optional(),
-}).refine((data) => data.content || data.url, {
-  message: 'Post must have either content or a URL',
-});
+const createPostSchema = z
+  .object({
+    title: nonEmptyString.min(3).max(300, 'Title must be less than 300 characters'),
+    content: z
+      .string()
+      .max(5000, 'Content must be less than 5000 characters')
+      .nullable()
+      .optional(),
+    url: urlString.nullable().optional(),
+  })
+  .refine((data) => data.content || data.url, {
+    message: 'Post must have either content or a URL',
+  });
 
 const updatePostSchema = z.object({
   id: z.string().uuid(),
@@ -39,9 +45,11 @@ export const createPost = rateLimitedAction
   .schema(createPostSchema)
   .action(async ({ parsedInput: { title, content, url } }) => {
     const supabase = await createClient();
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       throw new Error('You must be signed in to create posts');
     }
@@ -94,9 +102,11 @@ export const updatePost = rateLimitedAction
   .schema(updatePostSchema)
   .action(async ({ parsedInput: { id, title, content } }) => {
     const supabase = await createClient();
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       throw new Error('You must be signed in to edit posts');
     }
@@ -135,18 +145,16 @@ export const deletePost = rateLimitedAction
   .schema(z.object({ id: z.string().uuid() }))
   .action(async ({ parsedInput: { id } }) => {
     const supabase = await createClient();
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       throw new Error('You must be signed in to delete posts');
     }
 
-    const { error } = await supabase
-      .from('posts')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', user.id);
+    const { error } = await supabase.from('posts').delete().eq('id', id).eq('user_id', user.id);
 
     if (error) {
       throw new Error(error.message);
@@ -167,27 +175,29 @@ export const votePost = rateLimitedAction
     actionName: 'votePost',
     category: 'user',
   })
-  .schema(z.object({
-    post_id: z.string().uuid(),
-    action: z.enum(['vote', 'unvote']),
-  }))
+  .schema(
+    z.object({
+      post_id: z.string().uuid(),
+      action: z.enum(['vote', 'unvote']),
+    })
+  )
   .action(async ({ parsedInput: { post_id, action } }) => {
     const supabase = await createClient();
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       throw new Error('You must be signed in to vote');
     }
 
     if (action === 'vote') {
       // Add vote
-      const { error } = await supabase
-        .from('votes')
-        .insert({
-          user_id: user.id,
-          post_id,
-        });
+      const { error } = await supabase.from('votes').insert({
+        user_id: user.id,
+        post_id,
+      });
 
       if (error) {
         if (error.code === '23505') {
@@ -224,15 +234,19 @@ export const createComment = rateLimitedAction
     actionName: 'createComment',
     category: 'form',
   })
-  .schema(z.object({
-    post_id: z.string().uuid(),
-    content: nonEmptyString.min(1).max(2000, 'Comment must be less than 2000 characters'),
-  }))
+  .schema(
+    z.object({
+      post_id: z.string().uuid(),
+      content: nonEmptyString.min(1).max(2000, 'Comment must be less than 2000 characters'),
+    })
+  )
   .action(async ({ parsedInput: { post_id, content } }) => {
     const supabase = await createClient();
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       throw new Error('You must be signed in to comment');
     }
@@ -270,18 +284,16 @@ export const deleteComment = rateLimitedAction
   .schema(z.object({ id: z.string().uuid() }))
   .action(async ({ parsedInput: { id } }) => {
     const supabase = await createClient();
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       throw new Error('You must be signed in to delete comments');
     }
 
-    const { error } = await supabase
-      .from('comments')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', user.id);
+    const { error } = await supabase.from('comments').delete().eq('id', id).eq('user_id', user.id);
 
     if (error) {
       throw new Error(error.message);

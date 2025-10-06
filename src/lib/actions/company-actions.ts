@@ -5,11 +5,11 @@
  * Server actions for company profile management
  */
 
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { createClient } from '@/src/lib/supabase/server';
 import { nonEmptyString, slugString, urlString } from '@/src/lib/schemas/primitives/base-strings';
-import { revalidatePath } from 'next/cache';
+import { createClient } from '@/src/lib/supabase/server';
 
 // Company schema
 const createCompanySchema = z.object({
@@ -20,7 +20,11 @@ const createCompanySchema = z.object({
   description: z.string().max(1000).nullable().optional(),
   size: z.enum(['1-10', '11-50', '51-200', '201-500', '500+']).nullable().optional(),
   industry: nonEmptyString.max(100).nullable().optional(),
-  using_cursor_since: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  using_cursor_since: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable()
+    .optional(),
 });
 
 const updateCompanySchema = z.object({
@@ -31,7 +35,11 @@ const updateCompanySchema = z.object({
   description: z.string().max(1000).nullable().optional(),
   size: z.enum(['1-10', '11-50', '51-200', '201-500', '500+']).nullable().optional(),
   industry: nonEmptyString.max(100).nullable().optional(),
-  using_cursor_since: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  using_cursor_since: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable()
+    .optional(),
 });
 
 /**
@@ -45,9 +53,11 @@ export const createCompany = rateLimitedAction
   .schema(createCompanySchema)
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       throw new Error('You must be signed in to create a company profile');
     }
@@ -88,9 +98,11 @@ export const updateCompany = rateLimitedAction
   .schema(updateCompanySchema)
   .action(async ({ parsedInput }) => {
     const supabase = await createClient();
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     if (!user) {
       throw new Error('You must be signed in to update companies');
     }
@@ -124,9 +136,11 @@ export const updateCompany = rateLimitedAction
  */
 export async function getUserCompanies() {
   const supabase = await createClient();
-  
-  const { data: { user } } = await supabase.auth.getUser();
-  
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (!user) {
     return [];
   }

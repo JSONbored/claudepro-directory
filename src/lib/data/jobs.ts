@@ -1,13 +1,13 @@
 /**
  * Jobs Data Layer
  * Fetches job listings from Supabase database
- * 
+ *
  * Migration: Moved from static JSON to database for dynamic content management
  */
 
-import { createClient } from '@/src/lib/supabase/server';
-import { jobContentSchema, type JobContent } from '@/src/lib/schemas/content/job.schema';
 import { logger } from '@/src/lib/logger';
+import { type JobContent, jobContentSchema } from '@/src/lib/schemas/content/job.schema';
+import { createClient } from '@/src/lib/supabase/server';
 
 export type Job = JobContent;
 
@@ -17,7 +17,7 @@ export type Job = JobContent;
 export async function getJobs(): Promise<Job[]> {
   try {
     const supabase = await createClient();
-    
+
     const { data, error } = await supabase
       .from('jobs')
       .select('*')
@@ -32,7 +32,7 @@ export async function getJobs(): Promise<Job[]> {
     }
 
     // Transform database records to JobContent type
-    return (data || []).map(job => jobContentSchema.parse(job));
+    return (data || []).map((job) => jobContentSchema.parse(job));
   } catch (error) {
     logger.error('Error in getJobs', error instanceof Error ? error : new Error(String(error)));
     return [];
@@ -45,7 +45,7 @@ export async function getJobs(): Promise<Job[]> {
 export async function getJobBySlug(slug: string): Promise<Job | undefined> {
   try {
     const supabase = await createClient();
-    
+
     const { data, error } = await supabase
       .from('jobs')
       .select('*')
@@ -59,7 +59,10 @@ export async function getJobBySlug(slug: string): Promise<Job | undefined> {
 
     return jobContentSchema.parse(data);
   } catch (error) {
-    logger.error('Error in getJobBySlug', error instanceof Error ? error : new Error(String(error)));
+    logger.error(
+      'Error in getJobBySlug',
+      error instanceof Error ? error : new Error(String(error))
+    );
     return undefined;
   }
 }
@@ -70,7 +73,7 @@ export async function getJobBySlug(slug: string): Promise<Job | undefined> {
 export async function getFeaturedJobs(): Promise<Job[]> {
   try {
     const supabase = await createClient();
-    
+
     const { data, error } = await supabase
       .from('jobs')
       .select('*')
@@ -86,9 +89,12 @@ export async function getFeaturedJobs(): Promise<Job[]> {
       return [];
     }
 
-    return (data || []).map(job => jobContentSchema.parse(job));
+    return (data || []).map((job) => jobContentSchema.parse(job));
   } catch (error) {
-    logger.error('Error in getFeaturedJobs', error instanceof Error ? error : new Error(String(error)));
+    logger.error(
+      'Error in getFeaturedJobs',
+      error instanceof Error ? error : new Error(String(error))
+    );
     return [];
   }
 }
@@ -99,7 +105,7 @@ export async function getFeaturedJobs(): Promise<Job[]> {
 export async function getJobsByCategory(category: string): Promise<Job[]> {
   try {
     const supabase = await createClient();
-    
+
     const { data, error } = await supabase
       .from('jobs')
       .select('*')
@@ -113,9 +119,12 @@ export async function getJobsByCategory(category: string): Promise<Job[]> {
       return [];
     }
 
-    return (data || []).map(job => jobContentSchema.parse(job));
+    return (data || []).map((job) => jobContentSchema.parse(job));
   } catch (error) {
-    logger.error('Error in getJobsByCategory', error instanceof Error ? error : new Error(String(error)));
+    logger.error(
+      'Error in getJobsByCategory',
+      error instanceof Error ? error : new Error(String(error))
+    );
     return [];
   }
 }
@@ -126,7 +135,7 @@ export async function getJobsByCategory(category: string): Promise<Job[]> {
 export async function getJobsCount(): Promise<number> {
   try {
     const supabase = await createClient();
-    
+
     const { count, error } = await supabase
       .from('jobs')
       .select('*', { count: 'exact', head: true })
@@ -140,7 +149,10 @@ export async function getJobsCount(): Promise<number> {
 
     return count || 0;
   } catch (error) {
-    logger.error('Error in getJobsCount', error instanceof Error ? error : new Error(String(error)));
+    logger.error(
+      'Error in getJobsCount',
+      error instanceof Error ? error : new Error(String(error))
+    );
     return 0;
   }
 }

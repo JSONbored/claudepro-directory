@@ -123,12 +123,7 @@ export function generatePRBody(data: {
  * Returns array of label names for GitHub
  */
 export function generatePRLabels(type: ConfigSubmissionData['type']): string[] {
-  return [
-    'community-submission',
-    `type:${type}`,
-    'needs-review',
-    'automated',
-  ];
+  return ['community-submission', `type:${type}`, 'needs-review', 'automated'];
 }
 
 /**

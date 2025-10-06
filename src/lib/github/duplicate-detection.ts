@@ -3,10 +3,10 @@
  * Prevents duplicate content submissions
  */
 
-import { contentExists, findSimilarContent } from './content-manager';
+import { logger } from '@/src/lib/logger';
 import type { ConfigSubmissionData } from '@/src/lib/schemas/form.schema';
 import { createClient } from '@/src/lib/supabase/server';
-import { logger } from '@/src/lib/logger';
+import { contentExists, findSimilarContent } from './content-manager';
 
 /**
  * Check for duplicate submissions
@@ -53,7 +53,10 @@ export async function checkForDuplicates(
       isDuplicate: false,
     };
   } catch (error) {
-    logger.error('Duplicate detection failed', error instanceof Error ? error : new Error(String(error)));
+    logger.error(
+      'Duplicate detection failed',
+      error instanceof Error ? error : new Error(String(error))
+    );
     // Don't block submissions on duplicate check errors
     return {
       isDuplicate: false,
@@ -87,7 +90,10 @@ async function checkPendingSubmissions(
 
     return !!data;
   } catch (error) {
-    logger.error('Failed to check pending submissions', error instanceof Error ? error : new Error(String(error)));
+    logger.error(
+      'Failed to check pending submissions',
+      error instanceof Error ? error : new Error(String(error))
+    );
     return false;
   }
 }
@@ -135,7 +141,9 @@ export async function validateSubmission(data: {
 
   // Check slug format
   if (!/^[a-z0-9-]+$/.test(data.slug)) {
-    errors.push('Slug contains invalid characters (use only lowercase letters, numbers, and hyphens)');
+    errors.push(
+      'Slug contains invalid characters (use only lowercase letters, numbers, and hyphens)'
+    );
   }
 
   if (data.slug.length > 100) {

@@ -1,7 +1,7 @@
 /**
  * Job Content Schema
  * Zod validation for job listings (replaces TypeScript-only JobContent type)
- * 
+ *
  * Matches database schema from Supabase
  */
 
@@ -9,7 +9,13 @@ import { z } from 'zod';
 import { nonEmptyString, slugString, urlString } from '@/src/lib/schemas/primitives/base-strings';
 
 // Job-specific enums
-export const jobTypeSchema = z.enum(['full-time', 'part-time', 'contract', 'internship', 'freelance']);
+export const jobTypeSchema = z.enum([
+  'full-time',
+  'part-time',
+  'contract',
+  'internship',
+  'freelance',
+]);
 export const jobWorkplaceSchema = z.enum(['On site', 'Remote', 'Hybrid']);
 export const jobExperienceSchema = z.enum(['Entry', 'Mid', 'Senior', 'Lead', 'Executive']);
 export const jobPlanSchema = z.enum(['standard', 'featured', 'premium']);
@@ -22,7 +28,7 @@ export const jobDatabaseSchema = z.object({
   id: z.string().uuid(),
   user_id: z.string().uuid().nullable(),
   company_id: z.string().uuid().nullable(),
-  
+
   // Job details
   slug: slugString,
   title: nonEmptyString.max(200),
@@ -41,7 +47,7 @@ export const jobDatabaseSchema = z.object({
   link: urlString, // Apply URL
   contact_email: z.string().email().nullable(),
   company_logo: urlString.nullable(),
-  
+
   // Business fields
   plan: jobPlanSchema.default('standard'),
   active: z.boolean().default(false),
@@ -50,11 +56,11 @@ export const jobDatabaseSchema = z.object({
   expires_at: z.string().datetime().nullable(),
   featured: z.boolean().default(false),
   order: z.number().int().default(0),
-  
+
   // Analytics
   view_count: z.number().int().nonnegative().default(0),
   click_count: z.number().int().nonnegative().default(0),
-  
+
   // Audit
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
@@ -69,7 +75,10 @@ export type JobDatabase = z.infer<typeof jobDatabaseSchema>;
 export const createJobSchema = z.object({
   title: nonEmptyString.min(3).max(200, 'Title must be less than 200 characters'),
   company: nonEmptyString.min(2).max(200, 'Company name must be less than 200 characters'),
-  location: nonEmptyString.max(200, 'Location must be less than 200 characters').nullable().optional(),
+  location: nonEmptyString
+    .max(200, 'Location must be less than 200 characters')
+    .nullable()
+    .optional(),
   description: nonEmptyString.min(50, 'Description must be at least 50 characters'),
   salary: z.string().max(100).nullable().optional(),
   remote: z.boolean().default(false),

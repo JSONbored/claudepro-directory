@@ -1,19 +1,17 @@
 import Link from 'next/link';
-import { createClient } from '@/src/lib/supabase/server';
+import { redirect } from 'next/navigation';
 import { SignOutButton } from '@/src/components/auth/auth-buttons';
 import { Button } from '@/src/components/ui/button';
 import { Card } from '@/src/components/ui/card';
-import { Bookmark, Briefcase, Home, Settings, User, Send } from '@/src/lib/icons';
+import { Bookmark, Briefcase, Home, Send, Settings, User } from '@/src/lib/icons';
+import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { redirect } from 'next/navigation';
 
-export default async function AccountLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function AccountLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // Double-check auth (middleware should already handle this)
   if (!user) {
@@ -39,13 +37,15 @@ export default async function AccountLayout({
     <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
       {/* Top navigation */}
       <div className={`border-b ${UI_CLASSES.PX_4} py-4`}>
-          <div className={`container ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_BETWEEN}`}>
-            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-              <Link href="/" className={UI_CLASSES.HOVER_TEXT_ACCENT}>
-                ← Back to Directory
-              </Link>
-            </div>
-            <div className="flex items-center gap-4">
+        <div
+          className={`container ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_BETWEEN}`}
+        >
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+            <Link href="/" className={UI_CLASSES.HOVER_TEXT_ACCENT}>
+              ← Back to Directory
+            </Link>
+          </div>
+          <div className="flex items-center gap-4">
             {profile?.slug && (
               <Link href={`/u/${profile.slug}`} className={UI_CLASSES.TEXT_SM}>
                 View Profile
@@ -81,10 +81,7 @@ export default async function AccountLayout({
             <nav className={UI_CLASSES.SPACE_Y_2}>
               {navigation.map((item) => (
                 <Link key={item.name} href={item.href}>
-                  <Button
-                    variant="ghost"
-                    className={`w-full justify-start ${UI_CLASSES.TEXT_SM}`}
-                  >
+                  <Button variant="ghost" className={`w-full justify-start ${UI_CLASSES.TEXT_SM}`}>
                     <item.icon className="h-4 w-4 mr-2" />
                     {item.name}
                   </Button>
@@ -94,9 +91,7 @@ export default async function AccountLayout({
           </Card>
 
           {/* Main content */}
-          <div className="md:col-span-3">
-            {children}
-          </div>
+          <div className="md:col-span-3">{children}</div>
         </div>
       </div>
     </div>

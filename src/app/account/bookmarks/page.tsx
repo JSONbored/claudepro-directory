@@ -1,10 +1,16 @@
-import { createClient } from '@/src/lib/supabase/server';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Badge } from '@/src/components/ui/badge';
-import { Bookmark, ExternalLink } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-import Link from 'next/link';
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { Badge } from '@/src/components/ui/badge';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
+import { Bookmark, ExternalLink } from '@/src/lib/icons';
+import { createClient } from '@/src/lib/supabase/server';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
   title: 'Bookmarks - ClaudePro Directory',
@@ -13,7 +19,9 @@ export const metadata: Metadata = {
 
 export default async function BookmarksPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) return null;
 
@@ -39,12 +47,10 @@ export default async function BookmarksPage() {
             <Bookmark className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-xl font-semibold mb-2">No bookmarks yet</h3>
             <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} text-center max-w-md`}>
-              Start exploring the directory and bookmark your favorite agents, MCP servers, rules, and more!
+              Start exploring the directory and bookmark your favorite agents, MCP servers, rules,
+              and more!
             </p>
-            <Link
-              href="/"
-              className="mt-4 text-primary hover:underline"
-            >
+            <Link href="/" className="mt-4 text-primary hover:underline">
               Browse Directory →
             </Link>
           </CardContent>
@@ -60,14 +66,10 @@ export default async function BookmarksPage() {
                       <Badge variant="outline" className="capitalize">
                         {bookmark.content_type}
                       </Badge>
-                      <CardTitle className={UI_CLASSES.TEXT_LG}>
-                        {bookmark.content_slug}
-                      </CardTitle>
+                      <CardTitle className={UI_CLASSES.TEXT_LG}>{bookmark.content_slug}</CardTitle>
                     </div>
                     {bookmark.notes && (
-                      <CardDescription className="mt-2">
-                        {bookmark.notes}
-                      </CardDescription>
+                      <CardDescription className="mt-2">{bookmark.notes}</CardDescription>
                     )}
                   </div>
                   <Link

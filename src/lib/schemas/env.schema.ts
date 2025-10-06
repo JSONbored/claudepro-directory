@@ -139,7 +139,9 @@ const serverEnvSchema = z
     // GitHub (content submissions)
     GITHUB_BOT_TOKEN: nonEmptyString
       .optional()
-      .describe('GitHub Personal Access Token for automated PR creation (requires Contents + Pull Requests permissions)'),
+      .describe(
+        'GitHub Personal Access Token for automated PR creation (requires Contents + Pull Requests permissions)'
+      ),
 
     // Polar.sh (payments)
     POLAR_ACCESS_TOKEN: nonEmptyString

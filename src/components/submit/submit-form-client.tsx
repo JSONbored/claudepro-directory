@@ -4,13 +4,14 @@
  * Submit Form Client Component
  * Handles all form logic, state, and submission
  * Integrated with template selector and duplicate detection
- * 
+ *
  * RESPONSIVE DESIGN:
  * - Desktop: Full-width form fields, grid layouts for numeric inputs
  * - Tablet: Responsive grids (grid-cols-2 → grid-cols-1 on small screens)
  * - Mobile: Single column, optimized spacing
  */
 
+import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
@@ -24,12 +25,11 @@ import {
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
+import { submitConfiguration } from '@/src/lib/actions/submission-actions';
 import { CheckCircle, ExternalLink, Github, Send } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { submitConfiguration } from '@/src/lib/actions/submission-actions';
-import { TemplateSelector } from './template-selector';
 import { DuplicateWarning } from './duplicate-warning';
-import Link from 'next/link';
+import { TemplateSelector } from './template-selector';
 
 type ContentType = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines';
 
@@ -78,12 +78,12 @@ export function SubmitFormClient() {
     if (contentType === 'agents' && template.systemPrompt) {
       const promptInput = form.querySelector('#systemPrompt') as HTMLTextAreaElement;
       if (promptInput) promptInput.value = template.systemPrompt;
-      
+
       if (template.temperature !== undefined) {
         const tempInput = form.querySelector('#temperature') as HTMLInputElement;
         if (tempInput) tempInput.value = template.temperature.toString();
       }
-      
+
       if (template.maxTokens !== undefined) {
         const tokensInput = form.querySelector('#maxTokens') as HTMLInputElement;
         if (tokensInput) tokensInput.value = template.maxTokens.toString();
@@ -138,7 +138,7 @@ export function SubmitFormClient() {
     startTransition(async () => {
       try {
         const formData = new FormData(event.currentTarget);
-        
+
         // Build submission data based on type
         const baseData = {
           type: contentType,
@@ -150,20 +150,24 @@ export function SubmitFormClient() {
           tags: (formData.get('tags') as string) || undefined,
         };
 
-        let submissionData: any = { ...baseData };
+        const submissionData: any = { ...baseData };
 
         // Add type-specific fields
         switch (contentType) {
           case 'agents':
             submissionData.systemPrompt = formData.get('systemPrompt') as string;
-            submissionData.temperature = parseFloat(formData.get('temperature') as string) || 0.7;
-            submissionData.maxTokens = parseInt(formData.get('maxTokens') as string) || 8000;
+            submissionData.temperature =
+              Number.parseFloat(formData.get('temperature') as string) || 0.7;
+            submissionData.maxTokens =
+              Number.parseInt(formData.get('maxTokens') as string, 10) || 8000;
             break;
 
           case 'rules':
             submissionData.rulesContent = formData.get('rulesContent') as string;
-            submissionData.temperature = parseFloat(formData.get('temperature') as string) || 0.7;
-            submissionData.maxTokens = parseInt(formData.get('maxTokens') as string) || 8000;
+            submissionData.temperature =
+              Number.parseFloat(formData.get('temperature') as string) || 0.7;
+            submissionData.maxTokens =
+              Number.parseInt(formData.get('maxTokens') as string, 10) || 8000;
             break;
 
           case 'commands':
@@ -179,7 +183,8 @@ export function SubmitFormClient() {
           case 'statuslines':
             submissionData.statuslineScript = formData.get('statuslineScript') as string;
             submissionData.statuslineType = formData.get('statuslineType') as string;
-            submissionData.refreshInterval = parseInt(formData.get('refreshInterval') as string) || 1000;
+            submissionData.refreshInterval =
+              Number.parseInt(formData.get('refreshInterval') as string, 10) || 1000;
             submissionData.position = formData.get('position') as string;
             break;
 
@@ -188,7 +193,8 @@ export function SubmitFormClient() {
             submissionData.serverType = formData.get('serverType') as string;
             submissionData.installCommand = formData.get('installCommand') as string;
             submissionData.configCommand = formData.get('configCommand') as string;
-            submissionData.toolsDescription = (formData.get('toolsDescription') as string) || undefined;
+            submissionData.toolsDescription =
+              (formData.get('toolsDescription') as string) || undefined;
             submissionData.envVars = (formData.get('envVars') as string) || undefined;
             break;
         }
@@ -227,7 +233,8 @@ export function SubmitFormClient() {
               <div className="flex-1 min-w-0">
                 <p className={UI_CLASSES.FONT_MEDIUM}>Submission Successful! 🎉</p>
                 <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
-                  Your configuration has been submitted for review. Pull Request #{submissionResult.prNumber} created on GitHub.
+                  Your configuration has been submitted for review. Pull Request #
+                  {submissionResult.prNumber} created on GitHub.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-3">
                   <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
@@ -236,9 +243,7 @@ export function SubmitFormClient() {
                     </a>
                   </Button>
                   <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
-                    <Link href="/account/submissions">
-                      Track Status
-                    </Link>
+                    <Link href="/account/submissions">Track Status</Link>
                   </Button>
                 </div>
               </div>
@@ -279,7 +284,7 @@ export function SubmitFormClient() {
                   <option value="statuslines">Statusline</option>
                 </select>
               </div>
-              
+
               <div className="space-y-2">
                 <Label>Quick Start</Label>
                 <TemplateSelector contentType={contentType} onSelect={handleTemplateSelect} />
@@ -294,7 +299,7 @@ export function SubmitFormClient() {
                 name="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder={`e.g., ${contentType === 'agents' ? 'Code Review Assistant' : contentType === 'mcp' ? 'GitHub MCP Server' : 'My ' + contentType}`}
+                placeholder={`e.g., ${contentType === 'agents' ? 'Code Review Assistant' : contentType === 'mcp' ? 'GitHub MCP Server' : `My ${contentType}`}`}
                 required
               />
               <DuplicateWarning contentType={contentType} name={name} />
@@ -493,11 +498,7 @@ export function SubmitFormClient() {
 
                   <div className="space-y-2">
                     <Label htmlFor="triggeredBy">Triggered By (optional)</Label>
-                    <Input
-                      id="triggeredBy"
-                      name="triggeredBy"
-                      placeholder="tool1, tool2"
-                    />
+                    <Input id="triggeredBy" name="triggeredBy" placeholder="tool1, tool2" />
                   </div>
                 </div>
               </>
@@ -673,7 +674,8 @@ export function SubmitFormClient() {
                     How it works
                   </p>
                   <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
-                    We'll automatically create a Pull Request with your submission. Our team reviews for quality and accuracy, then merges it to make your contribution live!
+                    We'll automatically create a Pull Request with your submission. Our team reviews
+                    for quality and accuracy, then merges it to make your contribution live!
                   </p>
                 </div>
               </div>

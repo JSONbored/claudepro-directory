@@ -1,12 +1,18 @@
-import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
-import { createClient } from '@/src/lib/supabase/server';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
 import { Globe, MessageSquare, Users } from '@/src/lib/icons';
+import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
+import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { notFound } from 'next/navigation';
-import type { Metadata } from 'next';
 
 interface UserProfilePageProps {
   params: { slug: string };
@@ -14,7 +20,7 @@ interface UserProfilePageProps {
 
 export async function generateMetadata({ params }: UserProfilePageProps): Promise<Metadata> {
   const { slug } = params;
-  
+
   return {
     title: `${slug} - ClaudePro Directory`,
     description: `View ${slug}'s profile, contributions, and activity`,
@@ -27,7 +33,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
   // Get current user (if logged in)
   const currentUserClient = await createClient();
-  const { data: { user: currentUser } } = await currentUserClient.auth.getUser();
+  const {
+    data: { user: currentUser },
+  } = await currentUserClient.auth.getUser();
 
   // Get profile data
   const { data: profile } = await supabase
@@ -69,7 +77,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
       .eq('follower_id', currentUser.id)
       .eq('following_id', profile.id)
       .single();
-    
+
     isFollowing = !!data;
   }
 
@@ -79,14 +87,10 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
       <section className="relative">
         {profile.hero && (
           <div className="w-full h-48 bg-gradient-to-r from-primary/20 to-accent/20">
-            <img
-              src={profile.hero}
-              alt=""
-              className="w-full h-full object-cover"
-            />
+            <img src={profile.hero} alt="" className="w-full h-full object-cover" />
           </div>
         )}
-        
+
         <div className={`container ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.PX_4}`}>
           <div className={`flex items-start justify-between ${profile.hero ? '-mt-16' : 'pt-12'}`}>
             <div className="flex items-start gap-4">
@@ -104,9 +108,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
               <div className="mt-4">
                 <h1 className="text-3xl font-bold">{profile.name || slug}</h1>
-                {profile.work && (
-                  <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>{profile.work}</p>
-                )}
+                {profile.work && <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>{profile.work}</p>}
                 {profile.bio && (
                   <p className={`${UI_CLASSES.TEXT_SM} mt-2 max-w-2xl`}>{profile.bio}</p>
                 )}
@@ -118,7 +120,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   </div>
                   <span>•</span>
                   <div>{followingCount || 0} following</div>
-                  
+
                   {profile.website && (
                     <>
                       <span>•</span>
@@ -163,9 +165,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Member since</span>
                   <span className={UI_CLASSES.TEXT_SM}>
-                    {new Date(profile.created_at).toLocaleDateString('en-US', { 
-                      month: 'short', 
-                      year: 'numeric' 
+                    {new Date(profile.created_at).toLocaleDateString('en-US', {
+                      month: 'short',
+                      year: 'numeric',
                     })}
                   </span>
                 </div>
@@ -177,7 +179,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
           <div className="md:col-span-2 space-y-6">
             <div>
               <h2 className="text-2xl font-bold mb-4">Recent Posts</h2>
-              
+
               {!posts || posts.length === 0 ? (
                 <Card>
                   <CardContent className={`${UI_CLASSES.FLEX_COL_CENTER} py-12`}>
@@ -208,13 +210,14 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                           <CardDescription className="mt-2 whitespace-pre-wrap">
                             {post.content.length > 150
                               ? `${post.content.slice(0, 150)}...`
-                              : post.content
-                            }
+                              : post.content}
                           </CardDescription>
                         )}
                       </CardHeader>
                       <CardContent>
-                        <div className={`flex items-center gap-3 ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                        <div
+                          className={`flex items-center gap-3 ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
+                        >
                           <Badge variant="secondary">{post.vote_count || 0} votes</Badge>
                           <span>{post.comment_count || 0} comments</span>
                           <span>•</span>

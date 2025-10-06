@@ -1,20 +1,24 @@
-import { getSubmissionStats, getRecentMerged, getTopContributors } from '@/src/lib/actions/submission-stats-actions';
-import { SubmitStatsCard } from '@/src/components/submit/sidebar/submit-stats-card';
 import { RecentSubmissionsCard } from '@/src/components/submit/sidebar/recent-submissions-card';
-import { TopContributorsCard } from '@/src/components/submit/sidebar/top-contributors-card';
+import { SubmitStatsCard } from '@/src/components/submit/sidebar/submit-stats-card';
 import { TipsCard } from '@/src/components/submit/sidebar/tips-card';
+import { TopContributorsCard } from '@/src/components/submit/sidebar/top-contributors-card';
 import { SubmitFormClient } from '@/src/components/submit/submit-form-client';
+import {
+  getRecentMerged,
+  getSubmissionStats,
+  getTopContributors,
+} from '@/src/lib/actions/submission-stats-actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Submit Page - Server Component
  * Fetches sidebar data in parallel on server for performance
- * 
+ *
  * RESPONSIVE DESIGN:
  * - Desktop (≥1024px): Two-column layout (form + sticky sidebar)
  * - Tablet (768-1023px): Single column, sidebar below form
  * - Mobile (<768px): Single column, sidebar below form, optimized spacing
- * 
+ *
  * PERFORMANCE:
  * - Server-side data fetching (parallel queries)
  * - Edge caching (5-10 min TTL)
@@ -39,7 +43,9 @@ export default async function SubmitPage() {
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4">
           Submit Your Configuration
         </h1>
-        <p className={`text-base sm:text-lg ${UI_CLASSES.TEXT_MUTED_FOREGROUND} max-w-3xl mx-auto px-2 sm:px-4`}>
+        <p
+          className={`text-base sm:text-lg ${UI_CLASSES.TEXT_MUTED_FOREGROUND} max-w-3xl mx-auto px-2 sm:px-4`}
+        >
           Share your Claude configurations with the community - no JSON formatting required!
         </p>
       </div>

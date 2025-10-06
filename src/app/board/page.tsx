@@ -1,11 +1,17 @@
-import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Button } from '@/src/components/ui/button';
-import { Badge } from '@/src/components/ui/badge';
-import { MessageSquare, Plus, TrendingUp, User as UserIcon } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-import Link from 'next/link';
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { Badge } from '@/src/components/ui/badge';
+import { Button } from '@/src/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
+import { MessageSquare, Plus, TrendingUp, User as UserIcon } from '@/src/lib/icons';
+import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/date-utils';
 
 export const metadata: Metadata = {
@@ -14,6 +20,20 @@ export const metadata: Metadata = {
 };
 
 export const revalidate = 60; // Revalidate every minute
+
+interface PopularPost {
+  id: string;
+  user_id: string;
+  title: string;
+  content: string | null;
+  url: string | null;
+  vote_count: number;
+  comment_count: number;
+  created_at: string;
+  user_name: string | null;
+  user_avatar: string | null;
+  user_slug: string | null;
+}
 
 export default async function BoardPage() {
   const supabase = await createAdminClient();
@@ -77,16 +97,16 @@ export default async function BoardPage() {
           </Card>
         ) : (
           <div className={UI_CLASSES.SPACE_Y_4}>
-            {posts.map((post: any) => (
+            {posts.map((post: PopularPost) => (
               <Card key={post.id} className={UI_CLASSES.CARD_GRADIENT_HOVER}>
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className={UI_CLASSES.TEXT_LG}>
                         {post.url ? (
-                          <a 
-                            href={post.url} 
-                            target="_blank" 
+                          <a
+                            href={post.url}
+                            target="_blank"
                             rel="noopener noreferrer"
                             className={UI_CLASSES.HOVER_TEXT_ACCENT}
                           >
@@ -96,17 +116,18 @@ export default async function BoardPage() {
                           <span>{post.title}</span>
                         )}
                       </CardTitle>
-                      
+
                       {post.content && (
                         <CardDescription className="mt-2 whitespace-pre-wrap">
-                          {post.content.length > 200 
-                            ? `${post.content.slice(0, 200)}...` 
-                            : post.content
-                          }
+                          {post.content.length > 200
+                            ? `${post.content.slice(0, 200)}...`
+                            : post.content}
                         </CardDescription>
                       )}
 
-                      <div className={`flex items-center gap-3 ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-3`}>
+                      <div
+                        className={`flex items-center gap-3 ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-3`}
+                      >
                         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                           {post.user_avatar ? (
                             <img
@@ -134,7 +155,10 @@ export default async function BoardPage() {
                         {post.comment_count > 0 && (
                           <>
                             <span>•</span>
-                            <span>{post.comment_count} {post.comment_count === 1 ? 'comment' : 'comments'}</span>
+                            <span>
+                              {post.comment_count}{' '}
+                              {post.comment_count === 1 ? 'comment' : 'comments'}
+                            </span>
                           </>
                         )}
                       </div>

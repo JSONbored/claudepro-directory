@@ -1,12 +1,12 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import type * as React from 'react';
+import { Star, TrendingUp, Zap } from '@/src/lib/icons';
 import { cn } from '@/src/lib/utils';
-import { TrendingUp, Star, Zap } from '@/src/lib/icons';
 
 /**
  * Sponsored Badge Component
  * Transparent disclosure badges for sponsored/promoted content
- * 
+ *
  * Follows existing badge.tsx patterns with sponsor-specific variants
  */
 
@@ -36,7 +36,7 @@ export interface SponsoredBadgeProps
 function SponsoredBadge({ className, tier, showIcon = true, ...props }: SponsoredBadgeProps) {
   const getIcon = () => {
     if (!showIcon) return null;
-    
+
     switch (tier) {
       case 'featured':
         return <Star className="h-3 w-3 mr-1 fill-current" aria-hidden="true" />;
@@ -63,8 +63,8 @@ function SponsoredBadge({ className, tier, showIcon = true, ...props }: Sponsore
   };
 
   return (
-    <div 
-      className={cn(sponsoredBadgeVariants({ tier }), className)} 
+    <div
+      className={cn(sponsoredBadgeVariants({ tier }), className)}
       aria-label={`${getLabel()} content`}
       {...props}
     >

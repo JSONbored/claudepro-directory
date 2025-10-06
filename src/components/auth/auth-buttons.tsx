@@ -3,15 +3,15 @@
 /**
  * Auth Buttons Component
  * Sign in/out buttons with GitHub and Google OAuth
- * 
+ *
  * Reuses existing UI components (Button, icons)
  */
 
 import { useState } from 'react';
-import { createClient } from '@/src/lib/supabase/client';
+import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
 import { Chrome, Github, LogOut } from '@/src/lib/icons';
-import { toast } from 'sonner';
+import { createClient } from '@/src/lib/supabase/client';
 
 interface AuthButtonsProps {
   className?: string;
@@ -24,7 +24,7 @@ export function AuthButtons({ className, redirectTo }: AuthButtonsProps) {
 
   const handleSignIn = async (provider: 'github' | 'google') => {
     setLoading(provider);
-    
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
@@ -55,7 +55,7 @@ export function AuthButtons({ className, redirectTo }: AuthButtonsProps) {
           </>
         )}
       </Button>
-      
+
       <Button
         onClick={() => handleSignIn('google')}
         disabled={loading !== null}
@@ -82,24 +82,19 @@ export function SignOutButton({ className }: { className?: string }) {
   const handleSignOut = async () => {
     setLoading(true);
     const { error } = await supabase.auth.signOut();
-    
+
     if (error) {
       toast.error(`Sign out failed: ${error.message}`);
     } else {
       toast.success('Signed out successfully');
       window.location.href = '/';
     }
-    
+
     setLoading(false);
   };
 
   return (
-    <Button
-      onClick={handleSignOut}
-      disabled={loading}
-      variant="ghost"
-      className={className}
-    >
+    <Button onClick={handleSignOut} disabled={loading} variant="ghost" className={className}>
       <LogOut className="h-4 w-4 mr-2" />
       {loading ? 'Signing out...' : 'Sign out'}
     </Button>

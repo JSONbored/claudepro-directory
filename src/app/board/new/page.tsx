@@ -1,12 +1,18 @@
-import { createPost } from '@/src/lib/actions/post-actions';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
+import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { Button } from '@/src/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
+import { createPost } from '@/src/lib/actions/post-actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'New Post - ClaudePro Directory',
@@ -16,7 +22,7 @@ export const metadata: Metadata = {
 export default function NewPostPage() {
   const handleSubmit = async (formData: FormData) => {
     'use server';
-    
+
     const title = formData.get('title') as string;
     const content = formData.get('content') as string | null;
     const url = formData.get('url') as string | null;
@@ -47,9 +53,7 @@ export default function NewPostPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Post Details</CardTitle>
-                <CardDescription>
-                  Include either a URL, text content, or both
-                </CardDescription>
+                <CardDescription>Include either a URL, text content, or both</CardDescription>
               </CardHeader>
               <CardContent className={UI_CLASSES.SPACE_Y_4}>
                 <div>
@@ -65,12 +69,7 @@ export default function NewPostPage() {
 
                 <div>
                   <Label htmlFor="url">URL (optional)</Label>
-                  <Input
-                    id="url"
-                    name="url"
-                    type="url"
-                    placeholder="https://example.com/article"
-                  />
+                  <Input id="url" name="url" type="url" placeholder="https://example.com/article" />
                   <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
                     Share a link to an article, project, or resource
                   </p>

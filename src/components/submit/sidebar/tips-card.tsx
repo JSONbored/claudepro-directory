@@ -14,9 +14,10 @@ export function TipsCard() {
   return (
     <Card className="bg-blue-500/5 border-blue-500/20">
       <CardHeader>
-        <CardTitle className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} flex items-center gap-2`}>
-          <Lightbulb className="h-4 w-4 text-blue-400" />
-          💡 Tips for Success
+        <CardTitle
+          className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} flex items-center gap-2`}
+        >
+          <Lightbulb className="h-4 w-4 text-blue-400" />💡 Tips for Success
         </CardTitle>
       </CardHeader>
       <CardContent>

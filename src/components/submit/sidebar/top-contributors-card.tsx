@@ -1,8 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Trophy, Medal } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 import Link from 'next/link';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Medal, Trophy } from '@/src/lib/icons';
 import type { TopContributor } from '@/src/lib/schemas/submission-stats.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface TopContributorsCardProps {
   contributors: TopContributor[];
@@ -35,13 +35,17 @@ export function TopContributorsCard({ contributors }: TopContributorsCardProps) 
             className={`flex items-center justify-between ${UI_CLASSES.PY_2} hover:bg-accent/5 ${UI_CLASSES.PX_2} -mx-2 rounded transition-colors`}
           >
             <div className="flex items-center gap-2 min-w-0 flex-1">
-              <span className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} text-muted-foreground w-4 flex-shrink-0`}>
+              <span
+                className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} text-muted-foreground w-4 flex-shrink-0`}
+              >
                 {contributor.rank}.
               </span>
               {getMedalIcon(contributor.rank)}
               <span className={`${UI_CLASSES.TEXT_SM} truncate`}>@{contributor.name}</span>
             </div>
-            <span className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_SEMIBOLD} text-green-400 flex-shrink-0 ml-2`}>
+            <span
+              className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_SEMIBOLD} text-green-400 flex-shrink-0 ml-2`}
+            >
               {contributor.mergedCount}
             </span>
           </Link>

@@ -3,7 +3,7 @@
 /**
  * Content Submission Actions
  * Server actions for community content submissions
- * 
+ *
  * Flow:
  * 1. Validate user is authenticated
  * 2. Check for duplicates
@@ -16,28 +16,25 @@
  * 9. Return PR URL
  */
 
+import { revalidatePath } from 'next/cache';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { configSubmissionSchema } from '@/src/lib/schemas/form.schema';
-import { createClient } from '@/src/lib/supabase/server';
-import { createBranch, commitFile, createPullRequest } from '@/src/lib/github/client';
+import { commitFile, createBranch, createPullRequest } from '@/src/lib/github/client';
 import {
+  formatContentFile,
   generateSlug,
   getContentFilePath,
-  formatContentFile,
   validateContentFile,
 } from '@/src/lib/github/content-manager';
+import { checkForDuplicates, validateSubmission } from '@/src/lib/github/duplicate-detection';
 import {
-  checkForDuplicates,
-  validateSubmission,
-} from '@/src/lib/github/duplicate-detection';
-import {
-  generatePRTitle,
+  generateCommitMessage,
   generatePRBody,
   generatePRLabels,
-  generateCommitMessage,
+  generatePRTitle,
 } from '@/src/lib/github/pr-template';
 import { logger } from '@/src/lib/logger';
-import { revalidatePath } from 'next/cache';
+import { configSubmissionSchema } from '@/src/lib/schemas/form.schema';
+import { createClient } from '@/src/lib/supabase/server';
 
 /**
  * Submit new content configuration
@@ -88,16 +85,12 @@ export const submitConfiguration = rateLimitedAction
     const duplicateCheck = await checkForDuplicates(parsedInput.type, slug, parsedInput.name);
 
     if (duplicateCheck.isDuplicate) {
-      throw new Error(
-        duplicateCheck.reason || 'This content already exists or is pending review'
-      );
+      throw new Error(duplicateCheck.reason || 'This content already exists or is pending review');
     }
 
     // Warn about similar content (but don't block)
     if (duplicateCheck.suggestions && duplicateCheck.suggestions.length > 0) {
-      logger.warn(
-        `Similar content found for ${slug}: ${duplicateCheck.suggestions.join(', ')}`
-      );
+      logger.warn(`Similar content found for ${slug}: ${duplicateCheck.suggestions.join(', ')}`);
     }
 
     // 5. Format content file (pass full parsed input with slug)
@@ -116,7 +109,10 @@ export const submitConfiguration = rateLimitedAction
     try {
       await createBranch(branchName);
     } catch (error) {
-      logger.error('Failed to create branch', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Failed to create branch',
+        error instanceof Error ? error : new Error(String(error))
+      );
       throw new Error(
         `Failed to create branch: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -134,7 +130,10 @@ export const submitConfiguration = rateLimitedAction
         message: commitMessage,
       });
     } catch (error) {
-      logger.error('Failed to commit file', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Failed to commit file',
+        error instanceof Error ? error : new Error(String(error))
+      );
       throw new Error(
         `Failed to commit file: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -174,7 +173,10 @@ export const submitConfiguration = rateLimitedAction
       prNumber = pr.number;
       prUrl = pr.url;
     } catch (error) {
-      logger.error('Failed to create PR', error instanceof Error ? error : new Error(String(error)));
+      logger.error(
+        'Failed to create PR',
+        error instanceof Error ? error : new Error(String(error))
+      );
       throw new Error(
         `Failed to create pull request: ${error instanceof Error ? error.message : 'Unknown error'}`
       );

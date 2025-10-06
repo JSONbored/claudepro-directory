@@ -8,14 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 **Latest Features:**
 
+- [Automated Submission System](#2025-10-06---automated-submission-tracking-and-analytics) - Database-backed submission tracking with analytics
+- [User Authentication](#2025-10-06---user-authentication-and-account-management) - Complete auth system with profiles and settings
+- [Sponsorship Analytics](#2025-10-06---sponsorship-analytics-dashboard) - Detailed metrics for sponsored content
+- [Submit Page Enhancements](#2025-10-06---submit-page-sidebar-and-statistics) - Stats, tips, and templates for contributors
 - [Newsletter Integration](#2025-10-05---resend-newsletter-integration-with-sticky-footer-bar) - Email newsletter signups via Resend
 - [Infinite Scroll Fix](#2025-10-05---homepage-infinite-scroll-bug-fix) - Fixed 60-item limit on homepage
-- [LLMs.txt AI Optimization](#2025-10-04---llmstxt-complete-content-generation-for-ai-discovery) - Complete page content for AI/LLM consumption
-- [SEO Title Optimization](#2025-10-04---seo-title-optimization-system-with-automated-enhancement) - Automated title enhancement for 168+ pages
-- [Trending Algorithm](#2025-10-04---production-hardened-trending-algorithm-with-security--performance-optimizations) - Real-time growth velocity tracking
 
 **Platform Improvements:**
 
+- [Email Templates](#2025-10-06---email-templates-infrastructure) - React Email templates for transactional emails
+- [LLMs.txt AI Optimization](#2025-10-04---llmstxt-complete-content-generation-for-ai-discovery) - Complete page content for AI/LLM consumption
+- [SEO Title Optimization](#2025-10-04---seo-title-optimization-system-with-automated-enhancement) - Automated title enhancement for 168+ pages
+- [Trending Algorithm](#2025-10-04---production-hardened-trending-algorithm-with-security--performance-optimizations) - Real-time growth velocity tracking
 - [Trending Page Fix](#2025-10-04---trending-page-infinite-loading-fix-with-isr) - ISR configuration fixes
 - [Submit Form](#2025-10-04---submit-form-github-api-elimination) - Zero-API GitHub integration
 - [CI Optimization](#2025-10-04---github-actions-ci-optimization-for-community-contributors) - Faster community PRs
@@ -24,7 +29,253 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - [Reddit MCP Server](#2025-10-04---reddit-mcp-server-community-contribution) - Browse Reddit from Claude
 
-[View All Updates ↓](#2025-10-05---resend-newsletter-integration-with-sticky-footer-bar)
+[View All Updates ↓](#2025-10-06---automated-submission-tracking-and-analytics)
+
+---
+
+## 2025-10-06 - Automated Submission Tracking and Analytics
+
+**TL;DR:** Implemented database-backed submission tracking system with statistics dashboard, enabling community contribution analytics and submission management.
+
+### What Changed
+
+Added comprehensive submission tracking infrastructure using Supabase database with server actions for statistics, recent submissions display, and top contributors leaderboard.
+
+### Added
+
+- **Submission Tracking Database** (`submissions` table in Supabase)
+  - Tracks all community submissions with status (pending, merged, rejected)
+  - Stores submission metadata (content type, slug, GitHub URL, submitter info)
+  - Indexes on user_id, status, and created_at for performant queries
+  - Foreign key relationships with users table
+
+- **Submission Statistics Actions** (`src/lib/actions/submission-stats-actions.ts`)
+  - `getSubmissionStats()` - Overall statistics (total, merged, pending, rejection rate)
+  - `getRecentMergedSubmissions()` - Latest 5 merged submissions with user info
+  - `getTopContributors()` - Leaderboard of top 5 contributors by merged count
+  - Type-safe server actions with Zod validation
+  - Rate-limited to prevent abuse
+
+- **Sidebar Components** for submit page
+  - **SubmitStatsCard** - Real-time submission statistics dashboard
+  - **RecentSubmissionsCard** - Recent merged submissions with avatars
+  - **TopContributorsCard** - Contributor leaderboard with badges
+  - **TipsCard** - Submission guidelines and best practices
+  - **TemplateSelector** - Quick-start templates for common content types
+  - **DuplicateWarning** - Real-time duplicate name detection
+
+### Changed
+
+- Submit page layout now includes comprehensive sidebar with statistics and tips
+- Submission form accepts plaintext input instead of manual JSON formatting
+- Improved content formatting logic for GitHub submissions
+- Enhanced user experience with template selection and duplicate warnings
+
+### Technical Details
+
+**Database Schema:**
+- `submissions.user_id` → Foreign key to `users.id`
+- `submissions.status` → ENUM ('pending', 'merged', 'rejected')
+- `submissions.content_type` → Submission category (agents, mcp, rules, etc.)
+- Composite index on (status, created_at DESC) for efficient filtering
+
+**Files Added:**
+- `src/components/submit/sidebar/*.tsx` - 6 new sidebar components
+- `src/lib/actions/submission-stats-actions.ts` - Statistics server actions
+- `src/components/submit/template-selector.tsx` - Template selection UI
+- `src/components/submit/duplicate-warning.tsx` - Duplicate detection
+
+---
+
+## 2025-10-06 - User Authentication and Account Management
+
+**TL;DR:** Complete user authentication system with Supabase Auth, user profiles, account settings, and social features (following, bookmarks).
+
+### What Changed
+
+Implemented full-featured authentication system enabling users to create accounts, manage profiles, bookmark content, and follow other users.
+
+### Added
+
+- **Supabase Authentication Integration**
+  - Email/password authentication via Supabase Auth
+  - Server-side and client-side auth helpers
+  - Protected routes with middleware
+  - Session management with cookie-based tokens
+
+- **User Profile System** (`/u/[slug]` routes)
+  - Public user profiles with customizable slugs
+  - Profile fields: name, bio, work, website, social links
+  - Avatar and hero image support
+  - Privacy controls (public/private profiles)
+  - Follow/unfollow functionality
+
+- **Account Management Pages**
+  - `/account` - Account dashboard and navigation
+  - `/account/settings` - Profile settings and preferences
+  - `/account/bookmarks` - Saved content collections
+  - `/account/following` - Users you follow
+  - `/account/sponsorships` - Sponsorship management (for sponsors)
+
+- **Social Features**
+  - Followers table with bidirectional relationships
+  - Bookmarks with notes and organization by content type
+  - Follow notifications (configurable)
+  - User activity tracking
+
+### Changed
+
+- Navigation includes login/logout and account links
+- Content pages show bookmark and follow actions when authenticated
+- Submit forms associate submissions with authenticated users
+- Profile slugs auto-generated from usernames
+
+### Security
+
+- Row Level Security (RLS) policies on all user tables
+- Users can only edit their own profiles
+- Public profiles visible to everyone, private profiles owner-only
+- Server-side auth validation on all protected routes
+
+---
+
+## 2025-10-06 - Sponsorship Analytics Dashboard
+
+**TL;DR:** Added detailed analytics dashboard for sponsored content showing views, clicks, CTR, and performance metrics over time.
+
+### What Changed
+
+Implemented comprehensive analytics page for sponsors to track the performance of their sponsored content with detailed metrics and insights.
+
+### Added
+
+- **Sponsorship Analytics Page** (`/account/sponsorships/[id]/analytics`)
+  - Real-time view and click tracking
+  - Click-through rate (CTR) calculation
+  - Days active and performance trends
+  - Sponsorship tier display (featured, promoted, spotlight)
+  - Start/end date tracking
+  - Active/inactive status indicators
+
+- **Performance Metrics**
+  - Total views count with trend indicators
+  - Total clicks with CTR percentage
+  - Days active calculation
+  - Cost-per-click (CPC) insights
+  - View-to-click conversion tracking
+
+### UI Components
+
+- Metric cards with icon badges (Eye, MousePointer, TrendingUp)
+- Sponsored badges with tier-specific styling
+- Grid layout for sponsorship details
+- Responsive design for mobile and desktop
+
+### Technical Implementation
+
+**Data Structure:**
+- Tracks content_type, content_id, tier, dates, and status
+- Links to users table for sponsor identification
+- Integration with view tracking (Redis) for real-time metrics
+
+---
+
+## 2025-10-06 - Submit Page Sidebar and Statistics
+
+**TL;DR:** Enhanced submit page with comprehensive sidebar featuring real-time statistics, recent submissions, top contributors, and helpful tips.
+
+### What Changed
+
+Transformed the submit page into a community hub by adding sidebar components that display submission statistics, guide contributors, and showcase community activity.
+
+### Added
+
+- **Stats Dashboard** - Live submission metrics
+  - Total submissions count
+  - Merged submissions (approval rate)
+  - Pending submissions
+  - Rejection rate percentage
+
+- **Recent Submissions** - Latest 5 merged contributions
+  - Submitter avatars and names
+  - Submission titles and content types
+  - Time ago formatting
+  - Links to contributor profiles
+
+- **Top Contributors** - Leaderboard of top 5 submitters
+  - Ranked by merged submission count
+  - User avatars and profile links
+  - Badge indicators for top performers
+
+- **Tips & Guidelines** - Best practices for submissions
+  - Clear naming conventions
+  - Comprehensive descriptions
+  - Testing requirements
+  - Documentation expectations
+
+- **Template Selector** - Quick-start templates
+  - Pre-filled forms for common content types
+  - Reduces errors and saves time
+  - Ensures consistent formatting
+
+### UI/UX Improvements
+
+- Two-column layout (form + sidebar)
+- Responsive design (sidebar moves below form on mobile)
+- Loading states for async data
+  - Skeleton loaders for statistics
+  - Shimmer effects for contributor cards
+- Empty states when no data available
+
+---
+
+## 2025-10-06 - Email Templates Infrastructure
+
+**TL;DR:** Integrated React Email for type-safe, production-ready transactional email templates with development preview server.
+
+### What Changed
+
+Added email template infrastructure using React Email, enabling the platform to send beautifully designed transactional emails with a development preview environment.
+
+### Added
+
+- **React Email Integration**
+  - `@react-email/components` for email component primitives
+  - `@react-email/render` for server-side email generation
+  - Development server: `npm run email:dev` (port 3001)
+  - Email templates directory: `src/emails/`
+
+- **Email Templates** (Foundation for future features)
+  - Base layout with branding and styling
+  - Responsive design optimized for all email clients
+  - Plain text fallbacks for accessibility
+  - Consistent typography and color scheme
+
+### Development Workflow
+
+- **Preview Server** - Live preview of email templates
+  - Hot-reload on template changes
+  - Test rendering across different email clients
+  - Access at `http://localhost:3001`
+
+- **Type Safety**
+  - TypeScript support for all email components
+  - Props validation with JSX type checking
+  - Compile-time error detection
+
+### Technical Details
+
+**Files Added:**
+- `src/emails/` - Email templates directory
+- Email development dependencies in package.json
+- npm script: `email:dev` for preview server
+
+**Use Cases:**
+- Welcome emails for new users
+- Submission notifications
+- Newsletter digests
+- Sponsorship confirmations
+- Follow notifications
 
 ---
 

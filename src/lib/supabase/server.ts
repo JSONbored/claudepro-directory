@@ -1,7 +1,7 @@
 /**
  * Supabase Server Client
  * Used in Server Components, Server Actions, and Route Handlers
- * 
+ *
  * Handles cookies automatically for auth session management
  * Uses anon key + RLS for user-level access
  */

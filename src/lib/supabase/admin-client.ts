@@ -1,12 +1,12 @@
 /**
  * Supabase Admin Client
  * Used for admin operations that bypass RLS
- * 
+ *
  * WARNING: Use sparingly and carefully
  * - Server-side only (never expose to client)
  * - Bypasses all RLS policies
  * - Use for: cron jobs, webhooks, admin operations
- * 
+ *
  * Examples: Sending emails to users, bulk operations, system tasks
  */
 

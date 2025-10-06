@@ -1,11 +1,17 @@
-import { getUserJobs } from '@/src/lib/actions/job-actions';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
+import type { Metadata } from 'next';
+import Link from 'next/link';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
-import { Briefcase, Plus, Eye, ExternalLink, Edit, Pause, Play, Trash } from '@/src/lib/icons';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
+import { getUserJobs } from '@/src/lib/actions/job-actions';
+import { Briefcase, Edit, ExternalLink, Eye, Pause, Play, Plus, Trash } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import Link from 'next/link';
-import type { Metadata } from 'next';
 import { formatRelativeDate } from '@/src/lib/utils/date-utils';
 
 export const metadata: Metadata = {
@@ -27,8 +33,10 @@ export default async function MyJobsPage() {
   };
 
   const getPlanBadge = (plan: string) => {
-    if (plan === 'premium') return <Badge className="bg-purple-500/10 text-purple-400">Premium</Badge>;
-    if (plan === 'featured') return <Badge className="bg-blue-500/10 text-blue-400">Featured</Badge>;
+    if (plan === 'premium')
+      return <Badge className="bg-purple-500/10 text-purple-400">Premium</Badge>;
+    if (plan === 'featured')
+      return <Badge className="bg-blue-500/10 text-blue-400">Featured</Badge>;
     return null;
   };
 
@@ -85,19 +93,17 @@ export default async function MyJobsPage() {
                   </div>
                 </div>
               </CardHeader>
-              
+
               <CardContent>
-                <div className={`${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.MB_4} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                <div
+                  className={`${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.MB_4} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
+                >
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                     <Eye className="h-4 w-4" />
                     {job.viewCount || 0} views
                   </div>
-                  {job.posted_at && (
-                    <div>Posted {formatRelativeDate(job.posted_at)}</div>
-                  )}
-                  {job.expires_at && (
-                    <div>Expires {formatRelativeDate(job.expires_at)}</div>
-                  )}
+                  {job.posted_at && <div>Posted {formatRelativeDate(job.posted_at)}</div>}
+                  {job.expires_at && <div>Expires {formatRelativeDate(job.expires_at)}</div>}
                 </div>
 
                 <div className={UI_CLASSES.FLEX_GAP_2}>
@@ -107,21 +113,21 @@ export default async function MyJobsPage() {
                       Edit
                     </Link>
                   </Button>
-                  
+
                   {job.status === 'active' && (
                     <Button variant="ghost" size="sm" disabled>
                       <Pause className="h-3 w-3 mr-1" />
                       Pause
                     </Button>
                   )}
-                  
+
                   {job.status === 'paused' && (
                     <Button variant="ghost" size="sm" disabled>
                       <Play className="h-3 w-3 mr-1" />
                       Resume
                     </Button>
                   )}
-                  
+
                   {job.slug && (
                     <Button variant="ghost" size="sm" asChild>
                       <Link href={`/jobs/${job.slug}`}>
@@ -130,7 +136,7 @@ export default async function MyJobsPage() {
                       </Link>
                     </Button>
                   )}
-                  
+
                   <Button variant="ghost" size="sm" disabled className="text-destructive">
                     <Trash className="h-3 w-3 mr-1" />
                     Delete

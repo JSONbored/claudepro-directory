@@ -1,12 +1,18 @@
-import { createClient } from '@/src/lib/supabase/server';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Badge } from '@/src/components/ui/badge';
-import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
-import { Button } from '@/src/components/ui/button';
-import { TrendingUp, Eye, MousePointer, BarChart } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-import Link from 'next/link';
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { Badge } from '@/src/components/ui/badge';
+import { Button } from '@/src/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
+import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
+import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
+import { createClient } from '@/src/lib/supabase/server';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
   title: 'Sponsorships - ClaudePro Directory',
@@ -15,7 +21,9 @@ export const metadata: Metadata = {
 
 export default async function SponsorshipsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) return null;
 
@@ -32,7 +40,8 @@ export default async function SponsorshipsPage() {
         <div>
           <h1 className="text-3xl font-bold mb-2">Sponsorships</h1>
           <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
-            {sponsorships?.length || 0} active {sponsorships?.length === 1 ? 'campaign' : 'campaigns'}
+            {sponsorships?.length || 0} active{' '}
+            {sponsorships?.length === 1 ? 'campaign' : 'campaigns'}
           </p>
         </div>
         <Button variant="outline" asChild>
@@ -52,25 +61,26 @@ export default async function SponsorshipsPage() {
               Promote your content to thousands of Claude developers
             </p>
             <Button asChild>
-              <Link href="/partner">
-                Learn About Sponsorships
-              </Link>
+              <Link href="/partner">Learn About Sponsorships</Link>
             </Button>
           </CardContent>
         </Card>
       ) : (
         <div className="grid gap-4">
           {sponsorships.map((sponsorship) => {
-            const isActive = sponsorship.active && 
+            const isActive =
+              sponsorship.active &&
               new Date(sponsorship.start_date) <= new Date() &&
               new Date(sponsorship.end_date) >= new Date();
-            
-            const hasHitLimit = sponsorship.impression_limit && 
+
+            const hasHitLimit =
+              sponsorship.impression_limit &&
               sponsorship.impression_count >= sponsorship.impression_limit;
 
-            const ctr = sponsorship.impression_count > 0
-              ? ((sponsorship.click_count / sponsorship.impression_count) * 100).toFixed(2)
-              : '0.00';
+            const ctr =
+              sponsorship.impression_count > 0
+                ? ((sponsorship.click_count / sponsorship.impression_count) * 100).toFixed(2)
+                : '0.00';
 
             return (
               <Card key={sponsorship.id}>
@@ -78,7 +88,9 @@ export default async function SponsorshipsPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                        <SponsoredBadge tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'} />
+                        <SponsoredBadge
+                          tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'}
+                        />
                         {isActive ? (
                           <Badge className="bg-green-500/10 text-green-400 border-green-500/20">
                             Active
@@ -96,7 +108,8 @@ export default async function SponsorshipsPage() {
                         {sponsorship.content_type} - ID: {sponsorship.content_id}
                       </CardTitle>
                       <CardDescription>
-                        {new Date(sponsorship.start_date).toLocaleDateString()} - {new Date(sponsorship.end_date).toLocaleDateString()}
+                        {new Date(sponsorship.start_date).toLocaleDateString()} -{' '}
+                        {new Date(sponsorship.end_date).toLocaleDateString()}
                       </CardDescription>
                     </div>
                     <Button variant="outline" size="sm" asChild>
@@ -107,12 +120,14 @@ export default async function SponsorshipsPage() {
                     </Button>
                   </div>
                 </CardHeader>
-                
+
                 <CardContent>
                   {/* Quick stats */}
                   <div className="grid grid-cols-3 gap-4 mb-4">
                     <div>
-                      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mb-1`}>
+                      <div
+                        className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mb-1`}
+                      >
                         <Eye className="h-3 w-3" />
                         Impressions
                       </div>
@@ -127,7 +142,9 @@ export default async function SponsorshipsPage() {
                     </div>
 
                     <div>
-                      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mb-1`}>
+                      <div
+                        className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mb-1`}
+                      >
                         <MousePointer className="h-3 w-3" />
                         Clicks
                       </div>
@@ -137,13 +154,13 @@ export default async function SponsorshipsPage() {
                     </div>
 
                     <div>
-                      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mb-1`}>
+                      <div
+                        className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mb-1`}
+                      >
                         <BarChart className="h-3 w-3" />
                         CTR
                       </div>
-                      <div className="text-2xl font-bold">
-                        {ctr}%
-                      </div>
+                      <div className="text-2xl font-bold">{ctr}%</div>
                     </div>
                   </div>
 

@@ -1,14 +1,14 @@
 /**
  * Content File Manager
  * Handles reading and writing content files in /content/ directory
- * 
+ *
  * Supports the existing file structure:
  * /content/{type}/{slug}.json
  */
 
 import { logger } from '@/src/lib/logger';
-import { fileExists, listFiles } from './client';
 import type { ConfigSubmissionData } from '@/src/lib/schemas/form.schema';
+import { fileExists, listFiles } from './client';
 
 /**
  * Content type to directory mapping
@@ -82,7 +82,10 @@ export async function findSimilarContent(
 
     return similar;
   } catch (error) {
-    logger.error('Failed to find similar content', error instanceof Error ? error : new Error(String(error)));
+    logger.error(
+      'Failed to find similar content',
+      error instanceof Error ? error : new Error(String(error))
+    );
     return [];
   }
 }
@@ -191,7 +194,7 @@ export function formatContentFile(data: ConfigSubmissionData & { slug: string })
       };
       break;
 
-    case 'mcp':
+    case 'mcp': {
       // Parse env vars from KEY=value format
       const envVars: Record<string, string> = {};
       if (data.envVars) {
@@ -229,6 +232,7 @@ export function formatContentFile(data: ConfigSubmissionData & { slug: string })
           : {}),
       };
       break;
+    }
   }
 
   // Pretty print with 2-space indentation (matches existing files)
@@ -263,7 +267,10 @@ export function validateContentFile(content: string): boolean {
 
     return true;
   } catch (error) {
-    logger.error('Content validation error', error instanceof Error ? error : new Error(String(error)));
+    logger.error(
+      'Content validation error',
+      error instanceof Error ? error : new Error(String(error))
+    );
     return false;
   }
 }

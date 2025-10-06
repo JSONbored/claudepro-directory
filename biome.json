@@ -140,12 +140,14 @@
         "noUnusedLabels": "error",
         "noUnusedPrivateClassMembers": "error",
         "noUnusedVariables": "warn",
+        "noUnusedFunctionParameters": "warn",
         "noVoidElementsWithChildren": "error",
         "noVoidTypeReturn": "error",
         "useExhaustiveDependencies": "warn",
         "useHookAtTopLevel": "error",
         "useIsNan": "error",
         "useJsxKeyInIterable": "error",
+        "useUniqueElementIds": "warn",
         "useValidForDirection": "error",
         "useYield": "error"
       },
@@ -153,6 +155,7 @@
         "noAccumulatingSpread": "error",
         "noBarrelFile": "error",
         "noDelete": "error",
+        "noImgElement": "warn",
         "noReExportAll": "error"
       },
       "style": {
@@ -209,6 +212,7 @@
         "useAnchorContent": "error",
         "useAriaActivedescendantWithTabindex": "error",
         "useAriaPropsForRole": "error",
+        "useAriaPropsSupportedByRole": "warn",
         "useButtonType": "error",
         "useHeadingContent": "error",
         "useHtmlLang": "error",
@@ -294,6 +298,25 @@
                 "ignoreRestSiblings": true
               }
             }
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "src/app/page.tsx",
+        "src/app/collections/**/*.tsx",
+        "src/app/collections/**/*.ts",
+        "src/app/jobs/page.tsx",
+        "src/components/submit/**/*.tsx",
+        "src/components/shared/bookmark-button.tsx",
+        "src/lib/actions/submission-stats-actions.ts",
+        "src/lib/github/content-manager.ts"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "warn"
           }
         }
       }

@@ -3,25 +3,39 @@
 /**
  * Job Form Component
  * Reusable form for creating/editing job listings
- * 
+ *
  * Follows patterns from existing forms and react-hook-form integration
  */
 
 import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
+import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/src/components/ui/select';
 import { Textarea } from '@/src/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/src/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Badge } from '@/src/components/ui/badge';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { toast } from 'sonner';
 import type { CreateJobInput } from '@/src/lib/schemas/content/job.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface JobFormProps {
   initialData?: Partial<CreateJobInput>;
-  onSubmit: (data: CreateJobInput) => Promise<{ success: boolean; requiresPayment?: boolean; job?: unknown }>;
+  onSubmit: (
+    data: CreateJobInput
+  ) => Promise<{ success: boolean; requiresPayment?: boolean; job?: unknown }>;
   submitLabel?: string;
 }
 
@@ -36,9 +50,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     const formData = new FormData(e.currentTarget);
-    
+
     const jobData: CreateJobInput = {
       title: formData.get('title') as string,
       company: formData.get('company') as string,
@@ -46,9 +60,15 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
       description: formData.get('description') as string,
       salary: (formData.get('salary') as string) || null,
       remote: formData.get('remote') === 'on',
-      type: formData.get('type') as 'full-time' | 'part-time' | 'contract' | 'internship' | 'freelance',
+      type: formData.get('type') as
+        | 'full-time'
+        | 'part-time'
+        | 'contract'
+        | 'internship'
+        | 'freelance',
       workplace: (formData.get('workplace') as 'On site' | 'Remote' | 'Hybrid') || null,
-      experience: (formData.get('experience') as 'Entry' | 'Mid' | 'Senior' | 'Lead' | 'Executive') || null,
+      experience:
+        (formData.get('experience') as 'Entry' | 'Mid' | 'Senior' | 'Lead' | 'Executive') || null,
       category: formData.get('category') as string,
       tags,
       requirements,
@@ -62,9 +82,13 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
     startTransition(async () => {
       try {
         const result = await onSubmit(jobData);
-        
+
         if (result?.success) {
-          toast.success(result.requiresPayment ? 'Job created! Contact us for payment.' : 'Job posted successfully!');
+          toast.success(
+            result.requiresPayment
+              ? 'Job created! Contact us for payment.'
+              : 'Job posted successfully!'
+          );
         }
       } catch (error) {
         toast.error(error instanceof Error ? error.message : 'Failed to save job');
@@ -80,7 +104,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
   };
 
   const removeTag = (tag: string) => {
-    setTags(tags.filter(t => t !== tag));
+    setTags(tags.filter((t) => t !== tag));
   };
 
   const addRequirement = () => {
@@ -257,7 +281,12 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
                 id="requirement-input"
                 value={currentRequirement}
                 onChange={(e) => setCurrentRequirement(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addRequirement())}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addRequirement();
+                  }
+                }}
                 placeholder="e.g., 5+ years of Python experience"
               />
               <Button type="button" onClick={addRequirement} variant="outline">
@@ -269,7 +298,10 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           {requirements.length > 0 && (
             <div className={UI_CLASSES.SPACE_Y_2}>
               {requirements.map((req, index) => (
-                <div key={index} className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} p-2 border rounded`}>
+                <div
+                  key={index}
+                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} p-2 border rounded`}
+                >
                   <span className={UI_CLASSES.TEXT_SM}>{req}</span>
                   <Button
                     type="button"
@@ -300,7 +332,12 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
                 id="benefit-input"
                 value={currentBenefit}
                 onChange={(e) => setCurrentBenefit(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addBenefit())}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addBenefit();
+                  }
+                }}
                 placeholder="e.g., Health insurance, 401k, Remote work"
               />
               <Button type="button" onClick={addBenefit} variant="outline">
@@ -342,7 +379,12 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
                 id="tag-input"
                 value={currentTag}
                 onChange={(e) => setCurrentTag(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addTag();
+                  }
+                }}
                 placeholder="e.g., AI, Python, Remote"
               />
               <Button type="button" onClick={addTag} variant="outline" disabled={tags.length >= 10}>
@@ -367,11 +409,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
               ))}
             </div>
           )}
-          
+
           {tags.length === 0 && (
-            <p className={`${UI_CLASSES.TEXT_XS} text-destructive`}>
-              At least one tag is required
-            </p>
+            <p className={`${UI_CLASSES.TEXT_XS} text-destructive`}>At least one tag is required</p>
           )}
         </CardContent>
       </Card>
@@ -461,7 +501,10 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
 
       {/* Submit */}
       <div className={UI_CLASSES.FLEX_GAP_4}>
-        <Button type="submit" disabled={isPending || tags.length === 0 || requirements.length === 0}>
+        <Button
+          type="submit"
+          disabled={isPending || tags.length === 0 || requirements.length === 0}
+        >
           {isPending ? 'Saving...' : submitLabel}
         </Button>
         <Button type="button" variant="outline" asChild>

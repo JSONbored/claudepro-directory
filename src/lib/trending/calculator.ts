@@ -455,7 +455,8 @@ function interleaveSponsored<T extends UnifiedContentItem>(
 ): Array<T & { isSponsored?: boolean; sponsoredId?: string; sponsorTier?: string }> {
   if (sponsored.length === 0) return organic;
 
-  const result: Array<T & { isSponsored?: boolean; sponsoredId?: string; sponsorTier?: string }> = [];
+  const result: Array<T & { isSponsored?: boolean; sponsoredId?: string; sponsorTier?: string }> =
+    [];
   let sponsoredIndex = 0;
   const INJECTION_RATIO = 5; // 1 sponsored per 5 organic
 
@@ -467,7 +468,7 @@ function interleaveSponsored<T extends UnifiedContentItem>(
     if ((i + 1) % INJECTION_RATIO === 0 && sponsoredIndex < sponsored.length) {
       const sponsoredItem = sponsored[sponsoredIndex];
       const content = sponsoredItem && contentMap.get(sponsoredItem.content_id);
-      
+
       if (content) {
         result.push({
           ...content,
@@ -486,14 +487,16 @@ function interleaveSponsored<T extends UnifiedContentItem>(
 /**
  * Get active sponsored content from database
  */
-async function getActiveSponsored(): Promise<Array<{ content_id: string; content_type: string; tier: string; sponsored_id: string }>> {
+async function getActiveSponsored(): Promise<
+  Array<{ content_id: string; content_type: string; tier: string; sponsored_id: string }>
+> {
   try {
     // Dynamic import to avoid circular dependency
     const { createClient } = await import('@/src/lib/supabase/server');
     const supabase = await createClient();
-    
+
     const now = new Date().toISOString();
-    
+
     const { data, error } = await supabase
       .from('sponsored_content')
       .select('id, content_id, content_type, tier, impression_limit, impression_count')
@@ -508,15 +511,18 @@ async function getActiveSponsored(): Promise<Array<{ content_id: string; content
 
     // Filter out items that hit impression limit
     return data
-      .filter(item => !item.impression_limit || item.impression_count < item.impression_limit)
-      .map(item => ({
+      .filter((item) => !item.impression_limit || item.impression_count < item.impression_limit)
+      .map((item) => ({
         content_id: item.content_id,
         content_type: item.content_type,
         tier: item.tier,
         sponsored_id: item.id,
       }));
   } catch (error) {
-    logger.error('Failed to fetch sponsored content', error instanceof Error ? error : new Error(String(error)));
+    logger.error(
+      'Failed to fetch sponsored content',
+      error instanceof Error ? error : new Error(String(error))
+    );
     return [];
   }
 }
@@ -525,15 +531,18 @@ async function getActiveSponsored(): Promise<Array<{ content_id: string; content
  * Batch trending calculation for multiple categories
  * Now includes sponsored content injection
  */
-export async function getBatchTrendingData(contentByCategory: {
-  agents: UnifiedContentItem[];
-  mcp: UnifiedContentItem[];
-  rules: UnifiedContentItem[];
-  commands: UnifiedContentItem[];
-  hooks: UnifiedContentItem[];
-  statuslines?: UnifiedContentItem[];
-  collections?: UnifiedContentItem[];
-}, options?: { includeSponsored?: boolean }) {
+export async function getBatchTrendingData(
+  contentByCategory: {
+    agents: UnifiedContentItem[];
+    mcp: UnifiedContentItem[];
+    rules: UnifiedContentItem[];
+    commands: UnifiedContentItem[];
+    hooks: UnifiedContentItem[];
+    statuslines?: UnifiedContentItem[];
+    collections?: UnifiedContentItem[];
+  },
+  options?: { includeSponsored?: boolean }
+) {
   // Combine all content for batch Redis query
   const allContent = [
     ...contentByCategory.agents,
@@ -560,13 +569,15 @@ export async function getBatchTrendingData(contentByCategory: {
   }
 
   // Interleave sponsored content if enabled
-  const trendingWithSponsored = options?.includeSponsored !== false
-    ? interleaveSponsored(trending, sponsored, contentMap)
-    : trending;
+  const trendingWithSponsored =
+    options?.includeSponsored !== false
+      ? interleaveSponsored(trending, sponsored, contentMap)
+      : trending;
 
-  const popularWithSponsored = options?.includeSponsored !== false
-    ? interleaveSponsored(popular, sponsored, contentMap)
-    : popular;
+  const popularWithSponsored =
+    options?.includeSponsored !== false
+      ? interleaveSponsored(popular, sponsored, contentMap)
+      : popular;
 
   return {
     trending: trendingWithSponsored,

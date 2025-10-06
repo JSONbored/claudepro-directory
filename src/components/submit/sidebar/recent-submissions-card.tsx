@@ -1,9 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Badge } from '@/src/components/ui/badge';
-import { CheckCircle } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 import Link from 'next/link';
+import { Badge } from '@/src/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { CheckCircle } from '@/src/lib/icons';
 import type { RecentMerged } from '@/src/lib/schemas/submission-stats.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface RecentSubmissionsCardProps {
   submissions: RecentMerged[];

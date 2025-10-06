@@ -4,8 +4,8 @@
  */
 
 import { z } from 'zod';
-import { nonEmptyString } from './primitives/base-strings';
 import { nonNegativeInt } from './primitives/base-numbers';
+import { nonEmptyString } from './primitives/base-strings';
 
 /**
  * Submission statistics schema
@@ -24,12 +24,17 @@ export type SubmissionStats = z.infer<typeof submissionStatsSchema>;
 export const recentMergedSchema = z.object({
   id: z.string().uuid().describe('Submission ID'),
   content_name: nonEmptyString.describe('Name of the submitted content'),
-  content_type: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines']).describe('Type of content'),
+  content_type: z
+    .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'])
+    .describe('Type of content'),
   merged_at: z.string().datetime().describe('When the submission was merged'),
-  user: z.object({
-    name: nonEmptyString.describe('User name'),
-    slug: nonEmptyString.describe('User profile slug'),
-  }).nullable().describe('User who submitted'),
+  user: z
+    .object({
+      name: nonEmptyString.describe('User name'),
+      slug: nonEmptyString.describe('User profile slug'),
+    })
+    .nullable()
+    .describe('User who submitted'),
 });
 
 export type RecentMerged = z.infer<typeof recentMergedSchema>;
@@ -49,12 +54,14 @@ export type TopContributor = z.infer<typeof topContributorSchema>;
 /**
  * Template data schema
  */
-export const templateDataSchema = z.object({
-  id: nonEmptyString.describe('Template identifier'),
-  name: nonEmptyString.describe('Template name'),
-  description: nonEmptyString.describe('Template description'),
-  category: nonEmptyString.describe('Template category'),
-  tags: nonEmptyString.describe('Comma-separated tags'),
-}).passthrough(); // Allow type-specific fields
+export const templateDataSchema = z
+  .object({
+    id: nonEmptyString.describe('Template identifier'),
+    name: nonEmptyString.describe('Template name'),
+    description: nonEmptyString.describe('Template description'),
+    category: nonEmptyString.describe('Template category'),
+    tags: nonEmptyString.describe('Comma-separated tags'),
+  })
+  .passthrough(); // Allow type-specific fields
 
 export type TemplateData = z.infer<typeof templateDataSchema>;

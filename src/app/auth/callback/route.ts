@@ -1,7 +1,7 @@
 /**
  * Auth Callback Route
  * Handles OAuth redirects from GitHub, Google, etc.
- * 
+ *
  * Flow:
  * 1. User clicks "Sign in with GitHub"
  * 2. Redirected to GitHub for authorization
@@ -10,8 +10,8 @@
  * 5. Redirect to homepage or intended destination
  */
 
+import { type NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/src/lib/supabase/server';
-import { NextResponse, type NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -32,12 +32,12 @@ export async function GET(request: NextRequest) {
         // Local development - use localhost
         return NextResponse.redirect(`${origin}${next}`);
       }
-      
+
       if (forwardedHost) {
         // Production - use forwarded host
         return NextResponse.redirect(`https://${forwardedHost}${next}`);
       }
-      
+
       // Fallback - use origin
       return NextResponse.redirect(`${origin}${next}`);
     }

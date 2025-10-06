@@ -1,7 +1,7 @@
 /**
  * Supabase Browser Client
  * Used in Client Components for browser-side operations
- * 
+ *
  * Security: Uses anon key (safe for client-side)
  * RLS policies enforce data access rules
  */

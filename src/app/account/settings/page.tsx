@@ -1,7 +1,13 @@
-import { createClient } from '@/src/lib/supabase/server';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { Metadata } from 'next';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
+import { createClient } from '@/src/lib/supabase/server';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
   title: 'Settings - ClaudePro Directory',
@@ -10,16 +16,14 @@ export const metadata: Metadata = {
 
 export default async function SettingsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) return null;
 
   // Get user profile
-  const { data: profile } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+  const { data: profile } = await supabase.from('users').select('*').eq('id', user.id).single();
 
   return (
     <div className={UI_CLASSES.SPACE_Y_6}>
@@ -38,12 +42,12 @@ export default async function SettingsPage() {
         </CardHeader>
         <CardContent className={UI_CLASSES.SPACE_Y_4}>
           <div>
-            <label className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Email</label>
+            <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Email</p>
             <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>{user.email}</p>
           </div>
-          
+
           <div>
-            <label className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>User ID</label>
+            <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>User ID</p>
             <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.TEXT_XS} font-mono`}>
               {user.id}
             </p>
@@ -51,15 +55,13 @@ export default async function SettingsPage() {
 
           {profile?.slug && (
             <div>
-              <label className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Profile URL</label>
-              <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
-                /u/{profile.slug}
-              </p>
+              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Profile URL</p>
+              <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>/u/{profile.slug}</p>
             </div>
           )}
 
           <div>
-            <label className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Member Since</label>
+            <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Member Since</p>
             <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
               {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : 'N/A'}
             </p>

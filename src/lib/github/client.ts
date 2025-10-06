@@ -1,7 +1,7 @@
 /**
  * GitHub API Client
  * Wrapper around Octokit for automated PR creation
- * 
+ *
  * Security:
  * - Uses Fine-Grained PAT (Personal Access Token)
  * - Repository-scoped (only access to claudepro-directory)
@@ -49,7 +49,7 @@ export function getOctokit(): Octokit {
 
 /**
  * Create a new branch from main
- * 
+ *
  * @param branchName - Name of the branch to create
  * @returns Branch reference SHA
  */
@@ -84,7 +84,7 @@ export async function createBranch(branchName: string): Promise<string> {
 
 /**
  * Commit a file to a branch
- * 
+ *
  * @param params - Commit parameters
  * @returns Commit SHA
  */
@@ -109,14 +109,19 @@ export async function commitFile(params: {
     logger.info(`Committed file: ${params.path} to ${params.branch}`);
     return data.commit.sha!;
   } catch (error) {
-    logger.error('Failed to commit file', error instanceof Error ? error : new Error(String(error)));
-    throw new Error(`Failed to commit file: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      'Failed to commit file',
+      error instanceof Error ? error : new Error(String(error))
+    );
+    throw new Error(
+      `Failed to commit file: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 }
 
 /**
  * Create a pull request
- * 
+ *
  * @param params - PR parameters
  * @returns PR number and URL
  */
@@ -155,13 +160,15 @@ export async function createPullRequest(params: {
     };
   } catch (error) {
     logger.error('Failed to create PR', error instanceof Error ? error : new Error(String(error)));
-    throw new Error(`Failed to create PR: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Failed to create PR: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 }
 
 /**
  * Get file contents from repository
- * 
+ *
  * @param path - File path in repo
  * @param ref - Branch/tag/commit (defaults to main)
  * @returns File content as string
@@ -192,7 +199,7 @@ export async function getFileContents(path: string, ref?: string): Promise<strin
 
 /**
  * Check if file exists in repository
- * 
+ *
  * @param path - File path to check
  * @returns Boolean indicating if file exists
  */
@@ -203,7 +210,7 @@ export async function fileExists(path: string): Promise<boolean> {
 
 /**
  * List files in a directory
- * 
+ *
  * @param path - Directory path
  * @returns Array of file names
  */
@@ -217,9 +224,7 @@ export async function listFiles(path: string): Promise<string[]> {
     });
 
     if (Array.isArray(data)) {
-      return data
-        .filter((item) => item.type === 'file')
-        .map((item) => item.name);
+      return data.filter((item) => item.type === 'file').map((item) => item.name);
     }
 
     return [];

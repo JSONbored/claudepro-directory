@@ -1,11 +1,17 @@
-import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Button } from '@/src/components/ui/button';
-import { Badge } from '@/src/components/ui/badge';
-import { Building, ExternalLink, Plus, Star } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-import Link from 'next/link';
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { Badge } from '@/src/components/ui/badge';
+import { Button } from '@/src/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
+import { Building, ExternalLink, Plus, Star } from '@/src/lib/icons';
+import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
   title: 'Companies Using Claude - ClaudePro Directory',
@@ -78,7 +84,7 @@ export default async function CompaniesPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6`}>
+          <div className={'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}>
             {companies.map((company) => (
               <Card key={company.id} className={UI_CLASSES.CARD_GRADIENT_HOVER}>
                 {company.featured && (
@@ -101,20 +107,23 @@ export default async function CompaniesPage() {
                     )}
                     <div className="flex-1">
                       <CardTitle>
-                        <Link href={`/companies/${company.slug}`} className={UI_CLASSES.HOVER_TEXT_ACCENT}>
+                        <Link
+                          href={`/companies/${company.slug}`}
+                          className={UI_CLASSES.HOVER_TEXT_ACCENT}
+                        >
                           {company.name}
                         </Link>
                       </CardTitle>
-                      {company.industry && (
-                        <CardDescription>{company.industry}</CardDescription>
-                      )}
+                      {company.industry && <CardDescription>{company.industry}</CardDescription>}
                     </div>
                   </div>
                 </CardHeader>
 
                 <CardContent>
                   {company.description && (
-                    <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MB_4} ${UI_CLASSES.LINE_CLAMP_2}`}>
+                    <p
+                      className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MB_4} ${UI_CLASSES.LINE_CLAMP_2}`}
+                    >
                       {company.description}
                     </p>
                   )}
@@ -127,11 +136,7 @@ export default async function CompaniesPage() {
                     )}
 
                     {company.website && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        asChild
-                      >
+                      <Button variant="ghost" size="sm" asChild>
                         <a href={company.website} target="_blank" rel="noopener noreferrer">
                           <ExternalLink className="h-3 w-3" />
                         </a>
