@@ -227,6 +227,51 @@ class ResendService {
   }
 
   /**
+   * Remove contact from audience
+   *
+   * @param email - Email address to remove
+   * @param audienceId - Optional audience ID (defaults to env RESEND_AUDIENCE_ID)
+   * @returns Success result
+   */
+  async removeContact(
+    email: string,
+    audienceId?: string
+  ): Promise<{ success: boolean; message?: string; error?: string }> {
+    if (!(this.client && this.AUDIENCE_ID)) {
+      return {
+        success: false,
+        error: 'Resend is not enabled - missing API key or audience ID',
+      };
+    }
+
+    try {
+      const targetAudienceId = audienceId || this.AUDIENCE_ID;
+
+      await this.client.contacts.remove({
+        audienceId: targetAudienceId,
+        email,
+      });
+
+      logger.info('Contact removed from audience', {
+        audienceId: targetAudienceId,
+      });
+
+      return { success: true, message: 'Contact removed successfully' };
+    } catch (error) {
+      const errorDetails = this.parseError(error);
+      logger.error('Failed to remove contact', error instanceof Error ? error : undefined, {
+        errorName: errorDetails.name,
+        errorMessage: errorDetails.message,
+      });
+
+      return {
+        success: false,
+        error: errorDetails.message,
+      };
+    }
+  }
+
+  /**
    * Check if service is enabled and configured
    */
   isEnabled(): boolean {
@@ -409,9 +454,10 @@ class ResendService {
             .filter((email): email is string => typeof email === 'string');
           contacts.push(...emails);
 
-          // Check for next page
-          hasMore = !!response.data.next_cursor;
-          cursor = response.data.next_cursor || undefined;
+          // Check for next page (using type assertion for Resend API pagination)
+          const paginatedData = response.data as { next_cursor?: string };
+          hasMore = !!paginatedData.next_cursor;
+          cursor = paginatedData.next_cursor || undefined;
         } else {
           hasMore = false;
         }
@@ -500,19 +546,26 @@ class ResendService {
 
       // Send emails in batch
       const batchResults = await Promise.allSettled(
-        batch.map((email) =>
-          this.sendEmail(email, subject, template, {
-            from: options?.from,
-            replyTo: options?.replyTo,
-            tags: options?.tags,
-          })
-        )
+        batch.map((email) => {
+          const emailOptions: {
+            from?: string;
+            replyTo?: string;
+            tags?: { name: string; value: string }[];
+          } = {};
+          if (options?.from) emailOptions.from = options.from;
+          if (options?.replyTo) emailOptions.replyTo = options.replyTo;
+          if (options?.tags) emailOptions.tags = options.tags;
+
+          return this.sendEmail(email, subject, template, emailOptions);
+        })
       );
 
       // Count results
       for (let j = 0; j < batchResults.length; j++) {
         const result = batchResults[j];
         const email = batch[j];
+
+        if (!(result && email)) continue;
 
         if (result.status === 'fulfilled' && result.value.success) {
           results.success++;

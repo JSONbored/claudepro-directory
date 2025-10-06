@@ -94,10 +94,10 @@ function getContextualMessage(category?: string): { headline: string; descriptio
     },
   } as const satisfies Record<string, { headline: string; description: string }>;
 
-  if (!category || !(category in messages)) {
+  if (!(category && category in messages)) {
     return messages.default;
   }
-  
+
   return messages[category as keyof typeof messages] as { headline: string; description: string };
 }
 

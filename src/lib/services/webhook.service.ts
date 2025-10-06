@@ -73,6 +73,8 @@ class WebhookService {
 
         // Increment stats counter
         await redis.incr(statsKey);
+
+        return {};
       },
       () => ({}),
       'webhook_bounce_tracking'
@@ -82,7 +84,7 @@ class WebhookService {
     logger.warn('Email bounced', {
       email_hash: emailHash,
       bounceType,
-      error: event.data.error,
+      ...(event.data.error ? { error: event.data.error } : {}),
       timestamp: event.created_at,
     });
 
@@ -111,15 +113,16 @@ class WebhookService {
       async (redis) => {
         await redis.sadd('email:complaints', email);
         await redis.incr('email:stats:complaints');
+        return {};
       },
       () => ({}),
       'webhook_complaint_tracking'
     );
 
     // Log complaint (serious issue)
-    logger.error('Email spam complaint received', {
+    logger.error('Email spam complaint received', undefined, {
       email_hash: emailHash,
-      feedbackType: event.data.feedback_type,
+      ...(event.data.feedback_type ? { feedbackType: event.data.feedback_type } : {}),
       timestamp: event.created_at,
     });
 
@@ -141,6 +144,7 @@ class WebhookService {
         const today = new Date().toISOString().split('T')[0];
         await redis.incr(`email:opens:${today}`);
         await redis.incr('email:stats:opens');
+        return {};
       },
       () => ({}),
       'webhook_open_tracking'
@@ -168,6 +172,7 @@ class WebhookService {
         await redis.incr(`email:clicks:${today}`);
         await redis.incr('email:stats:clicks');
         await redis.hincrby('email:link_clicks', link, 1);
+        return {};
       },
       () => ({}),
       'webhook_click_tracking'
@@ -190,7 +195,7 @@ class WebhookService {
 
     logger.warn('Email delivery delayed', {
       email_hash: emailHash,
-      error: 'error' in event.data ? event.data.error : undefined,
+      ...('error' in event.data && event.data.error ? { error: event.data.error } : {}),
       timestamp: event.created_at,
     });
 
@@ -198,6 +203,7 @@ class WebhookService {
     await redisClient.executeOperation(
       async (redis) => {
         await redis.incr('email:stats:delayed');
+        return {};
       },
       () => ({}),
       'webhook_delayed_tracking'
@@ -213,7 +219,7 @@ class WebhookService {
     try {
       // Remove from Resend audience
       if (resendService.isEnabled()) {
-        await resendService.unsubscribe(email);
+        await resendService.removeContact(email);
       }
 
       // Cancel email sequences
@@ -239,23 +245,27 @@ class WebhookService {
    * Get bounce count for an email
    */
   private async getBounceCount(email: string): Promise<number> {
-    const count = await redisClient.executeOperation(
+    const result = await redisClient.executeOperation(
       async (redis) => {
-        const result = await redis.get(`email:bounces:${email}`);
-        return result ? Number.parseInt(result, 10) : 0;
+        const value = await redis.get(`email:bounces:${email}`);
+        const count = value && typeof value === 'string' ? Number.parseInt(value, 10) : 0;
+        return { count };
       },
-      () => 0,
+      () => ({ count: 0 }),
       'get_bounce_count'
     );
 
-    return count;
+    return result.count;
   }
 
   /**
    * Extract email from 'to' field (can be string or array)
    */
   private extractEmail(to: string | string[]): string {
-    return Array.isArray(to) ? to[0] : to;
+    if (Array.isArray(to)) {
+      return to[0] || '';
+    }
+    return to;
   }
 
   /**

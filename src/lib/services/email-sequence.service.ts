@@ -238,14 +238,9 @@ class EmailSequenceService {
       throw new Error(`Invalid sequence step: ${step}`);
     }
 
-    // Load template dynamically
+    // Load template dynamically (all templates export as default)
     const templateModule = await templateLoader();
-    const Template =
-      templateModule.default ||
-      templateModule.OnboardingGettingStarted ||
-      templateModule.OnboardingPowerTips ||
-      templateModule.OnboardingCommunity ||
-      templateModule.OnboardingStayEngaged;
+    const Template = templateModule.default;
 
     if (!Template) {
       throw new Error(`Template not found for step: ${step}`);
@@ -303,7 +298,7 @@ class EmailSequenceService {
     logger.info('Sequence email sent', {
       email,
       step,
-      emailId: result.emailId,
+      emailId: result.emailId || 'unknown',
       sequenceId: this.SEQUENCE_ID,
     });
   }
