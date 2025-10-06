@@ -109,11 +109,6 @@ export default function SubmitPage() {
             warnings: [],
           });
 
-          // Remove any warnings reference
-          if ('warnings' in result.data) {
-            setSubmissionResult(prev => prev ? { ...prev, warnings: [] } : null);
-          });
-
           toast.success('Submission Created!', {
             description: `Your ${validatedData.type} has been submitted for review.`,
           });
