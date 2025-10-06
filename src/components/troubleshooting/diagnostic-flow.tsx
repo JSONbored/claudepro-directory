@@ -28,7 +28,12 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
   const validSteps =
     steps && Array.isArray(steps) && steps.length > 0
       ? steps
-      : [{ question: 'No diagnostic steps available', solution: 'Please check configuration' }];
+      : [
+          {
+            question: 'No diagnostic steps available',
+            solution: 'Please check configuration',
+          },
+        ];
 
   const [currentStep, setCurrentStep] = React.useState(0);
   const [path, setPath] = React.useState<string[]>([]);

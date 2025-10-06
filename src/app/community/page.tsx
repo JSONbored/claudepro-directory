@@ -1,18 +1,13 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
+import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { Github, MessageCircle, MessageSquare, Twitter, Users } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: `Community - ${APP_CONFIG.name}`,
-  description:
-    'Join the Claude AI community. Connect with developers, share configurations, and learn from experts.',
-  keywords: 'Claude community, AI developers, collaboration, open source',
-};
+export const metadata = await generatePageMetadata('/community');
 
 // Enable ISR - revalidate every 24 hours for community page
 

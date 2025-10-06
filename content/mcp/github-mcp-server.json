@@ -103,5 +103,6 @@
   "requiresAuth": true,
   "permissions": ["repo", "public_repo", "read:user"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://www.npmjs.com/package/@modelcontextprotocol/server-github"
+  "documentationUrl": "https://www.npmjs.com/package/@modelcontextprotocol/server-github",
+  "seoTitle": "GitHub MCP Server for Claude"
 }

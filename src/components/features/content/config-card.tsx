@@ -18,6 +18,7 @@ import { ExternalLink, Eye, Github } from '@/src/lib/icons';
 import type { ConfigCardProps } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
+import { formatViewCount } from '@/src/lib/utils/transformers';
 
 export const ConfigCard = memo(
   ({ item, variant = 'default', showCategory = true, showActions = true }: ConfigCardProps) => {
@@ -105,76 +106,83 @@ export const ConfigCard = memo(
                   {item.author}
                 </a>
               </span>
-              {/* Show view count if available (from Redis), otherwise show static popularity */}
-              {(item as { viewCount?: number }).viewCount !== undefined ? (
-                <>
-                  <span>•</span>
-                  <span className="flex items-center gap-1">
-                    <Eye className="h-3 w-3" aria-hidden="true" />
-                    {(item as { viewCount?: number }).viewCount} views
-                  </span>
-                </>
-              ) : (
+              {/* Show static popularity if no view count */}
+              {(item as { viewCount?: number }).viewCount === undefined &&
                 item.popularity !== undefined && (
                   <>
                     <span>•</span>
                     <span>{item.popularity}% popular</span>
                   </>
-                )
-              )}
+                )}
             </div>
 
-            {showActions && (
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                {item.repository && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={`h-7 w-7 p-0 ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.open(item.repository, '_blank');
-                    }}
-                    aria-label={`View ${displayTitle} repository on GitHub`}
-                  >
-                    <Github className="h-3 w-3" aria-hidden="true" />
-                  </Button>
-                )}
-
-                {item.documentationUrl && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={`h-7 w-7 p-0 ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.open(item.documentationUrl, '_blank');
-                    }}
-                    aria-label={`View ${displayTitle} documentation`}
-                  >
-                    <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                  </Button>
-                )}
-
-                <CardCopyAction
-                  url={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
-                  category={item.category || ''}
-                  slug={item.slug}
-                  title={displayTitle}
-                  componentName="config-card"
-                />
-
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`h-7 px-2 ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-                  onClick={handleActionClick}
-                  aria-label={`View details for ${displayTitle}`}
+            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+              {/* View count badge - prominent on bottom right */}
+              {(item as { viewCount?: number }).viewCount !== undefined && (
+                <Badge
+                  variant="secondary"
+                  className="h-7 px-2.5 gap-1.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors font-medium"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  View
-                </Button>
-              </div>
-            )}
+                  <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span className="text-xs">
+                    {formatViewCount((item as { viewCount?: number }).viewCount!)}
+                  </span>
+                </Badge>
+              )}
+
+              {showActions && (
+                <>
+                  {item.repository && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`h-7 w-7 p-0 ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(item.repository, '_blank');
+                      }}
+                      aria-label={`View ${displayTitle} repository on GitHub`}
+                    >
+                      <Github className="h-3 w-3" aria-hidden="true" />
+                    </Button>
+                  )}
+
+                  {item.documentationUrl && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`h-7 w-7 p-0 ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(item.documentationUrl, '_blank');
+                      }}
+                      aria-label={`View ${displayTitle} documentation`}
+                    >
+                      <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                    </Button>
+                  )}
+
+                  <CardCopyAction
+                    url={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
+                    category={item.category || ''}
+                    slug={item.slug}
+                    title={displayTitle}
+                    componentName="config-card"
+                  />
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`h-7 px-2 ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                    onClick={handleActionClick}
+                    aria-label={`View details for ${displayTitle}`}
+                  >
+                    View
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

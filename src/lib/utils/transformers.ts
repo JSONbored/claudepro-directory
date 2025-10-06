@@ -84,6 +84,16 @@ function generateDisplayTitle(slug: string): string {
 }
 
 /**
+ * Format view count for display with compact notation
+ * Examples: 1234 -> "1.2K", 1500000 -> "1.5M", 42 -> "42"
+ */
+export function formatViewCount(count: number): string {
+  if (count < 1000) return count.toString();
+  if (count < 1000000) return `${(count / 1000).toFixed(1).replace(/\.0$/, '')}K`;
+  return `${(count / 1000000).toFixed(1).replace(/\.0$/, '')}M`;
+}
+
+/**
  * Transform for specific detail page props
  */
 export function transformForDetailPage(

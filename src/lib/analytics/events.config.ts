@@ -37,9 +37,16 @@ export const EVENTS = {
 
   // Interaction Events
   COPY_CODE: 'copy_code',
+  COPY_MARKDOWN: 'copy_markdown',
   DOWNLOAD_RESOURCE: 'download_resource',
+  DOWNLOAD_MARKDOWN: 'download_markdown',
   SHARE_CONTENT: 'share_content',
   FEEDBACK_SUBMITTED: 'feedback_submitted',
+
+  // Email Capture Events
+  EMAIL_CAPTURED: 'email_captured',
+  EMAIL_MODAL_SHOWN: 'email_modal_shown',
+  EMAIL_MODAL_DISMISSED: 'email_modal_dismissed',
 
   // Error Events
   ERROR_OCCURRED: 'error_occurred',
@@ -186,11 +193,26 @@ export interface EventPayloads {
     content_length: number;
   };
 
+  [EVENTS.COPY_MARKDOWN]: {
+    content_category: string;
+    content_slug: string;
+    include_metadata: boolean;
+    include_footer: boolean;
+    content_length: number;
+  };
+
   [EVENTS.DOWNLOAD_RESOURCE]: {
     resource_type: string;
     resource_name: string;
     file_size?: number;
     page: string;
+  };
+
+  [EVENTS.DOWNLOAD_MARKDOWN]: {
+    content_category: string;
+    content_slug: string;
+    filename: string;
+    file_size: number;
   };
 
   [EVENTS.SHARE_CONTENT]: {
@@ -203,6 +225,25 @@ export interface EventPayloads {
     feedback_type: 'helpful' | 'not_helpful' | 'report_issue';
     page: string;
     category?: string;
+  };
+
+  [EVENTS.EMAIL_CAPTURED]: {
+    trigger_source: 'post_copy' | 'cta' | 'footer' | 'modal';
+    copy_type?: 'llmstxt' | 'markdown' | 'code' | 'link';
+    content_category?: string;
+    content_slug?: string;
+  };
+
+  [EVENTS.EMAIL_MODAL_SHOWN]: {
+    trigger_source: string;
+    copy_type?: string;
+    session_copy_count: number;
+  };
+
+  [EVENTS.EMAIL_MODAL_DISMISSED]: {
+    trigger_source: string;
+    dismissal_method: 'close_button' | 'overlay_click' | 'maybe_later';
+    time_shown_ms: number;
   };
 
   [EVENTS.ERROR_OCCURRED]: {
@@ -297,9 +338,14 @@ export const EVENT_CATEGORIES = {
   ],
   INTERACTION: [
     EVENTS.COPY_CODE,
+    EVENTS.COPY_MARKDOWN,
     EVENTS.DOWNLOAD_RESOURCE,
+    EVENTS.DOWNLOAD_MARKDOWN,
     EVENTS.SHARE_CONTENT,
     EVENTS.FEEDBACK_SUBMITTED,
+    EVENTS.EMAIL_CAPTURED,
+    EVENTS.EMAIL_MODAL_SHOWN,
+    EVENTS.EMAIL_MODAL_DISMISSED,
   ],
   ERROR: [EVENTS.ERROR_OCCURRED, EVENTS.NOT_FOUND, EVENTS.API_ERROR],
   FEATURE: [
@@ -412,8 +458,18 @@ export const EVENT_CONFIG: Record<
     category: 'INTERACTION',
     enabled: true,
   },
+  [EVENTS.COPY_MARKDOWN]: {
+    description: 'User copies content as markdown',
+    category: 'INTERACTION',
+    enabled: true,
+  },
   [EVENTS.DOWNLOAD_RESOURCE]: {
     description: 'User downloads resource',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.DOWNLOAD_MARKDOWN]: {
+    description: 'User downloads content as markdown file',
     category: 'INTERACTION',
     enabled: true,
   },
@@ -485,6 +541,21 @@ export const EVENT_CONFIG: Record<
   [EVENTS.PAGINATION_CLICKED]: {
     description: 'Pagination used',
     category: 'NAVIGATION',
+    enabled: true,
+  },
+  [EVENTS.EMAIL_CAPTURED]: {
+    description: 'User email captured for newsletter',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.EMAIL_MODAL_SHOWN]: {
+    description: 'Email capture modal displayed to user',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.EMAIL_MODAL_DISMISSED]: {
+    description: 'User dismissed email capture modal',
+    category: 'INTERACTION',
     enabled: true,
   },
 };

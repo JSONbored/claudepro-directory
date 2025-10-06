@@ -8,6 +8,7 @@
 
 import { z } from 'zod';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
+import type { TrendingContentItem } from '@/src/lib/trending/calculator';
 import type { UnifiedContentItem } from './components/content-item.schema';
 import type { HomePageClientProps } from './components/page-props.schema';
 import type { SortOption } from './content-filter.schema';
@@ -88,9 +89,9 @@ export interface UnifiedSearchProps {
 
 // TrendingContent component props
 export interface TrendingContentProps {
-  trending: UnifiedContentItem[];
-  popular: UnifiedContentItem[];
-  recent: UnifiedContentItem[];
+  trending: TrendingContentItem[];
+  popular: TrendingContentItem[];
+  recent: TrendingContentItem[];
 }
 
 /**

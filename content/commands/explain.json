@@ -13,5 +13,6 @@
   "githubUrl": "https://github.com/claudepro/code-explainer",
   "documentationUrl": "https://docs.claude.ai/commands/explain",
   "source": "community",
-  "slug": "explain"
+  "slug": "explain",
+  "seoTitle": "Explain for Claude"
 }

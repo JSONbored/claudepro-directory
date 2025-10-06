@@ -92,5 +92,6 @@
   "requiresAuth": false,
   "permissions": ["git", "filesystem"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://modelcontextprotocol.io/examples"
+  "documentationUrl": "https://modelcontextprotocol.io/examples",
+  "seoTitle": "Git MCP Server for Claude"
 }

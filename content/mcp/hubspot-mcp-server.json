@@ -84,5 +84,6 @@
   "requiresAuth": true,
   "permissions": ["read", "write", "create"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://developers.hubspot.com/mcp"
+  "documentationUrl": "https://developers.hubspot.com/mcp",
+  "seoTitle": "Hubspot MCP Server for Claude"
 }

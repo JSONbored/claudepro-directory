@@ -84,5 +84,6 @@
   "requiresAuth": true,
   "permissions": ["read", "write", "create"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://developers.notion.com/docs/mcp"
+  "documentationUrl": "https://developers.notion.com/docs/mcp",
+  "seoTitle": "Notion MCP Server for Claude"
 }

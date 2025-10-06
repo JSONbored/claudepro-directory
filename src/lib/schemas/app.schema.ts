@@ -78,9 +78,12 @@ export type LazyLoaderOptions<T> = {
 
 /**
  * SEO page data schema
+ * @property seoTitle - Short title for <title> tag optimization (<60 chars), falls back to full title
+ * @property title - Full title for H1 heading and longtail keywords
  */
 const seoPageDataSchema = z.object({
   title: nonEmptyString.max(200),
+  seoTitle: shortString.max(60).optional(),
   description: nonEmptyString.max(500),
   keywords: z.array(shortString.max(50)).max(20),
   dateUpdated: shortString,

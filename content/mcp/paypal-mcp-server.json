@@ -88,5 +88,6 @@
   "requiresAuth": true,
   "permissions": ["read", "write", "refund"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://www.paypal.ai/"
+  "documentationUrl": "https://www.paypal.ai/",
+  "seoTitle": "Paypal MCP Server for Claude"
 }

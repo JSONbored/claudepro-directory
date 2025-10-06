@@ -108,5 +108,6 @@
   "requiresAuth": false,
   "permissions": ["read"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://github.com/karanb192/reddit-mcp-buddy"
+  "documentationUrl": "https://github.com/karanb192/reddit-mcp-buddy",
+  "seoTitle": "Reddit MCP Buddy for Claude"
 }

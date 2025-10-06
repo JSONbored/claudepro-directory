@@ -13,5 +13,6 @@
   },
   "githubUrl": "https://github.com/kubernetes/kubernetes",
   "documentationUrl": "https://kubernetes.io/docs/",
-  "source": "community"
+  "source": "community",
+  "seoTitle": "Devops Sre Expert for Claude"
 }

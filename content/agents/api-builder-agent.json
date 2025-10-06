@@ -28,5 +28,6 @@
     "Creating API documentation and testing suites",
     "Performance optimization for high-traffic API endpoints"
   ],
-  "source": "community"
+  "source": "community",
+  "seoTitle": "API Builder Agent for Claude"
 }

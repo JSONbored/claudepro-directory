@@ -32,6 +32,7 @@ const guideItemSchema = z.object({
  */
 export const guideItemWithCategorySchema = guideItemSchema.extend({
   category: z.string(),
+  viewCount: z.number().int().nonnegative().optional(),
 });
 
 /**

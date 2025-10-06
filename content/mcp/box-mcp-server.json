@@ -90,5 +90,6 @@
   "requiresAuth": true,
   "permissions": ["read", "write", "delete"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://box.dev/guides/box-mcp/remote/"
+  "documentationUrl": "https://box.dev/guides/box-mcp/remote/",
+  "seoTitle": "Box MCP Server for Claude"
 }

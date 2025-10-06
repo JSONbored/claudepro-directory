@@ -37,7 +37,10 @@ async function handleGET(
     );
 
     const { contentType } = validatedParams;
-    requestLogger.info('Content type API request started', { contentType, validated: true });
+    requestLogger.info('Content type API request started', {
+      contentType,
+      validated: true,
+    });
 
     // Try to get from cache first
     const cacheKey = `content-api:${contentType}`;

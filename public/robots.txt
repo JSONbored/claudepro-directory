@@ -11,21 +11,27 @@ Allow: /
 Allow: /api-docs
 Allow: /openapi.json
 Allow: /.well-known/api-catalog
-Crawl-delay: 2
+Allow: /llms.txt
+Allow: /*/llms.txt
+Allow: /*/*/llms.txt
 
 # OpenAI SearchBot - ChatGPT Browse Feature
 User-agent: OAI-SearchBot
 Allow: /
 Allow: /api-docs
 Allow: /openapi.json
-Crawl-delay: 2
+Allow: /llms.txt
+Allow: /*/llms.txt
+Allow: /*/*/llms.txt
 
 # ChatGPT User - Direct ChatGPT User Queries
 User-agent: ChatGPT-User
 Allow: /
 Allow: /api-docs
 Allow: /openapi.json
-Crawl-delay: 2
+Allow: /llms.txt
+Allow: /*/llms.txt
+Allow: /*/*/llms.txt
 
 # Perplexity AI - Perplexity Search Engine
 User-agent: PerplexityBot
@@ -33,7 +39,9 @@ Allow: /
 Allow: /api-docs
 Allow: /openapi.json
 Allow: /.well-known/api-catalog
-Crawl-delay: 2
+Allow: /llms.txt
+Allow: /*/llms.txt
+Allow: /*/*/llms.txt
 
 # Anthropic Claude - ClaudeBot Crawler
 User-agent: ClaudeBot
@@ -41,14 +49,18 @@ Allow: /
 Allow: /api-docs
 Allow: /openapi.json
 Allow: /.well-known/api-catalog
-Crawl-delay: 2
+Allow: /llms.txt
+Allow: /*/llms.txt
+Allow: /*/*/llms.txt
 
 # Google Gemini - Google AI Crawler
 User-agent: Google-Extended
 Allow: /
 Allow: /api-docs
 Allow: /openapi.json
-Crawl-delay: 2
+Allow: /llms.txt
+Allow: /*/llms.txt
+Allow: /*/*/llms.txt
 
 # ============================================================================
 # GENERAL CRAWLERS (Search Engines, Social Media, etc.)
@@ -78,12 +90,14 @@ Allow: /.well-known/api-catalog
 # API endpoints (allow for better indexing of JSON-LD structured data)
 Allow: /api/*
 
+# LLMs.txt AI-optimized plain text content (185 endpoints)
+Allow: /llms.txt
+Allow: /*/llms.txt
+Allow: /*/*/llms.txt
+
 # Block admin areas if they exist
 Disallow: /admin*
 Disallow: /private*
 
 # Sitemap location
 Sitemap: https://claudepro.directory/sitemap.xml
-
-# Crawl delay (be respectful to server resources)
-Crawl-delay: 1

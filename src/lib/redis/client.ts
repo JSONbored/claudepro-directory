@@ -218,7 +218,9 @@ class RedisClientManager {
       this.connectionStatus.consecutiveFailures++;
 
       const err = error instanceof Error ? error : new Error(String(error));
-      logger.warn(`Redis operation ${operationName} failed`, { error: err.message });
+      logger.warn(`Redis operation ${operationName} failed`, {
+        error: err.message,
+      });
 
       // If too many consecutive failures, enable fallback mode
       if (this.connectionStatus.consecutiveFailures >= this.config.retryAttempts) {

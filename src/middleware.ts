@@ -63,7 +63,7 @@ const aj = arcjet({
 // PRODUCTION CSP STRATEGY (2025 Best Practices with Nonces):
 // - Dynamic rendering (connection() in layout.tsx) enables per-request nonces
 // - Nosecone's built-in nonce() function generates unique nonces per request
-// - strict-dynamic automatically trusts dynamically loaded scripts (fixes eval CSP violations)
+// - strict-dynamic added manually (not in Nosecone defaults) - allows nonce-based scripts to load additional scripts
 // - Defense in depth: Arcjet WAF + Shield + nonce-based CSP + rate limiting + bot detection
 //
 // DEVELOPMENT CSP STRATEGY:
@@ -73,17 +73,18 @@ const aj = arcjet({
 const noseconeConfig = {
   ...nosecone.defaults,
   // Extend Nosecone defaults with our trusted sources
-  // Note: Nosecone defaults already include nonce() for scriptSrc with strict-dynamic
+  // Note: Nosecone defaults include nonce() for scriptSrc (strict-dynamic added manually in scriptSrc array)
   contentSecurityPolicy: {
     directives: {
       // Start with Nosecone's secure defaults (includes nonce support)
       ...nosecone.defaults.contentSecurityPolicy.directives,
 
       // Extend scriptSrc to add our trusted sources while keeping nonce + strict-dynamic
-      // Nosecone's defaults include: nonce(), 'strict-dynamic'
+      // Nosecone's defaults include: nonce() only (strict-dynamic added manually above)
       // We're adding our analytics and development tools
       scriptSrc: [
         ...(nosecone.defaults.contentSecurityPolicy.directives.scriptSrc || []),
+        "'strict-dynamic'", // Allow nonce-based scripts to load additional scripts
         ...(isDevelopment ? (["'unsafe-eval'"] as const) : []), // HMR/hot reload in development only
         'https://umami.claudepro.directory', // Umami analytics
         'https://*.vercel-scripts.com', // Vercel analytics
@@ -240,6 +241,11 @@ async function applyEndpointRateLimit(
     return limiter.middleware(request);
   }
 
+  // LLMs.txt routes - moderate rate limiting to prevent scraping abuse
+  if (pathname === '/llms.txt' || pathname.endsWith('/llms.txt')) {
+    return rateLimiters.llmstxt.middleware(request);
+  }
+
   // Pattern-based matching using classified endpoint type
   if (pathname.startsWith('/api/')) {
     // Use endpoint classification for rate limiting
@@ -392,6 +398,22 @@ export async function middleware(request: NextRequest) {
         },
       }
     );
+  }
+
+  // Skip Arcjet for Next.js RSC prefetch requests (legitimate browser behavior)
+  const isRSCRequest = pathname.includes('_rsc=') || request.headers.get('rsc') === '1';
+  if (isRSCRequest) {
+    const noseconeResponse = await noseconeMiddleware();
+
+    if (isDevelopment) {
+      const duration = performance.now() - startTime;
+      logger.debug('Middleware execution (RSC prefetch)', {
+        path: sanitizePathForLogging(pathname),
+        duration: `${duration.toFixed(2)}ms`,
+      });
+    }
+
+    return noseconeResponse;
   }
 
   // Skip Arcjet protection for static assets and Next.js internals
@@ -575,9 +597,10 @@ export const config = {
      * - manifest.json (PWA manifest)
      * - .well-known (well-known files for verification)
      * - /js/ (public JavaScript files)
+     * - /scripts/ (public script files - service workers, etc.)
      * - /css/ (public CSS files)
      * - *.png, *.jpg, *.jpeg, *.gif, *.webp, *.svg, *.ico (image files)
      */
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.json|\\.well-known|js/|css/|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.json|\\.well-known|js/|scripts/|css/|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
   ],
 };

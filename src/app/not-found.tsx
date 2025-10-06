@@ -2,12 +2,10 @@ import Link from 'next/link';
 import { Button } from '@/src/components/ui/button';
 import { Card } from '@/src/components/ui/card';
 import { Home, Search } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = {
-  title: '404 - Page Not Found',
-  description: 'The page you are looking for could not be found.',
-};
+export const metadata = await generatePageMetadata('/404');
 
 export default function NotFound() {
   return (

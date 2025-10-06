@@ -13,5 +13,6 @@
   },
   "githubUrl": "https://github.com/OAI/OpenAPI-Specification",
   "documentationUrl": "https://swagger.io/specification/",
-  "source": "community"
+  "source": "community",
+  "seoTitle": "API Design Expert for Claude"
 }

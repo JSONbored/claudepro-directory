@@ -37,6 +37,18 @@ const homePagePropsSchema = z
 const homePageClientPropsSchema = z
   .object({
     initialData: homePagePropsSchema.describe('Initial server-side data for client hydration'),
+    stats: z
+      .object({
+        rules: z.number().describe('Number of rules'),
+        mcp: z.number().describe('Number of MCP servers'),
+        agents: z.number().describe('Number of AI agents'),
+        commands: z.number().describe('Number of commands'),
+        hooks: z.number().describe('Number of automation hooks'),
+        statuslines: z.number().describe('Number of statuslines'),
+        collections: z.number().describe('Number of collections'),
+      })
+      .optional()
+      .describe('Content category statistics'),
   })
   .describe('Props for client-side home page component with SSR hydration data');
 

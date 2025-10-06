@@ -51,7 +51,11 @@ export function TrendingGuidesCard({
   title = 'Trending Now',
 }: TrendingGuidesCardProps) {
   // Validate props
-  const validated = trendingGuidesCardPropsSchema.parse({ guides, isLoading, title });
+  const validated = trendingGuidesCardPropsSchema.parse({
+    guides,
+    isLoading,
+    title,
+  });
 
   // Don't render if no guides and not loading
   if (validated.guides.length === 0 && !validated.isLoading) {

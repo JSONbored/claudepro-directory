@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useCallback, useEffect, useState } from 'react';
+import { type ReactNode, useCallback, useState } from 'react';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import { Button } from '@/src/components/ui/button';
 import { useInfiniteScroll } from '@/src/hooks/use-infinite-scroll';
@@ -14,7 +14,6 @@ export interface InfiniteScrollContainerProps<T> {
   renderItem: (item: T, index: number) => ReactNode;
   loadMore: () => Promise<T[]>;
   hasMore: boolean;
-  pageSize?: number;
   className?: string;
   gridClassName?: string;
   loadingClassName?: string;
@@ -28,7 +27,6 @@ export function InfiniteScrollContainer<T>({
   renderItem,
   loadMore,
   hasMore,
-  pageSize = 20,
   className,
   gridClassName = UI_CLASSES.GRID_RESPONSIVE_3_TIGHT,
   loadingClassName,
@@ -37,29 +35,18 @@ export function InfiniteScrollContainer<T>({
   keyExtractor,
 }: InfiniteScrollContainerProps<T>) {
   const [loading, setLoading] = useState(false);
-  const [allItems, setAllItems] = useState<T[]>(items);
-  const [localHasMore, setLocalHasMore] = useState(hasMore);
   const [error, setError] = useState<string | null>(null);
 
   const handleLoadMore = useCallback(async () => {
-    if (loading || !localHasMore) return;
+    if (loading || !hasMore) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      const newItems = await loadMore();
-
-      if (newItems.length === 0) {
-        setLocalHasMore(false);
-      } else {
-        setAllItems((prev) => [...prev, ...newItems]);
-
-        // Check if we got fewer items than expected
-        if (newItems.length < pageSize) {
-          setLocalHasMore(false);
-        }
-      }
+      await loadMore();
+      // Trust parent's hasMore prop for pagination state
+      // No need to manage local state
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load more items';
       setError(errorMessage);
@@ -68,20 +55,19 @@ export function InfiniteScrollContainer<T>({
         'Infinite scroll failed to load more items',
         err instanceof Error ? err : new Error(String(err)),
         {
-          currentItemCount: allItems.length,
-          pageSize,
-          hasMore: localHasMore,
+          currentItemCount: items.length,
+          hasMore,
           component: 'InfiniteScrollContainer',
         }
       );
     } finally {
       setLoading(false);
     }
-  }, [loading, localHasMore, loadMore, pageSize, allItems.length]);
+  }, [loading, hasMore, loadMore, items.length]);
 
   // Use infinite scroll hook
   const observerTarget = useInfiniteScroll(handleLoadMore, {
-    hasMore: localHasMore,
+    hasMore,
     loading,
     threshold: 0.1,
     rootMargin: '200px',
@@ -94,17 +80,7 @@ export function InfiniteScrollContainer<T>({
     });
   }, [handleLoadMore]);
 
-  // Update items when props change
-  useEffect(() => {
-    setAllItems(items);
-  }, [items]);
-
-  // Update hasMore when prop changes
-  useEffect(() => {
-    setLocalHasMore(hasMore);
-  }, [hasMore]);
-
-  if (allItems.length === 0 && !loading) {
+  if (items.length === 0 && !loading) {
     return (
       <div className={UI_CLASSES.CONTAINER_CENTER}>
         <p className={`text-muted-foreground ${UI_CLASSES.TEXT_LG}`}>{emptyMessage}</p>
@@ -116,7 +92,7 @@ export function InfiniteScrollContainer<T>({
     <div className={cn('space-y-8', className)}>
       {/* Items Grid */}
       <div className={gridClassName}>
-        {allItems.map((item, index) => {
+        {items.map((item, index) => {
           const key = keyExtractor ? keyExtractor(item, index) : `item-${index}`;
           return (
             <div key={key}>
@@ -150,12 +126,12 @@ export function InfiniteScrollContainer<T>({
       )}
 
       {/* Infinite Scroll Trigger */}
-      {!loading && localHasMore && (
+      {!loading && hasMore && (
         <div ref={observerTarget} className={`h-4 ${UI_CLASSES.W_FULL}`} aria-hidden="true" />
       )}
 
       {/* Manual Load More Button (Optional) */}
-      {!loading && localHasMore && showLoadMoreButton && (
+      {!loading && hasMore && showLoadMoreButton && (
         <div className={`flex ${UI_CLASSES.JUSTIFY_CENTER} pt-4 pb-8`}>
           <Button
             onClick={handleManualLoadMore}
@@ -169,10 +145,10 @@ export function InfiniteScrollContainer<T>({
       )}
 
       {/* End of List Message */}
-      {!localHasMore && allItems.length > 0 && (
+      {!hasMore && items.length > 0 && (
         <div className={`flex ${UI_CLASSES.JUSTIFY_CENTER} py-8`}>
           <p className="text-muted-foreground text-sm">
-            You've reached the end • {allItems.length} total items
+            You've reached the end • {items.length} total items
           </p>
         </div>
       )}

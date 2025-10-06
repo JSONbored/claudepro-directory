@@ -13,5 +13,6 @@
   "githubUrl": "https://github.com/claudepro/performance-optimizer",
   "documentationUrl": "https://docs.claude.ai/commands/optimize",
   "source": "community",
-  "slug": "optimize"
+  "slug": "optimize",
+  "seoTitle": "Optimize for Claude"
 }

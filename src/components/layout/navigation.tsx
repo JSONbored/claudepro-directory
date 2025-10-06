@@ -222,7 +222,10 @@ export const Navigation = () => {
                     'input[name="search"], input[type="search"]'
                   );
                   searchInput?.focus();
-                  searchInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  searchInput?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center',
+                  });
                 }}
               />
             </div>

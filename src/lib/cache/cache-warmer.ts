@@ -241,7 +241,11 @@ class CacheWarmer {
       );
     } catch (error) {
       // Don't fail the whole process for one item
-      logger.warn('Failed to warm cache for item', { category, slug, error: String(error) });
+      logger.warn('Failed to warm cache for item', {
+        category,
+        slug,
+        error: String(error),
+      });
     }
   }
 
@@ -277,7 +281,10 @@ class CacheWarmer {
             exclude: [],
           });
         } catch (error) {
-          logger.warn('Failed to warm related content', { page: page.path, error: String(error) });
+          logger.warn('Failed to warm related content', {
+            page: page.path,
+            error: String(error),
+          });
         }
       }
     } catch (error) {

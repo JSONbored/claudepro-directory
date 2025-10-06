@@ -50,7 +50,8 @@ export const URL_SAFE_CHARS_REGEX = /^https?:\/\/[^\s<>"']+$/;
  */
 export const seoTextSchema = nonEmptyString
   .regex(HTML_TAG_REGEX, 'HTML tags not allowed')
-  .transform((text) => text.trim());
+  .transform((text) => text.trim())
+  .describe('XSS-safe text field for SEO content');
 
 /**
  * Safe URL validator with character restrictions
@@ -65,7 +66,7 @@ export const seoUrlSchema = urlString
 /**
  * SEO Title validator
  * Used for: Page titles, meta titles
- * Length: 60 chars (Google recommendation)
+ * Length: 60 chars (Google recommendation, October 2025)
  */
 export const seoTitleSchema = nonEmptyString
   .max(
@@ -73,20 +74,24 @@ export const seoTitleSchema = nonEmptyString
     `Title must be ${SEO_LIMITS.MAX_TITLE_LENGTH} characters or less`
   )
   .regex(HTML_TAG_REGEX, 'HTML tags not allowed')
-  .transform((text) => text.trim());
+  .transform((text) => text.trim())
+  .describe('SEO-optimized page title (≤60 chars for Google)');
 
 /**
  * SEO Description validator
  * Used for: Meta descriptions
- * Length: 160 chars (Google recommendation)
+ * Length: 120-160 chars (AI-optimized for October 2025)
+ * Note: AI search engines prefer 120-150 chars for better citation rates
  */
 export const seoDescriptionSchema = nonEmptyString
+  .min(120, 'Description should be at least 120 characters for AI optimization')
   .max(
     SEO_LIMITS.MAX_DESCRIPTION_LENGTH,
     `Description must be ${SEO_LIMITS.MAX_DESCRIPTION_LENGTH} characters or less`
   )
   .regex(HTML_TAG_REGEX, 'HTML tags not allowed')
-  .transform((text) => text.trim());
+  .transform((text) => text.trim())
+  .describe('AI-optimized meta description (120-160 chars for ChatGPT/Perplexity)');
 
 /**
  * OpenGraph Title validator

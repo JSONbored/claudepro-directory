@@ -4,7 +4,12 @@
   "category": "agents",
   "author": "Your Name or GitHub Username",
   "dateAdded": "YYYY-MM-DD",
-  "tags": ["primary-expertise", "secondary-skill", "technology-stack", "use-case"],
+  "tags": [
+    "primary-expertise",
+    "secondary-skill",
+    "technology-stack",
+    "use-case"
+  ],
   "content": "You are an expert [ROLE] with deep knowledge of [DOMAIN]. Your expertise includes [KEY_AREAS].\n\n## Core Expertise\n\n### 1. [Primary Skill Area]\n- Key capability 1\n- Key capability 2\n- Key capability 3\n\n### 2. [Secondary Skill Area]\n- Advanced technique 1\n- Advanced technique 2\n- Advanced technique 3\n\n## Code Examples\n\n```[language]\n// Example code demonstrating expertise\nfunction example() {\n  // Your implementation here\n}\n```\n\n## Best Practices\n\n1. **Practice 1**: Description and reasoning\n2. **Practice 2**: Description and reasoning\n3. **Practice 3**: Description and reasoning\n\nAlways focus on [CORE_PRINCIPLES] while maintaining [QUALITY_STANDARDS].",
   "configuration": {
     "temperature": 0.3,

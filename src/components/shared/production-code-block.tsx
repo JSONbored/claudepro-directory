@@ -56,15 +56,10 @@ export function ProductionCodeBlock({
   const preRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
-  // Check if content exceeds maxLines
+  // Check if content exceeds maxLines (no DOM access needed - calculate from code prop)
   useEffect(() => {
-    if (preRef.current) {
-      const pre = preRef.current.querySelector('pre');
-      if (pre) {
-        const lines = code.split('\n').length;
-        setNeedsCollapse(lines > maxLines);
-      }
-    }
+    const lines = code.split('\n').length;
+    setNeedsCollapse(lines > maxLines);
   }, [code, maxLines]);
 
   const handleCopy = async () => {

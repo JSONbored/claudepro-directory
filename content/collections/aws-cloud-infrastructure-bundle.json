@@ -1,6 +1,7 @@
 {
   "slug": "aws-cloud-infrastructure-bundle",
   "title": "AWS Cloud Infrastructure Bundle",
+  "seoTitle": "AWS Infra Bundle",
   "description": "Complete AWS infrastructure management toolkit combining cloud architecture expertise, CloudFormation validation, and AWS services integration. Perfect for teams building and maintaining cloud-native applications on AWS.",
   "author": "JSONbored",
   "dateAdded": "2025-10-02",
