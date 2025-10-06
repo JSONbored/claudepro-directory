@@ -8,6 +8,7 @@ import { hooksMetadata } from '../generated/hooks-metadata.js';
 import { mcpMetadata } from '../generated/mcp-metadata.js';
 import { rulesMetadata } from '../generated/rules-metadata.js';
 import { statuslinesMetadata } from '../generated/statuslines-metadata.js';
+import { parseChangelog } from '../src/lib/changelog/parser.js';
 import { APP_CONFIG, CONTENT_PATHS, MAIN_CONTENT_CATEGORIES } from '../src/lib/constants';
 import { logger } from '../src/lib/logger.js';
 import type { ContentItem } from '../src/lib/schemas/content/content-item-union.schema';
@@ -48,13 +49,22 @@ async function generateSitemap(): Promise<string> {
   });
 
   // Static pages
-  const staticPages = ['jobs', 'community', 'trending', 'submit', 'partner', 'guides', 'api-docs'];
+  const staticPages = [
+    'jobs',
+    'community',
+    'trending',
+    'submit',
+    'partner',
+    'guides',
+    'api-docs',
+    'changelog',
+  ];
   staticPages.forEach((page) => {
     urls.push({
       loc: `${baseUrl || ''}/${page}`,
       lastmod: new Date().toISOString().split('T')[0] || '',
-      changefreq: 'weekly',
-      priority: page === 'api-docs' ? 0.9 : 0.6, // High priority for API docs (AI discoverability)
+      changefreq: page === 'changelog' ? 'daily' : 'weekly',
+      priority: page === 'api-docs' ? 0.9 : page === 'changelog' ? 0.85 : 0.6, // High priority for changelog (recency signals)
     });
   });
 
@@ -98,6 +108,37 @@ async function generateSitemap(): Promise<string> {
       }
     }
   });
+
+  // Changelog entries
+  try {
+    const changelog = await parseChangelog();
+    changelog.entries.forEach((entry) => {
+      urls.push({
+        loc: `${baseUrl}/changelog/${entry.slug}`,
+        lastmod: entry.date,
+        changefreq: 'monthly', // Changelog entries rarely change after publication
+        priority: 0.7, // High priority for recent updates
+      });
+    });
+
+    // Changelog RSS/Atom feeds (for feed aggregators)
+    urls.push(
+      {
+        loc: `${baseUrl}/changelog/rss.xml`,
+        lastmod: changelog.entries[0]?.date || new Date().toISOString().split('T')[0] || '',
+        changefreq: 'daily',
+        priority: 0.8,
+      },
+      {
+        loc: `${baseUrl}/changelog/atom.xml`,
+        lastmod: changelog.entries[0]?.date || new Date().toISOString().split('T')[0] || '',
+        changefreq: 'daily',
+        priority: 0.8,
+      }
+    );
+  } catch {
+    logger.warn('Failed to parse changelog for sitemap, skipping changelog entries');
+  }
 
   // Individual content pages (excluding collections - they're added separately)
   const allContent: ContentItem[] = [
@@ -192,6 +233,31 @@ async function generateSitemap(): Promise<string> {
     });
   });
 
+  // Changelog llms.txt routes (for AI discovery)
+  try {
+    const changelog = await parseChangelog();
+
+    // Main changelog llms.txt index
+    urls.push({
+      loc: `${baseUrl}/changelog/llms.txt`,
+      lastmod: changelog.entries[0]?.date || new Date().toISOString().split('T')[0] || '',
+      changefreq: 'daily',
+      priority: 0.85, // High priority for AI discovery
+    });
+
+    // Individual changelog entry llms.txt pages
+    changelog.entries.forEach((entry) => {
+      urls.push({
+        loc: `${baseUrl}/changelog/${entry.slug}/llms.txt`,
+        lastmod: entry.date,
+        changefreq: 'weekly',
+        priority: 0.75,
+      });
+    });
+  } catch {
+    logger.warn('Failed to parse changelog for llms.txt routes, skipping');
+  }
+
   // Generate XML
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -268,6 +334,10 @@ Allow: /
 Allow: /api-docs
 Allow: /openapi.json
 Allow: /.well-known/api-catalog
+Allow: /changelog
+Allow: /changelog/*
+Allow: /changelog/rss.xml
+Allow: /changelog/atom.xml
 Allow: /llms.txt
 Allow: /*/llms.txt
 Allow: /*/*/llms.txt
