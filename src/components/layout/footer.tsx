@@ -5,10 +5,10 @@
  * @module components/layout/footer
  */
 
-import Link from 'next/link';
-import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
-import { DiscordIcon, Github, Sparkles } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import Link from "next/link";
+import { APP_CONFIG, SOCIAL_LINKS } from "@/src/lib/constants";
+import { DiscordIcon, Github, Sparkles } from "@/src/lib/icons";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 /**
  * Footer Component
@@ -22,18 +22,24 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className={`${UI_CLASSES.BORDER_T} border-border/50 bg-background/95 backdrop-blur`}>
+    <footer
+      className={`${UI_CLASSES.BORDER_T} border-border/50 bg-background/95 backdrop-blur`}
+    >
       <div className="container mx-auto px-4 py-8">
         <div className={`${UI_CLASSES.GRID_RESPONSIVE_3} ${UI_CLASSES.GAP_8}`}>
           {/* About Section */}
           <div>
-            <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_4}`}>{APP_CONFIG.name}</h3>
-            <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED} ${UI_CLASSES.MB_4}`}>
+            <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_4}`}>
+              {APP_CONFIG.name}
+            </h3>
+            <p
+              className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED} ${UI_CLASSES.MB_4}`}
+            >
               {APP_CONFIG.description}
             </p>
             <div className={`flex ${UI_CLASSES.GAP_4}`}>
               <Link
-                href={SOCIAL_LINKS.github || '#'}
+                href={SOCIAL_LINKS.github || "#"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
@@ -42,7 +48,7 @@ export function Footer() {
                 <Github className="h-5 w-5" />
               </Link>
               <Link
-                href={SOCIAL_LINKS.discord || '#'}
+                href={SOCIAL_LINKS.discord || "#"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
@@ -55,7 +61,9 @@ export function Footer() {
 
           {/* Quick Links Section */}
           <div>
-            <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_4}`}>Quick Links</h3>
+            <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_4}`}>
+              Quick Links
+            </h3>
             <ul className={`space-y-2 ${UI_CLASSES.TEXT_SM}`}>
               <li>
                 <Link
@@ -94,7 +102,9 @@ export function Footer() {
 
           {/* AI & Resources Section */}
           <div>
-            <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_4}`}>AI & Resources</h3>
+            <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_4}`}>
+              AI & Resources
+            </h3>
             <ul className={`space-y-2 ${UI_CLASSES.TEXT_SM}`}>
               <li>
                 <Link

@@ -1,14 +1,26 @@
-'use client';
+"use client";
 
-import { useId } from 'react';
-import { ConfigCard } from '@/src/components/features/content/config-card';
-import { Badge } from '@/src/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
-import { Clock, Star, TrendingUp } from '@/src/lib/icons';
-import type { TrendingContentProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { useId } from "react";
+import { ConfigCard } from "@/src/components/features/content/config-card";
+import { Badge } from "@/src/components/ui/badge";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/src/components/ui/tabs";
+import { Clock, Star, TrendingUp } from "@/src/lib/icons";
+import type {
+  TrendingContentProps,
+  UnifiedContentItem,
+} from "@/src/lib/schemas/component.schema";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
-export function TrendingContent({ trending, popular, recent }: TrendingContentProps) {
+export function TrendingContent({
+  trending,
+  popular,
+  recent,
+}: TrendingContentProps) {
   // Generate unique IDs for headings
   const trendingHeadingId = useId();
   const popularHeadingId = useId();
@@ -24,14 +36,23 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
         aria-label="Trending content categories"
       >
         <TabsTrigger value="trending" aria-label="View trending configurations">
-          <TrendingUp className={`h-4 w-4 ${UI_CLASSES.MR_2}`} aria-hidden="true" />
+          <TrendingUp
+            className={`h-4 w-4 ${UI_CLASSES.MR_2}`}
+            aria-hidden="true"
+          />
           Trending
         </TabsTrigger>
-        <TabsTrigger value="popular" aria-label="View most popular configurations">
+        <TabsTrigger
+          value="popular"
+          aria-label="View most popular configurations"
+        >
           <Star className={`h-4 w-4 ${UI_CLASSES.MR_2}`} aria-hidden="true" />
           Popular
         </TabsTrigger>
-        <TabsTrigger value="recent" aria-label="View recently added configurations">
+        <TabsTrigger
+          value="recent"
+          aria-label="View recently added configurations"
+        >
           <Clock className={`h-4 w-4 ${UI_CLASSES.MR_2}`} aria-hidden="true" />
           Recent
         </TabsTrigger>
@@ -44,7 +65,10 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
         aria-labelledby={trendingHeadingId}
       >
         <div>
-          <h2 id={trendingHeadingId} className={`text-2xl ${UI_CLASSES.FONT_BOLD} mb-4`}>
+          <h2
+            id={trendingHeadingId}
+            className={`text-2xl ${UI_CLASSES.FONT_BOLD} mb-4`}
+          >
             🔥 Trending This Week
           </h2>
           <ul className={UI_CLASSES.GRID_RESPONSIVE_LIST}>
@@ -86,7 +110,10 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
         aria-labelledby={popularHeadingId}
       >
         <div>
-          <h2 id={popularHeadingId} className={`text-2xl ${UI_CLASSES.FONT_BOLD} mb-4`}>
+          <h2
+            id={popularHeadingId}
+            className={`text-2xl ${UI_CLASSES.FONT_BOLD} mb-4`}
+          >
             ⭐ Most Popular
           </h2>
           <ul className={UI_CLASSES.GRID_RESPONSIVE_LIST}>
@@ -119,7 +146,10 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
         aria-labelledby={recentHeadingId}
       >
         <div>
-          <h2 id={recentHeadingId} className={`text-2xl ${UI_CLASSES.FONT_BOLD} mb-4`}>
+          <h2
+            id={recentHeadingId}
+            className={`text-2xl ${UI_CLASSES.FONT_BOLD} mb-4`}
+          >
             🆕 Recently Added
           </h2>
           <ul className={UI_CLASSES.GRID_RESPONSIVE_LIST}>

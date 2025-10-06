@@ -13,19 +13,19 @@
  * @see components/unified-detail-page.tsx - Original implementation
  */
 
-import { CodeBlockServer } from '@/src/components/shared/code-block-server';
+import { CodeBlockServer } from "@/src/components/shared/code-block-server";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { detectLanguage } from '@/src/lib/content/language-detection';
-import { Copy } from '@/src/lib/icons';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { generateFilename } from '@/src/lib/utils/filename-generator';
+} from "@/src/components/ui/card";
+import { detectLanguage } from "@/src/lib/content/language-detection";
+import { Copy } from "@/src/lib/icons";
+import type { UnifiedContentItem } from "@/src/lib/schemas/component.schema";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
+import { generateFilename } from "@/src/lib/utils/filename-generator";
 
 export interface ContentSectionProps {
   item: UnifiedContentItem;
@@ -39,17 +39,25 @@ export interface ContentSectionProps {
  * Renders code or configuration content with SERVER-SIDE syntax highlighting.
  * No client-side JavaScript needed for highlighting.
  */
-export async function ContentSection({ item, title, description }: ContentSectionProps) {
+export async function ContentSection({
+  item,
+  title,
+  description,
+}: ContentSectionProps) {
   // Extract content from item
-  let content = '';
-  if ('content' in item && typeof (item as { content?: string }).content === 'string') {
+  let content = "";
+  if (
+    "content" in item &&
+    typeof (item as { content?: string }).content === "string"
+  ) {
     content = (item as { content: string }).content;
   } else if (
-    'configuration' in item &&
+    "configuration" in item &&
     (item as unknown as { configuration?: unknown }).configuration
   ) {
-    const config = (item as unknown as { configuration?: unknown }).configuration;
-    if (typeof config === 'string') {
+    const config = (item as unknown as { configuration?: unknown })
+      .configuration;
+    if (typeof config === "string") {
       content = config;
     } else {
       content = JSON.stringify(config, null, 2);
@@ -60,7 +68,8 @@ export async function ContentSection({ item, title, description }: ContentSectio
   if (!content) return null;
 
   // Production-grade language detection with caching
-  const languageHint = 'language' in item ? (item as { language?: string }).language : undefined;
+  const languageHint =
+    "language" in item ? (item as { language?: string }).language : undefined;
   const language = await detectLanguage(content, languageHint);
 
   // Generate intelligent filename based on content type and category
@@ -71,12 +80,16 @@ export async function ContentSection({ item, title, description }: ContentSectio
       <CardHeader>
         <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
           <Copy className="h-5 w-5" />
-          {title || 'Content'}
+          {title || "Content"}
         </CardTitle>
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        <CodeBlockServer code={content} language={language} filename={filename} />
+        <CodeBlockServer
+          code={content}
+          language={language}
+          filename={filename}
+        />
       </CardContent>
     </Card>
   );

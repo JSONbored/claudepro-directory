@@ -9,14 +9,14 @@
  * @see lib/search-adapters/fuzzysort-adapter.ts
  */
 
-import { logger } from '@/src/lib/logger';
-import { contentCache } from '@/src/lib/redis';
+import { logger } from "@/src/lib/logger";
+import { contentCache } from "@/src/lib/redis";
 import type {
   SearchableItem,
   SearchCacheKey,
   SearchFilters,
-} from '@/src/lib/schemas/search.schema';
-import { searchWithFilters } from '@/src/lib/search-adapters/fuzzysort-adapter';
+} from "@/src/lib/schemas/search.schema";
+import { searchWithFilters } from "@/src/lib/search-adapters/fuzzysort-adapter";
 
 // Re-export types
 export type { SearchableItem, SearchFilters, SearchCacheKey };
@@ -47,7 +47,7 @@ class SearchCache {
       categories: [],
       tags: [],
       authors: [],
-      sort: 'trending',
+      sort: "trending",
       popularity: [0, 100],
     },
     options?: {
@@ -55,7 +55,7 @@ class SearchCache {
       limit?: number;
       includeScore?: boolean;
       keys?: Array<{ name: string; weight: number }>;
-    }
+    },
   ): Promise<T[]> {
     const cacheKey = generateSearchCacheKey(query, filters);
 
@@ -75,9 +75,9 @@ class SearchCache {
       return results;
     } catch (error) {
       logger.error(
-        'Search cache error, falling back to direct search',
+        "Search cache error, falling back to direct search",
         error instanceof Error ? error : new Error(String(error)),
-        { query, filtersCount: Object.keys(filters).length }
+        { query, filtersCount: Object.keys(filters).length },
       );
 
       // Fallback to direct search
@@ -93,13 +93,13 @@ class SearchCache {
       categories: [],
       tags: [],
       authors: [],
-      sort: 'trending',
+      sort: "trending",
       popularity: [0, 100],
     },
     options?: {
       threshold?: number;
       limit?: number;
-    }
+    },
   ): Promise<T[]> {
     // Use Fuzzysort adapter with filters
     return searchWithFilters(items, query, filters, {
@@ -109,15 +109,15 @@ class SearchCache {
   }
 
   // Invalidate cache for a specific pattern
-  async invalidateSearchCache(pattern: string = 'search:*'): Promise<void> {
+  async invalidateSearchCache(pattern: string = "search:*"): Promise<void> {
     try {
       await contentCache.invalidatePattern(pattern);
-      logger.info('Search cache invalidated', { pattern });
+      logger.info("Search cache invalidated", { pattern });
     } catch (error) {
       logger.error(
-        'Failed to invalidate search cache',
+        "Failed to invalidate search cache",
         error instanceof Error ? error : new Error(String(error)),
-        { pattern }
+        { pattern },
       );
     }
   }
@@ -127,7 +127,7 @@ class SearchCache {
     cacheType: string;
   } {
     return {
-      cacheType: 'Redis-based with Fuzzysort',
+      cacheType: "Redis-based with Fuzzysort",
     };
   }
 }

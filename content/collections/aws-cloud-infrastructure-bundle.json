@@ -5,7 +5,14 @@
   "description": "Complete AWS infrastructure management toolkit combining cloud architecture expertise, CloudFormation validation, and AWS services integration. Perfect for teams building and maintaining cloud-native applications on AWS.",
   "author": "JSONbored",
   "dateAdded": "2025-10-02",
-  "tags": ["aws", "cloud", "infrastructure", "devops", "cloudformation", "serverless"],
+  "tags": [
+    "aws",
+    "cloud",
+    "infrastructure",
+    "devops",
+    "cloudformation",
+    "serverless"
+  ],
   "source": "community",
   "category": "collections",
   "collectionType": "use-case",

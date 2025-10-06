@@ -1,19 +1,36 @@
-'use client';
+"use client";
 
 /**
  * CaseStudy - Rich case study presentation component
  * Used in 1 MDX file across the codebase - Specialized component for business case studies
  */
 
-import { Badge } from '@/src/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { BookOpen } from '@/src/lib/icons';
-import { type CaseStudyProps, caseStudyPropsSchema } from '@/src/lib/schemas/shared.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { Badge } from "@/src/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
+import { BookOpen } from "@/src/lib/icons";
+import {
+  type CaseStudyProps,
+  caseStudyPropsSchema,
+} from "@/src/lib/schemas/shared.schema";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 export function CaseStudy(props: CaseStudyProps) {
   const validated = caseStudyPropsSchema.parse(props);
-  const { company, industry, challenge, solution, results, metrics, testimonial, logo } = validated;
+  const {
+    company,
+    industry,
+    challenge,
+    solution,
+    results,
+    metrics,
+    testimonial,
+    logo,
+  } = validated;
 
   return (
     <Card
@@ -22,7 +39,9 @@ export function CaseStudy(props: CaseStudyProps) {
       className={`my-8 ${UI_CLASSES.OVERFLOW_HIDDEN}`}
     >
       <CardHeader className={UI_CLASSES.PB_4}>
-        <div className={`flex ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN}`}>
+        <div
+          className={`flex ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN}`}
+        >
           <div>
             <CardTitle className="text-2xl" itemProp="headline">
               {company} Case Study
@@ -44,14 +63,18 @@ export function CaseStudy(props: CaseStudyProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
-          <h4 className={`${UI_CLASSES.FONT_SEMIBOLD} text-destructive ${UI_CLASSES.MB_2}`}>
+          <h4
+            className={`${UI_CLASSES.FONT_SEMIBOLD} text-destructive ${UI_CLASSES.MB_2}`}
+          >
             Challenge
           </h4>
           <p className="text-muted-foreground">{challenge}</p>
         </div>
 
         <div>
-          <h4 className={`${UI_CLASSES.FONT_SEMIBOLD} text-primary ${UI_CLASSES.MB_2}`}>
+          <h4
+            className={`${UI_CLASSES.FONT_SEMIBOLD} text-primary ${UI_CLASSES.MB_2}`}
+          >
             Solution
           </h4>
           <p className="text-muted-foreground">{solution}</p>
@@ -79,18 +102,18 @@ export function CaseStudy(props: CaseStudyProps) {
                   {metric.trend && (
                     <span
                       className={
-                        metric.trend === 'up' || metric.trend === '+'
-                          ? 'text-green-500'
-                          : metric.trend === 'down'
-                            ? 'text-red-500'
-                            : 'text-gray-500'
+                        metric.trend === "up" || metric.trend === "+"
+                          ? "text-green-500"
+                          : metric.trend === "down"
+                            ? "text-red-500"
+                            : "text-gray-500"
                       }
                     >
-                      {metric.trend === 'up' || metric.trend === '+'
-                        ? '↑'
-                        : metric.trend === 'down'
-                          ? '↓'
-                          : '→'}
+                      {metric.trend === "up" || metric.trend === "+"
+                        ? "↑"
+                        : metric.trend === "down"
+                          ? "↓"
+                          : "→"}
                     </span>
                   )}
                 </p>
@@ -106,9 +129,13 @@ export function CaseStudy(props: CaseStudyProps) {
               "{testimonial.quote}"
             </p>
             <footer className="text-sm">
-              <cite className={`not-italic ${UI_CLASSES.FONT_SEMIBOLD}`}>{testimonial.author}</cite>
+              <cite className={`not-italic ${UI_CLASSES.FONT_SEMIBOLD}`}>
+                {testimonial.author}
+              </cite>
               {testimonial.role && (
-                <span className="text-muted-foreground">, {testimonial.role}</span>
+                <span className="text-muted-foreground">
+                  , {testimonial.role}
+                </span>
               )}
             </footer>
           </blockquote>

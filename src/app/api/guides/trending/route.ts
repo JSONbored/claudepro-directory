@@ -1,26 +1,26 @@
-import { type NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { CACHE_HEADERS } from '@/src/lib/constants';
-import { handleApiError } from '@/src/lib/error-handler';
-import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/redis';
-import { errorInputSchema } from '@/src/lib/schemas/error.schema';
-import { viewCountService } from '@/src/lib/services/view-count.service';
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { CACHE_HEADERS } from "@/src/lib/constants";
+import { handleApiError } from "@/src/lib/error-handler";
+import { logger } from "@/src/lib/logger";
+import { statsRedis } from "@/src/lib/redis";
+import { errorInputSchema } from "@/src/lib/schemas/error.schema";
+import { viewCountService } from "@/src/lib/services/view-count.service";
 
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 // Query parameters schema
 const querySchema = z.object({
   category: z
-    .enum(['guides', 'tutorials', 'use-cases', 'workflows', 'comparisons'])
+    .enum(["guides", "tutorials", "use-cases", "workflows", "comparisons"])
     .optional()
-    .describe('Content category filter for trending guides'),
+    .describe("Content category filter for trending guides"),
   limit: z.coerce
     .number()
     .min(1)
     .max(50)
     .default(10)
-    .describe('Maximum number of trending items to return (1-50)'),
+    .describe("Maximum number of trending items to return (1-50)"),
 });
 
 export async function GET(request: NextRequest) {
@@ -30,23 +30,24 @@ export async function GET(request: NextRequest) {
     // Parse query parameters
     const searchParams = request.nextUrl.searchParams;
     const params = querySchema.parse({
-      category: searchParams.get('category') || undefined,
-      limit: searchParams.get('limit') ? Number(searchParams.get('limit')) : 10,
+      category: searchParams.get("category") || undefined,
+      limit: searchParams.get("limit") ? Number(searchParams.get("limit")) : 10,
     });
 
-    requestLogger.info('Trending guides API request', {
-      category: params.category || 'all',
+    requestLogger.info("Trending guides API request", {
+      category: params.category || "all",
       limit: params.limit,
     });
 
-    const category = params.category || 'guides';
+    const category = params.category || "guides";
 
     // Get trending items from Redis
     const trendingSlugs = await statsRedis.getTrending(category, params.limit);
 
     // Get view counts for all trending guides using centralized service
     const viewCountRequests = trendingSlugs.map((slug) => ({ category, slug }));
-    const viewCounts = await viewCountService.getBatchViewCounts(viewCountRequests);
+    const viewCounts =
+      await viewCountService.getBatchViewCounts(viewCountRequests);
 
     // Build trending guides response
     const trendingGuides = trendingSlugs.map((slug, index) => {
@@ -56,9 +57,9 @@ export async function GET(request: NextRequest) {
       return {
         slug,
         title: slug
-          .split('-')
+          .split("-")
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' '),
+          .join(" "),
         url: `/guides/${category}/${slug}`,
         views: viewCountResult?.views || 0,
         rank: index + 1,
@@ -72,20 +73,22 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     };
 
-    requestLogger.info('Trending guides API response', {
+    requestLogger.info("Trending guides API response", {
       count: response.count,
       category,
     });
 
     return NextResponse.json(response, {
       headers: {
-        'Cache-Control': CACHE_HEADERS.MEDIUM,
+        "Cache-Control": CACHE_HEADERS.MEDIUM,
       },
     });
   } catch (error) {
     const validatedError = errorInputSchema.safeParse(error);
     return handleApiError(
-      validatedError.success ? validatedError.data : { message: 'Trending guides error occurred' }
+      validatedError.success
+        ? validatedError.data
+        : { message: "Trending guides error occurred" },
     );
   }
 }

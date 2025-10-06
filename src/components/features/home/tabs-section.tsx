@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * TabsSection Component
@@ -9,15 +9,23 @@
  * Adding a new tab now only requires updating HOMEPAGE_TAB_CATEGORIES
  */
 
-import Link from 'next/link';
-import { type FC, memo, useMemo } from 'react';
-import { LazyConfigCard } from '@/src/components/shared/lazy-config-card';
-import { LazyInfiniteScrollContainer } from '@/src/components/shared/lazy-infinite-scroll';
-import { Button } from '@/src/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
-import { CATEGORY_CONFIGS, HOMEPAGE_TAB_CATEGORIES } from '@/src/lib/config/category-config';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import Link from "next/link";
+import { type FC, memo, useMemo } from "react";
+import { LazyConfigCard } from "@/src/components/shared/lazy-config-card";
+import { LazyInfiniteScrollContainer } from "@/src/components/shared/lazy-infinite-scroll";
+import { Button } from "@/src/components/ui/button";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/src/components/ui/tabs";
+import {
+  CATEGORY_CONFIGS,
+  HOMEPAGE_TAB_CATEGORIES,
+} from "@/src/lib/config/category-config";
+import type { UnifiedContentItem } from "@/src/lib/schemas/component.schema";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 interface TabsSectionProps {
   activeTab: string;
@@ -38,18 +46,22 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
 }) => {
   // Get content tabs (exclude 'community' which has custom content)
   const contentTabs = useMemo(
-    () => HOMEPAGE_TAB_CATEGORIES.filter((tab) => tab !== 'community'),
-    []
+    () => HOMEPAGE_TAB_CATEGORIES.filter((tab) => tab !== "community"),
+    [],
   );
 
   return (
-    <Tabs value={activeTab} onValueChange={onTabChange} className={UI_CLASSES.SPACE_Y_8}>
+    <Tabs
+      value={activeTab}
+      onValueChange={onTabChange}
+      className={UI_CLASSES.SPACE_Y_8}
+    >
       <TabsList className="grid w-full lg:w-auto lg:grid-flow-col lg:auto-cols-fr gap-1">
         {HOMEPAGE_TAB_CATEGORIES.map((tab) => {
           // Get display name from category config, or use tab name
           let displayName = tab.charAt(0).toUpperCase() + tab.slice(1);
 
-          if (tab !== 'all' && tab !== 'community') {
+          if (tab !== "all" && tab !== "community") {
             const config = CATEGORY_CONFIGS[tab];
             if (config) {
               displayName = config.pluralTitle;
@@ -67,8 +79,8 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
       {/* Tab content for all content tabs */}
       {contentTabs.map((tab) => {
         const categoryName =
-          tab === 'all'
-            ? 'configurations'
+          tab === "all"
+            ? "configurations"
             : CATEGORY_CONFIGS[tab]?.pluralTitle?.toLowerCase() || tab;
 
         return (
@@ -87,18 +99,23 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
                 )}
                 loadMore={loadMore}
                 hasMore={hasMore}
-                pageSize={20}
                 gridClassName={UI_CLASSES.GRID_RESPONSIVE_3}
                 emptyMessage={`No ${categoryName} found`}
-                keyExtractor={(item: UnifiedContentItem, _index: number) => item.slug}
+                keyExtractor={(item: UnifiedContentItem, _index: number) =>
+                  item.slug
+                }
                 showLoadMoreButton={false}
               />
             ) : (
               <div className={`${UI_CLASSES.TEXT_CENTER} py-12`}>
-                <p className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                <p
+                  className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
+                >
                   No {categoryName} found
                 </p>
-                <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
+                <p
+                  className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}
+                >
                   Try adjusting your filters.
                 </p>
               </div>
@@ -122,7 +139,8 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
           <p
             className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MB_6}`}
           >
-            Coming soon! Featured contributors who create amazing Claude configurations.
+            Coming soon! Featured contributors who create amazing Claude
+            configurations.
           </p>
         </div>
 

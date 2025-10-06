@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { logger } from '@/src/lib/logger';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { useEffect } from "react";
+import { logger } from "@/src/lib/logger";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 export default function GlobalError({
   error,
@@ -13,11 +13,12 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     // Log critical global errors with digest for Vercel observability
-    logger.fatal('Global error boundary triggered', error, {
-      errorDigest: error.digest || 'no-digest',
+    logger.fatal("Global error boundary triggered", error, {
+      errorDigest: error.digest || "no-digest",
       digestAvailable: Boolean(error.digest),
-      userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent || '' : '',
-      url: typeof window !== 'undefined' ? window.location?.href || '' : '',
+      userAgent:
+        typeof window !== "undefined" ? window.navigator?.userAgent || "" : "",
+      url: typeof window !== "undefined" ? window.location?.href || "" : "",
       timestamp: new Date().toISOString(),
       global: true,
     });
@@ -31,9 +32,12 @@ export default function GlobalError({
           <div
             className={`max-w-md ${UI_CLASSES.P_8} ${UI_CLASSES.ROUNDED_LG} border border-border ${UI_CLASSES.BG_CARD} text-center`}
           >
-            <h2 className="mb-4 text-2xl font-bold text-destructive">Application Error</h2>
+            <h2 className="mb-4 text-2xl font-bold text-destructive">
+              Application Error
+            </h2>
             <p className="mb-6 text-muted-foreground">
-              A critical error occurred. Please refresh the page or try again later.
+              A critical error occurred. Please refresh the page or try again
+              later.
             </p>
             <button
               type="button"

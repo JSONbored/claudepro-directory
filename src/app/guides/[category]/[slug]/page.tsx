@@ -1,25 +1,36 @@
-import fs from 'fs/promises';
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import Script from 'next/script';
-import path from 'path';
-import { z } from 'zod';
+import fs from "fs/promises";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import Script from "next/script";
+import path from "path";
+import { z } from "zod";
 // Removed unused import: CategoryGuidesPage
-import { UnifiedSidebar } from '@/src/components/layout/sidebar/unified-sidebar';
-import { MDXRenderer } from '@/src/components/shared/mdx-renderer';
-import { ViewTracker } from '@/src/components/shared/view-tracker';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent } from '@/src/components/ui/card';
-import { APP_CONFIG } from '@/src/lib/constants';
-import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
-import { ArrowLeft, BookOpen, Calendar, Eye, FileText, Tag, Users, Zap } from '@/src/lib/icons';
-import { logger } from '@/src/lib/logger';
-import { contentCache, statsRedis } from '@/src/lib/redis';
-import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { GuideItemWithCategory } from '@/src/lib/utils/guide-helpers';
+import { UnifiedSidebar } from "@/src/components/layout/sidebar/unified-sidebar";
+import { MDXContentProvider } from "@/src/components/providers/mdx-content-provider";
+import { InlineEmailCTA } from "@/src/components/shared/inline-email-cta";
+import { MDXRenderer } from "@/src/components/shared/mdx-renderer";
+import { ViewTracker } from "@/src/components/shared/view-tracker";
+import { Badge } from "@/src/components/ui/badge";
+import { Button } from "@/src/components/ui/button";
+import { Card, CardContent } from "@/src/components/ui/card";
+import { APP_CONFIG } from "@/src/lib/constants";
+import { parseMDXFrontmatter } from "@/src/lib/content/mdx-config";
+import {
+  ArrowLeft,
+  BookOpen,
+  Calendar,
+  Eye,
+  FileText,
+  Tag,
+  Users,
+  Zap,
+} from "@/src/lib/icons";
+import { logger } from "@/src/lib/logger";
+import { contentCache, statsRedis } from "@/src/lib/redis";
+import { generatePageMetadata } from "@/src/lib/seo/metadata-generator";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
+import type { GuideItemWithCategory } from "@/src/lib/utils/guide-helpers";
 
 // ISR Configuration - Revalidate every 5 minutes for fresh view counts
 export const revalidate = 300;
@@ -29,33 +40,39 @@ export const dynamicParams = true;
 const guideParamsSchema = z.object({
   category: z
     .string()
-    .min(1, 'Category cannot be empty')
-    .max(100, 'Category too long')
+    .min(1, "Category cannot be empty")
+    .max(100, "Category too long")
     .regex(
       /^[a-zA-Z0-9-_]+$/,
-      'Category can only contain letters, numbers, hyphens, and underscores'
+      "Category can only contain letters, numbers, hyphens, and underscores",
     )
     .transform((val) => val.toLowerCase().trim()),
   slug: z
     .string()
-    .min(1, 'Slug cannot be empty')
-    .max(200, 'Slug too long')
-    .regex(/^[a-zA-Z0-9-_]+$/, 'Slug can only contain letters, numbers, hyphens, and underscores')
+    .min(1, "Slug cannot be empty")
+    .max(200, "Slug too long")
+    .regex(
+      /^[a-zA-Z0-9-_]+$/,
+      "Slug can only contain letters, numbers, hyphens, and underscores",
+    )
     .transform((val) => val.toLowerCase().trim()),
 });
 
-import type { RelatedGuide, SEOPageData } from '@/src/lib/schemas/app.schema';
+import type { RelatedGuide, SEOPageData } from "@/src/lib/schemas/app.schema";
 
-async function getSEOPageData(category: string, slug: string): Promise<SEOPageData | null> {
+async function getSEOPageData(
+  category: string,
+  slug: string,
+): Promise<SEOPageData | null> {
   // Map URL paths to file locations
   const pathMap: Record<string, string> = {
-    'use-cases': 'use-cases',
-    tutorials: 'tutorials',
-    collections: 'collections',
-    categories: 'categories',
-    workflows: 'workflows',
-    comparisons: 'comparisons',
-    troubleshooting: 'troubleshooting',
+    "use-cases": "use-cases",
+    tutorials: "tutorials",
+    collections: "collections",
+    categories: "categories",
+    workflows: "workflows",
+    comparisons: "comparisons",
+    troubleshooting: "troubleshooting",
   };
 
   const filename = `${slug}.mdx`;
@@ -71,24 +88,32 @@ async function getSEOPageData(category: string, slug: string): Promise<SEOPageDa
         const mappedPath = pathMap[category];
         if (!mappedPath) return null;
 
-        const filePath = path.join(process.cwd(), 'content', 'guides', mappedPath, filename);
+        const filePath = path.join(
+          process.cwd(),
+          "content",
+          "guides",
+          mappedPath,
+          filename,
+        );
 
         // Read file directly - this avoids TOCTOU race condition
         // If file doesn't exist or can't be read, catch block will handle it
-        const fileContent = await fs.readFile(filePath, 'utf-8');
+        const fileContent = await fs.readFile(filePath, "utf-8");
 
         // Parse frontmatter using our MDX parser
         const { frontmatter, content } = parseMDXFrontmatter(fileContent);
 
         return {
-          title: frontmatter.title || '',
+          title: frontmatter.title || "",
           seoTitle: frontmatter.seoTitle, // Short title for <title> tag optimization
-          description: frontmatter.description || '',
-          keywords: Array.isArray(frontmatter.keywords) ? frontmatter.keywords : [],
-          dateUpdated: frontmatter.dateUpdated || '',
+          description: frontmatter.description || "",
+          keywords: Array.isArray(frontmatter.keywords)
+            ? frontmatter.keywords
+            : [],
+          dateUpdated: frontmatter.dateUpdated || "",
           author: frontmatter.author || APP_CONFIG.author,
-          readingTime: frontmatter.readingTime || '',
-          difficulty: frontmatter.difficulty || '',
+          readingTime: frontmatter.readingTime || "",
+          difficulty: frontmatter.difficulty || "",
           category: frontmatter.category || category,
           content,
         };
@@ -96,13 +121,15 @@ async function getSEOPageData(category: string, slug: string): Promise<SEOPageDa
         return null;
       }
     },
-    24 * 60 * 60 // Cache for 24 hours
+    24 * 60 * 60, // Cache for 24 hours
   );
 }
 
 // Unused function - kept for future potential use
 // @ts-expect-error - Function intentionally unused, kept for future use
-async function _getCategoryGuides(category: string): Promise<GuideItemWithCategory[]> {
+async function _getCategoryGuides(
+  category: string,
+): Promise<GuideItemWithCategory[]> {
   const cacheKey = `category-guides:${category}`;
 
   const guides = await contentCache.cacheWithRefresh(
@@ -111,23 +138,23 @@ async function _getCategoryGuides(category: string): Promise<GuideItemWithCatego
       const guidesList: GuideItemWithCategory[] = [];
 
       try {
-        const dir = path.join(process.cwd(), 'content', 'guides', category);
+        const dir = path.join(process.cwd(), "content", "guides", category);
 
         // Read directory directly - catch will handle if it doesn't exist
         const files = await fs.readdir(dir);
 
         for (const file of files) {
-          if (file.endsWith('.mdx')) {
+          if (file.endsWith(".mdx")) {
             try {
-              const content = await fs.readFile(path.join(dir, file), 'utf-8');
+              const content = await fs.readFile(path.join(dir, file), "utf-8");
               const { frontmatter } = parseMDXFrontmatter(content);
 
               guidesList.push({
-                title: frontmatter.title || file.replace('.mdx', ''),
-                description: frontmatter.description || '',
-                slug: `/guides/${category}/${file.replace('.mdx', '')}`,
+                title: frontmatter.title || file.replace(".mdx", ""),
+                description: frontmatter.description || "",
+                slug: `/guides/${category}/${file.replace(".mdx", "")}`,
                 category,
-                dateUpdated: frontmatter.dateUpdated || '',
+                dateUpdated: frontmatter.dateUpdated || "",
               });
             } catch {
               // Skip files that fail to parse
@@ -140,16 +167,16 @@ async function _getCategoryGuides(category: string): Promise<GuideItemWithCatego
 
       return guidesList;
     },
-    4 * 60 * 60 // Cache for 4 hours
+    4 * 60 * 60, // Cache for 4 hours
   );
 
   // Enrich with view counts from Redis
   const enriched = await statsRedis.enrichWithViewCounts(
     guides.map((guide) => ({
       ...guide,
-      category: 'guides' as const,
-      slug: guide.slug.replace('/guides/', ''), // e.g., "tutorials/desktop-mcp-setup"
-    }))
+      category: "guides" as const,
+      slug: guide.slug.replace("/guides/", ""), // e.g., "tutorials/desktop-mcp-setup"
+    })),
   );
 
   // Restore original category field and slug format
@@ -163,7 +190,7 @@ async function _getCategoryGuides(category: string): Promise<GuideItemWithCatego
 async function getRelatedGuides(
   currentCategory: string,
   currentSlug: string,
-  limit = 3
+  limit = 3,
 ): Promise<RelatedGuide[]> {
   if (!currentCategory) return [];
 
@@ -175,15 +202,20 @@ async function getRelatedGuides(
       const relatedGuides: RelatedGuide[] = [];
 
       try {
-        const dir = path.join(process.cwd(), 'content', 'guides', currentCategory);
+        const dir = path.join(
+          process.cwd(),
+          "content",
+          "guides",
+          currentCategory,
+        );
 
         // Read directory directly - catch will handle if it doesn't exist
         const files = await fs.readdir(dir);
 
         for (const file of files) {
-          const fileSlug = file.replace('.mdx', '');
-          if (file.endsWith('.mdx') && fileSlug !== currentSlug) {
-            const content = await fs.readFile(path.join(dir, file), 'utf-8');
+          const fileSlug = file.replace(".mdx", "");
+          if (file.endsWith(".mdx") && fileSlug !== currentSlug) {
+            const content = await fs.readFile(path.join(dir, file), "utf-8");
             const titleMatch = content.match(/title:\s*["']([^"']+)["']/);
 
             if (titleMatch?.[1]) {
@@ -203,33 +235,33 @@ async function getRelatedGuides(
 
       return relatedGuides;
     },
-    4 * 60 * 60 // Cache for 4 hours
+    4 * 60 * 60, // Cache for 4 hours
   );
 }
 
 export async function generateStaticParams() {
   const categories = [
-    'use-cases',
-    'tutorials',
-    'collections',
-    'categories',
-    'workflows',
-    'comparisons',
-    'troubleshooting',
+    "use-cases",
+    "tutorials",
+    "collections",
+    "categories",
+    "workflows",
+    "comparisons",
+    "troubleshooting",
   ];
   const paths = [];
 
   for (const category of categories) {
     // Add individual guide pages only (category pages handled by [category]/page.tsx)
     try {
-      const dir = path.join(process.cwd(), 'content', 'guides', category);
+      const dir = path.join(process.cwd(), "content", "guides", category);
 
       // Read directory directly - catch will handle if it doesn't exist
       const files = await fs.readdir(dir);
 
       for (const file of files) {
-        if (file.endsWith('.mdx')) {
-          const slug = file.replace('.mdx', '');
+        if (file.endsWith(".mdx")) {
+          const slug = file.replace(".mdx", "");
           paths.push({
             category,
             slug,
@@ -254,15 +286,16 @@ export async function generateMetadata({
     const validationResult = guideParamsSchema.safeParse(rawParams);
 
     if (!validationResult.success) {
-      logger.warn('Invalid guide parameters for metadata', {
-        category: rawParams.category || 'unknown',
-        slug: rawParams.slug || 'unknown',
+      logger.warn("Invalid guide parameters for metadata", {
+        category: rawParams.category || "unknown",
+        slug: rawParams.slug || "unknown",
         errorCount: validationResult.error.issues.length,
-        firstError: validationResult.error.issues[0]?.message || 'Unknown error',
+        firstError:
+          validationResult.error.issues[0]?.message || "Unknown error",
       });
       return {
-        title: 'Guide Not Found',
-        description: 'The requested guide could not be found.',
+        title: "Guide Not Found",
+        description: "The requested guide could not be found.",
       };
     }
 
@@ -272,17 +305,17 @@ export async function generateMetadata({
 
     if (!data) {
       return {
-        title: 'Guide Not Found',
-        description: 'The requested guide could not be found.',
+        title: "Guide Not Found",
+        description: "The requested guide could not be found.",
       };
     }
 
     // Use centralized metadata system with AI citation optimization
     // This route uses Article schema + recency signals for better AI citations
-    return await generatePageMetadata('/guides/:category/:slug', {
+    return await generatePageMetadata("/guides/:category/:slug", {
       params: {
-        category: category || '',
-        slug: slug || '',
+        category: category || "",
+        slug: slug || "",
       },
       item: {
         title: data.title,
@@ -296,15 +329,15 @@ export async function generateMetadata({
     });
   } catch (error: unknown) {
     logger.error(
-      'Error generating guide metadata',
+      "Error generating guide metadata",
       error instanceof Error ? error : new Error(String(error)),
       {
-        type: 'metadata_generation',
-      }
+        type: "metadata_generation",
+      },
     );
     return {
-      title: 'Guide Error',
-      description: 'An error occurred while loading the guide.',
+      title: "Guide Error",
+      description: "An error occurred while loading the guide.",
     };
   }
 }
@@ -320,13 +353,16 @@ export default async function SEOGuidePage({
 
     if (!validationResult.success) {
       logger.error(
-        'Invalid guide parameters',
-        new Error(validationResult.error.issues[0]?.message || 'Invalid guide parameters'),
+        "Invalid guide parameters",
+        new Error(
+          validationResult.error.issues[0]?.message ||
+            "Invalid guide parameters",
+        ),
         {
-          category: rawParams.category || 'unknown',
-          slug: rawParams.slug || 'unknown',
+          category: rawParams.category || "unknown",
+          slug: rawParams.slug || "unknown",
           errorCount: validationResult.error.issues.length,
-        }
+        },
       );
       notFound();
     }
@@ -339,17 +375,17 @@ export default async function SEOGuidePage({
       notFound();
     }
     const categoryLabels: Record<string, string> = {
-      'use-cases': 'Use Case',
-      tutorials: 'Tutorial',
-      collections: 'Collection',
-      categories: 'Category Guide',
-      workflows: 'Workflow',
-      comparisons: 'Comparison',
-      troubleshooting: 'Troubleshooting',
+      "use-cases": "Use Case",
+      tutorials: "Tutorial",
+      collections: "Collection",
+      categories: "Category Guide",
+      workflows: "Workflow",
+      comparisons: "Comparison",
+      troubleshooting: "Troubleshooting",
     };
 
     const categoryIcons: Record<string, typeof Zap> = {
-      'use-cases': Zap,
+      "use-cases": Zap,
       tutorials: BookOpen,
       collections: Users,
       categories: FileText,
@@ -363,15 +399,15 @@ export default async function SEOGuidePage({
 
     // Fetch view count for this guide from Redis
     const guideSlug = `${category}/${slug}`; // e.g., "tutorials/desktop-mcp-setup"
-    const viewCount = await statsRedis.getViewCount('guides', guideSlug);
+    const viewCount = await statsRedis.getViewCount("guides", guideSlug);
 
     // Format date if available
     const formatDate = (dateStr: string) => {
       try {
-        return new Date(dateStr).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
+        return new Date(dateStr).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
         });
       } catch {
         return dateStr;
@@ -387,29 +423,29 @@ export default async function SEOGuidePage({
 
     // Generate breadcrumb structured data
     const breadcrumbList = {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
       itemListElement: [
         {
-          '@type': 'ListItem',
+          "@type": "ListItem",
           position: 1,
-          name: 'Home',
+          name: "Home",
           item: APP_CONFIG.url,
         },
         {
-          '@type': 'ListItem',
+          "@type": "ListItem",
           position: 2,
-          name: 'Guides',
+          name: "Guides",
           item: `${APP_CONFIG.url}/guides`,
         },
         {
-          '@type': 'ListItem',
+          "@type": "ListItem",
           position: 3,
-          name: categoryLabels[category || ''] || 'Guide',
+          name: categoryLabels[category || ""] || "Guide",
           item: `${APP_CONFIG.url}/guides/${category}`,
         },
         {
-          '@type': 'ListItem',
+          "@type": "ListItem",
           position: 4,
           name: data.title,
           item: `${APP_CONFIG.url}/guides/${category}/${slug}`,
@@ -419,30 +455,30 @@ export default async function SEOGuidePage({
 
     // Article structured data
     const articleData = {
-      '@context': 'https://schema.org',
-      '@type': 'Article',
+      "@context": "https://schema.org",
+      "@type": "Article",
       headline: data.title,
       description: data.description,
-      keywords: data.keywords?.join(', '),
+      keywords: data.keywords?.join(", "),
       author: {
-        '@type': 'Person',
+        "@type": "Person",
         name: data.author || APP_CONFIG.author,
       },
       datePublished: data.dateUpdated,
       dateModified: data.dateUpdated,
       publisher: {
-        '@type': 'Organization',
+        "@type": "Organization",
         name: APP_CONFIG.name,
         logo: {
-          '@type': 'ImageObject',
+          "@type": "ImageObject",
           url: `${APP_CONFIG.url}/logo.png`,
         },
       },
       mainEntityOfPage: {
-        '@type': 'WebPage',
-        '@id': `${APP_CONFIG.url}/guides/${category}/${slug}`,
+        "@type": "WebPage",
+        "@id": `${APP_CONFIG.url}/guides/${category}/${slug}`,
       },
-      articleSection: categoryLabels[category || ''] || 'Guide',
+      articleSection: categoryLabels[category || ""] || "Guide",
       wordCount: data.content.split(/\s+/).length,
     };
 
@@ -452,15 +488,25 @@ export default async function SEOGuidePage({
     const articleId = `article-${pageId}`;
     return (
       <>
-        <Script id={breadcrumbId} type="application/ld+json" strategy="afterInteractive">
+        <Script
+          id={breadcrumbId}
+          type="application/ld+json"
+          strategy="afterInteractive"
+        >
           {JSON.stringify(breadcrumbList)}
         </Script>
-        <Script id={articleId} type="application/ld+json" strategy="afterInteractive">
+        <Script
+          id={articleId}
+          type="application/ld+json"
+          strategy="afterInteractive"
+        >
           {JSON.stringify(articleData)}
         </Script>
         <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
           {/* Header - matches content pages */}
-          <div className={`${UI_CLASSES.BORDER_B} border-border/50 ${UI_CLASSES.BG_CARD}/30`}>
+          <div
+            className={`${UI_CLASSES.BORDER_B} border-border/50 ${UI_CLASSES.BG_CARD}/30`}
+          >
             <div className="container mx-auto px-4 py-8">
               {/* Modern back navigation */}
               <div className={UI_CLASSES.MB_6}>
@@ -478,20 +524,28 @@ export default async function SEOGuidePage({
               </div>
 
               <div className={UI_CLASSES.MAX_W_4XL}>
-                <div className={`flex ${UI_CLASSES.ITEMS_START} gap-4 ${UI_CLASSES.MB_6}`}>
+                <div
+                  className={`flex ${UI_CLASSES.ITEMS_START} gap-4 ${UI_CLASSES.MB_6}`}
+                >
                   <div className={`p-3 ${UI_CLASSES.BG_ACCENT_10} rounded-lg`}>
                     <Icon className="h-6 w-6 text-primary" />
                   </div>
                   <div className={UI_CLASSES.FLEX_1}>
-                    <h1 className={`text-3xl font-bold ${UI_CLASSES.MB_2}`}>{data.title}</h1>
-                    <p className="text-lg text-muted-foreground">{data.description}</p>
+                    <h1 className={`text-3xl font-bold ${UI_CLASSES.MB_2}`}>
+                      {data.title}
+                    </h1>
+                    <p className="text-lg text-muted-foreground">
+                      {data.description}
+                    </p>
                   </div>
                 </div>
 
                 {/* Metadata */}
-                <div className={`${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.TEXT_SM_MUTED}`}>
+                <div
+                  className={`${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.TEXT_SM_MUTED}`}
+                >
                   <Badge variant="secondary">
-                    {category ? categoryLabels[category] || category : 'Guide'}
+                    {category ? categoryLabels[category] || category : "Guide"}
                   </Badge>
                   {data.dateUpdated && (
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
@@ -505,7 +559,9 @@ export default async function SEOGuidePage({
                       className="h-7 px-2.5 gap-1.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors font-medium"
                     >
                       <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-                      <span className="text-xs">{formatViewCount(viewCount)}</span>
+                      <span className="text-xs">
+                        {formatViewCount(viewCount)}
+                      </span>
                     </Badge>
                   )}
                 </div>
@@ -532,17 +588,26 @@ export default async function SEOGuidePage({
               <div className="lg:col-span-2 space-y-8">
                 <Card>
                   <CardContent className="pt-6">
-                    <MDXRenderer
-                      source={data.content}
-                      className=""
-                      pathname={`/guides/${category}/${slug}`}
-                      metadata={{
-                        tags: data.keywords || [], // Note: SEO pages use keywords field
-                        keywords: data.keywords || [],
-                      }}
-                    />
+                    <MDXContentProvider category={category} slug={slug}>
+                      <MDXRenderer
+                        source={data.content}
+                        className=""
+                        pathname={`/guides/${category}/${slug}`}
+                        metadata={{
+                          tags: data.keywords || [], // Note: SEO pages use keywords field
+                          keywords: data.keywords || [],
+                        }}
+                      />
+                    </MDXContentProvider>
                   </CardContent>
                 </Card>
+
+                {/* Email CTA - End of guide */}
+                <InlineEmailCTA
+                  variant="inline"
+                  context="guide-end"
+                  category="guides"
+                />
               </div>
 
               {/* Sidebar */}
@@ -553,7 +618,7 @@ export default async function SEOGuidePage({
                   description: data.description,
                   keywords: data.keywords,
                   dateUpdated: data.dateUpdated,
-                  category: category || '',
+                  category: category || "",
                   content: data.content,
                 }}
                 relatedGuides={relatedGuides}
@@ -568,11 +633,11 @@ export default async function SEOGuidePage({
     );
   } catch (error: unknown) {
     logger.error(
-      'Error rendering guide page',
+      "Error rendering guide page",
       error instanceof Error ? error : new Error(String(error)),
       {
-        type: 'page_rendering',
-      }
+        type: "page_rendering",
+      },
     );
     notFound();
   }

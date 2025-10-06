@@ -10,8 +10,8 @@
  * - Maintain backwards compatibility when modifying
  */
 
-import { z } from 'zod';
-import { imageDimension } from '@/src/lib/schemas/primitives/base-numbers';
+import { z } from "zod";
+import { imageDimension } from "@/src/lib/schemas/primitives/base-numbers";
 import {
   codeString,
   extraLongString,
@@ -21,14 +21,14 @@ import {
   shortString,
   ultraLongString,
   veryLongCodeString,
-} from '@/src/lib/schemas/primitives/base-strings';
+} from "@/src/lib/schemas/primitives/base-strings";
 import {
   componentDescriptionString,
   componentLabelString,
   componentTimeString,
   componentTitleString,
   componentValueString,
-} from '@/src/lib/schemas/primitives/ui-component-primitives';
+} from "@/src/lib/schemas/primitives/ui-component-primitives";
 
 /**
  * Content Categories
@@ -38,43 +38,47 @@ import {
 export const contentCategorySchema = z
   .enum([
     // Core content types (have dedicated directories in /content)
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'statuslines',
+    "agents",
+    "mcp",
+    "rules",
+    "commands",
+    "hooks",
+    "statuslines",
 
     // SEO content types (in /seo directory)
-    'guides',
-    'tutorials',
-    'comparisons',
-    'workflows',
-    'use-cases',
-    'troubleshooting',
-    'categories',
-    'collections',
+    "guides",
+    "tutorials",
+    "comparisons",
+    "workflows",
+    "use-cases",
+    "troubleshooting",
+    "categories",
+    "collections",
 
     // Special types
-    'jobs', // Has route but no content directory
+    "jobs", // Has route but no content directory
   ])
-  .describe('All valid content categories including core types, SEO types, and special types');
+  .describe(
+    "All valid content categories including core types, SEO types, and special types",
+  );
 
 // Subset schema for cacheable categories (used by Redis caching)
 export const cacheableCategorySchema = z
   .enum([
-    'agents',
-    'mcp',
-    'rules',
-    'commands',
-    'hooks',
-    'statuslines',
-    'guides',
-    'collections',
-    'jobs',
+    "agents",
+    "mcp",
+    "rules",
+    "commands",
+    "hooks",
+    "statuslines",
+    "guides",
+    "collections",
+    "jobs",
     // Note: SEO content doesn't need Redis caching
   ])
-  .describe('Content categories that support Redis caching for performance optimization');
+  .describe(
+    "Content categories that support Redis caching for performance optimization",
+  );
 
 export type ContentCategory = z.infer<typeof contentCategorySchema>;
 
@@ -83,8 +87,17 @@ export type ContentCategory = z.infer<typeof contentCategorySchema>;
  * Used across: middleware, static-api
  */
 export const appContentTypeSchema = z
-  .enum(['agent', 'mcp', 'hook', 'command', 'rule', 'statusline', 'collection', 'job'])
-  .describe('Application content types for routing and middleware processing');
+  .enum([
+    "agent",
+    "mcp",
+    "hook",
+    "command",
+    "rule",
+    "statusline",
+    "collection",
+    "job",
+  ])
+  .describe("Application content types for routing and middleware processing");
 
 export type AppContentType = z.infer<typeof appContentTypeSchema>;
 
@@ -98,14 +111,20 @@ const rateLimitConfigSchema = z
       .number()
       .int()
       .positive()
-      .describe('Maximum number of requests allowed within the time window'),
-    windowMs: z.number().int().positive().describe('Time window in milliseconds for rate limiting'),
+      .describe("Maximum number of requests allowed within the time window"),
+    windowMs: z
+      .number()
+      .int()
+      .positive()
+      .describe("Time window in milliseconds for rate limiting"),
     message: z
       .string()
       .optional()
-      .describe('Custom error message shown when rate limit is exceeded'),
+      .describe("Custom error message shown when rate limit is exceeded"),
   })
-  .describe('Configuration for API rate limiting including request limits and time windows');
+  .describe(
+    "Configuration for API rate limiting including request limits and time windows",
+  );
 
 export type RateLimitConfig = z.infer<typeof rateLimitConfigSchema>;
 
@@ -115,64 +134,94 @@ export type RateLimitConfig = z.infer<typeof rateLimitConfigSchema>;
  */
 const mdxBasePropsSchema = z
   .object({
-    className: z.string().default('').describe('CSS class names for styling'),
+    className: z.string().default("").describe("CSS class names for styling"),
     style: z
       .record(
-        z.string().describe('CSS property name'),
-        z.union([z.string(), z.number()]).describe('CSS property value')
+        z.string().describe("CSS property name"),
+        z.union([z.string(), z.number()]).describe("CSS property value"),
       )
       .default({})
-      .describe('Inline CSS styles object'),
-    'data-testid': z.string().optional().describe('Test identifier for testing frameworks'),
-    'aria-label': z.string().optional().describe('Accessible label for screen readers'),
-    'aria-labelledby': z.string().optional().describe('ID of element that labels this component'),
-    'aria-describedby': z
+      .describe("Inline CSS styles object"),
+    "data-testid": z
       .string()
       .optional()
-      .describe('ID of element that describes this component'),
-    role: z.string().optional().describe('ARIA role attribute for accessibility'),
-    tabIndex: z.number().optional().describe('Tab order index for keyboard navigation'),
+      .describe("Test identifier for testing frameworks"),
+    "aria-label": z
+      .string()
+      .optional()
+      .describe("Accessible label for screen readers"),
+    "aria-labelledby": z
+      .string()
+      .optional()
+      .describe("ID of element that labels this component"),
+    "aria-describedby": z
+      .string()
+      .optional()
+      .describe("ID of element that describes this component"),
+    role: z
+      .string()
+      .optional()
+      .describe("ARIA role attribute for accessibility"),
+    tabIndex: z
+      .number()
+      .optional()
+      .describe("Tab order index for keyboard navigation"),
   })
-  .describe('Base props for MDX components including styling and accessibility attributes');
+  .describe(
+    "Base props for MDX components including styling and accessibility attributes",
+  );
 
 export const mdxHeadingPropsSchema = mdxBasePropsSchema
   .extend({
-    id: z.string().optional().describe('Unique identifier for heading anchor links'),
-    children: z.custom<React.ReactNode>().describe('Heading content'),
+    id: z
+      .string()
+      .optional()
+      .describe("Unique identifier for heading anchor links"),
+    children: z.custom<React.ReactNode>().describe("Heading content"),
   })
-  .describe('Props for MDX heading elements with anchor link support');
+  .describe("Props for MDX heading elements with anchor link support");
 
 export const mdxElementPropsSchema = mdxBasePropsSchema
   .extend({
-    children: z.custom<React.ReactNode>().describe('Element content'),
+    children: z.custom<React.ReactNode>().describe("Element content"),
   })
-  .describe('Props for generic MDX elements');
+  .describe("Props for generic MDX elements");
 
 export const mdxLinkPropsSchema = mdxBasePropsSchema
   .extend({
-    href: z.string().describe('Link destination URL'),
-    children: z.custom<React.ReactNode>().describe('Link text or content'),
-    target: z.string().optional().describe('Link target attribute (e.g., _blank for new tab)'),
-    rel: z.string().optional().describe('Link relationship attribute for security and SEO'),
+    href: z.string().describe("Link destination URL"),
+    children: z.custom<React.ReactNode>().describe("Link text or content"),
+    target: z
+      .string()
+      .optional()
+      .describe("Link target attribute (e.g., _blank for new tab)"),
+    rel: z
+      .string()
+      .optional()
+      .describe("Link relationship attribute for security and SEO"),
   })
-  .describe('Props for MDX link elements with URL and target attributes');
+  .describe("Props for MDX link elements with URL and target attributes");
 
 export const mdxImagePropsSchema = mdxBasePropsSchema
   .extend({
-    src: z.string().describe('Image source URL or path'),
-    alt: z.string().describe('Alternative text for accessibility and SEO'),
+    src: z.string().describe("Image source URL or path"),
+    alt: z.string().describe("Alternative text for accessibility and SEO"),
     width: z
       .union([imageDimension, z.string()])
-      .transform((val) => (typeof val === 'string' ? Number.parseInt(val, 10) : val))
+      .transform((val) =>
+        typeof val === "string" ? Number.parseInt(val, 10) : val,
+      )
       .default(800)
-      .describe('Image width in pixels'),
+      .describe("Image width in pixels"),
     height: z
       .union([imageDimension, z.string()])
-      .transform((val) => (typeof val === 'string' ? Number.parseInt(val, 10) : val))
+      .transform((val) =>
+        typeof val === "string" ? Number.parseInt(val, 10) : val,
+      )
       .default(600)
-      .describe('Image height in pixels'),
+      .describe("Image height in pixels"),
   })
-  .describe('Props for MDX image elements with responsive dimensions');
+  .describe("Props for MDX image elements with responsive dimensions");
 
 export type MdxBaseProps = z.infer<typeof mdxBasePropsSchema>;
 export type MdxHeadingProps = z.infer<typeof mdxHeadingPropsSchema>;
@@ -188,340 +237,416 @@ export type MdxImageProps = z.infer<typeof mdxImagePropsSchema>;
 // Core Components
 const featureSchema = z
   .object({
-    title: shortString.describe('Feature title or name'),
-    description: mediumString.describe('Feature description explaining its purpose'),
-    badge: componentValueString.optional().describe('Optional badge text for highlighting'),
+    title: shortString.describe("Feature title or name"),
+    description: mediumString.describe(
+      "Feature description explaining its purpose",
+    ),
+    badge: componentValueString
+      .optional()
+      .describe("Optional badge text for highlighting"),
   })
-  .describe('Individual feature item with title, description, and optional badge');
+  .describe(
+    "Individual feature item with title, description, and optional badge",
+  );
 
 const accordionItemSchema = z
   .object({
-    title: componentTitleString.describe('Accordion item title shown in header'),
-    content: z.custom<React.ReactNode>().describe('Accordion item content shown when expanded'),
-    defaultOpen: z.boolean().default(false).describe('Whether accordion item is open by default'),
+    title: componentTitleString.describe(
+      "Accordion item title shown in header",
+    ),
+    content: z
+      .custom<React.ReactNode>()
+      .describe("Accordion item content shown when expanded"),
+    defaultOpen: z
+      .boolean()
+      .default(false)
+      .describe("Whether accordion item is open by default"),
   })
-  .describe('Single accordion item with collapsible content');
+  .describe("Single accordion item with collapsible content");
 
 export const calloutPropsSchema = z
   .object({
     type: z
-      .enum(['info', 'warning', 'success', 'error', 'tip'])
-      .default('info')
-      .describe('Callout visual style and semantic meaning'),
-    title: shortString.optional().describe('Optional callout title'),
-    children: z.custom<React.ReactNode>().describe('Callout content'),
+      .enum(["info", "warning", "success", "error", "tip"])
+      .default("info")
+      .describe("Callout visual style and semantic meaning"),
+    title: shortString.optional().describe("Optional callout title"),
+    children: z.custom<React.ReactNode>().describe("Callout content"),
   })
-  .describe('Callout component props for highlighted information blocks');
+  .describe("Callout component props for highlighted information blocks");
 
 export const tldrSummaryPropsSchema = z
   .object({
-    content: codeString.optional().describe('Main summary content text'),
+    content: codeString.optional().describe("Main summary content text"),
     keyPoints: z
-      .array(componentTitleString.describe('Key point text'))
+      .array(componentTitleString.describe("Key point text"))
       .max(10)
       .optional()
-      .describe('List of key takeaway points'),
-    title: componentValueString.default('TL;DR').describe('Summary section title'),
+      .describe("List of key takeaway points"),
+    title: componentValueString
+      .default("TL;DR")
+      .describe("Summary section title"),
   })
   .transform((data) => ({
-    content: data.content || '',
+    content: data.content || "",
     keyPoints: data.keyPoints,
     title: data.title,
   }))
-  .describe('TL;DR summary component with content and key points');
+  .describe("TL;DR summary component with content and key points");
 
 // Template Components
 const guideStepSchema = z
   .object({
-    title: shortString.describe('Step title or heading'),
-    description: longString.optional().describe('Detailed step description'),
-    content: z.any().optional().describe('Additional React content for complex steps'),
-    code: veryLongCodeString.optional().describe('Code snippet for this step'),
-    tip: mediumString.optional().describe('Helpful tip or best practice for this step'),
-    time: componentTimeString.describe('Estimated time to complete this step'),
-    defaultOpen: z.boolean().optional().describe('Whether step is expanded by default'),
+    title: shortString.describe("Step title or heading"),
+    description: longString.optional().describe("Detailed step description"),
+    content: z
+      .any()
+      .optional()
+      .describe("Additional React content for complex steps"),
+    code: veryLongCodeString.optional().describe("Code snippet for this step"),
+    tip: mediumString
+      .optional()
+      .describe("Helpful tip or best practice for this step"),
+    time: componentTimeString.describe("Estimated time to complete this step"),
+    defaultOpen: z
+      .boolean()
+      .optional()
+      .describe("Whether step is expanded by default"),
   })
-  .describe('Individual step in a step-by-step guide with code and timing');
+  .describe("Individual step in a step-by-step guide with code and timing");
 
 const codeExampleSchema = z
   .object({
-    language: componentLabelString.describe('Programming language for syntax highlighting'),
-    filename: shortString.optional().describe('Optional filename to display'),
-    code: ultraLongString.describe('Code content to display'),
+    language: componentLabelString.describe(
+      "Programming language for syntax highlighting",
+    ),
+    filename: shortString.optional().describe("Optional filename to display"),
+    code: ultraLongString.describe("Code content to display"),
   })
-  .describe('Code example with language and optional filename');
+  .describe("Code example with language and optional filename");
 
 const comparisonItemSchema = z
   .object({
-    feature: shortString.describe('Feature name being compared'),
+    feature: shortString.describe("Feature name being compared"),
     option1: z
       .union([componentTitleString, z.boolean()])
-      .describe('First option value or boolean support indicator'),
+      .describe("First option value or boolean support indicator"),
     option2: z
       .union([componentTitleString, z.boolean()])
-      .describe('Second option value or boolean support indicator'),
+      .describe("Second option value or boolean support indicator"),
     option3: z
       .union([componentTitleString, z.boolean()])
       .optional()
-      .describe('Optional third option value or boolean support indicator'),
+      .describe("Optional third option value or boolean support indicator"),
     winner: componentValueString
       .optional()
-      .describe('Identifier of the winning option for this feature'),
+      .describe("Identifier of the winning option for this feature"),
   })
-  .describe('Single row in a comparison table showing feature support across options');
+  .describe(
+    "Single row in a comparison table showing feature support across options",
+  );
 
 // Interactive Components
 const tabItemSchema = z
   .object({
-    label: componentLabelString.describe('Tab label displayed in tab button'),
-    value: componentLabelString.describe('Unique identifier value for the tab'),
-    content: z.custom<React.ReactNode>().describe('Tab content shown when selected'),
+    label: componentLabelString.describe("Tab label displayed in tab button"),
+    value: componentLabelString.describe("Unique identifier value for the tab"),
+    content: z
+      .custom<React.ReactNode>()
+      .describe("Tab content shown when selected"),
   })
-  .describe('Individual tab item with label and content');
+  .describe("Individual tab item with label and content");
 
 const quickReferenceItemSchema = z
   .object({
-    label: shortString.optional().describe('Reference item label or key'),
-    value: mediumString.optional().describe('Reference item value or content'),
-    description: componentDescriptionString.describe('Detailed description of the reference item'),
+    label: shortString.optional().describe("Reference item label or key"),
+    value: mediumString.optional().describe("Reference item value or content"),
+    description: componentDescriptionString.describe(
+      "Detailed description of the reference item",
+    ),
   })
   .transform((data) => ({
-    label: data.label || '',
-    value: data.value || '',
+    label: data.label || "",
+    value: data.value || "",
     description: data.description,
   }))
-  .describe('Quick reference entry with label, value, and description');
+  .describe("Quick reference entry with label, value, and description");
 
 export const expertQuotePropsSchema = z
   .object({
-    quote: codeString.describe('Quote text content'),
-    author: shortString.describe('Quote author name'),
-    role: shortString.optional().describe('Author job title or role'),
-    company: shortString.optional().describe('Author company or organization'),
-    imageUrl: optionalUrlString.describe('Optional author profile image URL'),
+    quote: codeString.describe("Quote text content"),
+    author: shortString.describe("Quote author name"),
+    role: shortString.optional().describe("Author job title or role"),
+    company: shortString.optional().describe("Author company or organization"),
+    imageUrl: optionalUrlString.describe("Optional author profile image URL"),
   })
-  .describe('Expert quote with author attribution and optional image');
+  .describe("Expert quote with author attribution and optional image");
 
 // Component Props Schemas
 export const featureGridPropsSchema = z
   .object({
     features: z
-      .array(featureSchema.describe('Individual feature in grid'))
+      .array(featureSchema.describe("Individual feature in grid"))
       .max(20)
       .default([])
-      .describe('List of features to display'),
-    title: shortString.default('Key Features').describe('Grid section title'),
-    description: componentDescriptionString.describe('Grid section description'),
+      .describe("List of features to display"),
+    title: shortString.default("Key Features").describe("Grid section title"),
+    description: componentDescriptionString.describe(
+      "Grid section description",
+    ),
     columns: z
       .union([z.literal(2), z.literal(3), z.literal(4)])
       .default(2)
-      .describe('Number of columns in feature grid layout'),
+      .describe("Number of columns in feature grid layout"),
   })
-  .describe('Feature grid component displaying features in responsive columns');
+  .describe("Feature grid component displaying features in responsive columns");
 
 export const accordionPropsSchema = z
   .object({
     items: z
-      .array(accordionItemSchema.describe('Individual accordion item'))
+      .array(accordionItemSchema.describe("Individual accordion item"))
       .max(20)
       .default([])
-      .describe('List of accordion items'),
-    title: shortString.optional().describe('Optional accordion section title'),
-    description: componentDescriptionString.describe('Accordion section description'),
+      .describe("List of accordion items"),
+    title: shortString.optional().describe("Optional accordion section title"),
+    description: componentDescriptionString.describe(
+      "Accordion section description",
+    ),
     allowMultiple: z
       .boolean()
       .default(false)
-      .describe('Allow multiple accordion items open simultaneously'),
+      .describe("Allow multiple accordion items open simultaneously"),
   })
-  .describe('Accordion component with collapsible items');
+  .describe("Accordion component with collapsible items");
 
 export const stepGuidePropsSchema = z
   .object({
     steps: z
-      .array(guideStepSchema.describe('Individual guide step'))
+      .array(guideStepSchema.describe("Individual guide step"))
       .max(20)
       .default([])
-      .describe('List of guide steps'),
-    title: shortString.default('Step-by-Step Guide').describe('Guide section title'),
-    description: componentDescriptionString.describe('Guide section description'),
-    totalTime: componentTimeString.describe('Total estimated time for all steps'),
+      .describe("List of guide steps"),
+    title: shortString
+      .default("Step-by-Step Guide")
+      .describe("Guide section title"),
+    description: componentDescriptionString.describe(
+      "Guide section description",
+    ),
+    totalTime: componentTimeString.describe(
+      "Total estimated time for all steps",
+    ),
   })
-  .describe('Step-by-step guide component with timing information');
+  .describe("Step-by-step guide component with timing information");
 
 const codeGroupPropsSchema = z
   .object({
     examples: z
-      .array(codeExampleSchema.describe('Individual code example'))
+      .array(codeExampleSchema.describe("Individual code example"))
       .max(10)
       .default([])
-      .describe('List of code examples in different languages'),
-    title: shortString.optional().describe('Optional code group title'),
-    description: componentDescriptionString.describe('Code group description'),
+      .describe("List of code examples in different languages"),
+    title: shortString.optional().describe("Optional code group title"),
+    description: componentDescriptionString.describe("Code group description"),
   })
-  .describe('Code group component showing multiple language examples');
+  .describe("Code group component showing multiple language examples");
 
 export const comparisonTablePropsSchema = z
   .object({
-    title: shortString.optional().describe('Optional comparison table title'),
-    description: componentDescriptionString.describe('Table description explaining comparison'),
+    title: shortString.optional().describe("Optional comparison table title"),
+    description: componentDescriptionString.describe(
+      "Table description explaining comparison",
+    ),
     headers: z
-      .array(componentValueString.describe('Column header text'))
+      .array(componentValueString.describe("Column header text"))
       .max(10)
       .default([])
-      .describe('Column headers for comparison options'),
+      .describe("Column headers for comparison options"),
     items: z
-      .array(comparisonItemSchema.describe('Individual comparison row'))
+      .array(comparisonItemSchema.describe("Individual comparison row"))
       .max(50)
       .default([])
-      .describe('Comparison table rows'),
+      .describe("Comparison table rows"),
   })
-  .describe('Comparison table showing features across multiple options');
+  .describe("Comparison table showing features across multiple options");
 
 export const contentTabsPropsSchema = z
   .object({
     items: z
-      .array(tabItemSchema.describe('Individual tab'))
+      .array(tabItemSchema.describe("Individual tab"))
       .max(10)
       .default([])
-      .describe('List of tab items'),
-    title: shortString.optional().describe('Optional tabs section title'),
-    description: componentDescriptionString.describe('Tabs section description'),
-    defaultValue: componentValueString.optional().describe('Default active tab value'),
+      .describe("List of tab items"),
+    title: shortString.optional().describe("Optional tabs section title"),
+    description: componentDescriptionString.describe(
+      "Tabs section description",
+    ),
+    defaultValue: componentValueString
+      .optional()
+      .describe("Default active tab value"),
   })
-  .describe('Tabbed content component for organizing information');
+  .describe("Tabbed content component for organizing information");
 
 export const quickReferencePropsSchema = z
   .object({
-    title: shortString.describe('Quick reference section title'),
-    description: componentDescriptionString.describe('Quick reference section description'),
+    title: shortString.describe("Quick reference section title"),
+    description: componentDescriptionString.describe(
+      "Quick reference section description",
+    ),
     items: z
-      .array(quickReferenceItemSchema.describe('Individual reference entry'))
+      .array(quickReferenceItemSchema.describe("Individual reference entry"))
       .max(50)
       .default([])
-      .describe('List of quick reference items'),
+      .describe("List of quick reference items"),
     columns: z
       .union([z.literal(1), z.literal(2)])
       .default(1)
-      .describe('Number of columns in reference layout'),
+      .describe("Number of columns in reference layout"),
   })
-  .describe('Quick reference component for displaying key-value pairs');
+  .describe("Quick reference component for displaying key-value pairs");
 
 // FAQ Component Schemas
 const faqItemSchema = z
   .object({
-    question: mediumString.describe('FAQ question text'),
-    answer: extraLongString.describe('Detailed answer to the question'),
-    category: shortString.optional().describe('Optional category for grouping FAQs'),
+    question: mediumString.describe("FAQ question text"),
+    answer: extraLongString.describe("Detailed answer to the question"),
+    category: shortString
+      .optional()
+      .describe("Optional category for grouping FAQs"),
   })
-  .describe('Individual FAQ item with question and answer');
+  .describe("Individual FAQ item with question and answer");
 
 export const faqPropsSchema = z
   .object({
     questions: z
-      .array(faqItemSchema.describe('Individual FAQ entry'))
+      .array(faqItemSchema.describe("Individual FAQ entry"))
       .max(50)
       .default([])
-      .describe('List of FAQ items'),
-    title: shortString.default('Frequently Asked Questions').describe('FAQ section title'),
-    description: componentDescriptionString.describe('FAQ section description'),
+      .describe("List of FAQ items"),
+    title: shortString
+      .default("Frequently Asked Questions")
+      .describe("FAQ section title"),
+    description: componentDescriptionString.describe("FAQ section description"),
   })
-  .describe('FAQ component displaying questions and answers');
+  .describe("FAQ component displaying questions and answers");
 
 // Metrics Component Schemas
 const metricDataSchema = z
   .object({
-    label: shortString.optional().describe('Metric label or name'),
-    value: componentValueString.describe('Current metric value'),
-    change: shortString.optional().describe('Change amount or percentage'),
-    trend: z.enum(['up', 'down', 'neutral', '+']).optional().describe('Trend direction indicator'),
+    label: shortString.optional().describe("Metric label or name"),
+    value: componentValueString.describe("Current metric value"),
+    change: shortString.optional().describe("Change amount or percentage"),
+    trend: z
+      .enum(["up", "down", "neutral", "+"])
+      .optional()
+      .describe("Trend direction indicator"),
     // Support legacy healthcare guide format
-    metric: shortString.optional().describe('Legacy: alternative metric name field'),
-    before: componentValueString.optional().describe('Legacy: metric value before improvement'),
-    after: componentValueString.optional().describe('Legacy: metric value after improvement'),
+    metric: shortString
+      .optional()
+      .describe("Legacy: alternative metric name field"),
+    before: componentValueString
+      .optional()
+      .describe("Legacy: metric value before improvement"),
+    after: componentValueString
+      .optional()
+      .describe("Legacy: metric value after improvement"),
     improvement: componentValueString
       .optional()
-      .describe('Legacy: improvement percentage or amount'),
-    description: mediumString.optional().describe('Optional metric description'),
+      .describe("Legacy: improvement percentage or amount"),
+    description: mediumString
+      .optional()
+      .describe("Optional metric description"),
   })
-  .describe('Individual metric data with value, trend, and legacy format support');
+  .describe(
+    "Individual metric data with value, trend, and legacy format support",
+  );
 
 export const metricsDisplayPropsSchema = z
   .object({
-    title: shortString.optional().describe('Optional metrics section title'),
+    title: shortString.optional().describe("Optional metrics section title"),
     metrics: z
-      .array(metricDataSchema.describe('Individual metric'))
+      .array(metricDataSchema.describe("Individual metric"))
       .max(20)
       .default([])
-      .describe('List of metrics to display'),
-    description: mediumString.optional().describe('Optional metrics section description'),
+      .describe("List of metrics to display"),
+    description: mediumString
+      .optional()
+      .describe("Optional metrics section description"),
   })
-  .describe('Metrics display component showing performance or business metrics');
+  .describe(
+    "Metrics display component showing performance or business metrics",
+  );
 
 // Checklist Component Schemas
 const checklistItemSchema = z
   .object({
-    task: componentTitleString.describe('Task title or description'),
-    description: mediumString.optional().describe('Optional detailed task description'),
-    completed: z.boolean().default(false).describe('Whether task is completed'),
-    priority: z
-      .enum(['critical', 'high', 'medium', 'low'])
+    task: componentTitleString.describe("Task title or description"),
+    description: mediumString
       .optional()
-      .describe('Task priority level for sorting or highlighting'),
+      .describe("Optional detailed task description"),
+    completed: z.boolean().default(false).describe("Whether task is completed"),
+    priority: z
+      .enum(["critical", "high", "medium", "low"])
+      .optional()
+      .describe("Task priority level for sorting or highlighting"),
   })
-  .describe('Individual checklist item with task, status, and priority');
+  .describe("Individual checklist item with task, status, and priority");
 
 export const checklistPropsSchema = z
   .object({
-    title: shortString.optional().describe('Optional checklist section title'),
+    title: shortString.optional().describe("Optional checklist section title"),
     items: z
-      .array(checklistItemSchema.describe('Individual checklist task'))
+      .array(checklistItemSchema.describe("Individual checklist task"))
       .min(1)
       .max(50)
-      .describe('List of checklist items'),
-    description: componentDescriptionString.describe('Checklist section description'),
+      .describe("List of checklist items"),
+    description: componentDescriptionString.describe(
+      "Checklist section description",
+    ),
     type: z
-      .enum(['prerequisites', 'security', 'testing'])
-      .default('prerequisites')
-      .describe('Checklist type for styling and semantic meaning'),
+      .enum(["prerequisites", "security", "testing"])
+      .default("prerequisites")
+      .describe("Checklist type for styling and semantic meaning"),
   })
-  .describe('Checklist component for task tracking and prerequisites');
+  .describe("Checklist component for task tracking and prerequisites");
 
 // CaseStudy Component Schemas
 const caseStudyMetricSchema = z
   .object({
-    label: shortString.describe('Metric label or name'),
-    value: componentValueString.describe('Metric value or result'),
+    label: shortString.describe("Metric label or name"),
+    value: componentValueString.describe("Metric value or result"),
     trend: z
-      .enum(['up', 'down', 'neutral', '+'])
+      .enum(["up", "down", "neutral", "+"])
       .optional()
-      .describe('Trend direction for the metric'),
+      .describe("Trend direction for the metric"),
   })
-  .describe('Case study metric showing business impact or results');
+  .describe("Case study metric showing business impact or results");
 
 const caseStudyTestimonialSchema = z
   .object({
-    quote: codeString.describe('Testimonial quote text'),
-    author: shortString.describe('Testimonial author name'),
-    role: shortString.optional().describe('Author job title or role'),
+    quote: codeString.describe("Testimonial quote text"),
+    author: shortString.describe("Testimonial author name"),
+    role: shortString.optional().describe("Author job title or role"),
   })
-  .describe('Customer testimonial for case study');
+  .describe("Customer testimonial for case study");
 
 export const caseStudyPropsSchema = z
   .object({
-    company: shortString.describe('Company or client name'),
-    industry: shortString.optional().describe('Industry or business sector'),
-    challenge: longString.describe('Business challenge or problem faced'),
-    solution: longString.describe('Solution implemented to address challenge'),
-    results: longString.describe('Results and outcomes achieved'),
+    company: shortString.describe("Company or client name"),
+    industry: shortString.optional().describe("Industry or business sector"),
+    challenge: longString.describe("Business challenge or problem faced"),
+    solution: longString.describe("Solution implemented to address challenge"),
+    results: longString.describe("Results and outcomes achieved"),
     metrics: z
-      .array(caseStudyMetricSchema.describe('Individual result metric'))
+      .array(caseStudyMetricSchema.describe("Individual result metric"))
       .max(10)
       .optional()
-      .describe('Optional quantitative metrics showing impact'),
-    testimonial: caseStudyTestimonialSchema.optional().describe('Optional customer testimonial'),
-    logo: z.string().max(200).optional().describe('Optional company logo URL'),
+      .describe("Optional quantitative metrics showing impact"),
+    testimonial: caseStudyTestimonialSchema
+      .optional()
+      .describe("Optional customer testimonial"),
+    logo: z.string().max(200).optional().describe("Optional company logo URL"),
   })
-  .describe('Case study component showcasing customer success story');
+  .describe("Case study component showcasing customer success story");
 
 // Type exports for all UI components
 export type Feature = z.infer<typeof featureSchema>;
@@ -554,27 +679,33 @@ export type CaseStudyProps = z.infer<typeof caseStudyPropsSchema>;
 // ErrorTable Component Schemas
 export const errorItemSchema = z
   .object({
-    code: componentValueString.describe('Error code or identifier'),
-    message: componentTitleString.describe('Error message description'),
-    solution: mediumString.describe('Solution or fix for the error'),
+    code: componentValueString.describe("Error code or identifier"),
+    message: componentTitleString.describe("Error message description"),
+    solution: mediumString.describe("Solution or fix for the error"),
     severity: z
-      .enum(['critical', 'warning', 'info'])
-      .default('info')
-      .describe('Error severity level for visual styling'),
+      .enum(["critical", "warning", "info"])
+      .default("info")
+      .describe("Error severity level for visual styling"),
   })
-  .describe('Individual error entry with code, message, and solution');
+  .describe("Individual error entry with code, message, and solution");
 
 export const errorTablePropsSchema = z
   .object({
-    title: shortString.default('Common Errors & Solutions').describe('Error table section title'),
+    title: shortString
+      .default("Common Errors & Solutions")
+      .describe("Error table section title"),
     errors: z
-      .array(errorItemSchema.describe('Individual error entry'))
+      .array(errorItemSchema.describe("Individual error entry"))
       .min(1)
       .max(50)
-      .describe('List of errors and solutions'),
-    description: componentDescriptionString.describe('Error table section description'),
+      .describe("List of errors and solutions"),
+    description: componentDescriptionString.describe(
+      "Error table section description",
+    ),
   })
-  .describe('Error table component displaying common errors and their solutions');
+  .describe(
+    "Error table component displaying common errors and their solutions",
+  );
 
 export type ErrorItem = z.infer<typeof errorItemSchema>;
 export type ErrorTableProps = z.infer<typeof errorTablePropsSchema>;
@@ -582,24 +713,34 @@ export type ErrorTableProps = z.infer<typeof errorTablePropsSchema>;
 // DiagnosticFlow Component Schemas
 export const diagnosticStepSchema = z
   .object({
-    question: componentTitleString.describe('Diagnostic question to ask user'),
-    yesPath: componentTitleString.optional().describe('Next step or instruction if answer is yes'),
-    noPath: componentTitleString.optional().describe('Next step or instruction if answer is no'),
-    solution: mediumString.optional().describe('Final solution if this is a terminal step'),
+    question: componentTitleString.describe("Diagnostic question to ask user"),
+    yesPath: componentTitleString
+      .optional()
+      .describe("Next step or instruction if answer is yes"),
+    noPath: componentTitleString
+      .optional()
+      .describe("Next step or instruction if answer is no"),
+    solution: mediumString
+      .optional()
+      .describe("Final solution if this is a terminal step"),
   })
-  .describe('Individual diagnostic step in troubleshooting flowchart');
+  .describe("Individual diagnostic step in troubleshooting flowchart");
 
 export const diagnosticFlowPropsSchema = z
   .object({
-    title: shortString.default('Diagnostic Flow').describe('Diagnostic flow section title'),
+    title: shortString
+      .default("Diagnostic Flow")
+      .describe("Diagnostic flow section title"),
     steps: z
-      .array(diagnosticStepSchema.describe('Individual diagnostic step'))
+      .array(diagnosticStepSchema.describe("Individual diagnostic step"))
       .max(20)
       .default([])
-      .describe('List of diagnostic steps in flowchart'),
-    description: componentDescriptionString.describe('Diagnostic flow section description'),
+      .describe("List of diagnostic steps in flowchart"),
+    description: componentDescriptionString.describe(
+      "Diagnostic flow section description",
+    ),
   })
-  .describe('Diagnostic flowchart component for troubleshooting guidance');
+  .describe("Diagnostic flowchart component for troubleshooting guidance");
 
 export type DiagnosticStep = z.infer<typeof diagnosticStepSchema>;
 export type DiagnosticFlowProps = z.infer<typeof diagnosticFlowPropsSchema>;
@@ -607,13 +748,13 @@ export type DiagnosticFlowProps = z.infer<typeof diagnosticFlowPropsSchema>;
 // InfoBox Component Schemas
 export const infoBoxPropsSchema = z
   .object({
-    title: shortString.optional().describe('Optional info box title'),
-    children: z.any().describe('Info box content (React.ReactNode)'),
+    title: shortString.optional().describe("Optional info box title"),
+    children: z.any().describe("Info box content (React.ReactNode)"),
     variant: z
-      .enum(['default', 'important', 'success', 'warning', 'info'])
-      .default('default')
-      .describe('Visual variant for styling and semantic meaning'),
+      .enum(["default", "important", "success", "warning", "info"])
+      .default("default")
+      .describe("Visual variant for styling and semantic meaning"),
   })
-  .describe('Info box component for displaying highlighted information');
+  .describe("Info box component for displaying highlighted information");
 
 export type InfoBoxProps = z.infer<typeof infoBoxPropsSchema>;

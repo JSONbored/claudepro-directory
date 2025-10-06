@@ -14,7 +14,7 @@
  * - Works in both browser and Node.js environments (isomorphic-dompurify)
  */
 
-import createDOMPurify from 'isomorphic-dompurify';
+import createDOMPurify from "isomorphic-dompurify";
 
 /**
  * Initialize DOMPurify for isomorphic use (browser + Node.js)
@@ -84,50 +84,50 @@ export const DOMPurify = {
  * Default safe tags for rich content
  */
 export const DEFAULT_ALLOWED_TAGS = [
-  'p',
-  'br',
-  'strong',
-  'em',
-  'u',
-  'b',
-  'i',
-  'h1',
-  'h2',
-  'h3',
-  'h4',
-  'h5',
-  'h6',
-  'ul',
-  'ol',
-  'li',
-  'blockquote',
-  'a',
-  'code',
-  'pre',
-  'span',
-  'div',
-  'table',
-  'thead',
-  'tbody',
-  'tr',
-  'td',
-  'th',
-  'img',
-  'hr',
+  "p",
+  "br",
+  "strong",
+  "em",
+  "u",
+  "b",
+  "i",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "ul",
+  "ol",
+  "li",
+  "blockquote",
+  "a",
+  "code",
+  "pre",
+  "span",
+  "div",
+  "table",
+  "thead",
+  "tbody",
+  "tr",
+  "td",
+  "th",
+  "img",
+  "hr",
 ];
 
 /**
  * Default safe attributes
  */
 export const DEFAULT_ALLOWED_ATTRIBUTES = [
-  'href',
-  'target',
-  'rel',
-  'title',
-  'alt',
-  'src',
-  'width',
-  'height',
-  'class',
-  'id',
+  "href",
+  "target",
+  "rel",
+  "title",
+  "alt",
+  "src",
+  "width",
+  "height",
+  "class",
+  "id",
 ];

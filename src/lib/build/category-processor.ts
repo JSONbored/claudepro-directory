@@ -13,10 +13,10 @@
  * @module lib/build/category-processor
  */
 
-import crypto from 'node:crypto';
-import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
-import { z } from 'zod';
+import crypto from "node:crypto";
+import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { join, resolve } from "node:path";
+import { z } from "zod";
 import {
   type BuildCategoryConfig,
   type BuildCategoryId,
@@ -25,10 +25,10 @@ import {
   type ContentType,
   extractMetadata,
   getBuildCategoryConfig,
-} from '@/src/lib/config/build-category-config';
-import { logger } from '@/src/lib/logger';
-import { generateSlugFromFilename } from '@/src/lib/schemas/content-generation.schema';
-import { slugToTitle } from '@/src/lib/utils';
+} from "@/src/lib/config/build-category-config";
+import { logger } from "@/src/lib/logger";
+import { generateSlugFromFilename } from "@/src/lib/schemas/content-generation.schema";
+import { slugToTitle } from "@/src/lib/utils";
 
 /**
  * Build cache interface for incremental builds
@@ -67,7 +67,7 @@ function validateSecurePath(filePath: string, allowedDir: string): void {
 
   if (!resolvedPath.startsWith(resolvedAllowed)) {
     throw new Error(
-      `Security violation: Path traversal detected. File: ${filePath}, Allowed: ${allowedDir}`
+      `Security violation: Path traversal detected. File: ${filePath}, Allowed: ${allowedDir}`,
     );
   }
 }
@@ -80,7 +80,7 @@ function validateSecurePath(filePath: string, allowedDir: string): void {
  * @returns SHA-256 hash hex string
  */
 function computeContentHash(content: string): string {
-  return crypto.createHash('sha256').update(content, 'utf-8').digest('hex');
+  return crypto.createHash("sha256").update(content, "utf-8").digest("hex");
 }
 
 /**
@@ -90,11 +90,13 @@ function computeContentHash(content: string): string {
  * @param cacheDir - Cache directory path
  * @returns Build cache or null if not found/invalid
  */
-export async function loadBuildCache(cacheDir: string): Promise<BuildCache | null> {
+export async function loadBuildCache(
+  cacheDir: string,
+): Promise<BuildCache | null> {
   try {
     await mkdir(cacheDir, { recursive: true });
-    const cachePath = join(cacheDir, 'build-cache.json');
-    const content = await readFile(cachePath, 'utf-8');
+    const cachePath = join(cacheDir, "build-cache.json");
+    const content = await readFile(cachePath, "utf-8");
     return JSON.parse(content) as BuildCache;
   } catch {
     return null;
@@ -108,13 +110,16 @@ export async function loadBuildCache(cacheDir: string): Promise<BuildCache | nul
  * @param cacheDir - Cache directory path
  * @param cache - Cache data to save
  */
-export async function saveBuildCache(cacheDir: string, cache: BuildCache): Promise<void> {
+export async function saveBuildCache(
+  cacheDir: string,
+  cache: BuildCache,
+): Promise<void> {
   try {
     await mkdir(cacheDir, { recursive: true });
-    const cachePath = join(cacheDir, 'build-cache.json');
-    await writeFile(cachePath, JSON.stringify(cache, null, 2), 'utf-8');
+    const cachePath = join(cacheDir, "build-cache.json");
+    await writeFile(cachePath, JSON.stringify(cache, null, 2), "utf-8");
   } catch (error) {
-    logger.warn('Failed to save build cache', {
+    logger.warn("Failed to save build cache", {
       error: error instanceof Error ? error.message : String(error),
     });
   }
@@ -145,7 +150,7 @@ async function processContentFile<T extends ContentType>(
   file: string,
   contentDir: string,
   config: BuildCategoryConfig<T>,
-  cache: BuildCache | null
+  cache: BuildCache | null,
 ): Promise<FileProcessResult<T>> {
   const startTime = performance.now();
   const filePath = join(contentDir, config.id, file);
@@ -166,7 +171,10 @@ async function processContentFile<T extends ContentType>(
 
   try {
     // Read file metadata for caching
-    const [content, fileStats] = await Promise.all([readFile(filePath, 'utf-8'), stat(filePath)]);
+    const [content, fileStats] = await Promise.all([
+      readFile(filePath, "utf-8"),
+      stat(filePath),
+    ]);
 
     // Security: File size validation (prevent DoS)
     if (content.length > 1024 * 1024) {
@@ -178,7 +186,11 @@ async function processContentFile<T extends ContentType>(
     const contentHash = computeContentHash(content);
     if (cache && config.buildConfig.enableCache) {
       const cached = cache.files[filePath];
-      if (cached && cached.hash === contentHash && cached.mtime === fileStats.mtimeMs) {
+      if (
+        cached &&
+        cached.hash === contentHash &&
+        cached.mtime === fileStats.mtimeMs
+      ) {
         logger.debug(`Cache hit: ${file}`);
         // Note: In a full implementation, we'd return cached parsed content
         // For now, we proceed with parsing as cached content isn't stored
@@ -189,14 +201,14 @@ async function processContentFile<T extends ContentType>(
     const rawJsonSchema = z
       .object({})
       .passthrough()
-      .describe('Raw JSON content schema with passthrough for unknown fields');
+      .describe("Raw JSON content schema with passthrough for unknown fields");
     let parsedData: z.infer<typeof rawJsonSchema>;
     try {
       const rawParsed = JSON.parse(content);
       parsedData = rawJsonSchema.parse(rawParsed);
     } catch (parseError) {
       throw new Error(
-        `JSON parse error: ${parseError instanceof Error ? parseError.message : String(parseError)}`
+        `JSON parse error: ${parseError instanceof Error ? parseError.message : String(parseError)}`,
       );
     }
 
@@ -207,8 +219,9 @@ async function processContentFile<T extends ContentType>(
 
     // Auto-generate title from slug if missing
     if (
-      (!parsedData.title || (typeof parsedData.title === 'string' && !parsedData.title.trim())) &&
-      typeof parsedData.slug === 'string'
+      (!parsedData.title ||
+        (typeof parsedData.title === "string" && !parsedData.title.trim())) &&
+      typeof parsedData.slug === "string"
     ) {
       parsedData.title = slugToTitle(parsedData.slug);
     }
@@ -254,7 +267,7 @@ async function processContentFile<T extends ContentType>(
 async function processCategoryFiles<T extends ContentType>(
   contentDir: string,
   config: BuildCategoryConfig<T>,
-  cache: BuildCache | null
+  cache: BuildCache | null,
 ): Promise<readonly FileProcessResult<T>[]> {
   const categoryDir = join(contentDir, config.id);
 
@@ -268,11 +281,11 @@ async function processCategoryFiles<T extends ContentType>(
   // Prevents execution of other file types and excludes templates
   const jsonFiles = files.filter(
     (f) =>
-      f.endsWith('.json') &&
-      !f.includes('..') &&
-      !f.startsWith('.') &&
-      !f.includes('template') &&
-      /^[a-zA-Z0-9\-_]+\.json$/.test(f)
+      f.endsWith(".json") &&
+      !f.includes("..") &&
+      !f.startsWith(".") &&
+      !f.includes("template") &&
+      /^[a-zA-Z0-9\-_]+\.json$/.test(f),
   );
 
   logger.info(`Processing ${jsonFiles.length} ${config.name} files`);
@@ -284,13 +297,17 @@ async function processCategoryFiles<T extends ContentType>(
   for (let i = 0; i < jsonFiles.length; i += batchSize) {
     const batch = jsonFiles.slice(i, i + batchSize);
     const batchResults = await Promise.all(
-      batch.map((file) => processContentFile<T>(file, contentDir, config, cache))
+      batch.map((file) =>
+        processContentFile<T>(file, contentDir, config, cache),
+      ),
     );
     results.push(...batchResults);
 
     // Log progress for long-running builds
     if (jsonFiles.length > 50 && (i + batchSize) % 50 === 0) {
-      logger.info(`Processed ${i + batchSize}/${jsonFiles.length} ${config.name} files`);
+      logger.info(
+        `Processed ${i + batchSize}/${jsonFiles.length} ${config.name} files`,
+      );
     }
   }
 
@@ -315,7 +332,7 @@ async function processCategoryFiles<T extends ContentType>(
 export async function buildCategory(
   contentDir: string,
   categoryId: BuildCategoryId,
-  cache: BuildCache | null
+  cache: BuildCache | null,
 ): Promise<CategoryBuildResult> {
   const startTime = performance.now();
   const startMemory = process.memoryUsage().heapUsed;
@@ -324,7 +341,11 @@ export async function buildCategory(
 
   try {
     // Process all files with type-safe generic
-    const results = await processCategoryFiles<ContentType>(contentDir, config, cache);
+    const results = await processCategoryFiles<ContentType>(
+      contentDir,
+      config,
+      cache,
+    );
 
     // Separate successful and failed results
     const successful = results.filter((r) => r.success && r.content !== null);
@@ -332,7 +353,9 @@ export async function buildCategory(
 
     // Extract valid content and metadata
     const validContent = successful.map((r) => r.content!);
-    const metadata = validContent.map((content) => extractMetadata(content, config));
+    const metadata = validContent.map((content) =>
+      extractMetadata(content, config),
+    );
 
     // Calculate metrics
     const endTime = performance.now();
@@ -350,7 +373,7 @@ export async function buildCategory(
     };
 
     logger.success(
-      `Built ${config.name}: ${metrics.filesValid}/${metrics.filesProcessed} valid (${metrics.processingTimeMs.toFixed(0)}ms, ${metrics.peakMemoryMB.toFixed(1)}MB)`
+      `Built ${config.name}: ${metrics.filesValid}/${metrics.filesProcessed} valid (${metrics.processingTimeMs.toFixed(0)}ms, ${metrics.peakMemoryMB.toFixed(1)}MB)`,
     );
 
     return {
@@ -364,7 +387,7 @@ export async function buildCategory(
   } catch (error) {
     logger.error(
       `Failed to build category ${categoryId}`,
-      error instanceof Error ? error : new Error(String(error))
+      error instanceof Error ? error : new Error(String(error)),
     );
 
     return {
@@ -379,7 +402,8 @@ export async function buildCategory(
         filesInvalid: 0,
         processingTimeMs: performance.now() - startTime,
         cacheHitRate: 0,
-        peakMemoryMB: (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
+        peakMemoryMB:
+          (process.memoryUsage().heapUsed - startMemory) / 1024 / 1024,
       },
       errors: [error instanceof Error ? error : new Error(String(error))],
     };
@@ -393,12 +417,15 @@ export async function buildCategory(
  * @param outputPath - Output file path
  * @param content - Content to write
  */
-export async function writeBuildOutput(outputPath: string, content: string): Promise<void> {
+export async function writeBuildOutput(
+  outputPath: string,
+  content: string,
+): Promise<void> {
   // Ensure directory exists
-  const dir = resolve(outputPath, '..');
+  const dir = resolve(outputPath, "..");
   await mkdir(dir, { recursive: true });
 
   // Write file
-  await writeFile(outputPath, content, 'utf-8');
+  await writeFile(outputPath, content, "utf-8");
   logger.debug(`Written: ${outputPath}`);
 }

@@ -1,23 +1,31 @@
-'use client';
+"use client";
 
 /**
  * FeatureGrid - Grid layout for displaying features with gradients and animations
  * Used in 27+ MDX files across the codebase
  */
 
-import { Badge } from '@/src/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { type FeatureGridProps, featureGridPropsSchema } from '@/src/lib/schemas/shared.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { Badge } from "@/src/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
+import {
+  type FeatureGridProps,
+  featureGridPropsSchema,
+} from "@/src/lib/schemas/shared.schema";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 export function FeatureGrid(props: FeatureGridProps) {
   const validated = featureGridPropsSchema.parse(props);
   const { features, title, description, columns } = validated;
   const validFeatures = features;
   const gridCols: Record<2 | 3 | 4, string> = {
-    2: 'md:grid-cols-2',
-    3: 'md:grid-cols-3',
-    4: 'md:grid-cols-4',
+    2: "md:grid-cols-2",
+    3: "md:grid-cols-3",
+    4: "md:grid-cols-4",
   };
 
   // Handle undefined or empty features array
@@ -28,7 +36,10 @@ export function FeatureGrid(props: FeatureGridProps) {
   return (
     <section itemScope itemType="https://schema.org/ItemList" className="my-8">
       <div className={UI_CLASSES.MB_6}>
-        <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`} itemProp="name">
+        <h2
+          className={`text-2xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`}
+          itemProp="name"
+        >
           {title}
         </h2>
         {description && (
@@ -38,7 +49,9 @@ export function FeatureGrid(props: FeatureGridProps) {
         )}
       </div>
 
-      <div className={`${UI_CLASSES.GRID} grid-cols-1 ${gridCols[columns]} gap-6`}>
+      <div
+        className={`${UI_CLASSES.GRID} grid-cols-1 ${gridCols[columns]} gap-6`}
+      >
         {validFeatures.map((feature, index) => (
           <Card
             key={feature.title}
@@ -47,7 +60,7 @@ export function FeatureGrid(props: FeatureGridProps) {
             className={`${UI_CLASSES.RELATIVE} border border-border/50 bg-gradient-to-br from-card/30 via-card/50 to-card/30 hover:from-card/50 hover:via-card/70 hover:to-card/50 transition-all duration-300 ${UI_CLASSES.H_FULL} ${UI_CLASSES.GROUP} overflow-hidden shadow-lg hover:shadow-xl hover:-translate-y-1`}
             style={{
               animationDelay: `${index * 50}ms`,
-              animation: 'fadeInUp 0.5s ease-out forwards',
+              animation: "fadeInUp 0.5s ease-out forwards",
             }}
           >
             {/* Gradient overlay */}
@@ -75,8 +88,13 @@ export function FeatureGrid(props: FeatureGridProps) {
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent className={`${UI_CLASSES.RELATIVE} ${UI_CLASSES.Z_10}`}>
-              <p itemProp="description" className="text-muted-foreground leading-relaxed">
+            <CardContent
+              className={`${UI_CLASSES.RELATIVE} ${UI_CLASSES.Z_10}`}
+            >
+              <p
+                itemProp="description"
+                className="text-muted-foreground leading-relaxed"
+              >
                 {feature.description}
               </p>
             </CardContent>

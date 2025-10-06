@@ -14,18 +14,18 @@
  * @see lib/config/custom-renderers.tsx - Custom hook renderer
  */
 
-import { Badge } from '@/src/components/ui/badge';
+import { Badge } from "@/src/components/ui/badge";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { Copy } from '@/src/lib/icons';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
-import type { InstallationSteps } from '@/src/lib/types/content-type-config';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+} from "@/src/components/ui/card";
+import { Copy } from "@/src/lib/icons";
+import type { UnifiedContentItem } from "@/src/lib/schemas/component.schema";
+import type { InstallationSteps } from "@/src/lib/types/content-type-config";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 /**
  * Props for InstallationSection
@@ -34,7 +34,10 @@ export interface InstallationSectionProps {
   installation: InstallationSteps;
   item: UnifiedContentItem;
   customRenderer?:
-    | ((item: UnifiedContentItem, installation: InstallationSteps) => React.ReactElement)
+    | ((
+        item: UnifiedContentItem,
+        installation: InstallationSteps,
+      ) => React.ReactElement)
     | undefined;
 }
 
@@ -66,17 +69,22 @@ export function InstallationSection({
         <CardDescription>Setup instructions and requirements</CardDescription>
       </CardHeader>
       <CardContent>
-        {typeof installation === 'object' &&
-          'claudeCode' in installation &&
+        {typeof installation === "object" &&
+          "claudeCode" in installation &&
           installation.claudeCode && (
             <div className={UI_CLASSES.SPACE_Y_4}>
               <div>
                 <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_2}`}>
                   Claude Code Setup
                 </h4>
-                <ol className={`list-decimal list-inside ${UI_CLASSES.SPACE_Y_1} text-sm`}>
+                <ol
+                  className={`list-decimal list-inside ${UI_CLASSES.SPACE_Y_1} text-sm`}
+                >
                   {installation.claudeCode.steps?.map((step: string) => (
-                    <li key={step.slice(0, 50)} className={UI_CLASSES.LEADING_RELAXED}>
+                    <li
+                      key={step.slice(0, 50)}
+                      className={UI_CLASSES.LEADING_RELAXED}
+                    >
                       {step}
                     </li>
                   ))}
@@ -84,18 +92,24 @@ export function InstallationSection({
               </div>
               {installation.claudeCode.configPath && (
                 <div>
-                  <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_2}`}>
+                  <h4
+                    className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_2}`}
+                  >
                     Configuration Paths
                   </h4>
                   <div className={`${UI_CLASSES.SPACE_Y_1} text-sm`}>
-                    {Object.entries(installation.claudeCode.configPath).map(([location, path]) => (
-                      <div key={location} className={UI_CLASSES.FLEX_GAP_2}>
-                        <Badge variant="outline" className="capitalize">
-                          {location}
-                        </Badge>
-                        <code className="text-xs bg-muted px-1 py-0.5 rounded">{String(path)}</code>
-                      </div>
-                    ))}
+                    {Object.entries(installation.claudeCode.configPath).map(
+                      ([location, path]) => (
+                        <div key={location} className={UI_CLASSES.FLEX_GAP_2}>
+                          <Badge variant="outline" className="capitalize">
+                            {location}
+                          </Badge>
+                          <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                            {String(path)}
+                          </code>
+                        </div>
+                      ),
+                    )}
                   </div>
                 </div>
               )}
@@ -103,17 +117,22 @@ export function InstallationSection({
           )}
 
         {/* Claude Desktop installation (for MCP servers) */}
-        {typeof installation === 'object' &&
-          'claudeDesktop' in installation &&
+        {typeof installation === "object" &&
+          "claudeDesktop" in installation &&
           installation.claudeDesktop && (
             <div className={UI_CLASSES.SPACE_Y_4}>
               <div>
                 <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_2}`}>
                   Claude Desktop Setup
                 </h4>
-                <ol className={`list-decimal list-inside ${UI_CLASSES.SPACE_Y_1} text-sm`}>
+                <ol
+                  className={`list-decimal list-inside ${UI_CLASSES.SPACE_Y_1} text-sm`}
+                >
                   {installation.claudeDesktop.steps?.map((step: string) => (
-                    <li key={step.slice(0, 50)} className={UI_CLASSES.LEADING_RELAXED}>
+                    <li
+                      key={step.slice(0, 50)}
+                      className={UI_CLASSES.LEADING_RELAXED}
+                    >
                       {step}
                     </li>
                   ))}
@@ -121,7 +140,9 @@ export function InstallationSection({
               </div>
               {installation.claudeDesktop.configPath && (
                 <div>
-                  <h4 className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_2}`}>
+                  <h4
+                    className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.MB_2}`}
+                  >
                     Configuration Paths
                   </h4>
                   <div className={`${UI_CLASSES.SPACE_Y_1} text-sm`}>
@@ -135,7 +156,7 @@ export function InstallationSection({
                             {String(path)}
                           </code>
                         </div>
-                      )
+                      ),
                     )}
                   </div>
                 </div>
@@ -149,9 +170,14 @@ export function InstallationSection({
             <h4 className={`font-medium ${UI_CLASSES.MB_2}`}>Requirements</h4>
             <ul className={UI_CLASSES.SPACE_Y_2}>
               {installation.requirements.map((requirement: string) => (
-                <li key={requirement.slice(0, 50)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+                <li
+                  key={requirement.slice(0, 50)}
+                  className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}
+                >
                   <div className="h-1.5 w-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0" />
-                  <span className={`text-sm ${UI_CLASSES.LEADING_RELAXED}`}>{requirement}</span>
+                  <span className={`text-sm ${UI_CLASSES.LEADING_RELAXED}`}>
+                    {requirement}
+                  </span>
                 </li>
               ))}
             </ul>

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Card Copy Action Component
@@ -9,13 +9,13 @@
  * Used in: ConfigCard, CollectionCard
  */
 
-import { toast } from 'sonner';
-import { Button } from '@/src/components/ui/button';
-import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
-import { trackCopy } from '@/src/lib/actions/track-view';
-import { Check, Copy } from '@/src/lib/icons';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toast } from "sonner";
+import { Button } from "@/src/components/ui/button";
+import { useCopyWithEmailCapture } from "@/src/hooks/use-copy-with-email-capture";
+import { trackCopy } from "@/src/lib/actions/track-view";
+import { Check, Copy } from "@/src/lib/icons";
+import type { ContentCategory } from "@/src/lib/schemas/shared.schema";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 export interface CardCopyActionProps {
   /** Full URL to copy to clipboard */
@@ -30,26 +30,40 @@ export interface CardCopyActionProps {
   componentName: string;
 }
 
-export function CardCopyAction({ url, category, slug, title, componentName }: CardCopyActionProps) {
-  const { copied, copy } = useCopyToClipboard({
+export function CardCopyAction({
+  url,
+  category,
+  slug,
+  title,
+  componentName,
+}: CardCopyActionProps) {
+  const referrer =
+    typeof window !== "undefined" ? window.location.pathname : undefined;
+  const { copied, copy } = useCopyWithEmailCapture({
+    emailContext: {
+      copyType: "link",
+      category,
+      slug,
+      ...(referrer && { referrer }),
+    },
     onSuccess: () => {
       // Track copy action for analytics (silent fail)
       trackCopy({ category, slug }).catch(() => {
         // Silent fail - don't break UX
       });
 
-      toast.success('Link copied!', {
-        description: 'The link has been copied to your clipboard.',
+      toast.success("Link copied!", {
+        description: "The link has been copied to your clipboard.",
       });
     },
     onError: () => {
-      toast.error('Failed to copy', {
-        description: 'Could not copy the link to clipboard.',
+      toast.error("Failed to copy", {
+        description: "Could not copy the link to clipboard.",
       });
     },
     context: {
       component: componentName,
-      action: 'copy-link',
+      action: "copy-link",
     },
   });
 
@@ -64,7 +78,7 @@ export function CardCopyAction({ url, category, slug, title, componentName }: Ca
       size="sm"
       className={`h-7 w-7 p-0 ${UI_CLASSES.BUTTON_GHOST_ICON}`}
       onClick={handleCopy}
-      aria-label={copied ? 'Link copied to clipboard' : `Copy link to ${title}`}
+      aria-label={copied ? "Link copied to clipboard" : `Copy link to ${title}`}
     >
       {copied ? (
         <Check className="h-3 w-3 text-green-500" aria-hidden="true" />

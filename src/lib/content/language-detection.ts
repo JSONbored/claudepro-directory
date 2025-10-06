@@ -9,7 +9,7 @@
  * - Zero client-side JavaScript
  */
 
-import { createHash } from 'crypto';
+import { createHash } from "crypto";
 
 // Simple LRU cache implementation
 class LRUCache<K, V> {
@@ -63,7 +63,7 @@ const languageCache = new LRUCache<string, string>(1000);
  * Hash content for cache key (fast, deterministic)
  */
 function hashContent(content: string): string {
-  return createHash('sha256').update(content).digest('hex').slice(0, 16);
+  return createHash("sha256").update(content).digest("hex").slice(0, 16);
 }
 
 /**
@@ -74,10 +74,10 @@ function heuristicDetection(code: string): string {
   const trimmed = code.trim();
 
   // JSON detection (most common for configs)
-  if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+  if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
     try {
       JSON.parse(code);
-      return 'json';
+      return "json";
     } catch {
       // Not valid JSON, continue
     }
@@ -85,29 +85,33 @@ function heuristicDetection(code: string): string {
 
   // Shell/Bash - shebang or common commands
   if (
-    trimmed.startsWith('#!') ||
+    trimmed.startsWith("#!") ||
     /^(npm|npx|yarn|pnpm|bun|cd|ls|mkdir|rm|cp|mv|git|curl|wget|chmod|export|source)\s/.test(
-      trimmed
+      trimmed,
     )
   ) {
-    return 'bash';
+    return "bash";
   }
 
   // TypeScript - explicit type annotations
   if (
     /:\s*(string|number|boolean|any|unknown|void|never|Promise|Array|Record|Readonly)\b/.test(
-      code
+      code,
     ) ||
     /interface\s+\w+\s*\{/.test(code) ||
     /type\s+\w+\s*=/.test(code)
   ) {
-    return 'typescript';
+    return "typescript";
   }
 
   // JavaScript/TypeScript - ES6+ patterns
-  if (/^(import|export|const|let|var|async|await|function\*?)\s/.test(trimmed)) {
+  if (
+    /^(import|export|const|let|var|async|await|function\*?)\s/.test(trimmed)
+  ) {
     // Check for TypeScript-specific patterns
-    return code.includes(': ') && code.includes('=>') ? 'typescript' : 'javascript';
+    return code.includes(": ") && code.includes("=>")
+      ? "typescript"
+      : "javascript";
   }
 
   // Python - def, class, decorators
@@ -115,30 +119,34 @@ function heuristicDetection(code: string): string {
     /^(def|class|async def|@\w+|from .+ import|import \w+)\s/.test(trimmed) ||
     /if __name__ == ['"]__main__['"]/.test(code)
   ) {
-    return 'python';
+    return "python";
   }
 
   // YAML - key-value pairs without braces
-  if (/^[\w-]+:\s+.+$/m.test(code) && !code.includes('{') && !code.includes('[')) {
-    return 'yaml';
+  if (
+    /^[\w-]+:\s+.+$/m.test(code) &&
+    !code.includes("{") &&
+    !code.includes("[")
+  ) {
+    return "yaml";
   }
 
   // Markdown - headers or links
   if (/^#{1,6}\s+.+$/m.test(code) || /\[.+\]\(.+\)/.test(code)) {
-    return 'markdown';
+    return "markdown";
   }
 
   // HTML/XML
   if (/<[a-zA-Z][^>]*>/.test(trimmed)) {
-    return 'html';
+    return "html";
   }
 
   // CSS
   if (/[.#][\w-]+\s*\{/.test(code) || /@(media|keyframes|import)/.test(code)) {
-    return 'css';
+    return "css";
   }
 
-  return 'text';
+  return "text";
 }
 
 /**
@@ -150,9 +158,12 @@ function heuristicDetection(code: string): string {
  * - Heuristic fallback for accuracy
  * - Safe error handling
  */
-export async function detectLanguage(code: string, hint?: string): Promise<string> {
+export async function detectLanguage(
+  code: string,
+  hint?: string,
+): Promise<string> {
   // If hint provided and valid, use it
-  if (hint && hint !== 'text') {
+  if (hint && hint !== "text") {
     return hint;
   }
 

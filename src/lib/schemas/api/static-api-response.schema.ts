@@ -25,20 +25,23 @@
  * @see lib/constants.ts - MAIN_CONTENT_CATEGORIES source
  */
 
-import { z } from 'zod';
-import { APP_CONFIG, MAIN_CONTENT_CATEGORIES } from '@/src/lib/constants';
-import { nonNegativeInt, positiveInt } from '@/src/lib/schemas/primitives/base-numbers';
+import { z } from "zod";
+import { APP_CONFIG, MAIN_CONTENT_CATEGORIES } from "@/src/lib/constants";
+import {
+  nonNegativeInt,
+  positiveInt,
+} from "@/src/lib/schemas/primitives/base-numbers";
 import {
   isoDatetimeString,
   mediumString,
   nonEmptyString,
   urlString,
-} from '@/src/lib/schemas/primitives/base-strings';
+} from "@/src/lib/schemas/primitives/base-strings";
 import {
   type AppContentType,
   appContentTypeSchema,
   contentCategorySchema,
-} from '@/src/lib/schemas/shared.schema';
+} from "@/src/lib/schemas/shared.schema";
 
 /**
  * Static API Content Category
@@ -81,39 +84,39 @@ const STATIC_API_LIMITS = {
  */
 const CATEGORY_METADATA = {
   agents: {
-    singular: 'agent' as const,
-    description: 'Agent configurations',
-    pluralDescription: 'All agent configurations',
+    singular: "agent" as const,
+    description: "Agent configurations",
+    pluralDescription: "All agent configurations",
   },
   mcp: {
-    singular: 'mcp' as const,
-    description: 'MCP server configurations',
-    pluralDescription: 'All MCP server configurations',
+    singular: "mcp" as const,
+    description: "MCP server configurations",
+    pluralDescription: "All MCP server configurations",
   },
   rules: {
-    singular: 'rule' as const,
-    description: 'Rule configurations',
-    pluralDescription: 'All rule configurations',
+    singular: "rule" as const,
+    description: "Rule configurations",
+    pluralDescription: "All rule configurations",
   },
   commands: {
-    singular: 'command' as const,
-    description: 'Command configurations',
-    pluralDescription: 'All command configurations',
+    singular: "command" as const,
+    description: "Command configurations",
+    pluralDescription: "All command configurations",
   },
   hooks: {
-    singular: 'hook' as const,
-    description: 'Hook configurations',
-    pluralDescription: 'All hook configurations',
+    singular: "hook" as const,
+    description: "Hook configurations",
+    pluralDescription: "All hook configurations",
   },
   statuslines: {
-    singular: 'statusline' as const,
-    description: 'Statusline configurations',
-    pluralDescription: 'All statusline configurations',
+    singular: "statusline" as const,
+    description: "Statusline configurations",
+    pluralDescription: "All statusline configurations",
   },
   collections: {
-    singular: 'collection' as const,
-    description: 'Collection bundles',
-    pluralDescription: 'All collection bundles',
+    singular: "collection" as const,
+    description: "Collection bundles",
+    pluralDescription: "All collection bundles",
   },
 } as const satisfies Record<
   StaticAPICategory,
@@ -137,7 +140,7 @@ const CATEGORY_METADATA = {
  * - TypeScript errors if metadata is incomplete
  */
 export const CATEGORY_TYPE_MAP = Object.fromEntries(
-  MAIN_CONTENT_CATEGORIES.map((cat) => [cat, CATEGORY_METADATA[cat].singular])
+  MAIN_CONTENT_CATEGORIES.map((cat) => [cat, CATEGORY_METADATA[cat].singular]),
 ) as Record<StaticAPICategory, AppContentType>;
 
 /**
@@ -165,33 +168,41 @@ const baseContentItemSchema = z
   .object({
     slug: nonEmptyString
       .max(STATIC_API_LIMITS.MAX_SLUG_LENGTH)
-      .regex(/^[a-zA-Z0-9\-_]+$/, 'Invalid slug format')
-      .describe('URL-safe identifier for the content item'),
-    title: z.string().max(STATIC_API_LIMITS.MAX_TITLE_LENGTH).optional().describe('Content title'),
-    name: z.string().max(STATIC_API_LIMITS.MAX_TITLE_LENGTH).optional().describe('Content name'),
+      .regex(/^[a-zA-Z0-9\-_]+$/, "Invalid slug format")
+      .describe("URL-safe identifier for the content item"),
+    title: z
+      .string()
+      .max(STATIC_API_LIMITS.MAX_TITLE_LENGTH)
+      .optional()
+      .describe("Content title"),
+    name: z
+      .string()
+      .max(STATIC_API_LIMITS.MAX_TITLE_LENGTH)
+      .optional()
+      .describe("Content name"),
     seoTitle: z
       .string()
       .max(60)
       .optional()
       .describe(
-        'Short SEO-optimized title for <title> tag (max 60 characters), falls back to title'
+        "Short SEO-optimized title for <title> tag (max 60 characters), falls back to title",
       ),
     description: nonEmptyString
       .max(STATIC_API_LIMITS.MAX_DESCRIPTION_LENGTH)
-      .describe('Content description'),
+      .describe("Content description"),
     tags: z
       .array(
         nonEmptyString
           .max(STATIC_API_LIMITS.MAX_TAG_LENGTH)
-          .regex(/^[a-zA-Z0-9\-_]+$/, 'Invalid tag format')
-          .describe('Tag identifier')
+          .regex(/^[a-zA-Z0-9\-_]+$/, "Invalid tag format")
+          .describe("Tag identifier"),
       )
       .max(STATIC_API_LIMITS.MAX_TAGS)
       .default([])
-      .describe('Array of content tags'),
-    category: z.string().optional().describe('Content category'),
+      .describe("Array of content tags"),
+    category: z.string().optional().describe("Content category"),
   })
-  .describe('Base content item schema for static APIs');
+  .describe("Base content item schema for static APIs");
 
 /**
  * Transformed content item with type and URL
@@ -199,15 +210,17 @@ const baseContentItemSchema = z
  */
 export const transformedContentItemSchema = baseContentItemSchema
   .extend({
-    type: appContentTypeSchema.describe('Content type discriminator'),
+    type: appContentTypeSchema.describe("Content type discriminator"),
     url: urlString
       .max(STATIC_API_LIMITS.MAX_URL_LENGTH)
-      .regex(/^https:\/\/claudepro\.directory\//, 'Invalid URL format')
-      .describe('Full URL to the content item'),
+      .regex(/^https:\/\/claudepro\.directory\//, "Invalid URL format")
+      .describe("Full URL to the content item"),
   })
-  .describe('Transformed content item with type and URL');
+  .describe("Transformed content item with type and URL");
 
-export type TransformedContentItem = z.infer<typeof transformedContentItemSchema>;
+export type TransformedContentItem = z.infer<
+  typeof transformedContentItemSchema
+>;
 
 /**
  * Searchable item schema for search indexes
@@ -215,20 +228,31 @@ export type TransformedContentItem = z.infer<typeof transformedContentItemSchema
  */
 export const staticAPISearchableItemSchema = z
   .object({
-    title: z.string().max(STATIC_API_LIMITS.MAX_TITLE_LENGTH).describe('Searchable title'),
-    name: z.string().max(STATIC_API_LIMITS.MAX_TITLE_LENGTH).describe('Searchable name'),
-    description: mediumString.describe('Searchable description'),
+    title: z
+      .string()
+      .max(STATIC_API_LIMITS.MAX_TITLE_LENGTH)
+      .describe("Searchable title"),
+    name: z
+      .string()
+      .max(STATIC_API_LIMITS.MAX_TITLE_LENGTH)
+      .describe("Searchable name"),
+    description: mediumString.describe("Searchable description"),
     tags: z
       .array(z.string().max(STATIC_API_LIMITS.MAX_TAG_LENGTH))
       .max(STATIC_API_LIMITS.MAX_TAGS)
-      .describe('Searchable tags array'),
-    category: z.string().describe('Content category'),
-    popularity: nonNegativeInt.default(0).describe('Popularity score (0-100)'),
-    slug: z.string().max(STATIC_API_LIMITS.MAX_SLUG_LENGTH).describe('Content slug'),
+      .describe("Searchable tags array"),
+    category: z.string().describe("Content category"),
+    popularity: nonNegativeInt.default(0).describe("Popularity score (0-100)"),
+    slug: z
+      .string()
+      .max(STATIC_API_LIMITS.MAX_SLUG_LENGTH)
+      .describe("Content slug"),
   })
-  .describe('Searchable item schema for search indexes');
+  .describe("Searchable item schema for search indexes");
 
-export type StaticAPISearchableItem = z.infer<typeof staticAPISearchableItemSchema>;
+export type StaticAPISearchableItem = z.infer<
+  typeof staticAPISearchableItemSchema
+>;
 
 /**
  * Content Type API Response Schema
@@ -241,8 +265,11 @@ export type StaticAPISearchableItem = z.infer<typeof staticAPISearchableItemSche
 const categoryFields = Object.fromEntries(
   MAIN_CONTENT_CATEGORIES.map((cat) => [
     cat,
-    z.array(transformedContentItemSchema).optional().describe(CATEGORY_METADATA[cat].description),
-  ])
+    z
+      .array(transformedContentItemSchema)
+      .optional()
+      .describe(CATEGORY_METADATA[cat].description),
+  ]),
 );
 
 export const contentTypeApiResponseSchema = z
@@ -250,13 +277,15 @@ export const contentTypeApiResponseSchema = z
     ...categoryFields,
     count: nonNegativeInt
       .max(STATIC_API_LIMITS.MAX_ITEMS_PER_CATEGORY)
-      .describe('Total item count'),
-    lastUpdated: isoDatetimeString.describe('Last update timestamp'),
-    generated: z.literal('static').describe('Generation method'),
+      .describe("Total item count"),
+    lastUpdated: isoDatetimeString.describe("Last update timestamp"),
+    generated: z.literal("static").describe("Generation method"),
   })
-  .describe('API response for a single content type');
+  .describe("API response for a single content type");
 
-export type ContentTypeApiResponse = z.infer<typeof contentTypeApiResponseSchema>;
+export type ContentTypeApiResponse = z.infer<
+  typeof contentTypeApiResponseSchema
+>;
 
 /**
  * Statistics Schema
@@ -268,15 +297,15 @@ const statisticsFields = Object.fromEntries(
   MAIN_CONTENT_CATEGORIES.map((cat) => [
     cat,
     nonNegativeInt.describe(`${CATEGORY_METADATA[cat].singular} count`),
-  ])
+  ]),
 );
 
 const statisticsSchema = z
   .object({
-    totalConfigurations: nonNegativeInt.describe('Total configuration count'),
+    totalConfigurations: nonNegativeInt.describe("Total configuration count"),
     ...statisticsFields,
   })
-  .describe('Content statistics across all categories');
+  .describe("Content statistics across all categories");
 
 type Statistics = z.infer<typeof statisticsSchema>;
 
@@ -290,10 +319,10 @@ const endpointFields = Object.fromEntries(
   MAIN_CONTENT_CATEGORIES.map((cat) => [
     cat,
     urlString.describe(`${CATEGORY_METADATA[cat].singular}s API endpoint`),
-  ])
+  ]),
 );
 
-const endpointsSchema = z.object(endpointFields).describe('API endpoint URLs');
+const endpointsSchema = z.object(endpointFields).describe("API endpoint URLs");
 
 /**
  * All Configurations Response Schema
@@ -304,26 +333,30 @@ const endpointsSchema = z.object(endpointFields).describe('API endpoint URLs');
 const allConfigurationsDataFields = Object.fromEntries(
   MAIN_CONTENT_CATEGORIES.map((cat) => [
     cat,
-    z.array(transformedContentItemSchema).describe(CATEGORY_METADATA[cat].pluralDescription),
-  ])
+    z
+      .array(transformedContentItemSchema)
+      .describe(CATEGORY_METADATA[cat].pluralDescription),
+  ]),
 );
 
 export const allConfigurationsResponseSchema = z
   .object({
-    '@context': z.literal('https://schema.org').describe('JSON-LD context'),
-    '@type': z.literal('Dataset').describe('JSON-LD type'),
-    name: z.string().describe('Dataset name'),
-    description: z.string().describe('Dataset description'),
-    license: z.string().describe('Dataset license'),
-    lastUpdated: isoDatetimeString.describe('Last update timestamp'),
-    generated: z.literal('static').describe('Generation method'),
+    "@context": z.literal("https://schema.org").describe("JSON-LD context"),
+    "@type": z.literal("Dataset").describe("JSON-LD type"),
+    name: z.string().describe("Dataset name"),
+    description: z.string().describe("Dataset description"),
+    license: z.string().describe("Dataset license"),
+    lastUpdated: isoDatetimeString.describe("Last update timestamp"),
+    generated: z.literal("static").describe("Generation method"),
     statistics: statisticsSchema,
-    data: z.object(allConfigurationsDataFields).describe('Complete dataset'),
+    data: z.object(allConfigurationsDataFields).describe("Complete dataset"),
     endpoints: endpointsSchema,
   })
-  .describe('All configurations API response');
+  .describe("All configurations API response");
 
-export type AllConfigurationsResponse = z.infer<typeof allConfigurationsResponseSchema>;
+export type AllConfigurationsResponse = z.infer<
+  typeof allConfigurationsResponseSchema
+>;
 
 /**
  * Popular tag schema with usage count
@@ -331,10 +364,10 @@ export type AllConfigurationsResponse = z.infer<typeof allConfigurationsResponse
  */
 const popularTagSchema = z
   .object({
-    tag: z.string().max(STATIC_API_LIMITS.MAX_TAG_LENGTH).describe('Tag name'),
-    count: positiveInt.describe('Usage count'),
+    tag: z.string().max(STATIC_API_LIMITS.MAX_TAG_LENGTH).describe("Tag name"),
+    count: positiveInt.describe("Usage count"),
   })
-  .describe('Popular tag with usage count');
+  .describe("Popular tag with usage count");
 
 /**
  * Category count schema
@@ -342,10 +375,10 @@ const popularTagSchema = z
  */
 const categoryCountSchema = z
   .object({
-    category: z.string().describe('Category name'),
-    count: nonNegativeInt.describe('Item count'),
+    category: z.string().describe("Category name"),
+    count: nonNegativeInt.describe("Item count"),
   })
-  .describe('Category with item count');
+  .describe("Category with item count");
 
 /**
  * Category-specific search index schema
@@ -353,24 +386,24 @@ const categoryCountSchema = z
  */
 export const categorySearchIndexSchema = z
   .object({
-    category: contentCategorySchema.describe('Category identifier'),
+    category: contentCategorySchema.describe("Category identifier"),
     items: z
       .array(staticAPISearchableItemSchema)
       .max(STATIC_API_LIMITS.MAX_ITEMS_PER_CATEGORY)
-      .describe('Searchable items'),
-    count: nonNegativeInt.describe('Total item count'),
-    lastUpdated: isoDatetimeString.describe('Last update timestamp'),
-    generated: z.literal('static').describe('Generation method'),
+      .describe("Searchable items"),
+    count: nonNegativeInt.describe("Total item count"),
+    lastUpdated: isoDatetimeString.describe("Last update timestamp"),
+    generated: z.literal("static").describe("Generation method"),
     tags: z
       .array(z.string())
       .max(STATIC_API_LIMITS.MAX_TAGS * 10)
-      .describe('All unique tags'),
+      .describe("All unique tags"),
     popularTags: z
       .array(popularTagSchema)
       .max(STATIC_API_LIMITS.MAX_CATEGORY_TAGS)
-      .describe('Most popular tags'),
+      .describe("Most popular tags"),
   })
-  .describe('Search index for a single category');
+  .describe("Search index for a single category");
 
 export type CategorySearchIndex = z.infer<typeof categorySearchIndexSchema>;
 
@@ -380,18 +413,20 @@ export type CategorySearchIndex = z.infer<typeof categorySearchIndexSchema>;
  */
 export const combinedSearchIndexSchema = z
   .object({
-    items: z.array(staticAPISearchableItemSchema).describe('All searchable items'),
-    count: nonNegativeInt.describe('Total item count'),
-    lastUpdated: isoDatetimeString.describe('Last update timestamp'),
-    generated: z.literal('static').describe('Generation method'),
-    categories: z.array(categoryCountSchema).describe('Category counts'),
-    tags: z.array(z.string()).describe('All unique tags'),
+    items: z
+      .array(staticAPISearchableItemSchema)
+      .describe("All searchable items"),
+    count: nonNegativeInt.describe("Total item count"),
+    lastUpdated: isoDatetimeString.describe("Last update timestamp"),
+    generated: z.literal("static").describe("Generation method"),
+    categories: z.array(categoryCountSchema).describe("Category counts"),
+    tags: z.array(z.string()).describe("All unique tags"),
     popularTags: z
       .array(popularTagSchema)
       .max(STATIC_API_LIMITS.MAX_POPULAR_TAGS)
-      .describe('Most popular tags across all categories'),
+      .describe("Most popular tags across all categories"),
   })
-  .describe('Combined search index across all categories');
+  .describe("Combined search index across all categories");
 
 export type CombinedSearchIndex = z.infer<typeof combinedSearchIndexSchema>;
 
@@ -405,32 +440,34 @@ const healthCheckCountFields = Object.fromEntries(
   MAIN_CONTENT_CATEGORIES.map((cat) => [
     cat,
     nonNegativeInt.describe(`${CATEGORY_METADATA[cat].singular} count`),
-  ])
+  ]),
 );
 
 export const healthCheckResponseSchema = z
   .object({
-    status: z.enum(['healthy', 'degraded', 'unhealthy']).describe('Service health status'),
-    timestamp: isoDatetimeString.describe('Health check timestamp'),
-    generated: z.literal('static').describe('Generation method'),
-    version: z.string().describe('Application version'),
-    environment: z.string().describe('Runtime environment'),
+    status: z
+      .enum(["healthy", "degraded", "unhealthy"])
+      .describe("Service health status"),
+    timestamp: isoDatetimeString.describe("Health check timestamp"),
+    generated: z.literal("static").describe("Generation method"),
+    version: z.string().describe("Application version"),
+    environment: z.string().describe("Runtime environment"),
     counts: z
       .object({
         ...healthCheckCountFields,
-        total: nonNegativeInt.describe('Total count'),
+        total: nonNegativeInt.describe("Total count"),
       })
-      .describe('Content counts'),
+      .describe("Content counts"),
     features: z
       .object({
-        staticGeneration: z.boolean().describe('Static generation enabled'),
-        searchIndexes: z.boolean().describe('Search indexes enabled'),
-        redisCache: z.boolean().describe('Redis caching enabled'),
-        rateLimit: z.boolean().describe('Rate limiting enabled'),
+        staticGeneration: z.boolean().describe("Static generation enabled"),
+        searchIndexes: z.boolean().describe("Search indexes enabled"),
+        redisCache: z.boolean().describe("Redis caching enabled"),
+        rateLimit: z.boolean().describe("Rate limiting enabled"),
       })
-      .describe('Feature flags'),
+      .describe("Feature flags"),
   })
-  .describe('Health check API response');
+  .describe("Health check API response");
 
 export type HealthCheckResponse = z.infer<typeof healthCheckResponseSchema>;
 
@@ -443,7 +480,10 @@ export type HealthCheckResponse = z.infer<typeof healthCheckResponseSchema>;
  */
 export function generateCategoryEndpoints(): Record<StaticAPICategory, string> {
   return Object.fromEntries(
-    MAIN_CONTENT_CATEGORIES.map((cat) => [cat, `${APP_CONFIG.url}/api/${cat}.json`])
+    MAIN_CONTENT_CATEGORIES.map((cat) => [
+      cat,
+      `${APP_CONFIG.url}/api/${cat}.json`,
+    ]),
   ) as Record<StaticAPICategory, string>;
 }
 
@@ -462,10 +502,10 @@ export function createEmptyStatistics(): Statistics {
 /**
  * Helper function to generate empty counts for health check
  */
-export function createEmptyHealthCounts(): HealthCheckResponse['counts'] {
+export function createEmptyHealthCounts(): HealthCheckResponse["counts"] {
   const counts: Record<string, number> = { total: 0 };
   for (const cat of MAIN_CONTENT_CATEGORIES) {
     counts[cat] = 0;
   }
-  return counts as HealthCheckResponse['counts'];
+  return counts as HealthCheckResponse["counts"];
 }

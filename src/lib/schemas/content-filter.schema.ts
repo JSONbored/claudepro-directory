@@ -4,9 +4,12 @@
  * Ensures content category and author data integrity
  */
 
-import { z } from 'zod';
-import { logger } from '@/src/lib/logger';
-import { nonEmptyString, shortString } from '@/src/lib/schemas/primitives/base-strings';
+import { z } from "zod";
+import { logger } from "@/src/lib/logger";
+import {
+  nonEmptyString,
+  shortString,
+} from "@/src/lib/schemas/primitives/base-strings";
 
 /**
  * UI Sort/Filter types (preserved from deprecated hooks)
@@ -14,9 +17,9 @@ import { nonEmptyString, shortString } from '@/src/lib/schemas/primitives/base-s
  */
 
 // UI Sort options for sort-dropdown component
-export type SortOption = 'popularity' | 'date' | 'name' | 'author';
+export type SortOption = "popularity" | "date" | "name" | "author";
 
-export type SortDirection = 'asc' | 'desc';
+export type SortDirection = "asc" | "desc";
 
 /**
  * Helper to safely extract string arrays from content data
@@ -25,7 +28,7 @@ export type SortDirection = 'asc' | 'desc';
 function extractStringArray(
   values: unknown[],
   fieldName: string,
-  maxLength: number = 100
+  maxLength: number = 100,
 ): string[] {
   try {
     const stringSchema = nonEmptyString.max(maxLength);
@@ -40,11 +43,11 @@ function extractStringArray(
       .filter(Boolean) as string[];
   } catch (error) {
     logger.error(
-      'Failed to extract string array for field',
+      "Failed to extract string array for field",
       error instanceof Error ? error : new Error(String(error)),
       {
         fieldName: String(fieldName),
-      }
+      },
     );
     return [];
   }
@@ -67,23 +70,25 @@ export function extractFilterOptions(
     category?: unknown;
     author?: unknown;
     tags?: unknown[];
-  }>
+  }>,
 ): z.infer<typeof contentFilterOptionsSchema> {
   try {
     const categories = extractStringArray(
       data.map((item) => item.category),
-      'category',
-      50
+      "category",
+      50,
     );
 
     const authors = extractStringArray(
       data.map((item) => item.author),
-      'author',
-      100
+      "author",
+      100,
     );
 
-    const allTags = data.flatMap((item) => (Array.isArray(item.tags) ? item.tags : []));
-    const tags = extractStringArray(allTags, 'tags', 50);
+    const allTags = data.flatMap((item) =>
+      Array.isArray(item.tags) ? item.tags : [],
+    );
+    const tags = extractStringArray(allTags, "tags", 50);
 
     const filterOptions = {
       categories: categories.slice(0, 20), // Limit to reasonable number
@@ -94,9 +99,9 @@ export function extractFilterOptions(
     return contentFilterOptionsSchema.parse(filterOptions);
   } catch (error) {
     logger.error(
-      'Failed to extract filter options',
+      "Failed to extract filter options",
       error instanceof Error ? error : new Error(String(error)),
-      {}
+      {},
     );
     return { categories: [], tags: [], authors: [] };
   }

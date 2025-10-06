@@ -1,8 +1,13 @@
-import { z } from 'zod';
-import type { ContentItem } from '@/src/lib/schemas/content/content-item-union.schema';
+import { z } from "zod";
+import type { ContentItem } from "@/src/lib/schemas/content/content-item-union.schema";
 
 // Production-grade sort option validation schema
-const sortOptionSchema = z.enum(['trending', 'newest', 'alphabetical', 'popularity']);
+const sortOptionSchema = z.enum([
+  "trending",
+  "newest",
+  "alphabetical",
+  "popularity",
+]);
 export type SortOption = z.infer<typeof sortOptionSchema>;
 
 // Sorting options schema for production-grade validation
@@ -19,26 +24,32 @@ export type ViewDataMap = z.infer<typeof viewDataMapSchema>;
 
 // Simple synchronous sorting functions for backward compatibility
 // Moved from sorting.ts
-export function sortByPopularity<T extends ContentItem>(items: readonly T[] | T[]): T[] {
+export function sortByPopularity<T extends ContentItem>(
+  items: readonly T[] | T[],
+): T[] {
   return [...items].sort(
     (a, b) =>
       ((b as typeof b & { popularity?: number }).popularity ?? 0) -
-      ((a as typeof a & { popularity?: number }).popularity ?? 0)
+      ((a as typeof a & { popularity?: number }).popularity ?? 0),
   );
 }
 
 export function sortByNewest<T extends { createdAt?: string; date?: string }>(
-  items: readonly T[] | T[]
+  items: readonly T[] | T[],
 ): T[] {
   return [...items].sort((a, b) => {
-    const dateA = new Date(a.createdAt ?? a.date ?? '1970-01-01').getTime();
-    const dateB = new Date(b.createdAt ?? b.date ?? '1970-01-01').getTime();
+    const dateA = new Date(a.createdAt ?? a.date ?? "1970-01-01").getTime();
+    const dateB = new Date(b.createdAt ?? b.date ?? "1970-01-01").getTime();
     return dateB - dateA;
   });
 }
 
 export function sortAlphabetically<
-  T extends { name?: string | undefined; title?: string | undefined; slug: string },
+  T extends {
+    name?: string | undefined;
+    title?: string | undefined;
+    slug: string;
+  },
 >(items: readonly T[] | T[]): T[] {
   return [...items].sort((a, b) => {
     // Use a type-safe approach for getting display title

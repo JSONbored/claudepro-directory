@@ -1,10 +1,11 @@
-'use server';
+"use server";
 
-import { NewsletterWelcome } from '@/src/emails/templates/newsletter-welcome';
-import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { logger } from '@/src/lib/logger';
-import { newsletterSignupSchema } from '@/src/lib/schemas/newsletter.schema';
-import { resendService } from '@/src/lib/services/resend.service';
+import { NewsletterWelcome } from "@/src/emails/templates/newsletter-welcome";
+import { rateLimitedAction } from "@/src/lib/actions/safe-action";
+import { logger } from "@/src/lib/logger";
+import { newsletterSignupSchema } from "@/src/lib/schemas/newsletter.schema";
+import { emailSequenceService } from "@/src/lib/services/email-sequence.service";
+import { resendService } from "@/src/lib/services/resend.service";
 
 /**
  * Newsletter signup server action
@@ -36,8 +37,8 @@ import { resendService } from '@/src/lib/services/resend.service';
  */
 export const subscribeToNewsletter = rateLimitedAction
   .metadata({
-    actionName: 'subscribeToNewsletter',
-    category: 'form',
+    actionName: "subscribeToNewsletter",
+    category: "form",
     rateLimit: {
       maxRequests: 5,
       windowSeconds: 300, // 5 minutes
@@ -49,7 +50,7 @@ export const subscribeToNewsletter = rateLimitedAction
     if (!resendService.isEnabled()) {
       return {
         success: false,
-        message: 'Newsletter service is currently unavailable',
+        message: "Newsletter service is currently unavailable",
       };
     }
 
@@ -60,31 +61,42 @@ export const subscribeToNewsletter = rateLimitedAction
 
     const result = await resendService.subscribe(email, metadata);
 
-    // If subscription successful, send welcome email
+    // If subscription successful, send welcome email and enroll in sequence
     if (result.success) {
       // Send welcome email asynchronously (don't block on email send)
       // If email fails, subscription still succeeded
       resendService
         .sendEmail(
           email,
-          'Welcome to ClaudePro Directory! 🎉',
+          "Welcome to ClaudePro Directory! 🎉",
           NewsletterWelcome({ email, ...(source && { source }) }),
           {
             tags: [
-              { name: 'template', value: 'newsletter_welcome' },
-              { name: 'source', value: source || 'unknown' },
+              { name: "template", value: "newsletter_welcome" },
+              { name: "source", value: source || "unknown" },
             ],
-          }
+          },
         )
         .then((emailResult) => {
           if (emailResult.success) {
-            logger.info('Welcome email sent successfully', {
+            logger.info("Welcome email sent successfully", {
               email,
               ...(emailResult.emailId && { emailId: emailResult.emailId }),
               ...(source && { source }),
             });
+
+            // Enroll in onboarding sequence (async, don't block)
+            emailSequenceService.enrollInSequence(email).catch((seqError) => {
+              logger.error(
+                "Failed to enroll in sequence",
+                seqError instanceof Error ? seqError : undefined,
+                {
+                  email,
+                },
+              );
+            });
           } else {
-            logger.error('Failed to send welcome email', undefined, {
+            logger.error("Failed to send welcome email", undefined, {
               email,
               ...(emailResult.error && { error: emailResult.error }),
               ...(source && { source }),
@@ -92,10 +104,14 @@ export const subscribeToNewsletter = rateLimitedAction
           }
         })
         .catch((error) => {
-          logger.error('Welcome email send error', error instanceof Error ? error : undefined, {
-            email,
-            ...(source && { source }),
-          });
+          logger.error(
+            "Welcome email send error",
+            error instanceof Error ? error : undefined,
+            {
+              email,
+              ...(source && { source }),
+            },
+          );
         });
 
       return {

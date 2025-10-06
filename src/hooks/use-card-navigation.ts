@@ -11,8 +11,8 @@
  * ```
  */
 
-import { useRouter } from 'next/navigation';
-import { useCallback } from 'react';
+import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 
 export interface UseCardNavigationOptions {
   /** Target path for navigation */
@@ -23,12 +23,14 @@ export interface UseCardNavigationOptions {
   onAfterNavigate?: () => void;
 }
 
-export function useCardNavigation(pathOrOptions: string | UseCardNavigationOptions) {
+export function useCardNavigation(
+  pathOrOptions: string | UseCardNavigationOptions,
+) {
   const router = useRouter();
 
   // Normalize options
   const options: UseCardNavigationOptions =
-    typeof pathOrOptions === 'string' ? { path: pathOrOptions } : pathOrOptions;
+    typeof pathOrOptions === "string" ? { path: pathOrOptions } : pathOrOptions;
 
   const { path, onBeforeNavigate, onAfterNavigate } = options;
 
@@ -46,12 +48,12 @@ export function useCardNavigation(pathOrOptions: string | UseCardNavigationOptio
    */
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === ' ') {
+      if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         handleCardClick();
       }
     },
-    [handleCardClick]
+    [handleCardClick],
   );
 
   /**
@@ -64,7 +66,7 @@ export function useCardNavigation(pathOrOptions: string | UseCardNavigationOptio
       router.push(path);
       onAfterNavigate?.();
     },
-    [path, router, onBeforeNavigate, onAfterNavigate]
+    [path, router, onBeforeNavigate, onAfterNavigate],
   );
 
   return {

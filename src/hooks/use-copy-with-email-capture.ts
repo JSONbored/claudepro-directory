@@ -13,12 +13,15 @@
  * @module hooks/use-copy-with-email-capture
  */
 
-'use client';
+"use client";
 
-import { useCallback } from 'react';
-import { usePostCopyEmail } from '@/src/components/providers/post-copy-email-provider';
-import type { CopyType } from '@/src/components/shared/post-copy-email-modal';
-import { type UseCopyToClipboardOptions, useCopyToClipboard } from './use-copy-to-clipboard';
+import { useCallback } from "react";
+import { usePostCopyEmail } from "@/src/components/providers/post-copy-email-provider";
+import type { CopyType } from "@/src/components/shared/post-copy-email-modal";
+import {
+  type UseCopyToClipboardOptions,
+  useCopyToClipboard,
+} from "./use-copy-to-clipboard";
 
 /**
  * Email capture context for copy actions
@@ -49,7 +52,7 @@ export interface EmailCaptureContext {
  * Options for copy with email capture
  */
 export interface UseCopyWithEmailCaptureOptions
-  extends Omit<UseCopyToClipboardOptions, 'onSuccess'> {
+  extends Omit<UseCopyToClipboardOptions, "onSuccess"> {
   /**
    * Email capture context
    */
@@ -94,8 +97,15 @@ export interface UseCopyWithEmailCaptureOptions
  * }
  * ```
  */
-export function useCopyWithEmailCapture(options: UseCopyWithEmailCaptureOptions) {
-  const { emailContext, onSuccess, enableEmailModal = true, ...clipboardOptions } = options;
+export function useCopyWithEmailCapture(
+  options: UseCopyWithEmailCaptureOptions,
+) {
+  const {
+    emailContext,
+    onSuccess,
+    enableEmailModal = true,
+    ...clipboardOptions
+  } = options;
 
   // Get modal context
   const { showModal } = usePostCopyEmail();

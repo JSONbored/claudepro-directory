@@ -11,12 +11,15 @@ The ClaudePro Directory team takes security seriously. We appreciate your effort
 Instead, please report them via one of the following methods:
 
 ### Option 1: GitHub Security Advisories (Preferred)
+
 1. Go to our [Security Advisories](https://github.com/JSONbored/claudepro-directory/security/advisories) page
 2. Click "Report a vulnerability"
 3. Fill out the form with details about the vulnerability
 
 ### Option 2: Email
+
 Send an email to **security@claudepro.directory** with:
+
 - Type of issue (XSS, CSRF, SQL Injection, etc.)
 - Full paths of source file(s) related to the issue
 - Location of the affected source code (tag/branch/commit or direct URL)
@@ -32,12 +35,12 @@ Send an email to **security@claudepro.directory** with:
 
 ## 🎯 Severity Levels & Response Times
 
-| Severity | Description | Resolution Target |
-|----------|------------|-------------------|
-| **Critical** | Data exposure, authentication bypass, RCE | 24-48 hours |
-| **High** | Privilege escalation, significant data leak | 3-5 days |
-| **Medium** | Limited data exposure, XSS, CSRF | 7-14 days |
-| **Low** | Minor issues with minimal impact | 30 days |
+| Severity     | Description                                 | Resolution Target |
+| ------------ | ------------------------------------------- | ----------------- |
+| **Critical** | Data exposure, authentication bypass, RCE   | 24-48 hours       |
+| **High**     | Privilege escalation, significant data leak | 3-5 days          |
+| **Medium**   | Limited data exposure, XSS, CSRF            | 7-14 days         |
+| **Low**      | Minor issues with minimal impact            | 30 days           |
 
 ## ✅ Supported Versions
 

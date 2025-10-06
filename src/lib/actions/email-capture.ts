@@ -1,11 +1,12 @@
-'use server';
+"use server";
 
-import { NewsletterWelcome } from '@/src/emails/templates/newsletter-welcome';
-import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { EVENTS } from '@/src/lib/analytics/events.config';
-import { logger } from '@/src/lib/logger';
-import { postCopyEmailCaptureSchema } from '@/src/lib/schemas/email-capture.schema';
-import { resendService } from '@/src/lib/services/resend.service';
+import { NewsletterWelcome } from "@/src/emails/templates/newsletter-welcome";
+import { rateLimitedAction } from "@/src/lib/actions/safe-action";
+import { EVENTS } from "@/src/lib/analytics/events.config";
+import { logger } from "@/src/lib/logger";
+import { postCopyEmailCaptureSchema } from "@/src/lib/schemas/email-capture.schema";
+import { emailSequenceService } from "@/src/lib/services/email-sequence.service";
+import { resendService } from "@/src/lib/services/resend.service";
 
 /**
  * Post-Copy Email Capture Server Action
@@ -46,8 +47,8 @@ import { resendService } from '@/src/lib/services/resend.service';
  */
 export const postCopyEmailCaptureAction = rateLimitedAction
   .metadata({
-    actionName: 'postCopyEmailCapture',
-    category: 'form',
+    actionName: "postCopyEmailCapture",
+    category: "form",
     rateLimit: {
       maxRequests: 3,
       windowSeconds: 300, // 5 minutes
@@ -55,12 +56,21 @@ export const postCopyEmailCaptureAction = rateLimitedAction
   })
   .schema(postCopyEmailCaptureSchema)
   .action(
-    async ({ parsedInput: { email, source, referrer, copyType, copyCategory, copySlug } }) => {
+    async ({
+      parsedInput: {
+        email,
+        source,
+        referrer,
+        copyType,
+        copyCategory,
+        copySlug,
+      },
+    }) => {
       // Check if Resend service is enabled
       if (!resendService.isEnabled()) {
         return {
           success: false,
-          message: 'Newsletter service is currently unavailable',
+          message: "Newsletter service is currently unavailable",
         };
       }
 
@@ -71,54 +81,69 @@ export const postCopyEmailCaptureAction = rateLimitedAction
 
       const result = await resendService.subscribe(email, metadata);
 
-      // If subscription successful, send welcome email
+      // If subscription successful, send welcome email and enroll in sequence
       if (result.success) {
         // Send welcome email asynchronously (don't block on email send)
         resendService
           .sendEmail(
             email,
-            'Welcome to ClaudePro Directory! 🎉',
+            "Welcome to ClaudePro Directory! 🎉",
             NewsletterWelcome({ email, ...(source && { source }) }),
             {
               tags: [
-                { name: 'template', value: 'newsletter_welcome' },
-                { name: 'source', value: source || 'post_copy' },
-                ...(copyType ? [{ name: 'copy_type', value: copyType }] : []),
+                { name: "template", value: "newsletter_welcome" },
+                { name: "source", value: source || "post_copy" },
+                ...(copyType ? [{ name: "copy_type", value: copyType }] : []),
               ],
-            }
+            },
           )
           .then((emailResult) => {
             if (emailResult.success) {
-              logger.info('Welcome email sent successfully (post-copy)', {
+              logger.info("Welcome email sent successfully (post-copy)", {
                 email,
                 ...(emailResult.emailId && { emailId: emailResult.emailId }),
                 ...(source && { source }),
                 ...(copyType && { copyType }),
               });
-            } else {
-              logger.error('Failed to send welcome email (post-copy)', undefined, {
-                email,
-                ...(emailResult.error && { error: emailResult.error }),
-                ...(source && { source }),
+
+              // Enroll in onboarding sequence (async, don't block)
+              emailSequenceService.enrollInSequence(email).catch((seqError) => {
+                logger.error(
+                  "Failed to enroll in sequence (post-copy)",
+                  seqError instanceof Error ? seqError : undefined,
+                  {
+                    email,
+                  },
+                );
               });
+            } else {
+              logger.error(
+                "Failed to send welcome email (post-copy)",
+                undefined,
+                {
+                  email,
+                  ...(emailResult.error && { error: emailResult.error }),
+                  ...(source && { source }),
+                },
+              );
             }
           })
           .catch((error) => {
             logger.error(
-              'Welcome email send error (post-copy)',
+              "Welcome email send error (post-copy)",
               error instanceof Error ? error : undefined,
               {
                 email,
                 ...(source && { source }),
-              }
+              },
             );
           });
 
         // Log successful capture with context
-        logger.info('Post-copy email captured successfully', {
+        logger.info("Post-copy email captured successfully", {
           email,
           ...(result.contactId && { contactId: result.contactId }),
-          source: source || 'post_copy',
+          source: source || "post_copy",
           ...(copyType && { copyType }),
           ...(copyCategory && { copyCategory }),
           ...(copySlug && { copySlug }),
@@ -131,7 +156,7 @@ export const postCopyEmailCaptureAction = rateLimitedAction
           // Return analytics data for client-side tracking
           analytics: {
             event: EVENTS.EMAIL_CAPTURED,
-            trigger_source: 'post_copy' as const,
+            trigger_source: "post_copy" as const,
             ...(copyType && { copy_type: copyType }),
             ...(copyCategory && { content_category: copyCategory }),
             ...(copySlug && { content_slug: copySlug }),
@@ -145,5 +170,5 @@ export const postCopyEmailCaptureAction = rateLimitedAction
         message: result.message,
         error: result.error,
       };
-    }
+    },
   );

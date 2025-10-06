@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useState } from 'react';
-import { logger } from '@/src/lib/logger';
+import { useCallback, useEffect, useState } from "react";
+import { logger } from "@/src/lib/logger";
 
 /**
  * Options for configuring the localStorage hook behavior
@@ -123,7 +123,7 @@ export interface UseLocalStorageReturn<T> {
  */
 export function useLocalStorage<T>(
   key: string,
-  options: UseLocalStorageOptions<T> = {}
+  options: UseLocalStorageOptions<T> = {},
 ): UseLocalStorageReturn<T> {
   const {
     defaultValue,
@@ -137,7 +137,7 @@ export function useLocalStorage<T>(
   // Initialize state with value from localStorage or default
   const [value, setValue] = useState<T>(() => {
     // SSR check
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return defaultValue as T;
     }
 
@@ -149,9 +149,9 @@ export function useLocalStorage<T>(
       return deserialize(item);
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error(String(err));
-      logger.error('Failed to read from localStorage', errorObj, {
-        component: 'useLocalStorage',
-        action: 'initialize',
+      logger.error("Failed to read from localStorage", errorObj, {
+        component: "useLocalStorage",
+        action: "initialize",
         key,
       });
       setError(errorObj);
@@ -164,14 +164,15 @@ export function useLocalStorage<T>(
     (newValue: T | ((prev: T) => T)) => {
       try {
         // Handle functional updates
-        const valueToStore = newValue instanceof Function ? newValue(value) : newValue;
+        const valueToStore =
+          newValue instanceof Function ? newValue(value) : newValue;
 
         setValue(valueToStore);
 
         // SSR check
-        if (typeof window === 'undefined') {
-          logger.warn('Attempted to write to localStorage during SSR', {
-            component: 'useLocalStorage',
+        if (typeof window === "undefined") {
+          logger.warn("Attempted to write to localStorage during SSR", {
+            component: "useLocalStorage",
             key,
           });
           return;
@@ -182,24 +183,24 @@ export function useLocalStorage<T>(
         setError(null);
       } catch (err) {
         const errorObj = err instanceof Error ? err : new Error(String(err));
-        logger.error('Failed to write to localStorage', errorObj, {
-          component: 'useLocalStorage',
-          action: 'setValue',
+        logger.error("Failed to write to localStorage", errorObj, {
+          component: "useLocalStorage",
+          action: "setValue",
           key,
         });
         setError(errorObj);
       }
     },
-    [key, serialize, value]
+    [key, serialize, value],
   );
 
   // Remove value from localStorage
   const removeValue = useCallback(() => {
     try {
       // SSR check
-      if (typeof window === 'undefined') {
-        logger.warn('Attempted to remove from localStorage during SSR', {
-          component: 'useLocalStorage',
+      if (typeof window === "undefined") {
+        logger.warn("Attempted to remove from localStorage during SSR", {
+          component: "useLocalStorage",
           key,
         });
         return;
@@ -210,9 +211,9 @@ export function useLocalStorage<T>(
       setError(null);
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error(String(err));
-      logger.error('Failed to remove from localStorage', errorObj, {
-        component: 'useLocalStorage',
-        action: 'removeValue',
+      logger.error("Failed to remove from localStorage", errorObj, {
+        component: "useLocalStorage",
+        action: "removeValue",
         key,
       });
       setError(errorObj);
@@ -221,7 +222,7 @@ export function useLocalStorage<T>(
 
   // Sync across tabs/windows using storage event
   useEffect(() => {
-    if (!syncAcrossTabs || typeof window === 'undefined') {
+    if (!syncAcrossTabs || typeof window === "undefined") {
       return;
     }
 
@@ -233,9 +234,9 @@ export function useLocalStorage<T>(
           setError(null);
         } catch (err) {
           const errorObj = err instanceof Error ? err : new Error(String(err));
-          logger.error('Failed to sync localStorage across tabs', errorObj, {
-            component: 'useLocalStorage',
-            action: 'sync',
+          logger.error("Failed to sync localStorage across tabs", errorObj, {
+            component: "useLocalStorage",
+            action: "sync",
             key,
           });
           setError(errorObj);
@@ -246,10 +247,10 @@ export function useLocalStorage<T>(
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, [key, defaultValue, deserialize, syncAcrossTabs]);
 

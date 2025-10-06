@@ -4,7 +4,14 @@
   "category": "statuslines",
   "author": "JSONbored",
   "dateAdded": "2025-10-01",
-  "tags": ["git", "version-control", "developer", "bash", "powerline", "status-indicators"],
+  "tags": [
+    "git",
+    "version-control",
+    "developer",
+    "bash",
+    "powerline",
+    "status-indicators"
+  ],
   "statuslineType": "custom",
   "content": "#!/usr/bin/env bash\n\n# Git-Focused Statusline for Claude Code\n# Emphasizes git status with visual indicators\n\n# Read JSON from stdin\nread -r input\n\n# Extract Claude session data\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"' | sed 's/claude-//')\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\nworkdir=$(echo \"$input\" | jq -r '.workspace.path // \".\"')\n\n# Get git information from workspace\ncd \"$workdir\" 2>/dev/null || cd .\n\nif git rev-parse --git-dir > /dev/null 2>&1; then\n  # Get branch name\n  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo \"(detached)\")\n  \n  # Check if working directory is clean\n  if [ -z \"$(git status --porcelain)\" ]; then\n    status_icon=\"✓\"\n    status_color=\"\\033[32m\"  # Green\n  else\n    status_icon=\"✗\"\n    status_color=\"\\033[33m\"  # Yellow\n  fi\n  \n  # Check ahead/behind status\n  ahead_behind=$(git rev-list --left-right --count HEAD...@{upstream} 2>/dev/null)\n  if [ -n \"$ahead_behind\" ]; then\n    ahead=$(echo \"$ahead_behind\" | cut -f1)\n    behind=$(echo \"$ahead_behind\" | cut -f2)\n    if [ \"$ahead\" -gt 0 ]; then\n      tracking=\"↑$ahead\"\n    fi\n    if [ \"$behind\" -gt 0 ]; then\n      tracking=\"${tracking}↓$behind\"\n    fi\n  fi\n  \n  # Check stash count\n  stash_count=$(git stash list 2>/dev/null | wc -l | tr -d ' ')\n  if [ \"$stash_count\" -gt 0 ]; then\n    stash_info=\" ⚑$stash_count\"\n  fi\n  \n  git_info=\" ${status_color}${branch}${tracking}${stash_info} ${status_icon}\\033[0m\"\nelse\n  git_info=\"\"\nfi\n\n# Build statusline\necho -e \"\\033[36m${model}\\033[0m │ \\033[35m${tokens}\\033[0m${git_info}\"\n",
   "features": [

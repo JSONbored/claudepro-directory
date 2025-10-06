@@ -15,8 +15,8 @@
  * - SEO limits based on industry best practices
  */
 
-import { z } from 'zod';
-import { nonEmptyString, shortString, urlString } from './base-strings';
+import { z } from "zod";
+import { nonEmptyString, shortString, urlString } from "./base-strings";
 
 /**
  * SEO Content Limits
@@ -49,9 +49,9 @@ export const URL_SAFE_CHARS_REGEX = /^https?:\/\/[^\s<>"']+$/;
  * Common in: Titles, descriptions, alt text, author names
  */
 export const seoTextSchema = nonEmptyString
-  .regex(HTML_TAG_REGEX, 'HTML tags not allowed')
+  .regex(HTML_TAG_REGEX, "HTML tags not allowed")
   .transform((text) => text.trim())
-  .describe('XSS-safe text field for SEO content');
+  .describe("XSS-safe text field for SEO content");
 
 /**
  * Safe URL validator with character restrictions
@@ -60,8 +60,8 @@ export const seoTextSchema = nonEmptyString
  * Common in: All metadata URLs, image sources, social sharing
  */
 export const seoUrlSchema = urlString
-  .max(SEO_LIMITS.MAX_URL_LENGTH, 'URL too long')
-  .regex(URL_SAFE_CHARS_REGEX, 'Invalid URL characters');
+  .max(SEO_LIMITS.MAX_URL_LENGTH, "URL too long")
+  .regex(URL_SAFE_CHARS_REGEX, "Invalid URL characters");
 
 /**
  * SEO Title validator
@@ -71,11 +71,11 @@ export const seoUrlSchema = urlString
 export const seoTitleSchema = nonEmptyString
   .max(
     SEO_LIMITS.MAX_TITLE_LENGTH,
-    `Title must be ${SEO_LIMITS.MAX_TITLE_LENGTH} characters or less`
+    `Title must be ${SEO_LIMITS.MAX_TITLE_LENGTH} characters or less`,
   )
-  .regex(HTML_TAG_REGEX, 'HTML tags not allowed')
+  .regex(HTML_TAG_REGEX, "HTML tags not allowed")
   .transform((text) => text.trim())
-  .describe('SEO-optimized page title (≤60 chars for Google)');
+  .describe("SEO-optimized page title (≤60 chars for Google)");
 
 /**
  * SEO Description validator
@@ -84,14 +84,16 @@ export const seoTitleSchema = nonEmptyString
  * Note: AI search engines prefer 120-150 chars for better citation rates
  */
 export const seoDescriptionSchema = nonEmptyString
-  .min(120, 'Description should be at least 120 characters for AI optimization')
+  .min(120, "Description should be at least 120 characters for AI optimization")
   .max(
     SEO_LIMITS.MAX_DESCRIPTION_LENGTH,
-    `Description must be ${SEO_LIMITS.MAX_DESCRIPTION_LENGTH} characters or less`
+    `Description must be ${SEO_LIMITS.MAX_DESCRIPTION_LENGTH} characters or less`,
   )
-  .regex(HTML_TAG_REGEX, 'HTML tags not allowed')
+  .regex(HTML_TAG_REGEX, "HTML tags not allowed")
   .transform((text) => text.trim())
-  .describe('AI-optimized meta description (120-160 chars for ChatGPT/Perplexity)');
+  .describe(
+    "AI-optimized meta description (120-160 chars for ChatGPT/Perplexity)",
+  );
 
 /**
  * OpenGraph Title validator
@@ -101,9 +103,9 @@ export const seoDescriptionSchema = nonEmptyString
 export const ogTitleSchema = nonEmptyString
   .max(
     SEO_LIMITS.MAX_OG_TITLE_LENGTH,
-    `OpenGraph title must be ${SEO_LIMITS.MAX_OG_TITLE_LENGTH} characters or less`
+    `OpenGraph title must be ${SEO_LIMITS.MAX_OG_TITLE_LENGTH} characters or less`,
   )
-  .regex(HTML_TAG_REGEX, 'HTML tags not allowed')
+  .regex(HTML_TAG_REGEX, "HTML tags not allowed")
   .transform((text) => text.trim());
 
 /**
@@ -114,9 +116,9 @@ export const ogTitleSchema = nonEmptyString
 export const ogDescriptionSchema = nonEmptyString
   .max(
     SEO_LIMITS.MAX_OG_DESCRIPTION_LENGTH,
-    `OpenGraph description must be ${SEO_LIMITS.MAX_OG_DESCRIPTION_LENGTH} characters or less`
+    `OpenGraph description must be ${SEO_LIMITS.MAX_OG_DESCRIPTION_LENGTH} characters or less`,
   )
-  .regex(HTML_TAG_REGEX, 'HTML tags not allowed')
+  .regex(HTML_TAG_REGEX, "HTML tags not allowed")
   .transform((text) => text.trim());
 
 /**
@@ -125,8 +127,8 @@ export const ogDescriptionSchema = nonEmptyString
  * Length: 100 chars
  */
 export const seoSiteNameSchema = shortString
-  .max(SEO_LIMITS.MAX_SITE_NAME_LENGTH, 'Site name too long')
-  .regex(HTML_TAG_REGEX, 'HTML tags not allowed')
+  .max(SEO_LIMITS.MAX_SITE_NAME_LENGTH, "Site name too long")
+  .regex(HTML_TAG_REGEX, "HTML tags not allowed")
   .transform((text) => text.trim());
 
 /**
@@ -135,8 +137,8 @@ export const seoSiteNameSchema = shortString
  * Length: 125 chars (accessibility best practice)
  */
 export const seoAltTextSchema = nonEmptyString
-  .max(SEO_LIMITS.MAX_ALT_TEXT_LENGTH, 'Alt text too long')
-  .regex(HTML_TAG_REGEX, 'HTML tags not allowed')
+  .max(SEO_LIMITS.MAX_ALT_TEXT_LENGTH, "Alt text too long")
+  .regex(HTML_TAG_REGEX, "HTML tags not allowed")
   .transform((text) => text.trim());
 
 /**
@@ -146,8 +148,8 @@ export const seoAltTextSchema = nonEmptyString
  */
 export const twitterHandleSchema = z
   .string()
-  .regex(TWITTER_HANDLE_REGEX, 'Invalid Twitter handle format')
-  .max(SEO_LIMITS.MAX_TWITTER_HANDLE_LENGTH + 1, 'Twitter handle too long');
+  .regex(TWITTER_HANDLE_REGEX, "Invalid Twitter handle format")
+  .max(SEO_LIMITS.MAX_TWITTER_HANDLE_LENGTH + 1, "Twitter handle too long");
 
 /**
  * Twitter Title validator
@@ -155,8 +157,8 @@ export const twitterHandleSchema = z
  * Length: 70 chars (Twitter recommendation)
  */
 export const twitterTitleSchema = nonEmptyString
-  .max(70, 'Twitter title must be 70 characters or less')
-  .regex(HTML_TAG_REGEX, 'HTML tags not allowed')
+  .max(70, "Twitter title must be 70 characters or less")
+  .regex(HTML_TAG_REGEX, "HTML tags not allowed")
   .transform((text) => text.trim());
 
 /**
@@ -165,8 +167,8 @@ export const twitterTitleSchema = nonEmptyString
  * Length: 200 chars (Twitter recommendation)
  */
 export const twitterDescriptionSchema = nonEmptyString
-  .max(200, 'Twitter description must be 200 characters or less')
-  .regex(HTML_TAG_REGEX, 'HTML tags not allowed')
+  .max(200, "Twitter description must be 200 characters or less")
+  .regex(HTML_TAG_REGEX, "HTML tags not allowed")
   .transform((text) => text.trim());
 
 /**
@@ -175,8 +177,8 @@ export const twitterDescriptionSchema = nonEmptyString
  * Length: 100 chars
  */
 export const seoAuthorNameSchema = shortString
-  .max(100, 'Author name must be 100 characters or less')
-  .regex(HTML_TAG_REGEX, 'HTML tags not allowed')
+  .max(100, "Author name must be 100 characters or less")
+  .regex(HTML_TAG_REGEX, "HTML tags not allowed")
   .transform((text) => text.trim());
 
 /**
@@ -186,8 +188,8 @@ export const seoAuthorNameSchema = shortString
  */
 export const seoKeywordsSchema = z
   .string()
-  .max(SEO_LIMITS.MAX_KEYWORDS_LENGTH, 'Keywords too long')
-  .regex(/^[a-zA-Z0-9\s,.-]*$/, 'Invalid keyword characters')
+  .max(SEO_LIMITS.MAX_KEYWORDS_LENGTH, "Keywords too long")
+  .regex(/^[a-zA-Z0-9\s,.-]*$/, "Invalid keyword characters")
   .transform((keywords) => keywords.trim())
   .optional();
 
@@ -199,10 +201,13 @@ export const seoKeywordsSchema = z
 export const seoKeywordsArraySchema = z
   .array(
     nonEmptyString
-      .max(50, 'Individual keyword too long')
-      .regex(/^[a-zA-Z0-9\s.-]+$/, 'Invalid keyword characters')
+      .max(50, "Individual keyword too long")
+      .regex(/^[a-zA-Z0-9\s.-]+$/, "Invalid keyword characters"),
   )
-  .max(SEO_LIMITS.MAX_KEYWORDS_COUNT, `Maximum ${SEO_LIMITS.MAX_KEYWORDS_COUNT} keywords allowed`)
+  .max(
+    SEO_LIMITS.MAX_KEYWORDS_COUNT,
+    `Maximum ${SEO_LIMITS.MAX_KEYWORDS_COUNT} keywords allowed`,
+  )
   .optional();
 
 /**
