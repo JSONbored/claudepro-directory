@@ -156,7 +156,7 @@ export const jobContentSchema = jobDatabaseSchema.transform((data) => ({
   contactEmail: data.contact_email || '',
   remote: data.remote,
   featured: data.featured,
-  companyLogo: data.company_logo,
+  companyLogo: data.company_logo || '',
   // Additional fields for display
   id: data.id,
   status: data.status,
