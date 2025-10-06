@@ -259,16 +259,16 @@ export function JobPostedConfirmation({
             experience, and qualifications to attract the right candidates.
           </li>
           <li style={tipsItemStyle}>
-            <strong style={strongStyle}>Include salary information:</strong> Job postings with salary
-            ranges get 75% more applications.
+            <strong style={strongStyle}>Include salary information:</strong> Job postings with
+            salary ranges get 75% more applications.
           </li>
           <li style={tipsItemStyle}>
             <strong style={strongStyle}>Respond quickly:</strong> Fast response times increase your
             chances of hiring top talent.
           </li>
           <li style={tipsItemStyle}>
-            <strong style={strongStyle}>Share your posting:</strong> Promote your job on social media and
-            relevant communities to reach more candidates.
+            <strong style={strongStyle}>Share your posting:</strong> Promote your job on social
+            media and relevant communities to reach more candidates.
           </li>
         </ul>
       </Section>
