@@ -151,7 +151,9 @@ export function PaymentReceipt({
   const currencySymbol = getCurrencySymbol(currency);
 
   return (
-    <BaseLayout preview={`Payment Receipt - ${receiptNumber} | ${currencySymbol}${total.toFixed(2)}`}>
+    <BaseLayout
+      preview={`Payment Receipt - ${receiptNumber} | ${currencySymbol}${total.toFixed(2)}`}
+    >
       {/* Hero section */}
       <Section style={heroSection}>
         <Text style={successBadgeStyle}>✓ Payment Successful</Text>
@@ -209,7 +211,7 @@ export function PaymentReceipt({
           </thead>
           <tbody>
             {items.map((item, index) => (
-              <tr key={index} style={tableRowStyle}>
+              <tr key={`${item.description}-${item.amount}-${index}`} style={tableRowStyle}>
                 <td style={tableCellStyle}>{item.description}</td>
                 {items.some((i) => i.quantity) && (
                   <td style={{ ...tableCellStyle, textAlign: 'center' }}>{item.quantity || '-'}</td>
