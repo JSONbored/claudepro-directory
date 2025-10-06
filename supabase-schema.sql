@@ -310,6 +310,37 @@ CREATE TABLE IF NOT EXISTS public.sponsored_clicks (
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
+-- Submissions (community content submissions via /submit)
+CREATE TABLE IF NOT EXISTS public.submissions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+  
+  -- Content details
+  content_type TEXT NOT NULL CHECK (content_type IN ('agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines')),
+  content_slug TEXT NOT NULL,
+  content_name TEXT NOT NULL,
+  
+  -- GitHub PR details
+  pr_number INTEGER,
+  pr_url TEXT,
+  branch_name TEXT,
+  
+  -- Status tracking
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'merged')),
+  
+  -- Metadata
+  submission_data JSONB NOT NULL,
+  rejection_reason TEXT,
+  
+  -- Timestamps
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  merged_at TIMESTAMPTZ,
+  
+  -- Prevent duplicate submissions
+  UNIQUE(content_type, content_slug)
+);
+
 -- =====================================================
 -- INDEXES FOR PERFORMANCE
 -- =====================================================
@@ -710,6 +741,23 @@ CREATE POLICY "Anyone can record sponsored impressions"
 -- Sponsored Clicks: Anyone can record clicks
 CREATE POLICY "Anyone can record sponsored clicks"
   ON public.sponsored_clicks FOR INSERT
+  WITH CHECK (true);
+
+-- Submissions: Users can view their own submissions
+CREATE POLICY "Users can view own submissions"
+  ON public.submissions FOR SELECT
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create submissions"
+  ON public.submissions FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Service role has full access to submissions"
+  ON public.submissions FOR ALL
+  TO service_role
+  USING (true)
   WITH CHECK (true);
 
 -- =====================================================
