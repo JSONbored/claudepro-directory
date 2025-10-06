@@ -88,8 +88,8 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
         )}
         
         <div className={`container ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.PX_4}`}>
-          <div className={`${UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN} ${profile.hero ? '-mt-16' : 'pt-12'}`}>
-            <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_4}>
+          <div className={`flex items-start justify-between ${profile.hero ? '-mt-16' : 'pt-12'}`}>
+            <div className="flex items-start gap-4">
               {profile.image ? (
                 <img
                   src={profile.image}
@@ -111,7 +111,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   <p className={`${UI_CLASSES.TEXT_SM} mt-2 max-w-2xl`}>{profile.bio}</p>
                 )}
 
-                <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_4} mt-3 ${UI_CLASSES.TEXT_SM}`}>
+                <div className={`flex items-center gap-4 mt-3 ${UI_CLASSES.TEXT_SM}`}>
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                     <Users className="h-4 w-4" />
                     {followerCount || 0} followers
@@ -214,7 +214,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                         )}
                       </CardHeader>
                       <CardContent>
-                        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                        <div className={`flex items-center gap-3 ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
                           <Badge variant="secondary">{post.vote_count || 0} votes</Badge>
                           <span>{post.comment_count || 0} comments</span>
                           <span>•</span>

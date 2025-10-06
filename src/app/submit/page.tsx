@@ -96,10 +96,7 @@ export default function SubmitPage() {
         setErrors({});
 
         // Submit via server action
-        const result = await submitConfiguration({
-          ...validatedData,
-          tags: validatedData.tags || [],
-        });
+        const result = await submitConfiguration(validatedData);
 
         if (result?.data?.success) {
           setSubmissionResult({

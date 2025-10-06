@@ -10,7 +10,6 @@ import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { createClient } from '@/src/lib/supabase/server';
 import { nonEmptyString, slugString, urlString } from '@/src/lib/schemas/primitives/base-strings';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 
 // Company schema
 const createCompanySchema = z.object({
@@ -41,7 +40,7 @@ const updateCompanySchema = z.object({
 export const createCompany = rateLimitedAction
   .metadata({
     actionName: 'createCompany',
-    category: 'companies',
+    category: 'user',
   })
   .schema(createCompanySchema)
   .action(async ({ parsedInput }) => {
@@ -84,7 +83,7 @@ export const createCompany = rateLimitedAction
 export const updateCompany = rateLimitedAction
   .metadata({
     actionName: 'updateCompany',
-    category: 'companies',
+    category: 'user',
   })
   .schema(updateCompanySchema)
   .action(async ({ parsedInput }) => {
