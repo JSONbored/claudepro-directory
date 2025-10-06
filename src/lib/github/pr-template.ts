@@ -35,9 +35,9 @@ export function generatePRBody(data: {
   description: string;
   category: string;
   author: string;
-  github?: string;
+  github: string | undefined;
   tags: string[];
-  submittedBy?: { username: string; email: string };
+  submittedBy: { username: string; email: string } | undefined;
 }): string {
   const sections: string[] = [];
 

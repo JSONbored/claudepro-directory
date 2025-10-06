@@ -7,7 +7,7 @@
  */
 
 import { logger } from '@/src/lib/logger';
-import { fileExists, getFileContents, listFiles } from './client';
+import { fileExists, listFiles } from './client';
 import type { ConfigSubmissionData } from '@/src/lib/schemas/form.schema';
 
 /**
@@ -121,35 +121,115 @@ function levenshteinDistance(str1: string, str2: string): number {
 
 /**
  * Format submission data as JSON file content
- * Matches existing content file structure
+ * Converts plaintext fields to proper JSON structure matching templates
  */
-export function formatContentFile(data: {
-  slug: string;
-  name: string;
-  description: string;
-  category: string;
-  author: string;
-  github?: string;
-  content: string;
-  tags: string[];
-  type: ConfigSubmissionData['type'];
-}): string {
-  // Parse the content JSON to ensure it's valid
-  const contentParsed = JSON.parse(data.content);
-
-  // Build content object matching existing structure
-  const contentObject = {
+export function formatContentFile(data: ConfigSubmissionData & { slug: string }): string {
+  const baseFields = {
     slug: data.slug,
     description: data.description,
     category: data.type,
     author: data.author,
-    dateAdded: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+    dateAdded: new Date().toISOString().split('T')[0],
     tags: data.tags,
     ...(data.github ? { github: data.github } : {}),
-    // Merge the parsed content JSON
-    ...contentParsed,
     source: 'community',
   };
+
+  let contentObject: any = { ...baseFields };
+
+  // Build type-specific JSON from plaintext fields
+  switch (data.type) {
+    case 'agents':
+      contentObject = {
+        ...contentObject,
+        content: data.systemPrompt, // Plaintext prompt becomes "content"
+        configuration: {
+          temperature: data.temperature,
+          maxTokens: data.maxTokens,
+        },
+      };
+      break;
+
+    case 'rules':
+      contentObject = {
+        ...contentObject,
+        content: data.rulesContent, // Plaintext rules becomes "content"
+        configuration: {
+          temperature: data.temperature,
+          maxTokens: data.maxTokens,
+        },
+      };
+      break;
+
+    case 'commands':
+      contentObject = {
+        ...contentObject,
+        content: data.commandContent, // Plaintext markdown becomes "content"
+      };
+      break;
+
+    case 'hooks':
+      contentObject = {
+        ...contentObject,
+        content: data.hookScript, // Plaintext bash becomes "content"
+        hookType: data.hookType,
+        triggeredBy: data.triggeredBy,
+      };
+      break;
+
+    case 'statuslines':
+      contentObject = {
+        ...contentObject,
+        content: data.statuslineScript, // Plaintext bash becomes "content"
+        statuslineType: data.statuslineType,
+        configuration: {
+          format: 'bash',
+          refreshInterval: data.refreshInterval,
+          position: data.position,
+          colorScheme: 'default',
+        },
+      };
+      break;
+
+    case 'mcp':
+      // Parse env vars from KEY=value format
+      const envVars: Record<string, string> = {};
+      if (data.envVars) {
+        data.envVars.split('\n').forEach((line) => {
+          const [key, ...valueParts] = line.split('=');
+          if (key && valueParts.length) {
+            envVars[key.trim()] = valueParts.join('=').trim();
+          }
+        });
+      }
+
+      contentObject = {
+        ...contentObject,
+        npmPackage: data.npmPackage,
+        serverType: data.serverType,
+        installation: {
+          npm: data.installCommand,
+          configuration: {
+            command: data.configCommand,
+            args: [],
+            ...(Object.keys(envVars).length > 0 ? { env: envVars } : {}),
+          },
+        },
+        // Add tools array (simplified - maintainer can expand later)
+        ...(data.toolsDescription
+          ? {
+              tools: [
+                {
+                  name: 'primary_tool',
+                  description: data.toolsDescription,
+                  parameters: {},
+                },
+              ],
+            }
+          : {}),
+      };
+      break;
+  }
 
   // Pretty print with 2-space indentation (matches existing files)
   return JSON.stringify(contentObject, null, 2);

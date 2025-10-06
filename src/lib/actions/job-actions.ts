@@ -30,7 +30,7 @@ import { revalidatePath } from 'next/cache';
 export const createJob = rateLimitedAction
   .metadata({
     actionName: 'createJob',
-    category: 'jobs',
+    category: 'form',
   })
   .schema(createJobSchema)
   .action(async ({ parsedInput }) => {
@@ -84,7 +84,7 @@ export const createJob = rateLimitedAction
 export const updateJob = rateLimitedAction
   .metadata({
     actionName: 'updateJob',
-    category: 'jobs',
+    category: 'form',
   })
   .schema(updateJobSchema)
   .action(async ({ parsedInput }) => {
@@ -129,7 +129,7 @@ export const updateJob = rateLimitedAction
 export const toggleJobStatus = rateLimitedAction
   .metadata({
     actionName: 'toggleJobStatus',
-    category: 'jobs',
+    category: 'form',
   })
   .schema(toggleJobStatusSchema)
   .action(async ({ parsedInput: { id, status } }) => {
@@ -173,7 +173,7 @@ export const toggleJobStatus = rateLimitedAction
 export const deleteJob = rateLimitedAction
   .metadata({
     actionName: 'deleteJob',
-    category: 'jobs',
+    category: 'form',
   })
   .schema(z.object({ id: z.string().uuid() }))
   .action(async ({ parsedInput: { id } }) => {

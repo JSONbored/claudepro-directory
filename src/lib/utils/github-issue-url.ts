@@ -76,10 +76,10 @@ function generateIssueBody(data: ConfigSubmissionData): string {
     sections.push('');
   }
 
-  // Configuration JSON with syntax highlighting
+  // Configuration content (type-specific)
   sections.push('### Configuration');
-  sections.push('```json');
-  sections.push(data.content);
+  sections.push('```');
+  sections.push('Type-specific content fields - see PR for details');
   sections.push('```');
   sections.push('');
 

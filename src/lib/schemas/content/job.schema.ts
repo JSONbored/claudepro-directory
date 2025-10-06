@@ -7,7 +7,6 @@
 
 import { z } from 'zod';
 import { nonEmptyString, slugString, urlString } from '@/src/lib/schemas/primitives/base-strings';
-import { baseContentMetadataSchema } from './base-content.schema';
 
 // Job-specific enums
 export const jobTypeSchema = z.enum(['full-time', 'part-time', 'contract', 'internship', 'freelance']);
@@ -134,7 +133,7 @@ export const jobContentSchema = jobDatabaseSchema.transform((data) => ({
   description: data.description,
   category: data.category,
   author: data.company, // Company name as author
-  dateAdded: data.created_at.split('T')[0], // ISO date string
+  dateAdded: data.created_at.split('T')[0]!, // ISO date string
   tags: data.tags,
   title: data.title,
   company: data.company,
@@ -154,6 +153,10 @@ export const jobContentSchema = jobDatabaseSchema.transform((data) => ({
   status: data.status,
   viewCount: data.view_count,
   clickCount: data.click_count,
+  plan: data.plan,
+  active: data.active,
+  workplace: data.workplace,
+  experience: data.experience,
 }));
 
 export type JobContent = z.infer<typeof jobContentSchema>;

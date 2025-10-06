@@ -10,7 +10,6 @@
 
 import { Octokit } from '@octokit/rest';
 import { logger } from '@/src/lib/logger';
-import { env } from '@/src/lib/env';
 
 /**
  * Repository configuration
@@ -27,7 +26,7 @@ export const REPO_CONFIG = {
  * Validates token is present before creating client
  */
 export function getOctokit(): Octokit {
-  const token = env.GITHUB_BOT_TOKEN;
+  const token = process.env.GITHUB_BOT_TOKEN;
 
   if (!token) {
     throw new Error(

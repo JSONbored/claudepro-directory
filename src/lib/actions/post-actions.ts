@@ -34,7 +34,7 @@ const updatePostSchema = z.object({
 export const createPost = rateLimitedAction
   .metadata({
     actionName: 'createPost',
-    category: 'community',
+    category: 'form',
   })
   .schema(createPostSchema)
   .action(async ({ parsedInput: { title, content, url } }) => {
@@ -89,7 +89,7 @@ export const createPost = rateLimitedAction
 export const updatePost = rateLimitedAction
   .metadata({
     actionName: 'updatePost',
-    category: 'community',
+    category: 'form',
   })
   .schema(updatePostSchema)
   .action(async ({ parsedInput: { id, title, content } }) => {
@@ -130,7 +130,7 @@ export const updatePost = rateLimitedAction
 export const deletePost = rateLimitedAction
   .metadata({
     actionName: 'deletePost',
-    category: 'community',
+    category: 'form',
   })
   .schema(z.object({ id: z.string().uuid() }))
   .action(async ({ parsedInput: { id } }) => {
@@ -165,7 +165,7 @@ export const deletePost = rateLimitedAction
 export const votePost = rateLimitedAction
   .metadata({
     actionName: 'votePost',
-    category: 'community',
+    category: 'user',
   })
   .schema(z.object({
     post_id: z.string().uuid(),
@@ -222,7 +222,7 @@ export const votePost = rateLimitedAction
 export const createComment = rateLimitedAction
   .metadata({
     actionName: 'createComment',
-    category: 'community',
+    category: 'form',
   })
   .schema(z.object({
     post_id: z.string().uuid(),
@@ -265,7 +265,7 @@ export const createComment = rateLimitedAction
 export const deleteComment = rateLimitedAction
   .metadata({
     actionName: 'deleteComment',
-    category: 'community',
+    category: 'form',
   })
   .schema(z.object({ id: z.string().uuid() }))
   .action(async ({ parsedInput: { id } }) => {
