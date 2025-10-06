@@ -409,6 +409,13 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON public.subscriptions(stat
 CREATE INDEX IF NOT EXISTS idx_sponsored_content_active ON public.sponsored_content(active) WHERE active = true;
 CREATE INDEX IF NOT EXISTS idx_sponsored_content_dates ON public.sponsored_content(start_date, end_date);
 
+-- Submissions
+CREATE INDEX IF NOT EXISTS idx_submissions_user_id ON public.submissions(user_id);
+CREATE INDEX IF NOT EXISTS idx_submissions_status ON public.submissions(status);
+CREATE INDEX IF NOT EXISTS idx_submissions_content_type ON public.submissions(content_type);
+CREATE INDEX IF NOT EXISTS idx_submissions_pr_number ON public.submissions(pr_number) WHERE pr_number IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_submissions_created_at ON public.submissions(created_at DESC);
+
 -- =====================================================
 -- FUNCTIONS AND TRIGGERS
 -- =====================================================
