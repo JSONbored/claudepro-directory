@@ -11,17 +11,17 @@
  * @see components/unified-detail-page.tsx - Original implementation
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { Copy } from '@/src/lib/icons';
-import { componentDescriptionString } from '@/src/lib/schemas/primitives/ui-component-primitives';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+} from "@/src/components/ui/card";
+import { Copy } from "@/src/lib/icons";
+import { componentDescriptionString } from "@/src/lib/schemas/primitives/ui-component-primitives";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 /**
  * Troubleshooting item can be either a string or an issue/solution pair
@@ -42,7 +42,9 @@ const troubleshootingSectionPropsSchema = z.object({
   description: componentDescriptionString,
 });
 
-export type TroubleshootingSectionProps = z.infer<typeof troubleshootingSectionPropsSchema>;
+export type TroubleshootingSectionProps = z.infer<
+  typeof troubleshootingSectionPropsSchema
+>;
 
 /**
  * TroubleshootingSection Component (Server Component)
@@ -52,9 +54,15 @@ export type TroubleshootingSectionProps = z.infer<typeof troubleshootingSectionP
  * - Issue/solution objects for structured problem-solving
  * No React.memo needed - server components don't re-render
  */
-export function TroubleshootingSection({ items, description }: TroubleshootingSectionProps) {
+export function TroubleshootingSection({
+  items,
+  description,
+}: TroubleshootingSectionProps) {
   // Validate props
-  const validated = troubleshootingSectionPropsSchema.parse({ items, description });
+  const validated = troubleshootingSectionPropsSchema.parse({
+    items,
+    description,
+  });
 
   if (validated.items.length === 0) return null;
 
@@ -65,15 +73,20 @@ export function TroubleshootingSection({ items, description }: TroubleshootingSe
           <Copy className="h-5 w-5" />
           Troubleshooting
         </CardTitle>
-        {validated.description && <CardDescription>{validated.description}</CardDescription>}
+        {validated.description && (
+          <CardDescription>{validated.description}</CardDescription>
+        )}
       </CardHeader>
       <CardContent>
         <ul className={UI_CLASSES.SPACE_Y_4}>
           {validated.items.map((trouble) => {
             // Simple string format
-            if (typeof trouble === 'string') {
+            if (typeof trouble === "string") {
               return (
-                <li key={trouble.slice(0, 50)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+                <li
+                  key={trouble.slice(0, 50)}
+                  className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}
+                >
                   <div className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
                   <span className="text-sm leading-relaxed">{trouble}</span>
                 </li>
@@ -82,11 +95,16 @@ export function TroubleshootingSection({ items, description }: TroubleshootingSe
 
             // Issue/solution object format
             return (
-              <li key={trouble.issue.slice(0, 50)} className={UI_CLASSES.SPACE_Y_2}>
+              <li
+                key={trouble.issue.slice(0, 50)}
+                className={UI_CLASSES.SPACE_Y_2}
+              >
                 <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                   <div className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
                   <div className={UI_CLASSES.SPACE_Y_1}>
-                    <p className="text-sm font-medium text-foreground">{trouble.issue}</p>
+                    <p className="text-sm font-medium text-foreground">
+                      {trouble.issue}
+                    </p>
                     <p className="text-sm text-muted-foreground leading-relaxed">
                       {trouble.solution}
                     </p>

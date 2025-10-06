@@ -8,8 +8,8 @@
  * component tree without prop drilling.
  */
 
-import type { SmartRelatedContentWithMetadataProps } from '@/src/lib/schemas/related-content.schema';
-import { SmartRelatedContent } from './index';
+import type { SmartRelatedContentWithMetadataProps } from "@/src/lib/schemas/related-content.schema";
+import { SmartRelatedContent } from "./index";
 
 /**
  * Global metadata store (safe in server components)
@@ -24,7 +24,10 @@ let currentPageMetadata: {
  * Set metadata for current request
  * Called by MDXRenderer before rendering MDX content
  */
-export function setPageMetadata(metadata: { tags?: string[]; keywords?: string[] }) {
+export function setPageMetadata(metadata: {
+  tags?: string[];
+  keywords?: string[];
+}) {
   currentPageMetadata = metadata;
 }
 
@@ -38,7 +41,7 @@ export function SmartRelatedContentWithMetadata({
       {...props}
       currentTags={currentPageMetadata.tags || []}
       currentKeywords={currentPageMetadata.keywords || []}
-      pathname={pathname || ''}
+      pathname={pathname || ""}
     />
   );
 }

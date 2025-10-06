@@ -3,11 +3,11 @@
  * Handles Redis connection, fallback logic, and client initialization
  */
 
-import { Redis } from '@upstash/redis';
-import { z } from 'zod';
-import { logger } from '@/src/lib/logger';
-import type { RedisConnectionStatus } from '@/src/lib/schemas/cache.schema';
-import { ParseStrategy, safeParse } from '@/src/lib/utils/safe-json';
+import { Redis } from "@upstash/redis";
+import { z } from "zod";
+import { logger } from "@/src/lib/logger";
+import type { RedisConnectionStatus } from "@/src/lib/schemas/cache.schema";
+import { ParseStrategy, safeParse } from "@/src/lib/utils/safe-json";
 
 // Re-export Redis type for consumers
 export type { Redis };
@@ -16,7 +16,9 @@ export type { Redis };
 const redisConfig = {
   url: process.env.KV_REST_API_URL,
   token: process.env.KV_REST_API_TOKEN,
-  isConfigured: !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN),
+  isConfigured: !!(
+    process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN
+  ),
 } as const;
 
 // Redis client configuration schema
@@ -74,7 +76,9 @@ class RedisClientManager {
   private initializeConnection(): void {
     try {
       if (!(this.config.url && this.config.token)) {
-        logger.warn('Redis credentials not configured, using in-memory fallback');
+        logger.warn(
+          "Redis credentials not configured, using in-memory fallback",
+        );
         this.enableFallbackMode();
         return;
       }
@@ -84,10 +88,11 @@ class RedisClientManager {
         token: this.config.token,
         automaticDeserialization: false, // Handle serialization manually for security
         enableAutoPipelining: true, // Enable auto-pipelining for batch operations
-        latencyLogging: process.env.NODE_ENV === 'development', // Log latency in dev
+        latencyLogging: process.env.NODE_ENV === "development", // Log latency in dev
         retry: {
           retries: this.config.retryAttempts,
-          backoff: (retryCount) => Math.min(this.config.retryDelay * 2 ** retryCount, 5000),
+          backoff: (retryCount) =>
+            Math.min(this.config.retryDelay * 2 ** retryCount, 5000),
         },
       });
 
@@ -95,11 +100,11 @@ class RedisClientManager {
       this.connectionStatus.isFallback = false;
       this.connectionStatus.consecutiveFailures = 0;
 
-      logger.info('Redis client initialized successfully');
+      logger.info("Redis client initialized successfully");
     } catch (error) {
       logger.error(
-        'Failed to initialize Redis client',
-        error instanceof Error ? error : new Error(String(error))
+        "Failed to initialize Redis client",
+        error instanceof Error ? error : new Error(String(error)),
       );
       this.enableFallbackMode();
     }
@@ -113,7 +118,7 @@ class RedisClientManager {
     this.connectionStatus.isConnected = false;
     this.redis = null;
 
-    logger.info('Redis fallback mode enabled - using in-memory storage');
+    logger.info("Redis fallback mode enabled - using in-memory storage");
   }
 
   /**
@@ -126,7 +131,7 @@ class RedisClientManager {
 
     // Sort entries by last access time (oldest first)
     const entries = Array.from(this.fallbackStorage.entries()).sort(
-      (a, b) => a[1].lastAccess - b[1].lastAccess
+      (a, b) => a[1].lastAccess - b[1].lastAccess,
     );
 
     let evicted = 0;
@@ -144,7 +149,7 @@ class RedisClientManager {
 
     if (evicted > 0) {
       logger.info(
-        `Evicted ${evicted} entries from fallback storage (freed ${(bytesFreed / 1024 / 1024).toFixed(2)}MB)`
+        `Evicted ${evicted} entries from fallback storage (freed ${(bytesFreed / 1024 / 1024).toFixed(2)}MB)`,
       );
     }
   }
@@ -173,7 +178,7 @@ class RedisClientManager {
 
       if (cleaned > 0) {
         logger.debug(
-          `Cleaned ${cleaned} expired entries from fallback storage (freed ${(bytesFreed / 1024).toFixed(1)}KB)`
+          `Cleaned ${cleaned} expired entries from fallback storage (freed ${(bytesFreed / 1024).toFixed(1)}KB)`,
         );
       }
 
@@ -188,7 +193,7 @@ class RedisClientManager {
   async executeOperation<T>(
     operation: (redis: Redis) => Promise<T>,
     fallbackOperation?: () => Promise<T> | T,
-    operationName = 'unknown'
+    operationName = "unknown",
   ): Promise<T> {
     this.connectionStatus.totalOperations++;
     this.connectionStatus.lastConnectionAttempt = new Date();
@@ -199,14 +204,19 @@ class RedisClientManager {
         const result = await Promise.resolve(fallbackOperation());
         return result;
       }
-      throw new Error(`Redis operation ${operationName} not available in fallback mode`);
+      throw new Error(
+        `Redis operation ${operationName} not available in fallback mode`,
+      );
     }
 
     try {
       const result = await Promise.race([
         operation(this.redis),
         new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Operation timeout')), this.config.commandTimeout)
+          setTimeout(
+            () => reject(new Error("Operation timeout")),
+            this.config.commandTimeout,
+          ),
         ),
       ]);
 
@@ -218,12 +228,16 @@ class RedisClientManager {
       this.connectionStatus.consecutiveFailures++;
 
       const err = error instanceof Error ? error : new Error(String(error));
-      logger.warn(`Redis operation ${operationName} failed`, { error: err.message });
+      logger.warn(`Redis operation ${operationName} failed`, {
+        error: err.message,
+      });
 
       // If too many consecutive failures, enable fallback mode
-      if (this.connectionStatus.consecutiveFailures >= this.config.retryAttempts) {
+      if (
+        this.connectionStatus.consecutiveFailures >= this.config.retryAttempts
+      ) {
         logger.error(
-          `Redis connection unstable (${this.connectionStatus.consecutiveFailures} failures), enabling fallback mode`
+          `Redis connection unstable (${this.connectionStatus.consecutiveFailures} failures), enabling fallback mode`,
         );
         this.enableFallbackMode();
       }
@@ -261,13 +275,13 @@ class RedisClientManager {
       const result = await this.executeOperation(
         async (redis) => {
           const testKey = `connection_test_${Date.now()}`;
-          await redis.set(testKey, 'test', { ex: 1 });
+          await redis.set(testKey, "test", { ex: 1 });
           const value = await redis.get(testKey);
           await redis.del(testKey);
-          return value === 'test';
+          return value === "test";
         },
         () => true, // Fallback always succeeds
-        'connection_test'
+        "connection_test",
       );
       return result;
     } catch {
@@ -278,9 +292,13 @@ class RedisClientManager {
   /**
    * Fallback storage operations with memory management
    */
-  async setFallback(key: string, value: string, ttlSeconds?: number): Promise<void> {
+  async setFallback(
+    key: string,
+    value: string,
+    ttlSeconds?: number,
+  ): Promise<void> {
     const expiry = ttlSeconds ? Date.now() + ttlSeconds * 1000 : 0;
-    const size = Buffer.byteLength(value, 'utf8');
+    const size = Buffer.byteLength(value, "utf8");
     const now = Date.now();
 
     // Remove old entry if exists
@@ -338,7 +356,7 @@ class RedisClientManager {
     options: {
       batchSize?: number;
       deserialize?: boolean;
-    } = {}
+    } = {},
   ): Promise<Map<string, T | null>> {
     const { batchSize = 50, deserialize = false } = options;
 
@@ -420,7 +438,7 @@ class RedisClientManager {
           }
           return [];
         },
-        `getBatchPipeline_chunk_${i}`
+        `getBatchPipeline_chunk_${i}`,
       );
     }
 
@@ -437,7 +455,9 @@ class RedisClientManager {
    * @param keys - Array of Redis keys to fetch
    * @returns Map of key -> value (null if key doesn't exist)
    */
-  async getBatchMget<T = string>(keys: string[]): Promise<Map<string, T | null>> {
+  async getBatchMget<T = string>(
+    keys: string[],
+  ): Promise<Map<string, T | null>> {
     if (keys.length === 0) {
       return new Map();
     }
@@ -449,7 +469,12 @@ class RedisClientManager {
       async (redis) => {
         const values = (await redis.mget(...uniqueKeys)) as (string | null)[];
 
-        return new Map(uniqueKeys.map((key, index) => [key, (values[index] as T | null) || null]));
+        return new Map(
+          uniqueKeys.map((key, index) => [
+            key,
+            (values[index] as T | null) || null,
+          ]),
+        );
       },
       async () => {
         // Fallback: get from in-memory storage
@@ -460,7 +485,7 @@ class RedisClientManager {
         }
         return resultMap;
       },
-      'getBatchMget'
+      "getBatchMget",
     );
   }
 
@@ -483,11 +508,14 @@ class RedisClientManager {
       fallbackKeys: this.fallbackStorage.size,
       fallbackMemoryMB: this.fallbackMemoryBytes / 1024 / 1024,
       fallbackMemoryUsagePercent: (this.fallbackMemoryBytes / maxBytes) * 100,
-      redisConnected: this.connectionStatus.isConnected && !this.connectionStatus.isFallback,
+      redisConnected:
+        this.connectionStatus.isConnected && !this.connectionStatus.isFallback,
       totalOperations,
       failedOperations,
       successRate:
-        totalOperations > 0 ? ((totalOperations - failedOperations) / totalOperations) * 100 : 100,
+        totalOperations > 0
+          ? ((totalOperations - failedOperations) / totalOperations) * 100
+          : 100,
     };
   }
 

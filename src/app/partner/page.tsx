@@ -1,14 +1,14 @@
-import Link from 'next/link';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
+import Link from "next/link";
+import { Badge } from "@/src/components/ui/badge";
+import { Button } from "@/src/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
+} from "@/src/components/ui/card";
+import { SOCIAL_LINKS } from "@/src/lib/constants";
 import {
   ArrowRight,
   Briefcase,
@@ -22,11 +22,11 @@ import {
   TrendingUp,
   Users,
   Zap,
-} from '@/src/lib/icons';
-import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+} from "@/src/lib/icons";
+import { generatePageMetadata } from "@/src/lib/seo/metadata-generator";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
-export const metadata = await generatePageMetadata('/partner');
+export const metadata = await generatePageMetadata("/partner");
 
 // Enable ISR - revalidate every 24 hours for static marketing pages
 
@@ -41,12 +41,16 @@ export default function PartnerPage() {
           <Handshake className="h-3 w-3 mr-1" />
           Partnership & Advertising
         </Badge>
-        <h1 className={`text-4xl md:text-5xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_6}`}>
+        <h1
+          className={`text-4xl md:text-5xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_6}`}
+        >
           Grow Your Business With Us
         </h1>
-        <p className={`${UI_CLASSES.TEXT_XL} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-          Connect with thousands of Claude AI professionals and showcase your tools, services, and
-          opportunities
+        <p
+          className={`${UI_CLASSES.TEXT_XL} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
+        >
+          Connect with thousands of Claude AI professionals and showcase your
+          tools, services, and opportunities
         </p>
       </div>
 
@@ -55,15 +59,22 @@ export default function PartnerPage() {
         className={`${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO} mb-12 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20`}
       >
         <CardContent className={UI_CLASSES.PT_6}>
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} flex-wrap gap-4`}>
+          <div
+            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} flex-wrap gap-4`}
+          >
             <div className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3}`}>
-              <div className={`${UI_CLASSES.P_2} bg-primary/10 ${UI_CLASSES.ROUNDED_FULL}`}>
+              <div
+                className={`${UI_CLASSES.P_2} bg-primary/10 ${UI_CLASSES.ROUNDED_FULL}`}
+              >
                 <Sparkles className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className={`font-semibold ${UI_CLASSES.TEXT_LG}`}>Limited Time Offer</p>
+                <p className={`font-semibold ${UI_CLASSES.TEXT_LG}`}>
+                  Limited Time Offer
+                </p>
                 <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
-                  First 20 partners get 50% off for 3 months - Limited spots remaining!
+                  First 20 partners get 50% off for 3 months - Limited spots
+                  remaining!
                 </p>
               </div>
             </div>
@@ -106,28 +117,40 @@ export default function PartnerPage() {
               <div className={UI_CLASSES.FLEX_GAP_2}>
                 <TrendingUp className="h-4 w-4 text-green-500 mt-0.5" />
                 <div className={UI_CLASSES.FLEX_COL}>
-                  <p className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}>
+                  <p
+                    className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}
+                  >
                     Premium Visibility
                   </p>
-                  <p className={UI_CLASSES.TEXT_XS_MUTED}>Featured placement in Jobs section</p>
+                  <p className={UI_CLASSES.TEXT_XS_MUTED}>
+                    Featured placement in Jobs section
+                  </p>
                 </div>
               </div>
               <div className={UI_CLASSES.FLEX_GAP_2}>
                 <Users className="h-4 w-4 text-green-500 mt-0.5" />
                 <div className={UI_CLASSES.FLEX_COL}>
-                  <p className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}>
+                  <p
+                    className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}
+                  >
                     Targeted Audience
                   </p>
-                  <p className={UI_CLASSES.TEXT_XS_MUTED}>Reach Claude developers & AI engineers</p>
+                  <p className={UI_CLASSES.TEXT_XS_MUTED}>
+                    Reach Claude developers & AI engineers
+                  </p>
                 </div>
               </div>
               <div className={UI_CLASSES.FLEX_GAP_2}>
                 <Zap className="h-4 w-4 text-green-500 mt-0.5" />
                 <div className={UI_CLASSES.FLEX_COL}>
-                  <p className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}>
+                  <p
+                    className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}
+                  >
                     30-Day Listings
                   </p>
-                  <p className={UI_CLASSES.TEXT_XS_MUTED}>Extended visibility for your positions</p>
+                  <p className={UI_CLASSES.TEXT_XS_MUTED}>
+                    Extended visibility for your positions
+                  </p>
                 </div>
               </div>
             </div>
@@ -138,7 +161,7 @@ export default function PartnerPage() {
               <Button className={UI_CLASSES.W_FULL} size="lg" asChild>
                 <a
                   href={`mailto:${SOCIAL_LINKS.partnerEmail}?subject=${encodeURIComponent(
-                    'Job Listing Inquiry - Claude Pro Directory'
+                    "Job Listing Inquiry - Claude Pro Directory",
                   )}&body=${encodeURIComponent(
                     `Hi Claude Pro Directory Team,
 
@@ -167,7 +190,7 @@ Please let me know the next steps and pricing details.
 Best regards,
 [Your Name]
 [Your Email]
-[Your Phone]`
+[Your Phone]`,
                   )}`}
                 >
                   Post a Job
@@ -206,37 +229,57 @@ Best regards,
               <div className={UI_CLASSES.FLEX_GAP_2}>
                 <Target className="h-4 w-4 text-green-500 mt-0.5" />
                 <div className={UI_CLASSES.FLEX_COL}>
-                  <p className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}>Top Positions</p>
-                  <p className={UI_CLASSES.TEXT_XS_MUTED}>Featured in category listings</p>
+                  <p
+                    className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}
+                  >
+                    Top Positions
+                  </p>
+                  <p className={UI_CLASSES.TEXT_XS_MUTED}>
+                    Featured in category listings
+                  </p>
                 </div>
               </div>
               <div className={UI_CLASSES.FLEX_GAP_2}>
                 <Sparkles className="h-4 w-4 text-green-500 mt-0.5" />
                 <div className={UI_CLASSES.FLEX_COL}>
-                  <p className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}>
+                  <p
+                    className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}
+                  >
                     "Sponsored" Badge
                   </p>
-                  <p className={UI_CLASSES.TEXT_XS_MUTED}>Stand out with premium designation</p>
+                  <p className={UI_CLASSES.TEXT_XS_MUTED}>
+                    Stand out with premium designation
+                  </p>
                 </div>
               </div>
               <div className={UI_CLASSES.FLEX_GAP_2}>
                 <TrendingUp className="h-4 w-4 text-green-500 mt-0.5" />
                 <div className={UI_CLASSES.FLEX_COL}>
-                  <p className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}>
+                  <p
+                    className={`${UI_CLASSES.FONT_MEDIUM} ${UI_CLASSES.TEXT_SM}`}
+                  >
                     Analytics Dashboard
                   </p>
-                  <p className={UI_CLASSES.TEXT_XS_MUTED}>Track views and engagement</p>
+                  <p className={UI_CLASSES.TEXT_XS_MUTED}>
+                    Track views and engagement
+                  </p>
                 </div>
               </div>
             </div>
             <div className={`${UI_CLASSES.PT_4} ${UI_CLASSES.BORDER_T}`}>
               <p className={`${UI_CLASSES.TEXT_SM_MUTED} mb-4`}>
-                Available for all categories: Agents, MCP, Rules, Commands, Hooks
+                Available for all categories: Agents, MCP, Rules, Commands,
+                Hooks
               </p>
-              <Button className={UI_CLASSES.W_FULL} size="lg" variant="default" asChild>
+              <Button
+                className={UI_CLASSES.W_FULL}
+                size="lg"
+                variant="default"
+                asChild
+              >
                 <a
                   href={`mailto:${SOCIAL_LINKS.partnerEmail}?subject=${encodeURIComponent(
-                    'Sponsored Placement Inquiry - Claude Pro Directory'
+                    "Sponsored Placement Inquiry - Claude Pro Directory",
                   )}&body=${encodeURIComponent(
                     `Hi Claude Pro Directory Team,
 
@@ -276,7 +319,7 @@ Best regards,
 [Your Name]
 [Your Company]
 [Your Email]
-[Your Phone]`
+[Your Phone]`,
                   )}`}
                 >
                   Get Featured
@@ -294,25 +337,33 @@ Best regards,
       >
         <Card className={UI_CLASSES.TEXT_CENTER}>
           <CardContent className={UI_CLASSES.PT_6}>
-            <p className={`text-lg ${UI_CLASSES.FONT_BOLD} text-primary`}>Featured</p>
+            <p className={`text-lg ${UI_CLASSES.FONT_BOLD} text-primary`}>
+              Featured
+            </p>
             <p className={UI_CLASSES.TEXT_SM_MUTED}>Placement</p>
           </CardContent>
         </Card>
         <Card className={UI_CLASSES.TEXT_CENTER}>
           <CardContent className={UI_CLASSES.PT_6}>
-            <p className={`text-lg ${UI_CLASSES.FONT_BOLD} text-primary`}>Targeted</p>
+            <p className={`text-lg ${UI_CLASSES.FONT_BOLD} text-primary`}>
+              Targeted
+            </p>
             <p className={UI_CLASSES.TEXT_SM_MUTED}>Audience</p>
           </CardContent>
         </Card>
         <Card className={UI_CLASSES.TEXT_CENTER}>
           <CardContent className={UI_CLASSES.PT_6}>
-            <p className={`text-lg ${UI_CLASSES.FONT_BOLD} text-primary`}>Quick</p>
+            <p className={`text-lg ${UI_CLASSES.FONT_BOLD} text-primary`}>
+              Quick
+            </p>
             <p className={UI_CLASSES.TEXT_SM_MUTED}>Setup</p>
           </CardContent>
         </Card>
         <Card className={UI_CLASSES.TEXT_CENTER}>
           <CardContent className={UI_CLASSES.PT_6}>
-            <p className={`text-lg ${UI_CLASSES.FONT_BOLD} text-primary`}>Cancel</p>
+            <p className={`text-lg ${UI_CLASSES.FONT_BOLD} text-primary`}>
+              Cancel
+            </p>
             <p className={UI_CLASSES.TEXT_SM_MUTED}>Anytime</p>
           </CardContent>
         </Card>
@@ -336,10 +387,14 @@ Best regards,
               <CardTitle className="text-lg">Integration Partners</CardTitle>
             </CardHeader>
             <CardContent>
-              <CardDescription className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.MB_3}`}>
+              <CardDescription
+                className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.MB_3}`}
+              >
                 Integrate your tools with Claude configurations
               </CardDescription>
-              <ul className={`${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.TEXT_SM_MUTED}`}>
+              <ul
+                className={`${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.TEXT_SM_MUTED}`}
+              >
                 <li className={UI_CLASSES.FLEX_GAP_2}>
                   <span className="text-green-500">✓</span>
                   API access
@@ -366,10 +421,14 @@ Best regards,
               <CardTitle className="text-lg">Content Partners</CardTitle>
             </CardHeader>
             <CardContent>
-              <CardDescription className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.MB_3}`}>
+              <CardDescription
+                className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.MB_3}`}
+              >
                 Contribute premium configurations
               </CardDescription>
-              <ul className={`${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.TEXT_SM_MUTED}`}>
+              <ul
+                className={`${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.TEXT_SM_MUTED}`}
+              >
                 <li className={UI_CLASSES.FLEX_GAP_2}>
                   <span className="text-green-500">✓</span>
                   Featured status
@@ -396,10 +455,14 @@ Best regards,
               <CardTitle className="text-lg">Enterprise</CardTitle>
             </CardHeader>
             <CardContent>
-              <CardDescription className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.MB_3}`}>
+              <CardDescription
+                className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.MB_3}`}
+              >
                 Custom solutions for large teams
               </CardDescription>
-              <ul className={`${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.TEXT_SM_MUTED}`}>
+              <ul
+                className={`${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.TEXT_SM_MUTED}`}
+              >
                 <li className={UI_CLASSES.FLEX_GAP_2}>
                   <span className="text-green-500">✓</span>
                   Private listings
@@ -419,13 +482,19 @@ Best regards,
       </div>
 
       {/* CTA */}
-      <div className={`${UI_CLASSES.TEXT_CENTER} ${UI_CLASSES.MAX_W_2XL} ${UI_CLASSES.MX_AUTO}`}>
+      <div
+        className={`${UI_CLASSES.TEXT_CENTER} ${UI_CLASSES.MAX_W_2XL} ${UI_CLASSES.MX_AUTO}`}
+      >
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="pt-8 pb-8">
-            <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD} mb-4`}>Ready to Get Started?</h2>
-            <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MB_6}`}>
-              Join the first 20 partners and get 50% off for your first 3 months. Let's discuss how
-              we can help grow your business.
+            <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD} mb-4`}>
+              Ready to Get Started?
+            </h2>
+            <p
+              className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MB_6}`}
+            >
+              Join the first 20 partners and get 50% off for your first 3
+              months. Let's discuss how we can help grow your business.
             </p>
             <div
               className={`${UI_CLASSES.FLEX_COL} sm:flex-row gap-4 ${UI_CLASSES.JUSTIFY_CENTER}`}

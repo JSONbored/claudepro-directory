@@ -4,7 +4,13 @@
   "category": "mcp",
   "author": "hauptsacheNet",
   "dateAdded": "2025-09-18",
-  "tags": ["project-management", "clickup", "tasks", "productivity", "team-collaboration"],
+  "tags": [
+    "project-management",
+    "clickup",
+    "tasks",
+    "productivity",
+    "team-collaboration"
+  ],
   "content": "Manage ClickUp tasks and projects directly through Claude for comprehensive project management.",
   "features": [
     "Create and update tasks with custom fields",

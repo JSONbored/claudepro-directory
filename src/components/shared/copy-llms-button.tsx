@@ -5,15 +5,15 @@
  * @module components/shared/copy-llms-button
  */
 
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Button } from '@/src/components/ui/button';
-import { toast } from '@/src/components/ui/sonner';
-import { Check, Sparkles } from '@/src/lib/icons';
-import { logger } from '@/src/lib/logger';
-import { cn } from '@/src/lib/utils';
-import { copyToClipboard } from '@/src/lib/utils/clipboard-utils';
+import { useState } from "react";
+import { Button } from "@/src/components/ui/button";
+import { toast } from "@/src/components/ui/sonner";
+import { Check, Sparkles } from "@/src/lib/icons";
+import { logger } from "@/src/lib/logger";
+import { cn } from "@/src/lib/utils";
+import { copyToClipboard } from "@/src/lib/utils/clipboard-utils";
 
 /**
  * Props for CopyLLMsButton component
@@ -35,13 +35,19 @@ export interface CopyLLMsButtonProps {
    * Button size variant
    * @default "sm"
    */
-  size?: 'default' | 'sm' | 'lg' | 'icon';
+  size?: "default" | "sm" | "lg" | "icon";
 
   /**
    * Button style variant
    * @default "outline"
    */
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  variant?:
+    | "default"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link";
 
   /**
    * Additional CSS classes
@@ -75,9 +81,9 @@ export interface CopyLLMsButtonProps {
  */
 export function CopyLLMsButton({
   llmsTxtUrl,
-  label = 'Copy for AI',
-  size = 'sm',
-  variant = 'outline',
+  label = "Copy for AI",
+  size = "sm",
+  variant = "outline",
   className,
   showIcon = true,
 }: CopyLLMsButtonProps) {
@@ -98,23 +104,25 @@ export function CopyLLMsButton({
       const response = await fetch(llmsTxtUrl);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch llms.txt: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch llms.txt: ${response.status} ${response.statusText}`,
+        );
       }
 
       const content = await response.text();
 
       // Copy to clipboard
       const success = await copyToClipboard(content, {
-        component: 'CopyLLMsButton',
-        action: 'copy_llmstxt',
+        component: "CopyLLMsButton",
+        action: "copy_llmstxt",
       });
 
       if (success) {
         setIsCopied(true);
 
         // Show success toast
-        toast.success('Copied to clipboard!', {
-          description: 'AI-optimized content ready to paste',
+        toast.success("Copied to clipboard!", {
+          description: "AI-optimized content ready to paste",
           duration: 3000,
         });
 
@@ -123,21 +131,21 @@ export function CopyLLMsButton({
           setIsCopied(false);
         }, 2000);
       } else {
-        throw new Error('Clipboard API failed');
+        throw new Error("Clipboard API failed");
       }
     } catch (error) {
       logger.error(
-        'Failed to copy llms.txt content',
+        "Failed to copy llms.txt content",
         error instanceof Error ? error : new Error(String(error)),
         {
-          component: 'CopyLLMsButton',
+          component: "CopyLLMsButton",
           llmsTxtUrl,
-        }
+        },
       );
 
       // Show error toast
-      toast.error('Failed to copy', {
-        description: 'Please try again or copy the URL manually',
+      toast.error("Failed to copy", {
+        description: "Please try again or copy the URL manually",
         duration: 4000,
       });
     } finally {
@@ -152,11 +160,11 @@ export function CopyLLMsButton({
       onClick={handleCopy}
       disabled={isLoading || isCopied}
       className={cn(
-        'gap-2 transition-all',
-        isCopied && 'border-green-500/50 bg-green-500/10 text-green-400',
-        className
+        "gap-2 transition-all",
+        isCopied && "border-green-500/50 bg-green-500/10 text-green-400",
+        className,
       )}
-      aria-label={isCopied ? 'Content copied' : 'Copy AI-optimized content'}
+      aria-label={isCopied ? "Content copied" : "Copy AI-optimized content"}
     >
       {showIcon &&
         (isCopied ? (
@@ -166,7 +174,9 @@ export function CopyLLMsButton({
         ) : (
           <Sparkles className="h-4 w-4" aria-hidden="true" />
         ))}
-      <span className="text-sm">{isCopied ? 'Copied!' : isLoading ? 'Loading...' : label}</span>
+      <span className="text-sm">
+        {isCopied ? "Copied!" : isLoading ? "Loading..." : label}
+      </span>
     </Button>
   );
 }
@@ -185,8 +195,8 @@ export function CopyLLMsButton({
 export function CopyLLMsButtonIcon({
   llmsTxtUrl,
   className,
-  variant = 'ghost',
-}: Omit<CopyLLMsButtonProps, 'label' | 'size' | 'showIcon'>) {
+  variant = "ghost",
+}: Omit<CopyLLMsButtonProps, "label" | "size" | "showIcon">) {
   const [isCopied, setIsCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -205,25 +215,25 @@ export function CopyLLMsButtonIcon({
       const content = await response.text();
 
       const success = await copyToClipboard(content, {
-        component: 'CopyLLMsButtonIcon',
-        action: 'copy_llmstxt',
+        component: "CopyLLMsButtonIcon",
+        action: "copy_llmstxt",
       });
 
       if (success) {
         setIsCopied(true);
-        toast.success('Copied for AI!');
+        toast.success("Copied for AI!");
         setTimeout(() => setIsCopied(false), 2000);
       } else {
-        throw new Error('Clipboard failed');
+        throw new Error("Clipboard failed");
       }
     } catch (error) {
       logger.error(
-        'Failed to copy llms.txt',
+        "Failed to copy llms.txt",
         error instanceof Error ? error : new Error(String(error)),
-        { component: 'CopyLLMsButtonIcon', llmsTxtUrl }
+        { component: "CopyLLMsButtonIcon", llmsTxtUrl },
       );
 
-      toast.error('Failed to copy');
+      toast.error("Failed to copy");
     } finally {
       setIsLoading(false);
     }
@@ -236,9 +246,9 @@ export function CopyLLMsButtonIcon({
       onClick={handleCopy}
       disabled={isLoading || isCopied}
       className={cn(
-        'transition-all',
-        isCopied && 'border-green-500/50 bg-green-500/10 text-green-400',
-        className
+        "transition-all",
+        isCopied && "border-green-500/50 bg-green-500/10 text-green-400",
+        className,
       )}
       aria-label="Copy AI-optimized content"
       title="Copy for AI"

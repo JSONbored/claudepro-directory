@@ -38,13 +38,13 @@
  * @see lib/config/build-category-config.ts - Category configuration
  */
 
-import { mkdir, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { z } from 'zod';
-import { getAllBuildCategoryConfigs } from '../src/lib/config/build-category-config.js';
-import { APP_CONFIG, MAIN_CONTENT_CATEGORIES } from '../src/lib/constants';
-import { logger } from '../src/lib/logger.js';
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { z } from "zod";
+import { getAllBuildCategoryConfigs } from "../src/lib/config/build-category-config.js";
+import { APP_CONFIG, MAIN_CONTENT_CATEGORIES } from "../src/lib/constants";
+import { logger } from "../src/lib/logger.js";
 import {
   type AllConfigurationsResponse,
   allConfigurationsResponseSchema,
@@ -65,15 +65,18 @@ import {
   staticAPISearchableItemSchema,
   type TransformedContentItem,
   transformedContentItemSchema,
-} from '../src/lib/schemas/api/static-api-response.schema.js';
-import { buildConfig, env } from '../src/lib/schemas/env.schema';
-import { type ContentCategory, contentCategorySchema } from '../src/lib/schemas/shared.schema';
+} from "../src/lib/schemas/api/static-api-response.schema.js";
+import { buildConfig, env } from "../src/lib/schemas/env.schema";
+import {
+  type ContentCategory,
+  contentCategorySchema,
+} from "../src/lib/schemas/shared.schema";
 
 /**
  * Output directory for static APIs
  * Modern path handling with node:path
  */
-const OUTPUT_DIR = join(process.cwd(), 'public', 'static-api');
+const OUTPUT_DIR = join(process.cwd(), "public", "static-api");
 
 /**
  * Load metadata for a category dynamically
@@ -86,16 +89,20 @@ const OUTPUT_DIR = join(process.cwd(), 'public', 'static-api');
  * @returns Array of metadata items for the category
  * @throws Error if metadata file not found or invalid
  */
-async function loadCategoryMetadata(categoryId: string): Promise<readonly unknown[]> {
+async function loadCategoryMetadata(
+  categoryId: string,
+): Promise<readonly unknown[]> {
   try {
     // Convert kebab-case to camelCase for variable name
-    const varName = categoryId.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+    const varName = categoryId.replace(/-([a-z])/g, (_, letter: string) =>
+      letter.toUpperCase(),
+    );
     const module = await import(`../generated/${categoryId}-metadata.js`);
     return module[`${varName}Metadata`] || [];
   } catch (error) {
     logger.error(
       `Failed to load metadata for ${categoryId}`,
-      error instanceof Error ? error : new Error(String(error))
+      error instanceof Error ? error : new Error(String(error)),
     );
     throw error;
   }
@@ -118,7 +125,7 @@ async function loadCategoryMetadata(categoryId: string): Promise<readonly unknow
 function transformContent<T extends { slug: string; seoTitle?: string }>(
   content: readonly T[],
   type: string,
-  category: string
+  category: string,
 ): TransformedContentItem[] {
   return content.map((item) => {
     const transformed = {
@@ -155,8 +162,8 @@ function toSearchableItems<
 >(items: readonly T[], category: string): StaticAPISearchableItem[] {
   return items.map((item) => {
     const searchable = {
-      title: item.title || item.name || '',
-      name: item.name || '',
+      title: item.title || item.name || "",
+      name: item.name || "",
       description: item.description,
       tags: item.tags ? (Array.isArray(item.tags) ? [...item.tags] : []) : [],
       category: item.category || category,
@@ -177,9 +184,9 @@ function toSearchableItems<
  * @param metadataByCategory - Map of category ID to metadata items
  */
 async function generateContentTypeAPIs(
-  metadataByCategory: Map<string, readonly unknown[]>
+  metadataByCategory: Map<string, readonly unknown[]>,
 ): Promise<void> {
-  logger.progress('Generating individual content type APIs...');
+  logger.progress("Generating individual content type APIs...");
 
   const configs = getAllBuildCategoryConfigs();
 
@@ -208,18 +215,25 @@ async function generateContentTypeAPIs(
         [validatedCategory]: transformedItems,
         count: transformedItems.length,
         lastUpdated: new Date().toISOString(),
-        generated: 'static' as const,
+        generated: "static" as const,
       } as ContentTypeApiResponse;
 
       // Final validation before write
-      const validatedResponse = contentTypeApiResponseSchema.parse(responseData);
+      const validatedResponse =
+        contentTypeApiResponseSchema.parse(responseData);
 
       // Atomic write for safety
       const outputFile = join(OUTPUT_DIR, `${config.id}.json`);
-      await writeFile(outputFile, JSON.stringify(validatedResponse, null, 2), 'utf-8');
+      await writeFile(
+        outputFile,
+        JSON.stringify(validatedResponse, null, 2),
+        "utf-8",
+      );
 
-      logger.success(`Generated ${config.id}.json (${transformedItems.length} items)`);
-    })
+      logger.success(
+        `Generated ${config.id}.json (${transformedItems.length} items)`,
+      );
+    }),
   );
 }
 
@@ -233,9 +247,9 @@ async function generateContentTypeAPIs(
  * @param metadataByCategory - Map of category ID to metadata items
  */
 async function generateAllConfigurationsAPI(
-  metadataByCategory: Map<string, readonly unknown[]>
+  metadataByCategory: Map<string, readonly unknown[]>,
 ): Promise<void> {
-  logger.progress('Generating all-configurations API...');
+  logger.progress("Generating all-configurations API...");
 
   const configs = getAllBuildCategoryConfigs();
 
@@ -247,7 +261,11 @@ async function generateAllConfigurationsAPI(
   for (const config of configs) {
     const metadata = metadataByCategory.get(config.id) || [];
     const type = CATEGORY_TYPE_MAP[config.id];
-    const transformed = transformContent(metadata as readonly MetadataItem[], type, config.id);
+    const transformed = transformContent(
+      metadata as readonly MetadataItem[],
+      type,
+      config.id,
+    );
 
     transformedData[config.id] = transformed;
     statistics[config.id] = transformed.length;
@@ -259,27 +277,32 @@ async function generateAllConfigurationsAPI(
 
   // Build response with JSON-LD structured data
   const allConfigurations: AllConfigurationsResponse = {
-    '@context': 'https://schema.org',
-    '@type': 'Dataset',
+    "@context": "https://schema.org",
+    "@type": "Dataset",
     name: `${APP_CONFIG.name} - All Configurations`,
     description: APP_CONFIG.description,
     license: APP_CONFIG.license,
     lastUpdated: new Date().toISOString(),
-    generated: 'static' as const,
+    generated: "static" as const,
     statistics,
-    data: transformedData as AllConfigurationsResponse['data'],
+    data: transformedData as AllConfigurationsResponse["data"],
     endpoints,
   };
 
   // Validate before write
-  const validatedConfigurations = allConfigurationsResponseSchema.parse(allConfigurations);
+  const validatedConfigurations =
+    allConfigurationsResponseSchema.parse(allConfigurations);
 
   // Atomic write
-  const outputFile = join(OUTPUT_DIR, 'all-configurations.json');
-  await writeFile(outputFile, JSON.stringify(validatedConfigurations, null, 2), 'utf-8');
+  const outputFile = join(OUTPUT_DIR, "all-configurations.json");
+  await writeFile(
+    outputFile,
+    JSON.stringify(validatedConfigurations, null, 2),
+    "utf-8",
+  );
 
   logger.success(
-    `Generated all-configurations.json (${validatedConfigurations.statistics.totalConfigurations} total items)`
+    `Generated all-configurations.json (${validatedConfigurations.statistics.totalConfigurations} total items)`,
   );
 }
 
@@ -293,65 +316,86 @@ async function generateAllConfigurationsAPI(
  * @param metadataByCategory - Map of category ID to metadata items
  */
 async function generateSearchIndexes(
-  metadataByCategory: Map<string, readonly unknown[]>
+  metadataByCategory: Map<string, readonly unknown[]>,
 ): Promise<void> {
-  logger.progress('Generating search indexes...');
+  logger.progress("Generating search indexes...");
 
   // Create combined searchable dataset
   const allSearchableItems: StaticAPISearchableItem[] = [];
 
   for (const [categoryId, metadata] of metadataByCategory.entries()) {
-    allSearchableItems.push(...toSearchableItems([...metadata] as MetadataItem[], categoryId));
+    allSearchableItems.push(
+      ...toSearchableItems([...metadata] as MetadataItem[], categoryId),
+    );
   }
 
   // Generate category-specific indexes in parallel
   await Promise.all(
-    (MAIN_CONTENT_CATEGORIES as readonly ContentCategory[]).map(async (category) => {
-      const categoryItems = allSearchableItems.filter((item) => item.category === category);
+    (MAIN_CONTENT_CATEGORIES as readonly ContentCategory[]).map(
+      async (category) => {
+        const categoryItems = allSearchableItems.filter(
+          (item) => item.category === category,
+        );
 
-      // Extract and sort unique tags
-      const uniqueTags = [...new Set(categoryItems.flatMap((item) => item.tags))].sort();
+        // Extract and sort unique tags
+        const uniqueTags = [
+          ...new Set(categoryItems.flatMap((item) => item.tags)),
+        ].sort();
 
-      // Calculate popular tags with counts
-      const tagCounts = new Map<string, number>();
-      for (const item of categoryItems) {
-        for (const tag of item.tags) {
-          tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+        // Calculate popular tags with counts
+        const tagCounts = new Map<string, number>();
+        for (const item of categoryItems) {
+          for (const tag of item.tags) {
+            tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+          }
         }
-      }
 
-      const popularTags = Array.from(tagCounts.entries())
-        .map(([tag, count]) => ({ tag, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 20);
+        const popularTags = Array.from(tagCounts.entries())
+          .map(([tag, count]) => ({ tag, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 20);
 
-      const searchIndex: CategorySearchIndex = {
-        category,
-        items: categoryItems,
-        count: categoryItems.length,
-        lastUpdated: new Date().toISOString(),
-        generated: 'static' as const,
-        tags: uniqueTags,
-        popularTags,
-      };
+        const searchIndex: CategorySearchIndex = {
+          category,
+          items: categoryItems,
+          count: categoryItems.length,
+          lastUpdated: new Date().toISOString(),
+          generated: "static" as const,
+          tags: uniqueTags,
+          popularTags,
+        };
 
-      // Validate and write
-      const validatedIndex = categorySearchIndexSchema.parse(searchIndex);
-      const outputFile = join(OUTPUT_DIR, 'search-indexes', `${category}.json`);
-      await writeFile(outputFile, JSON.stringify(validatedIndex, null, 2), 'utf-8');
+        // Validate and write
+        const validatedIndex = categorySearchIndexSchema.parse(searchIndex);
+        const outputFile = join(
+          OUTPUT_DIR,
+          "search-indexes",
+          `${category}.json`,
+        );
+        await writeFile(
+          outputFile,
+          JSON.stringify(validatedIndex, null, 2),
+          "utf-8",
+        );
 
-      logger.success(`Generated search index for ${category} (${categoryItems.length} items)`);
-    })
+        logger.success(
+          `Generated search index for ${category} (${categoryItems.length} items)`,
+        );
+      },
+    ),
   );
 
   // Generate combined search index
   const categoryCounts = MAIN_CONTENT_CATEGORIES.map((category) => ({
     category,
-    count: allSearchableItems.filter((item) => item.category === category).length,
+    count: allSearchableItems.filter((item) => item.category === category)
+      .length,
   }));
 
   // Global unique tags
-  const allTags = [...new Set(allSearchableItems.flatMap((item) => item.tags))].sort();
+  const allTags = [
+    ...new Set(allSearchableItems.flatMap((item) => item.tags)),
+  ].sort();
 
   // Global popular tags
   const globalTagCounts = new Map<string, number>();
@@ -370,18 +414,29 @@ async function generateSearchIndexes(
     items: allSearchableItems,
     count: allSearchableItems.length,
     lastUpdated: new Date().toISOString(),
-    generated: 'static' as const,
+    generated: "static" as const,
     categories: categoryCounts,
     tags: allTags,
     popularTags: globalPopularTags,
   };
 
   // Validate and write
-  const validatedCombinedIndex = combinedSearchIndexSchema.parse(combinedSearchIndex);
-  const combinedOutputFile = join(OUTPUT_DIR, 'search-indexes', 'combined.json');
-  await writeFile(combinedOutputFile, JSON.stringify(validatedCombinedIndex, null, 2), 'utf-8');
+  const validatedCombinedIndex =
+    combinedSearchIndexSchema.parse(combinedSearchIndex);
+  const combinedOutputFile = join(
+    OUTPUT_DIR,
+    "search-indexes",
+    "combined.json",
+  );
+  await writeFile(
+    combinedOutputFile,
+    JSON.stringify(validatedCombinedIndex, null, 2),
+    "utf-8",
+  );
 
-  logger.success(`Generated combined search index (${allSearchableItems.length} items)`);
+  logger.success(
+    `Generated combined search index (${allSearchableItems.length} items)`,
+  );
 }
 
 /**
@@ -394,9 +449,9 @@ async function generateSearchIndexes(
  * @param metadataByCategory - Map of category ID to metadata items
  */
 async function generateHealthCheck(
-  metadataByCategory: Map<string, readonly unknown[]>
+  metadataByCategory: Map<string, readonly unknown[]>,
 ): Promise<void> {
-  logger.progress('Generating health check endpoint...');
+  logger.progress("Generating health check endpoint...");
 
   // Initialize counts with helper function
   const counts = createEmptyHealthCounts();
@@ -408,9 +463,9 @@ async function generateHealthCheck(
   }
 
   const healthData: HealthCheckResponse = {
-    status: 'healthy',
+    status: "healthy",
     timestamp: new Date().toISOString(),
-    generated: 'static' as const,
+    generated: "static" as const,
     version: buildConfig.version,
     environment: env.NODE_ENV,
     counts,
@@ -424,10 +479,14 @@ async function generateHealthCheck(
 
   // Validate and write
   const validatedHealth = healthCheckResponseSchema.parse(healthData);
-  const outputFile = join(OUTPUT_DIR, 'health.json');
-  await writeFile(outputFile, JSON.stringify(validatedHealth, null, 2), 'utf-8');
+  const outputFile = join(OUTPUT_DIR, "health.json");
+  await writeFile(
+    outputFile,
+    JSON.stringify(validatedHealth, null, 2),
+    "utf-8",
+  );
 
-  logger.success('Generated health check endpoint');
+  logger.success("Generated health check endpoint");
 }
 
 /**
@@ -440,7 +499,7 @@ async function generateHealthCheck(
  * @returns Generation result with success status and metrics
  */
 async function generateStaticAPIs(): Promise<GenerationResult> {
-  logger.progress('Starting static API generation...');
+  logger.progress("Starting static API generation...");
   const startTime = performance.now();
   const filesGenerated: string[] = [];
   const errors: string[] = [];
@@ -448,10 +507,10 @@ async function generateStaticAPIs(): Promise<GenerationResult> {
   try {
     // Ensure output directories exist
     await mkdir(OUTPUT_DIR, { recursive: true });
-    await mkdir(join(OUTPUT_DIR, 'search-indexes'), { recursive: true });
+    await mkdir(join(OUTPUT_DIR, "search-indexes"), { recursive: true });
 
     // Load all category metadata dynamically
-    logger.progress('Loading category metadata...');
+    logger.progress("Loading category metadata...");
     const configs = getAllBuildCategoryConfigs();
     const metadataByCategory = new Map<string, readonly unknown[]>();
 
@@ -461,7 +520,7 @@ async function generateStaticAPIs(): Promise<GenerationResult> {
         const metadata = await loadCategoryMetadata(config.id);
         metadataByCategory.set(config.id, metadata);
         logger.info(`Loaded ${config.name}: ${metadata.length} items`);
-      })
+      }),
     );
 
     // Generate all static APIs
@@ -469,26 +528,28 @@ async function generateStaticAPIs(): Promise<GenerationResult> {
     filesGenerated.push(...configs.map((c) => `${c.id}.json`));
 
     await generateAllConfigurationsAPI(metadataByCategory);
-    filesGenerated.push('all-configurations.json');
+    filesGenerated.push("all-configurations.json");
 
     await generateSearchIndexes(metadataByCategory);
     filesGenerated.push(
       ...configs.map((c) => `search-indexes/${c.id}.json`),
-      'search-indexes/combined.json'
+      "search-indexes/combined.json",
     );
 
     await generateHealthCheck(metadataByCategory);
-    filesGenerated.push('health.json');
+    filesGenerated.push("health.json");
 
     const duration = performance.now() - startTime;
     const totalItems = Array.from(metadataByCategory.values()).reduce(
       (sum, items) => sum + items.length,
-      0
+      0,
     );
 
-    logger.success('All static APIs generated successfully!');
+    logger.success("All static APIs generated successfully!");
     logger.log(`Output directory: ${OUTPUT_DIR}`);
-    logger.log('APIs can now be served directly from CDN for maximum performance');
+    logger.log(
+      "APIs can now be served directly from CDN for maximum performance",
+    );
 
     return {
       success: true,
@@ -501,12 +562,14 @@ async function generateStaticAPIs(): Promise<GenerationResult> {
   } catch (error) {
     if (error instanceof z.ZodError) {
       logger.error(
-        `Validation error during generation: ${error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(', ')}`
+        `Validation error during generation: ${error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join(", ")}`,
       );
-      errors.push(...error.issues.map((i) => `${i.path.join('.')}: ${i.message}`));
+      errors.push(
+        ...error.issues.map((i) => `${i.path.join(".")}: ${i.message}`),
+      );
     } else {
       logger.failure(
-        `Failed to generate static APIs: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to generate static APIs: ${error instanceof Error ? error.message : String(error)}`,
       );
       errors.push(String(error));
     }
@@ -516,18 +579,19 @@ async function generateStaticAPIs(): Promise<GenerationResult> {
 }
 
 // Run if called directly (ESM compatible)
-if (import.meta.url.startsWith('file:')) {
+if (import.meta.url.startsWith("file:")) {
   const modulePath = fileURLToPath(import.meta.url);
   if (
     process.argv[1] &&
-    (process.argv[1] === modulePath || process.argv[1].endsWith('generate-static-apis.ts'))
+    (process.argv[1] === modulePath ||
+      process.argv[1].endsWith("generate-static-apis.ts"))
   ) {
     generateStaticAPIs()
       .then(() => process.exit(0))
       .catch((error) => {
         logger.error(
-          'Unexpected error:',
-          error instanceof Error ? error : new Error(String(error))
+          "Unexpected error:",
+          error instanceof Error ? error : new Error(String(error)),
         );
         process.exit(1);
       });

@@ -7,14 +7,14 @@
  * @see lib/schemas/content/*.schema.ts - Individual content schemas
  */
 
-import { agentContentSchema } from '@/src/lib/schemas/content/agent.schema';
-import { collectionContentSchema } from '@/src/lib/schemas/content/collection.schema';
-import { commandContentSchema } from '@/src/lib/schemas/content/command.schema';
-import { guideContentSchema } from '@/src/lib/schemas/content/guide.schema';
-import { hookContentSchema } from '@/src/lib/schemas/content/hook.schema';
-import { mcpContentSchema } from '@/src/lib/schemas/content/mcp.schema';
-import { ruleContentSchema } from '@/src/lib/schemas/content/rule.schema';
-import { statuslineContentSchema } from '@/src/lib/schemas/content/statusline.schema';
+import { agentContentSchema } from "@/src/lib/schemas/content/agent.schema";
+import { collectionContentSchema } from "@/src/lib/schemas/content/collection.schema";
+import { commandContentSchema } from "@/src/lib/schemas/content/command.schema";
+import { guideContentSchema } from "@/src/lib/schemas/content/guide.schema";
+import { hookContentSchema } from "@/src/lib/schemas/content/hook.schema";
+import { mcpContentSchema } from "@/src/lib/schemas/content/mcp.schema";
+import { ruleContentSchema } from "@/src/lib/schemas/content/rule.schema";
+import { statuslineContentSchema } from "@/src/lib/schemas/content/statusline.schema";
 
 /**
  * Validate content data by category
@@ -26,21 +26,21 @@ import { statuslineContentSchema } from '@/src/lib/schemas/content/statusline.sc
  */
 export function validateContentByCategory(data: unknown, category: string) {
   switch (category) {
-    case 'agents':
+    case "agents":
       return agentContentSchema.parse(data);
-    case 'mcp':
+    case "mcp":
       return mcpContentSchema.parse(data);
-    case 'rules':
+    case "rules":
       return ruleContentSchema.parse(data);
-    case 'commands':
+    case "commands":
       return commandContentSchema.parse(data);
-    case 'hooks':
+    case "hooks":
       return hookContentSchema.parse(data);
-    case 'guides':
+    case "guides":
       return guideContentSchema.parse(data);
-    case 'statuslines':
+    case "statuslines":
       return statuslineContentSchema.parse(data);
-    case 'collections':
+    case "collections":
       return collectionContentSchema.parse(data);
     default:
       throw new Error(`Unknown content category: ${category}`);

@@ -6,11 +6,11 @@
  * This approach is more tsc-efficient than .extend() and follows Zod best practices.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 import {
   baseConfigurationSchema,
   baseContentMetadataSchema,
-} from '@/src/lib/schemas/content/base-content.schema';
+} from "@/src/lib/schemas/content/base-content.schema";
 
 /**
  * Agent content schema - matches actual production agent JSON structure
@@ -30,20 +30,26 @@ export const agentContentSchema = z
     ...baseContentMetadataSchema.shape,
 
     // Agent-specific required fields
-    category: z.literal('agents').describe('Content category literal identifier: "agents"'),
+    category: z
+      .literal("agents")
+      .describe('Content category literal identifier: "agents"'),
 
     // Agent-specific optional fields
     configuration: baseConfigurationSchema
       .optional()
-      .describe('Optional AI model configuration settings (temperature, maxTokens, systemPrompt)'),
+      .describe(
+        "Optional AI model configuration settings (temperature, maxTokens, systemPrompt)",
+      ),
     installation: z
       .object({})
       .passthrough()
       .optional()
-      .describe('Optional complex installation object with platform-specific setup instructions'), // Complex installation object - allows any properties while maintaining type safety
+      .describe(
+        "Optional complex installation object with platform-specific setup instructions",
+      ), // Complex installation object - allows any properties while maintaining type safety
   })
   .describe(
-    'Agent content schema for AI assistant configurations. Inherits base content metadata and adds agent-specific fields including AI model settings and installation instructions.'
+    "Agent content schema for AI assistant configurations. Inherits base content metadata and adds agent-specific fields including AI model settings and installation instructions.",
   );
 
 export type AgentContent = z.infer<typeof agentContentSchema>;

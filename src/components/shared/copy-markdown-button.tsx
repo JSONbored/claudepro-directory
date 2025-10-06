@@ -14,19 +14,19 @@
  * @module components/shared/copy-markdown-button
  */
 
-'use client';
+"use client";
 
-import { useAction } from 'next-safe-action/hooks';
-import { useState } from 'react';
-import { Button } from '@/src/components/ui/button';
-import { toast } from '@/src/components/ui/sonner';
-import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
-import { copyMarkdownAction } from '@/src/lib/actions/markdown-actions';
-import { EVENTS } from '@/src/lib/analytics/events.config';
-import { trackEvent } from '@/src/lib/analytics/tracker';
-import { Check, FileText } from '@/src/lib/icons';
-import { logger } from '@/src/lib/logger';
-import { cn } from '@/src/lib/utils';
+import { useAction } from "next-safe-action/hooks";
+import { useState } from "react";
+import { Button } from "@/src/components/ui/button";
+import { toast } from "@/src/components/ui/sonner";
+import { useCopyWithEmailCapture } from "@/src/hooks/use-copy-with-email-capture";
+import { copyMarkdownAction } from "@/src/lib/actions/markdown-actions";
+import { EVENTS } from "@/src/lib/analytics/events.config";
+import { trackEvent } from "@/src/lib/analytics/tracker";
+import { Check, FileText } from "@/src/lib/icons";
+import { logger } from "@/src/lib/logger";
+import { cn } from "@/src/lib/utils";
 
 /**
  * Props for CopyMarkdownButton component
@@ -52,13 +52,19 @@ export interface CopyMarkdownButtonProps {
    * Button size variant
    * @default "sm"
    */
-  size?: 'default' | 'sm' | 'lg' | 'icon';
+  size?: "default" | "sm" | "lg" | "icon";
 
   /**
    * Button style variant
    * @default "outline"
    */
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  variant?:
+    | "default"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link";
 
   /**
    * Additional CSS classes
@@ -105,9 +111,9 @@ export interface CopyMarkdownButtonProps {
 export function CopyMarkdownButton({
   category,
   slug,
-  label = 'Copy as Markdown',
-  size = 'sm',
-  variant = 'outline',
+  label = "Copy as Markdown",
+  size = "sm",
+  variant = "outline",
   className,
   showIcon = true,
   includeMetadata = true,
@@ -115,29 +121,30 @@ export function CopyMarkdownButton({
 }: CopyMarkdownButtonProps) {
   const [isExecuting, setIsExecuting] = useState(false);
 
-  const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
+  const referrer =
+    typeof window !== "undefined" ? window.location.pathname : undefined;
   const { copied, copy } = useCopyWithEmailCapture({
     emailContext: {
-      copyType: 'markdown',
+      copyType: "markdown",
       category,
       slug,
       ...(referrer ? { referrer } : {}),
     },
     onSuccess: () => {
-      toast.success('Copied to clipboard!', {
-        description: 'Markdown content ready to paste',
+      toast.success("Copied to clipboard!", {
+        description: "Markdown content ready to paste",
         duration: 3000,
       });
     },
     onError: () => {
-      toast.error('Failed to copy', {
-        description: 'Please try again',
+      toast.error("Failed to copy", {
+        description: "Please try again",
         duration: 4000,
       });
     },
     context: {
-      component: 'CopyMarkdownButton',
-      action: 'copy_markdown',
+      component: "CopyMarkdownButton",
+      action: "copy_markdown",
     },
   });
 
@@ -157,28 +164,28 @@ export function CopyMarkdownButton({
           content_length: result.data.markdown.length,
         });
       } else {
-        throw new Error(result.data?.error || 'Failed to generate markdown');
+        throw new Error(result.data?.error || "Failed to generate markdown");
       }
     },
     onError: (error) => {
       const serverError = error.error?.serverError;
       const errorMessage =
         serverError &&
-        typeof serverError === 'object' &&
-        'message' in serverError &&
-        typeof (serverError as { message?: unknown }).message === 'string'
+        typeof serverError === "object" &&
+        "message" in serverError &&
+        typeof (serverError as { message?: unknown }).message === "string"
           ? (serverError as { message: string }).message
-          : typeof serverError === 'string'
+          : typeof serverError === "string"
             ? serverError
-            : 'Failed to copy';
+            : "Failed to copy";
 
-      logger.error('Copy markdown action failed', new Error(errorMessage), {
-        component: 'CopyMarkdownButton',
+      logger.error("Copy markdown action failed", new Error(errorMessage), {
+        component: "CopyMarkdownButton",
         category,
         slug,
       });
 
-      toast.error('Failed to copy markdown', {
+      toast.error("Failed to copy markdown", {
         description: errorMessage,
         duration: 4000,
       });
@@ -189,7 +196,7 @@ export function CopyMarkdownButton({
    * Handle copy button click
    */
   const handleCopy = async () => {
-    if (isExecuting || copied || status === 'executing') return;
+    if (isExecuting || copied || status === "executing") return;
 
     setIsExecuting(true);
 
@@ -205,7 +212,7 @@ export function CopyMarkdownButton({
     }
   };
 
-  const isLoading = status === 'executing' || isExecuting;
+  const isLoading = status === "executing" || isExecuting;
 
   return (
     <Button
@@ -214,11 +221,11 @@ export function CopyMarkdownButton({
       onClick={handleCopy}
       disabled={isLoading || copied}
       className={cn(
-        'gap-2 transition-all',
-        copied && 'border-green-500/50 bg-green-500/10 text-green-400',
-        className
+        "gap-2 transition-all",
+        copied && "border-green-500/50 bg-green-500/10 text-green-400",
+        className,
       )}
-      aria-label={copied ? 'Markdown copied' : 'Copy as markdown'}
+      aria-label={copied ? "Markdown copied" : "Copy as markdown"}
     >
       {showIcon &&
         (copied ? (
@@ -228,7 +235,9 @@ export function CopyMarkdownButton({
         ) : (
           <FileText className="h-4 w-4" aria-hidden="true" />
         ))}
-      <span className="text-sm">{copied ? 'Copied!' : isLoading ? 'Loading...' : label}</span>
+      <span className="text-sm">
+        {copied ? "Copied!" : isLoading ? "Loading..." : label}
+      </span>
     </Button>
   );
 }
@@ -248,29 +257,30 @@ export function CopyMarkdownButtonIcon({
   category,
   slug,
   className,
-  variant = 'ghost',
+  variant = "ghost",
   includeMetadata = true,
   includeFooter = false,
-}: Omit<CopyMarkdownButtonProps, 'label' | 'size' | 'showIcon'>) {
+}: Omit<CopyMarkdownButtonProps, "label" | "size" | "showIcon">) {
   const [isExecuting, setIsExecuting] = useState(false);
 
-  const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
+  const referrer =
+    typeof window !== "undefined" ? window.location.pathname : undefined;
   const { copied, copy } = useCopyWithEmailCapture({
     emailContext: {
-      copyType: 'markdown',
+      copyType: "markdown",
       category,
       slug,
       ...(referrer ? { referrer } : {}),
     },
     onSuccess: () => {
-      toast.success('Copied as Markdown!');
+      toast.success("Copied as Markdown!");
     },
     onError: () => {
-      toast.error('Failed to copy');
+      toast.error("Failed to copy");
     },
     context: {
-      component: 'CopyMarkdownButtonIcon',
-      action: 'copy_markdown',
+      component: "CopyMarkdownButtonIcon",
+      action: "copy_markdown",
     },
   });
 
@@ -288,32 +298,32 @@ export function CopyMarkdownButtonIcon({
           content_length: result.data.markdown.length,
         });
       } else {
-        throw new Error(result.data?.error || 'Failed to generate markdown');
+        throw new Error(result.data?.error || "Failed to generate markdown");
       }
     },
     onError: (error) => {
       const serverError = error.error?.serverError;
       const errorMessage =
         serverError &&
-        typeof serverError === 'object' &&
-        'message' in serverError &&
-        typeof (serverError as { message?: unknown }).message === 'string'
+        typeof serverError === "object" &&
+        "message" in serverError &&
+        typeof (serverError as { message?: unknown }).message === "string"
           ? (serverError as { message: string }).message
-          : typeof serverError === 'string'
+          : typeof serverError === "string"
             ? serverError
-            : 'Failed to copy';
+            : "Failed to copy";
 
-      logger.error('Copy markdown failed', new Error(errorMessage), {
-        component: 'CopyMarkdownButtonIcon',
+      logger.error("Copy markdown failed", new Error(errorMessage), {
+        component: "CopyMarkdownButtonIcon",
         category,
         slug,
       });
-      toast.error('Failed to copy');
+      toast.error("Failed to copy");
     },
   });
 
   const handleCopy = async () => {
-    if (isExecuting || copied || status === 'executing') return;
+    if (isExecuting || copied || status === "executing") return;
 
     setIsExecuting(true);
     try {
@@ -323,7 +333,7 @@ export function CopyMarkdownButtonIcon({
     }
   };
 
-  const isLoading = status === 'executing' || isExecuting;
+  const isLoading = status === "executing" || isExecuting;
 
   return (
     <Button
@@ -332,9 +342,9 @@ export function CopyMarkdownButtonIcon({
       onClick={handleCopy}
       disabled={isLoading || copied}
       className={cn(
-        'transition-all',
-        copied && 'border-green-500/50 bg-green-500/10 text-green-400',
-        className
+        "transition-all",
+        copied && "border-green-500/50 bg-green-500/10 text-green-400",
+        className,
       )}
       aria-label="Copy as markdown"
       title="Copy as Markdown"

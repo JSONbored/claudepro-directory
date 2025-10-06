@@ -4,14 +4,20 @@
  * This prevents runtime errors from missing or malformed environment variables
  */
 
-import { z } from 'zod';
-import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives/base-strings';
+import { z } from "zod";
+import {
+  nonEmptyString,
+  urlString,
+} from "@/src/lib/schemas/primitives/base-strings";
 
 // Logger import - must be lazy to avoid circular dependency during env initialization
-function getLogger(): { error: (msg: string) => void; warn: (msg: string) => void } {
+function getLogger(): {
+  error: (msg: string) => void;
+  warn: (msg: string) => void;
+} {
   try {
     // Lazy load to avoid circular dependency
-    const loggerModule = require('../logger');
+    const loggerModule = require("../logger");
     return loggerModule.logger;
   } catch {
     // Fallback to console if logger is not available during early initialization
@@ -36,100 +42,118 @@ const serverEnvSchema = z
   .object({
     // Node environment
     NODE_ENV: z
-      .enum(['development', 'production', 'test'])
-      .default('development')
-      .describe('Application runtime environment mode'),
+      .enum(["development", "production", "test"])
+      .default("development")
+      .describe("Application runtime environment mode"),
 
     // Redis/Upstash configuration
     KV_REST_API_URL: urlString
       .optional()
-      .describe('Upstash Redis REST API endpoint URL for key-value storage'),
+      .describe("Upstash Redis REST API endpoint URL for key-value storage"),
     KV_REST_API_TOKEN: nonEmptyString
       .optional()
-      .describe('Authentication token for Upstash Redis REST API'),
+      .describe("Authentication token for Upstash Redis REST API"),
 
     // Arcjet security - Required in production for rate limiting and DDoS protection
     ARCJET_KEY: nonEmptyString
       .optional()
-      .describe('Arcjet API key for rate limiting and DDoS protection (required in production)'),
+      .describe(
+        "Arcjet API key for rate limiting and DDoS protection (required in production)",
+      ),
 
     // Vercel environment
-    VERCEL: z.enum(['1']).optional().describe('Flag indicating if running on Vercel platform'),
-    VERCEL_ENV: z
-      .enum(['production', 'preview', 'development'])
+    VERCEL: z
+      .enum(["1"])
       .optional()
-      .describe('Vercel deployment environment type'),
-    VERCEL_URL: z.string().optional().describe('Vercel deployment URL'),
-    VERCEL_REGION: z.string().optional().describe('Vercel deployment region'),
-    VERCEL_GIT_COMMIT_SHA: z.string().optional().describe('Git commit SHA of the deployment'),
+      .describe("Flag indicating if running on Vercel platform"),
+    VERCEL_ENV: z
+      .enum(["production", "preview", "development"])
+      .optional()
+      .describe("Vercel deployment environment type"),
+    VERCEL_URL: z.string().optional().describe("Vercel deployment URL"),
+    VERCEL_REGION: z.string().optional().describe("Vercel deployment region"),
+    VERCEL_GIT_COMMIT_SHA: z
+      .string()
+      .optional()
+      .describe("Git commit SHA of the deployment"),
     VERCEL_GIT_COMMIT_MESSAGE: z
       .string()
       .optional()
-      .describe('Git commit message of the deployment'),
+      .describe("Git commit message of the deployment"),
     VERCEL_GIT_COMMIT_AUTHOR_NAME: z
       .string()
       .optional()
-      .describe('Git commit author name of the deployment'),
+      .describe("Git commit author name of the deployment"),
 
     // Analytics configuration (optional for development)
     UMAMI_WEBSITE_ID: z
       .string()
       .uuid()
       .optional()
-      .describe('Umami analytics website ID for server-side tracking'),
+      .describe("Umami analytics website ID for server-side tracking"),
     UMAMI_API_URL: urlString
       .optional()
-      .describe('Umami API endpoint URL for server-side analytics'),
+      .describe("Umami API endpoint URL for server-side analytics"),
 
     // Rate limiting secrets
     RATE_LIMIT_SECRET: z
       .string()
       .min(32)
       .optional()
-      .describe('Secret key for rate limiting token generation (minimum 32 characters)'),
+      .describe(
+        "Secret key for rate limiting token generation (minimum 32 characters)",
+      ),
 
     // Cache warming authorization
     CACHE_WARM_AUTH_TOKEN: z
       .string()
       .min(32)
       .optional()
-      .describe('Authorization token for cache warming endpoints (minimum 32 characters)'),
+      .describe(
+        "Authorization token for cache warming endpoints (minimum 32 characters)",
+      ),
 
     // Development cache bypass flags
     BYPASS_RELATED_CACHE: z
-      .enum(['true', 'false'])
+      .enum(["true", "false"])
       .optional()
-      .describe('Development flag to bypass related content caching'),
+      .describe("Development flag to bypass related content caching"),
 
     // View count security salt
     VIEW_COUNT_SALT: z
       .string()
       .min(16)
       .optional()
-      .describe('Salt for secure view count hashing (minimum 16 characters)'),
+      .describe("Salt for secure view count hashing (minimum 16 characters)"),
 
     // Webhook security
     WEBHOOK_SECRET: z
       .string()
       .min(32)
       .optional()
-      .describe('Secret key for webhook signature validation (minimum 32 characters)'),
+      .describe(
+        "Secret key for webhook signature validation (minimum 32 characters)",
+      ),
 
     // Email provider (Resend)
     RESEND_API_KEY: nonEmptyString
       .optional()
-      .describe('Resend API key for transactional email and newsletter subscriptions'),
+      .describe(
+        "Resend API key for transactional email and newsletter subscriptions",
+      ),
 
     RESEND_AUDIENCE_ID: nonEmptyString
       .optional()
-      .describe('Resend Audience ID for newsletter contact management'),
+      .describe("Resend Audience ID for newsletter contact management"),
 
     RESEND_WEBHOOK_SECRET: nonEmptyString
       .optional()
-      .describe('Resend webhook signing secret (from Svix) for verifying webhook authenticity'),
+      .describe(
+        "Resend webhook signing secret (from Svix) for verifying webhook authenticity",
+      ),
   })
   .describe(
-    'Server-side environment variables containing sensitive data only accessible on the server'
+    "Server-side environment variables containing sensitive data only accessible on the server",
   );
 
 /**
@@ -140,13 +164,20 @@ const buildEnvSchema = z
   .object({
     // Package version from npm
     npm_package_version: nonEmptyString
-      .default('1.0.0')
-      .describe('NPM package version from package.json'),
-    npm_package_name: z.string().optional().describe('NPM package name from package.json'),
+      .default("1.0.0")
+      .describe("NPM package version from package.json"),
+    npm_package_name: z
+      .string()
+      .optional()
+      .describe("NPM package name from package.json"),
     // Server port
-    PORT: nonEmptyString.default('3000').describe('Server port for local development'),
+    PORT: nonEmptyString
+      .default("3000")
+      .describe("Server port for local development"),
   })
-  .describe('Build-time environment variables available during the build process');
+  .describe(
+    "Build-time environment variables available during the build process",
+  );
 
 /**
  * Client-side environment variables schema
@@ -160,27 +191,31 @@ const clientEnvSchema = z
       .string()
       .uuid()
       .optional()
-      .describe('Public Umami analytics website ID exposed to the browser'),
+      .describe("Public Umami analytics website ID exposed to the browser"),
     NEXT_PUBLIC_UMAMI_SCRIPT_URL: urlString
       .optional()
-      .describe('Public Umami analytics script URL for client-side tracking'),
+      .describe("Public Umami analytics script URL for client-side tracking"),
 
     // Debug flags
     NEXT_PUBLIC_DEBUG_ANALYTICS: z
-      .enum(['true', 'false'])
+      .enum(["true", "false"])
       .optional()
-      .describe('Enable debug logging for analytics in the browser'),
+      .describe("Enable debug logging for analytics in the browser"),
     NEXT_PUBLIC_ENABLE_PWA: z
-      .enum(['true', 'false'])
+      .enum(["true", "false"])
       .optional()
-      .describe('Enable Progressive Web App features'),
+      .describe("Enable Progressive Web App features"),
 
     // Public API endpoints
-    NEXT_PUBLIC_API_URL: urlString.optional().describe('Public API endpoint URL'),
-    NEXT_PUBLIC_SITE_URL: urlString.optional().describe('Public site URL for canonical links'),
+    NEXT_PUBLIC_API_URL: urlString
+      .optional()
+      .describe("Public API endpoint URL"),
+    NEXT_PUBLIC_SITE_URL: urlString
+      .optional()
+      .describe("Public site URL for canonical links"),
   })
   .describe(
-    'Client-side environment variables exposed to the browser (must not contain sensitive data)'
+    "Client-side environment variables exposed to the browser (must not contain sensitive data)",
   );
 
 /**
@@ -189,7 +224,9 @@ const clientEnvSchema = z
 const envSchema = serverEnvSchema
   .merge(clientEnvSchema)
   .merge(buildEnvSchema)
-  .describe('Combined environment schema merging server, client, and build-time variables');
+  .describe(
+    "Combined environment schema merging server, client, and build-time variables",
+  );
 
 /**
  * Type definitions exported from schemas
@@ -204,11 +241,11 @@ export type Env = z.infer<typeof envSchema>;
  * These must be set in production for security and functionality
  */
 const productionRequiredEnvs = [
-  'ARCJET_KEY', // DDoS and rate limiting protection
-  'RATE_LIMIT_SECRET', // Rate limiting security
-  'CACHE_WARM_AUTH_TOKEN', // Cache warming authorization
-  'VIEW_COUNT_SALT', // Secure view count generation
-  'WEBHOOK_SECRET', // Webhook signature validation
+  "ARCJET_KEY", // DDoS and rate limiting protection
+  "RATE_LIMIT_SECRET", // Rate limiting security
+  "CACHE_WARM_AUTH_TOKEN", // Cache warming authorization
+  "VIEW_COUNT_SALT", // Secure view count generation
+  "WEBHOOK_SECRET", // Webhook signature validation
 ] as const;
 
 /**
@@ -235,20 +272,26 @@ function validateEnv(): Env {
 
   if (!parsed.success) {
     const log = getLogger();
-    const errorDetails = JSON.stringify(parsed.error.flatten().fieldErrors, null, 2);
+    const errorDetails = JSON.stringify(
+      parsed.error.flatten().fieldErrors,
+      null,
+      2,
+    );
 
     log.error(`Invalid environment variables detected: ${errorDetails}`);
 
     // In production, we should fail fast on invalid env vars
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('Invalid environment variables. Check the logs for details.');
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "Invalid environment variables. Check the logs for details.",
+      );
     }
 
     // In development, warn but continue with defaults
-    log.warn('Using default values for missing environment variables');
+    log.warn("Using default values for missing environment variables");
     cachedEnv = envSchema.parse({
       ...process.env,
-      NODE_ENV: process.env.NODE_ENV || 'development',
+      NODE_ENV: process.env.NODE_ENV || "development",
     });
     return cachedEnv;
   }
@@ -256,48 +299,53 @@ function validateEnv(): Env {
   // Additional production validation - ONLY RUN SERVER-SIDE
   // Security-critical: This validation MUST NEVER run client-side
   // Client bundles must not include server-only env var names or validation logic
-  const isServer = typeof window === 'undefined';
+  const isServer = typeof window === "undefined";
   const isBuildPhase =
-    process.env.NEXT_PHASE === 'phase-production-build' ||
-    process.env.NEXT_PHASE === 'phase-production-server';
+    process.env.NEXT_PHASE === "phase-production-build" ||
+    process.env.NEXT_PHASE === "phase-production-server";
   const isProductionRuntime =
-    process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production';
+    process.env.NODE_ENV === "production" ||
+    process.env.VERCEL_ENV === "production";
 
   // Only validate server-only env vars on server, outside build phase, in production runtime
   // This ensures: 1) No client-side exposure 2) No build-time failures 3) Runtime security enforcement
   if (isServer && !isBuildPhase && isProductionRuntime) {
-    const missingRequiredEnvs = productionRequiredEnvs.filter((envVar) => !process.env[envVar]);
+    const missingRequiredEnvs = productionRequiredEnvs.filter(
+      (envVar) => !process.env[envVar],
+    );
 
     if (missingRequiredEnvs.length > 0) {
       const log = getLogger();
-      const missingVars = missingRequiredEnvs.join(', ');
+      const missingVars = missingRequiredEnvs.join(", ");
 
       // Security: Log without exposing which specific vars are missing in production logs
-      log.error('Missing required production environment variables for security features');
+      log.error(
+        "Missing required production environment variables for security features",
+      );
       throw new Error(
-        `Missing required production environment variables: ${missingVars}. These are required for security and functionality in production.`
+        `Missing required production environment variables: ${missingVars}. These are required for security and functionality in production.`,
       );
     }
 
     // Validate minimum security token lengths - fail fast on weak secrets
     const securityValidations = [
       {
-        name: 'RATE_LIMIT_SECRET',
+        name: "RATE_LIMIT_SECRET",
         value: process.env.RATE_LIMIT_SECRET,
         minLength: 32,
       },
       {
-        name: 'CACHE_WARM_AUTH_TOKEN',
+        name: "CACHE_WARM_AUTH_TOKEN",
         value: process.env.CACHE_WARM_AUTH_TOKEN,
         minLength: 32,
       },
       {
-        name: 'VIEW_COUNT_SALT',
+        name: "VIEW_COUNT_SALT",
         value: process.env.VIEW_COUNT_SALT,
         minLength: 16,
       },
       {
-        name: 'WEBHOOK_SECRET',
+        name: "WEBHOOK_SECRET",
         value: process.env.WEBHOOK_SECRET,
         minLength: 32,
       },
@@ -306,7 +354,7 @@ function validateEnv(): Env {
     for (const validation of securityValidations) {
       if (validation.value && validation.value.length < validation.minLength) {
         throw new Error(
-          `${validation.name} must be at least ${validation.minLength} characters for production security`
+          `${validation.name} must be at least ${validation.minLength} characters for production security`,
         );
       }
     }
@@ -327,8 +375,8 @@ export const env = validateEnv();
 /**
  * Helper functions for common environment checks
  */
-export const isDevelopment = env.NODE_ENV === 'development';
-export const isProduction = env.NODE_ENV === 'production';
+export const isDevelopment = env.NODE_ENV === "development";
+export const isProduction = env.NODE_ENV === "production";
 
 /**
  * Security configuration

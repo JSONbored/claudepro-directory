@@ -3,7 +3,7 @@
  * Functions for parsing and loading guide content
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Schema for guide frontmatter metadata
@@ -38,7 +38,10 @@ export const guideItemWithCategorySchema = guideItemSchema.extend({
 /**
  * Schema for guides by category
  */
-const guidesByCategorySchema = z.record(z.string(), z.array(guideItemWithCategorySchema));
+const guidesByCategorySchema = z.record(
+  z.string(),
+  z.array(guideItemWithCategorySchema),
+);
 
 export type GuideFrontmatter = z.infer<typeof guideFrontmatterSchema>;
 export type GuideItem = z.infer<typeof guideItemSchema>;
@@ -58,7 +61,7 @@ export function parseFrontmatter(content: string): GuideFrontmatter | null {
     }
 
     const metadata: Record<string, string | string[]> = {};
-    const lines = frontmatterMatch[1].split('\n');
+    const lines = frontmatterMatch[1].split("\n");
     let currentKey: string | null = null;
     let currentValue: string[] = [];
 
@@ -68,12 +71,12 @@ export function parseFrontmatter(content: string): GuideFrontmatter | null {
         // Save previous key-value pair if exists
         if (currentKey) {
           const value = currentValue
-            .join(' ')
+            .join(" ")
             .trim()
-            .replace(/^["']|["']$/g, '');
+            .replace(/^["']|["']$/g, "");
 
           // Handle arrays (tags)
-          if (currentKey === 'tags' && value.startsWith('[')) {
+          if (currentKey === "tags" && value.startsWith("[")) {
             try {
               metadata[currentKey] = JSON.parse(value) as string[];
             } catch {
@@ -85,9 +88,9 @@ export function parseFrontmatter(content: string): GuideFrontmatter | null {
         }
 
         // Start new key-value pair
-        const [key, ...valueParts] = line.split(':');
-        currentKey = key ? key.trim() : '';
-        currentValue = [valueParts.join(':').trim()];
+        const [key, ...valueParts] = line.split(":");
+        currentKey = key ? key.trim() : "";
+        currentValue = [valueParts.join(":").trim()];
       } else if (currentKey) {
         // Continuation of multi-line value
         currentValue.push(line.trim());
@@ -97,12 +100,12 @@ export function parseFrontmatter(content: string): GuideFrontmatter | null {
     // Save the last key-value pair
     if (currentKey) {
       const value = currentValue
-        .join(' ')
+        .join(" ")
         .trim()
-        .replace(/^["']|["']$/g, '');
+        .replace(/^["']|["']$/g, "");
 
       // Handle arrays (tags)
-      if (currentKey === 'tags' && value.startsWith('[')) {
+      if (currentKey === "tags" && value.startsWith("[")) {
         try {
           metadata[currentKey] = JSON.parse(value) as string[];
         } catch {
@@ -123,7 +126,9 @@ export function parseFrontmatter(content: string): GuideFrontmatter | null {
       return {
         title: String(metadata.title),
         description: String(metadata.description),
-        dateUpdated: metadata.dateUpdated ? String(metadata.dateUpdated) : undefined,
+        dateUpdated: metadata.dateUpdated
+          ? String(metadata.dateUpdated)
+          : undefined,
         author: metadata.author ? String(metadata.author) : undefined,
         tags: Array.isArray(metadata.tags) ? metadata.tags : undefined,
         category: metadata.category ? String(metadata.category) : undefined,

@@ -11,8 +11,8 @@
  * ```
  */
 
-import { highlightCode } from '@/src/lib/content/syntax-highlighting';
-import { ProductionCodeBlock } from './production-code-block';
+import { highlightCode } from "@/src/lib/content/syntax-highlighting";
+import { ProductionCodeBlock } from "./production-code-block";
 
 export interface CodeBlockServerProps {
   code: string;
@@ -28,11 +28,11 @@ export interface CodeBlockServerProps {
  */
 export async function CodeBlockServer({
   code,
-  language = 'text',
+  language = "text",
   filename,
   maxLines = 20,
   showLineNumbers = false,
-  className = '',
+  className = "",
 }: CodeBlockServerProps) {
   // Highlight code on the server
   const highlightedHtml = await highlightCode(code, language);

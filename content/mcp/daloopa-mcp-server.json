@@ -4,7 +4,13 @@
   "category": "mcp",
   "author": "Daloopa",
   "dateAdded": "2025-09-18",
-  "tags": ["finance", "daloopa", "sec-filings", "financial-data", "investor-relations"],
+  "tags": [
+    "finance",
+    "daloopa",
+    "sec-filings",
+    "financial-data",
+    "investor-relations"
+  ],
   "content": "Access comprehensive financial data and SEC filing information through Daloopa's curated database.",
   "features": [
     "Access SEC filing data and documents",

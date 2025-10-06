@@ -1,27 +1,27 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
-import { Badge } from '@/src/components/ui/badge';
-import { Card } from '@/src/components/ui/card';
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { Badge } from "@/src/components/ui/badge";
+import { Card } from "@/src/components/ui/card";
 import {
   trackRelatedContentClick,
   trackRelatedContentView,
-} from '@/src/lib/analytics/events/related-content';
-import { Sparkles } from '@/src/lib/icons';
+} from "@/src/lib/analytics/events/related-content";
+import { Sparkles } from "@/src/lib/icons";
 import type {
   RelatedCarouselClientProps,
   RelatedContentItem,
-} from '@/src/lib/schemas/related-content.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+} from "@/src/lib/schemas/related-content.schema";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 export function RelatedCarouselClient({
   items,
   performance,
   trackingEnabled = true,
-  className = '',
+  className = "",
   showTitle = true,
-  title = 'Related Content',
+  title = "Related Content",
 }: RelatedCarouselClientProps) {
   const [hasTrackedView, setHasTrackedView] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -33,11 +33,15 @@ export function RelatedCarouselClient({
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) {
-          trackRelatedContentView(window.location.pathname, items.length, performance.cacheHit);
+          trackRelatedContentView(
+            window.location.pathname,
+            items.length,
+            performance.cacheHit,
+          );
           setHasTrackedView(true);
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     );
 
     if (containerRef.current) {
@@ -55,96 +59,114 @@ export function RelatedCarouselClient({
     const itemUrl = `/${item.category}/${item.slug}`;
 
     // Track click event
-    trackRelatedContentClick(window.location.pathname, itemUrl, index + 1, item.score);
+    trackRelatedContentClick(
+      window.location.pathname,
+      itemUrl,
+      index + 1,
+      item.score,
+    );
   };
 
   // Get match type badge color
   const getMatchTypeBadge = (matchType: string) => {
-    const badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> =
-      {
-        same_category: { label: 'Related', variant: 'default' },
-        tag_match: { label: 'Similar Topics', variant: 'secondary' },
-        keyword_match: { label: 'Keyword', variant: 'secondary' }, // Short label to prevent overflow
-        trending: { label: 'Trending', variant: 'default' },
-        popular: { label: 'Popular', variant: 'default' },
-        cross_category: { label: 'Recommended', variant: 'outline' },
-      };
+    const badges: Record<
+      string,
+      { label: string; variant: "default" | "secondary" | "outline" }
+    > = {
+      same_category: { label: "Related", variant: "default" },
+      tag_match: { label: "Similar Topics", variant: "secondary" },
+      keyword_match: { label: "Keyword", variant: "secondary" }, // Short label to prevent overflow
+      trending: { label: "Trending", variant: "default" },
+      popular: { label: "Popular", variant: "default" },
+      cross_category: { label: "Recommended", variant: "outline" },
+    };
 
-    return badges[matchType] || { label: 'Related', variant: 'outline' };
+    return badges[matchType] || { label: "Related", variant: "outline" };
   };
 
   // Use existing color scheme from config-badge.tsx
   const getCategoryStyles = (
-    category: string
+    category: string,
   ): { badge: string; border: string; accent: string } => {
-    const styles: Record<string, { badge: string; border: string; accent: string }> = {
+    const styles: Record<
+      string,
+      { badge: string; border: string; accent: string }
+    > = {
       agents: {
-        badge: 'badge-category-agents',
+        badge: "badge-category-agents",
         border:
-          'border-[var(--color-category-agents-border)] hover:border-[var(--color-category-agents-hover)]',
-        accent: 'from-[var(--color-category-agents)] to-[var(--color-category-agents)]',
+          "border-[var(--color-category-agents-border)] hover:border-[var(--color-category-agents-hover)]",
+        accent:
+          "from-[var(--color-category-agents)] to-[var(--color-category-agents)]",
       },
       mcp: {
-        badge: 'badge-category-mcp',
+        badge: "badge-category-mcp",
         border:
-          'border-[var(--color-category-mcp-border)] hover:border-[var(--color-category-mcp-hover)]',
-        accent: 'from-[var(--color-category-mcp)] to-[var(--color-category-mcp)]',
+          "border-[var(--color-category-mcp-border)] hover:border-[var(--color-category-mcp-hover)]",
+        accent:
+          "from-[var(--color-category-mcp)] to-[var(--color-category-mcp)]",
       },
       rules: {
-        badge: 'badge-category-rules',
+        badge: "badge-category-rules",
         border:
-          'border-[var(--color-category-rules-border)] hover:border-[var(--color-category-rules-hover)]',
-        accent: 'from-[var(--color-category-rules)] to-[var(--color-category-rules)]',
+          "border-[var(--color-category-rules-border)] hover:border-[var(--color-category-rules-hover)]",
+        accent:
+          "from-[var(--color-category-rules)] to-[var(--color-category-rules)]",
       },
       commands: {
-        badge: 'badge-category-commands',
+        badge: "badge-category-commands",
         border:
-          'border-[var(--color-category-commands-border)] hover:border-[var(--color-category-commands-hover)]',
-        accent: 'from-[var(--color-category-commands)] to-[var(--color-category-commands)]',
+          "border-[var(--color-category-commands-border)] hover:border-[var(--color-category-commands-hover)]",
+        accent:
+          "from-[var(--color-category-commands)] to-[var(--color-category-commands)]",
       },
       hooks: {
-        badge: 'badge-category-hooks',
+        badge: "badge-category-hooks",
         border:
-          'border-[var(--color-category-hooks-border)] hover:border-[var(--color-category-hooks-hover)]',
-        accent: 'from-[var(--color-category-hooks)] to-[var(--color-category-hooks)]',
+          "border-[var(--color-category-hooks-border)] hover:border-[var(--color-category-hooks-hover)]",
+        accent:
+          "from-[var(--color-category-hooks)] to-[var(--color-category-hooks)]",
       },
       tutorials: {
-        badge: 'badge-category-tutorials',
+        badge: "badge-category-tutorials",
         border:
-          'border-[var(--color-category-tutorials-border)] hover:border-[var(--color-category-tutorials-hover)]',
-        accent: 'from-[var(--color-category-tutorials)] to-[var(--color-category-tutorials)]',
+          "border-[var(--color-category-tutorials-border)] hover:border-[var(--color-category-tutorials-hover)]",
+        accent:
+          "from-[var(--color-category-tutorials)] to-[var(--color-category-tutorials)]",
       },
       comparisons: {
-        badge: 'bg-primary/20 text-primary border-primary/30',
-        border: 'border-primary/30 hover:border-primary/60',
-        accent: 'from-primary to-primary/80',
+        badge: "bg-primary/20 text-primary border-primary/30",
+        border: "border-primary/30 hover:border-primary/60",
+        accent: "from-primary to-primary/80",
       },
       workflows: {
-        badge: 'badge-category-workflows',
+        badge: "badge-category-workflows",
         border:
-          'border-[var(--color-category-workflows-border)] hover:border-[var(--color-category-workflows-hover)]',
-        accent: 'from-[var(--color-category-workflows)] to-[var(--color-category-workflows)]',
+          "border-[var(--color-category-workflows-border)] hover:border-[var(--color-category-workflows-hover)]",
+        accent:
+          "from-[var(--color-category-workflows)] to-[var(--color-category-workflows)]",
       },
-      'use-cases': {
-        badge: 'badge-category-use-cases',
+      "use-cases": {
+        badge: "badge-category-use-cases",
         border:
-          'border-[var(--color-category-use-cases-border)] hover:border-[var(--color-category-use-cases-hover)]',
-        accent: 'from-[var(--color-category-use-cases)] to-[var(--color-category-use-cases)]',
+          "border-[var(--color-category-use-cases-border)] hover:border-[var(--color-category-use-cases-hover)]",
+        accent:
+          "from-[var(--color-category-use-cases)] to-[var(--color-category-use-cases)]",
       },
       troubleshooting: {
-        badge: 'badge-category-troubleshooting',
+        badge: "badge-category-troubleshooting",
         border:
-          'border-[var(--color-category-troubleshooting-border)] hover:border-[var(--color-category-troubleshooting-hover)]',
+          "border-[var(--color-category-troubleshooting-border)] hover:border-[var(--color-category-troubleshooting-hover)]",
         accent:
-          'from-[var(--color-category-troubleshooting)] to-[var(--color-category-troubleshooting)]',
+          "from-[var(--color-category-troubleshooting)] to-[var(--color-category-troubleshooting)]",
       },
     };
 
     return (
       styles[category as keyof typeof styles] || {
-        badge: 'bg-muted/20 text-muted border-muted/30',
-        border: 'border-muted/30 hover:border-muted/60',
-        accent: 'from-muted to-muted/80',
+        badge: "bg-muted/20 text-muted border-muted/30",
+        border: "border-muted/30 hover:border-muted/60",
+        accent: "from-muted to-muted/80",
       }
     );
   };
@@ -229,7 +251,11 @@ export function RelatedCarouselClient({
                   <Badge
                     variant={matchBadge.variant}
                     className={`text-2xs sm:${UI_CLASSES.TEXT_XS} ${UI_CLASSES.FONT_MEDIUM} border px-1.5 sm:${UI_CLASSES.PX_2} ${UI_CLASSES.PY_1} group-hover:border-current/40 ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.FLEX_SHRINK_0}`}
-                    title={matchBadge.label === 'Keyword' ? 'Keyword Match' : matchBadge.label}
+                    title={
+                      matchBadge.label === "Keyword"
+                        ? "Keyword Match"
+                        : matchBadge.label
+                    }
                   >
                     {matchBadge.label}
                   </Badge>
@@ -251,29 +277,34 @@ export function RelatedCarouselClient({
                   </p>
                 </div>
 
-                {item.matchDetails?.matchedTags && item.matchDetails.matchedTags.length > 0 && (
-                  <div className={`pt-3 ${UI_CLASSES.BORDER_T} border-border/30 mt-auto`}>
-                    <div className={UI_CLASSES.FLEX_WRAP_GAP_1}>
-                      {item.matchDetails.matchedTags.slice(0, 2).map((tag: string) => (
-                        <Badge
-                          key={tag}
-                          variant="outline"
-                          className={`text-2xs sm:${UI_CLASSES.TEXT_XS} bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 ${UI_CLASSES.TRANSITION_COLORS} px-1.5 sm:${UI_CLASSES.PX_2} ${UI_CLASSES.PY_1}`}
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
-                      {item.matchDetails.matchedTags.length > 2 && (
-                        <Badge
-                          variant="outline"
-                          className={`text-2xs sm:${UI_CLASSES.TEXT_XS} bg-muted/50 ${UI_CLASSES.TEXT_MUTED_FOREGROUND} border-muted px-1.5 sm:${UI_CLASSES.PX_2} ${UI_CLASSES.PY_1}`}
-                        >
-                          +{item.matchDetails.matchedTags.length - 2}
-                        </Badge>
-                      )}
+                {item.matchDetails?.matchedTags &&
+                  item.matchDetails.matchedTags.length > 0 && (
+                    <div
+                      className={`pt-3 ${UI_CLASSES.BORDER_T} border-border/30 mt-auto`}
+                    >
+                      <div className={UI_CLASSES.FLEX_WRAP_GAP_1}>
+                        {item.matchDetails.matchedTags
+                          .slice(0, 2)
+                          .map((tag: string) => (
+                            <Badge
+                              key={tag}
+                              variant="outline"
+                              className={`text-2xs sm:${UI_CLASSES.TEXT_XS} bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 ${UI_CLASSES.TRANSITION_COLORS} px-1.5 sm:${UI_CLASSES.PX_2} ${UI_CLASSES.PY_1}`}
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
+                        {item.matchDetails.matchedTags.length > 2 && (
+                          <Badge
+                            variant="outline"
+                            className={`text-2xs sm:${UI_CLASSES.TEXT_XS} bg-muted/50 ${UI_CLASSES.TEXT_MUTED_FOREGROUND} border-muted px-1.5 sm:${UI_CLASSES.PX_2} ${UI_CLASSES.PY_1}`}
+                          >
+                            +{item.matchDetails.matchedTags.length - 2}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </Link>
             </Card>
           );

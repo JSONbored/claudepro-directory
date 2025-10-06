@@ -6,10 +6,16 @@
  * Content: How to use configurations, top agents, quick start guide
  */
 
-import { Button, Hr, Section, Text } from '@react-email/components';
-import type * as React from 'react';
-import { BaseLayout } from '../layouts/base-layout';
-import { borderRadius, brandColors, emailTheme, spacing, typography } from '../utils/theme';
+import { Button, Hr, Section, Text } from "@react-email/components";
+import type * as React from "react";
+import { BaseLayout } from "../layouts/base-layout";
+import {
+  borderRadius,
+  brandColors,
+  emailTheme,
+  spacing,
+  typography,
+} from "../utils/theme";
 
 export interface OnboardingGettingStartedProps {
   /**
@@ -21,7 +27,9 @@ export interface OnboardingGettingStartedProps {
 /**
  * Getting Started Email Component (Step 2 of 5)
  */
-export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProps) {
+export function OnboardingGettingStarted({
+  email,
+}: OnboardingGettingStartedProps) {
   return (
     <BaseLayout preview="Getting Started with ClaudePro Directory - Your Quick Start Guide">
       {/* Hero section */}
@@ -42,10 +50,14 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
           <Text style={stepNumberStyle}>1</Text>
           <Text style={stepTitleStyle}>Browse Top Agents</Text>
           <Text style={stepDescStyle}>
-            Start with our most popular AI agents. These pre-configured prompts help Claude handle
-            specific tasks like code review, API building, and technical documentation.
+            Start with our most popular AI agents. These pre-configured prompts
+            help Claude handle specific tasks like code review, API building,
+            and technical documentation.
           </Text>
-          <Button href="https://claudepro.directory/agents" style={stepButtonStyle}>
+          <Button
+            href="https://claudepro.directory/agents"
+            style={stepButtonStyle}
+          >
             View Top Agents
           </Button>
         </Section>
@@ -54,10 +66,13 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
           <Text style={stepNumberStyle}>2</Text>
           <Text style={stepTitleStyle}>Try MCP Servers</Text>
           <Text style={stepDescStyle}>
-            Model Context Protocol (MCP) servers extend Claude's capabilities with real-time data,
-            tool integrations, and custom workflows.
+            Model Context Protocol (MCP) servers extend Claude's capabilities
+            with real-time data, tool integrations, and custom workflows.
           </Text>
-          <Button href="https://claudepro.directory/mcp" style={stepButtonStyle}>
+          <Button
+            href="https://claudepro.directory/mcp"
+            style={stepButtonStyle}
+          >
             Explore MCP Servers
           </Button>
         </Section>
@@ -66,10 +81,13 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
           <Text style={stepNumberStyle}>3</Text>
           <Text style={stepTitleStyle}>Add Custom Rules</Text>
           <Text style={stepDescStyle}>
-            Customize Claude's behavior with rules that define coding standards, response formats,
-            and project-specific guidelines.
+            Customize Claude's behavior with rules that define coding standards,
+            response formats, and project-specific guidelines.
           </Text>
-          <Button href="https://claudepro.directory/rules" style={stepButtonStyle}>
+          <Button
+            href="https://claudepro.directory/rules"
+            style={stepButtonStyle}
+          >
             Browse Rules
           </Button>
         </Section>
@@ -80,24 +98,29 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
       {/* Featured Content */}
       <Section style={contentSection}>
         <Text style={sectionTitleStyle}>🌟 Start With These</Text>
-        <Text style={paragraphStyle}>Our community's most loved configurations for beginners:</Text>
+        <Text style={paragraphStyle}>
+          Our community's most loved configurations for beginners:
+        </Text>
 
         <ul style={listStyle}>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>API Builder Agent</strong> - Generate REST APIs with best
-            practices
+            <strong style={strongStyle}>API Builder Agent</strong> - Generate
+            REST APIs with best practices
           </li>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>Code Reviewer</strong> - Automated code review with security
-            checks
+            <strong style={strongStyle}>Code Reviewer</strong> - Automated code
+            review with security checks
           </li>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>Database Specialist</strong> - SQL optimization and schema
-            design
+            <strong style={strongStyle}>Database Specialist</strong> - SQL
+            optimization and schema design
           </li>
         </ul>
 
-        <Button href="https://claudepro.directory/trending" style={primaryButtonStyle}>
+        <Button
+          href="https://claudepro.directory/trending"
+          style={primaryButtonStyle}
+        >
           See All Trending
         </Button>
       </Section>
@@ -108,10 +131,13 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
       <Section style={helpSection}>
         <Text style={helpTitleStyle}>Need Help Getting Started?</Text>
         <Text style={paragraphStyle}>
-          Check out our tutorials and guides for step-by-step instructions on using Claude
-          configurations effectively.
+          Check out our tutorials and guides for step-by-step instructions on
+          using Claude configurations effectively.
         </Text>
-        <Button href="https://claudepro.directory/guides/tutorials" style={secondaryButtonStyle}>
+        <Button
+          href="https://claudepro.directory/guides/tutorials"
+          style={secondaryButtonStyle}
+        >
           View Tutorials
         </Button>
       </Section>
@@ -122,7 +148,8 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
           📧 <strong style={strongStyle}>{email}</strong>
         </Text>
         <Text style={footerNoteStyle}>
-          This is part 2 of your 5-email onboarding series. Next up: Power User Tips!
+          This is part 2 of your 5-email onboarding series. Next up: Power User
+          Tips!
         </Text>
       </Section>
     </BaseLayout>
@@ -134,12 +161,12 @@ export function OnboardingGettingStarted({ email }: OnboardingGettingStartedProp
  */
 
 const heroSection: React.CSSProperties = {
-  textAlign: 'center',
+  textAlign: "center",
   marginBottom: spacing.lg,
 };
 
 const headingStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['3xl'],
+  fontSize: typography.fontSize["3xl"],
   fontWeight: typography.fontWeight.bold,
   color: emailTheme.textPrimary,
   margin: `0 0 ${spacing.sm} 0`,
@@ -159,7 +186,7 @@ const contentSection: React.CSSProperties = {
 };
 
 const sectionTitleStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['2xl'],
+  fontSize: typography.fontSize["2xl"],
   fontWeight: typography.fontWeight.bold,
   color: emailTheme.textPrimary,
   margin: `0 0 ${spacing.md} 0`,
@@ -181,7 +208,7 @@ const stepCard: React.CSSProperties = {
 };
 
 const stepNumberStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['2xl'],
+  fontSize: typography.fontSize["2xl"],
   fontWeight: typography.fontWeight.bold,
   color: brandColors.primary,
   margin: `0 0 ${spacing.xs} 0`,
@@ -203,14 +230,14 @@ const stepDescStyle: React.CSSProperties = {
 
 const stepButtonStyle: React.CSSProperties = {
   backgroundColor: brandColors.primary,
-  color: '#ffffff',
+  color: "#ffffff",
   fontWeight: typography.fontWeight.medium,
   fontSize: typography.fontSize.sm,
   padding: `${spacing.sm} ${spacing.lg}`,
   borderRadius: borderRadius.sm,
-  textDecoration: 'none',
-  display: 'inline-block',
-  border: 'none',
+  textDecoration: "none",
+  display: "inline-block",
+  border: "none",
 };
 
 const listStyle: React.CSSProperties = {
@@ -232,15 +259,15 @@ const strongStyle: React.CSSProperties = {
 
 const primaryButtonStyle: React.CSSProperties = {
   backgroundColor: brandColors.primary,
-  color: '#ffffff',
+  color: "#ffffff",
   fontWeight: typography.fontWeight.semibold,
   fontSize: typography.fontSize.base,
   padding: `${spacing.md} ${spacing.xl}`,
   borderRadius: borderRadius.md,
-  textDecoration: 'none',
-  display: 'inline-block',
+  textDecoration: "none",
+  display: "inline-block",
   marginTop: spacing.sm,
-  border: 'none',
+  border: "none",
 };
 
 const secondaryButtonStyle: React.CSSProperties = {
@@ -250,14 +277,14 @@ const secondaryButtonStyle: React.CSSProperties = {
   fontSize: typography.fontSize.base,
   padding: `${spacing.md} ${spacing.xl}`,
   borderRadius: borderRadius.md,
-  textDecoration: 'none',
-  display: 'inline-block',
+  textDecoration: "none",
+  display: "inline-block",
   marginTop: spacing.sm,
   border: `1px solid ${emailTheme.borderDefault}`,
 };
 
 const helpSection: React.CSSProperties = {
-  textAlign: 'center',
+  textAlign: "center",
   backgroundColor: emailTheme.bgTertiary,
   padding: spacing.lg,
   borderRadius: borderRadius.md,
@@ -279,7 +306,7 @@ const dividerStyle: React.CSSProperties = {
 
 const footerNoteSection: React.CSSProperties = {
   marginTop: spacing.lg,
-  textAlign: 'center',
+  textAlign: "center",
 };
 
 const footerNoteStyle: React.CSSProperties = {

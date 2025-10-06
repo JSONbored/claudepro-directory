@@ -4,8 +4,11 @@
  * Ensures log data integrity and prevents injection attacks
  */
 
-import { z } from 'zod';
-import { isoDatetimeString, nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
+import { z } from "zod";
+import {
+  isoDatetimeString,
+  nonEmptyString,
+} from "@/src/lib/schemas/primitives/base-strings";
 
 /**
  * Security constants for logging
@@ -23,33 +26,35 @@ const LOGGER_LIMITS = {
  * Log level validation
  */
 const logLevelSchema = z
-  .enum(['debug', 'info', 'warn', 'error', 'fatal'])
-  .describe('Log severity level for structured logging operations');
+  .enum(["debug", "info", "warn", "error", "fatal"])
+  .describe("Log severity level for structured logging operations");
 
 /**
  * Log context validation with security constraints
  */
 export const logContextSchema = z
   .record(
-    nonEmptyString.max(100, 'Context key too long').describe('Context key identifier'),
+    nonEmptyString
+      .max(100, "Context key too long")
+      .describe("Context key identifier"),
     z
       .union([
-        z.string().describe('String context value'),
-        z.number().describe('Numeric context value'),
-        z.boolean().describe('Boolean context value'),
+        z.string().describe("String context value"),
+        z.number().describe("Numeric context value"),
+        z.boolean().describe("Boolean context value"),
       ])
-      .describe('Context value supporting string, number, or boolean types')
+      .describe("Context value supporting string, number, or boolean types")
       .refine((value) => {
-        if (typeof value === 'string') {
+        if (typeof value === "string") {
           return value.length <= LOGGER_LIMITS.MAX_CONTEXT_VALUE_LENGTH;
         }
         return true;
-      }, 'Context value too long')
+      }, "Context value too long"),
   )
-  .describe('Key-value pairs providing contextual information for log entries')
+  .describe("Key-value pairs providing contextual information for log entries")
   .refine(
     (data) => Object.keys(data).length <= LOGGER_LIMITS.MAX_CONTEXT_KEYS,
-    `Too many context keys (max ${LOGGER_LIMITS.MAX_CONTEXT_KEYS})`
+    `Too many context keys (max ${LOGGER_LIMITS.MAX_CONTEXT_KEYS})`,
   );
 
 /**
@@ -57,33 +62,38 @@ export const logContextSchema = z
  */
 const logEntrySchema = z
   .object({
-    level: logLevelSchema.describe('Severity level of the log entry'),
+    level: logLevelSchema.describe("Severity level of the log entry"),
     message: nonEmptyString
       .max(LOGGER_LIMITS.MAX_MESSAGE_LENGTH)
-      .describe('Primary log message content'),
-    context: logContextSchema.optional().describe('Optional contextual key-value data'),
+      .describe("Primary log message content"),
+    context: logContextSchema
+      .optional()
+      .describe("Optional contextual key-value data"),
     error: z
       .union([
-        z.instanceof(Error).describe('Native Error object'),
-        z.string().max(LOGGER_LIMITS.MAX_ERROR_MESSAGE_LENGTH).describe('Error message string'),
+        z.instanceof(Error).describe("Native Error object"),
+        z
+          .string()
+          .max(LOGGER_LIMITS.MAX_ERROR_MESSAGE_LENGTH)
+          .describe("Error message string"),
       ])
       .optional()
-      .describe('Optional error information for exception logging'),
+      .describe("Optional error information for exception logging"),
     metadata: z
       .record(
-        nonEmptyString.describe('Metadata key'),
+        nonEmptyString.describe("Metadata key"),
         z
           .union([
-            z.string().describe('String metadata value'),
-            z.number().describe('Numeric metadata value'),
-            z.boolean().describe('Boolean metadata value'),
+            z.string().describe("String metadata value"),
+            z.number().describe("Numeric metadata value"),
+            z.boolean().describe("Boolean metadata value"),
           ])
-          .describe('Metadata value')
+          .describe("Metadata value"),
       )
       .optional()
-      .describe('Additional metadata key-value pairs for the log entry'),
+      .describe("Additional metadata key-value pairs for the log entry"),
   })
-  .describe('Complete log entry structure for application logging');
+  .describe("Complete log entry structure for application logging");
 
 export type LogEntry = z.infer<typeof logEntrySchema>;
 
@@ -94,49 +104,68 @@ const logErrorSchema = z
   .object({
     name: nonEmptyString
       .max(LOGGER_LIMITS.MAX_ERROR_NAME_LENGTH)
-      .describe('Error type or class name'),
+      .describe("Error type or class name"),
     message: nonEmptyString
       .max(LOGGER_LIMITS.MAX_ERROR_MESSAGE_LENGTH)
-      .describe('Error message describing what went wrong'),
+      .describe("Error message describing what went wrong"),
     stack: z
       .string()
       .max(LOGGER_LIMITS.MAX_STACK_TRACE_LENGTH)
       .optional()
-      .describe('Optional stack trace for debugging'),
+      .describe("Optional stack trace for debugging"),
   })
-  .describe('Structured error object for consistent error logging');
+  .describe("Structured error object for consistent error logging");
 
 /**
  * Complete log object validation
  */
 const logObjectSchema = z
   .object({
-    timestamp: isoDatetimeString.describe('ISO 8601 timestamp when the log was created'),
-    level: logLevelSchema.describe('Log severity level'),
-    message: z.string().max(LOGGER_LIMITS.MAX_MESSAGE_LENGTH).describe('Log message content'),
-    context: logContextSchema.optional().describe('Optional contextual data'),
-    metadata: logContextSchema.optional().describe('Optional additional metadata'),
-    error: logErrorSchema.optional().describe('Optional error information'),
+    timestamp: isoDatetimeString.describe(
+      "ISO 8601 timestamp when the log was created",
+    ),
+    level: logLevelSchema.describe("Log severity level"),
+    message: z
+      .string()
+      .max(LOGGER_LIMITS.MAX_MESSAGE_LENGTH)
+      .describe("Log message content"),
+    context: logContextSchema.optional().describe("Optional contextual data"),
+    metadata: logContextSchema
+      .optional()
+      .describe("Optional additional metadata"),
+    error: logErrorSchema.optional().describe("Optional error information"),
   })
   .strict()
-  .describe('Complete validated log object for production logging'); // Only allow defined properties
+  .describe("Complete validated log object for production logging"); // Only allow defined properties
 
 /**
  * Development log format components validation
  */
 const developmentLogComponentsSchema = z
   .object({
-    timestamp: isoDatetimeString.describe('ISO 8601 timestamp of the log event'),
-    level: logLevelSchema.describe('Log severity level'),
-    message: z.string().max(LOGGER_LIMITS.MAX_MESSAGE_LENGTH).describe('Log message text'),
-    context: logContextSchema.optional().describe('Optional context information'),
-    metadata: z
-      .record(nonEmptyString.describe('Metadata key'), z.unknown().describe('Any metadata value'))
+    timestamp: isoDatetimeString.describe(
+      "ISO 8601 timestamp of the log event",
+    ),
+    level: logLevelSchema.describe("Log severity level"),
+    message: z
+      .string()
+      .max(LOGGER_LIMITS.MAX_MESSAGE_LENGTH)
+      .describe("Log message text"),
+    context: logContextSchema
       .optional()
-      .describe('Optional metadata with flexible value types for development'),
-    error: logErrorSchema.optional().describe('Optional error details'),
+      .describe("Optional context information"),
+    metadata: z
+      .record(
+        nonEmptyString.describe("Metadata key"),
+        z.unknown().describe("Any metadata value"),
+      )
+      .optional()
+      .describe("Optional metadata with flexible value types for development"),
+    error: logErrorSchema.optional().describe("Optional error details"),
   })
-  .describe('Log components used in development environment with relaxed validation');
+  .describe(
+    "Log components used in development environment with relaxed validation",
+  );
 
 /**
  * Request context validation for HTTP logging
@@ -145,12 +174,12 @@ const requestContextSchema = z
   .object({
     method: nonEmptyString
       .max(10)
-      .regex(/^[A-Z]+$/, 'Invalid HTTP method')
-      .describe('HTTP method (GET, POST, PUT, DELETE, etc.)'),
+      .regex(/^[A-Z]+$/, "Invalid HTTP method")
+      .describe("HTTP method (GET, POST, PUT, DELETE, etc.)"),
     url: nonEmptyString
       .max(2048)
-      .regex(/^[^\s<>'"]+$/, 'Invalid URL format')
-      .describe('Request URL path'),
+      .regex(/^[^\s<>'"]+$/, "Invalid URL format")
+      .describe("Request URL path"),
     userAgent: z
       .string()
       .max(512)
@@ -164,23 +193,31 @@ const requestContextSchema = z
           }
         }
         return true;
-      }, 'Invalid user agent: contains control characters')
-      .describe('Client user agent string'),
+      }, "Invalid user agent: contains control characters")
+      .describe("Client user agent string"),
     requestId: nonEmptyString
       .max(100)
-      .regex(/^[a-zA-Z0-9\-_]*$/, 'Invalid request ID')
-      .describe('Unique identifier for request tracing'),
-    timestamp: isoDatetimeString.describe('ISO 8601 timestamp of the request'),
-    region: z.string().max(50).optional().describe('Geographic region of the request'),
-    deployment: z.string().max(100).optional().describe('Deployment identifier or environment'),
+      .regex(/^[a-zA-Z0-9\-_]*$/, "Invalid request ID")
+      .describe("Unique identifier for request tracing"),
+    timestamp: isoDatetimeString.describe("ISO 8601 timestamp of the request"),
+    region: z
+      .string()
+      .max(50)
+      .optional()
+      .describe("Geographic region of the request"),
+    deployment: z
+      .string()
+      .max(100)
+      .optional()
+      .describe("Deployment identifier or environment"),
     environment: z
       .string()
       .max(20)
       .optional()
-      .describe('Environment name (production, staging, etc.)'),
+      .describe("Environment name (production, staging, etc.)"),
   })
   .strict()
-  .describe('HTTP request context for structured request logging');
+  .describe("HTTP request context for structured request logging");
 
 /**
  * Performance timing metadata validation
@@ -189,17 +226,19 @@ const performanceMetadataSchema = z
   .object({
     duration: z
       .string()
-      .regex(/^\d+\.\d{2}ms$/, 'Invalid duration format')
+      .regex(/^\d+\.\d{2}ms$/, "Invalid duration format")
       .describe('Execution duration in milliseconds (formatted as "123.45ms")'),
-    success: z.boolean().describe('Whether the operation completed successfully'),
+    success: z
+      .boolean()
+      .describe("Whether the operation completed successfully"),
   })
-  .describe('Performance metrics for operation timing and success tracking');
+  .describe("Performance metrics for operation timing and success tracking");
 
 /**
  * Safe development log components parser
  */
 export function parseDevelopmentLogComponents(
-  logObject: Record<string, unknown>
+  logObject: Record<string, unknown>,
 ):
   | { success: true; data: z.infer<typeof developmentLogComponentsSchema> }
   | { success: false; error: string } {
@@ -207,7 +246,7 @@ export function parseDevelopmentLogComponents(
     const parsed = developmentLogComponentsSchema.parse(logObject);
     return { success: true, data: parsed };
   } catch {
-    return { success: false, error: 'Validation failed' };
+    return { success: false, error: "Validation failed" };
   }
 }
 
@@ -215,13 +254,13 @@ export function parseDevelopmentLogComponents(
  * Sanitize log message to prevent injection attacks
  */
 export function sanitizeLogMessage(message: unknown): string {
-  if (typeof message !== 'string') {
+  if (typeof message !== "string") {
     return String(message).slice(0, LOGGER_LIMITS.MAX_MESSAGE_LENGTH);
   }
 
   // Remove potential injection patterns
   // Remove control characters (ASCII 0-31 and 127) for security
-  let sanitized = '';
+  let sanitized = "";
   for (let i = 0; i < message.length; i++) {
     const code = message.charCodeAt(i);
     // Skip control characters
@@ -234,35 +273,39 @@ export function sanitizeLogMessage(message: unknown): string {
   // Additional validation: reject if contains dangerous patterns
   // (Don't try to fix with regex - just reject)
   if (/<script|<\/script|javascript:|data:/i.test(sanitized)) {
-    return '[BLOCKED: Potentially dangerous content]';
+    return "[BLOCKED: Potentially dangerous content]";
   }
 
   return sanitized
-    .replace(/\${.*?}/g, '[TEMPLATE]') // Remove template literals
-    .replace(/[<>]/g, '') // Remove angle brackets (simpler, more secure)
+    .replace(/\${.*?}/g, "[TEMPLATE]") // Remove template literals
+    .replace(/[<>]/g, "") // Remove angle brackets (simpler, more secure)
     .slice(0, LOGGER_LIMITS.MAX_MESSAGE_LENGTH);
 }
 
 /**
  * Validate and sanitize context data
  */
-export function validateLogContext(context: unknown): z.infer<typeof logContextSchema> | null {
+export function validateLogContext(
+  context: unknown,
+): z.infer<typeof logContextSchema> | null {
   try {
     if (context === null || context === undefined) {
       return null;
     }
 
     // Ensure context is an object
-    if (typeof context !== 'object') {
+    if (typeof context !== "object") {
       return null;
     }
 
     // Sanitize string values in context
     const sanitized = {} as Record<string, string | number | boolean>;
-    for (const [key, value] of Object.entries(context as Record<string, unknown>)) {
-      if (typeof value === 'string') {
+    for (const [key, value] of Object.entries(
+      context as Record<string, unknown>,
+    )) {
+      if (typeof value === "string") {
         sanitized[key] = sanitizeLogMessage(value);
-      } else if (typeof value === 'number' || typeof value === 'boolean') {
+      } else if (typeof value === "number" || typeof value === "boolean") {
         sanitized[key] = value;
       }
       // Skip other types for security
@@ -281,6 +324,8 @@ export type LogLevel = z.infer<typeof logLevelSchema>;
 export type LogContext = z.infer<typeof logContextSchema>;
 export type LogError = z.infer<typeof logErrorSchema>;
 export type LogObject = z.infer<typeof logObjectSchema>;
-export type DevelopmentLogComponents = z.infer<typeof developmentLogComponentsSchema>;
+export type DevelopmentLogComponents = z.infer<
+  typeof developmentLogComponentsSchema
+>;
 export type RequestContext = z.infer<typeof requestContextSchema>;
 export type PerformanceMetadata = z.infer<typeof performanceMetadataSchema>;

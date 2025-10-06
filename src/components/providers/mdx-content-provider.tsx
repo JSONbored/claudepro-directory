@@ -12,9 +12,9 @@
  * @module components/providers/mdx-content-provider
  */
 
-'use client';
+"use client";
 
-import { createContext, type ReactNode, useContext } from 'react';
+import { createContext, type ReactNode, useContext } from "react";
 
 /**
  * MDX content context value
@@ -34,7 +34,9 @@ interface MDXContentContextValue {
 /**
  * Create context with undefined default (requires provider)
  */
-const MDXContentContext = createContext<MDXContentContextValue | undefined>(undefined);
+const MDXContentContext = createContext<MDXContentContextValue | undefined>(
+  undefined,
+);
 
 /**
  * Props for MDXContentProvider
@@ -77,9 +79,15 @@ interface MDXContentProviderProps {
  * }
  * ```
  */
-export function MDXContentProvider({ category, slug, children }: MDXContentProviderProps) {
+export function MDXContentProvider({
+  category,
+  slug,
+  children,
+}: MDXContentProviderProps) {
   return (
-    <MDXContentContext.Provider value={{ category, slug }}>{children}</MDXContentContext.Provider>
+    <MDXContentContext.Provider value={{ category, slug }}>
+      {children}
+    </MDXContentContext.Provider>
   );
 }
 

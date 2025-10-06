@@ -85,11 +85,7 @@
       {
         "title": "Example scenario #1",
         "description": "Detailed walkthrough of a common use case",
-        "steps": [
-          "Step 1 of example",
-          "Step 2 of example",
-          "Expected outcome"
-        ]
+        "steps": ["Step 1 of example", "Step 2 of example", "Expected outcome"]
       }
     ]
   },

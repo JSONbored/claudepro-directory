@@ -5,7 +5,14 @@
   "description": "Streamlined workflow for content creators and marketers. Manage projects across multiple platforms, design graphics, and automate content distribution with integrated tools.",
   "author": "JSONbored",
   "dateAdded": "2025-10-02",
-  "tags": ["content", "marketing", "design", "workflow", "automation", "social-media"],
+  "tags": [
+    "content",
+    "marketing",
+    "design",
+    "workflow",
+    "automation",
+    "social-media"
+  ],
   "source": "community",
   "category": "collections",
   "collectionType": "workflow",

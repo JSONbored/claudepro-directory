@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Unified Search Component (SHA-2087 Refactored)
@@ -11,43 +11,51 @@
  * Current: 180 lines (57% reduction)
  */
 
-import { usePathname } from 'next/navigation';
-import { useCallback, useEffect, useId, useState } from 'react';
-import { SearchFilterPanel } from '@/src/components/features/search/search-filter-panel';
-import { ErrorBoundary } from '@/src/components/shared/error-boundary';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
-import { Collapsible, CollapsibleContent } from '@/src/components/ui/collapsible';
-import { Input } from '@/src/components/ui/input';
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useId, useState } from "react";
+import { SearchFilterPanel } from "@/src/components/features/search/search-filter-panel";
+import { ErrorBoundary } from "@/src/components/shared/error-boundary";
+import { Badge } from "@/src/components/ui/badge";
+import { Button } from "@/src/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+} from "@/src/components/ui/collapsible";
+import { Input } from "@/src/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/ui/select';
-import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
-import { EVENTS } from '@/src/lib/analytics/events.config';
-import { trackEvent } from '@/src/lib/analytics/tracker';
-import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
-import type { FilterState, UnifiedSearchProps } from '@/src/lib/schemas/component.schema';
-import { sanitizers } from '@/src/lib/security/validators';
+} from "@/src/components/ui/select";
+import { useUnifiedSearch } from "@/src/hooks/use-unified-search";
+import { EVENTS } from "@/src/lib/analytics/events.config";
+import { trackEvent } from "@/src/lib/analytics/tracker";
+import { ChevronDown, ChevronUp, Filter, Search } from "@/src/lib/icons";
+import type {
+  FilterState,
+  UnifiedSearchProps,
+} from "@/src/lib/schemas/component.schema";
+import { sanitizers } from "@/src/lib/security/validators";
 
 const { sanitizeSearchQuery } = sanitizers;
 
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { cn } from '@/src/lib/utils';
+import { UI_CLASSES } from "@/src/lib/ui-constants";
+import { cn } from "@/src/lib/utils";
 
 // Re-export FilterState for backward compatibility
 export type { FilterState };
 
 // SearchErrorFallback component moved outside to avoid recreation on every render
 const SearchErrorFallback = () => (
-  <div className="p-4 text-center text-muted-foreground">Error loading search</div>
+  <div className="p-4 text-center text-muted-foreground">
+    Error loading search
+  </div>
 );
 
 export function UnifiedSearch({
-  placeholder = 'Search...',
+  placeholder = "Search...",
   onSearch,
   onFiltersChange,
   filters: initialFilters,
@@ -57,7 +65,7 @@ export function UnifiedSearch({
   resultCount = 0,
   className,
 }: UnifiedSearchProps) {
-  const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const [localSearchQuery, setLocalSearchQuery] = useState("");
   const pathname = usePathname();
 
   // Use consolidated search hook
@@ -71,7 +79,7 @@ export function UnifiedSearch({
     clearFilters,
     setIsFilterOpen,
   } = useUnifiedSearch({
-    initialSort: initialFilters?.sort || 'trending',
+    initialSort: initialFilters?.sort || "trending",
     onFiltersChange,
   });
 
@@ -89,13 +97,13 @@ export function UnifiedSearch({
 
       // Track search event (only for non-empty queries)
       if (sanitized && sanitized.length > 0) {
-        const category = pathname?.split('/')[1] || 'unknown';
+        const category = pathname?.split("/")[1] || "unknown";
 
         trackEvent(EVENTS.SEARCH_PERFORMED, {
           query: sanitized.substring(0, 100), // Truncate for privacy
           results_count: resultCount,
           category,
-          filters_applied: activeFilterCount > 0 ? 'yes' : 'no',
+          filters_applied: activeFilterCount > 0 ? "yes" : "no",
           time_to_results: 0, // Could add performance timing if needed
         });
       }
@@ -112,11 +120,11 @@ export function UnifiedSearch({
 
   // Handle sort change directly (no need to apply)
   const handleSortChange = useCallback(
-    (value: FilterState['sort']) => {
-      const newFilters = { ...filters, sort: value || 'trending' };
+    (value: FilterState["sort"]) => {
+      const newFilters = { ...filters, sort: value || "trending" };
       handleFiltersChange(newFilters);
     },
-    [filters, handleFiltersChange]
+    [filters, handleFiltersChange],
   );
 
   return (
@@ -125,7 +133,10 @@ export function UnifiedSearch({
         {/* Search Bar */}
         <div className={UI_CLASSES.SPACE_Y_3}>
           <div className="relative">
-            <Search className={UI_CLASSES.ICON_ABSOLUTE_LEFT} aria-hidden="true" />
+            <Search
+              className={UI_CLASSES.ICON_ABSOLUTE_LEFT}
+              aria-hidden="true"
+            />
             <Input
               id={searchInputId}
               name="search"
@@ -135,7 +146,11 @@ export function UnifiedSearch({
               placeholder={placeholder}
               className={`pl-10 pr-4 h-12 text-base ${UI_CLASSES.BG_CARD_50} backdrop-blur-sm border-border/50 focus:border-primary/50 focus:${UI_CLASSES.BG_CARD} transition-smooth w-full`}
               aria-label="Search configurations"
-              aria-describedby={resultCount > 0 && localSearchQuery ? searchResultsId : undefined}
+              aria-describedby={
+                resultCount > 0 && localSearchQuery
+                  ? searchResultsId
+                  : undefined
+              }
               autoComplete="search"
             />
           </div>
@@ -144,8 +159,10 @@ export function UnifiedSearch({
           <div className={`flex gap-2 ${UI_CLASSES.JUSTIFY_END}`}>
             {/* Sort Dropdown styled as button */}
             <Select
-              value={filters.sort || 'trending'}
-              onValueChange={(value) => handleSortChange(value as FilterState['sort'])}
+              value={filters.sort || "trending"}
+              onValueChange={(value) =>
+                handleSortChange(value as FilterState["sort"])
+              }
               name="sort"
             >
               <SelectTrigger
@@ -169,12 +186,12 @@ export function UnifiedSearch({
               size="default"
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               className={cn(
-                'h-10 px-4 gap-2 transition-smooth',
-                isFilterOpen && `${UI_CLASSES.BG_ACCENT_10} border-accent`
+                "h-10 px-4 gap-2 transition-smooth",
+                isFilterOpen && `${UI_CLASSES.BG_ACCENT_10} border-accent`,
               )}
               aria-expanded={isFilterOpen}
               aria-controls={filterPanelId}
-              aria-label={`${isFilterOpen ? 'Close' : 'Open'} filter panel${activeFilterCount > 0 ? ` (${activeFilterCount} active filters)` : ''}`}
+              aria-label={`${isFilterOpen ? "Close" : "Open"} filter panel${activeFilterCount > 0 ? ` (${activeFilterCount} active filters)` : ""}`}
             >
               <Filter className="h-4 w-4" aria-hidden="true" />
               <span>Filter</span>
@@ -203,7 +220,7 @@ export function UnifiedSearch({
             id={searchResultsId}
             aria-live="polite"
           >
-            {resultCount} {resultCount === 1 ? 'result' : 'results'} found
+            {resultCount} {resultCount === 1 ? "result" : "results"} found
           </div>
         )}
 

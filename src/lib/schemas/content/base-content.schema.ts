@@ -15,16 +15,22 @@
  * - Uses Phase 1 primitives (base-strings, base-numbers, base-arrays)
  */
 
-import { z } from 'zod';
-import { largeContentArray, requiredTagArray } from '@/src/lib/schemas/primitives/base-arrays';
-import { aiTemperature, optionalPositiveInt } from '@/src/lib/schemas/primitives/base-numbers';
+import { z } from "zod";
+import {
+  largeContentArray,
+  requiredTagArray,
+} from "@/src/lib/schemas/primitives/base-arrays";
+import {
+  aiTemperature,
+  optionalPositiveInt,
+} from "@/src/lib/schemas/primitives/base-numbers";
 import {
   isoDateString,
   mediumString,
   nonEmptyString,
   optionalUrlString,
   slugString,
-} from '@/src/lib/schemas/primitives/base-strings';
+} from "@/src/lib/schemas/primitives/base-strings";
 
 /**
  * Base Content Metadata Schema
@@ -56,44 +62,52 @@ import {
  */
 export const baseContentMetadataSchema = z
   .object({
-    slug: slugString.describe('URL-safe identifier for the content item'),
-    description: nonEmptyString.describe('Content description or summary'),
-    author: nonEmptyString.describe('Content creator or maintainer name'),
-    dateAdded: isoDateString.describe('ISO 8601 date when content was added to directory'),
+    slug: slugString.describe("URL-safe identifier for the content item"),
+    description: nonEmptyString.describe("Content description or summary"),
+    author: nonEmptyString.describe("Content creator or maintainer name"),
+    dateAdded: isoDateString.describe(
+      "ISO 8601 date when content was added to directory",
+    ),
     tags: requiredTagArray.describe(
-      'Array of content tags for categorization and search (min 1 tag)'
+      "Array of content tags for categorization and search (min 1 tag)",
     ),
     content: z
       .string()
       .optional()
-      .describe('Main content body (optional - hooks may not have content field)'), // Optional because hooks don't have content field; no max length for large agent content
+      .describe(
+        "Main content body (optional - hooks may not have content field)",
+      ), // Optional because hooks don't have content field; no max length for large agent content
     title: z
       .string()
       .optional()
-      .describe('Display title for the content (auto-generated during build if not provided)'), // Allow empty/missing titles - auto-generated during build
+      .describe(
+        "Display title for the content (auto-generated during build if not provided)",
+      ), // Allow empty/missing titles - auto-generated during build
     seoTitle: z
       .string()
       .max(60)
       .optional()
       .describe(
-        'Short SEO-optimized title for <title> tag (max 60 characters), falls back to title'
+        "Short SEO-optimized title for <title> tag (max 60 characters), falls back to title",
       ),
     source: z
-      .enum(['community', 'official', 'verified', 'claudepro'])
+      .enum(["community", "official", "verified", "claudepro"])
       .optional()
       .describe(
-        'Content source type: community (user-submitted), official (vendor), verified (reviewed), claudepro (internal)'
+        "Content source type: community (user-submitted), official (vendor), verified (reviewed), claudepro (internal)",
       ),
-    documentationUrl: optionalUrlString.describe('Optional external documentation or homepage URL'),
+    documentationUrl: optionalUrlString.describe(
+      "Optional external documentation or homepage URL",
+    ),
     features: largeContentArray
       .optional()
-      .describe('Optional list of key features or capabilities'),
+      .describe("Optional list of key features or capabilities"),
     useCases: largeContentArray
       .optional()
-      .describe('Optional list of common use cases or applications'),
+      .describe("Optional list of common use cases or applications"),
   })
   .describe(
-    'Base content metadata schema shared across all content types (agents, commands, rules, mcp, hooks, guides). Provides standard fields for slug, description, author, dates, tags, and content body.'
+    "Base content metadata schema shared across all content types (agents, commands, rules, mcp, hooks, guides). Provides standard fields for slug, description, author, dates, tags, and content body.",
   );
 
 /**
@@ -120,18 +134,18 @@ export const baseConfigurationSchema = z
     temperature: aiTemperature
       .optional()
       .describe(
-        'AI model temperature parameter for response randomness (0-2, default varies by model)'
+        "AI model temperature parameter for response randomness (0-2, default varies by model)",
       ),
     maxTokens: optionalPositiveInt.describe(
-      'Maximum number of tokens for AI model response (optional, uses model default if not specified)'
+      "Maximum number of tokens for AI model response (optional, uses model default if not specified)",
     ),
     systemPrompt: z
       .string()
       .optional()
-      .describe('Optional system prompt override for AI model behavior'),
+      .describe("Optional system prompt override for AI model behavior"),
   })
   .describe(
-    'Base configuration schema for AI model parameters used across agents, commands, and rules. Provides standard fields for temperature, max tokens, and system prompts.'
+    "Base configuration schema for AI model parameters used across agents, commands, and rules. Provides standard fields for temperature, max tokens, and system prompts.",
   );
 
 /**
@@ -162,45 +176,59 @@ export const baseInstallationSchema = z
       .object({
         steps: z
           .array(mediumString)
-          .describe('Step-by-step installation instructions for Claude Desktop'),
+          .describe(
+            "Step-by-step installation instructions for Claude Desktop",
+          ),
         configPath: z
           .record(z.string(), mediumString)
           .optional()
           .describe(
-            'Optional configuration file paths by operating system (e.g., macos, windows, linux)'
+            "Optional configuration file paths by operating system (e.g., macos, windows, linux)",
           ),
       })
       .optional()
-      .describe('Installation guide for Claude Desktop application'),
+      .describe("Installation guide for Claude Desktop application"),
     claudeCode: z
       .union([
-        nonEmptyString.describe('Simple installation command string (for MCP servers)'), // For MCP servers (simple command string)
+        nonEmptyString.describe(
+          "Simple installation command string (for MCP servers)",
+        ), // For MCP servers (simple command string)
         z
           .object({
             // For commands and hooks (detailed steps)
-            steps: z.array(mediumString).describe('Step-by-step installation instructions'),
+            steps: z
+              .array(mediumString)
+              .describe("Step-by-step installation instructions"),
             configFormat: z
               .string()
               .optional()
-              .describe('Optional configuration file format (e.g., json, yaml)'),
+              .describe(
+                "Optional configuration file format (e.g., json, yaml)",
+              ),
             configPath: z
               .record(z.string(), mediumString)
               .optional()
-              .describe('Optional configuration file paths by operating system'),
+              .describe(
+                "Optional configuration file paths by operating system",
+              ),
           })
-          .describe('Detailed installation instructions object (for commands and hooks)'),
+          .describe(
+            "Detailed installation instructions object (for commands and hooks)",
+          ),
       ])
       .optional()
       .describe(
-        'Installation guide for Claude Code CLI (can be simple command string or detailed steps object)'
+        "Installation guide for Claude Code CLI (can be simple command string or detailed steps object)",
       ),
     requirements: z
       .array(mediumString)
       .optional()
-      .describe('Optional list of prerequisites or dependencies (e.g., Node.js 18+, Python 3.9+)'),
+      .describe(
+        "Optional list of prerequisites or dependencies (e.g., Node.js 18+, Python 3.9+)",
+      ),
   })
   .describe(
-    'Base installation schema for commands, MCP servers, and hooks. Provides platform-specific installation instructions for Claude Desktop and Claude Code.'
+    "Base installation schema for commands, MCP servers, and hooks. Provides platform-specific installation instructions for Claude Desktop and Claude Code.",
   );
 
 /**
@@ -220,11 +248,13 @@ export const baseInstallationSchema = z
  */
 export const baseTroubleshootingSchema = z
   .object({
-    issue: nonEmptyString.describe('Description of the problem or error'),
-    solution: mediumString.describe('Step-by-step solution to resolve the issue'),
+    issue: nonEmptyString.describe("Description of the problem or error"),
+    solution: mediumString.describe(
+      "Step-by-step solution to resolve the issue",
+    ),
   })
   .describe(
-    'Base troubleshooting entry schema used across hooks, rules, and MCP servers. Provides standardized issue-solution pairs for common problems.'
+    "Base troubleshooting entry schema used across hooks, rules, and MCP servers. Provides standardized issue-solution pairs for common problems.",
   );
 
 /**

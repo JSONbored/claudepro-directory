@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Homepage Client Component (SHA-2086 Performance Optimizations + SHA-2102 Component Split)
@@ -20,37 +20,45 @@
  * Result: Main component reduced from 370 lines to ~150 lines
  */
 
-import dynamic from 'next/dynamic';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FeaturedSections } from '@/src/components/features/home/featured-sections';
-import { SearchSection } from '@/src/components/features/home/search-section';
-import { TabsSection } from '@/src/components/features/home/tabs-section';
-import { useSearch } from '@/src/hooks/use-search';
-import { HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
-import type { HomePageClientProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import dynamic from "next/dynamic";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FeaturedSections } from "@/src/components/features/home/featured-sections";
+import { SearchSection } from "@/src/components/features/home/search-section";
+import { TabsSection } from "@/src/components/features/home/tabs-section";
+import { useSearch } from "@/src/hooks/use-search";
+import { HOMEPAGE_FEATURED_CATEGORIES } from "@/src/lib/config/category-config";
+import { BookOpen, Layers, Server, Sparkles } from "@/src/lib/icons";
+import type {
+  HomePageClientProps,
+  UnifiedContentItem,
+} from "@/src/lib/schemas/component.schema";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 const UnifiedSearch = dynamic(
   () =>
-    import('@/src/components/features/search/unified-search').then((mod) => ({
+    import("@/src/components/features/search/unified-search").then((mod) => ({
       default: mod.UnifiedSearch,
     })),
   {
     ssr: false,
     loading: () => (
-      <div className={`h-14 ${UI_CLASSES.BG_MUTED_50} ${UI_CLASSES.ROUNDED_LG} animate-pulse`} />
+      <div
+        className={`h-14 ${UI_CLASSES.BG_MUTED_50} ${UI_CLASSES.ROUNDED_LG} animate-pulse`}
+      />
     ),
-  }
+  },
 );
 
-function HomePageClientComponent({ initialData }: HomePageClientProps) {
+function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
   const { allConfigs } = initialData;
 
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState("all");
   const pageSize = 20;
 
   // Don't pre-initialize displayedItems - let useEffect handle it based on filteredResults
-  const [displayedItems, setDisplayedItems] = useState<UnifiedContentItem[]>([]);
+  const [displayedItems, setDisplayedItems] = useState<UnifiedContentItem[]>(
+    [],
+  );
 
   // Memoize search options to prevent infinite re-renders
   const searchOptions = useMemo(
@@ -58,15 +66,21 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
       threshold: 0.3,
       minMatchCharLength: 2,
     }),
-    []
+    [],
   );
 
   // Use React 19 optimized search hook
-  const { filters, searchResults, filterOptions, handleSearch, handleFiltersChange, isSearching } =
-    useSearch({
-      data: allConfigs,
-      searchOptions,
-    });
+  const {
+    filters,
+    searchResults,
+    filterOptions,
+    handleSearch,
+    handleFiltersChange,
+    isSearching,
+  } = useSearch({
+    data: allConfigs,
+    searchOptions,
+  });
 
   // Create lookup maps dynamically for all featured categories
   // O(1) slug checking instead of O(n) array.some() calls
@@ -76,7 +90,9 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
     for (const category of HOMEPAGE_FEATURED_CATEGORIES) {
       const categoryData = initialData[category as keyof typeof initialData];
       if (categoryData && Array.isArray(categoryData)) {
-        maps[category] = new Set(categoryData.map((item: UnifiedContentItem) => item.slug));
+        maps[category] = new Set(
+          categoryData.map((item: UnifiedContentItem) => item.slug),
+        );
       }
     }
 
@@ -89,12 +105,14 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
     // Use allConfigs when not searching, searchResults when searching
     const dataSource = isSearching ? searchResults : allConfigs;
 
-    if (activeTab === 'all' || activeTab === 'community') {
+    if (activeTab === "all" || activeTab === "community") {
       return dataSource;
     }
 
     const lookupSet = slugLookupMaps[activeTab as keyof typeof slugLookupMaps];
-    return lookupSet ? dataSource.filter((item) => lookupSet.has(item.slug)) : dataSource;
+    return lookupSet
+      ? dataSource.filter((item) => lookupSet.has(item.slug))
+      : dataSource;
   }, [searchResults, allConfigs, activeTab, slugLookupMaps, isSearching]);
 
   // Use ref to track filtered results for stable pagination
@@ -110,7 +128,9 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
   // pagination when the same data is re-filtered (which creates a new array reference)
   // biome-ignore lint/correctness/useExhaustiveDependencies: Intentionally using activeTab/isSearching to avoid pagination reset on re-renders
   useEffect(() => {
-    setDisplayedItems(filteredResults.slice(0, pageSize) as UnifiedContentItem[]);
+    setDisplayedItems(
+      filteredResults.slice(0, pageSize) as UnifiedContentItem[],
+    );
     currentPageRef.current = 1;
   }, [activeTab, isSearching]);
 
@@ -128,7 +148,7 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
     setDisplayedItems((prev) => {
       const prevSlugs = new Set(prev.map((item) => item.slug));
       uniqueNextItems = nextItems.filter(
-        (item) => !prevSlugs.has(item.slug)
+        (item) => !prevSlugs.has(item.slug),
       ) as UnifiedContentItem[];
       return [...prev, ...uniqueNextItems] as UnifiedContentItem[];
     });
@@ -148,14 +168,14 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
 
   // Handle clear search
   const handleClearSearch = useCallback(() => {
-    handleSearch('');
+    handleSearch("");
     setDisplayedItems([]);
   }, [handleSearch]);
 
   return (
     <>
       {/* Search Section */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-8`}>
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 pt-4 pb-6`}>
         <div className={`${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
           <UnifiedSearch
             placeholder="Search for rules, MCP servers, agents, commands, and more..."
@@ -167,6 +187,42 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
             availableCategories={filterOptions.categories}
             resultCount={filteredResults.length}
           />
+
+          {/* Quick Stats - Below Search Bar */}
+          {stats && (
+            <div
+              className={`flex flex-wrap ${UI_CLASSES.JUSTIFY_CENTER} gap-4 lg:gap-6 text-xs lg:text-sm text-muted-foreground mt-6`}
+            >
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <BookOpen className="h-4 w-4" />
+                {stats.rules} Expert Rules
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Server className="h-4 w-4" />
+                {stats.mcp} MCP Servers
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Sparkles className="h-4 w-4" />
+                {stats.agents} AI Agents
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Sparkles className="h-4 w-4" />
+                {stats.commands} Commands
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Sparkles className="h-4 w-4" />
+                {stats.hooks} Automation Hooks
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Sparkles className="h-4 w-4" />
+                {stats.statuslines} Statuslines
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Layers className="h-4 w-4" />
+                {stats.collections} Collections
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

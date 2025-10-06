@@ -17,8 +17,6 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4.1-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 
-
-
 <div align="center">
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/Ax3Py4YDrq)
@@ -61,16 +59,15 @@ See our [Contributing Guide](.github/CONTRIBUTING.md) for detailed instructions.
 
 <div align="center">
 
-| **[🤖 Agents (10)](https://claudepro.directory/agents)** | **[⚙️ MCP Servers (39)](https://claudepro.directory/mcp)** | **[📜 Rules (11)](https://claudepro.directory/rules)** |
-|:---:|:---:|:---:|
-| Specialized AI personas | Model Context Protocol servers | Custom instructions |
-| **[🔧 Commands (12)](https://claudepro.directory/commands)** | **[🪝 Hooks (60)](https://claudepro.directory/hooks)** | **[📦 Collections (9)](https://claudepro.directory/collections)** |
-| Quick actions | Event automation | Curated bundles |
-| **[💻 Statuslines (6)](https://claudepro.directory/statuslines)** | **[📊 Trending](https://claudepro.directory/trending)** | |
-| Custom status displays | Popular this week | |
+|     **[🤖 Agents (10)](https://claudepro.directory/agents)**      | **[⚙️ MCP Servers (39)](https://claudepro.directory/mcp)** |      **[📜 Rules (11)](https://claudepro.directory/rules)**       |
+| :---------------------------------------------------------------: | :--------------------------------------------------------: | :---------------------------------------------------------------: |
+|                      Specialized AI personas                      |               Model Context Protocol servers               |                        Custom instructions                        |
+|   **[🔧 Commands (12)](https://claudepro.directory/commands)**    |   **[🪝 Hooks (60)](https://claudepro.directory/hooks)**   | **[📦 Collections (9)](https://claudepro.directory/collections)** |
+|                           Quick actions                           |                      Event automation                      |                          Curated bundles                          |
+| **[💻 Statuslines (6)](https://claudepro.directory/statuslines)** |  **[📊 Trending](https://claudepro.directory/trending)**   |                                                                   |
+|                      Custom status displays                       |                     Popular this week                      |                                                                   |
 
 </div>
-
 
 ## 📈 Activity
 
@@ -91,8 +88,6 @@ Thanks to everyone who has contributed to making Claude better for everyone!
 <a href="https://github.com/JSONbored/claudepro-directory/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=JSONbored/claudepro-directory" />
 </a>
-
-
 
 <div align="center">
 

@@ -45,7 +45,12 @@
     "Security Validation Audit: Audit API endpoints for missing Zod validations and security issues, producing detailed schemas and recommendations",
     "Code Consolidation Analysis: Analyze components for duplicate patterns, providing consolidation strategies with estimated code reduction"
   ],
-  "relatedRules": ["security-auditor", "code-review-expert", "react-expert", "typescript-expert"],
+  "relatedRules": [
+    "security-auditor",
+    "code-review-expert",
+    "react-expert",
+    "typescript-expert"
+  ],
   "expertiseAreas": [
     "Security vulnerability assessment",
     "Code quality and maintainability",

@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## Quick Navigation
 
 **Latest Features:**
+
 - [Newsletter Integration](#2025-10-05---resend-newsletter-integration-with-sticky-footer-bar) - Email newsletter signups via Resend
 - [Infinite Scroll Fix](#2025-10-05---homepage-infinite-scroll-bug-fix) - Fixed 60-item limit on homepage
 - [LLMs.txt AI Optimization](#2025-10-04---llmstxt-complete-content-generation-for-ai-discovery) - Complete page content for AI/LLM consumption
@@ -14,11 +15,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - [Trending Algorithm](#2025-10-04---production-hardened-trending-algorithm-with-security--performance-optimizations) - Real-time growth velocity tracking
 
 **Platform Improvements:**
+
 - [Trending Page Fix](#2025-10-04---trending-page-infinite-loading-fix-with-isr) - ISR configuration fixes
 - [Submit Form](#2025-10-04---submit-form-github-api-elimination) - Zero-API GitHub integration
 - [CI Optimization](#2025-10-04---github-actions-ci-optimization-for-community-contributors) - Faster community PRs
 
 **Community:**
+
 - [Reddit MCP Server](#2025-10-04---reddit-mcp-server-community-contribution) - Browse Reddit from Claude
 
 [View All Updates ↓](#2025-10-05---resend-newsletter-integration-with-sticky-footer-bar)
@@ -100,21 +103,25 @@ Added complete newsletter subscription infrastructure with Resend integration, f
 ### Technical Details
 
 **Email Infrastructure:**
+
 - **Domain:** `mail.claudepro.directory` (subdomain for deliverability)
 - **Integration:** Resend <> Vercel Marketplace direct integration
 - **DNS:** Managed via Resend <> Cloudflare integration
 - **From Address:** `hello@mail.claudepro.directory`
 
 **Rate Limiting:**
+
 - Newsletter signups: 5 requests per 300 seconds (5 minutes) per IP
 - Stricter than default (100 req/60s) to prevent newsletter spam
 - Allows legitimate retries while blocking abuse
 
 **Dependencies Added:**
+
 - `resend` - Official Resend SDK for email API
 - `@react-email/render` - Email template rendering (Resend dependency)
 
 **Files Modified:**
+
 - `src/app/layout.tsx` - Added FooterNewsletterBar component
 - `src/components/features/home/tabs-section.tsx` - Set `showLoadMoreButton={false}`
 - `src/components/shared/infinite-scroll-container.tsx` - Removed dual state management
@@ -122,6 +129,7 @@ Added complete newsletter subscription infrastructure with Resend integration, f
 - `src/lib/schemas/env.schema.ts` - Added Resend env vars
 
 **Files Created:**
+
 - `src/lib/schemas/newsletter.schema.ts`
 - `src/lib/services/resend.service.ts`
 - `src/lib/actions/newsletter-signup.ts`
@@ -168,6 +176,7 @@ Added complete newsletter subscription infrastructure with Resend integration, f
   - More modern UX (no manual clicking required)
 
 **Files Modified:**
+
 - `src/components/shared/infinite-scroll-container.tsx`
 - `src/components/features/home/index.tsx`
 - `src/components/features/home/tabs-section.tsx`
@@ -233,9 +242,15 @@ Implemented production-grade llms.txt generation system following the [llmstxt.o
 ### Technical Implementation
 
 **Type-Safe Content Extraction**:
+
 ```typescript
-export type ContentItem = McpContent | AgentContent | HookContent |
-                          CommandContent | RuleContent | StatuslineContent;
+export type ContentItem =
+  | McpContent
+  | AgentContent
+  | HookContent
+  | CommandContent
+  | RuleContent
+  | StatuslineContent;
 
 export function buildRichContent(item: ContentItem): string {
   const sections: string[] = [];
@@ -244,22 +259,25 @@ export function buildRichContent(item: ContentItem): string {
   // 4. Requirements, 5. Configuration, 6. Security
   // 7. Troubleshooting, 8. Examples, 9. Technical Details, 10. Preview
 
-  return sections.filter(s => s.length > 0).join('\n\n');
+  return sections.filter((s) => s.length > 0).join("\n\n");
 }
 ```
 
 **Category-Specific Formatting**:
+
 - MCP: Server configs, transport settings (HTTP/SSE), authentication requirements
 - Hooks: Hook configuration + actual script content (critical for implementation)
 - Statuslines: Format, refresh interval, position, color scheme
 - Agents/Commands/Rules: Temperature, max tokens, system prompts
 
 **Static Generation**:
+
 - All 168 item pages pre-rendered at build time via `generateStaticParams()`
 - ISR revalidation every 600 seconds for content updates
 - Production-optimized with Next.js 15.5.4 App Router
 
 **Validation & Quality Assurance**:
+
 - Automated validation script (`scripts/validate-llmstxt.ts`) checks all 26+ llms.txt routes
 - Validates markdown headers (`# Title`), metadata fields (`Title:`, `URL:`), category markers
 - Cache versioning (v2) for breaking changes to ensure fresh content delivery
@@ -279,6 +297,7 @@ export function buildRichContent(item: ContentItem): string {
 All content automatically generates llms.txt routes. No special configuration needed. The system extracts ALL available fields from your content schemas.
 
 **Example URLs**:
+
 - Item: `/mcp/airtable-mcp-server/llms.txt`
 - Category: `/mcp/llms.txt`
 - Collection: `/collections/essential-mcp-servers/llms.txt`
@@ -287,6 +306,7 @@ All content automatically generates llms.txt routes. No special configuration ne
 ### Compliance
 
 Follows llmstxt.org specification (Oct 2025 standards):
+
 - Plain text format (UTF-8)
 - Structured sections with clear headers
 - No artificial length limits (AI consumption priority)
@@ -329,14 +349,16 @@ Implemented dual-title metadata system allowing separate SEO-optimized titles (`
 ### Technical Implementation
 
 **Character Budget per Category**:
+
 - Agents: 28 chars | MCP: 31 chars (most space) | Rules: 29 chars
 - Commands: 26 chars | Hooks: 29 chars | Statuslines: 23 chars | Collections: 23 chars
 
 **Enhancement Logic**:
+
 ```typescript
 // Automated "for Claude" suffix with slug fallback
 const baseTitle = item.title || item.name || slugToTitle(item.slug);
-if (' for Claude'.length <= availableSpace) {
+if (" for Claude".length <= availableSpace) {
   return `${baseTitle} for Claude`;
 }
 ```
@@ -398,13 +420,13 @@ The trending tab uses a production-grade growth rate algorithm with security har
 ```typescript
 // UTC-normalized date calculation (prevents timezone bugs)
 const nowUtc = new Date();
-const todayStr = nowUtc.toISOString().split('T')[0];
+const todayStr = nowUtc.toISOString().split("T")[0];
 
 // Input validation (prevents negative/invalid values)
 const todayCount = Math.max(0, Number(todayViews[key]) || 0);
 
 // Atomic Redis operations (prevents race conditions)
-pipeline.expire(dailyKey, 604800, 'NX'); // Only set if key doesn't have TTL
+pipeline.expire(dailyKey, 604800, "NX"); // Only set if key doesn't have TTL
 ```
 
 ### Documentation
@@ -483,7 +505,10 @@ Redesigned the view counter display to be more prominent and visually appealing.
 ### Implementation
 
 ```tsx
-<Badge variant="secondary" className="h-7 px-2.5 gap-1.5 bg-primary/10 text-primary">
+<Badge
+  variant="secondary"
+  className="h-7 px-2.5 gap-1.5 bg-primary/10 text-primary"
+>
   <Eye className="h-3.5 w-3.5" />
   <span className="text-xs">{formatViewCount(viewCount)}</span>
 </Badge>
@@ -551,10 +576,14 @@ The trending page used `export const dynamic = 'force-static'` which froze data 
 
 ```typescript
 // Before: Incorrect check (returns true in fallback mode)
-if (!statsRedis.isEnabled()) { /* fallback */ }
+if (!statsRedis.isEnabled()) {
+  /* fallback */
+}
 
 // After: Correct check (only true when actually connected)
-if (!statsRedis.isConnected()) { /* fallback */ }
+if (!statsRedis.isConnected()) {
+  /* fallback */
+}
 ```
 
 ### For Users
@@ -650,9 +679,9 @@ New flow: Form → Pre-fill GitHub URL → Redirect → User reviews → Submit
 ```typescript
 // Production-grade GitHub issue URL generator
 const url = new URL(`https://github.com/${owner}/${repo}/issues/new`);
-url.searchParams.set('title', title);
-url.searchParams.set('body', body);
-window.open(url.toString(), '_blank');
+url.searchParams.set("title", title);
+url.searchParams.set("body", body);
+window.open(url.toString(), "_blank");
 ```
 
 ### Added

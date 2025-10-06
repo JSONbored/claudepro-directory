@@ -25,28 +25,28 @@
  * @see https://docs.github.com/en/issues/tracking-your-work-with-issues/creating-an-issue#creating-an-issue-from-a-url-query
  */
 
-import type { ConfigSubmissionData } from '@/src/lib/schemas/form.schema';
+import type { ConfigSubmissionData } from "@/src/lib/schemas/form.schema";
 
 /**
  * GitHub repository configuration
  * Hardcoded for security - prevents tampering via environment variables
  */
 const GITHUB_CONFIG = {
-  owner: 'JSONbored',
-  repo: 'claudepro-directory',
-  baseUrl: 'https://github.com',
+  owner: "JSONbored",
+  repo: "claudepro-directory",
+  baseUrl: "https://github.com",
 } as const;
 
 /**
  * Content type display names for issue titles
  */
-const CONTENT_TYPE_LABELS: Record<ConfigSubmissionData['type'], string> = {
-  agents: 'Agent',
-  mcp: 'MCP Server',
-  rules: 'Rule',
-  commands: 'Command',
-  hooks: 'Hook',
-  statuslines: 'Statusline',
+const CONTENT_TYPE_LABELS: Record<ConfigSubmissionData["type"], string> = {
+  agents: "Agent",
+  mcp: "MCP Server",
+  rules: "Rule",
+  commands: "Command",
+  hooks: "Hook",
+  statuslines: "Statusline",
 } as const;
 
 /**
@@ -55,69 +55,69 @@ const CONTENT_TYPE_LABELS: Record<ConfigSubmissionData['type'], string> = {
  */
 function generateIssueBody(data: ConfigSubmissionData): string {
   const sections: string[] = [
-    '## New Configuration Submission',
-    '',
+    "## New Configuration Submission",
+    "",
     `**Submission Type:** ${CONTENT_TYPE_LABELS[data.type]}`,
     `**Name:** ${data.name}`,
     `**Author:** ${data.author}`,
     `**Category:** ${data.category}`,
-    '',
+    "",
   ];
 
   // Description section
-  sections.push('### Description');
+  sections.push("### Description");
   sections.push(data.description);
-  sections.push('');
+  sections.push("");
 
   // GitHub URL if provided
   if (data.github?.trim()) {
-    sections.push('### Repository');
+    sections.push("### Repository");
     sections.push(`**GitHub URL:** ${data.github}`);
-    sections.push('');
+    sections.push("");
   }
 
   // Configuration JSON with syntax highlighting
-  sections.push('### Configuration');
-  sections.push('```json');
+  sections.push("### Configuration");
+  sections.push("```json");
   sections.push(data.content);
-  sections.push('```');
-  sections.push('');
+  sections.push("```");
+  sections.push("");
 
   // Tags if provided (already an array after Zod transform)
   if (data.tags && data.tags.length > 0) {
-    const tagList = data.tags.map((tag) => `\`${tag}\``).join(', ');
+    const tagList = data.tags.map((tag) => `\`${tag}\``).join(", ");
 
-    sections.push('### Tags');
+    sections.push("### Tags");
     sections.push(tagList);
-    sections.push('');
+    sections.push("");
   }
 
   // Review checklist for maintainers
-  sections.push('---');
-  sections.push('### Review Checklist');
-  sections.push('- [ ] Configuration format is valid JSON');
-  sections.push('- [ ] All required fields are present');
-  sections.push('- [ ] Content follows community guidelines');
-  sections.push('- [ ] No security concerns identified');
-  sections.push('- [ ] GitHub repository is accessible (if provided)');
-  sections.push('- [ ] Appropriate labels have been added');
-  sections.push('');
+  sections.push("---");
+  sections.push("### Review Checklist");
+  sections.push("- [ ] Configuration format is valid JSON");
+  sections.push("- [ ] All required fields are present");
+  sections.push("- [ ] Content follows community guidelines");
+  sections.push("- [ ] No security concerns identified");
+  sections.push("- [ ] GitHub repository is accessible (if provided)");
+  sections.push("- [ ] Appropriate labels have been added");
+  sections.push("");
 
   // Metadata
-  sections.push('### Submission Metadata');
+  sections.push("### Submission Metadata");
   sections.push(`**Submitted:** ${new Date().toISOString()}`);
   sections.push(`**Type:** ${data.type}`);
-  sections.push('**Status:** Pending Review');
-  sections.push('');
+  sections.push("**Status:** Pending Review");
+  sections.push("");
 
   // Footer with attribution
-  sections.push('---');
-  sections.push('');
+  sections.push("---");
+  sections.push("");
   sections.push(
-    '*This issue was generated automatically from the ClaudePro Directory submission form.*'
+    "*This issue was generated automatically from the ClaudePro Directory submission form.*",
   );
 
-  return sections.join('\n');
+  return sections.join("\n");
 }
 
 /**
@@ -149,7 +149,7 @@ export function generateGitHubIssueUrl(data: ConfigSubmissionData): string {
   const body = generateIssueBody(data);
 
   // Generate labels (GitHub supports comma-separated labels)
-  const labels = ['submission', `type:${data.type}`, 'needs-review'].join(',');
+  const labels = ["submission", `type:${data.type}`, "needs-review"].join(",");
 
   // Construct URL with query parameters
   // Using URLSearchParams ensures proper encoding
@@ -185,14 +185,20 @@ export function validateIssueUrlLength(url: string): boolean {
 export function openGitHubIssue(url: string): boolean {
   // Validate URL before opening
   if (!validateIssueUrlLength(url)) {
-    throw new Error('Issue content is too large. Please reduce the configuration size.');
+    throw new Error(
+      "Issue content is too large. Please reduce the configuration size.",
+    );
   }
 
   // Open in new tab with security attributes
-  const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+  const newWindow = window.open(url, "_blank", "noopener,noreferrer");
 
   // Check if popup was blocked
-  if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+  if (
+    !newWindow ||
+    newWindow.closed ||
+    typeof newWindow.closed === "undefined"
+  ) {
     return false; // Popup blocked
   }
 
@@ -206,14 +212,16 @@ export function openGitHubIssue(url: string): boolean {
  * @param data - Validated submission data
  * @returns HTML anchor element with pre-filled GitHub issue URL
  */
-export function createGitHubIssueLink(data: ConfigSubmissionData): HTMLAnchorElement {
+export function createGitHubIssueLink(
+  data: ConfigSubmissionData,
+): HTMLAnchorElement {
   const url = generateGitHubIssueUrl(data);
-  const link = document.createElement('a');
+  const link = document.createElement("a");
 
   link.href = url;
-  link.target = '_blank';
-  link.rel = 'noopener noreferrer';
-  link.textContent = 'Open GitHub Issue';
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.textContent = "Open GitHub Issue";
 
   return link;
 }

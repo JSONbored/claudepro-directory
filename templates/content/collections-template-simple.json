@@ -15,10 +15,7 @@
     "Feature or benefit #2",
     "Feature or benefit #3"
   ],
-  "useCases": [
-    "Use case #1",
-    "Use case #2"
-  ],
+  "useCases": ["Use case #1", "Use case #2"],
   "items": [
     {
       "category": "hooks",
@@ -31,14 +28,8 @@
       "reason": "Why this item is included in the collection"
     }
   ],
-  "installationOrder": [
-    "example-hook-slug",
-    "example-command-slug"
-  ],
-  "prerequisites": [
-    "Prerequisite #1",
-    "Prerequisite #2"
-  ],
+  "installationOrder": ["example-hook-slug", "example-command-slug"],
+  "prerequisites": ["Prerequisite #1", "Prerequisite #2"],
   "compatibility": {
     "claudeDesktop": false,
     "claudeCode": true

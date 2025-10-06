@@ -4,7 +4,13 @@
   "category": "mcp",
   "author": "Monday.com",
   "dateAdded": "2025-09-18",
-  "tags": ["monday", "project-management", "crm", "workflow", "team-management"],
+  "tags": [
+    "monday",
+    "project-management",
+    "crm",
+    "workflow",
+    "team-management"
+  ],
   "content": "Control monday.com boards and workflows through Claude for visual project management.",
   "features": [
     "Create and update board items",

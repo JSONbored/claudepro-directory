@@ -21,9 +21,9 @@
  * - app/[category]/[slug]/page.tsx (detail pages)
  */
 
-import { logger } from '@/src/lib/logger';
-import { contentCache } from '@/src/lib/redis';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import { logger } from "@/src/lib/logger";
+import { contentCache } from "@/src/lib/redis";
+import type { UnifiedContentItem } from "@/src/lib/schemas/component.schema";
 
 /**
  * Cache TTL configuration
@@ -46,19 +46,25 @@ const CACHE_TTL = {
  * @param category - The content category (agents, mcp, commands, rules, hooks, statuslines)
  * @returns Array of content items for the specified category
  */
-export async function getContentByCategory(category: string): Promise<UnifiedContentItem[]> {
+export async function getContentByCategory(
+  category: string,
+): Promise<UnifiedContentItem[]> {
   try {
     // Try Redis cache first (production optimization)
     if (contentCache.isEnabled()) {
-      const cached = await contentCache.getContentMetadata<UnifiedContentItem[]>(category);
+      const cached =
+        await contentCache.getContentMetadata<UnifiedContentItem[]>(category);
       if (cached && Array.isArray(cached)) {
-        logger.debug('Content cache hit', { category, itemCount: cached.length });
+        logger.debug("Content cache hit", {
+          category,
+          itemCount: cached.length,
+        });
         return cached;
       }
     }
 
     // Cache miss - load from generated files
-    const contentModule = await import('@/generated/content');
+    const contentModule = await import("@/generated/content");
 
     // Map category to loader function
     const loaderMap: Record<string, () => Promise<UnifiedContentItem[]>> = {
@@ -73,10 +79,14 @@ export async function getContentByCategory(category: string): Promise<UnifiedCon
 
     const loader = loaderMap[category];
     if (!loader) {
-      logger.error('Invalid category for content loading', new Error('Category not found'), {
-        category,
-        availableCategories: Object.keys(loaderMap).join(', '),
-      });
+      logger.error(
+        "Invalid category for content loading",
+        new Error("Category not found"),
+        {
+          category,
+          availableCategories: Object.keys(loaderMap).join(", "),
+        },
+      );
       return [];
     }
 
@@ -86,15 +96,23 @@ export async function getContentByCategory(category: string): Promise<UnifiedCon
     if (contentCache.isEnabled() && items.length > 0) {
       contentCache
         .cacheContentMetadata(category, items, CACHE_TTL.CATEGORY)
-        .catch((err) => logger.warn('Failed to cache category content', { category, error: err }));
+        .catch((err) =>
+          logger.warn("Failed to cache category content", {
+            category,
+            error: err,
+          }),
+        );
     }
 
-    logger.debug('Content loaded from file system', { category, itemCount: items.length });
+    logger.debug("Content loaded from file system", {
+      category,
+      itemCount: items.length,
+    });
     return items;
   } catch (error) {
     logger.error(
       `Failed to load content for category: ${category}`,
-      error instanceof Error ? error : new Error(String(error))
+      error instanceof Error ? error : new Error(String(error)),
     );
     return [];
   }
@@ -117,24 +135,28 @@ export async function getContentByCategory(category: string): Promise<UnifiedCon
  */
 export async function getContentBySlug(
   category: string,
-  slug: string
+  slug: string,
 ): Promise<UnifiedContentItem | null> {
   try {
     // Try granular item cache first (faster than category cache for single items)
     const cacheKey = `content:${category}:item:${slug}`;
     if (contentCache.isEnabled()) {
-      const cached = await contentCache.getAPIResponse<UnifiedContentItem>(cacheKey);
+      const cached =
+        await contentCache.getAPIResponse<UnifiedContentItem>(cacheKey);
       if (cached) {
-        logger.debug('Item cache hit', { category, slug });
+        logger.debug("Item cache hit", { category, slug });
         return cached;
       }
     }
 
     // Cache miss - load from generated files
-    const contentModule = await import('@/generated/content');
+    const contentModule = await import("@/generated/content");
 
     // Map category to slug loader function
-    const bySlugMap: Record<string, (slug: string) => Promise<UnifiedContentItem | undefined>> = {
+    const bySlugMap: Record<
+      string,
+      (slug: string) => Promise<UnifiedContentItem | undefined>
+    > = {
       agents: contentModule.getAgentBySlug,
       mcp: contentModule.getMcpBySlug,
       commands: contentModule.getCommandBySlug,
@@ -146,7 +168,7 @@ export async function getContentBySlug(
 
     const loader = bySlugMap[category];
     if (!loader) {
-      logger.warn('Invalid category for slug lookup', {
+      logger.warn("Invalid category for slug lookup", {
         category,
         slug,
       });
@@ -155,7 +177,7 @@ export async function getContentBySlug(
 
     const item = await loader(slug);
     if (!item) {
-      logger.debug('Item not found', { category, slug });
+      logger.debug("Item not found", { category, slug });
       return null;
     }
 
@@ -163,15 +185,17 @@ export async function getContentBySlug(
     if (contentCache.isEnabled()) {
       contentCache
         .cacheAPIResponse(cacheKey, item, CACHE_TTL.ITEM)
-        .catch((err) => logger.warn('Failed to cache item', { category, slug, error: err }));
+        .catch((err) =>
+          logger.warn("Failed to cache item", { category, slug, error: err }),
+        );
     }
 
-    logger.debug('Item loaded from file system', { category, slug });
+    logger.debug("Item loaded from file system", { category, slug });
     return item;
   } catch (error) {
     logger.error(
       `Failed to load content by slug: ${category}/${slug}`,
-      error instanceof Error ? error : new Error(String(error))
+      error instanceof Error ? error : new Error(String(error)),
     );
     return null;
   }
@@ -189,16 +213,19 @@ export async function getContentBySlug(
  */
 export async function getFullContentBySlug(
   category: string,
-  slug: string
+  slug: string,
 ): Promise<UnifiedContentItem | null> {
   try {
-    const contentModule = await import('@/generated/content');
+    const contentModule = await import("@/generated/content");
 
     // Map category to full content loader
     // Each category returns its specific type (AgentContent, MCPContent, etc.)
     // which are all compatible with UnifiedContentItem
     // Each loader can return null if the item is not found
-    const fullContentMap: Record<string, (slug: string) => Promise<UnifiedContentItem | null>> = {
+    const fullContentMap: Record<
+      string,
+      (slug: string) => Promise<UnifiedContentItem | null>
+    > = {
       agents: contentModule.getAgentFullContent,
       mcp: contentModule.getMcpFullContent,
       commands: contentModule.getCommandFullContent,
@@ -216,7 +243,7 @@ export async function getFullContentBySlug(
   } catch (error) {
     logger.error(
       `Failed to load full content: ${category}/${slug}`,
-      error instanceof Error ? error : new Error(String(error))
+      error instanceof Error ? error : new Error(String(error)),
     );
     return null;
   }
@@ -233,7 +260,7 @@ export async function getFullContentBySlug(
 export async function getRelatedContent(
   category: string,
   currentSlug: string,
-  limit: number = 3
+  limit: number = 3,
 ): Promise<UnifiedContentItem[]> {
   const allContent = await getContentByCategory(category);
 

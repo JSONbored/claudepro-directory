@@ -5,9 +5,9 @@
  * Part of unified lib/security/ module
  */
 
-import { logger } from '@/src/lib/logger';
-import type { RequestId } from '@/src/lib/schemas/branded-types.schema';
-import { isProduction } from '@/src/lib/schemas/env.schema';
+import { logger } from "@/src/lib/logger";
+import type { RequestId } from "@/src/lib/schemas/branded-types.schema";
+import { isProduction } from "@/src/lib/schemas/env.schema";
 import {
   determineErrorType,
   type ErrorContext,
@@ -15,8 +15,8 @@ import {
   errorSeveritySchema,
   type SanitizedError,
   validateErrorInput,
-} from '@/src/lib/schemas/error.schema';
-import { SENSITIVE_PATTERNS } from './patterns';
+} from "@/src/lib/schemas/error.schema";
+import { SENSITIVE_PATTERNS } from "./patterns";
 
 // Merge with extended patterns from original file
 
@@ -24,19 +24,19 @@ import { SENSITIVE_PATTERNS } from './patterns';
  * Generic safe error messages for different error types
  */
 const SAFE_ERROR_MESSAGES = {
-  ValidationError: 'Invalid input provided',
-  DatabaseError: 'Database operation failed',
-  AuthenticationError: 'Authentication failed',
-  AuthorizationError: 'Access denied',
-  NotFoundError: 'Resource not found',
-  RateLimitError: 'Too many requests',
-  NetworkError: 'Network request failed',
-  FileSystemError: 'File operation failed',
-  ConfigurationError: 'Configuration error',
-  TimeoutError: 'Request timeout',
-  ServiceUnavailableError: 'Service temporarily unavailable',
-  InternalServerError: 'Internal server error',
-  default: 'An error occurred while processing your request',
+  ValidationError: "Invalid input provided",
+  DatabaseError: "Database operation failed",
+  AuthenticationError: "Authentication failed",
+  AuthorizationError: "Access denied",
+  NotFoundError: "Resource not found",
+  RateLimitError: "Too many requests",
+  NetworkError: "Network request failed",
+  FileSystemError: "File operation failed",
+  ConfigurationError: "Configuration error",
+  TimeoutError: "Request timeout",
+  ServiceUnavailableError: "Service temporarily unavailable",
+  InternalServerError: "Internal server error",
+  default: "An error occurred while processing your request",
 } as const;
 
 /**
@@ -57,7 +57,10 @@ export class ErrorSanitizer {
   /**
    * Sanitize error message by removing sensitive patterns
    */
-  private sanitizeMessage(message: string): { sanitized: string; removed: string[] } {
+  private sanitizeMessage(message: string): {
+    sanitized: string;
+    removed: string[];
+  } {
     let sanitized = message;
     const removed: string[] = [];
 
@@ -66,16 +69,16 @@ export class ErrorSanitizer {
       const matches = sanitized.match(pattern);
       if (matches) {
         removed.push(...matches);
-        sanitized = sanitized.replace(pattern, '[REDACTED]');
+        sanitized = sanitized.replace(pattern, "[REDACTED]");
       }
     }
 
     // Additional sanitization for common sensitive info
     sanitized = sanitized
-      .replace(/password\s*[:=]\s*[^\s]+/gi, 'password=[REDACTED]')
-      .replace(/token\s*[:=]\s*[^\s]+/gi, 'token=[REDACTED]')
-      .replace(/key\s*[:=]\s*[^\s]+/gi, 'key=[REDACTED]')
-      .replace(/secret\s*[:=]\s*[^\s]+/gi, 'secret=[REDACTED]');
+      .replace(/password\s*[:=]\s*[^\s]+/gi, "password=[REDACTED]")
+      .replace(/token\s*[:=]\s*[^\s]+/gi, "token=[REDACTED]")
+      .replace(/key\s*[:=]\s*[^\s]+/gi, "key=[REDACTED]")
+      .replace(/secret\s*[:=]\s*[^\s]+/gi, "secret=[REDACTED]");
 
     return { sanitized, removed };
   }
@@ -86,7 +89,7 @@ export class ErrorSanitizer {
   private normalizeError(error: unknown): Error {
     const validatedInput = validateErrorInput(error);
 
-    if (validatedInput.isValid && validatedInput.type === 'error') {
+    if (validatedInput.isValid && validatedInput.type === "error") {
       // Create Error instance from validated data
       const err = new Error(validatedInput.error.message);
       if (validatedInput.error.name) {
@@ -98,7 +101,7 @@ export class ErrorSanitizer {
       return err;
     }
 
-    if (validatedInput.isValid && validatedInput.type === 'string') {
+    if (validatedInput.isValid && validatedInput.type === "string") {
       return new Error(validatedInput.fallback);
     }
 
@@ -106,7 +109,7 @@ export class ErrorSanitizer {
       return new Error(validatedInput.fallback);
     }
 
-    return new Error('Unknown error occurred');
+    return new Error("Unknown error occurred");
   }
 
   /**
@@ -119,45 +122,48 @@ export class ErrorSanitizer {
   /**
    * Determine error severity based on error type and content using schema validation
    */
-  private determineErrorSeverity(error: Error, errorType: string): ErrorSeverity {
+  private determineErrorSeverity(
+    error: Error,
+    errorType: string,
+  ): ErrorSeverity {
     const message = error.message.toLowerCase();
 
     // Critical errors that indicate security issues
     if (
-      message.includes('injection') ||
-      message.includes('exploit') ||
-      message.includes('unauthorized') ||
-      message.includes('breach') ||
-      errorType === 'AuthorizationError'
+      message.includes("injection") ||
+      message.includes("exploit") ||
+      message.includes("unauthorized") ||
+      message.includes("breach") ||
+      errorType === "AuthorizationError"
     ) {
-      return errorSeveritySchema.parse('critical');
+      return errorSeveritySchema.parse("critical");
     }
 
     // High severity errors
     if (
-      errorType === 'DatabaseError' ||
-      errorType === 'AuthenticationError' ||
-      message.includes('crash') ||
-      message.includes('corruption')
+      errorType === "DatabaseError" ||
+      errorType === "AuthenticationError" ||
+      message.includes("crash") ||
+      message.includes("corruption")
     ) {
-      return errorSeveritySchema.parse('high');
+      return errorSeveritySchema.parse("high");
     }
 
     // Medium severity errors
     if (
-      errorType === 'NetworkError' ||
-      errorType === 'TimeoutError' ||
-      errorType === 'ServiceUnavailableError'
+      errorType === "NetworkError" ||
+      errorType === "TimeoutError" ||
+      errorType === "ServiceUnavailableError"
     ) {
-      return errorSeveritySchema.parse('medium');
+      return errorSeveritySchema.parse("medium");
     }
 
     // Low severity errors
-    if (errorType === 'ValidationError' || errorType === 'NotFoundError') {
-      return errorSeveritySchema.parse('low');
+    if (errorType === "ValidationError" || errorType === "NotFoundError") {
+      return errorSeveritySchema.parse("low");
     }
 
-    return errorSeveritySchema.parse('medium');
+    return errorSeveritySchema.parse("medium");
   }
 
   /**
@@ -165,10 +171,10 @@ export class ErrorSanitizer {
    */
   private generateErrorCode(severity: ErrorSeverity): string {
     const prefixes: Record<ErrorSeverity, string> = {
-      low: 'USR',
-      medium: 'SYS',
-      high: 'SVR',
-      critical: 'SEC',
+      low: "USR",
+      medium: "SYS",
+      high: "SVR",
+      critical: "SEC",
     };
 
     const timestamp = Date.now().toString(36).toUpperCase();
@@ -181,7 +187,7 @@ export class ErrorSanitizer {
   public sanitizeError(
     inputError: unknown,
     requestId: RequestId,
-    context: ErrorContext = {}
+    context: ErrorContext = {},
   ): SanitizedError {
     const error = this.normalizeError(inputError);
     const errorType = this.determineErrorType(error);
@@ -189,14 +195,15 @@ export class ErrorSanitizer {
     const errorCode = this.generateErrorCode(severity);
 
     const originalMessage = error.message || error.toString();
-    const { sanitized: sanitizedMessage, removed } = this.sanitizeMessage(originalMessage);
+    const { sanitized: sanitizedMessage, removed } =
+      this.sanitizeMessage(originalMessage);
 
     // Log the full error details internally (never expose to client)
     logger.error(`Error sanitized [${errorCode}]`, error, {
       errorType,
       severity,
       removedPatternsCount: removed.length,
-      contextKeys: Object.keys(context).join(','),
+      contextKeys: Object.keys(context).join(","),
       requestId,
     });
 
@@ -217,15 +224,15 @@ export class ErrorSanitizer {
    */
   public sanitizeStackTrace(stackTrace: string): string {
     if (isProduction) {
-      return '[Stack trace hidden in production]';
+      return "[Stack trace hidden in production]";
     }
 
     const { sanitized } = this.sanitizeMessage(stackTrace);
     return sanitized
-      .split('\n')
-      .filter((line) => !line.includes('node_modules'))
+      .split("\n")
+      .filter((line) => !line.includes("node_modules"))
       .slice(0, 10) // Limit stack trace depth
-      .join('\n');
+      .join("\n");
   }
 
   /**
@@ -234,7 +241,11 @@ export class ErrorSanitizer {
    */
   public shouldReportError(severity: ErrorSeverity): boolean {
     // Only report medium and above severity errors
-    const reportableSeverities: ErrorSeverity[] = ['medium', 'high', 'critical'];
+    const reportableSeverities: ErrorSeverity[] = [
+      "medium",
+      "high",
+      "critical",
+    ];
     return reportableSeverities.includes(severity);
   }
 }
@@ -250,7 +261,7 @@ const errorSanitizer = ErrorSanitizer.getInstance();
 export function sanitizeApiError(
   error: unknown,
   requestId: RequestId,
-  context: ErrorContext = {}
+  context: ErrorContext = {},
 ): SanitizedError {
   return errorSanitizer.sanitizeError(error, requestId, context);
 }

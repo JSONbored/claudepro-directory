@@ -4,7 +4,13 @@
   "category": "mcp",
   "author": "Socket",
   "dateAdded": "2025-09-18",
-  "tags": ["security", "dependencies", "vulnerability-scanning", "npm", "supply-chain"],
+  "tags": [
+    "security",
+    "dependencies",
+    "vulnerability-scanning",
+    "npm",
+    "supply-chain"
+  ],
   "content": "Analyze dependency security and supply chain risks with Socket's comprehensive vulnerability detection.",
   "features": [
     "Scan dependencies for known vulnerabilities",

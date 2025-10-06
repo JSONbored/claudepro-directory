@@ -1,4 +1,4 @@
-import { logger } from '@/src/lib/logger';
+import { logger } from "@/src/lib/logger";
 
 /**
  * Clipboard utilities
@@ -12,20 +12,20 @@ import { logger } from '@/src/lib/logger';
  */
 export async function copyToClipboard(
   text: string,
-  context?: { component?: string; action?: string }
+  context?: { component?: string; action?: string },
 ): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(text);
     return true;
   } catch (err) {
     logger.error(
-      'Failed to copy to clipboard',
+      "Failed to copy to clipboard",
       err instanceof Error ? err : new Error(String(err)),
       {
-        component: context?.component || 'Unknown',
-        action: context?.action || 'copy',
+        component: context?.component || "Unknown",
+        action: context?.action || "copy",
         textLength: text.length,
-      }
+      },
     );
     return false;
   }

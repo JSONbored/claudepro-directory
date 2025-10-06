@@ -4,9 +4,9 @@
  * Integrates with existing Redis infrastructure and provides fallbacks
  */
 
-import { z } from 'zod';
-import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/redis';
+import { z } from "zod";
+import { logger } from "@/src/lib/logger";
+import { statsRedis } from "@/src/lib/redis";
 
 // Zod schemas for type safety
 const viewCountRequestSchema = z.object({
@@ -20,7 +20,7 @@ const batchViewCountRequestSchema = z.object({
 
 const viewCountResponseSchema = z.object({
   views: z.number().min(0),
-  source: z.enum(['redis', 'deterministic', 'fallback']),
+  source: z.enum(["redis", "deterministic", "fallback"]),
   cached: z.boolean(),
 });
 
@@ -34,12 +34,16 @@ type ViewCountResponse = z.infer<typeof viewCountResponseSchema>;
 class ViewCountService {
   private cache = new Map<string, { views: number; timestamp: number }>();
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-  private readonly VIEW_COUNT_SALT = process.env.VIEW_COUNT_SALT || 'claudepro-view-salt-2024';
+  private readonly VIEW_COUNT_SALT =
+    process.env.VIEW_COUNT_SALT || "claudepro-view-salt-2024";
 
   /**
    * Get view count with proper fallback strategy
    */
-  async getViewCount(category: string, slug: string): Promise<ViewCountResponse> {
+  async getViewCount(
+    category: string,
+    slug: string,
+  ): Promise<ViewCountResponse> {
     try {
       // Validate inputs
       const request = viewCountRequestSchema.parse({ category, slug });
@@ -50,7 +54,7 @@ class ViewCountService {
       if (cached) {
         return viewCountResponseSchema.parse({
           views: cached.views,
-          source: 'redis',
+          source: "redis",
           cached: true,
         });
       }
@@ -58,19 +62,22 @@ class ViewCountService {
       // Try Redis first (real analytics)
       if (statsRedis.isEnabled()) {
         try {
-          const redisViews = await statsRedis.getViewCount(request.category, request.slug);
+          const redisViews = await statsRedis.getViewCount(
+            request.category,
+            request.slug,
+          );
 
           // Cache the result
-          const viewCount = typeof redisViews === 'number' ? redisViews : 0;
+          const viewCount = typeof redisViews === "number" ? redisViews : 0;
           this.setCache(cacheKey, viewCount);
 
           return viewCountResponseSchema.parse({
             views: viewCount,
-            source: 'redis',
+            source: "redis",
             cached: false,
           });
         } catch (error) {
-          logger.warn('Redis view count failed, using deterministic fallback', {
+          logger.warn("Redis view count failed, using deterministic fallback", {
             category: request.category,
             slug: request.slug,
             error: error instanceof Error ? error.message : String(error),
@@ -79,28 +86,30 @@ class ViewCountService {
       }
 
       // Fallback to deterministic view count
-      const deterministicViews = await this.getDeterministicViewCount(request.slug);
+      const deterministicViews = await this.getDeterministicViewCount(
+        request.slug,
+      );
       this.setCache(cacheKey, deterministicViews);
 
       return viewCountResponseSchema.parse({
         views: deterministicViews,
-        source: 'deterministic',
+        source: "deterministic",
         cached: false,
       });
     } catch (error) {
       logger.error(
-        'View count service error',
+        "View count service error",
         error instanceof Error ? error : new Error(String(error)),
         {
           category,
           slug,
-        }
+        },
       );
 
       // Ultimate fallback
       return viewCountResponseSchema.parse({
         views: 0,
-        source: 'fallback',
+        source: "fallback",
         cached: false,
       });
     }
@@ -110,7 +119,7 @@ class ViewCountService {
    * Get multiple view counts efficiently
    */
   async getBatchViewCounts(
-    items: Array<{ category: string; slug: string }>
+    items: Array<{ category: string; slug: string }>,
   ): Promise<Record<string, ViewCountResponse>> {
     try {
       // Validate inputs
@@ -118,7 +127,11 @@ class ViewCountService {
       const result: Record<string, ViewCountResponse> = {};
 
       // Check cache for all items first
-      const uncachedItems: Array<{ category: string; slug: string; key: string }> = [];
+      const uncachedItems: Array<{
+        category: string;
+        slug: string;
+        key: string;
+      }> = [];
 
       for (const item of request.items) {
         const cacheKey = `${item.category}:${item.slug}`;
@@ -127,7 +140,7 @@ class ViewCountService {
         if (cached) {
           result[cacheKey] = viewCountResponseSchema.parse({
             views: cached.views,
-            source: 'redis',
+            source: "redis",
             cached: true,
           });
         } else {
@@ -139,7 +152,10 @@ class ViewCountService {
       if (uncachedItems.length > 0 && statsRedis.isEnabled()) {
         try {
           const redisResults = await statsRedis.getViewCounts(
-            uncachedItems.map((item) => ({ category: item.category, slug: item.slug }))
+            uncachedItems.map((item) => ({
+              category: item.category,
+              slug: item.slug,
+            })),
           );
 
           for (const item of uncachedItems) {
@@ -151,25 +167,30 @@ class ViewCountService {
 
             result[item.key] = viewCountResponseSchema.parse({
               views: redisViews,
-              source: 'redis',
+              source: "redis",
               cached: false,
             });
           }
         } catch (error) {
-          logger.warn('Batch Redis view count failed, using deterministic fallbacks', {
-            itemCount: uncachedItems.length,
-            error: error instanceof Error ? error.message : String(error),
-          });
+          logger.warn(
+            "Batch Redis view count failed, using deterministic fallbacks",
+            {
+              itemCount: uncachedItems.length,
+              error: error instanceof Error ? error.message : String(error),
+            },
+          );
 
           // Fallback to deterministic for failed items
           for (const item of uncachedItems) {
             if (!result[item.key]) {
-              const deterministicViews = await this.getDeterministicViewCount(item.slug);
+              const deterministicViews = await this.getDeterministicViewCount(
+                item.slug,
+              );
               this.setCache(item.key, deterministicViews);
 
               result[item.key] = viewCountResponseSchema.parse({
                 views: deterministicViews,
-                source: 'deterministic',
+                source: "deterministic",
                 cached: false,
               });
             }
@@ -178,12 +199,14 @@ class ViewCountService {
       } else {
         // Use deterministic for all uncached items
         for (const item of uncachedItems) {
-          const deterministicViews = await this.getDeterministicViewCount(item.slug);
+          const deterministicViews = await this.getDeterministicViewCount(
+            item.slug,
+          );
           this.setCache(item.key, deterministicViews);
 
           result[item.key] = viewCountResponseSchema.parse({
             views: deterministicViews,
-            source: 'deterministic',
+            source: "deterministic",
             cached: false,
           });
         }
@@ -192,11 +215,11 @@ class ViewCountService {
       return result;
     } catch (error) {
       logger.error(
-        'Batch view count service error',
+        "Batch view count service error",
         error instanceof Error ? error : new Error(String(error)),
         {
           itemCount: items.length,
-        }
+        },
       );
 
       // Return fallback for all items
@@ -205,7 +228,7 @@ class ViewCountService {
         const key = `${item.category}:${item.slug}`;
         result[key] = viewCountResponseSchema.parse({
           views: 0,
-          source: 'fallback',
+          source: "fallback",
           cached: false,
         });
       }
@@ -225,15 +248,15 @@ class ViewCountService {
 
       // Import key for HMAC
       const key = await crypto.subtle.importKey(
-        'raw',
+        "raw",
         keyData,
-        { name: 'HMAC', hash: 'SHA-256' },
+        { name: "HMAC", hash: "SHA-256" },
         false,
-        ['sign']
+        ["sign"],
       );
 
       // Generate HMAC
-      const signature = await crypto.subtle.sign('HMAC', key, data);
+      const signature = await crypto.subtle.sign("HMAC", key, data);
       const hashArray = new Uint8Array(signature);
 
       // Convert first 4 bytes to integer and normalize to view count range
@@ -244,10 +267,13 @@ class ViewCountService {
         (hashArray[3] ?? 0);
       return (Math.abs(hashInt) % 900) + 100; // 100-999 range
     } catch (error) {
-      logger.warn('Web Crypto API deterministic view count failed, using simple hash', {
-        slug,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      logger.warn(
+        "Web Crypto API deterministic view count failed, using simple hash",
+        {
+          slug,
+          error: error instanceof Error ? error.message : String(error),
+        },
+      );
 
       // Fallback to simple hash if crypto fails
       let hash = 0;
@@ -262,7 +288,9 @@ class ViewCountService {
   /**
    * Cache management
    */
-  private getFromCache(key: string): { views: number; timestamp: number } | null {
+  private getFromCache(
+    key: string,
+  ): { views: number; timestamp: number } | null {
     const cached = this.cache.get(key);
     if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
       return cached;

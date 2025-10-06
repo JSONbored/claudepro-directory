@@ -11,11 +11,13 @@
  * - Beautiful Shiki syntax highlighting
  */
 
-import { createHighlighterCore } from 'shiki/core';
-import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
+import { createHighlighterCore } from "shiki/core";
+import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 
 // Singleton highlighter instance (cached in memory)
-let highlighterInstance: Awaited<ReturnType<typeof createHighlighterCore>> | null = null;
+let highlighterInstance: Awaited<
+  ReturnType<typeof createHighlighterCore>
+> | null = null;
 
 /**
  * Get or create the Shiki highlighter instance
@@ -39,16 +41,16 @@ async function getHighlighter() {
     jsx,
     tsx,
   ] = await Promise.all([
-    import('shiki/themes/github-dark-dimmed.mjs'),
-    import('shiki/themes/github-light.mjs'),
-    import('shiki/langs/typescript.mjs'),
-    import('shiki/langs/javascript.mjs'),
-    import('shiki/langs/json.mjs'),
-    import('shiki/langs/bash.mjs'),
-    import('shiki/langs/python.mjs'),
-    import('shiki/langs/markdown.mjs'),
-    import('shiki/langs/jsx.mjs'),
-    import('shiki/langs/tsx.mjs'),
+    import("shiki/themes/github-dark-dimmed.mjs"),
+    import("shiki/themes/github-light.mjs"),
+    import("shiki/langs/typescript.mjs"),
+    import("shiki/langs/javascript.mjs"),
+    import("shiki/langs/json.mjs"),
+    import("shiki/langs/bash.mjs"),
+    import("shiki/langs/python.mjs"),
+    import("shiki/langs/markdown.mjs"),
+    import("shiki/langs/jsx.mjs"),
+    import("shiki/langs/tsx.mjs"),
   ]);
 
   highlighterInstance = await createHighlighterCore({
@@ -75,8 +77,8 @@ async function getHighlighter() {
  */
 export async function highlightCode(
   code: string,
-  language: string = 'text',
-  showLineNumbers: boolean = true
+  language: string = "text",
+  showLineNumbers: boolean = true,
 ): Promise<string> {
   try {
     const highlighter = await getHighlighter();
@@ -84,29 +86,30 @@ export async function highlightCode(
     const html = highlighter.codeToHtml(code, {
       lang: language,
       themes: {
-        dark: 'github-dark-dimmed',
-        light: 'github-light',
+        dark: "github-dark-dimmed",
+        light: "github-light",
       },
-      defaultColor: 'dark',
+      defaultColor: "dark",
       transformers: [
         {
-          name: 'line-numbers',
+          name: "line-numbers",
           pre(node) {
             node.properties.style = undefined;
             node.properties.class =
-              'overflow-x-auto text-sm leading-relaxed p-4 rounded-lg border border-border bg-code/50 backdrop-blur-sm';
+              "overflow-x-auto text-sm leading-relaxed p-4 rounded-lg border border-border bg-code/50 backdrop-blur-sm";
           },
           code(node) {
             if (showLineNumbers) {
-              node.properties.style = 'display: grid; background: transparent;';
+              node.properties.style = "display: grid; background: transparent;";
             } else {
-              node.properties.style = 'display: block; background: transparent;';
+              node.properties.style =
+                "display: block; background: transparent;";
             }
           },
           line(node, line) {
             if (showLineNumbers) {
-              node.properties['data-line'] = line;
-              node.properties.class = 'line-number';
+              node.properties["data-line"] = line;
+              node.properties.class = "line-number";
             }
           },
         },
@@ -117,11 +120,11 @@ export async function highlightCode(
   } catch (_error) {
     // Fallback to plain text if highlighting fails
     const escapedCode = code
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
 
     return `<pre class="overflow-x-auto text-sm leading-relaxed p-4 rounded-lg border border-border bg-code/50 backdrop-blur-sm"><code style="color: var(--color-text-secondary);">${escapedCode}</code></pre>`;
   }

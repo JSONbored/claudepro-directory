@@ -38,13 +38,16 @@
  * @see {@link file://../../lib/content-loaders.ts} - Content loading with caching
  */
 
-import { notFound } from 'next/navigation';
-import { ContentListServer } from '@/src/components/content-list-server';
-import { getCategoryConfig, isValidCategory } from '@/src/lib/config/category-config';
-import { getContentByCategory } from '@/src/lib/content/content-loaders';
-import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/redis';
-import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { notFound } from "next/navigation";
+import { ContentListServer } from "@/src/components/content-list-server";
+import {
+  getCategoryConfig,
+  isValidCategory,
+} from "@/src/lib/config/category-config";
+import { getContentByCategory } from "@/src/lib/content/content-loaders";
+import { logger } from "@/src/lib/logger";
+import { statsRedis } from "@/src/lib/redis";
+import { generatePageMetadata } from "@/src/lib/seo/metadata-generator";
 
 // ISR - revalidate every 5 minutes for fresh view counts
 export const revalidate = 300;
@@ -81,7 +84,7 @@ export const revalidate = 300;
  * // ]
  */
 export async function generateStaticParams() {
-  const { VALID_CATEGORIES } = await import('@/src/lib/config/category-config');
+  const { VALID_CATEGORIES } = await import("@/src/lib/config/category-config");
 
   return VALID_CATEGORIES.map((category) => ({
     category,
@@ -109,28 +112,32 @@ export async function generateStaticParams() {
  * //   twitter: { ... }
  * // }
  */
-export async function generateMetadata({ params }: { params: Promise<{ category: string }> }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}) {
   const { category } = await params;
 
   // Validate category
   if (!isValidCategory(category)) {
     return {
-      title: 'Category Not Found',
-      description: 'The requested content category could not be found.',
+      title: "Category Not Found",
+      description: "The requested content category could not be found.",
     };
   }
 
   const config = getCategoryConfig(category);
   if (!config) {
     return {
-      title: 'Category Not Found',
-      description: 'The requested content category could not be found.',
+      title: "Category Not Found",
+      description: "The requested content category could not be found.",
     };
   }
 
   // Use centralized metadata with category context
   // Explicit context construction for exactOptionalPropertyTypes compatibility
-  return await generatePageMetadata('/:category', {
+  return await generatePageMetadata("/:category", {
     params: { category },
     category,
     categoryConfig: config,
@@ -158,12 +165,16 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
  * // /mcp → Lists all MCP servers with search/filter
  * // /statuslines → Lists all statuslines with search/filter
  */
-export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
+export default async function CategoryPage({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}) {
   const { category } = await params;
 
   // Validate category
   if (!isValidCategory(category)) {
-    logger.warn('Invalid category requested', { category });
+    logger.warn("Invalid category requested", { category });
     notFound();
   }
 
@@ -178,16 +189,20 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
   // Enrich with view counts from Redis
   const items = await statsRedis.enrichWithViewCounts(
-    itemsData.map((item) => ({ ...item, category: category as typeof item.category }))
+    itemsData.map((item) => ({
+      ...item,
+      category: category as typeof item.category,
+    })),
   );
 
   // Process badges (handle dynamic count badges)
   const badges = config.listPage.badges.map((badge) => ({
     ...(badge.icon && { icon: badge.icon }),
-    text: typeof badge.text === 'function' ? badge.text(items.length) : badge.text,
+    text:
+      typeof badge.text === "function" ? badge.text(items.length) : badge.text,
   }));
 
-  logger.info('Category page rendered', {
+  logger.info("Category page rendered", {
     category,
     itemCount: items.length,
   });
@@ -196,9 +211,11 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     <ContentListServer
       title={config.pluralTitle}
       description={config.description}
-      icon={config.icon.displayName?.toLowerCase() || 'sparkles'}
+      icon={config.icon.displayName?.toLowerCase() || "sparkles"}
       items={items}
-      type={category as 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides'}
+      type={
+        category as "agents" | "mcp" | "rules" | "commands" | "hooks" | "guides"
+      }
       searchPlaceholder={config.listPage.searchPlaceholder}
       badges={badges}
     />
