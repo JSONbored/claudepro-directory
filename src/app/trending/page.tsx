@@ -13,7 +13,6 @@ import { getBatchTrendingData } from '@/src/lib/trending/calculator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // ISR Configuration - Revalidate every 5 minutes for real-time Redis data
-export const revalidate = 300; // 5 minutes in seconds
 export const dynamic = 'force-static'; // Enable ISR (Incremental Static Regeneration)
 
 /**

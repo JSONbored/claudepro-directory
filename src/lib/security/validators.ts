@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { DOMPurify } from './html-sanitizer';
 import { VALIDATION_PATTERNS } from './patterns';
 
 /**
@@ -314,40 +315,28 @@ export const validation = {
  * XSS Sanitization Utilities
  * Provides secure sanitization for user input
  * Consolidated from lib/sanitizer.ts for better maintainability
+ *
+ * Security: Uses DOMPurify for HTML sanitization instead of regex patterns
+ * which are vulnerable to bypasses and edge cases.
  */
 
 /**
- * Lightweight HTML tag stripper
- * Removes all HTML tags from a string without using heavy dependencies
+ * Secure HTML tag stripper using DOMPurify
+ * Removes all HTML tags from a string using battle-tested library
+ *
+ * Security benefits over regex:
+ * - Handles all HTML/XSS edge cases (e.g., </script\t\n bar>)
+ * - Prevents multi-character sanitization bypasses (e.g., <scr<script>ipt>)
+ * - Actively maintained and used by major companies
+ * - No performance issues with complex patterns
  */
 function stripHtmlTags(str: string): string {
-  // Remove script and style content entirely
-  let result = str.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  result = result.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
-
-  // Remove all HTML tags
-  result = result.replace(/<[^>]*>/g, '');
-
-  // Decode HTML entities
-  const textarea = typeof document !== 'undefined' ? document.createElement('textarea') : null;
-  if (textarea) {
-    textarea.innerHTML = result;
-    result = textarea.value;
-  } else {
-    // Server-side fallback for common entities
-    result = result
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#039;/g, "'")
-      .replace(/&#x27;/g, "'")
-      .replace(/&#x2F;/g, '/')
-      .replace(/&#x5C;/g, '\\')
-      .replace(/&#96;/g, '`');
-  }
-
-  return result;
+  // Use DOMPurify to strip all HTML tags while keeping text content
+  return DOMPurify.sanitize(str, {
+    ALLOWED_TAGS: [], // Strip all HTML tags
+    ALLOWED_ATTR: [], // Strip all attributes
+    KEEP_CONTENT: true, // Keep text content between tags
+  });
 }
 
 export const sanitizers = {
@@ -387,6 +376,7 @@ export const sanitizers = {
     const sanitized = param
       .replace(/[<>"'`]/g, '') // Remove HTML/JS injection characters
       .replace(/javascript:/gi, '') // Remove javascript: protocol
+      .replace(/vbscript:/gi, '') // Remove vbscript: protocol
       .replace(/data:/gi, '') // Remove data: protocol
       .trim();
 

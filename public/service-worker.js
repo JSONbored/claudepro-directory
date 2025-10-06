@@ -7,7 +7,17 @@ const isDev = location.hostname === 'localhost' || location.hostname === '127.0.
 const log = isDev ? console.log.bind(console) : () => {};
 const error = isDev ? console.error.bind(console) : () => {};
 
-const CACHE_NAME = 'claudepro-v1.2';
+// Security constants (synchronized with src/lib/constants.ts SECURITY_CONFIG)
+const TRUSTED_HOSTNAMES = {
+  umami: 'umami.claudepro.directory',
+  vercel: 'va.vercel-scripts.com'
+};
+
+const ALLOWED_ORIGINS = [
+  'https://claudepro.directory',
+  'https://www.claudepro.directory'
+];
+
 const STATIC_CACHE = 'claudepro-static-v1.2';
 const DYNAMIC_CACHE = 'claudepro-dynamic-v1.2';
 const API_CACHE = 'claudepro-api-v1.2';
@@ -86,9 +96,10 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
 
   // Skip cross-origin requests (except trusted domains)
+  // Use exact hostname matching to prevent subdomain bypass attacks
   if (url.origin !== location.origin &&
-      !url.hostname.includes('umami.claudepro.directory') &&
-      !url.hostname.includes('va.vercel-scripts.com')) {
+      url.hostname !== TRUSTED_HOSTNAMES.umami &&
+      url.hostname !== TRUSTED_HOSTNAMES.vercel) {
     return;
   }
 
@@ -271,45 +282,6 @@ self.addEventListener('sync', (event) => {
 const FAILED_REQUESTS_STORE = 'failed-requests-v1';
 const MAX_RETRY_ATTEMPTS = 3;
 
-// Queue failed requests for background sync
-async function queueFailedRequest(request, attempt = 1) {
-  const cache = await caches.open(FAILED_REQUESTS_STORE);
-  const id = `retry-${Date.now()}-${crypto.randomUUID()}`;
-
-  // Store request with metadata
-  const requestData = {
-    url: request.url,
-    method: request.method,
-    headers: Object.fromEntries(request.headers.entries()),
-    body: request.method !== 'GET' && request.method !== 'HEAD'
-      ? await request.text()
-      : null,
-    attempt,
-    timestamp: Date.now(),
-    id
-  };
-
-  const metadataResponse = new Response(JSON.stringify(requestData), {
-    headers: { 'Content-Type': 'application/json' }
-  });
-
-  await cache.put(new Request(id), metadataResponse);
-
-  // Register sync if available
-  if (self.registration && self.registration.sync) {
-    try {
-      await self.registration.sync.register(id);
-      log('Queued for background sync:', id);
-    } catch (err) {
-      log('Background sync registration failed:', err);
-      // Fallback to periodic retry
-      setTimeout(() => retryFailedRequest(id), 30000);
-    }
-  }
-
-  return id;
-}
-
 // Retry a specific failed request
 async function retryFailedRequest(tag) {
   const cache = await caches.open(FAILED_REQUESTS_STORE);
@@ -448,6 +420,13 @@ async function syncAnalyticsData() {
 
 // Periodic background sync (fallback)
 self.addEventListener('message', (event) => {
+  // Security: Validate origin before processing postMessage
+  // Only accept messages from trusted origins to prevent malicious commands
+  if (!ALLOWED_ORIGINS.includes(event.origin)) {
+    log('Rejected message from untrusted origin:', event.origin);
+    return;
+  }
+
   if (event.data && event.data.type === 'start-periodic-sync') {
     setInterval(async () => {
       const cache = await caches.open(FAILED_REQUESTS_STORE);

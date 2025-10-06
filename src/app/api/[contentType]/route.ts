@@ -8,7 +8,6 @@ import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 import { apiSchemas, ValidationError, validation } from '@/src/lib/security/validators';
 
 export const runtime = 'nodejs';
-export const revalidate = 14400; // 4 hours
 
 // Content type mapping with async data getters
 const contentMap = {

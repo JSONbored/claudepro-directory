@@ -108,15 +108,6 @@ const serverEnvSchema = z
       .optional()
       .describe('Salt for secure view count hashing (minimum 16 characters)'),
 
-    // GitHub API integration
-    GITHUB_TOKEN: nonEmptyString
-      .optional()
-      .describe('GitHub personal access token for API integration'),
-    GITHUB_OWNER: nonEmptyString
-      .optional()
-      .describe('GitHub repository owner username or organization'),
-    GITHUB_REPO: nonEmptyString.optional().describe('GitHub repository name'),
-
     // Webhook security
     WEBHOOK_SECRET: z
       .string()
@@ -343,20 +334,3 @@ export const buildConfig = {
   version: env.npm_package_version,
   packageName: env.npm_package_name,
 } as const;
-
-/**
- * GitHub configuration
- */
-export const githubConfig = {
-  token: env.GITHUB_TOKEN,
-  owner: env.GITHUB_OWNER,
-  repo: env.GITHUB_REPO,
-  isConfigured: !!(env.GITHUB_TOKEN && env.GITHUB_OWNER && env.GITHUB_REPO),
-} as const;
-
-/**
- * Type guard functions for runtime checks
- */
-export function hasGitHubConfig(): boolean {
-  return githubConfig.isConfigured;
-}

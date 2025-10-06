@@ -1,9 +1,8 @@
 'use client';
 
-import { useActionState, useId, useState } from 'react';
+import { useId, useState } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { submitConfiguration } from '@/src/app/actions/submit-config';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,
@@ -15,10 +14,14 @@ import {
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
-import { CheckCircle, ExternalLink, FileJson, Github, Loader2, Send } from '@/src/lib/icons';
+import { CheckCircle, ExternalLink, FileJson, Github, Send } from '@/src/lib/icons';
 import { type ConfigSubmissionInput, configSubmissionSchema } from '@/src/lib/schemas/form.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import {
+  generateGitHubIssueUrl,
+  openGitHubIssue,
+  validateIssueUrlLength,
+} from '@/src/lib/utils/github-issue-url';
 
 export default function SubmitPage() {
   // Generate unique IDs for form elements
@@ -31,10 +34,7 @@ export default function SubmitPage() {
   const contentId = useId();
   const tagsId = useId();
 
-  // React 19 useActionState for Server Actions
-  const [state, formAction, isPending] = useActionState(submitConfiguration, null);
-
-  // Local form state for validation and UX with proper typing
+  // Local form state with proper typing
   const [formData, setFormData] = useState<ConfigSubmissionInput>({
     type: 'agents', // Default to first valid enum value
     name: '',
@@ -48,27 +48,7 @@ export default function SubmitPage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isValidating, setIsValidating] = useState(false);
-
-  // Show toast notifications based on server action state
-  if (state?.success && !isPending) {
-    toast.success('Configuration Submitted!', {
-      description: 'Your configuration has been submitted for review.',
-    });
-  } else if (state?.error && !isPending) {
-    if (state.fallback) {
-      toast.error('Please use GitHub', {
-        description: state.error,
-        action: {
-          label: 'Open GitHub',
-          onClick: () => window.open(`${SOCIAL_LINKS.github}/issues/new`, '_blank'),
-        },
-      });
-    } else {
-      toast.error('Submission Failed', {
-        description: state.error,
-      });
-    }
-  }
+  const [lastSubmittedUrl, setLastSubmittedUrl] = useState<string | null>(null);
 
   // Client-side validation with Zod
   const validateField = (fieldName: string, value: string | undefined) => {
@@ -78,7 +58,6 @@ export default function SubmitPage() {
         configSubmissionSchema.shape[fieldName as keyof typeof configSubmissionSchema.shape];
       if (fieldSchema) {
         fieldSchema.parse(value);
-        // Clear error if validation passes
         setErrors((prev) => {
           const newErrors = { ...prev };
           delete newErrors[fieldName];
@@ -87,68 +66,84 @@ export default function SubmitPage() {
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const errorMessage = error.issues[0]?.message || 'Invalid value';
-        setErrors((prev) => ({ ...prev, [fieldName]: errorMessage }));
+        setErrors((prev) => ({
+          ...prev,
+          [fieldName]: error.issues[0]?.message || 'Invalid value',
+        }));
       }
     }
   };
 
-  const validateAllFields = () => {
+  // Handle input changes with validation
+  const handleChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    validateField(name, value);
+  };
+
+  // Handle form submission - generate GitHub issue URL and redirect
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsValidating(true);
+
     try {
-      configSubmissionSchema.parse(formData);
+      // Validate entire form
+      const validatedData = configSubmissionSchema.parse(formData);
       setErrors({});
-      return true;
+
+      // Generate GitHub issue URL
+      const issueUrl = generateGitHubIssueUrl(validatedData);
+
+      // Validate URL length
+      if (!validateIssueUrlLength(issueUrl)) {
+        toast.error('Content Too Large', {
+          description: 'Please reduce the size of your configuration content.',
+        });
+        setIsValidating(false);
+        return;
+      }
+
+      // Store URL for display
+      setLastSubmittedUrl(issueUrl);
+
+      // Open GitHub issue in new tab
+      const opened = openGitHubIssue(issueUrl);
+
+      if (opened) {
+        toast.success('Redirecting to GitHub', {
+          description: 'Review and submit your configuration on GitHub.',
+        });
+      } else {
+        // Popup blocked - show fallback
+        toast.error('Popup Blocked', {
+          description: 'Please allow popups or use the link below.',
+          action: {
+            label: 'Open GitHub',
+            onClick: () => window.open(issueUrl, '_blank'),
+          },
+        });
+      }
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
         for (const issue of error.issues) {
-          const path = issue.path.join('.');
-          fieldErrors[path] = issue.message;
+          const fieldName = issue.path.join('.');
+          fieldErrors[fieldName] = issue.message;
         }
         setErrors(fieldErrors);
-        return false;
+        toast.error('Validation Error', {
+          description: 'Please check the form for errors.',
+        });
+      } else if (error instanceof Error) {
+        toast.error('Submission Error', {
+          description: error.message,
+        });
       }
-      return false;
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Validate field on change for immediate feedback
-    validateField(name, value);
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Validate field on change for immediate feedback
-    validateField(name, value);
-  };
-
-  // Enhanced form submission with client-side validation
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    setIsValidating(true);
-
-    // Run client-side validation before submitting
-    const isValid = validateAllFields();
-
-    if (!isValid) {
-      setIsValidating(false);
-      toast.error('Validation Failed', {
-        description: 'Please fix the errors below before submitting.',
-      });
-      return;
     }
 
     setIsValidating(false);
-
-    // If validation passes, submit via Server Action
-    const formData = new FormData(event.currentTarget);
-    formAction(formData);
   };
 
   return (
@@ -163,8 +158,8 @@ export default function SubmitPage() {
         </p>
       </div>
 
-      {/* Success Message */}
-      {state?.success && state.issueUrl && (
+      {/* Success Message with GitHub Link */}
+      {lastSubmittedUrl && (
         <Card
           className={`${UI_CLASSES.MAX_W_2XL} ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.MB_8} border-green-500/20 bg-green-500/5`}
         >
@@ -172,9 +167,9 @@ export default function SubmitPage() {
             <div className={`flex ${UI_CLASSES.ITEMS_START} gap-3`}>
               <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
               <div className="flex-1">
-                <p className={UI_CLASSES.FONT_MEDIUM}>Successfully submitted!</p>
+                <p className={UI_CLASSES.FONT_MEDIUM}>Ready to submit!</p>
                 <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
-                  Your configuration has been submitted for review.
+                  Your configuration has been formatted. Click below to review and submit on GitHub.
                 </p>
                 <Button
                   variant="link"
@@ -182,8 +177,8 @@ export default function SubmitPage() {
                   asChild
                   className={`${UI_CLASSES.MT_2} p-0 h-auto`}
                 >
-                  <a href={state.issueUrl} target="_blank" rel="noopener noreferrer">
-                    View submission on GitHub
+                  <a href={lastSubmittedUrl} target="_blank" rel="noopener noreferrer">
+                    Open GitHub Issue
                     <ExternalLink className="h-3 w-3 ml-1" />
                   </a>
                 </Button>
@@ -193,323 +188,207 @@ export default function SubmitPage() {
         </Card>
       )}
 
-      {/* Form and Instructions */}
-      <div
-        className={`${UI_CLASSES.GRID_RESPONSIVE_3_GAP_8} ${UI_CLASSES.MAX_W_6XL} ${UI_CLASSES.MX_AUTO}`}
-      >
-        {/* Submission Form - Takes up 2 columns */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Configuration Details</CardTitle>
-            <CardDescription>
-              Fill out the form below to submit your configuration for review
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleFormSubmit} className={UI_CLASSES.SPACE_Y_6}>
-              {/* Type and Category Row */}
-              <div className={UI_CLASSES.GRID_RESPONSIVE_2}>
-                <div className={UI_CLASSES.SPACE_Y_2}>
-                  <Label htmlFor={typeId}>
-                    Configuration Type <span className="text-red-500">*</span>
-                  </Label>
-                  <select
-                    name="type"
-                    id={typeId}
-                    value={formData.type}
-                    onChange={(e) => handleSelectChange('type', e.target.value)}
-                    disabled={isPending}
-                    autoComplete="off"
-                    className={`flex h-10 w-full rounded-md border border-input bg-background ${UI_CLASSES.PX_3} ${UI_CLASSES.PY_2} ${UI_CLASSES.TEXT_SM} ring-offset-background file:border-0 file:bg-transparent file:${UI_CLASSES.TEXT_SM} file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.type ? 'border-red-500' : ''}`}
-                  >
-                    <option value="">Select type</option>
-                    <option value="agents">AI Agent</option>
-                    <option value="mcp">MCP Server</option>
-                    <option value="rules">Rule</option>
-                    <option value="commands">Command</option>
-                    <option value="hooks">Hook</option>
-                    <option value="statuslines">Statusline</option>
-                  </select>
-                  {errors.type && (
-                    <p className={`${UI_CLASSES.TEXT_SM} text-red-500`}>{errors.type}</p>
-                  )}
-                </div>
+      {/* Main Form Card */}
+      <Card className={`${UI_CLASSES.MAX_W_2XL} ${UI_CLASSES.MX_AUTO}`}>
+        <CardHeader>
+          <CardTitle>Configuration Details</CardTitle>
+          <CardDescription>
+            Fill out the form below to generate a pre-filled GitHub issue for review
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Type Selection */}
+            <div className="space-y-2">
+              <Label htmlFor={typeId}>Type *</Label>
+              <select
+                id={typeId}
+                name="type"
+                value={formData.type}
+                onChange={handleChange}
+                required
+                className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+                  errors.type ? 'border-destructive' : ''
+                }`}
+              >
+                <option value="agents">Agent</option>
+                <option value="mcp">MCP Server</option>
+                <option value="rules">Rule</option>
+                <option value="commands">Command</option>
+                <option value="hooks">Hook</option>
+                <option value="statuslines">Statusline</option>
+              </select>
+              {errors.type && (
+                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.type}</p>
+              )}
+            </div>
 
-                <div className={UI_CLASSES.SPACE_Y_2}>
-                  <Label htmlFor={categoryId}>
-                    Category <span className="text-red-500">*</span>
-                  </Label>
-                  <select
-                    name="category"
-                    id={categoryId}
-                    value={formData.category}
-                    onChange={(e) => handleSelectChange('category', e.target.value)}
-                    disabled={isPending}
-                    autoComplete="off"
-                    className={`flex h-10 w-full rounded-md border border-input bg-background ${UI_CLASSES.PX_3} ${UI_CLASSES.PY_2} ${UI_CLASSES.TEXT_SM} ring-offset-background file:border-0 file:bg-transparent file:${UI_CLASSES.TEXT_SM} file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.category ? 'border-red-500' : ''}`}
-                  >
-                    <option value="">Select category</option>
-                    <option value="development">Development</option>
-                    <option value="writing">Writing</option>
-                    <option value="analysis">Analysis</option>
-                    <option value="creative">Creative</option>
-                    <option value="business">Business</option>
-                    <option value="productivity">Productivity</option>
-                    <option value="other">Other</option>
-                  </select>
-                  {errors.category && (
-                    <p className={`${UI_CLASSES.TEXT_SM} text-red-500`}>{errors.category}</p>
-                  )}
-                </div>
-              </div>
+            {/* Name */}
+            <div className="space-y-2">
+              <Label htmlFor={nameId}>Name *</Label>
+              <Input
+                id={nameId}
+                name="name"
+                placeholder="e.g., Code Review Assistant"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                className={errors.name ? 'border-destructive' : ''}
+              />
+              {errors.name && (
+                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.name}</p>
+              )}
+            </div>
 
-              {/* Name */}
-              <div className={UI_CLASSES.SPACE_Y_2}>
-                <Label htmlFor={nameId}>
-                  Name <span className="text-red-500">*</span>
-                </Label>
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor={descriptionId}>Description *</Label>
+              <Textarea
+                id={descriptionId}
+                name="description"
+                placeholder="Brief description of what your configuration does..."
+                value={formData.description}
+                onChange={handleChange}
+                required
+                rows={3}
+                className={errors.description ? 'border-destructive' : ''}
+              />
+              {errors.description && (
+                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.description}</p>
+              )}
+            </div>
+
+            {/* Category */}
+            <div className="space-y-2">
+              <Label htmlFor={categoryId}>Category *</Label>
+              <Input
+                id={categoryId}
+                name="category"
+                placeholder="e.g., Development, Productivity, Writing"
+                value={formData.category}
+                onChange={handleChange}
+                required
+                className={errors.category ? 'border-destructive' : ''}
+              />
+              {errors.category && (
+                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.category}</p>
+              )}
+            </div>
+
+            {/* Author */}
+            <div className="space-y-2">
+              <Label htmlFor={authorId}>Author *</Label>
+              <Input
+                id={authorId}
+                name="author"
+                placeholder="Your name or GitHub username"
+                value={formData.author}
+                onChange={handleChange}
+                required
+                className={errors.author ? 'border-destructive' : ''}
+              />
+              {errors.author && (
+                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.author}</p>
+              )}
+            </div>
+
+            {/* GitHub URL */}
+            <div className="space-y-2">
+              <Label htmlFor={githubId}>GitHub URL (optional)</Label>
+              <div className="flex gap-2">
+                <Github className="h-5 w-5 mt-2.5 text-muted-foreground" />
                 <Input
-                  id={nameId}
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Code Review Assistant"
-                  disabled={isPending}
-                  autoComplete="off"
-                  className={errors.name ? 'border-red-500' : ''}
+                  id={githubId}
+                  name="github"
+                  type="url"
+                  placeholder="https://github.com/username/repo"
+                  value={formData.github}
+                  onChange={handleChange}
+                  className={errors.github ? 'border-destructive' : ''}
                 />
-                {errors.name && (
-                  <p className={`${UI_CLASSES.TEXT_SM} text-red-500`}>{errors.name}</p>
-                )}
               </div>
+              {errors.github && (
+                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.github}</p>
+              )}
+            </div>
 
-              {/* Description */}
-              <div className={UI_CLASSES.SPACE_Y_2}>
-                <Label htmlFor={descriptionId}>
-                  Description <span className="text-red-500">*</span>
-                </Label>
-                <Textarea
-                  id={descriptionId}
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Describe what your configuration does and how it helps users..."
-                  rows={3}
-                  disabled={isPending}
-                  autoComplete="off"
-                  className={errors.description ? 'border-red-500' : ''}
-                />
-                {errors.description && (
-                  <p className={`${UI_CLASSES.TEXT_SM} text-red-500`}>{errors.description}</p>
-                )}
-              </div>
-
-              {/* Author and GitHub Row */}
-              <div className={UI_CLASSES.GRID_RESPONSIVE_2}>
-                <div className={UI_CLASSES.SPACE_Y_2}>
-                  <Label htmlFor={authorId}>
-                    Your Name <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id={authorId}
-                    name="author"
-                    value={formData.author}
-                    onChange={handleInputChange}
-                    placeholder="John Doe"
-                    disabled={isPending}
-                    autoComplete="name"
-                    className={errors.author ? 'border-red-500' : ''}
-                  />
-                  {errors.author && (
-                    <p className={`${UI_CLASSES.TEXT_SM} text-red-500`}>{errors.author}</p>
-                  )}
-                </div>
-
-                <div className={UI_CLASSES.SPACE_Y_2}>
-                  <Label htmlFor={githubId}>GitHub Username</Label>
-                  <Input
-                    id={githubId}
-                    name="github"
-                    value={formData.github}
-                    onChange={handleInputChange}
-                    placeholder="johndoe"
-                    disabled={isPending}
-                    autoComplete="username"
-                  />
-                  <p className={UI_CLASSES.TEXT_XS_MUTED}>Optional</p>
-                </div>
-              </div>
-
-              {/* Configuration Content */}
-              <div className={UI_CLASSES.SPACE_Y_2}>
-                <Label htmlFor={contentId}>
-                  Configuration Content (JSON) <span className="text-red-500">*</span>
-                </Label>
+            {/* Configuration Content */}
+            <div className="space-y-2">
+              <Label htmlFor={contentId}>Configuration (JSON) *</Label>
+              <div className="flex gap-2 items-start">
+                <FileJson className="h-5 w-5 mt-2.5 text-muted-foreground" />
                 <Textarea
                   id={contentId}
                   name="content"
+                  placeholder='{"name": "example", "version": "1.0.0"}'
                   value={formData.content}
-                  onChange={handleInputChange}
-                  placeholder={'{\n  "name": "Your Config",\n  "description": "...",\n  ...\n}'}
+                  onChange={handleChange}
+                  required
                   rows={8}
-                  className={`font-mono ${UI_CLASSES.TEXT_SM} ${errors.content ? 'border-red-500' : ''}`}
-                  disabled={isPending}
-                  autoComplete="off"
+                  className={`font-mono text-sm ${errors.content ? 'border-destructive' : ''}`}
                 />
-                {errors.content && (
-                  <p className={`${UI_CLASSES.TEXT_SM} text-red-500`}>{errors.content}</p>
-                )}
               </div>
+              {errors.content && (
+                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.content}</p>
+              )}
+            </div>
 
-              {/* Tags */}
-              <div className={UI_CLASSES.SPACE_Y_2}>
-                <Label htmlFor={tagsId}>Tags</Label>
-                <Input
-                  id={tagsId}
-                  name="tags"
-                  value={formData.tags}
-                  onChange={handleInputChange}
-                  placeholder="productivity, automation, coding (comma-separated)"
-                  disabled={isPending}
-                  autoComplete="off"
-                />
-                <p className={UI_CLASSES.TEXT_XS_MUTED}>
-                  Optional - Help others find your configuration
-                </p>
-              </div>
+            {/* Tags */}
+            <div className="space-y-2">
+              <Label htmlFor={tagsId}>Tags (optional)</Label>
+              <Input
+                id={tagsId}
+                name="tags"
+                placeholder="productivity, ai, automation (comma-separated)"
+                value={formData.tags}
+                onChange={handleChange}
+                className={errors.tags ? 'border-destructive' : ''}
+              />
+              {errors.tags && (
+                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.tags}</p>
+              )}
+              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                Separate multiple tags with commas (max 10)
+              </p>
+            </div>
 
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                className={UI_CLASSES.W_FULL}
-                disabled={isPending || isValidating}
-                size="lg"
-              >
-                {isPending ? (
+            {/* Submit Button */}
+            <div className="flex gap-4 pt-4">
+              <Button type="submit" disabled={isValidating} className="flex-1">
+                {isValidating ? (
                   <>
-                    <Loader2 className={`h-4 w-4 ${UI_CLASSES.MR_2} animate-spin`} />
-                    Submitting...
-                  </>
-                ) : isValidating ? (
-                  <>
-                    <Loader2 className={`h-4 w-4 ${UI_CLASSES.MR_2} animate-spin`} />
-                    Validating...
+                    <Github className="mr-2 h-4 w-4 animate-pulse" />
+                    Generating GitHub Issue...
                   </>
                 ) : (
                   <>
-                    <Send className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />
-                    Submit Configuration
+                    <Send className="mr-2 h-4 w-4" />
+                    Create GitHub Issue
                   </>
                 )}
               </Button>
-            </form>
-          </CardContent>
-        </Card>
+            </div>
 
-        {/* Right Column - Instructions */}
-        <div className={UI_CLASSES.SPACE_Y_6}>
-          {/* GitHub Alternative */}
-          <Card>
-            <CardHeader>
-              <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_LG}`}>
-                <Github className="h-5 w-5" />
-                Prefer GitHub?
-              </CardTitle>
-            </CardHeader>
-            <CardContent className={UI_CLASSES.SPACE_Y_3}>
-              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-                You can also submit directly via GitHub:
-              </p>
-              <ol className={`${UI_CLASSES.SPACE_Y_2} ${UI_CLASSES.TEXT_SM}`}>
-                <li className={UI_CLASSES.FLEX_GAP_2}>
-                  <span className={`text-primary ${UI_CLASSES.FONT_SEMIBOLD}`}>1.</span>
-                  <span>Fork the repository</span>
-                </li>
-                <li className={UI_CLASSES.FLEX_GAP_2}>
-                  <span className={`text-primary ${UI_CLASSES.FONT_SEMIBOLD}`}>2.</span>
-                  <span>
-                    Add your JSON file to{' '}
-                    <code className="text-xs bg-muted px-1 ${UI_CLASSES.PY_1} rounded">
-                      content/[type]
-                    </code>
-                  </span>
-                </li>
-                <li className={UI_CLASSES.FLEX_GAP_2}>
-                  <span className={`text-primary ${UI_CLASSES.FONT_SEMIBOLD}`}>3.</span>
-                  <span>Submit a pull request</span>
-                </li>
-              </ol>
-              <Button variant="outline" size="sm" asChild className={UI_CLASSES.W_FULL}>
-                <a href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer">
-                  <Github className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />
-                  View Repository
-                </a>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* JSON Format Guide */}
-          <Card>
-            <CardHeader>
-              <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_LG}`}>
-                <FileJson className="h-5 w-5" />
-                JSON Format
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p
-                className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MB_3}`}
-              >
-                Example format:
-              </p>
-              <pre className={`bg-muted p-3 rounded-lg text-xs ${UI_CLASSES.OVERFLOW_X_AUTO}`}>
-                {`{
-  "name": "Config Name",
-  "description": "What it does",
-  "category": "development",
-  "author": "Your Name",
-  "tags": ["tag1", "tag2"],
-  "content": "..."
-}`}
-              </pre>
-            </CardContent>
-          </Card>
-
-          {/* Review Process */}
-          <Card>
-            <CardHeader>
-              <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_LG}`}>
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                Review Process
-              </CardTitle>
-            </CardHeader>
-            <CardContent className={`${UI_CLASSES.SPACE_Y_2} ${UI_CLASSES.TEXT_SM}`}>
-              <div className={UI_CLASSES.FLEX_GAP_2}>
-                <span className="text-green-500">✓</span>
-                <span className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
-                  Reviewed within 24-48 hours
-                </span>
+            {/* Info Message */}
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+              <div className="flex gap-3">
+                <Github className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} text-blue-400`}>
+                    How submissions work
+                  </p>
+                  <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
+                    When you submit, we&apos;ll generate a pre-filled GitHub issue with your
+                    configuration. You&apos;ll be able to review and edit it before submitting. No
+                    GitHub account required to fill out this form, but you&apos;ll need one to
+                    create the issue.
+                  </p>
+                </div>
               </div>
-              <div className={UI_CLASSES.FLEX_GAP_2}>
-                <span className="text-green-500">✓</span>
-                <span className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
-                  Quality and originality check
-                </span>
-              </div>
-              <div className={UI_CLASSES.FLEX_GAP_2}>
-                <span className="text-green-500">✓</span>
-                <span className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
-                  Added to directory if approved
-                </span>
-              </div>
-              <div className={UI_CLASSES.FLEX_GAP_2}>
-                <span className="text-green-500">✓</span>
-                <span className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>Full credit to authors</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

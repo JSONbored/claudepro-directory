@@ -3,8 +3,14 @@ name: Security
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'content/**/*.json'
+      - 'templates/**'
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - 'content/**/*.json'
+      - 'templates/**'
   schedule:
     - cron: '0 3 * * 1'  # Weekly security scan on Mondays at 3am UTC
 
@@ -42,6 +48,9 @@ jobs:
       security-events: write
 
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
     - uses: ./.github/actions/setup-node-deps
 
     - name: Initialize CodeQL
@@ -88,6 +97,9 @@ jobs:
     timeout-minutes: 10
 
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
     - uses: ./.github/actions/setup-node-deps
 
     - name: Run npm audit
