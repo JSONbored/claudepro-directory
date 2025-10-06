@@ -297,6 +297,16 @@
           }
         }
       }
+    },
+    {
+      "includes": ["src/components/structured-data/**/*.tsx"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "useUniqueElementIds": "off"
+          }
+        }
+      }
     }
   ]
 }

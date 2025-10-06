@@ -27,6 +27,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChangelogContent } from '@/src/components/changelog/changelog-content';
 import { ViewTracker } from '@/src/components/shared/view-tracker';
+import { ChangelogArticleStructuredData } from '@/src/components/structured-data/changelog-structured-data';
 import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { ArrowLeft, Calendar } from '@/src/lib/icons';
@@ -120,6 +121,9 @@ export default async function ChangelogEntryPage({
       <>
         {/* View Tracker - Track page views */}
         <ViewTracker category="changelog" slug={entry.slug} />
+
+        {/* Structured Data - TechArticle Schema */}
+        <ChangelogArticleStructuredData entry={entry} />
 
         <article className="container max-w-4xl py-8 space-y-8">
           {/* Navigation */}

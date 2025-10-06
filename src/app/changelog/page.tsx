@@ -25,6 +25,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ChangelogListClient } from '@/src/components/changelog/changelog-list-client';
+import { ChangelogBlogStructuredData } from '@/src/components/structured-data/changelog-structured-data';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { ArrowLeft } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -60,47 +61,54 @@ export default async function ChangelogPage() {
     const entries = await getAllChangelogEntries();
 
     return (
-      <div className="container max-w-6xl py-8 space-y-8">
-        {/* Header */}
-        <div className="space-y-4">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back to Home</span>
-          </Link>
+      <>
+        {/* Structured Data - Blog Schema */}
+        <ChangelogBlogStructuredData entries={entries} />
 
-          <div className="space-y-2">
-            <h1 className="text-4xl font-bold tracking-tight">Changelog</h1>
-            <p className="text-lg text-muted-foreground">
-              Track all updates, new features, bug fixes, and improvements to Claude Pro Directory.
-            </p>
-          </div>
+        <div className="container max-w-6xl py-8 space-y-8">
+          {/* Header */}
+          <div className="space-y-4">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Home</span>
+            </Link>
 
-          {/* Stats */}
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <div>
-              <span className="font-semibold text-foreground">{entries.length}</span> total updates
+            <div className="space-y-2">
+              <h1 className="text-4xl font-bold tracking-tight">Changelog</h1>
+              <p className="text-lg text-muted-foreground">
+                Track all updates, new features, bug fixes, and improvements to Claude Pro
+                Directory.
+              </p>
             </div>
-            {entries.length > 0 && entries[0] && (
-              <div>
-                Latest:{' '}
-                <time dateTime={entries[0].date} className="font-medium text-foreground">
-                  {new Date(entries[0].date).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </time>
-              </div>
-            )}
-          </div>
-        </div>
 
-        {/* Client-side filtered list */}
-        <ChangelogListClient entries={entries} />
-      </div>
+            {/* Stats */}
+            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+              <div>
+                <span className="font-semibold text-foreground">{entries.length}</span> total
+                updates
+              </div>
+              {entries.length > 0 && entries[0] && (
+                <div>
+                  Latest:{' '}
+                  <time dateTime={entries[0].date} className="font-medium text-foreground">
+                    {new Date(entries[0].date).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </time>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Client-side filtered list */}
+          <ChangelogListClient entries={entries} />
+        </div>
+      </>
     );
   } catch (error) {
     logger.error(
