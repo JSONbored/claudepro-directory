@@ -13,8 +13,8 @@ import { getContentBySlug } from '@/src/lib/content/content-loaders';
 import { handleApiError } from '@/src/lib/error-handler';
 import { generateLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
-import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 import type { CollectionItemReference } from '@/src/lib/schemas/content/collection.schema';
+import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 
 /**
  * Runtime configuration

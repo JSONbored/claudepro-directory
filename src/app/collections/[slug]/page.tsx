@@ -34,9 +34,9 @@ import { trackView } from '@/src/lib/actions/track-view';
 import { getContentBySlug } from '@/src/lib/content/content-loaders';
 import { AlertTriangle, CheckCircle, Clock, Layers } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
-import type { CollectionItemReference } from '@/src/lib/schemas/content/collection.schema';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import type { CollectionItemReference } from '@/src/lib/schemas/content/collection.schema';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 interface ItemWithData extends CollectionItemReference {
@@ -199,8 +199,9 @@ export default async function CollectionDetailPage({
                 className="text-sm border-blue-500/20 bg-blue-500/10 text-blue-400"
               >
                 <Layers className="h-3 w-3 mr-1" />
-                {COLLECTION_TYPE_LABELS[collection.collectionType as keyof typeof COLLECTION_TYPE_LABELS] ||
-                  collection.collectionType}
+                {COLLECTION_TYPE_LABELS[
+                  collection.collectionType as keyof typeof COLLECTION_TYPE_LABELS
+                ] || collection.collectionType}
               </Badge>
               <Badge
                 variant="outline"
@@ -279,7 +280,8 @@ export default async function CollectionDetailPage({
                 {Object.entries(itemsByCategory).map(([category, items]) => (
                   <div key={category}>
                     <h3 className="text-lg font-semibold text-foreground mb-4">
-                      {CATEGORY_NAMES[category as keyof typeof CATEGORY_NAMES] || category} ({items.length})
+                      {CATEGORY_NAMES[category as keyof typeof CATEGORY_NAMES] || category} (
+                      {items.length})
                     </h3>
                     <div className="grid gap-4 sm:grid-cols-1">
                       {items.map((item) =>
