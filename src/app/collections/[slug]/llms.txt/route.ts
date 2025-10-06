@@ -13,6 +13,7 @@ import { getContentBySlug } from '@/src/lib/content/content-loaders';
 import { handleApiError } from '@/src/lib/error-handler';
 import { generateLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
+import type { CollectionItemReference } from '@/src/lib/schemas/content/collection.schema';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 
 /**
@@ -83,13 +84,13 @@ export async function GET(
 
       // Group items by category
       const itemsByCategory = collection.items.reduce(
-        (acc, item) => {
+        (acc: Record<string, CollectionItemReference[]>, item) => {
           const category = item.category || 'other';
           if (!acc[category]) acc[category] = [];
           acc[category].push(item);
           return acc;
         },
-        {} as Record<string, typeof collection.items>
+        {} as Record<string, CollectionItemReference[]>
       );
 
       // Fetch actual item details and build full content (NO TRUNCATION)

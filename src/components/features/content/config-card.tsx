@@ -1,6 +1,7 @@
 'use client';
 
 import { memo } from 'react';
+import { BookmarkButton } from '@/src/components/shared/bookmark-button';
 import { CardCopyAction } from '@/src/components/shared/card-copy-action';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
@@ -162,6 +163,8 @@ export const ConfigCard = memo(
                       <ExternalLink className="h-3 w-3" aria-hidden="true" />
                     </Button>
                   )}
+
+                  <BookmarkButton contentType={item.category || 'agents'} contentSlug={item.slug} />
 
                   <CardCopyAction
                     url={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}

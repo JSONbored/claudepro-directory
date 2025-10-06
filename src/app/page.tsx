@@ -1,9 +1,28 @@
+// Import types for metadata
+import type { AgentMetadata } from '@/generated/agents-metadata';
+import type { CollectionMetadata } from '@/generated/collections-metadata';
+import type { CommandMetadata } from '@/generated/commands-metadata';
+import type { HookMetadata } from '@/generated/hooks-metadata';
+import type { McpMetadata } from '@/generated/mcp-metadata';
+import type { RuleMetadata } from '@/generated/rules-metadata';
+import type { StatuslineMetadata } from '@/generated/statuslines-metadata';
 import { HomePageClient } from '@/src/components/features/home';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 import { statsRedis } from '@/src/lib/redis';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { transformForHomePage } from '@/src/lib/utils/transformers';
+
+type ContentMetadataWithCategory =
+  | (AgentMetadata & { category: 'agents' })
+  | (McpMetadata & { category: 'mcp' })
+  | (RuleMetadata & { category: 'rules' })
+  | (CommandMetadata & { category: 'commands' })
+  | (HookMetadata & { category: 'hooks' })
+  | (StatuslineMetadata & { category: 'statuslines' })
+  | (CollectionMetadata & { category: 'collections' });
+
+type EnrichedMetadata = ContentMetadataWithCategory & { viewCount: number };
 
 // Enable ISR - revalidate every 5 minutes for fresh view counts
 export const revalidate = 300;
@@ -80,14 +99,14 @@ export default async function HomePage() {
   // Transform data using transform functions to convert readonly arrays to mutable
   // Metadata arrays contain the core fields needed for display
   const initialData = transformForHomePage({
-    rules,
-    mcp,
-    agents,
-    commands,
-    hooks,
-    statuslines,
-    collections,
-    allConfigs,
+    rules: rules as RuleMetadata[],
+    mcp: mcp as McpMetadata[],
+    agents: agents as AgentMetadata[],
+    commands: commands as CommandMetadata[],
+    hooks: hooks as HookMetadata[],
+    statuslines: statuslines as StatuslineMetadata[],
+    collections: collections as CollectionMetadata[],
+    allConfigs: allConfigs as EnrichedMetadata[],
   });
 
   return (
