@@ -98,7 +98,7 @@ export interface TrendingContentProps {
  * View tracker props
  */
 const viewTrackerPropsSchema = z.object({
-  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'guides']),
+  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'guides', 'changelog']),
   slug: nonEmptyString.max(200),
 });
 
