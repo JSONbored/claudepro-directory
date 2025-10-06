@@ -3,7 +3,7 @@ import { createClient } from '@/src/lib/supabase/server';
 import { SignOutButton } from '@/src/components/auth/auth-buttons';
 import { Button } from '@/src/components/ui/button';
 import { Card } from '@/src/components/ui/card';
-import { Bookmark, Briefcase, Home, Settings, User } from '@/src/lib/icons';
+import { Bookmark, Briefcase, Home, Settings, User, Send } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { redirect } from 'next/navigation';
 
@@ -31,6 +31,7 @@ export default async function AccountLayout({
     { name: 'Dashboard', href: '/account', icon: Home },
     { name: 'Bookmarks', href: '/account/bookmarks', icon: Bookmark },
     { name: 'Jobs', href: '/account/jobs', icon: Briefcase },
+    { name: 'Submissions', href: '/account/submissions', icon: Send },
     { name: 'Settings', href: '/account/settings', icon: Settings },
   ];
 
