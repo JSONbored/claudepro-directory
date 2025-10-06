@@ -13,7 +13,12 @@
           "cpuSlowdownMultiplier": 1
         },
         "emulatedFormFactor": "desktop",
-        "onlyCategories": ["performance", "accessibility", "best-practices", "seo"]
+        "onlyCategories": [
+          "performance",
+          "accessibility",
+          "best-practices",
+          "seo"
+        ]
       }
     },
     "assert": {

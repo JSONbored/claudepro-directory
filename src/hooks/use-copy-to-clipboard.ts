@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { TIME_CONSTANTS } from '@/src/lib/constants';
-import { logger } from '@/src/lib/logger';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { TIME_CONSTANTS } from "@/src/lib/constants";
+import { logger } from "@/src/lib/logger";
 
 export interface UseCopyToClipboardOptions {
   /**
@@ -62,9 +62,14 @@ export interface UseCopyToClipboardReturn {
  * @returns Object with copy function and state
  */
 export function useCopyToClipboard(
-  options: UseCopyToClipboardOptions = {}
+  options: UseCopyToClipboardOptions = {},
 ): UseCopyToClipboardReturn {
-  const { onSuccess, onError, resetDelay = 2 * TIME_CONSTANTS.SECOND, context } = options;
+  const {
+    onSuccess,
+    onError,
+    resetDelay = 2 * TIME_CONSTANTS.SECOND,
+    context,
+  } = options;
 
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -114,9 +119,9 @@ export function useCopyToClipboard(
         setError(errorObj);
         setCopied(false);
 
-        logger.error('Failed to copy to clipboard', errorObj, {
-          component: context?.component || 'useCopyToClipboard',
-          action: context?.action || 'copy',
+        logger.error("Failed to copy to clipboard", errorObj, {
+          component: context?.component || "useCopyToClipboard",
+          action: context?.action || "copy",
           textLength: text.length,
         });
 
@@ -124,7 +129,7 @@ export function useCopyToClipboard(
         return false;
       }
     },
-    [resetDelay, onSuccess, onError, context]
+    [resetDelay, onSuccess, onError, context],
   );
 
   return { copied, copy, error, reset };

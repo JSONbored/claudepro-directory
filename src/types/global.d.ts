@@ -3,7 +3,10 @@
  * All types are sourced from Zod schemas for runtime validation
  */
 
-import type { UmamiEventData, UmamiGlobal } from '@/src/lib/schemas/analytics.schema';
+import type {
+  UmamiEventData,
+  UmamiGlobal,
+} from "@/src/lib/schemas/analytics.schema";
 
 declare global {
   interface Window {

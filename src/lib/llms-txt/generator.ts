@@ -6,11 +6,14 @@
  * @see {@link https://llmstxt.org} - LLMs.txt specification by Jeremy Howard
  */
 
-import { z } from 'zod';
-import { APP_CONFIG, SEO_CONFIG } from '@/src/lib/constants';
-import { logger } from '@/src/lib/logger';
-import { type SanitizationOptions, sanitizeContent } from './content-sanitizer';
-import { type ConversionOptions, markdownToPlainText } from './markdown-to-plain';
+import { z } from "zod";
+import { APP_CONFIG, SEO_CONFIG } from "@/src/lib/constants";
+import { logger } from "@/src/lib/logger";
+import { type SanitizationOptions, sanitizeContent } from "./content-sanitizer";
+import {
+  type ConversionOptions,
+  markdownToPlainText,
+} from "./markdown-to-plain";
 
 /**
  * Schema for content item metadata
@@ -18,23 +21,35 @@ import { type ConversionOptions, markdownToPlainText } from './markdown-to-plain
  */
 export const llmsTxtItemSchema = z
   .object({
-    slug: z.string().min(1).describe('Content item slug/identifier'),
-    title: z.string().min(1).describe('Content title (no length limit for AI consumption)'),
+    slug: z.string().min(1).describe("Content item slug/identifier"),
+    title: z
+      .string()
+      .min(1)
+      .describe("Content title (no length limit for AI consumption)"),
     description: z
       .string()
       .min(1)
-      .describe('Content description (short summary - no artificial length limits)'),
+      .describe(
+        "Content description (short summary - no artificial length limits)",
+      ),
     content: z
       .string()
       .optional()
-      .describe('Full content (markdown/plain text) - unlimited length for complete AI context'),
-    category: z.string().min(1).describe('Content category (agents, mcp, rules, etc)'),
-    tags: z.array(z.string()).default([]).describe('Content tags'),
-    author: z.string().optional().describe('Content author'),
-    dateAdded: z.string().optional().describe('Date added (ISO format)'),
-    url: z.string().url().optional().describe('Full URL to content'),
+      .describe(
+        "Full content (markdown/plain text) - unlimited length for complete AI context",
+      ),
+    category: z
+      .string()
+      .min(1)
+      .describe("Content category (agents, mcp, rules, etc)"),
+    tags: z.array(z.string()).default([]).describe("Content tags"),
+    author: z.string().optional().describe("Content author"),
+    dateAdded: z.string().optional().describe("Date added (ISO format)"),
+    url: z.string().url().optional().describe("Full URL to content"),
   })
-  .describe('Content item for llms.txt generation - no length limits for AI consumption');
+  .describe(
+    "Content item for llms.txt generation - no length limits for AI consumption",
+  );
 
 /**
  * Schema for llms.txt generation options
@@ -42,22 +57,31 @@ export const llmsTxtItemSchema = z
  */
 export const llmsTxtOptionsSchema = z
   .object({
-    includeMetadata: z.boolean().default(true).describe('Include metadata (author, date, tags)'),
-    includeUrl: z.boolean().default(true).describe('Include canonical URL'),
-    includeDescription: z.boolean().default(true).describe('Include content description'),
-    includeTags: z.boolean().default(true).describe('Include tags list'),
-    includeContent: z.boolean().default(true).describe('Include full content (if available)'),
-    sanitize: z.boolean().default(true).describe('Apply PII sanitization'),
+    includeMetadata: z
+      .boolean()
+      .default(true)
+      .describe("Include metadata (author, date, tags)"),
+    includeUrl: z.boolean().default(true).describe("Include canonical URL"),
+    includeDescription: z
+      .boolean()
+      .default(true)
+      .describe("Include content description"),
+    includeTags: z.boolean().default(true).describe("Include tags list"),
+    includeContent: z
+      .boolean()
+      .default(true)
+      .describe("Include full content (if available)"),
+    sanitize: z.boolean().default(true).describe("Apply PII sanitization"),
     markdownOptions: z
       .custom<Partial<ConversionOptions>>()
       .optional()
-      .describe('Markdown conversion options'),
+      .describe("Markdown conversion options"),
     sanitizationOptions: z
       .custom<Partial<SanitizationOptions>>()
       .optional()
-      .describe('Content sanitization options'),
+      .describe("Content sanitization options"),
   })
-  .describe('Options for llms.txt generation');
+  .describe("Options for llms.txt generation");
 
 /**
  * Type exports
@@ -73,9 +97,9 @@ export type LLMsTxtOptions = z.infer<typeof llmsTxtOptionsSchema>;
 function formatDate(dateStr: string): string {
   try {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
-      month: 'long',
-      year: 'numeric',
+    return date.toLocaleDateString("en-US", {
+      month: "long",
+      year: "numeric",
     });
   } catch {
     return dateStr;
@@ -108,7 +132,7 @@ ${description}
  * @internal
  */
 function generateFooter(url?: string): string {
-  let footer = '\n\n---\n\n';
+  let footer = "\n\n---\n\n";
   footer += `Source: ${APP_CONFIG.name}\n`;
   footer += `Website: ${APP_CONFIG.url}\n`;
 
@@ -116,8 +140,9 @@ function generateFooter(url?: string): string {
     footer += `URL: ${url}\n`;
   }
 
-  footer += '\nThis content is optimized for Large Language Models (LLMs).\n';
-  footer += 'For full formatting and interactive features, visit the website.\n';
+  footer += "\nThis content is optimized for Large Language Models (LLMs).\n";
+  footer +=
+    "For full formatting and interactive features, visit the website.\n";
 
   return footer;
 }
@@ -146,7 +171,7 @@ function generateFooter(url?: string): string {
  */
 export async function generateLLMsTxt(
   item: LLMsTxtItem,
-  options?: Partial<LLMsTxtOptions>
+  options?: Partial<LLMsTxtOptions>,
 ): Promise<string> {
   try {
     // Validate input
@@ -156,14 +181,16 @@ export async function generateLLMsTxt(
     const sections: string[] = [];
 
     // Header
-    sections.push(generateHeader(validatedItem.title, validatedItem.description));
+    sections.push(
+      generateHeader(validatedItem.title, validatedItem.description),
+    );
 
     // Metadata section
     if (opts.includeMetadata) {
       const metadata: string[] = [];
 
-      metadata.push('METADATA');
-      metadata.push('--------');
+      metadata.push("METADATA");
+      metadata.push("--------");
 
       // Add Title field for validation compatibility
       metadata.push(`Title: ${validatedItem.title}`);
@@ -180,34 +207,41 @@ export async function generateLLMsTxt(
         metadata.push(`Added: ${formatDate(validatedItem.dateAdded)}`);
       }
 
-      if (validatedItem.tags && validatedItem.tags.length > 0 && opts.includeTags) {
-        metadata.push(`Tags: ${validatedItem.tags.join(', ')}`);
+      if (
+        validatedItem.tags &&
+        validatedItem.tags.length > 0 &&
+        opts.includeTags
+      ) {
+        metadata.push(`Tags: ${validatedItem.tags.join(", ")}`);
       }
 
       if (validatedItem.url && opts.includeUrl) {
         metadata.push(`URL: ${validatedItem.url}`);
       }
 
-      sections.push(metadata.join('\n'));
-      sections.push(''); // Empty line
+      sections.push(metadata.join("\n"));
+      sections.push(""); // Empty line
     }
 
     // Description section (if not already in header)
     if (opts.includeDescription && validatedItem.description) {
-      sections.push('OVERVIEW');
-      sections.push('--------');
+      sections.push("OVERVIEW");
+      sections.push("--------");
       sections.push(validatedItem.description);
-      sections.push(''); // Empty line
+      sections.push(""); // Empty line
     }
 
     // Content section
     if (opts.includeContent && validatedItem.content) {
-      sections.push('CONTENT');
-      sections.push('-------');
-      sections.push('');
+      sections.push("CONTENT");
+      sections.push("-------");
+      sections.push("");
 
       // Convert markdown to plain text
-      const plainText = await markdownToPlainText(validatedItem.content, opts.markdownOptions);
+      const plainText = await markdownToPlainText(
+        validatedItem.content,
+        opts.markdownOptions,
+      );
 
       // Sanitize if requested
       let finalContent = plainText;
@@ -219,23 +253,27 @@ export async function generateLLMsTxt(
     }
 
     // Footer
-    sections.push(generateFooter(opts.includeUrl ? validatedItem.url : undefined));
+    sections.push(
+      generateFooter(opts.includeUrl ? validatedItem.url : undefined),
+    );
 
     // Join all sections
-    const result = sections.join('\n');
+    const result = sections.join("\n");
 
     return result;
   } catch (error) {
     logger.error(
-      'Failed to generate llms.txt content',
+      "Failed to generate llms.txt content",
       error instanceof Error ? error : new Error(String(error)),
       {
-        slug: item?.slug || 'unknown',
-        category: item?.category || 'unknown',
+        slug: item?.slug || "unknown",
+        category: item?.category || "unknown",
         hasContent: !!item?.content,
-      }
+      },
     );
-    throw new Error(`Failed to generate llms.txt for ${item?.slug || 'unknown'}`);
+    throw new Error(
+      `Failed to generate llms.txt for ${item?.slug || "unknown"}`,
+    );
   }
 }
 
@@ -262,7 +300,7 @@ export async function generateCategoryLLMsTxt(
   items: LLMsTxtItem[],
   categoryName: string,
   categoryDescription: string,
-  options?: Partial<LLMsTxtOptions>
+  options?: Partial<LLMsTxtOptions>,
 ): Promise<string> {
   try {
     const opts = llmsTxtOptionsSchema.parse(options || {});
@@ -272,11 +310,11 @@ export async function generateCategoryLLMsTxt(
     // Header with category marker for validation
     sections.push(`# Category: ${categoryName}\n`);
     sections.push(categoryDescription);
-    sections.push('\n---\n');
+    sections.push("\n---\n");
 
     // Index section
-    sections.push('INDEX');
-    sections.push('-----');
+    sections.push("INDEX");
+    sections.push("-----");
     sections.push(`Total items: ${items.length}\n`);
 
     // List each item
@@ -287,7 +325,7 @@ export async function generateCategoryLLMsTxt(
 
       if (opts.includeDescription && validatedItem.description) {
         sections.push(
-          `  ${validatedItem.description.substring(0, 150)}${validatedItem.description.length > 150 ? '...' : ''}`
+          `  ${validatedItem.description.substring(0, 150)}${validatedItem.description.length > 150 ? "..." : ""}`,
         );
       }
 
@@ -295,28 +333,34 @@ export async function generateCategoryLLMsTxt(
         sections.push(`  ${validatedItem.url}`);
       }
 
-      if (opts.includeTags && validatedItem.tags && validatedItem.tags.length > 0) {
-        sections.push(`  Tags: ${validatedItem.tags.slice(0, 5).join(', ')}`);
+      if (
+        opts.includeTags &&
+        validatedItem.tags &&
+        validatedItem.tags.length > 0
+      ) {
+        sections.push(`  Tags: ${validatedItem.tags.slice(0, 5).join(", ")}`);
       }
 
-      sections.push(''); // Empty line between items
+      sections.push(""); // Empty line between items
     }
 
     // Footer
-    const categoryUrl = `${APP_CONFIG.url}/${categoryName.toLowerCase().replace(/\s+/g, '-')}`;
+    const categoryUrl = `${APP_CONFIG.url}/${categoryName.toLowerCase().replace(/\s+/g, "-")}`;
     sections.push(generateFooter(opts.includeUrl ? categoryUrl : undefined));
 
-    return sections.join('\n');
+    return sections.join("\n");
   } catch (error) {
     logger.error(
-      'Failed to generate category llms.txt',
+      "Failed to generate category llms.txt",
       error instanceof Error ? error : new Error(String(error)),
       {
         categoryName,
         itemCount: items?.length || 0,
-      }
+      },
     );
-    throw new Error(`Failed to generate llms.txt for category: ${categoryName}`);
+    throw new Error(
+      `Failed to generate llms.txt for category: ${categoryName}`,
+    );
   }
 }
 
@@ -335,29 +379,36 @@ export async function generateCategoryLLMsTxt(
  * ```
  */
 export async function generateSiteLLMsTxt(
-  categoryStats: Array<{ name: string; count: number; url: string; description: string }>
+  categoryStats: Array<{
+    name: string;
+    count: number;
+    url: string;
+    description: string;
+  }>,
 ): Promise<string> {
   try {
     const sections: string[] = [];
 
     // Header
-    sections.push(generateHeader(APP_CONFIG.name, SEO_CONFIG.defaultDescription));
+    sections.push(
+      generateHeader(APP_CONFIG.name, SEO_CONFIG.defaultDescription),
+    );
 
     // Categories section
-    sections.push('CATEGORIES');
-    sections.push('----------\n');
+    sections.push("CATEGORIES");
+    sections.push("----------\n");
 
     for (const category of categoryStats) {
       sections.push(`${category.name.toUpperCase()} (${category.count} items)`);
       sections.push(`${category.description}`);
       sections.push(`${APP_CONFIG.url}${category.url}`);
       sections.push(`${APP_CONFIG.url}${category.url}/llms.txt`);
-      sections.push(''); // Empty line
+      sections.push(""); // Empty line
     }
 
     // Navigation section
-    sections.push('\nNAVIGATION');
-    sections.push('----------');
+    sections.push("\nNAVIGATION");
+    sections.push("----------");
     sections.push(`Homepage: ${APP_CONFIG.url}`);
     sections.push(`Trending: ${APP_CONFIG.url}/trending`);
     sections.push(`Submit: ${APP_CONFIG.url}/submit`);
@@ -366,12 +417,12 @@ export async function generateSiteLLMsTxt(
     // Footer
     sections.push(generateFooter(APP_CONFIG.url));
 
-    return sections.join('\n');
+    return sections.join("\n");
   } catch (error) {
     logger.error(
-      'Failed to generate site llms.txt',
-      error instanceof Error ? error : new Error(String(error))
+      "Failed to generate site llms.txt",
+      error instanceof Error ? error : new Error(String(error)),
     );
-    throw new Error('Failed to generate site llms.txt');
+    throw new Error("Failed to generate site llms.txt");
   }
 }

@@ -1,16 +1,19 @@
-import dynamic from 'next/dynamic';
-import type React from 'react';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import dynamic from "next/dynamic";
+import type React from "react";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 // Generate stable keys for skeleton items (prevents unnecessary re-renders)
-const generateSkeletonKeys = () => Array.from({ length: 6 }, () => crypto.randomUUID());
+const generateSkeletonKeys = () =>
+  Array.from({ length: 6 }, () => crypto.randomUUID());
 
 /**
  * Lazy-loaded InfiniteScrollContainer with grid skeleton loading state
  */
 export const LazyInfiniteScrollContainer = dynamic(
   () =>
-    import('./infinite-scroll-container').then((mod) => ({ default: mod.InfiniteScrollContainer })),
+    import("./infinite-scroll-container").then((mod) => ({
+      default: mod.InfiniteScrollContainer,
+    })),
   {
     loading: () => (
       <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
@@ -27,7 +30,7 @@ export const LazyInfiniteScrollContainer = dynamic(
         ))}
       </div>
     ),
-  }
+  },
 ) as <T>(
-  props: import('./infinite-scroll-container').InfiniteScrollContainerProps<T>
+  props: import("./infinite-scroll-container").InfiniteScrollContainerProps<T>,
 ) => React.JSX.Element;

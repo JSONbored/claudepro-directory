@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { NewsletterForm } from '@/src/components/shared/newsletter-form';
-import { Button } from '@/src/components/ui/button';
-import { X } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { useEffect, useState } from "react";
+import { NewsletterForm } from "@/src/components/shared/newsletter-form";
+import { Button } from "@/src/components/ui/button";
+import { X } from "@/src/lib/icons";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 /**
  * Sticky footer newsletter bar
@@ -34,7 +34,7 @@ export function FooterNewsletterBar() {
     setIsClient(true);
 
     // Check if user has dismissed the bar before
-    const isDismissed = localStorage.getItem('newsletter-bar-dismissed');
+    const isDismissed = localStorage.getItem("newsletter-bar-dismissed");
 
     if (!isDismissed) {
       // Show after 3 second delay (non-intrusive)
@@ -53,7 +53,7 @@ export function FooterNewsletterBar() {
   const handleDismiss = () => {
     setIsVisible(false);
     // Remember dismissal
-    localStorage.setItem('newsletter-bar-dismissed', 'true');
+    localStorage.setItem("newsletter-bar-dismissed", "true");
   };
 
   // Don't render on server or if dismissed
@@ -72,9 +72,11 @@ export function FooterNewsletterBar() {
         {/* Desktop layout */}
         <div className="hidden md:flex items-center justify-between gap-4">
           <p className="text-sm font-medium text-primary">
-            Get weekly updates on{' '}
-            <span className="text-[var(--color-accent-light)]">new tools & guides</span> — no spam,
-            unsubscribe anytime
+            Get weekly updates on{" "}
+            <span className="text-[var(--color-accent-light)]">
+              new tools & guides
+            </span>{" "}
+            — no spam, unsubscribe anytime
           </p>
           <div className="flex items-center gap-3">
             <NewsletterForm source="footer" className="w-[400px]" />
@@ -93,7 +95,10 @@ export function FooterNewsletterBar() {
         <div className="flex md:hidden flex-col gap-3">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-primary">
-              <span className="text-[var(--color-accent-light)]">Weekly updates</span> on new tools
+              <span className="text-[var(--color-accent-light)]">
+                Weekly updates
+              </span>{" "}
+              on new tools
             </p>
             <Button
               variant="ghost"

@@ -16,17 +16,17 @@
  * @see components/unified-sidebar.tsx - Original implementation
  */
 
-import Link from 'next/link';
-import { z } from 'zod';
+import Link from "next/link";
+import { z } from "zod";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/src/components/ui/tooltip';
-import type { LucideIcon } from '@/src/lib/icons';
-import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+} from "@/src/components/ui/tooltip";
+import type { LucideIcon } from "@/src/lib/icons";
+import { nonEmptyString } from "@/src/lib/schemas/primitives/base-strings";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 /**
  * Schema for category info
@@ -45,10 +45,12 @@ const categoryInfoSchema = z.object({
 const categoryNavigationCardPropsSchema = z.object({
   currentCategory: z.string().optional(),
   categories: z.record(z.string(), categoryInfoSchema),
-  basePath: nonEmptyString.default('/guides'),
+  basePath: nonEmptyString.default("/guides"),
 });
 
-export type CategoryNavigationCardProps = z.infer<typeof categoryNavigationCardPropsSchema>;
+export type CategoryNavigationCardProps = z.infer<
+  typeof categoryNavigationCardPropsSchema
+>;
 
 /**
  * CategoryNavigationCard Component (Server Component)
@@ -60,7 +62,7 @@ export type CategoryNavigationCardProps = z.infer<typeof categoryNavigationCardP
 export function CategoryNavigationCard({
   currentCategory,
   categories,
-  basePath = '/guides',
+  basePath = "/guides",
 }: CategoryNavigationCardProps) {
   // Validate props
   const validatedProps = categoryNavigationCardPropsSchema.parse({
@@ -83,7 +85,7 @@ export function CategoryNavigationCard({
                   href={`${validatedProps.basePath}/${key}`}
                   className={`p-2 rounded-lg transition-all duration-200 ${
                     isActive
-                      ? info.activeColor || 'text-primary bg-primary/10'
+                      ? info.activeColor || "text-primary bg-primary/10"
                       : `text-muted-foreground ${info.color || `${UI_CLASSES.HOVER_TEXT_PRIMARY} ${UI_CLASSES.HOVER_BG_MUTED_50}`}`
                   }`}
                 >
@@ -92,7 +94,9 @@ export function CategoryNavigationCard({
               </TooltipTrigger>
               <TooltipContent side="bottom" className="text-xs max-w-[200px]">
                 <div className="font-semibold">{info.label}</div>
-                <div className="text-muted-foreground mt-0.5">{info.description}</div>
+                <div className="text-muted-foreground mt-0.5">
+                  {info.description}
+                </div>
               </TooltipContent>
             </Tooltip>
           );

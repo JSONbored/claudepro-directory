@@ -57,26 +57,26 @@
  * @see {@link file://../../../components/unified-detail-page/index.tsx} - Detail page component
  */
 
-import { notFound } from 'next/navigation';
-import { PageViewTracker } from '@/src/components/shared/page-view-tracker';
-import { ViewTracker } from '@/src/components/shared/view-tracker';
-import { UnifiedStructuredData } from '@/src/components/structured-data/unified-structured-data';
-import { UnifiedDetailPage } from '@/src/components/unified-detail-page';
+import { notFound } from "next/navigation";
+import { PageViewTracker } from "@/src/components/shared/page-view-tracker";
+import { ViewTracker } from "@/src/components/shared/view-tracker";
+import { UnifiedStructuredData } from "@/src/components/structured-data/unified-structured-data";
+import { UnifiedDetailPage } from "@/src/components/unified-detail-page";
 import {
   getCategoryConfig,
   isValidCategory,
   VALID_CATEGORIES,
-} from '@/src/lib/config/category-config';
+} from "@/src/lib/config/category-config";
 import {
   getContentByCategory,
   getContentBySlug,
   getFullContentBySlug,
   getRelatedContent,
-} from '@/src/lib/content/content-loaders';
-import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/redis';
-import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { transformForDetailPage } from '@/src/lib/utils/transformers';
+} from "@/src/lib/content/content-loaders";
+import { logger } from "@/src/lib/logger";
+import { statsRedis } from "@/src/lib/redis";
+import { generatePageMetadata } from "@/src/lib/seo/metadata-generator";
+import { transformForDetailPage } from "@/src/lib/utils/transformers";
 
 /**
  * Dynamic Rendering (No ISR)
@@ -162,16 +162,16 @@ export async function generateMetadata({
   // Validate category
   if (!isValidCategory(category)) {
     return {
-      title: 'Not Found',
-      description: 'The requested content could not be found.',
+      title: "Not Found",
+      description: "The requested content could not be found.",
     };
   }
 
   const config = getCategoryConfig(category);
   if (!config) {
     return {
-      title: 'Not Found',
-      description: 'The requested content could not be found.',
+      title: "Not Found",
+      description: "The requested content could not be found.",
     };
   }
 
@@ -187,7 +187,7 @@ export async function generateMetadata({
 
   // Use centralized metadata with content detail context
   // Explicit context construction for exactOptionalPropertyTypes compatibility
-  return await generatePageMetadata('/:category/:slug', {
+  return await generatePageMetadata("/:category/:slug", {
     params: { category, slug },
     category,
     slug,
@@ -247,7 +247,7 @@ export default async function DetailPage({
 
   // Validate category
   if (!isValidCategory(category)) {
-    logger.warn('Invalid category in detail page', { category, slug });
+    logger.warn("Invalid category in detail page", { category, slug });
     notFound();
   }
 
@@ -256,7 +256,7 @@ export default async function DetailPage({
     notFound();
   }
 
-  logger.info('Detail page accessed', {
+  logger.info("Detail page accessed", {
     category,
     slug,
     validated: true,
@@ -266,7 +266,7 @@ export default async function DetailPage({
   const itemMeta = await getContentBySlug(category, slug);
 
   if (!itemMeta) {
-    logger.warn('Item not found', { category, slug });
+    logger.warn("Item not found", { category, slug });
     notFound();
   }
 
@@ -284,22 +284,32 @@ export default async function DetailPage({
   // Type assertion needed because runtime validation ensures type safety
   const { item, relatedItems } = transformForDetailPage(
     itemData as Parameters<typeof transformForDetailPage>[0],
-    relatedItemsData as Parameters<typeof transformForDetailPage>[1]
+    relatedItemsData as Parameters<typeof transformForDetailPage>[1],
   );
 
   return (
     <>
       <ViewTracker
-        category={category as 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides'}
+        category={
+          category as
+            | "agents"
+            | "mcp"
+            | "rules"
+            | "commands"
+            | "hooks"
+            | "guides"
+        }
         slug={slug}
       />
       <PageViewTracker category={category} slug={slug} />
-      {
-        await UnifiedStructuredData({
-          item: itemData as Parameters<typeof UnifiedStructuredData>[0]['item'],
-        })
-      }
-      <UnifiedDetailPage item={item} relatedItems={relatedItems} viewCount={viewCount} />
+      {await UnifiedStructuredData({
+        item: itemData as Parameters<typeof UnifiedStructuredData>[0]["item"],
+      })}
+      <UnifiedDetailPage
+        item={item}
+        relatedItems={relatedItems}
+        viewCount={viewCount}
+      />
     </>
   );
 }

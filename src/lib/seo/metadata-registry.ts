@@ -14,9 +14,9 @@
  * @module lib/seo/metadata-registry
  */
 
-import { z } from 'zod';
-import { APP_CONFIG } from '@/src/lib/constants';
-import { getDisplayTitle } from '@/src/lib/utils';
+import { z } from "zod";
+import { APP_CONFIG } from "@/src/lib/constants";
+import { getDisplayTitle } from "@/src/lib/utils";
 
 /**
  * Context type for metadata generation
@@ -74,33 +74,39 @@ export const aiOptimizationSchema = z
     includeYear: z
       .boolean()
       .default(true)
-      .describe('Add current year/month to description for AI search optimization'),
+      .describe(
+        "Add current year/month to description for AI search optimization",
+      ),
 
     /** Add recency signal (dateModified timestamp) for 3.2x more AI citations */
     recencySignal: z
       .boolean()
       .default(false)
-      .describe('Include dateModified in metadata for fresh content signals'),
+      .describe("Include dateModified in metadata for fresh content signals"),
 
     /** Use Article schema instead of WebPage (better for AI citations) */
     useArticleSchema: z
       .boolean()
       .default(false)
-      .describe('Prefer Article over WebPage schema for content pages'),
+      .describe("Prefer Article over WebPage schema for content pages"),
 
     /** Generate FAQ schema for AI answer engines */
     generateFAQSchema: z
       .boolean()
       .default(false)
-      .describe('Generate FAQ structured data for question-answering AI engines'),
+      .describe(
+        "Generate FAQ structured data for question-answering AI engines",
+      ),
 
     /** Structure content like Wikipedia (preferred by AI models - 7.8% citation rate) */
     wikipediaStyle: z
       .boolean()
       .default(false)
-      .describe('Use Wikipedia-style structure (H2→H3→bullets) for higher citation rate'),
+      .describe(
+        "Use Wikipedia-style structure (H2→H3→bullets) for higher citation rate",
+      ),
   })
-  .describe('AI search engine optimization configuration for October 2025');
+  .describe("AI search engine optimization configuration for October 2025");
 
 export type AIOptimization = z.infer<typeof aiOptimizationSchema>;
 
@@ -119,15 +125,23 @@ export type AIOptimization = z.infer<typeof aiOptimizationSchema>;
 export const titleConfigSchema = z
   .object({
     /** Title tier (home, section, or content) */
-    tier: z.enum(['home', 'section', 'content']).describe('Title hierarchy tier'),
+    tier: z
+      .enum(["home", "section", "content"])
+      .describe("Title hierarchy tier"),
 
     /** Page-specific title (optional for home tier) */
-    title: z.union([z.string(), z.function()]).optional().describe('Page-specific title text'),
+    title: z
+      .union([z.string(), z.function()])
+      .optional()
+      .describe("Page-specific title text"),
 
     /** Section name (required for content tier) */
-    section: z.union([z.string(), z.function()]).optional().describe('Section/category name'),
+    section: z
+      .union([z.string(), z.function()])
+      .optional()
+      .describe("Section/category name"),
   })
-  .describe('Configuration for building SEO-optimized page titles');
+  .describe("Configuration for building SEO-optimized page titles");
 
 export type TitleConfig = z.infer<typeof titleConfigSchema>;
 
@@ -148,29 +162,37 @@ export const structuredDataConfigSchema = z
     /** Primary schema type (Article recommended for AI citations) */
     type: z
       .enum([
-        'WebPage',
-        'Article',
-        'FAQPage',
-        'HowTo',
-        'SoftwareApplication',
-        'JobPosting',
-        'CollectionPage',
+        "WebPage",
+        "Article",
+        "FAQPage",
+        "HowTo",
+        "SoftwareApplication",
+        "JobPosting",
+        "CollectionPage",
       ])
-      .describe('Schema.org type for structured data generation'),
+      .describe("Schema.org type for structured data generation"),
 
     /** Generate breadcrumb navigation schema */
-    breadcrumbs: z.boolean().default(true).describe('Include BreadcrumbList schema for navigation'),
+    breadcrumbs: z
+      .boolean()
+      .default(true)
+      .describe("Include BreadcrumbList schema for navigation"),
 
     /** Include dateModified for recency signals */
     dateModified: z
       .boolean()
       .default(false)
-      .describe('Add dateModified property for fresh content signals (3.2x more AI citations)'),
+      .describe(
+        "Add dateModified property for fresh content signals (3.2x more AI citations)",
+      ),
 
     /** Include author information */
-    author: z.boolean().default(false).describe('Include author/publisher information in schema'),
+    author: z
+      .boolean()
+      .default(false)
+      .describe("Include author/publisher information in schema"),
   })
-  .describe('Configuration for JSON-LD structured data generation');
+  .describe("Configuration for JSON-LD structured data generation");
 
 export type StructuredDataConfig = z.infer<typeof structuredDataConfigSchema>;
 
@@ -204,21 +226,27 @@ export interface RouteMetadata {
    * }
    * ```
    */
-  title: TitleConfig | ((context?: MetadataContext) => TitleConfig | Promise<TitleConfig>);
+  title:
+    | TitleConfig
+    | ((context?: MetadataContext) => TitleConfig | Promise<TitleConfig>);
 
   /**
    * Meta description (120-160 chars for AI optimization)
    * AI-optimized length based on October 2025 research
    * Can be static string or function for dynamic resolution
    */
-  description: string | ((context?: MetadataContext) => string | Promise<string>);
+  description:
+    | string
+    | ((context?: MetadataContext) => string | Promise<string>);
 
   /**
    * Keywords array (max 10 for SEO best practice)
    * Optional - only used for specific content types
    * Can be static array or function for dynamic resolution
    */
-  keywords?: string[] | ((context?: MetadataContext) => string[] | Promise<string[]>);
+  keywords?:
+    | string[]
+    | ((context?: MetadataContext) => string[] | Promise<string[]>);
 
   /**
    * OpenGraph configuration (REQUIRED for all routes)
@@ -228,7 +256,7 @@ export interface RouteMetadata {
   openGraph: {
     title?: string | undefined;
     description?: string | undefined;
-    type: 'website' | 'article';
+    type: "website" | "article";
   };
 
   /**
@@ -239,7 +267,7 @@ export interface RouteMetadata {
   twitter: {
     title?: string | undefined;
     description?: string | undefined;
-    card: 'summary' | 'summary_large_image';
+    card: "summary" | "summary_large_image";
   };
 
   /**
@@ -261,10 +289,10 @@ export interface RouteMetadata {
  */
 export const METADATA_DEFAULTS = {
   siteName: APP_CONFIG.name,
-  separator: ' - ',
+  separator: " - ",
   includeYear: true,
   serverSideOnly: true, // No client-side JSON-LD (AI bots skip JavaScript)
-  schemaVersion: '29.3', // Schema.org version (Sept 4, 2025)
+  schemaVersion: "29.3", // Schema.org version (Sept 4, 2025)
 } as const;
 
 /**
@@ -284,27 +312,27 @@ export const METADATA_REGISTRY = {
    * OpenGraph/Twitter: Uses page title and description by default from metadata-generator.ts
    * Title will be just APP_CONFIG.name (tier: home)
    */
-  '/': {
-    title: { tier: 'home' as const },
+  "/": {
+    title: { tier: "home" as const },
     description:
-      'Open-source directory of 150+ Claude AI configurations in October 2025. Community-driven collection of MCP servers, AI agents, automation hooks, custom commands, and development rules.',
+      "Open-source directory of 150+ Claude AI configurations in October 2025. Community-driven collection of MCP servers, AI agents, automation hooks, custom commands, and development rules.",
     keywords: [
-      'claude ai',
-      'claude pro',
-      'mcp servers 2025',
-      'claude agents',
-      'claude configurations',
-      'ai development tools',
-      'model context protocol',
+      "claude ai",
+      "claude pro",
+      "mcp servers 2025",
+      "claude agents",
+      "claude configurations",
+      "ai development tools",
+      "model context protocol",
     ],
     openGraph: {
-      type: 'website' as const,
+      type: "website" as const,
     },
     twitter: {
-      card: 'summary_large_image' as const,
+      card: "summary_large_image" as const,
     },
     structuredData: {
-      type: 'WebPage' as const,
+      type: "WebPage" as const,
       breadcrumbs: false,
       dateModified: false,
       author: false,
@@ -322,24 +350,24 @@ export const METADATA_REGISTRY = {
    * Trending Page - Tier 2
    * High recency signal for fresh content
    */
-  '/trending': {
-    title: { tier: 'section' as const, title: 'Trending Configurations' },
+  "/trending": {
+    title: { tier: "section" as const, title: "Trending Configurations" },
     description:
-      'Discover trending Claude AI configurations updated daily in October 2025. View real-time growth velocity and popularity metrics for MCP servers, agents, and tools.',
+      "Discover trending Claude AI configurations updated daily in October 2025. View real-time growth velocity and popularity metrics for MCP servers, agents, and tools.",
     keywords: [
-      'trending claude configs',
-      'popular mcp servers 2025',
-      'claude ai trending',
-      'ai tools popularity',
+      "trending claude configs",
+      "popular mcp servers 2025",
+      "claude ai trending",
+      "ai tools popularity",
     ],
     openGraph: {
-      type: 'website' as const,
+      type: "website" as const,
     },
     twitter: {
-      card: 'summary_large_image' as const,
+      card: "summary_large_image" as const,
     },
     structuredData: {
-      type: 'WebPage' as const,
+      type: "WebPage" as const,
       breadcrumbs: true,
       dateModified: true, // High recency signal
       author: false,
@@ -357,24 +385,24 @@ export const METADATA_REGISTRY = {
    * Submit Page - Tier 2
    * Clear action-oriented description
    */
-  '/submit': {
-    title: { tier: 'section' as const, title: 'Submit Configuration' },
+  "/submit": {
+    title: { tier: "section" as const, title: "Submit Configuration" },
     description:
-      'Submit your Claude AI configuration to the community directory in October 2025. Share agents, MCP servers, hooks, commands, and rules with developers worldwide.',
+      "Submit your Claude AI configuration to the community directory in October 2025. Share agents, MCP servers, hooks, commands, and rules with developers worldwide.",
     keywords: [
-      'submit claude config',
-      'contribute to claude directory',
-      'share mcp server',
-      'claude community 2025',
+      "submit claude config",
+      "contribute to claude directory",
+      "share mcp server",
+      "claude community 2025",
     ],
     openGraph: {
-      type: 'website' as const,
+      type: "website" as const,
     },
     twitter: {
-      card: 'summary_large_image' as const,
+      card: "summary_large_image" as const,
     },
     structuredData: {
-      type: 'WebPage' as const,
+      type: "WebPage" as const,
       breadcrumbs: true,
       dateModified: false,
       author: false,
@@ -392,24 +420,24 @@ export const METADATA_REGISTRY = {
    * Partner Page - Tier 2
    * Business-focused description
    */
-  '/partner': {
-    title: { tier: 'section' as const, title: 'Partner With Us' },
+  "/partner": {
+    title: { tier: "section" as const, title: "Partner With Us" },
     description:
-      'Partner with Claude Pro Directory to showcase your AI tools and reach developers in October 2025. Collaborate on integrations, sponsorships, and community initiatives.',
+      "Partner with Claude Pro Directory to showcase your AI tools and reach developers in October 2025. Collaborate on integrations, sponsorships, and community initiatives.",
     keywords: [
-      'claude pro partnership',
-      'ai tools partnership 2025',
-      'developer community collaboration',
-      'claude sponsorship',
+      "claude pro partnership",
+      "ai tools partnership 2025",
+      "developer community collaboration",
+      "claude sponsorship",
     ],
     openGraph: {
-      type: 'website' as const,
+      type: "website" as const,
     },
     twitter: {
-      card: 'summary_large_image' as const,
+      card: "summary_large_image" as const,
     },
     structuredData: {
-      type: 'WebPage' as const,
+      type: "WebPage" as const,
       breadcrumbs: true,
       dateModified: false,
       author: false,
@@ -427,24 +455,27 @@ export const METADATA_REGISTRY = {
    * Collections List - Tier 2
    * Curated content discovery
    */
-  '/collections': {
-    title: { tier: 'section' as const, title: 'Claude Configuration Collections 2025' },
+  "/collections": {
+    title: {
+      tier: "section" as const,
+      title: "Claude Configuration Collections 2025",
+    },
     description:
-      'Browse curated collections of Claude AI tools and configurations in October 2025. Hand-picked MCP servers, agents, and workflows organized by use case and expertise level.',
+      "Browse curated collections of Claude AI tools and configurations in October 2025. Hand-picked MCP servers, agents, and workflows organized by use case and expertise level.",
     keywords: [
-      'claude collections',
-      'curated ai tools 2025',
-      'mcp server collections',
-      'claude workflows',
+      "claude collections",
+      "curated ai tools 2025",
+      "mcp server collections",
+      "claude workflows",
     ],
     openGraph: {
-      type: 'website' as const,
+      type: "website" as const,
     },
     twitter: {
-      card: 'summary_large_image' as const,
+      card: "summary_large_image" as const,
     },
     structuredData: {
-      type: 'CollectionPage' as const,
+      type: "CollectionPage" as const,
       breadcrumbs: true,
       dateModified: true,
       author: false,
@@ -462,24 +493,27 @@ export const METADATA_REGISTRY = {
    * Guides List - Tier 2
    * Educational content hub
    */
-  '/guides': {
-    title: { tier: 'section' as const, title: 'Claude AI Guides & Tutorials 2025' },
+  "/guides": {
+    title: {
+      tier: "section" as const,
+      title: "Claude AI Guides & Tutorials 2025",
+    },
     description:
-      'Comprehensive guides for Claude AI in October 2025. Learn MCP server setup, agent configuration, automation workflows, and advanced development techniques.',
+      "Comprehensive guides for Claude AI in October 2025. Learn MCP server setup, agent configuration, automation workflows, and advanced development techniques.",
     keywords: [
-      'claude ai guides 2025',
-      'mcp server tutorial',
-      'claude agent setup',
-      'ai development guides',
+      "claude ai guides 2025",
+      "mcp server tutorial",
+      "claude agent setup",
+      "ai development guides",
     ],
     openGraph: {
-      type: 'website' as const,
+      type: "website" as const,
     },
     twitter: {
-      card: 'summary_large_image' as const,
+      card: "summary_large_image" as const,
     },
     structuredData: {
-      type: 'WebPage' as const,
+      type: "WebPage" as const,
       breadcrumbs: true,
       dateModified: true,
       author: false,
@@ -497,24 +531,24 @@ export const METADATA_REGISTRY = {
    * Community Page - Tier 2
    * Social engagement focus
    */
-  '/community': {
-    title: { tier: 'section' as const, title: 'Community' },
+  "/community": {
+    title: { tier: "section" as const, title: "Community" },
     description:
-      'Join the Claude Pro Directory community in October 2025. Connect with AI developers, share configurations, contribute to open-source projects, and get support.',
+      "Join the Claude Pro Directory community in October 2025. Connect with AI developers, share configurations, contribute to open-source projects, and get support.",
     keywords: [
-      'claude community 2025',
-      'ai developers network',
-      'claude discord',
-      'open source ai tools',
+      "claude community 2025",
+      "ai developers network",
+      "claude discord",
+      "open source ai tools",
     ],
     openGraph: {
-      type: 'website' as const,
+      type: "website" as const,
     },
     twitter: {
-      card: 'summary_large_image' as const,
+      card: "summary_large_image" as const,
     },
     structuredData: {
-      type: 'WebPage' as const,
+      type: "WebPage" as const,
       breadcrumbs: true,
       dateModified: false,
       author: false,
@@ -532,24 +566,24 @@ export const METADATA_REGISTRY = {
    * Jobs List - Tier 2
    * Career opportunities
    */
-  '/jobs': {
-    title: { tier: 'section' as const, title: 'AI Jobs' },
+  "/jobs": {
+    title: { tier: "section" as const, title: "AI Jobs" },
     description:
-      'Discover Claude AI and machine learning job opportunities in October 2025. Browse open roles in AI development, research, engineering, and data science with leading companies.',
+      "Discover Claude AI and machine learning job opportunities in October 2025. Browse open roles in AI development, research, engineering, and data science with leading companies.",
     keywords: [
-      'ai jobs 2025',
-      'claude ai careers',
-      'machine learning jobs',
-      'ai engineering positions',
+      "ai jobs 2025",
+      "claude ai careers",
+      "machine learning jobs",
+      "ai engineering positions",
     ],
     openGraph: {
-      type: 'website' as const,
+      type: "website" as const,
     },
     twitter: {
-      card: 'summary_large_image' as const,
+      card: "summary_large_image" as const,
     },
     structuredData: {
-      type: 'CollectionPage' as const,
+      type: "CollectionPage" as const,
       breadcrumbs: true,
       dateModified: true,
       author: false,
@@ -567,19 +601,24 @@ export const METADATA_REGISTRY = {
    * API Documentation - Tier 2
    * Developer resources
    */
-  '/api-docs': {
-    title: { tier: 'section' as const, title: 'API Documentation' },
+  "/api-docs": {
+    title: { tier: "section" as const, title: "API Documentation" },
     description:
-      'Comprehensive REST API documentation for ClaudePro Directory in October 2025. Browse 8 endpoints for content discovery, analytics, and caching with full examples.',
-    keywords: ['claude pro api', 'rest api documentation 2025', 'developer api', 'api reference'],
+      "Comprehensive REST API documentation for ClaudePro Directory in October 2025. Browse 8 endpoints for content discovery, analytics, and caching with full examples.",
+    keywords: [
+      "claude pro api",
+      "rest api documentation 2025",
+      "developer api",
+      "api reference",
+    ],
     openGraph: {
-      type: 'website' as const,
+      type: "website" as const,
     },
     twitter: {
-      card: 'summary_large_image' as const,
+      card: "summary_large_image" as const,
     },
     structuredData: {
-      type: 'WebPage' as const,
+      type: "WebPage" as const,
       breadcrumbs: true,
       dateModified: true,
       author: false,
@@ -597,18 +636,18 @@ export const METADATA_REGISTRY = {
    * 404 Error Page
    * User-friendly error messaging
    */
-  '/404': {
-    title: { tier: 'section' as const, title: '404 - Page Not Found' },
+  "/404": {
+    title: { tier: "section" as const, title: "404 - Page Not Found" },
     description: `The page you're looking for doesn't exist on Claude Pro Directory. Browse our collection of AI agents, MCP servers, and configurations instead.`,
-    keywords: ['404', 'page not found', 'claude directory'],
+    keywords: ["404", "page not found", "claude directory"],
     openGraph: {
-      type: 'website' as const,
+      type: "website" as const,
     },
     twitter: {
-      card: 'summary_large_image' as const,
+      card: "summary_large_image" as const,
     },
     structuredData: {
-      type: 'WebPage' as const,
+      type: "WebPage" as const,
       breadcrumbs: false,
       dateModified: false,
       author: false,
@@ -629,43 +668,46 @@ export const METADATA_REGISTRY = {
    *
    * SEO Strategy: Maximize 60-char limit with keyword-rich titles
    */
-  '/:category': {
+  "/:category": {
     title: {
-      tier: 'section' as const,
+      tier: "section" as const,
       title: (context?: MetadataContext) => {
         const category = context?.category || context?.params?.category;
 
         // Optimized titles that maximize SEO value within 60-char limit
         const categoryTitles: Record<string, string> = {
-          agents: 'Claude AI Agent Templates 2025',
-          mcp: 'Claude MCP Server Templates 2025',
-          hooks: 'Claude Hook Templates 2025',
-          commands: 'Claude Commands Templates 2025',
-          rules: 'Claude Rules & Prompts 2025',
-          statuslines: 'Claude Statusline Templates 2025',
+          agents: "Claude AI Agent Templates 2025",
+          mcp: "Claude MCP Server Templates 2025",
+          hooks: "Claude Hook Templates 2025",
+          commands: "Claude Commands Templates 2025",
+          rules: "Claude Rules & Prompts 2025",
+          statuslines: "Claude Statusline Templates 2025",
         };
 
         return (
-          categoryTitles[category as string] || context?.categoryConfig?.pluralTitle || 'Content'
+          categoryTitles[category as string] ||
+          context?.categoryConfig?.pluralTitle ||
+          "Content"
         );
       },
     },
     description: (context?: MetadataContext) =>
-      context?.categoryConfig?.metaDescription || 'Browse Claude AI configurations.',
+      context?.categoryConfig?.metaDescription ||
+      "Browse Claude AI configurations.",
     keywords: (context?: MetadataContext): string[] => {
       const keywordsStr = context?.categoryConfig?.keywords;
       return keywordsStr
-        ? keywordsStr.split(',').map((k) => k.trim())
-        : ['claude ai', 'configurations'];
+        ? keywordsStr.split(",").map((k) => k.trim())
+        : ["claude ai", "configurations"];
     },
     openGraph: {
-      type: 'website' as const,
+      type: "website" as const,
     },
     twitter: {
-      card: 'summary_large_image' as const,
+      card: "summary_large_image" as const,
     },
     structuredData: {
-      type: 'WebPage' as const,
+      type: "WebPage" as const,
       breadcrumbs: true,
       dateModified: false,
       author: false,
@@ -684,11 +726,11 @@ export const METADATA_REGISTRY = {
    * Handles: /agents/code-reviewer, /mcp/filesystem-server, etc. (138 pages)
    * Uses Article schema for better AI citations
    */
-  '/:category/:slug': {
+  "/:category/:slug": {
     title: {
-      tier: 'content' as const,
+      tier: "content" as const,
       title: (context?: MetadataContext) => {
-        if (!context?.item) return 'Item';
+        if (!context?.item) return "Item";
 
         // Prioritize seoTitle for SEO optimization (<60 chars)
         // Fall back to full title for longtail keywords
@@ -704,23 +746,25 @@ export const METADATA_REGISTRY = {
         };
         return getDisplayTitle(item);
       },
-      section: (context?: MetadataContext) => context?.categoryConfig?.title || 'Content',
+      section: (context?: MetadataContext) =>
+        context?.categoryConfig?.title || "Content",
     },
     description: (context?: MetadataContext) =>
-      context?.item?.description || 'Claude AI configuration from the community directory.',
+      context?.item?.description ||
+      "Claude AI configuration from the community directory.",
     keywords: (context?: MetadataContext): string[] => {
       const baseTags = (context?.item?.tags as string[]) || [];
       const year = new Date().getFullYear().toString();
-      return [...baseTags, 'claude ai', `claude ${year}`].slice(0, 10);
+      return [...baseTags, "claude ai", `claude ${year}`].slice(0, 10);
     },
     openGraph: {
-      type: 'article' as const,
+      type: "article" as const,
     },
     twitter: {
-      card: 'summary_large_image' as const,
+      card: "summary_large_image" as const,
     },
     structuredData: {
-      type: 'Article' as const, // Article schema for AI citations
+      type: "Article" as const, // Article schema for AI citations
       breadcrumbs: true,
       dateModified: true, // Recency signal
       author: true,
@@ -738,21 +782,21 @@ export const METADATA_REGISTRY = {
    * Guide Category Pages (/guides/:category)
    * Handles: /guides/tutorials, /guides/workflows, etc.
    */
-  '/guides/:category': {
+  "/guides/:category": {
     title: {
-      tier: 'content' as const,
+      tier: "content" as const,
       title: (context?: MetadataContext) => {
         const categoryMap: Record<string, string> = {
-          tutorials: 'Tutorials',
-          'use-cases': 'Use Cases',
-          workflows: 'Workflows',
-          comparisons: 'Comparisons',
-          troubleshooting: 'Troubleshooting',
+          tutorials: "Tutorials",
+          "use-cases": "Use Cases",
+          workflows: "Workflows",
+          comparisons: "Comparisons",
+          troubleshooting: "Troubleshooting",
         };
         const category = context?.params?.category as string;
-        return categoryMap[category] || 'Guides';
+        return categoryMap[category] || "Guides";
       },
-      section: 'Guides',
+      section: "Guides",
     },
     description: (context?: MetadataContext) => {
       const category = context?.params?.category as string;
@@ -760,16 +804,21 @@ export const METADATA_REGISTRY = {
     },
     keywords: (context?: MetadataContext): string[] => {
       const category = context?.params?.category as string;
-      return [`claude ${category}`, `ai ${category} 2025`, 'claude guides', 'ai tutorials'];
+      return [
+        `claude ${category}`,
+        `ai ${category} 2025`,
+        "claude guides",
+        "ai tutorials",
+      ];
     },
     openGraph: {
-      type: 'website' as const,
+      type: "website" as const,
     },
     twitter: {
-      card: 'summary_large_image' as const,
+      card: "summary_large_image" as const,
     },
     structuredData: {
-      type: 'WebPage' as const,
+      type: "WebPage" as const,
       breadcrumbs: true,
       dateModified: true,
       author: false,
@@ -788,29 +837,34 @@ export const METADATA_REGISTRY = {
    * Individual tutorial/guide content with Article schema
    * Prioritizes seoTitle for <title> tag, preserves full title for H1/longtail
    */
-  '/guides/:category/:slug': {
+  "/guides/:category/:slug": {
     title: {
-      tier: 'content' as const,
+      tier: "content" as const,
       title: (context?: MetadataContext) => {
         // Prioritize seoTitle for SEO optimization (<60 chars)
         // Fall back to full title for longtail keywords
         const seoTitle = (context?.item as { seoTitle?: string })?.seoTitle;
-        return seoTitle || context?.item?.title || 'Guide';
+        return seoTitle || context?.item?.title || "Guide";
       },
-      section: 'Guides',
+      section: "Guides",
     },
     description: (context?: MetadataContext) =>
-      context?.item?.description || 'Comprehensive guide for Claude AI development.',
+      context?.item?.description ||
+      "Comprehensive guide for Claude AI development.",
     keywords: (context?: MetadataContext): string[] =>
-      (context?.item?.tags as string[]) || ['claude ai', 'guide', 'tutorial 2025'],
+      (context?.item?.tags as string[]) || [
+        "claude ai",
+        "guide",
+        "tutorial 2025",
+      ],
     openGraph: {
-      type: 'article' as const,
+      type: "article" as const,
     },
     twitter: {
-      card: 'summary_large_image' as const,
+      card: "summary_large_image" as const,
     },
     structuredData: {
-      type: 'Article' as const,
+      type: "Article" as const,
       breadcrumbs: true,
       dateModified: true,
       author: true,
@@ -828,23 +882,25 @@ export const METADATA_REGISTRY = {
    * Comparison Pages (/compare/:slug)
    * Tool/feature comparison content
    */
-  '/compare/:slug': {
+  "/compare/:slug": {
     title: {
-      tier: 'content' as const,
-      title: (context?: MetadataContext) => context?.item?.title || 'Comparison',
-      section: 'Comparisons',
+      tier: "content" as const,
+      title: (context?: MetadataContext) =>
+        context?.item?.title || "Comparison",
+      section: "Comparisons",
     },
     description: (context?: MetadataContext) =>
-      context?.item?.description || 'Compare Claude AI tools and configurations.',
-    keywords: ['claude comparison', 'ai tool comparison 2025', 'claude vs'],
+      context?.item?.description ||
+      "Compare Claude AI tools and configurations.",
+    keywords: ["claude comparison", "ai tool comparison 2025", "claude vs"],
     openGraph: {
-      type: 'article' as const,
+      type: "article" as const,
     },
     twitter: {
-      card: 'summary_large_image' as const,
+      card: "summary_large_image" as const,
     },
     structuredData: {
-      type: 'Article' as const,
+      type: "Article" as const,
       breadcrumbs: true,
       dateModified: true,
       author: true,
@@ -863,27 +919,28 @@ export const METADATA_REGISTRY = {
    * Curated content collections
    * Prioritizes seoTitle for <title> tag optimization
    */
-  '/collections/:slug': {
+  "/collections/:slug": {
     title: {
-      tier: 'content' as const,
+      tier: "content" as const,
       title: (context?: MetadataContext) => {
         // Prioritize seoTitle for SEO optimization (<60 chars)
         const seoTitle = (context?.item as { seoTitle?: string })?.seoTitle;
-        return seoTitle || context?.item?.title || 'Collection';
+        return seoTitle || context?.item?.title || "Collection";
       },
-      section: 'Collections',
+      section: "Collections",
     },
     description: (context?: MetadataContext) =>
-      context?.item?.description || 'Curated collection of Claude AI tools and configurations.',
-    keywords: ['claude collection', 'curated ai tools 2025', 'claude toolkit'],
+      context?.item?.description ||
+      "Curated collection of Claude AI tools and configurations.",
+    keywords: ["claude collection", "curated ai tools 2025", "claude toolkit"],
     openGraph: {
-      type: 'website' as const,
+      type: "website" as const,
     },
     twitter: {
-      card: 'summary_large_image' as const,
+      card: "summary_large_image" as const,
     },
     structuredData: {
-      type: 'CollectionPage' as const,
+      type: "CollectionPage" as const,
       breadcrumbs: true,
       dateModified: true,
       author: true,
@@ -901,23 +958,28 @@ export const METADATA_REGISTRY = {
    * Job Posting Pages (/jobs/:slug)
    * Individual job listings
    */
-  '/jobs/:slug': {
+  "/jobs/:slug": {
     title: {
-      tier: 'content' as const,
-      title: (context?: MetadataContext) => context?.item?.title || 'Job',
-      section: 'AI Jobs',
+      tier: "content" as const,
+      title: (context?: MetadataContext) => context?.item?.title || "Job",
+      section: "AI Jobs",
     },
     description: (context?: MetadataContext) =>
-      context?.item?.description || 'AI job opportunity in machine learning and development.',
-    keywords: ['ai jobs 2025', 'machine learning careers', 'claude ai positions'],
+      context?.item?.description ||
+      "AI job opportunity in machine learning and development.",
+    keywords: [
+      "ai jobs 2025",
+      "machine learning careers",
+      "claude ai positions",
+    ],
     openGraph: {
-      type: 'website' as const,
+      type: "website" as const,
     },
     twitter: {
-      card: 'summary_large_image' as const,
+      card: "summary_large_image" as const,
     },
     structuredData: {
-      type: 'JobPosting' as const,
+      type: "JobPosting" as const,
       breadcrumbs: true,
       dateModified: true,
       author: false,
@@ -937,4 +999,5 @@ export const METADATA_REGISTRY = {
  * Ensures all route configurations are valid
  */
 export type MetadataRegistryKey = keyof typeof METADATA_REGISTRY;
-export type MetadataRegistryValue = (typeof METADATA_REGISTRY)[MetadataRegistryKey];
+export type MetadataRegistryValue =
+  (typeof METADATA_REGISTRY)[MetadataRegistryKey];

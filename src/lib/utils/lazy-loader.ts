@@ -3,8 +3,11 @@
  * Optimizes memory usage by loading data only when needed
  */
 
-import { logger } from '@/src/lib/logger';
-import type { LazyLoadedData, LazyLoaderOptions } from '@/src/lib/schemas/app.schema';
+import { logger } from "@/src/lib/logger";
+import type {
+  LazyLoadedData,
+  LazyLoaderOptions,
+} from "@/src/lib/schemas/app.schema";
 
 /**
  * Creates a lazy-loaded data wrapper that loads data only when accessed
@@ -18,7 +21,7 @@ export class LazyLoader<T> {
 
   constructor(
     private loader: () => Promise<T>,
-    private options: LazyLoaderOptions<T> = {}
+    private options: LazyLoaderOptions<T> = {},
   ) {
     if (options.preload) {
       this.load().catch(() => {
@@ -63,7 +66,7 @@ export class LazyLoader<T> {
       })
       .catch((error) => {
         const err = error instanceof Error ? error : new Error(String(error));
-        logger.error('Lazy loader failed', err);
+        logger.error("Lazy loader failed", err);
         this.options.onError?.(err);
         this.cache.loadPromise = null;
         throw err;
@@ -122,11 +125,11 @@ export function createLazyModule<T>(
   options?: {
     preload?: boolean;
     cacheTimeout?: number;
-  }
+  },
 ): LazyLoader<T> {
   return new LazyLoader(async () => {
     const module = await importFn();
-    if (module && typeof module === 'object' && 'default' in module) {
+    if (module && typeof module === "object" && "default" in module) {
       return module.default;
     }
     return module as T;
@@ -144,7 +147,7 @@ export class BatchLazyLoader<T extends Record<string, unknown>> {
     options?: {
       preloadKeys?: (keyof T)[];
       cacheTimeout?: number;
-    }
+    },
   ) {
     // Initialize loaders
     for (const [key, loader] of Object.entries(loaderMap) as Array<
@@ -156,7 +159,8 @@ export class BatchLazyLoader<T extends Record<string, unknown>> {
         cacheTimeout?: number;
       } = {};
       if (shouldPreload) loaderOptions.preload = true;
-      if (options?.cacheTimeout !== undefined) loaderOptions.cacheTimeout = options.cacheTimeout;
+      if (options?.cacheTimeout !== undefined)
+        loaderOptions.cacheTimeout = options.cacheTimeout;
 
       this.loaders.set(key, new LazyLoader(loader, loaderOptions));
     }
@@ -177,7 +181,9 @@ export class BatchLazyLoader<T extends Record<string, unknown>> {
    * Get multiple keys at once
    */
   async getMany<K extends keyof T>(keys: K[]): Promise<Pick<T, K>> {
-    const results = await Promise.all(keys.map(async (key) => [key, await this.get(key)] as const));
+    const results = await Promise.all(
+      keys.map(async (key) => [key, await this.get(key)] as const),
+    );
 
     return Object.fromEntries(results) as Pick<T, K>;
   }
@@ -219,7 +225,7 @@ export class PaginatedLazyLoader<T> {
       pageSize: number;
       maxCachedPages?: number;
       totalItems?: number;
-    }
+    },
   ) {}
 
   /**
@@ -279,7 +285,10 @@ export class PaginatedLazyLoader<T> {
    * Enforce maximum cached pages limit
    */
   private enforcePageLimit(): void {
-    if (!this.options.maxCachedPages || this.pages.size <= this.options.maxCachedPages) {
+    if (
+      !this.options.maxCachedPages ||
+      this.pages.size <= this.options.maxCachedPages
+    ) {
       return;
     }
 
@@ -311,7 +320,10 @@ export class PaginatedLazyLoader<T> {
     loadingPages: number;
     cachedItems: number;
   } {
-    const cachedItems = Array.from(this.pages.values()).reduce((sum, page) => sum + page.length, 0);
+    const cachedItems = Array.from(this.pages.values()).reduce(
+      (sum, page) => sum + page.length,
+      0,
+    );
 
     return {
       cachedPages: this.pages.size,

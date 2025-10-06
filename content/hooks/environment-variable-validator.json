@@ -5,7 +5,13 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-16",
-  "tags": ["environment", "configuration", "validation", "deployment", "security"],
+  "tags": [
+    "environment",
+    "configuration",
+    "validation",
+    "deployment",
+    "security"
+  ],
   "hookType": "PostToolUse",
   "features": [
     "Automatic validation when .env files are modified",

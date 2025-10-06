@@ -20,9 +20,15 @@ import {
   Preview,
   Section,
   Text,
-} from '@react-email/components';
-import type * as React from 'react';
-import { borderRadius, brandColors, emailTheme, spacing, typography } from '../utils/theme';
+} from "@react-email/components";
+import type * as React from "react";
+import {
+  borderRadius,
+  brandColors,
+  emailTheme,
+  spacing,
+  typography,
+} from "../utils/theme";
 
 export interface BaseLayoutProps {
   /**
@@ -93,8 +99,11 @@ export function BaseLayout({
               {customFooter || (
                 <Section style={footerStyle}>
                   <Text style={footerTextStyle}>
-                    You received this email because you subscribed to{' '}
-                    <Link href="https://claudepro.directory" style={footerLinkStyle}>
+                    You received this email because you subscribed to{" "}
+                    <Link
+                      href="https://claudepro.directory"
+                      style={footerLinkStyle}
+                    >
                       ClaudePro Directory
                     </Link>
                     .
@@ -103,17 +112,21 @@ export function BaseLayout({
                     <Link href="{{unsubscribe_url}}" style={footerLinkStyle}>
                       Unsubscribe
                     </Link>
-                    {' · '}
+                    {" · "}
                     <Link href="{{preferences_url}}" style={footerLinkStyle}>
                       Email Preferences
                     </Link>
-                    {' · '}
-                    <Link href="https://claudepro.directory/privacy" style={footerLinkStyle}>
+                    {" · "}
+                    <Link
+                      href="https://claudepro.directory/privacy"
+                      style={footerLinkStyle}
+                    >
                       Privacy Policy
                     </Link>
                   </Text>
                   <Text style={footerCopyrightStyle}>
-                    © {new Date().getFullYear()} ClaudePro Directory. All rights reserved.
+                    © {new Date().getFullYear()} ClaudePro Directory. All
+                    rights reserved.
                   </Text>
                 </Section>
               )}
@@ -138,29 +151,29 @@ const bodyStyle: React.CSSProperties = {
   color: emailTheme.textPrimary,
   margin: 0,
   padding: 0,
-  width: '100%',
+  width: "100%",
 };
 
 const containerStyle: React.CSSProperties = {
-  maxWidth: '600px',
-  margin: '0 auto',
+  maxWidth: "600px",
+  margin: "0 auto",
   padding: `${spacing.lg} ${spacing.md}`,
 };
 
 const headerStyle: React.CSSProperties = {
   paddingBottom: spacing.lg,
-  textAlign: 'center',
+  textAlign: "center",
 };
 
 const logoLinkStyle: React.CSSProperties = {
-  textDecoration: 'none',
-  display: 'inline-block',
+  textDecoration: "none",
+  display: "inline-block",
 };
 
 const logoTextStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['2xl'],
+  fontSize: typography.fontSize["2xl"],
   fontWeight: typography.fontWeight.bold,
-  letterSpacing: '-0.02em',
+  letterSpacing: "-0.02em",
   margin: 0,
 };
 
@@ -194,19 +207,19 @@ const footerTextStyle: React.CSSProperties = {
   color: emailTheme.textSecondary,
   lineHeight: typography.lineHeight.relaxed,
   margin: `${spacing.sm} 0`,
-  textAlign: 'center' as const,
+  textAlign: "center" as const,
 };
 
 const footerLinkStyle: React.CSSProperties = {
   color: brandColors.primary,
-  textDecoration: 'none',
+  textDecoration: "none",
 };
 
 const footerCopyrightStyle: React.CSSProperties = {
   fontSize: typography.fontSize.xs,
   color: emailTheme.textTertiary,
   marginTop: spacing.md,
-  textAlign: 'center' as const,
+  textAlign: "center" as const,
 };
 
 /**

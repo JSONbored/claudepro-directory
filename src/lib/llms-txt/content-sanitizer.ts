@@ -6,8 +6,8 @@
  * @security PII protection, data privacy, content safety
  */
 
-import { z } from 'zod';
-import { logger } from '@/src/lib/logger';
+import { z } from "zod";
+import { logger } from "@/src/lib/logger";
 
 /**
  * Schema for content sanitization options
@@ -15,19 +15,40 @@ import { logger } from '@/src/lib/logger';
  */
 const sanitizationOptionsSchema = z
   .object({
-    removeEmails: z.boolean().default(true).describe('Remove email addresses from content'),
-    removePhones: z.boolean().default(true).describe('Remove phone numbers from content'),
-    removeIPs: z.boolean().default(true).describe('Remove IP addresses from content'),
-    removeAPIKeys: z.boolean().default(true).describe('Remove API keys and tokens'),
-    removeSSNs: z.boolean().default(true).describe('Remove Social Security Numbers'),
-    removeCreditCards: z.boolean().default(true).describe('Remove credit card numbers'),
-    removePrivateKeys: z.boolean().default(true).describe('Remove private cryptographic keys'),
+    removeEmails: z
+      .boolean()
+      .default(true)
+      .describe("Remove email addresses from content"),
+    removePhones: z
+      .boolean()
+      .default(true)
+      .describe("Remove phone numbers from content"),
+    removeIPs: z
+      .boolean()
+      .default(true)
+      .describe("Remove IP addresses from content"),
+    removeAPIKeys: z
+      .boolean()
+      .default(true)
+      .describe("Remove API keys and tokens"),
+    removeSSNs: z
+      .boolean()
+      .default(true)
+      .describe("Remove Social Security Numbers"),
+    removeCreditCards: z
+      .boolean()
+      .default(true)
+      .describe("Remove credit card numbers"),
+    removePrivateKeys: z
+      .boolean()
+      .default(true)
+      .describe("Remove private cryptographic keys"),
     replaceWithPlaceholder: z
       .boolean()
       .default(false)
-      .describe('Replace sensitive data with [REDACTED] instead of removing'),
+      .describe("Replace sensitive data with [REDACTED] instead of removing"),
   })
-  .describe('Options for content sanitization');
+  .describe("Options for content sanitization");
 
 /**
  * Type exports
@@ -54,7 +75,8 @@ const PII_PATTERNS = {
   ipv6: /\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b|\b::(?:[0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4}\b/g,
 
   // API keys and tokens (common patterns)
-  apiKey: /\b(?:api[_-]?key|token|secret|password|passwd|pwd)[=:\s]*["']?([a-zA-Z0-9_-]{20,})\b/gi,
+  apiKey:
+    /\b(?:api[_-]?key|token|secret|password|passwd|pwd)[=:\s]*["']?([a-zA-Z0-9_-]{20,})\b/gi,
 
   // Generic tokens/keys (40+ hex chars or base64 patterns)
   genericToken: /\b[a-f0-9]{40,}\b|\b[A-Za-z0-9+/]{40,}={0,2}\b/g,
@@ -87,10 +109,12 @@ const WHITELIST_PATTERNS = {
   exampleDomains: /@(?:example\.com|example\.org|test\.com|localhost)/i,
 
   // Documentation URLs with localhost/example IPs
-  docIPs: /\b(?:127\.0\.0\.1|0\.0\.0\.0|localhost|192\.168\.x\.x|10\.x\.x\.x)\b/i,
+  docIPs:
+    /\b(?:127\.0\.0\.1|0\.0\.0\.0|localhost|192\.168\.x\.x|10\.x\.x\.x)\b/i,
 
   // Public documentation email examples
-  docEmails: /@(?:company\.com|domain\.com|yourcompany\.com|yourdomain\.com)\b/i,
+  docEmails:
+    /@(?:company\.com|domain\.com|yourcompany\.com|yourdomain\.com)\b/i,
 } as const;
 
 /**
@@ -99,7 +123,9 @@ const WHITELIST_PATTERNS = {
  * @returns true if text should be whitelisted (not sanitized)
  */
 function isWhitelisted(text: string): boolean {
-  return Object.values(WHITELIST_PATTERNS).some((pattern) => pattern.test(text));
+  return Object.values(WHITELIST_PATTERNS).some((pattern) =>
+    pattern.test(text),
+  );
 }
 
 /**
@@ -114,7 +140,7 @@ function sanitizeEmails(text: string, replace: boolean): string {
     if (isWhitelisted(match)) {
       return match;
     }
-    return replace ? '[EMAIL_REDACTED]' : '';
+    return replace ? "[EMAIL_REDACTED]" : "";
   });
 }
 
@@ -126,7 +152,7 @@ function sanitizeEmails(text: string, replace: boolean): string {
  */
 function sanitizePhones(text: string, replace: boolean): string {
   return text.replace(PII_PATTERNS.phone, () => {
-    return replace ? '[PHONE_REDACTED]' : '';
+    return replace ? "[PHONE_REDACTED]" : "";
   });
 }
 
@@ -144,8 +170,12 @@ function sanitizeIPs(text: string, replace: boolean): string {
     return text;
   }
 
-  result = result.replace(PII_PATTERNS.ipv4, () => (replace ? '[IP_REDACTED]' : ''));
-  result = result.replace(PII_PATTERNS.ipv6, () => (replace ? '[IP_REDACTED]' : ''));
+  result = result.replace(PII_PATTERNS.ipv4, () =>
+    replace ? "[IP_REDACTED]" : "",
+  );
+  result = result.replace(PII_PATTERNS.ipv6, () =>
+    replace ? "[IP_REDACTED]" : "",
+  );
 
   return result;
 }
@@ -161,22 +191,22 @@ function sanitizeAPIKeys(text: string, replace: boolean): string {
 
   result = result.replace(PII_PATTERNS.apiKey, (match, key) => {
     // If it's a pattern like "api_key=..." keep the prefix
-    if (replace && match.includes('=')) {
+    if (replace && match.includes("=")) {
       return `${match.substring(0, match.indexOf(key))}[REDACTED]`;
     }
-    return replace ? '[API_KEY_REDACTED]' : '';
+    return replace ? "[API_KEY_REDACTED]" : "";
   });
 
   result = result.replace(PII_PATTERNS.genericToken, () => {
-    return replace ? '[TOKEN_REDACTED]' : '';
+    return replace ? "[TOKEN_REDACTED]" : "";
   });
 
   result = result.replace(PII_PATTERNS.awsKey, () => {
-    return replace ? '[AWS_KEY_REDACTED]' : '';
+    return replace ? "[AWS_KEY_REDACTED]" : "";
   });
 
   result = result.replace(PII_PATTERNS.jwt, () => {
-    return replace ? '[JWT_REDACTED]' : '';
+    return replace ? "[JWT_REDACTED]" : "";
   });
 
   return result;
@@ -190,7 +220,7 @@ function sanitizeAPIKeys(text: string, replace: boolean): string {
  */
 function sanitizeSSNs(text: string, replace: boolean): string {
   return text.replace(PII_PATTERNS.ssn, () => {
-    return replace ? '[SSN_REDACTED]' : '';
+    return replace ? "[SSN_REDACTED]" : "";
   });
 }
 
@@ -202,7 +232,7 @@ function sanitizeSSNs(text: string, replace: boolean): string {
  */
 function sanitizeCreditCards(text: string, replace: boolean): string {
   return text.replace(PII_PATTERNS.creditCard, () => {
-    return replace ? '[CARD_REDACTED]' : '';
+    return replace ? "[CARD_REDACTED]" : "";
   });
 }
 
@@ -214,7 +244,7 @@ function sanitizeCreditCards(text: string, replace: boolean): string {
  */
 function sanitizePrivateKeys(text: string, replace: boolean): string {
   return text.replace(PII_PATTERNS.privateKey, () => {
-    return replace ? '[PRIVATE_KEY_REDACTED]' : '';
+    return replace ? "[PRIVATE_KEY_REDACTED]" : "";
   });
 }
 
@@ -244,7 +274,10 @@ function sanitizePrivateKeys(text: string, replace: boolean): string {
  * // "Contact us at support@example.com or call"
  * ```
  */
-export function sanitizeContent(content: string, options?: Partial<SanitizationOptions>): string {
+export function sanitizeContent(
+  content: string,
+  options?: Partial<SanitizationOptions>,
+): string {
   try {
     // Validate and merge options
     const opts = sanitizationOptionsSchema.parse(options || {});
@@ -282,27 +315,30 @@ export function sanitizeContent(content: string, options?: Partial<SanitizationO
 
     // Clean up multiple consecutive redactions
     if (opts.replaceWithPlaceholder) {
-      sanitized = sanitized.replace(/(\[.*?_REDACTED\]\s*){2,}/g, '[REDACTED] ');
+      sanitized = sanitized.replace(
+        /(\[.*?_REDACTED\]\s*){2,}/g,
+        "[REDACTED] ",
+      );
     }
 
     // Clean up extra whitespace left by removals
     sanitized = sanitized
-      .replace(/ {2,}/g, ' ')
-      .replace(/\n{3,}/g, '\n\n')
+      .replace(/ {2,}/g, " ")
+      .replace(/\n{3,}/g, "\n\n")
       .trim();
 
     return sanitized;
   } catch (error) {
     logger.error(
-      'Failed to sanitize content',
+      "Failed to sanitize content",
       error instanceof Error ? error : new Error(String(error)),
       {
         contentLength: content?.length || 0,
         hasOptions: !!options,
-      }
+      },
     );
     // In case of error, return empty string (fail secure)
-    return '';
+    return "";
   }
 }
 
@@ -357,7 +393,7 @@ export function detectPII(content: string): {
   };
 
   detection.hasPII = Object.entries(detection).some(
-    ([key, value]) => key !== 'hasPII' && value === true
+    ([key, value]) => key !== "hasPII" && value === true,
   );
 
   return detection;

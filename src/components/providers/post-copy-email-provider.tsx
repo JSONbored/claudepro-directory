@@ -13,10 +13,20 @@
  * @module components/providers/post-copy-email-provider
  */
 
-'use client';
+"use client";
 
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { type CopyType, PostCopyEmailModal } from '@/src/components/shared/post-copy-email-modal';
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import {
+  type CopyType,
+  PostCopyEmailModal,
+} from "@/src/components/shared/post-copy-email-modal";
 
 /**
  * Modal context data structure
@@ -46,17 +56,19 @@ interface PostCopyEmailContextValue {
 /**
  * LocalStorage key for tracking dismissals
  */
-const STORAGE_KEY = 'post-copy-email-modal-dismissed';
+const STORAGE_KEY = "post-copy-email-modal-dismissed";
 
 /**
  * Session storage key for tracking if shown this session
  */
-const SESSION_KEY = 'post-copy-email-modal-shown';
+const SESSION_KEY = "post-copy-email-modal-shown";
 
 /**
  * Create context with undefined default (must use provider)
  */
-const PostCopyEmailContext = createContext<PostCopyEmailContextValue | undefined>(undefined);
+const PostCopyEmailContext = createContext<
+  PostCopyEmailContextValue | undefined
+>(undefined);
 
 /**
  * Props for PostCopyEmailProvider
@@ -90,7 +102,9 @@ interface PostCopyEmailProviderProps {
  * }
  * ```
  */
-export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) {
+export function PostCopyEmailProvider({
+  children,
+}: PostCopyEmailProviderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [modalContext, setModalContext] = useState<ModalContext | null>(null);
   const [hasShownThisSession, setHasShownThisSession] = useState(false);
@@ -98,7 +112,7 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
   // Check if modal has been shown this session on mount
   useEffect(() => {
     const shown = sessionStorage.getItem(SESSION_KEY);
-    if (shown === 'true') {
+    if (shown === "true") {
       setHasShownThisSession(true);
     }
   }, []);
@@ -115,7 +129,7 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
 
       // Check if user has dismissed permanently (localStorage)
       const dismissed = localStorage.getItem(STORAGE_KEY);
-      if (dismissed === 'true') {
+      if (dismissed === "true") {
         return;
       }
 
@@ -123,9 +137,9 @@ export function PostCopyEmailProvider({ children }: PostCopyEmailProviderProps) 
       setModalContext(context);
       setIsOpen(true);
       setHasShownThisSession(true);
-      sessionStorage.setItem(SESSION_KEY, 'true');
+      sessionStorage.setItem(SESSION_KEY, "true");
     },
-    [hasShownThisSession]
+    [hasShownThisSession],
   );
 
   /**
@@ -183,7 +197,9 @@ export function usePostCopyEmail(): PostCopyEmailContextValue {
   const context = useContext(PostCopyEmailContext);
 
   if (context === undefined) {
-    throw new Error('usePostCopyEmail must be used within PostCopyEmailProvider');
+    throw new Error(
+      "usePostCopyEmail must be used within PostCopyEmailProvider",
+    );
   }
 
   return context;

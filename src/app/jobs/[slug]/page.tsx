@@ -1,10 +1,15 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { jobs } from '@/src/lib/data/jobs';
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Badge } from "@/src/components/ui/badge";
+import { Button } from "@/src/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
+import { jobs } from "@/src/lib/data/jobs";
 import {
   ArrowLeft,
   Building2,
@@ -14,18 +19,20 @@ import {
   ExternalLink,
   MapPin,
   Users,
-} from '@/src/lib/icons';
-import { logger } from '@/src/lib/logger';
-import type { PageProps } from '@/src/lib/schemas/app.schema';
-import { slugParamsSchema } from '@/src/lib/schemas/app.schema';
-import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+} from "@/src/lib/icons";
+import { logger } from "@/src/lib/logger";
+import type { PageProps } from "@/src/lib/schemas/app.schema";
+import { slugParamsSchema } from "@/src/lib/schemas/app.schema";
+import { generatePageMetadata } from "@/src/lib/seo/metadata-generator";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   if (!params) {
     return {
-      title: 'Job Not Found',
-      description: 'The requested job posting could not be found.',
+      title: "Job Not Found",
+      description: "The requested job posting could not be found.",
     };
   }
 
@@ -35,14 +42,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const validationResult = slugParamsSchema.safeParse(rawParams);
 
   if (!validationResult.success) {
-    logger.warn('Invalid slug parameter for job metadata', {
+    logger.warn("Invalid slug parameter for job metadata", {
       slug: String(rawParams.slug),
       errorCount: validationResult.error.issues.length,
-      firstError: validationResult.error.issues[0]?.message || 'Unknown error',
+      firstError: validationResult.error.issues[0]?.message || "Unknown error",
     });
     return {
-      title: 'Job Not Found',
-      description: 'The requested job posting could not be found.',
+      title: "Job Not Found",
+      description: "The requested job posting could not be found.",
     };
   }
 
@@ -51,14 +58,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!job) {
     return {
-      title: 'Job Not Found',
-      description: 'The requested job posting could not be found.',
+      title: "Job Not Found",
+      description: "The requested job posting could not be found.",
     };
   }
 
   // Use centralized metadata system with JobPosting schema
   // Job pages use special structured data for job search engines
-  return await generatePageMetadata('/jobs/:slug', {
+  return await generatePageMetadata("/jobs/:slug", {
     params: { slug },
     item: {
       title: `${job.title} at ${job.company}`,
@@ -89,19 +96,19 @@ export default async function JobPage({ params }: PageProps) {
 
   if (!validationResult.success) {
     logger.error(
-      'Invalid slug parameter for job page',
-      new Error(validationResult.error.issues[0]?.message || 'Invalid slug'),
+      "Invalid slug parameter for job page",
+      new Error(validationResult.error.issues[0]?.message || "Invalid slug"),
       {
         slug: String(rawParams.slug),
         errorCount: validationResult.error.issues.length,
-      }
+      },
     );
     notFound();
   }
 
   const { slug } = validationResult.data;
 
-  logger.info('Job page accessed', {
+  logger.info("Job page accessed", {
     slug: slug,
     validated: true,
   });
@@ -115,7 +122,9 @@ export default async function JobPage({ params }: PageProps) {
   return (
     <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
       {/* Header */}
-      <div className={`${UI_CLASSES.BORDER_B} border-border/50 ${UI_CLASSES.BG_CARD}/30`}>
+      <div
+        className={`${UI_CLASSES.BORDER_B} border-border/50 ${UI_CLASSES.BG_CARD}/30`}
+      >
         <div className="container mx-auto px-4 py-8">
           <Button variant="ghost" asChild className={UI_CLASSES.MB_6}>
             <Link href="/jobs">
@@ -126,12 +135,16 @@ export default async function JobPage({ params }: PageProps) {
 
           <div className={UI_CLASSES.MAX_W_4XL}>
             <div className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} gap-4 mb-6`}>
-              <div className={`p-3 ${UI_CLASSES.BG_ACCENT_10} ${UI_CLASSES.ROUNDED_LG}`}>
+              <div
+                className={`p-3 ${UI_CLASSES.BG_ACCENT_10} ${UI_CLASSES.ROUNDED_LG}`}
+              >
                 <Building2 className="h-6 w-6 text-primary" />
               </div>
               <div className="flex-1">
                 <h1 className="text-3xl font-bold mb-2">{job.title}</h1>
-                <p className={`${UI_CLASSES.TEXT_XL} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                <p
+                  className={`${UI_CLASSES.TEXT_XL} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
+                >
                   {job.company}
                 </p>
               </div>
@@ -145,7 +158,7 @@ export default async function JobPage({ params }: PageProps) {
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                 <DollarSign className="h-4 w-4" />
-                <span>{job.salary || 'Competitive'}</span>
+                <span>{job.salary || "Competitive"}</span>
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                 <Clock className="h-4 w-4" />
@@ -184,7 +197,9 @@ export default async function JobPage({ params }: PageProps) {
                 <CardTitle>About this role</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>{job.description}</p>
+                <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+                  {job.description}
+                </p>
               </CardContent>
             </Card>
 
@@ -214,7 +229,10 @@ export default async function JobPage({ params }: PageProps) {
                 <CardContent>
                   <ul className={UI_CLASSES.SPACE_Y_2}>
                     {job.benefits.map((benefit) => (
-                      <li key={benefit} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+                      <li
+                        key={benefit}
+                        className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}
+                      >
                         <span className="text-green-500 mt-1">✓</span>
                         <span>{benefit}</span>
                       </li>
@@ -234,13 +252,21 @@ export default async function JobPage({ params }: PageProps) {
               </CardHeader>
               <CardContent className={UI_CLASSES.SPACE_Y_2}>
                 <Button className={UI_CLASSES.W_FULL} asChild>
-                  <a href={job.applyUrl} target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={job.applyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <ExternalLink className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />
                     Apply Now
                   </a>
                 </Button>
                 {job.contactEmail && (
-                  <Button variant="outline" className={UI_CLASSES.W_FULL} asChild>
+                  <Button
+                    variant="outline"
+                    className={UI_CLASSES.W_FULL}
+                    asChild
+                  >
                     <a href={`mailto:${job.contactEmail}`}>
                       <Building2 className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />
                       Contact Company
@@ -256,17 +282,34 @@ export default async function JobPage({ params }: PageProps) {
                 <CardTitle>Job Details</CardTitle>
               </CardHeader>
               <CardContent className={UI_CLASSES.SPACE_Y_2}>
-                <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_SM}`}>
-                  <Clock className={`h-4 w-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`} />
-                  <span>{job.type.charAt(0).toUpperCase() + job.type.slice(1)}</span>
+                <div
+                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_SM}`}
+                >
+                  <Clock
+                    className={`h-4 w-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
+                  />
+                  <span>
+                    {job.type.charAt(0).toUpperCase() + job.type.slice(1)}
+                  </span>
                 </div>
-                <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_SM}`}>
-                  <MapPin className={`h-4 w-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`} />
-                  <span>{job.remote ? 'Remote Available' : 'On-site'}</span>
+                <div
+                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_SM}`}
+                >
+                  <MapPin
+                    className={`h-4 w-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
+                  />
+                  <span>{job.remote ? "Remote Available" : "On-site"}</span>
                 </div>
-                <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_SM}`}>
-                  <Users className={`h-4 w-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`} />
-                  <span>{job.category.charAt(0).toUpperCase() + job.category.slice(1)}</span>
+                <div
+                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_SM}`}
+                >
+                  <Users
+                    className={`h-4 w-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
+                  />
+                  <span>
+                    {job.category.charAt(0).toUpperCase() +
+                      job.category.slice(1)}
+                  </span>
                 </div>
               </CardContent>
             </Card>

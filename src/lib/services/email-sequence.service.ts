@@ -14,10 +14,10 @@
  * @module lib/services/email-sequence.service
  */
 
-import type { ReactElement } from 'react';
-import { logger } from '@/src/lib/logger';
-import { redisClient } from '@/src/lib/redis';
-import { resendService } from '@/src/lib/services/resend.service';
+import type { ReactElement } from "react";
+import { logger } from "@/src/lib/logger";
+import { redisClient } from "@/src/lib/redis";
+import { resendService } from "@/src/lib/services/resend.service";
 
 /**
  * Email sequence state
@@ -29,7 +29,7 @@ export interface EmailSequence {
   totalSteps: number;
   startedAt: string; // ISO date
   lastSentAt: string | null; // ISO date
-  status: 'active' | 'completed' | 'cancelled';
+  status: "active" | "completed" | "cancelled";
 }
 
 /**
@@ -48,21 +48,21 @@ const SEQUENCE_DELAYS = {
  */
 const TEMPLATE_LOADERS = {
   step1: null, // Welcome email already sent on signup
-  step2: () => import('@/src/emails/templates/onboarding-getting-started'),
-  step3: () => import('@/src/emails/templates/onboarding-power-tips'),
-  step4: () => import('@/src/emails/templates/onboarding-community'),
-  step5: () => import('@/src/emails/templates/onboarding-stay-engaged'),
+  step2: () => import("@/src/emails/templates/onboarding-getting-started"),
+  step3: () => import("@/src/emails/templates/onboarding-power-tips"),
+  step4: () => import("@/src/emails/templates/onboarding-community"),
+  step5: () => import("@/src/emails/templates/onboarding-stay-engaged"),
 } as const;
 
 /**
  * Email subjects for each step
  */
 const STEP_SUBJECTS = {
-  step1: '', // Welcome email
-  step2: 'Getting Started with ClaudePro Directory',
-  step3: 'Power User Tips for Claude',
-  step4: 'Join the ClaudePro Community',
-  step5: 'Stay Engaged with ClaudePro',
+  step1: "", // Welcome email
+  step2: "Getting Started with ClaudePro Directory",
+  step3: "Power User Tips for Claude",
+  step4: "Join the ClaudePro Community",
+  step5: "Stay Engaged with ClaudePro",
 } as const;
 
 /**
@@ -71,7 +71,7 @@ const STEP_SUBJECTS = {
  * Singleton service for managing email sequences.
  */
 class EmailSequenceService {
-  private readonly SEQUENCE_ID = 'onboarding';
+  private readonly SEQUENCE_ID = "onboarding";
 
   /**
    * Enroll subscriber in onboarding sequence
@@ -88,7 +88,7 @@ class EmailSequenceService {
         totalSteps: 5,
         startedAt: new Date().toISOString(),
         lastSentAt: new Date().toISOString(), // Welcome just sent
-        status: 'active',
+        status: "active",
       };
 
       const key = `email_sequence:${this.SEQUENCE_ID}:${email}`;
@@ -107,20 +107,22 @@ class EmailSequenceService {
           });
         },
         () => {
-          logger.error('Failed to enroll in email sequence', undefined, { email });
+          logger.error("Failed to enroll in email sequence", undefined, {
+            email,
+          });
         },
-        'email_sequence_enroll'
+        "email_sequence_enroll",
       );
 
-      logger.info('Enrolled in email sequence', {
+      logger.info("Enrolled in email sequence", {
         email,
         sequenceId: this.SEQUENCE_ID,
       });
     } catch (error) {
       logger.error(
-        'Email sequence enrollment error',
+        "Email sequence enrollment error",
         error instanceof Error ? error : new Error(String(error)),
-        { email }
+        { email },
       );
     }
   }
@@ -149,7 +151,7 @@ class EmailSequenceService {
             });
           },
           () => [],
-          'email_sequence_get_due'
+          "email_sequence_get_due",
         );
 
         if (dueEmails.length === 0) continue;
@@ -173,13 +175,13 @@ class EmailSequenceService {
               () => {
                 // Silent fallback - already logged in main error handler
               },
-              'email_sequence_remove_due'
+              "email_sequence_remove_due",
             );
 
             // Rate limit: 100ms delay between emails
             await new Promise((resolve) => setTimeout(resolve, 100));
           } catch (error) {
-            logger.error('Failed to send sequence email', undefined, {
+            logger.error("Failed to send sequence email", undefined, {
               email,
               step,
               error: error instanceof Error ? error.message : String(error),
@@ -189,7 +191,7 @@ class EmailSequenceService {
         }
       }
 
-      logger.info('Email sequence processing completed', {
+      logger.info("Email sequence processing completed", {
         sent: sentCount,
         failed: failedCount,
         sequenceId: this.SEQUENCE_ID,
@@ -198,9 +200,9 @@ class EmailSequenceService {
       return { sent: sentCount, failed: failedCount };
     } catch (error) {
       logger.error(
-        'Email sequence queue processing failed',
+        "Email sequence queue processing failed",
         error instanceof Error ? error : new Error(String(error)),
-        { sequenceId: this.SEQUENCE_ID }
+        { sequenceId: this.SEQUENCE_ID },
       );
       return { sent: sentCount, failed: failedCount };
     }
@@ -222,11 +224,11 @@ class EmailSequenceService {
         return data ? (JSON.parse(data as string) as EmailSequence) : null;
       },
       () => null,
-      'email_sequence_get'
+      "email_sequence_get",
     );
 
-    if (!sequenceData || sequenceData.status !== 'active') {
-      logger.warn('Sequence not active or not found', { email, step });
+    if (!sequenceData || sequenceData.status !== "active") {
+      logger.warn("Sequence not active or not found", { email, step });
       return;
     }
 
@@ -253,15 +255,20 @@ class EmailSequenceService {
 
     // Send email
     const subjectKey = `step${step}` as keyof typeof STEP_SUBJECTS;
-    const result = await resendService.sendEmail(email, STEP_SUBJECTS[subjectKey], element, {
-      tags: [
-        { name: 'template', value: 'onboarding_sequence' },
-        { name: 'step', value: step.toString() },
-      ],
-    });
+    const result = await resendService.sendEmail(
+      email,
+      STEP_SUBJECTS[subjectKey],
+      element,
+      {
+        tags: [
+          { name: "template", value: "onboarding_sequence" },
+          { name: "step", value: step.toString() },
+        ],
+      },
+    );
 
     if (!result.success) {
-      throw new Error(result.error || 'Email send failed');
+      throw new Error(result.error || "Email send failed");
     }
 
     // Update sequence state
@@ -269,7 +276,7 @@ class EmailSequenceService {
       ...sequenceData,
       currentStep: step,
       lastSentAt: new Date().toISOString(),
-      status: step === 5 ? 'completed' : 'active',
+      status: step === 5 ? "completed" : "active",
     };
 
     await redisClient.executeOperation(
@@ -285,22 +292,28 @@ class EmailSequenceService {
           const delay = SEQUENCE_DELAYS[delayKey];
           const dueAt = Date.now() + delay * 1000;
 
-          await redis.zadd(`email_sequence:due:${this.SEQUENCE_ID}:${nextStep}`, {
-            score: dueAt,
-            member: email,
-          });
+          await redis.zadd(
+            `email_sequence:due:${this.SEQUENCE_ID}:${nextStep}`,
+            {
+              score: dueAt,
+              member: email,
+            },
+          );
         }
       },
       () => {
-        logger.error('Failed to update sequence state', undefined, { email, step });
+        logger.error("Failed to update sequence state", undefined, {
+          email,
+          step,
+        });
       },
-      'email_sequence_update'
+      "email_sequence_update",
     );
 
-    logger.info('Sequence email sent', {
+    logger.info("Sequence email sent", {
       email,
       step,
-      emailId: result.emailId ?? 'unknown',
+      emailId: result.emailId ?? "unknown",
       sequenceId: this.SEQUENCE_ID,
     });
   }
@@ -319,7 +332,7 @@ class EmailSequenceService {
           const data = await redis.get(key);
           if (data) {
             const sequence: EmailSequence = JSON.parse(data as string);
-            sequence.status = 'cancelled';
+            sequence.status = "cancelled";
             await redis.set(key, JSON.stringify(sequence), {
               ex: 90 * 86400,
             });
@@ -327,21 +340,27 @@ class EmailSequenceService {
 
           // Remove from all due queues
           for (let step = 2; step <= 5; step++) {
-            await redis.zrem(`email_sequence:due:${this.SEQUENCE_ID}:${step}`, email);
+            await redis.zrem(
+              `email_sequence:due:${this.SEQUENCE_ID}:${step}`,
+              email,
+            );
           }
         },
         () => {
-          logger.error('Failed to cancel sequence', undefined, { email });
+          logger.error("Failed to cancel sequence", undefined, { email });
         },
-        'email_sequence_cancel'
+        "email_sequence_cancel",
       );
 
-      logger.info('Sequence cancelled', { email, sequenceId: this.SEQUENCE_ID });
+      logger.info("Sequence cancelled", {
+        email,
+        sequenceId: this.SEQUENCE_ID,
+      });
     } catch (error) {
       logger.error(
-        'Cancel sequence error',
+        "Cancel sequence error",
         error instanceof Error ? error : new Error(String(error)),
-        { email }
+        { email },
       );
     }
   }
@@ -362,13 +381,13 @@ class EmailSequenceService {
           return data ? (JSON.parse(data as string) as EmailSequence) : null;
         },
         () => null,
-        'email_sequence_get_status'
+        "email_sequence_get_status",
       );
     } catch (error) {
       logger.error(
-        'Get sequence status error',
+        "Get sequence status error",
         error instanceof Error ? error : new Error(String(error)),
-        { email }
+        { email },
       );
       return null;
     }

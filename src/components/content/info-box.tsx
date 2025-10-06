@@ -1,23 +1,26 @@
-'use client';
+"use client";
 
 /**
  * InfoBox - Information highlight box
  * Used in 8 MDX files across the codebase - General-purpose informational component
  */
 
-import { AlertTriangle, CheckCircle, Info, Star } from '@/src/lib/icons';
-import { type InfoBoxProps, infoBoxPropsSchema } from '@/src/lib/schemas/shared.schema';
+import { AlertTriangle, CheckCircle, Info, Star } from "@/src/lib/icons";
+import {
+  type InfoBoxProps,
+  infoBoxPropsSchema,
+} from "@/src/lib/schemas/shared.schema";
 
 export function InfoBox(props: InfoBoxProps) {
   const validated = infoBoxPropsSchema.parse(props);
   const { title, children, variant } = validated;
 
   const variantStyles = {
-    default: 'border-border bg-card',
-    important: 'border-primary bg-primary/5',
-    success: 'border-green-500 bg-green-500/5',
-    warning: 'border-yellow-500 bg-yellow-500/5',
-    info: 'border-blue-500 bg-blue-500/5',
+    default: "border-border bg-card",
+    important: "border-primary bg-primary/5",
+    success: "border-green-500 bg-green-500/5",
+    warning: "border-yellow-500 bg-yellow-500/5",
+    info: "border-blue-500 bg-blue-500/5",
   };
 
   const iconMap = {

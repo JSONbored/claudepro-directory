@@ -15,7 +15,8 @@ export const VALIDATION_PATTERNS = {
   SLUG: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
 
   // Content type validation (exact match)
-  CONTENT_TYPE: /^(agents|mcp|rules|commands|hooks|statuslines|collections)\.json$/,
+  CONTENT_TYPE:
+    /^(agents|mcp|rules|commands|hooks|statuslines|collections)\.json$/,
 
   // File extensions (security-focused)
   SAFE_FILE_EXT: /^[a-zA-Z0-9_-]+\.(json|md|txt|yaml|yml)$/i,
@@ -35,7 +36,8 @@ export const VALIDATION_PATTERNS = {
   URL: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)$/,
 
   // GitHub URL specifically
-  GITHUB_URL: /^https:\/\/github\.com\/[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+(?:\/.*)?$/,
+  GITHUB_URL:
+    /^https:\/\/github\.com\/[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+(?:\/.*)?$/,
 
   // IP address (IPv4 and IPv6)
   IP_ADDRESS:

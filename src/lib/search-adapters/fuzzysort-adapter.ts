@@ -19,22 +19,25 @@ import {
   sortAlphabetically,
   sortByNewest,
   sortByPopularity,
-} from '@/src/lib/content/content-sorting';
-import { logger } from '@/src/lib/logger';
-import type { SearchableItem, SearchFilters } from '@/src/lib/schemas/search.schema';
+} from "@/src/lib/content/content-sorting";
+import { logger } from "@/src/lib/logger";
+import type {
+  SearchableItem,
+  SearchFilters,
+} from "@/src/lib/schemas/search.schema";
 
 // Lazy-load fuzzysort module
-let fuzzysortModule: typeof import('fuzzysort') | null = null;
+let fuzzysortModule: typeof import("fuzzysort") | null = null;
 
 async function loadFuzzysort() {
   if (!fuzzysortModule) {
     try {
-      fuzzysortModule = await import('fuzzysort');
-      logger.info('Fuzzysort module loaded successfully');
+      fuzzysortModule = await import("fuzzysort");
+      logger.info("Fuzzysort module loaded successfully");
     } catch (error) {
       logger.error(
-        'Failed to load fuzzysort module',
-        error instanceof Error ? error : new Error(String(error))
+        "Failed to load fuzzysort module",
+        error instanceof Error ? error : new Error(String(error)),
       );
       throw error;
     }
@@ -58,7 +61,9 @@ interface PreparedItem {
  * Prepare items for fast searching
  * Uses WeakMap for automatic garbage collection
  */
-async function prepareItems<T extends SearchableItem>(items: T[]): Promise<PreparedItem[]> {
+async function prepareItems<T extends SearchableItem>(
+  items: T[],
+): Promise<PreparedItem[]> {
   const fuzzysort = await loadFuzzysort();
 
   return items.map((item) => {
@@ -73,9 +78,15 @@ async function prepareItems<T extends SearchableItem>(items: T[]): Promise<Prepa
       item,
       titlePrepared: item.title ? fuzzysort.prepare(item.title) : undefined,
       namePrepared: item.name ? fuzzysort.prepare(item.name) : undefined,
-      descriptionPrepared: item.description ? fuzzysort.prepare(item.description) : undefined,
-      tagsPrepared: item.tags?.length ? fuzzysort.prepare(item.tags.join(' ')) : undefined,
-      categoryPrepared: item.category ? fuzzysort.prepare(item.category) : undefined,
+      descriptionPrepared: item.description
+        ? fuzzysort.prepare(item.description)
+        : undefined,
+      tagsPrepared: item.tags?.length
+        ? fuzzysort.prepare(item.tags.join(" "))
+        : undefined,
+      categoryPrepared: item.category
+        ? fuzzysort.prepare(item.category)
+        : undefined,
     };
 
     // Cache for future use
@@ -116,7 +127,7 @@ async function searchWithFuzzysort<T extends SearchableItem>(
     threshold?: number;
     limit?: number;
     keys?: Array<{ name: string; weight?: number }>;
-  }
+  },
 ): Promise<T[]> {
   const fuzzysort = await loadFuzzysort();
 
@@ -129,15 +140,18 @@ async function searchWithFuzzysort<T extends SearchableItem>(
   const prepared = await prepareItems(items);
 
   // Convert Fuse.js threshold to Fuzzysort threshold
-  const threshold = options?.threshold !== undefined ? convertThreshold(options.threshold) : -10000; // Default similar to Fuse.js 0.3
+  const threshold =
+    options?.threshold !== undefined
+      ? convertThreshold(options.threshold)
+      : -10000; // Default similar to Fuse.js 0.3
 
   // Build search targets based on keys option
   const targets = [
-    'titlePrepared',
-    'namePrepared',
-    'descriptionPrepared',
-    'tagsPrepared',
-    'categoryPrepared',
+    "titlePrepared",
+    "namePrepared",
+    "descriptionPrepared",
+    "tagsPrepared",
+    "categoryPrepared",
   ];
 
   try {
@@ -150,25 +164,27 @@ async function searchWithFuzzysort<T extends SearchableItem>(
     });
 
     // Extract items from results
-    return results.map((result: Fuzzysort.KeysResult<PreparedItem>) => result.obj.item as T);
+    return results.map(
+      (result: Fuzzysort.KeysResult<PreparedItem>) => result.obj.item as T,
+    );
   } catch (error) {
     logger.error(
-      'Fuzzysort search failed',
+      "Fuzzysort search failed",
       error instanceof Error ? error : new Error(String(error)),
-      { query, itemCount: items.length }
+      { query, itemCount: items.length },
     );
 
     // Fallback to simple filtering
     const queryLower = query.toLowerCase();
     return items.filter((item) => {
       const searchText = [
-        item.title || '',
-        item.name || '',
-        item.description || '',
+        item.title || "",
+        item.name || "",
+        item.description || "",
         ...(item.tags || []),
-        item.category || '',
+        item.category || "",
       ]
-        .join(' ')
+        .join(" ")
         .toLowerCase();
 
       return searchText.includes(queryLower);
@@ -186,22 +202,26 @@ export async function searchWithFilters<T extends SearchableItem>(
   options?: {
     threshold?: number;
     limit?: number;
-  }
+  },
 ): Promise<T[]> {
   // Apply filters first (reduces search space)
   let filtered = items;
 
   // Category filter
   if (filters.categories.length > 0) {
-    filtered = filtered.filter((item) => filters.categories.includes(item.category));
+    filtered = filtered.filter((item) =>
+      filters.categories.includes(item.category),
+    );
   }
 
   // Tags filter
   if (filters.tags.length > 0) {
     filtered = filtered.filter((item) =>
       filters.tags.some((tag) =>
-        item.tags.some((itemTag) => itemTag.toLowerCase().includes(tag.toLowerCase()))
-      )
+        item.tags.some((itemTag) =>
+          itemTag.toLowerCase().includes(tag.toLowerCase()),
+        ),
+      ),
     );
   }
 
@@ -228,19 +248,19 @@ export async function searchWithFilters<T extends SearchableItem>(
  */
 function applySorting<T extends SearchableItem>(items: T[], sort: string): T[] {
   switch (sort) {
-    case 'alphabetical':
+    case "alphabetical":
       // biome-ignore lint/suspicious/noExplicitAny: Type assertion needed for generic sorting
       return sortAlphabetically(items as any) as unknown as T[];
 
-    case 'newest':
+    case "newest":
       // biome-ignore lint/suspicious/noExplicitAny: Type assertion needed for generic sorting
       return sortByNewest(items as any) as unknown as T[];
 
-    case 'popularity':
+    case "popularity":
       // biome-ignore lint/suspicious/noExplicitAny: Type assertion needed for generic sorting
       return sortByPopularity(items as any) as unknown as T[];
 
-    case 'trending':
+    case "trending":
       // Trending uses popularity with slight boost
       // biome-ignore lint/suspicious/noExplicitAny: Type assertion needed for generic sorting
       return sortByPopularity(items as any) as unknown as T[];

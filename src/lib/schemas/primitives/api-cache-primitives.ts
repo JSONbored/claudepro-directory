@@ -16,10 +16,10 @@
  * - Single source of truth for timing and expiration
  */
 
-import { z } from 'zod';
-import { nonNegativeInt, positiveInt } from './base-numbers';
-import type { slugString } from './base-strings';
-import { isoDatetimeString, nonEmptyString } from './base-strings';
+import { z } from "zod";
+import { nonNegativeInt, positiveInt } from "./base-numbers";
+import type { slugString } from "./base-strings";
+import { isoDatetimeString, nonEmptyString } from "./base-strings";
 
 /**
  * ============================================================================
@@ -45,8 +45,11 @@ const TTL_RANGES = {
  */
 const shortTTL = positiveInt
   .min(TTL_RANGES.MIN_TTL, `TTL must be at least ${TTL_RANGES.MIN_TTL} seconds`)
-  .max(TTL_RANGES.SHORT_TTL_MAX, `TTL cannot exceed ${TTL_RANGES.SHORT_TTL_MAX} seconds (1 hour)`)
-  .describe('Short-lived TTL for temporary cache (60s - 1 hour)');
+  .max(
+    TTL_RANGES.SHORT_TTL_MAX,
+    `TTL cannot exceed ${TTL_RANGES.SHORT_TTL_MAX} seconds (1 hour)`,
+  )
+  .describe("Short-lived TTL for temporary cache (60s - 1 hour)");
 
 /**
  * Medium TTL validator (1 hour - 24 hours)
@@ -56,13 +59,15 @@ const shortTTL = positiveInt
 const mediumTTL = positiveInt
   .min(
     TTL_RANGES.SHORT_TTL_MAX,
-    `TTL must be at least ${TTL_RANGES.SHORT_TTL_MAX} seconds (1 hour)`
+    `TTL must be at least ${TTL_RANGES.SHORT_TTL_MAX} seconds (1 hour)`,
   )
   .max(
     TTL_RANGES.MEDIUM_TTL_MAX,
-    `TTL cannot exceed ${TTL_RANGES.MEDIUM_TTL_MAX} seconds (24 hours)`
+    `TTL cannot exceed ${TTL_RANGES.MEDIUM_TTL_MAX} seconds (24 hours)`,
   )
-  .describe('Standard TTL for API responses and daily cache (1 hour - 24 hours)');
+  .describe(
+    "Standard TTL for API responses and daily cache (1 hour - 24 hours)",
+  );
 
 /**
  * Long TTL validator (24 hours - 30 days)
@@ -72,10 +77,13 @@ const mediumTTL = positiveInt
 const longTTL = positiveInt
   .min(
     TTL_RANGES.MEDIUM_TTL_MAX,
-    `TTL must be at least ${TTL_RANGES.MEDIUM_TTL_MAX} seconds (24 hours)`
+    `TTL must be at least ${TTL_RANGES.MEDIUM_TTL_MAX} seconds (24 hours)`,
   )
-  .max(TTL_RANGES.LONG_TTL_MAX, `TTL cannot exceed ${TTL_RANGES.LONG_TTL_MAX} seconds (30 days)`)
-  .describe('Long-lived TTL for static content (24 hours - 30 days)');
+  .max(
+    TTL_RANGES.LONG_TTL_MAX,
+    `TTL cannot exceed ${TTL_RANGES.LONG_TTL_MAX} seconds (30 days)`,
+  )
+  .describe("Long-lived TTL for static content (24 hours - 30 days)");
 
 /**
  * Flexible TTL validator (60s - 30 days)
@@ -84,8 +92,11 @@ const longTTL = positiveInt
  */
 const flexibleTTL = positiveInt
   .min(TTL_RANGES.MIN_TTL, `TTL must be at least ${TTL_RANGES.MIN_TTL} seconds`)
-  .max(TTL_RANGES.LONG_TTL_MAX, `TTL cannot exceed ${TTL_RANGES.LONG_TTL_MAX} seconds (30 days)`)
-  .describe('Flexible TTL for configurable cache expiration (60s - 30 days)');
+  .max(
+    TTL_RANGES.LONG_TTL_MAX,
+    `TTL cannot exceed ${TTL_RANGES.LONG_TTL_MAX} seconds (30 days)`,
+  )
+  .describe("Flexible TTL for configurable cache expiration (60s - 30 days)");
 
 /**
  * Rate limit window validator (60s - 24 hours)
@@ -96,9 +107,9 @@ const rateLimitWindow = positiveInt
   .min(TTL_RANGES.MIN_TTL, `Window must be at least ${TTL_RANGES.MIN_TTL}s`)
   .max(
     TTL_RANGES.RATE_LIMIT_WINDOW_MAX,
-    `Window cannot exceed ${TTL_RANGES.RATE_LIMIT_WINDOW_MAX}s`
+    `Window cannot exceed ${TTL_RANGES.RATE_LIMIT_WINDOW_MAX}s`,
   )
-  .describe('Rate limiting time window for API throttling (60s - 24 hours)');
+  .describe("Rate limiting time window for API throttling (60s - 24 hours)");
 
 /**
  * ============================================================================
@@ -133,10 +144,12 @@ export const KEY_LIMITS = {
  * Common in: All cache operations
  */
 export const cacheKeyString = nonEmptyString
-  .max(KEY_LIMITS.MAX_KEY_LENGTH, 'Cache key too long')
-  .regex(KEY_PATTERNS.CACHE_KEY, 'Invalid cache key format')
-  .refine((key) => !key.includes('\0'), 'Null bytes not allowed in cache key')
-  .describe('Redis-compatible cache key with alphanumeric and safe special chars');
+  .max(KEY_LIMITS.MAX_KEY_LENGTH, "Cache key too long")
+  .regex(KEY_PATTERNS.CACHE_KEY, "Invalid cache key format")
+  .refine((key) => !key.includes("\0"), "Null bytes not allowed in cache key")
+  .describe(
+    "Redis-compatible cache key with alphanumeric and safe special chars",
+  );
 
 /**
  * Category validator
@@ -145,9 +158,11 @@ export const cacheKeyString = nonEmptyString
  * Common in: Content categorization, cache namespacing
  */
 const categoryString = nonEmptyString
-  .max(KEY_LIMITS.MAX_CATEGORY_LENGTH, 'Category name too long')
-  .regex(KEY_PATTERNS.CATEGORY, 'Invalid category format')
-  .describe('Content category identifier (alphanumeric with hyphens/underscores)');
+  .max(KEY_LIMITS.MAX_CATEGORY_LENGTH, "Category name too long")
+  .regex(KEY_PATTERNS.CATEGORY, "Invalid category format")
+  .describe(
+    "Content category identifier (alphanumeric with hyphens/underscores)",
+  );
 
 /**
  * Slug validator
@@ -163,12 +178,12 @@ const categoryString = nonEmptyString
  * Common in: MDX cache, file operations
  */
 const pathString = nonEmptyString
-  .max(KEY_LIMITS.MAX_PATH_LENGTH, 'Path too long')
-  .regex(KEY_PATTERNS.PATH, 'Invalid path format')
-  .refine((path) => !path.includes('..'), 'Path traversal detected')
-  .refine((path) => !path.includes('\\'), 'Backslash not allowed in paths')
-  .refine((path) => !path.includes('\0'), 'Null bytes not allowed in paths')
-  .describe('Secure file/URL path with traversal prevention');
+  .max(KEY_LIMITS.MAX_PATH_LENGTH, "Path too long")
+  .regex(KEY_PATTERNS.PATH, "Invalid path format")
+  .refine((path) => !path.includes(".."), "Path traversal detected")
+  .refine((path) => !path.includes("\\"), "Backslash not allowed in paths")
+  .refine((path) => !path.includes("\0"), "Null bytes not allowed in paths")
+  .describe("Secure file/URL path with traversal prevention");
 
 /**
  * ============================================================================
@@ -182,8 +197,8 @@ const pathString = nonEmptyString
  * Common in: API response metadata, performance monitoring
  */
 const cacheStatusEnum = z
-  .enum(['HIT', 'MISS', 'BYPASS'])
-  .describe('Cache operation status for API response tracking');
+  .enum(["HIT", "MISS", "BYPASS"])
+  .describe("Cache operation status for API response tracking");
 
 /**
  * Processing time validator (milliseconds)
@@ -194,7 +209,7 @@ export const processingTimeMs = z
   .number()
   .min(0)
   .max(60000)
-  .describe('API processing time in milliseconds (0-60s)'); // Max 60 seconds
+  .describe("API processing time in milliseconds (0-60s)"); // Max 60 seconds
 
 /**
  * API response metadata schema
@@ -209,7 +224,7 @@ const apiResponseMetaSchema = z
     processingTime: processingTimeMs.optional(),
   })
   .optional()
-  .describe('Standard API response metadata with timestamp and cache status');
+  .describe("Standard API response metadata with timestamp and cache status");
 
 /**
  * Pagination metadata schema
@@ -225,7 +240,7 @@ const paginationMetaSchema = z
     hasNext: z.boolean(),
     hasPrev: z.boolean(),
   })
-  .describe('Pagination metadata for list endpoints and search results');
+  .describe("Pagination metadata for list endpoints and search results");
 
 /**
  * ============================================================================
@@ -248,10 +263,16 @@ export function validateCacheKey(key: string | number): string {
 export function validateTTL(ttl: string | number): number {
   const schema = z.coerce
     .number()
-    .int('TTL must be an integer')
+    .int("TTL must be an integer")
     .positive()
-    .min(TTL_RANGES.MIN_TTL, `TTL must be at least ${TTL_RANGES.MIN_TTL} seconds`)
-    .max(TTL_RANGES.LONG_TTL_MAX, `TTL cannot exceed ${TTL_RANGES.LONG_TTL_MAX} seconds`);
+    .min(
+      TTL_RANGES.MIN_TTL,
+      `TTL must be at least ${TTL_RANGES.MIN_TTL} seconds`,
+    )
+    .max(
+      TTL_RANGES.LONG_TTL_MAX,
+      `TTL cannot exceed ${TTL_RANGES.LONG_TTL_MAX} seconds`,
+    );
 
   return schema.parse(ttl);
 }

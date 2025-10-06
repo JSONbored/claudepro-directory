@@ -3,23 +3,23 @@
  * Type definitions for unified structured data generation
  */
 
-import type { AgentContent } from '@/src/lib/schemas/content/agent.schema';
-import type { CommandContent } from '@/src/lib/schemas/content/command.schema';
-import type { HookContent } from '@/src/lib/schemas/content/hook.schema';
-import type { McpContent } from '@/src/lib/schemas/content/mcp.schema';
-import type { RuleContent } from '@/src/lib/schemas/content/rule.schema';
-import type { StatuslineContent } from '@/src/lib/schemas/content/statusline.schema';
+import type { AgentContent } from "@/src/lib/schemas/content/agent.schema";
+import type { CommandContent } from "@/src/lib/schemas/content/command.schema";
+import type { HookContent } from "@/src/lib/schemas/content/hook.schema";
+import type { McpContent } from "@/src/lib/schemas/content/mcp.schema";
+import type { RuleContent } from "@/src/lib/schemas/content/rule.schema";
+import type { StatuslineContent } from "@/src/lib/schemas/content/statusline.schema";
 
 /**
  * Discriminated union for all content types
  */
 export type UnifiedContent =
-  | ({ category: 'agents' } & AgentContent)
-  | ({ category: 'commands' } & CommandContent)
-  | ({ category: 'hooks' } & HookContent)
-  | ({ category: 'mcp' } & McpContent)
-  | ({ category: 'rules' } & RuleContent)
-  | ({ category: 'statuslines' } & StatuslineContent);
+  | ({ category: "agents" } & AgentContent)
+  | ({ category: "commands" } & CommandContent)
+  | ({ category: "hooks" } & HookContent)
+  | ({ category: "mcp" } & McpContent)
+  | ({ category: "rules" } & RuleContent)
+  | ({ category: "statuslines" } & StatuslineContent);
 
 /**
  * Props for unified structured data component
@@ -32,33 +32,39 @@ export interface UnifiedStructuredDataProps {
  * Type guards for content discrimination
  */
 export function isAgentContent(
-  item: UnifiedContent
-): item is AgentContent & { category: 'agents' } {
-  return item.category === 'agents';
+  item: UnifiedContent,
+): item is AgentContent & { category: "agents" } {
+  return item.category === "agents";
 }
 
 export function isCommandContent(
-  item: UnifiedContent
-): item is CommandContent & { category: 'commands' } {
-  return item.category === 'commands';
+  item: UnifiedContent,
+): item is CommandContent & { category: "commands" } {
+  return item.category === "commands";
 }
 
-export function isHookContent(item: UnifiedContent): item is HookContent & { category: 'hooks' } {
-  return item.category === 'hooks';
+export function isHookContent(
+  item: UnifiedContent,
+): item is HookContent & { category: "hooks" } {
+  return item.category === "hooks";
 }
 
-export function isMcpContent(item: UnifiedContent): item is McpContent & { category: 'mcp' } {
-  return item.category === 'mcp';
+export function isMcpContent(
+  item: UnifiedContent,
+): item is McpContent & { category: "mcp" } {
+  return item.category === "mcp";
 }
 
-export function isRuleContent(item: UnifiedContent): item is RuleContent & { category: 'rules' } {
-  return item.category === 'rules';
+export function isRuleContent(
+  item: UnifiedContent,
+): item is RuleContent & { category: "rules" } {
+  return item.category === "rules";
 }
 
 export function isStatuslineContent(
-  item: UnifiedContent
-): item is StatuslineContent & { category: 'statuslines' } {
-  return item.category === 'statuslines';
+  item: UnifiedContent,
+): item is StatuslineContent & { category: "statuslines" } {
+  return item.category === "statuslines";
 }
 
 /**
@@ -74,7 +80,10 @@ export interface SchemaGenerationConfig {
   generateSpeakable: boolean;
 }
 
-export const SCHEMA_CONFIGS: Record<UnifiedContent['category'], SchemaGenerationConfig> = {
+export const SCHEMA_CONFIGS: Record<
+  UnifiedContent["category"],
+  SchemaGenerationConfig
+> = {
   agents: {
     generateApplication: true,
     generateSourceCode: true,

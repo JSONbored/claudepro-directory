@@ -1,9 +1,9 @@
-import { HomePageClient } from '@/src/components/features/home';
-import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
-import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
-import { statsRedis } from '@/src/lib/redis';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { transformForHomePage } from '@/src/lib/utils/transformers';
+import { HomePageClient } from "@/src/components/features/home";
+import { InlineEmailCTA } from "@/src/components/shared/inline-email-cta";
+import { lazyContentLoaders } from "@/src/components/shared/lazy-content-loaders";
+import { statsRedis } from "@/src/lib/redis";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
+import { transformForHomePage } from "@/src/lib/utils/transformers";
 
 // Enable ISR - revalidate every 5 minutes for fresh view counts
 export const revalidate = 300;
@@ -30,27 +30,39 @@ export default async function HomePage() {
   ]);
 
   // Enrich with view counts from Redis
-  const [rules, mcp, agents, commands, hooks, statuslines, collections] = await Promise.all([
-    statsRedis.enrichWithViewCounts(
-      rulesData.map((item) => ({ ...item, category: 'rules' as const }))
-    ),
-    statsRedis.enrichWithViewCounts(mcpData.map((item) => ({ ...item, category: 'mcp' as const }))),
-    statsRedis.enrichWithViewCounts(
-      agentsData.map((item) => ({ ...item, category: 'agents' as const }))
-    ),
-    statsRedis.enrichWithViewCounts(
-      commandsData.map((item) => ({ ...item, category: 'commands' as const }))
-    ),
-    statsRedis.enrichWithViewCounts(
-      hooksData.map((item) => ({ ...item, category: 'hooks' as const }))
-    ),
-    statsRedis.enrichWithViewCounts(
-      statuslinesData.map((item) => ({ ...item, category: 'statuslines' as const }))
-    ),
-    statsRedis.enrichWithViewCounts(
-      collectionsData.map((item) => ({ ...item, category: 'collections' as const }))
-    ),
-  ]);
+  const [rules, mcp, agents, commands, hooks, statuslines, collections] =
+    await Promise.all([
+      statsRedis.enrichWithViewCounts(
+        rulesData.map((item) => ({ ...item, category: "rules" as const })),
+      ),
+      statsRedis.enrichWithViewCounts(
+        mcpData.map((item) => ({ ...item, category: "mcp" as const })),
+      ),
+      statsRedis.enrichWithViewCounts(
+        agentsData.map((item) => ({ ...item, category: "agents" as const })),
+      ),
+      statsRedis.enrichWithViewCounts(
+        commandsData.map((item) => ({
+          ...item,
+          category: "commands" as const,
+        })),
+      ),
+      statsRedis.enrichWithViewCounts(
+        hooksData.map((item) => ({ ...item, category: "hooks" as const })),
+      ),
+      statsRedis.enrichWithViewCounts(
+        statuslinesData.map((item) => ({
+          ...item,
+          category: "statuslines" as const,
+        })),
+      ),
+      statsRedis.enrichWithViewCounts(
+        collectionsData.map((item) => ({
+          ...item,
+          category: "collections" as const,
+        })),
+      ),
+    ]);
 
   // Create stable allConfigs array to prevent infinite re-renders
   // Deduplicate by slug to prevent duplicate keys in React rendering
@@ -65,7 +77,9 @@ export default async function HomePage() {
   ];
 
   // Use Map to deduplicate by slug (last occurrence wins)
-  const allConfigsMap = new Map(allConfigsWithDuplicates.map((item) => [item.slug, item]));
+  const allConfigsMap = new Map(
+    allConfigsWithDuplicates.map((item) => [item.slug, item]),
+  );
   const allConfigs = Array.from(allConfigsMap.values());
 
   // Transform data using transform functions to convert readonly arrays to mutable
@@ -88,8 +102,12 @@ export default async function HomePage() {
         className={`relative overflow-hidden ${UI_CLASSES.BORDER_B} border-border/50`}
         aria-label="Homepage hero"
       >
-        <div className={`relative container ${UI_CLASSES.MX_AUTO} px-4 py-10 sm:py-16 lg:py-24`}>
-          <div className={`text-center ${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
+        <div
+          className={`relative container ${UI_CLASSES.MX_AUTO} px-4 py-10 sm:py-16 lg:py-24`}
+        >
+          <div
+            className={`text-center ${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}
+          >
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 text-foreground tracking-tight">
               The home for Claude enthusiasts
             </h1>
@@ -97,9 +115,10 @@ export default async function HomePage() {
             <p
               className={`text-base sm:text-lg lg:text-xl text-muted-foreground ${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO}`}
             >
-              Discover and share the best Claude configurations. Explore expert rules, browse
-              powerful MCP servers, find specialized agents and commands, discover automation hooks,
-              and connect with the community building the future of AI.
+              Discover and share the best Claude configurations. Explore expert
+              rules, browse powerful MCP servers, find specialized agents and
+              commands, discover automation hooks, and connect with the
+              community building the future of AI.
             </p>
           </div>
         </div>

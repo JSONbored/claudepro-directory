@@ -9,9 +9,9 @@
  * @module seo/title-builder
  */
 
-import { APP_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG } from "@/src/lib/constants";
 
-export type TitleTier = 'home' | 'section' | 'content';
+export type TitleTier = "home" | "section" | "content";
 
 export interface TitleOptions {
   /** Title tier strategy */
@@ -65,20 +65,22 @@ export function buildPageTitle(options: TitleOptions): string {
   const siteName = APP_CONFIG.name;
 
   switch (tier) {
-    case 'home':
+    case "home":
       return siteName;
 
-    case 'section':
+    case "section":
       if (!title) {
-        throw new Error('Title is required for section-tier titles');
+        throw new Error("Title is required for section-tier titles");
       }
       // Tier 2: Section keyword + brand
       // Dash separator (Google: higher CTR, Bing/DDG: no penalty)
       return `${title} - ${siteName}`;
 
-    case 'content':
+    case "content":
       if (!(title && section)) {
-        throw new Error('Both title and section are required for content-tier titles');
+        throw new Error(
+          "Both title and section are required for content-tier titles",
+        );
       }
       // Tier 3: Title + Section + Brand
       // All dashes for consistency and optimal SERP display
@@ -107,7 +109,7 @@ export function validateTitleLength(title: string): TitleValidation {
     return {
       isValid: true,
       length,
-      recommendation: 'Optimal for all search engines',
+      recommendation: "Optimal for all search engines",
     };
   }
 
@@ -115,14 +117,14 @@ export function validateTitleLength(title: string): TitleValidation {
     return {
       isValid: true,
       length,
-      recommendation: 'Good for Bing, may truncate on Google',
+      recommendation: "Good for Bing, may truncate on Google",
     };
   }
 
   return {
     isValid: false,
     length,
-    recommendation: 'Too long - will truncate on all engines',
+    recommendation: "Too long - will truncate on all engines",
   };
 }
 

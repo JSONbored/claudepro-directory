@@ -4,7 +4,14 @@
   "category": "statuslines",
   "author": "JSONbored",
   "dateAdded": "2025-10-01",
-  "tags": ["simple", "plain-text", "minimal", "bash", "lightweight", "no-dependencies"],
+  "tags": [
+    "simple",
+    "plain-text",
+    "minimal",
+    "bash",
+    "lightweight",
+    "no-dependencies"
+  ],
   "statuslineType": "simple",
   "content": "#!/usr/bin/env bash\n\n# Simple Text Statusline for Claude Code\n# Plain text only - maximum compatibility\n\n# Read JSON from stdin\nread -r input\n\n# Extract values using bash built-ins (no jq required)\nmodel=$(echo \"$input\" | grep -o '\"model\":\"[^\"]*\"' | cut -d'\"' -f4)\ndir=$(echo \"$input\" | grep -o '\"path\":\"[^\"]*\"' | cut -d'\"' -f4 | sed \"s|$HOME|~|\")\ntokens=$(echo \"$input\" | grep -o '\"totalTokens\":[0-9]*' | cut -d':' -f2)\n\n# Default values if extraction fails\nmodel=${model:-\"unknown\"}\ndir=${dir:-\"~\"}\ntokens=${tokens:-\"0\"}\n\n# Build simple plain text status\necho \"[Model: $model] [Dir: $dir] [Tokens: $tokens]\"\n",
   "features": [

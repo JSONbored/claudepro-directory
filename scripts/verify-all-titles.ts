@@ -5,9 +5,9 @@
  * Verifies ALL page titles from generated content and guides
  */
 
-import { existsSync } from 'fs';
-import fs from 'fs/promises';
-import path from 'path';
+import { existsSync } from "fs";
+import fs from "fs/promises";
+import path from "path";
 
 interface TitleCheck {
   route: string;
@@ -15,7 +15,7 @@ interface TitleCheck {
   seoTitle?: string;
   finalTitle: string;
   length: number;
-  status: 'pass' | 'warn' | 'fail';
+  status: "pass" | "warn" | "fail";
   category: string;
 }
 
@@ -23,10 +23,10 @@ const results: TitleCheck[] = [];
 const MAX_CHARS = 60;
 const OPTIMAL_MIN = 55;
 
-const SITE_SUFFIX = ' - Claude Pro Directory';
+const SITE_SUFFIX = " - Claude Pro Directory";
 const SECTION_SUFFIXES = {
-  guides: ' - Guides - Claude Pro Directory',
-  collections: ' - Collections - Claude Pro Directory',
+  guides: " - Guides - Claude Pro Directory",
+  collections: " - Collections - Claude Pro Directory",
 };
 
 async function checkTitle(
@@ -34,17 +34,17 @@ async function checkTitle(
   title: string,
   seoTitle: string | undefined,
   category: string,
-  sectionSuffix?: string
+  sectionSuffix?: string,
 ) {
   const effectiveTitle = seoTitle || title;
-  const finalTitle = effectiveTitle + (sectionSuffix || '');
+  const finalTitle = effectiveTitle + (sectionSuffix || "");
   const length = finalTitle.length;
 
-  let status: 'pass' | 'warn' | 'fail' = 'pass';
+  let status: "pass" | "warn" | "fail" = "pass";
   if (length > MAX_CHARS) {
-    status = 'fail';
+    status = "fail";
   } else if (length < OPTIMAL_MIN) {
-    status = 'warn';
+    status = "warn";
   }
 
   results.push({
@@ -59,14 +59,14 @@ async function checkTitle(
 }
 
 async function main() {
-  console.log('🔍 COMPREHENSIVE SEO TITLE VERIFICATION\n');
-  console.log('='.repeat(100));
+  console.log("🔍 COMPREHENSIVE SEO TITLE VERIFICATION\n");
+  console.log("=".repeat(100));
 
-  const contentDir = path.join(process.cwd(), 'public/static-api');
+  const contentDir = path.join(process.cwd(), "public/static-api");
 
   // 1. Guides - check all MDX files
-  console.log('\n📚 Checking Guides...');
-  const guidesDir = path.join(process.cwd(), 'content/guides');
+  console.log("\n📚 Checking Guides...");
+  const guidesDir = path.join(process.cwd(), "content/guides");
   const guideCategories = await fs.readdir(guidesDir);
 
   let guidesCount = 0;
@@ -77,13 +77,16 @@ async function main() {
     if (stat.isDirectory()) {
       const files = await fs.readdir(categoryPath);
       for (const file of files) {
-        if (file.endsWith('.mdx')) {
-          const content = await fs.readFile(path.join(categoryPath, file), 'utf-8');
+        if (file.endsWith(".mdx")) {
+          const content = await fs.readFile(
+            path.join(categoryPath, file),
+            "utf-8",
+          );
           const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
 
           if (frontmatterMatch) {
             const frontmatter: { title?: string; seoTitle?: string } = {};
-            const lines = frontmatterMatch[1].split('\n');
+            const lines = frontmatterMatch[1].split("\n");
 
             for (const line of lines) {
               const titleMatch = line.match(/^title:\s*["'](.+)["']/);
@@ -97,13 +100,13 @@ async function main() {
               }
             }
 
-            const slug = file.replace('.mdx', '');
+            const slug = file.replace(".mdx", "");
             await checkTitle(
               `/guides/${guideCategory}/${slug}`,
-              frontmatter.title || 'Unknown',
+              frontmatter.title || "Unknown",
               frontmatter.seoTitle,
-              'guide',
-              SECTION_SUFFIXES.guides
+              "guide",
+              SECTION_SUFFIXES.guides,
             );
             guidesCount++;
           }
@@ -114,43 +117,53 @@ async function main() {
   console.log(`✓ Checked ${guidesCount} guides`);
 
   // 2. Collections
-  console.log('\n📦 Checking Collections...');
-  const collectionsFile = path.join(contentDir, 'collections.json');
+  console.log("\n📦 Checking Collections...");
+  const collectionsFile = path.join(contentDir, "collections.json");
   if (existsSync(collectionsFile)) {
-    const collectionsData = JSON.parse(await fs.readFile(collectionsFile, 'utf-8'));
+    const collectionsData = JSON.parse(
+      await fs.readFile(collectionsFile, "utf-8"),
+    );
     const collections = collectionsData.collections || collectionsData;
     for (const collection of collections) {
       await checkTitle(
         `/collections/${collection.slug}`,
         collection.title,
         collection.seoTitle,
-        'collection',
-        SECTION_SUFFIXES.collections
+        "collection",
+        SECTION_SUFFIXES.collections,
       );
     }
     console.log(`✓ Checked ${collections.length} collections`);
   }
 
   // 3. Content pages (agents, mcp, rules, commands, hooks, statuslines)
-  console.log('\n⚙️  Checking Content Pages...');
-  const categories = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'];
+  console.log("\n⚙️  Checking Content Pages...");
+  const categories = [
+    "agents",
+    "mcp",
+    "rules",
+    "commands",
+    "hooks",
+    "statuslines",
+  ];
   let contentCount = 0;
 
   for (const category of categories) {
     const apiFile = path.join(contentDir, `${category}.json`);
     if (existsSync(apiFile)) {
-      const itemsData = JSON.parse(await fs.readFile(apiFile, 'utf-8'));
+      const itemsData = JSON.parse(await fs.readFile(apiFile, "utf-8"));
       const items = itemsData[category] || itemsData;
 
       for (const item of items) {
-        const categoryDisplay = category.charAt(0).toUpperCase() + category.slice(1);
+        const categoryDisplay =
+          category.charAt(0).toUpperCase() + category.slice(1);
 
         await checkTitle(
           `/${category}/${item.slug}`,
           item.title || item.name || item.slug,
           item.seoTitle,
           category,
-          ` - ${categoryDisplay}${SITE_SUFFIX}`
+          ` - ${categoryDisplay}${SITE_SUFFIX}`,
         );
         contentCount++;
       }
@@ -159,13 +172,13 @@ async function main() {
   console.log(`✓ Checked ${contentCount} content pages`);
 
   // Print results
-  console.log(`\n${'='.repeat(100)}`);
-  console.log('\n📊 DETAILED RESULTS\n');
-  console.log('='.repeat(100));
+  console.log(`\n${"=".repeat(100)}`);
+  console.log("\n📊 DETAILED RESULTS\n");
+  console.log("=".repeat(100));
 
-  const failures = results.filter((r) => r.status === 'fail');
-  const warnings = results.filter((r) => r.status === 'warn');
-  const passes = results.filter((r) => r.status === 'pass');
+  const failures = results.filter((r) => r.status === "fail");
+  const warnings = results.filter((r) => r.status === "warn");
+  const passes = results.filter((r) => r.status === "pass");
 
   if (failures.length > 0) {
     console.log(`\n❌ FAILURES (>${MAX_CHARS} chars): ${failures.length}\n`);
@@ -181,54 +194,61 @@ async function main() {
   }
 
   // Print all results in a single compact list
-  console.log('\n📋 ALL PAGE TITLES\n');
+  console.log("\n📋 ALL PAGE TITLES\n");
 
   for (const result of results) {
-    const emoji = result.status === 'pass' ? '✅' : result.status === 'warn' ? '⚠️' : '❌';
-    console.log(`${emoji} [${result.length}] ${result.route} → "${result.finalTitle}"`);
+    const emoji =
+      result.status === "pass" ? "✅" : result.status === "warn" ? "⚠️" : "❌";
+    console.log(
+      `${emoji} [${result.length}] ${result.route} → "${result.finalTitle}"`,
+    );
   }
 
   // Summary by category
-  console.log(`\n${'='.repeat(100)}`);
-  console.log('\n📈 SUMMARY BY CATEGORY\n');
-  console.log(`${'='.repeat(100)}\n`);
+  console.log(`\n${"=".repeat(100)}`);
+  console.log("\n📈 SUMMARY BY CATEGORY\n");
+  console.log(`${"=".repeat(100)}\n`);
 
   const categories_unique = [...new Set(results.map((r) => r.category))];
   for (const category of categories_unique) {
     const catResults = results.filter((r) => r.category === category);
-    const catFails = catResults.filter((r) => r.status === 'fail');
-    const catWarns = catResults.filter((r) => r.status === 'warn');
-    const catPasses = catResults.filter((r) => r.status === 'pass');
+    const catFails = catResults.filter((r) => r.status === "fail");
+    const catWarns = catResults.filter((r) => r.status === "warn");
+    const catPasses = catResults.filter((r) => r.status === "pass");
 
     const avgLength = (
       catResults.reduce((sum, r) => sum + r.length, 0) / catResults.length
     ).toFixed(1);
 
     console.log(
-      `${category.toUpperCase().padEnd(15)} | Total: ${catResults.length.toString().padStart(3)} | ✅ ${catPasses.length.toString().padStart(3)} | ⚠️  ${catWarns.length.toString().padStart(3)} | ❌ ${catFails.length.toString().padStart(3)} | Avg: ${avgLength} chars`
+      `${category.toUpperCase().padEnd(15)} | Total: ${catResults.length.toString().padStart(3)} | ✅ ${catPasses.length.toString().padStart(3)} | ⚠️  ${catWarns.length.toString().padStart(3)} | ❌ ${catFails.length.toString().padStart(3)} | Avg: ${avgLength} chars`,
     );
   }
 
   // Final summary
-  console.log(`\n${'='.repeat(100)}`);
-  console.log('\n🎯 FINAL RESULTS\n');
-  console.log(`${'='.repeat(100)}\n`);
+  console.log(`\n${"=".repeat(100)}`);
+  console.log("\n🎯 FINAL RESULTS\n");
+  console.log(`${"=".repeat(100)}\n`);
   console.log(`Total Pages: ${results.length}`);
   console.log(
-    `✅ Optimal (${OPTIMAL_MIN}-${MAX_CHARS} chars): ${passes.length} (${((passes.length / results.length) * 100).toFixed(1)}%)`
+    `✅ Optimal (${OPTIMAL_MIN}-${MAX_CHARS} chars): ${passes.length} (${((passes.length / results.length) * 100).toFixed(1)}%)`,
   );
   console.log(
-    `⚠️  Underutilized (<${OPTIMAL_MIN} chars): ${warnings.length} (${((warnings.length / results.length) * 100).toFixed(1)}%)`
+    `⚠️  Underutilized (<${OPTIMAL_MIN} chars): ${warnings.length} (${((warnings.length / results.length) * 100).toFixed(1)}%)`,
   );
   console.log(
-    `❌ Over Limit (>${MAX_CHARS} chars): ${failures.length} (${((failures.length / results.length) * 100).toFixed(1)}%)`
+    `❌ Over Limit (>${MAX_CHARS} chars): ${failures.length} (${((failures.length / results.length) * 100).toFixed(1)}%)`,
   );
 
   if (failures.length === 0) {
-    console.log('\n✨ SUCCESS! All page titles are within SEO limits (<60 chars)\n');
+    console.log(
+      "\n✨ SUCCESS! All page titles are within SEO limits (<60 chars)\n",
+    );
     process.exit(0);
   } else {
-    console.log('\n⚠️  FAILED: Some page titles exceed 60 characters. Review required.\n');
+    console.log(
+      "\n⚠️  FAILED: Some page titles exceed 60 characters. Review required.\n",
+    );
     process.exit(1);
   }
 }

@@ -6,11 +6,14 @@
  * Designed with security-first approach for open-source production codebase.
  */
 
-import { type NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { isDevelopment, isProduction } from '@/src/lib/env-client';
-import { logger } from '@/src/lib/logger';
-import { createRequestId, type RequestId } from '@/src/lib/schemas/branded-types.schema';
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { isDevelopment, isProduction } from "@/src/lib/env-client";
+import { logger } from "@/src/lib/logger";
+import {
+  createRequestId,
+  type RequestId,
+} from "@/src/lib/schemas/branded-types.schema";
 import {
   determineErrorType,
   type ErrorContext,
@@ -20,8 +23,8 @@ import {
   errorInputSchema,
   validateErrorContext,
   validateErrorInput,
-} from '@/src/lib/schemas/error.schema';
-import { ValidationError } from '@/src/lib/security/validators';
+} from "@/src/lib/schemas/error.schema";
+import { ValidationError } from "@/src/lib/security/validators";
 
 /**
  * HTTP status code mapping for different error types
@@ -45,18 +48,21 @@ const ERROR_STATUS_MAP: Record<ErrorType, number> = {
  * User-friendly error messages
  */
 const USER_FRIENDLY_MESSAGES: Record<ErrorType, string> = {
-  ValidationError: 'The provided data is invalid. Please check your input and try again.',
-  DatabaseError: 'A database error occurred. Please try again later.',
-  AuthenticationError: 'Authentication failed. Please check your credentials.',
-  AuthorizationError: 'You do not have permission to access this resource.',
-  NotFoundError: 'The requested resource was not found.',
-  RateLimitError: 'Too many requests. Please try again later.',
-  NetworkError: 'A network error occurred. Please try again.',
-  FileSystemError: 'A file system error occurred. Please try again later.',
-  ConfigurationError: 'A configuration error occurred. Please contact support.',
-  TimeoutError: 'The request timed out. Please try again.',
-  ServiceUnavailableError: 'The service is temporarily unavailable. Please try again later.',
-  InternalServerError: 'An internal server error occurred. Please try again later.',
+  ValidationError:
+    "The provided data is invalid. Please check your input and try again.",
+  DatabaseError: "A database error occurred. Please try again later.",
+  AuthenticationError: "Authentication failed. Please check your credentials.",
+  AuthorizationError: "You do not have permission to access this resource.",
+  NotFoundError: "The requested resource was not found.",
+  RateLimitError: "Too many requests. Please try again later.",
+  NetworkError: "A network error occurred. Please try again.",
+  FileSystemError: "A file system error occurred. Please try again later.",
+  ConfigurationError: "A configuration error occurred. Please contact support.",
+  TimeoutError: "The request timed out. Please try again.",
+  ServiceUnavailableError:
+    "The service is temporarily unavailable. Please try again later.",
+  InternalServerError:
+    "An internal server error occurred. Please try again later.",
 } as const;
 
 /**
@@ -79,16 +85,18 @@ export class ErrorHandler {
    */
   public handleError(
     error: z.infer<typeof errorInputSchema>,
-    config: ErrorHandlerConfig = {}
+    config: ErrorHandlerConfig = {},
   ): ErrorResponse {
     const startTime = performance.now();
 
     try {
       // Validate and extract error information
       const validationResult = validateErrorInput(error);
-      const validatedError = validationResult.type === 'error' ? validationResult.error : undefined;
+      const validatedError =
+        validationResult.type === "error" ? validationResult.error : undefined;
       const fallback =
-        validationResult.type === 'string' || validationResult.type === 'invalid'
+        validationResult.type === "string" ||
+        validationResult.type === "invalid"
           ? validationResult.fallback
           : undefined;
       const errorType = determineErrorType(error);
@@ -98,9 +106,9 @@ export class ErrorHandler {
 
       // Create base error context
       const baseContext: ErrorContext = {
-        route: config.route || 'unknown',
-        operation: config.operation || 'unknown',
-        method: config.method || 'unknown',
+        route: config.route || "unknown",
+        operation: config.operation || "unknown",
+        method: config.method || "unknown",
         errorType,
         timestamp: new Date().toISOString(),
       };
@@ -115,7 +123,7 @@ export class ErrorHandler {
       });
 
       // Log the error with appropriate level
-      this.logError(error, errorType, fullContext, config.logLevel || 'error');
+      this.logError(error, errorType, fullContext, config.logLevel || "error");
 
       // Handle specific error types
       if (error instanceof z.ZodError) {
@@ -129,7 +137,7 @@ export class ErrorHandler {
       // Handle generic errors - create a proper Error object
       const errorToHandle = validatedError
         ? new Error(validatedError.message)
-        : new Error(fallback || 'Unknown error');
+        : new Error(fallback || "Unknown error");
 
       // Copy properties if they exist
       if (validatedError) {
@@ -137,16 +145,26 @@ export class ErrorHandler {
         if (validatedError.stack) errorToHandle.stack = validatedError.stack;
       }
 
-      return this.handleGenericError(errorToHandle, errorType, requestId, config);
+      return this.handleGenericError(
+        errorToHandle,
+        errorType,
+        requestId,
+        config,
+      );
     } catch (handlerError) {
       // Fallback error handling if the error handler itself fails
       logger.fatal(
-        'Error handler failed',
-        handlerError instanceof Error ? handlerError : new Error(String(handlerError)),
+        "Error handler failed",
+        handlerError instanceof Error
+          ? handlerError
+          : new Error(String(handlerError)),
         {
           originalError: error instanceof Error ? error.message : String(error),
-          handlerError: handlerError instanceof Error ? handlerError.message : String(handlerError),
-        }
+          handlerError:
+            handlerError instanceof Error
+              ? handlerError.message
+              : String(handlerError),
+        },
       );
 
       return this.createFallbackErrorResponse(config.requestId);
@@ -159,26 +177,29 @@ export class ErrorHandler {
   private handleZodError(
     zodError: z.ZodError,
     requestId: RequestId,
-    config: ErrorHandlerConfig
+    config: ErrorHandlerConfig,
   ): ErrorResponse {
     const details = zodError.issues.map((issue) => ({
-      path: issue.path.join('.') || 'root',
+      path: issue.path.join(".") || "root",
       message: issue.message,
       code: issue.code.toUpperCase(),
     }));
 
     const mainMessage =
-      config.customMessage || `Validation failed: ${details[0]?.message || 'Invalid input'}`;
+      config.customMessage ||
+      `Validation failed: ${details[0]?.message || "Invalid input"}`;
 
     return {
       success: false,
-      error: 'Validation Error',
+      error: "Validation Error",
       message: mainMessage,
-      code: 'VALIDATION_FAILED',
+      code: "VALIDATION_FAILED",
       timestamp: new Date().toISOString(),
       requestId,
       ...(config.includeDetails !== false && { details }),
-      ...(config.includeStack && isDevelopment && zodError.stack && { stack: zodError.stack }),
+      ...(config.includeStack &&
+        isDevelopment &&
+        zodError.stack && { stack: zodError.stack }),
     };
   }
 
@@ -188,7 +209,7 @@ export class ErrorHandler {
   private handleValidationError(
     validationError: ValidationError,
     requestId: RequestId,
-    config: ErrorHandlerConfig
+    config: ErrorHandlerConfig,
   ): ErrorResponse {
     return this.handleZodError(validationError.details, requestId, {
       ...config,
@@ -203,7 +224,7 @@ export class ErrorHandler {
     error: Error,
     errorType: ErrorType,
     requestId: RequestId,
-    config: ErrorHandlerConfig
+    config: ErrorHandlerConfig,
   ): ErrorResponse {
     const userMessage =
       config.customMessage ||
@@ -213,7 +234,7 @@ export class ErrorHandler {
 
     const response: ErrorResponse = {
       success: false,
-      error: errorType.replace('Error', ' Error'),
+      error: errorType.replace("Error", " Error"),
       message: userMessage,
       code: this.generateErrorCode(errorType),
       timestamp: new Date().toISOString(),
@@ -234,9 +255,9 @@ export class ErrorHandler {
   private createFallbackErrorResponse(requestId?: RequestId): ErrorResponse {
     return {
       success: false,
-      error: 'Internal Server Error',
-      message: 'An unexpected error occurred. Please try again later.',
-      code: 'INTERNAL_ERROR',
+      error: "Internal Server Error",
+      message: "An unexpected error occurred. Please try again later.",
+      code: "INTERNAL_ERROR",
       timestamp: new Date().toISOString(),
       requestId: requestId || this.generateRequestId(),
     };
@@ -249,7 +270,7 @@ export class ErrorHandler {
     error: z.infer<typeof errorInputSchema>,
     errorType: ErrorType,
     context: ErrorContext | null,
-    level: 'debug' | 'info' | 'warn' | 'error' | 'fatal'
+    level: "debug" | "info" | "warn" | "error" | "fatal",
   ): void {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const logMessage = `${errorType}: ${errorMessage}`;
@@ -257,34 +278,34 @@ export class ErrorHandler {
     const logContext = context || {};
     const metadata: Record<string, string | number | boolean> = {
       errorType,
-      errorConstructor: error?.constructor?.name || 'Unknown',
+      errorConstructor: error?.constructor?.name || "Unknown",
       hasStack: error instanceof Error && Boolean(error.stack),
     };
 
     switch (level) {
-      case 'debug':
+      case "debug":
         logger.debug(logMessage, logContext, metadata);
         break;
-      case 'info':
+      case "info":
         logger.info(logMessage, logContext, metadata);
         break;
-      case 'warn':
+      case "warn":
         logger.warn(logMessage, logContext, metadata);
         break;
-      case 'error':
+      case "error":
         logger.error(
           logMessage,
           error instanceof Error ? error : new Error(String(error)),
           logContext,
-          metadata
+          metadata,
         );
         break;
-      case 'fatal':
+      case "fatal":
         logger.fatal(
           logMessage,
           error instanceof Error ? error : new Error(String(error)),
           logContext,
-          metadata
+          metadata,
         );
         break;
       default:
@@ -292,7 +313,7 @@ export class ErrorHandler {
           logMessage,
           error instanceof Error ? error : new Error(String(error)),
           logContext,
-          metadata
+          metadata,
         );
     }
   }
@@ -308,7 +329,7 @@ export class ErrorHandler {
    * Generate structured error codes
    */
   private generateErrorCode(errorType: ErrorType): string {
-    const typeCode = errorType.replace('Error', '').toUpperCase();
+    const typeCode = errorType.replace("Error", "").toUpperCase();
     const timestamp = Date.now().toString(36).toUpperCase();
     return `${typeCode.slice(0, 3)}_${timestamp.slice(-8)}`;
   }
@@ -318,7 +339,7 @@ export class ErrorHandler {
    */
   public createNextResponse(
     error: z.infer<typeof errorInputSchema>,
-    config: ErrorHandlerConfig = {}
+    config: ErrorHandlerConfig = {},
   ): NextResponse {
     const errorResponse = this.handleError(error, config);
     const statusCode = this.getStatusCodeForError(error);
@@ -326,9 +347,9 @@ export class ErrorHandler {
     return NextResponse.json(errorResponse, {
       status: statusCode,
       headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'X-Request-ID': errorResponse.requestId || '',
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "X-Request-ID": errorResponse.requestId || "",
       },
     });
   }
@@ -346,16 +367,20 @@ export class ErrorHandler {
    */
   public async handleAsync<T>(
     operation: () => Promise<T>,
-    config: ErrorHandlerConfig = {}
-  ): Promise<{ success: true; data: T } | { success: false; error: ErrorResponse }> {
+    config: ErrorHandlerConfig = {},
+  ): Promise<
+    { success: true; data: T } | { success: false; error: ErrorResponse }
+  > {
     try {
       const data = await operation();
       return { success: true, data };
     } catch (error) {
       const validatedError = errorInputSchema.safeParse(error);
       const errorResponse = this.handleError(
-        validatedError.success ? validatedError.data : { message: 'Unknown error occurred' },
-        config
+        validatedError.success
+          ? validatedError.data
+          : { message: "Unknown error occurred" },
+        config,
       );
       return { success: false, error: errorResponse };
     }
@@ -367,20 +392,22 @@ export class ErrorHandler {
   public handleMiddlewareError(
     error: z.infer<typeof errorInputSchema>,
     request: NextRequest,
-    config: Partial<ErrorHandlerConfig> = {}
+    config: Partial<ErrorHandlerConfig> = {},
   ): NextResponse {
     const url = new URL(request.url);
-    const headerRequestId = request.headers.get('x-request-id');
-    const requestId = headerRequestId ? (headerRequestId as RequestId) : this.generateRequestId();
+    const headerRequestId = request.headers.get("x-request-id");
+    const requestId = headerRequestId
+      ? (headerRequestId as RequestId)
+      : this.generateRequestId();
 
     const fullConfig: ErrorHandlerConfig = {
       route: url.pathname,
       method: request.method,
       requestId,
       logContext: {
-        userAgent: request.headers.get('user-agent') || '',
-        ip: request.headers.get('x-forwarded-for') || '',
-        referer: request.headers.get('referer') || '',
+        userAgent: request.headers.get("user-agent") || "",
+        ip: request.headers.get("x-forwarded-for") || "",
+        referer: request.headers.get("referer") || "",
       },
       ...config,
     };
@@ -395,23 +422,23 @@ const errorHandler = ErrorHandler.getInstance();
 // Convenience functions for common use cases
 export const handleApiError = (
   error: z.infer<typeof errorInputSchema>,
-  config: ErrorHandlerConfig = {}
+  config: ErrorHandlerConfig = {},
 ): NextResponse => {
   return errorHandler.createNextResponse(error, {
     hideInternalErrors: true,
     sanitizeResponse: true,
-    logLevel: 'error',
+    logLevel: "error",
     ...config,
   });
 };
 
 export const handleValidationError = (
   validationError: ValidationError,
-  config: ErrorHandlerConfig = {}
+  config: ErrorHandlerConfig = {},
 ): NextResponse => {
   return errorHandler.createNextResponse(validationError, {
     includeDetails: true,
-    logLevel: 'warn',
+    logLevel: "warn",
     ...config,
   });
 };
@@ -419,11 +446,11 @@ export const handleValidationError = (
 // React component error boundary helper
 export const createErrorBoundaryFallback = (
   error: Error,
-  errorInfo: { componentStack: string }
+  errorInfo: { componentStack: string },
 ) => {
   const errorResponse = errorHandler.handleError(error, {
-    operation: 'react_render',
-    logLevel: 'error',
+    operation: "react_render",
+    logLevel: "error",
     includeStack: isDevelopment,
     logContext: {
       componentStack: errorInfo.componentStack,

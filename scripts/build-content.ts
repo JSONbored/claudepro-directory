@@ -17,31 +17,31 @@
  * @see lib/build/category-processor.ts - Shared processing utilities
  */
 
-import { mkdir } from 'node:fs/promises';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { mkdir } from "node:fs/promises";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   buildCategory,
   loadBuildCache,
   saveBuildCache,
   writeBuildOutput,
-} from '../src/lib/build/category-processor.js';
+} from "../src/lib/build/category-processor.js";
 import {
   BUILD_CATEGORY_CONFIGS,
   type BuildCategoryId,
   getAllBuildCategoryConfigs,
-} from '../src/lib/config/build-category-config.js';
-import { logger } from '../src/lib/logger.js';
-import { onBuildComplete } from '../src/lib/related-content/cache-invalidation.js';
-import { contentIndexer } from '../src/lib/related-content/indexer.js';
-import type { ContentStats } from '../src/lib/schemas/content/content-types.js';
+} from "../src/lib/config/build-category-config.js";
+import { logger } from "../src/lib/logger.js";
+import { onBuildComplete } from "../src/lib/related-content/cache-invalidation.js";
+import { contentIndexer } from "../src/lib/related-content/indexer.js";
+import type { ContentStats } from "../src/lib/schemas/content/content-types.js";
 
 // Paths
-const __dirname = fileURLToPath(new URL('.', import.meta.url));
-const ROOT_DIR = join(__dirname, '..');
-const CONTENT_DIR = join(ROOT_DIR, 'content');
-const GENERATED_DIR = join(ROOT_DIR, 'generated');
-const CACHE_DIR = join(ROOT_DIR, '.next', 'cache', 'build-content');
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
+const ROOT_DIR = join(__dirname, "..");
+const CONTENT_DIR = join(ROOT_DIR, "content");
+const GENERATED_DIR = join(ROOT_DIR, "generated");
+const CACHE_DIR = join(ROOT_DIR, ".next", "cache", "build-content");
 
 /**
  * Build statistics for reporting
@@ -66,7 +66,7 @@ interface BuildStats {
  */
 function getSchemaPathFromTypeName(typeName: string): string {
   // Remove "Content" suffix and convert to lowercase
-  const baseName = typeName.replace(/Content$/, '').toLowerCase();
+  const baseName = typeName.replace(/Content$/, "").toLowerCase();
   return `${baseName}.schema`;
 }
 
@@ -78,14 +78,22 @@ function getSchemaPathFromTypeName(typeName: string): string {
  * @param metadata - Metadata items
  * @returns TypeScript file content
  */
-function generateMetadataFile(categoryId: BuildCategoryId, metadata: readonly unknown[]): string {
+function generateMetadataFile(
+  categoryId: BuildCategoryId,
+  metadata: readonly unknown[],
+): string {
   const config = BUILD_CATEGORY_CONFIGS[categoryId];
-  const varName = categoryId.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
-  const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
-  const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
+  const varName = categoryId.replace(/-([a-z])/g, (_, letter: string) =>
+    letter.toUpperCase(),
+  );
+  const singularName = varName.replace(/s$/, "").replace(/Servers/, "Server");
+  const capitalizedSingular =
+    singularName.charAt(0).toUpperCase() + singularName.slice(1);
 
   // Generate metadata fields string for Pick type
-  const metadataFieldsStr = config.metadataFields.map((f) => `'${String(f)}'`).join(' | ');
+  const metadataFieldsStr = config.metadataFields
+    .map((f) => `'${String(f)}'`)
+    .join(" | ");
 
   return `/**
  * Auto-generated metadata file
@@ -118,11 +126,17 @@ export function get${capitalizedSingular}MetadataBySlug(slug: string): ${capital
  * @param items - Full content items
  * @returns TypeScript file content
  */
-function generateFullContentFile(categoryId: BuildCategoryId, items: readonly unknown[]): string {
+function generateFullContentFile(
+  categoryId: BuildCategoryId,
+  items: readonly unknown[],
+): string {
   const config = BUILD_CATEGORY_CONFIGS[categoryId];
-  const varName = categoryId.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
-  const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
-  const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
+  const varName = categoryId.replace(/-([a-z])/g, (_, letter: string) =>
+    letter.toUpperCase(),
+  );
+  const singularName = varName.replace(/s$/, "").replace(/Servers/, "Server");
+  const capitalizedSingular =
+    singularName.charAt(0).toUpperCase() + singularName.slice(1);
 
   return `/**
  * Auto-generated full content file
@@ -176,27 +190,34 @@ import type { ContentStats } from '../src/lib/schemas/content/content-types';
 // Lazy metadata getters
 ${categories
   .map((cat) => {
-    const varName = cat.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+    const varName = cat.replace(/-([a-z])/g, (_, letter: string) =>
+      letter.toUpperCase(),
+    );
     const capitalizedName = varName.charAt(0).toUpperCase() + varName.slice(1);
     return `export const get${capitalizedName} = () => metadataLoader.get('${varName}Metadata');`;
   })
-  .join('\n')}
+  .join("\n")}
 
 // Backward compatibility exports
 ${categories
   .map((cat) => {
-    const varName = cat.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+    const varName = cat.replace(/-([a-z])/g, (_, letter: string) =>
+      letter.toUpperCase(),
+    );
     const capitalizedName = varName.charAt(0).toUpperCase() + varName.slice(1);
     return `export const ${varName} = get${capitalizedName}();`;
   })
-  .join('\n')}
+  .join("\n")}
 
 // By-slug getters
 ${categories
   .map((cat) => {
-    const varName = cat.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
-    const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
-    const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
+    const varName = cat.replace(/-([a-z])/g, (_, letter: string) =>
+      letter.toUpperCase(),
+    );
+    const singularName = varName.replace(/s$/, "").replace(/Servers/, "Server");
+    const capitalizedSingular =
+      singularName.charAt(0).toUpperCase() + singularName.slice(1);
     const capitalizedName = varName.charAt(0).toUpperCase() + varName.slice(1);
 
     return `export const get${capitalizedSingular}BySlug = async (slug: string) => {
@@ -204,21 +225,24 @@ ${categories
   return (${varName}Data as any[]).find(item => item.slug === slug);
 };`;
   })
-  .join('\n\n')}
+  .join("\n\n")}
 
 // Full content lazy loaders
 ${categories
   .map((cat) => {
-    const varName = cat.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
-    const singularName = varName.replace(/s$/, '').replace(/Servers/, 'Server');
-    const capitalizedSingular = singularName.charAt(0).toUpperCase() + singularName.slice(1);
+    const varName = cat.replace(/-([a-z])/g, (_, letter: string) =>
+      letter.toUpperCase(),
+    );
+    const singularName = varName.replace(/s$/, "").replace(/Servers/, "Server");
+    const capitalizedSingular =
+      singularName.charAt(0).toUpperCase() + singularName.slice(1);
 
     return `export async function get${capitalizedSingular}FullContent(slug: string) {
   const module = await import('./${cat}-full');
   return module.get${capitalizedSingular}FullBySlug(slug);
 }`;
   })
-  .join('\n\n')}
+  .join("\n\n")}
 
 // Content statistics
 export const contentStats: ContentStats = ${JSON.stringify(contentStats, null, 2)};
@@ -233,7 +257,7 @@ async function main(): Promise<void> {
   const buildStartTime = performance.now();
   const buildStartMemory = process.memoryUsage().heapUsed;
 
-  logger.info('🔨 Starting modern content build system...\n');
+  logger.info("🔨 Starting modern content build system...\n");
 
   try {
     // Ensure output directory exists
@@ -247,12 +271,14 @@ async function main(): Promise<void> {
 
     // Build all categories in parallel using modern config system
     const categoryConfigs = getAllBuildCategoryConfigs();
-    logger.info(`Building ${categoryConfigs.length} categories in parallel...\n`);
+    logger.info(
+      `Building ${categoryConfigs.length} categories in parallel...\n`,
+    );
 
     const buildResults = await Promise.all(
       (Object.keys(BUILD_CATEGORY_CONFIGS) as BuildCategoryId[]).map((id) =>
-        buildCategory(CONTENT_DIR, id, cache)
-      )
+        buildCategory(CONTENT_DIR, id, cache),
+      ),
     );
 
     // Generate TypeScript files for each category
@@ -271,28 +297,39 @@ async function main(): Promise<void> {
       contentStats[result.category] = result.items.length;
 
       // Generate metadata file
-      const metadataPath = join(GENERATED_DIR, `${result.category}-metadata.ts`);
-      const metadataContent = generateMetadataFile(result.category, result.metadata);
+      const metadataPath = join(
+        GENERATED_DIR,
+        `${result.category}-metadata.ts`,
+      );
+      const metadataContent = generateMetadataFile(
+        result.category,
+        result.metadata,
+      );
       await writeBuildOutput(metadataPath, metadataContent);
 
       // Generate full content file
       const fullPath = join(GENERATED_DIR, `${result.category}-full.ts`);
-      const fullContent = generateFullContentFile(result.category, result.items);
+      const fullContent = generateFullContentFile(
+        result.category,
+        result.items,
+      );
       await writeBuildOutput(fullPath, fullContent);
 
       logger.success(
-        `✓ ${config.name}: ${result.metrics.filesValid} valid, ${result.metrics.filesInvalid} invalid (${result.metrics.processingTimeMs.toFixed(0)}ms)`
+        `✓ ${config.name}: ${result.metrics.filesValid} valid, ${result.metrics.filesInvalid} invalid (${result.metrics.processingTimeMs.toFixed(0)}ms)`,
       );
     }
 
     // Generate main index file
-    const indexPath = join(GENERATED_DIR, 'content.ts');
+    const indexPath = join(GENERATED_DIR, "content.ts");
     const indexContent = generateIndexFile(contentStats as ContentStats);
     await writeBuildOutput(indexPath, indexContent);
 
-    logger.info('\n📊 Building content index...');
+    logger.info("\n📊 Building content index...");
     const contentIndex = await contentIndexer.buildIndex();
-    logger.success(`✓ Built content index with ${contentIndex.items.length} items`);
+    logger.success(
+      `✓ Built content index with ${contentIndex.items.length} items`,
+    );
 
     // Save the main index
     await contentIndexer.saveIndex(contentIndex);
@@ -302,7 +339,7 @@ async function main(): Promise<void> {
 
     // Save updated cache
     const newCache = {
-      version: '1.0.0',
+      version: "1.0.0",
       files: {},
       lastBuild: new Date().toISOString(),
     };
@@ -313,7 +350,7 @@ async function main(): Promise<void> {
     await saveBuildCache(CACHE_DIR, newCache);
 
     // Trigger cache invalidation for related content
-    if (typeof onBuildComplete === 'function') {
+    if (typeof onBuildComplete === "function") {
       await onBuildComplete();
     }
 
@@ -331,8 +368,8 @@ async function main(): Promise<void> {
       peakMemoryMB: (buildEndMemory - buildStartMemory) / 1024 / 1024,
     };
 
-    logger.info('\n✨ Build complete!\n');
-    logger.info('📊 Build Statistics:');
+    logger.info("\n✨ Build complete!\n");
+    logger.info("📊 Build Statistics:");
     logger.info(`   Categories: ${stats.categoriesBuilt}`);
     logger.info(`   Total files: ${stats.totalFiles}`);
     logger.info(`   Valid: ${stats.totalValid}`);
@@ -342,7 +379,7 @@ async function main(): Promise<void> {
 
     process.exit(0);
   } catch (error) {
-    logger.error('❌ Build failed:', {
+    logger.error("❌ Build failed:", {
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
     });
@@ -352,6 +389,6 @@ async function main(): Promise<void> {
 
 // Run the build - handle promise to avoid floating promise warning
 main().catch((error: unknown) => {
-  logger.error('Build failed:', { error });
+  logger.error("Build failed:", { error });
   process.exit(1);
 });

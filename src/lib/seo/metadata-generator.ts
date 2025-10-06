@@ -12,11 +12,17 @@
  * @module lib/seo/metadata-generator
  */
 
-import type { Metadata } from 'next';
-import { APP_CONFIG } from '@/src/lib/constants';
-import type { MetadataContext, RouteMetadata } from '@/src/lib/seo/metadata-registry';
-import { METADATA_DEFAULTS, METADATA_REGISTRY } from '@/src/lib/seo/metadata-registry';
-import { buildPageTitle } from '@/src/lib/seo/title-builder';
+import type { Metadata } from "next";
+import { APP_CONFIG } from "@/src/lib/constants";
+import type {
+  MetadataContext,
+  RouteMetadata,
+} from "@/src/lib/seo/metadata-registry";
+import {
+  METADATA_DEFAULTS,
+  METADATA_REGISTRY,
+} from "@/src/lib/seo/metadata-registry";
+import { buildPageTitle } from "@/src/lib/seo/title-builder";
 
 /**
  * Generate Next.js Metadata from registry configuration
@@ -39,7 +45,7 @@ import { buildPageTitle } from '@/src/lib/seo/title-builder';
  */
 export async function generatePageMetadata(
   route: string,
-  context?: MetadataContext
+  context?: MetadataContext,
 ): Promise<Metadata> {
   // Get metadata config from registry
   const config = METADATA_REGISTRY[route as keyof typeof METADATA_REGISTRY];
@@ -59,7 +65,9 @@ export async function generatePageMetadata(
   const description = await resolveValue(config.description, context);
 
   // Resolve keywords (may be function or array)
-  const keywords = config.keywords ? await resolveValue(config.keywords, context) : undefined;
+  const keywords = config.keywords
+    ? await resolveValue(config.keywords, context)
+    : undefined;
 
   // Build canonical URL
   const canonicalUrl = buildCanonicalUrl(route, context);
@@ -68,7 +76,7 @@ export async function generatePageMetadata(
   const ogConfig = config.openGraph as {
     title?: string;
     description?: string;
-    type: 'website' | 'article';
+    type: "website" | "article";
   };
   const ogTitle = ogConfig.title || title;
   const ogDescription = ogConfig.description || description;
@@ -78,7 +86,7 @@ export async function generatePageMetadata(
   const twitterConfig = config.twitter as {
     title?: string;
     description?: string;
-    card: 'summary' | 'summary_large_image';
+    card: "summary" | "summary_large_image";
   };
   const twitterTitle = twitterConfig.title || title;
   const twitterDescription = twitterConfig.description || description;
@@ -88,14 +96,16 @@ export async function generatePageMetadata(
   const metadata: Metadata = {
     title,
     description,
-    keywords: keywords?.join(', '),
+    keywords: keywords?.join(", "),
     alternates: {
       canonical: canonicalUrl,
       types:
-        route === '/:category/:slug' && context?.params?.category && context?.params?.slug
+        route === "/:category/:slug" &&
+        context?.params?.category &&
+        context?.params?.slug
           ? {
               // Add llms.txt alternate link for content detail pages (AI-optimized plain text)
-              'text/plain': `/${context.params.category}/${context.params.slug}/llms.txt`,
+              "text/plain": `/${context.params.category}/${context.params.slug}/llms.txt`,
               // Note: Markdown export is available via server action, not as alternate link
               // to avoid duplicate content penalties and maintain SEO best practices
             }
@@ -119,9 +129,9 @@ export async function generatePageMetadata(
       googleBot: {
         index: true,
         follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
       },
     },
   };
@@ -134,7 +144,7 @@ export async function generatePageMetadata(
   // Add published/modified dates for Article schema
   if (config.aiOptimization?.useArticleSchema && context?.item) {
     const ogMetadata = metadata.openGraph as Record<string, unknown>;
-    ogMetadata.type = 'article';
+    ogMetadata.type = "article";
 
     if (context.item.dateAdded) {
       ogMetadata.publishedTime = context.item.dateAdded;
@@ -160,15 +170,19 @@ export async function generatePageMetadata(
  * Compatible with exactOptionalPropertyTypes: true
  */
 async function resolveTitle(
-  titleConfig: RouteMetadata['title'],
-  context?: MetadataContext
+  titleConfig: RouteMetadata["title"],
+  context?: MetadataContext,
 ): Promise<string> {
   // First check if titleConfig itself is a function (rare but possible)
-  if (typeof titleConfig === 'function') {
+  if (typeof titleConfig === "function") {
     const resolved = await titleConfig(context);
     // Type assertion needed to widen Zod-inferred function return type
     return buildPageTitle(
-      resolved as { tier: 'home' | 'section' | 'content'; title?: string; section?: string }
+      resolved as {
+        tier: "home" | "section" | "content";
+        title?: string;
+        section?: string;
+      },
     );
   }
 
@@ -179,8 +193,12 @@ async function resolveTitle(
   let titleValue: string | undefined;
   if (config.title !== undefined) {
     titleValue =
-      typeof config.title === 'function'
-        ? await (config.title as (context?: MetadataContext) => string | Promise<string>)(context)
+      typeof config.title === "function"
+        ? await (
+            config.title as (
+              context?: MetadataContext,
+            ) => string | Promise<string>
+          )(context)
         : (config.title as string);
   }
 
@@ -188,8 +206,12 @@ async function resolveTitle(
   let sectionValue: string | undefined;
   if (config.section !== undefined) {
     sectionValue =
-      typeof config.section === 'function'
-        ? await (config.section as (context?: MetadataContext) => string | Promise<string>)(context)
+      typeof config.section === "function"
+        ? await (
+            config.section as (
+              context?: MetadataContext,
+            ) => string | Promise<string>
+          )(context)
         : (config.section as string);
   }
 
@@ -207,10 +229,12 @@ async function resolveTitle(
  */
 async function resolveValue<T>(
   value: T | ((context?: MetadataContext) => T | Promise<T>),
-  context?: MetadataContext
+  context?: MetadataContext,
 ): Promise<T> {
-  if (typeof value === 'function') {
-    return await (value as (context?: MetadataContext) => T | Promise<T>)(context);
+  if (typeof value === "function") {
+    return await (value as (context?: MetadataContext) => T | Promise<T>)(
+      context,
+    );
   }
   return value;
 }
@@ -225,7 +249,7 @@ function buildCanonicalUrl(route: string, context?: MetadataContext): string {
   // Replace dynamic segments with actual values
   if (context?.params) {
     for (const [key, value] of Object.entries(context.params)) {
-      const segment = Array.isArray(value) ? value.join('/') : value;
+      const segment = Array.isArray(value) ? value.join("/") : value;
       path = path.replace(`:${key}`, segment);
       path = path.replace(`[${key}]`, segment);
       path = path.replace(`[...${key}]`, segment);
@@ -233,10 +257,10 @@ function buildCanonicalUrl(route: string, context?: MetadataContext): string {
   }
 
   // Remove any remaining parameter markers
-  path = path.replace(/\/:\w+/g, '').replace(/\/\[\w+\]/g, '');
+  path = path.replace(/\/:\w+/g, "").replace(/\/\[\w+\]/g, "");
 
   // Ensure path starts with /
-  if (!path.startsWith('/')) {
+  if (!path.startsWith("/")) {
     path = `/${path}`;
   }
 
@@ -251,7 +275,7 @@ function buildCanonicalUrl(route: string, context?: MetadataContext): string {
  */
 export async function generateCategoryMetadata(
   category: string,
-  categoryConfig: MetadataContext['categoryConfig']
+  categoryConfig: MetadataContext["categoryConfig"],
 ): Promise<Metadata> {
   // Explicit context construction with proper undefined handling
   const context: MetadataContext = {
@@ -259,7 +283,7 @@ export async function generateCategoryMetadata(
     ...(categoryConfig !== undefined && { categoryConfig }),
   };
 
-  return generatePageMetadata('/:category', context);
+  return generatePageMetadata("/:category", context);
 }
 
 /**
@@ -271,8 +295,8 @@ export async function generateCategoryMetadata(
 export async function generateContentMetadata(
   category: string,
   slug: string,
-  item: MetadataContext['item'],
-  categoryConfig?: MetadataContext['categoryConfig']
+  item: MetadataContext["item"],
+  categoryConfig?: MetadataContext["categoryConfig"],
 ): Promise<Metadata> {
   // Explicit context construction with proper undefined handling
   const context: MetadataContext = {
@@ -281,5 +305,5 @@ export async function generateContentMetadata(
     ...(categoryConfig !== undefined && { categoryConfig }),
   };
 
-  return generatePageMetadata('/:category/:slug', context);
+  return generatePageMetadata("/:category/:slug", context);
 }

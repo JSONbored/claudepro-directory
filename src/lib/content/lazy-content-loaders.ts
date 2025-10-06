@@ -14,9 +14,9 @@
  * @see lib/config/build-category-config.ts - Category configuration
  */
 
-import type { BuildCategoryId } from '@/src/lib/config/build-category-config';
-import { getAllBuildCategoryConfigs } from '@/src/lib/config/build-category-config';
-import { BatchLazyLoader } from '@/src/lib/utils/lazy-loader';
+import type { BuildCategoryId } from "@/src/lib/config/build-category-config";
+import { getAllBuildCategoryConfigs } from "@/src/lib/config/build-category-config";
+import { BatchLazyLoader } from "@/src/lib/utils/lazy-loader";
 
 /**
  * Factory function to create metadata loaders dynamically
@@ -26,7 +26,9 @@ import { BatchLazyLoader } from '@/src/lib/utils/lazy-loader';
  * @returns Loader function for metadata
  */
 function createMetadataLoaderFactory(categoryId: BuildCategoryId) {
-  const varName = categoryId.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+  const varName = categoryId.replace(/-([a-z])/g, (_, letter: string) =>
+    letter.toUpperCase(),
+  );
   return () =>
     import(`@/generated/${categoryId}-metadata`).then((m) => {
       const metadataKey = `${varName}Metadata`;
@@ -41,12 +43,17 @@ function createMetadataLoaderFactory(categoryId: BuildCategoryId) {
 export const metadataLoader = new BatchLazyLoader(
   Object.fromEntries(
     getAllBuildCategoryConfigs().map((config) => {
-      const varName = config.id.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
-      return [`${varName}Metadata`, createMetadataLoaderFactory(config.id as BuildCategoryId)];
-    })
+      const varName = config.id.replace(/-([a-z])/g, (_, letter: string) =>
+        letter.toUpperCase(),
+      );
+      return [
+        `${varName}Metadata`,
+        createMetadataLoaderFactory(config.id as BuildCategoryId),
+      ];
+    }),
   ),
   {
     preloadKeys: [],
     cacheTimeout: 10 * 60 * 1000, // 10 minutes
-  }
+  },
 );

@@ -6,10 +6,16 @@
  * Content: Advanced Claude features, MCP integration, custom rules, best practices
  */
 
-import { Button, Hr, Section, Text } from '@react-email/components';
-import type * as React from 'react';
-import { BaseLayout } from '../layouts/base-layout';
-import { borderRadius, brandColors, emailTheme, spacing, typography } from '../utils/theme';
+import { Button, Hr, Section, Text } from "@react-email/components";
+import type * as React from "react";
+import { BaseLayout } from "../layouts/base-layout";
+import {
+  borderRadius,
+  brandColors,
+  emailTheme,
+  spacing,
+  typography,
+} from "../utils/theme";
 
 export interface OnboardingPowerTipsProps {
   /**
@@ -42,11 +48,13 @@ export function OnboardingPowerTips({ email }: OnboardingPowerTipsProps) {
           <Text style={tipIconStyle}>🔌</Text>
           <Text style={tipTitleStyle}>Combine Multiple MCP Servers</Text>
           <Text style={tipDescStyle}>
-            Stack MCP servers for powerful workflows. For example: GitHub MCP + Filesystem MCP +
-            Database MCP = Complete full-stack development environment.
+            Stack MCP servers for powerful workflows. For example: GitHub MCP +
+            Filesystem MCP + Database MCP = Complete full-stack development
+            environment.
           </Text>
           <Text style={tipCodeStyle}>
-            💡 Pro Tip: Start with 2-3 servers, then add more as you master each one.
+            💡 Pro Tip: Start with 2-3 servers, then add more as you master each
+            one.
           </Text>
         </Section>
 
@@ -54,12 +62,13 @@ export function OnboardingPowerTips({ email }: OnboardingPowerTipsProps) {
           <Text style={tipIconStyle}>📝</Text>
           <Text style={tipTitleStyle}>Create Custom Rule Sets</Text>
           <Text style={tipDescStyle}>
-            Build project-specific rules that define your coding standards, response formats, and
-            best practices. Claude will automatically apply them to every interaction.
+            Build project-specific rules that define your coding standards,
+            response formats, and best practices. Claude will automatically
+            apply them to every interaction.
           </Text>
           <Text style={tipCodeStyle}>
-            💡 Pro Tip: Use rules for code style guides, security requirements, and team
-            conventions.
+            💡 Pro Tip: Use rules for code style guides, security requirements,
+            and team conventions.
           </Text>
         </Section>
 
@@ -67,12 +76,13 @@ export function OnboardingPowerTips({ email }: OnboardingPowerTipsProps) {
           <Text style={tipIconStyle}>🎯</Text>
           <Text style={tipTitleStyle}>Master Context Windows</Text>
           <Text style={tipDescStyle}>
-            Use hooks and commands to automatically inject relevant context. This keeps Claude
-            informed about your project structure, dependencies, and requirements.
+            Use hooks and commands to automatically inject relevant context.
+            This keeps Claude informed about your project structure,
+            dependencies, and requirements.
           </Text>
           <Text style={tipCodeStyle}>
-            💡 Pro Tip: Create hooks that run on project load to set up your ideal Claude
-            environment.
+            💡 Pro Tip: Create hooks that run on project load to set up your
+            ideal Claude environment.
           </Text>
         </Section>
       </Section>
@@ -81,24 +91,26 @@ export function OnboardingPowerTips({ email }: OnboardingPowerTipsProps) {
 
       {/* Best Practices */}
       <Section style={contentSection}>
-        <Text style={sectionTitleStyle}>✨ Best Practices from the Community</Text>
+        <Text style={sectionTitleStyle}>
+          ✨ Best Practices from the Community
+        </Text>
 
         <ul style={listStyle}>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>Start Small:</strong> Master one configuration before
-            combining multiple tools
+            <strong style={strongStyle}>Start Small:</strong> Master one
+            configuration before combining multiple tools
           </li>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>Document Everything:</strong> Keep notes on which
-            configurations work best for different tasks
+            <strong style={strongStyle}>Document Everything:</strong> Keep notes
+            on which configurations work best for different tasks
           </li>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>Iterate Often:</strong> Refine your prompts and rules based
-            on results
+            <strong style={strongStyle}>Iterate Often:</strong> Refine your
+            prompts and rules based on results
           </li>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>Share Back:</strong> Submit your successful configurations
-            to help others
+            <strong style={strongStyle}>Share Back:</strong> Submit your
+            successful configurations to help others
           </li>
         </ul>
       </Section>
@@ -109,14 +121,21 @@ export function OnboardingPowerTips({ email }: OnboardingPowerTipsProps) {
       <Section style={ctaSection}>
         <Text style={ctaTitleStyle}>Explore Advanced Features</Text>
         <Text style={paragraphStyle}>
-          Dive deeper into MCP servers, custom hooks, and advanced automation techniques.
+          Dive deeper into MCP servers, custom hooks, and advanced automation
+          techniques.
         </Text>
 
-        <Button href="https://claudepro.directory/mcp" style={primaryButtonStyle}>
+        <Button
+          href="https://claudepro.directory/mcp"
+          style={primaryButtonStyle}
+        >
           Browse MCP Servers
         </Button>
 
-        <Button href="https://claudepro.directory/hooks" style={secondaryButtonStyle}>
+        <Button
+          href="https://claudepro.directory/hooks"
+          style={secondaryButtonStyle}
+        >
           Explore Hooks
         </Button>
       </Section>
@@ -127,8 +146,8 @@ export function OnboardingPowerTips({ email }: OnboardingPowerTipsProps) {
       <Section style={teaserSection}>
         <Text style={teaserTitleStyle}>Coming Up Next...</Text>
         <Text style={teaserDescStyle}>
-          In our next email, we'll introduce you to the ClaudePro community and show you how to
-          contribute your own configurations. Stay tuned! 🎉
+          In our next email, we'll introduce you to the ClaudePro community and
+          show you how to contribute your own configurations. Stay tuned! 🎉
         </Text>
       </Section>
 
@@ -137,7 +156,9 @@ export function OnboardingPowerTips({ email }: OnboardingPowerTipsProps) {
         <Text style={footerNoteStyle}>
           📧 <strong style={strongStyle}>{email}</strong>
         </Text>
-        <Text style={footerNoteStyle}>This is part 3 of your 5-email onboarding series.</Text>
+        <Text style={footerNoteStyle}>
+          This is part 3 of your 5-email onboarding series.
+        </Text>
       </Section>
     </BaseLayout>
   );
@@ -148,12 +169,12 @@ export function OnboardingPowerTips({ email }: OnboardingPowerTipsProps) {
  */
 
 const heroSection: React.CSSProperties = {
-  textAlign: 'center',
+  textAlign: "center",
   marginBottom: spacing.lg,
 };
 
 const headingStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['3xl'],
+  fontSize: typography.fontSize["3xl"],
   fontWeight: typography.fontWeight.bold,
   color: emailTheme.textPrimary,
   margin: `0 0 ${spacing.sm} 0`,
@@ -173,7 +194,7 @@ const contentSection: React.CSSProperties = {
 };
 
 const sectionTitleStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['2xl'],
+  fontSize: typography.fontSize["2xl"],
   fontWeight: typography.fontWeight.bold,
   color: emailTheme.textPrimary,
   margin: `0 0 ${spacing.md} 0`,
@@ -195,9 +216,9 @@ const tipCard: React.CSSProperties = {
 };
 
 const tipIconStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['2xl'],
+  fontSize: typography.fontSize["2xl"],
   margin: `0 0 ${spacing.xs} 0`,
-  display: 'block',
+  display: "block",
 };
 
 const tipTitleStyle: React.CSSProperties = {
@@ -217,7 +238,7 @@ const tipDescStyle: React.CSSProperties = {
 const tipCodeStyle: React.CSSProperties = {
   fontSize: typography.fontSize.sm,
   color: brandColors.primary,
-  fontStyle: 'italic',
+  fontStyle: "italic",
   lineHeight: typography.lineHeight.relaxed,
   margin: 0,
 };
@@ -240,13 +261,13 @@ const strongStyle: React.CSSProperties = {
 };
 
 const ctaSection: React.CSSProperties = {
-  textAlign: 'center',
+  textAlign: "center",
   marginTop: spacing.lg,
   marginBottom: spacing.lg,
 };
 
 const ctaTitleStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['2xl'],
+  fontSize: typography.fontSize["2xl"],
   fontWeight: typography.fontWeight.bold,
   color: emailTheme.textPrimary,
   margin: `0 0 ${spacing.md} 0`,
@@ -254,18 +275,18 @@ const ctaTitleStyle: React.CSSProperties = {
 
 const primaryButtonStyle: React.CSSProperties = {
   backgroundColor: brandColors.primary,
-  color: '#ffffff',
+  color: "#ffffff",
   fontWeight: typography.fontWeight.semibold,
   fontSize: typography.fontSize.base,
   padding: `${spacing.md} ${spacing.xl}`,
   borderRadius: borderRadius.md,
-  textDecoration: 'none',
-  display: 'inline-block',
+  textDecoration: "none",
+  display: "inline-block",
   marginTop: spacing.sm,
   marginBottom: spacing.sm,
   marginLeft: spacing.sm,
   marginRight: spacing.sm,
-  border: 'none',
+  border: "none",
 };
 
 const secondaryButtonStyle: React.CSSProperties = {
@@ -275,8 +296,8 @@ const secondaryButtonStyle: React.CSSProperties = {
   fontSize: typography.fontSize.base,
   padding: `${spacing.md} ${spacing.xl}`,
   borderRadius: borderRadius.md,
-  textDecoration: 'none',
-  display: 'inline-block',
+  textDecoration: "none",
+  display: "inline-block",
   marginTop: spacing.sm,
   marginBottom: spacing.sm,
   marginLeft: spacing.sm,
@@ -288,7 +309,7 @@ const teaserSection: React.CSSProperties = {
   backgroundColor: emailTheme.bgTertiary,
   padding: spacing.lg,
   borderRadius: borderRadius.md,
-  textAlign: 'center',
+  textAlign: "center",
   marginTop: spacing.lg,
   marginBottom: spacing.lg,
 };
@@ -314,7 +335,7 @@ const dividerStyle: React.CSSProperties = {
 
 const footerNoteSection: React.CSSProperties = {
   marginTop: spacing.lg,
-  textAlign: 'center',
+  textAlign: "center",
 };
 
 const footerNoteStyle: React.CSSProperties = {

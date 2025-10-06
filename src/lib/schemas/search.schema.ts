@@ -3,10 +3,18 @@
  * Security-first approach to prevent injection and ensure data integrity
  */
 
-import { z } from 'zod';
-import { logger } from '@/src/lib/logger';
-import { nonNegativeInt, percentage, positiveInt } from './primitives/base-numbers';
-import { mediumString, nonEmptyString, shortString } from './primitives/base-strings';
+import { z } from "zod";
+import { logger } from "@/src/lib/logger";
+import {
+  nonNegativeInt,
+  percentage,
+  positiveInt,
+} from "./primitives/base-numbers";
+import {
+  mediumString,
+  nonEmptyString,
+  shortString,
+} from "./primitives/base-strings";
 
 /**
  * Searchable item schema for search cache
@@ -16,18 +24,34 @@ const searchableItemSchema = z
   .object({
     title: nonEmptyString
       .max(200)
-      .describe('Display title of the searchable item, max 200 characters'),
-    name: z.string().optional().describe('Optional alternative name for the item'),
-    description: mediumString.describe('Detailed description of the item for search indexing'),
+      .describe("Display title of the searchable item, max 200 characters"),
+    name: z
+      .string()
+      .optional()
+      .describe("Optional alternative name for the item"),
+    description: mediumString.describe(
+      "Detailed description of the item for search indexing",
+    ),
     tags: z
-      .array(z.string().max(50).describe('Individual tag, max 50 characters'))
-      .describe('Array of tags associated with the item'),
-    category: z.string().max(50).describe('Primary category classification, max 50 characters'),
-    popularity: percentage.optional().describe('Optional popularity score as percentage (0-100)'),
-    slug: nonEmptyString.max(200).describe('URL-safe slug identifier, max 200 characters'),
-    id: nonEmptyString.max(200).describe('Unique identifier for the item, max 200 characters'),
+      .array(z.string().max(50).describe("Individual tag, max 50 characters"))
+      .describe("Array of tags associated with the item"),
+    category: z
+      .string()
+      .max(50)
+      .describe("Primary category classification, max 50 characters"),
+    popularity: percentage
+      .optional()
+      .describe("Optional popularity score as percentage (0-100)"),
+    slug: nonEmptyString
+      .max(200)
+      .describe("URL-safe slug identifier, max 200 characters"),
+    id: nonEmptyString
+      .max(200)
+      .describe("Unique identifier for the item, max 200 characters"),
   })
-  .describe('Schema for searchable items in the search cache used with Fuzzysort adapter');
+  .describe(
+    "Schema for searchable items in the search cache used with Fuzzysort adapter",
+  );
 
 export type SearchableItem = z.infer<typeof searchableItemSchema>;
 
@@ -37,20 +61,22 @@ export type SearchableItem = z.infer<typeof searchableItemSchema>;
 const searchFiltersSchema = z
   .object({
     categories: z
-      .array(z.string().max(50).describe('Category name, max 50 characters'))
-      .describe('Array of category filters to apply'),
+      .array(z.string().max(50).describe("Category name, max 50 characters"))
+      .describe("Array of category filters to apply"),
     tags: z
-      .array(z.string().max(50).describe('Tag name, max 50 characters'))
-      .describe('Array of tag filters to apply'),
-    authors: z.array(shortString).describe('Array of author names to filter by'),
+      .array(z.string().max(50).describe("Tag name, max 50 characters"))
+      .describe("Array of tag filters to apply"),
+    authors: z
+      .array(shortString)
+      .describe("Array of author names to filter by"),
     sort: z
-      .enum(['trending', 'newest', 'alphabetical', 'popularity'])
-      .describe('Sort order for search results'),
+      .enum(["trending", "newest", "alphabetical", "popularity"])
+      .describe("Sort order for search results"),
     popularity: z
       .tuple([nonNegativeInt, percentage])
-      .describe('Popularity range filter as tuple of min and max percentage'),
+      .describe("Popularity range filter as tuple of min and max percentage"),
   })
-  .describe('Schema for search filters applied to cached search results');
+  .describe("Schema for search filters applied to cached search results");
 
 export type SearchFilters = z.infer<typeof searchFiltersSchema>;
 
@@ -59,10 +85,16 @@ export type SearchFilters = z.infer<typeof searchFiltersSchema>;
  */
 const searchCacheKeySchema = z
   .object({
-    query: mediumString.describe('Search query string for cache key generation'),
-    filters: searchFiltersSchema.describe('Active search filters for cache key generation'),
+    query: mediumString.describe(
+      "Search query string for cache key generation",
+    ),
+    filters: searchFiltersSchema.describe(
+      "Active search filters for cache key generation",
+    ),
   })
-  .describe('Schema for generating unique cache keys based on query and filters');
+  .describe(
+    "Schema for generating unique cache keys based on query and filters",
+  );
 
 export type SearchCacheKey = z.infer<typeof searchCacheKeySchema>;
 
@@ -73,37 +105,39 @@ const searchPaginationSchema = z
   .object({
     page: z
       .union([
-        z.string().describe('Page number as string'),
-        z.number().describe('Page number as integer'),
+        z.string().describe("Page number as string"),
+        z.number().describe("Page number as integer"),
       ])
       .transform((val) => Number(val))
       .pipe(positiveInt.max(1000))
       .optional()
       .default(1)
-      .describe('Current page number for pagination, max 1000, defaults to 1'),
+      .describe("Current page number for pagination, max 1000, defaults to 1"),
 
     limit: z
       .union([
-        z.string().describe('Results per page as string'),
-        z.number().describe('Results per page as integer'),
+        z.string().describe("Results per page as string"),
+        z.number().describe("Results per page as integer"),
       ])
       .transform((val) => Number(val))
       .pipe(positiveInt.max(100))
       .optional()
       .default(20)
-      .describe('Number of results per page, max 100, defaults to 20'),
+      .describe("Number of results per page, max 100, defaults to 20"),
 
     offset: z
       .union([
-        z.string().describe('Result offset as string'),
-        z.number().describe('Result offset as integer'),
+        z.string().describe("Result offset as string"),
+        z.number().describe("Result offset as integer"),
       ])
       .transform((val) => Number(val))
       .pipe(nonNegativeInt.max(10000))
       .optional()
-      .describe('Optional offset for result skipping, max 10000'),
+      .describe("Optional offset for result skipping, max 10000"),
   })
-  .describe('Schema for pagination parameters with string or number input support');
+  .describe(
+    "Schema for pagination parameters with string or number input support",
+  );
 
 export type SearchPaginationParams = z.infer<typeof searchPaginationSchema>;
 
@@ -116,50 +150,67 @@ const searchQuerySchema = z
       .string()
       .optional()
       .transform((val) => val?.trim())
-      .refine((val) => !val || val.length >= 2, 'Search query must be at least 2 characters')
-      .refine((val) => !val || val.length <= 200, 'Search query is too long')
+      .refine(
+        (val) => !val || val.length >= 2,
+        "Search query must be at least 2 characters",
+      )
+      .refine((val) => !val || val.length <= 200, "Search query is too long")
       .transform((val) => {
         if (!val) return undefined;
         // Sanitize search query to prevent injection
         return val
-          .replace(/[<>'"&]/g, '') // Remove potential XSS characters
-          .replace(/\s+/g, ' ') // Normalize whitespace
+          .replace(/[<>'"&]/g, "") // Remove potential XSS characters
+          .replace(/\s+/g, " ") // Normalize whitespace
           .slice(0, 200); // Enforce max length
       })
-      .describe('Search query parameter (q), sanitized and validated 2-200 characters'),
+      .describe(
+        "Search query parameter (q), sanitized and validated 2-200 characters",
+      ),
 
     query: z
       .string()
       .optional()
       .transform((val) => val?.trim())
-      .refine((val) => !val || val.length >= 2, 'Search query must be at least 2 characters')
-      .refine((val) => !val || val.length <= 200, 'Search query is too long')
+      .refine(
+        (val) => !val || val.length >= 2,
+        "Search query must be at least 2 characters",
+      )
+      .refine((val) => !val || val.length <= 200, "Search query is too long")
       .transform((val) => {
         if (!val) return undefined;
         // Sanitize search query to prevent injection
         return val
-          .replace(/[<>'"&]/g, '') // Remove potential XSS characters
-          .replace(/\s+/g, ' ') // Normalize whitespace
+          .replace(/[<>'"&]/g, "") // Remove potential XSS characters
+          .replace(/\s+/g, " ") // Normalize whitespace
           .slice(0, 200); // Enforce max length
       })
-      .describe('Search query parameter (query), sanitized and validated 2-200 characters'),
+      .describe(
+        "Search query parameter (query), sanitized and validated 2-200 characters",
+      ),
 
     search: z
       .string()
       .optional()
       .transform((val) => val?.trim())
-      .refine((val) => !val || val.length >= 2, 'Search term must be at least 2 characters')
-      .refine((val) => !val || val.length <= 200, 'Search term is too long')
+      .refine(
+        (val) => !val || val.length >= 2,
+        "Search term must be at least 2 characters",
+      )
+      .refine((val) => !val || val.length <= 200, "Search term is too long")
       .transform((val) => {
         if (!val) return undefined;
         return val
-          .replace(/[<>'"&]/g, '')
-          .replace(/\s+/g, ' ')
+          .replace(/[<>'"&]/g, "")
+          .replace(/\s+/g, " ")
           .slice(0, 200);
       })
-      .describe('Search query parameter (search), sanitized and validated 2-200 characters'),
+      .describe(
+        "Search query parameter (search), sanitized and validated 2-200 characters",
+      ),
   })
-  .describe('Schema for search query parameters with XSS protection and normalization');
+  .describe(
+    "Schema for search query parameters with XSS protection and normalization",
+  );
 
 export type SearchQuery = z.infer<typeof searchQuerySchema>;
 
@@ -169,25 +220,46 @@ export type SearchQuery = z.infer<typeof searchQuerySchema>;
 const sortSchema = z
   .object({
     sort: z
-      .enum(['relevance', 'date', 'popularity', 'name', 'updated', 'created', 'views', 'trending'])
+      .enum([
+        "relevance",
+        "date",
+        "popularity",
+        "name",
+        "updated",
+        "created",
+        "views",
+        "trending",
+      ])
       .optional()
-      .default('relevance')
-      .describe('Primary sort field, defaults to relevance'),
+      .default("relevance")
+      .describe("Primary sort field, defaults to relevance"),
 
     order: z
-      .enum(['asc', 'desc'])
+      .enum(["asc", "desc"])
       .optional()
-      .default('desc')
-      .describe('Sort order direction, defaults to descending'),
+      .default("desc")
+      .describe("Sort order direction, defaults to descending"),
 
     sortBy: z
-      .enum(['relevance', 'date', 'popularity', 'name', 'updated', 'created', 'views', 'trending'])
+      .enum([
+        "relevance",
+        "date",
+        "popularity",
+        "name",
+        "updated",
+        "created",
+        "views",
+        "trending",
+      ])
       .optional()
-      .describe('Alternative sort field parameter'),
+      .describe("Alternative sort field parameter"),
 
-    orderBy: z.enum(['asc', 'desc']).optional().describe('Alternative sort order parameter'),
+    orderBy: z
+      .enum(["asc", "desc"])
+      .optional()
+      .describe("Alternative sort order parameter"),
   })
-  .describe('Schema for sorting parameters with flexible field naming');
+  .describe("Schema for sorting parameters with flexible field naming");
 
 export type SortParams = z.infer<typeof sortSchema>;
 
@@ -200,71 +272,81 @@ const filterSchema = z
       .union([
         z
           .enum([
-            'all',
-            'agents',
-            'mcp',
-            'rules',
-            'commands',
-            'hooks',
-            'statuslines',
-            'collections',
-            'guides',
+            "all",
+            "agents",
+            "mcp",
+            "rules",
+            "commands",
+            "hooks",
+            "statuslines",
+            "collections",
+            "guides",
           ])
-          .describe('Predefined category value'),
+          .describe("Predefined category value"),
         z
           .string()
           .transform((val) => {
             const normalized = val.toLowerCase().trim();
             if (
               [
-                'all',
-                'agents',
-                'mcp',
-                'rules',
-                'commands',
-                'hooks',
-                'statuslines',
-                'collections',
-                'guides',
+                "all",
+                "agents",
+                "mcp",
+                "rules",
+                "commands",
+                "hooks",
+                "statuslines",
+                "collections",
+                "guides",
               ].includes(normalized)
             ) {
               return normalized as
-                | 'all'
-                | 'agents'
-                | 'mcp'
-                | 'rules'
-                | 'commands'
-                | 'hooks'
-                | 'statuslines'
-                | 'collections'
-                | 'guides';
+                | "all"
+                | "agents"
+                | "mcp"
+                | "rules"
+                | "commands"
+                | "hooks"
+                | "statuslines"
+                | "collections"
+                | "guides";
             }
-            return 'all';
+            return "all";
           })
-          .describe('Category string normalized to valid value or all'),
+          .describe("Category string normalized to valid value or all"),
       ])
       .optional()
-      .default('all')
-      .describe('Content category filter, defaults to all'),
+      .default("all")
+      .describe("Content category filter, defaults to all"),
 
     type: z
       .union([
         z
-          .enum(['all', 'agent', 'mcp', 'rule', 'command', 'hook'])
-          .describe('Predefined content type'),
+          .enum(["all", "agent", "mcp", "rule", "command", "hook"])
+          .describe("Predefined content type"),
         z
           .string()
           .transform((val) => {
             const normalized = val.toLowerCase().trim();
-            if (['all', 'agent', 'mcp', 'rule', 'command', 'hook'].includes(normalized)) {
-              return normalized as 'all' | 'agent' | 'mcp' | 'rule' | 'command' | 'hook';
+            if (
+              ["all", "agent", "mcp", "rule", "command", "hook"].includes(
+                normalized,
+              )
+            ) {
+              return normalized as
+                | "all"
+                | "agent"
+                | "mcp"
+                | "rule"
+                | "command"
+                | "hook";
             }
-            return 'all';
+            return "all";
           })
-          .describe('Content type string normalized to valid value or all'),
+          .describe("Content type string normalized to valid value or all"),
       ])
       .optional()
-      .describe('Content type filter'),
+      .describe("Content type filter"),
 
     tags: z
       .union([
@@ -273,65 +355,65 @@ const filterSchema = z
           .transform(
             (val) =>
               val
-                .split(',')
+                .split(",")
                 .map((tag) => tag.trim())
                 .filter((tag) => tag.length > 0)
-                .slice(0, 10) // Maximum 10 tags
+                .slice(0, 10), // Maximum 10 tags
           )
-          .describe('Comma-separated tag string parsed to array, max 10 tags'),
+          .describe("Comma-separated tag string parsed to array, max 10 tags"),
         z
-          .array(z.string().describe('Individual tag string'))
+          .array(z.string().describe("Individual tag string"))
           .transform((tags) =>
             tags
               .map((tag) => tag.trim())
               .filter((tag) => tag.length > 0)
-              .slice(0, 10)
+              .slice(0, 10),
           )
-          .describe('Tag array normalized and limited to 10 tags'),
+          .describe("Tag array normalized and limited to 10 tags"),
       ])
       .optional()
-      .describe('Tag filter as comma-separated string or array'),
+      .describe("Tag filter as comma-separated string or array"),
 
     featured: z
       .union([
-        z.boolean().describe('Featured flag as boolean'),
+        z.boolean().describe("Featured flag as boolean"),
         z
           .string()
-          .transform((val) => val.toLowerCase() === 'true')
-          .describe('Featured flag as string converted to boolean'),
+          .transform((val) => val.toLowerCase() === "true")
+          .describe("Featured flag as string converted to boolean"),
         z
-          .literal('true')
+          .literal("true")
           .transform(() => true)
-          .describe('Literal true string'),
+          .describe("Literal true string"),
         z
-          .literal('false')
+          .literal("false")
           .transform(() => false)
-          .describe('Literal false string'),
+          .describe("Literal false string"),
       ])
       .optional()
-      .describe('Filter for featured content only'),
+      .describe("Filter for featured content only"),
 
     trending: z
       .union([
-        z.boolean().describe('Trending flag as boolean'),
+        z.boolean().describe("Trending flag as boolean"),
         z
           .string()
-          .transform((val) => val.toLowerCase() === 'true')
-          .describe('Trending flag as string converted to boolean'),
+          .transform((val) => val.toLowerCase() === "true")
+          .describe("Trending flag as string converted to boolean"),
         z
-          .literal('true')
+          .literal("true")
           .transform(() => true)
-          .describe('Literal true string'),
+          .describe("Literal true string"),
         z
-          .literal('false')
+          .literal("false")
           .transform(() => false)
-          .describe('Literal false string'),
+          .describe("Literal false string"),
       ])
       .optional()
-      .describe('Filter for trending content only'),
+      .describe("Filter for trending content only"),
   })
   .describe(
-    'Schema for content filtering with category, type, tags, featured, and trending options'
+    "Schema for content filtering with category, type, tags, featured, and trending options",
   );
 
 export type FilterParams = z.infer<typeof filterSchema>;
@@ -344,7 +426,7 @@ const searchAPIParamsSchema = searchPaginationSchema
   .merge(sortSchema)
   .merge(filterSchema)
   .describe(
-    'Combined schema for all search API parameters including pagination, query, sort, and filters'
+    "Combined schema for all search API parameters including pagination, query, sort, and filters",
   );
 
 export type SearchAPIParams = z.infer<typeof searchAPIParamsSchema>;
@@ -358,34 +440,34 @@ export const jobsSearchSchema = searchAPIParamsSchema
       .string()
       .optional()
       .transform((val) => val?.trim())
-      .refine((val) => !val || val.length <= 100, 'Location is too long')
-      .describe('Job location filter, max 100 characters'),
+      .refine((val) => !val || val.length <= 100, "Location is too long")
+      .describe("Job location filter, max 100 characters"),
 
     remote: z
       .union([
-        z.boolean().describe('Remote flag as boolean'),
+        z.boolean().describe("Remote flag as boolean"),
         z
           .string()
-          .transform((val) => val.toLowerCase() === 'true')
-          .describe('Remote flag as string'),
+          .transform((val) => val.toLowerCase() === "true")
+          .describe("Remote flag as string"),
       ])
       .optional()
-      .describe('Filter for remote jobs only'),
+      .describe("Filter for remote jobs only"),
 
     experience: z
-      .enum(['entry', 'mid', 'senior', 'lead', 'any'])
+      .enum(["entry", "mid", "senior", "lead", "any"])
       .optional()
-      .default('any')
-      .describe('Required experience level filter, defaults to any'),
+      .default("any")
+      .describe("Required experience level filter, defaults to any"),
 
     employment: z
-      .enum(['fulltime', 'parttime', 'contract', 'freelance', 'any'])
+      .enum(["fulltime", "parttime", "contract", "freelance", "any"])
       .optional()
-      .default('any')
-      .describe('Employment type filter, defaults to any'),
+      .default("any")
+      .describe("Employment type filter, defaults to any"),
   })
   .describe(
-    'Extended search schema for job listings with location, remote, experience, and employment filters'
+    "Extended search schema for job listings with location, remote, experience, and employment filters",
   );
 
 export type JobsSearchParams = z.infer<typeof jobsSearchSchema>;
@@ -397,18 +479,20 @@ export const trendingParamsSchema = searchPaginationSchema
   .merge(filterSchema)
   .extend({
     period: z
-      .enum(['today', 'week', 'month', 'year', 'all'])
+      .enum(["today", "week", "month", "year", "all"])
       .optional()
-      .default('week')
-      .describe('Time period for trending calculation, defaults to week'),
+      .default("week")
+      .describe("Time period for trending calculation, defaults to week"),
 
     metric: z
-      .enum(['views', 'likes', 'shares', 'downloads', 'all'])
+      .enum(["views", "likes", "shares", "downloads", "all"])
       .optional()
-      .default('views')
-      .describe('Metric to use for trending calculation, defaults to views'),
+      .default("views")
+      .describe("Metric to use for trending calculation, defaults to views"),
   })
-  .describe('Schema for trending content parameters with time period and metric filters');
+  .describe(
+    "Schema for trending content parameters with time period and metric filters",
+  );
 
 export type TrendingParams = z.infer<typeof trendingParamsSchema>;
 
@@ -423,7 +507,7 @@ export type Filter = z.infer<typeof filterSchema>;
 export function parseSearchParams<T extends z.ZodType>(
   schema: T,
   params: unknown,
-  context?: string
+  context?: string,
 ): z.infer<T> {
   try {
     // Convert URLSearchParams to plain object if needed
@@ -432,7 +516,9 @@ export function parseSearchParams<T extends z.ZodType>(
       params.forEach((value, key) => {
         if (key in obj) {
           const existing = obj[key];
-          obj[key] = Array.isArray(existing) ? [...existing, value] : [existing as string, value];
+          obj[key] = Array.isArray(existing)
+            ? [...existing, value]
+            : [existing as string, value];
         } else {
           obj[key] = value;
         }
@@ -443,9 +529,13 @@ export function parseSearchParams<T extends z.ZodType>(
     return schema.parse(params);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      logger.error('Invalid search parameters', error, {
-        context: String(context || 'default'),
-        errors: String(error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')),
+      logger.error("Invalid search parameters", error, {
+        context: String(context || "default"),
+        errors: String(
+          error.issues
+            .map((e) => `${e.path.join(".")}: ${e.message}`)
+            .join(", "),
+        ),
       });
       // Return default values on validation failure
       return schema.parse({});
