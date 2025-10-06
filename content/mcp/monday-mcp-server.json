@@ -84,5 +84,6 @@
   "requiresAuth": true,
   "permissions": ["read", "write", "create"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://developer.monday.com/apps/docs/mondaycom-mcp-integration"
+  "documentationUrl": "https://developer.monday.com/apps/docs/mondaycom-mcp-integration",
+  "seoTitle": "Monday MCP Server for Claude"
 }

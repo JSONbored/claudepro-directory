@@ -62,7 +62,6 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
           )}
           loadMore={loadMore}
           hasMore={hasMore}
-          pageSize={20}
           gridClassName={UI_CLASSES.GRID_RESPONSIVE_3}
           emptyMessage="No results found"
           keyExtractor={(item) => item.slug}

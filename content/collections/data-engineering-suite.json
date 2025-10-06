@@ -1,6 +1,7 @@
 {
   "slug": "data-engineering-suite",
   "title": "Data Engineering Suite",
+  "seoTitle": "Data Engineering Suite",
   "description": "Comprehensive toolkit for data engineers working with databases, ETL pipelines, and data infrastructure. Includes database design, optimization, and cloud services integration.",
   "author": "JSONbored",
   "dateAdded": "2025-10-02",

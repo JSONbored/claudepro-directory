@@ -88,5 +88,6 @@
   "requiresAuth": true,
   "permissions": ["read", "search"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol"
+  "documentationUrl": "https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol",
+  "seoTitle": "Fireflies MCP Server for Claude"
 }

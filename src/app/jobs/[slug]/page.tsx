@@ -18,6 +18,7 @@ import {
 import { logger } from '@/src/lib/logger';
 import type { PageProps } from '@/src/lib/schemas/app.schema';
 import { slugParamsSchema } from '@/src/lib/schemas/app.schema';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -55,15 +56,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  return {
-    title: `${job.title} at ${job.company}`,
-    description: job.description,
-    openGraph: {
+  // Use centralized metadata system with JobPosting schema
+  // Job pages use special structured data for job search engines
+  return await generatePageMetadata('/jobs/:slug', {
+    params: { slug },
+    item: {
       title: `${job.title} at ${job.company}`,
       description: job.description,
-      type: 'article',
+      dateAdded: job.postedAt,
+      lastModified: job.postedAt,
     },
-  };
+  });
 }
 
 export async function generateStaticParams() {

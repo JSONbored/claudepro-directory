@@ -1,5 +1,6 @@
 {
   "slug": "api-endpoint-documentation-generator",
+  "seoTitle": "API Doc Generator",
   "description": "Automatically generates or updates API documentation when endpoint files are modified",
   "category": "hooks",
   "author": "JSONbored",

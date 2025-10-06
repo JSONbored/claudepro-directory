@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import Script from 'next/script';
 import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
 import {
@@ -29,7 +30,12 @@ import {
  *
  * Consolidates 5 previously separate schema components into one with type discrimination
  */
-export function UnifiedStructuredData({ item }: UnifiedStructuredDataProps) {
+export async function UnifiedStructuredData({ item }: UnifiedStructuredDataProps) {
+  // Extract nonce from CSP header for script security
+  const headersList = await headers();
+  const cspHeader = headersList.get('content-security-policy');
+  const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
+
   const schemas: SchemaObject[] = [];
   const config = SCHEMA_CONFIGS[item.category];
 
@@ -146,6 +152,7 @@ export function UnifiedStructuredData({ item }: UnifiedStructuredDataProps) {
               __html: serializeJsonLd(schema),
             }}
             strategy="afterInteractive"
+            nonce={nonce}
           />
         );
       })}
@@ -403,7 +410,10 @@ function getHowToSteps(item: UnifiedContent) {
       position: 3,
       name: 'Create hook script',
       text: 'Create the hook script file',
-      ...(scriptContent && { code: scriptContent, programmingLanguage: 'bash' }),
+      ...(scriptContent && {
+        code: scriptContent,
+        programmingLanguage: 'bash',
+      }),
     });
   }
 

@@ -282,9 +282,9 @@ const seoConfigSchema = z.object({
 
 export const SEO_CONFIG = seoConfigSchema.parse({
   defaultTitle: 'Claude Pro Directory',
-  titleTemplate: '%s | Claude Pro Directory',
+  titleTemplate: '%s - Claude Pro Directory',
   defaultDescription:
-    'Complete database of Claude AI configurations, agents, MCP servers, hooks, and rules for developers.',
+    'Open-source directory of 150+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.',
   keywords: [
     'claude ai',
     'claude pro',
@@ -512,4 +512,6 @@ export const ACRONYMS = [
   'MCP',
   'LLM',
   'GPT',
+  'SRE',
+  'DevOps',
 ] as const;

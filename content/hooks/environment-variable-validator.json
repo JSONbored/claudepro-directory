@@ -1,5 +1,6 @@
 {
   "slug": "environment-variable-validator",
+  "seoTitle": "Environment Validator",
   "description": "Validates environment variables, checks for required vars, and ensures proper configuration across environments",
   "category": "hooks",
   "author": "JSONbored",

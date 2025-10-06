@@ -88,5 +88,6 @@
   "requiresAuth": true,
   "permissions": ["read", "write", "deploy"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://vercel.com/docs/mcp/vercel-mcp"
+  "documentationUrl": "https://vercel.com/docs/mcp/vercel-mcp",
+  "seoTitle": "Vercel MCP Server for Claude"
 }

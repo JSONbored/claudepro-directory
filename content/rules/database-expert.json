@@ -13,5 +13,6 @@
   },
   "githubUrl": "https://github.com/postgres/postgres",
   "documentationUrl": "https://www.postgresql.org/docs/",
-  "source": "community"
+  "source": "community",
+  "seoTitle": "Database Expert for Claude"
 }

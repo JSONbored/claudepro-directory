@@ -80,7 +80,10 @@ export default async function Image({
 
     if (!item) {
       // Fallback for non-existent items
-      const gradient = CATEGORY_GRADIENTS[category] || { start: '#667eea', end: '#764ba2' };
+      const gradient = CATEGORY_GRADIENTS[category] || {
+        start: '#667eea',
+        end: '#764ba2',
+      };
       return new ImageResponse(
         <div
           style={{
@@ -101,7 +104,10 @@ export default async function Image({
       );
     }
 
-    const gradient = CATEGORY_GRADIENTS[category] || { start: '#667eea', end: '#764ba2' };
+    const gradient = CATEGORY_GRADIENTS[category] || {
+      start: '#667eea',
+      end: '#764ba2',
+    };
 
     return new ImageResponse(
       <div
@@ -128,14 +134,26 @@ export default async function Image({
           >
             {config.title}
           </div>
-          <div style={{ marginLeft: 'auto', fontSize: 28, color: 'white', opacity: 0.9 }}>
+          <div
+            style={{
+              marginLeft: 'auto',
+              fontSize: 28,
+              color: 'white',
+              opacity: 0.9,
+            }}
+          >
             Claude Pro Directory
           </div>
         </div>
 
         {/* Main Content */}
         <div
-          style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+          }}
         >
           <h1
             style={{

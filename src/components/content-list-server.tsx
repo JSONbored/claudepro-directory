@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Suspense, useId } from 'react';
 import { ContentSearchClient } from '@/src/components/content-search-client';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { ExternalLink, getIconByName } from '@/src/lib/icons';
@@ -123,6 +124,9 @@ export function ContentListServer<T extends UnifiedContentItem>({
         aria-label={`${title} content and search`}
       >
         <div className="space-y-8">
+          {/* Email CTA - Minimal variant */}
+          <InlineEmailCTA variant="minimal" context="category-page" category={type} />
+
           {/* Search Component with Suspense boundary */}
           <Suspense fallback={<ContentSearchSkeleton />}>
             <ContentSearchClient

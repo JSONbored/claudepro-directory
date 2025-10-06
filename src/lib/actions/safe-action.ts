@@ -30,10 +30,9 @@ import { redisClient } from '@/src/lib/redis';
  * Action metadata schema for tracking and observability
  */
 const actionMetadataSchema = z.object({
-  actionName: z
-    .string()
-    .min(1)
-    .meta({ description: 'Unique name for the action (e.g., trackView, trackCopy)' }),
+  actionName: z.string().min(1).meta({
+    description: 'Unique name for the action (e.g., trackView, trackCopy)',
+  }),
   category: z
     .enum(['analytics', 'form', 'content', 'user', 'admin'])
     .optional()
@@ -100,7 +99,10 @@ async function checkRateLimit(
         // Use Redis pipeline for atomic operations
         const pipeline = redis.pipeline();
         pipeline.zremrangebyscore(key, 0, windowStart); // Remove old entries
-        pipeline.zadd(key, { score: now, member: `${now}-${crypto.randomUUID()}` }); // Add current request
+        pipeline.zadd(key, {
+          score: now,
+          member: `${now}-${crypto.randomUUID()}`,
+        }); // Add current request
         pipeline.zcard(key); // Count requests in window
         pipeline.expire(key, windowSeconds); // Set TTL
 

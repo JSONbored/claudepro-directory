@@ -48,20 +48,33 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
             🔥 Trending This Week
           </h2>
           <ul className={UI_CLASSES.GRID_RESPONSIVE_LIST}>
-            {trending.map((item: UnifiedContentItem, index: number) => (
-              <li key={item.slug} className="relative">
-                {index < 3 && (
-                  <Badge
-                    className={`absolute -top-2 -right-2 ${UI_CLASSES.Z_10}`}
-                    variant="default"
-                    aria-label={`Rank ${index + 1}`}
-                  >
-                    #{index + 1}
-                  </Badge>
-                )}
-                <ConfigCard item={item} variant="default" showCategory={true} showActions={false} />
+            {trending.length === 0 ? (
+              <li className="col-span-full text-center py-12">
+                <p className="text-muted-foreground text-lg">
+                  No trending content available yet. Check back soon!
+                </p>
               </li>
-            ))}
+            ) : (
+              trending.map((item: UnifiedContentItem, index: number) => (
+                <li key={item.slug} className="relative">
+                  {index < 3 && (
+                    <Badge
+                      className={`absolute -top-2 -right-2 ${UI_CLASSES.Z_10}`}
+                      variant="default"
+                      aria-label={`Rank ${index + 1}`}
+                    >
+                      #{index + 1}
+                    </Badge>
+                  )}
+                  <ConfigCard
+                    item={item}
+                    variant="default"
+                    showCategory={true}
+                    showActions={false}
+                  />
+                </li>
+              ))
+            )}
           </ul>
         </div>
       </TabsContent>
@@ -77,11 +90,24 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
             ⭐ Most Popular
           </h2>
           <ul className={UI_CLASSES.GRID_RESPONSIVE_LIST}>
-            {popular.map((item) => (
-              <li key={item.slug}>
-                <ConfigCard item={item} variant="default" showCategory={true} showActions={false} />
+            {popular.length === 0 ? (
+              <li className="col-span-full text-center py-12">
+                <p className="text-muted-foreground text-lg">
+                  No popular content available yet. Check back soon!
+                </p>
               </li>
-            ))}
+            ) : (
+              popular.map((item) => (
+                <li key={item.slug}>
+                  <ConfigCard
+                    item={item}
+                    variant="default"
+                    showCategory={true}
+                    showActions={false}
+                  />
+                </li>
+              ))
+            )}
           </ul>
         </div>
       </TabsContent>
@@ -97,11 +123,24 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
             🆕 Recently Added
           </h2>
           <ul className={UI_CLASSES.GRID_RESPONSIVE_LIST}>
-            {recent.map((item) => (
-              <li key={item.slug}>
-                <ConfigCard item={item} variant="default" showCategory={true} showActions={false} />
+            {recent.length === 0 ? (
+              <li className="col-span-full text-center py-12">
+                <p className="text-muted-foreground text-lg">
+                  No recent content available yet. Check back soon!
+                </p>
               </li>
-            ))}
+            ) : (
+              recent.map((item) => (
+                <li key={item.slug}>
+                  <ConfigCard
+                    item={item}
+                    variant="default"
+                    showCategory={true}
+                    showActions={false}
+                  />
+                </li>
+              ))
+            )}
           </ul>
         </div>
       </TabsContent>

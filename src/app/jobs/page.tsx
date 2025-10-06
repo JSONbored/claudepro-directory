@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { JobCard } from '@/src/components/shared/job-card';
 import { Badge } from '@/src/components/ui/badge';
@@ -12,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/ui/select';
-import { APP_CONFIG } from '@/src/lib/constants';
 import { type Job, jobs } from '@/src/lib/data/jobs';
 import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -22,34 +20,39 @@ import {
   jobsSearchSchema,
   parseSearchParams,
 } from '@/src/lib/schemas/search.schema';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export async function generateMetadata({
-  searchParams,
-}: PagePropsWithSearchParams): Promise<Metadata> {
+export async function generateMetadata({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
   const params = parseSearchParams(jobsSearchSchema, rawParams, 'jobs page metadata');
 
-  let title = `AI Jobs Board - Find Your Dream Job | ${APP_CONFIG.name}`;
-  let description =
-    'Discover opportunities with companies building the future of artificial intelligence. From startups to industry giants, find your perfect role.';
+  // Use centralized metadata with dynamic filtering context
+  const baseMetadata = await generatePageMetadata('/jobs', {
+    filters: {
+      category: (params as JobsSearchParams).category,
+      remote: params.remote,
+    },
+  });
 
-  // Safely handle category if it exists in the validated params
+  // Apply dynamic title/description modifications for filtering
+  let { title, description } = baseMetadata;
+
   const category = (params as JobsSearchParams).category;
   if (category && category !== 'all') {
-    title = `${category.charAt(0).toUpperCase() + category.slice(1)} Jobs | ${APP_CONFIG.name}`;
-    description = `Find ${category} positions in AI companies. ${description}`;
+    title = `${category.charAt(0).toUpperCase() + category.slice(1)} ${title}`;
+    description = `Find ${category} positions. ${description || ''}`;
   }
 
   if (params.remote === true) {
     title = `Remote ${title}`;
-    description = `Remote ${description.toLowerCase()}`;
+    description = `Remote ${(description || '').toLowerCase()}`;
   }
 
   return {
+    ...baseMetadata,
     title,
     description,
-    keywords: 'AI jobs, machine learning jobs, Claude careers, AI engineering positions',
   };
 }
 

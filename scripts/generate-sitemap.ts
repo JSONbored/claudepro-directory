@@ -48,13 +48,24 @@ async function generateSitemap(): Promise<string> {
   });
 
   // Static pages
-  const staticPages = ['jobs', 'community', 'trending', 'submit', 'guides', 'api-docs'];
+  const staticPages = ['jobs', 'community', 'trending', 'submit', 'partner', 'guides', 'api-docs'];
   staticPages.forEach((page) => {
     urls.push({
       loc: `${baseUrl || ''}/${page}`,
       lastmod: new Date().toISOString().split('T')[0] || '',
       changefreq: 'weekly',
       priority: page === 'api-docs' ? 0.9 : 0.6, // High priority for API docs (AI discoverability)
+    });
+  });
+
+  // Static page llms.txt routes (api-docs and guides only)
+  const staticPagesWithLlmsTxt = ['api-docs', 'guides'];
+  staticPagesWithLlmsTxt.forEach((page) => {
+    urls.push({
+      loc: `${baseUrl || ''}/${page}/llms.txt`,
+      lastmod: new Date().toISOString().split('T')[0] || '',
+      changefreq: 'daily',
+      priority: 0.85, // High priority for AI discovery
     });
   });
 
@@ -88,7 +99,7 @@ async function generateSitemap(): Promise<string> {
     }
   });
 
-  // Individual content pages - each content type already has proper category
+  // Individual content pages (excluding collections - they're added separately)
   const allContent: ContentItem[] = [
     ...rulesMetadata,
     ...mcpMetadata,
@@ -96,15 +107,88 @@ async function generateSitemap(): Promise<string> {
     ...commandsMetadata,
     ...hooksMetadata,
     ...statuslinesMetadata,
-    ...collectionsMetadata,
   ];
 
+  // Add non-collection content items (139 items)
   allContent.forEach((item) => {
     urls.push({
       loc: `${baseUrl}/${item.category}/${item.slug}`,
       lastmod: (item.dateAdded || new Date().toISOString()).split('T')[0] || '',
       changefreq: 'weekly',
       priority: 0.7,
+    });
+  });
+
+  // Add collection pages separately (9 collections)
+  collectionsMetadata.forEach((collection) => {
+    urls.push({
+      loc: `${baseUrl}/collections/${collection.slug}`,
+      lastmod: (collection.dateAdded || new Date().toISOString()).split('T')[0] || '',
+      changefreq: 'weekly',
+      priority: 0.7,
+    });
+  });
+
+  // ============================================================================
+  // LLMs.txt Routes - AI-Optimized Plain Text Content (185 URLs)
+  // ============================================================================
+
+  // Site-wide llms.txt index
+  urls.push({
+    loc: `${baseUrl}/llms.txt`,
+    lastmod: new Date().toISOString().split('T')[0] || '',
+    changefreq: 'daily',
+    priority: 0.9, // High priority for AI discovery
+  });
+
+  // Category llms.txt indexes (7 categories)
+  categories.forEach((category) => {
+    urls.push({
+      loc: `${baseUrl}/${category}/llms.txt`,
+      lastmod: new Date().toISOString().split('T')[0] || '',
+      changefreq: 'daily',
+      priority: 0.85,
+    });
+  });
+
+  // Individual item llms.txt pages (139 non-collection items)
+  allContent.forEach((item) => {
+    urls.push({
+      loc: `${baseUrl}/${item.category}/${item.slug}/llms.txt`,
+      lastmod: (item.dateAdded || new Date().toISOString()).split('T')[0] || '',
+      changefreq: 'daily',
+      priority: 0.75,
+    });
+  });
+
+  // Guide llms.txt pages
+  seoCategories.forEach((category) => {
+    const seoDir = join(CONTENT_PATHS.guides, category);
+    if (existsSync(seoDir)) {
+      try {
+        const files = readdirSync(seoDir).filter((f) => f.endsWith('.mdx'));
+        files.forEach((file) => {
+          const slug = file.replace('.mdx', '');
+          urls.push({
+            loc: `${baseUrl}/guides/${category}/${slug}/llms.txt`,
+            lastmod: new Date().toISOString().split('T')[0] || '',
+            changefreq: 'weekly',
+            priority: 0.7,
+          });
+        });
+      } catch {
+        // Directory doesn't exist yet
+      }
+    }
+  });
+
+  // Collection llms.txt pages (9 collections)
+  collectionsMetadata.forEach((collection) => {
+    urls.push({
+      loc: `${baseUrl}/collections/${collection.slug}/llms.txt`,
+      lastmod: (collection.dateAdded || new Date().toISOString()).split('T')[0] || '',
+      changefreq: 'weekly',
+      priority: 0.75,
     });
   });
 
@@ -156,21 +240,27 @@ Allow: /
 Allow: /api-docs
 Allow: /openapi.json
 Allow: /.well-known/api-catalog
-Crawl-delay: 2
+Allow: /llms.txt
+Allow: /*/llms.txt
+Allow: /*/*/llms.txt
 
 # OpenAI SearchBot - ChatGPT Browse Feature
 User-agent: OAI-SearchBot
 Allow: /
 Allow: /api-docs
 Allow: /openapi.json
-Crawl-delay: 2
+Allow: /llms.txt
+Allow: /*/llms.txt
+Allow: /*/*/llms.txt
 
 # ChatGPT User - Direct ChatGPT User Queries
 User-agent: ChatGPT-User
 Allow: /
 Allow: /api-docs
 Allow: /openapi.json
-Crawl-delay: 2
+Allow: /llms.txt
+Allow: /*/llms.txt
+Allow: /*/*/llms.txt
 
 # Perplexity AI - Perplexity Search Engine
 User-agent: PerplexityBot
@@ -178,7 +268,9 @@ Allow: /
 Allow: /api-docs
 Allow: /openapi.json
 Allow: /.well-known/api-catalog
-Crawl-delay: 2
+Allow: /llms.txt
+Allow: /*/llms.txt
+Allow: /*/*/llms.txt
 
 # Anthropic Claude - ClaudeBot Crawler
 User-agent: ClaudeBot
@@ -186,14 +278,18 @@ Allow: /
 Allow: /api-docs
 Allow: /openapi.json
 Allow: /.well-known/api-catalog
-Crawl-delay: 2
+Allow: /llms.txt
+Allow: /*/llms.txt
+Allow: /*/*/llms.txt
 
 # Google Gemini - Google AI Crawler
 User-agent: Google-Extended
 Allow: /
 Allow: /api-docs
 Allow: /openapi.json
-Crawl-delay: 2
+Allow: /llms.txt
+Allow: /*/llms.txt
+Allow: /*/*/llms.txt
 
 # ============================================================================
 # GENERAL CRAWLERS (Search Engines, Social Media, etc.)
@@ -223,15 +319,17 @@ Allow: /.well-known/api-catalog
 # API endpoints (allow for better indexing of JSON-LD structured data)
 Allow: /api/*
 
+# LLMs.txt AI-optimized plain text content (185 endpoints)
+Allow: /llms.txt
+Allow: /*/llms.txt
+Allow: /*/*/llms.txt
+
 # Block admin areas if they exist
 Disallow: /admin*
 Disallow: /private*
 
 # Sitemap location
-Sitemap: ${baseUrl}/sitemap.xml
-
-# Crawl delay (be respectful to server resources)
-Crawl-delay: 1`;
+Sitemap: ${baseUrl}/sitemap.xml`;
 
   return robotsTxt;
 }

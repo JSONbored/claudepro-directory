@@ -84,5 +84,6 @@
   "requiresAuth": true,
   "permissions": ["read", "write", "payments"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://developer.squareup.com/docs/mcp"
+  "documentationUrl": "https://developer.squareup.com/docs/mcp",
+  "seoTitle": "Square MCP Server for Claude"
 }

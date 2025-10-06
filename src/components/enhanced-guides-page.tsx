@@ -17,6 +17,7 @@ import { createSearchIndex, performLocalSearch } from '@/src/hooks/use-search';
 import {
   AlertTriangle,
   BookOpen,
+  Eye,
   FileText,
   GitCompare,
   Search,
@@ -82,6 +83,13 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
   const searchInputId = useId();
   const categorySelectId = useId();
   const sortSelectId = useId();
+
+  // Format view count helper (same as other components)
+  const formatViewCount = (count: number): string => {
+    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return count.toString();
+  };
 
   // Memoize totalGuides to prevent recalculation on every render
   const totalGuides = useMemo(
@@ -232,16 +240,29 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
                               {guide.description}
                             </p>
                             <div
-                              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mt-auto`}
+                              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mt-auto gap-2`}
                             >
                               <Badge variant="outline" className={UI_CLASSES.TEXT_XS}>
                                 {info.label}
                               </Badge>
-                              {guide.dateUpdated && (
-                                <span className={UI_CLASSES.TEXT_XS_MUTED}>
-                                  {new Date(guide.dateUpdated).toLocaleDateString()}
-                                </span>
-                              )}
+                              <div className="flex items-center gap-2">
+                                {guide.dateUpdated && (
+                                  <span className={UI_CLASSES.TEXT_XS_MUTED}>
+                                    {new Date(guide.dateUpdated).toLocaleDateString()}
+                                  </span>
+                                )}
+                                {guide.viewCount !== undefined && guide.viewCount > 0 && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="h-6 px-2 gap-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors font-medium"
+                                  >
+                                    <Eye className="h-3 w-3" aria-hidden="true" />
+                                    <span className="text-xs">
+                                      {formatViewCount(guide.viewCount)}
+                                    </span>
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </Card>

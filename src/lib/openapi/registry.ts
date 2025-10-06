@@ -101,23 +101,26 @@ export const trendingQuerySchema = z.object({
 export const successResponseSchema = z.object({
   success: z.literal(true).openapi({ description: 'Request succeeded' }),
   data: z.unknown().openapi({ description: 'Response data payload' }),
-  timestamp: z
-    .string()
-    .openapi({ description: 'ISO 8601 timestamp', example: '2025-01-15T10:30:00.000Z' }),
+  timestamp: z.string().openapi({
+    description: 'ISO 8601 timestamp',
+    example: '2025-01-15T10:30:00.000Z',
+  }),
 });
 
 export const errorResponseSchema = z.object({
   success: z.literal(false).openapi({ description: 'Request failed' }),
   error: z.object({
     code: z.string().openapi({ description: 'Error code', example: 'VALIDATION_ERROR' }),
-    message: z
-      .string()
-      .openapi({ description: 'Error message', example: 'Invalid category parameter' }),
+    message: z.string().openapi({
+      description: 'Error message',
+      example: 'Invalid category parameter',
+    }),
     details: z.unknown().optional().openapi({ description: 'Optional error details' }),
   }),
-  timestamp: z
-    .string()
-    .openapi({ description: 'ISO 8601 timestamp', example: '2025-01-15T10:30:00.000Z' }),
+  timestamp: z.string().openapi({
+    description: 'ISO 8601 timestamp',
+    example: '2025-01-15T10:30:00.000Z',
+  }),
 });
 
 export const contentListDataSchema = z.object({
@@ -188,20 +191,23 @@ export const cacheWarmRequestSchema = z
 
 export const cacheWarmResponseSchema = z.object({
   success: z.boolean().openapi({ description: 'Whether cache warming succeeded' }),
-  message: z
-    .string()
-    .openapi({ description: 'Status message', example: 'Cache warming completed successfully' }),
-  timestamp: z
-    .string()
-    .openapi({ description: 'ISO 8601 timestamp', example: '2025-01-15T10:30:00.000Z' }),
+  message: z.string().openapi({
+    description: 'Status message',
+    example: 'Cache warming completed successfully',
+  }),
+  timestamp: z.string().openapi({
+    description: 'ISO 8601 timestamp',
+    example: '2025-01-15T10:30:00.000Z',
+  }),
 });
 
 export const cacheStatusResponseSchema = z.object({
   status: z.string().optional().openapi({ description: 'Current cache status', example: 'idle' }),
   message: z.string().optional().openapi({ description: 'Status message' }),
-  currentTime: z
-    .string()
-    .openapi({ description: 'ISO 8601 timestamp', example: '2025-01-15T10:30:00.000Z' }),
+  currentTime: z.string().openapi({
+    description: 'ISO 8601 timestamp',
+    example: '2025-01-15T10:30:00.000Z',
+  }),
   validated: z.boolean().openapi({ description: 'Whether response was validated' }),
 });
 
@@ -222,10 +228,14 @@ export const guidesTrendingQuerySchema = z.object({
 
 export const trendingGuideItemSchema = z.object({
   slug: slugSchema,
-  title: z.string().openapi({ description: 'Guide title', example: 'Getting Started with Claude' }),
-  url: z
-    .string()
-    .openapi({ description: 'Relative URL to guide', example: '/guides/guides/getting-started' }),
+  title: z.string().openapi({
+    description: 'Guide title',
+    example: 'Getting Started with Claude',
+  }),
+  url: z.string().openapi({
+    description: 'Relative URL to guide',
+    example: '/guides/guides/getting-started',
+  }),
   views: z.number().int().min(0).openapi({ description: 'Total views', example: 542 }),
   rank: z.number().int().min(1).openapi({ description: 'Trending rank position', example: 1 }),
 });
@@ -238,9 +248,10 @@ export const guidesTrendingDataSchema = z.object({
     .int()
     .min(0)
     .openapi({ description: 'Number of results returned', example: 10 }),
-  timestamp: z
-    .string()
-    .openapi({ description: 'ISO 8601 timestamp', example: '2025-01-15T10:30:00.000Z' }),
+  timestamp: z.string().openapi({
+    description: 'ISO 8601 timestamp',
+    example: '2025-01-15T10:30:00.000Z',
+  }),
 });
 
 // All configurations streaming schemas

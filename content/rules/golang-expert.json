@@ -13,5 +13,6 @@
   },
   "githubUrl": "https://github.com/golang/go",
   "documentationUrl": "https://go.dev/doc/",
-  "source": "community"
+  "source": "community",
+  "seoTitle": "Go Golang Expert for Claude"
 }

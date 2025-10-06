@@ -98,6 +98,21 @@ const RATE_LIMIT_CONFIGS = {
     maxRequests: 10000,
     windowMs: 3600000, // 1 hour in ms
   }),
+  // LLMs.txt endpoints - moderate limit to prevent scraping abuse
+  llmstxt: middlewareRateLimitConfigSchema.parse({
+    maxRequests: 100,
+    windowMs: 3600000, // 1 hour in ms (100 requests per hour per IP)
+  }),
+  // Webhook endpoints - deliverability events (bounces, complaints)
+  webhookBounce: middlewareRateLimitConfigSchema.parse({
+    maxRequests: 100,
+    windowMs: 60000, // 1 minute in ms (100 bounce events per minute)
+  }),
+  // Webhook endpoints - analytics events (opens, clicks)
+  webhookAnalytics: middlewareRateLimitConfigSchema.parse({
+    maxRequests: 500,
+    windowMs: 60000, // 1 minute in ms (500 analytics events per minute)
+  }),
   // Heavy API endpoints (large datasets) - reasonable for data access
   heavyApi: middlewareRateLimitConfigSchema.parse({
     maxRequests: 100, // Increased from 50 for legitimate data operations
@@ -260,7 +275,10 @@ export class RateLimiter {
 
           // Remove expired entries and add current request
           pipeline.zremrangebyscore(key, 0, windowStart);
-          pipeline.zadd(key, { score: now, member: `${now}-${crypto.randomUUID()}` });
+          pipeline.zadd(key, {
+            score: now,
+            member: `${now}-${crypto.randomUUID()}`,
+          });
           pipeline.zcard(key);
           pipeline.expire(key, this.config.windowSeconds);
 
@@ -363,6 +381,9 @@ export const rateLimiters = {
   heavyApi: new RateLimiter(RATE_LIMIT_CONFIGS.heavyApi),
   admin: new RateLimiter(RATE_LIMIT_CONFIGS.admin),
   bulk: new RateLimiter(RATE_LIMIT_CONFIGS.bulk),
+  llmstxt: new RateLimiter(RATE_LIMIT_CONFIGS.llmstxt),
+  webhookBounce: new RateLimiter(RATE_LIMIT_CONFIGS.webhookBounce),
+  webhookAnalytics: new RateLimiter(RATE_LIMIT_CONFIGS.webhookAnalytics),
 };
 
 /**

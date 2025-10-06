@@ -148,6 +148,7 @@ export interface MetadataItem {
   slug: string;
   title?: string;
   name?: string;
+  seoTitle?: string;
   description: string;
   author: string;
   tags: string[];
@@ -168,6 +169,13 @@ const baseContentItemSchema = z
       .describe('URL-safe identifier for the content item'),
     title: z.string().max(STATIC_API_LIMITS.MAX_TITLE_LENGTH).optional().describe('Content title'),
     name: z.string().max(STATIC_API_LIMITS.MAX_TITLE_LENGTH).optional().describe('Content name'),
+    seoTitle: z
+      .string()
+      .max(60)
+      .optional()
+      .describe(
+        'Short SEO-optimized title for <title> tag (max 60 characters), falls back to title'
+      ),
     description: nonEmptyString
       .max(STATIC_API_LIMITS.MAX_DESCRIPTION_LENGTH)
       .describe('Content description'),

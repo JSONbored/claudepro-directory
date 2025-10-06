@@ -48,9 +48,7 @@
       "get": {
         "summary": "Get content items by category",
         "description": "Retrieve a paginated list of content items for a specific category (agents, mcp, rules, commands, hooks, statuslines)",
-        "tags": [
-          "Content"
-        ],
+        "tags": ["Content"],
         "operationId": "getContentByCategory",
         "parameters": [
           {
@@ -112,9 +110,7 @@
                   "properties": {
                     "success": {
                       "type": "boolean",
-                      "enum": [
-                        true
-                      ],
+                      "enum": [true],
                       "description": "Request succeeded"
                     },
                     "data": {
@@ -162,11 +158,7 @@
                           "example": "agents"
                         }
                       },
-                      "required": [
-                        "items",
-                        "total",
-                        "category"
-                      ]
+                      "required": ["items", "total", "category"]
                     },
                     "timestamp": {
                       "type": "string",
@@ -174,11 +166,7 @@
                       "example": "2025-01-15T10:30:00.000Z"
                     }
                   },
-                  "required": [
-                    "success",
-                    "data",
-                    "timestamp"
-                  ]
+                  "required": ["success", "data", "timestamp"]
                 }
               }
             }
@@ -192,9 +180,7 @@
                   "properties": {
                     "success": {
                       "type": "boolean",
-                      "enum": [
-                        false
-                      ],
+                      "enum": [false],
                       "description": "Request failed"
                     },
                     "error": {
@@ -214,10 +200,7 @@
                           "description": "Optional error details"
                         }
                       },
-                      "required": [
-                        "code",
-                        "message"
-                      ]
+                      "required": ["code", "message"]
                     },
                     "timestamp": {
                       "type": "string",
@@ -225,11 +208,7 @@
                       "example": "2025-01-15T10:30:00.000Z"
                     }
                   },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
+                  "required": ["success", "error", "timestamp"]
                 }
               }
             }
@@ -243,9 +222,7 @@
                   "properties": {
                     "success": {
                       "type": "boolean",
-                      "enum": [
-                        false
-                      ],
+                      "enum": [false],
                       "description": "Request failed"
                     },
                     "error": {
@@ -265,10 +242,7 @@
                           "description": "Optional error details"
                         }
                       },
-                      "required": [
-                        "code",
-                        "message"
-                      ]
+                      "required": ["code", "message"]
                     },
                     "timestamp": {
                       "type": "string",
@@ -276,11 +250,7 @@
                       "example": "2025-01-15T10:30:00.000Z"
                     }
                   },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
+                  "required": ["success", "error", "timestamp"]
                 }
               }
             }
@@ -292,9 +262,7 @@
       "get": {
         "summary": "Get content item by slug",
         "description": "Retrieve full details for a single content item by category and slug identifier",
-        "tags": [
-          "Content"
-        ],
+        "tags": ["Content"],
         "operationId": "getContentBySlug",
         "parameters": [
           {
@@ -342,9 +310,7 @@
                   "properties": {
                     "success": {
                       "type": "boolean",
-                      "enum": [
-                        true
-                      ],
+                      "enum": [true],
                       "description": "Request succeeded"
                     },
                     "data": {
@@ -356,10 +322,7 @@
                       "example": "2025-01-15T10:30:00.000Z"
                     }
                   },
-                  "required": [
-                    "success",
-                    "timestamp"
-                  ]
+                  "required": ["success", "timestamp"]
                 }
               }
             }
@@ -373,9 +336,7 @@
                   "properties": {
                     "success": {
                       "type": "boolean",
-                      "enum": [
-                        false
-                      ],
+                      "enum": [false],
                       "description": "Request failed"
                     },
                     "error": {
@@ -395,10 +356,7 @@
                           "description": "Optional error details"
                         }
                       },
-                      "required": [
-                        "code",
-                        "message"
-                      ]
+                      "required": ["code", "message"]
                     },
                     "timestamp": {
                       "type": "string",
@@ -406,11 +364,7 @@
                       "example": "2025-01-15T10:30:00.000Z"
                     }
                   },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
+                  "required": ["success", "error", "timestamp"]
                 }
               }
             }
@@ -424,9 +378,7 @@
                   "properties": {
                     "success": {
                       "type": "boolean",
-                      "enum": [
-                        false
-                      ],
+                      "enum": [false],
                       "description": "Request failed"
                     },
                     "error": {
@@ -446,10 +398,7 @@
                           "description": "Optional error details"
                         }
                       },
-                      "required": [
-                        "code",
-                        "message"
-                      ]
+                      "required": ["code", "message"]
                     },
                     "timestamp": {
                       "type": "string",
@@ -457,11 +406,7 @@
                       "example": "2025-01-15T10:30:00.000Z"
                     }
                   },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
+                  "required": ["success", "error", "timestamp"]
                 }
               }
             }
@@ -473,9 +418,7 @@
       "get": {
         "summary": "Search all content",
         "description": "Full-text search across all content categories with filtering, sorting, and pagination",
-        "tags": [
-          "Search"
-        ],
+        "tags": ["Search"],
         "operationId": "searchContent",
         "parameters": [
           {
@@ -541,12 +484,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "relevance",
-                "date",
-                "name",
-                "popularity"
-              ],
+              "enum": ["relevance", "date", "name", "popularity"],
               "default": "relevance",
               "description": "Field to sort results by",
               "example": "relevance"
@@ -559,10 +497,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "asc",
-                "desc"
-              ],
+              "enum": ["asc", "desc"],
               "default": "desc",
               "description": "Sort direction",
               "example": "desc"
@@ -583,9 +518,7 @@
                   "properties": {
                     "success": {
                       "type": "boolean",
-                      "enum": [
-                        true
-                      ],
+                      "enum": [true],
                       "description": "Request succeeded"
                     },
                     "data": {
@@ -631,10 +564,7 @@
                           "description": "Applied filters"
                         }
                       },
-                      "required": [
-                        "results",
-                        "total"
-                      ]
+                      "required": ["results", "total"]
                     },
                     "timestamp": {
                       "type": "string",
@@ -642,11 +572,7 @@
                       "example": "2025-01-15T10:30:00.000Z"
                     }
                   },
-                  "required": [
-                    "success",
-                    "data",
-                    "timestamp"
-                  ]
+                  "required": ["success", "data", "timestamp"]
                 }
               }
             }
@@ -660,9 +586,7 @@
                   "properties": {
                     "success": {
                       "type": "boolean",
-                      "enum": [
-                        false
-                      ],
+                      "enum": [false],
                       "description": "Request failed"
                     },
                     "error": {
@@ -682,10 +606,7 @@
                           "description": "Optional error details"
                         }
                       },
-                      "required": [
-                        "code",
-                        "message"
-                      ]
+                      "required": ["code", "message"]
                     },
                     "timestamp": {
                       "type": "string",
@@ -693,11 +614,7 @@
                       "example": "2025-01-15T10:30:00.000Z"
                     }
                   },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
+                  "required": ["success", "error", "timestamp"]
                 }
               }
             }
@@ -709,19 +626,13 @@
       "get": {
         "summary": "Get trending content",
         "description": "Retrieve currently trending content items based on view counts and engagement metrics",
-        "tags": [
-          "Analytics"
-        ],
+        "tags": ["Analytics"],
         "operationId": "getTrendingContent",
         "parameters": [
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "trending",
-                "popular",
-                "recent"
-              ],
+              "enum": ["trending", "popular", "recent"],
               "default": "trending",
               "description": "Trending algorithm to use",
               "example": "trending"
@@ -734,12 +645,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "day",
-                "week",
-                "month",
-                "all"
-              ],
+              "enum": ["day", "week", "month", "all"],
               "default": "week",
               "description": "Time period for trending calculation",
               "example": "week"
@@ -774,9 +680,7 @@
                   "properties": {
                     "success": {
                       "type": "boolean",
-                      "enum": [
-                        true
-                      ],
+                      "enum": [true],
                       "description": "Request succeeded"
                     },
                     "data": {
@@ -833,41 +737,24 @@
                                 "example": 156
                               }
                             },
-                            "required": [
-                              "category",
-                              "slug",
-                              "title",
-                              "views"
-                            ]
+                            "required": ["category", "slug", "title", "views"]
                           },
                           "description": "Trending content items"
                         },
                         "algorithm": {
                           "type": "string",
-                          "enum": [
-                            "trending",
-                            "popular",
-                            "recent"
-                          ],
+                          "enum": ["trending", "popular", "recent"],
                           "description": "Algorithm used",
                           "example": "trending"
                         },
                         "period": {
                           "type": "string",
-                          "enum": [
-                            "day",
-                            "week",
-                            "month",
-                            "all"
-                          ],
+                          "enum": ["day", "week", "month", "all"],
                           "description": "Time period",
                           "example": "week"
                         }
                       },
-                      "required": [
-                        "trending",
-                        "algorithm"
-                      ]
+                      "required": ["trending", "algorithm"]
                     },
                     "timestamp": {
                       "type": "string",
@@ -875,11 +762,7 @@
                       "example": "2025-01-15T10:30:00.000Z"
                     }
                   },
-                  "required": [
-                    "success",
-                    "data",
-                    "timestamp"
-                  ]
+                  "required": ["success", "data", "timestamp"]
                 }
               }
             }
@@ -893,9 +776,7 @@
                   "properties": {
                     "success": {
                       "type": "boolean",
-                      "enum": [
-                        false
-                      ],
+                      "enum": [false],
                       "description": "Request failed"
                     },
                     "error": {
@@ -915,10 +796,7 @@
                           "description": "Optional error details"
                         }
                       },
-                      "required": [
-                        "code",
-                        "message"
-                      ]
+                      "required": ["code", "message"]
                     },
                     "timestamp": {
                       "type": "string",
@@ -926,11 +804,7 @@
                       "example": "2025-01-15T10:30:00.000Z"
                     }
                   },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
+                  "required": ["success", "error", "timestamp"]
                 }
               }
             }
@@ -942,9 +816,7 @@
       "post": {
         "summary": "Trigger cache warming",
         "description": "Manually trigger cache warming to pre-load popular content into cache. Rate limited to 10 requests per hour.",
-        "tags": [
-          "Cache"
-        ],
+        "tags": ["Cache"],
         "operationId": "triggerCacheWarming",
         "requestBody": {
           "content": {
@@ -966,10 +838,7 @@
                       ]
                     },
                     "description": "Array of content types to warm cache for (omit for all types)",
-                    "example": [
-                      "agents",
-                      "mcp"
-                    ]
+                    "example": ["agents", "mcp"]
                   },
                   "force": {
                     "type": "boolean",
@@ -1006,11 +875,7 @@
                       "example": "2025-01-15T10:30:00.000Z"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "timestamp"
-                  ]
+                  "required": ["success", "message", "timestamp"]
                 }
               }
             }
@@ -1024,9 +889,7 @@
                   "properties": {
                     "success": {
                       "type": "boolean",
-                      "enum": [
-                        false
-                      ],
+                      "enum": [false],
                       "description": "Request failed"
                     },
                     "error": {
@@ -1046,10 +909,7 @@
                           "description": "Optional error details"
                         }
                       },
-                      "required": [
-                        "code",
-                        "message"
-                      ]
+                      "required": ["code", "message"]
                     },
                     "timestamp": {
                       "type": "string",
@@ -1057,11 +917,7 @@
                       "example": "2025-01-15T10:30:00.000Z"
                     }
                   },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
+                  "required": ["success", "error", "timestamp"]
                 }
               }
             }
@@ -1088,11 +944,7 @@
                       "example": "2025-01-15T10:30:00.000Z"
                     }
                   },
-                  "required": [
-                    "success",
-                    "message",
-                    "timestamp"
-                  ]
+                  "required": ["success", "message", "timestamp"]
                 }
               }
             }
@@ -1102,9 +954,7 @@
       "get": {
         "summary": "Get cache warming status",
         "description": "Retrieve current cache warming status and statistics",
-        "tags": [
-          "Cache"
-        ],
+        "tags": ["Cache"],
         "operationId": "getCacheStatus",
         "parameters": [
           {
@@ -1149,10 +999,7 @@
                       "description": "Whether response was validated"
                     }
                   },
-                  "required": [
-                    "currentTime",
-                    "validated"
-                  ]
+                  "required": ["currentTime", "validated"]
                 }
               }
             }
@@ -1166,9 +1013,7 @@
                   "properties": {
                     "success": {
                       "type": "boolean",
-                      "enum": [
-                        false
-                      ],
+                      "enum": [false],
                       "description": "Request failed"
                     },
                     "error": {
@@ -1188,10 +1033,7 @@
                           "description": "Optional error details"
                         }
                       },
-                      "required": [
-                        "code",
-                        "message"
-                      ]
+                      "required": ["code", "message"]
                     },
                     "timestamp": {
                       "type": "string",
@@ -1199,11 +1041,7 @@
                       "example": "2025-01-15T10:30:00.000Z"
                     }
                   },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
+                  "required": ["success", "error", "timestamp"]
                 }
               }
             }
@@ -1215,9 +1053,7 @@
       "get": {
         "summary": "Get trending guides",
         "description": "Retrieve currently trending guides filtered by category with view counts and rankings",
-        "tags": [
-          "Analytics"
-        ],
+        "tags": ["Analytics"],
         "operationId": "getTrendingGuides",
         "parameters": [
           {
@@ -1297,13 +1133,7 @@
                             "example": 1
                           }
                         },
-                        "required": [
-                          "slug",
-                          "title",
-                          "url",
-                          "views",
-                          "rank"
-                        ]
+                        "required": ["slug", "title", "url", "views", "rank"]
                       },
                       "description": "Trending guides list"
                     },
@@ -1324,12 +1154,7 @@
                       "example": "2025-01-15T10:30:00.000Z"
                     }
                   },
-                  "required": [
-                    "guides",
-                    "category",
-                    "count",
-                    "timestamp"
-                  ]
+                  "required": ["guides", "category", "count", "timestamp"]
                 }
               }
             }
@@ -1343,9 +1168,7 @@
                   "properties": {
                     "success": {
                       "type": "boolean",
-                      "enum": [
-                        false
-                      ],
+                      "enum": [false],
                       "description": "Request failed"
                     },
                     "error": {
@@ -1365,10 +1188,7 @@
                           "description": "Optional error details"
                         }
                       },
-                      "required": [
-                        "code",
-                        "message"
-                      ]
+                      "required": ["code", "message"]
                     },
                     "timestamp": {
                       "type": "string",
@@ -1376,11 +1196,7 @@
                       "example": "2025-01-15T10:30:00.000Z"
                     }
                   },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
+                  "required": ["success", "error", "timestamp"]
                 }
               }
             }
@@ -1392,18 +1208,13 @@
       "get": {
         "summary": "Get all configurations",
         "description": "Retrieve all content configurations across all categories with optional streaming support for large datasets. Supports both standard JSON and NDJSON formats.",
-        "tags": [
-          "Content"
-        ],
+        "tags": ["Content"],
         "operationId": "getAllConfigurations",
         "parameters": [
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "true",
-                "false"
-              ],
+              "enum": ["true", "false"],
               "default": "false",
               "description": "Enable streaming response for large datasets",
               "example": "false"
@@ -1416,10 +1227,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "json",
-                "ndjson"
-              ],
+              "enum": ["json", "ndjson"],
               "default": "json",
               "description": "Response format: standard JSON or newline-delimited JSON (NDJSON)",
               "example": "json"
@@ -1598,9 +1406,7 @@
                   "properties": {
                     "success": {
                       "type": "boolean",
-                      "enum": [
-                        false
-                      ],
+                      "enum": [false],
                       "description": "Request failed"
                     },
                     "error": {
@@ -1620,10 +1426,7 @@
                           "description": "Optional error details"
                         }
                       },
-                      "required": [
-                        "code",
-                        "message"
-                      ]
+                      "required": ["code", "message"]
                     },
                     "timestamp": {
                       "type": "string",
@@ -1631,11 +1434,7 @@
                       "example": "2025-01-15T10:30:00.000Z"
                     }
                   },
-                  "required": [
-                    "success",
-                    "error",
-                    "timestamp"
-                  ]
+                  "required": ["success", "error", "timestamp"]
                 }
               }
             }

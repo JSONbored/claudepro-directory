@@ -1,6 +1,7 @@
 {
   "slug": "api-development-starter-kit",
   "title": "API Development Starter Kit",
+  "seoTitle": "API Development Kit",
   "description": "Complete toolkit for building and documenting RESTful APIs with automated testing and documentation generation. Perfect for backend developers starting new API projects.",
   "author": "JSONbored",
   "dateAdded": "2025-10-02",

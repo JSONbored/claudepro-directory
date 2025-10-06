@@ -13,5 +13,6 @@
   "githubUrl": "https://github.com/claudepro/code-reviewer",
   "documentationUrl": "https://docs.claude.ai/commands/debug",
   "source": "community",
-  "slug": "debug"
+  "slug": "debug",
+  "seoTitle": "Debug for Claude"
 }
