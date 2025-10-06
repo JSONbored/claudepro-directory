@@ -936,6 +936,91 @@ export const METADATA_REGISTRY = {
       wikipediaStyle: false,
     },
   },
+
+  /**
+   * Changelog List - Tier 2
+   * Platform updates and release notes
+   */
+  '/changelog': {
+    title: {
+      tier: 'section' as const,
+      title: 'Changelog',
+    },
+    description:
+      'Track all updates, new features, bug fixes, and improvements to Claude Pro Directory in October 2025. Stay informed about platform changes and enhancements.',
+    keywords: [
+      'claude pro directory changelog 2025',
+      'platform updates',
+      'release notes',
+      'new features',
+      'bug fixes',
+    ],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary_large_image' as const,
+    },
+    structuredData: {
+      type: 'Blog' as const,
+      breadcrumbs: true,
+      dateModified: true,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: true,
+      recencySignal: true, // Changelog freshness is important
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  /**
+   * Changelog Entry Pages (/changelog/:slug)
+   * Individual changelog entries
+   */
+  '/changelog/:slug': {
+    title: {
+      tier: 'content' as const,
+      title: (context?: MetadataContext) => {
+        // Extract title from item or use slug fallback
+        if (context?.item?.title) {
+          return context.item.title as string;
+        }
+        return 'Update';
+      },
+      section: 'Changelog',
+    },
+    description: (context?: MetadataContext) =>
+      (context?.item?.description as string | undefined) ||
+      'Platform update and release notes for Claude Pro Directory.',
+    keywords: [
+      'claude pro changelog',
+      'platform updates 2025',
+      'release notes',
+      'feature updates',
+    ],
+    openGraph: {
+      type: 'article' as const,
+    },
+    twitter: {
+      card: 'summary_large_image' as const,
+    },
+    structuredData: {
+      type: 'TechArticle' as const,
+      breadcrumbs: true,
+      dateModified: true,
+      author: true,
+    },
+    aiOptimization: {
+      includeYear: true,
+      recencySignal: true, // Update recency is critical for changelog
+      useArticleSchema: true, // Article schema for better AI citations
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
 } as const satisfies Record<string, RouteMetadata>;
 
 /**
