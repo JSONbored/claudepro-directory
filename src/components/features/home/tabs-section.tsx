@@ -99,7 +99,6 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
                 )}
                 loadMore={loadMore}
                 hasMore={hasMore}
-                pageSize={20}
                 gridClassName={UI_CLASSES.GRID_RESPONSIVE_3}
                 emptyMessage={`No ${categoryName} found`}
                 keyExtractor={(item: UnifiedContentItem, _index: number) =>
