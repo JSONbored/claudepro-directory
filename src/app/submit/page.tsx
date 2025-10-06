@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useId, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { Button } from '@/src/components/ui/button';
@@ -14,14 +14,11 @@ import {
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
-import { CheckCircle, ExternalLink, FileJson, Github, Send } from '@/src/lib/icons';
+import { CheckCircle, ExternalLink, FileJson, Github, Send, AlertCircle } from '@/src/lib/icons';
 import { type ConfigSubmissionInput, configSubmissionSchema } from '@/src/lib/schemas/form.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import {
-  generateGitHubIssueUrl,
-  openGitHubIssue,
-  validateIssueUrlLength,
-} from '@/src/lib/utils/github-issue-url';
+import { submitConfiguration } from '@/src/lib/actions/submission-actions';
+import Link from 'next/link';
 
 export default function SubmitPage() {
   // Generate unique IDs for form elements
@@ -47,8 +44,13 @@ export default function SubmitPage() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isValidating, setIsValidating] = useState(false);
-  const [lastSubmittedUrl, setLastSubmittedUrl] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const [submissionResult, setSubmissionResult] = useState<{
+    prUrl: string;
+    prNumber: number;
+    slug: string;
+    warnings?: string[];
+  } | null>(null);
 
   // Client-side validation with Zod
   const validateField = (fieldName: string, value: string | undefined) => {
@@ -83,67 +85,52 @@ export default function SubmitPage() {
     validateField(name, value);
   };
 
-  // Handle form submission - generate GitHub issue URL and redirect
+  // Handle form submission - create automated PR
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsValidating(true);
 
-    try {
-      // Validate entire form
-      const validatedData = configSubmissionSchema.parse(formData);
-      setErrors({});
+    startTransition(async () => {
+      try {
+        // Validate entire form
+        const validatedData = configSubmissionSchema.parse(formData);
+        setErrors({});
 
-      // Generate GitHub issue URL
-      const issueUrl = generateGitHubIssueUrl(validatedData);
+        // Submit via server action
+        const result = await submitConfiguration(validatedData);
 
-      // Validate URL length
-      if (!validateIssueUrlLength(issueUrl)) {
-        toast.error('Content Too Large', {
-          description: 'Please reduce the size of your configuration content.',
-        });
-        setIsValidating(false);
-        return;
-      }
+        if (result?.data?.success) {
+          setSubmissionResult({
+            prUrl: result.data.prUrl,
+            prNumber: result.data.prNumber,
+            slug: result.data.slug,
+            warnings: result.data.warnings,
+          });
 
-      // Store URL for display
-      setLastSubmittedUrl(issueUrl);
+          toast.success('Submission Created!', {
+            description: `Your ${validatedData.type} has been submitted for review.`,
+          });
 
-      // Open GitHub issue in new tab
-      const opened = openGitHubIssue(issueUrl);
-
-      if (opened) {
-        toast.success('Redirecting to GitHub', {
-          description: 'Review and submit your configuration on GitHub.',
-        });
-      } else {
-        // Popup blocked - show fallback
-        toast.error('Popup Blocked', {
-          description: 'Please allow popups or use the link below.',
-          action: {
-            label: 'Open GitHub',
-            onClick: () => window.open(issueUrl, '_blank'),
-          },
-        });
-      }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const fieldErrors: Record<string, string> = {};
-        for (const issue of error.issues) {
-          const fieldName = issue.path.join('.');
-          fieldErrors[fieldName] = issue.message;
+          // Scroll to success message
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-        setErrors(fieldErrors);
-        toast.error('Validation Error', {
-          description: 'Please check the form for errors.',
-        });
-      } else if (error instanceof Error) {
-        toast.error('Submission Error', {
-          description: error.message,
-        });
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          const fieldErrors: Record<string, string> = {};
+          for (const issue of error.issues) {
+            const fieldName = issue.path.join('.');
+            fieldErrors[fieldName] = issue.message;
+          }
+          setErrors(fieldErrors);
+          toast.error('Validation Error', {
+            description: 'Please check the form for errors.',
+          });
+        } else if (error instanceof Error) {
+          toast.error('Submission Error', {
+            description: error.message,
+          });
+        }
       }
-    }
-
-    setIsValidating(false);
+    });
   };
 
   return (
@@ -158,8 +145,8 @@ export default function SubmitPage() {
         </p>
       </div>
 
-      {/* Success Message with GitHub Link */}
-      {lastSubmittedUrl && (
+      {/* Success Message with PR Link */}
+      {submissionResult && (
         <Card
           className={`${UI_CLASSES.MAX_W_2XL} ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.MB_8} border-green-500/20 bg-green-500/5`}
         >
@@ -167,21 +154,48 @@ export default function SubmitPage() {
             <div className={`flex ${UI_CLASSES.ITEMS_START} gap-3`}>
               <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
               <div className="flex-1">
-                <p className={UI_CLASSES.FONT_MEDIUM}>Ready to submit!</p>
+                <p className={UI_CLASSES.FONT_MEDIUM}>Submission Successful! 🎉</p>
                 <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
-                  Your configuration has been formatted. Click below to review and submit on GitHub.
+                  Your configuration has been submitted for review. We&apos;ve created Pull Request #{submissionResult.prNumber} on GitHub.
                 </p>
-                <Button
-                  variant="link"
-                  size="sm"
-                  asChild
-                  className={`${UI_CLASSES.MT_2} p-0 h-auto`}
-                >
-                  <a href={lastSubmittedUrl} target="_blank" rel="noopener noreferrer">
-                    Open GitHub Issue
-                    <ExternalLink className="h-3 w-3 ml-1" />
-                  </a>
-                </Button>
+                
+                {submissionResult.warnings && submissionResult.warnings.length > 0 && (
+                  <div className="mt-3 p-2 bg-yellow-500/10 border border-yellow-500/20 rounded">
+                    <div className="flex gap-2">
+                      <AlertCircle className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className={`${UI_CLASSES.TEXT_XS} text-yellow-500 font-medium`}>Suggestions:</p>
+                        <ul className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1 space-y-1`}>
+                          {submissionResult.warnings.map((warning, i) => (
+                            <li key={i}>• {warning}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-2 mt-4">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    asChild
+                  >
+                    <a href={submissionResult.prUrl} target="_blank" rel="noopener noreferrer">
+                      View Pull Request
+                      <ExternalLink className="h-3 w-3 ml-1" />
+                    </a>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                  >
+                    <Link href="/account/submissions">
+                      View My Submissions
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -354,16 +368,16 @@ export default function SubmitPage() {
 
             {/* Submit Button */}
             <div className="flex gap-4 pt-4">
-              <Button type="submit" disabled={isValidating} className="flex-1">
-                {isValidating ? (
+              <Button type="submit" disabled={isPending} className="flex-1">
+                {isPending ? (
                   <>
                     <Github className="mr-2 h-4 w-4 animate-pulse" />
-                    Generating GitHub Issue...
+                    Creating Pull Request...
                   </>
                 ) : (
                   <>
                     <Send className="mr-2 h-4 w-4" />
-                    Create GitHub Issue
+                    Submit for Review
                   </>
                 )}
               </Button>
@@ -378,10 +392,9 @@ export default function SubmitPage() {
                     How submissions work
                   </p>
                   <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
-                    When you submit, we&apos;ll generate a pre-filled GitHub issue with your
-                    configuration. You&apos;ll be able to review and edit it before submitting. No
-                    GitHub account required to fill out this form, but you&apos;ll need one to
-                    create the issue.
+                    When you submit, we&apos;ll automatically create a GitHub Pull Request with your
+                    configuration. Our team will review it, and you&apos;ll be notified when it&apos;s approved.
+                    You must be signed in to submit.
                   </p>
                 </div>
               </div>
