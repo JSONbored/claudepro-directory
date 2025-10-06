@@ -167,6 +167,16 @@ export const Navigation = () => {
 
                 <DropdownMenuItem>
                   <Link
+                    href="/changelog"
+                    className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
+                  >
+                    <div>Changelog</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Latest updates & releases</div>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem>
+                  <Link
                     href="/jobs"
                     className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
                   >
@@ -379,6 +389,15 @@ export const Navigation = () => {
                             className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
                           >
                             Trending
+                          </NavLink>
+
+                          <NavLink
+                            href="/changelog"
+                            isActive={isActive}
+                            onClick={() => setIsOpen(false)}
+                            className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                          >
+                            Changelog
                           </NavLink>
 
                           <NavLink

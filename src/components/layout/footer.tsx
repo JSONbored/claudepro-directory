@@ -75,6 +75,14 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/changelog"
+                  className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
+                >
+                  Changelog
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/community"
                   className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
                 >
