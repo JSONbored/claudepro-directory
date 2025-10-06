@@ -1,7 +1,6 @@
 import { HomePageClient } from '@/src/components/features/home';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
-import { BookOpen, Layers, Server, Sparkles } from '@/src/lib/icons';
 import { statsRedis } from '@/src/lib/redis';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { transformForHomePage } from '@/src/lib/utils/transformers';
@@ -89,14 +88,14 @@ export default async function HomePage() {
         className={`relative overflow-hidden ${UI_CLASSES.BORDER_B} border-border/50`}
         aria-label="Homepage hero"
       >
-        <div className={`relative container ${UI_CLASSES.MX_AUTO} px-4 py-20 lg:py-32`}>
+        <div className={`relative container ${UI_CLASSES.MX_AUTO} px-4 py-10 sm:py-16 lg:py-24`}>
           <div className={`text-center ${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
-            <h1 className="text-5xl lg:text-7xl font-bold mb-6 text-foreground tracking-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 text-foreground tracking-tight">
               The home for Claude enthusiasts
             </h1>
 
             <p
-              className={`${UI_CLASSES.TEXT_HEADING_LARGE} ${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO}`}
+              className={`text-base sm:text-lg lg:text-xl text-muted-foreground ${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO}`}
             >
               Discover and share the best Claude configurations. Explore expert rules, browse
               powerful MCP servers, find specialized agents and commands, discover automation hooks,

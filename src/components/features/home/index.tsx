@@ -26,8 +26,8 @@ import { FeaturedSections } from '@/src/components/features/home/featured-sectio
 import { SearchSection } from '@/src/components/features/home/search-section';
 import { TabsSection } from '@/src/components/features/home/tabs-section';
 import { useSearch } from '@/src/hooks/use-search';
-import { BookOpen, Layers, Server, Sparkles } from '@/src/lib/icons';
 import { HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
+import { BookOpen, Layers, Server, Sparkles } from '@/src/lib/icons';
 import type { HomePageClientProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
