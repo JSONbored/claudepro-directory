@@ -130,6 +130,23 @@ const serverEnvSchema = z
     RESEND_WEBHOOK_SECRET: nonEmptyString
       .optional()
       .describe('Resend webhook signing secret (from Svix) for verifying webhook authenticity'),
+
+    // Supabase (server-side only)
+    SUPABASE_SERVICE_ROLE_KEY: nonEmptyString
+      .optional()
+      .describe('Supabase service role key for admin operations (bypasses RLS)'),
+
+    // Polar.sh (payments)
+    POLAR_ACCESS_TOKEN: nonEmptyString
+      .optional()
+      .describe('Polar.sh API access token for payment operations'),
+    POLAR_WEBHOOK_SECRET: nonEmptyString
+      .optional()
+      .describe('Polar.sh webhook secret for signature verification'),
+    POLAR_ENVIRONMENT: z
+      .enum(['sandbox', 'production'])
+      .optional()
+      .describe('Polar.sh environment (sandbox for testing, production for live)'),
   })
   .describe(
     'Server-side environment variables containing sensitive data only accessible on the server'
@@ -181,6 +198,14 @@ const clientEnvSchema = z
     // Public API endpoints
     NEXT_PUBLIC_API_URL: urlString.optional().describe('Public API endpoint URL'),
     NEXT_PUBLIC_SITE_URL: urlString.optional().describe('Public site URL for canonical links'),
+
+    // Supabase (client-side safe)
+    NEXT_PUBLIC_SUPABASE_URL: urlString
+      .optional()
+      .describe('Supabase project URL (safe for client-side)'),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: nonEmptyString
+      .optional()
+      .describe('Supabase anonymous/public key (safe for client-side, RLS enforced)'),
   })
   .describe(
     'Client-side environment variables exposed to the browser (must not contain sensitive data)'
