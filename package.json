@@ -76,7 +76,7 @@
     "clsx": "^2.1.1",
     "devalue": "^5.3.2",
     "framer-motion": "^12.23.22",
-    "fumadocs-openapi": "^9.4.0",
+    "fumadocs-openapi": "^9.4.1",
     "fumadocs-ui": "^15.8.3",
     "fuzzysort": "^3.1.0",
     "gray-matter": "^4.0.3",
