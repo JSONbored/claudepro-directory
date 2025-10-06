@@ -26,6 +26,7 @@ import { FeaturedSections } from '@/src/components/features/home/featured-sectio
 import { SearchSection } from '@/src/components/features/home/search-section';
 import { TabsSection } from '@/src/components/features/home/tabs-section';
 import { useSearch } from '@/src/hooks/use-search';
+import { BookOpen, Layers, Server, Sparkles } from '@/src/lib/icons';
 import { HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
 import type { HomePageClientProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -155,7 +156,7 @@ function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
   return (
     <>
       {/* Search Section */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 pt-4 pb-8`}>
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 pt-4 pb-6`}>
         <div className={`${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
           <UnifiedSearch
             placeholder="Search for rules, MCP servers, agents, commands, and more..."
@@ -167,6 +168,42 @@ function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
             availableCategories={filterOptions.categories}
             resultCount={filteredResults.length}
           />
+
+          {/* Quick Stats - Below Search Bar */}
+          {stats && (
+            <div
+              className={`flex flex-wrap ${UI_CLASSES.JUSTIFY_CENTER} gap-4 lg:gap-6 text-xs lg:text-sm text-muted-foreground mt-6`}
+            >
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <BookOpen className="h-4 w-4" />
+                {stats.rules} Expert Rules
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Server className="h-4 w-4" />
+                {stats.mcp} MCP Servers
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Sparkles className="h-4 w-4" />
+                {stats.agents} AI Agents
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Sparkles className="h-4 w-4" />
+                {stats.commands} Commands
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Sparkles className="h-4 w-4" />
+                {stats.hooks} Automation Hooks
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Sparkles className="h-4 w-4" />
+                {stats.statuslines} Statuslines
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Layers className="h-4 w-4" />
+                {stats.collections} Collections
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
