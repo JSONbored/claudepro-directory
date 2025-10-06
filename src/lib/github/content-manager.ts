@@ -138,6 +138,7 @@ export function formatContentFile(data: ConfigSubmissionData & { slug: string })
     source: 'community',
   };
 
+  // biome-ignore lint/suspicious/noExplicitAny: Dynamic content object with type-specific fields added in switch statement
   let contentObject: any = { ...baseFields };
 
   // Build type-specific JSON from plaintext fields

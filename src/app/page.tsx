@@ -5,6 +5,26 @@ import { statsRedis } from '@/src/lib/redis';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { transformForHomePage } from '@/src/lib/utils/transformers';
 
+// Import types for metadata
+import type { AgentMetadata } from '@/generated/agents-metadata';
+import type { McpMetadata } from '@/generated/mcp-metadata';
+import type { RuleMetadata } from '@/generated/rules-metadata';
+import type { CommandMetadata } from '@/generated/commands-metadata';
+import type { HookMetadata } from '@/generated/hooks-metadata';
+import type { StatuslineMetadata } from '@/generated/statuslines-metadata';
+import type { CollectionMetadata } from '@/generated/collections-metadata';
+
+type ContentMetadataWithCategory =
+  | (AgentMetadata & { category: 'agents' })
+  | (McpMetadata & { category: 'mcp' })
+  | (RuleMetadata & { category: 'rules' })
+  | (CommandMetadata & { category: 'commands' })
+  | (HookMetadata & { category: 'hooks' })
+  | (StatuslineMetadata & { category: 'statuslines' })
+  | (CollectionMetadata & { category: 'collections' });
+
+type EnrichedMetadata = ContentMetadataWithCategory & { viewCount: number };
+
 // Enable ISR - revalidate every 5 minutes for fresh view counts
 export const revalidate = 300;
 
@@ -32,31 +52,31 @@ export default async function HomePage() {
   // Enrich with view counts from Redis
   const [rules, mcp, agents, commands, hooks, statuslines, collections] = await Promise.all([
     statsRedis.enrichWithViewCounts(
-      rulesData.map((item: any) => ({ ...item, category: 'rules' as const }))
+      rulesData.map((item) => ({ ...item, category: 'rules' as const }))
     ),
     statsRedis.enrichWithViewCounts(
-      mcpData.map((item: any) => ({ ...item, category: 'mcp' as const }))
+      mcpData.map((item) => ({ ...item, category: 'mcp' as const }))
     ),
     statsRedis.enrichWithViewCounts(
-      agentsData.map((item: any) => ({ ...item, category: 'agents' as const }))
+      agentsData.map((item) => ({ ...item, category: 'agents' as const }))
     ),
     statsRedis.enrichWithViewCounts(
-      commandsData.map((item: any) => ({
+      commandsData.map((item) => ({
         ...item,
         category: 'commands' as const,
       }))
     ),
     statsRedis.enrichWithViewCounts(
-      hooksData.map((item: any) => ({ ...item, category: 'hooks' as const }))
+      hooksData.map((item) => ({ ...item, category: 'hooks' as const }))
     ),
     statsRedis.enrichWithViewCounts(
-      statuslinesData.map((item: any) => ({
+      statuslinesData.map((item) => ({
         ...item,
         category: 'statuslines' as const,
       }))
     ),
     statsRedis.enrichWithViewCounts(
-      collectionsData.map((item: any) => ({
+      collectionsData.map((item) => ({
         ...item,
         category: 'collections' as const,
       }))
@@ -76,20 +96,20 @@ export default async function HomePage() {
   ];
 
   // Use Map to deduplicate by slug (last occurrence wins)
-  const allConfigsMap = new Map(allConfigsWithDuplicates.map((item: any) => [item.slug, item]));
+  const allConfigsMap = new Map(allConfigsWithDuplicates.map((item) => [item.slug, item]));
   const allConfigs = Array.from(allConfigsMap.values());
 
   // Transform data using transform functions to convert readonly arrays to mutable
   // Metadata arrays contain the core fields needed for display
   const initialData = transformForHomePage({
-    rules: rules as any,
-    mcp: mcp as any,
-    agents: agents as any,
-    commands: commands as any,
-    hooks: hooks as any,
-    statuslines: statuslines as any,
-    collections: collections as any,
-    allConfigs: allConfigs as any,
+    rules: rules as RuleMetadata[],
+    mcp: mcp as McpMetadata[],
+    agents: agents as AgentMetadata[],
+    commands: commands as CommandMetadata[],
+    hooks: hooks as HookMetadata[],
+    statuslines: statuslines as StatuslineMetadata[],
+    collections: collections as CollectionMetadata[],
+    allConfigs: allConfigs as EnrichedMetadata[],
   });
 
   return (

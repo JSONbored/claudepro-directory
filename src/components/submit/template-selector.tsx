@@ -118,6 +118,7 @@ type ContentType = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statusli
 
 interface TemplateSelectorProps {
   contentType: ContentType;
+  // biome-ignore lint/suspicious/noExplicitAny: Templates have dynamic fields based on content type
   onSelect: (template: any) => void;
 }
 

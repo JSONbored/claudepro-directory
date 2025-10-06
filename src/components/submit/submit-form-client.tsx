@@ -44,6 +44,7 @@ export function SubmitFormClient() {
   } | null>(null);
 
   // Handle template selection
+  // biome-ignore lint/suspicious/noExplicitAny: Templates have dynamic fields based on content type
   const handleTemplateSelect = (template: any) => {
     // Pre-fill form with template data
     const form = document.querySelector('form') as HTMLFormElement;
@@ -150,6 +151,7 @@ export function SubmitFormClient() {
           tags: (formData.get('tags') as string) || undefined,
         };
 
+        // biome-ignore lint/suspicious/noExplicitAny: Dynamic form data with type-specific fields added in switch statement
         const submissionData: any = { ...baseData };
 
         // Add type-specific fields

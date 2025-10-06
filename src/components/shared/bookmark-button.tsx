@@ -41,6 +41,7 @@ export function BookmarkButton({
         if (isBookmarked) {
           // Remove bookmark
           const result = await removeBookmark({
+            // biome-ignore lint/suspicious/noExplicitAny: contentType is validated by server action schema
             content_type: contentType as any,
             content_slug: contentSlug,
           });
@@ -52,6 +53,7 @@ export function BookmarkButton({
         } else {
           // Add bookmark
           const result = await addBookmark({
+            // biome-ignore lint/suspicious/noExplicitAny: contentType is validated by server action schema
             content_type: contentType as any,
             content_slug: contentSlug,
           });
