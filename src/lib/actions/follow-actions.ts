@@ -8,7 +8,6 @@
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { createClient } from '@/src/lib/supabase/server';
-import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { revalidatePath } from 'next/cache';
 
 const followSchema = z.object({
@@ -23,7 +22,7 @@ const followSchema = z.object({
 export const toggleFollow = rateLimitedAction
   .metadata({
     actionName: 'toggleFollow',
-    category: 'social',
+    category: 'user',
   })
   .schema(followSchema)
   .action(async ({ parsedInput: { action, user_id, slug } }) => {

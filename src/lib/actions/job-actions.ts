@@ -15,11 +15,8 @@ import {
   createJobSchema, 
   updateJobSchema, 
   toggleJobStatusSchema,
-  type CreateJobInput,
-  type UpdateJobInput,
 } from '@/src/lib/schemas/content/job.schema';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 
 /**
  * Create a new job listing
