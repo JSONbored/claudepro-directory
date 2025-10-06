@@ -109,7 +109,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.2.5",
     "@next/bundle-analyzer": "^15.5.4",
-    "knip": "^5.64.1",
+    "knip": "^5.64.2",
     "lefthook": "^1.13.5",
     "ultracite": "^5.4.6"
   }
