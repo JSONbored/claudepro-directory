@@ -4,7 +4,12 @@
   "category": "mcp",
   "author": "Your Name or GitHub Username",
   "dateAdded": "YYYY-MM-DD",
-  "tags": ["server-type", "data-source", "technology-stack", "use-case-category"],
+  "tags": [
+    "server-type",
+    "data-source",
+    "technology-stack",
+    "use-case-category"
+  ],
   "content": "Detailed description of the MCP server's functionality, what it connects to, and how it enhances Claude's capabilities. Explain the value proposition and key benefits.",
   "configuration": {
     "claudeDesktop": {

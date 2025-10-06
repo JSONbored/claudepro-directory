@@ -87,5 +87,6 @@
   "requiresAuth": false,
   "permissions": ["read", "export"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://help.figma.com/hc/en-us/articles/32132100833559"
+  "documentationUrl": "https://help.figma.com/hc/en-us/articles/32132100833559",
+  "seoTitle": "Figma MCP Server for Claude"
 }

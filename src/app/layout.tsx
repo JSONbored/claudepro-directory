@@ -6,20 +6,24 @@ import { connection } from 'next/server';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { Toaster } from 'sonner';
+import { Footer } from '@/src/components/layout/footer';
 import { Navigation } from '@/src/components/layout/navigation';
+import { PostCopyEmailProvider } from '@/src/components/providers/post-copy-email-provider';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
+import { FooterNewsletterBar } from '@/src/components/shared/footer-newsletter-bar';
 import { PerformanceOptimizer } from '@/src/components/shared/performance-optimizer';
 import { StructuredData } from '@/src/components/shared/structured-data';
 import { UmamiScript } from '@/src/components/shared/umami-script';
 import { WebVitals } from '@/src/components/shared/web-vitals';
 import { OrganizationStructuredData } from '@/src/components/structured-data/organization-schema';
-import { APP_CONFIG, SEO_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG } from '@/src/lib/constants';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // Configure Inter font with optimizations
 const inter = Inter({
   subsets: ['latin'],
-  display: 'swap',
+  display: 'optional', // Changed from 'swap' to 'optional' for better performance (zero layout shifts)
   variable: '--font-inter',
   preload: true,
   fallback: [
@@ -33,80 +37,75 @@ const inter = Inter({
   ],
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(APP_CONFIG.url),
-  title: SEO_CONFIG.titleTemplate.replace('%s', SEO_CONFIG.defaultTitle),
-  description: SEO_CONFIG.defaultDescription,
-  keywords: SEO_CONFIG.keywords.join(', '),
-  authors: [{ name: APP_CONFIG.author, url: `${APP_CONFIG.url}/about` }],
-  openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: `${APP_CONFIG.url}/`,
-    siteName: APP_CONFIG.name,
-    title: SEO_CONFIG.titleTemplate.replace('%s', SEO_CONFIG.defaultTitle),
-    description: SEO_CONFIG.defaultDescription,
-    images: [
-      {
-        url: '/opengraph-image',
-        width: 1200,
-        height: 630,
-        alt: `${APP_CONFIG.name} - Community Configurations`,
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: SEO_CONFIG.titleTemplate.replace('%s', SEO_CONFIG.defaultTitle),
-    description: SEO_CONFIG.defaultDescription,
-    // Next.js automatically uses opengraph-image if no twitter-image is specified
-    creator: '@JSONbored',
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+// Generate homepage metadata from centralized registry
+export async function generateMetadata(): Promise<Metadata> {
+  const homeMetadata = await generatePageMetadata('/');
+
+  return {
+    ...homeMetadata,
+    metadataBase: new URL(APP_CONFIG.url),
+    authors: [{ name: APP_CONFIG.author, url: `${APP_CONFIG.url}/about` }],
+    openGraph: {
+      ...homeMetadata.openGraph,
+      locale: 'en_US',
+      images: [
+        {
+          url: '/opengraph-image',
+          width: 1200,
+          height: 630,
+          alt: `${APP_CONFIG.name} - Community Configurations`,
+        },
+      ],
     },
-  },
-  alternates: {
-    canonical: `${APP_CONFIG.url}/`,
-    types: {
-      // OpenAPI 3.1.0 Specification for AI Discovery (RFC 9727)
-      'application/openapi+json': '/openapi.json',
-      // API Catalog for RFC 9727 Compliant Discovery
-      'application/json': '/.well-known/api-catalog',
+    twitter: {
+      ...homeMetadata.twitter,
+      creator: '@JSONbored',
     },
-  },
-  icons: {
-    icon: [
-      { url: '/assets/icons/claudepro-directory-icon.ico' },
-      { url: '/assets/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/assets/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-    ],
-    shortcut: '/assets/icons/claudepro-directory-icon.ico',
-    apple: '/assets/icons/apple-touch-icon.png',
-    other: [
-      {
-        rel: 'icon',
-        type: 'image/png',
-        sizes: '192x192',
-        url: '/assets/icons/icon-192.png',
+    alternates: {
+      ...homeMetadata.alternates,
+      types: {
+        // OpenAPI 3.1.0 Specification for AI Discovery (RFC 9727)
+        'application/openapi+json': '/openapi.json',
+        // API Catalog for RFC 9727 Compliant Discovery
+        'application/json': '/.well-known/api-catalog',
+        // LLMs.txt for AI-Optimized Plain Text Content (llmstxt.org)
+        'text/plain': '/llms.txt',
       },
-      {
-        rel: 'icon',
-        type: 'image/png',
-        sizes: '512x512',
-        url: '/assets/icons/icon-512.png',
-      },
-    ],
-  },
-  manifest: '/manifest.webmanifest',
-};
+    },
+    icons: {
+      icon: [
+        { url: '/assets/icons/claudepro-directory-icon.ico' },
+        {
+          url: '/assets/icons/favicon-16x16.png',
+          sizes: '16x16',
+          type: 'image/png',
+        },
+        {
+          url: '/assets/icons/favicon-32x32.png',
+          sizes: '32x32',
+          type: 'image/png',
+        },
+      ],
+      shortcut: '/assets/icons/claudepro-directory-icon.ico',
+      apple: '/assets/icons/apple-touch-icon.png',
+      other: [
+        {
+          rel: 'icon',
+          type: 'image/png',
+          sizes: '192x192',
+          url: '/assets/icons/icon-192.png',
+        },
+        {
+          rel: 'icon',
+          type: 'image/png',
+          sizes: '512x512',
+          url: '/assets/icons/icon-512.png',
+        },
+      ],
+    },
+    manifest: '/manifest.webmanifest',
+  };
+}
 
 export default async function RootLayout({
   children,
@@ -153,8 +152,8 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
       </head>
       <body className="font-sans">
-        <StructuredData type="website" />
-        <OrganizationStructuredData />
+        {await StructuredData({ type: 'website' })}
+        {await OrganizationStructuredData()}
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -162,20 +161,26 @@ export default async function RootLayout({
           disableTransitionOnChange
           {...(nonce ? { nonce } : {})}
         >
-          <ErrorBoundary>
-            <a
-              href="#main-content"
-              className={`sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:${UI_CLASSES.Z_50} focus:px-4 focus:${UI_CLASSES.PY_2} focus:bg-primary focus:text-primary-foreground ${UI_CLASSES.ROUNDED_MD}`}
-            >
-              Skip to main content
-            </a>
-            <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
-              <Navigation />
-              {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
-              <main id="main-content">{children}</main>
-            </div>
-          </ErrorBoundary>
-          <Toaster />
+          <PostCopyEmailProvider>
+            <ErrorBoundary>
+              <a
+                href="#main-content"
+                className={`sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:${UI_CLASSES.Z_50} focus:px-4 focus:${UI_CLASSES.PY_2} focus:bg-primary focus:text-primary-foreground ${UI_CLASSES.ROUNDED_MD}`}
+              >
+                Skip to main content
+              </a>
+              <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background flex flex-col`}>
+                <Navigation />
+                {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
+                <main id="main-content" className="flex-1">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+            </ErrorBoundary>
+            <Toaster />
+            <FooterNewsletterBar />
+          </PostCopyEmailProvider>
         </ThemeProvider>
         <PerformanceOptimizer />
         <Analytics />
@@ -183,12 +188,14 @@ export default async function RootLayout({
         {/* Umami Analytics - Privacy-focused analytics (production only) */}
         {await UmamiScript()}
         {/* Service Worker Registration for PWA Support */}
+        {/* suppressHydrationWarning: Browsers remove nonce attribute after execution (security feature), causing harmless hydration warning */}
         <script
           src="/scripts/service-worker-init.js"
           integrity="sha384-0tKKFTk8IlkGOHQjqC00b0Xn/MEUQcn73JljDRsW34lCFxSqKEUZwBNKSp9N/AM/"
           crossOrigin="anonymous"
           nonce={nonce}
           defer
+          suppressHydrationWarning
         />
       </body>
     </html>

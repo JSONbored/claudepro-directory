@@ -31,11 +31,11 @@ import { Badge } from '@/src/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { SourceBadge, TagBadge } from '@/src/components/ui/config-badge';
 import { trackView } from '@/src/lib/actions/track-view';
-import { APP_CONFIG } from '@/src/lib/constants';
 import { getContentBySlug } from '@/src/lib/content/content-loaders';
 import { AlertTriangle, CheckCircle, Clock, Layers } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 /**
  * ISR revalidation (4 hours)
@@ -84,6 +84,7 @@ export async function generateStaticParams() {
 
 /**
  * Generate metadata for collection page
+ * Uses centralized metadata system with CollectionPage schema for SEO
  */
 export async function generateMetadata({
   params,
@@ -100,29 +101,19 @@ export async function generateMetadata({
     };
   }
 
-  const title = collection.title || collection.slug;
-  const description = collection.description;
-
-  return {
-    title: `${title} - Collections - ${APP_CONFIG.name}`,
-    description,
-    keywords: collection.tags,
-    alternates: {
-      canonical: `${APP_CONFIG.url}/collections/${slug}`,
+  // Use centralized metadata system with CollectionPage schema
+  // Collections use special structured data for better discovery
+  return await generatePageMetadata('/collections/:slug', {
+    params: { slug },
+    item: {
+      title: collection.title || collection.slug,
+      description: collection.description,
+      tags: collection.tags,
+      author: collection.author,
+      dateAdded: collection.dateAdded,
+      lastModified: collection.dateAdded,
     },
-    openGraph: {
-      title: `${title} - ${APP_CONFIG.name}`,
-      description,
-      type: 'article',
-      url: `${APP_CONFIG.url}/collections/${slug}`,
-      siteName: APP_CONFIG.name,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: `${title} - ${APP_CONFIG.name}`,
-      description,
-    },
-  };
+  });
 }
 
 /**

@@ -200,7 +200,11 @@ export function validateErrorInput(error: unknown): ErrorValidationResult {
       }
     }
 
-    return { isValid: false, type: 'invalid', fallback: 'Unknown error occurred' };
+    return {
+      isValid: false,
+      type: 'invalid',
+      fallback: 'Unknown error occurred',
+    };
   } catch (validationError) {
     logger.error(
       'Error Validation: Failed to validate error input',
@@ -214,7 +218,11 @@ export function validateErrorInput(error: unknown): ErrorValidationResult {
         errorConstructor: error?.constructor?.name || 'Error',
       }
     );
-    return { isValid: false, type: 'invalid', fallback: 'Error validation failed' };
+    return {
+      isValid: false,
+      type: 'invalid',
+      fallback: 'Error validation failed',
+    };
   }
 }
 
@@ -421,7 +429,10 @@ const errorResponseSchema = z
 /**
  * Type exports
  */
-export type { ErrorSeverity, ErrorType } from './primitives/performance-primitives';
+export type {
+  ErrorSeverity,
+  ErrorType,
+} from './primitives/performance-primitives';
 export type ErrorContext = z.infer<typeof errorContextSchema>;
 export type SanitizedError = z.infer<typeof sanitizedErrorSchema>;
 export type ErrorHandlerConfig = z.infer<typeof errorHandlerConfigSchema>;

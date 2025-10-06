@@ -111,6 +111,7 @@ export const BUILD_CATEGORY_CONFIGS = {
     metadataFields: [
       'slug',
       'title',
+      'seoTitle',
       'description',
       'author',
       'tags',
@@ -139,6 +140,7 @@ export const BUILD_CATEGORY_CONFIGS = {
     metadataFields: [
       'slug',
       'title',
+      'seoTitle',
       'description',
       'author',
       'tags',
@@ -167,6 +169,7 @@ export const BUILD_CATEGORY_CONFIGS = {
     metadataFields: [
       'slug',
       'title',
+      'seoTitle',
       'description',
       'author',
       'tags',
@@ -195,6 +198,7 @@ export const BUILD_CATEGORY_CONFIGS = {
     metadataFields: [
       'slug',
       'title',
+      'seoTitle',
       'description',
       'author',
       'tags',
@@ -223,6 +227,7 @@ export const BUILD_CATEGORY_CONFIGS = {
     metadataFields: [
       'slug',
       'title',
+      'seoTitle',
       'description',
       'author',
       'tags',
@@ -251,6 +256,7 @@ export const BUILD_CATEGORY_CONFIGS = {
     metadataFields: [
       'slug',
       'title',
+      'seoTitle',
       'description',
       'author',
       'tags',
@@ -279,6 +285,7 @@ export const BUILD_CATEGORY_CONFIGS = {
     metadataFields: [
       'slug',
       'title',
+      'seoTitle',
       'description',
       'author',
       'tags',

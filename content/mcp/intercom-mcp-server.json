@@ -84,5 +84,6 @@
   "requiresAuth": true,
   "permissions": ["read", "write", "respond"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://developers.intercom.com/docs/guides/mcp"
+  "documentationUrl": "https://developers.intercom.com/docs/guides/mcp",
+  "seoTitle": "Intercom MCP Server for Claude"
 }

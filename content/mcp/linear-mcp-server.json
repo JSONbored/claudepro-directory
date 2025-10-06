@@ -84,5 +84,6 @@
   "requiresAuth": true,
   "permissions": ["read", "write", "admin"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://linear.app/docs/mcp"
+  "documentationUrl": "https://linear.app/docs/mcp",
+  "seoTitle": "Linear MCP Server for Claude"
 }

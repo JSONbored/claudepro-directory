@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import React from 'react';
 import { z } from 'zod';
-import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
+import { useMDXContent } from '@/src/components/providers/mdx-content-provider';
+import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { CheckCircle, Copy, ExternalLink } from '@/src/lib/icons';
 import type {
   MdxElementProps,
@@ -20,7 +21,18 @@ export function CopyableHeading({
   className,
   ...props
 }: MdxHeadingProps & { level: 1 | 2 | 3 }) {
-  const { copied, copy } = useCopyToClipboard({
+  const mdxContext = useMDXContent();
+
+  const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
+  const { copied, copy } = useCopyWithEmailCapture({
+    emailContext: {
+      copyType: 'link',
+      ...(mdxContext && {
+        category: mdxContext.category,
+        slug: mdxContext.slug,
+      }),
+      ...(referrer && { referrer }),
+    },
     context: {
       component: 'CopyableHeading',
       action: 'copy-heading-link',
@@ -71,7 +83,18 @@ const textContentSchema = z.string().min(0);
 
 // Client component for copyable code blocks (MDX/rehype-pretty-code)
 export function CopyableCodeBlock({ children, className, ...props }: MdxElementProps) {
-  const { copied, copy } = useCopyToClipboard({
+  const mdxContext = useMDXContent();
+
+  const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
+  const { copied, copy } = useCopyWithEmailCapture({
+    emailContext: {
+      copyType: 'code',
+      ...(mdxContext && {
+        category: mdxContext.category,
+        slug: mdxContext.slug,
+      }),
+      ...(referrer && { referrer }),
+    },
     context: {
       component: 'CopyableCodeBlock',
       action: 'copy-code',
@@ -88,7 +111,9 @@ export function CopyableCodeBlock({ children, className, ...props }: MdxElementP
       }
       if (React.isValidElement(node)) {
         // Use type assertion only after React.isValidElement check
-        const element = node as React.ReactElement<{ children?: React.ReactNode }>;
+        const element = node as React.ReactElement<{
+          children?: React.ReactNode;
+        }>;
         return extractTextContent(element.props.children);
       }
       return '';

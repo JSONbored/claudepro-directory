@@ -88,5 +88,6 @@
   "requiresAuth": true,
   "permissions": ["read", "write", "trigger"],
   "configLocation": "user_specific",
-  "documentationUrl": "https://help.zapier.com/hc/en-us/articles/36265392843917"
+  "documentationUrl": "https://help.zapier.com/hc/en-us/articles/36265392843917",
+  "seoTitle": "Zapier MCP Server for Claude"
 }

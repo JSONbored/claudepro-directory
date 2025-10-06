@@ -11,7 +11,7 @@
 
 import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
-import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
+import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { trackCopy } from '@/src/lib/actions/track-view';
 import { Check, Copy } from '@/src/lib/icons';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
@@ -31,7 +31,14 @@ export interface CardCopyActionProps {
 }
 
 export function CardCopyAction({ url, category, slug, title, componentName }: CardCopyActionProps) {
-  const { copied, copy } = useCopyToClipboard({
+  const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
+  const { copied, copy } = useCopyWithEmailCapture({
+    emailContext: {
+      copyType: 'link',
+      category,
+      slug,
+      ...(referrer && { referrer }),
+    },
     onSuccess: () => {
       // Track copy action for analytics (silent fail)
       trackCopy({ category, slug }).catch(() => {

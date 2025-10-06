@@ -1,5 +1,6 @@
 {
   "slug": "session-timer-statusline",
+  "seoTitle": "Session Timer",
   "description": "Time-tracking statusline showing elapsed session duration, tokens per minute rate, and estimated cost with productivity metrics",
   "category": "statuslines",
   "author": "JSONbored",

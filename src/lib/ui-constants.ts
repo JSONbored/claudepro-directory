@@ -92,7 +92,12 @@ export const UI_CLASSES = {
    * Framer Motion Animation Constants
    * Production-grade spring physics for natural, fluid motion
    */
-  SPRING_SMOOTH: { type: 'spring' as const, stiffness: 300, damping: 30, mass: 0.8 },
+  SPRING_SMOOTH: {
+    type: 'spring' as const,
+    stiffness: 300,
+    damping: 30,
+    mass: 0.8,
+  },
   SPRING_BOUNCY: { type: 'spring' as const, stiffness: 400, damping: 25 },
   SPRING_GENTLE: { type: 'spring' as const, stiffness: 200, damping: 20 },
   FADE_IN_OUT: { duration: 0.3 },

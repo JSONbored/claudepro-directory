@@ -16,7 +16,12 @@ const SCHEMA_CONTEXT = 'https://schema.org' as const;
 function buildAuthor(
   authorName?: string,
   githubUrl?: string
-): { '@type': 'Person' | 'Organization'; name: string; url?: string; sameAs?: string } {
+): {
+  '@type': 'Person' | 'Organization';
+  name: string;
+  url?: string;
+  sameAs?: string;
+} {
   const isAnthropicOrg = githubUrl?.includes('github.com/anthropics');
 
   return {

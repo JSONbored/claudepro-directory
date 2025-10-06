@@ -84,5 +84,6 @@
   "requiresAuth": true,
   "permissions": ["read", "write", "admin"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://www.atlassian.com/platform/remote-mcp-server"
+  "documentationUrl": "https://www.atlassian.com/platform/remote-mcp-server",
+  "seoTitle": "Jira MCP Server for Claude"
 }

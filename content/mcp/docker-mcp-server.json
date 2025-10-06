@@ -104,5 +104,6 @@
   "requiresAuth": false,
   "permissions": ["containers", "images", "volumes", "networks"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://docs.docker.com/engine/api/"
+  "documentationUrl": "https://docs.docker.com/engine/api/",
+  "seoTitle": "Docker MCP Server for Claude"
 }

@@ -27,7 +27,9 @@ const Alert = ({
   ref,
   ...props
 }: React.HTMLAttributes<HTMLDivElement> &
-  VariantProps<typeof alertVariants> & { ref?: React.RefObject<HTMLDivElement | null> }) => (
+  VariantProps<typeof alertVariants> & {
+    ref?: React.RefObject<HTMLDivElement | null>;
+  }) => (
   <div ref={ref} role="alert" className={cn(alertVariants({ variant }), className)} {...props} />
 );
 Alert.displayName = 'Alert';

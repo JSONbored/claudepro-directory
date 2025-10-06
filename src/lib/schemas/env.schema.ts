@@ -8,7 +8,10 @@ import { z } from 'zod';
 import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives/base-strings';
 
 // Logger import - must be lazy to avoid circular dependency during env initialization
-function getLogger(): { error: (msg: string) => void; warn: (msg: string) => void } {
+function getLogger(): {
+  error: (msg: string) => void;
+  warn: (msg: string) => void;
+} {
   try {
     // Lazy load to avoid circular dependency
     const loggerModule = require('../logger');
@@ -114,6 +117,19 @@ const serverEnvSchema = z
       .min(32)
       .optional()
       .describe('Secret key for webhook signature validation (minimum 32 characters)'),
+
+    // Email provider (Resend)
+    RESEND_API_KEY: nonEmptyString
+      .optional()
+      .describe('Resend API key for transactional email and newsletter subscriptions'),
+
+    RESEND_AUDIENCE_ID: nonEmptyString
+      .optional()
+      .describe('Resend Audience ID for newsletter contact management'),
+
+    RESEND_WEBHOOK_SECRET: nonEmptyString
+      .optional()
+      .describe('Resend webhook signing secret (from Svix) for verifying webhook authenticity'),
   })
   .describe(
     'Server-side environment variables containing sensitive data only accessible on the server'

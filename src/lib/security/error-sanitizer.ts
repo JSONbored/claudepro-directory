@@ -57,7 +57,10 @@ export class ErrorSanitizer {
   /**
    * Sanitize error message by removing sensitive patterns
    */
-  private sanitizeMessage(message: string): { sanitized: string; removed: string[] } {
+  private sanitizeMessage(message: string): {
+    sanitized: string;
+    removed: string[];
+  } {
     let sanitized = message;
     const removed: string[] = [];
 

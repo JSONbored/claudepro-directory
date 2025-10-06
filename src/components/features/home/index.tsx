@@ -27,6 +27,7 @@ import { SearchSection } from '@/src/components/features/home/search-section';
 import { TabsSection } from '@/src/components/features/home/tabs-section';
 import { useSearch } from '@/src/hooks/use-search';
 import { HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
+import { BookOpen, Layers, Server, Sparkles } from '@/src/lib/icons';
 import type { HomePageClientProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -43,7 +44,7 @@ const UnifiedSearch = dynamic(
   }
 );
 
-function HomePageClientComponent({ initialData }: HomePageClientProps) {
+function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
   const { allConfigs } = initialData;
 
   const [activeTab, setActiveTab] = useState('all');
@@ -105,11 +106,14 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
     filteredResultsRef.current = filteredResults;
   }, [filteredResults]);
 
-  // Update displayed items when filtered results change
+  // Update displayed items only when tab or search changes (not on every filteredResults reference change)
+  // Using activeTab and isSearching as dependencies instead of filteredResults to avoid resetting
+  // pagination when the same data is re-filtered (which creates a new array reference)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Intentionally using activeTab/isSearching to avoid pagination reset on re-renders
   useEffect(() => {
     setDisplayedItems(filteredResults.slice(0, pageSize) as UnifiedContentItem[]);
     currentPageRef.current = 1;
-  }, [filteredResults]);
+  }, [activeTab, isSearching]);
 
   // Load more function for infinite scroll
   // Uses refs to avoid stale closures when filteredResults changes
@@ -119,16 +123,22 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
     const endIndex = startIndex + pageSize;
     const nextItems = filteredResultsRef.current.slice(startIndex, endIndex);
 
-    // Deduplicate to prevent duplicate keys
-    const prevSlugs = new Set(displayedItems.map((item) => item.slug));
-    const uniqueNextItems = nextItems.filter((item) => !prevSlugs.has(item.slug));
+    let uniqueNextItems: UnifiedContentItem[] = [];
 
-    setDisplayedItems((prev) => [...prev, ...uniqueNextItems] as UnifiedContentItem[]);
+    // Deduplicate using functional setState to get latest state
+    setDisplayedItems((prev) => {
+      const prevSlugs = new Set(prev.map((item) => item.slug));
+      uniqueNextItems = nextItems.filter(
+        (item) => !prevSlugs.has(item.slug)
+      ) as UnifiedContentItem[];
+      return [...prev, ...uniqueNextItems] as UnifiedContentItem[];
+    });
+
     currentPageRef.current = nextPage;
 
     // Return the new items so infinite scroll knows items were loaded
-    return uniqueNextItems as UnifiedContentItem[];
-  }, [displayedItems]);
+    return uniqueNextItems;
+  }, []);
 
   const hasMore = displayedItems.length < filteredResults.length;
 
@@ -146,7 +156,7 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
   return (
     <>
       {/* Search Section */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-8`}>
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 pt-4 pb-6`}>
         <div className={`${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
           <UnifiedSearch
             placeholder="Search for rules, MCP servers, agents, commands, and more..."
@@ -158,6 +168,42 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
             availableCategories={filterOptions.categories}
             resultCount={filteredResults.length}
           />
+
+          {/* Quick Stats - Below Search Bar */}
+          {stats && (
+            <div
+              className={`flex flex-wrap ${UI_CLASSES.JUSTIFY_CENTER} gap-4 lg:gap-6 text-xs lg:text-sm text-muted-foreground mt-6`}
+            >
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <BookOpen className="h-4 w-4" />
+                {stats.rules} Expert Rules
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Server className="h-4 w-4" />
+                {stats.mcp} MCP Servers
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Sparkles className="h-4 w-4" />
+                {stats.agents} AI Agents
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Sparkles className="h-4 w-4" />
+                {stats.commands} Commands
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Sparkles className="h-4 w-4" />
+                {stats.hooks} Automation Hooks
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Sparkles className="h-4 w-4" />
+                {stats.statuslines} Statuslines
+              </div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <Layers className="h-4 w-4" />
+                {stats.collections} Collections
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

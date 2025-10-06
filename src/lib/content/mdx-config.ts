@@ -31,6 +31,7 @@ const frontmatterSchema = z.record(z.string(), frontmatterValueSchema);
 // Local MDX frontmatter schema for validation
 const localMdxFrontmatterSchema = z.object({
   title: z.string(),
+  seoTitle: z.string().optional(),
   description: z.string(),
   keywords: z.array(z.string()).default([]),
   dateUpdated: z.string().default(''),
@@ -56,6 +57,7 @@ function parseFrontmatterWithValidation(
 ): z.infer<typeof localMdxFrontmatterSchema> {
   return localMdxFrontmatterSchema.parse({
     title: rawFrontmatter.title || 'Untitled',
+    seoTitle: typeof rawFrontmatter.seoTitle === 'string' ? rawFrontmatter.seoTitle : undefined,
     description: rawFrontmatter.description || '',
     keywords: Array.isArray(rawFrontmatter.keywords) ? rawFrontmatter.keywords : [],
     dateUpdated: typeof rawFrontmatter.dateUpdated === 'string' ? rawFrontmatter.dateUpdated : '',
