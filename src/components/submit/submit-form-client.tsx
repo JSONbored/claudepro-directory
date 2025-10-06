@@ -296,9 +296,9 @@ export function SubmitFormClient() {
             {/* Type Selection + Template Selector */}
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="type">Content Type *</Label>
+                <Label htmlFor={typeId}>Content Type *</Label>
                 <select
-                  id="type"
+                  id={typeId}
                   value={contentType}
                   onChange={(e) => {
                     setContentType(e.target.value as ContentType);
@@ -324,9 +324,9 @@ export function SubmitFormClient() {
 
             {/* Name Field + Duplicate Warning */}
             <div className="space-y-2">
-              <Label htmlFor="name">Name *</Label>
+              <Label htmlFor={nameId}>Name *</Label>
               <Input
-                id="name"
+                id={nameId}
                 name="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -338,9 +338,9 @@ export function SubmitFormClient() {
 
             {/* Base Fields (All Types) */}
             <div className="space-y-2">
-              <Label htmlFor="description">Description *</Label>
+              <Label htmlFor={descriptionId}>Description *</Label>
               <Textarea
-                id="description"
+                id={descriptionId}
                 name="description"
                 placeholder="Brief description of what this does..."
                 required
@@ -351,9 +351,9 @@ export function SubmitFormClient() {
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="category">Category *</Label>
+                <Label htmlFor={categoryId}>Category *</Label>
                 <Input
-                  id="category"
+                  id={categoryId}
                   name="category"
                   placeholder="e.g., Development, Productivity"
                   required
@@ -361,9 +361,9 @@ export function SubmitFormClient() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="author">Your Name *</Label>
+                <Label htmlFor={authorId}>Your Name *</Label>
                 <Input
-                  id="author"
+                  id={authorId}
                   name="author"
                   placeholder="Your name or GitHub username"
                   required
@@ -372,11 +372,11 @@ export function SubmitFormClient() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="github">GitHub Repository (optional)</Label>
+              <Label htmlFor={githubId}>GitHub Repository (optional)</Label>
               <div className="flex gap-2">
                 <Github className="h-5 w-5 mt-2.5 text-muted-foreground flex-shrink-0" />
                 <Input
-                  id="github"
+                  id={githubId}
                   name="github"
                   type="url"
                   placeholder="https://github.com/username/repo"
@@ -388,9 +388,9 @@ export function SubmitFormClient() {
             {contentType === 'agents' && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="systemPrompt">System Prompt * (Plaintext)</Label>
+                  <Label htmlFor={systemPromptId}>System Prompt * (Plaintext)</Label>
                   <Textarea
-                    id="systemPrompt"
+                    id={systemPromptId}
                     name="systemPrompt"
                     placeholder="You are an expert in... [Write your Claude system prompt here in plain English]"
                     required
@@ -404,9 +404,9 @@ export function SubmitFormClient() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="temperature">Temperature (0-1)</Label>
+                    <Label htmlFor={temperatureIdAgents}>Temperature (0-1)</Label>
                     <Input
-                      id="temperature"
+                      id={temperatureIdAgents}
                       name="temperature"
                       type="number"
                       min="0"
@@ -417,9 +417,9 @@ export function SubmitFormClient() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="maxTokens">Max Tokens</Label>
+                    <Label htmlFor={maxTokensIdAgents}>Max Tokens</Label>
                     <Input
-                      id="maxTokens"
+                      id={maxTokensIdAgents}
                       name="maxTokens"
                       type="number"
                       min="100"
@@ -434,9 +434,9 @@ export function SubmitFormClient() {
             {contentType === 'rules' && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="rulesContent">Claude Rules Content * (Plaintext)</Label>
+                  <Label htmlFor={rulesContentId}>Claude Rules Content * (Plaintext)</Label>
                   <Textarea
-                    id="rulesContent"
+                    id={rulesContentId}
                     name="rulesContent"
                     placeholder="You are an expert in... [Write your Claude expertise rules in plain text]"
                     required
@@ -450,9 +450,9 @@ export function SubmitFormClient() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="temperature">Temperature (0-1)</Label>
+                    <Label htmlFor={temperatureIdCommands}>Temperature (0-1)</Label>
                     <Input
-                      id="temperature"
+                      id={temperatureIdCommands}
                       name="temperature"
                       type="number"
                       min="0"
@@ -463,9 +463,9 @@ export function SubmitFormClient() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="maxTokens">Max Tokens</Label>
+                    <Label htmlFor={maxTokensIdCommands}>Max Tokens</Label>
                     <Input
-                      id="maxTokens"
+                      id={maxTokensIdCommands}
                       name="maxTokens"
                       type="number"
                       min="100"
@@ -479,9 +479,9 @@ export function SubmitFormClient() {
 
             {contentType === 'commands' && (
               <div className="space-y-2">
-                <Label htmlFor="commandContent">Command Content * (Plaintext)</Label>
+                <Label htmlFor={commandContentId}>Command Content * (Plaintext)</Label>
                 <Textarea
-                  id="commandContent"
+                  id={commandContentId}
                   name="commandContent"
                   placeholder="---&#10;description: What this command does&#10;model: claude-3-5-sonnet-20241022&#10;---&#10;&#10;Command instructions here..."
                   required
@@ -497,9 +497,9 @@ export function SubmitFormClient() {
             {contentType === 'hooks' && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="hookScript">Hook Script * (Bash)</Label>
+                  <Label htmlFor={hookScriptId}>Hook Script * (Bash)</Label>
                   <Textarea
-                    id="hookScript"
+                    id={hookScriptId}
                     name="hookScript"
                     placeholder="#!/usr/bin/env bash&#10;# Your hook script here...&#10;&#10;echo 'Hook running...'&#10;exit 0"
                     required
@@ -513,9 +513,9 @@ export function SubmitFormClient() {
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="hookType">Hook Type *</Label>
+                    <Label htmlFor={hookTypeId}>Hook Type *</Label>
                     <select
-                      id="hookType"
+                      id={hookTypeId}
                       name="hookType"
                       required
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -528,8 +528,8 @@ export function SubmitFormClient() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="triggeredBy">Triggered By (optional)</Label>
-                    <Input id="triggeredBy" name="triggeredBy" placeholder="tool1, tool2" />
+                    <Label htmlFor={triggeredById}>Triggered By (optional)</Label>
+                    <Input id={triggeredById} name="triggeredBy" placeholder="tool1, tool2" />
                   </div>
                 </div>
               </>
@@ -538,9 +538,9 @@ export function SubmitFormClient() {
             {contentType === 'statuslines' && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="statuslineScript">Statusline Script * (Bash)</Label>
+                  <Label htmlFor={statuslineScriptId}>Statusline Script * (Bash)</Label>
                   <Textarea
-                    id="statuslineScript"
+                    id={statuslineScriptId}
                     name="statuslineScript"
                     placeholder="#!/usr/bin/env bash&#10;&#10;read -r input&#10;echo 'Your statusline output'"
                     required
@@ -554,9 +554,9 @@ export function SubmitFormClient() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="statuslineType">Type</Label>
+                    <Label htmlFor={statuslineTypeId}>Type</Label>
                     <select
-                      id="statuslineType"
+                      id={statuslineTypeId}
                       name="statuslineType"
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     >
@@ -567,9 +567,9 @@ export function SubmitFormClient() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="refreshInterval">Refresh (ms)</Label>
+                    <Label htmlFor={refreshIntervalId}>Refresh (ms)</Label>
                     <Input
-                      id="refreshInterval"
+                      id={refreshIntervalId}
                       name="refreshInterval"
                       type="number"
                       defaultValue="1000"
@@ -577,9 +577,9 @@ export function SubmitFormClient() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="position">Position</Label>
+                    <Label htmlFor={positionId}>Position</Label>
                     <select
-                      id="position"
+                      id={positionId}
                       name="position"
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     >
@@ -594,9 +594,9 @@ export function SubmitFormClient() {
             {contentType === 'mcp' && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="npmPackage">NPM Package Name *</Label>
+                  <Label htmlFor={npmPackageId}>NPM Package Name *</Label>
                   <Input
-                    id="npmPackage"
+                    id={npmPackageId}
                     name="npmPackage"
                     placeholder="@company/mcp-server-name"
                     required
@@ -605,9 +605,9 @@ export function SubmitFormClient() {
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="serverType">Server Type *</Label>
+                    <Label htmlFor={serverTypeId}>Server Type *</Label>
                     <select
-                      id="serverType"
+                      id={serverTypeId}
                       name="serverType"
                       required
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -619,9 +619,9 @@ export function SubmitFormClient() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="installCommand">Installation Command *</Label>
+                    <Label htmlFor={installCommandId}>Installation Command *</Label>
                     <Input
-                      id="installCommand"
+                      id={installCommandId}
                       name="installCommand"
                       placeholder="npm install -g @company/mcp-server"
                       required
@@ -630,9 +630,9 @@ export function SubmitFormClient() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="configCommand">Configuration Command *</Label>
+                  <Label htmlFor={configCommandId}>Configuration Command *</Label>
                   <Input
-                    id="configCommand"
+                    id={configCommandId}
                     name="configCommand"
                     placeholder="mcp-server-name"
                     required
@@ -640,9 +640,9 @@ export function SubmitFormClient() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="toolsDescription">Tools/Capabilities (optional)</Label>
+                  <Label htmlFor={toolsDescriptionId}>Tools/Capabilities (optional)</Label>
                   <Textarea
-                    id="toolsDescription"
+                    id={toolsDescriptionId}
                     name="toolsDescription"
                     placeholder="Describe what tools and capabilities this MCP server provides..."
                     rows={4}
@@ -651,9 +651,9 @@ export function SubmitFormClient() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="envVars">Environment Variables (optional)</Label>
+                  <Label htmlFor={envVarsId}>Environment Variables (optional)</Label>
                   <Textarea
-                    id="envVars"
+                    id={envVarsId}
                     name="envVars"
                     placeholder="API_KEY=your-key-here&#10;DATABASE_URL=postgres://..."
                     rows={4}
@@ -668,9 +668,9 @@ export function SubmitFormClient() {
 
             {/* Tags (All Types) */}
             <div className="space-y-2">
-              <Label htmlFor="tags">Tags (optional)</Label>
+              <Label htmlFor={tagsId}>Tags (optional)</Label>
               <Input
-                id="tags"
+                id={tagsId}
                 name="tags"
                 placeholder="productivity, ai, automation (comma-separated)"
               />

@@ -126,16 +126,25 @@ export const getRecentMerged = rateLimitedAction
 
           if (error) throw error;
 
+          // Define type for Supabase query result with joined users table
+          type SubmissionWithUser = {
+            id: string;
+            content_name: string;
+            content_type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines';
+            merged_at: string;
+            users: { name: string; slug: string }[] | null;
+          };
+
           // Transform to match schema
-          const transformed: RecentMerged[] = (data || []).map((item: any) => ({
+          const transformed: RecentMerged[] = (data || []).map((item: SubmissionWithUser) => ({
             id: item.id,
             content_name: item.content_name,
             content_type: item.content_type,
             merged_at: item.merged_at,
-            user: item.users
+            user: item.users?.[0]
               ? {
-                  name: item.users.name,
-                  slug: item.users.slug,
+                  name: item.users[0].name,
+                  slug: item.users[0].slug,
                 }
               : null,
           }));
@@ -191,8 +200,13 @@ export const getTopContributors = rateLimitedAction
           // Group by user and count
           const userCounts = new Map<string, { name: string; slug: string; count: number }>();
 
+          // Define type for Supabase query result with joined users table
+          type TopContributorSubmission = {
+            users: { name: string; slug: string }[] | null;
+          };
+
           for (const submission of data || []) {
-            const user = (submission as any).users;
+            const user = (submission as TopContributorSubmission).users?.[0];
             if (!user) continue;
 
             const existing = userCounts.get(user.slug) || {

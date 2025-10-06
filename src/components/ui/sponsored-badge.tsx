@@ -63,14 +63,15 @@ function SponsoredBadge({ className, tier, showIcon = true, ...props }: Sponsore
   };
 
   return (
-    <div
+    <span
       className={cn(sponsoredBadgeVariants({ tier }), className)}
+      role="status"
       aria-label={`${getLabel()} content`}
       {...props}
     >
       {getIcon()}
       {getLabel()}
-    </div>
+    </span>
   );
 }
 
