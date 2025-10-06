@@ -247,6 +247,8 @@ export {
   ArrowRight,
   ArrowUp,
   ArrowUpIcon,
+  Medal,
+  Trophy,
   BarChart,
   Bookmark,
   BookmarkCheck,

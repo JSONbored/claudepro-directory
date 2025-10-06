@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { TrendingUp, Clock, CheckCircle2 } from '@/src/lib/icons';
+import { TrendingUp, Clock, CheckCircle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { SubmissionStats } from '@/src/lib/schemas/submission-stats.schema';
 
@@ -42,7 +42,7 @@ export function SubmitStatsCard({ stats }: SubmitStatsCardProps) {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-green-400" />
+            <CheckCircle className="h-4 w-4 text-green-400" />
             <span className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
               Merged This Week
             </span>

@@ -11,7 +11,7 @@
  */
 
 import { z } from 'zod';
-import { action } from '@/src/lib/actions/safe-action';
+import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { createClient } from '@/src/lib/supabase/server';
 import { logger } from '@/src/lib/logger';
 import { unstable_cache } from 'next/cache';
@@ -28,7 +28,7 @@ import { nonNegativeInt } from '@/src/lib/schemas/primitives/base-numbers';
  * Get submission statistics
  * Cached for 5 minutes
  */
-export const getSubmissionStats = action
+export const getSubmissionStats = rateLimitedAction
   .metadata({
     actionName: 'getSubmissionStats',
     category: 'analytics',
@@ -86,7 +86,7 @@ export const getSubmissionStats = action
  * Get recently merged submissions
  * Shows social proof
  */
-export const getRecentMerged = action
+export const getRecentMerged = rateLimitedAction
   .metadata({
     actionName: 'getRecentMerged',
     category: 'analytics',
@@ -95,7 +95,7 @@ export const getRecentMerged = action
     limit: nonNegativeInt.min(1).max(10).default(5),
   }))
   .outputSchema(z.array(recentMergedSchema))
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput }: { parsedInput: { limit: number } }) => {
     const cachedMerged = await unstable_cache(
       async () => {
         try {
@@ -153,7 +153,7 @@ export const getRecentMerged = action
  * Get top contributors
  * Gamification element
  */
-export const getTopContributors = action
+export const getTopContributors = rateLimitedAction
   .metadata({
     actionName: 'getTopContributors',
     category: 'analytics',
@@ -162,7 +162,7 @@ export const getTopContributors = action
     limit: nonNegativeInt.min(1).max(10).default(5),
   }))
   .outputSchema(z.array(topContributorSchema))
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput }: { parsedInput: { limit: number } }) => {
     const cachedContributors = await unstable_cache(
       async () => {
         try {
