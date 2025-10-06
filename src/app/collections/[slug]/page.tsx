@@ -141,7 +141,7 @@ export default async function CollectionDetailPage({
 
   // Load all referenced items with full content
   const itemsWithContent = await Promise.all(
-    collection.items.map(async (itemRef) => {
+    collection.items.map(async (itemRef: any) => {
       try {
         const item = await getContentBySlug(itemRef.category as ContentCategory, itemRef.slug);
         return item ? { ...itemRef, data: item } : null;
@@ -156,11 +156,11 @@ export default async function CollectionDetailPage({
   );
 
   // Filter out failed loads
-  const validItems = itemsWithContent.filter((item) => item !== null);
+  const validItems = itemsWithContent.filter((item: any) => item !== null);
 
   // Group items by category
   const itemsByCategory = validItems.reduce(
-    (acc, item) => {
+    (acc: Record<string, any[]>, item: any) => {
       if (!item) return acc;
       const category = item.category;
       if (!acc[category]) {
@@ -169,7 +169,7 @@ export default async function CollectionDetailPage({
       acc[category].push(item);
       return acc;
     },
-    {} as Record<string, typeof validItems>
+    {} as Record<string, any[]>
   );
 
   const title = collection.title || collection.slug;
@@ -193,11 +193,11 @@ export default async function CollectionDetailPage({
                 className="text-sm border-blue-500/20 bg-blue-500/10 text-blue-400"
               >
                 <Layers className="h-3 w-3 mr-1" />
-                {COLLECTION_TYPE_LABELS[collection.collectionType]}
+                {(COLLECTION_TYPE_LABELS as any)[collection.collectionType] || collection.collectionType}
               </Badge>
               <Badge
                 variant="outline"
-                className={`text-sm ${DIFFICULTY_COLORS[collection.difficulty]}`}
+                className={`text-sm ${(DIFFICULTY_COLORS as any)[collection.difficulty] || ''}`}
               >
                 {collection.difficulty}
               </Badge>
@@ -219,7 +219,7 @@ export default async function CollectionDetailPage({
             {/* Tags */}
             {collection.tags && collection.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
-                {collection.tags.map((tag) => (
+                {collection.tags.map((tag: string) => (
                   <TagBadge key={tag} tag={tag} />
                 ))}
               </div>
@@ -242,7 +242,7 @@ export default async function CollectionDetailPage({
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {collection.prerequisites.map((prereq) => (
+                  {collection.prerequisites.map((prereq: string) => (
                     <li key={prereq} className="flex items-start gap-2">
                       <CheckCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                       <span className="text-sm text-muted-foreground">{prereq}</span>
@@ -269,13 +269,13 @@ export default async function CollectionDetailPage({
               }
             >
               <div className="space-y-8">
-                {Object.entries(itemsByCategory).map(([category, items]) => (
+                {(Object.entries(itemsByCategory) as [string, any[]][]).map(([category, items]) => (
                   <div key={category}>
                     <h3 className="text-lg font-semibold text-foreground mb-4">
-                      {CATEGORY_NAMES[category] || category} ({items.length})
+                      {(CATEGORY_NAMES as any)[category] || category} ({items.length})
                     </h3>
                     <div className="grid gap-4 sm:grid-cols-1">
-                      {items.map((item) =>
+                      {items.map((item: any) =>
                         item?.data ? (
                           <ConfigCard key={item.slug} item={item.data} showCategory={false} />
                         ) : null
@@ -295,8 +295,8 @@ export default async function CollectionDetailPage({
               </CardHeader>
               <CardContent>
                 <ol className="space-y-2">
-                  {collection.installationOrder.map((slug, index) => {
-                    const item = validItems.find((i) => i?.slug === slug);
+                  {collection.installationOrder.map((slug: string, index: number) => {
+                    const item = validItems.find((i: any) => i?.slug === slug);
                     return (
                       <li key={slug} className="flex items-start gap-3">
                         <span className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-primary text-sm font-semibold">

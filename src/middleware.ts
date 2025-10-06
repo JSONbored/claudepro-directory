@@ -434,6 +434,27 @@ export async function middleware(request: NextRequest) {
     return noseconeResponse;
   }
 
+  // Auth protection for /account routes
+  // Check if user is authenticated before accessing account pages
+  if (pathname.startsWith('/account')) {
+    const { createClient } = await import('@/src/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      // Not authenticated - redirect to login
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // User is authenticated - continue
+    logger.debug('Authenticated request to account page', {
+      userId: user.id,
+      path: sanitizePathForLogging(pathname),
+    });
+  }
+
   // PERFORMANCE OPTIMIZATION: Run Arcjet and Nosecone in parallel
   // Both operations are independent - Arcjet checks security rules while Nosecone generates headers
   // This saves 5-10ms per request by running concurrently instead of sequentially

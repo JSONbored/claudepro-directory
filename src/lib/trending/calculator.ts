@@ -445,7 +445,85 @@ function getFallbackPopular(
 }
 
 /**
+ * Interleave sponsored content into organic results
+ * Maintains 1 sponsored per 5 organic ratio (20% max)
+ */
+function interleaveSponsored<T extends UnifiedContentItem>(
+  organic: T[],
+  sponsored: Array<{ content_id: string; tier: string; sponsored_id: string }>,
+  contentMap: Map<string, T>
+): Array<T & { isSponsored?: boolean; sponsoredId?: string; sponsorTier?: string }> {
+  if (sponsored.length === 0) return organic;
+
+  const result: Array<T & { isSponsored?: boolean; sponsoredId?: string; sponsorTier?: string }> = [];
+  let sponsoredIndex = 0;
+  const INJECTION_RATIO = 5; // 1 sponsored per 5 organic
+
+  for (let i = 0; i < organic.length; i++) {
+    // Add organic content
+    result.push(organic[i]!);
+
+    // Inject sponsored every 5 items (if available)
+    if ((i + 1) % INJECTION_RATIO === 0 && sponsoredIndex < sponsored.length) {
+      const sponsoredItem = sponsored[sponsoredIndex];
+      const content = sponsoredItem && contentMap.get(sponsoredItem.content_id);
+      
+      if (content) {
+        result.push({
+          ...content,
+          isSponsored: true,
+          sponsoredId: sponsoredItem.sponsored_id,
+          sponsorTier: sponsoredItem.tier,
+        });
+        sponsoredIndex++;
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Get active sponsored content from database
+ */
+async function getActiveSponsored(): Promise<Array<{ content_id: string; content_type: string; tier: string; sponsored_id: string }>> {
+  try {
+    // Dynamic import to avoid circular dependency
+    const { createClient } = await import('@/src/lib/supabase/server');
+    const supabase = await createClient();
+    
+    const now = new Date().toISOString();
+    
+    const { data, error } = await supabase
+      .from('sponsored_content')
+      .select('id, content_id, content_type, tier, impression_limit, impression_count')
+      .eq('active', true)
+      .lte('start_date', now)
+      .gte('end_date', now)
+      .order('tier', { ascending: true }); // Featured first, then promoted, spotlight
+
+    if (error || !data) {
+      return [];
+    }
+
+    // Filter out items that hit impression limit
+    return data
+      .filter(item => !item.impression_limit || item.impression_count < item.impression_limit)
+      .map(item => ({
+        content_id: item.content_id,
+        content_type: item.content_type,
+        tier: item.tier,
+        sponsored_id: item.id,
+      }));
+  } catch (error) {
+    logger.error('Failed to fetch sponsored content', error instanceof Error ? error : new Error(String(error)));
+    return [];
+  }
+}
+
+/**
  * Batch trending calculation for multiple categories
+ * Now includes sponsored content injection
  */
 export async function getBatchTrendingData(contentByCategory: {
   agents: UnifiedContentItem[];
@@ -455,7 +533,7 @@ export async function getBatchTrendingData(contentByCategory: {
   hooks: UnifiedContentItem[];
   statuslines?: UnifiedContentItem[];
   collections?: UnifiedContentItem[];
-}) {
+}, options?: { includeSponsored?: boolean }) {
   // Combine all content for batch Redis query
   const allContent = [
     ...contentByCategory.agents,
@@ -467,22 +545,39 @@ export async function getBatchTrendingData(contentByCategory: {
     ...(contentByCategory.collections || []),
   ];
 
-  // Run all calculations in parallel
-  const [trending, popular, recent] = await Promise.all([
+  // Run all calculations in parallel (including sponsored fetch)
+  const [trending, popular, recent, sponsored] = await Promise.all([
     getTrendingContent(allContent),
     getPopularContent(allContent),
     getRecentContent(allContent),
+    options?.includeSponsored !== false ? getActiveSponsored() : Promise.resolve([]),
   ]);
 
+  // Create content map for quick lookups
+  const contentMap = new Map<string, UnifiedContentItem>();
+  for (const item of allContent) {
+    contentMap.set(item.slug, item);
+  }
+
+  // Interleave sponsored content if enabled
+  const trendingWithSponsored = options?.includeSponsored !== false
+    ? interleaveSponsored(trending, sponsored, contentMap)
+    : trending;
+
+  const popularWithSponsored = options?.includeSponsored !== false
+    ? interleaveSponsored(popular, sponsored, contentMap)
+    : popular;
+
   return {
-    trending,
-    popular,
-    recent,
+    trending: trendingWithSponsored,
+    popular: popularWithSponsored,
+    recent, // Don't inject into recent (keep chronological)
     metadata: {
       algorithm: 'redis-views',
       generated: new Date().toISOString(),
       redisEnabled: statsRedis.isEnabled(),
       totalItems: allContent.length,
+      sponsoredItems: sponsored.length,
     },
   };
 }
