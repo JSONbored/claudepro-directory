@@ -39,13 +39,13 @@ export default async function AccountLayout({
     <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
       {/* Top navigation */}
       <div className={`border-b ${UI_CLASSES.PX_4} py-4`}>
-        <div className={`container ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_BETWEEN}`}>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-            <Link href="/" className={UI_CLASSES.HOVER_TEXT_ACCENT}>
-              ← Back to Directory
-            </Link>
-          </div>
-          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_4}>
+          <div className={`container ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_BETWEEN}`}>
+            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+              <Link href="/" className={UI_CLASSES.HOVER_TEXT_ACCENT}>
+                ← Back to Directory
+              </Link>
+            </div>
+            <div className="flex items-center gap-4">
             {profile?.slug && (
               <Link href={`/u/${profile.slug}`} className={UI_CLASSES.TEXT_SM}>
                 View Profile
@@ -60,7 +60,7 @@ export default async function AccountLayout({
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Sidebar */}
           <Card className="md:col-span-1 h-fit p-4">
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.MB_6} pb-4 border-b`}>
+            <div className={`flex items-center gap-3 ${UI_CLASSES.MB_6} pb-4 border-b`}>
               {profile?.image ? (
                 <img
                   src={profile.image}
