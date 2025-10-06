@@ -69,7 +69,7 @@
     "@types/node": "^24.6.0",
     "@types/react": "^19.1.17",
     "@types/react-dom": "^19.1.11",
-    "@upstash/redis": "^1.35.4",
+    "@upstash/redis": "^1.35.5",
     "@vercel/analytics": "^1.5.0",
     "babel-plugin-react-compiler": "^19.1.0-rc.3",
     "class-variance-authority": "^0.7.1",
