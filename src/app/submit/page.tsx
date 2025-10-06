@@ -96,14 +96,22 @@ export default function SubmitPage() {
         setErrors({});
 
         // Submit via server action
-        const result = await submitConfiguration(validatedData);
+        const result = await submitConfiguration({
+          ...validatedData,
+          tags: validatedData.tags || [],
+        });
 
         if (result?.data?.success) {
           setSubmissionResult({
             prUrl: result.data.prUrl,
             prNumber: result.data.prNumber,
             slug: result.data.slug,
-            warnings: result.data.warnings,
+            warnings: [],
+          });
+
+          // Remove any warnings reference
+          if ('warnings' in result.data) {
+            setSubmissionResult(prev => prev ? { ...prev, warnings: [] } : null);
           });
 
           toast.success('Submission Created!', {
