@@ -102,46 +102,23 @@ export default async function HomePage() {
               powerful MCP servers, find specialized agents and commands, discover automation hooks,
               and connect with the community building the future of AI.
             </p>
-
-            {/* Quick Stats - Server Rendered for SEO */}
-            <div
-              className={`flex flex-wrap ${UI_CLASSES.JUSTIFY_CENTER} gap-6 text-sm text-muted-foreground mb-8`}
-            >
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <BookOpen className="h-4 w-4" />
-                {rules.length} Expert Rules
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Server className="h-4 w-4" />
-                {mcp.length} MCP Servers
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" />
-                {agents.length} AI Agents
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" />
-                {commands.length} Commands
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" />
-                {hooks.length} Automation Hooks
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" />
-                {statuslines.length} Statuslines
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Layers className="h-4 w-4" />
-                {collections.length} Collections
-              </div>
-            </div>
           </div>
         </div>
       </section>
 
       {/* Client Component for Interactive Features */}
-      <HomePageClient initialData={initialData} />
+      <HomePageClient
+        initialData={initialData}
+        stats={{
+          rules: rules.length,
+          mcp: mcp.length,
+          agents: agents.length,
+          commands: commands.length,
+          hooks: hooks.length,
+          statuslines: statuslines.length,
+          collections: collections.length,
+        }}
+      />
 
       {/* Email CTA - Moved to bottom of page */}
       <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>

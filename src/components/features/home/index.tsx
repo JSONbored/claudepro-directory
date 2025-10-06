@@ -43,7 +43,7 @@ const UnifiedSearch = dynamic(
   }
 );
 
-function HomePageClientComponent({ initialData }: HomePageClientProps) {
+function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
   const { allConfigs } = initialData;
 
   const [activeTab, setActiveTab] = useState('all');
