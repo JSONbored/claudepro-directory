@@ -32,29 +32,29 @@ export default async function HomePage() {
   // Enrich with view counts from Redis
   const [rules, mcp, agents, commands, hooks, statuslines, collections] = await Promise.all([
     statsRedis.enrichWithViewCounts(
-      rulesData.map((item) => ({ ...item, category: 'rules' as const }))
+      rulesData.map((item: any) => ({ ...item, category: 'rules' as const }))
     ),
-    statsRedis.enrichWithViewCounts(mcpData.map((item) => ({ ...item, category: 'mcp' as const }))),
+    statsRedis.enrichWithViewCounts(mcpData.map((item: any) => ({ ...item, category: 'mcp' as const }))),
     statsRedis.enrichWithViewCounts(
-      agentsData.map((item) => ({ ...item, category: 'agents' as const }))
+      agentsData.map((item: any) => ({ ...item, category: 'agents' as const }))
     ),
     statsRedis.enrichWithViewCounts(
-      commandsData.map((item) => ({
+      commandsData.map((item: any) => ({
         ...item,
         category: 'commands' as const,
       }))
     ),
     statsRedis.enrichWithViewCounts(
-      hooksData.map((item) => ({ ...item, category: 'hooks' as const }))
+      hooksData.map((item: any) => ({ ...item, category: 'hooks' as const }))
     ),
     statsRedis.enrichWithViewCounts(
-      statuslinesData.map((item) => ({
+      statuslinesData.map((item: any) => ({
         ...item,
         category: 'statuslines' as const,
       }))
     ),
     statsRedis.enrichWithViewCounts(
-      collectionsData.map((item) => ({
+      collectionsData.map((item: any) => ({
         ...item,
         category: 'collections' as const,
       }))
@@ -74,20 +74,20 @@ export default async function HomePage() {
   ];
 
   // Use Map to deduplicate by slug (last occurrence wins)
-  const allConfigsMap = new Map(allConfigsWithDuplicates.map((item) => [item.slug, item]));
+  const allConfigsMap = new Map(allConfigsWithDuplicates.map((item: any) => [item.slug, item]));
   const allConfigs = Array.from(allConfigsMap.values());
 
   // Transform data using transform functions to convert readonly arrays to mutable
   // Metadata arrays contain the core fields needed for display
   const initialData = transformForHomePage({
-    rules,
-    mcp,
-    agents,
-    commands,
-    hooks,
-    statuslines,
-    collections,
-    allConfigs,
+    rules: rules as any,
+    mcp: mcp as any,
+    agents: agents as any,
+    commands: commands as any,
+    hooks: hooks as any,
+    statuslines: statuslines as any,
+    collections: collections as any,
+    allConfigs: allConfigs as any,
   });
 
   return (
