@@ -70,7 +70,7 @@ export default async function MyJobsPage() {
           {jobs.map((job) => (
             <Card key={job.id}>
               <CardHeader>
-                <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+                <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                       <Badge className={getStatusColor(job.status)} variant="outline">

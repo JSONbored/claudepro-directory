@@ -3,9 +3,8 @@ import { createClient } from '@/src/lib/supabase/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
-import { Calendar, ExternalLink, Globe, Bookmark, MessageSquare, Users } from '@/src/lib/icons';
+import { Globe, MessageSquare, Users } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 

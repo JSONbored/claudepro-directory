@@ -54,7 +54,7 @@ export default async function BookmarksPage() {
           {bookmarks.map((bookmark) => (
             <Card key={bookmark.id}>
               <CardHeader>
-                <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+                <div className="flex items-start justify-between">
                   <div>
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                       <Badge variant="outline" className="capitalize">

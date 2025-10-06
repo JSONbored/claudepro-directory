@@ -77,10 +77,10 @@ export default async function BoardPage() {
           </Card>
         ) : (
           <div className={UI_CLASSES.SPACE_Y_4}>
-            {posts.map((post) => (
+            {posts.map((post: any) => (
               <Card key={post.id} className={UI_CLASSES.CARD_GRADIENT_HOVER}>
                 <CardHeader>
-                  <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+                  <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className={UI_CLASSES.TEXT_LG}>
                         {post.url ? (
@@ -106,7 +106,7 @@ export default async function BoardPage() {
                         </CardDescription>
                       )}
 
-                      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-3`}>
+                      <div className={`flex items-center gap-3 ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-3`}>
                         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                           {post.user_avatar ? (
                             <img

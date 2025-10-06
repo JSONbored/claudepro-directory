@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src
 import { Badge } from '@/src/components/ui/badge';
 import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
 import { Button } from '@/src/components/ui/button';
-import { TrendingUp, Eye, MousePointer, Calendar, BarChart } from '@/src/lib/icons';
+import { TrendingUp, Eye, MousePointer, BarChart } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import Link from 'next/link';
 import type { Metadata } from 'next';
@@ -75,7 +75,7 @@ export default async function SponsorshipsPage() {
             return (
               <Card key={sponsorship.id}>
                 <CardHeader>
-                  <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+                  <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                         <SponsoredBadge tier={sponsorship.tier as 'featured' | 'promoted' | 'spotlight'} />

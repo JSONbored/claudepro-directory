@@ -2,7 +2,7 @@ import { createClient } from '@/src/lib/supabase/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { Badge } from '@/src/components/ui/badge';
 import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
-import { Eye, MousePointer, BarChart, TrendingUp, Calendar } from '@/src/lib/icons';
+import { Eye, MousePointer, BarChart, TrendingUp } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';

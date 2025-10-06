@@ -101,7 +101,7 @@ export default async function SubmissionsPage() {
           {submissions.map((submission) => (
             <Card key={submission.id}>
               <CardHeader>
-                <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+                <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                       {getStatusBadge(submission.status)}
