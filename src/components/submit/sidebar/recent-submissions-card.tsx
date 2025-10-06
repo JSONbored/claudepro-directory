@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { Badge } from '@/src/components/ui/badge';
-import { CheckCircle2 } from '@/src/lib/icons';
+import { CheckCircle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import Link from 'next/link';
 import type { RecentMerged } from '@/src/lib/schemas/submission-stats.schema';
@@ -50,9 +50,9 @@ export function RecentSubmissionsCard({ submissions }: RecentSubmissionsCardProp
         {submissions.map((submission) => (
           <div
             key={submission.id}
-            className={`flex items-start gap-2 ${UI_CLASSES.PB_3} ${UI_CLASSES.BORDER_B} border-border/50 last:border-0 last:pb-0`}
+            className={`flex items-start gap-2 pb-3 ${UI_CLASSES.BORDER_B} border-border/50 last:border-0 last:pb-0`}
           >
-            <CheckCircle2 className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
+            <CheckCircle className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} truncate`}>
                 {submission.content_name}
