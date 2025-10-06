@@ -155,7 +155,7 @@ function HomePageClientComponent({ initialData }: HomePageClientProps) {
   return (
     <>
       {/* Search Section */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-8`}>
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 pt-4 pb-8`}>
         <div className={`${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
           <UnifiedSearch
             placeholder="Search for rules, MCP servers, agents, commands, and more..."
