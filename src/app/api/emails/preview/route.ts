@@ -6,19 +6,19 @@
  * Usage: GET /api/emails/preview?template=newsletter-welcome
  */
 
-import { type NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from "next/server";
 import {
   NewsletterWelcome,
   type NewsletterWelcomeProps,
-} from '@/src/emails/templates/newsletter-welcome';
-import { renderEmailHtml } from '@/src/emails/utils/render';
-import { logger } from '@/src/lib/logger';
+} from "@/src/emails/templates/newsletter-welcome";
+import { renderEmailHtml } from "@/src/emails/utils/render";
+import { logger } from "@/src/lib/logger";
 
 /**
  * Available email templates for preview
  */
 const templates = {
-  'newsletter-welcome': NewsletterWelcome,
+  "newsletter-welcome": NewsletterWelcome,
 } as const;
 
 type TemplateName = keyof typeof templates;
@@ -27,9 +27,9 @@ type TemplateName = keyof typeof templates;
  * Sample props for each template
  */
 const sampleProps: Record<TemplateName, NewsletterWelcomeProps> = {
-  'newsletter-welcome': {
-    email: 'demo@example.com',
-    source: 'preview',
+  "newsletter-welcome": {
+    email: "demo@example.com",
+    source: "preview",
   },
 };
 
@@ -44,23 +44,23 @@ const sampleProps: Record<TemplateName, NewsletterWelcomeProps> = {
  */
 export async function GET(request: NextRequest) {
   // Security: Only allow in development
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === "production") {
     return NextResponse.json(
-      { error: 'Email preview is only available in development' },
-      { status: 403 }
+      { error: "Email preview is only available in development" },
+      { status: 403 },
     );
   }
 
   try {
     const searchParams = request.nextUrl.searchParams;
-    const templateName = searchParams.get('template') as TemplateName;
+    const templateName = searchParams.get("template") as TemplateName;
 
     // List available templates if no template specified
     if (!templateName) {
       return NextResponse.json({
-        message: 'Email preview API',
+        message: "Email preview API",
         availableTemplates: Object.keys(templates),
-        usage: '/api/emails/preview?template=newsletter-welcome',
+        usage: "/api/emails/preview?template=newsletter-welcome",
       });
     }
 
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
           error: `Template '${templateName}' not found`,
           availableTemplates: Object.keys(templates),
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -79,9 +79,9 @@ export async function GET(request: NextRequest) {
     const TemplateComponent = templates[templateName];
     const baseProps = sampleProps[templateName];
     const props: NewsletterWelcomeProps = {
-      email: (searchParams.get('email') as string) || baseProps.email,
-      ...(searchParams.get('source')
-        ? { source: searchParams.get('source') as string }
+      email: (searchParams.get("email") as string) || baseProps.email,
+      ...(searchParams.get("source")
+        ? { source: searchParams.get("source") as string }
         : baseProps.source
           ? { source: baseProps.source }
           : {}),
@@ -91,31 +91,38 @@ export async function GET(request: NextRequest) {
     const html = await renderEmailHtml(TemplateComponent(props));
 
     if (!html) {
-      logger.error('Failed to render email template for preview', undefined, {
+      logger.error("Failed to render email template for preview", undefined, {
         template: templateName,
       });
 
-      return NextResponse.json({ error: 'Failed to render email template' }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to render email template" },
+        { status: 500 },
+      );
     }
 
     // Return HTML response
     return new NextResponse(html, {
       headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-store, must-revalidate',
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store, must-revalidate",
       },
     });
   } catch (error) {
-    logger.error('Email preview error', error instanceof Error ? error : undefined, {
-      errorMessage: error instanceof Error ? error.message : String(error),
-    });
+    logger.error(
+      "Email preview error",
+      error instanceof Error ? error : undefined,
+      {
+        errorMessage: error instanceof Error ? error.message : String(error),
+      },
+    );
 
     return NextResponse.json(
       {
-        error: 'Internal server error',
+        error: "Internal server error",
         message: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

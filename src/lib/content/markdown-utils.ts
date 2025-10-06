@@ -3,11 +3,11 @@
  * Used for converting markdown to safe HTML in production
  */
 
-import { marked } from 'marked';
-import { z } from 'zod';
-import { logger } from '@/src/lib/logger';
-import { nonNegativeInt } from '@/src/lib/schemas/primitives/base-numbers';
-import { DOMPurify } from '@/src/lib/security/html-sanitizer';
+import { marked } from "marked";
+import { z } from "zod";
+import { logger } from "@/src/lib/logger";
+import { nonNegativeInt } from "@/src/lib/schemas/primitives/base-numbers";
+import { DOMPurify } from "@/src/lib/security/html-sanitizer";
 
 /**
  * Internal Markdown Schemas
@@ -20,47 +20,47 @@ import { DOMPurify } from '@/src/lib/security/html-sanitizer';
  * Based on security requirements for public-facing content
  */
 const ALLOWED_HTML_TAGS = [
-  'h1',
-  'h2',
-  'h3',
-  'h4',
-  'h5',
-  'h6',
-  'p',
-  'br',
-  'hr',
-  'ul',
-  'ol',
-  'li',
-  'strong',
-  'b',
-  'em',
-  'i',
-  'code',
-  'pre',
-  'blockquote',
-  'a',
-  'span',
-  'div',
-  'table',
-  'thead',
-  'tbody',
-  'tr',
-  'th',
-  'td',
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "p",
+  "br",
+  "hr",
+  "ul",
+  "ol",
+  "li",
+  "strong",
+  "b",
+  "em",
+  "i",
+  "code",
+  "pre",
+  "blockquote",
+  "a",
+  "span",
+  "div",
+  "table",
+  "thead",
+  "tbody",
+  "tr",
+  "th",
+  "td",
 ] as const;
 
 /**
  * Allowed HTML attributes for sanitized content
  */
 const ALLOWED_HTML_ATTRS = [
-  'class',
-  'id',
-  'href', // for links
-  'target', // for links
-  'rel', // for links
-  'title',
-  'alt',
+  "class",
+  "id",
+  "href", // for links
+  "target", // for links
+  "rel", // for links
+  "title",
+  "alt",
 ] as const;
 
 /**
@@ -72,8 +72,12 @@ const markdownContentSchema = z.string().min(1).max(500000); // Max 500KB
  * Schema for sanitization options
  */
 const sanitizationOptionsSchema = z.object({
-  allowedTags: z.array(z.enum(ALLOWED_HTML_TAGS)).default([...ALLOWED_HTML_TAGS]),
-  allowedAttributes: z.array(z.enum(ALLOWED_HTML_ATTRS)).default([...ALLOWED_HTML_ATTRS]),
+  allowedTags: z
+    .array(z.enum(ALLOWED_HTML_TAGS))
+    .default([...ALLOWED_HTML_TAGS]),
+  allowedAttributes: z
+    .array(z.enum(ALLOWED_HTML_ATTRS))
+    .default([...ALLOWED_HTML_ATTRS]),
   allowDataAttributes: z.boolean().default(false),
   enforceNoFollow: z.boolean().default(true), // Add rel="nofollow" to external links
   enforceNoOpener: z.boolean().default(true), // Add rel="noopener" to external links
@@ -106,8 +110,8 @@ const markdownSanitizedHtmlSchema = z.string().refine(
     return !dangerousPatterns.some((pattern) => pattern.test(html));
   },
   {
-    message: 'HTML contains potentially dangerous content',
-  }
+    message: "HTML contains potentially dangerous content",
+  },
 );
 
 /**
@@ -188,13 +192,18 @@ export async function markdownToSafeHtml(
   options?: {
     parseOptions?: Partial<MarkdownParseOptions>;
     sanitizeOptions?: Partial<SanitizationOptions>;
-  }
+  },
 ): Promise<MarkdownToHtmlResponse> {
   try {
     // Validate input
-    const validatedMarkdown: MarkdownContent = markdownContentSchema.parse(markdown);
-    const parseOptions = markdownParseOptionsSchema.parse(options?.parseOptions || {});
-    const sanitizeOptions = sanitizationOptionsSchema.parse(options?.sanitizeOptions || {});
+    const validatedMarkdown: MarkdownContent =
+      markdownContentSchema.parse(markdown);
+    const parseOptions = markdownParseOptionsSchema.parse(
+      options?.parseOptions || {},
+    );
+    const sanitizeOptions = sanitizationOptionsSchema.parse(
+      options?.sanitizeOptions || {},
+    );
 
     // Configure marked with validated options
     marked.setOptions({
@@ -212,9 +221,9 @@ export async function markdownToSafeHtml(
       ALLOWED_TAGS: sanitizeOptions.allowedTags as string[],
       ALLOWED_ATTR: sanitizeOptions.allowedAttributes as string[],
       ALLOW_DATA_ATTR: sanitizeOptions.allowDataAttributes,
-      ADD_ATTR: ['target'], // Allow target for links
-      FORBID_TAGS: ['style', 'script', 'iframe', 'object', 'embed', 'form'],
-      FORBID_ATTR: ['style', 'onerror', 'onload', 'onclick'],
+      ADD_ATTR: ["target"], // Allow target for links
+      FORBID_TAGS: ["style", "script", "iframe", "object", "embed", "form"],
+      FORBID_ATTR: ["style", "onerror", "onload", "onclick"],
     };
 
     // Sanitize HTML - the result is a string when not using RETURN_DOM
@@ -226,28 +235,37 @@ export async function markdownToSafeHtml(
         /<a\s+([^>]*href=["'](?:https?:)?\/\/[^"']+["'][^>]*)>/gi,
         (_match: string, attrs: string) => {
           let newAttrs = attrs;
-          if (sanitizeOptions.enforceNoFollow && !attrs.includes('rel=')) {
+          if (sanitizeOptions.enforceNoFollow && !attrs.includes("rel=")) {
             newAttrs += ' rel="nofollow"';
           } else if (sanitizeOptions.enforceNoFollow) {
-            newAttrs = newAttrs.replace(/rel=["'][^"']*["']/i, 'rel="nofollow"');
+            newAttrs = newAttrs.replace(
+              /rel=["'][^"']*["']/i,
+              'rel="nofollow"',
+            );
           }
           if (sanitizeOptions.enforceNoOpener) {
-            if (newAttrs.includes('rel=')) {
-              newAttrs = newAttrs.replace(/rel=["']([^"']*)["']/i, 'rel="$1 noopener"');
+            if (newAttrs.includes("rel=")) {
+              newAttrs = newAttrs.replace(
+                /rel=["']([^"']*)["']/i,
+                'rel="$1 noopener"',
+              );
             } else {
               newAttrs += ' rel="noopener"';
             }
           }
           return `<a ${newAttrs}>`;
-        }
+        },
       );
     }
 
     // Validate final output
-    const validatedHtml: SanitizedHtml = markdownSanitizedHtmlSchema.parse(sanitizedHtml);
+    const validatedHtml: SanitizedHtml =
+      markdownSanitizedHtmlSchema.parse(sanitizedHtml);
 
     // Calculate metadata
-    const plainText = validatedHtml.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
+    const plainText = validatedHtml
+      .replace(/<[^>]*>/g, " ")
+      .replace(/\s+/g, " ");
     const wordCount = countWords(plainText);
     const readingTime = calculateReadingTime(wordCount);
     const contentAnalysis = analyzeHtmlContent(validatedHtml);
@@ -260,14 +278,14 @@ export async function markdownToSafeHtml(
     };
   } catch (error) {
     logger.error(
-      'Failed to convert markdown to safe HTML',
+      "Failed to convert markdown to safe HTML",
       error instanceof Error ? error : new Error(String(error)),
       {
         markdownLength: markdown.length,
         hasParseOptions: !!options?.parseOptions,
         hasSanitizeOptions: !!options?.sanitizeOptions,
-      }
+      },
     );
-    throw new Error('Failed to process markdown content safely');
+    throw new Error("Failed to process markdown content safely");
   }
 }

@@ -20,21 +20,27 @@
  * @see {@link https://fumadocs.dev/docs/ui/layouts/docs Fumadocs DocsLayout Documentation}
  */
 
-import type { Metadata } from 'next';
-import dynamic from 'next/dynamic';
-import type { ReactNode } from 'react';
-import { APP_CONFIG } from '@/src/lib/constants';
-import { buildPageTitle } from '@/src/lib/seo/title-builder';
+import type { Metadata } from "next";
+import dynamic from "next/dynamic";
+import type { ReactNode } from "react";
+import { APP_CONFIG } from "@/src/lib/constants";
+import { buildPageTitle } from "@/src/lib/seo/title-builder";
 
 // Dynamic imports for Fumadocs components (only loads on /api-docs routes for better performance)
 const DocsLayout = dynamic(
-  () => import('fumadocs-ui/layouts/docs').then((mod) => ({ default: mod.DocsLayout })),
-  { ssr: true }
+  () =>
+    import("fumadocs-ui/layouts/docs").then((mod) => ({
+      default: mod.DocsLayout,
+    })),
+  { ssr: true },
 );
 
 const RootProvider = dynamic(
-  () => import('fumadocs-ui/provider').then((mod) => ({ default: mod.RootProvider })),
-  { ssr: true }
+  () =>
+    import("fumadocs-ui/provider").then((mod) => ({
+      default: mod.RootProvider,
+    })),
+  { ssr: true },
 );
 
 /**
@@ -50,11 +56,11 @@ const RootProvider = dynamic(
  */
 export const metadata: Metadata = {
   title: {
-    template: buildPageTitle({ tier: 'section', title: '%s' }),
-    default: buildPageTitle({ tier: 'section', title: 'API Documentation' }),
+    template: buildPageTitle({ tier: "section", title: "%s" }),
+    default: buildPageTitle({ tier: "section", title: "API Documentation" }),
   },
   description:
-    'Comprehensive REST API documentation for ClaudePro Directory. Browse and search 8 endpoints for content discovery, analytics, and caching with full request/response examples.',
+    "Comprehensive REST API documentation for ClaudePro Directory. Browse and search 8 endpoints for content discovery, analytics, and caching with full request/response examples.",
 };
 
 /**
@@ -112,7 +118,7 @@ export default function APIDocsLayout({ children }: LayoutProps) {
     >
       <DocsLayout
         tree={{
-          name: 'API Documentation',
+          name: "API Documentation",
           children: [],
         }}
         nav={{

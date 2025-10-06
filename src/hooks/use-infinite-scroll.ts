@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * Options for configuring the infinite scroll behavior
@@ -64,9 +64,9 @@ interface InfiniteScrollHookOptions {
  */
 export function useInfiniteScroll(
   onLoadMore: () => void | Promise<void>,
-  options: InfiniteScrollHookOptions
+  options: InfiniteScrollHookOptions,
 ) {
-  const { threshold = 0.1, rootMargin = '100px', hasMore, loading } = options;
+  const { threshold = 0.1, rootMargin = "100px", hasMore, loading } = options;
   const observerTarget = useRef<HTMLDivElement>(null);
   const [isIntersecting, setIsIntersecting] = useState(false);
 

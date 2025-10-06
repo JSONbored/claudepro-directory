@@ -10,13 +10,13 @@
  * This ensures llms.txt content matches UnifiedDetailPage rendering EXACTLY for optimal LLM citation accuracy
  */
 
-import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
-import type { AgentContent } from '@/src/lib/schemas/content/agent.schema';
-import type { CommandContent } from '@/src/lib/schemas/content/command.schema';
-import type { HookContent } from '@/src/lib/schemas/content/hook.schema';
-import type { McpContent } from '@/src/lib/schemas/content/mcp.schema';
-import type { RuleContent } from '@/src/lib/schemas/content/rule.schema';
-import type { StatuslineContent } from '@/src/lib/schemas/content/statusline.schema';
+import { getContentTypeConfig } from "@/src/lib/config/content-type-configs";
+import type { AgentContent } from "@/src/lib/schemas/content/agent.schema";
+import type { CommandContent } from "@/src/lib/schemas/content/command.schema";
+import type { HookContent } from "@/src/lib/schemas/content/hook.schema";
+import type { McpContent } from "@/src/lib/schemas/content/mcp.schema";
+import type { RuleContent } from "@/src/lib/schemas/content/rule.schema";
+import type { StatuslineContent } from "@/src/lib/schemas/content/statusline.schema";
 
 /**
  * Union type for all content items
@@ -58,22 +58,28 @@ export function buildRichContent(item: ContentItem): string {
   const genTroubleshooting = config?.generators.troubleshooting;
 
   const features =
-    'features' in item && Array.isArray(item.features) && item.features.length > 0
+    "features" in item &&
+    Array.isArray(item.features) &&
+    item.features.length > 0
       ? item.features
       : genFeatures?.(item) || [];
 
   const requirements =
-    'requirements' in item && Array.isArray(item.requirements) && item.requirements.length > 0
+    "requirements" in item &&
+    Array.isArray(item.requirements) &&
+    item.requirements.length > 0
       ? item.requirements
       : genRequirements?.(item) || [];
 
   const useCases =
-    'useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0
+    "useCases" in item &&
+    Array.isArray(item.useCases) &&
+    item.useCases.length > 0
       ? item.useCases
       : genUseCases?.(item) || [];
 
   const troubleshooting =
-    'troubleshooting' in item &&
+    "troubleshooting" in item &&
     Array.isArray(item.troubleshooting) &&
     item.troubleshooting.length > 0
       ? item.troubleshooting
@@ -81,7 +87,7 @@ export function buildRichContent(item: ContentItem): string {
 
   // Handle installation: prefer schema field, fallback to generator
   const installation = (() => {
-    if ('installation' in item && item.installation) {
+    if ("installation" in item && item.installation) {
       return item.installation;
     }
     return config?.generators.installation?.(item);
@@ -92,20 +98,24 @@ export function buildRichContent(item: ContentItem): string {
   // NOTE: Do NOT add "CONTENT" header here - generator.ts adds it when converting to plain text
   // We pass the raw content and buildRichContent() output to generator as the 'content' field
   // Generator will add: "CONTENT\n-------\n" + markdownToPlainText(content)
-  if ('content' in item && typeof item.content === 'string' && item.content.trim().length > 0) {
+  if (
+    "content" in item &&
+    typeof item.content === "string" &&
+    item.content.trim().length > 0
+  ) {
     sections.push(item.content.trim());
   }
 
   // 2. FEATURES SECTION (matches UnifiedDetailPage lines 157-166)
   // Uses generated features if not in schema
   if (config?.sections.features && features.length > 0) {
-    sections.push(formatBulletList('KEY FEATURES', features));
+    sections.push(formatBulletList("KEY FEATURES", features));
   }
 
   // 3. REQUIREMENTS SECTION (matches UnifiedDetailPage lines 168-177)
   // Uses generated requirements if not in schema
   if (requirements.length > 0) {
-    sections.push(formatBulletList('REQUIREMENTS', requirements));
+    sections.push(formatBulletList("REQUIREMENTS", requirements));
   }
 
   // 4. INSTALLATION SECTION (matches UnifiedDetailPage lines 179-182)
@@ -115,24 +125,28 @@ export function buildRichContent(item: ContentItem): string {
   }
 
   // 5. CONFIGURATION SECTION (matches UnifiedDetailPage lines 184-193)
-  if (config?.sections.configuration && 'configuration' in item && item.configuration) {
+  if (
+    config?.sections.configuration &&
+    "configuration" in item &&
+    item.configuration
+  ) {
     sections.push(formatConfiguration(item.configuration, item.category));
   }
 
   // 6. USE CASES SECTION (matches UnifiedDetailPage lines 195-204)
   // Uses generated useCases if not in schema
   if (config?.sections.useCases && useCases.length > 0) {
-    sections.push(formatBulletList('USE CASES', useCases));
+    sections.push(formatBulletList("USE CASES", useCases));
   }
 
   // 7. SECURITY SECTION (MCP-specific, matches UnifiedDetailPage lines 206-215)
   if (
     config?.sections.security &&
-    'security' in item &&
+    "security" in item &&
     Array.isArray(item.security) &&
     item.security.length > 0
   ) {
-    sections.push(formatBulletList('SECURITY BEST PRACTICES', item.security));
+    sections.push(formatBulletList("SECURITY BEST PRACTICES", item.security));
   }
 
   // 8. TROUBLESHOOTING SECTION (matches UnifiedDetailPage lines 217-223)
@@ -144,7 +158,7 @@ export function buildRichContent(item: ContentItem): string {
   // 9. EXAMPLES SECTION (MCP-specific, matches UnifiedDetailPage lines 225-235)
   if (
     config?.sections.examples &&
-    'examples' in item &&
+    "examples" in item &&
     Array.isArray(item.examples) &&
     item.examples.length > 0
   ) {
@@ -155,41 +169,49 @@ export function buildRichContent(item: ContentItem): string {
   sections.push(buildTechnicalDetails(item));
 
   // 11. PREVIEW SECTION (statuslines only - rendered above content in actual page)
-  if (item.category === 'statuslines' && 'preview' in item && item.preview) {
+  if (item.category === "statuslines" && "preview" in item && item.preview) {
     sections.push(`PREVIEW\n-------\n\n${item.preview}`);
   }
 
   // Join all sections with double newlines
-  return sections.filter((s) => s.length > 0).join('\n\n');
+  return sections.filter((s) => s.length > 0).join("\n\n");
 }
 
 /**
  * Format array as bullet list with title
  */
 function formatBulletList(title: string, items: string[]): string {
-  const lines = [title, '-'.repeat(title.length), ''];
+  const lines = [title, "-".repeat(title.length), ""];
   for (const item of items) {
     lines.push(`• ${item}`);
   }
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
  * Format installation instructions
  */
-function formatInstallation(installation: Record<string, unknown> | unknown): string {
+function formatInstallation(
+  installation: Record<string, unknown> | unknown,
+): string {
   // Type guard: ensure installation is an object
-  if (typeof installation !== 'object' || installation === null || Array.isArray(installation)) {
-    return '';
+  if (
+    typeof installation !== "object" ||
+    installation === null ||
+    Array.isArray(installation)
+  ) {
+    return "";
   }
 
   const inst = installation as Record<string, unknown>;
-  const lines = ['INSTALLATION', '------------', ''];
+  const lines = ["INSTALLATION", "------------", ""];
 
   // Claude Desktop installation
-  const claudeDesktop = inst.claudeDesktop as Record<string, unknown> | undefined;
+  const claudeDesktop = inst.claudeDesktop as
+    | Record<string, unknown>
+    | undefined;
   if (claudeDesktop) {
-    lines.push('CLAUDE DESKTOP:', '');
+    lines.push("CLAUDE DESKTOP:", "");
 
     if (claudeDesktop.steps && Array.isArray(claudeDesktop.steps)) {
       claudeDesktop.steps.forEach((step: string, idx: number) => {
@@ -197,29 +219,32 @@ function formatInstallation(installation: Record<string, unknown> | unknown): st
       });
     }
 
-    if (claudeDesktop.configPath && typeof claudeDesktop.configPath === 'object') {
-      lines.push('', 'Configuration file locations:');
+    if (
+      claudeDesktop.configPath &&
+      typeof claudeDesktop.configPath === "object"
+    ) {
+      lines.push("", "Configuration file locations:");
       for (const [os, pathValue] of Object.entries(claudeDesktop.configPath)) {
         lines.push(`  ${os}: ${pathValue}`);
       }
     }
 
-    lines.push('');
+    lines.push("");
   }
 
   // Claude Code installation
   const claudeCode = inst.claudeCode;
   if (claudeCode) {
-    lines.push('CLAUDE CODE:', '');
+    lines.push("CLAUDE CODE:", "");
 
     // For MCP servers, claudeCode is a string (simple command)
-    if (typeof claudeCode === 'string') {
+    if (typeof claudeCode === "string") {
       lines.push(claudeCode);
     }
     // For hooks/commands, claudeCode might have steps
     else if (
-      typeof claudeCode === 'object' &&
-      'steps' in claudeCode &&
+      typeof claudeCode === "object" &&
+      "steps" in claudeCode &&
       Array.isArray(claudeCode.steps)
     ) {
       claudeCode.steps.forEach((step: string, idx: number) => {
@@ -227,38 +252,41 @@ function formatInstallation(installation: Record<string, unknown> | unknown): st
       });
     }
 
-    lines.push('');
+    lines.push("");
   }
 
   // Requirements
   if (inst.requirements && Array.isArray(inst.requirements)) {
-    lines.push('Requirements:');
+    lines.push("Requirements:");
     for (const req of inst.requirements) {
       lines.push(`• ${req}`);
     }
-    lines.push('');
+    lines.push("");
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
  * Format configuration based on content type
  */
-function formatConfiguration(config: Record<string, unknown>, category: string): string {
+function formatConfiguration(
+  config: Record<string, unknown>,
+  category: string,
+): string {
   switch (category) {
-    case 'mcp':
+    case "mcp":
       return formatMcpConfiguration(config);
-    case 'hooks':
+    case "hooks":
       return formatHookConfiguration(config);
-    case 'statuslines':
+    case "statuslines":
       return formatStatuslineConfiguration(config);
-    case 'agents':
-    case 'commands':
-    case 'rules':
+    case "agents":
+    case "commands":
+    case "rules":
       return formatAiConfiguration(config);
     default:
-      return '';
+      return "";
   }
 }
 
@@ -266,23 +294,30 @@ function formatConfiguration(config: Record<string, unknown>, category: string):
  * Format MCP server configuration
  */
 function formatMcpConfiguration(config: Record<string, unknown>): string {
-  const lines = ['CONFIGURATION', '-------------', ''];
+  const lines = ["CONFIGURATION", "-------------", ""];
 
   // Claude Desktop MCP Servers
-  const claudeDesktop = config.claudeDesktop as Record<string, unknown> | undefined;
-  if (claudeDesktop?.mcpServers && typeof claudeDesktop.mcpServers === 'object') {
-    lines.push('Claude Desktop MCP Servers:', '');
+  const claudeDesktop = config.claudeDesktop as
+    | Record<string, unknown>
+    | undefined;
+  if (
+    claudeDesktop?.mcpServers &&
+    typeof claudeDesktop.mcpServers === "object"
+  ) {
+    lines.push("Claude Desktop MCP Servers:", "");
 
-    for (const [serverName, serverConfig] of Object.entries(claudeDesktop.mcpServers)) {
+    for (const [serverName, serverConfig] of Object.entries(
+      claudeDesktop.mcpServers,
+    )) {
       const sc = serverConfig as Record<string, unknown>;
       lines.push(`Server: ${serverName}`);
 
       if (sc.command) lines.push(`  Command: ${sc.command}`);
       if (sc.args && Array.isArray(sc.args)) {
-        lines.push(`  Arguments: ${sc.args.join(' ')}`);
+        lines.push(`  Arguments: ${sc.args.join(" ")}`);
       }
-      if (sc.env && typeof sc.env === 'object' && sc.env !== null) {
-        lines.push('  Environment:');
+      if (sc.env && typeof sc.env === "object" && sc.env !== null) {
+        lines.push("  Environment:");
         for (const [key, value] of Object.entries(sc.env)) {
           lines.push(`    ${key}=${value}`);
         }
@@ -290,80 +325,86 @@ function formatMcpConfiguration(config: Record<string, unknown>): string {
       if (sc.url) lines.push(`  URL: ${sc.url}`);
       if (sc.transport) lines.push(`  Transport: ${sc.transport}`);
 
-      lines.push('');
+      lines.push("");
     }
   }
 
   // Claude Code MCP Servers
   const claudeCode = config.claudeCode as Record<string, unknown> | undefined;
-  if (claudeCode?.mcpServers && typeof claudeCode.mcpServers === 'object') {
-    lines.push('Claude Code MCP Servers:', '');
+  if (claudeCode?.mcpServers && typeof claudeCode.mcpServers === "object") {
+    lines.push("Claude Code MCP Servers:", "");
 
-    for (const [serverName, serverConfig] of Object.entries(claudeCode.mcpServers)) {
+    for (const [serverName, serverConfig] of Object.entries(
+      claudeCode.mcpServers,
+    )) {
       const sc = serverConfig as Record<string, unknown>;
       lines.push(`Server: ${serverName}`);
 
       if (sc.command) lines.push(`  Command: ${sc.command}`);
       if (sc.args && Array.isArray(sc.args)) {
-        lines.push(`  Arguments: ${sc.args.join(' ')}`);
+        lines.push(`  Arguments: ${sc.args.join(" ")}`);
       }
-      if (sc.env && typeof sc.env === 'object' && sc.env !== null) {
-        lines.push('  Environment:');
+      if (sc.env && typeof sc.env === "object" && sc.env !== null) {
+        lines.push("  Environment:");
         for (const [key, value] of Object.entries(sc.env)) {
           lines.push(`    ${key}=${value}`);
         }
       }
 
-      lines.push('');
+      lines.push("");
     }
   }
 
   // HTTP/SSE transport configs
   const http = config.http as Record<string, unknown> | undefined;
   if (http) {
-    lines.push('HTTP Transport:', '');
+    lines.push("HTTP Transport:", "");
     lines.push(`  URL: ${http.url}`);
-    if (http.headers && typeof http.headers === 'object') {
-      lines.push('  Headers:');
+    if (http.headers && typeof http.headers === "object") {
+      lines.push("  Headers:");
       for (const [key, value] of Object.entries(http.headers)) {
         lines.push(`    ${key}: ${value}`);
       }
     }
-    lines.push('');
+    lines.push("");
   }
 
   const sse = config.sse as Record<string, unknown> | undefined;
   if (sse) {
-    lines.push('SSE Transport:', '');
+    lines.push("SSE Transport:", "");
     lines.push(`  URL: ${sse.url}`);
-    if (sse.headers && typeof sse.headers === 'object') {
-      lines.push('  Headers:');
+    if (sse.headers && typeof sse.headers === "object") {
+      lines.push("  Headers:");
       for (const [key, value] of Object.entries(sse.headers)) {
         lines.push(`    ${key}: ${value}`);
       }
     }
-    lines.push('');
+    lines.push("");
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
  * Format hook configuration with script content
  */
 function formatHookConfiguration(config: Record<string, unknown>): string {
-  const lines = ['CONFIGURATION', '-------------', ''];
+  const lines = ["CONFIGURATION", "-------------", ""];
 
   // Hook Config
   const hookConfig = config.hookConfig as Record<string, unknown> | undefined;
-  if (hookConfig?.hooks && typeof hookConfig.hooks === 'object') {
-    lines.push('Hook Configuration:', '');
+  if (hookConfig?.hooks && typeof hookConfig.hooks === "object") {
+    lines.push("Hook Configuration:", "");
 
-    for (const [hookType, hookConfigValue] of Object.entries(hookConfig.hooks)) {
+    for (const [hookType, hookConfigValue] of Object.entries(
+      hookConfig.hooks,
+    )) {
       lines.push(`Hook Type: ${hookType}`);
 
       // Handle both single config and array of configs
-      const configs = Array.isArray(hookConfigValue) ? hookConfigValue : [hookConfigValue];
+      const configs = Array.isArray(hookConfigValue)
+        ? hookConfigValue
+        : [hookConfigValue];
 
       for (const [idx, hc] of configs.entries()) {
         const hook = hc as Record<string, unknown>;
@@ -373,43 +414,46 @@ function formatHookConfiguration(config: Record<string, unknown>): string {
 
         if (hook.script) lines.push(`  Script: ${hook.script}`);
         if (hook.matchers && Array.isArray(hook.matchers)) {
-          lines.push(`  Matchers: ${hook.matchers.join(', ')}`);
+          lines.push(`  Matchers: ${hook.matchers.join(", ")}`);
         }
         if (hook.timeout) lines.push(`  Timeout: ${hook.timeout}ms`);
         if (hook.description) lines.push(`  Description: ${hook.description}`);
       }
 
-      lines.push('');
+      lines.push("");
     }
   }
 
   // Script Content (THE ACTUAL HOOK SCRIPT - CRITICAL!)
-  if (typeof config.scriptContent === 'string') {
-    lines.push('HOOK SCRIPT', '-----------', '', config.scriptContent);
+  if (typeof config.scriptContent === "string") {
+    lines.push("HOOK SCRIPT", "-----------", "", config.scriptContent);
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
  * Format statusline configuration
  */
-function formatStatuslineConfiguration(config: Record<string, unknown>): string {
-  const lines = ['CONFIGURATION', '-------------', ''];
+function formatStatuslineConfiguration(
+  config: Record<string, unknown>,
+): string {
+  const lines = ["CONFIGURATION", "-------------", ""];
 
   if (config.format) lines.push(`Format: ${config.format}`);
-  if (config.refreshInterval) lines.push(`Refresh Interval: ${config.refreshInterval}ms`);
+  if (config.refreshInterval)
+    lines.push(`Refresh Interval: ${config.refreshInterval}ms`);
   if (config.position) lines.push(`Position: ${config.position}`);
   if (config.colorScheme) lines.push(`Color Scheme: ${config.colorScheme}`);
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
  * Format AI configuration (agents, commands, rules)
  */
 function formatAiConfiguration(config: Record<string, unknown>): string {
-  const lines = ['CONFIGURATION', '-------------', ''];
+  const lines = ["CONFIGURATION", "-------------", ""];
 
   if (config.temperature !== undefined) {
     lines.push(`Temperature: ${config.temperature}`);
@@ -417,156 +461,169 @@ function formatAiConfiguration(config: Record<string, unknown>): string {
   if (config.maxTokens !== undefined) {
     lines.push(`Max Tokens: ${config.maxTokens}`);
   }
-  if (typeof config.systemPrompt === 'string') {
-    lines.push('', 'System Prompt:', config.systemPrompt);
+  if (typeof config.systemPrompt === "string") {
+    lines.push("", "System Prompt:", config.systemPrompt);
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
  * Format troubleshooting section
  */
 function formatTroubleshooting(items: unknown[]): string {
-  const lines = ['TROUBLESHOOTING', '---------------', ''];
+  const lines = ["TROUBLESHOOTING", "---------------", ""];
 
   for (const [idx, item] of items.entries()) {
-    if (typeof item === 'object' && item !== null && 'issue' in item && 'solution' in item) {
+    if (
+      typeof item === "object" &&
+      item !== null &&
+      "issue" in item &&
+      "solution" in item
+    ) {
       const troubleItem = item as Record<string, unknown>;
       lines.push(`${idx + 1}. ${troubleItem.issue}`);
       lines.push(`   Solution: ${troubleItem.solution}`);
-      lines.push('');
-    } else if (typeof item === 'string') {
+      lines.push("");
+    } else if (typeof item === "string") {
       lines.push(`• ${item}`);
     }
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
  * Format examples section based on content type
  */
 function formatExamples(examples: unknown[], category: string): string {
-  const lines = ['USAGE EXAMPLES', '--------------', ''];
+  const lines = ["USAGE EXAMPLES", "--------------", ""];
 
   for (const [idx, example] of examples.entries()) {
     // Rules can have structured examples
     if (
-      category === 'rules' &&
-      typeof example === 'object' &&
+      category === "rules" &&
+      typeof example === "object" &&
       example !== null &&
-      'title' in example
+      "title" in example
     ) {
       const ex = example as Record<string, unknown>;
       lines.push(`${idx + 1}. ${ex.title}`);
       if (ex.description) lines.push(`   ${ex.description}`);
       if (ex.prompt) lines.push(`   Prompt: ${ex.prompt}`);
       if (ex.expectedOutcome) lines.push(`   Expected: ${ex.expectedOutcome}`);
-      lines.push('');
+      lines.push("");
     }
     // Simple string examples
-    else if (typeof example === 'string') {
+    else if (typeof example === "string") {
       lines.push(`• ${example}`);
     }
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 /**
  * Build technical details section
  */
 function buildTechnicalDetails(item: ContentItem): string {
-  const lines = ['TECHNICAL DETAILS', '-----------------', ''];
+  const lines = ["TECHNICAL DETAILS", "-----------------", ""];
 
   // Package info (MCP servers)
-  if (item.category === 'mcp' && 'package' in item && item.package) {
+  if (item.category === "mcp" && "package" in item && item.package) {
     lines.push(`Package: ${item.package}`);
   }
 
   // Hook type
-  if (item.category === 'hooks' && 'hookType' in item) {
+  if (item.category === "hooks" && "hookType" in item) {
     lines.push(`Hook Type: ${item.hookType}`);
   }
 
   // Statusline type
-  if (item.category === 'statuslines' && 'statuslineType' in item) {
+  if (item.category === "statuslines" && "statuslineType" in item) {
     lines.push(`Statusline Type: ${item.statuslineType}`);
   }
 
   // Authentication (MCP)
-  if (item.category === 'mcp') {
-    if ('requiresAuth' in item && item.requiresAuth) {
-      lines.push('Authentication Required: Yes');
-      if ('authType' in item && item.authType) {
+  if (item.category === "mcp") {
+    if ("requiresAuth" in item && item.requiresAuth) {
+      lines.push("Authentication Required: Yes");
+      if ("authType" in item && item.authType) {
         lines.push(`Authentication Type: ${item.authType}`);
       }
     }
 
     // Permissions
-    if ('permissions' in item && item.permissions && item.permissions.length > 0) {
-      lines.push(`Permissions: ${item.permissions.join(', ')}`);
+    if (
+      "permissions" in item &&
+      item.permissions &&
+      item.permissions.length > 0
+    ) {
+      lines.push(`Permissions: ${item.permissions.join(", ")}`);
     }
 
     // Tools/Resources provided
-    if ('toolsProvided' in item && item.toolsProvided && item.toolsProvided.length > 0) {
-      lines.push(`Tools Provided: ${item.toolsProvided.join(', ')}`);
+    if (
+      "toolsProvided" in item &&
+      item.toolsProvided &&
+      item.toolsProvided.length > 0
+    ) {
+      lines.push(`Tools Provided: ${item.toolsProvided.join(", ")}`);
     }
     if (
-      'resourcesProvided' in item &&
+      "resourcesProvided" in item &&
       item.resourcesProvided &&
       item.resourcesProvided.length > 0
     ) {
-      lines.push(`Resources Provided: ${item.resourcesProvided.join(', ')}`);
+      lines.push(`Resources Provided: ${item.resourcesProvided.join(", ")}`);
     }
-    if ('dataTypes' in item && item.dataTypes && item.dataTypes.length > 0) {
-      lines.push(`Data Types: ${item.dataTypes.join(', ')}`);
+    if ("dataTypes" in item && item.dataTypes && item.dataTypes.length > 0) {
+      lines.push(`Data Types: ${item.dataTypes.join(", ")}`);
     }
 
     // MCP protocol version
-    if ('mcpVersion' in item && item.mcpVersion) {
+    if ("mcpVersion" in item && item.mcpVersion) {
       lines.push(`MCP Version: ${item.mcpVersion}`);
     }
-    if ('serverType' in item && item.serverType) {
+    if ("serverType" in item && item.serverType) {
       lines.push(`Server Type: ${item.serverType}`);
     }
 
     // Config location
-    if ('configLocation' in item && item.configLocation) {
+    if ("configLocation" in item && item.configLocation) {
       lines.push(`Config Location: ${item.configLocation}`);
     }
   }
 
   // Related rules (rules only)
   if (
-    item.category === 'rules' &&
-    'relatedRules' in item &&
+    item.category === "rules" &&
+    "relatedRules" in item &&
     item.relatedRules &&
     item.relatedRules.length > 0
   ) {
-    lines.push(`Related Rules: ${item.relatedRules.join(', ')}`);
+    lines.push(`Related Rules: ${item.relatedRules.join(", ")}`);
   }
 
   // Expertise areas (rules only)
   if (
-    item.category === 'rules' &&
-    'expertiseAreas' in item &&
+    item.category === "rules" &&
+    "expertiseAreas" in item &&
     item.expertiseAreas &&
     item.expertiseAreas.length > 0
   ) {
-    lines.push(`Expertise Areas: ${item.expertiseAreas.join(', ')}`);
+    lines.push(`Expertise Areas: ${item.expertiseAreas.join(", ")}`);
   }
 
   // Documentation URL
-  if ('documentationUrl' in item && item.documentationUrl) {
+  if ("documentationUrl" in item && item.documentationUrl) {
     lines.push(`Documentation: ${item.documentationUrl}`);
   }
 
   // GitHub URL (commands, rules)
-  if ('githubUrl' in item && item.githubUrl) {
+  if ("githubUrl" in item && item.githubUrl) {
     lines.push(`GitHub: ${item.githubUrl}`);
   }
 
-  return lines.join('\n');
+  return lines.join("\n");
 }

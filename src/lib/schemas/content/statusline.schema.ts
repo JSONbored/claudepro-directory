@@ -7,14 +7,14 @@
  * Phase 4: Dynamic routes migration - new category addition
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 import {
   baseContentMetadataSchema,
   baseInstallationSchema,
   baseTroubleshootingSchema,
-} from '@/src/lib/schemas/content/base-content.schema';
-import { limitedMediumStringArray } from '@/src/lib/schemas/primitives/base-arrays';
-import { mediumString } from '@/src/lib/schemas/primitives/base-strings';
+} from "@/src/lib/schemas/content/base-content.schema";
+import { limitedMediumStringArray } from "@/src/lib/schemas/primitives/base-arrays";
+import { mediumString } from "@/src/lib/schemas/primitives/base-strings";
 
 /**
  * Statusline Configuration Schema
@@ -25,23 +25,31 @@ import { mediumString } from '@/src/lib/schemas/primitives/base-strings';
 const statuslineConfigSchema = z
   .object({
     format: z
-      .enum(['bash', 'python', 'javascript'])
+      .enum(["bash", "python", "javascript"])
       .optional()
-      .describe('Script format/language for the statusline (bash, python, or javascript)'),
+      .describe(
+        "Script format/language for the statusline (bash, python, or javascript)",
+      ),
     refreshInterval: z
       .number()
       .min(100)
       .max(60000)
       .optional()
-      .describe('Refresh interval in milliseconds (100ms to 60s, default varies by type)'), // 100ms to 60s
+      .describe(
+        "Refresh interval in milliseconds (100ms to 60s, default varies by type)",
+      ), // 100ms to 60s
     position: z
-      .enum(['left', 'center', 'right'])
+      .enum(["left", "center", "right"])
       .optional()
-      .describe('Position of statusline in the CLI (left, center, or right alignment)'),
-    colorScheme: mediumString.optional().describe('Optional color scheme name or theme identifier'),
+      .describe(
+        "Position of statusline in the CLI (left, center, or right alignment)",
+      ),
+    colorScheme: mediumString
+      .optional()
+      .describe("Optional color scheme name or theme identifier"),
   })
   .describe(
-    'Statusline configuration metadata including script format, refresh rate, position, and color scheme settings.'
+    "Statusline configuration metadata including script format, refresh rate, position, and color scheme settings.",
   );
 
 /**
@@ -86,37 +94,39 @@ export const statuslineContentSchema = z
 
     // Statusline-specific required fields
     category: z
-      .literal('statuslines')
+      .literal("statuslines")
       .describe('Content category literal identifier: "statuslines"'),
     statuslineType: z
-      .enum(['minimal', 'powerline', 'custom', 'rich', 'simple'])
+      .enum(["minimal", "powerline", "custom", "rich", "simple"])
       .describe(
-        'Statusline display type: minimal (text-only), powerline (segmented with symbols), custom (fully customized), rich (feature-rich), simple (basic display)'
+        "Statusline display type: minimal (text-only), powerline (segmented with symbols), custom (fully customized), rich (feature-rich), simple (basic display)",
       ),
 
     // Statusline configuration (script content and settings)
     configuration: statuslineConfigSchema.describe(
-      'Statusline configuration settings and metadata'
+      "Statusline configuration settings and metadata",
     ),
 
     // Statusline-specific optional fields
     installation: baseInstallationSchema
       .optional()
-      .describe('Optional platform-specific installation instructions'),
+      .describe("Optional platform-specific installation instructions"),
     troubleshooting: z
       .array(baseTroubleshootingSchema)
       .max(20)
       .optional()
-      .describe('Optional array of common issues and solutions (max 20 entries)'),
+      .describe(
+        "Optional array of common issues and solutions (max 20 entries)",
+      ),
     requirements: limitedMediumStringArray
       .optional()
-      .describe('Optional list of system requirements or dependencies'),
+      .describe("Optional list of system requirements or dependencies"),
     preview: mediumString
       .optional()
-      .describe('Optional preview text or example output of the statusline'), // Example output or preview text
+      .describe("Optional preview text or example output of the statusline"), // Example output or preview text
   })
   .describe(
-    'Statusline content schema for Claude Code CLI status bar customizations. Inherits base content metadata and adds statusline-specific fields including type, configuration, installation, troubleshooting, and preview.'
+    "Statusline content schema for Claude Code CLI status bar customizations. Inherits base content metadata and adds statusline-specific fields including type, configuration, installation, troubleshooting, and preview.",
   );
 
 export type StatuslineContent = z.infer<typeof statuslineContentSchema>;

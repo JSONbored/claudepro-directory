@@ -1,3 +1,3 @@
-import { CategoryLoading } from '@/src/lib/components/loading-factory';
+import { CategoryLoading } from "@/src/lib/components/loading-factory";
 
 export default CategoryLoading;

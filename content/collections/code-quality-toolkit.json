@@ -5,7 +5,13 @@
   "description": "Comprehensive suite of tools for maintaining high code quality through automated reviews, testing, and best practice enforcement. Essential for teams focused on code excellence.",
   "author": "JSONbored",
   "dateAdded": "2025-10-02",
-  "tags": ["code-quality", "review", "testing", "best-practices", "refactoring"],
+  "tags": [
+    "code-quality",
+    "review",
+    "testing",
+    "best-practices",
+    "refactoring"
+  ],
   "source": "community",
   "category": "collections",
   "collectionType": "workflow",

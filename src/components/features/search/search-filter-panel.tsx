@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Search Filter Panel (SHA-2087)
@@ -13,21 +13,21 @@
  * - Apply/Clear actions
  */
 
-import { useId } from 'react';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
-import { Label } from '@/src/components/ui/label';
-import { ScrollArea } from '@/src/components/ui/scroll-area';
+import { useId } from "react";
+import { Badge } from "@/src/components/ui/badge";
+import { Button } from "@/src/components/ui/button";
+import { Label } from "@/src/components/ui/label";
+import { ScrollArea } from "@/src/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/src/components/ui/select';
-import { Slider } from '@/src/components/ui/slider';
-import type { FilterState } from '@/src/lib/schemas/component.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+} from "@/src/components/ui/select";
+import { Slider } from "@/src/components/ui/slider";
+import type { FilterState } from "@/src/lib/schemas/component.schema";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 export interface SearchFilterPanelProps {
   filters: FilterState;
@@ -35,7 +35,10 @@ export interface SearchFilterPanelProps {
   availableAuthors?: readonly string[];
   availableCategories?: readonly string[];
   activeFilterCount: number;
-  onFilterChange: (key: keyof FilterState, value: FilterState[keyof FilterState]) => void;
+  onFilterChange: (
+    key: keyof FilterState,
+    value: FilterState[keyof FilterState],
+  ) => void;
   onToggleTag: (tag: string) => void;
   onClearFilters: () => void;
   onApplyFilters?: () => void;
@@ -67,16 +70,18 @@ export function SearchFilterPanel({
     >
       {/* Main Filters */}
       <fieldset className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        <legend className="sr-only">Filter by category, author, and date range</legend>
+        <legend className="sr-only">
+          Filter by category, author, and date range
+        </legend>
 
         {/* Category Filter */}
         {availableCategories.length > 0 && (
           <div className={UI_CLASSES.SPACE_Y_2}>
             <Label htmlFor={categorySelectId}>Category</Label>
             <Select
-              value={filters.category || 'all'}
+              value={filters.category || "all"}
               onValueChange={(value) =>
-                onFilterChange('category', value === 'all' ? undefined : value)
+                onFilterChange("category", value === "all" ? undefined : value)
               }
               name="category"
             >
@@ -104,9 +109,9 @@ export function SearchFilterPanel({
           <div className={UI_CLASSES.SPACE_Y_2}>
             <Label htmlFor={authorSelectId}>Author</Label>
             <Select
-              value={filters.author || 'all'}
+              value={filters.author || "all"}
               onValueChange={(value) =>
-                onFilterChange('author', value === 'all' ? undefined : value)
+                onFilterChange("author", value === "all" ? undefined : value)
               }
               name="author"
             >
@@ -133,9 +138,9 @@ export function SearchFilterPanel({
         <div className={UI_CLASSES.SPACE_Y_2}>
           <Label htmlFor={dateRangeSelectId}>Date Range</Label>
           <Select
-            value={filters.dateRange || 'all'}
+            value={filters.dateRange || "all"}
             onValueChange={(value) =>
-              onFilterChange('dateRange', value === 'all' ? undefined : value)
+              onFilterChange("dateRange", value === "all" ? undefined : value)
             }
           >
             <SelectTrigger
@@ -159,12 +164,15 @@ export function SearchFilterPanel({
       {/* Popularity Slider */}
       <fieldset className={UI_CLASSES.SPACE_Y_2}>
         <legend className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-          Popularity Range ({filters.popularity?.[0] || 0} - {filters.popularity?.[1] || 100})
+          Popularity Range ({filters.popularity?.[0] || 0} -{" "}
+          {filters.popularity?.[1] || 100})
         </legend>
         <div className="px-2 py-4">
           <Slider
             value={filters.popularity || [0, 100]}
-            onValueChange={(value) => onFilterChange('popularity', value as [number, number])}
+            onValueChange={(value) =>
+              onFilterChange("popularity", value as [number, number])
+            }
             min={0}
             max={100}
             step={1}
@@ -181,7 +189,9 @@ export function SearchFilterPanel({
         <fieldset className={UI_CLASSES.SPACE_Y_3}>
           <div className={`${UI_CLASSES.BORDER_T} border-border/50 pt-3`} />
           <div>
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-3`}>
+            <div
+              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mb-3`}
+            >
               <legend className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Tags
               </legend>
@@ -189,7 +199,7 @@ export function SearchFilterPanel({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onFilterChange('tags', undefined)}
+                  onClick={() => onFilterChange("tags", undefined)}
                   aria-label={`Clear all selected tags (${filters.tags.length} selected)`}
                 >
                   Clear Tags ({filters.tags.length})
@@ -204,19 +214,21 @@ export function SearchFilterPanel({
                 {availableTags.map((tag) => (
                   <Badge
                     key={tag}
-                    variant={filters.tags?.includes(tag) ? 'default' : 'outline'}
+                    variant={
+                      filters.tags?.includes(tag) ? "default" : "outline"
+                    }
                     className={`cursor-pointer transition-all duration-200 ${UI_CLASSES.HOVER_BG_ACCENT_10}`}
                     onClick={() => onToggleTag(tag)}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
+                      if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
                         onToggleTag(tag);
                       }
                     }}
                     aria-pressed={filters.tags?.includes(tag)}
-                    aria-label={`${filters.tags?.includes(tag) ? 'Remove' : 'Add'} ${tag} tag filter`}
+                    aria-label={`${filters.tags?.includes(tag) ? "Remove" : "Add"} ${tag} tag filter`}
                   >
                     {tag}
                   </Badge>
@@ -254,7 +266,7 @@ export function SearchFilterPanel({
             {onApplyFilters && (
               <Button
                 onClick={onApplyFilters}
-                aria-label={`Apply ${activeFilterCount} filter${activeFilterCount !== 1 ? 's' : ''}`}
+                aria-label={`Apply ${activeFilterCount} filter${activeFilterCount !== 1 ? "s" : ""}`}
               >
                 Apply Filters
               </Button>

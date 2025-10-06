@@ -1,12 +1,15 @@
-'use client';
+"use client";
 
 /**
  * ExpertQuote - Expert opinion component with attribution
  * Used in 11+ MDX files across the codebase
  */
 
-import Image from 'next/image';
-import { type ExpertQuoteProps, expertQuotePropsSchema } from '@/src/lib/schemas/shared.schema';
+import Image from "next/image";
+import {
+  type ExpertQuoteProps,
+  expertQuotePropsSchema,
+} from "@/src/lib/schemas/shared.schema";
 
 export function ExpertQuote(props: ExpertQuoteProps) {
   const validated = expertQuotePropsSchema.parse(props);
@@ -40,7 +43,7 @@ export function ExpertQuote(props: ExpertQuoteProps) {
                 {role && <span itemProp="jobTitle">, {role}</span>}
                 {company && (
                   <span itemProp="worksFor">
-                    {role ? ' at ' : ', '}
+                    {role ? " at " : ", "}
                     {company}
                   </span>
                 )}

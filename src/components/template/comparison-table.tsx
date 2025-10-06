@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * ComparisonTable - Feature comparison table for products/services
@@ -11,13 +11,13 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { CheckCircle } from '@/src/lib/icons';
+} from "@/src/components/ui/card";
+import { CheckCircle } from "@/src/lib/icons";
 import {
   type ComparisonTableProps,
   comparisonTablePropsSchema,
-} from '@/src/lib/schemas/shared.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+} from "@/src/lib/schemas/shared.schema";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 export function ComparisonTable(props: ComparisonTableProps) {
   const validated = comparisonTablePropsSchema.parse(props);
@@ -42,7 +42,11 @@ export function ComparisonTable(props: ComparisonTableProps) {
           <table className={UI_CLASSES.W_FULL}>
             <thead className="border-b">
               <tr>
-                <th className={`text-left ${UI_CLASSES.P_4} ${UI_CLASSES.FONT_MEDIUM}`}>Feature</th>
+                <th
+                  className={`text-left ${UI_CLASSES.P_4} ${UI_CLASSES.FONT_MEDIUM}`}
+                >
+                  Feature
+                </th>
                 {validHeaders.map((header) => (
                   <th
                     key={header}
@@ -56,9 +60,11 @@ export function ComparisonTable(props: ComparisonTableProps) {
             <tbody>
               {validItems.map((item) => (
                 <tr key={item.feature} className="border-b last:border-0">
-                  <td className={`${UI_CLASSES.P_4} ${UI_CLASSES.FONT_MEDIUM}`}>{item.feature}</td>
+                  <td className={`${UI_CLASSES.P_4} ${UI_CLASSES.FONT_MEDIUM}`}>
+                    {item.feature}
+                  </td>
                   <td className={UI_CLASSES.P_4}>
-                    {typeof item.option1 === 'boolean' ? (
+                    {typeof item.option1 === "boolean" ? (
                       item.option1 ? (
                         <CheckCircle className="h-5 w-5 text-green-500" />
                       ) : (
@@ -69,7 +75,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
                     )}
                   </td>
                   <td className={UI_CLASSES.P_4}>
-                    {typeof item.option2 === 'boolean' ? (
+                    {typeof item.option2 === "boolean" ? (
                       item.option2 ? (
                         <CheckCircle className="h-5 w-5 text-green-500" />
                       ) : (
@@ -81,7 +87,7 @@ export function ComparisonTable(props: ComparisonTableProps) {
                   </td>
                   {item.option3 !== undefined && (
                     <td className={UI_CLASSES.P_4}>
-                      {typeof item.option3 === 'boolean' ? (
+                      {typeof item.option3 === "boolean" ? (
                         item.option3 ? (
                           <CheckCircle className="h-5 w-5 text-green-500" />
                         ) : (

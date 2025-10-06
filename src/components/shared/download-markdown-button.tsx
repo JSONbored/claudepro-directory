@@ -14,18 +14,18 @@
  * @module components/shared/download-markdown-button
  */
 
-'use client';
+"use client";
 
-import { useAction } from 'next-safe-action/hooks';
-import { useState } from 'react';
-import { Button } from '@/src/components/ui/button';
-import { toast } from '@/src/components/ui/sonner';
-import { downloadMarkdownAction } from '@/src/lib/actions/markdown-actions';
-import { EVENTS } from '@/src/lib/analytics/events.config';
-import { trackEvent } from '@/src/lib/analytics/tracker';
-import { Check, Download } from '@/src/lib/icons';
-import { logger } from '@/src/lib/logger';
-import { cn } from '@/src/lib/utils';
+import { useAction } from "next-safe-action/hooks";
+import { useState } from "react";
+import { Button } from "@/src/components/ui/button";
+import { toast } from "@/src/components/ui/sonner";
+import { downloadMarkdownAction } from "@/src/lib/actions/markdown-actions";
+import { EVENTS } from "@/src/lib/analytics/events.config";
+import { trackEvent } from "@/src/lib/analytics/tracker";
+import { Check, Download } from "@/src/lib/icons";
+import { logger } from "@/src/lib/logger";
+import { cn } from "@/src/lib/utils";
 
 /**
  * Props for DownloadMarkdownButton component
@@ -51,13 +51,19 @@ export interface DownloadMarkdownButtonProps {
    * Button size variant
    * @default "sm"
    */
-  size?: 'default' | 'sm' | 'lg' | 'icon';
+  size?: "default" | "sm" | "lg" | "icon";
 
   /**
    * Button style variant
    * @default "outline"
    */
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  variant?:
+    | "default"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link";
 
   /**
    * Additional CSS classes
@@ -92,9 +98,9 @@ export interface DownloadMarkdownButtonProps {
 export function DownloadMarkdownButton({
   category,
   slug,
-  label = 'Download Markdown',
-  size = 'sm',
-  variant = 'outline',
+  label = "Download Markdown",
+  size = "sm",
+  variant = "outline",
   className,
   showIcon = true,
 }: DownloadMarkdownButtonProps) {
@@ -104,11 +110,17 @@ export function DownloadMarkdownButton({
   // Use next-safe-action hook
   const { execute, status } = useAction(downloadMarkdownAction, {
     onSuccess: (result) => {
-      if (result.data?.success && result.data.markdown && result.data.filename) {
+      if (
+        result.data?.success &&
+        result.data.markdown &&
+        result.data.filename
+      ) {
         // Create blob and download
-        const blob = new Blob([result.data.markdown], { type: 'text/markdown;charset=utf-8' });
+        const blob = new Blob([result.data.markdown], {
+          type: "text/markdown;charset=utf-8",
+        });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
         a.download = result.data.filename;
         document.body.appendChild(a);
@@ -119,7 +131,7 @@ export function DownloadMarkdownButton({
         setIsDownloaded(true);
 
         // Show success toast
-        toast.success('Downloaded successfully!', {
+        toast.success("Downloaded successfully!", {
           description: `Saved as ${result.data.filename}`,
           duration: 3000,
         });
@@ -137,28 +149,28 @@ export function DownloadMarkdownButton({
           setIsDownloaded(false);
         }, 2000);
       } else {
-        throw new Error(result.data?.error || 'Failed to generate markdown');
+        throw new Error(result.data?.error || "Failed to generate markdown");
       }
     },
     onError: (error) => {
       const serverError = error.error?.serverError;
       const errorMessage =
         serverError &&
-        typeof serverError === 'object' &&
-        'message' in serverError &&
-        typeof (serverError as { message?: unknown }).message === 'string'
+        typeof serverError === "object" &&
+        "message" in serverError &&
+        typeof (serverError as { message?: unknown }).message === "string"
           ? (serverError as { message: string }).message
-          : typeof serverError === 'string'
+          : typeof serverError === "string"
             ? serverError
-            : 'Failed to download';
+            : "Failed to download";
 
-      logger.error('Download markdown action failed', new Error(errorMessage), {
-        component: 'DownloadMarkdownButton',
+      logger.error("Download markdown action failed", new Error(errorMessage), {
+        component: "DownloadMarkdownButton",
         category,
         slug,
       });
 
-      toast.error('Failed to download', {
+      toast.error("Failed to download", {
         description: errorMessage,
         duration: 4000,
       });
@@ -169,7 +181,7 @@ export function DownloadMarkdownButton({
    * Handle download button click
    */
   const handleDownload = async () => {
-    if (isExecuting || isDownloaded || status === 'executing') return;
+    if (isExecuting || isDownloaded || status === "executing") return;
 
     setIsExecuting(true);
 
@@ -183,7 +195,7 @@ export function DownloadMarkdownButton({
     }
   };
 
-  const isLoading = status === 'executing' || isExecuting;
+  const isLoading = status === "executing" || isExecuting;
 
   return (
     <Button
@@ -192,11 +204,13 @@ export function DownloadMarkdownButton({
       onClick={handleDownload}
       disabled={isLoading || isDownloaded}
       className={cn(
-        'gap-2 transition-all',
-        isDownloaded && 'border-green-500/50 bg-green-500/10 text-green-400',
-        className
+        "gap-2 transition-all",
+        isDownloaded && "border-green-500/50 bg-green-500/10 text-green-400",
+        className,
       )}
-      aria-label={isDownloaded ? 'File downloaded' : 'Download as markdown file'}
+      aria-label={
+        isDownloaded ? "File downloaded" : "Download as markdown file"
+      }
     >
       {showIcon &&
         (isDownloaded ? (
@@ -207,7 +221,7 @@ export function DownloadMarkdownButton({
           <Download className="h-4 w-4" aria-hidden="true" />
         ))}
       <span className="text-sm">
-        {isDownloaded ? 'Downloaded!' : isLoading ? 'Downloading...' : label}
+        {isDownloaded ? "Downloaded!" : isLoading ? "Downloading..." : label}
       </span>
     </Button>
   );
@@ -228,17 +242,23 @@ export function DownloadMarkdownButtonIcon({
   category,
   slug,
   className,
-  variant = 'ghost',
-}: Omit<DownloadMarkdownButtonProps, 'label' | 'size' | 'showIcon'>) {
+  variant = "ghost",
+}: Omit<DownloadMarkdownButtonProps, "label" | "size" | "showIcon">) {
   const [isDownloaded, setIsDownloaded] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
 
   const { execute, status } = useAction(downloadMarkdownAction, {
     onSuccess: (result) => {
-      if (result.data?.success && result.data.markdown && result.data.filename) {
-        const blob = new Blob([result.data.markdown], { type: 'text/markdown;charset=utf-8' });
+      if (
+        result.data?.success &&
+        result.data.markdown &&
+        result.data.filename
+      ) {
+        const blob = new Blob([result.data.markdown], {
+          type: "text/markdown;charset=utf-8",
+        });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
         a.download = result.data.filename;
         document.body.appendChild(a);
@@ -247,7 +267,7 @@ export function DownloadMarkdownButtonIcon({
         URL.revokeObjectURL(url);
 
         setIsDownloaded(true);
-        toast.success('Downloaded!');
+        toast.success("Downloaded!");
 
         // Track analytics event
         trackEvent(EVENTS.DOWNLOAD_MARKDOWN, {
@@ -259,32 +279,32 @@ export function DownloadMarkdownButtonIcon({
 
         setTimeout(() => setIsDownloaded(false), 2000);
       } else {
-        throw new Error(result.data?.error || 'Download failed');
+        throw new Error(result.data?.error || "Download failed");
       }
     },
     onError: (error) => {
       const serverError = error.error?.serverError;
       const errorMessage =
         serverError &&
-        typeof serverError === 'object' &&
-        'message' in serverError &&
-        typeof (serverError as { message?: unknown }).message === 'string'
+        typeof serverError === "object" &&
+        "message" in serverError &&
+        typeof (serverError as { message?: unknown }).message === "string"
           ? (serverError as { message: string }).message
-          : typeof serverError === 'string'
+          : typeof serverError === "string"
             ? serverError
-            : 'Failed to download';
+            : "Failed to download";
 
-      logger.error('Download markdown failed', new Error(errorMessage), {
-        component: 'DownloadMarkdownButtonIcon',
+      logger.error("Download markdown failed", new Error(errorMessage), {
+        component: "DownloadMarkdownButtonIcon",
         category,
         slug,
       });
-      toast.error('Failed to download');
+      toast.error("Failed to download");
     },
   });
 
   const handleDownload = async () => {
-    if (isExecuting || isDownloaded || status === 'executing') return;
+    if (isExecuting || isDownloaded || status === "executing") return;
 
     setIsExecuting(true);
     try {
@@ -294,7 +314,7 @@ export function DownloadMarkdownButtonIcon({
     }
   };
 
-  const isLoading = status === 'executing' || isExecuting;
+  const isLoading = status === "executing" || isExecuting;
 
   return (
     <Button
@@ -303,9 +323,9 @@ export function DownloadMarkdownButtonIcon({
       onClick={handleDownload}
       disabled={isLoading || isDownloaded}
       className={cn(
-        'transition-all',
-        isDownloaded && 'border-green-500/50 bg-green-500/10 text-green-400',
-        className
+        "transition-all",
+        isDownloaded && "border-green-500/50 bg-green-500/10 text-green-400",
+        className,
       )}
       aria-label="Download as markdown file"
       title="Download Markdown"

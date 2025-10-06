@@ -3,16 +3,16 @@
  * Converts strict content schema data to flexible component interfaces
  */
 
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import type { UnifiedContentItem } from "@/src/lib/schemas/components/content-item.schema";
 // Import all content types
-import type { AgentContent } from '@/src/lib/schemas/content/agent.schema';
-import type { CollectionContent } from '@/src/lib/schemas/content/collection.schema';
-import type { CommandContent } from '@/src/lib/schemas/content/command.schema';
-import type { GuideContent } from '@/src/lib/schemas/content/guide.schema';
-import type { HookContent } from '@/src/lib/schemas/content/hook.schema';
-import type { McpContent } from '@/src/lib/schemas/content/mcp.schema';
-import type { RuleContent } from '@/src/lib/schemas/content/rule.schema';
-import type { StatuslineContent } from '@/src/lib/schemas/content/statusline.schema';
+import type { AgentContent } from "@/src/lib/schemas/content/agent.schema";
+import type { CollectionContent } from "@/src/lib/schemas/content/collection.schema";
+import type { CommandContent } from "@/src/lib/schemas/content/command.schema";
+import type { GuideContent } from "@/src/lib/schemas/content/guide.schema";
+import type { HookContent } from "@/src/lib/schemas/content/hook.schema";
+import type { McpContent } from "@/src/lib/schemas/content/mcp.schema";
+import type { RuleContent } from "@/src/lib/schemas/content/rule.schema";
+import type { StatuslineContent } from "@/src/lib/schemas/content/statusline.schema";
 
 // Union type for all content
 export type ContentItem =
@@ -28,7 +28,13 @@ export type ContentItem =
 // Metadata-only type (subset of full content)
 export type ContentMetadata = Pick<
   ContentItem,
-  'slug' | 'title' | 'description' | 'author' | 'tags' | 'category' | 'dateAdded'
+  | "slug"
+  | "title"
+  | "description"
+  | "author"
+  | "tags"
+  | "category"
+  | "dateAdded"
 >;
 
 /**
@@ -39,7 +45,7 @@ function transformToUnifiedContent(item: ContentItem): UnifiedContentItem {
   const transformed = {
     ...item,
     tags: [...item.tags], // Convert readonly array to mutable array
-    category: item.category as UnifiedContentItem['category'],
+    category: item.category as UnifiedContentItem["category"],
   } as UnifiedContentItem;
 
   // Add display properties for components
@@ -60,7 +66,9 @@ function transformToUnifiedContent(item: ContentItem): UnifiedContentItem {
 /**
  * Transform array of content items
  */
-function transformContentArray(items: readonly ContentItem[]): UnifiedContentItem[] {
+function transformContentArray(
+  items: readonly ContentItem[],
+): UnifiedContentItem[] {
   return items.map(transformToUnifiedContent);
 }
 
@@ -69,18 +77,29 @@ function transformContentArray(items: readonly ContentItem[]): UnifiedContentIte
  */
 function generateDisplayTitle(slug: string): string {
   return slug
-    .split('-')
+    .split("-")
     .map((word) => {
       // Handle common acronyms
       const upperWord = word.toUpperCase();
       if (
-        ['API', 'AWS', 'CSS', 'JSON', 'HTML', 'MCP', 'AI', 'ML', 'SQL', 'REST'].includes(upperWord)
+        [
+          "API",
+          "AWS",
+          "CSS",
+          "JSON",
+          "HTML",
+          "MCP",
+          "AI",
+          "ML",
+          "SQL",
+          "REST",
+        ].includes(upperWord)
       ) {
         return upperWord;
       }
       return word.charAt(0).toUpperCase() + word.slice(1);
     })
-    .join(' ');
+    .join(" ");
 }
 
 /**
@@ -89,8 +108,9 @@ function generateDisplayTitle(slug: string): string {
  */
 export function formatViewCount(count: number): string {
   if (count < 1000) return count.toString();
-  if (count < 1000000) return `${(count / 1000).toFixed(1).replace(/\.0$/, '')}K`;
-  return `${(count / 1000000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (count < 1000000)
+    return `${(count / 1000).toFixed(1).replace(/\.0$/, "")}K`;
+  return `${(count / 1000000).toFixed(1).replace(/\.0$/, "")}M`;
 }
 
 /**
@@ -98,7 +118,7 @@ export function formatViewCount(count: number): string {
  */
 export function transformForDetailPage(
   item: ContentItem,
-  relatedItems: ContentItem[] = []
+  relatedItems: ContentItem[] = [],
 ): {
   item: UnifiedContentItem;
   relatedItems: UnifiedContentItem[];
@@ -138,8 +158,14 @@ export function transformForHomePage(data: {
     agents: transformContentArray(data.agents as readonly ContentItem[]),
     commands: transformContentArray(data.commands as readonly ContentItem[]),
     hooks: transformContentArray(data.hooks as readonly ContentItem[]),
-    statuslines: transformContentArray(data.statuslines as readonly ContentItem[]),
-    collections: transformContentArray(data.collections as readonly ContentItem[]),
-    allConfigs: transformContentArray(data.allConfigs as readonly ContentItem[]),
+    statuslines: transformContentArray(
+      data.statuslines as readonly ContentItem[],
+    ),
+    collections: transformContentArray(
+      data.collections as readonly ContentItem[],
+    ),
+    allConfigs: transformContentArray(
+      data.allConfigs as readonly ContentItem[],
+    ),
   };
 }

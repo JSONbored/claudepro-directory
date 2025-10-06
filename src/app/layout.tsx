@@ -1,45 +1,45 @@
-import { Analytics } from '@vercel/analytics/next';
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import { headers } from 'next/headers';
-import { connection } from 'next/server';
-import { ThemeProvider } from 'next-themes';
-import './globals.css';
-import { Toaster } from 'sonner';
-import { Footer } from '@/src/components/layout/footer';
-import { Navigation } from '@/src/components/layout/navigation';
-import { PostCopyEmailProvider } from '@/src/components/providers/post-copy-email-provider';
-import { ErrorBoundary } from '@/src/components/shared/error-boundary';
-import { FooterNewsletterBar } from '@/src/components/shared/footer-newsletter-bar';
-import { PerformanceOptimizer } from '@/src/components/shared/performance-optimizer';
-import { StructuredData } from '@/src/components/shared/structured-data';
-import { UmamiScript } from '@/src/components/shared/umami-script';
-import { WebVitals } from '@/src/components/shared/web-vitals';
-import { OrganizationStructuredData } from '@/src/components/structured-data/organization-schema';
-import { APP_CONFIG } from '@/src/lib/constants';
-import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { Analytics } from "@vercel/analytics/next";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { headers } from "next/headers";
+import { connection } from "next/server";
+import { ThemeProvider } from "next-themes";
+import "./globals.css";
+import { Toaster } from "sonner";
+import { Footer } from "@/src/components/layout/footer";
+import { Navigation } from "@/src/components/layout/navigation";
+import { PostCopyEmailProvider } from "@/src/components/providers/post-copy-email-provider";
+import { ErrorBoundary } from "@/src/components/shared/error-boundary";
+import { FooterNewsletterBar } from "@/src/components/shared/footer-newsletter-bar";
+import { PerformanceOptimizer } from "@/src/components/shared/performance-optimizer";
+import { StructuredData } from "@/src/components/shared/structured-data";
+import { UmamiScript } from "@/src/components/shared/umami-script";
+import { WebVitals } from "@/src/components/shared/web-vitals";
+import { OrganizationStructuredData } from "@/src/components/structured-data/organization-schema";
+import { APP_CONFIG } from "@/src/lib/constants";
+import { generatePageMetadata } from "@/src/lib/seo/metadata-generator";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 // Configure Inter font with optimizations
 const inter = Inter({
-  subsets: ['latin'],
-  display: 'optional', // Changed from 'swap' to 'optional' for better performance (zero layout shifts)
-  variable: '--font-inter',
+  subsets: ["latin"],
+  display: "optional", // Changed from 'swap' to 'optional' for better performance (zero layout shifts)
+  variable: "--font-inter",
   preload: true,
   fallback: [
-    'system-ui',
-    '-apple-system',
-    'BlinkMacSystemFont',
-    'Segoe UI',
-    'Helvetica',
-    'Arial',
-    'sans-serif',
+    "system-ui",
+    "-apple-system",
+    "BlinkMacSystemFont",
+    "Segoe UI",
+    "Helvetica",
+    "Arial",
+    "sans-serif",
   ],
 });
 
 // Generate homepage metadata from centralized registry
 export async function generateMetadata(): Promise<Metadata> {
-  const homeMetadata = await generatePageMetadata('/');
+  const homeMetadata = await generatePageMetadata("/");
 
   return {
     ...homeMetadata,
@@ -47,10 +47,10 @@ export async function generateMetadata(): Promise<Metadata> {
     authors: [{ name: APP_CONFIG.author, url: `${APP_CONFIG.url}/about` }],
     openGraph: {
       ...homeMetadata.openGraph,
-      locale: 'en_US',
+      locale: "en_US",
       images: [
         {
-          url: '/opengraph-image',
+          url: "/opengraph-image",
           width: 1200,
           height: 630,
           alt: `${APP_CONFIG.name} - Community Configurations`,
@@ -59,43 +59,51 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       ...homeMetadata.twitter,
-      creator: '@JSONbored',
+      creator: "@JSONbored",
     },
     alternates: {
       ...homeMetadata.alternates,
       types: {
         // OpenAPI 3.1.0 Specification for AI Discovery (RFC 9727)
-        'application/openapi+json': '/openapi.json',
+        "application/openapi+json": "/openapi.json",
         // API Catalog for RFC 9727 Compliant Discovery
-        'application/json': '/.well-known/api-catalog',
+        "application/json": "/.well-known/api-catalog",
         // LLMs.txt for AI-Optimized Plain Text Content (llmstxt.org)
-        'text/plain': '/llms.txt',
+        "text/plain": "/llms.txt",
       },
     },
     icons: {
       icon: [
-        { url: '/assets/icons/claudepro-directory-icon.ico' },
-        { url: '/assets/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-        { url: '/assets/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      ],
-      shortcut: '/assets/icons/claudepro-directory-icon.ico',
-      apple: '/assets/icons/apple-touch-icon.png',
-      other: [
+        { url: "/assets/icons/claudepro-directory-icon.ico" },
         {
-          rel: 'icon',
-          type: 'image/png',
-          sizes: '192x192',
-          url: '/assets/icons/icon-192.png',
+          url: "/assets/icons/favicon-16x16.png",
+          sizes: "16x16",
+          type: "image/png",
         },
         {
-          rel: 'icon',
-          type: 'image/png',
-          sizes: '512x512',
-          url: '/assets/icons/icon-512.png',
+          url: "/assets/icons/favicon-32x32.png",
+          sizes: "32x32",
+          type: "image/png",
+        },
+      ],
+      shortcut: "/assets/icons/claudepro-directory-icon.ico",
+      apple: "/assets/icons/apple-touch-icon.png",
+      other: [
+        {
+          rel: "icon",
+          type: "image/png",
+          sizes: "192x192",
+          url: "/assets/icons/icon-192.png",
+        },
+        {
+          rel: "icon",
+          type: "image/png",
+          sizes: "512x512",
+          url: "/assets/icons/icon-512.png",
         },
       ],
     },
-    manifest: '/manifest.webmanifest',
+    manifest: "/manifest.webmanifest",
   };
 }
 
@@ -109,20 +117,30 @@ export default async function RootLayout({
 
   // Get CSP nonce for inline scripts
   const headersList = await headers();
-  const cspHeader = headersList.get('content-security-policy');
+  const cspHeader = headersList.get("content-security-policy");
   const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
 
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} font-sans`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} font-sans`}
+    >
       <head>
         {/* PWA Manifest */}
         <link rel="manifest" href="/manifest.webmanifest" />
 
         {/* iOS Safari PWA Support */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
         <meta name="apple-mobile-web-app-title" content="ClaudePro" />
-        <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png" />
+        <link
+          rel="apple-touch-icon"
+          href="/assets/icons/apple-touch-icon.png"
+        />
 
         {/* Theme Color for Mobile Browsers */}
         <meta name="theme-color" content="#000000" />
@@ -139,12 +157,20 @@ export default async function RootLayout({
         <link rel="dns-prefetch" href="https://vitals.vercel-insights.com" />
 
         {/* Preconnect for critical third-party resources */}
-        <link rel="preconnect" href="https://umami.claudepro.directory" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://vitals.vercel-insights.com" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://umami.claudepro.directory"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preconnect"
+          href="https://vitals.vercel-insights.com"
+          crossOrigin="anonymous"
+        />
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
       </head>
       <body className="font-sans">
-        {await StructuredData({ type: 'website' })}
+        {await StructuredData({ type: "website" })}
         {await OrganizationStructuredData()}
         <ThemeProvider
           attribute="class"
@@ -161,7 +187,9 @@ export default async function RootLayout({
               >
                 Skip to main content
               </a>
-              <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background flex flex-col`}>
+              <div
+                className={`${UI_CLASSES.MIN_H_SCREEN} bg-background flex flex-col`}
+              >
                 <Navigation />
                 {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
                 <main id="main-content" className="flex-1">

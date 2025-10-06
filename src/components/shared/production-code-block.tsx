@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Production Code Block Component
@@ -15,14 +15,14 @@
  * Server-rendered HTML from Shiki, client interactivity for UX
  */
 
-import { AnimatePresence, domAnimation, LazyMotion, m } from 'framer-motion';
-import { usePathname } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
-import { EVENTS } from '@/src/lib/analytics/events.config';
-import { trackEvent } from '@/src/lib/analytics/tracker';
-import { Check, ChevronDown, Copy } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { AnimatePresence, domAnimation, LazyMotion, m } from "framer-motion";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { EVENTS } from "@/src/lib/analytics/events.config";
+import { trackEvent } from "@/src/lib/analytics/tracker";
+import { Check, ChevronDown, Copy } from "@/src/lib/icons";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 export interface ProductionCodeBlockProps {
   /** Pre-rendered HTML from Shiki (server-side) */
@@ -44,11 +44,11 @@ export interface ProductionCodeBlockProps {
 export function ProductionCodeBlock({
   html,
   code,
-  language = 'text',
+  language = "text",
   filename,
   maxLines = 20,
   showLineNumbers = false,
-  className = '',
+  className = "",
 }: ProductionCodeBlockProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
@@ -58,7 +58,7 @@ export function ProductionCodeBlock({
 
   // Check if content exceeds maxLines (no DOM access needed - calculate from code prop)
   useEffect(() => {
-    const lines = code.split('\n').length;
+    const lines = code.split("\n").length;
     setNeedsCollapse(lines > maxLines);
   }, [code, maxLines]);
 
@@ -66,22 +66,22 @@ export function ProductionCodeBlock({
     try {
       await navigator.clipboard.writeText(code);
       setIsCopied(true);
-      toast.success('Code copied to clipboard!');
+      toast.success("Code copied to clipboard!");
       setTimeout(() => setIsCopied(false), 2000);
 
       // Track copy event with analytics
-      const pathParts = pathname?.split('/').filter(Boolean) || [];
-      const category = pathParts[0] || 'unknown';
-      const slug = pathParts[1] || 'unknown';
+      const pathParts = pathname?.split("/").filter(Boolean) || [];
+      const category = pathParts[0] || "unknown";
+      const slug = pathParts[1] || "unknown";
 
       trackEvent(EVENTS.COPY_CODE, {
-        content_type: 'code',
+        content_type: "code",
         content_category: category,
         content_slug: slug,
         content_length: code.length,
       });
     } catch (_err) {
-      toast.error('Failed to copy code');
+      toast.error("Failed to copy code");
     }
   };
 
@@ -96,7 +96,7 @@ export function ProductionCodeBlock({
             <span className={UI_CLASSES.CODE_BLOCK_FILENAME}>{filename}</span>
             <div className="flex items-center gap-2">
               {/* Language badge pill */}
-              {language && language !== 'text' && (
+              {language && language !== "text" && (
                 <span className="px-2 py-0.5 text-2xs font-medium uppercase tracking-wider rounded-full bg-accent/10 text-accent border border-accent/20">
                   {language}
                 </span>
@@ -130,12 +130,12 @@ export function ProductionCodeBlock({
           className="relative overflow-hidden"
           initial={false}
           animate={{
-            height: needsCollapse && !isExpanded ? maxHeight : 'auto',
+            height: needsCollapse && !isExpanded ? maxHeight : "auto",
           }}
           transition={UI_CLASSES.SPRING_SMOOTH}
         >
           {/* Language badge - top right corner */}
-          {language && language !== 'text' && !filename && (
+          {language && language !== "text" && !filename && (
             <div className="absolute top-3 right-3 z-20 px-2 py-1 text-2xs font-medium uppercase tracking-wide rounded-md bg-accent/10 text-accent border border-accent/20 backdrop-blur-sm">
               {language}
             </div>
@@ -152,7 +152,7 @@ export function ProductionCodeBlock({
                 className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none z-10"
                 style={{
                   background:
-                    'linear-gradient(to bottom, transparent 0%, var(--color-bg-code) 90%)',
+                    "linear-gradient(to bottom, transparent 0%, var(--color-bg-code) 90%)",
                 }}
               />
             )}
@@ -160,7 +160,7 @@ export function ProductionCodeBlock({
 
           {/* Server-rendered Shiki HTML */}
           <div
-            className={showLineNumbers ? 'code-with-line-numbers' : ''}
+            className={showLineNumbers ? "code-with-line-numbers" : ""}
             // biome-ignore lint/security/noDangerouslySetInnerHtml: Server-side Shiki generates trusted HTML
             dangerouslySetInnerHTML={{ __html: html }}
           />
@@ -173,18 +173,23 @@ export function ProductionCodeBlock({
             onClick={() => setIsExpanded(!isExpanded)}
             className={`flex items-center justify-center gap-2 w-full py-2 text-sm font-medium transition-all bg-code/30 backdrop-blur-sm border-t border-border/50 ${
               isExpanded
-                ? 'opacity-100 text-foreground'
-                : 'opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground'
+                ? "opacity-100 text-foreground"
+                : "opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground"
             }`}
             whileHover={UI_CLASSES.SCALE_HOVER}
             whileTap={UI_CLASSES.SCALE_TAP}
             transition={UI_CLASSES.SPRING_BOUNCY}
           >
-            <m.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={UI_CLASSES.SPRING_GENTLE}>
+            <m.div
+              animate={{ rotate: isExpanded ? 180 : 0 }}
+              transition={UI_CLASSES.SPRING_GENTLE}
+            >
               <ChevronDown className="h-4 w-4" />
             </m.div>
             <span className="text-xs">
-              {isExpanded ? 'Collapse' : `Expand ${code.split('\n').length} lines`}
+              {isExpanded
+                ? "Collapse"
+                : `Expand ${code.split("\n").length} lines`}
             </span>
           </m.button>
         )}
@@ -195,7 +200,7 @@ export function ProductionCodeBlock({
             type="button"
             onClick={handleCopy}
             className={UI_CLASSES.CODE_BLOCK_COPY_BUTTON_FLOATING}
-            style={{ minWidth: '48px', minHeight: '48px' }}
+            style={{ minWidth: "48px", minHeight: "48px" }}
             title="Copy code"
           >
             {isCopied ? (

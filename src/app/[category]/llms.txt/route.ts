@@ -6,19 +6,25 @@
  * @see {@link https://llmstxt.org} - LLMs.txt specification
  */
 
-import { type NextRequest, NextResponse } from 'next/server';
-import { getCategoryConfig, isValidCategory } from '@/src/lib/config/category-config';
-import { APP_CONFIG } from '@/src/lib/constants';
-import { getContentByCategory } from '@/src/lib/content/content-loaders';
-import { handleApiError } from '@/src/lib/error-handler';
-import { generateCategoryLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
-import { logger } from '@/src/lib/logger';
-import { errorInputSchema } from '@/src/lib/schemas/error.schema';
+import { type NextRequest, NextResponse } from "next/server";
+import {
+  getCategoryConfig,
+  isValidCategory,
+} from "@/src/lib/config/category-config";
+import { APP_CONFIG } from "@/src/lib/constants";
+import { getContentByCategory } from "@/src/lib/content/content-loaders";
+import { handleApiError } from "@/src/lib/error-handler";
+import {
+  generateCategoryLLMsTxt,
+  type LLMsTxtItem,
+} from "@/src/lib/llms-txt/generator";
+import { logger } from "@/src/lib/logger";
+import { errorInputSchema } from "@/src/lib/schemas/error.schema";
 
 /**
  * Runtime configuration
  */
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 /**
  * ISR revalidation
@@ -31,7 +37,7 @@ export const revalidate = 600;
  * @returns Array of category slugs for static generation
  */
 export async function generateStaticParams() {
-  const { VALID_CATEGORIES } = await import('@/src/lib/config/category-config');
+  const { VALID_CATEGORIES } = await import("@/src/lib/config/category-config");
 
   return VALID_CATEGORIES.map((category) => ({
     category,
@@ -47,23 +53,25 @@ export async function generateStaticParams() {
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ category: string }> }
+  { params }: { params: Promise<{ category: string }> },
 ): Promise<Response> {
   const requestLogger = logger.forRequest(request);
 
   try {
     const { category } = await params;
 
-    requestLogger.info('Category llms.txt generation started', { category });
+    requestLogger.info("Category llms.txt generation started", { category });
 
     // Validate category
     if (!isValidCategory(category)) {
-      requestLogger.warn('Invalid category requested for llms.txt', { category });
+      requestLogger.warn("Invalid category requested for llms.txt", {
+        category,
+      });
 
-      return new NextResponse('Category not found', {
+      return new NextResponse("Category not found", {
         status: 404,
         headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
+          "Content-Type": "text/plain; charset=utf-8",
         },
       });
     }
@@ -74,15 +82,15 @@ export async function GET(
     // Handle case where config is not found (should never happen with validation above)
     if (!config) {
       requestLogger.error(
-        'Category config not found despite validation',
-        new Error('Config not found after validation'),
-        { category }
+        "Category config not found despite validation",
+        new Error("Config not found after validation"),
+        { category },
       );
 
-      return new NextResponse('Internal server error', {
+      return new NextResponse("Internal server error", {
         status: 500,
         headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
+          "Content-Type": "text/plain; charset=utf-8",
         },
       });
     }
@@ -111,10 +119,10 @@ export async function GET(
         includeDescription: true,
         includeTags: true,
         includeUrl: true,
-      }
+      },
     );
 
-    requestLogger.info('Category llms.txt generated successfully', {
+    requestLogger.info("Category llms.txt generated successfully", {
       category,
       itemsCount: llmsItems.length,
       contentLength: llmsTxt.length,
@@ -124,31 +132,34 @@ export async function GET(
     return new NextResponse(llmsTxt, {
       status: 200,
       headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'public, max-age=600, s-maxage=600, stale-while-revalidate=3600',
-        'X-Content-Type-Options': 'nosniff',
-        'X-Robots-Tag': 'index, follow',
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control":
+          "public, max-age=600, s-maxage=600, stale-while-revalidate=3600",
+        "X-Content-Type-Options": "nosniff",
+        "X-Robots-Tag": "index, follow",
       },
     });
   } catch (error: unknown) {
-    const { category } = await params.catch(() => ({ category: 'unknown' }));
+    const { category } = await params.catch(() => ({ category: "unknown" }));
 
     requestLogger.error(
-      'Failed to generate category llms.txt',
+      "Failed to generate category llms.txt",
       error instanceof Error ? error : new Error(String(error)),
-      { category }
+      { category },
     );
 
     // Use centralized error handling
     const validatedError = errorInputSchema.safeParse(error);
     return handleApiError(
-      validatedError.success ? validatedError.data : { message: 'Failed to generate llms.txt' },
+      validatedError.success
+        ? validatedError.data
+        : { message: "Failed to generate llms.txt" },
       {
-        route: '/[category]/llms.txt',
-        operation: 'generate_category_llmstxt',
-        method: 'GET',
+        route: "/[category]/llms.txt",
+        operation: "generate_category_llmstxt",
+        method: "GET",
         logContext: { category },
-      }
+      },
     );
   }
 }

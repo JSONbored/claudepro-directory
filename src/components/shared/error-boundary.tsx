@@ -1,28 +1,31 @@
-'use client';
+"use client";
 
-import { useCallback } from 'react';
-import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
-import { Button } from '@/src/components/ui/button';
+import { useCallback } from "react";
+import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
+import { Button } from "@/src/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { createErrorBoundaryFallback } from '@/src/lib/error-handler';
-import { AlertTriangle, Home, RefreshCw } from '@/src/lib/icons';
-import { umamiEventDataSchema } from '@/src/lib/schemas/analytics.schema';
-import type { ErrorBoundaryProps, ErrorFallbackProps } from '@/src/lib/schemas/component.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+} from "@/src/components/ui/card";
+import { createErrorBoundaryFallback } from "@/src/lib/error-handler";
+import { AlertTriangle, Home, RefreshCw } from "@/src/lib/icons";
+import { umamiEventDataSchema } from "@/src/lib/schemas/analytics.schema";
+import type {
+  ErrorBoundaryProps,
+  ErrorFallbackProps,
+} from "@/src/lib/schemas/component.schema";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 // Client-safe environment check - doesn't trigger server env validation
-const isDevelopment = process.env.NODE_ENV === 'development';
+const isDevelopment = process.env.NODE_ENV === "development";
 
 function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
   const handleGoHome = useCallback(() => {
     resetErrorBoundary();
-    window.location.href = '/';
+    window.location.href = "/";
   }, [resetErrorBoundary]);
 
   const handleReset = useCallback(() => {
@@ -41,20 +44,31 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
             <CardTitle className="text-2xl">Something went wrong</CardTitle>
           </div>
           <CardDescription className={UI_CLASSES.MT_2}>
-            An unexpected error occurred. The error has been logged and we&apos;ll look into it.
+            An unexpected error occurred. The error has been logged and
+            we&apos;ll look into it.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {isDevelopment && error && (
-            <div className={`${UI_CLASSES.ROUNDED_LG} bg-muted ${UI_CLASSES.P_4} space-y-2`}>
-              <p className={`font-semibold ${UI_CLASSES.TEXT_SM}`}>Error Details:</p>
-              <pre className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.OVERFLOW_AUTO}`}>
+            <div
+              className={`${UI_CLASSES.ROUNDED_LG} bg-muted ${UI_CLASSES.P_4} space-y-2`}
+            >
+              <p className={`font-semibold ${UI_CLASSES.TEXT_SM}`}>
+                Error Details:
+              </p>
+              <pre
+                className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.OVERFLOW_AUTO}`}
+              >
                 {error.toString()}
               </pre>
               {error.stack && (
                 <details className={UI_CLASSES.TEXT_XS}>
-                  <summary className="cursor-pointer font-semibold">Stack Trace</summary>
-                  <pre className={`mt-2 ${UI_CLASSES.OVERFLOW_AUTO}`}>{error.stack}</pre>
+                  <summary className="cursor-pointer font-semibold">
+                    Stack Trace
+                  </summary>
+                  <pre className={`mt-2 ${UI_CLASSES.OVERFLOW_AUTO}`}>
+                    {error.stack}
+                  </pre>
                 </details>
               )}
             </div>
@@ -77,27 +91,31 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
 }
 
 export function ErrorBoundary({ children, fallback }: ErrorBoundaryProps) {
-  const handleError = useCallback((error: Error, errorInfo: { componentStack?: string | null }) => {
-    // Use centralized error handler for consistent logging and tracking
-    const errorResponse = createErrorBoundaryFallback(error, {
-      componentStack: errorInfo.componentStack || '',
-    });
-
-    // Track error boundary triggers in Umami with validated data
-    if (window?.umami) {
-      const eventData = umamiEventDataSchema.safeParse({
-        error_type: error.name || 'Unknown',
-        error_message: error.message?.substring(0, 100) || 'No message',
-        page: window.location.pathname,
-        component_stack_depth: errorInfo.componentStack?.split('\n').length || 0,
-        request_id: errorResponse.requestId || null,
+  const handleError = useCallback(
+    (error: Error, errorInfo: { componentStack?: string | null }) => {
+      // Use centralized error handler for consistent logging and tracking
+      const errorResponse = createErrorBoundaryFallback(error, {
+        componentStack: errorInfo.componentStack || "",
       });
 
-      if (eventData.success) {
-        window.umami?.track('error_boundary_triggered', eventData.data);
+      // Track error boundary triggers in Umami with validated data
+      if (window?.umami) {
+        const eventData = umamiEventDataSchema.safeParse({
+          error_type: error.name || "Unknown",
+          error_message: error.message?.substring(0, 100) || "No message",
+          page: window.location.pathname,
+          component_stack_depth:
+            errorInfo.componentStack?.split("\n").length || 0,
+          request_id: errorResponse.requestId || null,
+        });
+
+        if (eventData.success) {
+          window.umami?.track("error_boundary_triggered", eventData.data);
+        }
       }
-    }
-  }, []);
+    },
+    [],
+  );
 
   return (
     <ReactErrorBoundary

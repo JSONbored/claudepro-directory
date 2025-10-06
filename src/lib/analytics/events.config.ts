@@ -11,60 +11,60 @@
 // Event names as const for type safety
 export const EVENTS = {
   // Content View Events
-  CONTENT_VIEW: 'content_view',
+  CONTENT_VIEW: "content_view",
 
   // Related Content Events
-  RELATED_CONTENT_VIEW: 'related_content_view',
-  RELATED_CONTENT_CLICK: 'related_content_click',
-  RELATED_CONTENT_IMPRESSION: 'related_content_impression',
-  CAROUSEL_NAVIGATION: 'carousel_navigation',
+  RELATED_CONTENT_VIEW: "related_content_view",
+  RELATED_CONTENT_CLICK: "related_content_click",
+  RELATED_CONTENT_IMPRESSION: "related_content_impression",
+  CAROUSEL_NAVIGATION: "carousel_navigation",
 
   // User Journey Events
-  CONTENT_JOURNEY: 'content_journey',
-  SESSION_START: 'session_start',
-  SESSION_DEPTH: 'session_depth',
+  CONTENT_JOURNEY: "content_journey",
+  SESSION_START: "session_start",
+  SESSION_DEPTH: "session_depth",
 
   // Performance Events
-  PERFORMANCE_METRIC: 'performance_metric',
-  CACHE_PERFORMANCE: 'cache_performance',
-  API_LATENCY: 'api_latency',
-  PAGE_LOAD_TIME: 'page_load_time',
+  PERFORMANCE_METRIC: "performance_metric",
+  CACHE_PERFORMANCE: "cache_performance",
+  API_LATENCY: "api_latency",
+  PAGE_LOAD_TIME: "page_load_time",
 
   // Algorithm Events
-  ALGORITHM_PERFORMANCE: 'algorithm_performance',
-  SEARCH_PERFORMED: 'search_performed',
-  FILTER_APPLIED: 'filter_applied',
+  ALGORITHM_PERFORMANCE: "algorithm_performance",
+  SEARCH_PERFORMED: "search_performed",
+  FILTER_APPLIED: "filter_applied",
 
   // Interaction Events
-  COPY_CODE: 'copy_code',
-  COPY_MARKDOWN: 'copy_markdown',
-  DOWNLOAD_RESOURCE: 'download_resource',
-  DOWNLOAD_MARKDOWN: 'download_markdown',
-  SHARE_CONTENT: 'share_content',
-  FEEDBACK_SUBMITTED: 'feedback_submitted',
+  COPY_CODE: "copy_code",
+  COPY_MARKDOWN: "copy_markdown",
+  DOWNLOAD_RESOURCE: "download_resource",
+  DOWNLOAD_MARKDOWN: "download_markdown",
+  SHARE_CONTENT: "share_content",
+  FEEDBACK_SUBMITTED: "feedback_submitted",
 
   // Email Capture Events
-  EMAIL_CAPTURED: 'email_captured',
-  EMAIL_MODAL_SHOWN: 'email_modal_shown',
-  EMAIL_MODAL_DISMISSED: 'email_modal_dismissed',
+  EMAIL_CAPTURED: "email_captured",
+  EMAIL_MODAL_SHOWN: "email_modal_shown",
+  EMAIL_MODAL_DISMISSED: "email_modal_dismissed",
 
   // Error Events
-  ERROR_OCCURRED: 'error_occurred',
-  NOT_FOUND: 'not_found',
-  API_ERROR: 'api_error',
+  ERROR_OCCURRED: "error_occurred",
+  NOT_FOUND: "not_found",
+  API_ERROR: "api_error",
 
   // MCP/Agent Events
-  MCP_INSTALLED: 'mcp_installed',
-  AGENT_ACTIVATED: 'agent_activated',
-  COMMAND_EXECUTED: 'command_executed',
-  RULE_APPLIED: 'rule_applied',
-  HOOK_TRIGGERED: 'hook_triggered',
+  MCP_INSTALLED: "mcp_installed",
+  AGENT_ACTIVATED: "agent_activated",
+  COMMAND_EXECUTED: "command_executed",
+  RULE_APPLIED: "rule_applied",
+  HOOK_TRIGGERED: "hook_triggered",
 
   // Navigation Events
-  TAB_SWITCHED: 'tab_switched',
-  FILTER_TOGGLED: 'filter_toggled',
-  SORT_CHANGED: 'sort_changed',
-  PAGINATION_CLICKED: 'pagination_clicked',
+  TAB_SWITCHED: "tab_switched",
+  FILTER_TOGGLED: "filter_toggled",
+  SORT_CHANGED: "sort_changed",
+  PAGINATION_CLICKED: "pagination_clicked",
 } as const;
 
 // Type for event names
@@ -103,11 +103,11 @@ export interface EventPayloads {
     source_page: string;
     algorithm_version: string;
     content_ids: string;
-    user_segment?: 'new' | 'returning';
+    user_segment?: "new" | "returning";
   };
 
   [EVENTS.CAROUSEL_NAVIGATION]: {
-    action: 'next' | 'previous';
+    action: "next" | "previous";
     current_slide: number;
     total_slides: number;
     source_page: string;
@@ -187,7 +187,7 @@ export interface EventPayloads {
   };
 
   [EVENTS.COPY_CODE]: {
-    content_type: 'code' | 'command' | 'config';
+    content_type: "code" | "command" | "config";
     content_category: string;
     content_slug: string;
     content_length: number;
@@ -218,18 +218,18 @@ export interface EventPayloads {
   [EVENTS.SHARE_CONTENT]: {
     content_type: string;
     content_slug: string;
-    share_method: 'twitter' | 'linkedin' | 'copy_link' | 'email';
+    share_method: "twitter" | "linkedin" | "copy_link" | "email";
   };
 
   [EVENTS.FEEDBACK_SUBMITTED]: {
-    feedback_type: 'helpful' | 'not_helpful' | 'report_issue';
+    feedback_type: "helpful" | "not_helpful" | "report_issue";
     page: string;
     category?: string;
   };
 
   [EVENTS.EMAIL_CAPTURED]: {
-    trigger_source: 'post_copy' | 'cta' | 'footer' | 'modal';
-    copy_type?: 'llmstxt' | 'markdown' | 'code' | 'link';
+    trigger_source: "post_copy" | "cta" | "footer" | "modal";
+    copy_type?: "llmstxt" | "markdown" | "code" | "link";
     content_category?: string;
     content_slug?: string;
   };
@@ -242,7 +242,7 @@ export interface EventPayloads {
 
   [EVENTS.EMAIL_MODAL_DISMISSED]: {
     trigger_source: string;
-    dismissal_method: 'close_button' | 'overlay_click' | 'maybe_later';
+    dismissal_method: "close_button" | "overlay_click" | "maybe_later";
     time_shown_ms: number;
   };
 
@@ -307,7 +307,7 @@ export interface EventPayloads {
 
   [EVENTS.SORT_CHANGED]: {
     sort_field: string;
-    sort_direction: 'asc' | 'desc';
+    sort_direction: "asc" | "desc";
     page: string;
   };
 
@@ -375,187 +375,187 @@ export const EVENT_CONFIG: Record<
   }
 > = {
   [EVENTS.CONTENT_VIEW]: {
-    description: 'User views content detail page',
-    category: 'CONTENT',
+    description: "User views content detail page",
+    category: "CONTENT",
     enabled: true,
   },
   [EVENTS.RELATED_CONTENT_VIEW]: {
-    description: 'User views related content section',
-    category: 'CONTENT',
+    description: "User views related content section",
+    category: "CONTENT",
     enabled: true,
   },
   [EVENTS.RELATED_CONTENT_CLICK]: {
-    description: 'User clicks on related content item',
-    category: 'CONTENT',
+    description: "User clicks on related content item",
+    category: "CONTENT",
     enabled: true,
   },
   [EVENTS.RELATED_CONTENT_IMPRESSION]: {
-    description: 'Related content items shown to user',
-    category: 'CONTENT',
+    description: "Related content items shown to user",
+    category: "CONTENT",
     enabled: true,
     sampleRate: 0.5, // Sample 50% to reduce volume
   },
   [EVENTS.CAROUSEL_NAVIGATION]: {
-    description: 'User navigates carousel',
-    category: 'CONTENT',
+    description: "User navigates carousel",
+    category: "CONTENT",
     enabled: true,
   },
   [EVENTS.CONTENT_JOURNEY]: {
-    description: 'User navigates between content',
-    category: 'JOURNEY',
+    description: "User navigates between content",
+    category: "JOURNEY",
     enabled: true,
   },
   [EVENTS.SESSION_START]: {
-    description: 'New user session starts',
-    category: 'JOURNEY',
+    description: "New user session starts",
+    category: "JOURNEY",
     enabled: true,
   },
   [EVENTS.SESSION_DEPTH]: {
-    description: 'Session engagement metrics',
-    category: 'JOURNEY',
+    description: "Session engagement metrics",
+    category: "JOURNEY",
     enabled: true,
   },
   [EVENTS.PERFORMANCE_METRIC]: {
-    description: 'Performance measurement',
-    category: 'PERFORMANCE',
+    description: "Performance measurement",
+    category: "PERFORMANCE",
     enabled: true,
     debugOnly: true,
   },
   [EVENTS.CACHE_PERFORMANCE]: {
-    description: 'Cache hit/miss metrics',
-    category: 'PERFORMANCE',
+    description: "Cache hit/miss metrics",
+    category: "PERFORMANCE",
     enabled: true,
     sampleRate: 0.1, // Sample 10% in production
   },
   [EVENTS.API_LATENCY]: {
-    description: 'API response times',
-    category: 'PERFORMANCE',
+    description: "API response times",
+    category: "PERFORMANCE",
     enabled: true,
     sampleRate: 0.1,
   },
   [EVENTS.PAGE_LOAD_TIME]: {
-    description: 'Page load performance',
-    category: 'PERFORMANCE',
+    description: "Page load performance",
+    category: "PERFORMANCE",
     enabled: true,
   },
   [EVENTS.ALGORITHM_PERFORMANCE]: {
-    description: 'Content algorithm effectiveness',
-    category: 'CONTENT',
+    description: "Content algorithm effectiveness",
+    category: "CONTENT",
     enabled: true,
   },
   [EVENTS.SEARCH_PERFORMED]: {
-    description: 'User performs search',
-    category: 'INTERACTION',
+    description: "User performs search",
+    category: "INTERACTION",
     enabled: true,
   },
   [EVENTS.FILTER_APPLIED]: {
-    description: 'User applies filter',
-    category: 'NAVIGATION',
+    description: "User applies filter",
+    category: "NAVIGATION",
     enabled: true,
   },
   [EVENTS.COPY_CODE]: {
-    description: 'User copies code/command',
-    category: 'INTERACTION',
+    description: "User copies code/command",
+    category: "INTERACTION",
     enabled: true,
   },
   [EVENTS.COPY_MARKDOWN]: {
-    description: 'User copies content as markdown',
-    category: 'INTERACTION',
+    description: "User copies content as markdown",
+    category: "INTERACTION",
     enabled: true,
   },
   [EVENTS.DOWNLOAD_RESOURCE]: {
-    description: 'User downloads resource',
-    category: 'INTERACTION',
+    description: "User downloads resource",
+    category: "INTERACTION",
     enabled: true,
   },
   [EVENTS.DOWNLOAD_MARKDOWN]: {
-    description: 'User downloads content as markdown file',
-    category: 'INTERACTION',
+    description: "User downloads content as markdown file",
+    category: "INTERACTION",
     enabled: true,
   },
   [EVENTS.SHARE_CONTENT]: {
-    description: 'User shares content',
-    category: 'INTERACTION',
+    description: "User shares content",
+    category: "INTERACTION",
     enabled: true,
   },
   [EVENTS.FEEDBACK_SUBMITTED]: {
-    description: 'User submits feedback',
-    category: 'INTERACTION',
+    description: "User submits feedback",
+    category: "INTERACTION",
     enabled: true,
   },
   [EVENTS.ERROR_OCCURRED]: {
-    description: 'Error occurred',
-    category: 'ERROR',
+    description: "Error occurred",
+    category: "ERROR",
     enabled: true,
   },
   [EVENTS.NOT_FOUND]: {
-    description: '404 page accessed',
-    category: 'ERROR',
+    description: "404 page accessed",
+    category: "ERROR",
     enabled: true,
   },
   [EVENTS.API_ERROR]: {
-    description: 'API error occurred',
-    category: 'ERROR',
+    description: "API error occurred",
+    category: "ERROR",
     enabled: true,
   },
   [EVENTS.MCP_INSTALLED]: {
-    description: 'MCP server installed',
-    category: 'FEATURE',
+    description: "MCP server installed",
+    category: "FEATURE",
     enabled: true,
   },
   [EVENTS.AGENT_ACTIVATED]: {
-    description: 'Agent activated',
-    category: 'FEATURE',
+    description: "Agent activated",
+    category: "FEATURE",
     enabled: true,
   },
   [EVENTS.COMMAND_EXECUTED]: {
-    description: 'Command executed',
-    category: 'FEATURE',
+    description: "Command executed",
+    category: "FEATURE",
     enabled: true,
   },
   [EVENTS.RULE_APPLIED]: {
-    description: 'Rule applied',
-    category: 'FEATURE',
+    description: "Rule applied",
+    category: "FEATURE",
     enabled: true,
   },
   [EVENTS.HOOK_TRIGGERED]: {
-    description: 'Hook triggered',
-    category: 'FEATURE',
+    description: "Hook triggered",
+    category: "FEATURE",
     enabled: true,
   },
   [EVENTS.TAB_SWITCHED]: {
-    description: 'Tab switched',
-    category: 'NAVIGATION',
+    description: "Tab switched",
+    category: "NAVIGATION",
     enabled: true,
   },
   [EVENTS.FILTER_TOGGLED]: {
-    description: 'Filter toggled',
-    category: 'NAVIGATION',
+    description: "Filter toggled",
+    category: "NAVIGATION",
     enabled: true,
   },
   [EVENTS.SORT_CHANGED]: {
-    description: 'Sort order changed',
-    category: 'NAVIGATION',
+    description: "Sort order changed",
+    category: "NAVIGATION",
     enabled: true,
   },
   [EVENTS.PAGINATION_CLICKED]: {
-    description: 'Pagination used',
-    category: 'NAVIGATION',
+    description: "Pagination used",
+    category: "NAVIGATION",
     enabled: true,
   },
   [EVENTS.EMAIL_CAPTURED]: {
-    description: 'User email captured for newsletter',
-    category: 'INTERACTION',
+    description: "User email captured for newsletter",
+    category: "INTERACTION",
     enabled: true,
   },
   [EVENTS.EMAIL_MODAL_SHOWN]: {
-    description: 'Email capture modal displayed to user',
-    category: 'INTERACTION',
+    description: "Email capture modal displayed to user",
+    category: "INTERACTION",
     enabled: true,
   },
   [EVENTS.EMAIL_MODAL_DISMISSED]: {
-    description: 'User dismissed email capture modal',
-    category: 'INTERACTION',
+    description: "User dismissed email capture modal",
+    category: "INTERACTION",
     enabled: true,
   },
 };

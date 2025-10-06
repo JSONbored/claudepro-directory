@@ -10,12 +10,17 @@
  * @see components/unified-sidebar.tsx - Original implementation
  */
 
-import Link from 'next/link';
-import { z } from 'zod';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Clock } from '@/src/lib/icons';
-import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import Link from "next/link";
+import { z } from "zod";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
+import { Clock } from "@/src/lib/icons";
+import { nonEmptyString } from "@/src/lib/schemas/primitives/base-strings";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 /**
  * Schema for recent guide item
@@ -43,7 +48,10 @@ export type RecentGuidesCardProps = z.infer<typeof recentGuidesCardPropsSchema>;
  * Simple display card with no loading states.
  * No React.memo needed - server components don't re-render
  */
-export function RecentGuidesCard({ guides, title = 'Recent Guides' }: RecentGuidesCardProps) {
+export function RecentGuidesCard({
+  guides,
+  title = "Recent Guides",
+}: RecentGuidesCardProps) {
   // Validate props
   const validated = recentGuidesCardPropsSchema.parse({ guides, title });
 
@@ -72,7 +80,9 @@ export function RecentGuidesCard({ guides, title = 'Recent Guides' }: RecentGuid
                 className={`text-3xs text-muted-foreground ${UI_CLASSES.GROUP_HOVER_TEXT_PRIMARY} ${UI_CLASSES.TRANSITION_COLORS} py-0.5`}
               >
                 <div className="truncate">{guide.title}</div>
-                <div className="text-2xs text-muted-foreground/60">{guide.date}</div>
+                <div className="text-2xs text-muted-foreground/60">
+                  {guide.date}
+                </div>
               </div>
             </Link>
           ))}

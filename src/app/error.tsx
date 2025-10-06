@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { logger } from '@/src/lib/logger';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { useEffect } from "react";
+import { logger } from "@/src/lib/logger";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 export default function ErrorBoundary({
   error,
@@ -14,11 +14,12 @@ export default function ErrorBoundary({
   useEffect(() => {
     // Log error with structured logging for better Vercel observability
     // The digest is critical for finding Server Component errors in Vercel logs
-    logger.error('Application error boundary triggered', error, {
-      errorDigest: error.digest || 'no-digest',
+    logger.error("Application error boundary triggered", error, {
+      errorDigest: error.digest || "no-digest",
       digestAvailable: Boolean(error.digest),
-      userAgent: typeof window !== 'undefined' ? window.navigator?.userAgent || '' : '',
-      url: typeof window !== 'undefined' ? window.location?.href || '' : '',
+      userAgent:
+        typeof window !== "undefined" ? window.navigator?.userAgent || "" : "",
+      url: typeof window !== "undefined" ? window.location?.href || "" : "",
       timestamp: new Date().toISOString(),
     });
   }, [error]);
@@ -30,9 +31,12 @@ export default function ErrorBoundary({
       <div
         className={`max-w-md ${UI_CLASSES.ROUNDED_LG} border border-border ${UI_CLASSES.BG_CARD} ${UI_CLASSES.P_8} text-center`}
       >
-        <h2 className="mb-4 text-2xl font-bold text-destructive">Something went wrong!</h2>
+        <h2 className="mb-4 text-2xl font-bold text-destructive">
+          Something went wrong!
+        </h2>
         <p className="mb-6 text-muted-foreground">
-          An unexpected error occurred. We've been notified and are working on a fix.
+          An unexpected error occurred. We've been notified and are working on a
+          fix.
         </p>
         <button
           type="button"

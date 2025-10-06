@@ -15,7 +15,7 @@
  * - Easy to adjust limits globally
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Component title string (1-200 chars)
@@ -57,6 +57,8 @@ export const componentTimeString = z.string().max(20).optional();
  */
 export type ComponentTitleString = z.infer<typeof componentTitleString>;
 export type ComponentLabelString = z.infer<typeof componentLabelString>;
-export type ComponentDescriptionString = z.infer<typeof componentDescriptionString>;
+export type ComponentDescriptionString = z.infer<
+  typeof componentDescriptionString
+>;
 export type ComponentValueString = z.infer<typeof componentValueString>;
 export type ComponentTimeString = z.infer<typeof componentTimeString>;

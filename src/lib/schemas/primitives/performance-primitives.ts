@@ -5,8 +5,8 @@
  * Most performance/timing validators were removed as they were unused.
  */
 
-import { z } from 'zod';
-import { nonEmptyString } from './base-strings';
+import { z } from "zod";
+import { nonEmptyString } from "./base-strings";
 
 /**
  * Error type validator
@@ -15,8 +15,8 @@ import { nonEmptyString } from './base-strings';
  */
 const errorType = nonEmptyString
   .max(100)
-  .transform((val) => val.replace(/[^\w\s-]/g, ''))
-  .describe('Error type identifier for categorization and tracking');
+  .transform((val) => val.replace(/[^\w\s-]/g, ""))
+  .describe("Error type identifier for categorization and tracking");
 
 /**
  * Error severity validator
@@ -24,9 +24,9 @@ const errorType = nonEmptyString
  * Common in: Error tracking, monitoring systems
  */
 const errorSeverity = z
-  .enum(['low', 'medium', 'high', 'critical'])
-  .default('medium')
-  .describe('Error severity level for incident priority management');
+  .enum(["low", "medium", "high", "critical"])
+  .default("medium")
+  .describe("Error severity level for incident priority management");
 
 /**
  * Stack trace length limit

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * ContentTabs - Interactive tabs for content organization
@@ -6,9 +6,17 @@
  * Leverages existing shadcn/ui tabs with custom styling
  */
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
-import { type ContentTabsProps, contentTabsPropsSchema } from '@/src/lib/schemas/shared.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/src/components/ui/tabs";
+import {
+  type ContentTabsProps,
+  contentTabsPropsSchema,
+} from "@/src/lib/schemas/shared.schema";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 export function ContentTabs(props: ContentTabsProps) {
   const validated = contentTabsPropsSchema.parse(props);
@@ -19,7 +27,7 @@ export function ContentTabs(props: ContentTabsProps) {
     return null;
   }
 
-  const firstValue = defaultValue || validItems[0]?.value || '';
+  const firstValue = defaultValue || validItems[0]?.value || "";
 
   return (
     <section itemScope itemType="https://schema.org/ItemList" className="my-8">

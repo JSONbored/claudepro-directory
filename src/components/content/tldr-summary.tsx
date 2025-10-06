@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * TLDRSummary - Opening summary component for all templates
@@ -6,10 +6,18 @@
  * Used in 27+ MDX files across the codebase
  */
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { CheckCircle, Zap } from '@/src/lib/icons';
-import { type TLDRSummaryProps, tldrSummaryPropsSchema } from '@/src/lib/schemas/shared.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
+import { CheckCircle, Zap } from "@/src/lib/icons";
+import {
+  type TLDRSummaryProps,
+  tldrSummaryPropsSchema,
+} from "@/src/lib/schemas/shared.schema";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 export function TLDRSummary(props: TLDRSummaryProps) {
   const validated = tldrSummaryPropsSchema.parse(props);
@@ -27,7 +35,10 @@ export function TLDRSummary(props: TLDRSummaryProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p itemProp="abstract" className="text-muted-foreground leading-relaxed mb-4">
+        <p
+          itemProp="abstract"
+          className="text-muted-foreground leading-relaxed mb-4"
+        >
           {content}
         </p>
 
@@ -36,7 +47,10 @@ export function TLDRSummary(props: TLDRSummaryProps) {
             <h4 className="font-semibold mb-2">Key Takeaways:</h4>
             <ul className="space-y-1">
               {keyPoints.map((point) => (
-                <li key={point} className={`flex ${UI_CLASSES.ITEMS_START} gap-2 text-sm`}>
+                <li
+                  key={point}
+                  className={`flex ${UI_CLASSES.ITEMS_START} gap-2 text-sm`}
+                >
                   <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
                   <span>{point}</span>
                 </li>

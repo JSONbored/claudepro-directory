@@ -10,12 +10,12 @@
  * @module app/api/cron/process-email-sequences
  */
 
-import { NextResponse } from 'next/server';
-import { logger } from '@/src/lib/logger';
-import { emailSequenceService } from '@/src/lib/services/email-sequence.service';
+import { NextResponse } from "next/server";
+import { logger } from "@/src/lib/logger";
+import { emailSequenceService } from "@/src/lib/services/email-sequence.service";
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 /**
  * GET handler for email sequence processing cron job
@@ -28,30 +28,30 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(_request: Request) {
   try {
-    logger.info('Email sequence cron job started');
+    logger.info("Email sequence cron job started");
 
     // Process all due emails
     const results = await emailSequenceService.processSequenceQueue();
 
     // Check if there were emails to process
     if (results.sent === 0 && results.failed === 0) {
-      logger.info('No emails due for processing');
+      logger.info("No emails due for processing");
       return NextResponse.json({
         success: true,
-        message: 'No emails due',
+        message: "No emails due",
         sent: 0,
         failed: 0,
       });
     }
 
-    logger.info('Email sequence cron job completed', {
+    logger.info("Email sequence cron job completed", {
       sent: results.sent,
       failed: results.failed,
       total: results.sent + results.failed,
       successRate:
         results.sent > 0
           ? `${((results.sent / (results.sent + results.failed)) * 100).toFixed(1)}%`
-          : '0%',
+          : "0%",
     });
 
     return NextResponse.json({
@@ -62,23 +62,23 @@ export async function GET(_request: Request) {
       successRate:
         results.sent > 0
           ? `${((results.sent / (results.sent + results.failed)) * 100).toFixed(1)}%`
-          : '0%',
+          : "0%",
     });
   } catch (error) {
     logger.error(
-      'Email sequence cron job failed',
+      "Email sequence cron job failed",
       error instanceof Error ? error : new Error(String(error)),
       {
-        component: 'process-email-sequences-cron',
-      }
+        component: "process-email-sequences-cron",
+      },
     );
 
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -12,11 +12,21 @@
  * This prevents loading all content metadata upfront.
  */
 export const lazyContentLoaders = {
-  agents: () => import('@/generated/agents-metadata').then((m) => m.agentsMetadata),
-  mcp: () => import('@/generated/mcp-metadata').then((m) => m.mcpMetadata),
-  rules: () => import('@/generated/rules-metadata').then((m) => m.rulesMetadata),
-  commands: () => import('@/generated/commands-metadata').then((m) => m.commandsMetadata),
-  hooks: () => import('@/generated/hooks-metadata').then((m) => m.hooksMetadata),
-  statuslines: () => import('@/generated/statuslines-metadata').then((m) => m.statuslinesMetadata),
-  collections: () => import('@/generated/collections-metadata').then((m) => m.collectionsMetadata),
+  agents: () =>
+    import("@/generated/agents-metadata").then((m) => m.agentsMetadata),
+  mcp: () => import("@/generated/mcp-metadata").then((m) => m.mcpMetadata),
+  rules: () =>
+    import("@/generated/rules-metadata").then((m) => m.rulesMetadata),
+  commands: () =>
+    import("@/generated/commands-metadata").then((m) => m.commandsMetadata),
+  hooks: () =>
+    import("@/generated/hooks-metadata").then((m) => m.hooksMetadata),
+  statuslines: () =>
+    import("@/generated/statuslines-metadata").then(
+      (m) => m.statuslinesMetadata,
+    ),
+  collections: () =>
+    import("@/generated/collections-metadata").then(
+      (m) => m.collectionsMetadata,
+    ),
 };

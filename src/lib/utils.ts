@@ -1,6 +1,6 @@
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-import { ACRONYMS } from './constants';
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+import { ACRONYMS } from "./constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -17,7 +17,12 @@ export function cn(...inputs: ClassValue[]) {
 export function shallowEqual(objA: unknown, objB: unknown): boolean {
   if (Object.is(objA, objB)) return true;
 
-  if (typeof objA !== 'object' || objA === null || typeof objB !== 'object' || objB === null) {
+  if (
+    typeof objA !== "object" ||
+    objA === null ||
+    typeof objB !== "object" ||
+    objB === null
+  ) {
     return false;
   }
 
@@ -31,7 +36,10 @@ export function shallowEqual(objA: unknown, objB: unknown): boolean {
     if (
       !(
         Object.hasOwn(objB, key) &&
-        Object.is((objA as Record<string, unknown>)[key], (objB as Record<string, unknown>)[key])
+        Object.is(
+          (objA as Record<string, unknown>)[key],
+          (objB as Record<string, unknown>)[key],
+        )
       )
     ) {
       return false;
@@ -58,59 +66,67 @@ function capitalizeAcronyms(title: string): string {
       }
 
       // Extract the clean word (letters/numbers only) and any punctuation
-      const cleanWord = word.replace(/[^\w]/g, '');
+      const cleanWord = word.replace(/[^\w]/g, "");
 
       if (!cleanWord) return word;
 
       // Check if this word matches an acronym (case-insensitive)
-      const acronym = ACRONYMS.find((a) => a.toLowerCase() === cleanWord.toLowerCase());
+      const acronym = ACRONYMS.find(
+        (a) => a.toLowerCase() === cleanWord.toLowerCase(),
+      );
       if (acronym) {
         // Replace the clean word with the properly capitalized acronym, preserving punctuation
-        return word.replace(new RegExp(cleanWord, 'i'), acronym);
+        return word.replace(new RegExp(cleanWord, "i"), acronym);
       }
 
       // Handle special cases like "Next.js", "Vue.js"
-      if (cleanWord.toLowerCase().endsWith('js') && cleanWord.length > 2) {
+      if (cleanWord.toLowerCase().endsWith("js") && cleanWord.length > 2) {
         const baseWord = cleanWord.slice(0, -2);
-        const baseAcronym = ACRONYMS.find((a) => a.toLowerCase() === baseWord.toLowerCase());
+        const baseAcronym = ACRONYMS.find(
+          (a) => a.toLowerCase() === baseWord.toLowerCase(),
+        );
         if (baseAcronym) {
-          return word.replace(new RegExp(cleanWord, 'i'), `${baseAcronym}.js`);
+          return word.replace(new RegExp(cleanWord, "i"), `${baseAcronym}.js`);
         }
       }
 
       return word;
     })
-    .join('');
+    .join("");
 }
 
 export function slugToTitle(slug: string): string {
   return slug
-    .split('-')
+    .split("-")
     .map((word) => {
       // Check if this word is an acronym that should be all caps
-      const acronym = ACRONYMS.find((a) => a.toLowerCase() === word.toLowerCase());
+      const acronym = ACRONYMS.find(
+        (a) => a.toLowerCase() === word.toLowerCase(),
+      );
       if (acronym) {
         return acronym;
       }
 
       // Handle special cases like "Next.js", "Vue.js"
-      if (word.toLowerCase().endsWith('js') && word.length > 2) {
+      if (word.toLowerCase().endsWith("js") && word.length > 2) {
         const baseWord = word.slice(0, -2);
-        const baseAcronym = ACRONYMS.find((a) => a.toLowerCase() === baseWord.toLowerCase());
+        const baseAcronym = ACRONYMS.find(
+          (a) => a.toLowerCase() === baseWord.toLowerCase(),
+        );
         if (baseAcronym) {
           return `${baseAcronym}.js`;
         }
       }
 
       // Handle CloudFormation as special case
-      if (word.toLowerCase() === 'cloudformation') {
-        return 'CloudFormation';
+      if (word.toLowerCase() === "cloudformation") {
+        return "CloudFormation";
       }
 
       // Default: Title Case
       return word.charAt(0).toUpperCase() + word.slice(1);
     })
-    .join(' ');
+    .join(" ");
 }
 
 /**
@@ -137,7 +153,7 @@ export function getDisplayTitle(
         readonly name?: string | undefined;
         readonly slug: string;
         readonly category?: string | undefined;
-      }
+      },
 ): string {
   // For hooks (no title/name), use enhanced slugToTitle directly
   // For other content (has title/name), use formatTitle for consistency
@@ -149,7 +165,7 @@ export function getDisplayTitle(
   const baseTitle = slugToTitle(item.slug);
 
   // Commands should display with "/" prefix using the original slug
-  if (item.category === 'commands') {
+  if (item.category === "commands") {
     return `/${item.slug}`;
   }
 

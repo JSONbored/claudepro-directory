@@ -9,9 +9,9 @@
  * - Production-ready
  */
 
-import { render } from '@react-email/render';
-import type { ReactElement } from 'react';
-import { logger } from '@/src/lib/logger';
+import { render } from "@react-email/render";
+import type { ReactElement } from "react";
+import { logger } from "@/src/lib/logger";
 
 /**
  * Render options for email HTML generation
@@ -82,7 +82,7 @@ export interface RenderedEmail {
  */
 export async function renderEmail(
   component: ReactElement,
-  options: RenderEmailOptions = {}
+  options: RenderEmailOptions = {},
 ): Promise<RenderedEmail> {
   const { pretty = true, plainText = false } = options;
 
@@ -96,9 +96,10 @@ export async function renderEmail(
       text = await render(component, { plainText: true });
     }
 
-    const componentName = typeof component.type === 'function' ? component.type.name : 'Unknown';
+    const componentName =
+      typeof component.type === "function" ? component.type.name : "Unknown";
 
-    logger.info('Email rendered successfully', {
+    logger.info("Email rendered successfully", {
       componentName,
       htmlLength: html.length,
       ...(text && { textLength: text.length }),
@@ -112,15 +113,20 @@ export async function renderEmail(
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
-    const componentName = typeof component.type === 'function' ? component.type.name : 'Unknown';
+    const componentName =
+      typeof component.type === "function" ? component.type.name : "Unknown";
 
-    logger.error('Failed to render email', error instanceof Error ? error : undefined, {
-      componentName,
-      errorMessage,
-    });
+    logger.error(
+      "Failed to render email",
+      error instanceof Error ? error : undefined,
+      {
+        componentName,
+        errorMessage,
+      },
+    );
 
     return {
-      html: '',
+      html: "",
       success: false,
       error: errorMessage,
     };
@@ -134,7 +140,9 @@ export async function renderEmail(
  * @param component - React Email component to render
  * @returns HTML string or null if failed
  */
-export async function renderEmailHtml(component: ReactElement): Promise<string | null> {
+export async function renderEmailHtml(
+  component: ReactElement,
+): Promise<string | null> {
   const result = await renderEmail(component, { plainText: false });
   return result.success ? result.html : null;
 }
@@ -147,21 +155,25 @@ export async function renderEmailHtml(component: ReactElement): Promise<string |
  * @returns Object with html and text, or null if failed
  */
 export async function renderEmailBoth(
-  component: ReactElement
+  component: ReactElement,
 ): Promise<{ html: string; text: string } | null> {
   const result = await renderEmail(component, { plainText: true });
-  return result.success && result.text ? { html: result.html, text: result.text } : null;
+  return result.success && result.text
+    ? { html: result.html, text: result.text }
+    : null;
 }
 
 /**
  * Type guard to check if component is a valid React element
  */
-export function isValidEmailComponent(component: unknown): component is ReactElement {
+export function isValidEmailComponent(
+  component: unknown,
+): component is ReactElement {
   return (
-    typeof component === 'object' &&
+    typeof component === "object" &&
     component !== null &&
-    'type' in component &&
-    'props' in component
+    "type" in component &&
+    "props" in component
   );
 }
 

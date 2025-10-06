@@ -4,7 +4,13 @@
   "category": "mcp",
   "author": "Atlassian",
   "dateAdded": "2025-09-18",
-  "tags": ["jira", "confluence", "atlassian", "project-management", "documentation"],
+  "tags": [
+    "jira",
+    "confluence",
+    "atlassian",
+    "project-management",
+    "documentation"
+  ],
   "content": "Access Jira and Confluence through a unified Atlassian MCP interface for project and documentation management.",
   "features": [
     "Create and update Jira issues with custom fields",

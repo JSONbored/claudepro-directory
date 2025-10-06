@@ -6,10 +6,16 @@
  * Content: Recap of journey, new features, feedback request, continued engagement
  */
 
-import { Button, Hr, Section, Text } from '@react-email/components';
-import type * as React from 'react';
-import { BaseLayout } from '../layouts/base-layout';
-import { borderRadius, brandColors, emailTheme, spacing, typography } from '../utils/theme';
+import { Button, Hr, Section, Text } from "@react-email/components";
+import type * as React from "react";
+import { BaseLayout } from "../layouts/base-layout";
+import {
+  borderRadius,
+  brandColors,
+  emailTheme,
+  spacing,
+  typography,
+} from "../utils/theme";
 
 export interface OnboardingStayEngagedProps {
   /**
@@ -27,7 +33,9 @@ export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
       {/* Hero section */}
       <Section style={heroSection}>
         <Text style={headingStyle}>You're All Set! 🎉</Text>
-        <Text style={subheadingStyle}>Two weeks in - let's keep the momentum going</Text>
+        <Text style={subheadingStyle}>
+          Two weeks in - let's keep the momentum going
+        </Text>
       </Section>
 
       <Hr style={dividerStyle} />
@@ -35,24 +43,34 @@ export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
       {/* Journey Recap */}
       <Section style={recapSection}>
         <Text style={sectionTitleStyle}>Your Journey So Far</Text>
-        <Text style={paragraphStyle}>Over the past two weeks, you've discovered:</Text>
+        <Text style={paragraphStyle}>
+          Over the past two weeks, you've discovered:
+        </Text>
 
         <div style={checklistStyle}>
           <div style={checkItemStyle}>
             <Text style={checkIconStyle}>✓</Text>
-            <Text style={checkTextStyle}>How to use top agents and configurations</Text>
+            <Text style={checkTextStyle}>
+              How to use top agents and configurations
+            </Text>
           </div>
           <div style={checkItemStyle}>
             <Text style={checkIconStyle}>✓</Text>
-            <Text style={checkTextStyle}>Advanced MCP server integration techniques</Text>
+            <Text style={checkTextStyle}>
+              Advanced MCP server integration techniques
+            </Text>
           </div>
           <div style={checkItemStyle}>
             <Text style={checkIconStyle}>✓</Text>
-            <Text style={checkTextStyle}>Power user tips and best practices</Text>
+            <Text style={checkTextStyle}>
+              Power user tips and best practices
+            </Text>
           </div>
           <div style={checkItemStyle}>
             <Text style={checkIconStyle}>✓</Text>
-            <Text style={checkTextStyle}>The ClaudePro community and how to contribute</Text>
+            <Text style={checkTextStyle}>
+              The ClaudePro community and how to contribute
+            </Text>
           </div>
         </div>
       </Section>
@@ -66,24 +84,25 @@ export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
         <Section style={newsCard}>
           <Text style={newsTitleStyle}>Weekly Digests</Text>
           <Text style={newsDescStyle}>
-            You'll now receive a weekly email with new configurations and trending tools. Stay
-            updated without having to check the site constantly.
+            You'll now receive a weekly email with new configurations and
+            trending tools. Stay updated without having to check the site
+            constantly.
           </Text>
         </Section>
 
         <Section style={newsCard}>
           <Text style={newsTitleStyle}>Enhanced Search</Text>
           <Text style={newsDescStyle}>
-            Find exactly what you need with improved search and filtering across all configuration
-            types.
+            Find exactly what you need with improved search and filtering across
+            all configuration types.
           </Text>
         </Section>
 
         <Section style={newsCard}>
           <Text style={newsTitleStyle}>More Integrations</Text>
           <Text style={newsDescStyle}>
-            New MCP servers and integrations are added regularly. Check back often for the latest
-            tools.
+            New MCP servers and integrations are added regularly. Check back
+            often for the latest tools.
           </Text>
         </Section>
       </Section>
@@ -94,17 +113,25 @@ export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
       <Section style={feedbackSection}>
         <Text style={feedbackTitleStyle}>We'd Love Your Feedback! 💭</Text>
         <Text style={paragraphStyle}>
-          Your input helps us make ClaudePro Directory better for everyone. Tell us:
+          Your input helps us make ClaudePro Directory better for everyone. Tell
+          us:
         </Text>
 
         <ul style={listStyle}>
-          <li style={listItemStyle}>What features do you find most valuable?</li>
+          <li style={listItemStyle}>
+            What features do you find most valuable?
+          </li>
           <li style={listItemStyle}>What could we improve?</li>
-          <li style={listItemStyle}>What configurations are you looking for?</li>
+          <li style={listItemStyle}>
+            What configurations are you looking for?
+          </li>
           <li style={listItemStyle}>Any success stories to share?</li>
         </ul>
 
-        <Button href="https://claudepro.directory/feedback" style={primaryButtonStyle}>
+        <Button
+          href="https://claudepro.directory/feedback"
+          style={primaryButtonStyle}
+        >
           Share Your Feedback
         </Button>
       </Section>
@@ -122,7 +149,10 @@ export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
           Browse Directory
         </Button>
 
-        <Button href="https://claudepro.directory/trending" style={secondaryButtonStyle}>
+        <Button
+          href="https://claudepro.directory/trending"
+          style={secondaryButtonStyle}
+        >
           View Trending
         </Button>
       </Section>
@@ -133,10 +163,13 @@ export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
       <Section style={thankYouSection}>
         <Text style={thankYouTitleStyle}>Thank You! 🙏</Text>
         <Text style={thankYouTextStyle}>
-          We're grateful to have you in the ClaudePro community. Whether you're just browsing or
-          actively contributing, you're helping make Claude more powerful for everyone.
+          We're grateful to have you in the ClaudePro community. Whether you're
+          just browsing or actively contributing, you're helping make Claude
+          more powerful for everyone.
         </Text>
-        <Text style={thankYouTextStyle}>Keep building amazing things with Claude!</Text>
+        <Text style={thankYouTextStyle}>
+          Keep building amazing things with Claude!
+        </Text>
       </Section>
 
       {/* Footer note */}
@@ -145,8 +178,8 @@ export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
           📧 <strong style={strongStyle}>{email}</strong>
         </Text>
         <Text style={footerNoteStyle}>
-          This was the final email in your onboarding series. You'll continue to receive weekly
-          digests with the latest content.
+          This was the final email in your onboarding series. You'll continue to
+          receive weekly digests with the latest content.
         </Text>
       </Section>
     </BaseLayout>
@@ -158,12 +191,12 @@ export function OnboardingStayEngaged({ email }: OnboardingStayEngagedProps) {
  */
 
 const heroSection: React.CSSProperties = {
-  textAlign: 'center',
+  textAlign: "center",
   marginBottom: spacing.lg,
 };
 
 const headingStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['3xl'],
+  fontSize: typography.fontSize["3xl"],
   fontWeight: typography.fontWeight.bold,
   color: emailTheme.textPrimary,
   margin: `0 0 ${spacing.sm} 0`,
@@ -191,7 +224,7 @@ const contentSection: React.CSSProperties = {
 };
 
 const sectionTitleStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['2xl'],
+  fontSize: typography.fontSize["2xl"],
   fontWeight: typography.fontWeight.bold,
   color: emailTheme.textPrimary,
   margin: `0 0 ${spacing.md} 0`,
@@ -209,8 +242,8 @@ const checklistStyle: React.CSSProperties = {
 };
 
 const checkItemStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'flex-start',
+  display: "flex",
+  alignItems: "flex-start",
   gap: spacing.sm,
   marginBottom: spacing.sm,
 };
@@ -253,7 +286,7 @@ const newsDescStyle: React.CSSProperties = {
 };
 
 const feedbackSection: React.CSSProperties = {
-  textAlign: 'center',
+  textAlign: "center",
   backgroundColor: emailTheme.bgTertiary,
   padding: spacing.xl,
   borderRadius: borderRadius.md,
@@ -262,7 +295,7 @@ const feedbackSection: React.CSSProperties = {
 };
 
 const feedbackTitleStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['2xl'],
+  fontSize: typography.fontSize["2xl"],
   fontWeight: typography.fontWeight.bold,
   color: brandColors.primary,
   margin: `0 0 ${spacing.md} 0`,
@@ -271,8 +304,8 @@ const feedbackTitleStyle: React.CSSProperties = {
 const listStyle: React.CSSProperties = {
   margin: `${spacing.md} 0`,
   paddingLeft: spacing.lg,
-  textAlign: 'left',
-  display: 'inline-block',
+  textAlign: "left",
+  display: "inline-block",
 };
 
 const listItemStyle: React.CSSProperties = {
@@ -284,19 +317,19 @@ const listItemStyle: React.CSSProperties = {
 
 const primaryButtonStyle: React.CSSProperties = {
   backgroundColor: brandColors.primary,
-  color: '#ffffff',
+  color: "#ffffff",
   fontWeight: typography.fontWeight.semibold,
   fontSize: typography.fontSize.base,
   padding: `${spacing.md} ${spacing.xl}`,
   borderRadius: borderRadius.md,
-  textDecoration: 'none',
-  display: 'inline-block',
+  textDecoration: "none",
+  display: "inline-block",
   marginTop: spacing.md,
-  border: 'none',
+  border: "none",
 };
 
 const ctaSection: React.CSSProperties = {
-  textAlign: 'center',
+  textAlign: "center",
   marginTop: spacing.lg,
   marginBottom: spacing.lg,
 };
@@ -315,8 +348,8 @@ const secondaryButtonStyle: React.CSSProperties = {
   fontSize: typography.fontSize.base,
   padding: `${spacing.md} ${spacing.xl}`,
   borderRadius: borderRadius.md,
-  textDecoration: 'none',
-  display: 'inline-block',
+  textDecoration: "none",
+  display: "inline-block",
   marginTop: spacing.sm,
   marginLeft: spacing.sm,
   marginRight: spacing.sm,
@@ -324,14 +357,14 @@ const secondaryButtonStyle: React.CSSProperties = {
 };
 
 const thankYouSection: React.CSSProperties = {
-  textAlign: 'center',
+  textAlign: "center",
   padding: spacing.lg,
   marginTop: spacing.lg,
   marginBottom: spacing.lg,
 };
 
 const thankYouTitleStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['2xl'],
+  fontSize: typography.fontSize["2xl"],
   fontWeight: typography.fontWeight.bold,
   color: brandColors.primary,
   margin: `0 0 ${spacing.md} 0`,
@@ -356,7 +389,7 @@ const dividerStyle: React.CSSProperties = {
 
 const footerNoteSection: React.CSSProperties = {
   marginTop: spacing.lg,
-  textAlign: 'center',
+  textAlign: "center",
 };
 
 const footerNoteStyle: React.CSSProperties = {

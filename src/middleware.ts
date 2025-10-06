@@ -1,15 +1,20 @@
-import arcjet, { detectBot, fixedWindow, shield, tokenBucket } from '@arcjet/next';
-import * as nosecone from '@nosecone/next';
-import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
-import { z } from 'zod';
-import { isDevelopment, isProduction } from '@/src/lib/env-client';
-import { logger } from '@/src/lib/logger';
-import { rateLimiters } from '@/src/lib/rate-limiter';
-import { env, securityConfig } from '@/src/lib/schemas/env.schema';
+import arcjet, {
+  detectBot,
+  fixedWindow,
+  shield,
+  tokenBucket,
+} from "@arcjet/next";
+import * as nosecone from "@nosecone/next";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { isDevelopment, isProduction } from "@/src/lib/env-client";
+import { logger } from "@/src/lib/logger";
+import { rateLimiters } from "@/src/lib/rate-limiter";
+import { env, securityConfig } from "@/src/lib/schemas/env.schema";
 
 // Force Node.js runtime for middleware (Redis compression requires node:zlib)
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 import {
   type ApiEndpointType,
@@ -20,7 +25,7 @@ import {
   staticAssetSchema,
   validateRequest,
   validateSearchQuery,
-} from '@/src/lib/schemas/middleware.schema';
+} from "@/src/lib/schemas/middleware.schema";
 
 // Initialize Arcjet with comprehensive security rules
 const aj = arcjet({
@@ -29,22 +34,22 @@ const aj = arcjet({
   rules: [
     // Shield WAF - protect against common attacks
     shield({
-      mode: isDevelopment ? 'DRY_RUN' : 'LIVE', // DRY_RUN in development, LIVE in production
+      mode: isDevelopment ? "DRY_RUN" : "LIVE", // DRY_RUN in development, LIVE in production
     }),
 
     // Bot protection - block malicious bots, allow good ones
     detectBot({
-      mode: isDevelopment ? 'DRY_RUN' : 'LIVE',
+      mode: isDevelopment ? "DRY_RUN" : "LIVE",
       allow: [
-        'CATEGORY:SEARCH_ENGINE', // Allow search engines (Google, Bing, etc.)
-        'CATEGORY:MONITOR', // Allow monitoring services (uptime monitors)
-        'CATEGORY:PREVIEW', // Allow preview bots (social media previews)
+        "CATEGORY:SEARCH_ENGINE", // Allow search engines (Google, Bing, etc.)
+        "CATEGORY:MONITOR", // Allow monitoring services (uptime monitors)
+        "CATEGORY:PREVIEW", // Allow preview bots (social media previews)
       ],
     }),
 
     // Rate limiting - general API protection with token bucket
     tokenBucket({
-      mode: isDevelopment ? 'DRY_RUN' : 'LIVE',
+      mode: isDevelopment ? "DRY_RUN" : "LIVE",
       refillRate: 60, // 60 tokens
       interval: 60, // per 60 seconds (1 minute)
       capacity: 120, // burst capacity of 120 tokens
@@ -52,8 +57,8 @@ const aj = arcjet({
 
     // Fixed window rate limiting for aggressive protection
     fixedWindow({
-      mode: isDevelopment ? 'DRY_RUN' : 'LIVE',
-      window: '1m', // 1 minute window
+      mode: isDevelopment ? "DRY_RUN" : "LIVE",
+      window: "1m", // 1 minute window
       max: 100, // max 100 requests per window
     }),
   ],
@@ -86,33 +91,34 @@ const noseconeConfig = {
         ...(nosecone.defaults.contentSecurityPolicy.directives.scriptSrc || []),
         "'strict-dynamic'", // Allow nonce-based scripts to load additional scripts
         ...(isDevelopment ? (["'unsafe-eval'"] as const) : []), // HMR/hot reload in development only
-        'https://umami.claudepro.directory', // Umami analytics
-        'https://*.vercel-scripts.com', // Vercel analytics
-        'https://vercel.live', // Vercel toolbar
+        "https://umami.claudepro.directory", // Umami analytics
+        "https://*.vercel-scripts.com", // Vercel analytics
+        "https://vercel.live", // Vercel toolbar
       ],
 
       // Extend imgSrc with our domains
       imgSrc: [
         ...(nosecone.defaults.contentSecurityPolicy.directives.imgSrc || []),
-        'https://github.com',
-        'https://*.githubusercontent.com',
-        'https://claudepro.directory',
-        'https://www.claudepro.directory',
+        "https://github.com",
+        "https://*.githubusercontent.com",
+        "https://claudepro.directory",
+        "https://www.claudepro.directory",
       ],
 
       // Extend connectSrc for analytics and APIs
       connectSrc: [
-        ...(nosecone.defaults.contentSecurityPolicy.directives.connectSrc || []),
-        'wss://*.vercel.app', // WebSocket for HMR in preview
-        'wss://*.vercel-scripts.com', // Vercel live reload
-        'https://umami.claudepro.directory', // Umami analytics
-        'https://*.vercel-scripts.com', // Vercel analytics
-        'https://vercel.live', // Vercel toolbar
-        'https://api.github.com', // GitHub API
-        ...(env.VERCEL_ENV === 'preview'
+        ...(nosecone.defaults.contentSecurityPolicy.directives.connectSrc ||
+          []),
+        "wss://*.vercel.app", // WebSocket for HMR in preview
+        "wss://*.vercel-scripts.com", // Vercel live reload
+        "https://umami.claudepro.directory", // Umami analytics
+        "https://*.vercel-scripts.com", // Vercel analytics
+        "https://vercel.live", // Vercel toolbar
+        "https://api.github.com", // GitHub API
+        ...(env.VERCEL_ENV === "preview"
           ? ([
-              'ws://localhost:*',
-              'wss://localhost:*',
+              "ws://localhost:*",
+              "wss://localhost:*",
               ...(env.VERCEL_URL ? [`wss://${env.VERCEL_URL}`] : []),
             ] as const)
           : []),
@@ -125,21 +131,21 @@ const noseconeConfig = {
 
   // Keep other security headers from our custom config
   crossOriginEmbedderPolicy: {
-    policy: 'credentialless',
+    policy: "credentialless",
   },
 
   crossOriginOpenerPolicy: {
-    policy: 'same-origin-allow-popups',
+    policy: "same-origin-allow-popups",
   },
 
   crossOriginResourcePolicy: {
-    policy: 'cross-origin',
+    policy: "cross-origin",
   },
 
   originAgentCluster: true,
 
   referrerPolicy: {
-    policy: ['no-referrer'],
+    policy: ["no-referrer"],
   },
 
   strictTransportSecurity: {
@@ -157,11 +163,11 @@ const noseconeConfig = {
   xDownloadOptions: true,
 
   xFrameOptions: {
-    action: 'deny',
+    action: "deny",
   },
 
   xPermittedCrossDomainPolicies: {
-    permittedPolicies: 'none',
+    permittedPolicies: "none",
   },
 
   xXssProtection: true,
@@ -171,11 +177,13 @@ const noseconeConfig = {
 // Using type coercion because Nosecone's types don't support dynamic CSP array construction
 // Runtime values are correct - type mismatch is purely due to array spread operations
 const resolvedConfig =
-  env.VERCEL_ENV === 'preview'
-    ? nosecone.withVercelToolbar(noseconeConfig as unknown as typeof nosecone.defaults)
+  env.VERCEL_ENV === "preview"
+    ? nosecone.withVercelToolbar(
+        noseconeConfig as unknown as typeof nosecone.defaults,
+      )
     : undefined;
 const noseconeMiddleware = nosecone.createMiddleware(
-  (resolvedConfig ?? noseconeConfig) as unknown as typeof nosecone.defaults
+  (resolvedConfig ?? noseconeConfig) as unknown as typeof nosecone.defaults,
 );
 
 /**
@@ -193,46 +201,49 @@ function mergeSecurityHeaders(target: Headers, source: Headers): void {
  */
 async function applyEndpointRateLimit(
   request: NextRequest,
-  pathname: string
+  pathname: string,
 ): Promise<Response | null> {
   // Validate the pathname
   try {
     requestPathSchema.parse(pathname);
   } catch (error) {
     logger.error(
-      'Invalid pathname detected',
+      "Invalid pathname detected",
       error instanceof z.ZodError
-        ? new Error('Pathname validation failed')
+        ? new Error("Pathname validation failed")
         : new Error(String(error)),
       {
         pathname: sanitizePathForLogging(pathname),
-        type: 'validation',
-      }
+        type: "validation",
+      },
     );
-    return new NextResponse('Bad Request', { status: 400 });
+    return new NextResponse("Bad Request", { status: 400 });
   }
   // Classify the API endpoint type
-  const endpointType: ApiEndpointType = classifyApiEndpoint(pathname, request.method);
+  const endpointType: ApiEndpointType = classifyApiEndpoint(
+    pathname,
+    request.method,
+  );
 
   // Define route-specific rate limiting rules
   const rateLimit = {
     // Cache warming endpoint - admin operations (extremely restrictive)
-    '/api/cache/warm': rateLimiters.admin, // 5 requests per hour
+    "/api/cache/warm": rateLimiters.admin, // 5 requests per hour
 
     // All configurations endpoint - heavy dataset (moderate restrictions)
-    '/api/all-configurations.json': rateLimiters.heavyApi, // 50 requests per 15 minutes
+    "/api/all-configurations.json": rateLimiters.heavyApi, // 50 requests per 15 minutes
 
     // Trending guides endpoint - moderate usage (balanced restrictions)
-    '/api/guides/trending': rateLimiters.heavyApi, // 50 requests per 15 minutes
+    "/api/guides/trending": rateLimiters.heavyApi, // 50 requests per 15 minutes
 
     // Individual content type APIs - standard usage (generous)
-    '/api/agents.json': rateLimiters.api, // 1000 requests per hour
-    '/api/mcp.json': rateLimiters.api,
-    '/api/rules.json': rateLimiters.api,
-    '/api/commands.json': rateLimiters.api,
-    '/api/hooks.json': rateLimiters.api,
-    '/api/statuslines.json': rateLimiters.api,
-    '/api/collections.json': rateLimiters.api,
+    "/api/agents.json": rateLimiters.api, // 1000 requests per hour
+    "/api/mcp.json": rateLimiters.api,
+    "/api/rules.json": rateLimiters.api,
+    "/api/commands.json": rateLimiters.api,
+    "/api/hooks.json": rateLimiters.api,
+    "/api/statuslines.json": rateLimiters.api,
+    "/api/collections.json": rateLimiters.api,
   };
 
   // Check for exact path matches first
@@ -242,58 +253,58 @@ async function applyEndpointRateLimit(
   }
 
   // LLMs.txt routes - moderate rate limiting to prevent scraping abuse
-  if (pathname === '/llms.txt' || pathname.endsWith('/llms.txt')) {
+  if (pathname === "/llms.txt" || pathname.endsWith("/llms.txt")) {
     return rateLimiters.llmstxt.middleware(request);
   }
 
   // Pattern-based matching using classified endpoint type
-  if (pathname.startsWith('/api/')) {
+  if (pathname.startsWith("/api/")) {
     // Use endpoint classification for rate limiting
     switch (endpointType) {
-      case 'admin':
+      case "admin":
         return rateLimiters.admin.middleware(request);
-      case 'heavy_api':
+      case "heavy_api":
         return rateLimiters.heavyApi.middleware(request);
-      case 'search':
+      case "search":
         // Validate search query parameters if present
         try {
           const searchParams = new URLSearchParams(request.nextUrl.search);
           validateSearchQuery(searchParams);
         } catch (error) {
           logger.error(
-            'Invalid search query',
+            "Invalid search query",
             error instanceof z.ZodError
-              ? new Error('Search query validation failed')
+              ? new Error("Search query validation failed")
               : new Error(String(error)),
             {
               pathname: sanitizePathForLogging(pathname),
-              type: 'search_validation',
-            }
+              type: "search_validation",
+            },
           );
           return new NextResponse(
             JSON.stringify({
               success: false,
-              error: 'Bad Request',
-              message: 'Invalid search parameters',
-              code: 'SEARCH_VALIDATION_FAILED',
+              error: "Bad Request",
+              message: "Invalid search parameters",
+              code: "SEARCH_VALIDATION_FAILED",
               timestamp: new Date().toISOString(),
             }),
             {
               status: 400,
-              headers: { 'content-type': 'application/json' },
-            }
+              headers: { "content-type": "application/json" },
+            },
           );
         }
         return rateLimiters.search.middleware(request);
-      case 'submit':
+      case "submit":
         return rateLimiters.submit.middleware(request);
-      case 'api':
+      case "api":
         // Dynamic content type routes (e.g., /api/[contentType])
         if (pathname.match(/^\/api\/[^/]+\.json$/)) {
           return rateLimiters.api.middleware(request);
         }
         return rateLimiters.api.middleware(request);
-      case 'static':
+      case "static":
         // No rate limiting for static assets
         return null;
       default:
@@ -312,41 +323,44 @@ export async function middleware(request: NextRequest) {
   // CRITICAL SECURITY: CVE-2025-29927 mitigation - detect middleware bypass attempts
   // Check for suspicious headers that could bypass middleware execution
   const suspiciousHeaders = [
-    'x-middleware-subrequest', // CVE-2025-29927 exploit header
-    'x-middleware-rewrite', // Related bypass headers
-    'x-middleware-next',
-    'x-middleware-invoke',
-    'x-invoke-path', // Additional suspicious patterns
-    'x-vercel-invoke-path',
+    "x-middleware-subrequest", // CVE-2025-29927 exploit header
+    "x-middleware-rewrite", // Related bypass headers
+    "x-middleware-next",
+    "x-middleware-invoke",
+    "x-invoke-path", // Additional suspicious patterns
+    "x-vercel-invoke-path",
   ];
 
   for (const headerName of suspiciousHeaders) {
     const headerValue = request.headers.get(headerName);
     if (headerValue !== null) {
       logger.error(
-        'CVE-2025-29927: Middleware bypass attempt detected',
-        new Error('Suspicious header found'),
+        "CVE-2025-29927: Middleware bypass attempt detected",
+        new Error("Suspicious header found"),
         {
           header: headerName,
           value: headerValue.substring(0, 100), // Limit logged value length
           ip:
-            request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
-          userAgent: request.headers.get('user-agent')?.substring(0, 100) || 'unknown',
+            request.headers.get("x-forwarded-for") ||
+            request.headers.get("x-real-ip") ||
+            "unknown",
+          userAgent:
+            request.headers.get("user-agent")?.substring(0, 100) || "unknown",
           path: sanitizePathForLogging(pathname),
           method: request.method,
-          type: 'security_bypass_attempt',
-          severity: 'critical',
-          cve: 'CVE-2025-29927',
-        }
+          type: "security_bypass_attempt",
+          severity: "critical",
+          cve: "CVE-2025-29927",
+        },
       );
 
       // Immediately block the request with security headers
-      return new NextResponse('Forbidden: Suspicious header detected', {
+      return new NextResponse("Forbidden: Suspicious header detected", {
         status: 403,
         headers: {
-          'X-Security-Event': 'CVE-2025-29927-BLOCKED',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Content-Type': 'text/plain',
+          "X-Security-Event": "CVE-2025-29927-BLOCKED",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Content-Type": "text/plain",
         },
       });
     }
@@ -362,7 +376,7 @@ export async function middleware(request: NextRequest) {
 
     // Log validated request data (in development only)
     if (isDevelopment) {
-      logger.debug('Validated request', {
+      logger.debug("Validated request", {
         method: requestValidation.method,
         path: sanitizePathForLogging(requestValidation.path),
         userAgent: `${requestValidation.userAgent?.slice(0, 50)}...`,
@@ -371,43 +385,44 @@ export async function middleware(request: NextRequest) {
   } catch (error) {
     // Log validation error for monitoring
     logger.error(
-      'Request validation failed',
+      "Request validation failed",
       error instanceof z.ZodError
-        ? new Error('Request validation failed')
+        ? new Error("Request validation failed")
         : new Error(String(error)),
       {
         pathname: sanitizePathForLogging(pathname),
         method: request.method,
-        type: 'request_validation',
-      }
+        type: "request_validation",
+      },
     );
 
     // Return standardized error response
     return new NextResponse(
       JSON.stringify({
         success: false,
-        error: 'Bad Request',
-        message: 'Invalid request format',
-        code: 'REQUEST_VALIDATION_FAILED',
+        error: "Bad Request",
+        message: "Invalid request format",
+        code: "REQUEST_VALIDATION_FAILED",
         timestamp: new Date().toISOString(),
       }),
       {
         status: 400,
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json",
         },
-      }
+      },
     );
   }
 
   // Skip Arcjet for Next.js RSC prefetch requests (legitimate browser behavior)
-  const isRSCRequest = pathname.includes('_rsc=') || request.headers.get('rsc') === '1';
+  const isRSCRequest =
+    pathname.includes("_rsc=") || request.headers.get("rsc") === "1";
   if (isRSCRequest) {
     const noseconeResponse = await noseconeMiddleware();
 
     if (isDevelopment) {
       const duration = performance.now() - startTime;
-      logger.debug('Middleware execution (RSC prefetch)', {
+      logger.debug("Middleware execution (RSC prefetch)", {
         path: sanitizePathForLogging(pathname),
         duration: `${duration.toFixed(2)}ms`,
       });
@@ -425,7 +440,7 @@ export async function middleware(request: NextRequest) {
 
     if (isDevelopment) {
       const duration = performance.now() - startTime;
-      logger.debug('Middleware execution (static asset)', {
+      logger.debug("Middleware execution (static asset)", {
         path: sanitizePathForLogging(pathname),
         duration: `${duration.toFixed(2)}ms`,
       });
@@ -448,47 +463,47 @@ export async function middleware(request: NextRequest) {
     ]); // Total: ~20-30ms (concurrent execution)
 
     // Check Arcjet result (fail-closed: deny on error)
-    if (results[0].status === 'rejected') {
+    if (results[0].status === "rejected") {
       logger.error(
-        'Arcjet protection failed',
+        "Arcjet protection failed",
         results[0].reason instanceof Error
           ? results[0].reason
           : new Error(String(results[0].reason)),
         {
           path: sanitizePathForLogging(pathname),
-          type: 'arcjet_failure',
-          severity: 'critical',
-        }
+          type: "arcjet_failure",
+          severity: "critical",
+        },
       );
 
       // FAIL-CLOSED: Deny access on Arcjet failure for security
-      return new NextResponse('Service temporarily unavailable', {
+      return new NextResponse("Service temporarily unavailable", {
         status: 503,
         headers: {
-          'Retry-After': '60',
-          'Content-Type': 'text/plain',
+          "Retry-After": "60",
+          "Content-Type": "text/plain",
         },
       });
     }
     decision = results[0].value;
 
     // Check Nosecone result (fail-open: continue with basic headers on error)
-    if (results[1].status === 'rejected') {
-      logger.warn('Nosecone middleware failed, using fallback headers', {
+    if (results[1].status === "rejected") {
+      logger.warn("Nosecone middleware failed, using fallback headers", {
         error:
           results[1].reason instanceof Error
             ? results[1].reason.message
             : String(results[1].reason),
         path: sanitizePathForLogging(pathname),
-        type: 'nosecone_failure',
+        type: "nosecone_failure",
       });
 
       // FAIL-OPEN: Continue with minimal security headers
       noseconeResponse = new NextResponse(null, {
         headers: {
-          'X-Content-Type-Options': 'nosniff',
-          'X-Frame-Options': 'DENY',
-          'Referrer-Policy': 'no-referrer',
+          "X-Content-Type-Options": "nosniff",
+          "X-Frame-Options": "DENY",
+          "Referrer-Policy": "no-referrer",
         },
       });
     } else {
@@ -497,34 +512,38 @@ export async function middleware(request: NextRequest) {
   } catch (error) {
     // Catch any unexpected errors from Promise.allSettled itself
     logger.error(
-      'Critical middleware error',
+      "Critical middleware error",
       error instanceof Error ? error : new Error(String(error)),
       {
         path: sanitizePathForLogging(pathname),
-        type: 'middleware_critical_failure',
-        severity: 'critical',
-      }
+        type: "middleware_critical_failure",
+        severity: "critical",
+      },
     );
 
     // FAIL-CLOSED: Deny access on critical failures
-    return new NextResponse('Service temporarily unavailable', {
+    return new NextResponse("Service temporarily unavailable", {
       status: 503,
       headers: {
-        'Retry-After': '60',
-        'Content-Type': 'text/plain',
+        "Retry-After": "60",
+        "Content-Type": "text/plain",
       },
     });
   }
 
   // Handle denied requests
   if (decision.isDenied()) {
-    logger.error('Arcjet denied request', new Error(`Request denied: ${decision.conclusion}`), {
-      ip: String(decision.ip),
-      path: sanitizePathForLogging(pathname),
-      reason: String(decision.reason),
-      conclusion: decision.conclusion,
-      type: 'security_denial',
-    });
+    logger.error(
+      "Arcjet denied request",
+      new Error(`Request denied: ${decision.conclusion}`),
+      {
+        ip: String(decision.ip),
+        path: sanitizePathForLogging(pathname),
+        reason: String(decision.reason),
+        conclusion: decision.conclusion,
+        type: "security_denial",
+      },
+    );
 
     // Copy security headers from Nosecone response
     const headers = new Headers();
@@ -532,21 +551,21 @@ export async function middleware(request: NextRequest) {
 
     // Return appropriate error response based on denial reason
     if (decision.reason.isRateLimit()) {
-      return new NextResponse('Too Many Requests', {
+      return new NextResponse("Too Many Requests", {
         status: 429,
         headers,
       });
     }
 
     if (decision.reason.isBot()) {
-      return new NextResponse('Bot Detected', {
+      return new NextResponse("Bot Detected", {
         status: 403,
         headers,
       });
     }
 
     // Shield or other security violations
-    return new NextResponse('Forbidden', {
+    return new NextResponse("Forbidden", {
       status: 403,
       headers,
     });
@@ -567,13 +586,13 @@ export async function middleware(request: NextRequest) {
   mergeSecurityHeaders(response.headers, noseconeResponse.headers);
 
   // Add pathname header for SmartRelatedContent component
-  response.headers.set('x-pathname', pathname);
+  response.headers.set("x-pathname", pathname);
 
   // Add performance timing in development mode
   if (isDevelopment) {
     const duration = performance.now() - startTime;
-    response.headers.set('X-Middleware-Duration', `${duration.toFixed(2)}ms`);
-    logger.debug('Middleware execution', {
+    response.headers.set("X-Middleware-Duration", `${duration.toFixed(2)}ms`);
+    logger.debug("Middleware execution", {
       path: sanitizePathForLogging(pathname),
       duration: `${duration.toFixed(2)}ms`,
       arcjetDecision: decision.conclusion,
@@ -601,6 +620,6 @@ export const config = {
      * - /css/ (public CSS files)
      * - *.png, *.jpg, *.jpeg, *.gif, *.webp, *.svg, *.ico (image files)
      */
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.json|\\.well-known|js/|scripts/|css/|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.json|\\.well-known|js/|scripts/|css/|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)",
   ],
 };

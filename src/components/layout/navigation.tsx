@@ -1,23 +1,35 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { SearchTrigger } from '@/src/components/features/search/search-trigger';
-import { ThemeToggle } from '@/src/components/layout/theme-toggle';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { SearchTrigger } from "@/src/components/features/search/search-trigger";
+import { ThemeToggle } from "@/src/components/layout/theme-toggle";
+import { Badge } from "@/src/components/ui/badge";
+import { Button } from "@/src/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/src/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/src/components/ui/sheet';
-import { useSearchShortcut } from '@/src/hooks/use-search-shortcut';
-import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
-import { ChevronDown, DiscordIcon, ExternalLink, Github, LogoIcon, Menu } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+} from "@/src/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/src/components/ui/sheet";
+import { useSearchShortcut } from "@/src/hooks/use-search-shortcut";
+import { APP_CONFIG, SOCIAL_LINKS } from "@/src/lib/constants";
+import {
+  ChevronDown,
+  DiscordIcon,
+  ExternalLink,
+  Github,
+  LogoIcon,
+  Menu,
+} from "@/src/lib/icons";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 
 interface NavLinkProps {
   href: string;
@@ -27,13 +39,19 @@ interface NavLinkProps {
   onClick?: () => void;
 }
 
-const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkProps) => {
+const NavLink = ({
+  href,
+  children,
+  className = "",
+  isActive,
+  onClick,
+}: NavLinkProps) => {
   const active = isActive(href);
 
   // Only spread onClick if it's defined to avoid exactOptionalPropertyTypes issues
   const linkProps = {
     href,
-    className: `${active ? `ring-2 ring-accent/30 ${UI_CLASSES.BG_ACCENT_10} border-accent/50 text-primary` : 'text-muted-foreground hover:text-foreground'} transition-colors ${UI_CLASSES.DURATION_200} ${className}`,
+    className: `${active ? `ring-2 ring-accent/30 ${UI_CLASSES.BG_ACCENT_10} border-accent/50 text-primary` : "text-muted-foreground hover:text-foreground"} transition-colors ${UI_CLASSES.DURATION_200} ${className}`,
     ...(onClick && { onClick }),
   };
 
@@ -70,9 +88,9 @@ export const Navigation = () => {
     // Check initial scroll position
     handleScroll();
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
       if (rafId !== null) {
         cancelAnimationFrame(rafId);
       }
@@ -86,13 +104,13 @@ export const Navigation = () => {
   return (
     <header
       className={`sticky ${UI_CLASSES.TOP_0} ${UI_CLASSES.Z_50} ${UI_CLASSES.W_FULL} ${UI_CLASSES.BORDER_B} border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all ${UI_CLASSES.DURATION_300} will-change-transform contain-layout ${
-        isScrolled ? 'shadow-sm' : ''
+        isScrolled ? "shadow-sm" : ""
       }`}
     >
       <div className="container mx-auto px-4">
         <div
           className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} transition-all ${UI_CLASSES.DURATION_300} will-change-transform ${
-            isScrolled ? 'h-12' : 'h-16'
+            isScrolled ? "h-12" : "h-16"
           }`}
         >
           {/* Logo */}
@@ -103,12 +121,12 @@ export const Navigation = () => {
           >
             <LogoIcon
               className={`transition-all ${UI_CLASSES.DURATION_300} flex-shrink-0 ${UI_CLASSES.HIDDEN} xl:${UI_CLASSES.BLOCK} ${
-                isScrolled ? 'h-6 w-6' : 'h-8 w-8'
+                isScrolled ? "h-6 w-6" : "h-8 w-8"
               }`}
             />
             <span
               className={`font-medium text-foreground transition-all ${UI_CLASSES.DURATION_300} ${UI_CLASSES.HIDDEN} xl:inline ${
-                isScrolled ? 'text-base' : 'text-lg'
+                isScrolled ? "text-base" : "text-lg"
               }`}
             >
               {APP_CONFIG.domain}
@@ -117,28 +135,60 @@ export const Navigation = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-2 md:gap-3 lg:gap-4 text-sm lg:text-base">
-            <NavLink href="/agents" isActive={isActive} onClick={() => setIsOpen(false)}>
+            <NavLink
+              href="/agents"
+              isActive={isActive}
+              onClick={() => setIsOpen(false)}
+            >
               Agents
             </NavLink>
-            <NavLink href="/commands" isActive={isActive} onClick={() => setIsOpen(false)}>
+            <NavLink
+              href="/commands"
+              isActive={isActive}
+              onClick={() => setIsOpen(false)}
+            >
               Commands
             </NavLink>
-            <NavLink href="/hooks" isActive={isActive} onClick={() => setIsOpen(false)}>
+            <NavLink
+              href="/hooks"
+              isActive={isActive}
+              onClick={() => setIsOpen(false)}
+            >
               Hooks
             </NavLink>
-            <NavLink href="/mcp" isActive={isActive} onClick={() => setIsOpen(false)}>
+            <NavLink
+              href="/mcp"
+              isActive={isActive}
+              onClick={() => setIsOpen(false)}
+            >
               MCP
             </NavLink>
-            <NavLink href="/rules" isActive={isActive} onClick={() => setIsOpen(false)}>
+            <NavLink
+              href="/rules"
+              isActive={isActive}
+              onClick={() => setIsOpen(false)}
+            >
               Rules
             </NavLink>
-            <NavLink href="/statuslines" isActive={isActive} onClick={() => setIsOpen(false)}>
+            <NavLink
+              href="/statuslines"
+              isActive={isActive}
+              onClick={() => setIsOpen(false)}
+            >
               Statuslines
             </NavLink>
-            <NavLink href="/collections" isActive={isActive} onClick={() => setIsOpen(false)}>
+            <NavLink
+              href="/collections"
+              isActive={isActive}
+              onClick={() => setIsOpen(false)}
+            >
               Collections
             </NavLink>
-            <NavLink href="/guides" isActive={isActive} onClick={() => setIsOpen(false)}>
+            <NavLink
+              href="/guides"
+              isActive={isActive}
+              onClick={() => setIsOpen(false)}
+            >
               Guides
             </NavLink>
 
@@ -161,7 +211,9 @@ export const Navigation = () => {
                     className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
                   >
                     <div>Trending</div>
-                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Popular configurations</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>
+                      Popular configurations
+                    </div>
                   </Link>
                 </DropdownMenuItem>
 
@@ -171,7 +223,9 @@ export const Navigation = () => {
                     className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
                   >
                     <div>Jobs</div>
-                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Find opportunities</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>
+                      Find opportunities
+                    </div>
                   </Link>
                 </DropdownMenuItem>
 
@@ -181,7 +235,9 @@ export const Navigation = () => {
                     className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
                   >
                     <div>Community</div>
-                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Join the Claude community</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>
+                      Join the Claude community
+                    </div>
                   </Link>
                 </DropdownMenuItem>
 
@@ -191,7 +247,9 @@ export const Navigation = () => {
                     className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
                   >
                     <div>Partner</div>
-                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Post job listings & more</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>
+                      Post job listings & more
+                    </div>
                   </Link>
                 </DropdownMenuItem>
 
@@ -201,7 +259,9 @@ export const Navigation = () => {
                     className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
                   >
                     <div>Submit Config</div>
-                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Share your configurations</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>
+                      Share your configurations
+                    </div>
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -209,7 +269,9 @@ export const Navigation = () => {
           </nav>
 
           {/* Right Side Actions */}
-          <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 md:gap-3`}>
+          <div
+            className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 md:gap-3`}
+          >
             {/* Global Search Trigger */}
             <div className={`${UI_CLASSES.HIDDEN} lg:${UI_CLASSES.BLOCK}`}>
               <SearchTrigger
@@ -219,10 +281,13 @@ export const Navigation = () => {
                 onClick={() => {
                   // Trigger same behavior as ⌘K shortcut
                   const searchInput = document.querySelector<HTMLInputElement>(
-                    'input[name="search"], input[type="search"]'
+                    'input[name="search"], input[type="search"]',
                   );
                   searchInput?.focus();
-                  searchInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  searchInput?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
                 }}
               />
             </div>
@@ -230,7 +295,9 @@ export const Navigation = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
+              onClick={() =>
+                window.open("https://discord.gg/Ax3Py4YDrq", "_blank")
+              }
               className={`${UI_CLASSES.HIDDEN_SM_FLEX} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
               aria-label="Join our Discord community"
             >
@@ -241,7 +308,7 @@ export const Navigation = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => window.open(SOCIAL_LINKS.github, '_blank')}
+              onClick={() => window.open(SOCIAL_LINKS.github, "_blank")}
               className={`${UI_CLASSES.HIDDEN_SM_FLEX} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
               aria-label="View source code on GitHub"
             >
@@ -282,14 +349,18 @@ export const Navigation = () => {
                     className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3 ${UI_CLASSES.PT_6} ${UI_CLASSES.PB_8} px-1`}
                   >
                     <LogoIcon className="h-8 w-8 flex-shrink-0" />
-                    <span className={`font-semibold ${UI_CLASSES.TEXT_LG} text-foreground`}>
+                    <span
+                      className={`font-semibold ${UI_CLASSES.TEXT_LG} text-foreground`}
+                    >
                       {APP_CONFIG.domain}
                     </span>
                   </div>
 
                   {/* Main Navigation */}
                   <div className={`flex-1 ${UI_CLASSES.OVERFLOW_Y_AUTO}`}>
-                    <nav className={`${UI_CLASSES.SPACE_Y_4} ${UI_CLASSES.PX_3}`}>
+                    <nav
+                      className={`${UI_CLASSES.SPACE_Y_4} ${UI_CLASSES.PX_3}`}
+                    >
                       <div className={UI_CLASSES.SPACE_Y_3}>
                         <NavLink
                           href="/agents"
@@ -429,7 +500,9 @@ export const Navigation = () => {
                         variant="outline"
                         size="lg"
                         className={`w-16 h-16 ${UI_CLASSES.ROUNDED_2XL} border-border/40 ${UI_CLASSES.BG_CARD} hover:bg-discord/10 hover:border-discord/30 transition-all duration-200 active:scale-[0.95]`}
-                        onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
+                        onClick={() =>
+                          window.open("https://discord.gg/Ax3Py4YDrq", "_blank")
+                        }
                         aria-label="Join our Discord community"
                       >
                         <DiscordIcon className="h-7 w-7 text-discord" />
@@ -439,7 +512,9 @@ export const Navigation = () => {
                         variant="outline"
                         size="lg"
                         className={`w-16 h-16 ${UI_CLASSES.ROUNDED_2XL} border-border/40 ${UI_CLASSES.BG_CARD} ${UI_CLASSES.HOVER_BG_ACCENT_10} hover:border-accent/30 transition-all duration-200 active:scale-[0.95]`}
-                        onClick={() => window.open(SOCIAL_LINKS.github, '_blank')}
+                        onClick={() =>
+                          window.open(SOCIAL_LINKS.github, "_blank")
+                        }
                         aria-label="View source code on GitHub"
                       >
                         <Github className="h-7 w-7" />

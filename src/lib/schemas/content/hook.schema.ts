@@ -5,19 +5,19 @@
  * Phase 2: Refactored using base-content.schema.ts with shape destructuring
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 import {
   baseContentMetadataSchema,
   baseInstallationSchema,
   baseTroubleshootingSchema,
-} from '@/src/lib/schemas/content/base-content.schema';
-import { limitedMediumStringArray } from '@/src/lib/schemas/primitives/base-arrays';
-import { timeoutMs } from '@/src/lib/schemas/primitives/base-numbers';
+} from "@/src/lib/schemas/content/base-content.schema";
+import { limitedMediumStringArray } from "@/src/lib/schemas/primitives/base-arrays";
+import { timeoutMs } from "@/src/lib/schemas/primitives/base-numbers";
 import {
   massiveString,
   mediumString,
   shortString,
-} from '@/src/lib/schemas/primitives/base-strings';
+} from "@/src/lib/schemas/primitives/base-strings";
 
 /**
  * Hook Configuration Schema
@@ -33,15 +33,23 @@ import {
  */
 const hookConfigSchema = z
   .object({
-    script: mediumString.describe('Hook script content to execute'),
+    script: mediumString.describe("Hook script content to execute"),
     matchers: z
       .array(shortString)
       .optional()
-      .describe('Optional array of matcher patterns to filter when hook executes'),
-    timeout: timeoutMs.optional().describe('Optional timeout in milliseconds for hook execution'),
-    description: mediumString.optional().describe("Optional description of the hook's purpose"),
+      .describe(
+        "Optional array of matcher patterns to filter when hook executes",
+      ),
+    timeout: timeoutMs
+      .optional()
+      .describe("Optional timeout in milliseconds for hook execution"),
+    description: mediumString
+      .optional()
+      .describe("Optional description of the hook's purpose"),
   })
-  .describe('Individual hook configuration with script, matchers, timeout, and description.');
+  .describe(
+    "Individual hook configuration with script, matchers, timeout, and description.",
+  );
 
 /**
  * Hook Configuration Array Schema
@@ -61,17 +69,19 @@ const hookConfigArraySchema = z
         matchers: z
           .array(shortString)
           .optional()
-          .describe('Optional array of matcher patterns for this hook configuration'),
+          .describe(
+            "Optional array of matcher patterns for this hook configuration",
+          ),
         description: mediumString
           .optional()
-          .describe('Optional description of this hook configuration'),
+          .describe("Optional description of this hook configuration"),
         timeout: timeoutMs
           .optional()
-          .describe('Optional timeout in milliseconds for this hook execution'),
+          .describe("Optional timeout in milliseconds for this hook execution"),
       })
-      .describe('Single hook configuration entry in array')
+      .describe("Single hook configuration entry in array"),
   )
-  .describe('Array of multiple hook configurations that execute sequentially.');
+  .describe("Array of multiple hook configurations that execute sequentially.");
 
 /**
  * Full Hook Configuration Schema
@@ -88,17 +98,22 @@ const fullHookConfigSchema = z
     hookConfig: z
       .object({
         hooks: z
-          .record(z.string(), z.union([hookConfigSchema, hookConfigArraySchema]))
+          .record(
+            z.string(),
+            z.union([hookConfigSchema, hookConfigArraySchema]),
+          )
           .optional()
-          .describe('Record of hook types mapped to their configurations (single or array)'),
+          .describe(
+            "Record of hook types mapped to their configurations (single or array)",
+          ),
       })
-      .describe('Hook configuration object containing hook definitions'),
+      .describe("Hook configuration object containing hook definitions"),
     scriptContent: massiveString
       .optional()
-      .describe('Optional external script content (1MB limit)'), // 1MB limit for script content
+      .describe("Optional external script content (1MB limit)"), // 1MB limit for script content
   })
   .describe(
-    'Complete hook configuration with hookConfig record and optional external script content. Supports both single and array-based hook configurations.'
+    "Complete hook configuration with hookConfig record and optional external script content. Supports both single and array-based hook configurations.",
   );
 
 // Hook troubleshooting now uses baseTroubleshootingSchema from base-content.schema.ts
@@ -150,45 +165,47 @@ export const hookContentSchema = z
     ...baseContentMetadataSchema.shape,
 
     // Hook-specific required fields
-    category: z.literal('hooks').describe('Content category literal identifier: "hooks"'),
+    category: z
+      .literal("hooks")
+      .describe('Content category literal identifier: "hooks"'),
     hookType: z
       .enum([
-        'PostToolUse',
-        'PreToolUse',
-        'SessionStart',
-        'SessionEnd',
-        'UserPromptSubmit',
-        'Notification',
-        'PreCompact',
-        'Stop',
-        'SubagentStop',
+        "PostToolUse",
+        "PreToolUse",
+        "SessionStart",
+        "SessionEnd",
+        "UserPromptSubmit",
+        "Notification",
+        "PreCompact",
+        "Stop",
+        "SubagentStop",
       ])
       .describe(
-        'Type of hook determining when it executes: PostToolUse (after tool), PreToolUse (before tool), SessionStart/End, UserPromptSubmit, Notification, PreCompact (before context compaction), Stop, SubagentStop'
+        "Type of hook determining when it executes: PostToolUse (after tool), PreToolUse (before tool), SessionStart/End, UserPromptSubmit, Notification, PreCompact (before context compaction), Stop, SubagentStop",
       ),
 
     // Hook configuration (complex hook setup)
     configuration: fullHookConfigSchema.describe(
-      'Hook configuration with scripts, matchers, timeouts, and settings'
+      "Hook configuration with scripts, matchers, timeouts, and settings",
     ),
 
     // Hook-specific optional fields
     installation: baseInstallationSchema
       .optional()
-      .describe('Optional platform-specific installation instructions'),
+      .describe("Optional platform-specific installation instructions"),
     troubleshooting: z
       .array(baseTroubleshootingSchema)
       .max(20)
       .optional()
-      .describe('Optional array of common issues and solutions (max 20)'),
+      .describe("Optional array of common issues and solutions (max 20)"),
     requirements: limitedMediumStringArray
       .optional()
       .describe(
-        'Optional list of requirements for the hook (e.g., dependencies, environment variables)'
+        "Optional list of requirements for the hook (e.g., dependencies, environment variables)",
       ),
   })
   .describe(
-    'Hook content schema for Claude Code lifecycle hooks. Inherits base content metadata and adds hook-specific fields including hook type, configuration, installation, troubleshooting, and requirements.'
+    "Hook content schema for Claude Code lifecycle hooks. Inherits base content metadata and adds hook-specific fields including hook type, configuration, installation, troubleshooting, and requirements.",
   );
 
 export type HookContent = z.infer<typeof hookContentSchema>;

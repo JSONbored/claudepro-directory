@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * DetailSidebar - Sidebar orchestrator for detail pages
@@ -12,13 +12,13 @@
  * @see lib/config/custom-sidebars.tsx - Custom sidebar renderers
  */
 
-import { useRouter } from 'next/navigation';
-import { memo } from 'react';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { SidebarDetailsCard } from './sidebar-details-card';
-import { SidebarRelatedItemsCard } from './sidebar-related-items-card';
-import { SidebarResourcesCard } from './sidebar-resources-card';
+import { useRouter } from "next/navigation";
+import { memo } from "react";
+import type { UnifiedContentItem } from "@/src/lib/schemas/component.schema";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
+import { SidebarDetailsCard } from "./sidebar-details-card";
+import { SidebarRelatedItemsCard } from "./sidebar-related-items-card";
+import { SidebarResourcesCard } from "./sidebar-resources-card";
 
 /**
  * Props for DetailSidebar
@@ -40,7 +40,7 @@ export interface DetailSidebarProps {
     | ((
         item: UnifiedContentItem,
         relatedItems: UnifiedContentItem[],
-        router: ReturnType<typeof useRouter>
+        router: ReturnType<typeof useRouter>,
       ) => React.ReactNode)
     | undefined;
 }
@@ -61,7 +61,11 @@ export const DetailSidebar = memo(function DetailSidebar({
 
   // Use custom renderer if provided
   if (customRenderer) {
-    return <div className={UI_CLASSES.SPACE_Y_6}>{customRenderer(item, relatedItems, router)}</div>;
+    return (
+      <div className={UI_CLASSES.SPACE_Y_6}>
+        {customRenderer(item, relatedItems, router)}
+      </div>
+    );
   }
 
   // Default sidebar using composable cards

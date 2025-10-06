@@ -14,20 +14,20 @@
  * @see https://github.com/Rich-Harris/devalue - Secure serialization
  */
 
-import { parse as devalueParse, stringify as devalueStringify } from 'devalue';
-import { z } from 'zod';
-import { logger } from '@/src/lib/logger';
+import { parse as devalueParse, stringify as devalueStringify } from "devalue";
+import { z } from "zod";
+import { logger } from "@/src/lib/logger";
 
 /**
  * Parse strategy enum
  */
 export enum ParseStrategy {
   /** Use devalue for maximum security and type preservation */
-  DEVALUE = 'devalue',
+  DEVALUE = "devalue",
   /** Use JSON.parse with Zod validation for maximum compatibility */
-  VALIDATED_JSON = 'validated-json',
+  VALIDATED_JSON = "validated-json",
   /** Use JSON.parse without validation (unsafe - use only for trusted data) */
-  UNSAFE_JSON = 'unsafe-json',
+  UNSAFE_JSON = "unsafe-json",
 }
 
 /**
@@ -38,20 +38,20 @@ const parseOptionsSchema = z
     strategy: z
       .nativeEnum(ParseStrategy)
       .default(ParseStrategy.DEVALUE)
-      .describe('Parsing strategy to use'),
+      .describe("Parsing strategy to use"),
     maxSize: z
       .number()
       .positive()
       .max(10_000_000)
       .optional()
-      .describe('Maximum allowed size in bytes (10MB default)'),
-    enableLogging: z.boolean().default(true).describe('Enable error logging'),
+      .describe("Maximum allowed size in bytes (10MB default)"),
+    enableLogging: z.boolean().default(true).describe("Enable error logging"),
     fallbackStrategy: z
       .nativeEnum(ParseStrategy)
       .optional()
-      .describe('Fallback strategy if primary fails'),
+      .describe("Fallback strategy if primary fails"),
   })
-  .describe('Options for safe JSON parsing');
+  .describe("Options for safe JSON parsing");
 
 export type ParseOptions = z.infer<typeof parseOptionsSchema>;
 
@@ -63,11 +63,16 @@ const stringifyOptionsSchema = z
     strategy: z
       .nativeEnum(ParseStrategy)
       .default(ParseStrategy.DEVALUE)
-      .describe('Stringify strategy to use'),
-    space: z.number().min(0).max(10).optional().describe('Indentation spaces for JSON.stringify'),
-    enableLogging: z.boolean().default(true).describe('Enable error logging'),
+      .describe("Stringify strategy to use"),
+    space: z
+      .number()
+      .min(0)
+      .max(10)
+      .optional()
+      .describe("Indentation spaces for JSON.stringify"),
+    enableLogging: z.boolean().default(true).describe("Enable error logging"),
   })
-  .describe('Options for safe JSON stringification');
+  .describe("Options for safe JSON stringification");
 
 export type StringifyOptions = z.infer<typeof stringifyOptionsSchema>;
 
@@ -104,7 +109,7 @@ function parseWithDevalue<T = unknown>(str: string): T {
     return devalueParse(str) as T;
   } catch (error) {
     throw new Error(
-      `Devalue parse failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      `Devalue parse failed: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 }
@@ -129,7 +134,7 @@ function parseWithValidation<T>(str: string, schema: z.ZodType<T>): T {
     return schema.parse(parsed);
   } catch (error) {
     throw new Error(
-      `Validated JSON parse failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      `Validated JSON parse failed: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 }
@@ -148,7 +153,7 @@ function parseWithUnsafeJSON<T = unknown>(str: string): T {
     return JSON.parse(str) as T;
   } catch (error) {
     throw new Error(
-      `JSON parse failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      `JSON parse failed: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 }
@@ -185,7 +190,7 @@ function parseWithUnsafeJSON<T = unknown>(str: string): T {
 export function safeParse<T = unknown>(
   str: string,
   schema?: z.ZodType<T>,
-  options?: Partial<ParseOptions>
+  options?: Partial<ParseOptions>,
 ): T {
   const opts = parseOptionsSchema.parse(options || {});
   const startTime = performance.now();
@@ -193,12 +198,14 @@ export function safeParse<T = unknown>(
   // Size validation
   const maxSize = opts.maxSize || MAX_SAFE_SIZE;
   if (str.length > maxSize) {
-    throw new Error(`Input exceeds maximum safe size: ${str.length} > ${maxSize} bytes`);
+    throw new Error(
+      `Input exceeds maximum safe size: ${str.length} > ${maxSize} bytes`,
+    );
   }
 
   // Empty string check
-  if (!str || str.trim() === '') {
-    throw new Error('Cannot parse empty string');
+  if (!str || str.trim() === "") {
+    throw new Error("Cannot parse empty string");
   }
 
   let lastError: Error | undefined;
@@ -214,7 +221,7 @@ export function safeParse<T = unknown>(
 
       case ParseStrategy.VALIDATED_JSON:
         if (!schema) {
-          throw new Error('Schema is required for VALIDATED_JSON strategy');
+          throw new Error("Schema is required for VALIDATED_JSON strategy");
         }
         result = parseWithValidation(str, schema);
         break;
@@ -230,7 +237,7 @@ export function safeParse<T = unknown>(
     const parseTime = performance.now() - startTime;
 
     if (opts.enableLogging && parseTime > 100) {
-      logger.warn('Slow JSON parse detected', {
+      logger.warn("Slow JSON parse detected", {
         strategy: String(opts.strategy),
         parseTime: `${parseTime.toFixed(2)}ms`,
         size: `${str.length} bytes`,
@@ -242,7 +249,7 @@ export function safeParse<T = unknown>(
     lastError = error instanceof Error ? error : new Error(String(error));
 
     if (opts.enableLogging) {
-      logger.error('Primary parse strategy failed', lastError, {
+      logger.error("Primary parse strategy failed", lastError, {
         strategy: String(opts.strategy),
         size: `${str.length} bytes`,
         preview: str.slice(0, 100),
@@ -262,7 +269,7 @@ export function safeParse<T = unknown>(
 
         case ParseStrategy.VALIDATED_JSON:
           if (!schema) {
-            throw new Error('Schema is required for VALIDATED_JSON fallback');
+            throw new Error("Schema is required for VALIDATED_JSON fallback");
           }
           result = parseWithValidation(str, schema);
           break;
@@ -272,11 +279,13 @@ export function safeParse<T = unknown>(
           break;
 
         default:
-          throw new Error(`Unknown fallback strategy: ${opts.fallbackStrategy}`);
+          throw new Error(
+            `Unknown fallback strategy: ${opts.fallbackStrategy}`,
+          );
       }
 
       if (opts.enableLogging) {
-        logger.info('Fallback parse strategy succeeded', {
+        logger.info("Fallback parse strategy succeeded", {
           primaryStrategy: String(opts.strategy),
           fallbackStrategy: String(opts.fallbackStrategy),
         });
@@ -286,11 +295,13 @@ export function safeParse<T = unknown>(
     } catch (fallbackError) {
       if (opts.enableLogging) {
         logger.error(
-          'Fallback parse strategy failed',
-          fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError)),
+          "Fallback parse strategy failed",
+          fallbackError instanceof Error
+            ? fallbackError
+            : new Error(String(fallbackError)),
           {
             strategy: String(opts.fallbackStrategy),
-          }
+          },
         );
       }
     }
@@ -298,7 +309,7 @@ export function safeParse<T = unknown>(
 
   // All strategies failed
   throw new Error(
-    `All parse strategies failed. Last error: ${lastError?.message || 'Unknown error'}`
+    `All parse strategies failed. Last error: ${lastError?.message || "Unknown error"}`,
   );
 }
 
@@ -323,7 +334,7 @@ export function safeParse<T = unknown>(
 export function safeParseSafe<T = unknown>(
   str: string,
   schema?: z.ZodType<T>,
-  options?: Partial<ParseOptions>
+  options?: Partial<ParseOptions>,
 ): SafeParseResult<T> {
   const startTime = performance.now();
   const opts = parseOptionsSchema.parse(options || {});
@@ -366,7 +377,10 @@ export function safeParseSafe<T = unknown>(
  * });
  * ```
  */
-export function safeStringify<T = unknown>(value: T, options?: Partial<StringifyOptions>): string {
+export function safeStringify<T = unknown>(
+  value: T,
+  options?: Partial<StringifyOptions>,
+): string {
   const opts = stringifyOptionsSchema.parse(options || {});
 
   try {
@@ -383,13 +397,17 @@ export function safeStringify<T = unknown>(value: T, options?: Partial<Stringify
     }
   } catch (error) {
     if (opts.enableLogging) {
-      logger.error('Stringify failed', error instanceof Error ? error : new Error(String(error)), {
-        strategy: String(opts.strategy),
-        type: typeof value,
-      });
+      logger.error(
+        "Stringify failed",
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          strategy: String(opts.strategy),
+          type: typeof value,
+        },
+      );
     }
     throw new Error(
-      `Stringify failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      `Stringify failed: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 }

@@ -9,10 +9,13 @@
  * This approach is more tsc-efficient than .extend() and follows Zod best practices.
  */
 
-import { z } from 'zod';
-import { baseContentMetadataSchema } from '@/src/lib/schemas/content/base-content.schema';
-import { limitedMediumStringArray } from '@/src/lib/schemas/primitives/base-arrays';
-import { mediumString, shortString } from '@/src/lib/schemas/primitives/base-strings';
+import { z } from "zod";
+import { baseContentMetadataSchema } from "@/src/lib/schemas/content/base-content.schema";
+import { limitedMediumStringArray } from "@/src/lib/schemas/primitives/base-arrays";
+import {
+  mediumString,
+  shortString,
+} from "@/src/lib/schemas/primitives/base-strings";
 
 /**
  * Collection Item Reference Schema
@@ -23,20 +26,22 @@ import { mediumString, shortString } from '@/src/lib/schemas/primitives/base-str
 const collectionItemReferenceSchema = z
   .object({
     category: z
-      .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'])
-      .describe('Content category of the referenced item'),
-    slug: shortString.describe('Unique slug identifier of the referenced item'),
+      .enum(["agents", "mcp", "rules", "commands", "hooks", "statuslines"])
+      .describe("Content category of the referenced item"),
+    slug: shortString.describe("Unique slug identifier of the referenced item"),
     reason: mediumString
       .optional()
       .describe(
-        'Optional explanation for why this item is included in the collection (displayed in UI)'
+        "Optional explanation for why this item is included in the collection (displayed in UI)",
       ),
   })
   .describe(
-    'Reference to a content item included in the collection. Build-time validation ensures item exists.'
+    "Reference to a content item included in the collection. Build-time validation ensures item exists.",
   );
 
-export type CollectionItemReference = z.infer<typeof collectionItemReferenceSchema>;
+export type CollectionItemReference = z.infer<
+  typeof collectionItemReferenceSchema
+>;
 
 /**
  * Collection Compatibility Schema
@@ -48,15 +53,17 @@ const collectionCompatibilitySchema = z
     claudeDesktop: z
       .boolean()
       .default(true)
-      .describe('Whether collection is compatible with Claude Desktop'),
+      .describe("Whether collection is compatible with Claude Desktop"),
     claudeCode: z
       .boolean()
       .default(true)
-      .describe('Whether collection is compatible with Claude Code CLI'),
+      .describe("Whether collection is compatible with Claude Code CLI"),
   })
-  .describe('Platform compatibility information for the collection');
+  .describe("Platform compatibility information for the collection");
 
-export type CollectionCompatibility = z.infer<typeof collectionCompatibilitySchema>;
+export type CollectionCompatibility = z.infer<
+  typeof collectionCompatibilitySchema
+>;
 
 /**
  * Collection content schema - organized bundles of related configurations
@@ -82,25 +89,27 @@ export const collectionContentSchema = z
 
     // Collection-specific required fields
     category: z
-      .literal('collections')
+      .literal("collections")
       .describe('Content category literal identifier: "collections"'),
 
     collectionType: z
-      .enum(['starter-kit', 'workflow', 'advanced-system', 'use-case'])
+      .enum(["starter-kit", "workflow", "advanced-system", "use-case"])
       .describe(
-        'Type of collection: starter-kit (beginner bundles), workflow (task-specific), advanced-system (complex setups), use-case (solution-oriented)'
+        "Type of collection: starter-kit (beginner bundles), workflow (task-specific), advanced-system (complex setups), use-case (solution-oriented)",
       ),
 
     difficulty: z
-      .enum(['beginner', 'intermediate', 'advanced'])
-      .describe('Difficulty level indicating complexity and user experience requirements'),
+      .enum(["beginner", "intermediate", "advanced"])
+      .describe(
+        "Difficulty level indicating complexity and user experience requirements",
+      ),
 
     items: z
       .array(collectionItemReferenceSchema)
-      .min(2, 'Collections must include at least 2 items')
-      .max(20, 'Collections limited to 20 items for maintainability')
+      .min(2, "Collections must include at least 2 items")
+      .max(20, "Collections limited to 20 items for maintainability")
       .describe(
-        'Array of content item references included in this collection (minimum 2, maximum 20 items)'
+        "Array of content item references included in this collection (minimum 2, maximum 20 items)",
       ),
 
     // Collection-specific optional fields
@@ -108,29 +117,29 @@ export const collectionContentSchema = z
       .array(shortString)
       .optional()
       .describe(
-        'Optional ordered array of item slugs defining recommended installation sequence. If not provided, items can be installed in any order.'
+        "Optional ordered array of item slugs defining recommended installation sequence. If not provided, items can be installed in any order.",
       ),
 
     prerequisites: limitedMediumStringArray
       .optional()
       .describe(
-        'Optional list of prerequisites required before installing this collection (e.g., "Node.js 18+", "API key from service X")'
+        'Optional list of prerequisites required before installing this collection (e.g., "Node.js 18+", "API key from service X")',
       ),
 
     estimatedSetupTime: shortString
       .optional()
       .describe(
-        'Optional human-readable time estimate for complete setup (e.g., "15 minutes", "1 hour", "2-3 hours")'
+        'Optional human-readable time estimate for complete setup (e.g., "15 minutes", "1 hour", "2-3 hours")',
       ),
 
     compatibility: collectionCompatibilitySchema
       .optional()
       .describe(
-        'Optional platform compatibility information. Defaults to supporting both Claude Desktop and Claude Code.'
+        "Optional platform compatibility information. Defaults to supporting both Claude Desktop and Claude Code.",
       ),
   })
   .describe(
-    'Collection content schema for organized bundles of related configurations. Collections enable sharing multiple content items (agents, MCP servers, commands, etc.) together as a unified, curated package. Inherits base content metadata and adds collection-specific fields for item references, installation guidance, and compatibility.'
+    "Collection content schema for organized bundles of related configurations. Collections enable sharing multiple content items (agents, MCP servers, commands, etc.) together as a unified, curated package. Inherits base content metadata and adds collection-specific fields for item references, installation guidance, and compatibility.",
   );
 
 export type CollectionContent = z.infer<typeof collectionContentSchema>;

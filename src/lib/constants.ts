@@ -6,7 +6,7 @@
  * for type safety and runtime validation.
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Application Information Schema
@@ -18,17 +18,17 @@ const appConfigSchema = z.object({
   description: z.string().min(10).max(500),
   author: z.string().min(1).max(100),
   version: z.string().regex(/^\d+\.\d+\.\d+$/),
-  license: z.enum(['MIT', 'Apache-2.0', 'GPL-3.0', 'BSD-3-Clause']),
+  license: z.enum(["MIT", "Apache-2.0", "GPL-3.0", "BSD-3-Clause"]),
 });
 
 export const APP_CONFIG = appConfigSchema.parse({
-  name: 'Claude Pro Directory',
-  domain: 'claudepro.directory',
-  url: 'https://claudepro.directory',
-  description: 'Complete database of Claude AI configurations',
-  author: 'Claude Pro Directory',
-  version: '1.0.0',
-  license: 'MIT',
+  name: "Claude Pro Directory",
+  domain: "claudepro.directory",
+  url: "https://claudepro.directory",
+  description: "Complete database of Claude AI configurations",
+  author: "Claude Pro Directory",
+  version: "1.0.0",
+  license: "MIT",
 });
 
 /**
@@ -47,15 +47,15 @@ const socialLinksSchema = z.object({
 });
 
 export const SOCIAL_LINKS = socialLinksSchema.parse({
-  github: 'https://github.com/JSONbored/claudepro-directory',
-  authorProfile: 'https://github.com/JSONbored',
-  discord: 'https://discord.gg/Ax3Py4YDrq',
-  twitter: 'https://x.com/JSONbored',
-  email: 'contact@claudepro.directory',
-  hiEmail: 'hi@claudepro.directory',
-  partnerEmail: 'partner@claudepro.directory',
-  supportEmail: 'support@claudepro.directory',
-  securityEmail: 'security@claudepro.directory',
+  github: "https://github.com/JSONbored/claudepro-directory",
+  authorProfile: "https://github.com/JSONbored",
+  discord: "https://discord.gg/Ax3Py4YDrq",
+  twitter: "https://x.com/JSONbored",
+  email: "contact@claudepro.directory",
+  hiEmail: "hi@claudepro.directory",
+  partnerEmail: "partner@claudepro.directory",
+  supportEmail: "support@claudepro.directory",
+  securityEmail: "security@claudepro.directory",
 });
 
 /**
@@ -64,24 +64,24 @@ export const SOCIAL_LINKS = socialLinksSchema.parse({
 const apiConfigSchema = z.object({
   baseUrl: z.string().url(),
   endpoints: z.object({
-    agents: z.string().startsWith('/api/'),
-    mcp: z.string().startsWith('/api/'),
-    rules: z.string().startsWith('/api/'),
-    commands: z.string().startsWith('/api/'),
-    hooks: z.string().startsWith('/api/'),
-    allConfigurations: z.string().startsWith('/api/'),
+    agents: z.string().startsWith("/api/"),
+    mcp: z.string().startsWith("/api/"),
+    rules: z.string().startsWith("/api/"),
+    commands: z.string().startsWith("/api/"),
+    hooks: z.string().startsWith("/api/"),
+    allConfigurations: z.string().startsWith("/api/"),
   }),
 });
 
 export const API_CONFIG = apiConfigSchema.parse({
-  baseUrl: 'https://claudepro.directory/api',
+  baseUrl: "https://claudepro.directory/api",
   endpoints: {
-    agents: '/api/agents.json',
-    mcp: '/api/mcp.json',
-    rules: '/api/rules.json',
-    commands: '/api/commands.json',
-    hooks: '/api/hooks.json',
-    allConfigurations: '/api/all-configurations.json',
+    agents: "/api/agents.json",
+    mcp: "/api/mcp.json",
+    rules: "/api/rules.json",
+    commands: "/api/commands.json",
+    hooks: "/api/hooks.json",
+    allConfigurations: "/api/all-configurations.json",
   },
 });
 
@@ -100,40 +100,40 @@ const claudeConfigSchema = z.object({
 
 export const CLAUDE_CONFIG = claudeConfigSchema.parse({
   desktop: {
-    macos: '~/Library/Application Support/Claude/claude_desktop_config.json',
-    windows: '%APPDATA%\\Claude\\claude_desktop_config.json',
+    macos: "~/Library/Application Support/Claude/claude_desktop_config.json",
+    windows: "%APPDATA%\\Claude\\claude_desktop_config.json",
   },
   code: {
-    command: 'claude mcp add',
+    command: "claude mcp add",
   },
 });
 
 /**
  * Content Categories Schema (leveraging existing schema)
  */
-import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
+import { contentCategorySchema } from "@/src/lib/schemas/shared.schema";
 
 // CONSOLIDATION: Use complete category list from centralized schema instead of partial list
 // This eliminates the type mismatch between constants and actual categories used
 export const CONTENT_CATEGORIES = {
   // Core content types (have dedicated directories in /content)
-  agents: 'agents',
-  mcp: 'mcp',
-  rules: 'rules',
-  commands: 'commands',
-  hooks: 'hooks',
-  statuslines: 'statuslines',
+  agents: "agents",
+  mcp: "mcp",
+  rules: "rules",
+  commands: "commands",
+  hooks: "hooks",
+  statuslines: "statuslines",
   // SEO content types (in /seo directory)
-  guides: 'guides',
-  tutorials: 'tutorials',
-  comparisons: 'comparisons',
-  workflows: 'workflows',
-  'use-cases': 'use-cases',
-  troubleshooting: 'troubleshooting',
-  categories: 'categories',
-  collections: 'collections',
+  guides: "guides",
+  tutorials: "tutorials",
+  comparisons: "comparisons",
+  workflows: "workflows",
+  "use-cases": "use-cases",
+  troubleshooting: "troubleshooting",
+  categories: "categories",
+  collections: "collections",
   // Special types
-  jobs: 'jobs',
+  jobs: "jobs",
 } as const;
 
 // Validate each category exists in the centralized schema
@@ -143,22 +143,22 @@ Object.values(CONTENT_CATEGORIES).forEach((category) => {
 
 // CONSOLIDATION: Export unified main content categories for splitting logic
 export const MAIN_CONTENT_CATEGORIES = [
-  'hooks',
-  'mcp',
-  'commands',
-  'rules',
-  'agents',
-  'statuslines',
-  'collections',
+  "hooks",
+  "mcp",
+  "commands",
+  "rules",
+  "agents",
+  "statuslines",
+  "collections",
 ] as const;
 
 // CONSOLIDATION: Export SEO categories for better organization
 export const SEO_CATEGORIES = [
-  'tutorials',
-  'comparisons',
-  'workflows',
-  'use-cases',
-  'troubleshooting',
+  "tutorials",
+  "comparisons",
+  "workflows",
+  "use-cases",
+  "troubleshooting",
 ] as const;
 
 /**
@@ -167,42 +167,42 @@ export const SEO_CATEGORIES = [
  */
 const contentPathsSchema = z.object({
   // JSON content types (existing structure)
-  agents: z.string().startsWith('content/'),
-  mcp: z.string().startsWith('content/'),
-  rules: z.string().startsWith('content/'),
-  commands: z.string().startsWith('content/'),
-  hooks: z.string().startsWith('content/'),
-  statuslines: z.string().startsWith('content/'),
-  collections: z.string().startsWith('content/'),
+  agents: z.string().startsWith("content/"),
+  mcp: z.string().startsWith("content/"),
+  rules: z.string().startsWith("content/"),
+  commands: z.string().startsWith("content/"),
+  hooks: z.string().startsWith("content/"),
+  statuslines: z.string().startsWith("content/"),
+  collections: z.string().startsWith("content/"),
 
   // MDX guide content types (new structure)
-  guides: z.string().startsWith('content/'),
-  tutorials: z.string().startsWith('content/guides/'),
-  comparisons: z.string().startsWith('content/guides/'),
-  workflows: z.string().startsWith('content/guides/'),
-  'use-cases': z.string().startsWith('content/guides/'),
-  troubleshooting: z.string().startsWith('content/guides/'),
-  categories: z.string().startsWith('content/guides/'),
+  guides: z.string().startsWith("content/"),
+  tutorials: z.string().startsWith("content/guides/"),
+  comparisons: z.string().startsWith("content/guides/"),
+  workflows: z.string().startsWith("content/guides/"),
+  "use-cases": z.string().startsWith("content/guides/"),
+  troubleshooting: z.string().startsWith("content/guides/"),
+  categories: z.string().startsWith("content/guides/"),
 });
 
 export const CONTENT_PATHS = contentPathsSchema.parse({
   // JSON content (existing structure)
-  agents: 'content/agents',
-  mcp: 'content/mcp',
-  rules: 'content/rules',
-  commands: 'content/commands',
-  hooks: 'content/hooks',
-  statuslines: 'content/statuslines',
-  collections: 'content/collections',
+  agents: "content/agents",
+  mcp: "content/mcp",
+  rules: "content/rules",
+  commands: "content/commands",
+  hooks: "content/hooks",
+  statuslines: "content/statuslines",
+  collections: "content/collections",
 
   // MDX guide content (new structure)
-  guides: 'content/guides',
-  tutorials: 'content/guides/tutorials',
-  comparisons: 'content/guides/comparisons',
-  workflows: 'content/guides/workflows',
-  'use-cases': 'content/guides/use-cases',
-  troubleshooting: 'content/guides/troubleshooting',
-  categories: 'content/guides/categories',
+  guides: "content/guides",
+  tutorials: "content/guides/tutorials",
+  comparisons: "content/guides/comparisons",
+  workflows: "content/guides/workflows",
+  "use-cases": "content/guides/use-cases",
+  troubleshooting: "content/guides/troubleshooting",
+  categories: "content/guides/categories",
 });
 
 /**
@@ -213,7 +213,7 @@ export const GUIDE_CATEGORIES = {
   tutorials: CONTENT_PATHS.tutorials,
   comparisons: CONTENT_PATHS.comparisons,
   workflows: CONTENT_PATHS.workflows,
-  'use-cases': CONTENT_PATHS['use-cases'],
+  "use-cases": CONTENT_PATHS["use-cases"],
   troubleshooting: CONTENT_PATHS.troubleshooting,
   categories: CONTENT_PATHS.categories,
 } as const;
@@ -228,12 +228,12 @@ export const UI_CONFIG = {
   },
   animation: {
     duration: 300,
-    easing: 'ease-in-out',
+    easing: "ease-in-out",
   },
   breakpoints: {
-    mobile: '768px',
-    tablet: '1024px',
-    desktop: '1280px',
+    mobile: "768px",
+    tablet: "1024px",
+    desktop: "1280px",
   },
 } as const;
 
@@ -244,7 +244,7 @@ const dateConfigSchema = z.object({
   currentMonth: z
     .string()
     .regex(
-      /^(January|February|March|April|May|June|July|August|September|October|November|December)$/
+      /^(January|February|March|April|May|June|July|August|September|October|November|December)$/,
     ),
   currentYear: z.number().min(2024).max(2030),
   currentDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -256,13 +256,13 @@ const dateConfigSchema = z.object({
 });
 
 export const DATE_CONFIG = dateConfigSchema.parse({
-  currentMonth: 'October',
+  currentMonth: "October",
   currentYear: 2025,
-  currentDate: '2025-10-01',
-  lastReviewed: '2025-10-01',
+  currentDate: "2025-10-01",
+  lastReviewed: "2025-10-01",
   claudeModels: {
-    sonnet: 'Claude Sonnet 4.5',
-    opus: 'Claude Opus 4.1',
+    sonnet: "Claude Sonnet 4.5",
+    opus: "Claude Opus 4.1",
   },
 });
 
@@ -275,26 +275,26 @@ export const SEO_DATE_STRING = `${DATE_CONFIG.currentMonth.toLowerCase()} ${DATE
  */
 const seoConfigSchema = z.object({
   defaultTitle: z.string().min(1).max(60),
-  titleTemplate: z.string().includes('%s'),
+  titleTemplate: z.string().includes("%s"),
   defaultDescription: z.string().min(10).max(160),
   keywords: z.array(z.string().min(1)).min(1),
 });
 
 export const SEO_CONFIG = seoConfigSchema.parse({
-  defaultTitle: 'Claude Pro Directory',
-  titleTemplate: '%s - Claude Pro Directory',
+  defaultTitle: "Claude Pro Directory",
+  titleTemplate: "%s - Claude Pro Directory",
   defaultDescription:
-    'Open-source directory of 150+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.',
+    "Open-source directory of 150+ Claude AI configurations. Community-driven collection of MCP servers, automation hooks, custom commands, agents, and rules.",
   keywords: [
-    'claude ai',
-    'claude pro',
-    'mcp servers',
-    'claude agents',
-    'claude hooks',
-    'claude rules',
-    'claude commands',
-    'ai development',
-    'claude directory',
+    "claude ai",
+    "claude pro",
+    "mcp servers",
+    "claude agents",
+    "claude hooks",
+    "claude rules",
+    "claude commands",
+    "ai development",
+    "claude directory",
   ],
 });
 
@@ -303,13 +303,13 @@ export const SEO_CONFIG = seoConfigSchema.parse({
  */
 export const SCHEMA_ORG = {
   organization: {
-    '@type': 'Organization',
+    "@type": "Organization",
     name: APP_CONFIG.name,
     url: APP_CONFIG.url,
     description: APP_CONFIG.description,
   },
   website: {
-    '@type': 'WebSite',
+    "@type": "WebSite",
     name: APP_CONFIG.name,
     url: APP_CONFIG.url,
     description: SEO_CONFIG.defaultDescription,
@@ -335,7 +335,7 @@ export const DEV_CONFIG = {
     preview: 3001,
     testing: 3002,
   },
-  logLevel: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
+  logLevel: process.env.NODE_ENV === "development" ? "debug" : "info",
 } as const;
 
 /**
@@ -343,19 +343,22 @@ export const DEV_CONFIG = {
  */
 export const SECURITY_CONFIG = {
   headers: {
-    'X-Frame-Options': 'DENY',
-    'X-Content-Type-Options': 'nosniff',
-    'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+    "X-Frame-Options": "DENY",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
   },
   // Trusted hostnames for validation
   trustedHostnames: {
-    github: ['github.com', 'www.github.com'] as const,
-    umami: ['umami.claudepro.directory'] as const,
-    vercel: ['va.vercel-scripts.com'] as const,
+    github: ["github.com", "www.github.com"] as const,
+    umami: ["umami.claudepro.directory"] as const,
+    vercel: ["va.vercel-scripts.com"] as const,
   },
   // Allowed origins for postMessage
-  allowedOrigins: ['https://claudepro.directory', 'https://www.claudepro.directory'] as const,
+  allowedOrigins: [
+    "https://claudepro.directory",
+    "https://www.claudepro.directory",
+  ] as const,
 } as const;
 
 /**
@@ -385,9 +388,9 @@ export const CACHE_CONFIG = {
     longTerm: 60 * 60 * 1000, // 1 hour in milliseconds
   },
   keys: {
-    content: 'content:',
-    api: 'api:',
-    related: 'related:',
+    content: "content:",
+    api: "api:",
+    related: "related:",
   },
 } as const;
 
@@ -396,11 +399,11 @@ export const CACHE_CONFIG = {
  * Standardized cache-control headers for different content types
  */
 export const CACHE_HEADERS = {
-  LONG: 'public, max-age=31536000, immutable', // 1 year for immutable assets
-  MEDIUM: 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400', // 1 hour
-  SHORT: 'public, max-age=60, s-maxage=60, stale-while-revalidate=300', // 1 minute
-  STREAMING: 'public, max-age=0, must-revalidate', // For streaming/dynamic content
-  NO_CACHE: 'no-cache, no-store, must-revalidate', // No caching
+  LONG: "public, max-age=31536000, immutable", // 1 year for immutable assets
+  MEDIUM: "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400", // 1 hour
+  SHORT: "public, max-age=60, s-maxage=60, stale-while-revalidate=300", // 1 minute
+  STREAMING: "public, max-age=0, must-revalidate", // For streaming/dynamic content
+  NO_CACHE: "no-cache, no-store, must-revalidate", // No caching
 } as const;
 
 /**
@@ -440,78 +443,78 @@ export const SEARCH_CONFIG = {
  * Used for proper capitalization of technical terms
  */
 export const ACRONYMS = [
-  'API',
-  'AWS',
-  'CSS',
-  'JSON',
-  'SCSS',
-  'HTML',
-  'XML',
-  'HTTP',
-  'HTTPS',
-  'URL',
-  'URI',
-  'SQL',
-  'NoSQL',
-  'REST',
-  'GraphQL',
-  'JWT',
-  'SSH',
-  'FTP',
-  'SMTP',
-  'DNS',
-  'CDN',
-  'SDK',
-  'CLI',
-  'IDE',
-  'UI',
-  'UX',
-  'AI',
-  'ML',
-  'NPM',
-  'CI',
-  'CD',
-  'CI/CD',
-  'PDF',
-  'CSV',
-  'SVG',
-  'PNG',
-  'JPG',
-  'JPEG',
-  'GIF',
-  'TCP',
-  'UDP',
-  'IP',
-  'VPN',
-  'SSL',
-  'TLS',
-  'OAuth',
-  'SAML',
-  'LDAP',
-  'DB',
-  'CRUD',
-  'ORM',
-  'MVC',
-  'MVP',
-  'MVVM',
-  'SPA',
-  'PWA',
-  'SEO',
-  'CMS',
-  'CRM',
-  'SaaS',
-  'PaaS',
-  'IaaS',
-  'E2E',
-  'QA',
-  'TDD',
-  'BDD',
-  'CORS',
-  'CSRF',
-  'XSS',
-  'MCP',
-  'LLM',
-  'GPT',
-  'SRE',
-  'DevOps',
+  "API",
+  "AWS",
+  "CSS",
+  "JSON",
+  "SCSS",
+  "HTML",
+  "XML",
+  "HTTP",
+  "HTTPS",
+  "URL",
+  "URI",
+  "SQL",
+  "NoSQL",
+  "REST",
+  "GraphQL",
+  "JWT",
+  "SSH",
+  "FTP",
+  "SMTP",
+  "DNS",
+  "CDN",
+  "SDK",
+  "CLI",
+  "IDE",
+  "UI",
+  "UX",
+  "AI",
+  "ML",
+  "NPM",
+  "CI",
+  "CD",
+  "CI/CD",
+  "PDF",
+  "CSV",
+  "SVG",
+  "PNG",
+  "JPG",
+  "JPEG",
+  "GIF",
+  "TCP",
+  "UDP",
+  "IP",
+  "VPN",
+  "SSL",
+  "TLS",
+  "OAuth",
+  "SAML",
+  "LDAP",
+  "DB",
+  "CRUD",
+  "ORM",
+  "MVC",
+  "MVP",
+  "MVVM",
+  "SPA",
+  "PWA",
+  "SEO",
+  "CMS",
+  "CRM",
+  "SaaS",
+  "PaaS",
+  "IaaS",
+  "E2E",
+  "QA",
+  "TDD",
+  "BDD",
+  "CORS",
+  "CSRF",
+  "XSS",
+  "MCP",
+  "LLM",
+  "GPT",
+  "SRE",
+  "DevOps",
 ] as const;

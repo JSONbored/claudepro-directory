@@ -10,31 +10,33 @@
  * Handles: JSON configs, multi-format MCP configs, hook configs
  */
 
-import { ProductionCodeBlock } from '@/src/components/shared/production-code-block';
+import { ProductionCodeBlock } from "@/src/components/shared/production-code-block";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/src/components/ui/card';
-import { highlightCode } from '@/src/lib/content/syntax-highlighting';
-import { Copy } from '@/src/lib/icons';
-import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+} from "@/src/components/ui/card";
+import { highlightCode } from "@/src/lib/content/syntax-highlighting";
+import { Copy } from "@/src/lib/icons";
+import type { UnifiedContentItem } from "@/src/lib/schemas/component.schema";
+import { UI_CLASSES } from "@/src/lib/ui-constants";
 import {
   generateFilename,
   generateHookFilename,
   generateMultiFormatFilename,
-} from '@/src/lib/utils/filename-generator';
+} from "@/src/lib/utils/filename-generator";
 
 /**
  * Props for ConfigurationSection
  */
 export interface ConfigurationSectionProps {
   item: UnifiedContentItem;
-  customRenderer?: ((item: UnifiedContentItem) => React.ReactElement | null) | undefined;
-  format?: 'json' | 'multi' | 'hook';
+  customRenderer?:
+    | ((item: UnifiedContentItem) => React.ReactElement | null)
+    | undefined;
+  format?: "json" | "multi" | "hook";
   preHighlightedConfigHtml?: string | undefined;
 }
 
@@ -49,7 +51,7 @@ export interface ConfigurationSectionProps {
 export async function ConfigurationSection({
   item,
   customRenderer,
-  format = 'json',
+  format = "json",
   preHighlightedConfigHtml,
 }: ConfigurationSectionProps) {
   // Use custom renderer if provided
@@ -58,10 +60,10 @@ export async function ConfigurationSection({
   }
 
   // Check if configuration exists
-  if (!('configuration' in item && item.configuration)) return null;
+  if (!("configuration" in item && item.configuration)) return null;
 
   // Multi-format configuration (MCP servers) - SERVER-SIDE SHIKI
-  if (format === 'multi') {
+  if (format === "multi") {
     const config = item.configuration as {
       claudeDesktop?: Record<string, unknown>;
       claudeCode?: Record<string, unknown>;
@@ -75,8 +77,8 @@ export async function ConfigurationSection({
         if (!value) return null;
 
         const code = JSON.stringify(value, null, 2);
-        const html = await highlightCode(code, 'json');
-        const filename = generateMultiFormatFilename(item, key, 'json');
+        const html = await highlightCode(code, "json");
+        const filename = generateMultiFormatFilename(item, key, "json");
 
         return {
           key,
@@ -84,7 +86,7 @@ export async function ConfigurationSection({
           code,
           filename,
         };
-      })
+      }),
     );
 
     return (
@@ -119,7 +121,7 @@ export async function ConfigurationSection({
   }
 
   // Hook configuration format - SERVER-SIDE SHIKI
-  if (format === 'hook') {
+  if (format === "hook") {
     const config = item.configuration as {
       hookConfig?: { hooks?: Record<string, unknown> };
       scriptContent?: string;
@@ -128,9 +130,11 @@ export async function ConfigurationSection({
     // Pre-render hook config and script with Shiki
     const [highlightedHookConfig, highlightedScript] = await Promise.all([
       config.hookConfig
-        ? highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json')
+        ? highlightCode(JSON.stringify(config.hookConfig, null, 2), "json")
         : Promise.resolve(null),
-      config.scriptContent ? highlightCode(config.scriptContent, 'bash') : Promise.resolve(null),
+      config.scriptContent
+        ? highlightCode(config.scriptContent, "bash")
+        : Promise.resolve(null),
     ]);
 
     return (
@@ -148,7 +152,7 @@ export async function ConfigurationSection({
               html={highlightedHookConfig}
               code={JSON.stringify(config.hookConfig, null, 2)}
               language="json"
-              filename={generateHookFilename(item, 'hookConfig', 'json')}
+              filename={generateHookFilename(item, "hookConfig", "json")}
               maxLines={20}
             />
           )}
@@ -157,7 +161,7 @@ export async function ConfigurationSection({
               html={highlightedScript}
               code={config.scriptContent}
               language="bash"
-              filename={generateHookFilename(item, 'scriptContent', 'bash')}
+              filename={generateHookFilename(item, "scriptContent", "bash")}
               maxLines={25}
             />
           )}
@@ -168,7 +172,7 @@ export async function ConfigurationSection({
 
   // Default JSON configuration - SERVER-SIDE SHIKI
   const code = JSON.stringify(item.configuration, null, 2);
-  const html = preHighlightedConfigHtml || (await highlightCode(code, 'json'));
+  const html = preHighlightedConfigHtml || (await highlightCode(code, "json"));
 
   return (
     <Card>
@@ -184,7 +188,7 @@ export async function ConfigurationSection({
           html={html}
           code={code}
           language="json"
-          filename={generateFilename({ item, language: 'json' })}
+          filename={generateFilename({ item, language: "json" })}
           maxLines={25}
         />
       </CardContent>
