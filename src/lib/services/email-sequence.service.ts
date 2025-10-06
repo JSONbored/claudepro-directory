@@ -238,7 +238,7 @@ class EmailSequenceService {
       throw new Error(`Invalid sequence step: ${step}`);
     }
 
-    // Load template dynamically
+    // Load template dynamically (all templates export as default)
     const templateModule = await templateLoader();
     const Template = templateModule.default as
       | ((props: { email: string }) => ReactElement)

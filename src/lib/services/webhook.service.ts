@@ -242,16 +242,16 @@ class WebhookService {
    * Get bounce count for an email
    */
   private async getBounceCount(email: string): Promise<number> {
-    const count = await redisClient.executeOperation(
+    const result = await redisClient.executeOperation(
       async (redis) => {
         const result = await redis.get(`email:bounces:${email}`);
         return result ? Number.parseInt(result as string, 10) : 0;
       },
-      () => 0,
+      () => ({ count: 0 }),
       'get_bounce_count'
     );
 
-    return count;
+    return result.count;
   }
 
   /**

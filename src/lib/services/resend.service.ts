@@ -227,6 +227,51 @@ class ResendService {
   }
 
   /**
+   * Remove contact from audience
+   *
+   * @param email - Email address to remove
+   * @param audienceId - Optional audience ID (defaults to env RESEND_AUDIENCE_ID)
+   * @returns Success result
+   */
+  async removeContact(
+    email: string,
+    audienceId?: string
+  ): Promise<{ success: boolean; message?: string; error?: string }> {
+    if (!(this.client && this.AUDIENCE_ID)) {
+      return {
+        success: false,
+        error: 'Resend is not enabled - missing API key or audience ID',
+      };
+    }
+
+    try {
+      const targetAudienceId = audienceId || this.AUDIENCE_ID;
+
+      await this.client.contacts.remove({
+        audienceId: targetAudienceId,
+        email,
+      });
+
+      logger.info('Contact removed from audience', {
+        audienceId: targetAudienceId,
+      });
+
+      return { success: true, message: 'Contact removed successfully' };
+    } catch (error) {
+      const errorDetails = this.parseError(error);
+      logger.error('Failed to remove contact', error instanceof Error ? error : undefined, {
+        errorName: errorDetails.name,
+        errorMessage: errorDetails.message,
+      });
+
+      return {
+        success: false,
+        error: errorDetails.message,
+      };
+    }
+  }
+
+  /**
    * Check if service is enabled and configured
    */
   isEnabled(): boolean {
