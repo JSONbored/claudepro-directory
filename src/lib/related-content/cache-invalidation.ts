@@ -120,7 +120,10 @@ class CacheInvalidationService {
       try {
         await contentCache.invalidatePattern(pattern);
       } catch (error) {
-        logger.warn('Failed to invalidate pattern', { pattern, error: String(error) });
+        logger.warn('Failed to invalidate pattern', {
+          pattern,
+          error: String(error),
+        });
       }
     }
   }

@@ -1,175 +1,58 @@
 # PR Labeler Configuration
 # Automatically labels pull requests based on changed files
+#
+# Simplified to use only essential, non-overlapping labels
+# Previous version had 20+ labels causing excessive duplication
 
 # ========================================
-# COMMUNITY CONTRIBUTION LABELS
+# COMMUNITY CONTRIBUTIONS
 # ========================================
 
-# Community MCP Server Contributions
-community-mcp:
+# Any community content submission (agents, mcp, commands, rules, hooks, statuslines, collections)
+content-submission:
   - changed-files:
     - any-glob-to-any-file:
-      - 'content/mcp/*.json'
-      - 'templates/content/mcp-template*.json'
-
-# Community Hook Contributions
-community-hooks:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'content/hooks/*.json'
-      - 'templates/content/hooks-template*.json'
-
-# Community Agent Contributions
-community-agents:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'content/agents/*.json'
-      - 'templates/content/agents-template*.json'
-
-# Community Command Contributions
-community-commands:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'content/commands/*.json'
-      - 'templates/content/commands-template*.json'
-
-# Community Rule Contributions
-community-rules:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'content/rules/*.json'
-      - 'templates/content/rules-template*.json'
-
-# Community Statusline Contributions
-community-statuslines:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'content/statuslines/*.json'
-      - 'templates/content/statuslines-template*.json'
-
-# Community Collection Contributions
-community-collections:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'content/collections/*.json'
-      - 'templates/content/collections-template*.json'
+      - 'content/**/*.json'
+      - 'templates/content/**'
 
 # ========================================
-# TECHNICAL LABELS
+# TECHNICAL CHANGES
 # ========================================
 
-# Security-related changes
+# Security-related changes (middleware, security libs, auth)
 security:
   - changed-files:
     - any-glob-to-any-file:
       - 'src/middleware.ts'
       - 'src/lib/security/**'
+      - 'src/lib/actions/**'
       - '.github/workflows/security.yml'
-      - 'config/security/**'
 
-# Performance-related changes
-performance:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'src/components/shared/performance-optimizer.tsx'
-      - 'src/lib/performance/**'
-      - 'next.config.mjs'
-      - 'config/tools/lighthouserc.json'
-      - '.github/workflows/bundle-analysis.yml'
-      - '.github/workflows/lighthouse.yml'
-
-# General content changes (non-community)
-content:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'content/guides/**/*.mdx'
-      - 'src/lib/content/**'
-      - 'scripts/generate-*.ts'
-
-# Dependency updates
+# Dependency updates (package.json, lockfile)
 dependencies:
   - changed-files:
     - any-glob-to-any-file:
       - 'package.json'
       - 'package-lock.json'
 
-# GitHub Actions workflows
+# Documentation only (README, CHANGELOG, docs/, guides/)
+documentation:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'README.md'
+      - 'CHANGELOG.md'
+      - 'docs/**'
+      - 'content/guides/**/*.mdx'
+    - all-globs-to-all-files:
+      - '!src/**'
+      - '!config/**'
+      - '!scripts/**'
+      - '!.github/workflows/**'
+
+# GitHub Actions workflows and automation
 github-actions:
   - changed-files:
     - any-glob-to-any-file:
       - '.github/workflows/**'
       - '.github/actions/**'
       - '.github/labeler.yml'
-
-# Documentation
-documentation:
-  - changed-files:
-    - any-glob-to-any-file:
-      - '**/*.md'
-      - 'docs/**'
-      - 'CHANGELOG.md'
-      - 'README.md'
-      - 'templates/**'
-
-# Middleware changes
-middleware:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'src/middleware.ts'
-      - 'src/lib/middleware/**'
-
-# API routes
-api:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'src/app/api/**'
-      - 'src/lib/api/**'
-
-# UI components
-ui:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'src/components/**/*.tsx'
-      - 'src/lib/ui-constants.ts'
-      - 'src/app/**/page.tsx'
-      - 'src/app/**/layout.tsx'
-
-# Configuration
-config:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'config/**'
-      - 'tsconfig.json'
-      - 'biome.json'
-      - 'tailwind.config.ts'
-
-# Build system
-build:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'next.config.mjs'
-      - 'turbo.json'
-      - 'scripts/build-*.ts'
-
-# SEO and metadata
-seo:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'src/app/**/opengraph-image.tsx'
-      - 'src/app/**/twitter-image.tsx'
-      - 'src/components/structured-data/**'
-      - 'src/components/shared/structured-data.tsx'
-      - 'public/robots.txt'
-      - 'public/sitemap.xml'
-      - 'scripts/generate-sitemap.ts'
-
-# Testing
-testing:
-  - changed-files:
-    - any-glob-to-any-file:
-      - '**/*.test.ts'
-      - '**/*.test.tsx'
-      - '**/*.spec.ts'
-      - '**/*.spec.tsx'
-      - 'tests/**'
-      - '__tests__/**'

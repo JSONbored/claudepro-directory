@@ -493,7 +493,13 @@ export class CacheService {
         const fullKey = this.generateKey(key);
         const validatedTTL = validateTTL(ttl || this.config.defaultTTL);
         const serialized = this.serializeEntry(value, validatedTTL);
-        return { fullKey, key, serialized, ttl: validatedTTL, size: serialized.length };
+        return {
+          fullKey,
+          key,
+          serialized,
+          ttl: validatedTTL,
+          size: serialized.length,
+        };
       });
 
       // Use Promise.all to leverage auto-pipelining
@@ -582,7 +588,10 @@ export class CacheService {
           let cursor = '0';
           do {
             scanCycles++;
-            const result = await redis.scan(cursor, { match: fullPattern, count: 100 });
+            const result = await redis.scan(cursor, {
+              match: fullPattern,
+              count: 100,
+            });
             cursor = String(result[0]);
             const keys = result[1];
             keysScanned += keys.length;

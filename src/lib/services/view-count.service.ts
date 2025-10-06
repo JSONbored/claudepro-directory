@@ -118,7 +118,11 @@ class ViewCountService {
       const result: Record<string, ViewCountResponse> = {};
 
       // Check cache for all items first
-      const uncachedItems: Array<{ category: string; slug: string; key: string }> = [];
+      const uncachedItems: Array<{
+        category: string;
+        slug: string;
+        key: string;
+      }> = [];
 
       for (const item of request.items) {
         const cacheKey = `${item.category}:${item.slug}`;
@@ -139,7 +143,10 @@ class ViewCountService {
       if (uncachedItems.length > 0 && statsRedis.isEnabled()) {
         try {
           const redisResults = await statsRedis.getViewCounts(
-            uncachedItems.map((item) => ({ category: item.category, slug: item.slug }))
+            uncachedItems.map((item) => ({
+              category: item.category,
+              slug: item.slug,
+            }))
           );
 
           for (const item of uncachedItems) {

@@ -1,6 +1,7 @@
 {
   "slug": "your-collection-name",
   "title": "Your Collection Title",
+  "seoTitle": "OPTIONAL: Short title for browser tab (max 60 chars total with section suffix)",
   "description": "Comprehensive description of what this collection provides, what problem it solves, and how the items work together. This should give users a clear understanding of the value they'll get from using this curated set of configurations together.",
   "author": "Your Name or GitHub Username",
   "dateAdded": "YYYY-MM-DD",
@@ -84,11 +85,7 @@
       {
         "title": "Example scenario #1",
         "description": "Detailed walkthrough of a common use case",
-        "steps": [
-          "Step 1 of example",
-          "Step 2 of example",
-          "Expected outcome"
-        ]
+        "steps": ["Step 1 of example", "Step 2 of example", "Expected outcome"]
       }
     ]
   },

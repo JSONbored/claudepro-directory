@@ -14,12 +14,27 @@
 
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { CopyLLMsButton } from '@/src/components/shared/copy-llms-button';
+import { CopyMarkdownButton } from '@/src/components/shared/copy-markdown-button';
+import { DownloadMarkdownButton } from '@/src/components/shared/download-markdown-button';
+import type { CopyType } from '@/src/components/shared/post-copy-email-modal';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
-import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
+import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { ArrowLeft, Copy } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+
+/**
+ * Determine copy type based on content item structure
+ */
+function determineCopyType(item: UnifiedContentItem): CopyType {
+  // Check if item has content or configuration (indicates code/config copy)
+  if ('content' in item && item.content) return 'code';
+  if ('configuration' in item && item.configuration) return 'code';
+  // Default to link for other types
+  return 'link';
+}
 
 /**
  * Serializable action data for client component
@@ -59,7 +74,14 @@ export function DetailHeaderActions({
   onCopyContent,
 }: DetailHeaderActionsProps) {
   const router = useRouter();
-  const { copied, copy } = useCopyToClipboard({
+  const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
+  const { copied, copy } = useCopyWithEmailCapture({
+    emailContext: {
+      copyType: determineCopyType(item),
+      category,
+      slug: item.slug,
+      ...(referrer && { referrer }),
+    },
     onSuccess: () => {
       toast.success('Copied!', {
         description: `${typeName} content has been copied to your clipboard.`,
@@ -163,6 +185,32 @@ export function DetailHeaderActions({
               )}
             </Button>
           )}
+
+          {/* Copy for AI button */}
+          <CopyLLMsButton
+            llmsTxtUrl={`/${category}/${item.slug}/llms.txt`}
+            variant="outline"
+            size="default"
+            className={UI_CLASSES.MIN_W_0}
+          />
+
+          {/* Copy as Markdown button */}
+          <CopyMarkdownButton
+            category={category}
+            slug={item.slug}
+            variant="outline"
+            size="default"
+            className={UI_CLASSES.MIN_W_0}
+          />
+
+          {/* Download Markdown button */}
+          <DownloadMarkdownButton
+            category={category}
+            slug={item.slug}
+            variant="outline"
+            size="default"
+            className={UI_CLASSES.MIN_W_0}
+          />
 
           {secondaryActions?.map((action) => (
             <Button

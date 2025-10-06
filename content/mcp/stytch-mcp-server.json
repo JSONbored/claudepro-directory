@@ -88,5 +88,6 @@
   "requiresAuth": true,
   "permissions": ["read", "write", "configure"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://stytch.com/docs/workspace-management/stytch-mcp"
+  "documentationUrl": "https://stytch.com/docs/workspace-management/stytch-mcp",
+  "seoTitle": "Stytch MCP Server for Claude"
 }

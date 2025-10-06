@@ -38,7 +38,11 @@ export function sortByNewest<T extends { createdAt?: string; date?: string }>(
 }
 
 export function sortAlphabetically<
-  T extends { name?: string | undefined; title?: string | undefined; slug: string },
+  T extends {
+    name?: string | undefined;
+    title?: string | undefined;
+    slug: string;
+  },
 >(items: readonly T[] | T[]): T[] {
   return [...items].sort((a, b) => {
     // Use a type-safe approach for getting display title

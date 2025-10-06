@@ -21,15 +21,14 @@
  * @see components/features/content/collection-card.tsx - Collection card component
  */
 
-import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import type { CollectionMetadata } from '@/generated/collections-metadata';
 import { getCollections } from '@/generated/content';
 import { CollectionCard } from '@/src/components/features/content/collection-card';
 import { Badge } from '@/src/components/ui/badge';
-import { APP_CONFIG } from '@/src/lib/constants';
 import { Layers } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 /**
  * ISR revalidation interval (4 hours)
@@ -38,35 +37,7 @@ import { logger } from '@/src/lib/logger';
 /**
  * Page metadata for SEO
  */
-export const metadata: Metadata = {
-  title: `Collections - ${APP_CONFIG.name}`,
-  description:
-    'Browse curated collections of Claude configurations. Discover starter kits, workflows, and advanced systems combining multiple agents, MCP servers, commands, and more.',
-  keywords: [
-    'claude collections',
-    'configuration bundles',
-    'starter kits',
-    'workflows',
-    'setup guides',
-    'claude pro',
-    'ai tools',
-  ],
-  alternates: {
-    canonical: `${APP_CONFIG.url}/collections`,
-  },
-  openGraph: {
-    title: `Collections - ${APP_CONFIG.name}`,
-    description: 'Curated collections of Claude configurations for common workflows and use cases',
-    type: 'website',
-    url: `${APP_CONFIG.url}/collections`,
-    siteName: APP_CONFIG.name,
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `Collections - ${APP_CONFIG.name}`,
-    description: 'Curated collections of Claude configurations for common workflows and use cases',
-  },
-};
+export const metadata = await generatePageMetadata('/collections');
 
 /**
  * Collections list page component

@@ -54,7 +54,10 @@ export type TroubleshootingSectionProps = z.infer<typeof troubleshootingSectionP
  */
 export function TroubleshootingSection({ items, description }: TroubleshootingSectionProps) {
   // Validate props
-  const validated = troubleshootingSectionPropsSchema.parse({ items, description });
+  const validated = troubleshootingSectionPropsSchema.parse({
+    items,
+    description,
+  });
 
   if (validated.items.length === 0) return null;
 

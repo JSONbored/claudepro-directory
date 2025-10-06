@@ -52,7 +52,10 @@ export async function getContentByCategory(category: string): Promise<UnifiedCon
     if (contentCache.isEnabled()) {
       const cached = await contentCache.getContentMetadata<UnifiedContentItem[]>(category);
       if (cached && Array.isArray(cached)) {
-        logger.debug('Content cache hit', { category, itemCount: cached.length });
+        logger.debug('Content cache hit', {
+          category,
+          itemCount: cached.length,
+        });
         return cached;
       }
     }
@@ -84,12 +87,18 @@ export async function getContentByCategory(category: string): Promise<UnifiedCon
 
     // Cache the result for 4 hours (async, non-blocking)
     if (contentCache.isEnabled() && items.length > 0) {
-      contentCache
-        .cacheContentMetadata(category, items, CACHE_TTL.CATEGORY)
-        .catch((err) => logger.warn('Failed to cache category content', { category, error: err }));
+      contentCache.cacheContentMetadata(category, items, CACHE_TTL.CATEGORY).catch((err) =>
+        logger.warn('Failed to cache category content', {
+          category,
+          error: err,
+        })
+      );
     }
 
-    logger.debug('Content loaded from file system', { category, itemCount: items.length });
+    logger.debug('Content loaded from file system', {
+      category,
+      itemCount: items.length,
+    });
     return items;
   } catch (error) {
     logger.error(

@@ -13,5 +13,6 @@
   "githubUrl": "https://github.com/claudepro/test-generator",
   "documentationUrl": "https://docs.claude.ai/commands/test-gen",
   "source": "community",
-  "slug": "generate-tests"
+  "slug": "generate-tests",
+  "seoTitle": "Generate Tests for Claude"
 }

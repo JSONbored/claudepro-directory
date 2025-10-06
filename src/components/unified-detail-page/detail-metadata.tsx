@@ -12,16 +12,18 @@
 import { z } from 'zod';
 import { Badge } from '@/src/components/ui/badge';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
-import { Calendar, Tag, User } from '@/src/lib/icons';
+import { Calendar, Eye, Tag, User } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatDate } from '@/src/lib/utils/date-utils';
+import { formatViewCount } from '@/src/lib/utils/transformers';
 
 /**
  * Schema for DetailMetadata props
  */
 const detailMetadataPropsSchema = z.object({
   item: z.custom<UnifiedContentItem>(),
+  viewCount: z.number().optional(),
 });
 
 export type DetailMetadataProps = z.infer<typeof detailMetadataPropsSchema>;
@@ -29,18 +31,18 @@ export type DetailMetadataProps = z.infer<typeof detailMetadataPropsSchema>;
 /**
  * DetailMetadata Component (Server Component)
  *
- * Renders author, date, and tags metadata for a content item
+ * Renders author, date, view count, and tags metadata for a content item
  * No React.memo needed - server components don't re-render
  */
-export function DetailMetadata({ item }: DetailMetadataProps) {
-  const hasMetadata = item.author || item.dateAdded;
+export function DetailMetadata({ item, viewCount }: DetailMetadataProps) {
+  const hasMetadata = item.author || item.dateAdded || viewCount !== undefined;
   const hasTags = item.tags && item.tags.length > 0;
 
   if (!(hasMetadata || hasTags)) return null;
 
   return (
     <div className="container mx-auto px-4">
-      {/* Author & Date Metadata */}
+      {/* Author, Date & View Count Metadata */}
       {hasMetadata && (
         <div className={UI_CLASSES.FLEX_WRAP_MUTED}>
           {item.author && (
@@ -60,6 +62,12 @@ export function DetailMetadata({ item }: DetailMetadataProps) {
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Calendar className="h-4 w-4" />
               <span>{formatDate(item.dateAdded)}</span>
+            </div>
+          )}
+          {viewCount !== undefined && viewCount > 0 && (
+            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+              <Eye className="h-4 w-4" />
+              <span>{formatViewCount(viewCount)} views</span>
             </div>
           )}
         </div>

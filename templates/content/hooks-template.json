@@ -4,7 +4,12 @@
   "category": "hooks",
   "author": "Your Name or GitHub Username",
   "dateAdded": "YYYY-MM-DD",
-  "tags": ["primary-functionality", "secondary-feature", "tool-name", "use-case"],
+  "tags": [
+    "primary-functionality",
+    "secondary-feature",
+    "tool-name",
+    "use-case"
+  ],
   "hookType": "PostToolUse | PreToolUse | SessionStart | SessionEnd | UserPromptSubmit | Notification | PreCompact | Stop | SubagentStop",
   "configuration": {
     "hookConfig": {
@@ -29,7 +34,10 @@
     "Common use case scenario 3"
   ],
   "documentationUrl": "https://link-to-external-documentation.com",
-  "requirements": ["Custom requirement not auto-detected", "Special dependency or tool"],
+  "requirements": [
+    "Custom requirement not auto-detected",
+    "Special dependency or tool"
+  ],
   "troubleshooting": [
     {
       "issue": "Description of a potential issue",

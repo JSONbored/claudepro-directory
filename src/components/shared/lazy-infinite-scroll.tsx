@@ -10,7 +10,9 @@ const generateSkeletonKeys = () => Array.from({ length: 6 }, () => crypto.random
  */
 export const LazyInfiniteScrollContainer = dynamic(
   () =>
-    import('./infinite-scroll-container').then((mod) => ({ default: mod.InfiniteScrollContainer })),
+    import('./infinite-scroll-container').then((mod) => ({
+      default: mod.InfiniteScrollContainer,
+    })),
   {
     loading: () => (
       <div className={UI_CLASSES.GRID_RESPONSIVE_3}>

@@ -84,5 +84,6 @@
   "requiresAuth": true,
   "permissions": ["read", "write", "create", "export"],
   "configLocation": "claude_desktop_config.json",
-  "documentationUrl": "https://www.canva.dev/docs/connect/canva-mcp-server-setup/"
+  "documentationUrl": "https://www.canva.dev/docs/connect/canva-mcp-server-setup/",
+  "seoTitle": "Canva MCP Server for Claude"
 }

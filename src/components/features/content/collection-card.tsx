@@ -44,7 +44,9 @@ export interface CollectionCardProps {
   /** Collection content item to display (supports both metadata and full content) */
   item:
     | CollectionContent
-    | (Omit<CollectionContent, 'items'> & { items?: CollectionContent['items'] });
+    | (Omit<CollectionContent, 'items'> & {
+        items?: CollectionContent['items'];
+      });
   /** Display variant (default or detailed) */
   variant?: 'default' | 'detailed';
   /** Show action buttons (copy, view) */

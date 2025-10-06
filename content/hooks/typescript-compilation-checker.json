@@ -1,5 +1,6 @@
 {
   "slug": "typescript-compilation-checker",
+  "seoTitle": "TypeScript Checker",
   "description": "Automatically runs TypeScript compiler checks after editing .ts or .tsx files to catch type errors early",
   "category": "hooks",
   "author": "JSONbored",

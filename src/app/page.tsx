@@ -1,15 +1,25 @@
 import { HomePageClient } from '@/src/components/features/home';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
-import { BookOpen, Layers, Server, Sparkles } from '@/src/lib/icons';
+import { statsRedis } from '@/src/lib/redis';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { transformForHomePage } from '@/src/lib/utils/transformers';
 
-// Enable ISR - revalidate every hour
+// Enable ISR - revalidate every 5 minutes for fresh view counts
+export const revalidate = 300;
 
 // Server component that loads data
 export default async function HomePage() {
   // Load all content server-side for better SEO and initial page load
-  const [rules, mcp, agents, commands, hooks, statuslines, collections] = await Promise.all([
+  const [
+    rulesData,
+    mcpData,
+    agentsData,
+    commandsData,
+    hooksData,
+    statuslinesData,
+    collectionsData,
+  ] = await Promise.all([
     lazyContentLoaders.rules(),
     lazyContentLoaders.mcp(),
     lazyContentLoaders.agents(),
@@ -17,6 +27,38 @@ export default async function HomePage() {
     lazyContentLoaders.hooks(),
     lazyContentLoaders.statuslines(),
     lazyContentLoaders.collections(),
+  ]);
+
+  // Enrich with view counts from Redis
+  const [rules, mcp, agents, commands, hooks, statuslines, collections] = await Promise.all([
+    statsRedis.enrichWithViewCounts(
+      rulesData.map((item) => ({ ...item, category: 'rules' as const }))
+    ),
+    statsRedis.enrichWithViewCounts(mcpData.map((item) => ({ ...item, category: 'mcp' as const }))),
+    statsRedis.enrichWithViewCounts(
+      agentsData.map((item) => ({ ...item, category: 'agents' as const }))
+    ),
+    statsRedis.enrichWithViewCounts(
+      commandsData.map((item) => ({
+        ...item,
+        category: 'commands' as const,
+      }))
+    ),
+    statsRedis.enrichWithViewCounts(
+      hooksData.map((item) => ({ ...item, category: 'hooks' as const }))
+    ),
+    statsRedis.enrichWithViewCounts(
+      statuslinesData.map((item) => ({
+        ...item,
+        category: 'statuslines' as const,
+      }))
+    ),
+    statsRedis.enrichWithViewCounts(
+      collectionsData.map((item) => ({
+        ...item,
+        category: 'collections' as const,
+      }))
+    ),
   ]);
 
   // Create stable allConfigs array to prevent infinite re-renders
@@ -55,59 +97,46 @@ export default async function HomePage() {
         className={`relative overflow-hidden ${UI_CLASSES.BORDER_B} border-border/50`}
         aria-label="Homepage hero"
       >
-        <div className={`relative container ${UI_CLASSES.MX_AUTO} px-4 py-20 lg:py-32`}>
+        <div className={`relative container ${UI_CLASSES.MX_AUTO} px-4 py-10 sm:py-16 lg:py-24`}>
           <div className={`text-center ${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
-            <h1 className="text-5xl lg:text-7xl font-bold mb-6 text-foreground tracking-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 text-foreground tracking-tight">
               The home for Claude enthusiasts
             </h1>
 
             <p
-              className={`${UI_CLASSES.TEXT_HEADING_LARGE} ${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO}`}
+              className={`text-base sm:text-lg lg:text-xl text-muted-foreground ${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO}`}
             >
               Discover and share the best Claude configurations. Explore expert rules, browse
               powerful MCP servers, find specialized agents and commands, discover automation hooks,
               and connect with the community building the future of AI.
             </p>
-
-            {/* Quick Stats - Server Rendered for SEO */}
-            <div
-              className={`flex flex-wrap ${UI_CLASSES.JUSTIFY_CENTER} gap-6 text-sm text-muted-foreground mb-8`}
-            >
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <BookOpen className="h-4 w-4" />
-                {rules.length} Expert Rules
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Server className="h-4 w-4" />
-                {mcp.length} MCP Servers
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" />
-                {agents.length} AI Agents
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" />
-                {commands.length} Commands
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" />
-                {hooks.length} Automation Hooks
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" />
-                {statuslines.length} Statuslines
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Layers className="h-4 w-4" />
-                {collections.length} Collections
-              </div>
-            </div>
           </div>
         </div>
       </section>
 
       {/* Client Component for Interactive Features */}
-      <HomePageClient initialData={initialData} />
+      <HomePageClient
+        initialData={initialData}
+        stats={{
+          rules: rules.length,
+          mcp: mcp.length,
+          agents: agents.length,
+          commands: commands.length,
+          hooks: hooks.length,
+          statuslines: statuslines.length,
+          collections: collections.length,
+        }}
+      />
+
+      {/* Email CTA - Moved to bottom of page */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <InlineEmailCTA
+          variant="hero"
+          context="homepage"
+          headline="Join 1,000+ Claude Power Users"
+          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+        />
+      </section>
     </div>
   );
 }

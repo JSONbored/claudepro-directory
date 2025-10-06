@@ -1,5 +1,6 @@
 {
   "slug": "documentation-auto-generator-on-stop",
+  "seoTitle": "Doc Auto Generator",
   "description": "Automatically generates or updates project documentation when session ends",
   "category": "hooks",
   "author": "JSONbored",

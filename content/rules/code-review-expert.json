@@ -13,5 +13,6 @@
   },
   "githubUrl": "https://github.com/claudepro/code-review-rules",
   "documentationUrl": "https://docs.claude.ai/rules/code-review",
-  "source": "community"
+  "source": "community",
+  "seoTitle": "Code Review Expert for Claude"
 }

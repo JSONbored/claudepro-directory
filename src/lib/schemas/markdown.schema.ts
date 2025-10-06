@@ -16,6 +16,13 @@ import { nonEmptyString, shortString } from './primitives/base-strings';
 const mdxFrontmatterSchema = z
   .object({
     title: nonEmptyString.max(200).describe('Content title (max 200 characters)'),
+    seoTitle: z
+      .string()
+      .max(60)
+      .optional()
+      .describe(
+        'Short SEO-optimized title for <title> tag (max 60 characters), falls back to full title'
+      ),
     description: nonEmptyString.max(500).describe('Content description (max 500 characters)'),
     keywords: z
       .array(z.string().max(50).describe('SEO keyword (max 50 characters)'))

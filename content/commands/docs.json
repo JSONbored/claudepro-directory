@@ -13,5 +13,6 @@
   "githubUrl": "https://github.com/claudepro/documentation-generator",
   "documentationUrl": "https://docs.claude.ai/commands/docs",
   "source": "community",
-  "slug": "docs"
+  "slug": "docs",
+  "seoTitle": "Docs for Claude"
 }

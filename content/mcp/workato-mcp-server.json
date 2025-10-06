@@ -88,5 +88,6 @@
   "requiresAuth": true,
   "permissions": ["read", "write", "execute"],
   "configLocation": "custom_generated",
-  "documentationUrl": "https://docs.workato.com/mcp.html"
+  "documentationUrl": "https://docs.workato.com/mcp.html",
+  "seoTitle": "Workato MCP Server for Claude"
 }
