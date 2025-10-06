@@ -995,12 +995,7 @@ export const METADATA_REGISTRY = {
     description: (context?: MetadataContext) =>
       (context?.item?.description as string | undefined) ||
       'Platform update and release notes for Claude Pro Directory.',
-    keywords: [
-      'claude pro changelog',
-      'platform updates 2025',
-      'release notes',
-      'feature updates',
-    ],
+    keywords: ['claude pro changelog', 'platform updates 2025', 'release notes', 'feature updates'],
     openGraph: {
       type: 'article' as const,
     },
