@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { SignOutButton } from '@/src/components/auth/auth-buttons';
@@ -62,10 +63,12 @@ export default async function AccountLayout({ children }: { children: React.Reac
           <Card className="md:col-span-1 h-fit p-4">
             <div className={`flex items-center gap-3 ${UI_CLASSES.MB_6} pb-4 border-b`}>
               {profile?.image ? (
-                <img
+                <Image
                   src={profile.image}
                   alt={profile.name || 'User'}
-                  className="w-12 h-12 rounded-full"
+                  width={48}
+                  height={48}
+                  className="w-12 h-12 rounded-full object-cover"
                 />
               ) : (
                 <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">

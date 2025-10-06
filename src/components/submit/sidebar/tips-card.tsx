@@ -22,8 +22,8 @@ export function TipsCard() {
       </CardHeader>
       <CardContent>
         <ul className={`${UI_CLASSES.SPACE_Y_2} list-none`}>
-          {TIPS.map((tip, index) => (
-            <li key={index} className="flex items-start gap-2">
+          {TIPS.map((tip) => (
+            <li key={tip} className="flex items-start gap-2">
               <span className="text-blue-400 text-xs mt-0.5">•</span>
               <span className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
                 {tip}

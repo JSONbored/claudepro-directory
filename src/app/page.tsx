@@ -1,18 +1,17 @@
+// Import types for metadata
+import type { AgentMetadata } from '@/generated/agents-metadata';
+import type { CollectionMetadata } from '@/generated/collections-metadata';
+import type { CommandMetadata } from '@/generated/commands-metadata';
+import type { HookMetadata } from '@/generated/hooks-metadata';
+import type { McpMetadata } from '@/generated/mcp-metadata';
+import type { RuleMetadata } from '@/generated/rules-metadata';
+import type { StatuslineMetadata } from '@/generated/statuslines-metadata';
 import { HomePageClient } from '@/src/components/features/home';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 import { statsRedis } from '@/src/lib/redis';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { transformForHomePage } from '@/src/lib/utils/transformers';
-
-// Import types for metadata
-import type { AgentMetadata } from '@/generated/agents-metadata';
-import type { McpMetadata } from '@/generated/mcp-metadata';
-import type { RuleMetadata } from '@/generated/rules-metadata';
-import type { CommandMetadata } from '@/generated/commands-metadata';
-import type { HookMetadata } from '@/generated/hooks-metadata';
-import type { StatuslineMetadata } from '@/generated/statuslines-metadata';
-import type { CollectionMetadata } from '@/generated/collections-metadata';
 
 type ContentMetadataWithCategory =
   | (AgentMetadata & { category: 'agents' })
@@ -54,9 +53,7 @@ export default async function HomePage() {
     statsRedis.enrichWithViewCounts(
       rulesData.map((item) => ({ ...item, category: 'rules' as const }))
     ),
-    statsRedis.enrichWithViewCounts(
-      mcpData.map((item) => ({ ...item, category: 'mcp' as const }))
-    ),
+    statsRedis.enrichWithViewCounts(mcpData.map((item) => ({ ...item, category: 'mcp' as const }))),
     statsRedis.enrichWithViewCounts(
       agentsData.map((item) => ({ ...item, category: 'agents' as const }))
     ),

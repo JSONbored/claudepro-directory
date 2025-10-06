@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
@@ -99,9 +100,11 @@ export default async function CompaniesPage() {
                 <CardHeader>
                   <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                     {company.logo && (
-                      <img
+                      <Image
                         src={company.logo}
                         alt={`${company.name} logo`}
+                        width={48}
+                        height={48}
                         className="w-12 h-12 rounded-lg object-cover"
                       />
                     )}

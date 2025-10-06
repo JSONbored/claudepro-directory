@@ -396,7 +396,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
 
               <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
                 {filteredJobs.map((job) => (
-                  <JobCard key={job.slug} job={job as any} />
+                  <JobCard key={job.slug} job={job} />
                 ))}
               </div>
             </>

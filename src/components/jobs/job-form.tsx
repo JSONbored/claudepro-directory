@@ -7,7 +7,7 @@
  * Follows patterns from existing forms and react-hook-form integration
  */
 
-import { useState, useTransition } from 'react';
+import { useId, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
@@ -47,6 +47,23 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
   const [currentTag, setCurrentTag] = useState('');
   const [currentRequirement, setCurrentRequirement] = useState('');
   const [currentBenefit, setCurrentBenefit] = useState('');
+
+  // Generate unique IDs for form fields
+  const titleId = useId();
+  const companyId = useId();
+  const typeId = useId();
+  const workplaceId = useId();
+  const locationId = useId();
+  const experienceId = useId();
+  const categoryId = useId();
+  const salaryId = useId();
+  const descriptionId = useId();
+  const requirementInputId = useId();
+  const benefitInputId = useId();
+  const tagInputId = useId();
+  const linkId = useId();
+  const contactEmailId = useId();
+  const companyLogoId = useId();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -139,9 +156,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
         </CardHeader>
         <CardContent className={UI_CLASSES.SPACE_Y_4}>
           <div>
-            <Label htmlFor="title">Job Title *</Label>
+            <Label htmlFor={titleId}>Job Title *</Label>
             <Input
-              id="title"
+              id={titleId}
               name="title"
               defaultValue={initialData?.title}
               required
@@ -150,9 +167,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           </div>
 
           <div>
-            <Label htmlFor="company">Company *</Label>
+            <Label htmlFor={companyId}>Company *</Label>
             <Input
-              id="company"
+              id={companyId}
               name="company"
               defaultValue={initialData?.company}
               required
@@ -162,9 +179,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="type">Employment Type *</Label>
+              <Label htmlFor={typeId}>Employment Type *</Label>
               <Select name="type" defaultValue={initialData?.type || 'full-time'}>
-                <SelectTrigger id="type">
+                <SelectTrigger id={typeId}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -178,9 +195,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
             </div>
 
             <div>
-              <Label htmlFor="workplace">Workplace *</Label>
+              <Label htmlFor={workplaceId}>Workplace *</Label>
               <Select name="workplace" defaultValue={initialData?.workplace || 'Remote'}>
-                <SelectTrigger id="workplace">
+                <SelectTrigger id={workplaceId}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -194,9 +211,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor={locationId}>Location</Label>
               <Input
-                id="location"
+                id={locationId}
                 name="location"
                 defaultValue={initialData?.location || ''}
                 placeholder="e.g., San Francisco, CA"
@@ -204,9 +221,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
             </div>
 
             <div>
-              <Label htmlFor="experience">Experience Level</Label>
+              <Label htmlFor={experienceId}>Experience Level</Label>
               <Select name="experience" defaultValue={initialData?.experience || ''}>
-                <SelectTrigger id="experience">
+                <SelectTrigger id={experienceId}>
                   <SelectValue placeholder="Select level" />
                 </SelectTrigger>
                 <SelectContent>
@@ -222,9 +239,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="category">Category *</Label>
+              <Label htmlFor={categoryId}>Category *</Label>
               <Select name="category" defaultValue={initialData?.category || 'engineering'}>
-                <SelectTrigger id="category">
+                <SelectTrigger id={categoryId}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -239,9 +256,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
             </div>
 
             <div>
-              <Label htmlFor="salary">Salary Range</Label>
+              <Label htmlFor={salaryId}>Salary Range</Label>
               <Input
-                id="salary"
+                id={salaryId}
                 name="salary"
                 defaultValue={initialData?.salary || ''}
                 placeholder="e.g., $120k - $180k"
@@ -250,9 +267,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           </div>
 
           <div>
-            <Label htmlFor="description">Job Description *</Label>
+            <Label htmlFor={descriptionId}>Job Description *</Label>
             <Textarea
-              id="description"
+              id={descriptionId}
               name="description"
               defaultValue={initialData?.description}
               required
@@ -275,10 +292,10 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
         </CardHeader>
         <CardContent className={UI_CLASSES.SPACE_Y_4}>
           <div>
-            <Label htmlFor="requirement-input">Add Requirement</Label>
+            <Label htmlFor={requirementInputId}>Add Requirement</Label>
             <div className={UI_CLASSES.FLEX_GAP_2}>
               <Input
-                id="requirement-input"
+                id={requirementInputId}
                 value={currentRequirement}
                 onChange={(e) => setCurrentRequirement(e.target.value)}
                 onKeyDown={(e) => {
@@ -297,9 +314,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
 
           {requirements.length > 0 && (
             <div className={UI_CLASSES.SPACE_Y_2}>
-              {requirements.map((req, index) => (
+              {requirements.map((req) => (
                 <div
-                  key={index}
+                  key={req}
                   className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} p-2 border rounded`}
                 >
                   <span className={UI_CLASSES.TEXT_SM}>{req}</span>
@@ -307,7 +324,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => removeRequirement(index)}
+                    onClick={() => removeRequirement(requirements.indexOf(req))}
                   >
                     ×
                   </Button>
@@ -326,10 +343,10 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
         </CardHeader>
         <CardContent className={UI_CLASSES.SPACE_Y_4}>
           <div>
-            <Label htmlFor="benefit-input">Add Benefit</Label>
+            <Label htmlFor={benefitInputId}>Add Benefit</Label>
             <div className={UI_CLASSES.FLEX_GAP_2}>
               <Input
-                id="benefit-input"
+                id={benefitInputId}
                 value={currentBenefit}
                 onChange={(e) => setCurrentBenefit(e.target.value)}
                 onKeyDown={(e) => {
@@ -348,12 +365,12 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
 
           {benefits.length > 0 && (
             <div className={UI_CLASSES.FLEX_WRAP_GAP_2}>
-              {benefits.map((benefit, index) => (
-                <Badge key={index} variant="secondary">
+              {benefits.map((benefit) => (
+                <Badge key={benefit} variant="secondary">
                   {benefit}
                   <button
                     type="button"
-                    onClick={() => removeBenefit(index)}
+                    onClick={() => removeBenefit(benefits.indexOf(benefit))}
                     className="ml-1 hover:text-destructive"
                   >
                     ×
@@ -373,10 +390,10 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
         </CardHeader>
         <CardContent className={UI_CLASSES.SPACE_Y_4}>
           <div>
-            <Label htmlFor="tag-input">Add Tag</Label>
+            <Label htmlFor={tagInputId}>Add Tag</Label>
             <div className={UI_CLASSES.FLEX_GAP_2}>
               <Input
-                id="tag-input"
+                id={tagInputId}
                 value={currentTag}
                 onChange={(e) => setCurrentTag(e.target.value)}
                 onKeyDown={(e) => {
@@ -424,9 +441,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
         </CardHeader>
         <CardContent className={UI_CLASSES.SPACE_Y_4}>
           <div>
-            <Label htmlFor="link">Application URL *</Label>
+            <Label htmlFor={linkId}>Application URL *</Label>
             <Input
-              id="link"
+              id={linkId}
               name="link"
               type="url"
               defaultValue={initialData?.link}
@@ -436,9 +453,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           </div>
 
           <div>
-            <Label htmlFor="contact_email">Contact Email</Label>
+            <Label htmlFor={contactEmailId}>Contact Email</Label>
             <Input
-              id="contact_email"
+              id={contactEmailId}
               name="contact_email"
               type="email"
               defaultValue={initialData?.contact_email || ''}
@@ -447,9 +464,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           </div>
 
           <div>
-            <Label htmlFor="company_logo">Company Logo URL</Label>
+            <Label htmlFor={companyLogoId}>Company Logo URL</Label>
             <Input
-              id="company_logo"
+              id={companyLogoId}
               name="company_logo"
               type="url"
               defaultValue={initialData?.company_logo || ''}

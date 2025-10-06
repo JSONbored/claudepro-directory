@@ -147,7 +147,7 @@ export const jobContentSchema = jobDatabaseSchema.transform((data) => ({
   title: data.title,
   company: data.company,
   location: data.location || '',
-  salary: data.salary,
+  salary: data.salary || '',
   type: data.type,
   postedAt: data.posted_at || data.created_at,
   requirements: data.requirements,

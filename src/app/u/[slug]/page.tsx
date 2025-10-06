@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
@@ -86,8 +87,8 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
       {/* Hero/Profile Header */}
       <section className="relative">
         {profile.hero && (
-          <div className="w-full h-48 bg-gradient-to-r from-primary/20 to-accent/20">
-            <img src={profile.hero} alt="" className="w-full h-full object-cover" />
+          <div className="w-full h-48 bg-gradient-to-r from-primary/20 to-accent/20 relative">
+            <Image src={profile.hero} alt="Profile banner" fill className="object-cover" />
           </div>
         )}
 
@@ -95,10 +96,12 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
           <div className={`flex items-start justify-between ${profile.hero ? '-mt-16' : 'pt-12'}`}>
             <div className="flex items-start gap-4">
               {profile.image ? (
-                <img
+                <Image
                   src={profile.image}
                   alt={profile.name || slug}
-                  className="w-24 h-24 rounded-full border-4 border-background"
+                  width={96}
+                  height={96}
+                  className="w-24 h-24 rounded-full border-4 border-background object-cover"
                 />
               ) : (
                 <div className="w-24 h-24 rounded-full border-4 border-background bg-accent flex items-center justify-center text-2xl font-bold">

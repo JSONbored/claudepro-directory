@@ -43,6 +43,35 @@ export function SubmitFormClient() {
     slug: string;
   } | null>(null);
 
+  // Generate unique IDs for all form fields
+  const typeId = useId();
+  const nameId = useId();
+  const descriptionId = useId();
+  const categoryId = useId();
+  const authorId = useId();
+  const githubId = useId();
+  const tagsId = useId();
+  const systemPromptId = useId();
+  const temperatureIdAgents = useId();
+  const maxTokensIdAgents = useId();
+  const temperatureIdCommands = useId();
+  const maxTokensIdCommands = useId();
+  const npmPackageId = useId();
+  const installCommandId = useId();
+  const configCommandId = useId();
+  const serverTypeId = useId();
+  const toolsDescriptionId = useId();
+  const envVarsId = useId();
+  const hookScriptId = useId();
+  const hookTypeId = useId();
+  const triggeredById = useId();
+  const commandContentId = useId();
+  const rulesContentId = useId();
+  const statuslineScriptId = useId();
+  const statuslineTypeId = useId();
+  const refreshIntervalId = useId();
+  const positionId = useId();
+
   // Handle template selection
   // biome-ignore lint/suspicious/noExplicitAny: Templates have dynamic fields based on content type
   const handleTemplateSelect = (template: any) => {

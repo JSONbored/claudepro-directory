@@ -14,6 +14,7 @@ import { handleApiError } from '@/src/lib/error-handler';
 import { generateLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
+import type { CollectionItemReference } from '@/src/lib/schemas/content/collection.schema';
 
 /**
  * Runtime configuration
@@ -83,19 +84,19 @@ export async function GET(
 
       // Group items by category
       const itemsByCategory = collection.items.reduce(
-        (acc: Record<string, any[]>, item: any) => {
+        (acc: Record<string, CollectionItemReference[]>, item) => {
           const category = item.category || 'other';
           if (!acc[category]) acc[category] = [];
           acc[category].push(item);
           return acc;
         },
-        {} as Record<string, any[]>
+        {} as Record<string, CollectionItemReference[]>
       );
 
       // Fetch actual item details and build full content (NO TRUNCATION)
       for (const [category, items] of Object.entries(itemsByCategory)) {
         detailedContent += `${category.toUpperCase()}:\n`;
-        for (const itemRef of items as any[]) {
+        for (const itemRef of items) {
           // Fetch the actual item to get title and description
           try {
             const actualItem = await getContentBySlug(itemRef.category, itemRef.slug);

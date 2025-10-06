@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
@@ -130,10 +131,12 @@ export default async function BoardPage() {
                       >
                         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                           {post.user_avatar ? (
-                            <img
+                            <Image
                               src={post.user_avatar}
                               alt={post.user_name || 'User'}
-                              className="w-4 h-4 rounded-full"
+                              width={16}
+                              height={16}
+                              className="w-4 h-4 rounded-full object-cover"
                             />
                           ) : (
                             <UserIcon className="w-4 h-4" />
