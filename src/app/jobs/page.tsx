@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/ui/select';
-import { type Job, jobs } from '@/src/lib/data/jobs';
+import { getJobs, getJobsCount, type Job } from '@/src/lib/data/jobs';
 import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
@@ -96,6 +96,9 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
   // Validate and parse search parameters with Zod
   const params = parseSearchParams(jobsSearchSchema, rawParams, 'jobs page');
 
+  // Fetch jobs from database
+  const allJobs = await getJobs();
+
   // Log validated parameters for monitoring
   logger.info('Jobs page accessed', {
     search: params.q || params.query || params.search || '',
@@ -106,9 +109,10 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
     experience: params.experience,
     page: params.page,
     limit: params.limit,
+    totalJobs: allJobs.length,
   });
 
-  const filteredJobs = filterJobs(jobs, params);
+  const filteredJobs = filterJobs(allJobs, params);
 
   // Generate stable, unique IDs for accessibility
   const baseId = 'jobs-page';
@@ -164,7 +168,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
             <div className={`flex flex-wrap ${UI_CLASSES.JUSTIFY_CENTER} gap-2 ${UI_CLASSES.MB_8}`}>
               <Badge variant="secondary">
                 <Briefcase className="h-3 w-3 mr-1" />
-                {jobs.length} Jobs Available
+                {allJobs.length} Jobs Available
               </Badge>
               <Badge variant="outline">Community Driven</Badge>
               <Badge variant="outline">Verified Listings</Badge>
@@ -181,7 +185,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
       </section>
 
       {/* Filters Section */}
-      {jobs.length > 0 && (
+      {allJobs.length > 0 && (
         <section className={`${UI_CLASSES.PX_4} pb-8`}>
           <div className={`container ${UI_CLASSES.MX_AUTO}`}>
             <Card className="card-gradient glow-effect">
@@ -326,7 +330,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
       {/* Jobs Content */}
       <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
         <div className={UI_CLASSES.SPACE_Y_8}>
-          {jobs.length === 0 ? (
+          {allJobs.length === 0 ? (
             /* Empty State */
             <Card>
               <CardContent
