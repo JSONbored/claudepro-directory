@@ -17,21 +17,21 @@
  * @see components/unified-detail-page.tsx - Original implementation
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
-import type { LucideIcon } from "@/src/lib/icons";
+} from '@/src/components/ui/card';
+import type { LucideIcon } from '@/src/lib/icons';
 import {
   componentDescriptionString,
   componentTitleString,
-} from "@/src/lib/schemas/primitives/ui-component-primitives";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
-import { cn } from "@/src/lib/utils";
+} from '@/src/lib/schemas/primitives/ui-component-primitives';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { cn } from '@/src/lib/utils';
 
 /**
  * Schema for BulletListSection props using primitives
@@ -42,27 +42,25 @@ const bulletListSectionPropsSchema = z.object({
   items: z.array(z.string().min(1)),
   icon: z.custom<LucideIcon>(),
   bulletColor: z
-    .enum(["primary", "accent", "orange", "red", "green", "blue"])
-    .default("primary")
+    .enum(['primary', 'accent', 'orange', 'red', 'green', 'blue'])
+    .default('primary')
     .optional(),
   className: z.string().optional(),
-  variant: z.enum(["default", "mono"]).default("default").optional(),
+  variant: z.enum(['default', 'mono']).default('default').optional(),
 });
 
-export type BulletListSectionProps = z.infer<
-  typeof bulletListSectionPropsSchema
->;
+export type BulletListSectionProps = z.infer<typeof bulletListSectionPropsSchema>;
 
 /**
  * Bullet color class mapping
  */
 const bulletColorMap = {
-  primary: "bg-primary",
-  accent: "bg-accent",
-  orange: "bg-orange-500",
-  red: "bg-red-500",
-  green: "bg-green-500",
-  blue: "bg-blue-500",
+  primary: 'bg-primary',
+  accent: 'bg-accent',
+  orange: 'bg-orange-500',
+  red: 'bg-red-500',
+  green: 'bg-green-500',
+  blue: 'bg-blue-500',
 } as const;
 
 /**
@@ -77,9 +75,9 @@ export function BulletListSection({
   description,
   items,
   icon: Icon,
-  bulletColor = "primary",
+  bulletColor = 'primary',
   className,
-  variant = "default",
+  variant = 'default',
 }: BulletListSectionProps) {
   // Validate props (production safety)
   const validated = bulletListSectionPropsSchema.parse({
@@ -95,35 +93,24 @@ export function BulletListSection({
   // Don't render if no items
   if (validated.items.length === 0) return null;
 
-  const bulletClass = bulletColorMap[validated.bulletColor ?? "primary"];
-  const textClass =
-    validated.variant === "mono" ? "font-mono text-xs" : "text-sm";
+  const bulletClass = bulletColorMap[validated.bulletColor ?? 'primary'];
+  const textClass = validated.variant === 'mono' ? 'font-mono text-xs' : 'text-sm';
 
   return (
-    <Card className={cn("", validated.className)}>
+    <Card className={cn('', validated.className)}>
       <CardHeader>
         <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
           <Icon className="h-5 w-5" />
           {validated.title}
         </CardTitle>
-        {validated.description && (
-          <CardDescription>{validated.description}</CardDescription>
-        )}
+        {validated.description && <CardDescription>{validated.description}</CardDescription>}
       </CardHeader>
       <CardContent>
         <ul className="space-y-2">
           {validated.items.map((item) => (
-            <li
-              key={item.slice(0, 50)}
-              className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}
-            >
-              <div
-                className={cn(
-                  "h-1.5 w-1.5 rounded-full mt-2 flex-shrink-0",
-                  bulletClass,
-                )}
-              />
-              <span className={cn("leading-relaxed", textClass)}>{item}</span>
+            <li key={item.slice(0, 50)} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
+              <div className={cn('h-1.5 w-1.5 rounded-full mt-2 flex-shrink-0', bulletClass)} />
+              <span className={cn('leading-relaxed', textClass)}>{item}</span>
             </li>
           ))}
         </ul>

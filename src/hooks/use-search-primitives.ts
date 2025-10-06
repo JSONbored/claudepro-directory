@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * Search Hook Primitives
@@ -12,15 +12,15 @@
  * Reduces ~40-50 lines of duplication between hooks
  */
 
-import { useCallback, useMemo, useState } from "react";
-import type { FilterState } from "@/src/lib/schemas/component.schema";
-import { extractFilterOptions } from "@/src/lib/schemas/content-filter.schema";
+import { useCallback, useMemo, useState } from 'react';
+import type { FilterState } from '@/src/lib/schemas/component.schema';
+import { extractFilterOptions } from '@/src/lib/schemas/content-filter.schema';
 
 /**
  * Filter state management primitive
  * Provides stable filter state and change handler
  */
-export function useFilterState(initialSort: FilterState["sort"] = "trending") {
+export function useFilterState(initialSort: FilterState['sort'] = 'trending') {
   const [filters, setFilters] = useState<FilterState>({
     sort: initialSort,
   });
@@ -37,14 +37,14 @@ export function useFilterState(initialSort: FilterState["sort"] = "trending") {
  * Provides stable query state and handlers
  */
 export function useSearchQuery() {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
 
   const handleSearch = useCallback((newQuery: string) => {
     setQuery(newQuery);
   }, []);
 
   const clearSearch = useCallback(() => {
-    setQuery("");
+    setQuery('');
   }, []);
 
   return { query, handleSearch, clearSearch, setQuery };
@@ -63,8 +63,8 @@ export function useFilterOptions<
 >(items: readonly T[] | T[]) {
   return useMemo(() => {
     const compatibleData = [...items].map((item) => ({
-      category: item.category || "",
-      author: item.author || "",
+      category: item.category || '',
+      author: item.author || '',
       tags: [...(item.tags || [])] as string[],
     }));
     return extractFilterOptions(compatibleData);
@@ -81,8 +81,7 @@ export function hasActiveFilters(filters: FilterState): boolean {
     filters.author ||
     filters.dateRange ||
     (filters.tags && filters.tags.length > 0) ||
-    (filters.popularity &&
-      (filters.popularity[0] > 0 || filters.popularity[1] < 100))
+    (filters.popularity && (filters.popularity[0] > 0 || filters.popularity[1] < 100))
   );
 }
 
@@ -90,11 +89,8 @@ export function hasActiveFilters(filters: FilterState): boolean {
  * Combined search state primitive
  * Combines filter and query state for convenience
  */
-export function useCombinedSearchState(
-  initialSort: FilterState["sort"] = "trending",
-) {
-  const { filters, handleFiltersChange, setFilters } =
-    useFilterState(initialSort);
+export function useCombinedSearchState(initialSort: FilterState['sort'] = 'trending') {
+  const { filters, handleFiltersChange, setFilters } = useFilterState(initialSort);
   const { query, handleSearch, clearSearch } = useSearchQuery();
 
   const clearAll = useCallback(() => {

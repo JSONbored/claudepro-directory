@@ -3,13 +3,13 @@
  * Provides type-safe validation for Next.js app components
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 import {
   nonEmptyString,
   optionalUrlString,
   shortString,
   slugString,
-} from "@/src/lib/schemas/primitives/base-strings";
+} from '@/src/lib/schemas/primitives/base-strings';
 
 /**
  * Next.js 15 compatible page props - EXACTLY matches Next.js generated types

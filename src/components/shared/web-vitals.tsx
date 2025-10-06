@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useReportWebVitals } from "next/web-vitals";
+import { useReportWebVitals } from 'next/web-vitals';
 
 export function WebVitals() {
   // Next.js automatically optimizes Web Vitals

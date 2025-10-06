@@ -19,21 +19,21 @@
  * @see components/unified-detail-page.tsx - Original 685-line implementation
  */
 
-import { InlineEmailCTA } from "@/src/components/shared/inline-email-cta";
-import { getContentTypeConfig } from "@/src/lib/config/content-type-configs";
-import { highlightCode } from "@/src/lib/content/syntax-highlighting";
-import type { UnifiedContentItem } from "@/src/lib/schemas/component.schema";
-import type { InstallationSteps } from "@/src/lib/types/content-type-config";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
-import { getDisplayTitle } from "@/src/lib/utils";
-import { DetailHeader } from "./detail-header";
-import { DetailMetadata } from "./detail-metadata";
-import { BulletListSection } from "./sections/bullet-list-section";
-import { ConfigurationSection } from "./sections/configuration-section";
-import { ContentSection } from "./sections/content-section";
-import { InstallationSection } from "./sections/installation-section";
-import { TroubleshootingSection } from "./sections/troubleshooting-section";
-import { DetailSidebar } from "./sidebar/detail-sidebar";
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
+import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
+import { highlightCode } from '@/src/lib/content/syntax-highlighting';
+import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { InstallationSteps } from '@/src/lib/types/content-type-config';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { getDisplayTitle } from '@/src/lib/utils';
+import { DetailHeader } from './detail-header';
+import { DetailMetadata } from './detail-metadata';
+import { BulletListSection } from './sections/bullet-list-section';
+import { ConfigurationSection } from './sections/configuration-section';
+import { ContentSection } from './sections/content-section';
+import { InstallationSection } from './sections/installation-section';
+import { TroubleshootingSection } from './sections/troubleshooting-section';
+import { DetailSidebar } from './sidebar/detail-sidebar';
 
 export interface UnifiedDetailPageProps {
   item: UnifiedContentItem;
@@ -55,11 +55,8 @@ export async function UnifiedDetailPage({
   // Generate content using generators (Server Component - direct computation)
   const installation = (() => {
     if (!config) return undefined;
-    if ("installation" in item && item.installation) {
-      if (
-        typeof item.installation === "object" &&
-        !Array.isArray(item.installation)
-      ) {
+    if ('installation' in item && item.installation) {
+      if (typeof item.installation === 'object' && !Array.isArray(item.installation)) {
         return item.installation as InstallationSteps;
       }
     }
@@ -68,9 +65,7 @@ export async function UnifiedDetailPage({
 
   const useCases = (() => {
     if (!config) return [];
-    return "useCases" in item &&
-      Array.isArray(item.useCases) &&
-      item.useCases.length > 0
+    return 'useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0
       ? item.useCases
       : // biome-ignore lint/correctness/useHookAtTopLevel: config.generators.useCases is a generator function, not a React hook - false positive due to "use" in property name
         config.generators.useCases?.(item) || [];
@@ -78,16 +73,14 @@ export async function UnifiedDetailPage({
 
   const features = (() => {
     if (!config) return [];
-    return "features" in item &&
-      Array.isArray(item.features) &&
-      item.features.length > 0
+    return 'features' in item && Array.isArray(item.features) && item.features.length > 0
       ? item.features
       : config.generators.features?.(item) || [];
   })();
 
   const troubleshooting = (() => {
     if (!config) return [];
-    return "troubleshooting" in item &&
+    return 'troubleshooting' in item &&
       Array.isArray(item.troubleshooting) &&
       item.troubleshooting.length > 0
       ? item.troubleshooting
@@ -96,7 +89,7 @@ export async function UnifiedDetailPage({
 
   const requirements = (() => {
     if (!config) return [];
-    return "requirements" in item &&
+    return 'requirements' in item &&
       Array.isArray(item.requirements) &&
       item.requirements.length > 0
       ? item.requirements
@@ -108,16 +101,13 @@ export async function UnifiedDetailPage({
     // Only pre-render for 'json' format (rules, agents, commands)
     // 'mcp' uses 'multi' format (plain pre blocks), 'hooks' uses 'hook' format (plain pre blocks)
     if (
-      item.category !== "mcp" &&
-      item.category !== "hooks" &&
-      "configuration" in item &&
+      item.category !== 'mcp' &&
+      item.category !== 'hooks' &&
+      'configuration' in item &&
       item.configuration
     ) {
       try {
-        return await highlightCode(
-          JSON.stringify(item.configuration, null, 2),
-          "json",
-        );
+        return await highlightCode(JSON.stringify(item.configuration, null, 2), 'json');
       } catch (_error) {
         // Fallback to undefined if highlighting fails - ConfigurationSection will use plain pre
         return undefined;
@@ -156,10 +146,8 @@ export async function UnifiedDetailPage({
           {/* Primary content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Content/Code section */}
-            {(("content" in item &&
-              typeof (item as { content?: string }).content === "string") ||
-              ("configuration" in item &&
-                (item as { configuration?: object }).configuration)) && (
+            {(('content' in item && typeof (item as { content?: string }).content === 'string') ||
+              ('configuration' in item && (item as { configuration?: object }).configuration)) && (
               <ContentSection
                 item={item}
                 title={`${config.typeName} Content`}
@@ -195,21 +183,15 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Configuration Section */}
-            {config.sections.configuration &&
-              "configuration" in item &&
-              item.configuration && (
-                <ConfigurationSection
-                  item={item}
-                  format={
-                    item.category === "mcp"
-                      ? "multi"
-                      : item.category === "hooks"
-                        ? "hook"
-                        : "json"
-                  }
-                  preHighlightedConfigHtml={preHighlightedConfigHtml}
-                />
-              )}
+            {config.sections.configuration && 'configuration' in item && item.configuration && (
+              <ConfigurationSection
+                item={item}
+                format={
+                  item.category === 'mcp' ? 'multi' : item.category === 'hooks' ? 'hook' : 'json'
+                }
+                preHighlightedConfigHtml={preHighlightedConfigHtml}
+              />
+            )}
 
             {/* Use Cases Section */}
             {config.sections.useCases && useCases.length > 0 && (
@@ -223,17 +205,15 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Security Section (MCP-specific) */}
-            {config.sections.security &&
-              "security" in item &&
-              Array.isArray(item.security) && (
-                <BulletListSection
-                  title="Security Best Practices"
-                  description="Important security considerations"
-                  items={item.security as string[]}
-                  icon={config.icon}
-                  bulletColor="orange"
-                />
-              )}
+            {config.sections.security && 'security' in item && Array.isArray(item.security) && (
+              <BulletListSection
+                title="Security Best Practices"
+                description="Important security considerations"
+                items={item.security as string[]}
+                icon={config.icon}
+                bulletColor="orange"
+              />
+            )}
 
             {/* Troubleshooting Section */}
             {config.sections.troubleshooting && troubleshooting.length > 0 && (
@@ -244,25 +224,19 @@ export async function UnifiedDetailPage({
             )}
 
             {/* Examples Section (MCP-specific) */}
-            {config.sections.examples &&
-              "examples" in item &&
-              Array.isArray(item.examples) && (
-                <BulletListSection
-                  title="Usage Examples"
-                  description="Common queries and interactions"
-                  items={item.examples as string[]}
-                  icon={config.icon}
-                  bulletColor="accent"
-                  variant="mono"
-                />
-              )}
+            {config.sections.examples && 'examples' in item && Array.isArray(item.examples) && (
+              <BulletListSection
+                title="Usage Examples"
+                description="Common queries and interactions"
+                items={item.examples as string[]}
+                icon={config.icon}
+                bulletColor="accent"
+                variant="mono"
+              />
+            )}
 
             {/* Email CTA - Inline variant */}
-            <InlineEmailCTA
-              variant="inline"
-              context="content-detail"
-              category={item.category}
-            />
+            <InlineEmailCTA variant="inline" context="content-detail" category={item.category} />
           </div>
 
           {/* Sidebar */}

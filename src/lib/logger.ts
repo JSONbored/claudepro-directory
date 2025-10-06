@@ -3,14 +3,14 @@
  * Provides better observability and error tracking than console statements
  */
 
-import { isDevelopment, isProduction, isVercel } from "./env-client";
+import { isDevelopment, isProduction, isVercel } from './env-client';
 import {
   type LogContext,
   type LogEntry,
   parseDevelopmentLogComponents,
   sanitizeLogMessage,
   validateLogContext,
-} from "./schemas/logger.schema";
+} from './schemas/logger.schema';
 
 class Logger {
   private isDevelopment = isDevelopment;
@@ -39,18 +39,13 @@ class Logger {
 
     if (entry.error) {
       logObject.error = {
-        name: entry.error instanceof Error ? entry.error.name : "UnknownError",
-        message:
-          entry.error instanceof Error
-            ? entry.error.message
-            : String(entry.error),
+        name: entry.error instanceof Error ? entry.error.name : 'UnknownError',
+        message: entry.error instanceof Error ? entry.error.message : String(entry.error),
         stack: entry.error instanceof Error ? entry.error.stack : undefined,
       };
     }
 
-    return this.isDevelopment
-      ? this.formatForDevelopment(logObject)
-      : JSON.stringify(logObject);
+    return this.isDevelopment ? this.formatForDevelopment(logObject) : JSON.stringify(logObject);
   }
 
   /**
@@ -67,8 +62,7 @@ class Logger {
       return `[INVALID LOG] ${components.error}`;
     }
 
-    const { timestamp, level, message, context, metadata, error } =
-      components.data;
+    const { timestamp, level, message, context, metadata, error } = components.data;
 
     let output = `[${timestamp}] ${level.toUpperCase()}: ${message}`;
 
@@ -94,10 +88,10 @@ class Logger {
   private output(entry: LogEntry): void {
     // Multiple checks to ensure we're truly server-side only
     if (
-      typeof window !== "undefined" ||
-      typeof document !== "undefined" ||
-      typeof navigator !== "undefined" ||
-      process.env.NEXT_RUNTIME === "edge"
+      typeof window !== 'undefined' ||
+      typeof document !== 'undefined' ||
+      typeof navigator !== 'undefined' ||
+      process.env.NEXT_RUNTIME === 'edge'
     ) {
       return;
     }
@@ -108,18 +102,14 @@ class Logger {
     }
 
     // In production, only output errors and fatal logs
-    if (
-      this.isProduction &&
-      entry.level !== "error" &&
-      entry.level !== "fatal"
-    ) {
+    if (this.isProduction && entry.level !== 'error' && entry.level !== 'fatal') {
       return;
     }
 
     // For debug logs, write directly to process.stdout to avoid SSR leakage
     const formattedLog = this.formatLog(entry);
 
-    if (entry.level === "debug" && this.isDevelopment) {
+    if (entry.level === 'debug' && this.isDevelopment) {
       // Use console.debug for debug logs (Edge Runtime compatible)
       // biome-ignore lint/suspicious/noConsole: Development debug logging
       console.debug(`[DEBUG] ${formattedLog}`);
@@ -128,16 +118,16 @@ class Logger {
 
     // Server-only console output for non-debug levels
     switch (entry.level) {
-      case "info":
+      case 'info':
         // biome-ignore lint/suspicious/noConsole: Server-only logger implementation
         console.info(`[SERVER] ${formattedLog}`);
         break;
-      case "warn":
+      case 'warn':
         // biome-ignore lint/suspicious/noConsole: Server-only logger implementation
         console.warn(`[SERVER] ${formattedLog}`);
         break;
-      case "error":
-      case "fatal":
+      case 'error':
+      case 'fatal':
         // biome-ignore lint/suspicious/noConsole: Server-only logger implementation
         console.error(`[SERVER] ${formattedLog}`);
         break;
@@ -153,11 +143,11 @@ class Logger {
   debug(
     message: string,
     context?: LogContext,
-    metadata?: Record<string, string | number | boolean>,
+    metadata?: Record<string, string | number | boolean>
   ): void {
     if (this.isDevelopment) {
       const entry: LogEntry = {
-        level: "debug",
+        level: 'debug',
         message: sanitizeLogMessage(message),
       };
 
@@ -177,10 +167,10 @@ class Logger {
   info(
     message: string,
     context?: LogContext,
-    metadata?: Record<string, string | number | boolean>,
+    metadata?: Record<string, string | number | boolean>
   ): void {
     const entry: LogEntry = {
-      level: "info",
+      level: 'info',
       message: sanitizeLogMessage(message),
     };
 
@@ -199,10 +189,10 @@ class Logger {
   warn(
     message: string,
     context?: LogContext,
-    metadata?: Record<string, string | number | boolean>,
+    metadata?: Record<string, string | number | boolean>
   ): void {
     const entry: LogEntry = {
-      level: "warn",
+      level: 'warn',
       message: sanitizeLogMessage(message),
     };
 
@@ -222,10 +212,10 @@ class Logger {
     message: string,
     error?: Error | string,
     context?: LogContext,
-    metadata?: Record<string, string | number | boolean>,
+    metadata?: Record<string, string | number | boolean>
   ): void {
     const entry: LogEntry = {
-      level: "error",
+      level: 'error',
       message: sanitizeLogMessage(message),
     };
 
@@ -247,10 +237,10 @@ class Logger {
     message: string,
     error?: Error | string,
     context?: LogContext,
-    metadata?: Record<string, string | number | boolean>,
+    metadata?: Record<string, string | number | boolean>
   ): void {
     const entry: LogEntry = {
-      level: "fatal",
+      level: 'fatal',
       message: sanitizeLogMessage(message),
     };
 
@@ -275,7 +265,7 @@ class Logger {
     contextualLogger.debug = (
       message: string,
       context?: LogContext,
-      metadata?: Record<string, string | number | boolean>,
+      metadata?: Record<string, string | number | boolean>
     ) => {
       const finalContext = { ...baseContext, ...context };
       this.debug(message, finalContext, metadata);
@@ -285,7 +275,7 @@ class Logger {
     contextualLogger.info = (
       message: string,
       context?: LogContext,
-      metadata?: Record<string, string | number | boolean>,
+      metadata?: Record<string, string | number | boolean>
     ) => {
       const finalContext = { ...baseContext, ...context };
       this.info(message, finalContext, metadata);
@@ -295,7 +285,7 @@ class Logger {
     contextualLogger.warn = (
       message: string,
       context?: LogContext,
-      metadata?: Record<string, string | number | boolean>,
+      metadata?: Record<string, string | number | boolean>
     ) => {
       const finalContext = { ...baseContext, ...context };
       this.warn(message, finalContext, metadata);
@@ -306,7 +296,7 @@ class Logger {
       message: string,
       error?: Error | string,
       context?: LogContext,
-      metadata?: Record<string, string | number | boolean>,
+      metadata?: Record<string, string | number | boolean>
     ) => {
       const finalContext = { ...baseContext, ...context };
       this.error(message, error, finalContext, metadata);
@@ -317,7 +307,7 @@ class Logger {
       message: string,
       error?: Error | string,
       context?: LogContext,
-      metadata?: Record<string, string | number | boolean>,
+      metadata?: Record<string, string | number | boolean>
     ) => {
       const finalContext = { ...baseContext, ...context };
       this.fatal(message, error, finalContext, metadata);
@@ -334,15 +324,15 @@ class Logger {
     const context: LogContext = {
       method: request.method,
       url: url.pathname + url.search,
-      userAgent: request.headers.get("user-agent") || "",
-      requestId: request.headers.get("x-request-id") || "",
+      userAgent: request.headers.get('user-agent') || '',
+      requestId: request.headers.get('x-request-id') || '',
       timestamp: new Date().toISOString(),
     };
 
     // Add Vercel-specific headers if available
     if (this.isVercel) {
       const vercelContext = {
-        region: request.headers.get("x-vercel-id") || undefined,
+        region: request.headers.get('x-vercel-id') || undefined,
         deployment: process.env.VERCEL_URL || undefined,
         environment: process.env.VERCEL_ENV || undefined,
       };
@@ -355,18 +345,14 @@ class Logger {
   /**
    * Performance timing helper
    */
-  time<T>(
-    label: string,
-    fn: () => T | Promise<T>,
-    context?: LogContext,
-  ): Promise<T> {
+  time<T>(label: string, fn: () => T | Promise<T>, context?: LogContext): Promise<T> {
     return this.timeAsync(label, fn, context);
   }
 
   private async timeAsync<T>(
     label: string,
     fn: () => T | Promise<T>,
-    context?: LogContext,
+    context?: LogContext
   ): Promise<T> {
     const start = performance.now();
     this.debug(`Starting: ${label}`, context);
@@ -391,7 +377,7 @@ class Logger {
         {
           duration: `${duration.toFixed(2)}ms`,
           success: false,
-        },
+        }
       );
 
       throw error;
@@ -407,9 +393,9 @@ class Logger {
    * Simple console log for CLI scripts (environment-aware)
    */
   log(message: string, ...args: unknown[]): void {
-    const isProduction = process.env.NODE_ENV === "production";
-    const isVerbose = process.env.VERBOSE === "true";
-    const isCI = process.env.CI === "true" || process.env.VERCEL === "1";
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isVerbose = process.env.VERBOSE === 'true';
+    const isCI = process.env.CI === 'true' || process.env.VERCEL === '1';
 
     // Always output in dev, verbose mode, or CI/build environments
     if (!isProduction || isVerbose || isCI) {
@@ -422,9 +408,9 @@ class Logger {
    * Progress indicator for long-running operations
    */
   progress(message: string): void {
-    const isProduction = process.env.NODE_ENV === "production";
-    const isVerbose = process.env.VERBOSE === "true";
-    const isCI = process.env.CI === "true" || process.env.VERCEL === "1";
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isVerbose = process.env.VERBOSE === 'true';
+    const isCI = process.env.CI === 'true' || process.env.VERCEL === '1';
 
     // Always output in dev, verbose mode, or CI/build environments
     if (!isProduction || isVerbose || isCI) {
@@ -438,9 +424,9 @@ class Logger {
    * Success message with emoji for CLI
    */
   success(message: string): void {
-    const isProduction = process.env.NODE_ENV === "production";
-    const isVerbose = process.env.VERBOSE === "true";
-    const isCI = process.env.CI === "true" || process.env.VERCEL === "1";
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isVerbose = process.env.VERBOSE === 'true';
+    const isCI = process.env.CI === 'true' || process.env.VERCEL === '1';
 
     // Always output in dev, verbose mode, or CI/build environments
     if (!isProduction || isVerbose || isCI) {

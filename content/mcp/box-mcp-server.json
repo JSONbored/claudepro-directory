@@ -4,13 +4,7 @@
   "category": "mcp",
   "author": "Box",
   "dateAdded": "2025-09-18",
-  "tags": [
-    "storage",
-    "box",
-    "enterprise",
-    "document-management",
-    "collaboration"
-  ],
+  "tags": ["storage", "box", "enterprise", "document-management", "collaboration"],
   "content": "Connect Claude to Box for enterprise content management and document automation.",
   "features": [
     "Access and search files across your Box enterprise",

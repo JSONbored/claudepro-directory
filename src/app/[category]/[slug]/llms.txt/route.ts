@@ -6,33 +6,24 @@
  * @see {@link https://llmstxt.org} - LLMs.txt specification
  */
 
-import { type NextRequest, NextResponse } from "next/server";
-import {
-  isValidCategory,
-  VALID_CATEGORIES,
-} from "@/src/lib/config/category-config";
-import { APP_CONFIG } from "@/src/lib/constants";
+import { type NextRequest, NextResponse } from 'next/server';
+import { isValidCategory, VALID_CATEGORIES } from '@/src/lib/config/category-config';
+import { APP_CONFIG } from '@/src/lib/constants';
 import {
   getContentByCategory,
   getContentBySlug,
   getFullContentBySlug,
-} from "@/src/lib/content/content-loaders";
-import { handleApiError } from "@/src/lib/error-handler";
-import {
-  buildRichContent,
-  type ContentItem,
-} from "@/src/lib/llms-txt/content-builder";
-import {
-  generateLLMsTxt,
-  type LLMsTxtItem,
-} from "@/src/lib/llms-txt/generator";
-import { logger } from "@/src/lib/logger";
-import { errorInputSchema } from "@/src/lib/schemas/error.schema";
+} from '@/src/lib/content/content-loaders';
+import { handleApiError } from '@/src/lib/error-handler';
+import { buildRichContent, type ContentItem } from '@/src/lib/llms-txt/content-builder';
+import { generateLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
+import { logger } from '@/src/lib/logger';
+import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 
 /**
  * Runtime configuration
  */
-export const runtime = "nodejs";
+export const runtime = 'nodejs';
 
 /**
  * ISR revalidation
@@ -83,26 +74,26 @@ export async function generateStaticParams() {
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ category: string; slug: string }> },
+  { params }: { params: Promise<{ category: string; slug: string }> }
 ): Promise<Response> {
   const requestLogger = logger.forRequest(request);
 
   try {
     const { category, slug } = await params;
 
-    requestLogger.info("Item llms.txt generation started", { category, slug });
+    requestLogger.info('Item llms.txt generation started', { category, slug });
 
     // Validate category
     if (!isValidCategory(category)) {
-      requestLogger.warn("Invalid category requested for item llms.txt", {
+      requestLogger.warn('Invalid category requested for item llms.txt', {
         category,
         slug,
       });
 
-      return new NextResponse("Category not found", {
+      return new NextResponse('Category not found', {
         status: 404,
         headers: {
-          "Content-Type": "text/plain; charset=utf-8",
+          'Content-Type': 'text/plain; charset=utf-8',
         },
       });
     }
@@ -111,12 +102,12 @@ export async function GET(
     const item = await getContentBySlug(category, slug);
 
     if (!item) {
-      requestLogger.warn("Item not found for llms.txt", { category, slug });
+      requestLogger.warn('Item not found for llms.txt', { category, slug });
 
-      return new NextResponse("Content not found", {
+      return new NextResponse('Content not found', {
         status: 404,
         headers: {
-          "Content-Type": "text/plain; charset=utf-8",
+          'Content-Type': 'text/plain; charset=utf-8',
         },
       });
     }
@@ -126,15 +117,15 @@ export async function GET(
 
     // Handle case where full content is not found
     if (!fullItem) {
-      requestLogger.warn("Full item content not found for llms.txt", {
+      requestLogger.warn('Full item content not found for llms.txt', {
         category,
         slug,
       });
 
-      return new NextResponse("Content not found", {
+      return new NextResponse('Content not found', {
         status: 404,
         headers: {
-          "Content-Type": "text/plain; charset=utf-8",
+          'Content-Type': 'text/plain; charset=utf-8',
         },
       });
     }
@@ -166,7 +157,7 @@ export async function GET(
       sanitize: true, // Apply PII protection
     });
 
-    requestLogger.info("Item llms.txt generated successfully", {
+    requestLogger.info('Item llms.txt generated successfully', {
       category,
       slug,
       contentLength: llmsTxt.length,
@@ -177,37 +168,34 @@ export async function GET(
     return new NextResponse(llmsTxt, {
       status: 200,
       headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control":
-          "public, max-age=600, s-maxage=600, stale-while-revalidate=3600",
-        "X-Content-Type-Options": "nosniff",
-        "X-Robots-Tag": "index, follow",
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'public, max-age=600, s-maxage=600, stale-while-revalidate=3600',
+        'X-Content-Type-Options': 'nosniff',
+        'X-Robots-Tag': 'index, follow',
       },
     });
   } catch (error: unknown) {
     const { category, slug } = await params.catch(() => ({
-      category: "unknown",
-      slug: "unknown",
+      category: 'unknown',
+      slug: 'unknown',
     }));
 
     requestLogger.error(
-      "Failed to generate item llms.txt",
+      'Failed to generate item llms.txt',
       error instanceof Error ? error : new Error(String(error)),
-      { category, slug },
+      { category, slug }
     );
 
     // Use centralized error handling
     const validatedError = errorInputSchema.safeParse(error);
     return handleApiError(
-      validatedError.success
-        ? validatedError.data
-        : { message: "Failed to generate llms.txt" },
+      validatedError.success ? validatedError.data : { message: 'Failed to generate llms.txt' },
       {
-        route: "/[category]/[slug]/llms.txt",
-        operation: "generate_item_llmstxt",
-        method: "GET",
+        route: '/[category]/[slug]/llms.txt',
+        operation: 'generate_item_llmstxt',
+        method: 'GET',
         logContext: { category, slug },
-      },
+      }
     );
   }
 }

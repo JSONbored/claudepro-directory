@@ -1,24 +1,21 @@
-"use client";
+'use client';
 
 /**
  * ErrorTable - Specialized error display table
  * Used in 1 MDX file across the codebase - Specialized for troubleshooting documentation
  */
 
-import { Badge } from "@/src/components/ui/badge";
+import { Badge } from '@/src/components/ui/badge';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
-import { AlertTriangle, Info } from "@/src/lib/icons";
-import {
-  type ErrorTableProps,
-  errorTablePropsSchema,
-} from "@/src/lib/schemas/shared.schema";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
+} from '@/src/components/ui/card';
+import { AlertTriangle, Info } from '@/src/lib/icons';
+import { type ErrorTableProps, errorTablePropsSchema } from '@/src/lib/schemas/shared.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function ErrorTable(props: ErrorTableProps) {
   const validated = errorTablePropsSchema.parse(props);
@@ -26,10 +23,9 @@ export function ErrorTable(props: ErrorTableProps) {
   const validErrors = errors;
 
   const severityColors = {
-    critical: "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200",
-    warning:
-      "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200",
-    info: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200",
+    critical: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200',
+    warning: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200',
+    info: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200',
   };
 
   const severityIcons = {
@@ -75,30 +71,21 @@ export function ErrorTable(props: ErrorTableProps) {
               {validErrors.map((error, index) => (
                 <tr
                   key={error.code}
-                  className={`border-b last:border-0 ${index % 2 === 0 ? "bg-muted/10" : ""}`}
+                  className={`border-b last:border-0 ${index % 2 === 0 ? 'bg-muted/10' : ''}`}
                 >
-                  <td
-                    className={`${UI_CLASSES.P_4} font-mono ${UI_CLASSES.TEXT_SM}`}
-                  >
+                  <td className={`${UI_CLASSES.P_4} font-mono ${UI_CLASSES.TEXT_SM}`}>
                     {error.code}
                   </td>
                   <td className={UI_CLASSES.P_4}>
-                    <Badge
-                      className={severityColors[error.severity]}
-                      variant="secondary"
-                    >
+                    <Badge className={severityColors[error.severity]} variant="secondary">
                       <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                         {severityIcons[error.severity]}
                         {error.severity}
                       </span>
                     </Badge>
                   </td>
-                  <td className={`${UI_CLASSES.P_4} ${UI_CLASSES.TEXT_SM}`}>
-                    {error.message}
-                  </td>
-                  <td
-                    className={`${UI_CLASSES.P_4} ${UI_CLASSES.TEXT_SM} text-muted-foreground`}
-                  >
+                  <td className={`${UI_CLASSES.P_4} ${UI_CLASSES.TEXT_SM}`}>{error.message}</td>
+                  <td className={`${UI_CLASSES.P_4} ${UI_CLASSES.TEXT_SM} text-muted-foreground`}>
                     {error.solution}
                   </td>
                 </tr>

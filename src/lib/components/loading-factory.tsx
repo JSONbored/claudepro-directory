@@ -1,7 +1,4 @@
-import {
-  ConfigGridSkeleton,
-  LoadingSkeleton,
-} from "@/src/components/ui/loading-skeleton";
+import { ConfigGridSkeleton, LoadingSkeleton } from '@/src/components/ui/loading-skeleton';
 
 /**
  * Loading Component Factory

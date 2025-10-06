@@ -14,30 +14,30 @@
  * @module components/shared/post-copy-email-modal
  */
 
-"use client";
+'use client';
 
-import { useAction } from "next-safe-action/hooks";
-import { useEffect, useState } from "react";
-import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
+import { useAction } from 'next-safe-action/hooks';
+import { useEffect, useState } from 'react';
+import { Button } from '@/src/components/ui/button';
+import { Input } from '@/src/components/ui/input';
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@/src/components/ui/sheet";
-import { toast } from "@/src/components/ui/sonner";
-import { postCopyEmailCaptureAction } from "@/src/lib/actions/email-capture";
-import { EVENTS } from "@/src/lib/analytics/events.config";
-import { trackEvent } from "@/src/lib/analytics/tracker";
-import { logger } from "@/src/lib/logger";
-import { cn } from "@/src/lib/utils";
+} from '@/src/components/ui/sheet';
+import { toast } from '@/src/components/ui/sonner';
+import { postCopyEmailCaptureAction } from '@/src/lib/actions/email-capture';
+import { EVENTS } from '@/src/lib/analytics/events.config';
+import { trackEvent } from '@/src/lib/analytics/tracker';
+import { logger } from '@/src/lib/logger';
+import { cn } from '@/src/lib/utils';
 
 /**
  * Copy type for tracking context
  */
-export type CopyType = "llmstxt" | "markdown" | "code" | "link";
+export type CopyType = 'llmstxt' | 'markdown' | 'code' | 'link';
 
 /**
  * Props for PostCopyEmailModal
@@ -102,7 +102,7 @@ export function PostCopyEmailModal({
   slug,
   referrer,
 }: PostCopyEmailModalProps) {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [showTime, setShowTime] = useState<number | null>(null);
 
   // Track when modal is shown
@@ -113,7 +113,7 @@ export function PostCopyEmailModal({
 
       // Track modal shown event
       trackEvent(EVENTS.EMAIL_MODAL_SHOWN, {
-        trigger_source: "post_copy",
+        trigger_source: 'post_copy',
         copy_type: copyType,
         session_copy_count: 1, // TODO: Track actual session copy count
       });
@@ -124,8 +124,8 @@ export function PostCopyEmailModal({
   const { execute, status } = useAction(postCopyEmailCaptureAction, {
     onSuccess: (result) => {
       if (result.data?.success) {
-        toast.success("Welcome to the newsletter! 🎉", {
-          description: "Check your inbox for a welcome email",
+        toast.success('Welcome to the newsletter! 🎉', {
+          description: 'Check your inbox for a welcome email',
           duration: 5000,
         });
 
@@ -137,31 +137,31 @@ export function PostCopyEmailModal({
 
         // Close modal and reset
         onOpenChange(false);
-        setEmail("");
+        setEmail('');
       } else {
-        throw new Error(result.data?.error || "Subscription failed");
+        throw new Error(result.data?.error || 'Subscription failed');
       }
     },
     onError: (error) => {
       const serverError = error.error?.serverError;
       const errorMessage =
         serverError &&
-        typeof serverError === "object" &&
-        "message" in serverError &&
-        typeof (serverError as { message?: unknown }).message === "string"
+        typeof serverError === 'object' &&
+        'message' in serverError &&
+        typeof (serverError as { message?: unknown }).message === 'string'
           ? (serverError as { message: string }).message
-          : typeof serverError === "string"
+          : typeof serverError === 'string'
             ? serverError
-            : "Failed to subscribe";
+            : 'Failed to subscribe';
 
-      logger.error("Post-copy email capture failed", new Error(errorMessage), {
-        component: "PostCopyEmailModal",
+      logger.error('Post-copy email capture failed', new Error(errorMessage), {
+        component: 'PostCopyEmailModal',
         copyType,
         ...(category && { category }),
         ...(slug && { slug }),
       });
 
-      toast.error("Failed to subscribe", {
+      toast.error('Failed to subscribe', {
         description: errorMessage,
         duration: 4000,
       });
@@ -175,8 +175,8 @@ export function PostCopyEmailModal({
     e.preventDefault();
 
     if (!email.trim()) {
-      toast.error("Email required", {
-        description: "Please enter your email address",
+      toast.error('Email required', {
+        description: 'Please enter your email address',
         duration: 3000,
       });
       return;
@@ -184,7 +184,7 @@ export function PostCopyEmailModal({
 
     await execute({
       email: email.trim(),
-      source: "post_copy",
+      source: 'post_copy',
       ...(referrer && { referrer }),
       copyType,
       ...(category && { copyCategory: category }),
@@ -200,14 +200,14 @@ export function PostCopyEmailModal({
       const timeShown = Date.now() - showTime;
 
       trackEvent(EVENTS.EMAIL_MODAL_DISMISSED, {
-        trigger_source: "post_copy",
-        dismissal_method: "maybe_later",
+        trigger_source: 'post_copy',
+        dismissal_method: 'maybe_later',
         time_shown_ms: timeShown,
       });
     }
 
     onOpenChange(false);
-    setEmail("");
+    setEmail('');
   };
 
   /**
@@ -218,19 +218,19 @@ export function PostCopyEmailModal({
       const timeShown = Date.now() - showTime;
 
       trackEvent(EVENTS.EMAIL_MODAL_DISMISSED, {
-        trigger_source: "post_copy",
-        dismissal_method: "close_button",
+        trigger_source: 'post_copy',
+        dismissal_method: 'close_button',
         time_shown_ms: timeShown,
       });
     }
 
     onOpenChange(open);
     if (!open) {
-      setEmail("");
+      setEmail('');
     }
   };
 
-  const isLoading = status === "executing";
+  const isLoading = status === 'executing';
 
   return (
     <Sheet open={open} onOpenChange={handleDismiss}>
@@ -238,8 +238,7 @@ export function PostCopyEmailModal({
         <SheetHeader>
           <SheetTitle>Want more like this?</SheetTitle>
           <SheetDescription>
-            Get the best Claude resources delivered to your inbox. No spam,
-            unsubscribe anytime.
+            Get the best Claude resources delivered to your inbox. No spam, unsubscribe anytime.
           </SheetDescription>
         </SheetHeader>
 
@@ -262,9 +261,9 @@ export function PostCopyEmailModal({
             <Button
               type="submit"
               disabled={isLoading || !email.trim()}
-              className={cn("flex-1", isLoading && "opacity-50")}
+              className={cn('flex-1', isLoading && 'opacity-50')}
             >
-              {isLoading ? "Subscribing..." : "Subscribe"}
+              {isLoading ? 'Subscribing...' : 'Subscribe'}
             </Button>
             <Button
               type="button"
@@ -279,8 +278,7 @@ export function PostCopyEmailModal({
         </form>
 
         <p className="mt-4 text-xs text-muted-foreground text-center">
-          By subscribing, you agree to receive updates about Claude tools and
-          resources.
+          By subscribing, you agree to receive updates about Claude tools and resources.
         </p>
       </SheetContent>
     </Sheet>

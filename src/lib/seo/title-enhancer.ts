@@ -9,8 +9,8 @@ import {
   MIN_ENHANCEMENT_GAIN,
   OPTIMAL_MIN,
   SUFFIX_LENGTHS,
-} from "@/src/lib/config/seo-config";
-import type { ContentCategory } from "@/src/lib/schemas/shared.schema";
+} from '@/src/lib/config/seo-config';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 
 export interface ContentItem {
   title?: string;
@@ -56,39 +56,39 @@ function capitalize(str: string): string {
  */
 function slugToTitle(slug: string): string {
   return slug
-    .split("-")
+    .split('-')
     .map((word) => {
       // Handle common acronyms/brands
       const upper = word.toUpperCase();
       if (
         [
-          "API",
-          "REST",
-          "HTTP",
-          "CLI",
-          "MCP",
-          "AWS",
-          "GCP",
-          "SQL",
-          "CSS",
-          "HTML",
-          "JSON",
-          "XML",
+          'API',
+          'REST',
+          'HTTP',
+          'CLI',
+          'MCP',
+          'AWS',
+          'GCP',
+          'SQL',
+          'CSS',
+          'HTML',
+          'JSON',
+          'XML',
         ].includes(upper)
       ) {
         return upper;
       }
       // Handle common brand names
       const brands: Record<string, string> = {
-        github: "GitHub",
-        gitlab: "GitLab",
-        nodejs: "Node.js",
-        javascript: "JavaScript",
-        typescript: "TypeScript",
-        postgresql: "PostgreSQL",
-        mongodb: "MongoDB",
-        redis: "Redis",
-        graphql: "GraphQL",
+        github: 'GitHub',
+        gitlab: 'GitLab',
+        nodejs: 'Node.js',
+        javascript: 'JavaScript',
+        typescript: 'TypeScript',
+        postgresql: 'PostgreSQL',
+        mongodb: 'MongoDB',
+        redis: 'Redis',
+        graphql: 'GraphQL',
       };
       if (brands[word.toLowerCase()]) {
         return brands[word.toLowerCase()];
@@ -96,7 +96,7 @@ function slugToTitle(slug: string): string {
       // Default: capitalize first letter
       return capitalize(word);
     })
-    .join(" ");
+    .join(' ');
 }
 
 /**
@@ -105,14 +105,13 @@ function slugToTitle(slug: string): string {
 const strategies: EnhancementStrategy[] = [
   // Strategy: Add "for Claude" (natural SEO optimization)
   {
-    name: "for-claude",
+    name: 'for-claude',
     apply: (item, available) => {
       // Get base title - convert slug to human-readable if no title exists
       const rawTitle = item.title || item.name || item.slug;
-      const baseTitle =
-        item.title || item.name ? rawTitle : slugToTitle(item.slug);
+      const baseTitle = item.title || item.name ? rawTitle : slugToTitle(item.slug);
 
-      const addition = " for Claude";
+      const addition = ' for Claude';
       if (addition.length <= available) {
         return `${baseTitle} for Claude`;
       }
@@ -125,22 +124,15 @@ const strategies: EnhancementStrategy[] = [
 /**
  * Calculate total title length with category suffix
  */
-export function calculateTitleLength(
-  baseTitle: string,
-  category: ContentCategory,
-): number {
-  const suffixLength =
-    SUFFIX_LENGTHS[category as keyof typeof SUFFIX_LENGTHS] || 0;
+export function calculateTitleLength(baseTitle: string, category: ContentCategory): number {
+  const suffixLength = SUFFIX_LENGTHS[category as keyof typeof SUFFIX_LENGTHS] || 0;
   return baseTitle.length + suffixLength;
 }
 
 /**
  * Check if title needs enhancement
  */
-export function shouldEnhanceTitle(
-  item: ContentItem,
-  category: ContentCategory,
-): boolean {
+export function shouldEnhanceTitle(item: ContentItem, category: ContentCategory): boolean {
   const currentTitle = item.seoTitle || item.title || item.name || item.slug;
   const currentLength = calculateTitleLength(currentTitle, category);
 
@@ -151,10 +143,7 @@ export function shouldEnhanceTitle(
 /**
  * Enhance a title using smart strategies
  */
-export function enhanceTitle(
-  item: ContentItem,
-  category: ContentCategory,
-): EnhancementResult {
+export function enhanceTitle(item: ContentItem, category: ContentCategory): EnhancementResult {
   const originalTitle = item.seoTitle || item.title || item.name || item.slug;
   const currentLength = calculateTitleLength(originalTitle, category);
 
@@ -173,8 +162,7 @@ export function enhanceTitle(
   }
 
   // Calculate available space for enhancement
-  const maxAllowed =
-    MAX_BASE_TITLE_LENGTH[category as keyof typeof MAX_BASE_TITLE_LENGTH] || 20;
+  const maxAllowed = MAX_BASE_TITLE_LENGTH[category as keyof typeof MAX_BASE_TITLE_LENGTH] || 20;
   const available = maxAllowed - originalTitle.length;
 
   // Try each strategy in order
@@ -211,7 +199,7 @@ export function enhanceTitle(
  */
 export function batchEnhance(
   items: ContentItem[],
-  category: ContentCategory,
+  category: ContentCategory
 ): Map<string, EnhancementResult> {
   const results = new Map<string, EnhancementResult>();
 

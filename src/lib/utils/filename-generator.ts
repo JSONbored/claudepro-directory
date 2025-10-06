@@ -20,8 +20,8 @@
  * - Graceful fallbacks for missing/invalid data
  */
 
-import type { UnifiedContentItem } from "@/src/lib/schemas/component.schema";
-import { transforms } from "@/src/lib/security/validators";
+import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import { transforms } from '@/src/lib/security/validators';
 
 /**
  * Maximum safe filename length (excluding extension)
@@ -35,51 +35,51 @@ const MAX_FILENAME_LENGTH = 100;
  */
 const LANGUAGE_EXTENSIONS = {
   // Programming languages
-  typescript: "ts",
-  javascript: "js",
-  tsx: "tsx",
-  jsx: "jsx",
-  python: "py",
-  rust: "rs",
-  go: "go",
-  java: "java",
-  c: "c",
-  cpp: "cpp",
-  csharp: "cs",
-  php: "php",
-  ruby: "rb",
-  swift: "swift",
-  kotlin: "kt",
+  typescript: 'ts',
+  javascript: 'js',
+  tsx: 'tsx',
+  jsx: 'jsx',
+  python: 'py',
+  rust: 'rs',
+  go: 'go',
+  java: 'java',
+  c: 'c',
+  cpp: 'cpp',
+  csharp: 'cs',
+  php: 'php',
+  ruby: 'rb',
+  swift: 'swift',
+  kotlin: 'kt',
   // Shell/scripting
-  bash: "sh",
-  shell: "sh",
-  sh: "sh",
-  zsh: "sh",
-  powershell: "ps1",
+  bash: 'sh',
+  shell: 'sh',
+  sh: 'sh',
+  zsh: 'sh',
+  powershell: 'ps1',
   // Config/data formats
-  json: "json",
-  yaml: "yml",
-  yml: "yml",
-  toml: "toml",
-  xml: "xml",
-  ini: "ini",
-  env: "env",
+  json: 'json',
+  yaml: 'yml',
+  yml: 'yml',
+  toml: 'toml',
+  xml: 'xml',
+  ini: 'ini',
+  env: 'env',
   // Markup/documentation
-  markdown: "md",
-  md: "md",
-  html: "html",
+  markdown: 'md',
+  md: 'md',
+  html: 'html',
   // Styles
-  css: "css",
-  scss: "scss",
-  sass: "sass",
-  less: "less",
+  css: 'css',
+  scss: 'scss',
+  sass: 'sass',
+  less: 'less',
   // Database
-  sql: "sql",
-  graphql: "graphql",
+  sql: 'sql',
+  graphql: 'graphql',
   // Other
-  dockerfile: "Dockerfile",
-  text: "txt",
-  plaintext: "txt",
+  dockerfile: 'Dockerfile',
+  text: 'txt',
+  plaintext: 'txt',
 } as const;
 
 /**
@@ -87,10 +87,10 @@ const LANGUAGE_EXTENSIONS = {
  * Using 'as const' for type safety
  */
 const MCP_SECTION_LABELS = {
-  claudeDesktop: "claude-desktop",
-  claudeCode: "claude-code",
-  http: "http-transport",
-  sse: "sse-transport",
+  claudeDesktop: 'claude-desktop',
+  claudeCode: 'claude-code',
+  http: 'http-transport',
+  sse: 'sse-transport',
 } as const;
 
 /**
@@ -102,7 +102,7 @@ export interface FilenameGeneratorOptions {
   /** Detected or specified language */
   language: string;
   /** Optional format hint for specialized filename patterns */
-  format?: "json" | "multi" | "hook";
+  format?: 'json' | 'multi' | 'hook';
   /** Optional section identifier for multi-section configs */
   section?: string;
 }
@@ -119,8 +119,8 @@ export interface FilenameGeneratorOptions {
  * @returns Safe, filesystem-compatible string
  */
 function sanitizeFilename(input: string | undefined): string {
-  if (!input || typeof input !== "string") {
-    return "untitled";
+  if (!input || typeof input !== 'string') {
+    return 'untitled';
   }
 
   // Use existing production slug normalization as base
@@ -131,16 +131,16 @@ function sanitizeFilename(input: string | undefined): string {
   // Remove any remaining path separators and control characters
   const secure = normalized
     // Remove path separators (defense in depth)
-    .replace(/[/\\]/g, "")
+    .replace(/[/\\]/g, '')
     // Remove leading/trailing dots and hyphens (hidden files, relative paths)
-    .replace(/^[.-]+|[.-]+$/g, "")
+    .replace(/^[.-]+|[.-]+$/g, '')
     // Collapse multiple hyphens
-    .replace(/-{2,}/g, "-")
+    .replace(/-{2,}/g, '-')
     // Limit length for filesystem compatibility
     .slice(0, MAX_FILENAME_LENGTH)
     .trim();
 
-  return secure || "untitled";
+  return secure || 'untitled';
 }
 
 /**
@@ -159,9 +159,9 @@ function sanitizeFilename(input: string | undefined): string {
  */
 function convertHookTypeToKebab(hookType: string): string {
   return hookType
-    .replace(/([A-Z])/g, "-$1")
+    .replace(/([A-Z])/g, '-$1')
     .toLowerCase()
-    .replace(/^-/, "");
+    .replace(/^-/, '');
 }
 
 /**
@@ -174,9 +174,7 @@ function convertHookTypeToKebab(hookType: string): string {
  */
 function getExtensionFromLanguage(language: string): string {
   const normalized = language.toLowerCase().trim();
-  return (
-    LANGUAGE_EXTENSIONS[normalized as keyof typeof LANGUAGE_EXTENSIONS] || "txt"
-  );
+  return LANGUAGE_EXTENSIONS[normalized as keyof typeof LANGUAGE_EXTENSIONS] || 'txt';
 }
 
 /**
@@ -211,52 +209,49 @@ export function generateFilename(options: FilenameGeneratorOptions): string {
 
   // Early validation
   if (!(item && language)) {
-    return `untitled.${getExtensionFromLanguage(language || "text")}`;
+    return `untitled.${getExtensionFromLanguage(language || 'text')}`;
   }
 
   const { category, slug } = item;
   const ext = getExtensionFromLanguage(language);
 
   // Get name from item if it exists (backward compatibility)
-  const name = "name" in item ? (item as { name?: string }).name : undefined;
+  const name = 'name' in item ? (item as { name?: string }).name : undefined;
 
   // Build identifier with security sanitization
   const rawIdentifier = slug || name || category;
   const identifier = sanitizeFilename(rawIdentifier);
 
   // Handle multi-format MCP configs
-  if (format === "multi" && section) {
+  if (format === 'multi' && section) {
     const sanitizedSection = sanitizeFilename(section);
     return `${identifier}-${sanitizedSection}.${ext}`;
   }
 
   // Category-specific filename generation
   switch (category) {
-    case "mcp":
-    case "agents":
-    case "commands":
-    case "rules":
+    case 'mcp':
+    case 'agents':
+    case 'commands':
+    case 'rules':
       return `${identifier}-config.${ext}`;
 
-    case "hooks": {
+    case 'hooks': {
       // Use hookType for semantic naming if available
-      const hookType =
-        "hookType" in item
-          ? (item as { hookType?: string }).hookType
-          : undefined;
-      if (hookType && typeof hookType === "string") {
+      const hookType = 'hookType' in item ? (item as { hookType?: string }).hookType : undefined;
+      if (hookType && typeof hookType === 'string') {
         const hookSlug = convertHookTypeToKebab(hookType);
         return `${sanitizeFilename(hookSlug)}.${ext}`;
       }
       return `${identifier}.${ext}`;
     }
 
-    case "guides":
-    case "tutorials":
-    case "comparisons":
-    case "workflows":
-    case "use-cases":
-    case "troubleshooting":
+    case 'guides':
+    case 'tutorials':
+    case 'comparisons':
+    case 'workflows':
+    case 'use-cases':
+    case 'troubleshooting':
       return `${identifier}.${ext}`;
 
     default:
@@ -289,7 +284,7 @@ export function generateFilename(options: FilenameGeneratorOptions): string {
 export function generateMultiFormatFilename(
   item: UnifiedContentItem,
   sectionKey: string,
-  language: string,
+  language: string
 ): string {
   // Use predefined labels or sanitize custom section keys
   const section =
@@ -299,7 +294,7 @@ export function generateMultiFormatFilename(
   return generateFilename({
     item,
     language,
-    format: "multi",
+    format: 'multi',
     section,
   });
 }
@@ -336,21 +331,20 @@ export function generateMultiFormatFilename(
  */
 export function generateHookFilename(
   item: UnifiedContentItem,
-  contentType: "hookConfig" | "scriptContent",
-  language: string,
+  contentType: 'hookConfig' | 'scriptContent',
+  language: string
 ): string {
   const ext = getExtensionFromLanguage(language);
-  const hookType =
-    "hookType" in item ? (item as { hookType?: string }).hookType : undefined;
-  const suffix = contentType === "hookConfig" ? "config" : "script";
+  const hookType = 'hookType' in item ? (item as { hookType?: string }).hookType : undefined;
+  const suffix = contentType === 'hookConfig' ? 'config' : 'script';
 
   // Use hookType for semantic naming
-  if (hookType && typeof hookType === "string") {
+  if (hookType && typeof hookType === 'string') {
     const hookSlug = convertHookTypeToKebab(hookType);
     return `${sanitizeFilename(hookSlug)}-${suffix}.${ext}`;
   }
 
   // Fallback to slug
-  const identifier = sanitizeFilename(item.slug || "hook");
+  const identifier = sanitizeFilename(item.slug || 'hook');
   return `${identifier}-${suffix}.${ext}`;
 }

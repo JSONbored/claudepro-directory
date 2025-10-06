@@ -11,10 +11,10 @@
  * @see components/unified-detail-page.tsx - Original implementation
  */
 
-import type { UnifiedContentItem } from "@/src/lib/schemas/component.schema";
-import type { ContentTypeConfig } from "@/src/lib/types/content-type-config";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
-import { DetailHeaderActions } from "./detail-header-actions";
+import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentTypeConfig } from '@/src/lib/types/content-type-config';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { DetailHeaderActions } from './detail-header-actions';
 
 export interface DetailHeaderProps {
   displayTitle: string;
@@ -30,34 +30,25 @@ export interface DetailHeaderProps {
  * Static content is server-rendered, interactive elements use client component
  * No React.memo needed - server components don't re-render
  */
-export function DetailHeader({
-  displayTitle,
-  item,
-  config,
-  onCopyContent,
-}: DetailHeaderProps) {
+export function DetailHeader({ displayTitle, item, config, onCopyContent }: DetailHeaderProps) {
   const hasContent = Boolean(
-    ("content" in item &&
-      typeof (item as { content?: string }).content === "string") ||
-      ("configuration" in item &&
-        (item as { configuration?: object }).configuration),
+    ('content' in item && typeof (item as { content?: string }).content === 'string') ||
+      ('configuration' in item && (item as { configuration?: object }).configuration)
   );
 
   // Extract serializable action data from config
   const primaryAction = {
     label: config.primaryAction.label,
-    type: "deploy", // Generic type for all actions
+    type: 'deploy', // Generic type for all actions
   };
 
   const secondaryActions = config.secondaryActions?.map((action) => ({
     label: action.label,
-    type: "secondary",
+    type: 'secondary',
   }));
 
   return (
-    <div
-      className={`${UI_CLASSES.BORDER_B} border-border bg-code/50 backdrop-blur-sm`}
-    >
+    <div className={`${UI_CLASSES.BORDER_B} border-border bg-code/50 backdrop-blur-sm`}>
       <div className="container mx-auto px-4 py-8">
         {/* Client component for back button and actions */}
         <DetailHeaderActions

@@ -8,22 +8,14 @@
  * - Performant: Pre-rendered on server
  */
 
-import { Callout } from "@/src/components/content/callout";
-import { ProductionCodeBlock } from "@/src/components/shared/production-code-block";
-import { Badge } from "@/src/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/src/components/ui/card";
-import { highlightCode } from "@/src/lib/content/syntax-highlighting";
-import { Zap } from "@/src/lib/icons";
-import {
-  type StepByStepGuideProps,
-  stepGuidePropsSchema,
-} from "@/src/lib/schemas/shared.schema";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
+import { Callout } from '@/src/components/content/callout';
+import { ProductionCodeBlock } from '@/src/components/shared/production-code-block';
+import { Badge } from '@/src/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { highlightCode } from '@/src/lib/content/syntax-highlighting';
+import { Zap } from '@/src/lib/icons';
+import { type StepByStepGuideProps, stepGuidePropsSchema } from '@/src/lib/schemas/shared.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export async function StepByStepGuide(props: StepByStepGuideProps) {
   const validated = stepGuidePropsSchema.parse(props);
@@ -35,25 +27,19 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
     validSteps.map(async (step) => {
       if (!step.code) return { ...step, highlightedHtml: null };
 
-      const html = await highlightCode(step.code, "bash");
+      const html = await highlightCode(step.code, 'bash');
       return { ...step, highlightedHtml: html };
-    }),
+    })
   );
 
   return (
     <section itemScope itemType="https://schema.org/HowTo" className="my-8">
       <div className={UI_CLASSES.MB_6}>
-        <h2
-          className={`text-2xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`}
-          itemProp="name"
-        >
+        <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`} itemProp="name">
           {title}
         </h2>
         {description && (
-          <p
-            className={`text-muted-foreground ${UI_CLASSES.MB_4}`}
-            itemProp="description"
-          >
+          <p className={`text-muted-foreground ${UI_CLASSES.MB_4}`} itemProp="description">
             {description}
           </p>
         )}
@@ -85,10 +71,7 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
                 className="border-2 border-primary/20 bg-gradient-to-br from-card via-card/80 to-transparent hover:shadow-2xl transition-all duration-300"
               >
                 <CardHeader>
-                  <CardTitle
-                    className="flex items-center gap-4"
-                    itemProp="name"
-                  >
+                  <CardTitle className="flex items-center gap-4" itemProp="name">
                     <div className={UI_CLASSES.RELATIVE}>
                       <div
                         className={`flex-shrink-0 w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-full flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} shadow-lg`}
@@ -103,9 +86,7 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
                         className={`${UI_CLASSES.ABSOLUTE} ${UI_CLASSES.INSET_0} animate-ping rounded-full bg-primary opacity-20`}
                       />
                     </div>
-                    <span className={`text-xl ${UI_CLASSES.FONT_BOLD}`}>
-                      {step.title}
-                    </span>
+                    <span className={`text-xl ${UI_CLASSES.FONT_BOLD}`}>{step.title}</span>
                     {step.time && (
                       <Badge
                         variant="secondary"

@@ -10,18 +10,13 @@
  * @see components/unified-sidebar.tsx - Original implementation
  */
 
-import Link from "next/link";
-import { z } from "zod";
-import { Badge } from "@/src/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/src/components/ui/card";
-import { TrendingUp } from "@/src/lib/icons";
-import { nonEmptyString } from "@/src/lib/schemas/primitives/base-strings";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
+import Link from 'next/link';
+import { z } from 'zod';
+import { Badge } from '@/src/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { TrendingUp } from '@/src/lib/icons';
+import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Schema for trending guide item
@@ -41,9 +36,7 @@ const trendingGuidesCardPropsSchema = z.object({
   title: nonEmptyString.optional(),
 });
 
-export type TrendingGuidesCardProps = z.infer<
-  typeof trendingGuidesCardPropsSchema
->;
+export type TrendingGuidesCardProps = z.infer<typeof trendingGuidesCardPropsSchema>;
 
 /**
  * TrendingGuidesCard Component (Server Component)
@@ -55,7 +48,7 @@ export type TrendingGuidesCardProps = z.infer<
 export function TrendingGuidesCard({
   guides,
   isLoading = false,
-  title = "Trending Now",
+  title = 'Trending Now',
 }: TrendingGuidesCardProps) {
   // Validate props
   const validated = trendingGuidesCardPropsSchema.parse({
@@ -80,9 +73,7 @@ export function TrendingGuidesCard({
       <CardContent className="pb-3 px-3">
         <div className="space-y-1.5">
           {validated.isLoading ? (
-            <div className={UI_CLASSES.TEXT_XS_MUTED}>
-              Loading trending guides...
-            </div>
+            <div className={UI_CLASSES.TEXT_XS_MUTED}>Loading trending guides...</div>
           ) : (
             validated.guides.map((guide, index) => (
               <Link
@@ -93,15 +84,10 @@ export function TrendingGuidesCard({
                 <span
                   className={`text-muted-foreground group-hover:text-foreground truncate ${UI_CLASSES.FLEX_1}`}
                 >
-                  <span className="text-muted-foreground/60 mr-1.5">
-                    {index + 1}.
-                  </span>
+                  <span className="text-muted-foreground/60 mr-1.5">{index + 1}.</span>
                   {guide.title}
                 </span>
-                <Badge
-                  variant="secondary"
-                  className="text-2xs h-4 px-1 bg-muted/50"
-                >
+                <Badge variant="secondary" className="text-2xs h-4 px-1 bg-muted/50">
                   {guide.views}
                 </Badge>
               </Link>

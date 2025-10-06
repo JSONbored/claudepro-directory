@@ -1,36 +1,27 @@
-"use client";
+'use client';
 
-import { useId, useState } from "react";
-import { toast } from "sonner";
-import { z } from "zod";
-import { Button } from "@/src/components/ui/button";
+import { useId, useState } from 'react';
+import { toast } from 'sonner';
+import { z } from 'zod';
+import { Button } from '@/src/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
-import { Input } from "@/src/components/ui/input";
-import { Label } from "@/src/components/ui/label";
-import { Textarea } from "@/src/components/ui/textarea";
-import {
-  CheckCircle,
-  ExternalLink,
-  FileJson,
-  Github,
-  Send,
-} from "@/src/lib/icons";
-import {
-  type ConfigSubmissionInput,
-  configSubmissionSchema,
-} from "@/src/lib/schemas/form.schema";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
+} from '@/src/components/ui/card';
+import { Input } from '@/src/components/ui/input';
+import { Label } from '@/src/components/ui/label';
+import { Textarea } from '@/src/components/ui/textarea';
+import { CheckCircle, ExternalLink, FileJson, Github, Send } from '@/src/lib/icons';
+import { type ConfigSubmissionInput, configSubmissionSchema } from '@/src/lib/schemas/form.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 import {
   generateGitHubIssueUrl,
   openGitHubIssue,
   validateIssueUrlLength,
-} from "@/src/lib/utils/github-issue-url";
+} from '@/src/lib/utils/github-issue-url';
 
 export default function SubmitPage() {
   // Generate unique IDs for form elements
@@ -45,14 +36,14 @@ export default function SubmitPage() {
 
   // Local form state with proper typing
   const [formData, setFormData] = useState<ConfigSubmissionInput>({
-    type: "agents", // Default to first valid enum value
-    name: "",
-    description: "",
-    category: "",
-    author: "",
-    github: "",
-    content: "",
-    tags: "",
+    type: 'agents', // Default to first valid enum value
+    name: '',
+    description: '',
+    category: '',
+    author: '',
+    github: '',
+    content: '',
+    tags: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -64,9 +55,7 @@ export default function SubmitPage() {
     try {
       // Validate individual field using Zod schema
       const fieldSchema =
-        configSubmissionSchema.shape[
-          fieldName as keyof typeof configSubmissionSchema.shape
-        ];
+        configSubmissionSchema.shape[fieldName as keyof typeof configSubmissionSchema.shape];
       if (fieldSchema) {
         fieldSchema.parse(value);
         setErrors((prev) => {
@@ -79,7 +68,7 @@ export default function SubmitPage() {
       if (error instanceof z.ZodError) {
         setErrors((prev) => ({
           ...prev,
-          [fieldName]: error.issues[0]?.message || "Invalid value",
+          [fieldName]: error.issues[0]?.message || 'Invalid value',
         }));
       }
     }
@@ -87,9 +76,7 @@ export default function SubmitPage() {
 
   // Handle input changes with validation
   const handleChange = (
-    event: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = event.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -111,8 +98,8 @@ export default function SubmitPage() {
 
       // Validate URL length
       if (!validateIssueUrlLength(issueUrl)) {
-        toast.error("Content Too Large", {
-          description: "Please reduce the size of your configuration content.",
+        toast.error('Content Too Large', {
+          description: 'Please reduce the size of your configuration content.',
         });
         setIsValidating(false);
         return;
@@ -125,16 +112,16 @@ export default function SubmitPage() {
       const opened = openGitHubIssue(issueUrl);
 
       if (opened) {
-        toast.success("Redirecting to GitHub", {
-          description: "Review and submit your configuration on GitHub.",
+        toast.success('Redirecting to GitHub', {
+          description: 'Review and submit your configuration on GitHub.',
         });
       } else {
         // Popup blocked - show fallback
-        toast.error("Popup Blocked", {
-          description: "Please allow popups or use the link below.",
+        toast.error('Popup Blocked', {
+          description: 'Please allow popups or use the link below.',
           action: {
-            label: "Open GitHub",
-            onClick: () => window.open(issueUrl, "_blank"),
+            label: 'Open GitHub',
+            onClick: () => window.open(issueUrl, '_blank'),
           },
         });
       }
@@ -142,15 +129,15 @@ export default function SubmitPage() {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
         for (const issue of error.issues) {
-          const fieldName = issue.path.join(".");
+          const fieldName = issue.path.join('.');
           fieldErrors[fieldName] = issue.message;
         }
         setErrors(fieldErrors);
-        toast.error("Validation Error", {
-          description: "Please check the form for errors.",
+        toast.error('Validation Error', {
+          description: 'Please check the form for errors.',
         });
       } else if (error instanceof Error) {
-        toast.error("Submission Error", {
+        toast.error('Submission Error', {
           description: error.message,
         });
       }
@@ -166,9 +153,7 @@ export default function SubmitPage() {
         className={`${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.TEXT_CENTER} ${UI_CLASSES.MB_12}`}
       >
         <h1 className="text-4xl font-bold mb-4">Submit Your Configuration</h1>
-        <p
-          className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
-        >
+        <p className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
           Share your Claude configurations with the community
         </p>
       </div>
@@ -183,11 +168,8 @@ export default function SubmitPage() {
               <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
               <div className="flex-1">
                 <p className={UI_CLASSES.FONT_MEDIUM}>Ready to submit!</p>
-                <p
-                  className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}
-                >
-                  Your configuration has been formatted. Click below to review
-                  and submit on GitHub.
+                <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
+                  Your configuration has been formatted. Click below to review and submit on GitHub.
                 </p>
                 <Button
                   variant="link"
@@ -195,11 +177,7 @@ export default function SubmitPage() {
                   asChild
                   className={`${UI_CLASSES.MT_2} p-0 h-auto`}
                 >
-                  <a
-                    href={lastSubmittedUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <a href={lastSubmittedUrl} target="_blank" rel="noopener noreferrer">
                     Open GitHub Issue
                     <ExternalLink className="h-3 w-3 ml-1" />
                   </a>
@@ -215,8 +193,7 @@ export default function SubmitPage() {
         <CardHeader>
           <CardTitle>Configuration Details</CardTitle>
           <CardDescription>
-            Fill out the form below to generate a pre-filled GitHub issue for
-            review
+            Fill out the form below to generate a pre-filled GitHub issue for review
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -231,7 +208,7 @@ export default function SubmitPage() {
                 onChange={handleChange}
                 required
                 className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-                  errors.type ? "border-destructive" : ""
+                  errors.type ? 'border-destructive' : ''
                 }`}
               >
                 <option value="agents">Agent</option>
@@ -242,9 +219,7 @@ export default function SubmitPage() {
                 <option value="statuslines">Statusline</option>
               </select>
               {errors.type && (
-                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>
-                  {errors.type}
-                </p>
+                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.type}</p>
               )}
             </div>
 
@@ -258,12 +233,10 @@ export default function SubmitPage() {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className={errors.name ? "border-destructive" : ""}
+                className={errors.name ? 'border-destructive' : ''}
               />
               {errors.name && (
-                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>
-                  {errors.name}
-                </p>
+                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.name}</p>
               )}
             </div>
 
@@ -278,12 +251,10 @@ export default function SubmitPage() {
                 onChange={handleChange}
                 required
                 rows={3}
-                className={errors.description ? "border-destructive" : ""}
+                className={errors.description ? 'border-destructive' : ''}
               />
               {errors.description && (
-                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>
-                  {errors.description}
-                </p>
+                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.description}</p>
               )}
             </div>
 
@@ -297,12 +268,10 @@ export default function SubmitPage() {
                 value={formData.category}
                 onChange={handleChange}
                 required
-                className={errors.category ? "border-destructive" : ""}
+                className={errors.category ? 'border-destructive' : ''}
               />
               {errors.category && (
-                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>
-                  {errors.category}
-                </p>
+                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.category}</p>
               )}
             </div>
 
@@ -316,12 +285,10 @@ export default function SubmitPage() {
                 value={formData.author}
                 onChange={handleChange}
                 required
-                className={errors.author ? "border-destructive" : ""}
+                className={errors.author ? 'border-destructive' : ''}
               />
               {errors.author && (
-                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>
-                  {errors.author}
-                </p>
+                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.author}</p>
               )}
             </div>
 
@@ -337,13 +304,11 @@ export default function SubmitPage() {
                   placeholder="https://github.com/username/repo"
                   value={formData.github}
                   onChange={handleChange}
-                  className={errors.github ? "border-destructive" : ""}
+                  className={errors.github ? 'border-destructive' : ''}
                 />
               </div>
               {errors.github && (
-                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>
-                  {errors.github}
-                </p>
+                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.github}</p>
               )}
             </div>
 
@@ -360,13 +325,11 @@ export default function SubmitPage() {
                   onChange={handleChange}
                   required
                   rows={8}
-                  className={`font-mono text-sm ${errors.content ? "border-destructive" : ""}`}
+                  className={`font-mono text-sm ${errors.content ? 'border-destructive' : ''}`}
                 />
               </div>
               {errors.content && (
-                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>
-                  {errors.content}
-                </p>
+                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.content}</p>
               )}
             </div>
 
@@ -379,16 +342,12 @@ export default function SubmitPage() {
                 placeholder="productivity, ai, automation (comma-separated)"
                 value={formData.tags}
                 onChange={handleChange}
-                className={errors.tags ? "border-destructive" : ""}
+                className={errors.tags ? 'border-destructive' : ''}
               />
               {errors.tags && (
-                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>
-                  {errors.tags}
-                </p>
+                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.tags}</p>
               )}
-              <p
-                className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
-              >
+              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
                 Separate multiple tags with commas (max 10)
               </p>
             </div>
@@ -415,19 +374,14 @@ export default function SubmitPage() {
               <div className="flex gap-3">
                 <Github className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
-                  <p
-                    className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} text-blue-400`}
-                  >
+                  <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} text-blue-400`}>
                     How submissions work
                   </p>
-                  <p
-                    className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}
-                  >
-                    When you submit, we&apos;ll generate a pre-filled GitHub
-                    issue with your configuration. You&apos;ll be able to review
-                    and edit it before submitting. No GitHub account required to
-                    fill out this form, but you&apos;ll need one to create the
-                    issue.
+                  <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
+                    When you submit, we&apos;ll generate a pre-filled GitHub issue with your
+                    configuration. You&apos;ll be able to review and edit it before submitting. No
+                    GitHub account required to fill out this form, but you&apos;ll need one to
+                    create the issue.
                   </p>
                 </div>
               </div>

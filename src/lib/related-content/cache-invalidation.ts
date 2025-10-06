@@ -3,9 +3,9 @@
  * Automatically invalidates caches when content is updated
  */
 
-import { logger } from "@/src/lib/logger";
-import { contentCache } from "@/src/lib/redis";
-import type { ContentCategory } from "@/src/lib/schemas/shared.schema";
+import { logger } from '@/src/lib/logger';
+import { contentCache } from '@/src/lib/redis';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 
 class CacheInvalidationService {
   /**
@@ -17,14 +17,14 @@ class CacheInvalidationService {
     options: {
       invalidateRelated?: boolean;
       invalidateCategory?: boolean;
-    } = {},
+    } = {}
   ): Promise<void> {
     const { invalidateRelated = true, invalidateCategory = true } = options;
     const keysToInvalidate: string[] = [];
 
     try {
       // Invalidate specific content cache
-      const contentKey = `related:${slug.replace(/\//g, "_")}:*`;
+      const contentKey = `related:${slug.replace(/\//g, '_')}:*`;
       keysToInvalidate.push(contentKey);
 
       // Invalidate category caches if requested
@@ -43,13 +43,13 @@ class CacheInvalidationService {
       // Perform invalidation
       await this.invalidateKeys(keysToInvalidate);
 
-      logger.info("Cache invalidation completed", {
+      logger.info('Cache invalidation completed', {
         category,
         slug,
         keysInvalidated: keysToInvalidate.length,
       });
     } catch (error) {
-      logger.error("Cache invalidation failed", error as Error, {
+      logger.error('Cache invalidation failed', error as Error, {
         category,
         slug,
       });
@@ -62,15 +62,12 @@ class CacheInvalidationService {
    */
   async invalidateAllRelatedContent(): Promise<void> {
     try {
-      const pattern = "related:*";
+      const pattern = 'related:*';
       await contentCache.invalidatePattern(pattern);
 
-      logger.info("All related content caches invalidated");
+      logger.info('All related content caches invalidated');
     } catch (error) {
-      logger.error(
-        "Failed to invalidate all related content caches",
-        error as Error,
-      );
+      logger.error('Failed to invalidate all related content caches', error as Error);
     }
   }
 
@@ -82,27 +79,20 @@ class CacheInvalidationService {
       const pattern = `related:*:*:*:${algorithmVersion}`;
       await contentCache.invalidatePattern(pattern);
 
-      logger.info("Algorithm version caches invalidated", {
+      logger.info('Algorithm version caches invalidated', {
         algorithmVersion,
       });
     } catch (error) {
-      logger.error(
-        "Failed to invalidate algorithm version caches",
-        error as Error,
-        {
-          algorithmVersion,
-        },
-      );
+      logger.error('Failed to invalidate algorithm version caches', error as Error, {
+        algorithmVersion,
+      });
     }
   }
 
   /**
    * Find cache keys that might contain the updated content
    */
-  private async findRelatedCacheKeys(
-    category: ContentCategory,
-    slug: string,
-  ): Promise<string[]> {
+  private async findRelatedCacheKeys(category: ContentCategory, slug: string): Promise<string[]> {
     const keys: string[] = [];
 
     // Get related categories that might include this content
@@ -117,7 +107,7 @@ class CacheInvalidationService {
     keys.push(`popular:${category}:*`);
 
     // Invalidate any caches that specifically reference this slug
-    keys.push(`*:${slug.replace(/\//g, "_")}:*`);
+    keys.push(`*:${slug.replace(/\//g, '_')}:*`);
 
     return keys;
   }
@@ -130,7 +120,7 @@ class CacheInvalidationService {
       try {
         await contentCache.invalidatePattern(pattern);
       } catch (error) {
-        logger.warn("Failed to invalidate pattern", {
+        logger.warn('Failed to invalidate pattern', {
           pattern,
           error: String(error),
         });
@@ -143,16 +133,16 @@ class CacheInvalidationService {
    */
   private getRelatedCategories(category: ContentCategory): ContentCategory[] {
     const relationships: Record<string, ContentCategory[]> = {
-      tutorials: ["workflows", "use-cases"],
-      comparisons: ["tutorials", "troubleshooting"],
-      workflows: ["tutorials", "use-cases"],
-      "use-cases": ["tutorials", "workflows"],
-      troubleshooting: ["tutorials", "comparisons"],
-      agents: ["commands", "rules"],
-      mcp: ["agents", "hooks"],
-      rules: ["agents", "commands"],
-      commands: ["agents", "rules"],
-      hooks: ["mcp", "commands"],
+      tutorials: ['workflows', 'use-cases'],
+      comparisons: ['tutorials', 'troubleshooting'],
+      workflows: ['tutorials', 'use-cases'],
+      'use-cases': ['tutorials', 'workflows'],
+      troubleshooting: ['tutorials', 'comparisons'],
+      agents: ['commands', 'rules'],
+      mcp: ['agents', 'hooks'],
+      rules: ['agents', 'commands'],
+      commands: ['agents', 'rules'],
+      hooks: ['mcp', 'commands'],
     };
 
     return relationships[category] || [];
@@ -168,10 +158,10 @@ class CacheInvalidationService {
         try {
           await this.cleanupExpiredCaches();
         } catch (error) {
-          logger.error("Cache cleanup failed", error as Error);
+          logger.error('Cache cleanup failed', error as Error);
         }
       },
-      24 * 60 * 60 * 1000,
+      24 * 60 * 60 * 1000
     );
   }
 
@@ -182,9 +172,9 @@ class CacheInvalidationService {
     try {
       // This would be implemented based on Redis TTL
       // For now, we rely on Redis's built-in TTL mechanism
-      logger.info("Cache cleanup completed");
+      logger.info('Cache cleanup completed');
     } catch (error) {
-      logger.error("Failed to cleanup caches", error as Error);
+      logger.error('Failed to cleanup caches', error as Error);
     }
   }
 }

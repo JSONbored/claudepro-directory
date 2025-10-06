@@ -3,19 +3,19 @@
  * Builds searchable index from all content at build time
  */
 
-import fs from "fs/promises";
-import matter from "gray-matter";
-import path from "path";
-import { CONTENT_PATHS, MAIN_CONTENT_CATEGORIES } from "@/src/lib/constants";
-import { logger } from "@/src/lib/logger";
-import { basicErrorSchema } from "@/src/lib/schemas/error.schema";
-import { logContextSchema } from "@/src/lib/schemas/logger.schema";
+import fs from 'fs/promises';
+import matter from 'gray-matter';
+import path from 'path';
+import { CONTENT_PATHS, MAIN_CONTENT_CATEGORIES } from '@/src/lib/constants';
+import { logger } from '@/src/lib/logger';
+import { basicErrorSchema } from '@/src/lib/schemas/error.schema';
+import { logContextSchema } from '@/src/lib/schemas/logger.schema';
 import type {
   CategorizedContentIndex,
   ContentIndex,
   ContentItem,
-} from "@/src/lib/schemas/related-content.schema";
-import type { ContentCategory } from "@/src/lib/schemas/shared.schema";
+} from '@/src/lib/schemas/related-content.schema';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 
 const CONTENT_DIRECTORIES = {
   // Main content (JSON files)
@@ -31,7 +31,7 @@ const CONTENT_DIRECTORIES = {
   tutorials: CONTENT_PATHS.tutorials,
   comparisons: CONTENT_PATHS.comparisons,
   workflows: CONTENT_PATHS.workflows,
-  "use-cases": CONTENT_PATHS["use-cases"],
+  'use-cases': CONTENT_PATHS['use-cases'],
   troubleshooting: CONTENT_PATHS.troubleshooting,
 };
 
@@ -54,7 +54,7 @@ class ContentIndexer {
       tutorials: [],
       comparisons: [],
       workflows: [],
-      "use-cases": [],
+      'use-cases': [],
       troubleshooting: [],
       categories: [],
       collections: [],
@@ -64,10 +64,7 @@ class ContentIndexer {
 
     // Process each content directory
     for (const [category, dirPath] of Object.entries(CONTENT_DIRECTORIES)) {
-      const categoryItems = await this.indexDirectory(
-        category as ContentCategory,
-        dirPath,
-      );
+      const categoryItems = await this.indexDirectory(category as ContentCategory, dirPath);
 
       items.push(...categoryItems);
       categories[category as ContentCategory].push(...categoryItems);
@@ -98,17 +95,14 @@ class ContentIndexer {
       tags,
       keywords,
       generated: new Date().toISOString(),
-      version: "1.0.0",
+      version: '1.0.0',
     };
   }
 
   /**
    * Index a single directory
    */
-  private async indexDirectory(
-    category: ContentCategory,
-    dirPath: string,
-  ): Promise<ContentItem[]> {
+  private async indexDirectory(category: ContentCategory, dirPath: string): Promise<ContentItem[]> {
     const items: ContentItem[] = [];
     const fullPath = path.join(process.cwd(), dirPath);
 
@@ -116,21 +110,21 @@ class ContentIndexer {
       const files = await fs.readdir(fullPath);
 
       for (const file of files) {
-        if (file.endsWith(".json") || file.endsWith(".mdx")) {
+        if (file.endsWith('.json') || file.endsWith('.mdx')) {
           const item = await this.processFile(category, fullPath, file);
           if (item) items.push(item);
         }
       }
     } catch (error) {
       const errorData = basicErrorSchema.parse({
-        name: error instanceof Error ? error.name : "UnknownError",
+        name: error instanceof Error ? error.name : 'UnknownError',
         message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : "",
+        stack: error instanceof Error ? error.stack : '',
       });
 
       const context = logContextSchema.parse({
         dirPath,
-        operation: "indexDirectory",
+        operation: 'indexDirectory',
         errorName: errorData.name,
       });
 
@@ -146,31 +140,31 @@ class ContentIndexer {
   private async processFile(
     category: ContentCategory,
     dirPath: string,
-    fileName: string,
+    fileName: string
   ): Promise<ContentItem | null> {
     const filePath = path.join(dirPath, fileName);
 
     try {
-      const content = await fs.readFile(filePath, "utf-8");
-      const slug = fileName.replace(/\.(json|mdx)$/, "");
+      const content = await fs.readFile(filePath, 'utf-8');
+      const slug = fileName.replace(/\.(json|mdx)$/, '');
 
-      if (fileName.endsWith(".json")) {
+      if (fileName.endsWith('.json')) {
         return this.processJsonFile(category, slug, content);
       }
-      if (fileName.endsWith(".mdx")) {
+      if (fileName.endsWith('.mdx')) {
         return this.processMdxFile(category, slug, content);
       }
     } catch (error) {
       const errorData = basicErrorSchema.parse({
-        name: error instanceof Error ? error.name : "UnknownError",
+        name: error instanceof Error ? error.name : 'UnknownError',
         message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : "",
+        stack: error instanceof Error ? error.stack : '',
       });
 
       const context = logContextSchema.parse({
         fileName,
         category,
-        operation: "processFile",
+        operation: 'processFile',
         errorName: errorData.name,
       });
 
@@ -186,7 +180,7 @@ class ContentIndexer {
   private processJsonFile(
     category: ContentCategory,
     slug: string,
-    content: string,
+    content: string
   ): ContentItem | null {
     try {
       const data = JSON.parse(content);
@@ -194,25 +188,24 @@ class ContentIndexer {
       return {
         slug,
         title: data.title || data.name || slug,
-        description: data.description || "",
+        description: data.description || '',
         category,
-        author: data.author || "Community",
-        dateAdded:
-          data.dateUpdated || data.dateAdded || new Date().toISOString(),
+        author: data.author || 'Community',
+        dateAdded: data.dateUpdated || data.dateAdded || new Date().toISOString(),
         tags: data.tags || [],
         featured: data.featured ?? false,
       };
     } catch (error) {
       const errorData = basicErrorSchema.parse({
-        name: error instanceof Error ? error.name : "UnknownError",
+        name: error instanceof Error ? error.name : 'UnknownError',
         message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : "",
+        stack: error instanceof Error ? error.stack : '',
       });
 
       const context = logContextSchema.parse({
         slug,
         category,
-        operation: "parseJsonFile",
+        operation: 'parseJsonFile',
         errorName: errorData.name,
       });
 
@@ -227,7 +220,7 @@ class ContentIndexer {
   private processMdxFile(
     category: ContentCategory,
     slug: string,
-    content: string,
+    content: string
   ): ContentItem | null {
     try {
       const { data } = matter(content);
@@ -235,25 +228,24 @@ class ContentIndexer {
       return {
         slug,
         title: data.title || slug,
-        description: data.description || "",
+        description: data.description || '',
         category,
-        author: data.author || "Community",
-        dateAdded:
-          data.dateUpdated || data.dateAdded || new Date().toISOString(),
+        author: data.author || 'Community',
+        dateAdded: data.dateUpdated || data.dateAdded || new Date().toISOString(),
         tags: this.parseArrayField(data.tags),
         featured: data.featured ?? false,
       };
     } catch (error) {
       const errorData = basicErrorSchema.parse({
-        name: error instanceof Error ? error.name : "UnknownError",
+        name: error instanceof Error ? error.name : 'UnknownError',
         message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : "",
+        stack: error instanceof Error ? error.stack : '',
       });
 
       const context = logContextSchema.parse({
         slug,
         category,
-        operation: "parseMdxFile",
+        operation: 'parseMdxFile',
         errorName: errorData.name,
       });
 
@@ -265,12 +257,10 @@ class ContentIndexer {
   /**
    * Parse array field from frontmatter
    */
-  private parseArrayField(
-    field: string | string[] | null | undefined,
-  ): string[] {
+  private parseArrayField(field: string | string[] | null | undefined): string[] {
     if (!field) return [];
     if (Array.isArray(field)) return field;
-    if (typeof field === "string") return field.split(",").map((s) => s.trim());
+    if (typeof field === 'string') return field.split(',').map((s) => s.trim());
     return [];
   }
 
@@ -278,13 +268,9 @@ class ContentIndexer {
    * Save index to file system
    */
   async saveIndex(index: ContentIndex): Promise<void> {
-    const outputPath = path.join(
-      process.cwd(),
-      "generated",
-      "content-index.json",
-    );
+    const outputPath = path.join(process.cwd(), 'generated', 'content-index.json');
 
-    await fs.writeFile(outputPath, JSON.stringify(index, null, 2), "utf-8");
+    await fs.writeFile(outputPath, JSON.stringify(index, null, 2), 'utf-8');
   }
 
   /**
@@ -292,14 +278,12 @@ class ContentIndexer {
    * This reduces the monolithic 526KB file into smaller, category-specific files
    * CONSOLIDATION: Accepts both ContentIndex and CategorizedContentIndex for flexibility
    */
-  async saveSplitIndex(
-    index: ContentIndex | CategorizedContentIndex,
-  ): Promise<void> {
-    const generatedDir = path.join(process.cwd(), "generated");
+  async saveSplitIndex(index: ContentIndex | CategorizedContentIndex): Promise<void> {
+    const generatedDir = path.join(process.cwd(), 'generated');
 
     // CONSOLIDATION: Transform flat items into categorized structure if needed
     let categories: Record<string, ContentItem[]>;
-    if ("categories" in index && index.categories) {
+    if ('categories' in index && index.categories) {
       categories = index.categories as Record<string, ContentItem[]>;
     } else {
       // Transform flat items array into categorized structure
@@ -311,7 +295,7 @@ class ContentIndexer {
           acc[item.category]?.push(item);
           return acc;
         },
-        {} as Record<string, ContentItem[]>,
+        {} as Record<string, ContentItem[]>
       );
     }
 
@@ -329,34 +313,22 @@ class ContentIndexer {
         version: index.version,
       };
 
-      const outputPath = path.join(
-        generatedDir,
-        `content-index-${category}.json`,
-      );
-      await fs.writeFile(
-        outputPath,
-        JSON.stringify(categoryIndex, null, 2),
-        "utf-8",
-      );
+      const outputPath = path.join(generatedDir, `content-index-${category}.json`);
+      await fs.writeFile(outputPath, JSON.stringify(categoryIndex, null, 2), 'utf-8');
 
-      logger.info(
-        `Generated ${category} index: ${categoryItems.length} items`,
-        {
-          category,
-          count: categoryItems.length,
-          filePath: outputPath,
-        },
-      );
+      logger.info(`Generated ${category} index: ${categoryItems.length} items`, {
+        category,
+        count: categoryItems.length,
+        filePath: outputPath,
+      });
     });
 
     // Save remaining categories in a single "other" file
     const otherCategories = Object.keys(categories).filter(
-      (cat) => !mainCategories.includes(cat as (typeof mainCategories)[number]),
+      (cat) => !mainCategories.includes(cat as (typeof mainCategories)[number])
     );
 
-    const otherItems = otherCategories.flatMap(
-      (cat) => categories[cat as ContentCategory] || [],
-    );
+    const otherItems = otherCategories.flatMap((cat) => categories[cat as ContentCategory] || []);
     if (otherItems.length > 0) {
       const otherIndex = {
         items: otherItems,
@@ -366,10 +338,8 @@ class ContentIndexer {
         version: index.version,
       };
 
-      const otherPath = path.join(generatedDir, "content-index-other.json");
-      savePromises.push(
-        fs.writeFile(otherPath, JSON.stringify(otherIndex, null, 2), "utf-8"),
-      );
+      const otherPath = path.join(generatedDir, 'content-index-other.json');
+      savePromises.push(fs.writeFile(otherPath, JSON.stringify(otherIndex, null, 2), 'utf-8'));
     }
 
     // Save a lightweight summary index for quick navigation
@@ -383,15 +353,13 @@ class ContentIndexer {
       version: index.version,
     };
 
-    const summaryPath = path.join(generatedDir, "content-index-summary.json");
-    savePromises.push(
-      fs.writeFile(summaryPath, JSON.stringify(summaryIndex, null, 2), "utf-8"),
-    );
+    const summaryPath = path.join(generatedDir, 'content-index-summary.json');
+    savePromises.push(fs.writeFile(summaryPath, JSON.stringify(summaryIndex, null, 2), 'utf-8'));
 
     // Execute all saves in parallel
     await Promise.all(savePromises);
 
-    logger.info("Split content index generation completed", {
+    logger.info('Split content index generation completed', {
       totalFiles: savePromises.length,
       mainCategories: mainCategories.length,
       otherCategories: otherCategories.length,
@@ -402,29 +370,25 @@ class ContentIndexer {
    * Load index from file system
    */
   async loadIndex(): Promise<ContentIndex | null> {
-    const indexPath = path.join(
-      process.cwd(),
-      "generated",
-      "content-index.json",
-    );
+    const indexPath = path.join(process.cwd(), 'generated', 'content-index.json');
 
     try {
-      const content = await fs.readFile(indexPath, "utf-8");
+      const content = await fs.readFile(indexPath, 'utf-8');
       return JSON.parse(content);
     } catch (error) {
       const errorData = basicErrorSchema.parse({
-        name: error instanceof Error ? error.name : "UnknownError",
+        name: error instanceof Error ? error.name : 'UnknownError',
         message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : "",
+        stack: error instanceof Error ? error.stack : '',
       });
 
       const context = logContextSchema.parse({
         indexPath,
-        operation: "loadIndex",
+        operation: 'loadIndex',
         errorName: errorData.name,
       });
 
-      logger.warn("Failed to load content index", context);
+      logger.warn('Failed to load content index', context);
       return null;
     }
   }

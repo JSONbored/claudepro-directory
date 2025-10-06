@@ -21,14 +21,14 @@
  * @see components/features/content/collection-card.tsx - Collection card component
  */
 
-import { Suspense } from "react";
-import type { CollectionMetadata } from "@/generated/collections-metadata";
-import { getCollections } from "@/generated/content";
-import { CollectionCard } from "@/src/components/features/content/collection-card";
-import { Badge } from "@/src/components/ui/badge";
-import { Layers } from "@/src/lib/icons";
-import { logger } from "@/src/lib/logger";
-import { generatePageMetadata } from "@/src/lib/seo/metadata-generator";
+import { Suspense } from 'react';
+import type { CollectionMetadata } from '@/generated/collections-metadata';
+import { getCollections } from '@/generated/content';
+import { CollectionCard } from '@/src/components/features/content/collection-card';
+import { Badge } from '@/src/components/ui/badge';
+import { Layers } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 /**
  * ISR revalidation interval (4 hours)
@@ -37,7 +37,7 @@ import { generatePageMetadata } from "@/src/lib/seo/metadata-generator";
 /**
  * Page metadata for SEO
  */
-export const metadata = await generatePageMetadata("/collections");
+export const metadata = await generatePageMetadata('/collections');
 
 /**
  * Collections list page component
@@ -49,7 +49,7 @@ export default async function CollectionsPage() {
   // Load all collections
   const collections = await getCollections();
 
-  logger.info("Collections page rendered", {
+  logger.info('Collections page rendered', {
     collectionCount: collections.length,
   });
 
@@ -64,24 +64,21 @@ export default async function CollectionsPage() {
               <div className="rounded-lg bg-primary/10 p-2">
                 <Layers className="h-6 w-6 text-primary" aria-hidden="true" />
               </div>
-              <h1 className="text-4xl font-bold tracking-tight text-foreground">
-                Collections
-              </h1>
+              <h1 className="text-4xl font-bold tracking-tight text-foreground">Collections</h1>
             </div>
 
             {/* Description */}
             <p className="text-lg text-muted-foreground max-w-3xl mb-6">
-              Curated bundles of related configurations for common workflows and
-              use cases. Each collection combines multiple agents, MCP servers,
-              commands, and other tools into a cohesive system.
+              Curated bundles of related configurations for common workflows and use cases. Each
+              collection combines multiple agents, MCP servers, commands, and other tools into a
+              cohesive system.
             </p>
 
             {/* Stats Badges */}
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline" className="text-sm">
                 <Layers className="h-3 w-3 mr-1" aria-hidden="true" />
-                {collections.length}{" "}
-                {collections.length === 1 ? "Collection" : "Collections"}
+                {collections.length} {collections.length === 1 ? 'Collection' : 'Collections'}
               </Badge>
               <Badge variant="outline" className="text-sm">
                 Starter Kits, Workflows & Advanced Systems

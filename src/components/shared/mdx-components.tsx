@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import React from "react";
-import { z } from "zod";
-import { useMDXContent } from "@/src/components/providers/mdx-content-provider";
-import { useCopyWithEmailCapture } from "@/src/hooks/use-copy-with-email-capture";
-import { CheckCircle, Copy, ExternalLink } from "@/src/lib/icons";
+import Link from 'next/link';
+import React from 'react';
+import { z } from 'zod';
+import { useMDXContent } from '@/src/components/providers/mdx-content-provider';
+import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
+import { CheckCircle, Copy, ExternalLink } from '@/src/lib/icons';
 import type {
   MdxElementProps,
   MdxHeadingProps,
   MdxLinkProps,
-} from "@/src/lib/schemas/shared.schema";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
+} from '@/src/lib/schemas/shared.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // Client component for copy-to-clipboard headings
 export function CopyableHeading({
@@ -23,11 +23,10 @@ export function CopyableHeading({
 }: MdxHeadingProps & { level: 1 | 2 | 3 }) {
   const mdxContext = useMDXContent();
 
-  const referrer =
-    typeof window !== "undefined" ? window.location.pathname : undefined;
+  const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
   const { copied, copy } = useCopyWithEmailCapture({
     emailContext: {
-      copyType: "link",
+      copyType: 'link',
       ...(mdxContext && {
         category: mdxContext.category,
         slug: mdxContext.slug,
@@ -35,8 +34,8 @@ export function CopyableHeading({
       ...(referrer && { referrer }),
     },
     context: {
-      component: "CopyableHeading",
-      action: "copy-heading-link",
+      component: 'CopyableHeading',
+      action: 'copy-heading-link',
     },
   });
 
@@ -52,13 +51,13 @@ export function CopyableHeading({
     3: `text-xl ${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MT_6} mb-3`,
   };
 
-  const Tag = `h${level}` as "h1" | "h2" | "h3";
+  const Tag = `h${level}` as 'h1' | 'h2' | 'h3';
 
   return (
     <Tag
       id={id}
       {...props}
-      className={`${sizeClasses[level]} scroll-mt-16 ${UI_CLASSES.GROUP} flex items-center gap-2 ${className || ""}`}
+      className={`${sizeClasses[level]} scroll-mt-16 ${UI_CLASSES.GROUP} flex items-center gap-2 ${className || ''}`}
     >
       {children}
       {id && (
@@ -83,18 +82,13 @@ export function CopyableHeading({
 const textContentSchema = z.string().min(0);
 
 // Client component for copyable code blocks (MDX/rehype-pretty-code)
-export function CopyableCodeBlock({
-  children,
-  className,
-  ...props
-}: MdxElementProps) {
+export function CopyableCodeBlock({ children, className, ...props }: MdxElementProps) {
   const mdxContext = useMDXContent();
 
-  const referrer =
-    typeof window !== "undefined" ? window.location.pathname : undefined;
+  const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
   const { copied, copy } = useCopyWithEmailCapture({
     emailContext: {
-      copyType: "code",
+      copyType: 'code',
       ...(mdxContext && {
         category: mdxContext.category,
         slug: mdxContext.slug,
@@ -102,18 +96,18 @@ export function CopyableCodeBlock({
       ...(referrer && { referrer }),
     },
     context: {
-      component: "CopyableCodeBlock",
-      action: "copy-code",
+      component: 'CopyableCodeBlock',
+      action: 'copy-code',
     },
   });
 
   const handleCopy = async () => {
     // Extract text content from React children with proper validation
     const extractTextContent = (node: React.ReactNode): string => {
-      if (typeof node === "string") return node;
-      if (typeof node === "number") return String(node);
+      if (typeof node === 'string') return node;
+      if (typeof node === 'number') return String(node);
       if (Array.isArray(node)) {
-        return node.map(extractTextContent).join("");
+        return node.map(extractTextContent).join('');
       }
       if (React.isValidElement(node)) {
         // Use type assertion only after React.isValidElement check
@@ -122,7 +116,7 @@ export function CopyableCodeBlock({
         }>;
         return extractTextContent(element.props.children);
       }
-      return "";
+      return '';
     };
 
     const rawText = extractTextContent(children);
@@ -133,17 +127,14 @@ export function CopyableCodeBlock({
 
   return (
     <div className={UI_CLASSES.CODE_BLOCK_GROUP_WRAPPER}>
-      <pre
-        {...props}
-        className={`${UI_CLASSES.CODE_BLOCK_PRE} ${className || ""}`}
-      >
+      <pre {...props} className={`${UI_CLASSES.CODE_BLOCK_PRE} ${className || ''}`}>
         {children}
       </pre>
       <button
         type="button"
         onClick={handleCopy}
         className={UI_CLASSES.CODE_BLOCK_COPY_BUTTON_HEADER_FLOATING}
-        style={{ minWidth: "48px", minHeight: "48px" }}
+        style={{ minWidth: '48px', minHeight: '48px' }}
         title="Copy code"
       >
         {copied ? (
@@ -157,19 +148,14 @@ export function CopyableCodeBlock({
 }
 
 // External link component
-export function ExternalLinkComponent({
-  href,
-  children,
-  className,
-  ...props
-}: MdxLinkProps) {
+export function ExternalLinkComponent({ href, children, className, ...props }: MdxLinkProps) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
       {...props}
-      className={`text-primary hover:underline ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.INLINE_FLEX} items-center gap-1 ${className || ""}`}
+      className={`text-primary hover:underline ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.INLINE_FLEX} items-center gap-1 ${className || ''}`}
     >
       {children}
       <ExternalLink className="h-3 w-3" />
@@ -178,17 +164,12 @@ export function ExternalLinkComponent({
 }
 
 // Internal link component
-export function InternalLinkComponent({
-  href,
-  children,
-  className,
-  ...props
-}: MdxLinkProps) {
+export function InternalLinkComponent({ href, children, className, ...props }: MdxLinkProps) {
   return (
     <Link
       href={href}
       {...props}
-      className={`text-primary hover:underline ${UI_CLASSES.TRANSITION_COLORS} ${className || ""}`}
+      className={`text-primary hover:underline ${UI_CLASSES.TRANSITION_COLORS} ${className || ''}`}
     >
       {children}
     </Link>

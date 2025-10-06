@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "i18n",
-    "internationalization",
-    "translation",
-    "localization",
-    "validation"
-  ],
+  "tags": ["i18n", "internationalization", "translation", "localization", "validation"],
   "hookType": "PostToolUse",
   "features": [
     "Comprehensive translation key validation across multiple locales",

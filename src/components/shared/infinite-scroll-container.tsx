@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { type ReactNode, useCallback, useState } from "react";
-import { ErrorBoundary } from "@/src/components/shared/error-boundary";
-import { Button } from "@/src/components/ui/button";
-import { useInfiniteScroll } from "@/src/hooks/use-infinite-scroll";
-import { Loader2 } from "@/src/lib/icons";
-import { logger } from "@/src/lib/logger";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
-import { cn } from "@/src/lib/utils";
+import { type ReactNode, useCallback, useState } from 'react';
+import { ErrorBoundary } from '@/src/components/shared/error-boundary';
+import { Button } from '@/src/components/ui/button';
+import { useInfiniteScroll } from '@/src/hooks/use-infinite-scroll';
+import { Loader2 } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { cn } from '@/src/lib/utils';
 
 export interface InfiniteScrollContainerProps<T> {
   items: T[];
@@ -31,7 +31,7 @@ export function InfiniteScrollContainer<T>({
   gridClassName = UI_CLASSES.GRID_RESPONSIVE_3_TIGHT,
   loadingClassName,
   showLoadMoreButton = true,
-  emptyMessage = "No items found",
+  emptyMessage = 'No items found',
   keyExtractor,
 }: InfiniteScrollContainerProps<T>) {
   const [loading, setLoading] = useState(false);
@@ -48,18 +48,17 @@ export function InfiniteScrollContainer<T>({
       // Trust parent's hasMore prop for pagination state
       // No need to manage local state
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to load more items";
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load more items';
       setError(errorMessage);
 
       logger.error(
-        "Infinite scroll failed to load more items",
+        'Infinite scroll failed to load more items',
         err instanceof Error ? err : new Error(String(err)),
         {
           currentItemCount: items.length,
           hasMore,
-          component: "InfiniteScrollContainer",
-        },
+          component: 'InfiniteScrollContainer',
+        }
       );
     } finally {
       setLoading(false);
@@ -71,7 +70,7 @@ export function InfiniteScrollContainer<T>({
     hasMore,
     loading,
     threshold: 0.1,
-    rootMargin: "200px",
+    rootMargin: '200px',
   });
 
   // Manual load more
@@ -84,21 +83,17 @@ export function InfiniteScrollContainer<T>({
   if (items.length === 0 && !loading) {
     return (
       <div className={UI_CLASSES.CONTAINER_CENTER}>
-        <p className={`text-muted-foreground ${UI_CLASSES.TEXT_LG}`}>
-          {emptyMessage}
-        </p>
+        <p className={`text-muted-foreground ${UI_CLASSES.TEXT_LG}`}>{emptyMessage}</p>
       </div>
     );
   }
 
   return (
-    <div className={cn("space-y-8", className)}>
+    <div className={cn('space-y-8', className)}>
       {/* Items Grid */}
       <div className={gridClassName}>
         {items.map((item, index) => {
-          const key = keyExtractor
-            ? keyExtractor(item, index)
-            : `item-${index}`;
+          const key = keyExtractor ? keyExtractor(item, index) : `item-${index}`;
           return (
             <div key={key}>
               <ErrorBoundary>{renderItem(item, index)}</ErrorBoundary>
@@ -109,9 +104,7 @@ export function InfiniteScrollContainer<T>({
 
       {/* Error Message */}
       {error && (
-        <div
-          className={`${UI_CLASSES.FLEX_COL_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} py-8`}
-        >
+        <div className={`${UI_CLASSES.FLEX_COL_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} py-8`}>
           <p className="text-destructive text-sm mb-4">{error}</p>
           <Button onClick={handleManualLoadMore} variant="outline" size="sm">
             Try Again
@@ -124,7 +117,7 @@ export function InfiniteScrollContainer<T>({
         <div
           className={cn(
             `flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} py-8`,
-            loadingClassName,
+            loadingClassName
           )}
         >
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -134,11 +127,7 @@ export function InfiniteScrollContainer<T>({
 
       {/* Infinite Scroll Trigger */}
       {!loading && hasMore && (
-        <div
-          ref={observerTarget}
-          className={`h-4 ${UI_CLASSES.W_FULL}`}
-          aria-hidden="true"
-        />
+        <div ref={observerTarget} className={`h-4 ${UI_CLASSES.W_FULL}`} aria-hidden="true" />
       )}
 
       {/* Manual Load More Button (Optional) */}

@@ -7,16 +7,16 @@
  * Removed unused: SessionId, ApiKey, Timestamp, Email, URL and their helper functions
  */
 
-import type { z } from "zod";
-import { nonEmptyString } from "@/src/lib/schemas/primitives/base-strings";
+import type { z } from 'zod';
+import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 
 /**
  * RequestId - Unique identifier for API requests
  * Used for tracing and debugging in error handling and rate limiting
  */
 export const requestIdSchema = nonEmptyString
-  .uuid("Request ID must be a valid UUID")
-  .brand<"RequestId">();
+  .uuid('Request ID must be a valid UUID')
+  .brand<'RequestId'>();
 
 export type RequestId = z.infer<typeof requestIdSchema>;
 

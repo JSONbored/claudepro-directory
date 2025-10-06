@@ -3,30 +3,30 @@
  * Shared builders for generating schema.org structured data
  */
 
-import { APP_CONFIG } from "@/src/lib/constants";
+import { APP_CONFIG } from '@/src/lib/constants';
 
 /**
  * Base schema context
  */
-const SCHEMA_CONTEXT = "https://schema.org" as const;
+const SCHEMA_CONTEXT = 'https://schema.org' as const;
 
 /**
  * Build author/organization schema
  */
 function buildAuthor(
   authorName?: string,
-  githubUrl?: string,
+  githubUrl?: string
 ): {
-  "@type": "Person" | "Organization";
+  '@type': 'Person' | 'Organization';
   name: string;
   url?: string;
   sameAs?: string;
 } {
-  const isAnthropicOrg = githubUrl?.includes("github.com/anthropics");
+  const isAnthropicOrg = githubUrl?.includes('github.com/anthropics');
 
   return {
-    "@type": isAnthropicOrg ? "Organization" : "Person",
-    name: authorName || "Unknown",
+    '@type': isAnthropicOrg ? 'Organization' : 'Person',
+    name: authorName || 'Unknown',
     ...(githubUrl && { url: githubUrl, sameAs: githubUrl }),
   };
 }
@@ -38,13 +38,13 @@ export function buildBreadcrumb(items: Array<{ name: string; url: string }>) {
   const baseUrl = APP_CONFIG.url;
 
   return {
-    "@context": SCHEMA_CONTEXT,
-    "@type": "BreadcrumbList" as const,
+    '@context': SCHEMA_CONTEXT,
+    '@type': 'BreadcrumbList' as const,
     itemListElement: items.map((item, index) => ({
-      "@type": "ListItem" as const,
+      '@type': 'ListItem' as const,
       position: index + 1,
       item: {
-        "@id": item.url.startsWith("http") ? item.url : `${baseUrl}${item.url}`,
+        '@id': item.url.startsWith('http') ? item.url : `${baseUrl}${item.url}`,
         name: item.name,
       },
     })),
@@ -75,31 +75,30 @@ export function buildSoftwareApplication(config: SoftwareApplicationConfig) {
   const baseUrl = APP_CONFIG.url;
 
   return {
-    "@context": SCHEMA_CONTEXT,
-    "@type": "SoftwareApplication" as const,
-    "@id": `${baseUrl}/${config.category}/${config.slug}`,
+    '@context': SCHEMA_CONTEXT,
+    '@type': 'SoftwareApplication' as const,
+    '@id': `${baseUrl}/${config.category}/${config.slug}`,
     name: config.name,
     alternateName: config.slug,
     description: config.description,
-    applicationCategory: "DeveloperApplication",
+    applicationCategory: 'DeveloperApplication',
     applicationSubCategory: config.applicationSubCategory,
-    operatingSystem: config.operatingSystem || "Claude Desktop / Claude Code",
+    operatingSystem: config.operatingSystem || 'Claude Desktop / Claude Code',
     url: `${baseUrl}/${config.category}/${config.slug}`,
     datePublished: config.dateAdded,
     dateModified: config.lastModified || config.dateAdded,
-    keywords: config.keywords.join(", "),
+    keywords: config.keywords.join(', '),
     author: buildAuthor(config.author, config.githubUrl),
-    featureList: config.features?.join(", "),
-    softwareRequirements:
-      config.requirements?.join(", ") || "Claude Desktop or Claude Code",
+    featureList: config.features?.join(', '),
+    softwareRequirements: config.requirements?.join(', ') || 'Claude Desktop or Claude Code',
     offers: {
-      "@type": "Offer" as const,
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
+      '@type': 'Offer' as const,
+      price: '0',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
     },
-    learningResourceType: "Software Configuration",
-    educationalLevel: "Professional",
+    learningResourceType: 'Software Configuration',
+    educationalLevel: 'Professional',
   };
 }
 
@@ -122,23 +121,23 @@ export function buildSoftwareSourceCode(config: SoftwareSourceCodeConfig) {
   const baseUrl = APP_CONFIG.url;
 
   return {
-    "@context": SCHEMA_CONTEXT,
-    "@type": "SoftwareSourceCode" as const,
-    "@id": `${baseUrl}/${config.category}/${config.slug}#${config.fragmentId}`,
+    '@context': SCHEMA_CONTEXT,
+    '@type': 'SoftwareSourceCode' as const,
+    '@id': `${baseUrl}/${config.category}/${config.slug}#${config.fragmentId}`,
     name: config.name,
     description: config.description,
     programmingLanguage: {
-      "@type": "ComputerLanguage" as const,
+      '@type': 'ComputerLanguage' as const,
       name: config.programmingLanguage,
     },
     codeRepository: config.githubUrl,
     text: config.code,
     encodingFormat: config.encodingFormat,
-    runtimePlatform: "Claude AI Assistant",
-    targetProduct: "Claude Desktop / Claude Code",
-    license: "https://opensource.org/licenses/MIT",
+    runtimePlatform: 'Claude AI Assistant',
+    targetProduct: 'Claude Desktop / Claude Code',
+    license: 'https://opensource.org/licenses/MIT',
     isPartOf: {
-      "@id": `${baseUrl}/${config.category}/${config.slug}`,
+      '@id': `${baseUrl}/${config.category}/${config.slug}`,
     },
   };
 }
@@ -166,26 +165,26 @@ export function buildHowTo(config: HowToConfig) {
   const baseUrl = APP_CONFIG.url;
 
   return {
-    "@context": SCHEMA_CONTEXT,
-    "@type": "HowTo" as const,
-    "@id": `${baseUrl}/${config.category}/${config.slug}#howto`,
+    '@context': SCHEMA_CONTEXT,
+    '@type': 'HowTo' as const,
+    '@id': `${baseUrl}/${config.category}/${config.slug}#howto`,
     name: `How to use ${config.name}`,
     description: config.description,
     estimatedCost: {
-      "@type": "MonetaryAmount" as const,
-      currency: "USD",
-      value: "0",
+      '@type': 'MonetaryAmount' as const,
+      currency: 'USD',
+      value: '0',
     },
     step: config.steps.map((step) => ({
-      "@type": "HowToStep" as const,
+      '@type': 'HowToStep' as const,
       position: step.position,
       name: step.name,
       text: step.text,
       ...(step.code && {
         itemListElement: {
-          "@type": "SoftwareSourceCode" as const,
+          '@type': 'SoftwareSourceCode' as const,
           text: step.code,
-          programmingLanguage: step.programmingLanguage || "json",
+          programmingLanguage: step.programmingLanguage || 'json',
         },
       }),
     })),
@@ -208,23 +207,23 @@ export function buildCreativeWork(config: CreativeWorkConfig) {
   const baseUrl = APP_CONFIG.url;
 
   return {
-    "@context": SCHEMA_CONTEXT,
-    "@type": "CreativeWork" as const,
-    "@id": `${baseUrl}/${config.category}/${config.slug}#content`,
+    '@context': SCHEMA_CONTEXT,
+    '@type': 'CreativeWork' as const,
+    '@id': `${baseUrl}/${config.category}/${config.slug}#content`,
     name: `${config.name} - Content Template`,
     description: config.description,
     text: config.content,
-    inLanguage: "en",
-    encodingFormat: "text/plain",
+    inLanguage: 'en',
+    encodingFormat: 'text/plain',
     creator: {
-      "@type": "Person" as const,
-      name: config.author || "Unknown",
+      '@type': 'Person' as const,
+      name: config.author || 'Unknown',
     },
     isPartOf: {
-      "@id": `${baseUrl}/${config.category}/${config.slug}`,
+      '@id': `${baseUrl}/${config.category}/${config.slug}`,
     },
-    learningResourceType: "Template",
-    educationalUse: "Professional Development",
+    learningResourceType: 'Template',
+    educationalUse: 'Professional Development',
   };
 }
 
@@ -235,17 +234,14 @@ export function buildWebPageSpeakable(slug: string, category: string) {
   const baseUrl = APP_CONFIG.url;
 
   return {
-    "@context": SCHEMA_CONTEXT,
-    "@type": "WebPage" as const,
-    "@id": `${baseUrl}/${category}/${slug}#webpage`,
+    '@context': SCHEMA_CONTEXT,
+    '@type': 'WebPage' as const,
+    '@id': `${baseUrl}/${category}/${slug}#webpage`,
     url: `${baseUrl}/${category}/${slug}`,
     speakable: {
-      "@type": "SpeakableSpecification" as const,
-      cssSelector: ["description", "headline", ".features"],
-      xpath: [
-        "/html/head/title",
-        '/html/head/meta[@name="description"]/@content',
-      ],
+      '@type': 'SpeakableSpecification' as const,
+      cssSelector: ['description', 'headline', '.features'],
+      xpath: ['/html/head/title', '/html/head/meta[@name="description"]/@content'],
     },
   };
 }
@@ -262,22 +258,22 @@ export function buildFAQPage(
   slug: string,
   category: string,
   name: string,
-  troubleshooting: FAQItem[],
+  troubleshooting: FAQItem[]
 ) {
   const baseUrl = APP_CONFIG.url;
 
   return {
-    "@context": SCHEMA_CONTEXT,
-    "@type": "FAQPage" as const,
-    "@id": `${baseUrl}/${category}/${slug}#faq`,
+    '@context': SCHEMA_CONTEXT,
+    '@type': 'FAQPage' as const,
+    '@id': `${baseUrl}/${category}/${slug}#faq`,
     name: `${name} - Troubleshooting`,
     description: `Frequently asked questions and troubleshooting for ${name}`,
     url: `${baseUrl}/${category}/${slug}`,
     mainEntity: troubleshooting.map((item) => ({
-      "@type": "Question" as const,
+      '@type': 'Question' as const,
       name: item.issue,
       acceptedAnswer: {
-        "@type": "Answer" as const,
+        '@type': 'Answer' as const,
         text: item.solution,
       },
     })),

@@ -13,22 +13,11 @@
  * @module lib/services/digest.service
  */
 
-import {
-  agents,
-  collections,
-  commands,
-  hooks,
-  mcp,
-  rules,
-  statuslines,
-} from "@/generated/content";
-import type {
-  DigestContentItem,
-  DigestTrendingItem,
-} from "@/src/emails/templates/weekly-digest";
-import { APP_CONFIG } from "@/src/lib/constants";
-import { logger } from "@/src/lib/logger";
-import { contentCache, statsRedis } from "@/src/lib/redis";
+import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
+import type { DigestContentItem, DigestTrendingItem } from '@/src/emails/templates/weekly-digest';
+import { APP_CONFIG } from '@/src/lib/constants';
+import { logger } from '@/src/lib/logger';
+import { contentCache, statsRedis } from '@/src/lib/redis';
 
 /**
  * Digest data for a specific week
@@ -74,44 +63,36 @@ class DigestService {
         hooksData,
         statuslinesData,
         collectionsData,
-      ] = await Promise.all([
-        agents,
-        mcp,
-        rules,
-        commands,
-        hooks,
-        statuslines,
-        collections,
-      ]);
+      ] = await Promise.all([agents, mcp, rules, commands, hooks, statuslines, collections]);
 
       const allContent = [
         ...(agentsData as ContentItem[]).map((item) => ({
           ...item,
-          category: "agents" as const,
+          category: 'agents' as const,
         })),
         ...(mcpData as ContentItem[]).map((item) => ({
           ...item,
-          category: "mcp" as const,
+          category: 'mcp' as const,
         })),
         ...(rulesData as ContentItem[]).map((item) => ({
           ...item,
-          category: "rules" as const,
+          category: 'rules' as const,
         })),
         ...(commandsData as ContentItem[]).map((item) => ({
           ...item,
-          category: "commands" as const,
+          category: 'commands' as const,
         })),
         ...(hooksData as ContentItem[]).map((item) => ({
           ...item,
-          category: "hooks" as const,
+          category: 'hooks' as const,
         })),
         ...(statuslinesData as ContentItem[]).map((item) => ({
           ...item,
-          category: "statuslines" as const,
+          category: 'statuslines' as const,
         })),
         ...(collectionsData as ContentItem[]).map((item) => ({
           ...item,
-          category: "collections" as const,
+          category: 'collections' as const,
         })),
       ];
 
@@ -133,15 +114,15 @@ class DigestService {
       // Map to digest format
       return newItems.map((item) => ({
         title: item.title,
-        description: item.description || "",
+        description: item.description || '',
         category: item.category,
         slug: item.slug,
         url: `${APP_CONFIG.url}/${item.category}/${item.slug}`,
       }));
     } catch (error) {
       logger.error(
-        "Failed to get new content for digest",
-        error instanceof Error ? error : new Error(String(error)),
+        'Failed to get new content for digest',
+        error instanceof Error ? error : new Error(String(error))
       );
       return [];
     }
@@ -154,10 +135,7 @@ class DigestService {
    * @param limit - Maximum items to return
    * @returns Array of trending content items with view counts
    */
-  async getTrendingContent(
-    _since: Date,
-    limit = 3,
-  ): Promise<DigestTrendingItem[]> {
+  async getTrendingContent(_since: Date, limit = 3): Promise<DigestTrendingItem[]> {
     try {
       // Get all content
       const [
@@ -168,44 +146,36 @@ class DigestService {
         hooksData,
         statuslinesData,
         collectionsData,
-      ] = await Promise.all([
-        agents,
-        mcp,
-        rules,
-        commands,
-        hooks,
-        statuslines,
-        collections,
-      ]);
+      ] = await Promise.all([agents, mcp, rules, commands, hooks, statuslines, collections]);
 
       const allContent = [
         ...(agentsData as ContentItem[]).map((item) => ({
           ...item,
-          category: "agents" as const,
+          category: 'agents' as const,
         })),
         ...(mcpData as ContentItem[]).map((item) => ({
           ...item,
-          category: "mcp" as const,
+          category: 'mcp' as const,
         })),
         ...(rulesData as ContentItem[]).map((item) => ({
           ...item,
-          category: "rules" as const,
+          category: 'rules' as const,
         })),
         ...(commandsData as ContentItem[]).map((item) => ({
           ...item,
-          category: "commands" as const,
+          category: 'commands' as const,
         })),
         ...(hooksData as ContentItem[]).map((item) => ({
           ...item,
-          category: "hooks" as const,
+          category: 'hooks' as const,
         })),
         ...(statuslinesData as ContentItem[]).map((item) => ({
           ...item,
-          category: "statuslines" as const,
+          category: 'statuslines' as const,
         })),
         ...(collectionsData as ContentItem[]).map((item) => ({
           ...item,
-          category: "collections" as const,
+          category: 'collections' as const,
         })),
       ];
 
@@ -221,7 +191,7 @@ class DigestService {
       // Map to digest format
       return trending.map((item) => ({
         title: item.title,
-        description: item.description || "",
+        description: item.description || '',
         category: item.category,
         slug: item.slug,
         url: `${APP_CONFIG.url}/${item.category}/${item.slug}`,
@@ -229,8 +199,8 @@ class DigestService {
       }));
     } catch (error) {
       logger.error(
-        "Failed to get trending content for digest",
-        error instanceof Error ? error : new Error(String(error)),
+        'Failed to get trending content for digest',
+        error instanceof Error ? error : new Error(String(error))
       );
       return [];
     }
@@ -243,7 +213,7 @@ class DigestService {
    * @returns Complete digest data
    */
   async generateDigest(weekStart: Date): Promise<WeeklyDigestData> {
-    const cacheKey = `digest:${weekStart.toISOString().split("T")[0]}`;
+    const cacheKey = `digest:${weekStart.toISOString().split('T')[0]}`;
 
     return await contentCache.cacheWithRefresh(
       cacheKey,
@@ -261,7 +231,7 @@ class DigestService {
           this.getTrendingContent(weekStart, 3),
         ]);
 
-        logger.info("Generated weekly digest", {
+        logger.info('Generated weekly digest', {
           weekOf,
           newCount: newContent.length,
           trendingCount: trendingContent.length,
@@ -274,7 +244,7 @@ class DigestService {
         };
       },
       // Cache for 1 hour
-      3600,
+      3600
     );
   }
 
@@ -286,7 +256,7 @@ class DigestService {
    * @returns Formatted string (e.g., "December 2-8, 2025")
    */
   private formatWeekRange(start: Date, end: Date): string {
-    const startMonth = start.toLocaleDateString("en-US", { month: "long" });
+    const startMonth = start.toLocaleDateString('en-US', { month: 'long' });
     const startDay = start.getDate();
     const endDay = end.getDate();
     const year = start.getFullYear();
@@ -297,7 +267,7 @@ class DigestService {
     }
 
     // Different months: "December 30 - January 5, 2025"
-    const endMonth = end.toLocaleDateString("en-US", { month: "long" });
+    const endMonth = end.toLocaleDateString('en-US', { month: 'long' });
     return `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${year}`;
   }
 

@@ -9,10 +9,10 @@
  * @security Uses 'he' library for proper HTML entity decoding (prevents double-unescaping)
  */
 
-import { decode } from "he";
-import DOMPurify from "isomorphic-dompurify";
-import { z } from "zod";
-import { logger } from "@/src/lib/logger";
+import { decode } from 'he';
+import DOMPurify from 'isomorphic-dompurify';
+import { z } from 'zod';
+import { logger } from '@/src/lib/logger';
 
 /**
  * Schema for markdown content input
@@ -20,9 +20,9 @@ import { logger } from "@/src/lib/logger";
  */
 const markdownInputSchema = z
   .string()
-  .min(1, "Markdown content cannot be empty")
-  .max(1000000, "Markdown content exceeds 1MB limit")
-  .describe("Raw markdown content to convert to plain text");
+  .min(1, 'Markdown content cannot be empty')
+  .max(1000000, 'Markdown content exceeds 1MB limit')
+  .describe('Raw markdown content to convert to plain text');
 
 /**
  * Schema for conversion options
@@ -33,15 +33,15 @@ const conversionOptionsSchema = z
     preserveHeadings: z
       .boolean()
       .default(true)
-      .describe("Convert heading syntax to plain text with proper hierarchy"),
+      .describe('Convert heading syntax to plain text with proper hierarchy'),
     preserveLists: z
       .boolean()
       .default(true)
-      .describe("Convert list items to plain text with bullets/numbers"),
+      .describe('Convert list items to plain text with bullets/numbers'),
     preserveCodeBlocks: z
       .boolean()
       .default(true)
-      .describe("Keep code blocks with indentation for readability"),
+      .describe('Keep code blocks with indentation for readability'),
     preserveLinks: z
       .boolean()
       .default(true)
@@ -52,17 +52,11 @@ const conversionOptionsSchema = z
       .min(60)
       .max(200)
       .default(100)
-      .describe("Maximum characters per line before wrapping"),
-    removeHtml: z
-      .boolean()
-      .default(true)
-      .describe("Strip HTML tags from markdown"),
-    normalizeWhitespace: z
-      .boolean()
-      .default(true)
-      .describe("Normalize multiple spaces/newlines"),
+      .describe('Maximum characters per line before wrapping'),
+    removeHtml: z.boolean().default(true).describe('Strip HTML tags from markdown'),
+    normalizeWhitespace: z.boolean().default(true).describe('Normalize multiple spaces/newlines'),
   })
-  .describe("Configuration options for markdown conversion");
+  .describe('Configuration options for markdown conversion');
 
 /**
  * Schema for converted plain text output
@@ -71,10 +65,10 @@ const conversionOptionsSchema = z
 const plainTextOutputSchema = z
   .string()
   .min(1)
-  .refine((text) => !text.includes("<script"), {
-    message: "Output contains potentially dangerous content",
+  .refine((text) => !text.includes('<script'), {
+    message: 'Output contains potentially dangerous content',
   })
-  .describe("AI-optimized plain text output for llms.txt");
+  .describe('AI-optimized plain text output for llms.txt');
 
 /**
  * Type exports for external use
@@ -104,7 +98,7 @@ function convertHeading(line: string): string {
   if (!match) return line;
 
   const level = match[1]?.length ?? 1;
-  const text = match[2]?.trim() ?? "";
+  const text = match[2]?.trim() ?? '';
 
   // H1/H2 -> UPPERCASE for emphasis
   if (level <= 2) {
@@ -127,7 +121,7 @@ function convertHeading(line: string): string {
  */
 function convertLinks(text: string): string {
   // [text](url) -> text (url)
-  return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)");
+  return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1 ($2)');
 }
 
 /**
@@ -194,15 +188,15 @@ function normalizeWhitespace(text: string): string {
   return (
     text
       // Remove multiple spaces
-      .replace(/ {2,}/g, " ")
+      .replace(/ {2,}/g, ' ')
       // Normalize line endings
-      .replace(/\r\n/g, "\n")
+      .replace(/\r\n/g, '\n')
       // Remove trailing whitespace
-      .split("\n")
+      .split('\n')
       .map((line) => line.trimEnd())
-      .join("\n")
+      .join('\n')
       // Max 2 consecutive newlines
-      .replace(/\n{3,}/g, "\n\n")
+      .replace(/\n{3,}/g, '\n\n')
       // Trim final output
       .trim()
   );
@@ -238,7 +232,7 @@ function normalizeWhitespace(text: string): string {
  */
 export async function markdownToPlainText(
   markdown: string,
-  options?: Partial<ConversionOptions>,
+  options?: Partial<ConversionOptions>
 ): Promise<PlainTextOutput> {
   try {
     // Validate input
@@ -253,7 +247,7 @@ export async function markdownToPlainText(
     }
 
     // Process line by line
-    const lines = text.split("\n");
+    const lines = text.split('\n');
     const processed: string[] = [];
 
     let inCodeBlock = false;
@@ -266,7 +260,7 @@ export async function markdownToPlainText(
       let line = currentLine;
 
       // Handle code blocks
-      if (line.trim().startsWith("```")) {
+      if (line.trim().startsWith('```')) {
         if (!inCodeBlock) {
           // Starting code block
           inCodeBlock = true;
@@ -277,9 +271,9 @@ export async function markdownToPlainText(
         inCodeBlock = false;
         if (opts.preserveCodeBlocks && codeBlockLines.length > 0) {
           // Add indented code block
-          processed.push("");
+          processed.push('');
           processed.push(...codeBlockLines.map((l) => `    ${l}`));
-          processed.push("");
+          processed.push('');
         }
         codeBlockLines = [];
         continue; // Skip the ``` line
@@ -296,7 +290,7 @@ export async function markdownToPlainText(
         line = convertHeading(line);
       } else {
         // Remove heading markers if not preserving
-        line = line.replace(/^#{1,6}\s+/, "");
+        line = line.replace(/^#{1,6}\s+/, '');
       }
 
       // Convert list items
@@ -309,23 +303,23 @@ export async function markdownToPlainText(
         line = convertLinks(line);
       } else {
         // Remove link markdown, keep text only
-        line = line.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+        line = line.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
       }
 
       // Remove emphasis markers (bold/italic)
       line = line
-        .replace(/\*\*\*(.+?)\*\*\*/g, "$1") // bold+italic
-        .replace(/\*\*(.+?)\*\*/g, "$1") // bold
-        .replace(/\*(.+?)\*/g, "$1") // italic
-        .replace(/___(.+?)___/g, "$1") // alt bold+italic
-        .replace(/__(.+?)__/g, "$1") // alt bold
-        .replace(/_(.+?)_/g, "$1"); // alt italic
+        .replace(/\*\*\*(.+?)\*\*\*/g, '$1') // bold+italic
+        .replace(/\*\*(.+?)\*\*/g, '$1') // bold
+        .replace(/\*(.+?)\*/g, '$1') // italic
+        .replace(/___(.+?)___/g, '$1') // alt bold+italic
+        .replace(/__(.+?)__/g, '$1') // alt bold
+        .replace(/_(.+?)_/g, '$1'); // alt italic
 
       // Remove inline code markers
-      line = line.replace(/`([^`]+)`/g, "$1");
+      line = line.replace(/`([^`]+)`/g, '$1');
 
       // Remove blockquote markers
-      line = line.replace(/^>\s+/, "");
+      line = line.replace(/^>\s+/, '');
 
       // Remove horizontal rules
       if (line.match(/^[-*_]{3,}$/)) {
@@ -336,7 +330,7 @@ export async function markdownToPlainText(
     }
 
     // Join lines
-    let result = processed.join("\n");
+    let result = processed.join('\n');
 
     // Normalize whitespace if requested
     if (opts.normalizeWhitespace) {
@@ -349,14 +343,14 @@ export async function markdownToPlainText(
     return validatedOutput;
   } catch (error) {
     logger.error(
-      "Failed to convert markdown to plain text",
+      'Failed to convert markdown to plain text',
       error instanceof Error ? error : new Error(String(error)),
       {
         markdownLength: markdown?.length || 0,
         hasOptions: !!options,
-      },
+      }
     );
-    throw new Error("Failed to convert markdown content to plain text");
+    throw new Error('Failed to convert markdown content to plain text');
   }
 }
 

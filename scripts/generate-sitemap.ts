@@ -1,33 +1,22 @@
-import { existsSync, readdirSync, writeFileSync } from "fs";
-import { join } from "path";
+import { existsSync, readdirSync, writeFileSync } from 'fs';
+import { join } from 'path';
 // Import directly from metadata files for build-time usage (not runtime lazy loaders)
-import { agentsMetadata } from "../generated/agents-metadata.js";
-import { collectionsMetadata } from "../generated/collections-metadata.js";
-import { commandsMetadata } from "../generated/commands-metadata.js";
-import { hooksMetadata } from "../generated/hooks-metadata.js";
-import { mcpMetadata } from "../generated/mcp-metadata.js";
-import { rulesMetadata } from "../generated/rules-metadata.js";
-import { statuslinesMetadata } from "../generated/statuslines-metadata.js";
-import {
-  APP_CONFIG,
-  CONTENT_PATHS,
-  MAIN_CONTENT_CATEGORIES,
-} from "../src/lib/constants";
-import { logger } from "../src/lib/logger.js";
-import type { ContentItem } from "../src/lib/schemas/content/content-item-union.schema";
+import { agentsMetadata } from '../generated/agents-metadata.js';
+import { collectionsMetadata } from '../generated/collections-metadata.js';
+import { commandsMetadata } from '../generated/commands-metadata.js';
+import { hooksMetadata } from '../generated/hooks-metadata.js';
+import { mcpMetadata } from '../generated/mcp-metadata.js';
+import { rulesMetadata } from '../generated/rules-metadata.js';
+import { statuslinesMetadata } from '../generated/statuslines-metadata.js';
+import { APP_CONFIG, CONTENT_PATHS, MAIN_CONTENT_CATEGORIES } from '../src/lib/constants';
+import { logger } from '../src/lib/logger.js';
+import type { ContentItem } from '../src/lib/schemas/content/content-item-union.schema';
 
 // Define SitemapUrl type locally
 interface SitemapUrl {
   loc: string;
   lastmod: string;
-  changefreq:
-    | "always"
-    | "hourly"
-    | "daily"
-    | "weekly"
-    | "monthly"
-    | "yearly"
-    | "never";
+  changefreq: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
   priority: number;
 }
 
@@ -41,9 +30,9 @@ async function generateSitemap(): Promise<string> {
 
   // Homepage
   urls.push({
-    loc: baseUrl || "",
-    lastmod: new Date().toISOString().split("T")[0] || "",
-    changefreq: "daily",
+    loc: baseUrl || '',
+    lastmod: new Date().toISOString().split('T')[0] || '',
+    changefreq: 'daily',
     priority: 1.0,
   });
 
@@ -51,64 +40,56 @@ async function generateSitemap(): Promise<string> {
   const categories = [...MAIN_CONTENT_CATEGORIES];
   categories.forEach((category) => {
     urls.push({
-      loc: `${baseUrl || ""}/${category}`,
-      lastmod: new Date().toISOString().split("T")[0] || "",
-      changefreq: "daily",
+      loc: `${baseUrl || ''}/${category}`,
+      lastmod: new Date().toISOString().split('T')[0] || '',
+      changefreq: 'daily',
       priority: 0.8,
     });
   });
 
   // Static pages
-  const staticPages = [
-    "jobs",
-    "community",
-    "trending",
-    "submit",
-    "partner",
-    "guides",
-    "api-docs",
-  ];
+  const staticPages = ['jobs', 'community', 'trending', 'submit', 'partner', 'guides', 'api-docs'];
   staticPages.forEach((page) => {
     urls.push({
-      loc: `${baseUrl || ""}/${page}`,
-      lastmod: new Date().toISOString().split("T")[0] || "",
-      changefreq: "weekly",
-      priority: page === "api-docs" ? 0.9 : 0.6, // High priority for API docs (AI discoverability)
+      loc: `${baseUrl || ''}/${page}`,
+      lastmod: new Date().toISOString().split('T')[0] || '',
+      changefreq: 'weekly',
+      priority: page === 'api-docs' ? 0.9 : 0.6, // High priority for API docs (AI discoverability)
     });
   });
 
   // Static page llms.txt routes (api-docs and guides only)
-  const staticPagesWithLlmsTxt = ["api-docs", "guides"];
+  const staticPagesWithLlmsTxt = ['api-docs', 'guides'];
   staticPagesWithLlmsTxt.forEach((page) => {
     urls.push({
-      loc: `${baseUrl || ""}/${page}/llms.txt`,
-      lastmod: new Date().toISOString().split("T")[0] || "",
-      changefreq: "daily",
+      loc: `${baseUrl || ''}/${page}/llms.txt`,
+      lastmod: new Date().toISOString().split('T')[0] || '',
+      changefreq: 'daily',
       priority: 0.85, // High priority for AI discovery
     });
   });
 
   // Guide pages from content/guides/ directory
   const seoCategories = [
-    "use-cases",
-    "tutorials",
-    "collections",
-    "categories",
-    "workflows",
-    "comparisons",
-    "troubleshooting",
+    'use-cases',
+    'tutorials',
+    'collections',
+    'categories',
+    'workflows',
+    'comparisons',
+    'troubleshooting',
   ] as const;
   seoCategories.forEach((category) => {
     const seoDir = join(CONTENT_PATHS.guides, category);
     if (existsSync(seoDir)) {
       try {
-        const files = readdirSync(seoDir).filter((f) => f.endsWith(".mdx"));
+        const files = readdirSync(seoDir).filter((f) => f.endsWith('.mdx'));
         files.forEach((file) => {
-          const slug = file.replace(".mdx", "");
+          const slug = file.replace('.mdx', '');
           urls.push({
-            loc: `${baseUrl || ""}/guides/${category}/${slug}`,
-            lastmod: new Date().toISOString().split("T")[0] || "",
-            changefreq: "monthly",
+            loc: `${baseUrl || ''}/guides/${category}/${slug}`,
+            lastmod: new Date().toISOString().split('T')[0] || '',
+            changefreq: 'monthly',
             priority: 0.65,
           });
         });
@@ -132,8 +113,8 @@ async function generateSitemap(): Promise<string> {
   allContent.forEach((item) => {
     urls.push({
       loc: `${baseUrl}/${item.category}/${item.slug}`,
-      lastmod: (item.dateAdded || new Date().toISOString()).split("T")[0] || "",
-      changefreq: "weekly",
+      lastmod: (item.dateAdded || new Date().toISOString()).split('T')[0] || '',
+      changefreq: 'weekly',
       priority: 0.7,
     });
   });
@@ -142,9 +123,8 @@ async function generateSitemap(): Promise<string> {
   collectionsMetadata.forEach((collection) => {
     urls.push({
       loc: `${baseUrl}/collections/${collection.slug}`,
-      lastmod:
-        (collection.dateAdded || new Date().toISOString()).split("T")[0] || "",
-      changefreq: "weekly",
+      lastmod: (collection.dateAdded || new Date().toISOString()).split('T')[0] || '',
+      changefreq: 'weekly',
       priority: 0.7,
     });
   });
@@ -156,8 +136,8 @@ async function generateSitemap(): Promise<string> {
   // Site-wide llms.txt index
   urls.push({
     loc: `${baseUrl}/llms.txt`,
-    lastmod: new Date().toISOString().split("T")[0] || "",
-    changefreq: "daily",
+    lastmod: new Date().toISOString().split('T')[0] || '',
+    changefreq: 'daily',
     priority: 0.9, // High priority for AI discovery
   });
 
@@ -165,8 +145,8 @@ async function generateSitemap(): Promise<string> {
   categories.forEach((category) => {
     urls.push({
       loc: `${baseUrl}/${category}/llms.txt`,
-      lastmod: new Date().toISOString().split("T")[0] || "",
-      changefreq: "daily",
+      lastmod: new Date().toISOString().split('T')[0] || '',
+      changefreq: 'daily',
       priority: 0.85,
     });
   });
@@ -175,8 +155,8 @@ async function generateSitemap(): Promise<string> {
   allContent.forEach((item) => {
     urls.push({
       loc: `${baseUrl}/${item.category}/${item.slug}/llms.txt`,
-      lastmod: (item.dateAdded || new Date().toISOString()).split("T")[0] || "",
-      changefreq: "daily",
+      lastmod: (item.dateAdded || new Date().toISOString()).split('T')[0] || '',
+      changefreq: 'daily',
       priority: 0.75,
     });
   });
@@ -186,13 +166,13 @@ async function generateSitemap(): Promise<string> {
     const seoDir = join(CONTENT_PATHS.guides, category);
     if (existsSync(seoDir)) {
       try {
-        const files = readdirSync(seoDir).filter((f) => f.endsWith(".mdx"));
+        const files = readdirSync(seoDir).filter((f) => f.endsWith('.mdx'));
         files.forEach((file) => {
-          const slug = file.replace(".mdx", "");
+          const slug = file.replace('.mdx', '');
           urls.push({
             loc: `${baseUrl}/guides/${category}/${slug}/llms.txt`,
-            lastmod: new Date().toISOString().split("T")[0] || "",
-            changefreq: "weekly",
+            lastmod: new Date().toISOString().split('T')[0] || '',
+            changefreq: 'weekly',
             priority: 0.7,
           });
         });
@@ -206,9 +186,8 @@ async function generateSitemap(): Promise<string> {
   collectionsMetadata.forEach((collection) => {
     urls.push({
       loc: `${baseUrl}/collections/${collection.slug}/llms.txt`,
-      lastmod:
-        (collection.dateAdded || new Date().toISOString()).split("T")[0] || "",
-      changefreq: "weekly",
+      lastmod: (collection.dateAdded || new Date().toISOString()).split('T')[0] || '',
+      changefreq: 'weekly',
       priority: 0.75,
     });
   });
@@ -223,9 +202,9 @@ ${urls
     <lastmod>${url.lastmod}</lastmod>
     <changefreq>${url.changefreq}</changefreq>
     <priority>${url.priority}</priority>
-  </url>`,
+  </url>`
   )
-  .join("\n")}
+  .join('\n')}
 </urlset>`;
 
   return xml;
@@ -357,22 +336,20 @@ Sitemap: ${baseUrl}/sitemap.xml`;
 
 async function main() {
   try {
-    logger.progress("Generating sitemap...");
+    logger.progress('Generating sitemap...');
     const sitemap = await generateSitemap();
-    writeFileSync("public/sitemap.xml", sitemap, "utf-8");
-    logger.success("Sitemap generated successfully");
+    writeFileSync('public/sitemap.xml', sitemap, 'utf-8');
+    logger.success('Sitemap generated successfully');
 
-    logger.progress("Generating robots.txt...");
+    logger.progress('Generating robots.txt...');
     const robotsTxt = generateRobotsTxt();
-    writeFileSync("public/robots.txt", robotsTxt, "utf-8");
-    logger.success("Robots.txt generated successfully");
+    writeFileSync('public/robots.txt', robotsTxt, 'utf-8');
+    logger.success('Robots.txt generated successfully');
 
-    logger.log(
-      `Generated ${sitemap.match(/<url>/g)?.length || 0} URLs in sitemap`,
-    );
+    logger.log(`Generated ${sitemap.match(/<url>/g)?.length || 0} URLs in sitemap`);
   } catch (error) {
     logger.failure(
-      `Failed to generate sitemap/robots.txt: ${error instanceof Error ? error.message : String(error)}`,
+      `Failed to generate sitemap/robots.txt: ${error instanceof Error ? error.message : String(error)}`
     );
     process.exit(1);
   }
@@ -380,7 +357,7 @@ async function main() {
 
 // Run if this file is executed directly
 main().catch((error: unknown) => {
-  console.error("Failed to generate sitemap:", error);
+  console.error('Failed to generate sitemap:', error);
   process.exit(1);
 });
 

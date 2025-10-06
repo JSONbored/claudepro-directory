@@ -3,22 +3,16 @@
  * Pre-loads popular content into Redis cache for better performance
  */
 
-import { z } from "zod";
-import { metadataLoader } from "@/src/lib/content/lazy-content-loaders";
-import { logger } from "@/src/lib/logger";
-import { contentCache, statsRedis } from "@/src/lib/redis";
-import { contentIndexer } from "@/src/lib/related-content/indexer";
-import { relatedContentService } from "@/src/lib/related-content/service";
-import { isProduction } from "@/src/lib/schemas/env.schema";
-import { stringArray } from "@/src/lib/schemas/primitives/base-arrays";
-import {
-  nonNegativeInt,
-  positiveInt,
-} from "@/src/lib/schemas/primitives/base-numbers";
-import {
-  isoDatetimeString,
-  nonEmptyString,
-} from "@/src/lib/schemas/primitives/base-strings";
+import { z } from 'zod';
+import { metadataLoader } from '@/src/lib/content/lazy-content-loaders';
+import { logger } from '@/src/lib/logger';
+import { contentCache, statsRedis } from '@/src/lib/redis';
+import { contentIndexer } from '@/src/lib/related-content/indexer';
+import { relatedContentService } from '@/src/lib/related-content/service';
+import { isProduction } from '@/src/lib/schemas/env.schema';
+import { stringArray } from '@/src/lib/schemas/primitives/base-arrays';
+import { nonNegativeInt, positiveInt } from '@/src/lib/schemas/primitives/base-numbers';
+import { isoDatetimeString, nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 
 /**
  * Cache Warmer Schemas (inlined - only used here)
@@ -36,21 +30,21 @@ const CACHE_WARMER_LIMITS = {
 } as const;
 
 const warmableCategorySchema = z.enum([
-  "agents",
-  "mcp",
-  "rules",
-  "commands",
-  "hooks",
-  "statuslines",
-  "collections",
-  "guides",
-  "jobs",
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'collections',
+  'guides',
+  'jobs',
 ]);
 
 const cacheWarmerPopularItemSchema = z.object({
   slug: nonEmptyString
     .max(CACHE_WARMER_LIMITS.MAX_SLUG_LENGTH)
-    .regex(/^[a-zA-Z0-9\-_]+$/, "Invalid slug format"),
+    .regex(/^[a-zA-Z0-9\-_]+$/, 'Invalid slug format'),
   views: nonNegativeInt,
 });
 
@@ -62,7 +56,7 @@ const categoryMetadataSchema = z.object({
         slug: nonEmptyString,
         title: nonEmptyString.optional(),
         description: nonEmptyString.optional(),
-      }),
+      })
     )
     .max(CACHE_WARMER_LIMITS.MAX_ITEMS_PER_CATEGORY),
 });
@@ -70,17 +64,15 @@ const categoryMetadataSchema = z.object({
 const relatedContentWarmingSchema = z.object({
   path: nonEmptyString
     .max(CACHE_WARMER_LIMITS.MAX_PATH_LENGTH)
-    .regex(/^\/[a-zA-Z0-9\-_/]*$/, "Invalid path format")
-    .refine((path) => !path.includes(".."), "Path traversal detected"),
-  category: warmableCategorySchema.default("agents"),
+    .regex(/^\/[a-zA-Z0-9\-_/]*$/, 'Invalid path format')
+    .refine((path) => !path.includes('..'), 'Path traversal detected'),
+  category: warmableCategorySchema.default('agents'),
   tags: stringArray.max(50).default([]),
   keywords: stringArray.max(50).default([]),
   limit: positiveInt.min(1).max(20).default(6),
 });
 
-const commonQuerySchema = nonEmptyString.max(
-  CACHE_WARMER_LIMITS.MAX_QUERY_LENGTH,
-);
+const commonQuerySchema = nonEmptyString.max(CACHE_WARMER_LIMITS.MAX_QUERY_LENGTH);
 
 const cachedContentSchema = z.object({
   content: z.unknown(),
@@ -88,13 +80,7 @@ const cachedContentSchema = z.object({
   ttl: positiveInt,
 });
 
-const cacheWarmingStatusSchema = z.enum([
-  "idle",
-  "warming",
-  "completed",
-  "failed",
-  "partial",
-]);
+const cacheWarmingStatusSchema = z.enum(['idle', 'warming', 'completed', 'failed', 'partial']);
 
 const cacheWarmingResultSchema = z.object({
   status: cacheWarmingStatusSchema,
@@ -120,7 +106,7 @@ class CacheWarmer {
    */
   async warmPopularContent(): Promise<void> {
     if (this.isWarming) {
-      logger.info("Cache warming already in progress, skipping");
+      logger.info('Cache warming already in progress, skipping');
       return;
     }
 
@@ -130,7 +116,7 @@ class CacheWarmer {
     let errors = 0;
 
     try {
-      logger.info("Starting cache warming for popular content");
+      logger.info('Starting cache warming for popular content');
 
       // Lazy load metadata only when needed
       const [
@@ -142,49 +128,40 @@ class CacheWarmer {
         statuslinesMetadata,
         collectionsMetadata,
       ] = await Promise.all([
-        metadataLoader.get("agentsMetadata"),
-        metadataLoader.get("mcpMetadata"),
-        metadataLoader.get("rulesMetadata"),
-        metadataLoader.get("commandsMetadata"),
-        metadataLoader.get("hooksMetadata"),
-        metadataLoader.get("statuslinesMetadata"),
-        metadataLoader.get("collectionsMetadata"),
+        metadataLoader.get('agentsMetadata'),
+        metadataLoader.get('mcpMetadata'),
+        metadataLoader.get('rulesMetadata'),
+        metadataLoader.get('commandsMetadata'),
+        metadataLoader.get('hooksMetadata'),
+        metadataLoader.get('statuslinesMetadata'),
+        metadataLoader.get('collectionsMetadata'),
       ]);
 
       // Get popular items from each category
       const categories = [
-        { name: "agents" as WarmableCategory, items: agentsMetadata },
-        { name: "mcp" as WarmableCategory, items: mcpMetadata },
-        { name: "rules" as WarmableCategory, items: rulesMetadata },
-        { name: "commands" as WarmableCategory, items: commandsMetadata },
-        { name: "hooks" as WarmableCategory, items: hooksMetadata },
-        { name: "statuslines" as WarmableCategory, items: statuslinesMetadata },
-        { name: "collections" as WarmableCategory, items: collectionsMetadata },
+        { name: 'agents' as WarmableCategory, items: agentsMetadata },
+        { name: 'mcp' as WarmableCategory, items: mcpMetadata },
+        { name: 'rules' as WarmableCategory, items: rulesMetadata },
+        { name: 'commands' as WarmableCategory, items: commandsMetadata },
+        { name: 'hooks' as WarmableCategory, items: hooksMetadata },
+        { name: 'statuslines' as WarmableCategory, items: statuslinesMetadata },
+        { name: 'collections' as WarmableCategory, items: collectionsMetadata },
       ];
 
       // Validate categories
-      const validatedCategories = categories.map((cat) =>
-        categoryMetadataSchema.parse(cat),
-      );
+      const validatedCategories = categories.map((cat) => categoryMetadataSchema.parse(cat));
 
       for (const category of validatedCategories) {
         try {
           // Validate category name
-          const validatedCategoryName = warmableCategorySchema.parse(
-            category.name,
-          );
+          const validatedCategoryName = warmableCategorySchema.parse(category.name);
 
           // Get top 10 popular items from Redis stats
-          const popular = await statsRedis?.getPopular(
-            validatedCategoryName,
-            10,
-          );
+          const popular = await statsRedis?.getPopular(validatedCategoryName, 10);
 
           if (popular && popular.length > 0) {
             // Validate and warm cache for popular items
-            const validatedPopular = z
-              .array(cacheWarmerPopularItemSchema)
-              .parse(popular);
+            const validatedPopular = z.array(cacheWarmerPopularItemSchema).parse(popular);
             for (const item of validatedPopular) {
               await this.warmItem(validatedCategoryName, item.slug);
               itemsWarmed++;
@@ -198,10 +175,7 @@ class CacheWarmer {
             }
           }
         } catch (error) {
-          logger.error(
-            `Failed to warm cache for category ${category.name}`,
-            error as Error,
-          );
+          logger.error(`Failed to warm cache for category ${category.name}`, error as Error);
           errors++;
         }
       }
@@ -213,14 +187,14 @@ class CacheWarmer {
       await this.warmSearchIndexes();
 
       const duration = Math.round(performance.now() - startTime);
-      logger.info("Cache warming completed", {
+      logger.info('Cache warming completed', {
         itemsWarmed,
         errors,
         durationMs: duration,
       });
 
       // Track cache warming success
-      if (typeof window === "undefined") {
+      if (typeof window === 'undefined') {
         // Server-side only
         const status = cacheWarmingStatusSchema.parse({
           lastRun: new Date().toISOString(),
@@ -229,14 +203,10 @@ class CacheWarmer {
           duration,
         });
 
-        await contentCache?.cacheAPIResponse(
-          "cache_warming_status",
-          status,
-          86400,
-        ); // 24 hour TTL
+        await contentCache?.cacheAPIResponse('cache_warming_status', status, 86400); // 24 hour TTL
       }
     } catch (error) {
-      logger.error("Cache warming failed", error as Error);
+      logger.error('Cache warming failed', error as Error);
     } finally {
       this.isWarming = false;
     }
@@ -245,10 +215,7 @@ class CacheWarmer {
   /**
    * Warm cache for a specific item
    */
-  private async warmItem(
-    category: WarmableCategory,
-    slug: string,
-  ): Promise<void> {
+  private async warmItem(category: WarmableCategory, slug: string): Promise<void> {
     try {
       const cacheKey = `content:${category}:${slug}`;
 
@@ -270,11 +237,11 @@ class CacheWarmer {
       await contentCache?.cacheAPIResponse(
         cacheKey,
         cachedContent,
-        14400, // 4 hour TTL
+        14400 // 4 hour TTL
       );
     } catch (error) {
       // Don't fail the whole process for one item
-      logger.warn("Failed to warm cache for item", {
+      logger.warn('Failed to warm cache for item', {
         category,
         slug,
         error: String(error),
@@ -289,20 +256,18 @@ class CacheWarmer {
     try {
       // Pre-calculate related content for top pages
       const topPages = [
-        { path: "/", category: "agents" as WarmableCategory },
-        { path: "/agents", category: "agents" as WarmableCategory },
-        { path: "/mcp", category: "mcp" as WarmableCategory },
-        { path: "/rules", category: "rules" as WarmableCategory },
-        { path: "/commands", category: "commands" as WarmableCategory },
-        { path: "/hooks", category: "hooks" as WarmableCategory },
-        { path: "/statuslines", category: "statuslines" as WarmableCategory },
-        { path: "/collections", category: "collections" as WarmableCategory },
+        { path: '/', category: 'agents' as WarmableCategory },
+        { path: '/agents', category: 'agents' as WarmableCategory },
+        { path: '/mcp', category: 'mcp' as WarmableCategory },
+        { path: '/rules', category: 'rules' as WarmableCategory },
+        { path: '/commands', category: 'commands' as WarmableCategory },
+        { path: '/hooks', category: 'hooks' as WarmableCategory },
+        { path: '/statuslines', category: 'statuslines' as WarmableCategory },
+        { path: '/collections', category: 'collections' as WarmableCategory },
       ];
 
       // Validate pages
-      const validatedPages = topPages.map((page) =>
-        relatedContentWarmingSchema.parse(page),
-      );
+      const validatedPages = topPages.map((page) => relatedContentWarmingSchema.parse(page));
 
       for (const page of validatedPages) {
         try {
@@ -316,14 +281,14 @@ class CacheWarmer {
             exclude: [],
           });
         } catch (error) {
-          logger.warn("Failed to warm related content", {
+          logger.warn('Failed to warm related content', {
             page: page.path,
             error: String(error),
           });
         }
       }
     } catch (error) {
-      logger.error("Failed to warm related content caches", error as Error);
+      logger.error('Failed to warm related content caches', error as Error);
     }
   }
 
@@ -338,19 +303,19 @@ class CacheWarmer {
 
       // Cache common search queries
       const rawQueries = [
-        "ai",
-        "agent",
-        "mcp",
-        "server",
-        "api",
-        "database",
-        "auth",
-        "react",
-        "typescript",
-        "python",
-        "javascript",
-        "test",
-        "lint",
+        'ai',
+        'agent',
+        'mcp',
+        'server',
+        'api',
+        'database',
+        'auth',
+        'react',
+        'typescript',
+        'python',
+        'javascript',
+        'test',
+        'lint',
       ];
 
       // Validate queries
@@ -365,11 +330,11 @@ class CacheWarmer {
             warmed: true,
             timestamp: new Date().toISOString(),
           },
-          3600, // 1 hour TTL for search results
+          3600 // 1 hour TTL for search results
         );
       }
     } catch (error) {
-      logger.error("Failed to warm search indexes", error as Error);
+      logger.error('Failed to warm search indexes', error as Error);
     }
   }
 
@@ -378,7 +343,7 @@ class CacheWarmer {
    * Runs every 6 hours at off-peak times
    */
   scheduleWarming(): void {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       // Don't run in browser
       return;
     }
@@ -399,7 +364,7 @@ class CacheWarmer {
           });
         }
       },
-      6 * 60 * 60 * 1000,
+      6 * 60 * 60 * 1000
     ); // 6 hours
   }
 
@@ -411,7 +376,7 @@ class CacheWarmer {
     if (this.isWarming) {
       return cacheWarmingResultSchema.parse({
         success: false,
-        message: "Cache warming already in progress",
+        message: 'Cache warming already in progress',
       });
     }
 
@@ -422,7 +387,7 @@ class CacheWarmer {
 
       return cacheWarmingResultSchema.parse({
         success: true,
-        message: "Cache warming completed successfully",
+        message: 'Cache warming completed successfully',
         duration,
       });
     } catch (error) {
@@ -439,29 +404,25 @@ class CacheWarmer {
   /**
    * Get cache warming status
    */
-  async getStatus(): Promise<
-    CacheWarmingStatus | { message: string } | { error: string }
-  > {
+  async getStatus(): Promise<CacheWarmingStatus | { message: string } | { error: string }> {
     try {
-      const status = await contentCache?.getAPIResponse<unknown>(
-        "cache_warming_status",
-      );
+      const status = await contentCache?.getAPIResponse<unknown>('cache_warming_status');
       if (status) {
         // Validate the cached status
         return cacheWarmingStatusSchema.parse(status);
       }
-      return { message: "No cache warming data available" };
+      return { message: 'No cache warming data available' };
     } catch (error) {
       if (error instanceof z.ZodError) {
         logger.error(
-          "Invalid cache warming status data",
-          new Error(error.issues[0]?.message || "Invalid status"),
+          'Invalid cache warming status data',
+          new Error(error.issues[0]?.message || 'Invalid status'),
           {
             errorCount: error.issues.length,
-          },
+          }
         );
       }
-      return { error: "Failed to get cache warming status" };
+      return { error: 'Failed to get cache warming status' };
     }
   }
 }
@@ -470,7 +431,7 @@ class CacheWarmer {
 export const cacheWarmer = new CacheWarmer();
 
 // Auto-schedule if running on server
-if (typeof window === "undefined" && isProduction) {
+if (typeof window === 'undefined' && isProduction) {
   // Schedule cache warming in production
   cacheWarmer.scheduleWarming();
 }

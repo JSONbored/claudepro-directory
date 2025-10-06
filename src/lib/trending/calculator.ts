@@ -29,10 +29,10 @@
  * - **Graceful Degradation**: Falls back to static popularity if Redis unavailable
  */
 
-import { z } from "zod";
-import { logger } from "@/src/lib/logger";
-import { statsRedis } from "@/src/lib/redis";
-import type { UnifiedContentItem } from "@/src/lib/schemas/components/content-item.schema";
+import { z } from 'zod';
+import { logger } from '@/src/lib/logger';
+import { statsRedis } from '@/src/lib/redis';
+import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 
 /**
  * Content item with view count and growth rate data from Redis
@@ -64,7 +64,7 @@ export const trendingContentItemSchema = z
     growthRate: z.number().finite().optional(),
   })
   .passthrough() // Allow base UnifiedContentItem properties
-  .describe("Content item with Redis view tracking data");
+  .describe('Content item with Redis view tracking data');
 
 /**
  * Options for trending content calculation
@@ -91,20 +91,14 @@ export interface TrendingOptions {
  */
 export const trendingOptionsSchema = z
   .object({
-    limit: z
-      .number()
-      .int()
-      .positive()
-      .max(100)
-      .default(12)
-      .describe("Maximum items to return"),
+    limit: z.number().int().positive().max(100).default(12).describe('Maximum items to return'),
     fallbackToPopularity: z
       .boolean()
       .default(true)
-      .describe("Fallback to static popularity if Redis fails"),
+      .describe('Fallback to static popularity if Redis fails'),
   })
   .partial()
-  .describe("Trending calculation options");
+  .describe('Trending calculation options');
 
 /**
  * Calculate trending content based on 24-hour growth rate momentum
@@ -151,16 +145,14 @@ export const trendingOptionsSchema = z
  */
 async function getTrendingContent(
   allContent: UnifiedContentItem[],
-  options: TrendingOptions = {},
+  options: TrendingOptions = {}
 ): Promise<TrendingContentItem[]> {
   const { limit = 12, fallbackToPopularity = true } = options;
 
   try {
     // Check Redis availability - only use Redis if actually connected (not fallback mode)
     if (!statsRedis.isConnected()) {
-      logger.warn(
-        "Redis not connected for trending calculation, using fallback",
-      );
+      logger.warn('Redis not connected for trending calculation, using fallback');
       return getFallbackTrending(allContent, limit);
     }
 
@@ -173,11 +165,11 @@ async function getTrendingContent(
     // Calculate date strings for today and yesterday (UTC normalized)
     // SECURITY: Always use UTC to prevent timezone-based inconsistencies
     const nowUtc = new Date();
-    const todayStr = nowUtc.toISOString().split("T")[0];
+    const todayStr = nowUtc.toISOString().split('T')[0];
 
     const yesterdayUtc = new Date(nowUtc);
     yesterdayUtc.setUTCDate(yesterdayUtc.getUTCDate() - 1);
-    const yesterdayStr = yesterdayUtc.toISOString().split("T")[0];
+    const yesterdayStr = yesterdayUtc.toISOString().split('T')[0];
 
     // Batch fetch: today's views, yesterday's views, and total views
     const [todayViews, yesterdayViews, totalViews] = await Promise.all([
@@ -244,7 +236,7 @@ async function getTrendingContent(
       })
       .slice(0, limit);
 
-    logger.info("Trending content calculated from Redis growth rate", {
+    logger.info('Trending content calculated from Redis growth rate', {
       totalItems: allContent.length,
       withGrowth: sorted.filter((i) => (i.growthRate || 0) > 0).length,
       topGrowthRate: sorted[0]?.growthRate?.toFixed(1) || 0,
@@ -254,8 +246,8 @@ async function getTrendingContent(
     return sorted;
   } catch (error) {
     logger.error(
-      "Trending calculation failed",
-      error instanceof Error ? error : new Error(String(error)),
+      'Trending calculation failed',
+      error instanceof Error ? error : new Error(String(error))
     );
 
     // Fallback to static popularity
@@ -309,16 +301,14 @@ async function getTrendingContent(
  */
 async function getPopularContent(
   allContent: UnifiedContentItem[],
-  options: TrendingOptions = {},
+  options: TrendingOptions = {}
 ): Promise<TrendingContentItem[]> {
   const { limit = 12, fallbackToPopularity = true } = options;
 
   try {
     // Check Redis availability - only use Redis if actually connected (not fallback mode)
     if (!statsRedis.isConnected()) {
-      logger.warn(
-        "Redis not connected for popular calculation, using fallback",
-      );
+      logger.warn('Redis not connected for popular calculation, using fallback');
       return getFallbackPopular(allContent, limit);
     }
 
@@ -359,7 +349,7 @@ async function getPopularContent(
       })
       .slice(0, limit);
 
-    logger.info("Popular content calculated from Redis", {
+    logger.info('Popular content calculated from Redis', {
       totalItems: allContent.length,
       withViews: sorted.length,
       topViewCount: sorted[0]?.viewCount || 0,
@@ -368,8 +358,8 @@ async function getPopularContent(
     return sorted;
   } catch (error) {
     logger.error(
-      "Popular calculation failed",
-      error instanceof Error ? error : new Error(String(error)),
+      'Popular calculation failed',
+      error instanceof Error ? error : new Error(String(error))
     );
 
     // Fallback to static popularity
@@ -387,7 +377,7 @@ async function getPopularContent(
  */
 async function getRecentContent(
   allContent: UnifiedContentItem[],
-  options: TrendingOptions = {},
+  options: TrendingOptions = {}
 ): Promise<TrendingContentItem[]> {
   const { limit = 12 } = options;
 
@@ -402,7 +392,7 @@ async function getRecentContent(
       })
       .slice(0, limit);
 
-    logger.info("Recent content sorted by dateAdded", {
+    logger.info('Recent content sorted by dateAdded', {
       totalItems: allContent.length,
       withDates: sorted.length,
     });
@@ -410,8 +400,8 @@ async function getRecentContent(
     return sorted;
   } catch (error) {
     logger.error(
-      "Recent content sorting failed",
-      error instanceof Error ? error : new Error(String(error)),
+      'Recent content sorting failed',
+      error instanceof Error ? error : new Error(String(error))
     );
 
     // Return first N items as fallback
@@ -424,20 +414,18 @@ async function getRecentContent(
  */
 function getFallbackTrending(
   allContent: UnifiedContentItem[],
-  limit: number,
+  limit: number
 ): TrendingContentItem[] {
   const sorted = [...allContent]
-    .filter(
-      (item) => typeof item.popularity === "number" && item.popularity > 0,
-    )
+    .filter((item) => typeof item.popularity === 'number' && item.popularity > 0)
     .sort((a, b) => {
-      const aPop = typeof a.popularity === "number" ? a.popularity : 0;
-      const bPop = typeof b.popularity === "number" ? b.popularity : 0;
+      const aPop = typeof a.popularity === 'number' ? a.popularity : 0;
+      const bPop = typeof b.popularity === 'number' ? b.popularity : 0;
       return bPop - aPop;
     })
     .slice(0, limit);
 
-  logger.info("Using fallback trending (static popularity)", {
+  logger.info('Using fallback trending (static popularity)', {
     totalItems: allContent.length,
     withPopularity: sorted.length,
   });
@@ -450,7 +438,7 @@ function getFallbackTrending(
  */
 function getFallbackPopular(
   allContent: UnifiedContentItem[],
-  limit: number,
+  limit: number
 ): TrendingContentItem[] {
   // Same as trending fallback for now
   return getFallbackTrending(allContent, limit);
@@ -491,7 +479,7 @@ export async function getBatchTrendingData(contentByCategory: {
     popular,
     recent,
     metadata: {
-      algorithm: "redis-views",
+      algorithm: 'redis-views',
       generated: new Date().toISOString(),
       redisEnabled: statsRedis.isEnabled(),
       totalItems: allContent.length,

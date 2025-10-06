@@ -13,7 +13,7 @@
  * @module lib/seo/ai-optimization
  */
 
-import { APP_CONFIG } from "@/src/lib/constants";
+import { APP_CONFIG } from '@/src/lib/constants';
 
 /**
  * Get current year for AI search optimization
@@ -33,7 +33,7 @@ export function getCurrentYear(): string {
  */
 export function getCurrentMonthYear(): string {
   const date = new Date();
-  const month = date.toLocaleString("en-US", { month: "long" });
+  const month = date.toLocaleString('en-US', { month: 'long' });
   const year = date.getFullYear();
   return `${month} ${year}`;
 }
@@ -58,28 +58,25 @@ export function addYearToDescription(
     /** Use full month+year vs just year */
     fullDate?: boolean;
     /** Position to insert year ('end' | 'beginning') */
-    position?: "end" | "beginning";
-  } = {},
+    position?: 'end' | 'beginning';
+  } = {}
 ): string {
-  const { fullDate = true, position = "end" } = options;
+  const { fullDate = true, position = 'end' } = options;
   const yearText = fullDate ? getCurrentMonthYear() : getCurrentYear();
 
   // Don't add if already contains year
-  if (
-    description.includes(yearText) ||
-    description.includes(getCurrentYear())
-  ) {
+  if (description.includes(yearText) || description.includes(getCurrentYear())) {
     return description;
   }
 
-  if (position === "beginning") {
+  if (position === 'beginning') {
     return `${yearText}: ${description}`;
   }
 
   // Default: Add year at end naturally
   // Check if description ends with period
-  const endsWithPeriod = description.trim().endsWith(".");
-  const separator = endsWithPeriod ? "" : ".";
+  const endsWithPeriod = description.trim().endsWith('.');
+  const separator = endsWithPeriod ? '' : '.';
 
   return `${description.trim()}${separator} Updated ${yearText}.`;
 }
@@ -93,12 +90,9 @@ export function addYearToDescription(
  */
 export function isContentFresh(dateString: string | Date): boolean {
   try {
-    const date =
-      typeof dateString === "string" ? new Date(dateString) : dateString;
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
     const now = new Date();
-    const daysDiff = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
-    );
+    const daysDiff = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
     return daysDiff <= 30;
   } catch {
     return false;
@@ -133,7 +127,7 @@ export function getRecencySignal(lastModified?: string): string | undefined {
  */
 export function generateBasicFAQ(
   topic: string,
-  description: string,
+  description: string
 ): Array<{ question: string; answer: string }> {
   const year = getCurrentYear();
 
@@ -176,7 +170,7 @@ export function optimizeKeywordsForAI(
     addAITools?: boolean;
     /** Maximum keywords to return (SEO best practice: 10) */
     maxKeywords?: number;
-  } = {},
+  } = {}
 ): string[] {
   const { addYear = true, addAITools = true, maxKeywords = 10 } = options;
   const year = getCurrentYear();
@@ -192,7 +186,7 @@ export function optimizeKeywordsForAI(
     }
   }
 
-  if (addAITools && !baseKeywords.some((k) => k.includes("ai tools"))) {
+  if (addAITools && !baseKeywords.some((k) => k.includes('ai tools'))) {
     optimized.push(`ai tools ${year}`);
   }
 
@@ -211,23 +205,23 @@ export function optimizeKeywordsForAI(
 export function getWikipediaStyleRecommendations() {
   return {
     structure: [
-      "Start with clear, concise introduction paragraph",
-      "Use hierarchical headings (H2 → H3 → H4)",
-      "Include bullet points for key features/benefits",
+      'Start with clear, concise introduction paragraph',
+      'Use hierarchical headings (H2 → H3 → H4)',
+      'Include bullet points for key features/benefits',
       'Add "See Also" section for related topics',
-      "Include references/sources section",
+      'Include references/sources section',
     ],
     formatting: [
-      "Use tables for comparison data",
-      "Include code examples in fenced blocks",
-      "Add inline citations where relevant",
-      "Use consistent terminology throughout",
+      'Use tables for comparison data',
+      'Include code examples in fenced blocks',
+      'Add inline citations where relevant',
+      'Use consistent terminology throughout',
     ],
     contentDepth: [
-      "Cover topic comprehensively (1500+ words for main topics)",
+      'Cover topic comprehensively (1500+ words for main topics)',
       'Answer "what", "how", "why", and "when" questions',
-      "Include practical examples and use cases",
-      "Link to related concepts and resources",
+      'Include practical examples and use cases',
+      'Link to related concepts and resources',
     ],
   };
 }
@@ -241,19 +235,14 @@ export function getWikipediaStyleRecommendations() {
  */
 export function calculateFreshnessScore(lastModified: string | Date): number {
   try {
-    const date =
-      typeof lastModified === "string" ? new Date(lastModified) : lastModified;
+    const date = typeof lastModified === 'string' ? new Date(lastModified) : lastModified;
     const now = new Date();
-    const daysSinceUpdate = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
-    );
+    const daysSinceUpdate = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
 
     // Scoring: 100 (today) → 50 (30 days) → 0 (90+ days)
     if (daysSinceUpdate <= 0) return 100;
-    if (daysSinceUpdate <= 30)
-      return 100 - Math.floor((daysSinceUpdate / 30) * 50);
-    if (daysSinceUpdate <= 90)
-      return 50 - Math.floor(((daysSinceUpdate - 30) / 60) * 50);
+    if (daysSinceUpdate <= 30) return 100 - Math.floor((daysSinceUpdate / 30) * 50);
+    if (daysSinceUpdate <= 90) return 50 - Math.floor(((daysSinceUpdate - 30) / 60) * 50);
     return 0;
   } catch {
     return 0;
@@ -277,7 +266,7 @@ export function optimizeDescriptionForAI(
     targetLength?: number;
     /** Add action-oriented CTA */
     addCTA?: boolean;
-  } = {},
+  } = {}
 ): string {
   const { includeYear = true, targetLength = 150, addCTA = false } = options;
 
@@ -300,8 +289,8 @@ export function optimizeDescriptionForAI(
   // Truncate if too long (preserve sentence structure)
   if (description.length > targetLength) {
     const truncated = description.substring(0, targetLength - 3);
-    const lastPeriod = truncated.lastIndexOf(".");
-    const lastSpace = truncated.lastIndexOf(" ");
+    const lastPeriod = truncated.lastIndexOf('.');
+    const lastSpace = truncated.lastIndexOf(' ');
 
     // Try to end at sentence boundary, otherwise at word boundary
     if (lastPeriod > targetLength * 0.8) {

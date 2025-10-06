@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * SearchSection Component
@@ -7,13 +7,13 @@
  * Handles search UI and results display for the homepage
  */
 
-import { type FC, memo } from "react";
-import { ConfigCard } from "@/src/components/features/content/config-card";
-import { InfiniteScrollContainer } from "@/src/components/shared/infinite-scroll-container";
-import { Button } from "@/src/components/ui/button";
-import { Search } from "@/src/lib/icons";
-import type { UnifiedContentItem } from "@/src/lib/schemas/component.schema";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
+import { type FC, memo } from 'react';
+import { ConfigCard } from '@/src/components/features/content/config-card';
+import { InfiniteScrollContainer } from '@/src/components/shared/infinite-scroll-container';
+import { Button } from '@/src/components/ui/button';
+import { Search } from '@/src/lib/icons';
+import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface SearchSectionProps {
   isSearching: boolean;
@@ -36,9 +36,7 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
 
   return (
     <div className="mb-16">
-      <div
-        className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.MB_8}`}
-      >
+      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.MB_8}`}>
         <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD}`}>
           Search Results
           <span className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} ml-2`}>
@@ -73,9 +71,7 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
           <Search
             className={`h-12 w-12 ${UI_CLASSES.MX_AUTO} mb-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}/50`}
           />
-          <h3
-            className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.FONT_SEMIBOLD} mb-2`}
-          >
+          <h3 className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.FONT_SEMIBOLD} mb-2`}>
             No results found
           </h3>
           <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>

@@ -5,13 +5,7 @@
   "description": "Complete debugging toolkit for identifying, analyzing, and resolving complex software issues. Combines AI-assisted debugging with powerful diagnostic commands.",
   "author": "JSONbored",
   "dateAdded": "2025-10-02",
-  "tags": [
-    "debugging",
-    "troubleshooting",
-    "error-handling",
-    "diagnostics",
-    "problem-solving"
-  ],
+  "tags": ["debugging", "troubleshooting", "error-handling", "diagnostics", "problem-solving"],
   "source": "community",
   "category": "collections",
   "collectionType": "advanced-system",

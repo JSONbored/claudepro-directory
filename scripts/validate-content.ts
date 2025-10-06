@@ -1,11 +1,11 @@
 #!/usr/bin/env tsx
 
-import fs from "fs";
-import { z } from "zod";
-import { logger } from "@/src/lib/logger";
-import type { contentItemSchema } from "../src/lib/schemas/content/content-item-union.schema";
-import type { ContentCategory } from "../src/lib/schemas/shared.schema";
-import { validateContentByCategory } from "../src/lib/validation/content-validator";
+import fs from 'fs';
+import { z } from 'zod';
+import { logger } from '@/src/lib/logger';
+import type { contentItemSchema } from '../src/lib/schemas/content/content-item-union.schema';
+import type { ContentCategory } from '../src/lib/schemas/shared.schema';
+import { validateContentByCategory } from '../src/lib/validation/content-validator';
 
 // Schema for raw JSON data validation
 const rawJsonSchema = z.record(z.string(), z.unknown());
@@ -25,9 +25,9 @@ let hasErrors = false;
 // Filter to only validate actual content files (not system files)
 const contentFiles = files.filter(
   (filePath) =>
-    filePath.includes("content/") &&
-    !filePath.includes("template.json") &&
-    filePath.endsWith(".json"),
+    filePath.includes('content/') &&
+    !filePath.includes('template.json') &&
+    filePath.endsWith('.json')
 );
 
 if (contentFiles.length === 0) {
@@ -36,10 +36,8 @@ if (contentFiles.length === 0) {
 
 // Extract category from file path
 function getCategoryFromPath(filePath: string): string | null {
-  const pathParts = filePath.split("/");
-  const contentIndex = pathParts.findIndex(
-    (part: string) => part === "content",
-  );
+  const pathParts = filePath.split('/');
+  const contentIndex = pathParts.findIndex((part: string) => part === 'content');
   if (contentIndex !== -1 && contentIndex + 1 < pathParts.length) {
     return pathParts[contentIndex + 1] || null;
   }
@@ -50,7 +48,7 @@ function getCategoryFromPath(filePath: string): string | null {
 contentFiles.forEach((filePath) => {
   try {
     // Read and parse JSON file
-    const content = fs.readFileSync(filePath, "utf8");
+    const content = fs.readFileSync(filePath, 'utf8');
     let data: ContentData;
 
     let rawData: unknown;
@@ -58,11 +56,11 @@ contentFiles.forEach((filePath) => {
       rawData = JSON.parse(content);
     } catch (error) {
       logger.error(
-        "Invalid JSON in content file",
+        'Invalid JSON in content file',
         error instanceof Error ? error : new Error(String(error)),
         {
           filePath: String(filePath),
-        },
+        }
       );
       hasErrors = true;
       return;
@@ -71,13 +69,9 @@ contentFiles.forEach((filePath) => {
     // Validate raw JSON structure
     const rawValidation = rawJsonSchema.safeParse(rawData);
     if (!rawValidation.success) {
-      logger.error(
-        "Invalid JSON structure",
-        new Error(rawValidation.error.issues.join(", ")),
-        {
-          filePath: String(filePath),
-        },
-      );
+      logger.error('Invalid JSON structure', new Error(rawValidation.error.issues.join(', ')), {
+        filePath: String(filePath),
+      });
       hasErrors = true;
       return;
     }
@@ -88,12 +82,12 @@ contentFiles.forEach((filePath) => {
     const category = getCategoryFromPath(filePath);
     if (!category) {
       logger.error(
-        "Cannot determine content category from file path",
-        new Error("Category determination failed"),
+        'Cannot determine content category from file path',
+        new Error('Category determination failed'),
         {
           filePath: String(filePath),
-          pathParts: String(filePath.split("/").length),
-        },
+          pathParts: String(filePath.split('/').length),
+        }
       );
       hasErrors = true;
       return;
@@ -102,31 +96,29 @@ contentFiles.forEach((filePath) => {
     // Use Zod schema validation
     try {
       validateContentByCategory(data, category as ContentCategory);
-      logger.info("Content validation successful", {
+      logger.info('Content validation successful', {
         filePath,
         category,
         slug: data.slug,
       });
     } catch (validationError) {
       logger.error(
-        "Content validation failed",
-        validationError instanceof Error
-          ? validationError
-          : new Error(String(validationError)),
+        'Content validation failed',
+        validationError instanceof Error ? validationError : new Error(String(validationError)),
         {
           filePath: String(filePath),
           category: String(category),
-        },
+        }
       );
       hasErrors = true;
     }
   } catch (error) {
     logger.error(
-      "Failed to process content file",
+      'Failed to process content file',
       error instanceof Error ? error : new Error(String(error)),
       {
         filePath: String(filePath),
-      },
+      }
     );
     hasErrors = true;
   }

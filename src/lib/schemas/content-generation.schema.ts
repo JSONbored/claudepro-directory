@@ -12,9 +12,9 @@
  */
 export function generateSlugFromFilename(filename: string): string {
   return filename
-    .replace(/\.json$/i, "")
+    .replace(/\.json$/i, '')
     .toLowerCase()
-    .replace(/[^a-z0-9\-_]/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
+    .replace(/[^a-z0-9\-_]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 }

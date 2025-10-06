@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * FeaturedSections Component
@@ -9,17 +9,14 @@
  * Adding a new featured category now only requires updating HOMEPAGE_FEATURED_CATEGORIES
  */
 
-import Link from "next/link";
-import { type FC, memo, useMemo } from "react";
-import { LazyConfigCard } from "@/src/components/shared/lazy-config-card";
-import { Button } from "@/src/components/ui/button";
-import {
-  CATEGORY_CONFIGS,
-  HOMEPAGE_FEATURED_CATEGORIES,
-} from "@/src/lib/config/category-config";
-import { Briefcase, ExternalLink } from "@/src/lib/icons";
-import type { UnifiedContentItem } from "@/src/lib/schemas/component.schema";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
+import Link from 'next/link';
+import { type FC, memo, useMemo } from 'react';
+import { LazyConfigCard } from '@/src/components/shared/lazy-config-card';
+import { Button } from '@/src/components/ui/button';
+import { CATEGORY_CONFIGS, HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
+import { Briefcase, ExternalLink } from '@/src/lib/icons';
+import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface FeaturedSectionProps {
   title: string;
@@ -45,9 +42,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
 
     return (
       <div>
-        <div
-          className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.MB_8}`}
-        >
+        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.MB_8}`}>
           <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD}`}>{title}</h2>
           <Link href={href} className={UI_CLASSES.LINK_ACCENT_UNDERLINE}>
             View all <ExternalLink className="h-4 w-4" />
@@ -66,10 +61,10 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
         </div>
       </div>
     );
-  },
+  }
 );
 
-FeaturedSection.displayName = "FeaturedSection";
+FeaturedSection.displayName = 'FeaturedSection';
 
 /**
  * Props now accept a dynamic record of categories to content items
@@ -79,9 +74,7 @@ interface FeaturedSectionsProps {
   categories: Record<string, readonly UnifiedContentItem[]>;
 }
 
-const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
-  categories,
-}) => {
+const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories }) => {
   return (
     <div className={`${UI_CLASSES.SPACE_Y_16} mb-16`}>
       {/* Dynamically render featured sections based on HOMEPAGE_FEATURED_CATEGORIES */}
@@ -106,9 +99,7 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
 
       {/* Featured Jobs */}
       <div>
-        <div
-          className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.MB_8}`}
-        >
+        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.MB_8}`}>
           <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD}`}>Featured Jobs</h2>
           <Link href="/jobs" className={UI_CLASSES.LINK_ACCENT_UNDERLINE}>
             View all <ExternalLink className="h-4 w-4" />
@@ -118,14 +109,10 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({
           <Briefcase
             className={`h-12 w-12 ${UI_CLASSES.MX_AUTO} mb-4 ${UI_CLASSES.TEXT_MUTED_FOREGROUND}/50`}
           />
-          <h3
-            className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_2}`}
-          >
+          <h3 className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_2}`}>
             Find Your Next AI Role
           </h3>
-          <p
-            className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MB_6}`}
-          >
+          <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} ${UI_CLASSES.MB_6}`}>
             Discover opportunities with companies building the future of AI
           </p>
           <Button asChild>

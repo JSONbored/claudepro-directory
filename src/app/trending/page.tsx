@@ -1,29 +1,21 @@
-import {
-  agents,
-  collections,
-  commands,
-  hooks,
-  mcp,
-  rules,
-  statuslines,
-} from "@/generated/content";
-import { InlineEmailCTA } from "@/src/components/shared/inline-email-cta";
-import { TrendingContent } from "@/src/components/shared/trending-content";
-import { Badge } from "@/src/components/ui/badge";
-import { Clock, Star, TrendingUp, Users } from "@/src/lib/icons";
-import { logger } from "@/src/lib/logger";
-import type { PagePropsWithSearchParams } from "@/src/lib/schemas/app.schema";
+import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
+import { TrendingContent } from '@/src/components/shared/trending-content';
+import { Badge } from '@/src/components/ui/badge';
+import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
+import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
 import {
   parseSearchParams,
   type TrendingParams,
   trendingParamsSchema,
-} from "@/src/lib/schemas/search.schema";
-import { generatePageMetadata } from "@/src/lib/seo/metadata-generator";
-import { getBatchTrendingData } from "@/src/lib/trending/calculator";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
+} from '@/src/lib/schemas/search.schema';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { getBatchTrendingData } from '@/src/lib/trending/calculator';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // Generate metadata from centralized registry
-export const metadata = await generatePageMetadata("/trending");
+export const metadata = await generatePageMetadata('/trending');
 
 // ISR Configuration - Revalidate every 5 minutes for fresh Redis view counts
 export const revalidate = 300; // 5 minutes - Updates trending data while keeping static content
@@ -38,7 +30,7 @@ export const revalidate = 300; // 5 minutes - Updates trending data while keepin
 async function getTrendingData(params: TrendingParams) {
   // Log trending data access for analytics
   if (Object.keys(params).length > 0) {
-    logger.info("Trending data accessed with parameters", {
+    logger.info('Trending data accessed with parameters', {
       period: params.period,
       metric: params.metric,
       category: params.category,
@@ -57,15 +49,7 @@ async function getTrendingData(params: TrendingParams) {
       hooksData,
       statuslinesData,
       collectionsData,
-    ] = await Promise.all([
-      rules,
-      mcp,
-      agents,
-      commands,
-      hooks,
-      statuslines,
-      collections,
-    ]);
+    ] = await Promise.all([rules, mcp, agents, commands, hooks, statuslines, collections]);
 
     // Calculate total count
     const totalCount =
@@ -81,37 +65,35 @@ async function getTrendingData(params: TrendingParams) {
     const trendingData = await getBatchTrendingData({
       agents: agentsData.map((item: { [key: string]: unknown }) => ({
         ...item,
-        category: "agents" as const,
+        category: 'agents' as const,
       })),
       mcp: mcpData.map((item: { [key: string]: unknown }) => ({
         ...item,
-        category: "mcp" as const,
+        category: 'mcp' as const,
       })),
       rules: rulesData.map((item: { [key: string]: unknown }) => ({
         ...item,
-        category: "rules" as const,
+        category: 'rules' as const,
       })),
       commands: commandsData.map((item: { [key: string]: unknown }) => ({
         ...item,
-        category: "commands" as const,
+        category: 'commands' as const,
       })),
       hooks: hooksData.map((item: { [key: string]: unknown }) => ({
         ...item,
-        category: "hooks" as const,
+        category: 'hooks' as const,
       })),
       statuslines: statuslinesData.map((item: { [key: string]: unknown }) => ({
         ...item,
-        category: "statuslines" as const,
+        category: 'statuslines' as const,
       })),
       collections: collectionsData.map((item: { [key: string]: unknown }) => ({
         ...item,
-        category: "collections" as const,
+        category: 'collections' as const,
       })),
     });
 
-    const algorithm = trendingData.metadata.redisEnabled
-      ? "redis-views"
-      : "popularity-fallback";
+    const algorithm = trendingData.metadata.redisEnabled ? 'redis-views' : 'popularity-fallback';
     logger.info(`Loaded trending data using ${algorithm}`, {
       trendingCount: trendingData.trending.length,
       popularCount: trendingData.popular.length,
@@ -128,8 +110,8 @@ async function getTrendingData(params: TrendingParams) {
     };
   } catch (error) {
     logger.error(
-      "Failed to load trending data",
-      error instanceof Error ? error : new Error(String(error)),
+      'Failed to load trending data',
+      error instanceof Error ? error : new Error(String(error))
     );
 
     // Ultimate fallback - return empty arrays
@@ -142,20 +124,14 @@ async function getTrendingData(params: TrendingParams) {
   }
 }
 
-export default async function TrendingPage({
-  searchParams,
-}: PagePropsWithSearchParams) {
+export default async function TrendingPage({ searchParams }: PagePropsWithSearchParams) {
   const rawParams = await searchParams;
 
   // Validate and parse search parameters with Zod
-  const params = parseSearchParams(
-    trendingParamsSchema,
-    rawParams,
-    "trending page",
-  );
+  const params = parseSearchParams(trendingParamsSchema, rawParams, 'trending page');
 
   // Log validated parameters for monitoring
-  logger.info("Trending page accessed", {
+  logger.info('Trending page accessed', {
     period: params.period,
     metric: params.metric,
     category: params.category,
@@ -163,11 +139,10 @@ export default async function TrendingPage({
     limit: params.limit,
   });
 
-  const { trending, popular, recent, totalCount } =
-    await getTrendingData(params);
+  const { trending, popular, recent, totalCount } = await getTrendingData(params);
 
   // This is a server component, so we'll use a static ID
-  const pageTitleId = "trending-page-title";
+  const pageTitleId = 'trending-page-title';
 
   return (
     <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
@@ -182,29 +157,20 @@ export default async function TrendingPage({
               variant="outline"
               className={`mb-6 border-accent/20 ${UI_CLASSES.BG_ACCENT_5} text-accent`}
             >
-              <TrendingUp
-                className="h-3 w-3 mr-1 text-accent"
-                aria-hidden="true"
-              />
+              <TrendingUp className="h-3 w-3 mr-1 text-accent" aria-hidden="true" />
               Trending
             </Badge>
 
-            <h1
-              id={pageTitleId}
-              className="text-4xl md:text-6xl font-bold mb-6"
-            >
+            <h1 id={pageTitleId} className="text-4xl md:text-6xl font-bold mb-6">
               Trending Configurations
             </h1>
 
             <p className={UI_CLASSES.TEXT_HEADING_LARGE}>
-              Discover the most popular and trending Claude configurations in
-              our community. Stay up to date with what developers are using and
-              loving.
+              Discover the most popular and trending Claude configurations in our community. Stay up
+              to date with what developers are using and loving.
             </p>
 
-            <ul
-              className={`${UI_CLASSES.FLEX_WRAP_GAP_2} ${UI_CLASSES.JUSTIFY_CENTER} list-none`}
-            >
+            <ul className={`${UI_CLASSES.FLEX_WRAP_GAP_2} ${UI_CLASSES.JUSTIFY_CENTER} list-none`}>
               <li>
                 <Badge variant="secondary">
                   <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
@@ -243,11 +209,7 @@ export default async function TrendingPage({
         className={`container ${UI_CLASSES.MX_AUTO} px-4 py-16`}
         aria-label="Trending configurations content"
       >
-        <TrendingContent
-          trending={trending}
-          popular={popular}
-          recent={recent}
-        />
+        <TrendingContent trending={trending} popular={popular} recent={recent} />
       </section>
     </div>
   );

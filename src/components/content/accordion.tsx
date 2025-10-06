@@ -1,22 +1,14 @@
-"use client";
+'use client';
 
 /**
  * Accordion - Collapsible content sections with Schema.org FAQPage support
  * Used in 27+ MDX files across the codebase
  */
 
-import React from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/src/components/ui/card";
-import {
-  type AccordionProps,
-  accordionPropsSchema,
-} from "@/src/lib/schemas/shared.schema";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { type AccordionProps, accordionPropsSchema } from '@/src/lib/schemas/shared.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function Accordion(props: AccordionProps) {
   const validated = accordionPropsSchema.parse(props);
@@ -24,10 +16,8 @@ export function Accordion(props: AccordionProps) {
   const validItems = items;
   const [openItems, setOpenItems] = React.useState<Set<number>>(
     new Set(
-      validItems
-        .map((item, index) => (item.defaultOpen ? index : -1))
-        .filter((i) => i !== -1),
-    ),
+      validItems.map((item, index) => (item.defaultOpen ? index : -1)).filter((i) => i !== -1)
+    )
   );
 
   const toggleItem = (index: number) => {
@@ -47,10 +37,7 @@ export function Accordion(props: AccordionProps) {
     <section itemScope itemType="https://schema.org/FAQPage" className="my-8">
       {title && (
         <div className={UI_CLASSES.MB_6}>
-          <h3
-            className={`text-xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`}
-            itemProp="name"
-          >
+          <h3 className={`text-xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`} itemProp="name">
             {title}
           </h3>
           {description && (
@@ -75,13 +62,8 @@ export function Accordion(props: AccordionProps) {
               className={`${UI_CLASSES.W_FULL} text-left`}
               aria-expanded={openItems.has(index)}
             >
-              <CardHeader
-                className={`hover:bg-muted/30 ${UI_CLASSES.TRANSITION_COLORS}`}
-              >
-                <CardTitle
-                  className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}
-                  itemProp="name"
-                >
+              <CardHeader className={`hover:bg-muted/30 ${UI_CLASSES.TRANSITION_COLORS}`}>
+                <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} itemProp="name">
                   <span>{item.title}</span>
                   <div className="ml-4 flex-shrink-0">
                     {openItems.has(index) ? (
@@ -95,11 +77,7 @@ export function Accordion(props: AccordionProps) {
             </button>
 
             {openItems.has(index) && (
-              <CardContent
-                className="pt-0"
-                itemScope
-                itemType="https://schema.org/Answer"
-              >
+              <CardContent className="pt-0" itemScope itemType="https://schema.org/Answer">
                 <div itemProp="text">{item.content}</div>
               </CardContent>
             )}

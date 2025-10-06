@@ -7,10 +7,10 @@
 export const trackRelatedContentView = (
   sourcePage: string,
   itemsShown: number,
-  cacheHit: boolean,
+  cacheHit: boolean
 ): void => {
   if (window?.umami) {
-    window.umami.track("related_content_view", {
+    window.umami.track('related_content_view', {
       source_page: sourcePage,
       items_shown: itemsShown,
       cache_hit: cacheHit,
@@ -22,10 +22,10 @@ export const trackRelatedContentClick = (
   sourcePage: string,
   targetPage: string,
   position: number,
-  matchScore: number,
+  matchScore: number
 ): void => {
   if (window?.umami) {
-    window.umami.track("related_content_click", {
+    window.umami.track('related_content_click', {
       source_page: sourcePage,
       target_page: targetPage,
       position,

@@ -1,6 +1,6 @@
-import { headers } from "next/headers";
-import Script from "next/script";
-import { serializeJsonLd } from "@/src/lib/schemas/form.schema";
+import { headers } from 'next/headers';
+import Script from 'next/script';
+import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
 import {
   buildBreadcrumb,
   buildCreativeWork,
@@ -11,7 +11,7 @@ import {
   buildWebPageSpeakable,
   type FAQItem,
   type SchemaObject,
-} from "@/src/lib/structured-data/schema-builder";
+} from '@/src/lib/structured-data/schema-builder';
 import {
   isAgentContent,
   isCommandContent,
@@ -22,7 +22,7 @@ import {
   SCHEMA_CONFIGS,
   type UnifiedContent,
   type UnifiedStructuredDataProps,
-} from "@/src/lib/structured-data/schema-types";
+} from '@/src/lib/structured-data/schema-types';
 
 /**
  * Unified Structured Data Component
@@ -30,30 +30,22 @@ import {
  *
  * Consolidates 5 previously separate schema components into one with type discrimination
  */
-export async function UnifiedStructuredData({
-  item,
-}: UnifiedStructuredDataProps) {
+export async function UnifiedStructuredData({ item }: UnifiedStructuredDataProps) {
   // Extract nonce from CSP header for script security
   const headersList = await headers();
-  const cspHeader = headersList.get("content-security-policy");
+  const cspHeader = headersList.get('content-security-policy');
   const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
 
   const schemas: SchemaObject[] = [];
   const config = SCHEMA_CONFIGS[item.category];
 
   // Type-safe property access
-  const itemTitle =
-    "title" in item ? (item.title as string | undefined) : undefined;
-  const itemName =
-    "name" in item ? (item.name as string | undefined) : undefined;
-  const itemGithubUrl =
-    "githubUrl" in item ? (item.githubUrl as string | undefined) : undefined;
+  const itemTitle = 'title' in item ? (item.title as string | undefined) : undefined;
+  const itemName = 'name' in item ? (item.name as string | undefined) : undefined;
+  const itemGithubUrl = 'githubUrl' in item ? (item.githubUrl as string | undefined) : undefined;
   const itemLastModified =
-    "lastModified" in item
-      ? (item.lastModified as string | undefined)
-      : undefined;
-  const itemFeatures =
-    "features" in item ? (item.features as string[] | undefined) : undefined;
+    'lastModified' in item ? (item.lastModified as string | undefined) : undefined;
+  const itemFeatures = 'features' in item ? (item.features as string[] | undefined) : undefined;
 
   const displayName = itemTitle || itemName || item.slug;
   const displayTitle = itemTitle || itemName || item.slug;
@@ -120,7 +112,7 @@ export async function UnifiedStructuredData({
       item.slug,
       item.category,
       displayName,
-      item.troubleshooting as FAQItem[],
+      item.troubleshooting as FAQItem[]
     );
     schemas.push(faqSchema);
   }
@@ -128,7 +120,7 @@ export async function UnifiedStructuredData({
   // 6. Generate Breadcrumb Schema (all types)
   if (config.generateBreadcrumb) {
     const breadcrumbSchema = buildBreadcrumb([
-      { name: "Home", url: "/" },
+      { name: 'Home', url: '/' },
       { name: getCategoryName(item.category), url: `/${item.category}` },
       { name: displayTitle, url: `/${item.category}/${item.slug}` },
     ]);
@@ -146,12 +138,9 @@ export async function UnifiedStructuredData({
     <>
       {schemas.map((schema, index) => {
         // Extract type-safe @id or @type for unique key
-        const schemaWithId = schema as { "@id"?: string; "@type"?: string };
-        const idFragment = schemaWithId["@id"]
-          ? schemaWithId["@id"].split("#").pop()
-          : null;
-        const schemaId =
-          idFragment || `${schemaWithId["@type"] || "schema"}-${index}`;
+        const schemaWithId = schema as { '@id'?: string; '@type'?: string };
+        const idFragment = schemaWithId['@id'] ? schemaWithId['@id'].split('#').pop() : null;
+        const schemaId = idFragment || `${schemaWithId['@type'] || 'schema'}-${index}`;
 
         return (
           <Script
@@ -175,58 +164,37 @@ export async function UnifiedStructuredData({
  * Helper: Get application sub-category based on content type
  */
 function getApplicationSubCategory(item: UnifiedContent): string {
-  if (isAgentContent(item)) return "AI Agent";
-  if (isHookContent(item)) return `${item.hookType || "Hook"} - Claude Hook`;
-  if (isMcpContent(item)) return "MCP Server";
-  if (isRuleContent(item)) return "Development Rule";
-  if (isStatuslineContent(item))
-    return `${item.statuslineType || "Statusline"} - CLI Statusline`;
-  return "Claude Configuration";
+  if (isAgentContent(item)) return 'AI Agent';
+  if (isHookContent(item)) return `${item.hookType || 'Hook'} - Claude Hook`;
+  if (isMcpContent(item)) return 'MCP Server';
+  if (isRuleContent(item)) return 'Development Rule';
+  if (isStatuslineContent(item)) return `${item.statuslineType || 'Statusline'} - CLI Statusline`;
+  return 'Claude Configuration';
 }
 
 /**
  * Helper: Get keywords for SEO
  */
 function getKeywords(item: UnifiedContent): string[] {
-  const baseKeywords = [item.category, "Claude", ...(item.tags || [])];
+  const baseKeywords = [item.category, 'Claude', ...(item.tags || [])];
 
   if (isAgentContent(item)) {
-    return ["Claude Agent", "AI Assistant Agent", ...baseKeywords];
+    return ['Claude Agent', 'AI Assistant Agent', ...baseKeywords];
   }
   if (isCommandContent(item)) {
-    return ["Claude Command", "AI Assistant Command", ...baseKeywords];
+    return ['Claude Command', 'AI Assistant Command', ...baseKeywords];
   }
   if (isHookContent(item)) {
-    return [
-      "Claude Hook",
-      item.hookType || "Hook",
-      "Automation",
-      ...baseKeywords,
-    ];
+    return ['Claude Hook', item.hookType || 'Hook', 'Automation', ...baseKeywords];
   }
   if (isMcpContent(item)) {
-    return [
-      "MCP Server",
-      "Model Context Protocol",
-      "AI Development",
-      ...baseKeywords,
-    ];
+    return ['MCP Server', 'Model Context Protocol', 'AI Development', ...baseKeywords];
   }
   if (isRuleContent(item)) {
-    return [
-      "Development Rule",
-      "Code Standards",
-      "Best Practices",
-      ...baseKeywords,
-    ];
+    return ['Development Rule', 'Code Standards', 'Best Practices', ...baseKeywords];
   }
   if (isStatuslineContent(item)) {
-    return [
-      "Claude Statusline",
-      "CLI Statusline",
-      "Terminal Customization",
-      ...baseKeywords,
-    ];
+    return ['Claude Statusline', 'CLI Statusline', 'Terminal Customization', ...baseKeywords];
   }
 
   return baseKeywords;
@@ -236,7 +204,7 @@ function getKeywords(item: UnifiedContent): string[] {
  * Helper: Get software requirements
  */
 function getRequirements(item: UnifiedContent): string[] {
-  const baseRequirements = ["Claude Desktop or Claude Code"];
+  const baseRequirements = ['Claude Desktop or Claude Code'];
 
   if (isHookContent(item) && item.requirements) {
     return [...baseRequirements, ...item.requirements];
@@ -269,9 +237,9 @@ function getConfiguration(item: UnifiedContent): unknown {
  */
 function getSourceCodeSchemas(item: UnifiedContent): SchemaObject[] {
   const schemas: SchemaObject[] = [];
-  const itemTitle = "title" in item ? item.title : undefined;
-  const itemName = "name" in item ? item.name : undefined;
-  const itemGithubUrl = "githubUrl" in item ? item.githubUrl : undefined;
+  const itemTitle = 'title' in item ? item.title : undefined;
+  const itemName = 'name' in item ? item.name : undefined;
+  const itemGithubUrl = 'githubUrl' in item ? item.githubUrl : undefined;
   const displayName = itemTitle || itemName || item.slug;
 
   // Agent configuration
@@ -281,13 +249,13 @@ function getSourceCodeSchemas(item: UnifiedContent): SchemaObject[] {
         slug: item.slug,
         category: item.category,
         name: `${displayName} - Configuration`,
-        description: "Agent configuration for Claude",
-        programmingLanguage: "JSON",
+        description: 'Agent configuration for Claude',
+        programmingLanguage: 'JSON',
         code: JSON.stringify(item.configuration, null, 2),
-        encodingFormat: "application/json",
+        encodingFormat: 'application/json',
         githubUrl: itemGithubUrl,
-        fragmentId: "configuration",
-      }),
+        fragmentId: 'configuration',
+      })
     );
   }
 
@@ -298,13 +266,13 @@ function getSourceCodeSchemas(item: UnifiedContent): SchemaObject[] {
         slug: item.slug,
         category: item.category,
         name: `${displayName} - Command`,
-        description: "Command syntax and configuration",
-        programmingLanguage: "Claude Command",
+        description: 'Command syntax and configuration',
+        programmingLanguage: 'Claude Command',
         code: item.content,
-        encodingFormat: "text/plain",
+        encodingFormat: 'text/plain',
         githubUrl: itemGithubUrl,
-        fragmentId: "command",
-      }),
+        fragmentId: 'command',
+      })
     );
   }
 
@@ -315,13 +283,13 @@ function getSourceCodeSchemas(item: UnifiedContent): SchemaObject[] {
         slug: item.slug,
         category: item.category,
         name: `${displayName} - Script`,
-        description: `${item.hookType || "Hook"} script for Claude`,
-        programmingLanguage: "Shell Script",
+        description: `${item.hookType || 'Hook'} script for Claude`,
+        programmingLanguage: 'Shell Script',
         code: item.configuration.scriptContent,
-        encodingFormat: "text/x-shellscript",
+        encodingFormat: 'text/x-shellscript',
         githubUrl: itemGithubUrl,
-        fragmentId: "script",
-      }),
+        fragmentId: 'script',
+      })
     );
 
     if (item.configuration?.hookConfig) {
@@ -330,13 +298,13 @@ function getSourceCodeSchemas(item: UnifiedContent): SchemaObject[] {
           slug: item.slug,
           category: item.category,
           name: `${displayName} - Configuration`,
-          description: "Hook configuration",
-          programmingLanguage: "JSON",
+          description: 'Hook configuration',
+          programmingLanguage: 'JSON',
           code: JSON.stringify(item.configuration.hookConfig, null, 2),
-          encodingFormat: "application/json",
+          encodingFormat: 'application/json',
           githubUrl: itemGithubUrl,
-          fragmentId: "config",
-        }),
+          fragmentId: 'config',
+        })
       );
     }
   }
@@ -349,13 +317,13 @@ function getSourceCodeSchemas(item: UnifiedContent): SchemaObject[] {
           slug: item.slug,
           category: item.category,
           name: `${displayName} - Claude Desktop Config`,
-          description: "Configuration for Claude Desktop",
-          programmingLanguage: "JSON",
+          description: 'Configuration for Claude Desktop',
+          programmingLanguage: 'JSON',
           code: JSON.stringify(item.configuration.claudeDesktop, null, 2),
-          encodingFormat: "application/json",
+          encodingFormat: 'application/json',
           githubUrl: itemGithubUrl,
-          fragmentId: "claude-desktop-config",
-        }),
+          fragmentId: 'claude-desktop-config',
+        })
       );
     }
 
@@ -365,13 +333,13 @@ function getSourceCodeSchemas(item: UnifiedContent): SchemaObject[] {
           slug: item.slug,
           category: item.category,
           name: `${displayName} - Claude Code Config`,
-          description: "Configuration for Claude Code",
-          programmingLanguage: "JSON",
+          description: 'Configuration for Claude Code',
+          programmingLanguage: 'JSON',
           code: JSON.stringify(item.configuration.claudeCode, null, 2),
-          encodingFormat: "application/json",
+          encodingFormat: 'application/json',
           githubUrl: itemGithubUrl,
-          fragmentId: "claude-code-config",
-        }),
+          fragmentId: 'claude-code-config',
+        })
       );
     }
   }
@@ -383,17 +351,14 @@ function getSourceCodeSchemas(item: UnifiedContent): SchemaObject[] {
         slug: item.slug,
         category: item.category,
         name: `${displayName} - Script`,
-        description: `${item.statuslineType || "Statusline"} script for Claude Code`,
-        programmingLanguage:
-          item.configuration?.format === "python" ? "Python" : "Shell Script",
+        description: `${item.statuslineType || 'Statusline'} script for Claude Code`,
+        programmingLanguage: item.configuration?.format === 'python' ? 'Python' : 'Shell Script',
         code: item.content,
         encodingFormat:
-          item.configuration?.format === "python"
-            ? "text/x-python"
-            : "text/x-shellscript",
+          item.configuration?.format === 'python' ? 'text/x-python' : 'text/x-shellscript',
         githubUrl: itemGithubUrl,
-        fragmentId: "script",
-      }),
+        fragmentId: 'script',
+      })
     );
   }
 
@@ -404,23 +369,23 @@ function getSourceCodeSchemas(item: UnifiedContent): SchemaObject[] {
  * Helper: Get CreativeWork description
  */
 function getCreativeWorkDescription(item: UnifiedContent): string {
-  if (isAgentContent(item)) return "Agent system prompt and instructions";
-  if (isRuleContent(item)) return "Development rule and best practices";
-  return "Content template";
+  if (isAgentContent(item)) return 'Agent system prompt and instructions';
+  if (isRuleContent(item)) return 'Development rule and best practices';
+  return 'Content template';
 }
 
 /**
  * Helper: Get HowTo steps
  */
 function getHowToSteps(item: UnifiedContent) {
-  const itemTitle = "title" in item ? item.title : undefined;
-  const itemName = "name" in item ? item.name : undefined;
+  const itemTitle = 'title' in item ? item.title : undefined;
+  const itemName = 'name' in item ? item.name : undefined;
   const displayName = itemTitle || itemName || item.slug;
   const baseSteps = [
     {
       position: 1,
-      name: "Open Claude Desktop or Claude Code",
-      text: "Launch your Claude application",
+      name: 'Open Claude Desktop or Claude Code',
+      text: 'Launch your Claude application',
     },
     {
       position: 2,
@@ -430,14 +395,12 @@ function getHowToSteps(item: UnifiedContent) {
   ];
 
   if (isAgentContent(item) || isCommandContent(item) || isRuleContent(item)) {
-    const configCode = item.configuration
-      ? JSON.stringify(item.configuration, null, 2)
-      : undefined;
+    const configCode = item.configuration ? JSON.stringify(item.configuration, null, 2) : undefined;
     baseSteps.push({
       position: 3,
-      name: "Apply configuration",
+      name: 'Apply configuration',
       text: `Copy and apply the ${displayName} configuration`,
-      ...(configCode && { code: configCode, programmingLanguage: "json" }),
+      ...(configCode && { code: configCode, programmingLanguage: 'json' }),
     });
   }
 
@@ -445,25 +408,25 @@ function getHowToSteps(item: UnifiedContent) {
     const scriptContent = item.configuration?.scriptContent;
     baseSteps.push({
       position: 3,
-      name: "Create hook script",
-      text: "Create the hook script file",
+      name: 'Create hook script',
+      text: 'Create the hook script file',
       ...(scriptContent && {
         code: scriptContent,
-        programmingLanguage: "bash",
+        programmingLanguage: 'bash',
       }),
     });
   }
 
   if (isMcpContent(item)) {
     const installText =
-      typeof item.installation?.claudeCode === "string"
+      typeof item.installation?.claudeCode === 'string'
         ? item.installation.claudeCode
         : item.package
           ? `npm install ${item.package}`
-          : "Install the MCP server package";
+          : 'Install the MCP server package';
     baseSteps.push({
       position: 3,
-      name: "Install MCP server",
+      name: 'Install MCP server',
       text: installText,
     });
   }
@@ -476,12 +439,12 @@ function getHowToSteps(item: UnifiedContent) {
  */
 function getCategoryName(category: string): string {
   const names: Record<string, string> = {
-    agents: "Agents",
-    commands: "Commands",
-    hooks: "Hooks",
-    mcp: "MCP Servers",
-    rules: "Rules",
-    statuslines: "Statuslines",
+    agents: 'Agents',
+    commands: 'Commands',
+    hooks: 'Hooks',
+    mcp: 'MCP Servers',
+    rules: 'Rules',
+    statuslines: 'Statuslines',
   };
   return names[category] || category;
 }

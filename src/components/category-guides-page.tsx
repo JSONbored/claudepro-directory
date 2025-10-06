@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useId, useMemo, useState } from "react";
-import { Badge } from "@/src/components/ui/badge";
-import { Button } from "@/src/components/ui/button";
-import { Card } from "@/src/components/ui/card";
-import { Input } from "@/src/components/ui/input";
+import Link from 'next/link';
+import { useId, useMemo, useState } from 'react';
+import { Badge } from '@/src/components/ui/badge';
+import { Button } from '@/src/components/ui/button';
+import { Card } from '@/src/components/ui/card';
+import { Input } from '@/src/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/src/components/ui/select";
-import { createSearchIndex, performLocalSearch } from "@/src/hooks/use-search";
+} from '@/src/components/ui/select';
+import { createSearchIndex, performLocalSearch } from '@/src/hooks/use-search';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -25,52 +25,52 @@ import {
   Users,
   Workflow,
   Zap,
-} from "@/src/lib/icons";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
-import type { GuideItemWithCategory } from "@/src/lib/utils/guide-helpers";
+} from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { GuideItemWithCategory } from '@/src/lib/utils/guide-helpers';
 
 const categoryInfo = {
-  "use-cases": {
-    label: "Use Cases",
+  'use-cases': {
+    label: 'Use Cases',
     icon: Zap,
-    description: "Practical guides for specific Claude AI use cases",
-    color: "text-blue-500",
+    description: 'Practical guides for specific Claude AI use cases',
+    color: 'text-blue-500',
   },
   tutorials: {
-    label: "Tutorials",
+    label: 'Tutorials',
     icon: BookOpen,
-    description: "Step-by-step tutorials for Claude features",
-    color: "text-green-500",
+    description: 'Step-by-step tutorials for Claude features',
+    color: 'text-green-500',
   },
   collections: {
-    label: "Collections",
+    label: 'Collections',
     icon: Users,
-    description: "Curated collections of tools and agents",
-    color: "text-purple-500",
+    description: 'Curated collections of tools and agents',
+    color: 'text-purple-500',
   },
   categories: {
-    label: "Category Guides",
+    label: 'Category Guides',
     icon: FileText,
-    description: "Comprehensive guides by category",
-    color: "text-orange-500",
+    description: 'Comprehensive guides by category',
+    color: 'text-orange-500',
   },
   workflows: {
-    label: "Workflows",
+    label: 'Workflows',
     icon: Workflow,
-    description: "Complete workflow guides and strategies",
-    color: "text-pink-500",
+    description: 'Complete workflow guides and strategies',
+    color: 'text-pink-500',
   },
   comparisons: {
-    label: "Comparisons",
+    label: 'Comparisons',
     icon: GitCompare,
-    description: "Compare Claude with other development tools",
-    color: "text-red-500",
+    description: 'Compare Claude with other development tools',
+    color: 'text-red-500',
   },
   troubleshooting: {
-    label: "Troubleshooting",
+    label: 'Troubleshooting',
     icon: AlertTriangle,
-    description: "Solutions for common Claude AI issues",
-    color: "text-yellow-500",
+    description: 'Solutions for common Claude AI issues',
+    color: 'text-yellow-500',
   },
 };
 
@@ -79,12 +79,9 @@ interface CategoryGuidesPageProps {
   guides: GuideItemWithCategory[];
 }
 
-export function CategoryGuidesPage({
-  category,
-  guides,
-}: CategoryGuidesPageProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<"title" | "date">("title");
+export function CategoryGuidesPage({ category, guides }: CategoryGuidesPageProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'title' | 'date'>('title');
 
   const searchInputId = useId();
   const sortSelectId = useId();
@@ -100,34 +97,23 @@ export function CategoryGuidesPage({
   };
 
   // Create search index
-  const searchIndex = useMemo(
-    () => createSearchIndex<GuideItemWithCategory>(guides),
-    [guides],
-  );
+  const searchIndex = useMemo(() => createSearchIndex<GuideItemWithCategory>(guides), [guides]);
 
   // Filter and search guides
   const filteredGuides = useMemo(() => {
-    const searchResults = performLocalSearch<GuideItemWithCategory>(
-      searchIndex,
-      searchQuery,
-    );
+    const searchResults = performLocalSearch<GuideItemWithCategory>(searchIndex, searchQuery);
 
-    return [...searchResults].sort(
-      (a: GuideItemWithCategory, b: GuideItemWithCategory) => {
-        switch (sortBy) {
-          case "title":
-            return a.title.localeCompare(b.title);
-          case "date":
-            if (!(a.dateUpdated && b.dateUpdated)) return 0;
-            return (
-              new Date(b.dateUpdated).getTime() -
-              new Date(a.dateUpdated).getTime()
-            );
-          default:
-            return 0;
-        }
-      },
-    );
+    return [...searchResults].sort((a: GuideItemWithCategory, b: GuideItemWithCategory) => {
+      switch (sortBy) {
+        case 'title':
+          return a.title.localeCompare(b.title);
+        case 'date':
+          if (!(a.dateUpdated && b.dateUpdated)) return 0;
+          return new Date(b.dateUpdated).getTime() - new Date(a.dateUpdated).getTime();
+        default:
+          return 0;
+      }
+    });
   }, [searchIndex, searchQuery, sortBy]);
 
   return (
@@ -145,31 +131,25 @@ export function CategoryGuidesPage({
 
         {/* Header */}
         <div className={UI_CLASSES.MB_8}>
-          <div
-            className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3 ${UI_CLASSES.MB_4}`}
-          >
+          <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3 ${UI_CLASSES.MB_4}`}>
             <Icon className={`h-8 w-8 ${info?.color}`} />
-            <h1 className={`text-4xl ${UI_CLASSES.FONT_BOLD}`}>
-              {info?.label || category}
-            </h1>
+            <h1 className={`text-4xl ${UI_CLASSES.FONT_BOLD}`}>{info?.label || category}</h1>
           </div>
           <p className={`${UI_CLASSES.TEXT_XL} text-muted-foreground`}>
             {info?.description || `Browse all ${category} guides`}
           </p>
-          <div
-            className={`mt-4 ${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.ITEMS_CENTER}`}
-          >
+          <div className={`mt-4 ${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.ITEMS_CENTER}`}>
             <Badge variant="secondary">
               {filteredGuides.length} of {guides.length} guides
-              {searchQuery && " matching your search"}
+              {searchQuery && ' matching your search'}
             </Badge>
             {searchQuery && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setSearchQuery("");
-                  setSortBy("title");
+                  setSearchQuery('');
+                  setSortBy('title');
                 }}
               >
                 Clear search
@@ -202,22 +182,18 @@ export function CategoryGuidesPage({
                       <div className="mt-auto flex items-center justify-between gap-2">
                         {guide.dateUpdated && (
                           <span className={UI_CLASSES.TEXT_XS_MUTED}>
-                            Updated{" "}
-                            {new Date(guide.dateUpdated).toLocaleDateString()}
+                            Updated {new Date(guide.dateUpdated).toLocaleDateString()}
                           </span>
                         )}
-                        {guide.viewCount !== undefined &&
-                          guide.viewCount > 0 && (
-                            <Badge
-                              variant="secondary"
-                              className="h-6 px-2 gap-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors font-medium"
-                            >
-                              <Eye className="h-3 w-3" aria-hidden="true" />
-                              <span className="text-xs">
-                                {formatViewCount(guide.viewCount)}
-                              </span>
-                            </Badge>
-                          )}
+                        {guide.viewCount !== undefined && guide.viewCount > 0 && (
+                          <Badge
+                            variant="secondary"
+                            className="h-6 px-2 gap-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors font-medium"
+                          >
+                            <Eye className="h-3 w-3" aria-hidden="true" />
+                            <span className="text-xs">{formatViewCount(guide.viewCount)}</span>
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </Card>
@@ -229,8 +205,8 @@ export function CategoryGuidesPage({
               <Card className={`${UI_CLASSES.P_8} text-center`}>
                 <p className="text-muted-foreground">
                   {searchQuery
-                    ? "No guides found matching your search"
-                    : "No guides available in this category yet"}
+                    ? 'No guides found matching your search'
+                    : 'No guides available in this category yet'}
                 </p>
               </Card>
             )}
@@ -261,16 +237,10 @@ export function CategoryGuidesPage({
                 </div>
 
                 <div className={UI_CLASSES.SPACE_Y_2}>
-                  <span
-                    className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}
-                  >
-                    Sort by
-                  </span>
+                  <span className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Sort by</span>
                   <Select
                     value={sortBy}
-                    onValueChange={(value: "title" | "date") =>
-                      setSortBy(value)
-                    }
+                    onValueChange={(value: 'title' | 'date') => setSortBy(value)}
                   >
                     <SelectTrigger
                       className={UI_CLASSES.W_FULL}
@@ -289,9 +259,7 @@ export function CategoryGuidesPage({
 
               {/* Other Categories */}
               <Card className={UI_CLASSES.P_4}>
-                <h3
-                  className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_3}`}
-                >
+                <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_3}`}>
                   Other Categories
                 </h3>
                 <div className={UI_CLASSES.SPACE_Y_2}>
@@ -319,9 +287,7 @@ export function CategoryGuidesPage({
 
               {/* Quick Actions */}
               <Card className={UI_CLASSES.P_4}>
-                <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} mb-3`}>
-                  Quick Actions
-                </h3>
+                <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} mb-3`}>Quick Actions</h3>
                 <div className={UI_CLASSES.SPACE_Y_2}>
                   <Link href="/guides" className={UI_CLASSES.LIST_ITEM_HOVER}>
                     All Guides

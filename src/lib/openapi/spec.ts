@@ -13,11 +13,8 @@
  * - Compatible with Swagger UI, Redoc, Postman, etc.
  */
 
-import {
-  OpenAPIRegistry,
-  OpenApiGeneratorV31,
-} from "@asteasolutions/zod-to-openapi";
-import { endpointRegistry } from "./registry";
+import { OpenAPIRegistry, OpenApiGeneratorV31 } from '@asteasolutions/zod-to-openapi';
+import { endpointRegistry } from './registry';
 
 /**
  * Create OpenAPI Registry
@@ -29,13 +26,8 @@ function createOpenAPIRegistry(): OpenAPIRegistry {
   // Register each endpoint from the registry
   for (const [path, config] of Object.entries(endpointRegistry)) {
     // Parse path and method
-    const [method, pathTemplate] = path.split(" ") as [string, string];
-    const httpMethod = method.toLowerCase() as
-      | "get"
-      | "post"
-      | "put"
-      | "delete"
-      | "patch";
+    const [method, pathTemplate] = path.split(' ') as [string, string];
+    const httpMethod = method.toLowerCase() as 'get' | 'post' | 'put' | 'delete' | 'patch';
 
     // Register the path with OpenAPI
     registry.registerPath({
@@ -92,10 +84,10 @@ export function generateOpenAPISpec(): OpenAPISpec {
   const generator = new OpenApiGeneratorV31(registry.definitions);
 
   return generator.generateDocument({
-    openapi: "3.1.0",
+    openapi: '3.1.0',
     info: {
-      title: "ClaudePro Directory API",
-      version: "1.0.0",
+      title: 'ClaudePro Directory API',
+      version: '1.0.0',
       description: `
 # ClaudePro Directory API Documentation
 
@@ -158,38 +150,37 @@ Error responses include detailed error information:
 \`\`\`
       `.trim(),
       contact: {
-        name: "ClaudePro Directory",
-        url: "https://claudepro.directory",
-        email: "support@claudepro.directory",
+        name: 'ClaudePro Directory',
+        url: 'https://claudepro.directory',
+        email: 'support@claudepro.directory',
       },
       license: {
-        name: "MIT",
-        url: "https://opensource.org/licenses/MIT",
+        name: 'MIT',
+        url: 'https://opensource.org/licenses/MIT',
       },
     },
     servers: [
       {
-        url: "https://claudepro.directory",
-        description: "Production server",
+        url: 'https://claudepro.directory',
+        description: 'Production server',
       },
       {
-        url: "http://localhost:3000",
-        description: "Local development server",
+        url: 'http://localhost:3000',
+        description: 'Local development server',
       },
     ],
     tags: [
       {
-        name: "Content",
-        description:
-          "Endpoints for browsing and retrieving content by category",
+        name: 'Content',
+        description: 'Endpoints for browsing and retrieving content by category',
       },
       {
-        name: "Search",
-        description: "Full-text search across all content categories",
+        name: 'Search',
+        description: 'Full-text search across all content categories',
       },
       {
-        name: "Analytics",
-        description: "Trending content and analytics endpoints",
+        name: 'Analytics',
+        description: 'Trending content and analytics endpoints',
       },
     ],
     security: [], // No global security requirement - applied per-endpoint

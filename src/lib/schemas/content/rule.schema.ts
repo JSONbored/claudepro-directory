@@ -11,18 +11,15 @@
  * - Maintains all rule-specific validation logic
  */
 
-import { z } from "zod";
-import { SECURITY_CONFIG } from "@/src/lib/constants";
+import { z } from 'zod';
+import { SECURITY_CONFIG } from '@/src/lib/constants';
 import {
   baseConfigurationSchema,
   baseContentMetadataSchema,
   baseTroubleshootingSchema,
-} from "@/src/lib/schemas/content/base-content.schema";
-import { limitedMediumStringArray } from "@/src/lib/schemas/primitives/base-arrays";
-import {
-  codeString,
-  mediumString,
-} from "@/src/lib/schemas/primitives/base-strings";
+} from '@/src/lib/schemas/content/base-content.schema';
+import { limitedMediumStringArray } from '@/src/lib/schemas/primitives/base-arrays';
+import { codeString, mediumString } from '@/src/lib/schemas/primitives/base-strings';
 
 /**
  * Rule Example Schema
@@ -32,17 +29,13 @@ import {
  */
 const ruleExampleSchema = z
   .object({
-    title: z.string().max(200).describe("Example title or name"),
-    description: mediumString.describe(
-      "Description of what the example demonstrates",
-    ),
-    prompt: codeString.describe("Example prompt or input that uses the rule"),
-    expectedOutcome: codeString.describe(
-      "Expected result or outcome from using the rule",
-    ),
+    title: z.string().max(200).describe('Example title or name'),
+    description: mediumString.describe('Description of what the example demonstrates'),
+    prompt: codeString.describe('Example prompt or input that uses the rule'),
+    expectedOutcome: codeString.describe('Expected result or outcome from using the rule'),
   })
   .describe(
-    "Structured example demonstrating how to use a rule effectively with prompt and expected outcome.",
+    'Structured example demonstrating how to use a rule effectively with prompt and expected outcome.'
   );
 
 // Rule troubleshooting now uses baseTroubleshootingSchema from base-content.schema.ts
@@ -82,16 +75,12 @@ export const ruleContentSchema = z
     ...baseContentMetadataSchema.shape,
 
     // Rule-specific required fields
-    category: z
-      .literal("rules")
-      .describe('Content category literal identifier: "rules"'),
+    category: z.literal('rules').describe('Content category literal identifier: "rules"'),
 
     // Rule-specific optional fields
     configuration: baseConfigurationSchema
       .optional()
-      .describe(
-        "Optional AI model configuration settings (temperature, maxTokens, systemPrompt)",
-      ),
+      .describe('Optional AI model configuration settings (temperature, maxTokens, systemPrompt)'),
 
     // GitHub URL with strict hostname validation
     githubUrl: z
@@ -102,25 +91,21 @@ export const ruleContentSchema = z
           try {
             const urlObj = new URL(url);
             return SECURITY_CONFIG.trustedHostnames.github.includes(
-              urlObj.hostname as "github.com" | "www.github.com",
+              urlObj.hostname as 'github.com' | 'www.github.com'
             );
           } catch {
             return false;
           }
         },
-        { message: "Must be a valid GitHub URL (github.com)" },
+        { message: 'Must be a valid GitHub URL (github.com)' }
       )
       .optional()
-      .describe(
-        "Optional GitHub repository URL for rule source code or additional documentation",
-      ),
+      .describe('Optional GitHub repository URL for rule source code or additional documentation'),
 
     // Prerequisites and dependencies
     requirements: limitedMediumStringArray
       .optional()
-      .describe(
-        "Optional list of prerequisites or dependencies required to use this rule",
-      ),
+      .describe('Optional list of prerequisites or dependencies required to use this rule'),
 
     // Examples and troubleshooting guidance
     examples: z
@@ -128,33 +113,29 @@ export const ruleContentSchema = z
       .max(10)
       .optional()
       .describe(
-        "Optional array of usage examples (simple strings or structured example objects, max 10)",
+        'Optional array of usage examples (simple strings or structured example objects, max 10)'
       ),
     troubleshooting: z
       .array(baseTroubleshootingSchema)
       .max(20)
       .optional()
-      .describe("Optional array of common issues and solutions (max 20)"),
+      .describe('Optional array of common issues and solutions (max 20)'),
 
     // Rule metadata for organization and discovery
     relatedRules: z
       .array(z.string())
       .max(20)
       .optional()
-      .describe(
-        "Optional list of related rule slugs for cross-reference (max 20)",
-      ),
+      .describe('Optional list of related rule slugs for cross-reference (max 20)'),
     expertiseAreas: z
       .array(z.string().max(200))
       .max(10)
       .optional()
-      .describe(
-        "Optional list of domains or topics this rule applies to (max 10)",
-      ),
+      .describe('Optional list of domains or topics this rule applies to (max 10)'),
     // difficultyLevel removed - unused field (only in 1 content file + template)
   })
   .describe(
-    "Rule content schema for Claude Code rules and conventions. Inherits base content metadata and adds rule-specific fields including AI configuration, examples, troubleshooting, and related rules.",
+    'Rule content schema for Claude Code rules and conventions. Inherits base content metadata and adds rule-specific fields including AI configuration, examples, troubleshooting, and related rules.'
   );
 
 export type RuleContent = z.infer<typeof ruleContentSchema>;

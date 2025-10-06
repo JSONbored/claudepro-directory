@@ -10,15 +10,15 @@
  * @module app/api/cron/send-weekly-digest
  */
 
-import { NextResponse } from "next/server";
-import { WeeklyDigest } from "@/src/emails/templates/weekly-digest";
-import { logger } from "@/src/lib/logger";
-import { env } from "@/src/lib/schemas/env.schema";
-import { digestService } from "@/src/lib/services/digest.service";
-import { resendService } from "@/src/lib/services/resend.service";
+import { NextResponse } from 'next/server';
+import { WeeklyDigest } from '@/src/emails/templates/weekly-digest';
+import { logger } from '@/src/lib/logger';
+import { env } from '@/src/lib/schemas/env.schema';
+import { digestService } from '@/src/lib/services/digest.service';
+import { resendService } from '@/src/lib/services/resend.service';
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 /**
  * GET handler for weekly digest cron job
@@ -31,7 +31,7 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(_request: Request) {
   try {
-    logger.info("Weekly digest cron job started");
+    logger.info('Weekly digest cron job started');
 
     // Generate digest content for previous week
     const weekStart = digestService.getStartOfPreviousWeek();
@@ -39,28 +39,26 @@ export async function GET(_request: Request) {
 
     // Check if we have content to send
     if (digest.newContent.length === 0 && digest.trendingContent.length === 0) {
-      logger.warn("No content for weekly digest - skipping send", {
+      logger.warn('No content for weekly digest - skipping send', {
         weekOf: digest.weekOf,
       });
       return NextResponse.json({
         success: true,
         skipped: true,
-        reason: "No content available",
+        reason: 'No content available',
         weekOf: digest.weekOf,
       });
     }
 
     // Get all subscribers
-    const subscribers = await resendService.getAllContacts(
-      env.RESEND_AUDIENCE_ID,
-    );
+    const subscribers = await resendService.getAllContacts(env.RESEND_AUDIENCE_ID);
 
     if (subscribers.length === 0) {
-      logger.warn("No subscribers found - skipping digest send");
+      logger.warn('No subscribers found - skipping digest send');
       return NextResponse.json({
         success: true,
         skipped: true,
-        reason: "No subscribers",
+        reason: 'No subscribers',
         weekOf: digest.weekOf,
       });
     }
@@ -75,17 +73,17 @@ export async function GET(_request: Request) {
     const results = await resendService.sendBatchEmails(
       subscribers,
       `This Week in Claude - ${digest.weekOf}`,
-      WeeklyDigest({ email: "{email}", ...digest }), // {email} will be replaced per recipient
+      WeeklyDigest({ email: '{email}', ...digest }), // {email} will be replaced per recipient
       {
         tags: [
-          { name: "template", value: "weekly_digest" },
-          { name: "week", value: digest.weekOf },
+          { name: 'template', value: 'weekly_digest' },
+          { name: 'week', value: digest.weekOf },
         ],
         delayMs: 1000, // 1 second delay between batches
-      },
+      }
     );
 
-    logger.info("Weekly digest cron job completed", {
+    logger.info('Weekly digest cron job completed', {
       weekOf: digest.weekOf,
       totalSubscribers: subscribers.length,
       success: results.success,
@@ -95,13 +93,13 @@ export async function GET(_request: Request) {
 
     // Log errors if any
     if (results.errors.length > 0) {
-      logger.error("Some digest emails failed to send", undefined, {
+      logger.error('Some digest emails failed to send', undefined, {
         failedCount: results.failed,
         errorCount: results.errors.length,
         // Log first 3 errors as samples
-        sampleError1: results.errors[0] || "none",
-        sampleError2: results.errors[1] || "none",
-        sampleError3: results.errors[2] || "none",
+        sampleError1: results.errors[0] || 'none',
+        sampleError2: results.errors[1] || 'none',
+        sampleError3: results.errors[2] || 'none',
       });
     }
 
@@ -117,19 +115,19 @@ export async function GET(_request: Request) {
     });
   } catch (error) {
     logger.error(
-      "Weekly digest cron job failed",
+      'Weekly digest cron job failed',
       error instanceof Error ? error : new Error(String(error)),
       {
-        component: "send-weekly-digest-cron",
-      },
+        component: 'send-weekly-digest-cron',
+      }
     );
 
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

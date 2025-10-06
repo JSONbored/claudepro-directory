@@ -1,14 +1,14 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { cacheWarmer } from "@/src/lib/cache/cache-warmer";
-import { handleApiError, handleValidationError } from "@/src/lib/error-handler";
-import { logger } from "@/src/lib/logger";
-import { errorInputSchema } from "@/src/lib/schemas/error.schema";
+import { type NextRequest, NextResponse } from 'next/server';
+import { cacheWarmer } from '@/src/lib/cache/cache-warmer';
+import { handleApiError, handleValidationError } from '@/src/lib/error-handler';
+import { logger } from '@/src/lib/logger';
+import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 import {
   apiSchemas,
   baseSchemas,
   ValidationError,
   validation,
-} from "@/src/lib/security/validators";
+} from '@/src/lib/security/validators';
 
 /**
  * API endpoint to manually trigger cache warming
@@ -24,39 +24,36 @@ import {
 export async function POST(request: NextRequest) {
   try {
     // Validate authentication header if present
-    const authHeader = request.headers.get("authorization");
+    const authHeader = request.headers.get('authorization');
     if (authHeader) {
       validation.validate(
         baseSchemas.authToken,
-        authHeader.replace("Bearer ", ""),
-        "authorization header",
+        authHeader.replace('Bearer ', ''),
+        'authorization header'
       );
     }
 
     // Validate request body if present
     let validatedBody: Record<string, unknown> = {};
-    if (request.headers.get("content-type")?.includes("application/json")) {
+    if (request.headers.get('content-type')?.includes('application/json')) {
       try {
         const rawBody = await request.json();
         validatedBody = validation.validateBody(
           apiSchemas.cacheWarmParams,
           rawBody,
-          "cache warming parameters",
+          'cache warming parameters'
         );
       } catch (jsonError) {
         // If JSON parsing fails, treat as empty body
-        logger.warn("Invalid JSON in cache warm request body", {
-          error:
-            jsonError instanceof Error
-              ? jsonError.message
-              : "Unknown JSON parse error",
+        logger.warn('Invalid JSON in cache warm request body', {
+          error: jsonError instanceof Error ? jsonError.message : 'Unknown JSON parse error',
         });
       }
     }
 
     // Log cache warming trigger
-    logger.info("Cache warming triggered manually", {
-      ip: request.headers.get("x-forwarded-for") || "unknown",
+    logger.info('Cache warming triggered manually', {
+      ip: request.headers.get('x-forwarded-for') || 'unknown',
       hasParams: Object.keys(validatedBody).length > 0,
       validated: true,
     });
@@ -71,7 +68,7 @@ export async function POST(request: NextRequest) {
           message: result.message,
           timestamp: new Date().toISOString(),
         },
-        { status: 200 },
+        { status: 200 }
       );
     }
     return NextResponse.json(
@@ -80,29 +77,27 @@ export async function POST(request: NextRequest) {
         message: result.message,
         timestamp: new Date().toISOString(),
       },
-      { status: 429 }, // Too Many Requests if already running
+      { status: 429 } // Too Many Requests if already running
     );
   } catch (error: unknown) {
     // Use centralized error handling for consistent responses
     if (error instanceof ValidationError) {
       return handleValidationError(error, {
-        route: "cache/warm",
-        operation: "cache_warming",
-        method: "POST",
+        route: 'cache/warm',
+        operation: 'cache_warming',
+        method: 'POST',
       });
     }
 
     // Handle all other errors with centralized handler
     const validatedError = errorInputSchema.safeParse(error);
     return handleApiError(
-      validatedError.success
-        ? validatedError.data
-        : { message: "Cache warm error occurred" },
+      validatedError.success ? validatedError.data : { message: 'Cache warm error occurred' },
       {
-        route: "cache/warm",
-        operation: "cache_warming",
-        method: "POST",
-      },
+        route: 'cache/warm',
+        operation: 'cache_warming',
+        method: 'POST',
+      }
     );
   }
 }
@@ -121,9 +116,9 @@ export async function GET(request: NextRequest) {
       const allowedParams = validation.validate(
         apiSchemas.paginationQuery.partial().pick({ limit: true }),
         queryParams,
-        "cache status query parameters",
+        'cache status query parameters'
       );
-      logger.info("Cache status request with parameters", {
+      logger.info('Cache status request with parameters', {
         limit: allowedParams.limit || 0,
         validated: true,
       });
@@ -133,33 +128,31 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       {
-        ...(typeof status === "object" && status !== null ? status : {}),
+        ...(typeof status === 'object' && status !== null ? status : {}),
         currentTime: new Date().toISOString(),
         validated: true,
       },
-      { status: 200 },
+      { status: 200 }
     );
   } catch (error: unknown) {
     // Use centralized error handling for consistent responses
     if (error instanceof ValidationError) {
       return handleValidationError(error, {
-        route: "cache/warm",
-        operation: "get_status",
-        method: "GET",
+        route: 'cache/warm',
+        operation: 'get_status',
+        method: 'GET',
       });
     }
 
     // Handle all other errors with centralized handler
     const validatedError = errorInputSchema.safeParse(error);
     return handleApiError(
-      validatedError.success
-        ? validatedError.data
-        : { message: "Cache warm error occurred" },
+      validatedError.success ? validatedError.data : { message: 'Cache warm error occurred' },
       {
-        route: "cache/warm",
-        operation: "get_status",
-        method: "GET",
-      },
+        route: 'cache/warm',
+        operation: 'get_status',
+        method: 'GET',
+      }
     );
   }
 }

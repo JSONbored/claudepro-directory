@@ -1,40 +1,26 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import Link from "next/link";
-import { memo } from "react";
-import { Badge } from "@/src/components/ui/badge";
-import { Button } from "@/src/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/src/components/ui/card";
-import {
-  Building,
-  Clock,
-  DollarSign,
-  ExternalLink,
-  MapPin,
-  Star,
-} from "@/src/lib/icons";
-import type { JobCardProps } from "@/src/lib/schemas/component.schema";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
-import { formatRelativeDate } from "@/src/lib/utils/date-utils";
+import Image from 'next/image';
+import Link from 'next/link';
+import { memo } from 'react';
+import { Badge } from '@/src/components/ui/badge';
+import { Button } from '@/src/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Building, Clock, DollarSign, ExternalLink, MapPin, Star } from '@/src/lib/icons';
+import type { JobCardProps } from '@/src/lib/schemas/component.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { formatRelativeDate } from '@/src/lib/utils/date-utils';
 
 export const JobCard = memo(({ job }: JobCardProps) => {
   const getTypeColor = (type: string) => {
     const colors = {
-      "full-time": "bg-green-500/10 text-green-400 border-green-500/20",
-      "part-time": "bg-blue-500/10 text-blue-400 border-blue-500/20",
-      contract: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-      freelance: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-      remote: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+      'full-time': 'bg-green-500/10 text-green-400 border-green-500/20',
+      'part-time': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+      contract: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+      freelance: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+      remote: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     };
-    return (
-      colors[type as keyof typeof colors] || "bg-muted text-muted-foreground"
-    );
+    return colors[type as keyof typeof colors] || 'bg-muted text-muted-foreground';
   };
 
   return (
@@ -49,9 +35,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
       )}
 
       <CardHeader className="pb-4">
-        <div
-          className={`flex ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN}`}
-        >
+        <div className={`flex ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN}`}>
           <div className={UI_CLASSES.FLEX_1}>
             <div className="flex items-center gap-3 mb-2">
               {job.companyLogo && (
@@ -67,9 +51,7 @@ export const JobCard = memo(({ job }: JobCardProps) => {
                 />
               )}
               <div>
-                <CardTitle
-                  className={`text-xl ${UI_CLASSES.HOVER_TEXT_ACCENT}`}
-                >
+                <CardTitle className={`text-xl ${UI_CLASSES.HOVER_TEXT_ACCENT}`}>
                   <Link href={`/jobs/${job.slug}`}>{job.title}</Link>
                 </CardTitle>
                 <div className="flex items-center gap-2 text-muted-foreground">
@@ -97,21 +79,15 @@ export const JobCard = memo(({ job }: JobCardProps) => {
             </div>
           </div>
 
-          <div
-            className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_END} gap-2`}
-          >
-            <Badge className={getTypeColor(job.type)}>
-              {job.type.replace("-", " ")}
-            </Badge>
+          <div className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_END} gap-2`}>
+            <Badge className={getTypeColor(job.type)}>{job.type.replace('-', ' ')}</Badge>
             {job.remote && <Badge variant="secondary">Remote</Badge>}
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="pt-0">
-        <p
-          className={`text-muted-foreground ${UI_CLASSES.MB_4} ${UI_CLASSES.LINE_CLAMP_2}`}
-        >
+        <p className={`text-muted-foreground ${UI_CLASSES.MB_4} ${UI_CLASSES.LINE_CLAMP_2}`}>
           {job.description}
         </p>
 
@@ -146,4 +122,4 @@ export const JobCard = memo(({ job }: JobCardProps) => {
   );
 });
 
-JobCard.displayName = "JobCard";
+JobCard.displayName = 'JobCard';

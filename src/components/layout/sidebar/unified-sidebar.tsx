@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * Unified Sidebar - REFACTORED with modular cards
@@ -11,27 +11,22 @@
  * @see components/unified-detail-page/sidebar - Extracted modular components
  */
 
-import Link from "next/link";
-import { memo, useEffect, useState } from "react";
-import { z } from "zod";
-import { Badge } from "@/src/components/ui/badge";
-import { Button } from "@/src/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/src/components/ui/card";
-import { Input } from "@/src/components/ui/input";
+import Link from 'next/link';
+import { memo, useEffect, useState } from 'react';
+import { z } from 'zod';
+import { Badge } from '@/src/components/ui/badge';
+import { Button } from '@/src/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Input } from '@/src/components/ui/input';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/src/components/ui/tooltip";
-import { CategoryNavigationCard } from "@/src/components/unified-detail-page/sidebar/category-navigation-card";
-import { RecentGuidesCard } from "@/src/components/unified-detail-page/sidebar/recent-guides-card";
-import { TrendingGuidesCard } from "@/src/components/unified-detail-page/sidebar/trending-guides-card";
+} from '@/src/components/ui/tooltip';
+import { CategoryNavigationCard } from '@/src/components/unified-detail-page/sidebar/category-navigation-card';
+import { RecentGuidesCard } from '@/src/components/unified-detail-page/sidebar/recent-guides-card';
+import { TrendingGuidesCard } from '@/src/components/unified-detail-page/sidebar/trending-guides-card';
 import {
   BookOpen,
   FileText,
@@ -42,13 +37,13 @@ import {
   Users,
   Workflow,
   Zap,
-} from "@/src/lib/icons";
+} from '@/src/lib/icons';
 // Removed logger import - client components should not use server-side logger
 // Dynamic imports for server-side functions
-import { statsRedis } from "@/src/lib/redis";
-import { viewCountService } from "@/src/lib/services/view-count.service";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
-import { shallowEqual, slugToTitle } from "@/src/lib/utils";
+import { statsRedis } from '@/src/lib/redis';
+import { viewCountService } from '@/src/lib/services/view-count.service';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { shallowEqual, slugToTitle } from '@/src/lib/utils';
 
 // Zod schemas for type safety and validation
 const contentDataSchema = z.object({
@@ -74,7 +69,7 @@ const trendingGuideSchema = z.object({
 
 // Define UnifiedSidebarProps locally
 interface UnifiedSidebarProps {
-  mode?: "category" | "unified" | "content";
+  mode?: 'category' | 'unified' | 'content';
   contentData?: z.infer<typeof contentDataSchema>;
   relatedGuides?: Array<z.infer<typeof relatedGuideSchema>>;
   currentCategory?: string;
@@ -91,65 +86,61 @@ type TrendingGuide = z.infer<typeof trendingGuideSchema>;
 type RecentGuide = z.infer<typeof recentGuideSchema>;
 
 const categoryInfo = {
-  "use-cases": {
-    label: "Use Cases",
+  'use-cases': {
+    label: 'Use Cases',
     icon: Zap,
-    description: "Practical guides for specific Claude AI use cases",
-    color: "hover:text-blue-500 hover:bg-blue-500/10",
-    activeColor: "text-blue-500 bg-blue-500/10",
+    description: 'Practical guides for specific Claude AI use cases',
+    color: 'hover:text-blue-500 hover:bg-blue-500/10',
+    activeColor: 'text-blue-500 bg-blue-500/10',
   },
   tutorials: {
-    label: "Tutorials",
+    label: 'Tutorials',
     icon: BookOpen,
-    description: "Step-by-step tutorials for Claude features",
-    color: "hover:text-green-500 hover:bg-green-500/10",
-    activeColor: "text-green-500 bg-green-500/10",
+    description: 'Step-by-step tutorials for Claude features',
+    color: 'hover:text-green-500 hover:bg-green-500/10',
+    activeColor: 'text-green-500 bg-green-500/10',
   },
   collections: {
-    label: "Collections",
+    label: 'Collections',
     icon: Layers,
-    description: "Curated collections of tools and agents",
-    color: "hover:text-purple-500 hover:bg-purple-500/10",
-    activeColor: "text-purple-500 bg-purple-500/10",
+    description: 'Curated collections of tools and agents',
+    color: 'hover:text-purple-500 hover:bg-purple-500/10',
+    activeColor: 'text-purple-500 bg-purple-500/10',
   },
   categories: {
-    label: "Category Guides",
+    label: 'Category Guides',
     icon: FileText,
-    description: "Comprehensive guides by category",
-    color: "hover:text-orange-500 hover:bg-orange-500/10",
-    activeColor: "text-orange-500 bg-orange-500/10",
+    description: 'Comprehensive guides by category',
+    color: 'hover:text-orange-500 hover:bg-orange-500/10',
+    activeColor: 'text-orange-500 bg-orange-500/10',
   },
   workflows: {
-    label: "Workflows",
+    label: 'Workflows',
     icon: Workflow,
-    description: "Complete workflow guides and strategies",
-    color: "hover:text-pink-500 hover:bg-pink-500/10",
-    activeColor: "text-pink-500 bg-pink-500/10",
+    description: 'Complete workflow guides and strategies',
+    color: 'hover:text-pink-500 hover:bg-pink-500/10',
+    activeColor: 'text-pink-500 bg-pink-500/10',
   },
 };
 
 function UnifiedSidebarComponent({
-  mode = "category",
+  mode = 'category',
   contentData,
   relatedGuides = [],
   currentCategory: explicitCategory,
 }: UnifiedSidebarProps) {
   // Validate props with Zod schemas
-  const validatedContentData = contentData
-    ? contentDataSchema.parse(contentData)
-    : undefined;
-  const validatedRelatedGuides = z
-    .array(relatedGuideSchema)
-    .parse(relatedGuides);
+  const validatedContentData = contentData ? contentDataSchema.parse(contentData) : undefined;
+  const validatedRelatedGuides = z.array(relatedGuideSchema).parse(relatedGuides);
 
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [trendingGuides, setTrendingGuides] = useState<TrendingGuide[]>([]);
   const [recentGuides, setRecentGuides] = useState<RecentGuide[]>([]);
   const [isLoadingTrending, setIsLoadingTrending] = useState(false);
 
   // Static, deterministic ID - production-safe for SSR
-  const searchInputId = "unified-sidebar-guides-search";
+  const searchInputId = 'unified-sidebar-guides-search';
 
   // Fetch trending guides data - only run once on mount
   useEffect(() => {
@@ -161,13 +152,13 @@ function UnifiedSidebarComponent({
       setIsLoadingTrending(true);
       try {
         // Get trending guide slugs from Redis
-        const trendingSlugs = await statsRedis.getTrending("guides", 5);
+        const trendingSlugs = await statsRedis.getTrending('guides', 5);
 
         if (!isMounted) return;
 
         // Fetch real view counts for trending guides
         const viewCountResults = await viewCountService.getBatchViewCounts(
-          trendingSlugs.map((slug) => ({ category: "guides", slug })),
+          trendingSlugs.map((slug) => ({ category: 'guides', slug }))
         );
 
         const trendingData: TrendingGuide[] = trendingSlugs.map((slug) => {
@@ -206,18 +197,18 @@ function UnifiedSidebarComponent({
   useEffect(() => {
     const recentData: RecentGuide[] = [
       {
-        title: "Getting Started with Claude",
-        slug: "/guides/use-cases/getting-started",
+        title: 'Getting Started with Claude',
+        slug: '/guides/use-cases/getting-started',
         date: new Date().toLocaleDateString(),
       },
       {
-        title: "Advanced Automation",
-        slug: "/guides/workflows/automation",
+        title: 'Advanced Automation',
+        slug: '/guides/workflows/automation',
         date: new Date(Date.now() - 86400000).toLocaleDateString(),
       },
       {
-        title: "Development Tips",
-        slug: "/guides/tutorials/development",
+        title: 'Development Tips',
+        slug: '/guides/tutorials/development',
         date: new Date(Date.now() - 172800000).toLocaleDateString(),
       },
     ];
@@ -229,17 +220,15 @@ function UnifiedSidebarComponent({
   const currentCategory =
     explicitCategory ||
     validatedContentData?.category ||
-    (typeof window !== "undefined"
-      ? window.location.pathname.split("/")[2]
-      : "");
+    (typeof window !== 'undefined' ? window.location.pathname.split('/')[2] : '');
 
   return (
     <TooltipProvider delayDuration={300}>
       <div
         className={`sticky top-20 max-h-[calc(100vh-6rem)] ${UI_CLASSES.OVERFLOW_Y_AUTO}`}
         style={{
-          scrollbarWidth: "thin",
-          scrollbarColor: "rgba(156, 163, 175, 0.3) transparent",
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(156, 163, 175, 0.3) transparent',
         }}
       >
         <div className={`${UI_CLASSES.SPACE_Y_3} pr-2 ${UI_CLASSES.PB_4}`}>
@@ -268,13 +257,10 @@ function UnifiedSidebarComponent({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Filter
-                        className={`h-3.5 w-3.5 ${UI_CLASSES.TRANSITION_COLORS} ${showFilters ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                        className={`h-3.5 w-3.5 ${UI_CLASSES.TRANSITION_COLORS} ${showFilters ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                       />
                     </TooltipTrigger>
-                    <TooltipContent
-                      side="bottom"
-                      className={UI_CLASSES.TEXT_XS}
-                    >
+                    <TooltipContent side="bottom" className={UI_CLASSES.TEXT_XS}>
                       Filter by category
                     </TooltipContent>
                   </Tooltip>
@@ -292,17 +278,12 @@ function UnifiedSidebarComponent({
 
               {/* Active Filters (if any) */}
               {showFilters && searchQuery && (
-                <div
-                  className={`${UI_CLASSES.MT_2} ${UI_CLASSES.FLEX_WRAP_GAP_1}`}
-                >
-                  <Badge
-                    variant="secondary"
-                    className={`${UI_CLASSES.TEXT_XS} h-5`}
-                  >
+                <div className={`${UI_CLASSES.MT_2} ${UI_CLASSES.FLEX_WRAP_GAP_1}`}>
+                  <Badge variant="secondary" className={`${UI_CLASSES.TEXT_XS} h-5`}>
                     {searchQuery}
                     <button
                       type="button"
-                      onClick={() => setSearchQuery("")}
+                      onClick={() => setSearchQuery('')}
                       className="ml-1 hover:text-destructive"
                     >
                       ×
@@ -314,26 +295,20 @@ function UnifiedSidebarComponent({
           </Card>
 
           {/* Trending Section - Using extracted TrendingGuidesCard */}
-          <TrendingGuidesCard
-            guides={trendingGuides}
-            isLoading={isLoadingTrending}
-          />
+          <TrendingGuidesCard guides={trendingGuides} isLoading={isLoadingTrending} />
 
           {/* Content-specific sections */}
-          {mode === "content" && validatedContentData && (
+          {mode === 'content' && validatedContentData && (
             <>
               {/* Table of Contents */}
               {validatedContentData.content &&
                 (() => {
-                  const headings =
-                    validatedContentData.content.match(/^##\s+(.+)$/gm);
+                  const headings = validatedContentData.content.match(/^##\s+(.+)$/gm);
                   if (!headings || headings.length === 0) return null;
 
                   return (
                     <Card className="border-muted/40 shadow-sm">
-                      <CardHeader
-                        className={`${UI_CLASSES.PB_2} pt-3 ${UI_CLASSES.PX_3}`}
-                      >
+                      <CardHeader className={`${UI_CLASSES.PB_2} pt-3 ${UI_CLASSES.PX_3}`}>
                         <CardTitle
                           className={`${UI_CLASSES.TEXT_XS} font-medium text-muted-foreground`}
                         >
@@ -343,8 +318,8 @@ function UnifiedSidebarComponent({
                       <CardContent className={`pb-3 ${UI_CLASSES.PX_3}`}>
                         <nav className={UI_CLASSES.SPACE_Y_TIGHT}>
                           {headings.slice(0, 5).map((heading) => {
-                            const title = heading.replace("## ", "");
-                            const id = title.toLowerCase().replace(/\s+/g, "-");
+                            const title = heading.replace('## ', '');
+                            const id = title.toLowerCase().replace(/\s+/g, '-');
                             return (
                               <a
                                 key={id}
@@ -369,9 +344,7 @@ function UnifiedSidebarComponent({
               {/* Related Guides - Only on content pages */}
               {validatedRelatedGuides && validatedRelatedGuides.length > 0 && (
                 <Card className="border-muted/40 shadow-sm">
-                  <CardHeader
-                    className={`${UI_CLASSES.PB_2} pt-3 ${UI_CLASSES.PX_3}`}
-                  >
+                  <CardHeader className={`${UI_CLASSES.PB_2} pt-3 ${UI_CLASSES.PX_3}`}>
                     <CardTitle
                       className={`${UI_CLASSES.TEXT_XS} font-medium ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-1.5`}
                     >
@@ -382,11 +355,7 @@ function UnifiedSidebarComponent({
                   <CardContent className={`pb-3 ${UI_CLASSES.PX_3}`}>
                     <div className={UI_CLASSES.SPACE_Y_1}>
                       {validatedRelatedGuides.slice(0, 3).map((guide) => (
-                        <Link
-                          key={guide.slug}
-                          href={guide.slug}
-                          className="block group"
-                        >
+                        <Link key={guide.slug} href={guide.slug} className="block group">
                           <div
                             className={`text-3xs text-muted-foreground ${UI_CLASSES.GROUP_HOVER_TEXT_PRIMARY} ${UI_CLASSES.TRANSITION_COLORS} py-0.5 truncate`}
                           >
@@ -415,9 +384,7 @@ function UnifiedSidebarComponent({
           {/* Getting Started - Show when no trending/recent data */}
           {trendingGuides.length === 0 && recentGuides.length === 0 && (
             <Card className="border-muted/40 shadow-sm">
-              <CardHeader
-                className={`${UI_CLASSES.PB_2} pt-3 ${UI_CLASSES.PX_3}`}
-              >
+              <CardHeader className={`${UI_CLASSES.PB_2} pt-3 ${UI_CLASSES.PX_3}`}>
                 <CardTitle
                   className={`${UI_CLASSES.TEXT_XS} font-medium ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-1.5`}
                 >
@@ -426,13 +393,9 @@ function UnifiedSidebarComponent({
                 </CardTitle>
               </CardHeader>
               <CardContent className={`pb-3 ${UI_CLASSES.PX_3}`}>
-                <div
-                  className={`text-3xs text-muted-foreground ${UI_CLASSES.SPACE_Y_TIGHT_PLUS}`}
-                >
+                <div className={`text-3xs text-muted-foreground ${UI_CLASSES.SPACE_Y_TIGHT_PLUS}`}>
                   <p>New guides are being added regularly.</p>
-                  <p>
-                    Check back soon for trending content and recent updates!
-                  </p>
+                  <p>Check back soon for trending content and recent updates!</p>
                 </div>
               </CardContent>
             </Card>
@@ -456,9 +419,7 @@ function UnifiedSidebarComponent({
 
           {/* Quick Links */}
           <div className={`${UI_CLASSES.PX_2} pt-1`}>
-            <div
-              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-2xs`}
-            >
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-2xs`}>
               <Link
                 href="/guides"
                 className={`text-muted-foreground ${UI_CLASSES.HOVER_TEXT_PRIMARY} ${UI_CLASSES.TRANSITION_COLORS}`}
@@ -481,14 +442,11 @@ function UnifiedSidebarComponent({
 
 // Memoize the component to prevent unnecessary re-renders when props haven't changed
 // SHA-2090: Optimized with shallowEqual - 50-80% faster than JSON.stringify
-export const UnifiedSidebar = memo(
-  UnifiedSidebarComponent,
-  (prevProps, nextProps) => {
-    return (
-      prevProps.mode === nextProps.mode &&
-      prevProps.currentCategory === nextProps.currentCategory &&
-      shallowEqual(prevProps.contentData, nextProps.contentData) &&
-      shallowEqual(prevProps.relatedGuides, nextProps.relatedGuides)
-    );
-  },
-);
+export const UnifiedSidebar = memo(UnifiedSidebarComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.mode === nextProps.mode &&
+    prevProps.currentCategory === nextProps.currentCategory &&
+    shallowEqual(prevProps.contentData, nextProps.contentData) &&
+    shallowEqual(prevProps.relatedGuides, nextProps.relatedGuides)
+  );
+});

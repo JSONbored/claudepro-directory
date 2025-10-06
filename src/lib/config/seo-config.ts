@@ -3,7 +3,7 @@
  * Centralized SEO constants for title optimization
  */
 
-import type { ContentCategory } from "@/src/lib/schemas/shared.schema";
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 
 /**
  * Suffix lengths for each category
@@ -24,7 +24,7 @@ export const SUFFIX_LENGTHS: Record<ContentCategory, number> = {
   tutorials: 35, // " - Tutorials - Claude Pro Directory"
   comparisons: 37, // " - Comparisons - Claude Pro Directory"
   workflows: 35, // " - Workflows - Claude Pro Directory"
-  "use-cases": 36, // " - Use Cases - Claude Pro Directory"
+  'use-cases': 36, // " - Use Cases - Claude Pro Directory"
   troubleshooting: 41, // " - Troubleshooting - Claude Pro Directory"
   categories: 36, // " - Categories - Claude Pro Directory"
 
@@ -66,7 +66,7 @@ export const MAX_BASE_TITLE_LENGTH: Record<ContentCategory, number> = {
   tutorials: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.tutorials, // 25 chars
   comparisons: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.comparisons, // 23 chars
   workflows: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.workflows, // 25 chars
-  "use-cases": MAX_TITLE_LENGTH - SUFFIX_LENGTHS["use-cases"], // 24 chars
+  'use-cases': MAX_TITLE_LENGTH - SUFFIX_LENGTHS['use-cases'], // 24 chars
   troubleshooting: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.troubleshooting, // 19 chars
   categories: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.categories, // 24 chars
 

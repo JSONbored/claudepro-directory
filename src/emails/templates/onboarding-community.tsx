@@ -6,16 +6,10 @@
  * Content: Community contributions, how to submit, success stories
  */
 
-import { Button, Hr, Section, Text } from "@react-email/components";
-import type * as React from "react";
-import { BaseLayout } from "../layouts/base-layout";
-import {
-  borderRadius,
-  brandColors,
-  emailTheme,
-  spacing,
-  typography,
-} from "../utils/theme";
+import { Button, Hr, Section, Text } from '@react-email/components';
+import type * as React from 'react';
+import { BaseLayout } from '../layouts/base-layout';
+import { borderRadius, brandColors, emailTheme, spacing, typography } from '../utils/theme';
 
 export interface OnboardingCommunityProps {
   /**
@@ -66,20 +60,20 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
 
         <ul style={listStyle}>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>Help Others:</strong> Your solution
-            might be exactly what someone else needs
+            <strong style={strongStyle}>Help Others:</strong> Your solution might be exactly what
+            someone else needs
           </li>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>Get Feedback:</strong> Community members
-            will test and improve your work
+            <strong style={strongStyle}>Get Feedback:</strong> Community members will test and
+            improve your work
           </li>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>Build Reputation:</strong> Become a
-            recognized contributor in the Claude ecosystem
+            <strong style={strongStyle}>Build Reputation:</strong> Become a recognized contributor
+            in the Claude ecosystem
           </li>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>Discover Better Ways:</strong> Learn
-            from how others adapt your configurations
+            <strong style={strongStyle}>Discover Better Ways:</strong> Learn from how others adapt
+            your configurations
           </li>
         </ul>
       </Section>
@@ -93,31 +87,28 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
         <Section style={stepCard}>
           <Text style={stepNumberStyle}>1</Text>
           <Text style={stepDescStyle}>
-            <strong style={strongStyle}>Test Your Configuration:</strong> Make
-            sure it works reliably for your use case
+            <strong style={strongStyle}>Test Your Configuration:</strong> Make sure it works
+            reliably for your use case
           </Text>
         </Section>
 
         <Section style={stepCard}>
           <Text style={stepNumberStyle}>2</Text>
           <Text style={stepDescStyle}>
-            <strong style={strongStyle}>Document It Well:</strong> Clear
-            descriptions and examples help others understand
+            <strong style={strongStyle}>Document It Well:</strong> Clear descriptions and examples
+            help others understand
           </Text>
         </Section>
 
         <Section style={stepCard}>
           <Text style={stepNumberStyle}>3</Text>
           <Text style={stepDescStyle}>
-            <strong style={strongStyle}>Submit via GitHub:</strong> Open a pull
-            request or create an issue with your configuration
+            <strong style={strongStyle}>Submit via GitHub:</strong> Open a pull request or create an
+            issue with your configuration
           </Text>
         </Section>
 
-        <Button
-          href="https://claudepro.directory/submit"
-          style={primaryButtonStyle}
-        >
+        <Button href="https://claudepro.directory/submit" style={primaryButtonStyle}>
           Submit Your Configuration
         </Button>
       </Section>
@@ -126,32 +117,27 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
 
       {/* Featured Contributors */}
       <Section style={featureSection}>
-        <Text style={featureTitleStyle}>
-          🌟 Featured Community Contributions
-        </Text>
+        <Text style={featureTitleStyle}>🌟 Featured Community Contributions</Text>
         <Text style={paragraphStyle}>
           Recent configurations that are making waves in the community:
         </Text>
 
         <ul style={listStyle}>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>Advanced SQL Optimizer</strong> -
-            Automatically optimizes complex queries
+            <strong style={strongStyle}>Advanced SQL Optimizer</strong> - Automatically optimizes
+            complex queries
           </li>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>Security Audit Agent</strong> -
-            Comprehensive security analysis for web apps
+            <strong style={strongStyle}>Security Audit Agent</strong> - Comprehensive security
+            analysis for web apps
           </li>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>Documentation Generator</strong> -
-            Creates API docs from code automatically
+            <strong style={strongStyle}>Documentation Generator</strong> - Creates API docs from
+            code automatically
           </li>
         </ul>
 
-        <Button
-          href="https://claudepro.directory/community"
-          style={secondaryButtonStyle}
-        >
+        <Button href="https://claudepro.directory/community" style={secondaryButtonStyle}>
           See All Community Contributions
         </Button>
       </Section>
@@ -162,8 +148,7 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
       <Section style={connectSection}>
         <Text style={connectTitleStyle}>Stay Connected</Text>
         <Text style={paragraphStyle}>
-          Join discussions, get help, and share your experiences with other
-          Claude users.
+          Join discussions, get help, and share your experiences with other Claude users.
         </Text>
 
         <div style={connectLinksStyle}>
@@ -173,10 +158,7 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
           >
             GitHub
           </Button>
-          <Button
-            href="https://twitter.com/claudeprodirectory"
-            style={linkButtonStyle}
-          >
+          <Button href="https://twitter.com/claudeprodirectory" style={linkButtonStyle}>
             Twitter
           </Button>
         </div>
@@ -200,12 +182,12 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
  */
 
 const heroSection: React.CSSProperties = {
-  textAlign: "center",
+  textAlign: 'center',
   marginBottom: spacing.lg,
 };
 
 const headingStyle: React.CSSProperties = {
-  fontSize: typography.fontSize["3xl"],
+  fontSize: typography.fontSize['3xl'],
   fontWeight: typography.fontWeight.bold,
   color: emailTheme.textPrimary,
   margin: `0 0 ${spacing.sm} 0`,
@@ -225,8 +207,8 @@ const statsSection: React.CSSProperties = {
 };
 
 const statsGrid: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(3, 1fr)",
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, 1fr)',
   gap: spacing.md,
 };
 
@@ -234,23 +216,23 @@ const statCard: React.CSSProperties = {
   backgroundColor: emailTheme.bgTertiary,
   padding: spacing.md,
   borderRadius: borderRadius.md,
-  textAlign: "center",
+  textAlign: 'center',
   border: `1px solid ${emailTheme.borderDefault}`,
 };
 
 const statNumberStyle: React.CSSProperties = {
-  fontSize: typography.fontSize["2xl"],
+  fontSize: typography.fontSize['2xl'],
   fontWeight: typography.fontWeight.bold,
   color: brandColors.primary,
   margin: `0 0 ${spacing.xs} 0`,
-  display: "block",
+  display: 'block',
 };
 
 const statLabelStyle: React.CSSProperties = {
   fontSize: typography.fontSize.sm,
   color: emailTheme.textSecondary,
   margin: 0,
-  display: "block",
+  display: 'block',
 };
 
 const contentSection: React.CSSProperties = {
@@ -259,7 +241,7 @@ const contentSection: React.CSSProperties = {
 };
 
 const sectionTitleStyle: React.CSSProperties = {
-  fontSize: typography.fontSize["2xl"],
+  fontSize: typography.fontSize['2xl'],
   fontWeight: typography.fontWeight.bold,
   color: emailTheme.textPrimary,
   margin: `0 0 ${spacing.md} 0`,
@@ -295,8 +277,8 @@ const stepCard: React.CSSProperties = {
   borderRadius: borderRadius.md,
   padding: spacing.md,
   marginBottom: spacing.sm,
-  display: "flex",
-  alignItems: "flex-start",
+  display: 'flex',
+  alignItems: 'flex-start',
   gap: spacing.md,
 };
 
@@ -317,15 +299,15 @@ const stepDescStyle: React.CSSProperties = {
 
 const primaryButtonStyle: React.CSSProperties = {
   backgroundColor: brandColors.primary,
-  color: "#ffffff",
+  color: '#ffffff',
   fontWeight: typography.fontWeight.semibold,
   fontSize: typography.fontSize.base,
   padding: `${spacing.md} ${spacing.xl}`,
   borderRadius: borderRadius.md,
-  textDecoration: "none",
-  display: "inline-block",
+  textDecoration: 'none',
+  display: 'inline-block',
   marginTop: spacing.md,
-  border: "none",
+  border: 'none',
 };
 
 const secondaryButtonStyle: React.CSSProperties = {
@@ -335,8 +317,8 @@ const secondaryButtonStyle: React.CSSProperties = {
   fontSize: typography.fontSize.base,
   padding: `${spacing.md} ${spacing.xl}`,
   borderRadius: borderRadius.md,
-  textDecoration: "none",
-  display: "inline-block",
+  textDecoration: 'none',
+  display: 'inline-block',
   marginTop: spacing.sm,
   border: `1px solid ${emailTheme.borderDefault}`,
 };
@@ -357,7 +339,7 @@ const featureTitleStyle: React.CSSProperties = {
 };
 
 const connectSection: React.CSSProperties = {
-  textAlign: "center",
+  textAlign: 'center',
   marginTop: spacing.lg,
   marginBottom: spacing.lg,
 };
@@ -370,8 +352,8 @@ const connectTitleStyle: React.CSSProperties = {
 };
 
 const connectLinksStyle: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "center",
+  display: 'flex',
+  justifyContent: 'center',
   gap: spacing.md,
   marginTop: spacing.md,
 };
@@ -383,8 +365,8 @@ const linkButtonStyle: React.CSSProperties = {
   fontSize: typography.fontSize.sm,
   padding: `${spacing.sm} ${spacing.lg}`,
   borderRadius: borderRadius.sm,
-  textDecoration: "none",
-  display: "inline-block",
+  textDecoration: 'none',
+  display: 'inline-block',
   border: `1px solid ${emailTheme.borderDefault}`,
 };
 
@@ -395,7 +377,7 @@ const dividerStyle: React.CSSProperties = {
 
 const footerNoteSection: React.CSSProperties = {
   marginTop: spacing.lg,
-  textAlign: "center",
+  textAlign: 'center',
 };
 
 const footerNoteStyle: React.CSSProperties = {

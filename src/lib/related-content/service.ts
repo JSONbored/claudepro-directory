@@ -3,16 +3,16 @@
  * Maintains production Zod schemas with streamlined architecture
  */
 
-import { z } from "zod";
-import { CACHE_CONFIG } from "@/src/lib/constants";
-import { logger } from "@/src/lib/logger";
-import { isDevelopment } from "@/src/lib/schemas/env.schema";
+import { z } from 'zod';
+import { CACHE_CONFIG } from '@/src/lib/constants';
+import { logger } from '@/src/lib/logger';
+import { isDevelopment } from '@/src/lib/schemas/env.schema';
 import {
   type ContentIndex,
   type ContentItem,
   contentIndexSchema,
-} from "@/src/lib/schemas/related-content.schema";
-import { viewCountService } from "@/src/lib/services/view-count.service";
+} from '@/src/lib/schemas/related-content.schema';
+import { viewCountService } from '@/src/lib/services/view-count.service';
 
 // Clean, production Zod schemas
 
@@ -34,19 +34,14 @@ const scoredItemSchema = z.object({
     popularity: z.number().optional(),
   }),
   score: z.number(),
-  matchType: z.enum([
-    "same_category",
-    "tag_match",
-    "keyword_match",
-    "trending",
-  ]),
+  matchType: z.enum(['same_category', 'tag_match', 'keyword_match', 'trending']),
 });
 
 type ScoredItem = z.infer<typeof scoredItemSchema>;
 
 const relatedContentInputSchema = z.object({
-  currentPath: z.string().default("/"),
-  currentCategory: z.string().default("tutorials"),
+  currentPath: z.string().default('/'),
+  currentCategory: z.string().default('tutorials'),
   currentTags: z.array(z.string()).default([]),
   currentKeywords: z.array(z.string()).default([]),
   limit: z.number().min(1).max(20).default(3),
@@ -61,12 +56,7 @@ const relatedContentItemSchema = z.object({
   category: z.string(),
   url: z.string(),
   score: z.number().min(0).max(100),
-  matchType: z.enum([
-    "same_category",
-    "tag_match",
-    "keyword_match",
-    "trending",
-  ]),
+  matchType: z.enum(['same_category', 'tag_match', 'keyword_match', 'trending']),
   views: z.number().optional(),
   matchDetails: z
     .object({
@@ -89,7 +79,7 @@ const relatedContentResponseSchema = z.object({
 
 // Event tracking schemas
 const carouselNavigationEventSchema = z.object({
-  direction: z.enum(["next", "prev"]),
+  direction: z.enum(['next', 'prev']),
   position: z.number().int().min(0),
   itemCount: z.number().int().min(0),
 });
@@ -117,37 +107,25 @@ const relatedContentViewEventSchema = z.object({
 // Note: ContentItem, ContentIndex, and CategorizedContentIndex are now exported from @/lib/schemas/related-content.schema
 export type RelatedContentInput = z.infer<typeof relatedContentInputSchema>;
 export type RelatedContentItem = z.infer<typeof relatedContentItemSchema>;
-export type RelatedContentResponse = z.infer<
-  typeof relatedContentResponseSchema
->;
+export type RelatedContentResponse = z.infer<typeof relatedContentResponseSchema>;
 
 // Event tracking type exports
-export type CarouselNavigationEvent = z.infer<
-  typeof carouselNavigationEventSchema
->;
-export type RelatedContentClickEvent = z.infer<
-  typeof relatedContentClickEventSchema
->;
-export type RelatedContentImpressionEvent = z.infer<
-  typeof relatedContentImpressionEventSchema
->;
-export type RelatedContentViewEvent = z.infer<
-  typeof relatedContentViewEventSchema
->;
+export type CarouselNavigationEvent = z.infer<typeof carouselNavigationEventSchema>;
+export type RelatedContentClickEvent = z.infer<typeof relatedContentClickEventSchema>;
+export type RelatedContentImpressionEvent = z.infer<typeof relatedContentImpressionEventSchema>;
+export type RelatedContentViewEvent = z.infer<typeof relatedContentViewEventSchema>;
 
 // Simple in-memory cache
 let contentCache: ContentIndex | null = null;
 let lastLoaded = 0;
 
 class RelatedContentService {
-  private algorithmVersion = "v2.0.0-simplified";
+  private algorithmVersion = 'v2.0.0-simplified';
 
   /**
    * Get related content - main entry point
    */
-  async getRelatedContent(
-    input: RelatedContentInput,
-  ): Promise<RelatedContentResponse> {
+  async getRelatedContent(input: RelatedContentInput): Promise<RelatedContentResponse> {
     const startTime = performance.now();
 
     try {
@@ -158,12 +136,12 @@ class RelatedContentService {
       const contentIndex = await this.loadContentIndex();
 
       if (contentIndex.items.length === 0) {
-        logger.warn("Content index is empty");
+        logger.warn('Content index is empty');
         return this.createEmptyResponse(performance.now() - startTime);
       }
 
       if (isDevelopment) {
-        logger.debug("Content Index Debug", {
+        logger.debug('Content Index Debug', {
           itemsLoaded: contentIndex.items.length,
           currentPath: config.currentPath,
           currentCategory: config.currentCategory,
@@ -178,9 +156,7 @@ class RelatedContentService {
         items: finalItems,
         performance: {
           fetchTime: Math.round(performance.now() - startTime),
-          cacheHit:
-            !!contentCache &&
-            Date.now() - lastLoaded < CACHE_CONFIG.durations.shortTerm,
+          cacheHit: !!contentCache && Date.now() - lastLoaded < CACHE_CONFIG.durations.shortTerm,
           itemCount: finalItems.length,
           algorithmVersion: this.algorithmVersion,
         },
@@ -189,9 +165,8 @@ class RelatedContentService {
 
       return response;
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      logger.error("Related content service error", error as Error, {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error('Related content service error', error as Error, {
         input: JSON.stringify(input).substring(0, 200),
         errorMessage,
       });
@@ -213,14 +188,14 @@ class RelatedContentService {
 
     try {
       // Load from indexer
-      const { contentIndexer } = await import("./indexer");
+      const { contentIndexer } = await import('./indexer');
       const rawData = await contentIndexer.loadIndex();
 
       if (isDevelopment) {
-        logger.debug("RAW INDEX DATA", {
+        logger.debug('RAW INDEX DATA', {
           exists: !!rawData,
           itemsCount: rawData?.items?.length || 0,
-          keysPresent: rawData ? Object.keys(rawData).join(", ") : "none",
+          keysPresent: rawData ? Object.keys(rawData).join(', ') : 'none',
         });
       }
 
@@ -233,23 +208,17 @@ class RelatedContentService {
 
       return validatedIndex;
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      logger.warn(
-        "Failed to load content index, using empty index",
-        undefined,
-        {
-          error: errorMessage,
-          errorType:
-            error instanceof Error ? error.constructor.name : typeof error,
-        },
-      );
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.warn('Failed to load content index, using empty index', undefined, {
+        error: errorMessage,
+        errorType: error instanceof Error ? error.constructor.name : typeof error,
+      });
 
       // Return empty index on failure
       const emptyIndex = contentIndexSchema.parse({
         items: [],
         generated: new Date().toISOString(),
-        version: "1.0.0",
+        version: '1.0.0',
       });
 
       contentCache = emptyIndex;
@@ -262,26 +231,18 @@ class RelatedContentService {
   /**
    * Score items using simplified but effective algorithm
    */
-  private scoreItems(
-    items: ContentItem[],
-    config: RelatedContentInput,
-  ): ScoredItem[] {
+  private scoreItems(items: ContentItem[], config: RelatedContentInput): ScoredItem[] {
     return items.map((item) => {
       // Extend item with required scoring properties
       const scoringItem = {
         ...item,
         tags: item.tags || [],
-        keywords:
-          (item as typeof item & { keywords?: string[] }).keywords || [],
+        keywords: (item as typeof item & { keywords?: string[] }).keywords || [],
         priority: (item as typeof item & { priority?: number }).priority || 0,
         featured: (item as typeof item & { featured?: boolean }).featured,
       };
       let score = 0;
-      let matchType:
-        | "same_category"
-        | "tag_match"
-        | "keyword_match"
-        | "trending" = "same_category";
+      let matchType: 'same_category' | 'tag_match' | 'keyword_match' | 'trending' = 'same_category';
 
       // Category matching (base score)
       if (item.category === config.currentCategory) {
@@ -293,13 +254,13 @@ class RelatedContentService {
         config.currentTags.some(
           (currentTag) =>
             tag.toLowerCase().includes(currentTag.toLowerCase()) ||
-            currentTag.toLowerCase().includes(tag.toLowerCase()),
-        ),
+            currentTag.toLowerCase().includes(tag.toLowerCase())
+        )
       );
 
       if (tagMatches.length > 0) {
         score += tagMatches.length * 0.4;
-        matchType = "tag_match";
+        matchType = 'tag_match';
       }
 
       // Keyword matching
@@ -307,14 +268,14 @@ class RelatedContentService {
         config.currentKeywords.some(
           (currentKeyword) =>
             keyword.toLowerCase().includes(currentKeyword.toLowerCase()) ||
-            currentKeyword.toLowerCase().includes(keyword.toLowerCase()),
-        ),
+            currentKeyword.toLowerCase().includes(keyword.toLowerCase())
+        )
       );
 
       if (keywordMatches.length > 0) {
         score += keywordMatches.length * 0.3;
-        if (matchType === "same_category") {
-          matchType = "keyword_match";
+        if (matchType === 'same_category') {
+          matchType = 'keyword_match';
         }
       }
 
@@ -327,14 +288,7 @@ class RelatedContentService {
       score += scoringItem.priority * 0.1;
 
       // Main categories boost (ensure visibility)
-      const mainCategories = [
-        "agents",
-        "mcp",
-        "rules",
-        "commands",
-        "hooks",
-        "statuslines",
-      ];
+      const mainCategories = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'];
       if (mainCategories.includes(item.category)) {
         score += 0.2;
       }
@@ -355,9 +309,9 @@ class RelatedContentService {
    */
   private async selectFinalItems(
     scoredItems: ScoredItem[],
-    config: RelatedContentInput,
+    config: RelatedContentInput
   ): Promise<RelatedContentItem[]> {
-    const currentSlug = config.currentPath.split("/").pop() || "";
+    const currentSlug = config.currentPath.split('/').pop() || '';
 
     // Filter out current page and low-scoring items
     const eligible = scoredItems
@@ -371,13 +325,13 @@ class RelatedContentService {
       .sort((a, b) => b.score - a.score);
 
     if (isDevelopment && eligible.length > 0) {
-      logger.debug("Top scored items", {
+      logger.debug('Top scored items', {
         itemCount: eligible.slice(0, 5).length,
         topScore: eligible[0]?.score || 0,
         categories: eligible
           .slice(0, 5)
           .map((r) => r.item.category)
-          .join(", "),
+          .join(', '),
       });
     }
 
@@ -415,8 +369,7 @@ class RelatedContentService {
       slug: result.item.slug,
     }));
 
-    const viewCounts =
-      await viewCountService.getBatchViewCounts(viewCountRequests);
+    const viewCounts = await viewCountService.getBatchViewCounts(viewCountRequests);
 
     // Create final items with real view counts
     return itemsToProcess.map((result) => {
@@ -433,14 +386,10 @@ class RelatedContentService {
         matchType: result.matchType,
         views: viewCountResult?.views || 0, // Use real/deterministic view count
         matchDetails: {
-          matchedTags: result.item.tags.filter((tag) =>
-            config.currentTags.includes(tag),
-          ),
+          matchedTags: result.item.tags.filter((tag) => config.currentTags.includes(tag)),
           matchedKeywords:
-            (
-              result.item as typeof result.item & { keywords?: string[] }
-            ).keywords?.filter((kw: string) =>
-              config.currentKeywords.includes(kw),
+            (result.item as typeof result.item & { keywords?: string[] }).keywords?.filter(
+              (kw: string) => config.currentKeywords.includes(kw)
             ) || [],
         },
       });

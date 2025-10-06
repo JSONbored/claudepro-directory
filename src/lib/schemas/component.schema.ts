@@ -6,12 +6,12 @@
  * Extracted only the ConfigCardProps type that's actually used
  */
 
-import { z } from "zod";
-import { nonEmptyString } from "@/src/lib/schemas/primitives/base-strings";
-import type { TrendingContentItem } from "@/src/lib/trending/calculator";
-import type { UnifiedContentItem } from "./components/content-item.schema";
-import type { HomePageClientProps } from "./components/page-props.schema";
-import type { SortOption } from "./content-filter.schema";
+import { z } from 'zod';
+import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
+import type { TrendingContentItem } from '@/src/lib/trending/calculator';
+import type { UnifiedContentItem } from './components/content-item.schema';
+import type { HomePageClientProps } from './components/page-props.schema';
+import type { SortOption } from './content-filter.schema';
 
 /**
  * Config card component props (extracted from deleted ui-props.schema.ts)
@@ -19,7 +19,7 @@ import type { SortOption } from "./content-filter.schema";
  */
 export interface ConfigCardProps {
   item: UnifiedContentItem;
-  variant?: "default" | "detailed";
+  variant?: 'default' | 'detailed';
   showCategory?: boolean;
   showActions?: boolean;
   className?: string;
@@ -46,10 +46,7 @@ export interface ContentViewerProps {
 
 // EnhancedGuidesPage component props
 export interface EnhancedGuidesPageProps {
-  guides: Record<
-    string,
-    import("@/src/lib/utils/guide-helpers").GuideItemWithCategory[]
-  >;
+  guides: Record<string, import('@/src/lib/utils/guide-helpers').GuideItemWithCategory[]>;
 }
 
 // ErrorBoundary component props
@@ -65,7 +62,7 @@ export interface ErrorFallbackProps {
 
 // JobCard component props
 export interface JobCardProps {
-  job: import("@/src/lib/schemas/content/content-types").JobContent;
+  job: import('@/src/lib/schemas/content/content-types').JobContent;
 }
 
 // UnifiedSearch component props
@@ -101,7 +98,7 @@ export interface TrendingContentProps {
  * View tracker props
  */
 const viewTrackerPropsSchema = z.object({
-  category: z.enum(["agents", "mcp", "rules", "commands", "hooks", "guides"]),
+  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'guides']),
   slug: nonEmptyString.max(200),
 });
 
@@ -110,14 +107,12 @@ export type ViewTrackerProps = z.infer<typeof viewTrackerPropsSchema>;
 /**
  * Content list server props
  */
-export type ContentListServerProps<
-  T extends UnifiedContentItem = UnifiedContentItem,
-> = {
+export type ContentListServerProps<T extends UnifiedContentItem = UnifiedContentItem> = {
   title: string;
   description: string;
   icon: string;
   items: readonly T[] | T[];
-  type: "agents" | "mcp" | "rules" | "commands" | "hooks" | "guides";
+  type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides';
   searchPlaceholder?: string;
   badges?: Array<{
     icon?: string | React.ComponentType<{ className?: string }>;
@@ -128,12 +123,10 @@ export type ContentListServerProps<
 /**
  * Related configs props
  */
-export type RelatedConfigsProps<
-  T extends UnifiedContentItem = UnifiedContentItem,
-> = {
+export type RelatedConfigsProps<T extends UnifiedContentItem = UnifiedContentItem> = {
   configs: T[];
   title?: string;
-  type?: "rules" | "mcp" | "agents" | "commands" | "hooks" | "guides";
+  type?: 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks' | 'guides';
 };
 
 /**
@@ -150,11 +143,9 @@ export type FloatingSearchSidebarProps = {
 /**
  * Content search client props
  */
-export type ContentSearchClientProps<
-  T extends UnifiedContentItem = UnifiedContentItem,
-> = {
+export type ContentSearchClientProps<T extends UnifiedContentItem = UnifiedContentItem> = {
   items: readonly T[] | T[];
-  type: "agents" | "mcp" | "rules" | "commands" | "hooks" | "guides";
+  type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides';
   searchPlaceholder: string;
   title: string;
   icon: string;
@@ -163,12 +154,10 @@ export type ContentSearchClientProps<
 /**
  * Content sidebar props
  */
-export type ContentSidebarProps<
-  T extends UnifiedContentItem = UnifiedContentItem,
-> = {
+export type ContentSidebarProps<T extends UnifiedContentItem = UnifiedContentItem> = {
   item: T;
   relatedItems: T[];
-  type: import("./shared.schema").ContentCategory;
+  type: import('./shared.schema').ContentCategory;
   typeName: string;
 };
 
@@ -177,10 +166,10 @@ export type ContentSidebarProps<
  */
 export type SortDropdownProps = {
   sortBy: SortOption;
-  sortDirection: import("./content-filter.schema").SortDirection;
+  sortDirection: import('./content-filter.schema').SortDirection;
   onSortChange: (
     option: SortOption,
-    direction?: import("./content-filter.schema").SortDirection,
+    direction?: import('./content-filter.schema').SortDirection
   ) => void;
 };
 
@@ -189,7 +178,7 @@ export type SortDropdownProps = {
  */
 const codeHighlightPropsSchema = z.object({
   code: nonEmptyString,
-  language: nonEmptyString.default("typescript"),
+  language: nonEmptyString.default('typescript'),
   title: nonEmptyString.optional(),
   showCopy: z.boolean().default(true),
 });

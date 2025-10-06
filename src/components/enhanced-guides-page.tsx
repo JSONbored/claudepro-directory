@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useId, useMemo, useState } from "react";
-import { Badge } from "@/src/components/ui/badge";
-import { Button } from "@/src/components/ui/button";
-import { Card } from "@/src/components/ui/card";
-import { Input } from "@/src/components/ui/input";
+import Link from 'next/link';
+import { useId, useMemo, useState } from 'react';
+import { Badge } from '@/src/components/ui/badge';
+import { Button } from '@/src/components/ui/button';
+import { Card } from '@/src/components/ui/card';
+import { Input } from '@/src/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/src/components/ui/select";
-import { createSearchIndex, performLocalSearch } from "@/src/hooks/use-search";
+} from '@/src/components/ui/select';
+import { createSearchIndex, performLocalSearch } from '@/src/hooks/use-search';
 import {
   AlertTriangle,
   BookOpen,
@@ -24,60 +24,60 @@ import {
   Users,
   Workflow,
   Zap,
-} from "@/src/lib/icons";
-import type { EnhancedGuidesPageProps } from "@/src/lib/schemas/component.schema";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
-import type { GuideItemWithCategory } from "@/src/lib/utils/guide-helpers";
+} from '@/src/lib/icons';
+import type { EnhancedGuidesPageProps } from '@/src/lib/schemas/component.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+import type { GuideItemWithCategory } from '@/src/lib/utils/guide-helpers';
 
 const categoryInfo = {
-  "use-cases": {
-    label: "Use Cases",
+  'use-cases': {
+    label: 'Use Cases',
     icon: Zap,
-    description: "Practical guides for specific Claude AI use cases",
-    color: "text-blue-500",
+    description: 'Practical guides for specific Claude AI use cases',
+    color: 'text-blue-500',
   },
   tutorials: {
-    label: "Tutorials",
+    label: 'Tutorials',
     icon: BookOpen,
-    description: "Step-by-step tutorials for Claude features",
-    color: "text-green-500",
+    description: 'Step-by-step tutorials for Claude features',
+    color: 'text-green-500',
   },
   collections: {
-    label: "Collections",
+    label: 'Collections',
     icon: Users,
-    description: "Curated collections of tools and agents",
-    color: "text-purple-500",
+    description: 'Curated collections of tools and agents',
+    color: 'text-purple-500',
   },
   categories: {
-    label: "Category Guides",
+    label: 'Category Guides',
     icon: FileText,
-    description: "Comprehensive guides by category",
-    color: "text-orange-500",
+    description: 'Comprehensive guides by category',
+    color: 'text-orange-500',
   },
   workflows: {
-    label: "Workflows",
+    label: 'Workflows',
     icon: Workflow,
-    description: "Complete workflow guides and strategies",
-    color: "text-pink-500",
+    description: 'Complete workflow guides and strategies',
+    color: 'text-pink-500',
   },
   comparisons: {
-    label: "Comparisons",
+    label: 'Comparisons',
     icon: GitCompare,
-    description: "Compare Claude with other development tools",
-    color: "text-red-500",
+    description: 'Compare Claude with other development tools',
+    color: 'text-red-500',
   },
   troubleshooting: {
-    label: "Troubleshooting",
+    label: 'Troubleshooting',
     icon: AlertTriangle,
-    description: "Solutions for common Claude AI issues",
-    color: "text-yellow-500",
+    description: 'Solutions for common Claude AI issues',
+    color: 'text-yellow-500',
   },
 };
 
 export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<"title" | "category" | "date">("title");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'title' | 'category' | 'date'>('title');
 
   // Generate unique IDs for form controls
   const searchInputId = useId();
@@ -94,7 +94,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
   // Memoize totalGuides to prevent recalculation on every render
   const totalGuides = useMemo(
     () => Object.values(guides).reduce((acc, cat) => acc + cat.length, 0),
-    [guides],
+    [guides]
   );
 
   // Flatten guides for search, then re-group by category
@@ -103,7 +103,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
   // Create search index once
   const searchIndex = useMemo(
     () => createSearchIndex<GuideItemWithCategory>(allGuides),
-    [allGuides],
+    [allGuides]
   );
 
   // Filter and search guides - using consolidated search logic
@@ -112,28 +112,23 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
     const searchResults = performLocalSearch<GuideItemWithCategory>(
       searchIndex,
       searchQuery,
-      selectedCategory !== "all" ? { category: selectedCategory } : undefined,
+      selectedCategory !== 'all' ? { category: selectedCategory } : undefined
     );
 
     // Apply sorting
-    const sorted = [...searchResults].sort(
-      (a: GuideItemWithCategory, b: GuideItemWithCategory) => {
-        switch (sortBy) {
-          case "title":
-            return a.title.localeCompare(b.title);
-          case "category":
-            return a.category.localeCompare(b.category);
-          case "date":
-            if (!(a.dateUpdated && b.dateUpdated)) return 0;
-            return (
-              new Date(b.dateUpdated).getTime() -
-              new Date(a.dateUpdated).getTime()
-            );
-          default:
-            return 0;
-        }
-      },
-    );
+    const sorted = [...searchResults].sort((a: GuideItemWithCategory, b: GuideItemWithCategory) => {
+      switch (sortBy) {
+        case 'title':
+          return a.title.localeCompare(b.title);
+        case 'category':
+          return a.category.localeCompare(b.category);
+        case 'date':
+          if (!(a.dateUpdated && b.dateUpdated)) return 0;
+          return new Date(b.dateUpdated).getTime() - new Date(a.dateUpdated).getTime();
+        default:
+          return 0;
+      }
+    });
 
     // Re-group by category
     const result: Record<string, GuideItemWithCategory[]> = {};
@@ -150,7 +145,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
 
   const filteredTotalGuides = Object.values(filteredGuides).reduce(
     (acc, cat) => acc + cat.length,
-    0,
+    0
   );
 
   return (
@@ -164,21 +159,19 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
           <p className={`${UI_CLASSES.TEXT_XL} text-muted-foreground`}>
             Learn how to use Claude AI effectively with our comprehensive guides
           </p>
-          <div
-            className={`mt-4 ${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.ITEMS_CENTER}`}
-          >
+          <div className={`mt-4 ${UI_CLASSES.FLEX_WRAP_GAP_4} ${UI_CLASSES.ITEMS_CENTER}`}>
             <Badge variant="secondary">
               {filteredTotalGuides} of {totalGuides} guides
-              {searchQuery && " matching your search"}
+              {searchQuery && ' matching your search'}
             </Badge>
-            {(searchQuery || selectedCategory !== "all") && (
+            {(searchQuery || selectedCategory !== 'all') && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setSearchQuery("");
-                  setSelectedCategory("all");
-                  setSortBy("title");
+                  setSearchQuery('');
+                  setSelectedCategory('all');
+                  setSortBy('title');
                 }}
               >
                 Clear filters
@@ -199,9 +192,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
 
                 return (
                   <Card key={key} className={UI_CLASSES.P_4}>
-                    <div
-                      className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3`}
-                    >
+                    <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3`}>
                       <Icon className={`h-5 w-5 ${info.color}`} />
                       <div>
                         <p className={UI_CLASSES.FONT_SEMIBOLD}>{count}</p>
@@ -214,91 +205,73 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
             </div>
 
             {/* Guides by Category */}
-            {Object.entries(filteredGuides).map(
-              ([category, categoryGuides]) => {
-                if (categoryGuides.length === 0) return null;
+            {Object.entries(filteredGuides).map(([category, categoryGuides]) => {
+              if (categoryGuides.length === 0) return null;
 
-                const info =
-                  categoryInfo[category as keyof typeof categoryInfo];
-                if (!info) return null;
-                const Icon = info.icon;
+              const info = categoryInfo[category as keyof typeof categoryInfo];
+              if (!info) return null;
+              const Icon = info.icon;
 
-                return (
-                  <div key={category} className={UI_CLASSES.MB_12}>
-                    <div
-                      className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3 mb-4`}
-                    >
-                      <Icon className={`h-6 w-6 ${info.color}`} />
-                      <div>
-                        <h2 className={`text-2xl ${UI_CLASSES.FONT_SEMIBOLD}`}>
-                          {info.label}
-                        </h2>
-                        <p className="text-muted-foreground">
-                          {info.description}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className={UI_CLASSES.GRID_RESPONSIVE_2}>
-                      {categoryGuides.map((guide) => (
-                        <Link key={guide.slug} href={guide.slug}>
-                          <Card
-                            className={`${UI_CLASSES.P_6} h-full ${UI_CLASSES.HOVER_BG_ACCENT_10} ${UI_CLASSES.TRANSITION_COLORS}`}
-                          >
-                            <div className={`${UI_CLASSES.FLEX_COL} h-full`}>
-                              <h3
-                                className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_2} ${UI_CLASSES.LINE_CLAMP_2}`}
-                              >
-                                {guide.title}
-                              </h3>
-                              <p
-                                className={`${UI_CLASSES.TEXT_SM_MUTED} mb-4 ${UI_CLASSES.LINE_CLAMP_3} ${UI_CLASSES.FLEX_GROW}`}
-                              >
-                                {guide.description}
-                              </p>
-                              <div
-                                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mt-auto gap-2`}
-                              >
-                                <Badge
-                                  variant="outline"
-                                  className={UI_CLASSES.TEXT_XS}
-                                >
-                                  {info.label}
-                                </Badge>
-                                <div className="flex items-center gap-2">
-                                  {guide.dateUpdated && (
-                                    <span className={UI_CLASSES.TEXT_XS_MUTED}>
-                                      {new Date(
-                                        guide.dateUpdated,
-                                      ).toLocaleDateString()}
-                                    </span>
-                                  )}
-                                  {guide.viewCount !== undefined &&
-                                    guide.viewCount > 0 && (
-                                      <Badge
-                                        variant="secondary"
-                                        className="h-6 px-2 gap-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors font-medium"
-                                      >
-                                        <Eye
-                                          className="h-3 w-3"
-                                          aria-hidden="true"
-                                        />
-                                        <span className="text-xs">
-                                          {formatViewCount(guide.viewCount)}
-                                        </span>
-                                      </Badge>
-                                    )}
-                                </div>
-                              </div>
-                            </div>
-                          </Card>
-                        </Link>
-                      ))}
+              return (
+                <div key={category} className={UI_CLASSES.MB_12}>
+                  <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3 mb-4`}>
+                    <Icon className={`h-6 w-6 ${info.color}`} />
+                    <div>
+                      <h2 className={`text-2xl ${UI_CLASSES.FONT_SEMIBOLD}`}>{info.label}</h2>
+                      <p className="text-muted-foreground">{info.description}</p>
                     </div>
                   </div>
-                );
-              },
-            )}
+
+                  <div className={UI_CLASSES.GRID_RESPONSIVE_2}>
+                    {categoryGuides.map((guide) => (
+                      <Link key={guide.slug} href={guide.slug}>
+                        <Card
+                          className={`${UI_CLASSES.P_6} h-full ${UI_CLASSES.HOVER_BG_ACCENT_10} ${UI_CLASSES.TRANSITION_COLORS}`}
+                        >
+                          <div className={`${UI_CLASSES.FLEX_COL} h-full`}>
+                            <h3
+                              className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_2} ${UI_CLASSES.LINE_CLAMP_2}`}
+                            >
+                              {guide.title}
+                            </h3>
+                            <p
+                              className={`${UI_CLASSES.TEXT_SM_MUTED} mb-4 ${UI_CLASSES.LINE_CLAMP_3} ${UI_CLASSES.FLEX_GROW}`}
+                            >
+                              {guide.description}
+                            </p>
+                            <div
+                              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mt-auto gap-2`}
+                            >
+                              <Badge variant="outline" className={UI_CLASSES.TEXT_XS}>
+                                {info.label}
+                              </Badge>
+                              <div className="flex items-center gap-2">
+                                {guide.dateUpdated && (
+                                  <span className={UI_CLASSES.TEXT_XS_MUTED}>
+                                    {new Date(guide.dateUpdated).toLocaleDateString()}
+                                  </span>
+                                )}
+                                {guide.viewCount !== undefined && guide.viewCount > 0 && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="h-6 px-2 gap-1 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors font-medium"
+                                  >
+                                    <Eye className="h-3 w-3" aria-hidden="true" />
+                                    <span className="text-xs">
+                                      {formatViewCount(guide.viewCount)}
+                                    </span>
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* Persistent Search Sidebar - Takes 1/3 width */}
@@ -328,15 +301,10 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
 
                 {/* Category Filter */}
                 <div className={`${UI_CLASSES.SPACE_Y_2} mb-4`}>
-                  <span
-                    className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}
-                  >
+                  <span className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>
                     Filter by Category
                   </span>
-                  <Select
-                    value={selectedCategory}
-                    onValueChange={setSelectedCategory}
-                  >
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                     <SelectTrigger
                       className={UI_CLASSES.W_FULL}
                       id={categorySelectId}
@@ -357,16 +325,10 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
 
                 {/* Sort Options */}
                 <div className={`${UI_CLASSES.SPACE_Y_2} mb-4`}>
-                  <span
-                    className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}
-                  >
-                    Sort by
-                  </span>
+                  <span className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Sort by</span>
                   <Select
                     value={sortBy}
-                    onValueChange={(value: "title" | "category" | "date") =>
-                      setSortBy(value)
-                    }
+                    onValueChange={(value: 'title' | 'category' | 'date') => setSortBy(value)}
                   >
                     <SelectTrigger
                       className={UI_CLASSES.W_FULL}
@@ -385,37 +347,29 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
 
                 {/* Quick Filter Tags */}
                 <div className={UI_CLASSES.SPACE_Y_2}>
-                  <span
-                    className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}
-                  >
+                  <span className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>
                     Popular Tags
                   </span>
                   <div className={UI_CLASSES.FLEX_WRAP_GAP_1}>
-                    {[
-                      "automation",
-                      "development",
-                      "workflows",
-                      "beginner",
-                      "advanced",
-                    ].map((tag) => (
-                      <Badge
-                        key={tag}
-                        variant="outline"
-                        className={`text-xs cursor-pointer ${UI_CLASSES.HOVER_BG_ACCENT}`}
-                        onClick={() => setSearchQuery(tag)}
-                      >
-                        #{tag}
-                      </Badge>
-                    ))}
+                    {['automation', 'development', 'workflows', 'beginner', 'advanced'].map(
+                      (tag) => (
+                        <Badge
+                          key={tag}
+                          variant="outline"
+                          className={`text-xs cursor-pointer ${UI_CLASSES.HOVER_BG_ACCENT}`}
+                          onClick={() => setSearchQuery(tag)}
+                        >
+                          #{tag}
+                        </Badge>
+                      )
+                    )}
                   </div>
                 </div>
               </Card>
 
               {/* Categories */}
               <Card className={UI_CLASSES.P_4}>
-                <h3
-                  className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_3}`}
-                >
+                <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_3}`}>
                   Browse by Category
                 </h3>
                 <div className={UI_CLASSES.SPACE_Y_2}>
@@ -450,19 +404,15 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
 
               {/* Recent Guides */}
               <Card className={UI_CLASSES.P_4}>
-                <h3
-                  className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_3}`}
-                >
-                  Recent Guides
-                </h3>
+                <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} ${UI_CLASSES.MB_3}`}>Recent Guides</h3>
                 <div className={UI_CLASSES.SPACE_Y_2}>
                   {Object.values(guides)
                     .flat()
                     .filter((guide) => guide.dateUpdated)
                     .sort(
                       (a, b) =>
-                        new Date(b.dateUpdated || "").getTime() -
-                        new Date(a.dateUpdated || "").getTime(),
+                        new Date(b.dateUpdated || '').getTime() -
+                        new Date(a.dateUpdated || '').getTime()
                     )
                     .slice(0, 5)
                     .map((guide) => (
@@ -477,8 +427,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
                           {guide.title}
                         </div>
                         <div className={UI_CLASSES.TEXT_XS_MUTED}>
-                          {guide.dateUpdated &&
-                            new Date(guide.dateUpdated).toLocaleDateString()}
+                          {guide.dateUpdated && new Date(guide.dateUpdated).toLocaleDateString()}
                         </div>
                       </Link>
                     ))}
@@ -487,9 +436,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
 
               {/* Quick Actions */}
               <Card className={UI_CLASSES.P_4}>
-                <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} mb-3`}>
-                  Quick Actions
-                </h3>
+                <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} mb-3`}>Quick Actions</h3>
                 <div className={UI_CLASSES.SPACE_Y_2}>
                   <Link href="/" className={UI_CLASSES.LIST_ITEM_HOVER}>
                     Browse Directory
@@ -511,9 +458,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
           <p className="text-muted-foreground mb-6">
             Browse our complete directory or submit your own content
           </p>
-          <div
-            className={`${UI_CLASSES.FLEX} gap-4 ${UI_CLASSES.JUSTIFY_CENTER}`}
-          >
+          <div className={`${UI_CLASSES.FLEX} gap-4 ${UI_CLASSES.JUSTIFY_CENTER}`}>
             <Link href="/">
               <button
                 type="button"

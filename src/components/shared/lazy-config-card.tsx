@@ -1,12 +1,12 @@
-import dynamic from "next/dynamic";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
+import dynamic from 'next/dynamic';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Lazy-loaded ConfigCard component with skeleton loading state
  */
 export const LazyConfigCard = dynamic(
   () =>
-    import("../features/content/config-card").then((mod) => ({
+    import('../features/content/config-card').then((mod) => ({
       default: mod.ConfigCard,
     })),
   {
@@ -19,5 +19,5 @@ export const LazyConfigCard = dynamic(
         <div className="h-4 bg-card/70 rounded w-2/3" />
       </div>
     ),
-  },
+  }
 );

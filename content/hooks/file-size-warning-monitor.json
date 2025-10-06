@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-19",
-  "tags": [
-    "file-size",
-    "performance",
-    "notification",
-    "monitoring",
-    "optimization"
-  ],
+  "tags": ["file-size", "performance", "notification", "monitoring", "optimization"],
   "hookType": "PostToolUse",
   "features": [
     "Real-time file size monitoring during write/edit operations",

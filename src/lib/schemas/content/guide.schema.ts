@@ -5,14 +5,14 @@
  * Phase 2: Refactored using base-content.schema.ts with shape destructuring
  */
 
-import { z } from "zod";
-import { baseContentMetadataSchema } from "@/src/lib/schemas/content/base-content.schema";
-import { requiredTagArray } from "@/src/lib/schemas/primitives/base-arrays";
+import { z } from 'zod';
+import { baseContentMetadataSchema } from '@/src/lib/schemas/content/base-content.schema';
+import { requiredTagArray } from '@/src/lib/schemas/primitives/base-arrays';
 import {
   isoDateString,
   nonEmptyString,
   optionalUrlString,
-} from "@/src/lib/schemas/primitives/base-strings";
+} from '@/src/lib/schemas/primitives/base-strings';
 
 /**
  * Guide Content Schema
@@ -77,14 +77,14 @@ export const guideContentSchema = z.object({
 
   // Guide-specific required fields (category discriminator)
   category: z.enum([
-    "tutorials", // tutorial-template.mdx
-    "comparisons", // comparison-template.mdx
-    "troubleshooting", // troubleshooting-template.mdx
-    "use-cases", // use-case-template.mdx
-    "workflows", // workflow-template.mdx
-    "categories", // category-template.mdx
-    "collections", // collection-template.mdx
-    "guides", // General guide category
+    'tutorials', // tutorial-template.mdx
+    'comparisons', // comparison-template.mdx
+    'troubleshooting', // troubleshooting-template.mdx
+    'use-cases', // use-case-template.mdx
+    'workflows', // workflow-template.mdx
+    'categories', // category-template.mdx
+    'collections', // collection-template.mdx
+    'guides', // General guide category
   ]),
 
   // Override: title is required for guides (not optional like in base)
@@ -102,7 +102,7 @@ export const guideContentSchema = z.object({
   readingTime: z.string().optional(),
   difficulty: z
     .union([
-      z.enum(["beginner", "intermediate", "advanced", "expert"]),
+      z.enum(['beginner', 'intermediate', 'advanced', 'expert']),
       z.string(), // Some templates use dynamic difficulty strings
     ])
     .optional(),
@@ -117,9 +117,9 @@ export const guideContentSchema = z.object({
 
   // Override: source defaults to 'claudepro' for guides
   source: z
-    .enum(["community", "official", "verified", "claudepro"])
+    .enum(['community', 'official', 'verified', 'claudepro'])
     .optional()
-    .default("claudepro"),
+    .default('claudepro'),
 
   // Additional guide-specific URLs
   githubUrl: optionalUrlString,

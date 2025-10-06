@@ -9,17 +9,14 @@
  *   npm run optimize:titles --dry-run # Preview without changes
  */
 
-import { existsSync } from "fs";
-import fs from "fs/promises";
-import path from "path";
-import { logger } from "../src/lib/logger.js";
-import type { ContentCategory } from "../src/lib/schemas/shared.schema.js";
-import {
-  type ContentItem,
-  enhanceTitle,
-} from "../src/lib/seo/title-enhancer.js";
+import { existsSync } from 'fs';
+import fs from 'fs/promises';
+import path from 'path';
+import { logger } from '../src/lib/logger.js';
+import type { ContentCategory } from '../src/lib/schemas/shared.schema.js';
+import { type ContentItem, enhanceTitle } from '../src/lib/seo/title-enhancer.js';
 
-const DRY_RUN = process.argv.includes("--dry-run");
+const DRY_RUN = process.argv.includes('--dry-run');
 
 interface OptimizationStats {
   total: number;
@@ -31,46 +28,36 @@ interface OptimizationStats {
 /**
  * Update seoTitle in JSON file
  */
-async function updateJsonFile(
-  filePath: string,
-  seoTitle: string,
-): Promise<void> {
-  const content = await fs.readFile(filePath, "utf-8");
+async function updateJsonFile(filePath: string, seoTitle: string): Promise<void> {
+  const content = await fs.readFile(filePath, 'utf-8');
   const data = JSON.parse(content);
 
   // Add or update seoTitle field (insert after title if exists)
   if (!data.seoTitle) {
     // Parse and rebuild to insert seoTitle in correct position
-    const lines = content.split("\n");
+    const lines = content.split('\n');
     const titleIndex = lines.findIndex((line) => line.includes('"title":'));
 
     if (titleIndex !== -1) {
       lines.splice(titleIndex + 1, 0, `  "seoTitle": "${seoTitle}",`);
-      await fs.writeFile(filePath, lines.join("\n"), "utf-8");
+      await fs.writeFile(filePath, lines.join('\n'), 'utf-8');
     } else {
       // Fallback: just add it
       data.seoTitle = seoTitle;
-      await fs.writeFile(
-        filePath,
-        `${JSON.stringify(data, null, 2)}\n`,
-        "utf-8",
-      );
+      await fs.writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8');
     }
   } else {
     // Update existing seoTitle
     data.seoTitle = seoTitle;
-    await fs.writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, "utf-8");
+    await fs.writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8');
   }
 }
 
 /**
  * Update seoTitle in MDX frontmatter
  */
-async function updateMdxFile(
-  filePath: string,
-  seoTitle: string,
-): Promise<void> {
-  const content = await fs.readFile(filePath, "utf-8");
+async function updateMdxFile(filePath: string, seoTitle: string): Promise<void> {
+  const content = await fs.readFile(filePath, 'utf-8');
   const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
 
   if (!frontmatterMatch) {
@@ -78,33 +65,27 @@ async function updateMdxFile(
   }
 
   const frontmatter = frontmatterMatch[1];
-  const hasSeoTitle = frontmatter.includes("seoTitle:");
+  const hasSeoTitle = frontmatter.includes('seoTitle:');
 
   let newFrontmatter: string;
   if (hasSeoTitle) {
     // Update existing seoTitle
-    newFrontmatter = frontmatter.replace(
-      /seoTitle:\s*["'].*["']/,
-      `seoTitle: "${seoTitle}"`,
-    );
+    newFrontmatter = frontmatter.replace(/seoTitle:\s*["'].*["']/, `seoTitle: "${seoTitle}"`);
   } else {
     // Add seoTitle after title
-    const lines = frontmatter.split("\n");
-    const titleIndex = lines.findIndex((line) => line.startsWith("title:"));
+    const lines = frontmatter.split('\n');
+    const titleIndex = lines.findIndex((line) => line.startsWith('title:'));
     if (titleIndex !== -1) {
       lines.splice(titleIndex + 1, 0, `seoTitle: "${seoTitle}"`);
-      newFrontmatter = lines.join("\n");
+      newFrontmatter = lines.join('\n');
     } else {
       newFrontmatter = `${frontmatter}\nseoTitle: "${seoTitle}"`;
     }
   }
 
-  const newContent = content.replace(
-    /^---\n[\s\S]*?\n---/,
-    `---\n${newFrontmatter}\n---`,
-  );
+  const newContent = content.replace(/^---\n[\s\S]*?\n---/, `---\n${newFrontmatter}\n---`);
 
-  await fs.writeFile(filePath, newContent, "utf-8");
+  await fs.writeFile(filePath, newContent, 'utf-8');
 }
 
 /**
@@ -112,7 +93,7 @@ async function updateMdxFile(
  */
 async function optimizeJsonContent(
   category: ContentCategory,
-  contentDir: string,
+  contentDir: string
 ): Promise<OptimizationStats> {
   const stats: OptimizationStats = {
     total: 0,
@@ -128,14 +109,14 @@ async function optimizeJsonContent(
   }
 
   const files = await fs.readdir(categoryDir);
-  const jsonFiles = files.filter((f) => f.endsWith(".json"));
+  const jsonFiles = files.filter((f) => f.endsWith('.json'));
 
   for (const file of jsonFiles) {
     const filePath = path.join(categoryDir, file);
     stats.total++;
 
     try {
-      const content = await fs.readFile(filePath, "utf-8");
+      const content = await fs.readFile(filePath, 'utf-8');
       const data = JSON.parse(content) as ContentItem;
       data.category = category;
 
@@ -146,13 +127,11 @@ async function optimizeJsonContent(
           logger.info(`[DRY RUN] ${file}:`);
           logger.info(`  ${result.originalTitle} → ${result.enhancedTitle}`);
           logger.info(
-            `  Strategy: ${result.strategy}, Gain: +${result.gain} chars (${result.finalLength} total)`,
+            `  Strategy: ${result.strategy}, Gain: +${result.gain} chars (${result.finalLength} total)`
           );
         } else {
           await updateJsonFile(filePath, result.enhancedTitle);
-          logger.success(
-            `✅ ${file}: ${result.originalTitle} → ${result.enhancedTitle}`,
-          );
+          logger.success(`✅ ${file}: ${result.originalTitle} → ${result.enhancedTitle}`);
         }
         stats.enhanced++;
       } else {
@@ -161,7 +140,7 @@ async function optimizeJsonContent(
     } catch (error) {
       logger.error(
         `Failed to process ${file}:`,
-        error instanceof Error ? error : new Error(String(error)),
+        error instanceof Error ? error : new Error(String(error))
       );
       stats.failed++;
     }
@@ -180,10 +159,10 @@ async function optimizeGuides(contentDir: string): Promise<OptimizationStats> {
     skipped: 0,
     failed: 0,
   };
-  const guidesDir = path.join(contentDir, "guides");
+  const guidesDir = path.join(contentDir, 'guides');
 
   if (!existsSync(guidesDir)) {
-    logger.info("Skipping guides - directory not found");
+    logger.info('Skipping guides - directory not found');
     return stats;
   }
 
@@ -196,14 +175,14 @@ async function optimizeGuides(contentDir: string): Promise<OptimizationStats> {
     if (!stat.isDirectory()) continue;
 
     const files = await fs.readdir(categoryPath);
-    const mdxFiles = files.filter((f) => f.endsWith(".mdx"));
+    const mdxFiles = files.filter((f) => f.endsWith('.mdx'));
 
     for (const file of mdxFiles) {
       const filePath = path.join(categoryPath, file);
       stats.total++;
 
       try {
-        const content = await fs.readFile(filePath, "utf-8");
+        const content = await fs.readFile(filePath, 'utf-8');
         const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
 
         if (!frontmatterMatch) {
@@ -212,7 +191,7 @@ async function optimizeGuides(contentDir: string): Promise<OptimizationStats> {
         }
 
         const frontmatter: { title?: string; seoTitle?: string } = {};
-        const lines = frontmatterMatch[1].split("\n");
+        const lines = frontmatterMatch[1].split('\n');
 
         for (const line of lines) {
           const titleMatch = line.match(/^title:\s*["'](.+)["']/);
@@ -222,27 +201,25 @@ async function optimizeGuides(contentDir: string): Promise<OptimizationStats> {
         }
 
         const item: ContentItem = {
-          title: frontmatter.title || file.replace(".mdx", ""),
+          title: frontmatter.title || file.replace('.mdx', ''),
           seoTitle: frontmatter.seoTitle,
-          slug: file.replace(".mdx", ""),
+          slug: file.replace('.mdx', ''),
           tags: [], // Guides typically don't have tags in frontmatter
-          category: "guides",
+          category: 'guides',
         };
 
-        const result = enhanceTitle(item, "guides" as ContentCategory);
+        const result = enhanceTitle(item, 'guides' as ContentCategory);
 
         if (result.enhanced && result.enhancedTitle) {
           if (DRY_RUN) {
             logger.info(`[DRY RUN] ${file}:`);
             logger.info(`  ${result.originalTitle} → ${result.enhancedTitle}`);
             logger.info(
-              `  Strategy: ${result.strategy}, Gain: +${result.gain} chars (${result.finalLength} total)`,
+              `  Strategy: ${result.strategy}, Gain: +${result.gain} chars (${result.finalLength} total)`
             );
           } else {
             await updateMdxFile(filePath, result.enhancedTitle);
-            logger.success(
-              `✅ ${file}: ${result.originalTitle} → ${result.enhancedTitle}`,
-            );
+            logger.success(`✅ ${file}: ${result.originalTitle} → ${result.enhancedTitle}`);
           }
           stats.enhanced++;
         } else {
@@ -251,7 +228,7 @@ async function optimizeGuides(contentDir: string): Promise<OptimizationStats> {
       } catch (error) {
         logger.error(
           `Failed to process ${file}:`,
-          error instanceof Error ? error : new Error(String(error)),
+          error instanceof Error ? error : new Error(String(error))
         );
         stats.failed++;
       }
@@ -265,21 +242,21 @@ async function optimizeGuides(contentDir: string): Promise<OptimizationStats> {
  * Main optimization function
  */
 async function main(): Promise<void> {
-  const contentDir = path.join(process.cwd(), "content");
+  const contentDir = path.join(process.cwd(), 'content');
 
-  console.log("🎯 SEO Title Optimization\n");
+  console.log('🎯 SEO Title Optimization\n');
   if (DRY_RUN) {
-    console.log("🔍 DRY RUN MODE - No files will be modified\n");
+    console.log('🔍 DRY RUN MODE - No files will be modified\n');
   }
 
   const categories: ContentCategory[] = [
-    "agents",
-    "mcp",
-    "rules",
-    "commands",
-    "hooks",
-    "statuslines",
-    "collections",
+    'agents',
+    'mcp',
+    'rules',
+    'commands',
+    'hooks',
+    'statuslines',
+    'collections',
   ];
 
   const allStats: OptimizationStats = {
@@ -301,13 +278,13 @@ async function main(): Promise<void> {
 
     if (stats.total > 0) {
       console.log(
-        `   Total: ${stats.total} | Enhanced: ${stats.enhanced} | Skipped: ${stats.skipped} | Failed: ${stats.failed}`,
+        `   Total: ${stats.total} | Enhanced: ${stats.enhanced} | Skipped: ${stats.skipped} | Failed: ${stats.failed}`
       );
     }
   }
 
   // Optimize guides
-  console.log("\n📁 Processing guides...");
+  console.log('\n📁 Processing guides...');
   const guideStats = await optimizeGuides(contentDir);
   allStats.total += guideStats.total;
   allStats.enhanced += guideStats.enhanced;
@@ -316,26 +293,24 @@ async function main(): Promise<void> {
 
   if (guideStats.total > 0) {
     console.log(
-      `   Total: ${guideStats.total} | Enhanced: ${guideStats.enhanced} | Skipped: ${guideStats.skipped} | Failed: ${guideStats.failed}`,
+      `   Total: ${guideStats.total} | Enhanced: ${guideStats.enhanced} | Skipped: ${guideStats.skipped} | Failed: ${guideStats.failed}`
     );
   }
 
   // Final summary
-  console.log(`\n${"=".repeat(80)}`);
-  console.log("📊 OPTIMIZATION SUMMARY\n");
+  console.log(`\n${'='.repeat(80)}`);
+  console.log('📊 OPTIMIZATION SUMMARY\n');
   console.log(`Total files processed: ${allStats.total}`);
   console.log(
-    `✅ Enhanced: ${allStats.enhanced} (${((allStats.enhanced / allStats.total) * 100).toFixed(1)}%)`,
+    `✅ Enhanced: ${allStats.enhanced} (${((allStats.enhanced / allStats.total) * 100).toFixed(1)}%)`
   );
   console.log(`⏭️  Skipped: ${allStats.skipped} (already optimal)`);
   console.log(`❌ Failed: ${allStats.failed}`);
 
   if (DRY_RUN) {
-    console.log("\n💡 Run without --dry-run to apply changes");
+    console.log('\n💡 Run without --dry-run to apply changes');
   } else {
-    console.log(
-      "\n✨ Optimization complete! Run `npm run validate:titles` to verify.",
-    );
+    console.log('\n✨ Optimization complete! Run `npm run validate:titles` to verify.');
   }
 }
 

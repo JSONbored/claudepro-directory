@@ -5,14 +5,7 @@
   "description": "Comprehensive system for ensuring code quality, security, and compliance before production deployment. Includes automated code reviews, complexity monitoring, backup strategies, and production-grade rules for professional development teams.",
   "author": "JSONbored",
   "dateAdded": "2025-10-02",
-  "tags": [
-    "production",
-    "code-quality",
-    "security",
-    "compliance",
-    "deployment",
-    "best-practices"
-  ],
+  "tags": ["production", "code-quality", "security", "compliance", "deployment", "best-practices"],
   "source": "community",
   "category": "collections",
   "collectionType": "advanced-system",

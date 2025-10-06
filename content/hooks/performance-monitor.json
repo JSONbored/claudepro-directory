@@ -4,13 +4,7 @@
   "category": "hooks",
   "author": "JSONbored",
   "dateAdded": "2025-09-16",
-  "tags": [
-    "performance",
-    "monitoring",
-    "optimization",
-    "metrics",
-    "automation"
-  ],
+  "tags": ["performance", "monitoring", "optimization", "metrics", "automation"],
   "hookType": "Stop",
   "features": [
     "Application performance tracking",

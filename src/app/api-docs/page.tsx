@@ -20,8 +20,8 @@
  * @see {@link /public/openapi.json OpenAPI 3.1.0 Specification}
  */
 
-import type { Metadata } from "next";
-import { APP_CONFIG } from "@/src/lib/constants";
+import type { Metadata } from 'next';
+import { APP_CONFIG } from '@/src/lib/constants';
 
 /**
  * Page metadata for API documentation landing page
@@ -29,9 +29,9 @@ import { APP_CONFIG } from "@/src/lib/constants";
  * @type {Metadata}
  */
 export const metadata: Metadata = {
-  title: "Overview",
+  title: 'Overview',
   description:
-    "Claude Pro Directory REST API: Access 150+ open-source configurations via JSON endpoints. Includes agents, MCP servers, commands, hooks, search, and analytics with CORS.",
+    'Claude Pro Directory REST API: Access 150+ open-source configurations via JSON endpoints. Includes agents, MCP servers, commands, hooks, search, and analytics with CORS.',
 };
 
 /**
@@ -61,37 +61,30 @@ export default function APIDocsPage() {
       <h1>ClaudePro Directory API</h1>
 
       <p className="lead">
-        A comprehensive REST API for accessing Claude configurations including
-        agents, MCP servers, rules, commands, hooks, and statuslines. Browse,
-        search, and discover community-contributed configurations with full
-        TypeScript type safety.
+        A comprehensive REST API for accessing Claude configurations including agents, MCP servers,
+        rules, commands, hooks, and statuslines. Browse, search, and discover community-contributed
+        configurations with full TypeScript type safety.
       </p>
 
       <h2>Features</h2>
       <ul>
         <li>
-          <strong>Content Discovery:</strong> Browse and search Claude
-          configurations by category
+          <strong>Content Discovery:</strong> Browse and search Claude configurations by category
         </li>
         <li>
-          <strong>MCP Servers:</strong> Discover and integrate Model Context
-          Protocol servers
+          <strong>MCP Servers:</strong> Discover and integrate Model Context Protocol servers
         </li>
         <li>
-          <strong>Rules & Commands:</strong> Find expert-crafted rules and
-          automation commands
+          <strong>Rules & Commands:</strong> Find expert-crafted rules and automation commands
         </li>
         <li>
-          <strong>Trending Analytics:</strong> Track popular and trending
-          configurations
+          <strong>Trending Analytics:</strong> Track popular and trending configurations
         </li>
         <li>
-          <strong>Performance Optimized:</strong> Redis-backed caching with ISR
-          revalidation
+          <strong>Performance Optimized:</strong> Redis-backed caching with ISR revalidation
         </li>
         <li>
-          <strong>Type-Safe:</strong> Full TypeScript support with Zod
-          validation
+          <strong>Type-Safe:</strong> Full TypeScript support with Zod validation
         </li>
       </ul>
 
@@ -112,14 +105,13 @@ export default function APIDocsPage() {
 
       <h2>Authentication</h2>
       <p>
-        No authentication required for public endpoints. All endpoints are
-        publicly accessible with rate limiting applied.
+        No authentication required for public endpoints. All endpoints are publicly accessible with
+        rate limiting applied.
       </p>
 
       <h2>Rate Limiting</h2>
       <p>
-        Rate limits are enforced using Upstash Redis and Arcjet protection.
-        Default limits per IP:
+        Rate limits are enforced using Upstash Redis and Arcjet protection. Default limits per IP:
       </p>
       <ul>
         <li>
@@ -134,9 +126,7 @@ export default function APIDocsPage() {
       </ul>
 
       <h2>Response Format</h2>
-      <p>
-        All responses are returned in JSON format with the following structure:
-      </p>
+      <p>All responses are returned in JSON format with the following structure:</p>
       <pre>
         <code>
           {`{
@@ -187,9 +177,8 @@ console.log(data.items); // Array of agents`}
 
       <h2>Endpoint Documentation</h2>
       <p>
-        Browse the sidebar to explore detailed documentation for each endpoint,
-        including request parameters, response schemas, and code examples in
-        multiple languages.
+        Browse the sidebar to explore detailed documentation for each endpoint, including request
+        parameters, response schemas, and code examples in multiple languages.
       </p>
     </div>
   );

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { trackView } from "@/src/lib/actions/track-view";
-import type { ViewTrackerProps } from "@/src/lib/schemas/component.schema";
+import { useEffect } from 'react';
+import { trackView } from '@/src/lib/actions/track-view';
+import type { ViewTrackerProps } from '@/src/lib/schemas/component.schema';
 
 export function ViewTracker({ category, slug }: ViewTrackerProps) {
   useEffect(() => {

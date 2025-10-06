@@ -15,17 +15,14 @@
  * - Maximum lengths based on actual content analysis
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 
 /**
  * Non-empty string validator
  * Used for: Required text fields, names, titles, descriptions
  * Replaces: z.string().min(1) (111+ instances)
  */
-export const nonEmptyString = z
-  .string()
-  .min(1)
-  .describe("Required non-empty text field");
+export const nonEmptyString = z.string().min(1).describe('Required non-empty text field');
 
 /**
  * Short string validator (1-100 chars)
@@ -36,7 +33,7 @@ export const shortString = z
   .string()
   .min(1)
   .max(100)
-  .describe("Short text field for titles, names, and labels (1-100 chars)");
+  .describe('Short text field for titles, names, and labels (1-100 chars)');
 
 /**
  * Medium string validator (1-500 chars)
@@ -47,7 +44,7 @@ export const mediumString = z
   .string()
   .min(1)
   .max(500)
-  .describe("Medium text field for descriptions and summaries (1-500 chars)");
+  .describe('Medium text field for descriptions and summaries (1-500 chars)');
 
 /**
  * Long string validator (1-2000 chars)
@@ -58,9 +55,7 @@ export const longString = z
   .string()
   .min(1)
   .max(2000)
-  .describe(
-    "Long text field for detailed content and documentation (1-2000 chars)",
-  );
+  .describe('Long text field for detailed content and documentation (1-2000 chars)');
 
 /**
  * Extra long string validator (1-5000 chars)
@@ -71,9 +66,7 @@ export const extraLongString = z
   .string()
   .min(1)
   .max(5000)
-  .describe(
-    "Extra long text field for extended content and FAQs (1-5000 chars)",
-  );
+  .describe('Extra long text field for extended content and FAQs (1-5000 chars)');
 
 /**
  * URL string validator
@@ -81,19 +74,14 @@ export const extraLongString = z
  * Replaces: z.string().url() (61+ instances)
  * Common in: All content schemas, metadata, social sharing
  */
-export const urlString = z
-  .string()
-  .url()
-  .describe("Valid URL string for links and resources");
+export const urlString = z.string().url().describe('Valid URL string for links and resources');
 
 /**
  * ISO date string validator
  * Used for: Date fields (dateAdded, dateModified, lastUpdated, etc.)
  * Common in: All content schemas, timestamps, metadata
  */
-export const isoDateString = z
-  .string()
-  .describe("ISO date string for date fields");
+export const isoDateString = z.string().describe('ISO date string for date fields');
 
 /**
  * ISO datetime string validator (strict)
@@ -103,7 +91,7 @@ export const isoDateString = z
 export const isoDatetimeString = z
   .string()
   .datetime()
-  .describe("Strict ISO datetime string with time component");
+  .describe('Strict ISO datetime string with time component');
 
 /**
  * Slug string validator
@@ -113,15 +101,15 @@ export const isoDatetimeString = z
  */
 export const slugString = z
   .string()
-  .min(1, "Slug cannot be empty")
-  .max(100, "Slug too long (max 100 characters)")
+  .min(1, 'Slug cannot be empty')
+  .max(100, 'Slug too long (max 100 characters)')
   .regex(
     /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-    "Invalid slug: use lowercase letters, numbers, and single hyphens",
+    'Invalid slug: use lowercase letters, numbers, and single hyphens'
   )
   .transform((val) => val.toLowerCase())
   .describe(
-    "URL-safe slug identifier (lowercase alphanumeric with hyphens, no consecutive hyphens)",
+    'URL-safe slug identifier (lowercase alphanumeric with hyphens, no consecutive hyphens)'
   );
 
 /**
@@ -133,7 +121,7 @@ export const optionalUrlString = z
   .string()
   .url()
   .optional()
-  .describe("Optional URL field for links");
+  .describe('Optional URL field for links');
 
 /**
  * Code/command string validator (1-1000 chars)
@@ -144,7 +132,7 @@ export const codeString = z
   .string()
   .min(1)
   .max(1000)
-  .describe("Code snippet or command string (1-1000 chars)");
+  .describe('Code snippet or command string (1-1000 chars)');
 
 /**
  * Very long code/content string validator (1-10000 chars)
@@ -155,7 +143,7 @@ export const veryLongCodeString = z
   .string()
   .min(1)
   .max(10000)
-  .describe("Large code block or configuration (1-10000 chars)");
+  .describe('Large code block or configuration (1-10000 chars)');
 
 /**
  * Ultra long content string validator (1-50000 chars)
@@ -166,7 +154,7 @@ export const ultraLongString = z
   .string()
   .min(1)
   .max(50000)
-  .describe("Complete MDX content or full documentation (1-50000 chars)");
+  .describe('Complete MDX content or full documentation (1-50000 chars)');
 
 /**
  * Massive content string validator (1-1000000 chars / 1MB)
@@ -176,6 +164,4 @@ export const ultraLongString = z
 export const massiveString = z
   .string()
   .max(1000000)
-  .describe(
-    "Extremely large content block up to 1MB (hook scripts, massive data)",
-  );
+  .describe('Extremely large content block up to 1MB (hook scripts, massive data)');

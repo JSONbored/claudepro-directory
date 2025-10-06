@@ -1,10 +1,10 @@
-"use server";
+'use server';
 
-import { z } from "zod";
-import { rateLimitedAction } from "@/src/lib/actions/safe-action";
-import { statsRedis } from "@/src/lib/redis";
-import { nonEmptyString } from "@/src/lib/schemas/primitives/base-strings";
-import { contentCategorySchema } from "@/src/lib/schemas/shared.schema";
+import { z } from 'zod';
+import { rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { statsRedis } from '@/src/lib/redis';
+import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
+import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
 
 /**
  * Tracking parameters schema for view and copy events
@@ -12,10 +12,10 @@ import { contentCategorySchema } from "@/src/lib/schemas/shared.schema";
 const trackingParamsSchema = z.object({
   category: contentCategorySchema,
   slug: nonEmptyString
-    .max(200, "Content slug is too long")
+    .max(200, 'Content slug is too long')
     .regex(
       /^[a-zA-Z0-9-_/]+$/,
-      "Slug can only contain letters, numbers, hyphens, underscores, and forward slashes",
+      'Slug can only contain letters, numbers, hyphens, underscores, and forward slashes'
     )
     .transform((val) => val.toLowerCase().trim()),
 });
@@ -39,15 +39,15 @@ const trackingParamsSchema = z.object({
  */
 export const trackView = rateLimitedAction
   .metadata({
-    actionName: "trackView",
-    category: "analytics",
+    actionName: 'trackView',
+    category: 'analytics',
   })
   .schema(trackingParamsSchema)
   .action(async ({ parsedInput: { category, slug } }) => {
     if (!statsRedis.isEnabled()) {
       return {
         success: false,
-        message: "Stats tracking not enabled",
+        message: 'Stats tracking not enabled',
       };
     }
 
@@ -78,15 +78,15 @@ export const trackView = rateLimitedAction
  */
 export const trackCopy = rateLimitedAction
   .metadata({
-    actionName: "trackCopy",
-    category: "analytics",
+    actionName: 'trackCopy',
+    category: 'analytics',
   })
   .schema(trackingParamsSchema)
   .action(async ({ parsedInput: { category, slug } }) => {
     if (!statsRedis.isEnabled()) {
       return {
         success: false,
-        message: "Stats tracking not enabled",
+        message: 'Stats tracking not enabled',
       };
     }
 

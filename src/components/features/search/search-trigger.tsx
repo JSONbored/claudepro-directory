@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import { Button } from "@/src/components/ui/button";
-import { Search } from "@/src/lib/icons";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
+import { Button } from '@/src/components/ui/button';
+import { Search } from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface SearchTriggerProps {
   onClick?: () => void;
-  variant?: "outline" | "minimal" | "ghost" | "default";
-  size?: "sm" | "md" | "lg";
+  variant?: 'outline' | 'minimal' | 'ghost' | 'default';
+  size?: 'sm' | 'md' | 'lg';
   showShortcut?: boolean;
   className?: string;
 }
 
 export function SearchTrigger({
   onClick,
-  variant = "outline",
-  size = "md",
+  variant = 'outline',
+  size = 'md',
   showShortcut = true,
-  className = "",
+  className = '',
 }: SearchTriggerProps) {
   const sizeClasses = {
     sm: `h-8 ${UI_CLASSES.PX_3} ${UI_CLASSES.TEXT_XS}`,
@@ -25,7 +25,7 @@ export function SearchTrigger({
     lg: `h-12 ${UI_CLASSES.PX_6} text-base`,
   };
 
-  if (variant === "minimal") {
+  if (variant === 'minimal') {
     return (
       <button
         type="button"
@@ -40,18 +40,12 @@ export function SearchTrigger({
         `}
       >
         <Search className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
-        <span className={`${UI_CLASSES.FLEX_1} text-left text-sm`}>
-          Search content...
-        </span>
+        <span className={`${UI_CLASSES.FLEX_1} text-left text-sm`}>Search content...</span>
         {showShortcut && (
           <div
             className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.GAP_1} ${UI_CLASSES.TEXT_XS}`}
           >
-            <kbd
-              className={`px-1.5 py-0.5 ${UI_CLASSES.TEXT_XS} bg-muted border rounded`}
-            >
-              ⌘K
-            </kbd>
+            <kbd className={`px-1.5 py-0.5 ${UI_CLASSES.TEXT_XS} bg-muted border rounded`}>⌘K</kbd>
           </div>
         )}
       </button>
@@ -59,17 +53,11 @@ export function SearchTrigger({
   }
 
   return (
-    <Button
-      variant={variant}
-      onClick={onClick}
-      className={`${sizeClasses[size]} ${className}`}
-    >
+    <Button variant={variant} onClick={onClick} className={`${sizeClasses[size]} ${className}`}>
       <Search className="h-4 w-4 mr-2" />
       Search
-      {showShortcut && size !== "sm" && (
-        <div
-          className={`ml-2 ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.GAP_1}`}
-        >
+      {showShortcut && size !== 'sm' && (
+        <div className={`ml-2 ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.GAP_1}`}>
           <kbd
             className={`px-1.5 py-0.5 ${UI_CLASSES.TEXT_XS} bg-muted border rounded ${UI_CLASSES.HIDDEN} sm:${UI_CLASSES.INLINE_BLOCK}`}
           >

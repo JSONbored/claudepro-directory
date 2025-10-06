@@ -3,24 +3,23 @@
  * Implements sliding window rate limiting with Redis persistence
  */
 
-import { headers } from "next/headers";
-import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import { logger } from "@/src/lib/logger";
-import { redisClient } from "@/src/lib/redis";
-import { createRequestId } from "@/src/lib/schemas/branded-types.schema";
+import { headers } from 'next/headers';
+import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { logger } from '@/src/lib/logger';
+import { redisClient } from '@/src/lib/redis';
+import { createRequestId } from '@/src/lib/schemas/branded-types.schema';
 import {
   ipAddressSchema,
   type MiddlewareRateLimitConfig,
   middlewareRateLimitConfigSchema,
   requestPathSchema,
-} from "@/src/lib/schemas/middleware.schema";
-import { sanitizeApiError } from "@/src/lib/security/error-sanitizer";
+} from '@/src/lib/schemas/middleware.schema';
+import { sanitizeApiError } from '@/src/lib/security/error-sanitizer';
 
 // Use MiddlewareRateLimitConfig from middleware schema
 // Additional interface for extended functionality
-export interface ExtendedRateLimitConfig
-  extends Omit<MiddlewareRateLimitConfig, "windowMs"> {
+export interface ExtendedRateLimitConfig extends Omit<MiddlewareRateLimitConfig, 'windowMs'> {
   /** Window duration in seconds (converted from windowMs) */
   windowSeconds: number;
   /** Custom identifier function */
@@ -28,10 +27,7 @@ export interface ExtendedRateLimitConfig
   /** Skip rate limiting for certain conditions */
   skip?: (request: NextRequest) => boolean;
   /** Custom error response */
-  onLimitReached?: (
-    request: NextRequest,
-    limit: RateLimitInfo,
-  ) => Promise<Response>;
+  onLimitReached?: (request: NextRequest, limit: RateLimitInfo) => Promise<Response>;
 }
 
 /**
@@ -63,14 +59,14 @@ const rateLimitKeySchema = z.object({
     .string()
     .min(1)
     .max(50)
-    .regex(/^[a-z_]+$/, "Invalid prefix format"),
-  clientIP: ipAddressSchema.or(z.literal("unknown")),
+    .regex(/^[a-z_]+$/, 'Invalid prefix format'),
+  clientIP: ipAddressSchema.or(z.literal('unknown')),
   pathname: requestPathSchema,
   userAgentHash: z
     .string()
     .max(32)
-    .regex(/^[A-Za-z0-9+/=]+$/, "Invalid base64 format")
-    .or(z.literal("no-ua")),
+    .regex(/^[A-Za-z0-9+/=]+$/, 'Invalid base64 format')
+    .or(z.literal('no-ua')),
 });
 
 export type RateLimitInfo = z.infer<typeof rateLimitInfoSchema>;
@@ -137,9 +133,7 @@ const RATE_LIMIT_CONFIGS = {
 /**
  * Convert rate limit config from ms to seconds for internal use
  */
-function configToExtended(
-  config: MiddlewareRateLimitConfig,
-): ExtendedRateLimitConfig {
+function configToExtended(config: MiddlewareRateLimitConfig): ExtendedRateLimitConfig {
   return {
     ...config,
     windowSeconds: Math.floor(config.windowMs / 1000),
@@ -149,10 +143,7 @@ function configToExtended(
 /**
  * Generate rate limit key for Redis storage with validation
  */
-async function generateKey(
-  request: NextRequest,
-  prefix: string = "rate_limit",
-): Promise<string> {
+async function generateKey(request: NextRequest, prefix: string = 'rate_limit'): Promise<string> {
   // Priority order for client identification:
   // 1. CF-Connecting-IP (Cloudflare)
   // 2. X-Forwarded-For (proxy)
@@ -161,12 +152,12 @@ async function generateKey(
 
   const headersList = await headers();
   const rawClientIP =
-    headersList.get("cf-connecting-ip") ||
-    headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    headersList.get("x-real-ip") ||
-    "unknown";
+    headersList.get('cf-connecting-ip') ||
+    headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    headersList.get('x-real-ip') ||
+    'unknown';
 
-  const rawUserAgent = headersList.get("user-agent") || "";
+  const rawUserAgent = headersList.get('user-agent') || '';
   const rawPathname = new URL(request.url).pathname;
 
   // Validate all components
@@ -175,8 +166,8 @@ async function generateKey(
     clientIP: rawClientIP,
     pathname: rawPathname,
     userAgentHash: rawUserAgent
-      ? Buffer.from(rawUserAgent).toString("base64").slice(0, 16)
-      : "no-ua",
+      ? Buffer.from(rawUserAgent).toString('base64').slice(0, 16)
+      : 'no-ua',
   });
 
   return `${keyComponents.prefix}:${keyComponents.clientIP}:${keyComponents.pathname}:${keyComponents.userAgentHash}`;
@@ -203,20 +194,15 @@ export class RateLimiter {
     } as Required<ExtendedRateLimitConfig>;
   }
 
-  private async defaultErrorResponse(
-    request: NextRequest,
-    info: RateLimitInfo,
-  ): Promise<Response> {
+  private async defaultErrorResponse(request: NextRequest, info: RateLimitInfo): Promise<Response> {
     const headersList = await headers();
     const clientIP =
-      headersList.get("cf-connecting-ip") ||
-      headersList.get("x-forwarded-for") ||
-      "unknown";
+      headersList.get('cf-connecting-ip') || headersList.get('x-forwarded-for') || 'unknown';
 
-    logger.warn("Rate limit exceeded", {
+    logger.warn('Rate limit exceeded', {
       ip: clientIP,
       path: new URL(request.url).pathname,
-      userAgent: headersList.get("user-agent") || "",
+      userAgent: headersList.get('user-agent') || '',
       limit: info.limit,
       remaining: info.remaining,
       resetTime: info.resetTime,
@@ -224,7 +210,7 @@ export class RateLimiter {
 
     return NextResponse.json(
       {
-        error: "Rate limit exceeded",
+        error: 'Rate limit exceeded',
         message: `Too many requests. Limit: ${info.limit} requests per ${this.config.windowSeconds} seconds`,
         retryAfter: info.retryAfter,
         resetTime: info.resetTime,
@@ -233,13 +219,13 @@ export class RateLimiter {
       {
         status: 429,
         headers: {
-          "X-RateLimit-Limit": String(info.limit),
-          "X-RateLimit-Remaining": String(info.remaining),
-          "X-RateLimit-Reset": String(info.resetTime),
-          "Retry-After": String(info.retryAfter),
-          "Content-Type": "application/json",
+          'X-RateLimit-Limit': String(info.limit),
+          'X-RateLimit-Remaining': String(info.remaining),
+          'X-RateLimit-Reset': String(info.resetTime),
+          'Retry-After': String(info.retryAfter),
+          'Content-Type': 'application/json',
         },
-      },
+      }
     );
   }
 
@@ -265,15 +251,10 @@ export class RateLimiter {
 
     try {
       // If Redis is not available, allow requests but log warning
-      if (
-        !(
-          redisClient.getStatus().isConnected ||
-          redisClient.getStatus().isFallback
-        )
-      ) {
-        logger.warn("Redis not available for rate limiting", {
+      if (!(redisClient.getStatus().isConnected || redisClient.getStatus().isFallback)) {
+        logger.warn('Redis not available for rate limiting', {
           path: new URL(request.url).pathname,
-          fallback: "allowing request",
+          fallback: 'allowing request',
         });
 
         const fallbackResult = {
@@ -304,7 +285,7 @@ export class RateLimiter {
           const results = await pipeline.exec();
 
           if (!results || results.length < 3) {
-            throw new Error("Redis pipeline failed");
+            throw new Error('Redis pipeline failed');
           }
 
           // Get the count from zcard result (third command)
@@ -312,7 +293,7 @@ export class RateLimiter {
           return count || 0;
         },
         () => 0, // Fallback: allow request on failure
-        "rate_limit_check",
+        'rate_limit_check'
       );
       const remaining = Math.max(0, this.config.maxRequests - requestCount);
       const resetTime = now + this.config.windowSeconds * 1000;
@@ -328,7 +309,7 @@ export class RateLimiter {
           () => {
             // Fallback: no-op
           },
-          "rate_limit_cleanup",
+          'rate_limit_cleanup'
         );
       }
 
@@ -343,17 +324,16 @@ export class RateLimiter {
     } catch (error: unknown) {
       // Sanitize error to prevent information leakage
       const sanitizedError = sanitizeApiError(error, createRequestId(), {
-        component: "rate-limiter",
-        operation: "check_limit",
-        key: "redacted",
+        component: 'rate-limiter',
+        operation: 'check_limit',
+        key: 'redacted',
       });
 
-      const normalizedError =
-        error instanceof Error ? error : new Error(String(error));
-      logger.error("Rate limiter error", normalizedError, {
+      const normalizedError = error instanceof Error ? error : new Error(String(error));
+      logger.error('Rate limiter error', normalizedError, {
         sanitizedMessage: sanitizedError.message,
         path: new URL(request.url).pathname,
-        fallback: "allowing request",
+        fallback: 'allowing request',
       });
 
       // On error, allow the request but log the issue
@@ -379,8 +359,7 @@ export class RateLimiter {
         limit: result.limit,
         remaining: result.remaining,
         resetTime: result.resetTime,
-        retryAfter:
-          result.retryAfter || Math.ceil(this.config.windowSeconds / 2),
+        retryAfter: result.retryAfter || Math.ceil(this.config.windowSeconds / 2),
       });
 
       return this.config.onLimitReached(request, info);
@@ -433,9 +412,9 @@ export async function withRateLimit<T extends unknown[]>(
     headers: new Headers(response.headers),
   });
 
-  newResponse.headers.set("X-RateLimit-Limit", String(result.limit));
-  newResponse.headers.set("X-RateLimit-Remaining", String(result.remaining));
-  newResponse.headers.set("X-RateLimit-Reset", String(result.resetTime));
+  newResponse.headers.set('X-RateLimit-Limit', String(result.limit));
+  newResponse.headers.set('X-RateLimit-Remaining', String(result.remaining));
+  newResponse.headers.set('X-RateLimit-Reset', String(result.resetTime));
 
   return newResponse;
 }

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * Search Hook with Performance Optimizations (SHA-2085)
@@ -25,33 +25,28 @@
  * @see {@link useLocalSearch} - Lightweight alternative without Redis caching
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  type SearchableItem,
-  type SearchFilters,
-  searchCache,
-} from "@/src/lib/cache/search-cache";
-import { logger } from "@/src/lib/logger";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { type SearchableItem, type SearchFilters, searchCache } from '@/src/lib/cache/search-cache';
+import { logger } from '@/src/lib/logger';
 import type {
   FilterState,
   SearchOptions,
   UseSearchProps,
-} from "@/src/lib/schemas/component.schema";
-import type { ContentItem } from "@/src/lib/schemas/content/content-item-union.schema";
-import { getDisplayTitle } from "@/src/lib/utils";
+} from '@/src/lib/schemas/component.schema';
+import type { ContentItem } from '@/src/lib/schemas/content/content-item-union.schema';
+import { getDisplayTitle } from '@/src/lib/utils';
 import {
   hasActiveFilters,
   useCombinedSearchState,
   useFilterOptions,
-} from "./use-search-primitives";
+} from './use-search-primitives';
 
 // Convert ContentItem to SearchableItem for compatibility
 function convertToSearchableItem(item: ContentItem): SearchableItem {
   return {
     id: item.slug, // Use slug as id since SearchableItem requires id
     title: getDisplayTitle(item),
-    name:
-      (item as typeof item & { name?: string }).name || getDisplayTitle(item), // Ensure name is always a string
+    name: (item as typeof item & { name?: string }).name || getDisplayTitle(item), // Ensure name is always a string
     description: item.description,
     tags: [...(item.tags || [])], // Convert readonly array to mutable array
     category: item.category,
@@ -66,7 +61,7 @@ function convertFilters(filters: FilterState): SearchFilters {
     categories: filters.category ? [filters.category] : [],
     tags: filters.tags || [],
     authors: filters.author ? [filters.author] : [],
-    sort: filters.sort as "trending" | "newest" | "alphabetical",
+    sort: filters.sort as 'trending' | 'newest' | 'alphabetical',
     popularity: filters.popularity || [0, 100],
   };
 }
@@ -76,7 +71,7 @@ async function performCachedSearch(
   data: ContentItem[],
   query: string,
   filters: FilterState,
-  options: SearchOptions = {},
+  options: SearchOptions = {}
 ): Promise<ContentItem[]> {
   // CRITICAL: Early return BEFORE cache lookup when no search/filters active
   // This prevents returning stale cached results when user isn't actually searching
@@ -89,22 +84,17 @@ async function performCachedSearch(
   const searchFilters = convertFilters(filters);
 
   // Use cached search
-  const results = await searchCache.search(
-    searchableData,
-    query,
-    searchFilters,
-    {
-      threshold: options.threshold || 0.3,
-      includeScore: options.includeScore ?? true,
-      keys: [
-        { name: "name", weight: 2 },
-        { name: "description", weight: 1.5 },
-        { name: "category", weight: 1 },
-        { name: "author", weight: 0.8 },
-        { name: "tags", weight: 0.6 },
-      ],
-    },
-  );
+  const results = await searchCache.search(searchableData, query, searchFilters, {
+    threshold: options.threshold || 0.3,
+    includeScore: options.includeScore ?? true,
+    keys: [
+      { name: 'name', weight: 2 },
+      { name: 'description', weight: 1.5 },
+      { name: 'category', weight: 1 },
+      { name: 'author', weight: 0.8 },
+      { name: 'tags', weight: 0.6 },
+    ],
+  });
 
   // Convert back to ContentItem format
   // PERFORMANCE: Use data.find() directly instead of [...data].find()
@@ -117,9 +107,9 @@ async function performCachedSearch(
       original ||
       ({
         ...item,
-        author: "",
+        author: '',
         dateAdded: new Date().toISOString(),
-        content: "",
+        content: '',
         tags: item.tags || [],
       } as unknown as ContentItem)
     );
@@ -131,19 +121,19 @@ async function performCachedSearch(
 // Date threshold helper for future date filtering features
 function getDateThreshold(now: Date, dateRange: string): Date {
   switch (dateRange) {
-    case "today":
+    case 'today':
       return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    case "week": {
+    case 'week': {
       const weekAgo = new Date(now);
       weekAgo.setDate(now.getDate() - 7);
       return weekAgo;
     }
-    case "month": {
+    case 'month': {
       const monthAgo = new Date(now);
       monthAgo.setMonth(now.getMonth() - 1);
       return monthAgo;
     }
-    case "year": {
+    case 'year': {
       const yearAgo = new Date(now);
       yearAgo.setFullYear(now.getFullYear() - 1);
       return yearAgo;
@@ -177,13 +167,13 @@ export function createSearchIndex<
   return [...items].map((item) => ({
     item,
     searchText: [
-      item.title || item.name || "",
-      item.description || "",
+      item.title || item.name || '',
+      item.description || '',
       ...(item.tags || []),
-      item.category || "",
-      item.author || "",
+      item.category || '',
+      item.author || '',
     ]
-      .join(" ")
+      .join(' ')
       .toLowerCase(),
     tagsSet: new Set(item.tags || []),
   }));
@@ -208,24 +198,21 @@ export function performLocalSearch<
 >(
   searchIndex: Array<{ item: T; searchText: string; tagsSet: Set<string> }>,
   query: string,
-  filters?: Partial<FilterState>,
+  filters?: Partial<FilterState>
 ): T[] {
   return searchIndex
     .filter(({ item, searchText, tagsSet }) => {
       // Text search
-      const matchesQuery =
-        !query.trim() || searchText.includes(query.toLowerCase());
+      const matchesQuery = !query.trim() || searchText.includes(query.toLowerCase());
 
       // Category filter
-      const matchesCategory =
-        !filters?.category || item.category === filters.category;
+      const matchesCategory = !filters?.category || item.category === filters.category;
 
       // Author filter
       const matchesAuthor = !filters?.author || item.author === filters.author;
 
       // Tags filter - using Set for O(1) lookups
-      const matchesTags =
-        !filters?.tags?.length || filters.tags.every((tag) => tagsSet.has(tag));
+      const matchesTags = !filters?.tags?.length || filters.tags.every((tag) => tagsSet.has(tag));
 
       return matchesQuery && matchesCategory && matchesAuthor && matchesTags;
     })
@@ -251,14 +238,8 @@ export function useLocalSearch<
   },
 >(items: readonly T[] | T[]) {
   // Use primitives for state management
-  const {
-    query,
-    filters,
-    handleSearch,
-    handleFiltersChange,
-    clearSearch,
-    isSearching,
-  } = useCombinedSearchState("trending");
+  const { query, filters, handleSearch, handleFiltersChange, clearSearch, isSearching } =
+    useCombinedSearchState('trending');
 
   // Create search index once
   const searchIndex = useMemo(() => createSearchIndex(items), [items]);
@@ -287,20 +268,15 @@ export function useSearch({ data, searchOptions }: UseSearchProps) {
   // PERFORMANCE: Create stable reference for data array to prevent unnecessary re-renders
   const stableData = useMemo(() => data as ContentItem[], [data]);
 
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<FilterState>({
-    sort: "trending",
+    sort: 'trending',
   });
   // Initialize with full dataset - will be updated by useEffect if needed
-  const [searchResults, setSearchResults] = useState<ContentItem[]>(
-    () => stableData,
-  );
+  const [searchResults, setSearchResults] = useState<ContentItem[]>(() => stableData);
 
   // Memoize search options to prevent unnecessary re-renders
-  const memoizedSearchOptions = useMemo(
-    () => searchOptions || {},
-    [searchOptions],
-  );
+  const memoizedSearchOptions = useMemo(() => searchOptions || {}, [searchOptions]);
 
   // Compute filter options using primitive
   const filterOptions = useFilterOptions(stableData);
@@ -319,14 +295,11 @@ export function useSearch({ data, searchOptions }: UseSearchProps) {
           stableData,
           searchQuery,
           filters,
-          memoizedSearchOptions,
+          memoizedSearchOptions
         );
         setSearchResults(results);
       } catch (error) {
-        logger.error(
-          "Search failed, falling back to original data",
-          error as Error,
-        );
+        logger.error('Search failed, falling back to original data', error as Error);
         setSearchResults(stableData);
       }
     };
@@ -337,15 +310,12 @@ export function useSearch({ data, searchOptions }: UseSearchProps) {
   }, [stableData, searchQuery, filters, memoizedSearchOptions]);
 
   // Stable callbacks that don't cause re-renders
-  const handleSearch = useCallback(
-    (query: string, newFilters?: FilterState) => {
-      setSearchQuery(query);
-      if (newFilters) {
-        setFilters(newFilters);
-      }
-    },
-    [],
-  );
+  const handleSearch = useCallback((query: string, newFilters?: FilterState) => {
+    setSearchQuery(query);
+    if (newFilters) {
+      setFilters(newFilters);
+    }
+  }, []);
 
   const handleFiltersChange = useCallback((newFilters: FilterState) => {
     setFilters(newFilters);

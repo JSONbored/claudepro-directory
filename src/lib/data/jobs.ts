@@ -1,4 +1,4 @@
-import type { JobContent } from "@/src/lib/schemas/content/content-types";
+import type { JobContent } from '@/src/lib/schemas/content/content-types';
 
 // Use Zod schema type instead of interface
 export type Job = JobContent;

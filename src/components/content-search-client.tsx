@@ -1,33 +1,29 @@
-"use client";
+'use client';
 
-import dynamic from "next/dynamic";
-import { useCallback, useState } from "react";
-import { ConfigCard } from "@/src/components/features/content/config-card";
-import { ErrorBoundary } from "@/src/components/shared/error-boundary";
-import { InfiniteScrollContainer } from "@/src/components/shared/infinite-scroll-container";
-import { useLocalSearch } from "@/src/hooks/use-search";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
+import dynamic from 'next/dynamic';
+import { useCallback, useState } from 'react';
+import { ConfigCard } from '@/src/components/features/content/config-card';
+import { ErrorBoundary } from '@/src/components/shared/error-boundary';
+import { InfiniteScrollContainer } from '@/src/components/shared/infinite-scroll-container';
+import { useLocalSearch } from '@/src/hooks/use-search';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 const UnifiedSearch = dynamic(
   () =>
-    import("@/src/components/features/search/unified-search").then((mod) => ({
+    import('@/src/components/features/search/unified-search').then((mod) => ({
       default: mod.UnifiedSearch,
     })),
   {
     ssr: false,
-    loading: () => (
-      <div
-        className={`h-14 bg-muted/50 ${UI_CLASSES.ROUNDED_LG} animate-pulse`}
-      />
-    ),
-  },
+    loading: () => <div className={`h-14 bg-muted/50 ${UI_CLASSES.ROUNDED_LG} animate-pulse`} />,
+  }
 );
 
-import { getIconByName } from "@/src/lib/icons";
+import { getIconByName } from '@/src/lib/icons';
 import type {
   ContentSearchClientProps,
   UnifiedContentItem,
-} from "@/src/lib/schemas/component.schema";
+} from '@/src/lib/schemas/component.schema';
 
 export function ContentSearchClient<T extends UnifiedContentItem>({
   items,
@@ -40,13 +36,7 @@ export function ContentSearchClient<T extends UnifiedContentItem>({
   const pageSize = 20;
 
   // Use consolidated search hook
-  const {
-    filters,
-    searchResults,
-    filterOptions,
-    handleSearch,
-    handleFiltersChange,
-  } =
+  const { filters, searchResults, filterOptions, handleSearch, handleFiltersChange } =
     // biome-ignore lint/suspicious/noExplicitAny: Generic constraint too complex for UnifiedContentItem union
     useLocalSearch(items as any);
 
@@ -115,9 +105,7 @@ export function ContentSearchClient<T extends UnifiedContentItem>({
               />
             );
           })()}
-          <h2 className="text-lg font-semibold mb-2">
-            No {title.toLowerCase()} found
-          </h2>
+          <h2 className="text-lg font-semibold mb-2">No {title.toLowerCase()} found</h2>
           <p className="text-muted-foreground mb-6">
             Try adjusting your search criteria or filters.
           </p>

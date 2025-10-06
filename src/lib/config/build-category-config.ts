@@ -15,36 +15,24 @@
  * @see scripts/generate-static-apis.ts - Uses this for API generation
  */
 
-import type { z } from "zod";
-import {
-  type AgentContent,
-  agentContentSchema,
-} from "@/src/lib/schemas/content/agent.schema";
+import type { z } from 'zod';
+import { type AgentContent, agentContentSchema } from '@/src/lib/schemas/content/agent.schema';
 import {
   type CollectionContent,
   collectionContentSchema,
-} from "@/src/lib/schemas/content/collection.schema";
+} from '@/src/lib/schemas/content/collection.schema';
 import {
   type CommandContent,
   commandContentSchema,
-} from "@/src/lib/schemas/content/command.schema";
-import {
-  type HookContent,
-  hookContentSchema,
-} from "@/src/lib/schemas/content/hook.schema";
-import {
-  type McpContent,
-  mcpContentSchema,
-} from "@/src/lib/schemas/content/mcp.schema";
-import {
-  type RuleContent,
-  ruleContentSchema,
-} from "@/src/lib/schemas/content/rule.schema";
+} from '@/src/lib/schemas/content/command.schema';
+import { type HookContent, hookContentSchema } from '@/src/lib/schemas/content/hook.schema';
+import { type McpContent, mcpContentSchema } from '@/src/lib/schemas/content/mcp.schema';
+import { type RuleContent, ruleContentSchema } from '@/src/lib/schemas/content/rule.schema';
 import {
   type StatuslineContent,
   statuslineContentSchema,
-} from "@/src/lib/schemas/content/statusline.schema";
-import type { ContentCategory } from "@/src/lib/schemas/shared.schema";
+} from '@/src/lib/schemas/content/statusline.schema';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 
 /**
  * Content type discriminated union
@@ -115,21 +103,21 @@ export interface BuildCategoryConfig<T extends ContentType = ContentType> {
  */
 export const BUILD_CATEGORY_CONFIGS = {
   agents: {
-    id: "agents",
-    name: "AI Agents",
+    id: 'agents',
+    name: 'AI Agents',
     schema: agentContentSchema,
-    typeName: "AgentContent",
+    typeName: 'AgentContent',
     generateFullContent: true,
     metadataFields: [
-      "slug",
-      "title",
-      "seoTitle",
-      "description",
-      "author",
-      "tags",
-      "category",
-      "dateAdded",
-      "source",
+      'slug',
+      'title',
+      'seoTitle',
+      'description',
+      'author',
+      'tags',
+      'category',
+      'dateAdded',
+      'source',
     ] as const,
     buildConfig: {
       batchSize: 10,
@@ -144,21 +132,21 @@ export const BUILD_CATEGORY_CONFIGS = {
   },
 
   mcp: {
-    id: "mcp",
-    name: "MCP Servers",
+    id: 'mcp',
+    name: 'MCP Servers',
     schema: mcpContentSchema,
-    typeName: "McpContent",
+    typeName: 'McpContent',
     generateFullContent: true,
     metadataFields: [
-      "slug",
-      "title",
-      "seoTitle",
-      "description",
-      "author",
-      "tags",
-      "category",
-      "dateAdded",
-      "source",
+      'slug',
+      'title',
+      'seoTitle',
+      'description',
+      'author',
+      'tags',
+      'category',
+      'dateAdded',
+      'source',
     ] as const,
     buildConfig: {
       batchSize: 10,
@@ -173,21 +161,21 @@ export const BUILD_CATEGORY_CONFIGS = {
   },
 
   rules: {
-    id: "rules",
-    name: "Rules",
+    id: 'rules',
+    name: 'Rules',
     schema: ruleContentSchema,
-    typeName: "RuleContent",
+    typeName: 'RuleContent',
     generateFullContent: true,
     metadataFields: [
-      "slug",
-      "title",
-      "seoTitle",
-      "description",
-      "author",
-      "tags",
-      "category",
-      "dateAdded",
-      "source",
+      'slug',
+      'title',
+      'seoTitle',
+      'description',
+      'author',
+      'tags',
+      'category',
+      'dateAdded',
+      'source',
     ] as const,
     buildConfig: {
       batchSize: 10,
@@ -202,21 +190,21 @@ export const BUILD_CATEGORY_CONFIGS = {
   },
 
   commands: {
-    id: "commands",
-    name: "Commands",
+    id: 'commands',
+    name: 'Commands',
     schema: commandContentSchema,
-    typeName: "CommandContent",
+    typeName: 'CommandContent',
     generateFullContent: true,
     metadataFields: [
-      "slug",
-      "title",
-      "seoTitle",
-      "description",
-      "author",
-      "tags",
-      "category",
-      "dateAdded",
-      "source",
+      'slug',
+      'title',
+      'seoTitle',
+      'description',
+      'author',
+      'tags',
+      'category',
+      'dateAdded',
+      'source',
     ] as const,
     buildConfig: {
       batchSize: 10,
@@ -231,21 +219,21 @@ export const BUILD_CATEGORY_CONFIGS = {
   },
 
   hooks: {
-    id: "hooks",
-    name: "Hooks",
+    id: 'hooks',
+    name: 'Hooks',
     schema: hookContentSchema,
-    typeName: "HookContent",
+    typeName: 'HookContent',
     generateFullContent: true,
     metadataFields: [
-      "slug",
-      "title",
-      "seoTitle",
-      "description",
-      "author",
-      "tags",
-      "category",
-      "dateAdded",
-      "source",
+      'slug',
+      'title',
+      'seoTitle',
+      'description',
+      'author',
+      'tags',
+      'category',
+      'dateAdded',
+      'source',
     ] as const,
     buildConfig: {
       batchSize: 10,
@@ -260,21 +248,21 @@ export const BUILD_CATEGORY_CONFIGS = {
   },
 
   statuslines: {
-    id: "statuslines",
-    name: "Statuslines",
+    id: 'statuslines',
+    name: 'Statuslines',
     schema: statuslineContentSchema,
-    typeName: "StatuslineContent",
+    typeName: 'StatuslineContent',
     generateFullContent: true,
     metadataFields: [
-      "slug",
-      "title",
-      "seoTitle",
-      "description",
-      "author",
-      "tags",
-      "category",
-      "dateAdded",
-      "source",
+      'slug',
+      'title',
+      'seoTitle',
+      'description',
+      'author',
+      'tags',
+      'category',
+      'dateAdded',
+      'source',
     ] as const,
     buildConfig: {
       batchSize: 10,
@@ -289,24 +277,24 @@ export const BUILD_CATEGORY_CONFIGS = {
   },
 
   collections: {
-    id: "collections",
-    name: "Collections",
+    id: 'collections',
+    name: 'Collections',
     schema: collectionContentSchema,
-    typeName: "CollectionContent",
+    typeName: 'CollectionContent',
     generateFullContent: true,
     metadataFields: [
-      "slug",
-      "title",
-      "seoTitle",
-      "description",
-      "author",
-      "tags",
-      "category",
-      "dateAdded",
-      "source",
-      "collectionType",
-      "difficulty",
-      "estimatedSetupTime",
+      'slug',
+      'title',
+      'seoTitle',
+      'description',
+      'author',
+      'tags',
+      'category',
+      'dateAdded',
+      'source',
+      'collectionType',
+      'difficulty',
+      'estimatedSetupTime',
     ] as const,
     buildConfig: {
       batchSize: 10,
@@ -332,7 +320,7 @@ export type BuildCategoryId = keyof typeof BUILD_CATEGORY_CONFIGS;
  * Performance: O(1) object property access
  */
 export function getBuildCategoryConfig<T extends BuildCategoryId>(
-  categoryId: T,
+  categoryId: T
 ): (typeof BUILD_CATEGORY_CONFIGS)[T] {
   const config = BUILD_CATEGORY_CONFIGS[categoryId];
   if (!config) {
@@ -359,7 +347,7 @@ export function getAllBuildCategoryConfigs(): Array<BuildCategoryConfig> {
  */
 export function extractMetadata(
   content: ContentType,
-  config: BuildCategoryConfig,
+  config: BuildCategoryConfig
 ): Record<string, unknown> {
   const metadata: Record<string, unknown> = {};
 

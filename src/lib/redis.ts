@@ -75,49 +75,41 @@
  * - Mixed operations → Use getBatchPipeline() with proper chunking
  */
 
-import { z } from "zod";
-import { logger } from "./logger";
-import { type CacheService, CacheServices } from "./redis/cache";
-import { redisClient } from "./redis/client";
-import type { CacheInvalidationResult } from "./schemas/cache.schema";
+import { z } from 'zod';
+import { logger } from './logger';
+import { type CacheService, CacheServices } from './redis/cache';
+import { redisClient } from './redis/client';
+import type { CacheInvalidationResult } from './schemas/cache.schema';
 import {
   cacheCategorySchema,
   cacheKeyParamsSchema,
   parseRedisZRangeResponse,
   popularItemsQuerySchema,
-} from "./schemas/cache.schema";
-import { validateCacheKey } from "./schemas/primitives/api-cache-primitives";
+} from './schemas/cache.schema';
+import { validateCacheKey } from './schemas/primitives/api-cache-primitives';
 
 // Generic operation executor with error logging
-const exec = async <T>(
-  fn: () => Promise<T>,
-  fallback: T,
-  op: string,
-): Promise<T> => {
+const exec = async <T>(fn: () => Promise<T>, fallback: T, op: string): Promise<T> => {
   try {
     return await fn();
   } catch (e) {
-    logger.error(
-      `Failed: ${op}`,
-      e instanceof Error ? e : new Error(String(e)),
-    );
+    logger.error(`Failed: ${op}`, e instanceof Error ? e : new Error(String(e)));
     return fallback;
   }
 };
 
 // Redis client operation wrapper
 const redis = <T>(
-  fn: (client: import("@upstash/redis").Redis) => Promise<T>,
+  fn: (client: import('@upstash/redis').Redis) => Promise<T>,
   fallback: () => T | Promise<T>,
-  op: string,
+  op: string
 ) => redisClient.executeOperation(fn, fallback, op);
 
 /**
  * Unified stats operations
  */
 export const statsRedis = {
-  isEnabled: () =>
-    redisClient.getStatus().isConnected || redisClient.getStatus().isFallback,
+  isEnabled: () => redisClient.getStatus().isConnected || redisClient.getStatus().isFallback,
   isConnected: () => redisClient.getStatus().isConnected,
 
   incrementView: (cat: string, slug: string) =>
@@ -127,14 +119,14 @@ export const statsRedis = {
           async (c) => {
             const key = `views:${cat}:${slug}`;
             // SECURITY: Use UTC to prevent timezone inconsistencies
-            const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD UTC
+            const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD UTC
             const dailyKey = `views:daily:${cat}:${slug}:${today}`;
 
             // PERFORMANCE: Use pipeline for atomic operations
             const pipeline = c.pipeline();
             pipeline.incr(key); // Total all-time views
             pipeline.incr(dailyKey); // Today's views (for growth calculation)
-            pipeline.expire(dailyKey, 604800, "NX"); // Only set TTL if key doesn't have one
+            pipeline.expire(dailyKey, 604800, 'NX'); // Only set TTL if key doesn't have one
             pipeline.zadd(`trending:${cat}:weekly`, {
               score: Date.now(),
               member: slug,
@@ -145,17 +137,17 @@ export const statsRedis = {
             return results?.[0] as number | null; // Return total view count
           },
           () => null,
-          "incrementView",
+          'incrementView'
         ),
       null,
-      "incrementView",
+      'incrementView'
     ),
 
   getViewCount: (cat: string, slug: string) =>
     redis(
       async (c) => (await c.get<number>(`views:${cat}:${slug}`)) || 0,
       () => 0,
-      "getViewCount",
+      'getViewCount'
     ),
 
   getViewCounts: async (items: Array<{ category: string; slug: string }>) => {
@@ -164,15 +156,14 @@ export const statsRedis = {
     const counts = await redis(
       async (c) => await c.mget<(number | null)[]>(...keys),
       () => new Array(items.length).fill(0) as (number | null)[],
-      "getViewCounts",
+      'getViewCounts'
     );
     return items.reduce(
       (acc, item, i) => {
-        acc[`${item.category}:${item.slug}`] =
-          (counts as (number | null)[])[i] || 0;
+        acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
         return acc;
       },
-      {} as Record<string, number>,
+      {} as Record<string, number>
     );
   },
 
@@ -184,27 +175,24 @@ export const statsRedis = {
    */
   getDailyViewCounts: async (
     items: Array<{ category: string; slug: string }>,
-    date?: string,
+    date?: string
   ): Promise<Record<string, number>> => {
     if (!items.length) return {};
-    const targetDate = date || new Date().toISOString().split("T")[0];
-    const keys = items.map(
-      (i) => `views:daily:${i.category}:${i.slug}:${targetDate}`,
-    );
+    const targetDate = date || new Date().toISOString().split('T')[0];
+    const keys = items.map((i) => `views:daily:${i.category}:${i.slug}:${targetDate}`);
 
     const counts = await redis(
       async (c) => await c.mget<(number | null)[]>(...keys),
       () => new Array(items.length).fill(0) as (number | null)[],
-      "getDailyViewCounts",
+      'getDailyViewCounts'
     );
 
     return items.reduce(
       (acc, item, i) => {
-        acc[`${item.category}:${item.slug}`] =
-          (counts as (number | null)[])[i] || 0;
+        acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
         return acc;
       },
-      {} as Record<string, number>,
+      {} as Record<string, number>
     );
   },
 
@@ -212,20 +200,15 @@ export const statsRedis = {
     const q = popularItemsQuerySchema.parse({ category: cat, limit });
     const items = await redis(
       async (c) =>
-        await c.zrange(
-          `trending:${q.category}:weekly`,
-          Date.now() - 604800000,
-          Date.now(),
-          {
-            byScore: true,
-            rev: true,
-            withScores: false,
-            offset: 0,
-            count: q.limit,
-          },
-        ),
+        await c.zrange(`trending:${q.category}:weekly`, Date.now() - 604800000, Date.now(), {
+          byScore: true,
+          rev: true,
+          withScores: false,
+          offset: 0,
+          count: q.limit,
+        }),
       () => [],
-      "getTrending",
+      'getTrending'
     );
     return z.array(z.string()).parse(items || []);
   },
@@ -239,7 +222,7 @@ export const statsRedis = {
           withScores: true,
         }),
       () => [],
-      "getPopular",
+      'getPopular'
     );
     return parseRedisZRangeResponse(items || []);
   },
@@ -254,33 +237,26 @@ export const statsRedis = {
         ]);
       },
       () => undefined,
-      "trackCopy",
+      'trackCopy'
     );
   },
 
   cleanupOldTrending: () =>
     redis(
       async (c) => {
-        const cats = [
-          "agents",
-          "mcp",
-          "rules",
-          "commands",
-          "hooks",
-          "statuslines",
-        ] as const;
+        const cats = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'] as const;
         await Promise.all(
           cats.map((cat) =>
             c.zremrangebyscore(
               `trending:${cacheCategorySchema.parse(cat)}:weekly`,
               0,
-              Date.now() - 604800000,
-            ),
-          ),
+              Date.now() - 604800000
+            )
+          )
         );
       },
       () => undefined,
-      "cleanupOldTrending",
+      'cleanupOldTrending'
     ),
 
   /**
@@ -296,7 +272,7 @@ export const statsRedis = {
    * ```
    */
   enrichWithViewCounts: async <T extends { category: string; slug: string }>(
-    items: T[],
+    items: T[]
   ): Promise<(T & { viewCount: number })[]> => {
     if (!items.length) return [];
 
@@ -311,8 +287,8 @@ export const statsRedis = {
       }));
     } catch (error) {
       logger.error(
-        "Failed to enrich with view counts",
-        error instanceof Error ? error : new Error(String(error)),
+        'Failed to enrich with view counts',
+        error instanceof Error ? error : new Error(String(error))
       );
       // Return items without view counts on error
       return items.map((item) => ({ ...item, viewCount: 0 }));
@@ -324,35 +300,19 @@ export const statsRedis = {
  * Unified cache operations
  */
 const cache = {
-  set: async <T>(
-    service: CacheService,
-    key: string,
-    data: T,
-    ttl: number,
-    op: string,
-  ) => {
+  set: async <T>(service: CacheService, key: string, data: T, ttl: number, op: string) => {
     try {
       await service.set(key, data, ttl);
     } catch (e) {
-      logger.error(
-        `Cache set failed: ${op}`,
-        e instanceof Error ? e : new Error(String(e)),
-      );
+      logger.error(`Cache set failed: ${op}`, e instanceof Error ? e : new Error(String(e)));
     }
   },
 
-  get: async <T>(
-    service: CacheService,
-    key: string,
-    op: string,
-  ): Promise<T | null> => {
+  get: async <T>(service: CacheService, key: string, op: string): Promise<T | null> => {
     try {
       return await service.get<T>(key);
     } catch (e) {
-      logger.error(
-        `Cache get failed: ${op}`,
-        e instanceof Error ? e : new Error(String(e)),
-      );
+      logger.error(`Cache get failed: ${op}`, e instanceof Error ? e : new Error(String(e)));
       return null;
     }
   },
@@ -363,14 +323,11 @@ export const contentCache = {
 
   // MDX operations
   cacheMDX: (path: string, content: string, ttl = 86400) =>
-    cache.set(CacheServices.content, `mdx:${path}`, content, ttl, "MDX"),
+    cache.set(CacheServices.content, `mdx:${path}`, content, ttl, 'MDX'),
 
-  getMDX: (path: string) =>
-    cache.get<string>(CacheServices.content, `mdx:${path}`, "MDX"),
+  getMDX: (path: string) => cache.get<string>(CacheServices.content, `mdx:${path}`, 'MDX'),
 
-  batchCacheMDX: async (
-    items: Array<{ path: string; content: string; ttl?: number }>,
-  ) => {
+  batchCacheMDX: async (items: Array<{ path: string; content: string; ttl?: number }>) => {
     if (!items.length) return;
     try {
       await CacheServices.content.setMany(
@@ -378,13 +335,10 @@ export const contentCache = {
           key: `mdx:${path}`,
           value: content,
           ttl,
-        })),
+        }))
       );
     } catch (e) {
-      logger.error(
-        "Batch MDX failed",
-        e instanceof Error ? e : new Error(String(e)),
-      );
+      logger.error('Batch MDX failed', e instanceof Error ? e : new Error(String(e)));
     }
   },
 
@@ -395,26 +349,24 @@ export const contentCache = {
       `content:${cacheCategorySchema.parse(cat)}:metadata`,
       data,
       ttl,
-      "metadata",
+      'metadata'
     ),
 
   getContentMetadata: <T>(cat: string) =>
     cache.get<T>(
       CacheServices.content,
       `content:${cacheCategorySchema.parse(cat)}:metadata`,
-      "metadata",
+      'metadata'
     ),
 
   // API operations
   cacheAPIResponse: <T>(endpoint: string, data: T, ttl = 3600) =>
-    cache.set(CacheServices.api, `api:${endpoint}`, data, ttl, "API"),
+    cache.set(CacheServices.api, `api:${endpoint}`, data, ttl, 'API'),
 
   getAPIResponse: <T>(endpoint: string) =>
-    cache.get<T>(CacheServices.api, `api:${endpoint}`, "API"),
+    cache.get<T>(CacheServices.api, `api:${endpoint}`, 'API'),
 
-  invalidatePattern: async (
-    pattern: string,
-  ): Promise<CacheInvalidationResult> => {
+  invalidatePattern: async (pattern: string): Promise<CacheInvalidationResult> => {
     try {
       return await CacheServices.content.invalidatePattern(pattern);
     } catch {
@@ -429,11 +381,7 @@ export const contentCache = {
     }
   },
 
-  cacheWithRefresh: async <T>(
-    key: string,
-    fetcher: () => Promise<T>,
-    ttl = 3600,
-  ): Promise<T> => {
+  cacheWithRefresh: async <T>(key: string, fetcher: () => Promise<T>, ttl = 3600): Promise<T> => {
     try {
       const vKey = validateCacheKey(key);
       const cached = await CacheServices.api.get<T>(vKey);
@@ -443,13 +391,10 @@ export const contentCache = {
       await CacheServices.api.set(vKey, fresh, ttl);
       return fresh;
     } catch (e) {
-      logger.error(
-        "Refresh failed",
-        e instanceof Error ? e : new Error(String(e)),
-      );
+      logger.error('Refresh failed', e instanceof Error ? e : new Error(String(e)));
       return fetcher();
     }
   },
 };
 
-export { type Redis, redisClient } from "./redis/client";
+export { type Redis, redisClient } from './redis/client';

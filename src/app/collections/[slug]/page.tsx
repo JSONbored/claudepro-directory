@@ -22,25 +22,20 @@
  * @see components/features/content/config-card.tsx - Reused for embedded items
  */
 
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { Suspense } from "react";
-import { getCollectionFullContent, getCollections } from "@/generated/content";
-import { ConfigCard } from "@/src/components/features/content/config-card";
-import { Badge } from "@/src/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/src/components/ui/card";
-import { SourceBadge, TagBadge } from "@/src/components/ui/config-badge";
-import { trackView } from "@/src/lib/actions/track-view";
-import { getContentBySlug } from "@/src/lib/content/content-loaders";
-import { AlertTriangle, CheckCircle, Clock, Layers } from "@/src/lib/icons";
-import { logger } from "@/src/lib/logger";
-import type { ContentCategory } from "@/src/lib/schemas/shared.schema";
-import { generatePageMetadata } from "@/src/lib/seo/metadata-generator";
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
+import { getCollectionFullContent, getCollections } from '@/generated/content';
+import { ConfigCard } from '@/src/components/features/content/config-card';
+import { Badge } from '@/src/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { SourceBadge, TagBadge } from '@/src/components/ui/config-badge';
+import { trackView } from '@/src/lib/actions/track-view';
+import { getContentBySlug } from '@/src/lib/content/content-loaders';
+import { AlertTriangle, CheckCircle, Clock, Layers } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 /**
  * ISR revalidation (4 hours)
@@ -50,31 +45,31 @@ import { generatePageMetadata } from "@/src/lib/seo/metadata-generator";
  * Difficulty colors
  */
 const DIFFICULTY_COLORS = {
-  beginner: "bg-green-500/10 text-green-400 border-green-500/20",
-  intermediate: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-  advanced: "bg-red-500/10 text-red-400 border-red-500/20",
+  beginner: 'bg-green-500/10 text-green-400 border-green-500/20',
+  intermediate: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+  advanced: 'bg-red-500/10 text-red-400 border-red-500/20',
 } as const;
 
 /**
  * Collection type labels
  */
 const COLLECTION_TYPE_LABELS = {
-  "starter-kit": "Starter Kit",
-  workflow: "Workflow",
-  "advanced-system": "Advanced System",
-  "use-case": "Use Case",
+  'starter-kit': 'Starter Kit',
+  workflow: 'Workflow',
+  'advanced-system': 'Advanced System',
+  'use-case': 'Use Case',
 } as const;
 
 /**
  * Category display names
  */
 const CATEGORY_NAMES: Record<string, string> = {
-  agents: "AI Agents",
-  mcp: "MCP Servers",
-  rules: "Rules",
-  commands: "Commands",
-  hooks: "Hooks",
-  statuslines: "Statuslines",
+  agents: 'AI Agents',
+  mcp: 'MCP Servers',
+  rules: 'Rules',
+  commands: 'Commands',
+  hooks: 'Hooks',
+  statuslines: 'Statuslines',
 };
 
 /**
@@ -101,14 +96,14 @@ export async function generateMetadata({
 
   if (!collection) {
     return {
-      title: "Collection Not Found",
-      description: "The requested collection could not be found.",
+      title: 'Collection Not Found',
+      description: 'The requested collection could not be found.',
     };
   }
 
   // Use centralized metadata system with CollectionPage schema
   // Collections use special structured data for better discovery
-  return await generatePageMetadata("/collections/:slug", {
+  return await generatePageMetadata('/collections/:slug', {
     params: { slug },
     item: {
       title: collection.title || collection.slug,
@@ -135,12 +130,12 @@ export default async function CollectionDetailPage({
   const collection = await getCollectionFullContent(slug);
 
   if (!collection) {
-    logger.warn("Collection not found", { slug });
+    logger.warn('Collection not found', { slug });
     notFound();
   }
 
   // Track view (async, don't await)
-  trackView({ category: "collections", slug }).catch(() => {
+  trackView({ category: 'collections', slug }).catch(() => {
     // Silent fail
   });
 
@@ -148,19 +143,16 @@ export default async function CollectionDetailPage({
   const itemsWithContent = await Promise.all(
     collection.items.map(async (itemRef) => {
       try {
-        const item = await getContentBySlug(
-          itemRef.category as ContentCategory,
-          itemRef.slug,
-        );
+        const item = await getContentBySlug(itemRef.category as ContentCategory, itemRef.slug);
         return item ? { ...itemRef, data: item } : null;
       } catch (error) {
-        logger.error("Failed to load collection item", error as Error, {
+        logger.error('Failed to load collection item', error as Error, {
           category: itemRef.category,
           slug: itemRef.slug,
         });
         return null;
       }
-    }),
+    })
   );
 
   // Filter out failed loads
@@ -177,12 +169,12 @@ export default async function CollectionDetailPage({
       acc[category].push(item);
       return acc;
     },
-    {} as Record<string, typeof validItems>,
+    {} as Record<string, typeof validItems>
   );
 
   const title = collection.title || collection.slug;
 
-  logger.info("Collection detail page rendered", {
+  logger.info('Collection detail page rendered', {
     slug,
     itemCount: validItems.length,
     categories: Object.keys(itemsByCategory).length,
@@ -219,14 +211,10 @@ export default async function CollectionDetailPage({
             </div>
 
             {/* Title */}
-            <h1 className="text-4xl font-bold tracking-tight text-foreground mb-4">
-              {title}
-            </h1>
+            <h1 className="text-4xl font-bold tracking-tight text-foreground mb-4">{title}</h1>
 
             {/* Description */}
-            <p className="text-lg text-muted-foreground max-w-3xl mb-6">
-              {collection.description}
-            </p>
+            <p className="text-lg text-muted-foreground max-w-3xl mb-6">{collection.description}</p>
 
             {/* Tags */}
             {collection.tags && collection.tags.length > 0 && (
@@ -257,9 +245,7 @@ export default async function CollectionDetailPage({
                   {collection.prerequisites.map((prereq) => (
                     <li key={prereq} className="flex items-start gap-2">
                       <CheckCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-muted-foreground">
-                        {prereq}
-                      </span>
+                      <span className="text-sm text-muted-foreground">{prereq}</span>
                     </li>
                   ))}
                 </ul>
@@ -270,8 +256,7 @@ export default async function CollectionDetailPage({
           {/* What's Included Section */}
           <div>
             <h2 className="text-2xl font-bold text-foreground mb-6">
-              What's Included ({validItems.length}{" "}
-              {validItems.length === 1 ? "item" : "items"})
+              What's Included ({validItems.length} {validItems.length === 1 ? 'item' : 'items'})
             </h2>
 
             <Suspense
@@ -292,12 +277,8 @@ export default async function CollectionDetailPage({
                     <div className="grid gap-4 sm:grid-cols-1">
                       {items.map((item) =>
                         item?.data ? (
-                          <ConfigCard
-                            key={item.slug}
-                            item={item.data}
-                            showCategory={false}
-                          />
-                        ) : null,
+                          <ConfigCard key={item.slug} item={item.data} showCategory={false} />
+                        ) : null
                       )}
                     </div>
                   </div>
@@ -307,33 +288,30 @@ export default async function CollectionDetailPage({
           </div>
 
           {/* Installation Order */}
-          {collection.installationOrder &&
-            collection.installationOrder.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl">
-                    Recommended Installation Order
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ol className="space-y-2">
-                    {collection.installationOrder.map((slug, index) => {
-                      const item = validItems.find((i) => i?.slug === slug);
-                      return (
-                        <li key={slug} className="flex items-start gap-3">
-                          <span className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-primary text-sm font-semibold">
-                            {index + 1}
-                          </span>
-                          <span className="text-sm text-foreground mt-0.5">
-                            {item?.data?.title || slug}
-                          </span>
-                        </li>
-                      );
-                    })}
-                  </ol>
-                </CardContent>
-              </Card>
-            )}
+          {collection.installationOrder && collection.installationOrder.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl">Recommended Installation Order</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ol className="space-y-2">
+                  {collection.installationOrder.map((slug, index) => {
+                    const item = validItems.find((i) => i?.slug === slug);
+                    return (
+                      <li key={slug} className="flex items-start gap-3">
+                        <span className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-primary text-sm font-semibold">
+                          {index + 1}
+                        </span>
+                        <span className="text-sm text-foreground mt-0.5">
+                          {item?.data?.title || slug}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Compatibility */}
           {collection.compatibility && (
@@ -349,9 +327,7 @@ export default async function CollectionDetailPage({
                     ) : (
                       <AlertTriangle className="h-4 w-4 text-red-500" />
                     )}
-                    <span className="text-sm text-muted-foreground">
-                      Claude Desktop
-                    </span>
+                    <span className="text-sm text-muted-foreground">Claude Desktop</span>
                   </div>
                   <div className="flex items-center gap-2">
                     {collection.compatibility.claudeCode ? (
@@ -359,9 +335,7 @@ export default async function CollectionDetailPage({
                     ) : (
                       <AlertTriangle className="h-4 w-4 text-red-500" />
                     )}
-                    <span className="text-sm text-muted-foreground">
-                      Claude Code
-                    </span>
+                    <span className="text-sm text-muted-foreground">Claude Code</span>
                   </div>
                 </div>
               </CardContent>

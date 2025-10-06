@@ -3,19 +3,19 @@
  * Validation for webhook payloads from Resend (via Svix)
  */
 
-import { z } from "zod";
+import { z } from 'zod';
 
 /**
  * Resend webhook event types
  */
 export const webhookEventTypeSchema = z.enum([
-  "email.sent",
-  "email.delivered",
-  "email.delivery_delayed",
-  "email.complained",
-  "email.bounced",
-  "email.opened",
-  "email.clicked",
+  'email.sent',
+  'email.delivered',
+  'email.delivery_delayed',
+  'email.complained',
+  'email.bounced',
+  'email.opened',
+  'email.clicked',
 ]);
 
 export type WebhookEventType = z.infer<typeof webhookEventTypeSchema>;
@@ -23,7 +23,7 @@ export type WebhookEventType = z.infer<typeof webhookEventTypeSchema>;
 /**
  * Bounce types
  */
-export const bounceTypeSchema = z.enum(["hard", "soft"]);
+export const bounceTypeSchema = z.enum(['hard', 'soft']);
 
 export type BounceType = z.infer<typeof bounceTypeSchema>;
 
@@ -100,7 +100,7 @@ export type ResendWebhookEvent = z.infer<typeof resendWebhookEventSchema>;
  * Bounce event (specific type)
  */
 export const bounceEventSchema = z.object({
-  type: z.literal("email.bounced"),
+  type: z.literal('email.bounced'),
   created_at: z.string().datetime(),
   data: bounceEventDataSchema,
 });
@@ -111,7 +111,7 @@ export type BounceEvent = z.infer<typeof bounceEventSchema>;
  * Complaint event (specific type)
  */
 export const complaintEventSchema = z.object({
-  type: z.literal("email.complained"),
+  type: z.literal('email.complained'),
   created_at: z.string().datetime(),
   data: complaintEventDataSchema,
 });
@@ -122,7 +122,7 @@ export type ComplaintEvent = z.infer<typeof complaintEventSchema>;
  * Click event (specific type)
  */
 export const clickEventSchema = z.object({
-  type: z.literal("email.clicked"),
+  type: z.literal('email.clicked'),
   created_at: z.string().datetime(),
   data: clickEventDataSchema,
 });
@@ -133,7 +133,7 @@ export type ClickEvent = z.infer<typeof clickEventSchema>;
  * Open event (specific type)
  */
 export const openEventSchema = z.object({
-  type: z.literal("email.opened"),
+  type: z.literal('email.opened'),
   created_at: z.string().datetime(),
   data: openEventDataSchema,
 });

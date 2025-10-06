@@ -15,17 +15,15 @@
  * - Maximum sizes based on actual content analysis
  */
 
-import { z } from "zod";
-import { mediumString, nonEmptyString } from "./base-strings";
+import { z } from 'zod';
+import { mediumString, nonEmptyString } from './base-strings';
 
 /**
  * Basic string array validator
  * Used for: Any array of strings without constraints
  * Common in: General lists, collections
  */
-export const stringArray = z
-  .array(z.string())
-  .describe("Array of strings without constraints");
+export const stringArray = z.array(z.string()).describe('Array of strings without constraints');
 
 /**
  * Non-empty string array validator
@@ -34,7 +32,7 @@ export const stringArray = z
  */
 export const nonEmptyStringArray = z
   .array(nonEmptyString)
-  .describe("Array of non-empty strings for tags and keywords");
+  .describe('Array of non-empty strings for tags and keywords');
 
 /**
  * Required tag array (minimum 1 item)
@@ -44,7 +42,7 @@ export const nonEmptyStringArray = z
 export const requiredTagArray = z
   .array(nonEmptyString)
   .min(1)
-  .describe("Required tag array with minimum 1 item");
+  .describe('Required tag array with minimum 1 item');
 
 /**
  * Limited medium string array (max 20 items)
@@ -54,7 +52,7 @@ export const requiredTagArray = z
 export const limitedMediumStringArray = z
   .array(mediumString)
   .max(20)
-  .describe("Constrained list of medium strings (max 20 items)");
+  .describe('Constrained list of medium strings (max 20 items)');
 
 /**
  * Examples array (max 10 items)
@@ -64,7 +62,7 @@ export const limitedMediumStringArray = z
 export const examplesArray = z
   .array(z.string().max(1000))
   .max(10)
-  .describe("Code or usage examples (max 10 items, 1000 chars each)");
+  .describe('Code or usage examples (max 10 items, 1000 chars each)');
 
 /**
  * Large content array (max 50 items, up to 500 chars each)
@@ -74,6 +72,4 @@ export const examplesArray = z
 export const largeContentArray = z
   .array(mediumString)
   .max(50)
-  .describe(
-    "Large content collection for complete feature sets (max 50 items, 500 chars each)",
-  );
+  .describe('Large content collection for complete feature sets (max 50 items, 500 chars each)');

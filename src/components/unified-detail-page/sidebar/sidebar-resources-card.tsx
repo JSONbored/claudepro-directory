@@ -15,14 +15,9 @@
  * @see lib/config/custom-sidebars.tsx - Original implementations
  */
 
-import { Button } from "@/src/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/src/components/ui/card";
-import { ExternalLink, Github } from "@/src/lib/icons";
+import { Button } from '@/src/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { ExternalLink, Github } from '@/src/lib/icons';
 
 /**
  * Props for SidebarResourcesCard
@@ -74,11 +69,7 @@ export function SidebarResourcesCard({
         )}
         {documentationUrl && (
           <Button variant="outline" className="w-full justify-start" asChild>
-            <a
-              href={documentationUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={documentationUrl} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-4 w-4 mr-2" />
               Documentation
             </a>

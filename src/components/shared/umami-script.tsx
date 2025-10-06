@@ -1,7 +1,7 @@
-import { headers } from "next/headers";
+import { headers } from 'next/headers';
 
 // Client-safe environment check - doesn't trigger server env validation
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = process.env.NODE_ENV === 'production';
 
 /**
  * Umami Analytics Script Component
@@ -20,7 +20,7 @@ export async function UmamiScript() {
 
   // Get the nonce from CSP header for strict-dynamic compatibility
   const headersList = await headers();
-  const cspHeader = headersList.get("content-security-policy");
+  const cspHeader = headersList.get('content-security-policy');
   const nonce = cspHeader?.match(/nonce-([a-zA-Z0-9+/=]+)/)?.[1];
 
   return (

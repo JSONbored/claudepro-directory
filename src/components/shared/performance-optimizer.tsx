@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 // Critical resource preloader for perfect Core Web Vitals
 export function PerformanceOptimizer() {
   useEffect(() => {
     // Prefetch critical API routes
     const prefetchAPI = (url: string) => {
-      const link = document.createElement("link");
-      link.rel = "prefetch";
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
       link.href = url;
       document.head.appendChild(link);
     };
@@ -19,19 +19,19 @@ export function PerformanceOptimizer() {
         if (entry.isIntersecting) {
           // Lazy load non-critical content when scrolled into view
           const element = entry.target as HTMLElement;
-          element.style.willChange = "auto";
+          element.style.willChange = 'auto';
           observer.unobserve(element);
         }
       });
     });
 
     // Observe all lazy-loadable elements
-    document.querySelectorAll("[data-lazy]").forEach((el) => {
+    document.querySelectorAll('[data-lazy]').forEach((el) => {
       observer.observe(el);
     });
 
     // Prefetch critical routes
-    prefetchAPI("/api/all-configurations.json");
+    prefetchAPI('/api/all-configurations.json');
 
     // Cleanup
     return () => {

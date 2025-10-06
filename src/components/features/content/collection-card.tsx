@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * CollectionCard Component
@@ -16,23 +16,23 @@
  * @see components/features/content/config-card.tsx - Base card pattern
  */
 
-import { memo } from "react";
-import { CardCopyAction } from "@/src/components/shared/card-copy-action";
-import { Badge } from "@/src/components/ui/badge";
-import { Button } from "@/src/components/ui/button";
+import { memo } from 'react';
+import { CardCopyAction } from '@/src/components/shared/card-copy-action';
+import { Badge } from '@/src/components/ui/badge';
+import { Button } from '@/src/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
-import { SourceBadge, TagBadge } from "@/src/components/ui/config-badge";
-import { useCardNavigation } from "@/src/hooks/use-card-navigation";
-import { Clock, Layers } from "@/src/lib/icons";
-import type { CollectionContent } from "@/src/lib/schemas/content/collection.schema";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
-import { getDisplayTitle } from "@/src/lib/utils";
+} from '@/src/components/ui/card';
+import { SourceBadge, TagBadge } from '@/src/components/ui/config-badge';
+import { useCardNavigation } from '@/src/hooks/use-card-navigation';
+import { Clock, Layers } from '@/src/lib/icons';
+import type { CollectionContent } from '@/src/lib/schemas/content/collection.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { getDisplayTitle } from '@/src/lib/utils';
 
 /**
  * CollectionCard Props
@@ -44,11 +44,11 @@ export interface CollectionCardProps {
   /** Collection content item to display (supports both metadata and full content) */
   item:
     | CollectionContent
-    | (Omit<CollectionContent, "items"> & {
-        items?: CollectionContent["items"];
+    | (Omit<CollectionContent, 'items'> & {
+        items?: CollectionContent['items'];
       });
   /** Display variant (default or detailed) */
-  variant?: "default" | "detailed";
+  variant?: 'default' | 'detailed';
   /** Show action buttons (copy, view) */
   showActions?: boolean;
 }
@@ -57,19 +57,19 @@ export interface CollectionCardProps {
  * Difficulty badge variant mapping
  */
 const DIFFICULTY_COLORS = {
-  beginner: "bg-green-500/10 text-green-400 border-green-500/20",
-  intermediate: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-  advanced: "bg-red-500/10 text-red-400 border-red-500/20",
+  beginner: 'bg-green-500/10 text-green-400 border-green-500/20',
+  intermediate: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+  advanced: 'bg-red-500/10 text-red-400 border-red-500/20',
 } as const;
 
 /**
  * Collection type label mapping
  */
 const COLLECTION_TYPE_LABELS = {
-  "starter-kit": "Starter Kit",
-  workflow: "Workflow",
-  "advanced-system": "Advanced System",
-  "use-case": "Use Case",
+  'starter-kit': 'Starter Kit',
+  workflow: 'Workflow',
+  'advanced-system': 'Advanced System',
+  'use-case': 'Use Case',
 } as const;
 
 /**
@@ -79,17 +79,16 @@ const COLLECTION_TYPE_LABELS = {
  * Follows accessibility best practices with ARIA labels and keyboard navigation.
  */
 export const CollectionCard = memo(
-  ({ item, variant = "default", showActions = true }: CollectionCardProps) => {
+  ({ item, variant = 'default', showActions = true }: CollectionCardProps) => {
     const displayTitle = getDisplayTitle(item);
     const targetPath = `/collections/${item.slug}`;
     const itemCount = item.items?.length || 0;
 
-    const { handleCardClick, handleKeyDown, handleActionClick } =
-      useCardNavigation(targetPath);
+    const { handleCardClick, handleKeyDown, handleActionClick } = useCardNavigation(targetPath);
 
     return (
       <Card
-        className={`${UI_CLASSES.CARD_INTERACTIVE} ${variant === "detailed" ? "p-6" : ""}`}
+        className={`${UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? 'p-6' : ''}`}
         onClick={handleCardClick}
         role="article"
         aria-label={`${displayTitle} - ${COLLECTION_TYPE_LABELS[item.collectionType]} collection by ${item.author}`}
@@ -102,9 +101,7 @@ export const CollectionCard = memo(
           >
             <div className={UI_CLASSES.FLEX_1}>
               {/* Collection Type & Difficulty Badges */}
-              <div
-                className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 mb-2`}
-              >
+              <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 mb-2`}>
                 <Badge
                   variant="outline"
                   className={`${UI_CLASSES.TEXT_XS} border-blue-500/20 bg-blue-500/10 text-blue-400`}
@@ -122,7 +119,7 @@ export const CollectionCard = memo(
                   variant="outline"
                   className={`${UI_CLASSES.TEXT_XS} border-muted-foreground/20 text-muted-foreground`}
                 >
-                  {itemCount} {itemCount === 1 ? "item" : "items"}
+                  {itemCount} {itemCount === 1 ? 'item' : 'items'}
                 </Badge>
               </div>
 
@@ -138,9 +135,7 @@ export const CollectionCard = memo(
               </CardDescription>
             </div>
             {item.source && (
-              <div
-                className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-1 ml-2`}
-              >
+              <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-1 ml-2`}>
                 <SourceBadge source={item.source} />
               </div>
             )}
@@ -183,7 +178,7 @@ export const CollectionCard = memo(
             {showActions && (
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                 <CardCopyAction
-                  url={`${typeof window !== "undefined" ? window.location.origin : ""}${targetPath}`}
+                  url={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
                   category="collections"
                   slug={item.slug}
                   title={displayTitle}
@@ -205,7 +200,7 @@ export const CollectionCard = memo(
         </CardContent>
       </Card>
     );
-  },
+  }
 );
 
-CollectionCard.displayName = "CollectionCard";
+CollectionCard.displayName = 'CollectionCard';

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * PageViewTracker - Client component for tracking content detail page views
@@ -7,9 +7,9 @@
  * Sends event to Umami analytics on component mount
  */
 
-import { useEffect } from "react";
-import { EVENTS } from "@/src/lib/analytics/events.config";
-import { trackEvent } from "@/src/lib/analytics/tracker";
+import { useEffect } from 'react';
+import { EVENTS } from '@/src/lib/analytics/events.config';
+import { trackEvent } from '@/src/lib/analytics/tracker';
 
 interface PageViewTrackerProps {
   category: string;
@@ -17,21 +17,14 @@ interface PageViewTrackerProps {
   sourcePage?: string;
 }
 
-export function PageViewTracker({
-  category,
-  slug,
-  sourcePage,
-}: PageViewTrackerProps) {
+export function PageViewTracker({ category, slug, sourcePage }: PageViewTrackerProps) {
   useEffect(() => {
     // Track content view on mount (client-side only)
     trackEvent(EVENTS.CONTENT_VIEW, {
       category,
       slug,
-      page:
-        typeof window !== "undefined"
-          ? window.location.pathname
-          : `/${category}/${slug}`,
-      source: sourcePage || "direct",
+      page: typeof window !== 'undefined' ? window.location.pathname : `/${category}/${slug}`,
+      source: sourcePage || 'direct',
     });
   }, [category, slug, sourcePage]);
 

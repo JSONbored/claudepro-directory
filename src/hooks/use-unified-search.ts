@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * Unified Search Hook (SHA-2087)
@@ -16,12 +16,12 @@
  * - User preferences persisted via localStorage
  */
 
-import { useCallback, useState } from "react";
-import { useLocalStorage } from "@/src/hooks/use-local-storage";
-import type { FilterState } from "@/src/lib/schemas/component.schema";
+import { useCallback, useState } from 'react';
+import { useLocalStorage } from '@/src/hooks/use-local-storage';
+import type { FilterState } from '@/src/lib/schemas/component.schema';
 
 export interface UseUnifiedSearchOptions {
-  initialSort?: FilterState["sort"];
+  initialSort?: FilterState['sort'];
   onSearchChange?: (query: string) => void;
   onFiltersChange?: (filters: FilterState) => void;
 }
@@ -38,31 +38,25 @@ export interface UseUnifiedSearchReturn {
   // Handlers
   handleSearch: (query: string) => void;
   handleFiltersChange: (newFilters: FilterState) => void;
-  handleFilterChange: (
-    key: keyof FilterState,
-    value: FilterState[keyof FilterState],
-  ) => void;
+  handleFilterChange: (key: keyof FilterState, value: FilterState[keyof FilterState]) => void;
   toggleTag: (tag: string) => void;
   clearFilters: () => void;
   setIsFilterOpen: (open: boolean) => void;
 }
 
 export function useUnifiedSearch({
-  initialSort = "trending",
+  initialSort = 'trending',
   onSearchChange,
   onFiltersChange,
 }: UseUnifiedSearchOptions = {}): UseUnifiedSearchReturn {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Persist sort preference in localStorage
-  const { value: savedSort, setValue: setSavedSort } = useLocalStorage<string>(
-    "user-pref-sort",
-    {
-      defaultValue: initialSort,
-      syncAcrossTabs: true,
-    },
-  );
+  const { value: savedSort, setValue: setSavedSort } = useLocalStorage<string>('user-pref-sort', {
+    defaultValue: initialSort,
+    syncAcrossTabs: true,
+  });
 
   const [filters, setFilters] = useState<FilterState>(() => ({
     sort: savedSort,
@@ -74,11 +68,7 @@ export function useUnifiedSearch({
     if (filters.category) count++;
     if (filters.author) count++;
     if (filters.dateRange) count++;
-    if (
-      filters.popularity &&
-      (filters.popularity[0] > 0 || filters.popularity[1] < 100)
-    )
-      count++;
+    if (filters.popularity && (filters.popularity[0] > 0 || filters.popularity[1] < 100)) count++;
     if (filters.tags && filters.tags.length > 0) count += filters.tags.length;
     return count;
   })();
@@ -89,7 +79,7 @@ export function useUnifiedSearch({
       setSearchQuery(query);
       onSearchChange?.(query);
     },
-    [onSearchChange],
+    [onSearchChange]
   );
 
   // Handle full filter state change
@@ -102,7 +92,7 @@ export function useUnifiedSearch({
       }
       onFiltersChange?.(newFilters);
     },
-    [onFiltersChange, setSavedSort],
+    [onFiltersChange, setSavedSort]
   );
 
   // Handle individual filter field change
@@ -111,12 +101,12 @@ export function useUnifiedSearch({
       const newFilters = { ...filters, [key]: value };
       setFilters(newFilters);
       // Persist sort preference
-      if (key === "sort" && typeof value === "string") {
+      if (key === 'sort' && typeof value === 'string') {
         setSavedSort(value);
       }
       onFiltersChange?.(newFilters);
     },
-    [filters, onFiltersChange, setSavedSort],
+    [filters, onFiltersChange, setSavedSort]
   );
 
   // Toggle tag selection
@@ -135,13 +125,13 @@ export function useUnifiedSearch({
         return newFilters;
       });
     },
-    [onFiltersChange],
+    [onFiltersChange]
   );
 
   // Clear all filters (keep sort)
   const clearFilters = useCallback(() => {
     const clearedFilters: FilterState = {
-      sort: filters.sort || "trending",
+      sort: filters.sort || 'trending',
     };
     setFilters(clearedFilters);
     onFiltersChange?.(clearedFilters);

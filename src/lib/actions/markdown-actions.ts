@@ -14,14 +14,14 @@
  * @module lib/actions/markdown-actions
  */
 
-"use server";
+'use server';
 
-import { z } from "zod";
-import { APP_CONFIG } from "@/src/lib/constants";
-import { getContentBySlug } from "@/src/lib/content/content-loaders";
-import { logger } from "@/src/lib/logger";
-import { contentCache } from "@/src/lib/redis";
-import { rateLimitedAction } from "./safe-action";
+import { z } from 'zod';
+import { APP_CONFIG } from '@/src/lib/constants';
+import { getContentBySlug } from '@/src/lib/content/content-loaders';
+import { logger } from '@/src/lib/logger';
+import { contentCache } from '@/src/lib/redis';
+import { rateLimitedAction } from './safe-action';
 
 /**
  * Schema for markdown export request
@@ -31,18 +31,10 @@ const markdownExportSchema = z.object({
     .string()
     .min(1)
     .max(50)
-    .describe(
-      "Content category (agents, mcp, commands, rules, hooks, statuslines, collections)",
-    ),
-  slug: z.string().min(1).max(200).describe("Content slug identifier"),
-  includeMetadata: z
-    .boolean()
-    .default(true)
-    .describe("Include YAML frontmatter"),
-  includeFooter: z
-    .boolean()
-    .default(true)
-    .describe("Include attribution footer"),
+    .describe('Content category (agents, mcp, commands, rules, hooks, statuslines, collections)'),
+  slug: z.string().min(1).max(200).describe('Content slug identifier'),
+  includeMetadata: z.boolean().default(true).describe('Include YAML frontmatter'),
+  includeFooter: z.boolean().default(true).describe('Include attribution footer'),
 });
 
 /**
@@ -57,9 +49,7 @@ const markdownExportResponseSchema = z.object({
 });
 
 export type MarkdownExportInput = z.infer<typeof markdownExportSchema>;
-export type MarkdownExportResponse = z.infer<
-  typeof markdownExportResponseSchema
->;
+export type MarkdownExportResponse = z.infer<typeof markdownExportResponseSchema>;
 
 /**
  * Generate markdown content from content item
@@ -84,22 +74,20 @@ function generateMarkdownContent(
   options: {
     includeMetadata: boolean;
     includeFooter: boolean;
-  },
+  }
 ): string {
   const sections: string[] = [];
 
   // YAML Frontmatter
   if (options.includeMetadata) {
-    sections.push("---");
+    sections.push('---');
     sections.push(`title: "${item.title || item.slug}"`);
     if (item.seoTitle) {
       sections.push(`seoTitle: "${item.seoTitle}"`);
     }
     if (item.description) {
       // Security: Escape backslashes FIRST, then quotes (order matters for YAML injection prevention)
-      const escapedDesc = item.description
-        .replace(/\\/g, "\\\\")
-        .replace(/"/g, '\\"');
+      const escapedDesc = item.description.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
       sections.push(`description: "${escapedDesc}"`);
     }
     sections.push(`category: ${item.category}`);
@@ -111,13 +99,13 @@ function generateMarkdownContent(
       sections.push(`dateAdded: ${item.dateAdded}`);
     }
     if (item.tags && item.tags.length > 0) {
-      sections.push("tags:");
+      sections.push('tags:');
       for (const tag of item.tags) {
         sections.push(`  - ${tag}`);
       }
     }
     sections.push(`url: ${APP_CONFIG.url}/${item.category}/${item.slug}`);
-    sections.push("---\n");
+    sections.push('---\n');
   }
 
   // Title
@@ -129,9 +117,9 @@ function generateMarkdownContent(
   }
 
   // Metadata section
-  sections.push("## Metadata\n");
+  sections.push('## Metadata\n');
   sections.push(`- **Category**: ${item.category}`);
-  sections.push(`- **Author**: ${item.author || "Community"}`);
+  sections.push(`- **Author**: ${item.author || 'Community'}`);
   if (item.dateAdded) {
     sections.push(`- **Date Added**: ${item.dateAdded}`);
   }
@@ -139,66 +127,56 @@ function generateMarkdownContent(
 
   // Tags
   if (item.tags && item.tags.length > 0) {
-    sections.push("## Tags\n");
-    sections.push(`${item.tags.map((tag) => `\`${tag}\``).join(" ")}\n`);
+    sections.push('## Tags\n');
+    sections.push(`${item.tags.map((tag) => `\`${tag}\``).join(' ')}\n`);
   }
 
   // Features
-  if (
-    item.features &&
-    Array.isArray(item.features) &&
-    item.features.length > 0
-  ) {
-    sections.push("## Features\n");
+  if (item.features && Array.isArray(item.features) && item.features.length > 0) {
+    sections.push('## Features\n');
     for (const feature of item.features) {
       sections.push(`- ${feature}`);
     }
-    sections.push("");
+    sections.push('');
   }
 
   // Use Cases
-  if (
-    item.useCases &&
-    Array.isArray(item.useCases) &&
-    item.useCases.length > 0
-  ) {
-    sections.push("## Use Cases\n");
+  if (item.useCases && Array.isArray(item.useCases) && item.useCases.length > 0) {
+    sections.push('## Use Cases\n');
     for (const useCase of item.useCases) {
       sections.push(`- ${useCase}`);
     }
-    sections.push("");
+    sections.push('');
   }
 
   // Main Content
   if (item.content) {
-    sections.push("## Content\n");
+    sections.push('## Content\n');
     sections.push(item.content);
-    sections.push("");
+    sections.push('');
   }
 
   // Configuration
   if (item.configuration) {
-    sections.push("## Configuration\n");
-    sections.push("```json");
+    sections.push('## Configuration\n');
+    sections.push('```json');
     sections.push(JSON.stringify(item.configuration, null, 2));
-    sections.push("```\n");
+    sections.push('```\n');
   }
 
   // Footer with attribution
   if (options.includeFooter) {
-    sections.push("---\n");
-    sections.push("## About This Content\n");
+    sections.push('---\n');
+    sections.push('## About This Content\n');
     sections.push(
-      `This content was sourced from [Claude Pro Directory](${APP_CONFIG.url}), a community-driven repository of Claude configurations, prompts, and tools.\n`,
+      `This content was sourced from [Claude Pro Directory](${APP_CONFIG.url}), a community-driven repository of Claude configurations, prompts, and tools.\n`
     );
-    sections.push(
-      `**Original URL**: ${APP_CONFIG.url}/${item.category}/${item.slug}\n`,
-    );
-    sections.push(`**Author**: ${item.author || "Community Contribution"}\n`);
-    sections.push(`*Generated on ${new Date().toISOString().split("T")[0]}*`);
+    sections.push(`**Original URL**: ${APP_CONFIG.url}/${item.category}/${item.slug}\n`);
+    sections.push(`**Author**: ${item.author || 'Community Contribution'}\n`);
+    sections.push(`*Generated on ${new Date().toISOString().split('T')[0]}*`);
   }
 
-  return sections.join("\n");
+  return sections.join('\n');
 }
 
 /**
@@ -221,103 +199,96 @@ function generateMarkdownContent(
  */
 export const copyMarkdownAction = rateLimitedAction
   .metadata({
-    actionName: "copyMarkdown",
-    category: "content",
+    actionName: 'copyMarkdown',
+    category: 'content',
     rateLimit: {
       maxRequests: 50, // 50 copies per minute
       windowSeconds: 60,
     },
   })
   .schema(markdownExportSchema)
-  .action(
-    async ({
-      parsedInput: { category, slug, includeMetadata, includeFooter },
-      ctx,
-    }) => {
-      try {
-        logger.info("Copy markdown action started", {
-          category,
-          slug,
-          clientIP: ctx.clientIP,
-        });
+  .action(async ({ parsedInput: { category, slug, includeMetadata, includeFooter }, ctx }) => {
+    try {
+      logger.info('Copy markdown action started', {
+        category,
+        slug,
+        clientIP: ctx.clientIP,
+      });
 
-        // Check cache first
-        const cacheKey = `markdown:copy:${category}:${slug}:${includeMetadata}:${includeFooter}`;
-        if (contentCache.isEnabled()) {
-          const cached = await contentCache.getAPIResponse<string>(cacheKey);
-          if (cached) {
-            logger.info("Serving cached markdown for copy", {
-              category,
-              slug,
-              source: "redis-cache",
-            });
-            return {
-              success: true,
-              markdown: cached,
-              filename: `${slug}.md`,
-              length: cached.length,
-            };
-          }
-        }
-
-        // Load content
-        const item = await getContentBySlug(category, slug);
-
-        if (!item) {
-          logger.warn("Content not found for markdown copy", {
+      // Check cache first
+      const cacheKey = `markdown:copy:${category}:${slug}:${includeMetadata}:${includeFooter}`;
+      if (contentCache.isEnabled()) {
+        const cached = await contentCache.getAPIResponse<string>(cacheKey);
+        if (cached) {
+          logger.info('Serving cached markdown for copy', {
             category,
             slug,
+            source: 'redis-cache',
           });
           return {
-            success: false,
-            error: `Content not found: ${category}/${slug}`,
+            success: true,
+            markdown: cached,
+            filename: `${slug}.md`,
+            length: cached.length,
           };
         }
+      }
 
-        // Generate markdown
-        const markdown = generateMarkdownContent(item, {
-          includeMetadata,
-          includeFooter,
-        });
+      // Load content
+      const item = await getContentBySlug(category, slug);
 
-        // Cache the result for 1 hour
-        if (contentCache.isEnabled()) {
-          await contentCache
-            .cacheAPIResponse(cacheKey, markdown, 3600)
-            .catch((err) =>
-              logger.warn("Failed to cache markdown", {
-                category,
-                slug,
-                error: err,
-              }),
-            );
-        }
-
-        logger.info("Markdown copy action completed", {
+      if (!item) {
+        logger.warn('Content not found for markdown copy', {
           category,
           slug,
-          length: markdown.length,
         });
-
-        return {
-          success: true,
-          markdown,
-          filename: `${slug}.md`,
-          length: markdown.length,
-        };
-      } catch (error) {
-        logger.error(
-          "Copy markdown action failed",
-          error instanceof Error ? error : new Error(String(error)),
-          { category, slug },
-        );
         return {
           success: false,
-          error: "Failed to generate markdown content",
+          error: `Content not found: ${category}/${slug}`,
         };
       }
-    },
-  );
+
+      // Generate markdown
+      const markdown = generateMarkdownContent(item, {
+        includeMetadata,
+        includeFooter,
+      });
+
+      // Cache the result for 1 hour
+      if (contentCache.isEnabled()) {
+        await contentCache.cacheAPIResponse(cacheKey, markdown, 3600).catch((err) =>
+          logger.warn('Failed to cache markdown', {
+            category,
+            slug,
+            error: err,
+          })
+        );
+      }
+
+      logger.info('Markdown copy action completed', {
+        category,
+        slug,
+        length: markdown.length,
+      });
+
+      return {
+        success: true,
+        markdown,
+        filename: `${slug}.md`,
+        length: markdown.length,
+      };
+    } catch (error) {
+      logger.error(
+        'Copy markdown action failed',
+        error instanceof Error ? error : new Error(String(error)),
+        { category, slug }
+      );
+      return {
+        success: false,
+        error: 'Failed to generate markdown content',
+      };
+    }
+  });
 
 /**
  * Download Markdown Action
@@ -345,19 +316,17 @@ export const copyMarkdownAction = rateLimitedAction
  */
 export const downloadMarkdownAction = rateLimitedAction
   .metadata({
-    actionName: "downloadMarkdown",
-    category: "content",
+    actionName: 'downloadMarkdown',
+    category: 'content',
     rateLimit: {
       maxRequests: 30, // 30 downloads per minute (stricter than copy)
       windowSeconds: 60,
     },
   })
-  .schema(
-    markdownExportSchema.omit({ includeMetadata: true, includeFooter: true }),
-  )
+  .schema(markdownExportSchema.omit({ includeMetadata: true, includeFooter: true }))
   .action(async ({ parsedInput: { category, slug }, ctx }) => {
     try {
-      logger.info("Download markdown action started", {
+      logger.info('Download markdown action started', {
         category,
         slug,
         clientIP: ctx.clientIP,
@@ -368,10 +337,10 @@ export const downloadMarkdownAction = rateLimitedAction
       if (contentCache.isEnabled()) {
         const cached = await contentCache.getAPIResponse<string>(cacheKey);
         if (cached) {
-          logger.info("Serving cached markdown for download", {
+          logger.info('Serving cached markdown for download', {
             category,
             slug,
-            source: "redis-cache",
+            source: 'redis-cache',
           });
           return {
             success: true,
@@ -386,7 +355,7 @@ export const downloadMarkdownAction = rateLimitedAction
       const item = await getContentBySlug(category, slug);
 
       if (!item) {
-        logger.warn("Content not found for markdown download", {
+        logger.warn('Content not found for markdown download', {
           category,
           slug,
         });
@@ -404,18 +373,16 @@ export const downloadMarkdownAction = rateLimitedAction
 
       // Cache the result for 1 hour
       if (contentCache.isEnabled()) {
-        await contentCache
-          .cacheAPIResponse(cacheKey, markdown, 3600)
-          .catch((err) =>
-            logger.warn("Failed to cache markdown", {
-              category,
-              slug,
-              error: err,
-            }),
-          );
+        await contentCache.cacheAPIResponse(cacheKey, markdown, 3600).catch((err) =>
+          logger.warn('Failed to cache markdown', {
+            category,
+            slug,
+            error: err,
+          })
+        );
       }
 
-      logger.info("Markdown download action completed", {
+      logger.info('Markdown download action completed', {
         category,
         slug,
         length: markdown.length,
@@ -429,13 +396,13 @@ export const downloadMarkdownAction = rateLimitedAction
       };
     } catch (error) {
       logger.error(
-        "Download markdown action failed",
+        'Download markdown action failed',
         error instanceof Error ? error : new Error(String(error)),
-        { category, slug },
+        { category, slug }
       );
       return {
         success: false,
-        error: "Failed to generate markdown content",
+        error: 'Failed to generate markdown content',
       };
     }
   });

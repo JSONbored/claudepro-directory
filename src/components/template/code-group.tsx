@@ -9,11 +9,11 @@
  * - Performant: All highlighting done on server
  */
 
-"use client";
+'use client';
 
-import React from "react";
-import { ProductionCodeBlock } from "@/src/components/shared/production-code-block";
-import { UI_CLASSES } from "@/src/lib/ui-constants";
+import React from 'react';
+import { ProductionCodeBlock } from '@/src/components/shared/production-code-block';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export interface CodeGroupWithHighlightedExamples {
   examples: Array<{
@@ -35,24 +35,14 @@ export function CodeGroup(props: CodeGroupWithHighlightedExamples) {
   }
 
   return (
-    <section
-      itemScope
-      itemType="https://schema.org/SoftwareSourceCode"
-      className="my-10"
-    >
+    <section itemScope itemType="https://schema.org/SoftwareSourceCode" className="my-10">
       {title && (
         <div className={UI_CLASSES.MB_4}>
-          <h3
-            className={`text-xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`}
-            itemProp="name"
-          >
+          <h3 className={`text-xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`} itemProp="name">
             {title}
           </h3>
           {description && (
-            <p
-              className={`${UI_CLASSES.TEXT_BASE} text-muted-foreground`}
-              itemProp="description"
-            >
+            <p className={`${UI_CLASSES.TEXT_BASE} text-muted-foreground`} itemProp="description">
               {description}
             </p>
           )}
@@ -67,7 +57,7 @@ export function CodeGroup(props: CodeGroupWithHighlightedExamples) {
             return (
               <button
                 type="button"
-                key={example.language + (example.filename || "")}
+                key={example.language + (example.filename || '')}
                 onClick={() => setActiveExample(index)}
                 className={`
                   px-4 py-2 text-sm font-medium whitespace-nowrap
@@ -78,9 +68,7 @@ export function CodeGroup(props: CodeGroupWithHighlightedExamples) {
                 <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                   <span className="font-mono">{example.language}</span>
                   {example.filename && (
-                    <span
-                      className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
-                    >
+                    <span className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
                       • {example.filename}
                     </span>
                   )}
@@ -93,8 +81,8 @@ export function CodeGroup(props: CodeGroupWithHighlightedExamples) {
         {/* Code Content - Server-rendered Shiki HTML */}
         {examples.map((example, index) => (
           <div
-            key={`${example.language}${example.filename || ""}-content`}
-            className={activeExample === index ? "block" : "hidden"}
+            key={`${example.language}${example.filename || ''}-content`}
+            className={activeExample === index ? 'block' : 'hidden'}
           >
             <ProductionCodeBlock
               html={example.highlightedHtml}

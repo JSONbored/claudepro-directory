@@ -10,16 +10,10 @@
  * - Email client compatible
  */
 
-import { Button, Hr, Section, Text } from "@react-email/components";
-import type * as React from "react";
-import { BaseLayout } from "../layouts/base-layout";
-import {
-  borderRadius,
-  brandColors,
-  emailTheme,
-  spacing,
-  typography,
-} from "../utils/theme";
+import { Button, Hr, Section, Text } from '@react-email/components';
+import type * as React from 'react';
+import { BaseLayout } from '../layouts/base-layout';
+import { borderRadius, brandColors, emailTheme, spacing, typography } from '../utils/theme';
 
 export interface NewsletterWelcomeProps {
   /**
@@ -52,8 +46,8 @@ export function NewsletterWelcome({ email }: NewsletterWelcomeProps) {
       <Section style={heroSection}>
         <Text style={headingStyle}>Welcome to ClaudePro Directory! 🎉</Text>
         <Text style={subheadingStyle}>
-          You're now subscribed to weekly updates on the best Claude agents, MCP
-          servers, and productivity tools.
+          You're now subscribed to weekly updates on the best Claude agents, MCP servers, and
+          productivity tools.
         </Text>
       </Section>
 
@@ -68,20 +62,20 @@ export function NewsletterWelcome({ email }: NewsletterWelcomeProps) {
 
         <ul style={listStyle}>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>🤖 New Claude Agents</strong> - Discover
-            powerful AI configurations
+            <strong style={strongStyle}>🤖 New Claude Agents</strong> - Discover powerful AI
+            configurations
           </li>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>🔌 MCP Servers</strong> - Latest Model
-            Context Protocol integrations
+            <strong style={strongStyle}>🔌 MCP Servers</strong> - Latest Model Context Protocol
+            integrations
           </li>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>📚 Guides & Tutorials</strong> - Learn
-            advanced Claude techniques
+            <strong style={strongStyle}>📚 Guides & Tutorials</strong> - Learn advanced Claude
+            techniques
           </li>
           <li style={listItemStyle}>
-            <strong style={strongStyle}>💡 Tips & Tricks</strong> - Productivity
-            hacks from the community
+            <strong style={strongStyle}>💡 Tips & Tricks</strong> - Productivity hacks from the
+            community
           </li>
         </ul>
       </Section>
@@ -92,18 +86,14 @@ export function NewsletterWelcome({ email }: NewsletterWelcomeProps) {
       <Section style={ctaSection}>
         <Text style={ctaTitleStyle}>Get Started Now</Text>
         <Text style={paragraphStyle}>
-          Explore our directory and discover tools that will supercharge your
-          Claude experience.
+          Explore our directory and discover tools that will supercharge your Claude experience.
         </Text>
 
         <Button href="https://claudepro.directory" style={primaryButtonStyle}>
           Browse the Directory
         </Button>
 
-        <Button
-          href="https://claudepro.directory/trending"
-          style={secondaryButtonStyle}
-        >
+        <Button href="https://claudepro.directory/trending" style={secondaryButtonStyle}>
           View Trending Tools
         </Button>
       </Section>
@@ -116,8 +106,8 @@ export function NewsletterWelcome({ email }: NewsletterWelcomeProps) {
           📧 Subscribed with: <strong style={strongStyle}>{email}</strong>
         </Text>
         <Text style={footerNoteStyle}>
-          You can update your email preferences or unsubscribe anytime using the
-          links at the bottom of this email.
+          You can update your email preferences or unsubscribe anytime using the links at the bottom
+          of this email.
         </Text>
       </Section>
     </BaseLayout>
@@ -129,12 +119,12 @@ export function NewsletterWelcome({ email }: NewsletterWelcomeProps) {
  */
 
 const heroSection: React.CSSProperties = {
-  textAlign: "center",
+  textAlign: 'center',
   marginBottom: spacing.lg,
 };
 
 const headingStyle: React.CSSProperties = {
-  fontSize: typography.fontSize["3xl"],
+  fontSize: typography.fontSize['3xl'],
   fontWeight: typography.fontWeight.bold,
   color: emailTheme.textPrimary,
   margin: `0 0 ${spacing.md} 0`,
@@ -190,13 +180,13 @@ const dividerStyle: React.CSSProperties = {
 };
 
 const ctaSection: React.CSSProperties = {
-  textAlign: "center",
+  textAlign: 'center',
   marginTop: spacing.lg,
   marginBottom: spacing.lg,
 };
 
 const ctaTitleStyle: React.CSSProperties = {
-  fontSize: typography.fontSize["2xl"],
+  fontSize: typography.fontSize['2xl'],
   fontWeight: typography.fontWeight.bold,
   color: emailTheme.textPrimary,
   margin: `0 0 ${spacing.md} 0`,
@@ -204,18 +194,18 @@ const ctaTitleStyle: React.CSSProperties = {
 
 const primaryButtonStyle: React.CSSProperties = {
   backgroundColor: brandColors.primary,
-  color: "#ffffff",
+  color: '#ffffff',
   fontWeight: typography.fontWeight.semibold,
   fontSize: typography.fontSize.base,
   padding: `${spacing.md} ${spacing.xl}`,
   borderRadius: borderRadius.md,
-  textDecoration: "none",
-  display: "inline-block",
+  textDecoration: 'none',
+  display: 'inline-block',
   marginTop: spacing.md,
   marginBottom: spacing.sm,
   marginLeft: spacing.sm,
   marginRight: spacing.sm,
-  border: "none",
+  border: 'none',
 };
 
 const secondaryButtonStyle: React.CSSProperties = {
@@ -225,8 +215,8 @@ const secondaryButtonStyle: React.CSSProperties = {
   fontSize: typography.fontSize.base,
   padding: `${spacing.md} ${spacing.xl}`,
   borderRadius: borderRadius.md,
-  textDecoration: "none",
-  display: "inline-block",
+  textDecoration: 'none',
+  display: 'inline-block',
   marginTop: spacing.sm,
   marginBottom: spacing.md,
   marginLeft: spacing.sm,

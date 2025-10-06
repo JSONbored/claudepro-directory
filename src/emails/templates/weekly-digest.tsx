@@ -9,16 +9,10 @@
  * - Email client compatible
  */
 
-import { Button, Hr, Section, Text } from "@react-email/components";
-import type * as React from "react";
-import { BaseLayout } from "../layouts/base-layout";
-import {
-  borderRadius,
-  brandColors,
-  emailTheme,
-  spacing,
-  typography,
-} from "../utils/theme";
+import { Button, Hr, Section, Text } from '@react-email/components';
+import type * as React from 'react';
+import { BaseLayout } from '../layouts/base-layout';
+import { borderRadius, brandColors, emailTheme, spacing, typography } from '../utils/theme';
 
 /**
  * Content item for digest
@@ -78,23 +72,16 @@ export interface WeeklyDigestProps {
  * />
  * ```
  */
-export function WeeklyDigest({
-  email,
-  weekOf,
-  newContent,
-  trendingContent,
-}: WeeklyDigestProps) {
+export function WeeklyDigest({ email, weekOf, newContent, trendingContent }: WeeklyDigestProps) {
   return (
-    <BaseLayout
-      preview={`This Week in Claude - ${weekOf} | New tools, trending content, and more`}
-    >
+    <BaseLayout preview={`This Week in Claude - ${weekOf} | New tools, trending content, and more`}>
       {/* Hero section */}
       <Section style={heroSection}>
         <Text style={headingStyle}>This Week in Claude 🚀</Text>
         <Text style={subheadingStyle}>{weekOf}</Text>
         <Text style={paragraphStyle}>
-          Your weekly roundup of the best Claude tools, configurations, and
-          resources from the community.
+          Your weekly roundup of the best Claude tools, configurations, and resources from the
+          community.
         </Text>
       </Section>
 
@@ -110,13 +97,8 @@ export function WeeklyDigest({
             </Text>
 
             {newContent.map((item) => (
-              <Section
-                key={`${item.category}-${item.slug}`}
-                style={itemCardStyle}
-              >
-                <Text style={itemCategoryStyle}>
-                  {item.category.toUpperCase()}
-                </Text>
+              <Section key={`${item.category}-${item.slug}`} style={itemCardStyle}>
+                <Text style={itemCategoryStyle}>{item.category.toUpperCase()}</Text>
                 <Text style={itemTitleStyle}>{item.title}</Text>
                 <Text style={itemDescriptionStyle}>{item.description}</Text>
                 <Button href={item.url} style={itemButtonStyle}>
@@ -135,22 +117,13 @@ export function WeeklyDigest({
         <>
           <Section style={contentSection}>
             <Text style={sectionTitleStyle}>🔥 Trending This Week</Text>
-            <Text style={paragraphStyle}>
-              Most popular tools from the community:
-            </Text>
+            <Text style={paragraphStyle}>Most popular tools from the community:</Text>
 
             {trendingContent.map((item) => (
-              <Section
-                key={`trending-${item.category}-${item.slug}`}
-                style={itemCardStyle}
-              >
+              <Section key={`trending-${item.category}-${item.slug}`} style={itemCardStyle}>
                 <div style={trendingHeaderStyle}>
-                  <Text style={itemCategoryStyle}>
-                    {item.category.toUpperCase()}
-                  </Text>
-                  <Text style={viewCountStyle}>
-                    👁️ {formatViewCount(item.viewCount)} views
-                  </Text>
+                  <Text style={itemCategoryStyle}>{item.category.toUpperCase()}</Text>
+                  <Text style={viewCountStyle}>👁️ {formatViewCount(item.viewCount)} views</Text>
                 </div>
                 <Text style={itemTitleStyle}>{item.title}</Text>
                 <Text style={itemDescriptionStyle}>{item.description}</Text>
@@ -169,18 +142,14 @@ export function WeeklyDigest({
       <Section style={ctaSection}>
         <Text style={ctaTitleStyle}>Explore More</Text>
         <Text style={paragraphStyle}>
-          Browse the complete directory to discover even more tools and
-          configurations.
+          Browse the complete directory to discover even more tools and configurations.
         </Text>
 
         <Button href="https://claudepro.directory" style={primaryButtonStyle}>
           Browse Directory
         </Button>
 
-        <Button
-          href="https://claudepro.directory/trending"
-          style={secondaryButtonStyle}
-        >
+        <Button href="https://claudepro.directory/trending" style={secondaryButtonStyle}>
           View All Trending
         </Button>
       </Section>
@@ -193,9 +162,8 @@ export function WeeklyDigest({
           📧 Subscribed with: <strong style={strongStyle}>{email}</strong>
         </Text>
         <Text style={footerNoteStyle}>
-          You're receiving this because you subscribed to weekly updates from
-          ClaudePro Directory. You can unsubscribe anytime using the links at
-          the bottom of this email.
+          You're receiving this because you subscribed to weekly updates from ClaudePro Directory.
+          You can unsubscribe anytime using the links at the bottom of this email.
         </Text>
       </Section>
     </BaseLayout>
@@ -216,12 +184,12 @@ function formatViewCount(count: number): string {
  */
 
 const heroSection: React.CSSProperties = {
-  textAlign: "center",
+  textAlign: 'center',
   marginBottom: spacing.lg,
 };
 
 const headingStyle: React.CSSProperties = {
-  fontSize: typography.fontSize["3xl"],
+  fontSize: typography.fontSize['3xl'],
   fontWeight: typography.fontWeight.bold,
   color: emailTheme.textPrimary,
   margin: `0 0 ${spacing.sm} 0`,
@@ -242,7 +210,7 @@ const contentSection: React.CSSProperties = {
 };
 
 const sectionTitleStyle: React.CSSProperties = {
-  fontSize: typography.fontSize["2xl"],
+  fontSize: typography.fontSize['2xl'],
   fontWeight: typography.fontWeight.bold,
   color: emailTheme.textPrimary,
   margin: `0 0 ${spacing.md} 0`,
@@ -267,7 +235,7 @@ const itemCategoryStyle: React.CSSProperties = {
   fontSize: typography.fontSize.xs,
   fontWeight: typography.fontWeight.semibold,
   color: brandColors.primary,
-  letterSpacing: "0.05em",
+  letterSpacing: '0.05em',
   margin: `0 0 ${spacing.xs} 0`,
 };
 
@@ -288,20 +256,20 @@ const itemDescriptionStyle: React.CSSProperties = {
 
 const itemButtonStyle: React.CSSProperties = {
   backgroundColor: brandColors.primary,
-  color: "#ffffff",
+  color: '#ffffff',
   fontWeight: typography.fontWeight.medium,
   fontSize: typography.fontSize.sm,
   padding: `${spacing.sm} ${spacing.lg}`,
   borderRadius: borderRadius.sm,
-  textDecoration: "none",
-  display: "inline-block",
-  border: "none",
+  textDecoration: 'none',
+  display: 'inline-block',
+  border: 'none',
 };
 
 const trendingHeaderStyle: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
   marginBottom: spacing.xs,
 };
 
@@ -317,13 +285,13 @@ const dividerStyle: React.CSSProperties = {
 };
 
 const ctaSection: React.CSSProperties = {
-  textAlign: "center",
+  textAlign: 'center',
   marginTop: spacing.lg,
   marginBottom: spacing.lg,
 };
 
 const ctaTitleStyle: React.CSSProperties = {
-  fontSize: typography.fontSize["2xl"],
+  fontSize: typography.fontSize['2xl'],
   fontWeight: typography.fontWeight.bold,
   color: emailTheme.textPrimary,
   margin: `0 0 ${spacing.md} 0`,
@@ -331,18 +299,18 @@ const ctaTitleStyle: React.CSSProperties = {
 
 const primaryButtonStyle: React.CSSProperties = {
   backgroundColor: brandColors.primary,
-  color: "#ffffff",
+  color: '#ffffff',
   fontWeight: typography.fontWeight.semibold,
   fontSize: typography.fontSize.base,
   padding: `${spacing.md} ${spacing.xl}`,
   borderRadius: borderRadius.md,
-  textDecoration: "none",
-  display: "inline-block",
+  textDecoration: 'none',
+  display: 'inline-block',
   marginTop: spacing.md,
   marginBottom: spacing.sm,
   marginLeft: spacing.sm,
   marginRight: spacing.sm,
-  border: "none",
+  border: 'none',
 };
 
 const secondaryButtonStyle: React.CSSProperties = {
@@ -352,8 +320,8 @@ const secondaryButtonStyle: React.CSSProperties = {
   fontSize: typography.fontSize.base,
   padding: `${spacing.md} ${spacing.xl}`,
   borderRadius: borderRadius.md,
-  textDecoration: "none",
-  display: "inline-block",
+  textDecoration: 'none',
+  display: 'inline-block',
   marginTop: spacing.sm,
   marginBottom: spacing.md,
   marginLeft: spacing.sm,

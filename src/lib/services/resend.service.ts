@@ -10,19 +10,19 @@
  * - Production-ready with comprehensive error messages
  */
 
-import type { ReactElement } from "react";
-import { Resend } from "resend";
-import { z } from "zod";
-import { renderEmail } from "@/src/emails/utils/render";
-import { logger } from "@/src/lib/logger";
-import { env } from "@/src/lib/schemas/env.schema";
+import type { ReactElement } from 'react';
+import { Resend } from 'resend';
+import { z } from 'zod';
+import { renderEmail } from '@/src/emails/utils/render';
+import { logger } from '@/src/lib/logger';
+import { env } from '@/src/lib/schemas/env.schema';
 
 /**
  * Resend API response schemas for type safety
  * Based on official API docs: https://resend.com/docs/api-reference/contacts/create-contact
  */
 const resendContactSchema = z.object({
-  object: z.literal("contact"),
+  object: z.literal('contact'),
   id: z.string(),
 });
 
@@ -66,7 +66,7 @@ export interface EmailSendResult {
  */
 class ResendService {
   private client: Resend | null = null;
-  private readonly FROM_EMAIL = "hello@mail.claudepro.directory";
+  private readonly FROM_EMAIL = 'hello@mail.claudepro.directory';
   private readonly AUDIENCE_ID: string | undefined;
 
   constructor() {
@@ -77,11 +77,11 @@ class ResendService {
 
       if (!this.AUDIENCE_ID) {
         logger.warn(
-          "RESEND_AUDIENCE_ID not configured - contacts will need manual audience assignment",
+          'RESEND_AUDIENCE_ID not configured - contacts will need manual audience assignment'
         );
       }
     } else {
-      logger.warn("RESEND_API_KEY not configured - email service disabled");
+      logger.warn('RESEND_API_KEY not configured - email service disabled');
     }
   }
 
@@ -97,25 +97,25 @@ class ResendService {
     metadata?: {
       source?: string;
       referrer?: string;
-    },
+    }
   ): Promise<SubscribeResponse> {
     // Check if service is enabled
     if (!this.client) {
-      logger.error("Resend service not initialized - missing API key");
+      logger.error('Resend service not initialized - missing API key');
       return {
         success: false,
-        message: "Email service is not configured",
-        error: "RESEND_API_KEY missing",
+        message: 'Email service is not configured',
+        error: 'RESEND_API_KEY missing',
       };
     }
 
     // Verify audience ID is configured
     if (!this.AUDIENCE_ID) {
-      logger.error("RESEND_AUDIENCE_ID not configured - cannot create contact");
+      logger.error('RESEND_AUDIENCE_ID not configured - cannot create contact');
       return {
         success: false,
-        message: "Newsletter service is not fully configured",
-        error: "RESEND_AUDIENCE_ID missing",
+        message: 'Newsletter service is not fully configured',
+        error: 'RESEND_AUDIENCE_ID missing',
       };
     }
 
@@ -130,35 +130,32 @@ class ResendService {
 
       // Check for API errors first (Resend SDK returns either {data, error: null} or {data: null, error})
       if (response.error) {
-        logger.error("Resend API returned error", undefined, {
-          errorName: response.error.name || "ResendError",
+        logger.error('Resend API returned error', undefined, {
+          errorName: response.error.name || 'ResendError',
           errorMessage: response.error.message || String(response.error),
         });
 
         // Handle specific error cases
         const errorMessage = response.error.message || String(response.error);
 
-        if (errorMessage.includes("already exists")) {
+        if (errorMessage.includes('already exists')) {
           return {
             success: true, // Treat duplicate as success (idempotent)
-            message: "Email already subscribed",
+            message: 'Email already subscribed',
           };
         }
 
-        if (
-          errorMessage.includes("invalid email") ||
-          errorMessage.includes("validation")
-        ) {
+        if (errorMessage.includes('invalid email') || errorMessage.includes('validation')) {
           return {
             success: false,
-            message: "Invalid email address",
-            error: "Email validation failed",
+            message: 'Invalid email address',
+            error: 'Email validation failed',
           };
         }
 
         return {
           success: false,
-          message: "Subscription failed - please try again",
+          message: 'Subscription failed - please try again',
           error: errorMessage,
         };
       }
@@ -167,7 +164,7 @@ class ResendService {
       const contact = resendContactSchema.safeParse(response.data);
 
       if (contact.success) {
-        logger.info("Newsletter subscription successful", {
+        logger.info('Newsletter subscription successful', {
           contactId: contact.data.id,
           ...(metadata?.source && { source: metadata.source }),
           ...(metadata?.referrer && { referrer: metadata.referrer }),
@@ -176,60 +173,54 @@ class ResendService {
         return {
           success: true,
           contactId: contact.data.id,
-          message: "Successfully subscribed to newsletter",
+          message: 'Successfully subscribed to newsletter',
         };
       }
 
       // Response doesn't match expected schema - log detailed error
-      logger.error("Resend API response schema validation failed", undefined, {
+      logger.error('Resend API response schema validation failed', undefined, {
         responseData: JSON.stringify(response.data),
-        zodErrors: contact.error
-          ? JSON.stringify(contact.error.format())
-          : "No validation errors",
-        expectedSchema: "object: contact, id: string",
+        zodErrors: contact.error ? JSON.stringify(contact.error.format()) : 'No validation errors',
+        expectedSchema: 'object: contact, id: string',
       });
 
       return {
         success: false,
-        message: "Subscription failed - unexpected response",
-        error: "Invalid API response format",
+        message: 'Subscription failed - unexpected response',
+        error: 'Invalid API response format',
       };
     } catch (error) {
       // Handle Resend API errors
       const errorDetails = this.parseError(error);
 
-      logger.error(
-        "Newsletter subscription failed",
-        error instanceof Error ? error : undefined,
-        {
-          errorName: errorDetails.name,
-          errorMessage: errorDetails.message,
-          errorType: typeof error,
-          errorString: String(error),
-          ...(metadata?.source && { source: metadata.source }),
-        },
-      );
+      logger.error('Newsletter subscription failed', error instanceof Error ? error : undefined, {
+        errorName: errorDetails.name,
+        errorMessage: errorDetails.message,
+        errorType: typeof error,
+        errorString: String(error),
+        ...(metadata?.source && { source: metadata.source }),
+      });
 
       // Check for specific error cases
-      if (errorDetails.message.includes("already exists")) {
+      if (errorDetails.message.includes('already exists')) {
         return {
           success: true, // Treat duplicate as success (idempotent)
-          message: "Email already subscribed",
+          message: 'Email already subscribed',
         };
       }
 
-      if (errorDetails.message.includes("invalid email")) {
+      if (errorDetails.message.includes('invalid email')) {
         return {
           success: false,
-          message: "Invalid email address",
-          error: "Email validation failed",
+          message: 'Invalid email address',
+          error: 'Email validation failed',
         };
       }
 
       // Generic error response
       return {
         success: false,
-        message: "Subscription failed - please try again",
+        message: 'Subscription failed - please try again',
         error: errorDetails.message,
       };
     }
@@ -244,12 +235,12 @@ class ResendService {
    */
   async removeContact(
     email: string,
-    audienceId?: string,
+    audienceId?: string
   ): Promise<{ success: boolean; message?: string; error?: string }> {
     if (!(this.client && this.AUDIENCE_ID)) {
       return {
         success: false,
-        error: "Resend is not enabled - missing API key or audience ID",
+        error: 'Resend is not enabled - missing API key or audience ID',
       };
     }
 
@@ -261,21 +252,17 @@ class ResendService {
         email,
       });
 
-      logger.info("Contact removed from audience", {
+      logger.info('Contact removed from audience', {
         audienceId: targetAudienceId,
       });
 
-      return { success: true, message: "Contact removed successfully" };
+      return { success: true, message: 'Contact removed successfully' };
     } catch (error) {
       const errorDetails = this.parseError(error);
-      logger.error(
-        "Failed to remove contact",
-        error instanceof Error ? error : undefined,
-        {
-          errorName: errorDetails.name,
-          errorMessage: errorDetails.message,
-        },
-      );
+      logger.error('Failed to remove contact', error instanceof Error ? error : undefined, {
+        errorName: errorDetails.name,
+        errorMessage: errorDetails.message,
+      });
 
       return {
         success: false,
@@ -329,14 +316,14 @@ class ResendService {
       from?: string;
       replyTo?: string;
       tags?: Array<{ name: string; value: string }>;
-    },
+    }
   ): Promise<EmailSendResult> {
     // Check if service is enabled
     if (!this.client) {
-      logger.error("Resend service not initialized - missing API key");
+      logger.error('Resend service not initialized - missing API key');
       return {
         success: false,
-        error: "Email service is not configured",
+        error: 'Email service is not configured',
       };
     }
 
@@ -345,13 +332,13 @@ class ResendService {
       const rendered = await renderEmail(template, { plainText: true });
 
       if (!(rendered.success && rendered.html)) {
-        logger.error("Failed to render email template", undefined, {
+        logger.error('Failed to render email template', undefined, {
           ...(rendered.error && { error: rendered.error }),
         });
 
         return {
           success: false,
-          error: rendered.error || "Failed to render email template",
+          error: rendered.error || 'Failed to render email template',
         };
       }
 
@@ -368,10 +355,10 @@ class ResendService {
 
       // Check for API errors
       if (response.error) {
-        logger.error("Failed to send email via Resend", undefined, {
-          errorName: response.error.name || "ResendError",
+        logger.error('Failed to send email via Resend', undefined, {
+          errorName: response.error.name || 'ResendError',
           errorMessage: response.error.message || String(response.error),
-          recipients: Array.isArray(to) ? to.join(", ") : to,
+          recipients: Array.isArray(to) ? to.join(', ') : to,
           subject,
         });
 
@@ -382,9 +369,9 @@ class ResendService {
       }
 
       // Success
-      logger.info("Email sent successfully", {
+      logger.info('Email sent successfully', {
         emailId: response.data?.id,
-        recipients: Array.isArray(to) ? to.join(", ") : to,
+        recipients: Array.isArray(to) ? to.join(', ') : to,
         subject,
       });
 
@@ -399,16 +386,12 @@ class ResendService {
     } catch (error) {
       const errorDetails = this.parseError(error);
 
-      logger.error(
-        "Email sending failed",
-        error instanceof Error ? error : undefined,
-        {
-          errorName: errorDetails.name,
-          errorMessage: errorDetails.message,
-          recipients: Array.isArray(to) ? to.join(", ") : to,
-          subject,
-        },
-      );
+      logger.error('Email sending failed', error instanceof Error ? error : undefined, {
+        errorName: errorDetails.name,
+        errorMessage: errorDetails.message,
+        recipients: Array.isArray(to) ? to.join(', ') : to,
+        subject,
+      });
 
       return {
         success: false,
@@ -432,14 +415,14 @@ class ResendService {
   async getAllContacts(audienceId?: string): Promise<string[]> {
     // Check if service is enabled
     if (!this.client) {
-      logger.error("Resend service not initialized - missing API key");
+      logger.error('Resend service not initialized - missing API key');
       return [];
     }
 
     const targetAudienceId = audienceId || this.AUDIENCE_ID;
 
     if (!targetAudienceId) {
-      logger.error("Audience ID not provided or configured");
+      logger.error('Audience ID not provided or configured');
       return [];
     }
 
@@ -456,8 +439,8 @@ class ResendService {
         });
 
         if (response.error) {
-          logger.error("Failed to fetch contacts from Resend", undefined, {
-            errorName: response.error.name || "ResendError",
+          logger.error('Failed to fetch contacts from Resend', undefined, {
+            errorName: response.error.name || 'ResendError',
             errorMessage: response.error.message || String(response.error),
             audienceId: targetAudienceId,
           });
@@ -468,23 +451,19 @@ class ResendService {
           // Extract email addresses
           const emails = response.data.data
             .map((contact) => contact.email)
-            .filter((email): email is string => typeof email === "string");
+            .filter((email): email is string => typeof email === 'string');
           contacts.push(...emails);
 
           // Check for next page
-          const responseData = response.data as unknown as Record<
-            string,
-            unknown
-          >;
+          const responseData = response.data as unknown as Record<string, unknown>;
           hasMore = !!responseData.next_cursor;
-          cursor =
-            (responseData.next_cursor as string | undefined) || undefined;
+          cursor = (responseData.next_cursor as string | undefined) || undefined;
         } else {
           hasMore = false;
         }
       }
 
-      logger.info("Retrieved contacts from audience", {
+      logger.info('Retrieved contacts from audience', {
         audienceId: targetAudienceId,
         count: contacts.length,
       });
@@ -492,15 +471,11 @@ class ResendService {
       return contacts;
     } catch (error) {
       const errorDetails = this.parseError(error);
-      logger.error(
-        "Failed to get contacts",
-        error instanceof Error ? error : undefined,
-        {
-          errorName: errorDetails.name,
-          errorMessage: errorDetails.message,
-          audienceId: targetAudienceId,
-        },
-      );
+      logger.error('Failed to get contacts', error instanceof Error ? error : undefined, {
+        errorName: errorDetails.name,
+        errorMessage: errorDetails.message,
+        audienceId: targetAudienceId,
+      });
       return [];
     }
   }
@@ -537,7 +512,7 @@ class ResendService {
       replyTo?: string;
       tags?: Array<{ name: string; value: string }>;
       delayMs?: number; // Delay between batches (default: 1000ms)
-    },
+    }
   ): Promise<{ success: number; failed: number; errors: string[] }> {
     const results = {
       success: 0,
@@ -547,14 +522,14 @@ class ResendService {
 
     // Check if service is enabled
     if (!this.client) {
-      logger.error("Resend service not initialized - missing API key");
+      logger.error('Resend service not initialized - missing API key');
       return results;
     }
 
     const batchSize = 50; // Resend limit
     const delayMs = options?.delayMs || 1000;
 
-    logger.info("Starting batch email send", {
+    logger.info('Starting batch email send', {
       totalRecipients: recipients.length,
       batches: Math.ceil(recipients.length / batchSize),
     });
@@ -581,7 +556,7 @@ class ResendService {
           if (options?.replyTo) emailOptions.replyTo = options.replyTo;
           if (options?.tags) emailOptions.tags = options.tags;
           return this.sendEmail(email, subject, template, emailOptions);
-        }),
+        })
       );
 
       // Count results
@@ -591,14 +566,12 @@ class ResendService {
 
         if (!(result && email)) continue;
 
-        if (result.status === "fulfilled" && result.value.success) {
+        if (result.status === 'fulfilled' && result.value.success) {
           results.success++;
         } else {
           results.failed++;
           const errorMsg =
-            result.status === "rejected"
-              ? result.reason
-              : result.value.error || "Unknown error";
+            result.status === 'rejected' ? result.reason : result.value.error || 'Unknown error';
           results.errors.push(`${email}: ${errorMsg}`);
         }
       }
@@ -609,7 +582,7 @@ class ResendService {
       }
     }
 
-    logger.info("Batch email send completed", {
+    logger.info('Batch email send completed', {
       success: results.success,
       failed: results.failed,
       total: recipients.length,
@@ -638,7 +611,7 @@ class ResendService {
     }
 
     return {
-      name: "UnknownError",
+      name: 'UnknownError',
       message: String(error),
     };
   }
