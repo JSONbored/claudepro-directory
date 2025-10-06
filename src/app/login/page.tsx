@@ -23,7 +23,7 @@ export default function LoginPage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AuthButtons redirectTo={searchParams.redirect || undefined} />
+          <AuthButtons {...(searchParams.redirect ? { redirectTo: searchParams.redirect } : {})} />
           
           <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} text-center mt-4`}>
             By signing in, you agree to our Terms of Service and Privacy Policy

@@ -79,16 +79,16 @@ export const agentSubmissionSchema = z.object({
 });
 
 /**
- * Rules submission schema - PLAINTEXT .cursorrules content
+ * Rules submission schema - PLAINTEXT Claude expertise rules
  */
 export const rulesSubmissionSchema = z.object({
   type: z.literal('rules'),
   ...baseSubmissionFields,
   
-  // Plaintext rules content (NO JSON!)
+  // Plaintext Claude rules content (NO JSON!)
   rulesContent: nonEmptyString
-    .min(50, 'Rules content must be at least 50 characters')
-    .max(10000, 'Rules content is too long'),
+    .min(50, 'Claude rules content must be at least 50 characters')
+    .max(10000, 'Claude rules content is too long'),
   
   temperature: z.coerce.number().min(0).max(1).default(0.7),
   maxTokens: z.coerce.number().min(100).max(200000).default(8000),
@@ -186,5 +186,24 @@ export const configSubmissionSchema = z.discriminatedUnion('type', [
 export type ConfigSubmissionInput = z.input<typeof configSubmissionSchema>;
 export type ConfigSubmissionData = z.output<typeof configSubmissionSchema>;
 
-// Legacy export for backwards compatibility
-export { configSubmissionSchema as configSubmissionSchema };
+/**
+ * JSON-LD utilities (moved from previous version)
+ */
+export function validateJsonLdSafe(data: unknown): unknown {
+  const jsonString = JSON.stringify(data);
+  
+  if (/<script\b/i.test(jsonString)) {
+    throw new Error('Script tags are not allowed in JSON-LD data');
+  }
+  
+  if (/javascript:/i.test(jsonString)) {
+    throw new Error('JavaScript protocol not allowed in JSON-LD data');
+  }
+  
+  return JSON.parse(jsonString);
+}
+
+export function serializeJsonLd(data: unknown): string {
+  const validated = validateJsonLdSafe(data);
+  return JSON.stringify(validated).replace(/</g, '\\u003c');
+}

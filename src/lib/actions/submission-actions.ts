@@ -16,7 +16,6 @@
  * 9. Return PR URL
  */
 
-import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { configSubmissionSchema } from '@/src/lib/schemas/form.schema';
 import { createClient } from '@/src/lib/supabase/server';
@@ -47,7 +46,7 @@ import { revalidatePath } from 'next/cache';
 export const submitConfiguration = rateLimitedAction
   .metadata({
     actionName: 'submitConfiguration',
-    category: 'submissions',
+    category: 'form',
   })
   .schema(configSubmissionSchema)
   .action(async ({ parsedInput }) => {
@@ -101,17 +100,10 @@ export const submitConfiguration = rateLimitedAction
       );
     }
 
-    // 5. Format content file
+    // 5. Format content file (pass full parsed input with slug)
     const contentFile = formatContentFile({
+      ...parsedInput,
       slug,
-      name: parsedInput.name,
-      description: parsedInput.description,
-      category: parsedInput.category,
-      author: parsedInput.author,
-      github: parsedInput.github,
-      content: parsedInput.content,
-      tags: parsedInput.tags || [],
-      type: parsedInput.type,
     });
 
     // 6. Validate formatted content
@@ -157,7 +149,7 @@ export const submitConfiguration = rateLimitedAction
       description: parsedInput.description,
       category: parsedInput.category,
       author: parsedInput.author,
-      github: parsedInput.github,
+      github: parsedInput.github || undefined,
       tags: parsedInput.tags || [],
       submittedBy: profile
         ? {
