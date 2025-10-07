@@ -22,7 +22,6 @@
 import { useMemo, useState } from 'react';
 import { CategoryFilter } from '@/src/components/changelog/category-filter';
 import { ChangelogCard } from '@/src/components/changelog/changelog-card';
-import { TabsContent } from '@/src/components/ui/tabs';
 import type { ChangelogCategory, ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -67,7 +66,7 @@ export function ChangelogListClient({ entries }: ChangelogListClientProps) {
       />
 
       {/* Filtered Entries List */}
-      <TabsContent value={activeCategory} className="mt-6">
+      <div className="mt-6">
         {filteredEntries.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-1">
             {filteredEntries.map((entry) => (
@@ -81,7 +80,7 @@ export function ChangelogListClient({ entries }: ChangelogListClientProps) {
             </p>
           </div>
         )}
-      </TabsContent>
+      </div>
     </div>
   );
 }
