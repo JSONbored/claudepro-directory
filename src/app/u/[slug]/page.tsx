@@ -139,6 +139,17 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                     </>
                   )}
                 </div>
+
+                {/* Interests/Skills Tags */}
+                {profile.interests && profile.interests.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {profile.interests.map((interest: string) => (
+                      <Badge key={interest} variant="secondary">
+                        {interest}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -162,8 +173,18 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
               </CardHeader>
               <CardContent className={UI_CLASSES.SPACE_Y_3}>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Reputation</span>
+                  <Badge variant="secondary">{profile.reputation_score || 0}</Badge>
+                </div>
+                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Posts</span>
                   <Badge variant="secondary">{posts?.length || 0}</Badge>
+                </div>
+                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Tier</span>
+                  <Badge variant={profile.tier === 'pro' ? 'default' : 'secondary'}>
+                    {profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)}
+                  </Badge>
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Member since</span>
