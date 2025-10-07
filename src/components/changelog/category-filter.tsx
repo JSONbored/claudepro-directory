@@ -84,7 +84,8 @@ export const CategoryFilter = memo(
         if (entry.categories.Changed.length > 0) counts.Changed = (counts.Changed ?? 0) + 1;
         if (entry.categories.Fixed.length > 0) counts.Fixed = (counts.Fixed ?? 0) + 1;
         if (entry.categories.Removed.length > 0) counts.Removed = (counts.Removed ?? 0) + 1;
-        if (entry.categories.Deprecated.length > 0) counts.Deprecated = (counts.Deprecated ?? 0) + 1;
+        if (entry.categories.Deprecated.length > 0)
+          counts.Deprecated = (counts.Deprecated ?? 0) + 1;
         if (entry.categories.Security.length > 0) counts.Security = (counts.Security ?? 0) + 1;
       }
 

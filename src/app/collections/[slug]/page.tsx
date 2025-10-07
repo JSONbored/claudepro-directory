@@ -162,7 +162,9 @@ export default async function CollectionDetailPage({
   );
 
   // Filter out failed loads
-  const validItems = itemsWithContent.filter((item: ItemWithData | null): item is ItemWithData => item !== null);
+  const validItems = itemsWithContent.filter(
+    (item: ItemWithData | null): item is ItemWithData => item !== null
+  );
 
   // Group items by category
   const itemsByCategory = validItems.reduce(
@@ -277,21 +279,23 @@ export default async function CollectionDetailPage({
               }
             >
               <div className="space-y-8">
-                {(Object.entries(itemsByCategory) as [string, ItemWithData[]][]).map(([category, items]) => (
-                  <div key={category}>
-                    <h3 className="text-lg font-semibold text-foreground mb-4">
-                      {CATEGORY_NAMES[category as keyof typeof CATEGORY_NAMES] || category} (
-                      {items.length})
-                    </h3>
-                    <div className="grid gap-4 sm:grid-cols-1">
-                      {items.map((item: ItemWithData) =>
-                        item?.data ? (
-                          <ConfigCard key={item.slug} item={item.data} showCategory={false} />
-                        ) : null
-                      )}
+                {(Object.entries(itemsByCategory) as [string, ItemWithData[]][]).map(
+                  ([category, items]) => (
+                    <div key={category}>
+                      <h3 className="text-lg font-semibold text-foreground mb-4">
+                        {CATEGORY_NAMES[category as keyof typeof CATEGORY_NAMES] || category} (
+                        {items.length})
+                      </h3>
+                      <div className="grid gap-4 sm:grid-cols-1">
+                        {items.map((item: ItemWithData) =>
+                          item?.data ? (
+                            <ConfigCard key={item.slug} item={item.data} showCategory={false} />
+                          ) : null
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             </Suspense>
           </div>
