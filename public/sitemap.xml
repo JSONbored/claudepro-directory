@@ -259,7 +259,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/changelog/2025-10-05-resend-newsletter-integration-with-sticky-footer-b</loc>
+    <loc>https://claudepro.directory/changelog/2025-10-05-resend-newsletter-integration-with-sticky-footer-bar</loc>
     <lastmod>2025-10-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -271,25 +271,25 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-llmstxt-complete-content-generation-for-ai-discove</loc>
+    <loc>https://claudepro.directory/changelog/2025-10-04-llmstxt-complete-content-generation-for-ai-discovery</loc>
     <lastmod>2025-10-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-seo-title-optimization-system-with-automated-enhan</loc>
+    <loc>https://claudepro.directory/changelog/2025-10-04-seo-title-optimization-system-with-automated-enhancement</loc>
     <lastmod>2025-10-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-production-hardened-trending-algorithm-with-securi</loc>
+    <loc>https://claudepro.directory/changelog/2025-10-04-production-hardened-trending-algorithm-with-security-performance-optimizations</loc>
     <lastmod>2025-10-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-view-counter-ui-redesign-with-prominent-badge-disp</loc>
+    <loc>https://claudepro.directory/changelog/2025-10-04-view-counter-ui-redesign-with-prominent-badge-display</loc>
     <lastmod>2025-10-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -301,7 +301,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-content-security-policy-strict-dynamic-implementat</loc>
+    <loc>https://claudepro.directory/changelog/2025-10-04-content-security-policy-strict-dynamic-implementation</loc>
     <lastmod>2025-10-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -319,7 +319,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-github-actions-ci-optimization-for-community-contr</loc>
+    <loc>https://claudepro.directory/changelog/2025-10-04-github-actions-ci-optimization-for-community-contributors</loc>
     <lastmod>2025-10-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -2323,7 +2323,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/changelog/2025-10-05-resend-newsletter-integration-with-sticky-footer-b/llms.txt</loc>
+    <loc>https://claudepro.directory/changelog/2025-10-05-resend-newsletter-integration-with-sticky-footer-bar/llms.txt</loc>
     <lastmod>2025-10-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -2335,25 +2335,25 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-llmstxt-complete-content-generation-for-ai-discove/llms.txt</loc>
+    <loc>https://claudepro.directory/changelog/2025-10-04-llmstxt-complete-content-generation-for-ai-discovery/llms.txt</loc>
     <lastmod>2025-10-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-seo-title-optimization-system-with-automated-enhan/llms.txt</loc>
+    <loc>https://claudepro.directory/changelog/2025-10-04-seo-title-optimization-system-with-automated-enhancement/llms.txt</loc>
     <lastmod>2025-10-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-production-hardened-trending-algorithm-with-securi/llms.txt</loc>
+    <loc>https://claudepro.directory/changelog/2025-10-04-production-hardened-trending-algorithm-with-security-performance-optimizations/llms.txt</loc>
     <lastmod>2025-10-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-view-counter-ui-redesign-with-prominent-badge-disp/llms.txt</loc>
+    <loc>https://claudepro.directory/changelog/2025-10-04-view-counter-ui-redesign-with-prominent-badge-display/llms.txt</loc>
     <lastmod>2025-10-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -2365,7 +2365,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-content-security-policy-strict-dynamic-implementat/llms.txt</loc>
+    <loc>https://claudepro.directory/changelog/2025-10-04-content-security-policy-strict-dynamic-implementation/llms.txt</loc>
     <lastmod>2025-10-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
@@ -2383,7 +2383,7 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-github-actions-ci-optimization-for-community-contr/llms.txt</loc>
+    <loc>https://claudepro.directory/changelog/2025-10-04-github-actions-ci-optimization-for-community-contributors/llms.txt</loc>
     <lastmod>2025-10-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>

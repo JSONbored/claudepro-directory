@@ -122,7 +122,9 @@ export default async function Image() {
                   backgroundColor: '#22c55e',
                 }}
               />
-              <div style={{ display: 'flex', fontSize: 24, color: 'rgba(255, 255, 255, 0.8)' }}>New Features</div>
+              <div style={{ display: 'flex', fontSize: 24, color: 'rgba(255, 255, 255, 0.8)' }}>
+                New Features
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
               <div
@@ -133,7 +135,9 @@ export default async function Image() {
                   backgroundColor: '#a855f7',
                 }}
               />
-              <div style={{ display: 'flex', fontSize: 24, color: 'rgba(255, 255, 255, 0.8)' }}>Bug Fixes</div>
+              <div style={{ display: 'flex', fontSize: 24, color: 'rgba(255, 255, 255, 0.8)' }}>
+                Bug Fixes
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 15 }}>
               <div
@@ -144,7 +148,9 @@ export default async function Image() {
                   backgroundColor: '#3b82f6',
                 }}
               />
-              <div style={{ display: 'flex', fontSize: 24, color: 'rgba(255, 255, 255, 0.8)' }}>Improvements</div>
+              <div style={{ display: 'flex', fontSize: 24, color: 'rgba(255, 255, 255, 0.8)' }}>
+                Improvements
+              </div>
             </div>
           </div>
         </div>
