@@ -53,7 +53,9 @@ export default async function HomePage() {
     statsRedis.enrichWithViewCounts(
       rulesData.map((item: RuleMetadata) => ({ ...item, category: 'rules' as const }))
     ),
-    statsRedis.enrichWithViewCounts(mcpData.map((item: McpMetadata) => ({ ...item, category: 'mcp' as const }))),
+    statsRedis.enrichWithViewCounts(
+      mcpData.map((item: McpMetadata) => ({ ...item, category: 'mcp' as const }))
+    ),
     statsRedis.enrichWithViewCounts(
       agentsData.map((item: AgentMetadata) => ({ ...item, category: 'agents' as const }))
     ),
@@ -93,7 +95,9 @@ export default async function HomePage() {
   ];
 
   // Use Map to deduplicate by slug (last occurrence wins)
-  const allConfigsMap = new Map(allConfigsWithDuplicates.map((item: { slug: string }) => [item.slug, item]));
+  const allConfigsMap = new Map(
+    allConfigsWithDuplicates.map((item: { slug: string }) => [item.slug, item])
+  );
   const allConfigs = Array.from(allConfigsMap.values());
 
   // Transform data using transform functions to convert readonly arrays to mutable
