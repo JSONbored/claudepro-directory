@@ -70,7 +70,7 @@ export const addBookmark = rateLimitedAction
 
     // Revalidate account pages
     revalidatePath('/account');
-    revalidatePath('/account/bookmarks');
+    revalidatePath('/account/library');
 
     return {
       success: true,
@@ -118,7 +118,7 @@ export const removeBookmark = rateLimitedAction
 
     // Revalidate account pages
     revalidatePath('/account');
-    revalidatePath('/account/bookmarks');
+    revalidatePath('/account/library');
 
     return {
       success: true,

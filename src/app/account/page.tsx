@@ -131,9 +131,10 @@ export default async function AccountDashboard() {
           </p>
           <p className={UI_CLASSES.TEXT_SM}>
             • View your{' '}
-            <a href="/account/bookmarks" className="text-primary hover:underline">
-              saved bookmarks
-            </a>
+            <a href="/account/library" className="text-primary hover:underline">
+              library
+            </a>{' '}
+            with saved bookmarks and collections
           </p>
           <p className={UI_CLASSES.TEXT_SM}>
             • Update your profile in{' '}
