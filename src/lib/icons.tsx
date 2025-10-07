@@ -22,6 +22,7 @@
  */
 
 import {
+  Activity,
   AlertCircle,
   AlertTriangle,
   ArrowDown,
@@ -106,6 +107,7 @@ import {
   Target,
   Terminal,
   Thermometer,
+  ThumbsUp,
   Trash,
   TrendingUp,
   Trophy,
@@ -316,6 +318,8 @@ export {
   Webhook,
   Workflow,
   XCircle,
+  ThumbsUp,
+  Activity,
 };
 
 // Export LucideIcon type for component props

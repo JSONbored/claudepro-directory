@@ -22,7 +22,7 @@
 import { useMemo, useState } from 'react';
 import { CategoryFilter } from '@/src/components/changelog/category-filter';
 import { ChangelogCard } from '@/src/components/changelog/changelog-card';
-import { TabsContent } from '@/src/components/ui/tabs';
+import { Tabs, TabsContent } from '@/src/components/ui/tabs';
 import type { ChangelogCategory, ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -58,7 +58,11 @@ export function ChangelogListClient({ entries }: ChangelogListClientProps) {
   }, [entries, activeCategory]);
 
   return (
-    <div className={UI_CLASSES.SPACE_Y_6}>
+    <Tabs
+      value={activeCategory}
+      onValueChange={(value) => setActiveCategory(value as 'All' | ChangelogCategory)}
+      className={UI_CLASSES.SPACE_Y_6}
+    >
       {/* Category Filter */}
       <CategoryFilter
         entries={entries}
@@ -82,6 +86,6 @@ export function ChangelogListClient({ entries }: ChangelogListClientProps) {
           </div>
         )}
       </TabsContent>
-    </div>
+    </Tabs>
   );
 }

@@ -2,6 +2,7 @@
 -- ClaudePro Directory - Supabase Database Schema
 -- =====================================================
 -- PRODUCTION SCHEMA - LAST UPDATED: October 7, 2025
+-- Added: User Profile System (interests, reputation, tiers, badges, OAuth sync)
 --
 -- ⚠️ IMPORTANT: This schema represents the CURRENT STATE of the production database.
 -- If you've already run the previous schemas, DO NOT run this again.
@@ -33,12 +34,15 @@ CREATE TABLE IF NOT EXISTS public.users (
   email TEXT UNIQUE,
   name TEXT,
   slug TEXT UNIQUE,
-  image TEXT, -- Avatar URL
+  image TEXT, -- Avatar URL (synced from OAuth)
   hero TEXT, -- Hero/banner image URL
   bio TEXT,
   work TEXT, -- Job title/company
   website TEXT,
   social_x_link TEXT, -- Twitter/X profile
+  interests JSONB DEFAULT '[]', -- User interests/skills tags
+  reputation_score INTEGER DEFAULT 0, -- Gamification score
+  tier TEXT DEFAULT 'free' CHECK (tier IN ('free', 'pro', 'enterprise')), -- User tier/plan
   status TEXT DEFAULT 'active', -- active, suspended, deleted
   public BOOLEAN DEFAULT true, -- Public profile visibility
   follow_email BOOLEAN DEFAULT true, -- Email notifications for new followers
@@ -354,6 +358,32 @@ CREATE TABLE IF NOT EXISTS public.submissions (
   UNIQUE(content_type, content_slug)
 );
 
+-- Badges (achievement system)
+CREATE TABLE IF NOT EXISTS public.badges (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  slug TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  icon TEXT, -- Icon identifier or emoji
+  category TEXT NOT NULL, -- 'engagement', 'contribution', 'milestone', 'special'
+  criteria JSONB NOT NULL, -- JSON describing how to earn it
+  tier_required TEXT DEFAULT 'free' CHECK (tier_required IN ('free', 'pro', 'enterprise')),
+  "order" INTEGER DEFAULT 0, -- Display order
+  active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- User badges (which users have earned which badges)
+CREATE TABLE IF NOT EXISTS public.user_badges (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+  badge_id UUID REFERENCES public.badges(id) ON DELETE CASCADE NOT NULL,
+  earned_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  metadata JSONB, -- Optional data about how/when earned
+  featured BOOLEAN DEFAULT false, -- User can feature favorite badges
+  UNIQUE(user_id, badge_id)
+);
+
 -- =====================================================
 -- INDEXES FOR PERFORMANCE
 -- =====================================================
@@ -361,6 +391,8 @@ CREATE TABLE IF NOT EXISTS public.submissions (
 -- Users
 CREATE INDEX IF NOT EXISTS idx_users_slug ON public.users(slug);
 CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
+CREATE INDEX IF NOT EXISTS idx_users_reputation ON public.users(reputation_score DESC);
+CREATE INDEX IF NOT EXISTS idx_users_tier ON public.users(tier);
 
 -- Bookmarks
 CREATE INDEX IF NOT EXISTS idx_bookmarks_user_id ON public.bookmarks(user_id);
@@ -428,6 +460,13 @@ CREATE INDEX IF NOT EXISTS idx_submissions_status ON public.submissions(status);
 CREATE INDEX IF NOT EXISTS idx_submissions_content_type ON public.submissions(content_type);
 CREATE INDEX IF NOT EXISTS idx_submissions_pr_number ON public.submissions(pr_number) WHERE pr_number IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_submissions_created_at ON public.submissions(created_at DESC);
+
+-- Badges
+CREATE INDEX IF NOT EXISTS idx_badges_category ON public.badges(category);
+CREATE INDEX IF NOT EXISTS idx_badges_active ON public.badges(active) WHERE active = true;
+CREATE INDEX IF NOT EXISTS idx_user_badges_user_id ON public.user_badges(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_badges_badge_id ON public.user_badges(badge_id);
+CREATE INDEX IF NOT EXISTS idx_user_badges_featured ON public.user_badges(featured) WHERE featured = true;
 
 -- =====================================================
 -- FUNCTIONS AND TRIGGERS
@@ -607,6 +646,300 @@ $$;
 GRANT EXECUTE ON FUNCTION public.increment(TEXT, UUID, TEXT, INTEGER) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.increment(TEXT, UUID, TEXT, INTEGER) TO anon;
 
+-- Function to sync OAuth profile data to public.users on signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $function$
+DECLARE
+  avatar_url TEXT;
+  full_name TEXT;
+  user_email TEXT;
+BEGIN
+  -- Extract avatar URL (GitHub uses 'avatar_url', Google uses 'picture')
+  avatar_url := COALESCE(
+    NEW.raw_user_meta_data->>'avatar_url',
+    NEW.raw_user_meta_data->>'picture'
+  );
+  
+  -- Extract full name
+  full_name := COALESCE(
+    NEW.raw_user_meta_data->>'full_name',
+    NEW.raw_user_meta_data->>'name',
+    NEW.raw_user_meta_data->>'user_name'
+  );
+  
+  -- Get email
+  user_email := NEW.email;
+  
+  -- Insert into public.users
+  INSERT INTO public.users (id, email, name, image, created_at, updated_at)
+  VALUES (NEW.id, user_email, full_name, avatar_url, NOW(), NOW())
+  ON CONFLICT (id) DO NOTHING;
+  
+  RETURN NEW;
+END;
+$function$;
+
+-- Trigger to auto-create user profile on OAuth signup
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_new_user();
+
+-- Function to refresh profile from OAuth provider (optional)
+CREATE OR REPLACE FUNCTION public.refresh_profile_from_oauth(user_id UUID)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $function$
+DECLARE
+  auth_user RECORD;
+  avatar_url TEXT;
+  full_name TEXT;
+BEGIN
+  -- Get auth.users data
+  SELECT * INTO auth_user FROM auth.users WHERE id = user_id;
+  
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'User not found';
+  END IF;
+  
+  -- Extract data
+  avatar_url := COALESCE(
+    auth_user.raw_user_meta_data->>'avatar_url',
+    auth_user.raw_user_meta_data->>'picture'
+  );
+  
+  full_name := COALESCE(
+    auth_user.raw_user_meta_data->>'full_name',
+    auth_user.raw_user_meta_data->>'name',
+    auth_user.raw_user_meta_data->>'user_name'
+  );
+  
+  -- Update public.users with latest OAuth data
+  UPDATE public.users
+  SET 
+    name = COALESCE(full_name, name),
+    image = COALESCE(avatar_url, image),
+    updated_at = NOW()
+  WHERE id = user_id;
+END;
+$function$;
+
+-- Grant permission to authenticated users to refresh their own profile
+GRANT EXECUTE ON FUNCTION public.refresh_profile_from_oauth(UUID) TO authenticated;
+
+-- Function to calculate reputation for a user
+-- Formula: Post created: +10, Vote received: +5, Comment: +2, Submission merged: +20
+CREATE OR REPLACE FUNCTION public.calculate_user_reputation(target_user_id UUID)
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $function$
+DECLARE
+  post_points INTEGER := 0;
+  vote_points INTEGER := 0;
+  comment_points INTEGER := 0;
+  submission_points INTEGER := 0;
+  total_reputation INTEGER := 0;
+BEGIN
+  -- Points from posts created (10 points each)
+  SELECT COALESCE(COUNT(*) * 10, 0) INTO post_points
+  FROM public.posts WHERE user_id = target_user_id;
+  
+  -- Points from votes received on posts (5 points each)
+  SELECT COALESCE(SUM(p.vote_count) * 5, 0) INTO vote_points
+  FROM public.posts p WHERE p.user_id = target_user_id;
+  
+  -- Points from comments created (2 points each)
+  SELECT COALESCE(COUNT(*) * 2, 0) INTO comment_points
+  FROM public.comments WHERE user_id = target_user_id;
+  
+  -- Points from merged submissions (20 points each)
+  SELECT COALESCE(COUNT(*) * 20, 0) INTO submission_points
+  FROM public.submissions WHERE user_id = target_user_id AND status = 'merged';
+  
+  total_reputation := post_points + vote_points + comment_points + submission_points;
+  
+  UPDATE public.users
+  SET reputation_score = total_reputation, updated_at = NOW()
+  WHERE id = target_user_id;
+  
+  RETURN total_reputation;
+END;
+$function$;
+
+GRANT EXECUTE ON FUNCTION public.calculate_user_reputation(UUID) TO authenticated;
+
+-- Function to check and award a specific badge
+CREATE OR REPLACE FUNCTION public.check_and_award_badge(target_user_id UUID, badge_slug TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $function$
+DECLARE
+  badge_record RECORD;
+  user_qualifies BOOLEAN := false;
+  post_count INTEGER;
+  max_post_votes INTEGER;
+  merged_count INTEGER;
+  user_reputation INTEGER;
+BEGIN
+  SELECT * INTO badge_record FROM public.badges WHERE slug = badge_slug AND active = true;
+  IF NOT FOUND THEN RETURN false; END IF;
+  
+  IF EXISTS (SELECT 1 FROM public.user_badges WHERE user_id = target_user_id AND badge_id = badge_record.id) THEN
+    RETURN false;
+  END IF;
+  
+  CASE badge_record.criteria->>'type'
+    WHEN 'post_count' THEN
+      SELECT COUNT(*) INTO post_count FROM public.posts WHERE user_id = target_user_id;
+      user_qualifies := post_count >= (badge_record.criteria->>'threshold')::INTEGER;
+    WHEN 'post_votes' THEN
+      SELECT MAX(vote_count) INTO max_post_votes FROM public.posts WHERE user_id = target_user_id;
+      user_qualifies := COALESCE(max_post_votes, 0) >= (badge_record.criteria->>'threshold')::INTEGER;
+    WHEN 'submission_merged' THEN
+      SELECT COUNT(*) INTO merged_count FROM public.submissions WHERE user_id = target_user_id AND status = 'merged';
+      user_qualifies := merged_count >= (badge_record.criteria->>'threshold')::INTEGER;
+    WHEN 'reputation' THEN
+      SELECT reputation_score INTO user_reputation FROM public.users WHERE id = target_user_id;
+      user_qualifies := COALESCE(user_reputation, 0) >= (badge_record.criteria->>'threshold')::INTEGER;
+    WHEN 'manual' THEN
+      user_qualifies := false;
+    ELSE
+      user_qualifies := false;
+  END CASE;
+  
+  IF user_qualifies THEN
+    INSERT INTO public.user_badges (user_id, badge_id, earned_at)
+    VALUES (target_user_id, badge_record.id, NOW())
+    ON CONFLICT (user_id, badge_id) DO NOTHING;
+    RETURN true;
+  END IF;
+  
+  RETURN false;
+END;
+$function$;
+
+GRANT EXECUTE ON FUNCTION public.check_and_award_badge(UUID, TEXT) TO authenticated;
+
+-- Function to check all badge criteria for a user
+CREATE OR REPLACE FUNCTION public.check_all_badges(target_user_id UUID)
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $function$
+DECLARE
+  badge_record RECORD;
+  newly_awarded INTEGER := 0;
+  was_awarded BOOLEAN;
+BEGIN
+  FOR badge_record IN SELECT slug FROM public.badges WHERE active = true ORDER BY "order" LOOP
+    SELECT public.check_and_award_badge(target_user_id, badge_record.slug) INTO was_awarded;
+    IF was_awarded THEN newly_awarded := newly_awarded + 1; END IF;
+  END LOOP;
+  RETURN newly_awarded;
+END;
+$function$;
+
+GRANT EXECUTE ON FUNCTION public.check_all_badges(UUID) TO authenticated;
+
+-- Reputation update triggers
+CREATE OR REPLACE FUNCTION public.update_reputation_on_post() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $function$
+BEGIN
+  PERFORM public.calculate_user_reputation(NEW.user_id);
+  RETURN NEW;
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.update_reputation_on_vote() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $function$
+DECLARE post_owner_id UUID;
+BEGIN
+  SELECT user_id INTO post_owner_id FROM public.posts WHERE id = COALESCE(NEW.post_id, OLD.post_id);
+  IF post_owner_id IS NOT NULL THEN
+    PERFORM public.calculate_user_reputation(post_owner_id);
+  END IF;
+  RETURN COALESCE(NEW, OLD);
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.update_reputation_on_comment() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $function$
+BEGIN
+  PERFORM public.calculate_user_reputation(NEW.user_id);
+  RETURN NEW;
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.update_reputation_on_submission() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $function$
+BEGIN
+  IF (TG_OP = 'INSERT' AND NEW.status = 'merged') OR
+     (TG_OP = 'UPDATE' AND (OLD.status != NEW.status) AND 
+      (OLD.status = 'merged' OR NEW.status = 'merged')) THEN
+    PERFORM public.calculate_user_reputation(NEW.user_id);
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.check_badges_after_reputation() RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+AS $function$
+BEGIN
+  PERFORM public.check_all_badges(NEW.id);
+  RETURN NEW;
+END;
+$function$;
+
+-- Create reputation triggers
+DROP TRIGGER IF EXISTS trigger_reputation_on_post ON public.posts;
+CREATE TRIGGER trigger_reputation_on_post
+  AFTER INSERT ON public.posts
+  FOR EACH ROW EXECUTE FUNCTION public.update_reputation_on_post();
+
+DROP TRIGGER IF EXISTS trigger_reputation_on_vote_insert ON public.votes;
+CREATE TRIGGER trigger_reputation_on_vote_insert
+  AFTER INSERT ON public.votes
+  FOR EACH ROW EXECUTE FUNCTION public.update_reputation_on_vote();
+
+DROP TRIGGER IF EXISTS trigger_reputation_on_vote_delete ON public.votes;
+CREATE TRIGGER trigger_reputation_on_vote_delete
+  AFTER DELETE ON public.votes
+  FOR EACH ROW EXECUTE FUNCTION public.update_reputation_on_vote();
+
+DROP TRIGGER IF EXISTS trigger_reputation_on_comment ON public.comments;
+CREATE TRIGGER trigger_reputation_on_comment
+  AFTER INSERT ON public.comments
+  FOR EACH ROW EXECUTE FUNCTION public.update_reputation_on_comment();
+
+DROP TRIGGER IF EXISTS trigger_reputation_on_submission ON public.submissions;
+CREATE TRIGGER trigger_reputation_on_submission
+  AFTER INSERT OR UPDATE ON public.submissions
+  FOR EACH ROW EXECUTE FUNCTION public.update_reputation_on_submission();
+
+DROP TRIGGER IF EXISTS trigger_check_badges_on_reputation ON public.users;
+CREATE TRIGGER trigger_check_badges_on_reputation
+  AFTER UPDATE OF reputation_score ON public.users
+  FOR EACH ROW
+  WHEN (OLD.reputation_score IS DISTINCT FROM NEW.reputation_score)
+  EXECUTE FUNCTION public.check_badges_after_reputation();
+
 -- =====================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- =====================================================
@@ -628,6 +961,8 @@ ALTER TABLE public.sponsored_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sponsored_impressions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sponsored_clicks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.submissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.badges ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_badges ENABLE ROW LEVEL SECURITY;
 
 -- Users: Public profiles visible to all, own profile editable
 CREATE POLICY "Public users are viewable by everyone"
@@ -805,19 +1140,67 @@ CREATE POLICY "Service role has full access to submissions"
   USING (true)
   WITH CHECK (true);
 
+-- Badges: Active badges are viewable by everyone
+CREATE POLICY "Badges are viewable by everyone"
+  ON public.badges FOR SELECT
+  USING (active = true);
+
+-- User Badges: All user badges are viewable by everyone
+CREATE POLICY "User badges are viewable by everyone"
+  ON public.user_badges FOR SELECT
+  USING (true);
+
+-- User Badges: Users can feature their own badges
+CREATE POLICY "Users can feature their own badges"
+  ON public.user_badges FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- =====================================================
+-- SEED DATA: Initial Badge Definitions
+-- =====================================================
+
+INSERT INTO public.badges (slug, name, description, icon, category, criteria, "order") VALUES
+  ('first-post', 'First Post', 'Created your first community post', '📝', 'milestone', '{"type": "post_count", "threshold": 1}', 1),
+  ('active-contributor', '10 Posts', 'Created 10 community posts', '✍️', 'engagement', '{"type": "post_count", "threshold": 10}', 2),
+  ('prolific-writer', '50 Posts', 'Created 50 community posts', '📚', 'engagement', '{"type": "post_count", "threshold": 50}', 3),
+  ('popular-post', 'Popular Post', 'Received 10+ votes on a single post', '🔥', 'contribution', '{"type": "post_votes", "threshold": 10}', 4),
+  ('viral-post', 'Viral Post', 'Received 50+ votes on a single post', '⭐', 'contribution', '{"type": "post_votes", "threshold": 50}', 5),
+  ('early-adopter', 'Early Adopter', 'One of the first 100 users', '🚀', 'special', '{"type": "manual"}', 6),
+  ('verified', 'Verified', 'Verified community member', '✓', 'special', '{"type": "manual"}', 7),
+  ('contributor', 'Contributor', 'Submitted and merged a configuration', '🎯', 'contribution', '{"type": "submission_merged", "threshold": 1}', 8),
+  ('reputation-100', '100 Reputation', 'Earned 100 reputation points', '💯', 'milestone', '{"type": "reputation", "threshold": 100}', 9),
+  ('reputation-1000', '1000 Reputation', 'Earned 1000 reputation points', '👑', 'milestone', '{"type": "reputation", "threshold": 1000}', 10)
+ON CONFLICT (slug) DO NOTHING;
+
 -- =====================================================
 -- INITIAL SETUP COMPLETE
 -- =====================================================
 -- Schema includes:
---   ✅ All tables (users, bookmarks, jobs, sponsored content, etc.)
+--   ✅ All tables (users, bookmarks, jobs, sponsored content, badges, etc.)
+--   ✅ User profile system (interests, reputation, tiers)
+--   ✅ Badge achievement system with automatic awarding
+--   ✅ Reputation system with automatic calculation
+--   ✅ OAuth profile sync (auto-populate avatar/name on signup)
 --   ✅ Performance indexes
 --   ✅ Security functions (with SET search_path)
 --   ✅ Atomic increment function for tracking
 --   ✅ RLS policies
---   ✅ Triggers for auto-updates
+--   ✅ Triggers for auto-updates, reputation, and badge awarding
+--   ✅ Initial badge definitions
+--
+-- Reputation Formula:
+--   - Post created: +10 points
+--   - Vote received on post: +5 points
+--   - Comment created: +2 points
+--   - Submission merged: +20 points
+--
+-- Badge Awarding:
+--   - Automatically checks and awards badges when reputation changes
+--   - Criteria-based system (post counts, vote counts, reputation thresholds)
+--   - Manual badges (Early Adopter, Verified) require admin action
 --
 -- Next steps (for fresh setup only):
---   1. Configure OAuth providers in Supabase Authentication
+--   1. Configure OAuth providers in Supabase Authentication (GitHub, Google)
 --   2. Set up Vercel environment variables
---   3. Create user profiles via trigger (see migrations if needed)
+--   3. New users will automatically get profiles, reputation, and badges
 -- =====================================================
