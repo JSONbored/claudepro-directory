@@ -30,9 +30,8 @@ export function useBadgeNotifications() {
 
       // Update last check time
       lastCheckRef.current = new Date().toISOString();
-    } catch (error) {
+    } catch {
       // Silently fail - badge notifications shouldn't block user actions
-      console.error('Failed to check badges:', error);
     }
   };
 

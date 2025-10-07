@@ -147,94 +147,86 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     {activity.type === 'post' && (
-                      <>
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-base mb-1">
-                              {activity.url ? (
-                                <a
-                                  href={activity.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="hover:text-primary inline-flex items-center gap-1"
-                                >
-                                  {activity.title}
-                                  <ExternalLink className="h-3 w-3" />
-                                </a>
-                              ) : (
-                                activity.title
-                              )}
-                            </h3>
-                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                              <span>{activity.vote_count} votes</span>
-                              <span>•</span>
-                              <span>{activity.comment_count} comments</span>
-                            </div>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-base mb-1">
+                            {activity.url ? (
+                              <a
+                                href={activity.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-primary inline-flex items-center gap-1"
+                              >
+                                {activity.title}
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            ) : (
+                              activity.title
+                            )}
+                          </h3>
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                            <span>{activity.vote_count} votes</span>
+                            <span>•</span>
+                            <span>{activity.comment_count} comments</span>
                           </div>
-                          <Badge variant="outline" className="text-xs whitespace-nowrap">
-                            Posted
-                          </Badge>
                         </div>
-                      </>
+                        <Badge variant="outline" className="text-xs whitespace-nowrap">
+                          Posted
+                        </Badge>
+                      </div>
                     )}
 
                     {activity.type === 'comment' && (
-                      <>
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm text-muted-foreground mb-1">
-                              Commented on{' '}
-                              <span className="font-medium text-foreground">
-                                {activity.post_title}
-                              </span>
-                            </p>
-                            <p className="text-sm line-clamp-2">{activity.content}</p>
-                          </div>
-                          <Badge variant="outline" className="text-xs whitespace-nowrap">
-                            Comment
-                          </Badge>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-muted-foreground mb-1">
+                            Commented on{' '}
+                            <span className="font-medium text-foreground">
+                              {activity.post_title}
+                            </span>
+                          </p>
+                          <p className="text-sm line-clamp-2">{activity.content}</p>
                         </div>
-                      </>
+                        <Badge variant="outline" className="text-xs whitespace-nowrap">
+                          Comment
+                        </Badge>
+                      </div>
                     )}
 
                     {activity.type === 'vote' && (
-                      <>
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="text-sm">
-                            Upvoted <span className="font-medium">{activity.post_title}</span>
-                          </p>
-                          <Badge variant="outline" className="text-xs whitespace-nowrap">
-                            Voted
-                          </Badge>
-                        </div>
-                      </>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm">
+                          Upvoted <span className="font-medium">{activity.post_title}</span>
+                        </p>
+                        <Badge variant="outline" className="text-xs whitespace-nowrap">
+                          Voted
+                        </Badge>
+                      </div>
                     )}
 
                     {activity.type === 'submission' && (
-                      <>
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-base mb-1">{activity.content_name}</h3>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Badge variant="secondary" className="text-xs">
-                                {activity.content_type}
-                              </Badge>
-                              {getStatusBadge(activity.status)}
-                              {activity.pr_url && (
-                                <a
-                                  href={activity.pr_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 hover:text-primary"
-                                >
-                                  View PR
-                                  <ExternalLink className="h-3 w-3" />
-                                </a>
-                              )}
-                            </div>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-base mb-1">{activity.content_name}</h3>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Badge variant="secondary" className="text-xs">
+                              {activity.content_type}
+                            </Badge>
+                            {getStatusBadge(activity.status)}
+                            {activity.pr_url && (
+                              <a
+                                href={activity.pr_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 hover:text-primary"
+                              >
+                                View PR
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            )}
                           </div>
                         </div>
-                      </>
+                      </div>
                     )}
 
                     {/* Timestamp */}
