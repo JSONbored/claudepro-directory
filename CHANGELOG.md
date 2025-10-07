@@ -8,12 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 **Latest Features:**
 
+- [User Profile System](#2025-10-07---user-profile-system-with-oauth-avatar-sync) - Enhanced profiles with OAuth avatars, interests, reputation, and badges
 - [Automated Submission System](#2025-10-06---automated-submission-tracking-and-analytics) - Database-backed submission tracking with analytics
 - [User Authentication](#2025-10-06---user-authentication-and-account-management) - Complete auth system with profiles and settings
 - [Sponsorship Analytics](#2025-10-06---sponsorship-analytics-dashboard) - Detailed metrics for sponsored content
 - [Submit Page Enhancements](#2025-10-06---submit-page-sidebar-and-statistics) - Stats, tips, and templates for contributors
 - [Newsletter Integration](#2025-10-05---resend-newsletter-integration-with-sticky-footer-bar) - Email newsletter signups via Resend
-- [Infinite Scroll Fix](#2025-10-05---homepage-infinite-scroll-bug-fix) - Fixed 60-item limit on homepage
 
 **Platform Improvements:**
 
@@ -29,7 +29,87 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - [Reddit MCP Server](#2025-10-04---reddit-mcp-server-community-contribution) - Browse Reddit from Claude
 
-[View All Updates ↓](#2025-10-06---automated-submission-tracking-and-analytics)
+[View All Updates ↓](#2025-10-07---user-profile-system-with-oauth-avatar-sync)
+
+---
+
+## 2025-10-07 - User Profile System with OAuth Avatar Sync
+
+**TL;DR:** Enhanced user profiles with automatic OAuth avatar syncing, editable profile fields, interests/skills tags, reputation scoring, tier system, and badge achievement foundation.
+
+### What Changed
+
+Extended the existing user authentication system with comprehensive profile management features, eliminating the need for separate image upload infrastructure by leveraging OAuth provider avatars from GitHub and Google.
+
+### Added
+
+- **OAuth Avatar Sync** (automatic profile picture management)
+  - Database trigger (`on_auth_user_created`) automatically syncs avatar from GitHub/Google on signup
+  - Profile pictures use OAuth provider URLs (no storage costs)
+  - Manual refresh function (`refresh_profile_from_oauth`) for updating avatars
+  - Supports both GitHub (`avatar_url`) and Google (`picture`) metadata fields
+
+- **Profile Editing System** (`/account/settings`)
+  - Editable form with validation for name, bio, work, website, X/Twitter link
+  - Interests/skills tag system (max 10 tags, 30 chars each)
+  - Character counters and real-time validation
+  - Unsaved changes detection and cancel functionality
+  - Server actions with rate limiting and authorization checks
+
+- **Database Schema Extensions**
+  - `interests` field (JSONB array) for user skills and interests
+  - `reputation_score` field (INTEGER) for gamification
+  - `tier` field (TEXT) for free/pro/enterprise membership levels
+  - Indexed for performance on reputation and tier queries
+
+- **Badge Achievement System** (foundation)
+  - `badges` table with 10 initial achievement types
+  - `user_badges` table for tracking earned badges
+  - Badge categories: engagement, contribution, milestone, special
+  - Criteria-based system ready for automatic award logic
+  - Badge display components (icon, card, list, compact views)
+
+- **Enhanced Profile Display**
+  - Interests shown as badges on public profiles (`/u/[username]`)
+  - Reputation score in Activity sidebar
+  - Tier badge display (Free/Pro/Enterprise)
+  - OAuth provider indication for profile pictures
+
+### Changed
+
+- Settings page transformed from read-only to fully editable
+- Public profile pages now show reputation, tier, and interests
+- User profiles automatically populated on OAuth signup (name, email, avatar)
+
+### Technical Details
+
+**Server Actions:**
+- `updateProfile` - Type-safe profile updates with Zod validation
+- `refreshProfileFromOAuth` - Sync latest avatar from OAuth provider
+
+**Database Functions:**
+- `handle_new_user()` - Trigger function for OAuth profile sync
+- `refresh_profile_from_oauth()` - Manual avatar refresh function
+
+**Initial Badges:**
+- First Post, 10 Posts, 50 Posts (engagement)
+- Popular Post, Viral Post (contribution)
+- Early Adopter, Verified (special)
+- Contributor (submission merged)
+- Reputation milestones (100, 1000 points)
+
+**Files Added:**
+- `src/lib/schemas/profile.schema.ts` - Profile validation schemas
+- `src/lib/schemas/badge.schema.ts` - Badge types and schemas
+- `src/lib/actions/profile-actions.ts` - Profile update server actions
+- `src/components/features/profile/profile-edit-form.tsx` - Editable profile form
+- `src/components/features/profile/badge-display.tsx` - Badge UI components
+
+**Security:**
+- Row Level Security (RLS) policies for badges and user_badges tables
+- Server-side authorization checks in all profile actions
+- Zod schema validation for all profile inputs
+- Rate limiting on profile updates and OAuth refreshes
 
 ---
 
