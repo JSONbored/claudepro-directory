@@ -271,9 +271,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 <Card>
                   <CardContent className={`${UI_CLASSES.FLEX_COL_CENTER} py-12`}>
                     <FolderOpen className="h-12 w-12 text-muted-foreground mb-4" />
-                    <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
-                      No public collections yet
-                    </p>
+                    <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>No public collections yet</p>
                   </CardContent>
                 </Card>
               ) : (
@@ -282,9 +280,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                     <Card key={collection.id} className={UI_CLASSES.CARD_INTERACTIVE}>
                       <a href={`/u/${slug}/collections/${collection.slug}`}>
                         <CardHeader>
-                          <CardTitle className={UI_CLASSES.TEXT_LG}>
-                            {collection.name}
-                          </CardTitle>
+                          <CardTitle className={UI_CLASSES.TEXT_LG}>{collection.name}</CardTitle>
                           {collection.description && (
                             <CardDescription className="line-clamp-2">
                               {collection.description}

@@ -30,10 +30,7 @@ const collectionSchema = z.object({
   slug: nonEmptyString
     .min(2, 'Slug must be at least 2 characters')
     .max(100, 'Slug must be less than 100 characters')
-    .regex(
-      /^[a-z0-9-]+$/,
-      'Slug can only contain lowercase letters, numbers, and hyphens'
-    )
+    .regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens')
     .optional(),
   description: z
     .string()
@@ -56,10 +53,7 @@ const collectionItemSchema = z.object({
       'Slug can only contain letters, numbers, hyphens, underscores, and forward slashes'
     )
     .transform((val: string) => val.toLowerCase().trim()),
-  notes: z
-    .string()
-    .max(500, 'Notes must be less than 500 characters')
-    .optional(),
+  notes: z.string().max(500, 'Notes must be less than 500 characters').optional(),
   order: z.number().int().min(0).default(0),
 });
 
@@ -131,7 +125,7 @@ export const createCollection = rateLimitedAction
     revalidatePath('/account');
     revalidatePath('/account/library');
     if (data.is_public) {
-      revalidatePath(`/u/[slug]`, 'page');
+      revalidatePath('/u/[slug]', 'page');
     }
 
     return {
@@ -201,7 +195,7 @@ export const updateCollection = rateLimitedAction
     revalidatePath('/account/library');
     revalidatePath(`/account/library/${data.slug}`);
     if (data.is_public) {
-      revalidatePath(`/u/[slug]`, 'page');
+      revalidatePath('/u/[slug]', 'page');
     }
 
     return {
@@ -254,7 +248,7 @@ export const deleteCollection = rateLimitedAction
     // Revalidate account pages
     revalidatePath('/account');
     revalidatePath('/account/library');
-    revalidatePath(`/u/[slug]`, 'page');
+    revalidatePath('/u/[slug]', 'page');
 
     return {
       success: true,
@@ -326,8 +320,8 @@ export const addItemToCollection = rateLimitedAction
 
     // Revalidate collection pages
     revalidatePath('/account/library');
-    revalidatePath(`/account/library/[slug]`, 'page');
-    revalidatePath(`/u/[slug]`, 'page');
+    revalidatePath('/account/library/[slug]', 'page');
+    revalidatePath('/u/[slug]', 'page');
 
     return {
       success: true,
@@ -380,8 +374,8 @@ export const removeItemFromCollection = rateLimitedAction
 
     // Revalidate collection pages
     revalidatePath('/account/library');
-    revalidatePath(`/account/library/[slug]`, 'page');
-    revalidatePath(`/u/[slug]`, 'page');
+    revalidatePath('/account/library/[slug]', 'page');
+    revalidatePath('/u/[slug]', 'page');
 
     return {
       success: true,
@@ -440,8 +434,8 @@ export const reorderCollectionItems = rateLimitedAction
 
     // Revalidate collection pages
     revalidatePath('/account/library');
-    revalidatePath(`/account/library/[slug]`, 'page');
-    revalidatePath(`/u/[slug]`, 'page');
+    revalidatePath('/account/library/[slug]', 'page');
+    revalidatePath('/u/[slug]', 'page');
 
     return {
       success: true,

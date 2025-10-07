@@ -9,14 +9,14 @@
  */
 
 import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useId, useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { createCollection, updateCollection } from '@/src/lib/actions/collection-actions';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
+import { createCollection, updateCollection } from '@/src/lib/actions/collection-actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface Bookmark {
@@ -46,11 +46,17 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
   const [isPending, startTransition] = useTransition();
   const [selectedBookmarks, setSelectedBookmarks] = useState<string[]>([]);
 
+  // Generate unique IDs for form fields
+  const nameId = useId();
+  const slugId = useId();
+  const descriptionId = useId();
+  const isPublicId = useId();
+
   // Form state
   const [name, setName] = useState(collection?.name || '');
   const [slug, setSlug] = useState(collection?.slug || '');
   const [description, setDescription] = useState(collection?.description || '');
-  const [isPublic, setIsPublic] = useState(collection?.is_public || false);
+  const [isPublic, setIsPublic] = useState(collection?.is_public);
 
   // Auto-generate slug from name
   const handleNameChange = (value: string) => {
@@ -119,11 +125,11 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
     <form onSubmit={handleSubmit} className={UI_CLASSES.SPACE_Y_6}>
       {/* Collection Name */}
       <div className={UI_CLASSES.SPACE_Y_2}>
-        <Label htmlFor="name">
+        <Label htmlFor={nameId}>
           Collection Name <span className="text-destructive">*</span>
         </Label>
         <Input
-          id="name"
+          id={nameId}
           type="text"
           placeholder="My Awesome Collection"
           value={name}
@@ -139,9 +145,9 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
 
       {/* Collection Slug */}
       <div className={UI_CLASSES.SPACE_Y_2}>
-        <Label htmlFor="slug">Slug</Label>
+        <Label htmlFor={slugId}>Slug</Label>
         <Input
-          id="slug"
+          id={slugId}
           type="text"
           placeholder="my-awesome-collection"
           value={slug}
@@ -157,9 +163,9 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
 
       {/* Description */}
       <div className={UI_CLASSES.SPACE_Y_2}>
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor={descriptionId}>Description</Label>
         <Textarea
-          id="description"
+          id={descriptionId}
           placeholder="Describe what this collection is about..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -176,14 +182,14 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       <div className="flex items-center gap-3 rounded-lg border p-4">
         <input
           type="checkbox"
-          id="is_public"
+          id={isPublicId}
           checked={isPublic}
           onChange={(e) => setIsPublic(e.target.checked)}
           disabled={isPending}
           className="h-5 w-5 rounded border-gray-300"
         />
         <div className="flex-1">
-          <Label htmlFor="is_public" className="text-base font-medium cursor-pointer">
+          <Label htmlFor={isPublicId} className="text-base font-medium cursor-pointer">
             Public Collection
           </Label>
           <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
@@ -215,7 +221,9 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                     if (e.target.checked) {
                       setSelectedBookmarks([...selectedBookmarks, bookmark.id]);
                     } else {
-                      setSelectedBookmarks(selectedBookmarks.filter((id: string) => id !== bookmark.id));
+                      setSelectedBookmarks(
+                        selectedBookmarks.filter((id: string) => id !== bookmark.id)
+                      );
                     }
                   }}
                   disabled={isPending}
@@ -256,14 +264,15 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       {/* Actions */}
       <div className="flex items-center gap-4 pt-4">
         <Button type="submit" disabled={isPending} className="flex-1 sm:flex-initial">
-          {isPending ? (mode === 'create' ? 'Creating...' : 'Saving...') : mode === 'create' ? 'Create Collection' : 'Save Changes'}
+          {isPending
+            ? mode === 'create'
+              ? 'Creating...'
+              : 'Saving...'
+            : mode === 'create'
+              ? 'Create Collection'
+              : 'Save Changes'}
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.back()}
-          disabled={isPending}
-        >
+        <Button type="button" variant="outline" onClick={() => router.back()} disabled={isPending}>
           Cancel
         </Button>
       </div>

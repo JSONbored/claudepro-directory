@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { CollectionItemManager } from '@/src/components/library/collection-item-manager';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -10,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { CollectionItemManager } from '@/src/components/library/collection-item-manager';
 import { ArrowLeft, Edit, Share2 } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
 export default async function CollectionDetailPage({ params }: CollectionPageProps) {
   const { slug } = await params;
   const supabase = await createClient();
-  
+
   const {
     data: { user },
   } = await supabase.auth.getUser();

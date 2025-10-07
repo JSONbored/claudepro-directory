@@ -11,11 +11,6 @@
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import {
-  addItemToCollection,
-  removeItemFromCollection,
-  reorderCollectionItems,
-} from '@/src/lib/actions/collection-actions';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -25,7 +20,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/ui/select';
+import {
+  addItemToCollection,
+  removeItemFromCollection,
+  reorderCollectionItems,
+} from '@/src/lib/actions/collection-actions';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@/src/lib/icons';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface CollectionItem {
@@ -81,7 +82,7 @@ export function CollectionItemManager({
       try {
         const result = await addItemToCollection({
           collection_id: collectionId,
-          content_type: bookmark.content_type as any, // Type assertion needed - bookmarks can have any valid content type
+          content_type: bookmark.content_type as ContentCategory,
           content_slug: bookmark.content_slug,
           order: items.length, // Add to end
         });
@@ -125,7 +126,7 @@ export function CollectionItemManager({
       newItems[index] = prev;
       newItems[index - 1] = temp;
     }
-    
+
     // Update order values
     const reorderedItems = newItems.map((item, idx) => ({
       id: item.id,
@@ -142,7 +143,7 @@ export function CollectionItemManager({
         });
         toast.success('Items reordered');
         router.refresh();
-      } catch (error) {
+      } catch (_error) {
         setItems(items); // Revert on error
         toast.error('Failed to reorder items');
       }
@@ -159,7 +160,7 @@ export function CollectionItemManager({
       newItems[index] = next;
       newItems[index + 1] = temp;
     }
-    
+
     // Update order values
     const reorderedItems = newItems.map((item, idx) => ({
       id: item.id,
@@ -176,7 +177,7 @@ export function CollectionItemManager({
         });
         toast.success('Items reordered');
         router.refresh();
-      } catch (error) {
+      } catch (_error) {
         setItems(items); // Revert on error
         toast.error('Failed to reorder items');
       }
@@ -188,9 +189,9 @@ export function CollectionItemManager({
       {/* Add Item Section */}
       <div className="flex items-end gap-2 pb-4 border-b">
         <div className="flex-1">
-          <label className={`${UI_CLASSES.TEXT_SM} font-medium mb-2 block`}>
+          <div className={`${UI_CLASSES.TEXT_SM} font-medium mb-2 block`}>
             Add Bookmark to Collection
-          </label>
+          </div>
           <Select value={selectedBookmarkId} onValueChange={setSelectedBookmarkId}>
             <SelectTrigger>
               <SelectValue placeholder="Select a bookmark to add" />
@@ -289,7 +290,9 @@ export function CollectionItemManager({
                   variant="ghost"
                   size="sm"
                   className="h-8 w-8 p-0"
-                  onClick={() => window.open(`/${item.content_type}/${item.content_slug}`, '_blank')}
+                  onClick={() =>
+                    window.open(`/${item.content_type}/${item.content_slug}`, '_blank')
+                  }
                   aria-label="View item"
                 >
                   <ExternalLink className="h-4 w-4" />

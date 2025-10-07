@@ -20,25 +20,15 @@ interface PublicCollectionPageProps {
   params: Promise<{ slug: string; collectionSlug: string }>;
 }
 
-export async function generateMetadata({
-  params,
-}: PublicCollectionPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PublicCollectionPageProps): Promise<Metadata> {
   const { slug, collectionSlug } = await params;
   const supabase = await createAdminClient();
 
   // Get user
-  const { data: user } = await supabase
-    .from('users')
-    .select('name')
-    .eq('slug', slug)
-    .single();
+  const { data: user } = await supabase.from('users').select('name').eq('slug', slug).single();
 
   // Get collection
-  const { data: userData } = await supabase
-    .from('users')
-    .select('id')
-    .eq('slug', slug)
-    .single();
+  const { data: userData } = await supabase.from('users').select('id').eq('slug', slug).single();
 
   if (!userData) {
     return {
@@ -77,11 +67,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
   } = await currentUserClient.auth.getUser();
 
   // Get profile owner
-  const { data: profileUser } = await supabase
-    .from('users')
-    .select('*')
-    .eq('slug', slug)
-    .single();
+  const { data: profileUser } = await supabase.from('users').select('*').eq('slug', slug).single();
 
   if (!profileUser) {
     notFound();
@@ -169,9 +155,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
             {!items || items.length === 0 ? (
               <Card>
                 <CardContent className={`${UI_CLASSES.FLEX_COL_CENTER} py-12`}>
-                  <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
-                    This collection is empty
-                  </p>
+                  <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>This collection is empty</p>
                 </CardContent>
               </Card>
             ) : (
@@ -201,11 +185,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="flex items-center gap-2"
-                          >
+                          <Button variant="ghost" size="sm" className="flex items-center gap-2">
                             <ExternalLink className="h-4 w-4" />
                             View
                           </Button>
