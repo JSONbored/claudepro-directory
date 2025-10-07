@@ -79,11 +79,12 @@ This is a critical feature for building community engagement and monetization ca
    - **Current:** Settings page is read-only with "Coming Soon" message
    - **Required:** Create editable form with validation and server actions
 
-2. **Avatar Upload System (SHA-2550)**
-   - **Gap:** No Uploadthing integration found (searched entire codebase)
-   - **Missing:** Avatar upload component, API routes, Uploadthing configuration
-   - **Current:** `image` field exists in database but no upload mechanism
-   - **Required:** Full Uploadthing setup with image upload, cropping, optimization
+2. **OAuth Profile Picture Sync (SHA-2550 REVISED)**
+   - **Gap:** No database trigger to sync OAuth avatars to public.users
+   - **Current:** `image` field exists but not populated from OAuth providers
+   - **Missing:** Trigger to copy `auth.users.raw_user_meta_data.avatar_url` to `public.users.image`
+   - **Better Approach:** Use GitHub/Google OAuth profile pictures (no upload needed!)
+   - **Required:** Database trigger to auto-sync OAuth data on signup
 
 3. **Interests/Skills Field (SHA-2551 Partial)**
    - **Gap:** No `interests` field in users table
@@ -154,9 +155,9 @@ This is a critical feature for building community engagement and monetization ca
 
 ### Dependencies Needed
 
-**Missing from package.json:**
-1. `uploadthing` - For avatar/image uploads (SHA-2550)
-2. Potentially image processing libraries for cropping/resizing
+**GOOD NEWS:** No additional dependencies needed!
+- ~~`uploadthing`~~ - Not needed! Using OAuth profile pictures instead ✅
+- OAuth providers (GitHub/Google) already provide avatars via Supabase Auth
 
 ### Security Considerations
 
@@ -213,31 +214,30 @@ This is a critical feature for building community engagement and monetization ca
 - [ ] Test all form fields
 - **Success Criteria:** Settings page allows editing and saving changes
 
-### Phase 3: Avatar Upload System (SHA-2550)
-**Goal:** Implement avatar upload with Uploadthing
+### Phase 3: OAuth Profile Picture Sync (SHA-2550 REVISED - Much Simpler!)
+**Goal:** Automatically sync profile pictures from GitHub/Google OAuth
 
-#### Task 3.1: Setup Uploadthing Infrastructure
-- [ ] Install uploadthing package (`npm install uploadthing @uploadthing/react`)
-- [ ] Create Uploadthing API route (`src/app/api/uploadthing/route.ts`)
-- [ ] Configure Uploadthing with environment variables
-- [ ] Set file size limits and allowed types (JPEG, PNG, WebP)
-- [ ] Test upload endpoint
-- **Success Criteria:** Uploadthing API route working, can upload images
+#### Task 3.1: Create Database Trigger for OAuth Sync
+- [ ] Create `handle_new_user()` function to sync OAuth data on signup
+- [ ] Add trigger on `auth.users` INSERT to populate `public.users`
+- [ ] Sync: avatar_url → image, full_name → name, email → email
+- [ ] Test with new GitHub and Google OAuth signups
+- **Success Criteria:** New users automatically get profile picture from OAuth provider
 
-#### Task 3.2: Create Avatar Upload Component
-- [ ] Create AvatarUpload component with drag-and-drop
-- [ ] Add image preview before upload
-- [ ] Add upload progress indicator
-- [ ] Integrate with Uploadthing React hooks
-- [ ] Update user.image field after successful upload
-- **Success Criteria:** Users can upload avatars, see preview, image saved to profile
+#### Task 3.2: Migrate Existing Users
+- [ ] Write migration query to backfill OAuth avatars for existing users
+- [ ] Run migration on existing user base
+- [ ] Verify all existing users now have avatars
+- **Success Criteria:** Existing users' OAuth profile pictures appear
 
-#### Task 3.3: Add Avatar to Profile Edit UI
-- [ ] Add AvatarUpload to settings page
-- [ ] Add hero/banner image upload option
-- [ ] Add image cropping functionality
-- [ ] Add delete avatar option
-- **Success Criteria:** Avatar upload integrated into settings, visible on profile
+#### Task 3.3: Add Profile Refresh Feature (Optional)
+- [ ] Create `refresh_profile_from_oauth()` database function
+- [ ] Create server action to call refresh function
+- [ ] Add "Refresh from GitHub/Google" button to settings
+- [ ] Test refresh functionality
+- **Success Criteria:** Users can manually refresh their OAuth profile picture
+
+**Time Savings:** 1-2 hours vs 1-2 days for Uploadthing! 🎉
 
 ### Phase 4: Interests Implementation (SHA-2551)
 **Goal:** Allow users to add interests/skills tags
@@ -424,12 +424,11 @@ This is a critical feature for building community engagement and monetization ca
 - [ ] Update settings page with edit form
 - [ ] Add form validation and error handling
 
-#### Avatar Upload
-- [ ] Install and configure Uploadthing
-- [ ] Create Uploadthing API route
-- [ ] Build AvatarUpload component
-- [ ] Add image preview and cropping
-- [ ] Integrate with profile edit UI
+#### OAuth Profile Sync (REVISED - Much Simpler!)
+- [ ] Create database trigger for new user OAuth sync
+- [ ] Migrate existing users to populate OAuth avatars
+- [ ] Add profile refresh function (optional)
+- [ ] Add "Refresh Profile Picture" button (optional)
 
 #### Interests/Bio
 - [ ] Create InterestsInput component
@@ -489,17 +488,20 @@ This is a critical feature for building community engagement and monetization ca
 **Questions for User:**
 1. Should we implement tasks sequentially or prioritize certain features?
 2. Are there any specific design preferences for the UI components?
-3. Do you have Uploadthing account/API keys ready?
+3. ~~Do you have Uploadthing account/API keys ready?~~ NOT NEEDED - using OAuth pictures! ✅
 4. What should the reputation algorithm prioritize (posts, votes, contributions)?
 5. What tier benefits should we implement for free/pro/enterprise?
 6. Should profile slugs be changeable or permanent?
+7. Should we add custom avatar upload later, or OAuth-only is sufficient?
 
 **Recommendations:**
 1. Start with Phase 1 (Database Schema) as foundation
-2. Then Phase 2 (Profile Edit UI) for immediate user value
-3. Phase 3 (Avatar Upload) depends on Uploadthing setup
-4. Phases 5-8 can be done in parallel after foundations complete
+2. Then Phase 3 (OAuth Profile Sync) - **Now super quick!** Just database triggers
+3. Then Phase 2 (Profile Edit UI) for immediate user value
+4. Phases 4-8 can be done in parallel after foundations complete
 5. Consider using TDD approach for server actions and reputation logic
+
+**Major Win:** Eliminating Uploadthing saves significant development time and complexity! 🎉
 
 ## Lessons
 
@@ -507,7 +509,9 @@ This is a critical feature for building community engagement and monetization ca
 - Following existing patterns in codebase (server actions, Zod schemas, Supabase)
 - Using JSONB for flexible data like interests/tags
 - RLS policies must be added for all new tables
-- Image uploads should go through Uploadthing (not direct Supabase storage)
+- ~~Image uploads should go through Uploadthing~~ ❌ 
+- **USE OAuth profile pictures from GitHub/Google** ✅ Much simpler and better UX!
+- Supabase Auth already provides `raw_user_meta_data.avatar_url` from OAuth providers
 
 ### Security Notes
 - Always verify user authentication in server actions
@@ -522,7 +526,15 @@ This is a critical feature for building community engagement and monetization ca
 - Cache reputation calculations
 - Optimize badge checking (don't run on every request)
 
+### Key Realizations
+- **OAuth Profile Pictures:** User suggested leveraging GitHub/Google OAuth avatars instead of Uploadthing
+- This eliminates SHA-2550 entirely and replaces it with a simple database trigger
+- Saves 1-2 days of development time and ongoing image storage costs
+- Better UX since users already have profile pictures
+- Can add custom uploads later if needed, but OAuth should be default
+
 ---
 
 **Last Updated:** October 7, 2025
 **Status:** Planning Phase - Awaiting Approval
+**Major Update:** SHA-2550 revised to use OAuth profile pictures (much simpler approach)
