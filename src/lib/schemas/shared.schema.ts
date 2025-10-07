@@ -57,6 +57,7 @@ export const contentCategorySchema = z
 
     // Special types
     'jobs', // Has route but no content directory
+    'changelog', // Changelog route with CHANGELOG.md as source
   ])
   .describe('All valid content categories including core types, SEO types, and special types');
 
@@ -72,6 +73,7 @@ export const cacheableCategorySchema = z
     'guides',
     'collections',
     'jobs',
+    'changelog',
     // Note: SEO content doesn't need Redis caching
   ])
   .describe('Content categories that support Redis caching for performance optimization');

@@ -30,6 +30,7 @@ export const SUFFIX_LENGTHS: Record<ContentCategory, number> = {
 
   // Special types
   jobs: 30, // " - Jobs - Claude Pro Directory"
+  changelog: 35, // " - Changelog - Claude Pro Directory"
 } as const;
 
 /**
@@ -72,4 +73,5 @@ export const MAX_BASE_TITLE_LENGTH: Record<ContentCategory, number> = {
 
   // Special types
   jobs: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.jobs, // 30 chars
+  changelog: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.changelog, // 25 chars
 } as const;

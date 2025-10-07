@@ -84,7 +84,7 @@ export async function GET(
 
       // Group items by category
       const itemsByCategory = collection.items.reduce(
-        (acc: Record<string, CollectionItemReference[]>, item) => {
+        (acc: Record<string, CollectionItemReference[]>, item: CollectionItemReference) => {
           const category = item.category || 'other';
           if (!acc[category]) acc[category] = [];
           acc[category].push(item);
@@ -96,7 +96,7 @@ export async function GET(
       // Fetch actual item details and build full content (NO TRUNCATION)
       for (const [category, items] of Object.entries(itemsByCategory)) {
         detailedContent += `${category.toUpperCase()}:\n`;
-        for (const itemRef of items) {
+        for (const itemRef of items as CollectionItemReference[]) {
           // Fetch the actual item to get title and description
           try {
             const actualItem = await getContentBySlug(itemRef.category, itemRef.slug);

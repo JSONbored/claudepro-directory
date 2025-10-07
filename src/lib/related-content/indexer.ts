@@ -58,6 +58,7 @@ class ContentIndexer {
       troubleshooting: [],
       categories: [],
       collections: [],
+      changelog: [],
     };
     const tags: Record<string, ContentItem[]> = {};
     const keywords: Record<string, ContentItem[]> = {};
