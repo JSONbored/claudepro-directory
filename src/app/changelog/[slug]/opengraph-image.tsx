@@ -102,6 +102,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 30 }}>
           <div
             style={{
+              display: 'flex',
               backgroundColor: 'white',
               borderRadius: 12,
               padding: '12px 24px',
@@ -114,6 +115,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           </div>
           <div
             style={{
+              display: 'flex',
               marginLeft: 'auto',
               fontSize: 28,
               color: 'white',
@@ -134,6 +136,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         >
           <div
             style={{
+              display: 'flex',
               backgroundColor: 'rgba(255, 255, 255, 0.2)',
               borderRadius: 20,
               padding: '8px 20px',
@@ -156,8 +159,9 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           }}
         >
           {/* Title */}
-          <h1
+          <div
             style={{
+              display: 'flex',
               fontSize: 60,
               fontWeight: 700,
               color: 'white',
@@ -168,12 +172,13 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             }}
           >
             {entry.title}
-          </h1>
+          </div>
 
           {/* Description/TL;DR */}
           {displayDescription && (
-            <p
+            <div
               style={{
+                display: 'flex',
                 fontSize: 28,
                 color: 'rgba(255, 255, 255, 0.9)',
                 marginBottom: 30,
@@ -185,7 +190,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               {displayDescription.length > 150
                 ? `${displayDescription.substring(0, 147)}...`
                 : displayDescription}
-            </p>
+            </div>
           )}
 
           {/* Category Badges */}
@@ -195,6 +200,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
                 <div
                   key={category}
                   style={{
+                    display: 'flex',
                     backgroundColor: CATEGORY_COLORS[category] || '#6b7280',
                     borderRadius: 20,
                     padding: '8px 20px',
@@ -209,6 +215,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               {nonEmptyCategories.length > 5 && (
                 <div
                   style={{
+                    display: 'flex',
                     backgroundColor: 'rgba(255, 255, 255, 0.2)',
                     borderRadius: 20,
                     padding: '8px 20px',
