@@ -292,7 +292,15 @@ export const recommendationConfigSchema = z
         trending: z.number().min(0).max(1).describe('Trending boost weight'),
       })
       .refine(
-        (weights): boolean => {
+        (weights: {
+          useCase: number;
+          experience: number;
+          toolPreference: number;
+          integrations: number;
+          focusAreas: number;
+          popularity: number;
+          trending: number;
+        }): boolean => {
           const values = Object.values(weights) as number[];
           const sum = values.reduce((a, b) => a + b, 0);
           return Math.abs(sum - 1.0) < 0.01; // Allow small floating point error

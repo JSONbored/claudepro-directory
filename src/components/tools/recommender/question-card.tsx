@@ -5,7 +5,6 @@
  * Displays individual quiz questions with consistent styling
  */
 
-import { Card } from '@/src/components/ui/badge';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface QuestionCardProps {
