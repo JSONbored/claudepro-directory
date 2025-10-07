@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { ProfileEditForm } from '@/src/components/features/profile/profile-edit-form';
 import { Button } from '@/src/components/ui/button';
@@ -121,10 +122,12 @@ export default async function SettingsPage() {
         <CardContent className="space-y-4">
           {profile.image && (
             <div className="flex items-center gap-4">
-              <img
+              <Image
                 src={profile.image}
                 alt={profile.name || 'Profile'}
-                className="w-16 h-16 rounded-full"
+                width={64}
+                height={64}
+                className="w-16 h-16 rounded-full object-cover"
               />
               <div>
                 <p className={UI_CLASSES.TEXT_SM}>

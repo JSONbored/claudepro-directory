@@ -102,7 +102,7 @@ export const getUserBadges = rateLimitedAction
     }
 
     // Transform the data to match expected type
-    const badges = ((data as UserBadgeWithBadge[]) || []).map((item) => ({
+    const badges = ((data as unknown as UserBadgeWithBadge[]) || []).map((item) => ({
       id: item.id,
       badge_id: item.badge_id,
       earned_at: item.earned_at,
@@ -177,7 +177,7 @@ export const checkNewBadges = rateLimitedAction
       throw new Error(`Failed to check badges: ${error.message}`);
     }
 
-    const newBadges = ((data as BadgeEarnedItem[]) || []).map((item) => ({
+    const newBadges = ((data as unknown as BadgeEarnedItem[]) || []).map((item) => ({
       name: item.badge.name,
       description: item.badge.description,
       icon: item.badge.icon,

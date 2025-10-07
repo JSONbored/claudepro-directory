@@ -177,7 +177,7 @@ export const getActivityTimeline = rateLimitedAction
 
       if (comments) {
         activities.push(
-          ...(comments as CommentWithPost[]).map(
+          ...(comments as unknown as CommentWithPost[]).map(
             (comment): CommentActivity => ({
               id: comment.id,
               type: 'comment',
@@ -203,7 +203,7 @@ export const getActivityTimeline = rateLimitedAction
 
       if (votes) {
         activities.push(
-          ...(votes as VoteWithPost[]).map(
+          ...(votes as unknown as VoteWithPost[]).map(
             (vote): VoteActivity => ({
               id: vote.id,
               type: 'vote',
