@@ -45,7 +45,22 @@ export default async function AccountDashboard() {
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className={UI_CLASSES.TEXT_SM}>Reputation</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+              <span className="text-2xl">🏆</span>
+              <span className="text-3xl font-bold">{profile?.reputation_score || 0}</span>
+            </div>
+            <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
+              Total points
+            </p>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle className={UI_CLASSES.TEXT_SM}>Bookmarks</CardTitle>
@@ -56,14 +71,28 @@ export default async function AccountDashboard() {
               <span className="text-3xl font-bold">{bookmarkCount || 0}</span>
             </div>
             <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
-              Saved configurations
+              Saved items
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className={UI_CLASSES.TEXT_SM}>Account Age</CardTitle>
+            <CardTitle className={UI_CLASSES.TEXT_SM}>Tier</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Badge variant={profile?.tier === 'pro' ? 'default' : 'secondary'} className="mt-2">
+              {profile?.tier ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1) : 'Free'}
+            </Badge>
+            <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
+              Membership level
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className={UI_CLASSES.TEXT_SM}>Member Since</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
@@ -71,21 +100,7 @@ export default async function AccountDashboard() {
               <span className="text-3xl font-bold">{accountAge}</span>
             </div>
             <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
-              Days as member
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className={UI_CLASSES.TEXT_SM}>Status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Badge variant="secondary" className="mt-2">
-              {profile?.status === 'active' ? '✓ Active' : 'Inactive'}
-            </Badge>
-            <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
-              Account status
+              Days active
             </p>
           </CardContent>
         </Card>
@@ -98,6 +113,13 @@ export default async function AccountDashboard() {
           <CardDescription>Common tasks and features</CardDescription>
         </CardHeader>
         <CardContent className={UI_CLASSES.SPACE_Y_2}>
+          <p className={UI_CLASSES.TEXT_SM}>
+            • View your{' '}
+            <a href="/account/activity" className="text-primary hover:underline">
+              contribution history
+            </a>{' '}
+            and earn badges
+          </p>
           <p className={UI_CLASSES.TEXT_SM}>
             • Browse the{' '}
             <a href="/" className="text-primary hover:underline">

@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 **Latest Features:**
 
+- [Reputation & Badge System](#2025-10-07---reputation-system-and-automatic-badge-awarding) - Automatic reputation tracking and achievement badges
 - [User Profile System](#2025-10-07---user-profile-system-with-oauth-avatar-sync) - Enhanced profiles with OAuth avatars, interests, reputation, and badges
 - [Automated Submission System](#2025-10-06---automated-submission-tracking-and-analytics) - Database-backed submission tracking with analytics
 - [User Authentication](#2025-10-06---user-authentication-and-account-management) - Complete auth system with profiles and settings
@@ -29,7 +30,114 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - [Reddit MCP Server](#2025-10-04---reddit-mcp-server-community-contribution) - Browse Reddit from Claude
 
-[View All Updates ↓](#2025-10-07---user-profile-system-with-oauth-avatar-sync)
+[View All Updates ↓](#2025-10-07---reputation-system-and-automatic-badge-awarding)
+
+---
+
+## 2025-10-07 - Reputation System and Automatic Badge Awarding
+
+**TL;DR:** Implemented automatic reputation scoring and achievement badge system with database triggers that reward community contributions in real-time.
+
+### What Changed
+
+Added comprehensive gamification system that automatically tracks user contributions, calculates reputation scores, and awards achievement badges based on activity.
+
+### Added
+
+- **Automatic Reputation Calculation**
+  - Real-time reputation scoring based on community contributions
+  - Formula: Posts (+10), Votes received (+5), Comments (+2), Merged submissions (+20)
+  - Database triggers automatically update reputation on every action
+  - Reputation displayed on profiles and dashboards
+  - Indexed for leaderboard queries
+
+- **Automatic Badge Awarding System**
+  - Criteria-based achievement system with 10 initial badges
+  - Automatic checks and awards when reputation changes
+  - Categories: engagement, contribution, milestone, special
+  - Database functions: `check_and_award_badge()`, `check_all_badges()`
+  - Badge notifications via toast messages when earned
+
+- **Contribution History Page** (`/account/activity`)
+  - Unified timeline of all user activity (posts, comments, votes, submissions)
+  - Filter tabs by activity type
+  - Activity stats overview (counts for each type)
+  - Chronological timeline with status badges
+  - Links to original content
+
+- **Activity Tracking Infrastructure**
+  - Server actions for activity aggregation with caching
+  - Type-safe schemas with Zod validation
+  - Performant queries with proper indexing
+  - 5-minute cache for activity summaries
+
+### Changed
+
+- Account dashboard now shows reputation score prominently
+- Account navigation includes Activity link
+- Public profiles display reputation and tier badges
+- Quick actions promote contribution history
+
+### Database Triggers Flow
+
+**When user creates a post:**
+1. `trigger_reputation_on_post` → calculates reputation (+10)
+2. `trigger_check_badges_on_reputation` → checks all badge criteria
+3. Awards "First Post" (1 post), "10 Posts" (10 posts), etc.
+
+**When user's post gets voted:**
+1. `trigger_reputation_on_vote` → recalculates reputation (+5 per vote)
+2. Checks badge criteria → awards "Popular Post" (10 votes)
+
+**When submission is merged:**
+1. `trigger_reputation_on_submission` → awards +20 reputation
+2. Checks criteria → awards "Contributor" badge
+
+### Badge Definitions
+
+**Engagement Badges:**
+- 📝 First Post (1 post)
+- ✍️ 10 Posts (10 posts)
+- 📚 50 Posts (50 posts)
+
+**Contribution Badges:**
+- 🔥 Popular Post (10 votes on single post)
+- ⭐ Viral Post (50 votes on single post)
+- 🎯 Contributor (1 merged submission)
+
+**Milestone Badges:**
+- 💯 100 Reputation
+- 👑 1000 Reputation
+
+**Special Badges:**
+- 🚀 Early Adopter (manual)
+- ✓ Verified (manual)
+
+### Technical Implementation
+
+**Database Functions:**
+- `calculate_user_reputation()` - Aggregate all contribution points
+- `check_and_award_badge()` - Check single badge criteria
+- `check_all_badges()` - Check all badges for user
+- Reputation triggers on posts, votes, comments, submissions
+- Badge check trigger on reputation updates
+
+**Files Added:**
+- `src/lib/schemas/activity.schema.ts` - Activity and reputation types
+- `src/lib/actions/activity-actions.ts` - Activity aggregation actions
+- `src/lib/actions/reputation-actions.ts` - Reputation calculation actions
+- `src/lib/actions/badge-actions.ts` - Badge fetching and checking
+- `src/hooks/use-badge-notifications.ts` - Client-side badge notification hook
+- `src/components/features/profile/activity-timeline.tsx` - Activity timeline UI
+- `src/app/account/activity/page.tsx` - Contribution history page
+- `supabase/migrations/2025-10-07-reputation-system.sql` - Reputation migrations
+- `supabase/migrations/2025-10-07-badge-awarding-system.sql` - Badge migrations
+
+**Performance:**
+- Activity summaries cached for 5 minutes
+- Reputation calculation optimized with indexed queries
+- Badge checks only run when reputation changes
+- Async database operations don't block user actions
 
 ---
 

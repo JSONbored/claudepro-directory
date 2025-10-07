@@ -79,24 +79,97 @@ export type SubmissionActivity = BaseActivity & {
 export type Activity = PostActivity | CommentActivity | VoteActivity | SubmissionActivity;
 
 /**
- * Activity summary statistics
+ * Activity summary statistics schema
  */
-export type ActivitySummary = {
-  total_posts: number;
-  total_comments: number;
-  total_votes: number;
-  total_submissions: number;
-  merged_submissions: number;
-  total_activity: number;
-};
+export const activitySummarySchema = z.object({
+  total_posts: z.number().int().nonnegative(),
+  total_comments: z.number().int().nonnegative(),
+  total_votes: z.number().int().nonnegative(),
+  total_submissions: z.number().int().nonnegative(),
+  merged_submissions: z.number().int().nonnegative(),
+  total_activity: z.number().int().nonnegative(),
+});
+
+export type ActivitySummary = z.infer<typeof activitySummarySchema>;
 
 /**
- * Reputation breakdown
+ * Post activity schema
  */
-export type ReputationBreakdown = {
-  from_posts: number;
-  from_votes_received: number;
-  from_comments: number;
-  from_submissions: number;
-  total: number;
-};
+export const postActivitySchema = z.object({
+  id: z.string().uuid(),
+  type: z.literal('post'),
+  title: z.string(),
+  url: z.string().nullable(),
+  vote_count: z.number().int().nonnegative(),
+  comment_count: z.number().int().nonnegative(),
+  created_at: z.string(),
+});
+
+/**
+ * Comment activity schema
+ */
+export const commentActivitySchema = z.object({
+  id: z.string().uuid(),
+  type: z.literal('comment'),
+  content: z.string(),
+  post_id: z.string().uuid(),
+  post_title: z.string(),
+  created_at: z.string(),
+});
+
+/**
+ * Vote activity schema
+ */
+export const voteActivitySchema = z.object({
+  id: z.string().uuid(),
+  type: z.literal('vote'),
+  post_id: z.string().uuid(),
+  post_title: z.string(),
+  created_at: z.string(),
+});
+
+/**
+ * Submission activity schema
+ */
+export const submissionActivitySchema = z.object({
+  id: z.string().uuid(),
+  type: z.literal('submission'),
+  content_type: z.string(),
+  content_name: z.string(),
+  status: z.enum(['pending', 'approved', 'rejected', 'merged']),
+  pr_url: z.string().nullable(),
+  created_at: z.string(),
+});
+
+/**
+ * Activity union schema
+ */
+export const activitySchema = z.discriminatedUnion('type', [
+  postActivitySchema,
+  commentActivitySchema,
+  voteActivitySchema,
+  submissionActivitySchema,
+]);
+
+/**
+ * Activity timeline response schema
+ */
+export const activityTimelineResponseSchema = z.object({
+  activities: z.array(activitySchema),
+  hasMore: z.boolean(),
+});
+
+export type ActivityTimelineResponse = z.infer<typeof activityTimelineResponseSchema>;
+
+/**
+ * Reputation breakdown schema
+ */
+export const reputationBreakdownSchema = z.object({
+  from_posts: z.number().int().nonnegative(),
+  from_votes_received: z.number().int().nonnegative(),
+  from_comments: z.number().int().nonnegative(),
+  from_submissions: z.number().int().nonnegative(),
+  total: z.number().int().nonnegative(),
+});
+
+export type ReputationBreakdown = z.infer<typeof reputationBreakdownSchema>;
