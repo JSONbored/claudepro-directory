@@ -17,6 +17,7 @@ import {
 } from '@/src/components/ui/dialog';
 import { Input } from '@/src/components/ui/input';
 import { Check, Copy, Facebook, Linkedin, Mail, Share2, Twitter } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface ShareResultsProps {
@@ -91,8 +92,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
-                  // Track share event
-                  console.log('Shared to Twitter');
+                  logger.info('Recommendation results shared', { platform: 'twitter' });
                 }}
               >
                 <Twitter className="h-4 w-4" />
@@ -106,7 +106,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
-                  console.log('Shared to LinkedIn');
+                  logger.info('Recommendation results shared', { platform: 'linkedin' });
                 }}
               >
                 <Linkedin className="h-4 w-4" />
@@ -120,7 +120,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
-                  console.log('Shared to Facebook');
+                  logger.info('Recommendation results shared', { platform: 'facebook' });
                 }}
               >
                 <Facebook className="h-4 w-4" />
@@ -132,7 +132,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               <a
                 href={shareLinks.email}
                 onClick={() => {
-                  console.log('Shared via Email');
+                  logger.info('Recommendation results shared', { platform: 'email' });
                 }}
               >
                 <Mail className="h-4 w-4" />

@@ -349,7 +349,7 @@ export function encodeQuizAnswers(answers: QuizAnswers): string {
   try {
     const json = JSON.stringify(answers);
     return Buffer.from(json).toString('base64url');
-  } catch (error) {
+  } catch (_error) {
     throw new Error('Failed to encode quiz answers');
   }
 }
@@ -364,7 +364,7 @@ export function decodeQuizAnswers(encoded: string): QuizAnswers {
     const json: string = Buffer.from(encoded, 'base64url').toString('utf-8');
     const parsed = JSON.parse(json);
     return quizAnswersSchema.parse(parsed);
-  } catch (error) {
+  } catch (_error) {
     throw new Error('Invalid or corrupted quiz answers data');
   }
 }
