@@ -2,6 +2,7 @@
 -- ClaudePro Directory - Supabase Database Schema
 -- =====================================================
 -- PRODUCTION SCHEMA - LAST UPDATED: October 7, 2025
+-- Added: User Profile System (interests, reputation, tiers, badges, OAuth sync)
 --
 -- ⚠️ IMPORTANT: This schema represents the CURRENT STATE of the production database.
 -- If you've already run the previous schemas, DO NOT run this again.
@@ -33,12 +34,15 @@ CREATE TABLE IF NOT EXISTS public.users (
   email TEXT UNIQUE,
   name TEXT,
   slug TEXT UNIQUE,
-  image TEXT, -- Avatar URL
+  image TEXT, -- Avatar URL (synced from OAuth)
   hero TEXT, -- Hero/banner image URL
   bio TEXT,
   work TEXT, -- Job title/company
   website TEXT,
   social_x_link TEXT, -- Twitter/X profile
+  interests JSONB DEFAULT '[]', -- User interests/skills tags
+  reputation_score INTEGER DEFAULT 0, -- Gamification score
+  tier TEXT DEFAULT 'free' CHECK (tier IN ('free', 'pro', 'enterprise')), -- User tier/plan
   status TEXT DEFAULT 'active', -- active, suspended, deleted
   public BOOLEAN DEFAULT true, -- Public profile visibility
   follow_email BOOLEAN DEFAULT true, -- Email notifications for new followers
@@ -354,6 +358,32 @@ CREATE TABLE IF NOT EXISTS public.submissions (
   UNIQUE(content_type, content_slug)
 );
 
+-- Badges (achievement system)
+CREATE TABLE IF NOT EXISTS public.badges (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  slug TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  icon TEXT, -- Icon identifier or emoji
+  category TEXT NOT NULL, -- 'engagement', 'contribution', 'milestone', 'special'
+  criteria JSONB NOT NULL, -- JSON describing how to earn it
+  tier_required TEXT DEFAULT 'free' CHECK (tier_required IN ('free', 'pro', 'enterprise')),
+  "order" INTEGER DEFAULT 0, -- Display order
+  active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- User badges (which users have earned which badges)
+CREATE TABLE IF NOT EXISTS public.user_badges (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+  badge_id UUID REFERENCES public.badges(id) ON DELETE CASCADE NOT NULL,
+  earned_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  metadata JSONB, -- Optional data about how/when earned
+  featured BOOLEAN DEFAULT false, -- User can feature favorite badges
+  UNIQUE(user_id, badge_id)
+);
+
 -- =====================================================
 -- INDEXES FOR PERFORMANCE
 -- =====================================================
@@ -361,6 +391,8 @@ CREATE TABLE IF NOT EXISTS public.submissions (
 -- Users
 CREATE INDEX IF NOT EXISTS idx_users_slug ON public.users(slug);
 CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
+CREATE INDEX IF NOT EXISTS idx_users_reputation ON public.users(reputation_score DESC);
+CREATE INDEX IF NOT EXISTS idx_users_tier ON public.users(tier);
 
 -- Bookmarks
 CREATE INDEX IF NOT EXISTS idx_bookmarks_user_id ON public.bookmarks(user_id);
@@ -428,6 +460,13 @@ CREATE INDEX IF NOT EXISTS idx_submissions_status ON public.submissions(status);
 CREATE INDEX IF NOT EXISTS idx_submissions_content_type ON public.submissions(content_type);
 CREATE INDEX IF NOT EXISTS idx_submissions_pr_number ON public.submissions(pr_number) WHERE pr_number IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_submissions_created_at ON public.submissions(created_at DESC);
+
+-- Badges
+CREATE INDEX IF NOT EXISTS idx_badges_category ON public.badges(category);
+CREATE INDEX IF NOT EXISTS idx_badges_active ON public.badges(active) WHERE active = true;
+CREATE INDEX IF NOT EXISTS idx_user_badges_user_id ON public.user_badges(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_badges_badge_id ON public.user_badges(badge_id);
+CREATE INDEX IF NOT EXISTS idx_user_badges_featured ON public.user_badges(featured) WHERE featured = true;
 
 -- =====================================================
 -- FUNCTIONS AND TRIGGERS
@@ -607,6 +646,94 @@ $$;
 GRANT EXECUTE ON FUNCTION public.increment(TEXT, UUID, TEXT, INTEGER) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.increment(TEXT, UUID, TEXT, INTEGER) TO anon;
 
+-- Function to sync OAuth profile data to public.users on signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $function$
+DECLARE
+  avatar_url TEXT;
+  full_name TEXT;
+  user_email TEXT;
+BEGIN
+  -- Extract avatar URL (GitHub uses 'avatar_url', Google uses 'picture')
+  avatar_url := COALESCE(
+    NEW.raw_user_meta_data->>'avatar_url',
+    NEW.raw_user_meta_data->>'picture'
+  );
+  
+  -- Extract full name
+  full_name := COALESCE(
+    NEW.raw_user_meta_data->>'full_name',
+    NEW.raw_user_meta_data->>'name',
+    NEW.raw_user_meta_data->>'user_name'
+  );
+  
+  -- Get email
+  user_email := NEW.email;
+  
+  -- Insert into public.users
+  INSERT INTO public.users (id, email, name, image, created_at, updated_at)
+  VALUES (NEW.id, user_email, full_name, avatar_url, NOW(), NOW())
+  ON CONFLICT (id) DO NOTHING;
+  
+  RETURN NEW;
+END;
+$function$;
+
+-- Trigger to auto-create user profile on OAuth signup
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_new_user();
+
+-- Function to refresh profile from OAuth provider (optional)
+CREATE OR REPLACE FUNCTION public.refresh_profile_from_oauth(user_id UUID)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $function$
+DECLARE
+  auth_user RECORD;
+  avatar_url TEXT;
+  full_name TEXT;
+BEGIN
+  -- Get auth.users data
+  SELECT * INTO auth_user FROM auth.users WHERE id = user_id;
+  
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'User not found';
+  END IF;
+  
+  -- Extract data
+  avatar_url := COALESCE(
+    auth_user.raw_user_meta_data->>'avatar_url',
+    auth_user.raw_user_meta_data->>'picture'
+  );
+  
+  full_name := COALESCE(
+    auth_user.raw_user_meta_data->>'full_name',
+    auth_user.raw_user_meta_data->>'name',
+    auth_user.raw_user_meta_data->>'user_name'
+  );
+  
+  -- Update public.users with latest OAuth data
+  UPDATE public.users
+  SET 
+    name = COALESCE(full_name, name),
+    image = COALESCE(avatar_url, image),
+    updated_at = NOW()
+  WHERE id = user_id;
+END;
+$function$;
+
+-- Grant permission to authenticated users to refresh their own profile
+GRANT EXECUTE ON FUNCTION public.refresh_profile_from_oauth(UUID) TO authenticated;
+
 -- =====================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- =====================================================
@@ -628,6 +755,8 @@ ALTER TABLE public.sponsored_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sponsored_impressions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sponsored_clicks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.submissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.badges ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_badges ENABLE ROW LEVEL SECURITY;
 
 -- Users: Public profiles visible to all, own profile editable
 CREATE POLICY "Public users are viewable by everyone"
@@ -805,19 +934,55 @@ CREATE POLICY "Service role has full access to submissions"
   USING (true)
   WITH CHECK (true);
 
+-- Badges: Active badges are viewable by everyone
+CREATE POLICY "Badges are viewable by everyone"
+  ON public.badges FOR SELECT
+  USING (active = true);
+
+-- User Badges: All user badges are viewable by everyone
+CREATE POLICY "User badges are viewable by everyone"
+  ON public.user_badges FOR SELECT
+  USING (true);
+
+-- User Badges: Users can feature their own badges
+CREATE POLICY "Users can feature their own badges"
+  ON public.user_badges FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- =====================================================
+-- SEED DATA: Initial Badge Definitions
+-- =====================================================
+
+INSERT INTO public.badges (slug, name, description, icon, category, criteria, "order") VALUES
+  ('first-post', 'First Post', 'Created your first community post', '📝', 'milestone', '{"type": "post_count", "threshold": 1}', 1),
+  ('active-contributor', '10 Posts', 'Created 10 community posts', '✍️', 'engagement', '{"type": "post_count", "threshold": 10}', 2),
+  ('prolific-writer', '50 Posts', 'Created 50 community posts', '📚', 'engagement', '{"type": "post_count", "threshold": 50}', 3),
+  ('popular-post', 'Popular Post', 'Received 10+ votes on a single post', '🔥', 'contribution', '{"type": "post_votes", "threshold": 10}', 4),
+  ('viral-post', 'Viral Post', 'Received 50+ votes on a single post', '⭐', 'contribution', '{"type": "post_votes", "threshold": 50}', 5),
+  ('early-adopter', 'Early Adopter', 'One of the first 100 users', '🚀', 'special', '{"type": "manual"}', 6),
+  ('verified', 'Verified', 'Verified community member', '✓', 'special', '{"type": "manual"}', 7),
+  ('contributor', 'Contributor', 'Submitted and merged a configuration', '🎯', 'contribution', '{"type": "submission_merged", "threshold": 1}', 8),
+  ('reputation-100', '100 Reputation', 'Earned 100 reputation points', '💯', 'milestone', '{"type": "reputation", "threshold": 100}', 9),
+  ('reputation-1000', '1000 Reputation', 'Earned 1000 reputation points', '👑', 'milestone', '{"type": "reputation", "threshold": 1000}', 10)
+ON CONFLICT (slug) DO NOTHING;
+
 -- =====================================================
 -- INITIAL SETUP COMPLETE
 -- =====================================================
 -- Schema includes:
---   ✅ All tables (users, bookmarks, jobs, sponsored content, etc.)
+--   ✅ All tables (users, bookmarks, jobs, sponsored content, badges, etc.)
+--   ✅ User profile system (interests, reputation, tiers)
+--   ✅ Badge achievement system
+--   ✅ OAuth profile sync (auto-populate avatar/name on signup)
 --   ✅ Performance indexes
 --   ✅ Security functions (with SET search_path)
 --   ✅ Atomic increment function for tracking
 --   ✅ RLS policies
 --   ✅ Triggers for auto-updates
+--   ✅ Initial badge definitions
 --
 -- Next steps (for fresh setup only):
---   1. Configure OAuth providers in Supabase Authentication
+--   1. Configure OAuth providers in Supabase Authentication (GitHub, Google)
 --   2. Set up Vercel environment variables
---   3. Create user profiles via trigger (see migrations if needed)
+--   3. New users will automatically get profiles created via trigger
 -- =====================================================
