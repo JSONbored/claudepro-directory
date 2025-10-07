@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ActivityTimeline } from '@/src/components/features/profile/activity-timeline';
 import {
   Card,
   CardContent,
@@ -6,9 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { ActivityTimeline } from '@/src/components/features/profile/activity-timeline';
 import { getActivitySummary, getActivityTimeline } from '@/src/lib/actions/activity-actions';
-import { FileText, MessageSquare, ThumbsUp, GitPullRequest } from '@/src/lib/icons';
+import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
@@ -26,7 +26,7 @@ export default async function ActivityPage() {
   const summary = summaryResult?.data;
   const timeline = timelineResult?.data;
 
-  if (!summary || !timeline) {
+  if (!(summary && timeline)) {
     return (
       <div className={UI_CLASSES.SPACE_Y_6}>
         <div>

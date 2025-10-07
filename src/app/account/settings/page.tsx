@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { ProfileEditForm } from '@/src/components/features/profile/profile-edit-form';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,
@@ -8,10 +9,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { ProfileEditForm } from '@/src/components/features/profile/profile-edit-form';
-import { createClient } from '@/src/lib/supabase/server';
-import type { ProfileData } from '@/src/lib/schemas/profile.schema';
 import { RefreshCw } from '@/src/lib/icons';
+import type { ProfileData } from '@/src/lib/schemas/profile.schema';
+import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
@@ -103,9 +103,7 @@ export default async function SettingsPage() {
 
             <div>
               <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Reputation</p>
-              <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
-                {profile.reputation_score} points
-              </p>
+              <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>{profile.reputation_score} points</p>
             </div>
           </div>
         </CardContent>
@@ -116,7 +114,8 @@ export default async function SettingsPage() {
         <CardHeader>
           <CardTitle>Profile Picture</CardTitle>
           <CardDescription>
-            Your profile picture is synced from {user.app_metadata.provider === 'github' ? 'GitHub' : 'Google'}
+            Your profile picture is synced from{' '}
+            {user.app_metadata.provider === 'github' ? 'GitHub' : 'Google'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

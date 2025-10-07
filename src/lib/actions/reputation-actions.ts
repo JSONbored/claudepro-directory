@@ -117,7 +117,8 @@ export const getReputationBreakdown = rateLimitedAction
 
     // Calculate points
     const postCount = postsResult.count || 0;
-    const totalVotes = votesResult.data?.reduce((sum, post) => sum + (post.vote_count || 0), 0) || 0;
+    const totalVotes =
+      votesResult.data?.reduce((sum, post) => sum + (post.vote_count || 0), 0) || 0;
     const commentCount = commentsResult.count || 0;
     const mergedCount = submissionsResult.count || 0;
 

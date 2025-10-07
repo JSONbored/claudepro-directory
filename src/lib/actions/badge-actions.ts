@@ -9,6 +9,30 @@ import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { createClient } from '@/src/lib/supabase/server';
 
+// Supabase query result types
+type UserBadgeWithBadge = {
+  id: string;
+  badge_id: string;
+  earned_at: string;
+  featured: boolean;
+  badges: {
+    slug: string;
+    name: string;
+    description: string;
+    icon: string | null;
+    category: string;
+  };
+};
+
+type BadgeEarnedItem = {
+  earned_at: string;
+  badge: {
+    name: string;
+    description: string;
+    icon: string | null;
+  };
+};
+
 /**
  * Get user's badges with details
  */
@@ -78,7 +102,7 @@ export const getUserBadges = rateLimitedAction
     }
 
     // Transform the data to match expected type
-    const badges = (data || []).map((item: any) => ({
+    const badges = ((data as UserBadgeWithBadge[]) || []).map((item) => ({
       id: item.id,
       badge_id: item.badge_id,
       earned_at: item.earned_at,
@@ -153,10 +177,10 @@ export const checkNewBadges = rateLimitedAction
       throw new Error(`Failed to check badges: ${error.message}`);
     }
 
-    const newBadges = (data || []).map((item) => ({
-      name: (item.badge as any).name,
-      description: (item.badge as any).description,
-      icon: (item.badge as any).icon,
+    const newBadges = ((data as BadgeEarnedItem[]) || []).map((item) => ({
+      name: item.badge.name,
+      description: item.badge.description,
+      icon: item.badge.icon,
       earned_at: item.earned_at,
     }));
 

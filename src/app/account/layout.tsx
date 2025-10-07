@@ -4,7 +4,16 @@ import { redirect } from 'next/navigation';
 import { SignOutButton } from '@/src/components/auth/auth-buttons';
 import { Button } from '@/src/components/ui/button';
 import { Card } from '@/src/components/ui/card';
-import { Bookmark, Briefcase, Home, Send, Settings, TrendingUp, User, Activity } from '@/src/lib/icons';
+import {
+  Activity,
+  Bookmark,
+  Briefcase,
+  Home,
+  Send,
+  Settings,
+  TrendingUp,
+  User,
+} from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

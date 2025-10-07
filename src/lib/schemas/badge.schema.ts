@@ -8,12 +8,7 @@ import { z } from 'zod';
 /**
  * Badge category enum
  */
-export const badgeCategorySchema = z.enum([
-  'engagement',
-  'contribution',
-  'milestone',
-  'special',
-]);
+export const badgeCategorySchema = z.enum(['engagement', 'contribution', 'milestone', 'special']);
 
 export type BadgeCategory = z.infer<typeof badgeCategorySchema>;
 
@@ -52,7 +47,7 @@ export type UserBadge = {
   user_id: string;
   badge_id: string;
   earned_at: string;
-  metadata: Record<string, any> | null;
+  metadata: Record<string, unknown> | null;
   featured: boolean;
 };
 

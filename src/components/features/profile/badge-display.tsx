@@ -31,13 +31,14 @@ export function BadgeIcon({ badge, size = 'md' }: BadgeIconProps) {
   };
 
   return (
-    <div
+    <span
       className={`flex items-center justify-center ${sizeClasses[size]}`}
       title={badge.name}
+      role="img"
       aria-label={badge.name}
     >
       {badge.icon || '🏆'}
-    </div>
+    </span>
   );
 }
 
@@ -69,7 +70,8 @@ export function BadgeCard({ userBadge, showEarnedDate = true }: BadgeCardProps) 
         <CardDescription className="text-sm">{badge.description}</CardDescription>
         {showEarnedDate && (
           <p className="text-xs text-muted-foreground mt-2">
-            Earned {new Date(earned_at).toLocaleDateString('en-US', {
+            Earned{' '}
+            {new Date(earned_at).toLocaleDateString('en-US', {
               month: 'short',
               day: 'numeric',
               year: 'numeric',

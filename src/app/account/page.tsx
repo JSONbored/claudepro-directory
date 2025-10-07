@@ -82,7 +82,9 @@ export default async function AccountDashboard() {
           </CardHeader>
           <CardContent>
             <Badge variant={profile?.tier === 'pro' ? 'default' : 'secondary'} className="mt-2">
-              {profile?.tier ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1) : 'Free'}
+              {profile?.tier
+                ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
+                : 'Free'}
             </Badge>
             <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
               Membership level

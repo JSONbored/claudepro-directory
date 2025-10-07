@@ -9,17 +9,33 @@ import { unstable_cache } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import {
+  type Activity,
+  type ActivitySummary,
   activityFilterSchema,
   activitySummarySchema,
   activityTimelineResponseSchema,
-  type Activity,
-  type ActivitySummary,
   type CommentActivity,
   type PostActivity,
   type SubmissionActivity,
   type VoteActivity,
 } from '@/src/lib/schemas/activity.schema';
 import { createClient } from '@/src/lib/supabase/server';
+
+// Supabase query result types
+type CommentWithPost = {
+  id: string;
+  content: string;
+  post_id: string;
+  created_at: string;
+  posts: { title: string } | null;
+};
+
+type VoteWithPost = {
+  id: string;
+  post_id: string;
+  created_at: string;
+  posts: { title: string } | null;
+};
 
 /**
  * Get user's activity summary statistics
@@ -82,10 +98,7 @@ export const getActivitySummary = rateLimitedAction
           total_submissions: totalSubmissions || 0,
           merged_submissions: mergedSubmissions || 0,
           total_activity:
-            (postsCount || 0) +
-            (commentsCount || 0) +
-            (votesCount || 0) +
-            (totalSubmissions || 0),
+            (postsCount || 0) + (commentsCount || 0) + (votesCount || 0) + (totalSubmissions || 0),
         };
 
         return summary;
@@ -164,13 +177,13 @@ export const getActivityTimeline = rateLimitedAction
 
       if (comments) {
         activities.push(
-          ...comments.map(
+          ...(comments as CommentWithPost[]).map(
             (comment): CommentActivity => ({
               id: comment.id,
               type: 'comment',
               content: comment.content,
               post_id: comment.post_id,
-              post_title: (comment.posts as any)?.title || 'Unknown Post',
+              post_title: comment.posts?.title || 'Unknown Post',
               created_at: comment.created_at,
             })
           )
@@ -190,12 +203,12 @@ export const getActivityTimeline = rateLimitedAction
 
       if (votes) {
         activities.push(
-          ...votes.map(
+          ...(votes as VoteWithPost[]).map(
             (vote): VoteActivity => ({
               id: vote.id,
               type: 'vote',
               post_id: vote.post_id,
-              post_title: (vote.posts as any)?.title || 'Unknown Post',
+              post_title: vote.posts?.title || 'Unknown Post',
               created_at: vote.created_at,
             })
           )
@@ -231,9 +244,7 @@ export const getActivityTimeline = rateLimitedAction
     }
 
     // Sort all activities by date
-    activities.sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
+    activities.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
     // Apply limit after sorting
     const limitedActivities = activities.slice(0, limit);

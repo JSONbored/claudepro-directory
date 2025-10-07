@@ -9,8 +9,8 @@ import { useState } from 'react';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent } from '@/src/components/ui/card';
+import { ExternalLink, FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
 import type { Activity, ActivityType } from '@/src/lib/schemas/activity.schema';
-import { MessageSquare, FileText, ThumbsUp, GitPullRequest, ExternalLink } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface ActivityTimelineProps {
@@ -53,7 +53,9 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
       approved: 'secondary' as const,
       rejected: 'destructive' as const,
     };
-    return <Badge variant={variants[status as keyof typeof variants] || 'secondary'}>{status}</Badge>;
+    return (
+      <Badge variant={variants[status as keyof typeof variants] || 'secondary'}>{status}</Badge>
+    );
   };
 
   // Format date
@@ -80,7 +82,12 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
           size="sm"
           onClick={() => setFilter('all')}
         >
-          All ({summary.total_posts + summary.total_comments + summary.total_votes + summary.total_submissions})
+          All (
+          {summary.total_posts +
+            summary.total_comments +
+            summary.total_votes +
+            summary.total_submissions}
+          )
         </Button>
         <Button
           variant={filter === 'post' ? 'default' : 'outline'}
@@ -128,7 +135,10 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
           </Card>
         ) : (
           filteredActivities.map((activity) => (
-            <Card key={`${activity.type}-${activity.id}`} className="hover:shadow-md transition-shadow">
+            <Card
+              key={`${activity.type}-${activity.id}`}
+              className="hover:shadow-md transition-shadow"
+            >
               <CardContent className="pt-6">
                 <div className="flex gap-4">
                   {/* Icon */}
@@ -173,7 +183,10 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <p className="text-sm text-muted-foreground mb-1">
-                              Commented on <span className="font-medium text-foreground">{activity.post_title}</span>
+                              Commented on{' '}
+                              <span className="font-medium text-foreground">
+                                {activity.post_title}
+                              </span>
                             </p>
                             <p className="text-sm line-clamp-2">{activity.content}</p>
                           </div>
@@ -225,7 +238,9 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                     )}
 
                     {/* Timestamp */}
-                    <p className="text-xs text-muted-foreground mt-2">{formatDate(activity.created_at)}</p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {formatDate(activity.created_at)}
+                    </p>
                   </div>
                 </div>
               </CardContent>

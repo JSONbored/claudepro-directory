@@ -22,6 +22,7 @@
  */
 
 import {
+  Activity,
   AlertCircle,
   AlertTriangle,
   ArrowDown,
@@ -106,6 +107,7 @@ import {
   Target,
   Terminal,
   Thermometer,
+  ThumbsUp,
   Trash,
   TrendingUp,
   Trophy,
@@ -117,8 +119,6 @@ import {
   X,
   XCircle,
   Zap,
-  ThumbsUp,
-  Activity,
 } from 'lucide-react';
 
 // Map of icon names to components for dynamic loading

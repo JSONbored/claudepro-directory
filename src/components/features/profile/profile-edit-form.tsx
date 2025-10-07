@@ -5,7 +5,7 @@
  * Form for editing user profile information
  */
 
-import { useState, useTransition } from 'react';
+import { useId, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
@@ -13,8 +13,8 @@ import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
 import { updateProfile } from '@/src/lib/actions/profile-actions';
-import type { ProfileData } from '@/src/lib/schemas/profile.schema';
 import { X } from '@/src/lib/icons';
+import type { ProfileData } from '@/src/lib/schemas/profile.schema';
 
 interface ProfileEditFormProps {
   profile: ProfileData;
@@ -23,6 +23,14 @@ interface ProfileEditFormProps {
 export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const [isPending, startTransition] = useTransition();
   const [hasChanges, setHasChanges] = useState(false);
+
+  // Generate unique IDs for form fields
+  const nameId = useId();
+  const bioId = useId();
+  const workId = useId();
+  const websiteId = useId();
+  const socialXId = useId();
+  const interestsId = useId();
 
   // Form state
   const [name, setName] = useState(profile.name || '');
@@ -92,9 +100,9 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Name */}
       <div className="space-y-2">
-        <Label htmlFor="name">Name *</Label>
+        <Label htmlFor={nameId}>Name *</Label>
         <Input
-          id="name"
+          id={nameId}
           value={name}
           onChange={(e) => {
             setName(e.target.value);
@@ -108,9 +116,9 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
 
       {/* Bio */}
       <div className="space-y-2">
-        <Label htmlFor="bio">Bio</Label>
+        <Label htmlFor={bioId}>Bio</Label>
         <Textarea
-          id="bio"
+          id={bioId}
           value={bio}
           onChange={(e) => {
             setBio(e.target.value);
@@ -125,9 +133,9 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
 
       {/* Work */}
       <div className="space-y-2">
-        <Label htmlFor="work">Work</Label>
+        <Label htmlFor={workId}>Work</Label>
         <Input
-          id="work"
+          id={workId}
           value={work}
           onChange={(e) => {
             setWork(e.target.value);
@@ -140,9 +148,9 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
 
       {/* Website */}
       <div className="space-y-2">
-        <Label htmlFor="website">Website</Label>
+        <Label htmlFor={websiteId}>Website</Label>
         <Input
-          id="website"
+          id={websiteId}
           type="url"
           value={website}
           onChange={(e) => {
@@ -155,9 +163,9 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
 
       {/* X/Twitter Link */}
       <div className="space-y-2">
-        <Label htmlFor="social_x_link">X / Twitter</Label>
+        <Label htmlFor={socialXId}>X / Twitter</Label>
         <Input
-          id="social_x_link"
+          id={socialXId}
           type="url"
           value={socialXLink}
           onChange={(e) => {
@@ -170,10 +178,10 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
 
       {/* Interests/Tags */}
       <div className="space-y-2">
-        <Label htmlFor="interests">Interests & Skills</Label>
+        <Label htmlFor={interestsId}>Interests & Skills</Label>
         <div className="flex gap-2">
           <Input
-            id="interests"
+            id={interestsId}
             value={newInterest}
             onChange={(e) => setNewInterest(e.target.value)}
             onKeyDown={(e) => {
@@ -189,7 +197,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
             Add
           </Button>
         </div>
-        
+
         {/* Display interests */}
         {interests.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-3">
