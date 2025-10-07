@@ -50,8 +50,8 @@ import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-it
  * ```
  */
 export interface TrendingContentItem extends UnifiedContentItem {
-  viewCount?: number;
-  growthRate?: number;
+  viewCount?: number | undefined;
+  growthRate?: number | undefined;
 }
 
 /**
@@ -452,10 +452,10 @@ function interleaveSponsored<T extends UnifiedContentItem>(
   organic: T[],
   sponsored: Array<{ content_id: string; tier: string; sponsored_id: string }>,
   contentMap: Map<string, T>
-): Array<T & { isSponsored?: boolean; sponsoredId?: string; sponsorTier?: string }> {
-  if (sponsored.length === 0) return organic;
+): Array<T & { isSponsored?: boolean | undefined; sponsoredId?: string | undefined; sponsorTier?: string | undefined }> {
+  if (sponsored.length === 0) return organic as Array<T & { isSponsored?: boolean | undefined; sponsoredId?: string | undefined; sponsorTier?: string | undefined }>;
 
-  const result: Array<T & { isSponsored?: boolean; sponsoredId?: string; sponsorTier?: string }> =
+  const result: Array<T & { isSponsored?: boolean | undefined; sponsoredId?: string | undefined; sponsorTier?: string | undefined }> =
     [];
   let sponsoredIndex = 0;
   const INJECTION_RATIO = 5; // 1 sponsored per 5 organic

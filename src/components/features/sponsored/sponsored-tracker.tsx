@@ -16,9 +16,9 @@ interface SponsoredTrackerProps {
   /** UUID of the sponsored campaign */
   sponsoredId: string;
   /** Position in the feed (0-indexed) */
-  position?: number;
+  position?: number | undefined;
   /** URL of the current page */
-  pageUrl?: string;
+  pageUrl?: string | undefined;
   /** Target URL when clicked */
   targetUrl: string;
   /** Children to wrap (usually the card) */

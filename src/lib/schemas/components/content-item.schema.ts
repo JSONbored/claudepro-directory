@@ -63,6 +63,7 @@ export const unifiedContentItemSchema = z
     // Analytics properties
     viewCount: z.number().optional().describe('Number of views from Redis analytics'),
     position: z.number().optional().describe('Position in feed for tracking purposes'),
+    growthRate: z.number().optional().describe('24-hour growth percentage from trending calculator'),
     
     // Sponsored content properties (added by feed injection)
     isSponsored: z.boolean().optional().describe('Whether this item is sponsored content'),
