@@ -67,7 +67,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
                     </Badge>
                   )}
                   <ConfigCard
-                    item={item}
+                    item={{ ...item, position: index } as UnifiedContentItem}
                     variant="default"
                     showCategory={true}
                     showActions={false}
@@ -97,10 +97,10 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
                 </p>
               </li>
             ) : (
-              popular.map((item) => (
+              popular.map((item, index) => (
                 <li key={item.slug}>
                   <ConfigCard
-                    item={item}
+                    item={{ ...item, position: index } as UnifiedContentItem}
                     variant="default"
                     showCategory={true}
                     showActions={false}
@@ -130,10 +130,10 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
                 </p>
               </li>
             ) : (
-              recent.map((item) => (
+              recent.map((item, index) => (
                 <li key={item.slug}>
                   <ConfigCard
-                    item={item}
+                    item={{ ...item, position: index } as UnifiedContentItem}
                     variant="default"
                     showCategory={true}
                     showActions={false}

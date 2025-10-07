@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { JobActions } from '@/src/components/jobs/job-actions';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -10,7 +11,7 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { getUserJobs } from '@/src/lib/actions/job-actions';
-import { Briefcase, Edit, ExternalLink, Eye, Pause, Play, Plus, Trash } from '@/src/lib/icons';
+import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/date-utils';
 
@@ -114,19 +115,12 @@ export default async function MyJobsPage() {
                     </Link>
                   </Button>
 
-                  {job.status === 'active' && (
-                    <Button variant="ghost" size="sm" disabled>
-                      <Pause className="h-3 w-3 mr-1" />
-                      Pause
-                    </Button>
-                  )}
-
-                  {job.status === 'paused' && (
-                    <Button variant="ghost" size="sm" disabled>
-                      <Play className="h-3 w-3 mr-1" />
-                      Resume
-                    </Button>
-                  )}
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/account/jobs/${job.id}/analytics`}>
+                      <BarChart className="h-3 w-3 mr-1" />
+                      Analytics
+                    </Link>
+                  </Button>
 
                   {job.slug && (
                     <Button variant="ghost" size="sm" asChild>
@@ -137,10 +131,7 @@ export default async function MyJobsPage() {
                     </Button>
                   )}
 
-                  <Button variant="ghost" size="sm" disabled className="text-destructive">
-                    <Trash className="h-3 w-3 mr-1" />
-                    Delete
-                  </Button>
+                  <JobActions jobId={job.id} currentStatus={job.status} />
                 </div>
               </CardContent>
             </Card>

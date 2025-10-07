@@ -61,37 +61,40 @@ async function getTrendingData(params: TrendingParams) {
       statuslinesData.length +
       collectionsData.length;
 
-    // Use Redis-based trending calculator
-    const trendingData = await getBatchTrendingData({
-      agents: agentsData.map((item: { [key: string]: unknown }) => ({
-        ...item,
-        category: 'agents' as const,
-      })),
-      mcp: mcpData.map((item: { [key: string]: unknown }) => ({
-        ...item,
-        category: 'mcp' as const,
-      })),
-      rules: rulesData.map((item: { [key: string]: unknown }) => ({
-        ...item,
-        category: 'rules' as const,
-      })),
-      commands: commandsData.map((item: { [key: string]: unknown }) => ({
-        ...item,
-        category: 'commands' as const,
-      })),
-      hooks: hooksData.map((item: { [key: string]: unknown }) => ({
-        ...item,
-        category: 'hooks' as const,
-      })),
-      statuslines: statuslinesData.map((item: { [key: string]: unknown }) => ({
-        ...item,
-        category: 'statuslines' as const,
-      })),
-      collections: collectionsData.map((item: { [key: string]: unknown }) => ({
-        ...item,
-        category: 'collections' as const,
-      })),
-    });
+    // Use Redis-based trending calculator with sponsored content injection
+    const trendingData = await getBatchTrendingData(
+      {
+        agents: agentsData.map((item: { [key: string]: unknown }) => ({
+          ...item,
+          category: 'agents' as const,
+        })),
+        mcp: mcpData.map((item: { [key: string]: unknown }) => ({
+          ...item,
+          category: 'mcp' as const,
+        })),
+        rules: rulesData.map((item: { [key: string]: unknown }) => ({
+          ...item,
+          category: 'rules' as const,
+        })),
+        commands: commandsData.map((item: { [key: string]: unknown }) => ({
+          ...item,
+          category: 'commands' as const,
+        })),
+        hooks: hooksData.map((item: { [key: string]: unknown }) => ({
+          ...item,
+          category: 'hooks' as const,
+        })),
+        statuslines: statuslinesData.map((item: { [key: string]: unknown }) => ({
+          ...item,
+          category: 'statuslines' as const,
+        })),
+        collections: collectionsData.map((item: { [key: string]: unknown }) => ({
+          ...item,
+          category: 'collections' as const,
+        })),
+      },
+      { includeSponsored: true } // Enable sponsored content injection
+    );
 
     const algorithm = trendingData.metadata.redisEnabled ? 'redis-views' : 'popularity-fallback';
     logger.info(`Loaded trending data using ${algorithm}`, {
