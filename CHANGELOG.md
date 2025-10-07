@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 **Latest Features:**
 
+- [User Collections & Library](#2025-10-07---user-collections-and-my-library) - Create, organize, and share custom collections of bookmarked configurations
 - [Reputation & Badge System](#2025-10-07---reputation-system-and-automatic-badge-awarding) - Automatic reputation tracking and achievement badges
 - [User Profile System](#2025-10-07---user-profile-system-with-oauth-avatar-sync) - Enhanced profiles with OAuth avatars, interests, reputation, and badges
 - [Automated Submission System](#2025-10-06---automated-submission-tracking-and-analytics) - Database-backed submission tracking with analytics
@@ -30,7 +31,124 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - [Reddit MCP Server](#2025-10-04---reddit-mcp-server-community-contribution) - Browse Reddit from Claude
 
-[View All Updates ↓](#2025-10-07---reputation-system-and-automatic-badge-awarding)
+[View All Updates ↓](#2025-10-07---user-collections-and-my-library)
+
+---
+
+## 2025-10-07 - User Collections and My Library
+
+**TL;DR:** Users can now create custom collections to organize their bookmarked configurations, share them publicly on their profiles, and discover collections from other community members.
+
+### What Changed
+
+Implemented a complete user collections system that extends the existing bookmarks feature, allowing users to organize saved configurations into curated collections with public/private visibility, custom ordering, and profile integration.
+
+### Added
+
+- **User Collections Database**
+  - `user_collections` table for collection metadata (name, slug, description, visibility)
+  - `collection_items` junction table linking collections to bookmarked content
+  - Auto-generated slugs from collection names with collision handling
+  - Item count tracking via database triggers for performance
+  - Row Level Security policies for privacy control
+  - Indexed queries for public collections, user ownership, and view counts
+
+- **My Library Page** (`/account/library`)
+  - Unified tabbed interface showing bookmarks and collections
+  - Bookmark tab displays all saved configurations with filtering
+  - Collections tab shows user-created collections with stats
+  - Create new collection button with inline form access
+  - Empty states with helpful calls-to-action
+  - Backward compatible redirect from `/account/bookmarks`
+
+- **Collection Management UI**
+  - Create collection form with auto-slug generation (`/account/library/new`)
+  - Collection detail page with item management (`/account/library/[slug]`)
+  - Edit collection settings (`/account/library/[slug]/edit`)
+  - Add/remove bookmarks from collections
+  - Reorder items with up/down buttons (drag-drop ready architecture)
+  - Public/private visibility toggle
+  - Optional collection descriptions (max 500 characters)
+
+- **Public Collection Sharing**
+  - Collections displayed on user public profiles (`/u/[username]`)
+  - Dedicated public collection pages (`/u/[username]/collections/[slug]`)
+  - Share URLs with copy-to-clipboard functionality
+  - View tracking for collection analytics
+  - Owner can manage collections from public pages
+  - SEO-optimized metadata for public collections
+
+- **Collection Actions** (`src/lib/actions/collection-actions.ts`)
+  - `createCollection()` - Create new collection with validation
+  - `updateCollection()` - Edit collection details
+  - `deleteCollection()` - Remove collection (cascades to items)
+  - `addItemToCollection()` - Add bookmarks to collections
+  - `removeItemFromCollection()` - Remove items
+  - `reorderCollectionItems()` - Change display order
+  - All actions use next-safe-action with rate limiting
+  - Zod schema validation for all inputs
+
+- **Enhanced Bookmark Button**
+  - Added bookmark functionality to static collection cards
+  - Consistent bookmark button placement across all content types
+  - Works with agents, MCP servers, rules, commands, hooks, and collections
+
+### Changed
+
+- Account navigation renamed "Bookmarks" to "Library" for clarity
+- Account dashboard links updated to point to unified library
+- Bookmark actions now revalidate library pages instead of bookmarks pages
+- User profiles display public collections alongside posts and activity
+- Collections can be bookmarked like any other content type
+
+### Technical Implementation
+
+**Database Schema:**
+- `user_collections.slug` - Auto-generated from name, unique per user
+- `user_collections.is_public` - Controls visibility on profiles
+- `user_collections.item_count` - Denormalized count updated by triggers
+- `collection_items.order` - Sortable position within collection
+- Foreign keys ensure referential integrity (user, collection cascading)
+
+**Server Actions:**
+- Rate limits: 20 creates/min, 30 updates/min, 50 item operations/min
+- Type-safe with Zod schemas matching database constraints
+- Automatic revalidation of affected pages (library, profiles, collections)
+- Error handling with user-friendly messages
+- Authentication checks via Supabase auth
+
+**Files Added:**
+- `supabase/migrations/2025-10-07-user-collections.sql` - Collection tables migration
+- `src/lib/actions/collection-actions.ts` - Collection CRUD server actions
+- `src/app/account/library/page.tsx` - Main library page with tabs
+- `src/app/account/library/new/page.tsx` - Create collection page
+- `src/app/account/library/[slug]/page.tsx` - Collection management page
+- `src/app/account/library/[slug]/edit/page.tsx` - Edit collection page
+- `src/components/library/collection-form.tsx` - Reusable collection form
+- `src/components/library/collection-item-manager.tsx` - Item management UI
+- `src/app/u/[slug]/collections/[collectionSlug]/page.tsx` - Public collection view
+
+**Files Modified:**
+- `supabase/schema.sql` - Added user_collections and collection_items tables
+- `src/lib/icons.tsx` - Added FolderOpen and Share2 icons
+- `src/app/account/layout.tsx` - Updated navigation to "Library"
+- `src/app/account/page.tsx` - Updated dashboard quick actions
+- `src/app/u/[slug]/page.tsx` - Added public collections section
+- `src/components/features/content/collection-card.tsx` - Added bookmark button
+
+**Performance:**
+- Denormalized item counts prevent N+1 queries
+- Database triggers auto-update counts on insert/delete
+- Proper indexing on user_id, slug, is_public for fast queries
+- Optimistic UI updates for reordering with fallback
+- Static generation for all public collection pages
+
+**Security:**
+- Row Level Security enforces collection ownership
+- Public collections only visible when is_public = true
+- Collection items inherit parent visibility rules
+- SECURITY DEFINER functions with explicit search_path
+- Rate limiting prevents abuse of collection operations
 
 ---
 
