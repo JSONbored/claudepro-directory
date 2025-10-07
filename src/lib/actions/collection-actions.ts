@@ -26,7 +26,7 @@ const collectionSchema = z.object({
   name: nonEmptyString
     .min(2, 'Collection name must be at least 2 characters')
     .max(100, 'Collection name must be less than 100 characters')
-    .transform((val) => val.trim()),
+    .transform((val: string) => val.trim()),
   slug: nonEmptyString
     .min(2, 'Slug must be at least 2 characters')
     .max(100, 'Slug must be less than 100 characters')
@@ -39,7 +39,7 @@ const collectionSchema = z.object({
     .string()
     .max(500, 'Description must be less than 500 characters')
     .optional()
-    .transform((val) => val?.trim()),
+    .transform((val: string | undefined) => val?.trim()),
   is_public: z.boolean().default(false),
 });
 
@@ -55,7 +55,7 @@ const collectionItemSchema = z.object({
       /^[a-zA-Z0-9-_/]+$/,
       'Slug can only contain letters, numbers, hyphens, underscores, and forward slashes'
     )
-    .transform((val) => val.toLowerCase().trim()),
+    .transform((val: string) => val.toLowerCase().trim()),
   notes: z
     .string()
     .max(500, 'Notes must be less than 500 characters')
@@ -93,7 +93,8 @@ export const createCollection = rateLimitedAction
     },
   })
   .schema(collectionSchema)
-  .action(async ({ parsedInput: { name, slug, description, is_public } }) => {
+  .action(async ({ parsedInput }) => {
+    const { name, slug, description, is_public } = parsedInput;
     const supabase = await createClient();
 
     // Get current user
@@ -156,7 +157,8 @@ export const updateCollection = rateLimitedAction
       id: z.string().uuid('Invalid collection ID'),
     })
   )
-  .action(async ({ parsedInput: { id, name, slug, description, is_public } }) => {
+  .action(async ({ parsedInput }) => {
+    const { id, name, slug, description, is_public } = parsedInput;
     const supabase = await createClient();
 
     // Get current user
@@ -225,7 +227,8 @@ export const deleteCollection = rateLimitedAction
       id: z.string().uuid('Invalid collection ID'),
     })
   )
-  .action(async ({ parsedInput: { id } }) => {
+  .action(async ({ parsedInput }) => {
+    const { id } = parsedInput;
     const supabase = await createClient();
 
     // Get current user
@@ -275,7 +278,8 @@ export const addItemToCollection = rateLimitedAction
     },
   })
   .schema(collectionItemSchema)
-  .action(async ({ parsedInput: { collection_id, content_type, content_slug, notes, order } }) => {
+  .action(async ({ parsedInput }) => {
+    const { collection_id, content_type, content_slug, notes, order } = parsedInput;
     const supabase = await createClient();
 
     // Get current user
@@ -349,7 +353,8 @@ export const removeItemFromCollection = rateLimitedAction
       collection_id: z.string().uuid('Invalid collection ID'),
     })
   )
-  .action(async ({ parsedInput: { id, collection_id } }) => {
+  .action(async ({ parsedInput }) => {
+    const { id, collection_id } = parsedInput;
     const supabase = await createClient();
 
     // Get current user
@@ -396,7 +401,8 @@ export const reorderCollectionItems = rateLimitedAction
     },
   })
   .schema(reorderItemsSchema)
-  .action(async ({ parsedInput: { collection_id, items } }) => {
+  .action(async ({ parsedInput }) => {
+    const { collection_id, items } = parsedInput;
     const supabase = await createClient();
 
     // Get current user

@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/ui/select';
-import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash2 } from '@/src/lib/icons';
+import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface CollectionItem {
@@ -61,9 +61,9 @@ export function CollectionItemManager({
 
   // Filter out bookmarks that are already in the collection
   const availableToAdd = availableBookmarks.filter(
-    (bookmark) =>
+    (bookmark: Bookmark) =>
       !items.some(
-        (item) =>
+        (item: CollectionItem) =>
           item.content_type === bookmark.content_type && item.content_slug === bookmark.content_slug
       )
   );
@@ -81,7 +81,7 @@ export function CollectionItemManager({
       try {
         const result = await addItemToCollection({
           collection_id: collectionId,
-          content_type: bookmark.content_type,
+          content_type: bookmark.content_type as any, // Type assertion needed - bookmarks can have any valid content type
           content_slug: bookmark.content_slug,
           order: items.length, // Add to end
         });
@@ -119,7 +119,12 @@ export function CollectionItemManager({
     if (index === 0) return;
 
     const newItems = [...items];
-    [newItems[index - 1], newItems[index]] = [newItems[index], newItems[index - 1]];
+    const temp = newItems[index];
+    const prev = newItems[index - 1];
+    if (temp && prev) {
+      newItems[index] = prev;
+      newItems[index - 1] = temp;
+    }
     
     // Update order values
     const reorderedItems = newItems.map((item, idx) => ({
@@ -148,7 +153,12 @@ export function CollectionItemManager({
     if (index === items.length - 1) return;
 
     const newItems = [...items];
-    [newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]];
+    const temp = newItems[index];
+    const next = newItems[index + 1];
+    if (temp && next) {
+      newItems[index] = next;
+      newItems[index + 1] = temp;
+    }
     
     // Update order values
     const reorderedItems = newItems.map((item, idx) => ({
@@ -224,7 +234,7 @@ export function CollectionItemManager({
         </div>
       ) : (
         <div className={UI_CLASSES.SPACE_Y_2}>
-          {items.map((item, index) => (
+          {items.map((item: CollectionItem, index: number) => (
             <div
               key={item.id}
               className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
@@ -292,7 +302,7 @@ export function CollectionItemManager({
                   disabled={isPending}
                   aria-label="Remove item"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash className="h-4 w-4" />
                 </Button>
               </div>
             </div>

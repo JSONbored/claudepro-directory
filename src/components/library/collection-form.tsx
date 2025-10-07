@@ -14,10 +14,8 @@ import { toast } from 'sonner';
 import { createCollection, updateCollection } from '@/src/lib/actions/collection-actions';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
-import { Checkbox } from '@/src/components/ui/checkbox';
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
-import { Switch } from '@/src/components/ui/switch';
 import { Textarea } from '@/src/components/ui/textarea';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -67,7 +65,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!name.trim()) {
@@ -175,21 +173,23 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       </div>
 
       {/* Public Toggle */}
-      <div className="flex items-center justify-between rounded-lg border p-4">
-        <div className={UI_CLASSES.SPACE_Y_1}>
-          <Label htmlFor="is_public" className="text-base font-medium">
+      <div className="flex items-center gap-3 rounded-lg border p-4">
+        <input
+          type="checkbox"
+          id="is_public"
+          checked={isPublic}
+          onChange={(e) => setIsPublic(e.target.checked)}
+          disabled={isPending}
+          className="h-5 w-5 rounded border-gray-300"
+        />
+        <div className="flex-1">
+          <Label htmlFor="is_public" className="text-base font-medium cursor-pointer">
             Public Collection
           </Label>
           <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
             Make this collection visible on your public profile
           </p>
         </div>
-        <Switch
-          id="is_public"
-          checked={isPublic}
-          onCheckedChange={setIsPublic}
-          disabled={isPending}
-        />
       </div>
 
       {/* Bookmarks Selection (only in create mode initially) */}
@@ -207,17 +207,19 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                 key={bookmark.id}
                 className="flex items-start space-x-3 rounded-md p-2 hover:bg-accent"
               >
-                <Checkbox
+                <input
+                  type="checkbox"
                   id={bookmark.id}
                   checked={selectedBookmarks.includes(bookmark.id)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
+                  onChange={(e) => {
+                    if (e.target.checked) {
                       setSelectedBookmarks([...selectedBookmarks, bookmark.id]);
                     } else {
-                      setSelectedBookmarks(selectedBookmarks.filter((id) => id !== bookmark.id));
+                      setSelectedBookmarks(selectedBookmarks.filter((id: string) => id !== bookmark.id));
                     }
                   }}
                   disabled={isPending}
+                  className="h-4 w-4 mt-0.5 rounded border-gray-300"
                 />
                 <div className="flex-1">
                   <Label

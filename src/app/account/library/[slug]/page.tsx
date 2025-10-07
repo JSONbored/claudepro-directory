@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { CollectionItemManager } from '@/src/components/library/collection-item-manager';
-import { ArrowLeft, Edit, ExternalLink, Share2 } from '@/src/lib/icons';
+import { ArrowLeft, Edit, Share2 } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

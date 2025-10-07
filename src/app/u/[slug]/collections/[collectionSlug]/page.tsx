@@ -108,9 +108,10 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
     .order('order', { ascending: true });
 
   // Track view (async, non-blocking)
+  // Note: Using 'guides' category as a placeholder since trackView expects specific content types
   trackView({
-    category: 'user_collections',
-    slug: `${slug}/${collectionSlug}`,
+    category: 'guides',
+    slug: `user-collection-${slug}-${collectionSlug}`,
   }).catch(() => {
     // Ignore tracking errors
   });
