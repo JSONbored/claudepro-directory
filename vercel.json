@@ -16,6 +16,10 @@
     {
       "path": "/api/cron/process-email-sequences",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/expire-jobs",
+      "schedule": "0 0 * * *"
     }
   ]
 }
