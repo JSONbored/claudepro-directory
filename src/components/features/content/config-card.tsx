@@ -3,6 +3,7 @@
 import { memo } from 'react';
 import { BookmarkButton } from '@/src/components/shared/bookmark-button';
 import { CardCopyAction } from '@/src/components/shared/card-copy-action';
+import { SponsoredTracker } from '@/src/components/features/sponsored/sponsored-tracker';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -13,6 +14,7 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { SourceBadge, TagBadge, TypeBadge } from '@/src/components/ui/config-badge';
+import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
 import { useCardNavigation } from '@/src/hooks/use-card-navigation';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { ExternalLink, Eye, Github } from '@/src/lib/icons';
@@ -28,7 +30,12 @@ export const ConfigCard = memo(
 
     const { handleCardClick, handleKeyDown, handleActionClick } = useCardNavigation(targetPath);
 
-    return (
+    // Check if this item is sponsored
+    const isSponsored = (item as { isSponsored?: boolean }).isSponsored;
+    const sponsoredId = (item as { sponsoredId?: string }).sponsoredId;
+    const sponsorTier = (item as { sponsorTier?: string }).sponsorTier;
+
+    const cardContent = (
       <Card
         className={`${UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? 'p-6' : ''}`}
         onClick={handleCardClick}
@@ -55,6 +62,13 @@ export const ConfigCard = memo(
                         | 'guides'
                     }
                   />
+                  {/* Show sponsored badge if item is sponsored */}
+                  {isSponsored && sponsorTier && (
+                    <SponsoredBadge
+                      tier={sponsorTier as 'featured' | 'promoted' | 'spotlight'}
+                      showIcon={true}
+                    />
+                  )}
                 </div>
               )}
               <CardTitle
@@ -190,6 +204,21 @@ export const ConfigCard = memo(
         </CardContent>
       </Card>
     );
+
+    // Wrap in sponsored tracker if this is a sponsored item
+    if (isSponsored && sponsoredId) {
+      return (
+        <SponsoredTracker
+          sponsoredId={sponsoredId}
+          targetUrl={`https://claudepro.directory${targetPath}`}
+          position={(item as { position?: number }).position}
+        >
+          {cardContent}
+        </SponsoredTracker>
+      );
+    }
+
+    return cardContent;
   }
 );
 

@@ -27,12 +27,18 @@ export default async function SponsorshipsPage() {
 
   if (!user) return null;
 
-  // Get user's sponsored content
+  // Get user's sponsored content (they can only see their own campaigns)
   const { data: sponsorships } = await supabase
     .from('sponsored_content')
     .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
+
+  // If user has no sponsorships, don't show this page
+  // (Admin manually adds campaigns after payment, then user can access)
+  if (!sponsorships || sponsorships.length === 0) {
+    return null; // Or redirect to /partner page
+  }
 
   return (
     <div className={UI_CLASSES.SPACE_Y_6}>
@@ -52,21 +58,7 @@ export default async function SponsorshipsPage() {
         </Button>
       </div>
 
-      {!sponsorships || sponsorships.length === 0 ? (
-        <Card>
-          <CardContent className={`${UI_CLASSES.FLEX_COL_CENTER} py-12`}>
-            <TrendingUp className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No sponsorships yet</h3>
-            <p className={`${UI_CLASSES.TEXT_MUTED_FOREGROUND} text-center max-w-md mb-4`}>
-              Promote your content to thousands of Claude developers
-            </p>
-            <Button asChild>
-              <Link href="/partner">Learn About Sponsorships</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4">
+      <div className="grid gap-4">
           {sponsorships.map((sponsorship) => {
             const isActive =
               sponsorship.active &&
@@ -179,8 +171,7 @@ export default async function SponsorshipsPage() {
               </Card>
             );
           })}
-        </div>
-      )}
+      </div>
     </div>
   );
 }
