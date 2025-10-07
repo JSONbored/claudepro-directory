@@ -61,7 +61,7 @@ export const getUserBadges = rateLimitedAction
         badge_id,
         earned_at,
         featured,
-        badge:badges (
+        badges!inner (
           slug,
           name,
           description,
@@ -77,8 +77,23 @@ export const getUserBadges = rateLimitedAction
       throw new Error(`Failed to fetch badges: ${error.message}`);
     }
 
+    // Transform the data to match expected type
+    const badges = (data || []).map((item: any) => ({
+      id: item.id,
+      badge_id: item.badge_id,
+      earned_at: item.earned_at,
+      featured: item.featured,
+      badge: {
+        slug: item.badges.slug,
+        name: item.badges.name,
+        description: item.badges.description,
+        icon: item.badges.icon,
+        category: item.badges.category,
+      },
+    }));
+
     return {
-      badges: data || [],
+      badges,
     };
   });
 

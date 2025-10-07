@@ -117,6 +117,8 @@ import {
   X,
   XCircle,
   Zap,
+  ThumbsUp,
+  Activity,
 } from 'lucide-react';
 
 // Map of icon names to components for dynamic loading
@@ -316,6 +318,8 @@ export {
   Webhook,
   Workflow,
   XCircle,
+  ThumbsUp,
+  Activity,
 };
 
 // Export LucideIcon type for component props

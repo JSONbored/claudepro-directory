@@ -6,6 +6,7 @@
  */
 
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { updateProfileSchema } from '@/src/lib/schemas/profile.schema';
 import { createClient } from '@/src/lib/supabase/server';
@@ -69,7 +70,7 @@ export const refreshProfileFromOAuth = rateLimitedAction
       windowSeconds: 60,
     },
   })
-  .schema(null)
+  .schema(z.void())
   .action(async () => {
     const supabase = await createClient();
 

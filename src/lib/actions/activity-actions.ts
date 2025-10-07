@@ -12,6 +12,8 @@ import {
   activityFilterSchema,
   activitySummarySchema,
   activityTimelineResponseSchema,
+  type Activity,
+  type ActivitySummary,
   type CommentActivity,
   type PostActivity,
   type SubmissionActivity,

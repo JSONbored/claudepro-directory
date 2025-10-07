@@ -6,16 +6,9 @@
  */
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/src/components/ui/card';
+import { Card, CardContent } from '@/src/components/ui/card';
 import type { Activity, ActivityType } from '@/src/lib/schemas/activity.schema';
 import { MessageSquare, FileText, ThumbsUp, GitPullRequest, ExternalLink } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

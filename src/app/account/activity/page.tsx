@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { Badge } from '@/src/components/ui/badge';
 import { ActivityTimeline } from '@/src/components/features/profile/activity-timeline';
 import { getActivitySummary, getActivityTimeline } from '@/src/lib/actions/activity-actions';
 import { FileText, MessageSquare, ThumbsUp, GitPullRequest } from '@/src/lib/icons';
