@@ -17,6 +17,7 @@
  */
 
 import { memo } from 'react';
+import { BookmarkButton } from '@/src/components/shared/bookmark-button';
 import { CardCopyAction } from '@/src/components/shared/card-copy-action';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
@@ -177,6 +178,8 @@ export const CollectionCard = memo(
 
             {showActions && (
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
+                <BookmarkButton contentType="collections" contentSlug={item.slug} />
+
                 <CardCopyAction
                   url={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
                   category="collections"
