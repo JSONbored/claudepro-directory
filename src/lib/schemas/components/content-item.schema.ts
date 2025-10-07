@@ -59,16 +59,22 @@ export const unifiedContentItemSchema = z
       .optional()
       .describe('Full markdown or text content for long-form content types'), // long form content
     lastModified: z.string().optional().describe('ISO date string when content was last updated'), // last modification date
-    
+
     // Analytics properties
     viewCount: z.number().optional().describe('Number of views from Redis analytics'),
     position: z.number().optional().describe('Position in feed for tracking purposes'),
-    growthRate: z.number().optional().describe('24-hour growth percentage from trending calculator'),
-    
+    growthRate: z
+      .number()
+      .optional()
+      .describe('24-hour growth percentage from trending calculator'),
+
     // Sponsored content properties (added by feed injection)
     isSponsored: z.boolean().optional().describe('Whether this item is sponsored content'),
     sponsoredId: z.string().optional().describe('UUID of the sponsored campaign'),
-    sponsorTier: z.enum(['featured', 'promoted', 'spotlight']).optional().describe('Sponsorship tier for badge display'),
+    sponsorTier: z
+      .enum(['featured', 'promoted', 'spotlight'])
+      .optional()
+      .describe('Sponsorship tier for badge display'),
 
     // Source and metadata
     source: z

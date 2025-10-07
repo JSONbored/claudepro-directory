@@ -452,11 +452,29 @@ function interleaveSponsored<T extends UnifiedContentItem>(
   organic: T[],
   sponsored: Array<{ content_id: string; tier: string; sponsored_id: string }>,
   contentMap: Map<string, T>
-): Array<T & { isSponsored?: boolean | undefined; sponsoredId?: string | undefined; sponsorTier?: string | undefined }> {
-  if (sponsored.length === 0) return organic as Array<T & { isSponsored?: boolean | undefined; sponsoredId?: string | undefined; sponsorTier?: string | undefined }>;
+): Array<
+  T & {
+    isSponsored?: boolean | undefined;
+    sponsoredId?: string | undefined;
+    sponsorTier?: string | undefined;
+  }
+> {
+  if (sponsored.length === 0)
+    return organic as Array<
+      T & {
+        isSponsored?: boolean | undefined;
+        sponsoredId?: string | undefined;
+        sponsorTier?: string | undefined;
+      }
+    >;
 
-  const result: Array<T & { isSponsored?: boolean | undefined; sponsoredId?: string | undefined; sponsorTier?: string | undefined }> =
-    [];
+  const result: Array<
+    T & {
+      isSponsored?: boolean | undefined;
+      sponsoredId?: string | undefined;
+      sponsorTier?: string | undefined;
+    }
+  > = [];
   let sponsoredIndex = 0;
   const INJECTION_RATIO = 5; // 1 sponsored per 5 organic
 

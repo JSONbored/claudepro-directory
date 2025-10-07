@@ -1,9 +1,9 @@
 'use client';
 
 import { memo } from 'react';
+import { SponsoredTracker } from '@/src/components/features/sponsored/sponsored-tracker';
 import { BookmarkButton } from '@/src/components/shared/bookmark-button';
 import { CardCopyAction } from '@/src/components/shared/card-copy-action';
-import { SponsoredTracker } from '@/src/components/features/sponsored/sponsored-tracker';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {

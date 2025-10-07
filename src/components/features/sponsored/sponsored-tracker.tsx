@@ -2,10 +2,10 @@
 
 /**
  * Sponsored Content Tracker
- * 
+ *
  * Tracks impressions (when visible) and clicks for sponsored content.
  * Only renders when item is actually sponsored - no-op otherwise.
- * 
+ *
  * Uses Intersection Observer for visibility detection.
  */
 
@@ -69,20 +69,28 @@ export function SponsoredTracker({
     };
   }, [sponsoredId, pageUrl, position]);
 
-  // Track click when user interacts
-  const handleClick = () => {
-    // Fire-and-forget click tracking
-    trackSponsoredClick({
-      sponsored_id: sponsoredId,
-      target_url: targetUrl,
-    }).catch(() => {
-      // Silent fail - clicks are best-effort
-    });
-  };
+  // Track click when user interacts with children (via event delegation)
+  useEffect(() => {
+    const element = elementRef.current;
+    if (!element) return;
 
-  return (
-    <div ref={elementRef} onClick={handleClick}>
-      {children}
-    </div>
-  );
+    const handleClick = () => {
+      // Fire-and-forget click tracking
+      trackSponsoredClick({
+        sponsored_id: sponsoredId,
+        target_url: targetUrl,
+      }).catch(() => {
+        // Silent fail - clicks are best-effort
+      });
+    };
+
+    // Use capture phase to track clicks on any child elements
+    element.addEventListener('click', handleClick, { capture: true });
+
+    return () => {
+      element.removeEventListener('click', handleClick, { capture: true });
+    };
+  }, [sponsoredId, targetUrl]);
+
+  return <div ref={elementRef}>{children}</div>;
 }
