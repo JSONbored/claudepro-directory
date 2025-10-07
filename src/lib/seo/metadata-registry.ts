@@ -155,6 +155,8 @@ export const structuredDataConfigSchema = z
         'SoftwareApplication',
         'JobPosting',
         'CollectionPage',
+        'Blog',
+        'TechArticle',
       ])
       .describe('Schema.org type for structured data generation'),
 

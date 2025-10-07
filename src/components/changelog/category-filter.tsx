@@ -80,12 +80,12 @@ export const CategoryFilter = memo(
 
       // Count entries that have at least one item in each category
       for (const entry of entries) {
-        if (entry.categories.Added.length > 0) counts.Added++;
-        if (entry.categories.Changed.length > 0) counts.Changed++;
-        if (entry.categories.Fixed.length > 0) counts.Fixed++;
-        if (entry.categories.Removed.length > 0) counts.Removed++;
-        if (entry.categories.Deprecated.length > 0) counts.Deprecated++;
-        if (entry.categories.Security.length > 0) counts.Security++;
+        if (entry.categories.Added.length > 0) counts.Added = (counts.Added ?? 0) + 1;
+        if (entry.categories.Changed.length > 0) counts.Changed = (counts.Changed ?? 0) + 1;
+        if (entry.categories.Fixed.length > 0) counts.Fixed = (counts.Fixed ?? 0) + 1;
+        if (entry.categories.Removed.length > 0) counts.Removed = (counts.Removed ?? 0) + 1;
+        if (entry.categories.Deprecated.length > 0) counts.Deprecated = (counts.Deprecated ?? 0) + 1;
+        if (entry.categories.Security.length > 0) counts.Security = (counts.Security ?? 0) + 1;
       }
 
       return counts;

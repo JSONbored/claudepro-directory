@@ -36,6 +36,7 @@ export const unifiedContentItemSchema = z
         'workflows',
         'categories',
         'collections',
+        'changelog',
       ])
       .describe('Content type category or subcategory for classification and filtering'),
     author: z.string().describe('Name or identifier of the content creator or contributor'),

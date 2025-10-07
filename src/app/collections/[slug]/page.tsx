@@ -147,7 +147,7 @@ export default async function CollectionDetailPage({
 
   // Load all referenced items with full content
   const itemsWithContent = await Promise.all(
-    collection.items.map(async (itemRef): Promise<ItemWithData | null> => {
+    collection.items.map(async (itemRef: CollectionItemReference): Promise<ItemWithData | null> => {
       try {
         const item = await getContentBySlug(itemRef.category as ContentCategory, itemRef.slug);
         return item ? { ...itemRef, data: item } : null;
@@ -162,11 +162,11 @@ export default async function CollectionDetailPage({
   );
 
   // Filter out failed loads
-  const validItems = itemsWithContent.filter((item): item is ItemWithData => item !== null);
+  const validItems = itemsWithContent.filter((item: ItemWithData | null): item is ItemWithData => item !== null);
 
   // Group items by category
   const itemsByCategory = validItems.reduce(
-    (acc: Record<string, ItemWithData[]>, item) => {
+    (acc: Record<string, ItemWithData[]>, item: ItemWithData) => {
       if (!item) return acc;
       const category = item.category;
       if (!acc[category]) {
@@ -277,14 +277,14 @@ export default async function CollectionDetailPage({
               }
             >
               <div className="space-y-8">
-                {Object.entries(itemsByCategory).map(([category, items]) => (
+                {(Object.entries(itemsByCategory) as [string, ItemWithData[]][]).map(([category, items]) => (
                   <div key={category}>
                     <h3 className="text-lg font-semibold text-foreground mb-4">
                       {CATEGORY_NAMES[category as keyof typeof CATEGORY_NAMES] || category} (
                       {items.length})
                     </h3>
                     <div className="grid gap-4 sm:grid-cols-1">
-                      {items.map((item) =>
+                      {items.map((item: ItemWithData) =>
                         item?.data ? (
                           <ConfigCard key={item.slug} item={item.data} showCategory={false} />
                         ) : null
@@ -304,8 +304,8 @@ export default async function CollectionDetailPage({
               </CardHeader>
               <CardContent>
                 <ol className="space-y-2">
-                  {collection.installationOrder.map((slug, index) => {
-                    const item = validItems.find((i) => i?.slug === slug);
+                  {collection.installationOrder.map((slug: string, index: number) => {
+                    const item = validItems.find((i: ItemWithData) => i?.slug === slug);
                     return (
                       <li key={slug} className="flex items-start gap-3">
                         <span className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-primary text-sm font-semibold">
