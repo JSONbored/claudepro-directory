@@ -68,8 +68,19 @@ async function generateSitemap(): Promise<string> {
     });
   });
 
-  // Static page llms.txt routes (api-docs and guides only)
-  const staticPagesWithLlmsTxt = ['api-docs', 'guides'];
+  // Tools pages - Interactive tools for community value
+  const toolPages = ['tools/config-recommender'];
+  toolPages.forEach((page) => {
+    urls.push({
+      loc: `${baseUrl || ''}/${page}`,
+      lastmod: new Date().toISOString().split('T')[0] || '',
+      changefreq: 'monthly', // Static tool landing page
+      priority: 0.8, // High priority - valuable interactive feature
+    });
+  });
+
+  // Static page llms.txt routes (api-docs, guides, and tools)
+  const staticPagesWithLlmsTxt = ['api-docs', 'guides', 'tools/config-recommender'];
   staticPagesWithLlmsTxt.forEach((page) => {
     urls.push({
       loc: `${baseUrl || ''}/${page}/llms.txt`,
@@ -379,6 +390,7 @@ Allow: /guides*
 Allow: /trending*
 Allow: /community*
 Allow: /jobs*
+Allow: /tools*
 
 # API Documentation & Discovery (RFC 9727, OpenAPI 3.1)
 Allow: /api-docs*

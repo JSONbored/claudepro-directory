@@ -8,11 +8,22 @@
 import Link from 'next/link';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/src/components/ui/tooltip';
+import { ArrowRight, Award, Eye, Info, Sparkles } from '@/src/lib/icons';
 import type { RecommendationResult } from '@/src/lib/schemas/recommender.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { ArrowRight, Award, Eye, Info, Sparkles } from '@/src/lib/icons';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/src/components/ui/tooltip';
 
 interface RecommendationCardProps {
   result: RecommendationResult;
@@ -38,7 +49,9 @@ export function RecommendationCard({ result }: RecommendationCardProps) {
   };
 
   return (
-    <Card className={`relative overflow-hidden ${UI_CLASSES.CARD_INTERACTIVE} hover:shadow-lg transition-all`}>
+    <Card
+      className={`relative overflow-hidden ${UI_CLASSES.CARD_INTERACTIVE} hover:shadow-lg transition-all`}
+    >
       {/* Match score badge (top right) */}
       <div className="absolute top-4 right-4 z-10">
         <TooltipProvider>
@@ -69,7 +82,9 @@ export function RecommendationCard({ result }: RecommendationCardProps) {
       )}
 
       {/* Gradient overlay */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${getMatchGradient(result.matchScore)} opacity-50`} />
+      <div
+        className={`absolute inset-0 bg-gradient-to-br ${getMatchGradient(result.matchScore)} opacity-50`}
+      />
 
       {/* Card content */}
       <Link href={targetPath} className="relative">
@@ -81,14 +96,10 @@ export function RecommendationCard({ result }: RecommendationCardProps) {
             </Badge>
 
             {/* Title */}
-            <CardTitle className="text-lg line-clamp-2">
-              {result.title}
-            </CardTitle>
+            <CardTitle className="text-lg line-clamp-2">{result.title}</CardTitle>
 
             {/* Description */}
-            <CardDescription className="line-clamp-2">
-              {result.description}
-            </CardDescription>
+            <CardDescription className="line-clamp-2">{result.description}</CardDescription>
           </div>
         </CardHeader>
 
@@ -105,8 +116,8 @@ export function RecommendationCard({ result }: RecommendationCardProps) {
           {/* Additional reasons */}
           {result.reasons.length > 1 && (
             <div className="flex flex-wrap gap-1">
-              {result.reasons.slice(1, 4).map((reason, index) => (
-                <Badge key={index} variant="secondary" className="text-xs">
+              {result.reasons.slice(1, 4).map((reason) => (
+                <Badge key={reason.message} variant="secondary" className="text-xs">
                   {reason.message}
                 </Badge>
               ))}

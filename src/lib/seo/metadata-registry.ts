@@ -434,13 +434,11 @@ export const METADATA_REGISTRY = {
   '/tools/config-recommender/results/:id': {
     title: {
       tier: 'content' as const,
-      title: (ctx: MetadataContext) =>
-        ctx?.item?.title
-          ? String(ctx.item.title)
-          : 'Your Configuration Recommendations',
+      title: (ctx?: MetadataContext) =>
+        ctx?.item?.title ? String(ctx.item.title) : 'Your Configuration Recommendations',
       section: 'Config Recommender',
     },
-    description: (ctx: MetadataContext) =>
+    description: (ctx?: MetadataContext) =>
       ctx?.item?.description
         ? String(ctx.item.description)
         : 'View your personalized Claude configuration recommendations. Discover the best configs matched to your specific needs and use case.',

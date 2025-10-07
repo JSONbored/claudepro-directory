@@ -18,15 +18,15 @@
 
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 import { ResultsDisplay } from '@/src/components/tools/recommender/results-display';
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import { APP_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/redis';
 import { generateRecommendations } from '@/src/lib/recommender/algorithm';
+import { statsRedis } from '@/src/lib/redis';
+import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { decodeQuizAnswers } from '@/src/lib/schemas/recommender.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { APP_CONFIG } from '@/src/lib/constants';
-import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -38,6 +38,8 @@ export const revalidate = 3600;
 
 /**
  * Generate metadata for SEO and social sharing
+ * NOINDEX strategy: Result pages are personalized and should not be indexed
+ * to avoid thin content issues and infinite URL combinations
  */
 export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const resolvedParams = await params;
@@ -52,6 +54,10 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
       return {
         title: 'Configuration Recommendations',
         description: 'Your personalized Claude configuration recommendations',
+        robots: {
+          index: false,
+          follow: true,
+        },
       };
     }
 
@@ -74,6 +80,11 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
       ...baseMetadata,
       title,
       description,
+      // Prevent indexing of personalized result pages (avoid thin content penalty)
+      robots: {
+        index: false, // Don't index individual results
+        follow: true, // Do follow links to configurations
+      },
       openGraph: {
         ...baseMetadata.openGraph,
         title,
@@ -95,6 +106,10 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     return {
       title: 'Configuration Recommendations',
       description: 'Your personalized Claude configuration recommendations',
+      robots: {
+        index: false,
+        follow: true,
+      },
     };
   }
 }
@@ -112,7 +127,7 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
     notFound();
   }
 
-  let answers;
+  let answers: ReturnType<typeof decodeQuizAnswers>;
   try {
     answers = decodeQuizAnswers(resolvedSearchParams.answers);
   } catch (error) {
@@ -145,14 +160,14 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
 
     // Combine all configurations with category tags
     const allConfigs: UnifiedContentItem[] = [
-      ...agentsData.map((item: Record<string, unknown>) => ({ ...item, category: 'agents' as const })),
-      ...mcpData.map((item: Record<string, unknown>) => ({ ...item, category: 'mcp' as const })),
-      ...rulesData.map((item: Record<string, unknown>) => ({ ...item, category: 'rules' as const })),
-      ...commandsData.map((item: Record<string, unknown>) => ({ ...item, category: 'commands' as const })),
-      ...hooksData.map((item: Record<string, unknown>) => ({ ...item, category: 'hooks' as const })),
-      ...statuslinesData.map((item: Record<string, unknown>) => ({ ...item, category: 'statuslines' as const })),
-      ...collectionsData.map((item: Record<string, unknown>) => ({ ...item, category: 'collections' as const })),
-    ];
+      ...agentsData.map((item) => ({ ...item, category: 'agents' as const })),
+      ...mcpData.map((item) => ({ ...item, category: 'mcp' as const })),
+      ...rulesData.map((item) => ({ ...item, category: 'rules' as const })),
+      ...commandsData.map((item) => ({ ...item, category: 'commands' as const })),
+      ...hooksData.map((item) => ({ ...item, category: 'hooks' as const })),
+      ...statuslinesData.map((item) => ({ ...item, category: 'statuslines' as const })),
+      ...collectionsData.map((item) => ({ ...item, category: 'collections' as const })),
+    ] as UnifiedContentItem[];
 
     // Enrich with view counts from Redis
     const enrichedConfigs = await statsRedis.enrichWithViewCounts(allConfigs);

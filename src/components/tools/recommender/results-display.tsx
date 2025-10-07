@@ -12,15 +12,21 @@
  * - Responsive grid layout
  */
 
-import { useState } from 'react';
 import Link from 'next/link';
+import { useState } from 'react';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
+import { ArrowRight, BarChart, RefreshCw, Share2, Sparkles, TrendingUp } from '@/src/lib/icons';
 import type { RecommendationResponse } from '@/src/lib/schemas/recommender.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { ArrowRight, BarChart, RefreshCw, Share2, Sparkles, TrendingUp } from '@/src/lib/icons';
 import { RecommendationCard } from './recommendation-card';
 import { ShareResults } from './share-results';
 
@@ -37,9 +43,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
 
   // Filter results by category
   const filteredResults =
-    selectedCategory === 'all'
-      ? results
-      : results.filter((r) => r.category === selectedCategory);
+    selectedCategory === 'all' ? results : results.filter((r) => r.category === selectedCategory);
 
   // Get unique categories from results
   const categories = ['all', ...new Set(results.map((r) => r.category))];
@@ -54,8 +58,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </div>
 
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Based on your preferences, we found <strong>{totalMatches} matching configurations</strong>.
-          Here are the top {results.length} best fits for your needs.
+          Based on your preferences, we found{' '}
+          <strong>{totalMatches} matching configurations</strong>. Here are the top {results.length}{' '}
+          best fits for your needs.
         </p>
 
         {/* Summary Stats */}
@@ -84,11 +89,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             <Share2 className="h-4 w-4" />
             Share Results
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            asChild
-          >
+          <Button variant="outline" size="sm" asChild>
             <Link href="/tools/config-recommender" className="gap-2">
               <RefreshCw className="h-4 w-4" />
               Start Over
@@ -142,9 +143,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             {answers.teamSize && (
               <div>
                 <span className="text-sm font-medium">Team Size</span>
-                <p className="text-sm text-muted-foreground mt-1 capitalize">
-                  {answers.teamSize}
-                </p>
+                <p className="text-sm text-muted-foreground mt-1 capitalize">{answers.teamSize}</p>
               </div>
             )}
           </div>
@@ -156,7 +155,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         <TabsList className="flex-wrap h-auto">
           {categories.map((category) => {
             const count =
-              category === 'all' ? results.length : results.filter((r) => r.category === category).length;
+              category === 'all'
+                ? results.length
+                : results.filter((r) => r.category === category).length;
             return (
               <TabsTrigger key={category} value={category} className="capitalize">
                 {category === 'all' ? 'All Results' : category} ({count})

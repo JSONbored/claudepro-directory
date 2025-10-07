@@ -17,13 +17,13 @@
  * - No authentication required (public feature)
  */
 
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
-import { quizAnswersSchema, type QuizAnswers } from '@/src/lib/schemas/recommender.schema';
-import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/redis';
-import { generateRecommendations } from '@/src/lib/recommender/algorithm';
-import { rateLimitedAction } from './safe-action';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
+import { logger } from '@/src/lib/logger';
+import { generateRecommendations } from '@/src/lib/recommender/algorithm';
+import { statsRedis } from '@/src/lib/redis';
+import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import { type QuizAnswers, quizAnswersSchema } from '@/src/lib/schemas/recommender.schema';
+import { rateLimitedAction } from './safe-action';
 
 /**
  * Generate personalized configuration recommendations
@@ -70,14 +70,14 @@ export const generateConfigRecommendations = rateLimitedAction
 
       // Combine all configurations with category tags
       const allConfigs: UnifiedContentItem[] = [
-        ...agentsData.map((item: Record<string, unknown>) => ({ ...item, category: 'agents' as const })),
-        ...mcpData.map((item: Record<string, unknown>) => ({ ...item, category: 'mcp' as const })),
-        ...rulesData.map((item: Record<string, unknown>) => ({ ...item, category: 'rules' as const })),
-        ...commandsData.map((item: Record<string, unknown>) => ({ ...item, category: 'commands' as const })),
-        ...hooksData.map((item: Record<string, unknown>) => ({ ...item, category: 'hooks' as const })),
-        ...statuslinesData.map((item: Record<string, unknown>) => ({ ...item, category: 'statuslines' as const })),
-        ...collectionsData.map((item: Record<string, unknown>) => ({ ...item, category: 'collections' as const })),
-      ];
+        ...agentsData.map((item) => ({ ...item, category: 'agents' as const })),
+        ...mcpData.map((item) => ({ ...item, category: 'mcp' as const })),
+        ...rulesData.map((item) => ({ ...item, category: 'rules' as const })),
+        ...commandsData.map((item) => ({ ...item, category: 'commands' as const })),
+        ...hooksData.map((item) => ({ ...item, category: 'hooks' as const })),
+        ...statuslinesData.map((item) => ({ ...item, category: 'statuslines' as const })),
+        ...collectionsData.map((item) => ({ ...item, category: 'collections' as const })),
+      ] as UnifiedContentItem[];
 
       // Enrich with view counts from Redis for popularity scoring
       const enrichedConfigs = await statsRedis.enrichWithViewCounts(allConfigs);
@@ -140,24 +140,30 @@ export const trackRecommendationEvent = rateLimitedAction
       toolPreferences: true,
     })
   )
-  .action(async ({ parsedInput }: { parsedInput: Pick<QuizAnswers, 'useCase' | 'experienceLevel' | 'toolPreferences'> }) => {
-    // Simple event tracking for analytics
-    logger.info('Recommendation event tracked', {
-      useCase: parsedInput.useCase,
-      experienceLevel: parsedInput.experienceLevel,
-      toolPreferences: parsedInput.toolPreferences.join(','),
-    });
+  .action(
+    async ({
+      parsedInput,
+    }: {
+      parsedInput: Pick<QuizAnswers, 'useCase' | 'experienceLevel' | 'toolPreferences'>;
+    }) => {
+      // Simple event tracking for analytics
+      logger.info('Recommendation event tracked', {
+        useCase: parsedInput.useCase,
+        experienceLevel: parsedInput.experienceLevel,
+        toolPreferences: parsedInput.toolPreferences.join(','),
+      });
 
-    return {
-      success: true,
-    };
-  });
+      return {
+        success: true,
+      };
+    }
+  );
 
 /**
  * FUTURE: LLM-Enhanced Recommendations
- * 
+ *
  * When LLM integration is added, create this action:
- * 
+ *
  * export const generateEnhancedRecommendations = rateLimitedAction
  *   .metadata({
  *     actionName: 'generateEnhancedRecommendations',

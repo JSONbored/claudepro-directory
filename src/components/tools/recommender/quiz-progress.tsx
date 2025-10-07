@@ -6,8 +6,8 @@
  */
 
 import { Badge } from '@/src/components/ui/badge';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { CheckCircle } from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface QuizProgressProps {
   currentQuestion: number;
@@ -60,16 +60,12 @@ export function QuizProgress({
               step < currentQuestion
                 ? 'bg-primary text-primary-foreground'
                 : step === currentQuestion
-                ? 'bg-primary/20 text-primary border-2 border-primary'
-                : 'bg-muted text-muted-foreground'
+                  ? 'bg-primary/20 text-primary border-2 border-primary'
+                  : 'bg-muted text-muted-foreground'
             }`}
-            aria-label={`Question ${step}${step < currentQuestion ? ' (completed)' : step === currentQuestion ? ' (current)' : ''}`}
+            title={`Question ${step}${step < currentQuestion ? ' (completed)' : step === currentQuestion ? ' (current)' : ''}`}
           >
-            {step < currentQuestion ? (
-              <CheckCircle className="h-4 w-4" />
-            ) : (
-              step
-            )}
+            {step < currentQuestion ? <CheckCircle className="h-4 w-4" /> : step}
           </div>
         ))}
       </div>

@@ -97,6 +97,12 @@
     <priority>0.85</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/tools/config-recommender</loc>
+    <lastmod>2025-10-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/api-docs/llms.txt</loc>
     <lastmod>2025-10-07</lastmod>
     <changefreq>daily</changefreq>
@@ -104,6 +110,12 @@
   </url>
   <url>
     <loc>https://claudepro.directory/guides/llms.txt</loc>
+    <lastmod>2025-10-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/tools/config-recommender/llms.txt</loc>
     <lastmod>2025-10-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
@@ -227,6 +239,12 @@
     <lastmod>2025-10-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-07-user-collections-and-my-library</loc>
+    <lastmod>2025-10-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/changelog/2025-10-07-reputation-system-and-automatic-badge-awarding</loc>
@@ -2303,6 +2321,12 @@
     <lastmod>2025-10-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-07-user-collections-and-my-library/llms.txt</loc>
+    <lastmod>2025-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/changelog/2025-10-07-reputation-system-and-automatic-badge-awarding/llms.txt</loc>

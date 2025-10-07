@@ -17,15 +17,15 @@
  * - Optimized for serverless edge functions
  */
 
+import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import {
+  generateResultId,
   type QuizAnswers,
   type RecommendationConfig,
-  type RecommendationResult,
   type RecommendationResponse,
-  generateResultId,
+  type RecommendationResult,
 } from '@/src/lib/schemas/recommender.schema';
-import { logger } from '@/src/lib/logger';
 import {
   calculateCategoryScore,
   calculateExperienceScore,
@@ -244,10 +244,9 @@ function scoreConfigurations(
     const normalizedScore = Math.min(100, Math.round(totalScore));
 
     // Determine primary reason (highest weight)
+    const sortedReasons = reasons.sort((a, b) => (b.weight || 0) - (a.weight || 0));
     const primaryReason =
-      reasons.length > 0
-        ? reasons.sort((a, b) => (b.weight || 0) - (a.weight || 0))[0].message
-        : 'General match';
+      sortedReasons.length > 0 && sortedReasons[0] ? sortedReasons[0].message : 'General match';
 
     return {
       slug: item.slug,
@@ -293,6 +292,8 @@ function applyDiversityFilter(
   // For remaining slots, balance between score and diversity
   for (let i = 1; i < results.length && selected.length < maxResults; i++) {
     const candidate = results[i];
+    if (!candidate) continue;
+
     const categoryOccurrences = categoryCount[candidate.category] || 0;
 
     // Calculate diversity penalty (more occurrences = higher penalty)
@@ -311,8 +312,9 @@ function applyDiversityFilter(
   // Fill remaining slots if needed
   if (selected.length < maxResults) {
     for (let i = 1; i < results.length && selected.length < maxResults; i++) {
-      if (!selected.includes(results[i])) {
-        selected.push(results[i]);
+      const result = results[i];
+      if (result && !selected.includes(result)) {
+        selected.push(result);
       }
     }
   }
@@ -323,9 +325,7 @@ function applyDiversityFilter(
 /**
  * Calculate summary statistics for results
  */
-function calculateSummary(
-  results: RecommendationResult[]
-): RecommendationResponse['summary'] {
+function calculateSummary(results: RecommendationResult[]): RecommendationResponse['summary'] {
   if (results.length === 0) {
     return {
       topCategory: 'none',

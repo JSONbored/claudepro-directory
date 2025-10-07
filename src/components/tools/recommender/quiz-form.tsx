@@ -16,26 +16,26 @@
  * - Accessible (ARIA labels, screen reader support)
  */
 
-import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { Button } from '@/src/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { generateConfigRecommendations } from '@/src/lib/actions/recommender-actions';
+import { ArrowLeft, ArrowRight, Loader2, Sparkles } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
 import {
+  type ExperienceLevel,
+  encodeQuizAnswers,
+  type FocusArea,
+  type IntegrationNeed,
   type QuizAnswers,
   quizAnswersSchema,
-  encodeQuizAnswers,
-  type UseCase,
-  type ExperienceLevel,
-  type ToolPreference,
-  type IntegrationNeed,
-  type FocusArea,
   type TeamSize,
+  type ToolPreference,
+  type UseCase,
 } from '@/src/lib/schemas/recommender.schema';
-import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { ArrowLeft, ArrowRight, Loader2, Sparkles } from '@/src/lib/icons';
 import { QuestionCard } from './question-card';
 import { QuizProgress } from './quiz-progress';
 
@@ -44,7 +44,7 @@ const TOTAL_QUESTIONS = 7;
 export function QuizForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  
+
   // Quiz state
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [answers, setAnswers] = useState<Partial<QuizAnswers>>({
@@ -57,23 +57,17 @@ export function QuizForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Answer handlers for each question type
-  const updateAnswer = <K extends keyof QuizAnswers>(
-    key: K,
-    value: QuizAnswers[K]
-  ) => {
+  const updateAnswer = <K extends keyof QuizAnswers>(key: K, value: QuizAnswers[K]) => {
     setAnswers((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: '' }));
   };
 
-  const toggleArrayAnswer = <K extends keyof QuizAnswers>(
-    key: K,
-    value: string
-  ) => {
+  const toggleArrayAnswer = <K extends keyof QuizAnswers>(key: K, value: string) => {
     const currentArray = (answers[key] as string[]) || [];
     const newArray = currentArray.includes(value)
       ? currentArray.filter((v) => v !== value)
       : [...currentArray, value];
-    
+
     updateAnswer(key, newArray as QuizAnswers[K]);
   };
 
@@ -122,7 +116,7 @@ export function QuizForm() {
   // Submit handler
   const handleSubmit = async () => {
     // Validate all required fields
-    if (!answers.useCase || !answers.experienceLevel || !answers.toolPreferences?.length) {
+    if (!(answers.useCase && answers.experienceLevel && answers.toolPreferences?.length)) {
       toast.error('Please answer all required questions');
       setCurrentQuestion(1); // Go back to first unanswered question
       return;
@@ -143,10 +137,12 @@ export function QuizForm() {
           if (result?.data?.success && result.data.recommendations) {
             // Encode answers for URL
             const encoded = encodeQuizAnswers(validatedAnswers);
-            
+
             // Navigate to results page
-            router.push(`/tools/config-recommender/results/${result.data.recommendations.id}?answers=${encoded}`);
-            
+            router.push(
+              `/tools/config-recommender/results/${result.data.recommendations.id}?answers=${encoded}`
+            );
+
             // Track analytics
             logger.info('Quiz completed', {
               useCase: validatedAnswers.useCase,
@@ -188,7 +184,9 @@ export function QuizForm() {
       <Card className="relative overflow-hidden">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Question {currentQuestion} of {TOTAL_QUESTIONS}</span>
+            <span className="text-sm text-muted-foreground">
+              Question {currentQuestion} of {TOTAL_QUESTIONS}
+            </span>
           </CardTitle>
         </CardHeader>
 
@@ -202,15 +200,51 @@ export function QuizForm() {
             >
               <div className="grid gap-3 sm:grid-cols-2">
                 {[
-                  { value: 'code-review', label: 'Code Review & Optimization', desc: 'Review code quality, suggest improvements' },
-                  { value: 'api-development', label: 'API Development', desc: 'Build REST/GraphQL APIs' },
-                  { value: 'frontend-development', label: 'Frontend Development', desc: 'React, Vue, UI components' },
-                  { value: 'data-science', label: 'Data Science & ML', desc: 'Analysis, machine learning, Python' },
-                  { value: 'content-creation', label: 'Content & Documentation', desc: 'Writing docs, blog posts' },
-                  { value: 'devops-infrastructure', label: 'DevOps & Infrastructure', desc: 'Deployment, Docker, CI/CD' },
-                  { value: 'general-development', label: 'General Development', desc: 'Full-stack development' },
-                  { value: 'testing-qa', label: 'Testing & QA', desc: 'Test automation, quality assurance' },
-                  { value: 'security-audit', label: 'Security & Compliance', desc: 'Security audits, vulnerabilities' },
+                  {
+                    value: 'code-review',
+                    label: 'Code Review & Optimization',
+                    desc: 'Review code quality, suggest improvements',
+                  },
+                  {
+                    value: 'api-development',
+                    label: 'API Development',
+                    desc: 'Build REST/GraphQL APIs',
+                  },
+                  {
+                    value: 'frontend-development',
+                    label: 'Frontend Development',
+                    desc: 'React, Vue, UI components',
+                  },
+                  {
+                    value: 'data-science',
+                    label: 'Data Science & ML',
+                    desc: 'Analysis, machine learning, Python',
+                  },
+                  {
+                    value: 'content-creation',
+                    label: 'Content & Documentation',
+                    desc: 'Writing docs, blog posts',
+                  },
+                  {
+                    value: 'devops-infrastructure',
+                    label: 'DevOps & Infrastructure',
+                    desc: 'Deployment, Docker, CI/CD',
+                  },
+                  {
+                    value: 'general-development',
+                    label: 'General Development',
+                    desc: 'Full-stack development',
+                  },
+                  {
+                    value: 'testing-qa',
+                    label: 'Testing & QA',
+                    desc: 'Test automation, quality assurance',
+                  },
+                  {
+                    value: 'security-audit',
+                    label: 'Security & Compliance',
+                    desc: 'Security audits, vulnerabilities',
+                  },
                 ].map(({ value, label, desc }) => (
                   <button
                     key={value}
@@ -227,9 +261,7 @@ export function QuizForm() {
                   </button>
                 ))}
               </div>
-              {errors.useCase && (
-                <p className="text-sm text-destructive mt-2">{errors.useCase}</p>
-              )}
+              {errors.useCase && <p className="text-sm text-destructive mt-2">{errors.useCase}</p>}
             </QuestionCard>
           )}
 
@@ -242,9 +274,21 @@ export function QuizForm() {
             >
               <div className="grid gap-3">
                 {[
-                  { value: 'beginner', label: 'Beginner', desc: 'New to Claude, learning the basics' },
-                  { value: 'intermediate', label: 'Intermediate', desc: 'Comfortable with Claude, ready for more' },
-                  { value: 'advanced', label: 'Advanced', desc: 'Expert user, looking for advanced features' },
+                  {
+                    value: 'beginner',
+                    label: 'Beginner',
+                    desc: 'New to Claude, learning the basics',
+                  },
+                  {
+                    value: 'intermediate',
+                    label: 'Intermediate',
+                    desc: 'Comfortable with Claude, ready for more',
+                  },
+                  {
+                    value: 'advanced',
+                    label: 'Advanced',
+                    desc: 'Expert user, looking for advanced features',
+                  },
                 ].map(({ value, label, desc }) => (
                   <button
                     key={value}
@@ -277,7 +321,11 @@ export function QuizForm() {
               <div className="grid gap-3 sm:grid-cols-2">
                 {[
                   { value: 'agents', label: 'Agents', desc: 'Specialized AI personas' },
-                  { value: 'mcp', label: 'MCP Servers', desc: 'Model Context Protocol integrations' },
+                  {
+                    value: 'mcp',
+                    label: 'MCP Servers',
+                    desc: 'Model Context Protocol integrations',
+                  },
                   { value: 'rules', label: 'Rules', desc: 'Custom instructions & guidelines' },
                   { value: 'commands', label: 'Commands', desc: 'Quick action commands' },
                   { value: 'hooks', label: 'Hooks', desc: 'Event automation' },
@@ -355,9 +403,17 @@ export function QuizForm() {
                 {[
                   { value: 'security', label: 'Security', desc: 'Security audits, compliance' },
                   { value: 'performance', label: 'Performance', desc: 'Speed, optimization' },
-                  { value: 'documentation', label: 'Documentation', desc: 'Docs, guides, tutorials' },
+                  {
+                    value: 'documentation',
+                    label: 'Documentation',
+                    desc: 'Docs, guides, tutorials',
+                  },
                   { value: 'testing', label: 'Testing', desc: 'Test automation, QA' },
-                  { value: 'code-quality', label: 'Code Quality', desc: 'Clean code, best practices' },
+                  {
+                    value: 'code-quality',
+                    label: 'Code Quality',
+                    desc: 'Clean code, best practices',
+                  },
                   { value: 'automation', label: 'Automation', desc: 'Workflows, CI/CD' },
                 ].map(({ value, label, desc }) => {
                   const isSelected = answers.focusAreas?.includes(value as FocusArea);
@@ -367,13 +423,13 @@ export function QuizForm() {
                       key={value}
                       type="button"
                       onClick={() => toggleArrayAnswer('focusAreas', value)}
-                      disabled={!isSelected && !canSelect}
+                      disabled={!(isSelected || canSelect)}
                       className={`p-4 text-left rounded-lg border-2 transition-all ${
                         isSelected
                           ? 'border-primary bg-primary/5'
                           : canSelect
-                          ? 'border-border hover:border-primary/50'
-                          : 'border-border opacity-50 cursor-not-allowed'
+                            ? 'border-border hover:border-primary/50'
+                            : 'border-border opacity-50 cursor-not-allowed'
                       }`}
                     >
                       <div className="font-medium">{label}</div>
@@ -425,7 +481,9 @@ export function QuizForm() {
                 <div className="p-4 bg-muted rounded-lg space-y-2">
                   <div>
                     <span className="font-medium">Use Case:</span>{' '}
-                    <span className="text-muted-foreground">{answers.useCase?.replace('-', ' ')}</span>
+                    <span className="text-muted-foreground">
+                      {answers.useCase?.replace('-', ' ')}
+                    </span>
                   </div>
                   <div>
                     <span className="font-medium">Experience:</span>{' '}
@@ -433,12 +491,16 @@ export function QuizForm() {
                   </div>
                   <div>
                     <span className="font-medium">Tool Preferences:</span>{' '}
-                    <span className="text-muted-foreground">{answers.toolPreferences?.join(', ')}</span>
+                    <span className="text-muted-foreground">
+                      {answers.toolPreferences?.join(', ')}
+                    </span>
                   </div>
                   {answers.integrations && answers.integrations.length > 0 && (
                     <div>
                       <span className="font-medium">Integrations:</span>{' '}
-                      <span className="text-muted-foreground">{answers.integrations.join(', ')}</span>
+                      <span className="text-muted-foreground">
+                        {answers.integrations.join(', ')}
+                      </span>
                     </div>
                   )}
                   {answers.focusAreas && answers.focusAreas.length > 0 && (
@@ -488,11 +550,7 @@ export function QuizForm() {
             </Button>
 
             {currentQuestion < TOTAL_QUESTIONS ? (
-              <Button
-                type="button"
-                onClick={goToNext}
-                disabled={isPending}
-              >
+              <Button type="button" onClick={goToNext} disabled={isPending}>
                 Next
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>

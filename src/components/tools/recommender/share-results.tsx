@@ -6,6 +6,7 @@
  */
 
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
 import {
   Dialog,
@@ -15,9 +16,8 @@ import {
   DialogTitle,
 } from '@/src/components/ui/dialog';
 import { Input } from '@/src/components/ui/input';
-import { toast } from 'sonner';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { Check, Copy, Facebook, Linkedin, Mail, Share2, Twitter } from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface ShareResultsProps {
   shareUrl: string;
@@ -34,7 +34,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
       setCopied(true);
       toast.success('Link copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to copy link');
     }
   };
@@ -79,22 +79,13 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               onClick={handleCopy}
               className="shrink-0"
             >
-              {copied ? (
-                <Check className="h-4 w-4 text-green-600" />
-              ) : (
-                <Copy className="h-4 w-4" />
-              )}
+              {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
             </Button>
           </div>
 
           {/* Social share buttons */}
           <div className="grid grid-cols-2 gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className="gap-2"
-            >
+            <Button variant="outline" size="sm" asChild className="gap-2">
               <a
                 href={shareLinks.twitter}
                 target="_blank"
@@ -109,12 +100,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               </a>
             </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className="gap-2"
-            >
+            <Button variant="outline" size="sm" asChild className="gap-2">
               <a
                 href={shareLinks.linkedin}
                 target="_blank"
@@ -128,12 +114,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               </a>
             </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className="gap-2"
-            >
+            <Button variant="outline" size="sm" asChild className="gap-2">
               <a
                 href={shareLinks.facebook}
                 target="_blank"
@@ -147,12 +128,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
               </a>
             </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className="gap-2"
-            >
+            <Button variant="outline" size="sm" asChild className="gap-2">
               <a
                 href={shareLinks.email}
                 onClick={() => {

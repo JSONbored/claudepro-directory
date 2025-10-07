@@ -14,12 +14,12 @@
 
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import type {
-  UseCase,
   ExperienceLevel,
-  ToolPreference,
-  IntegrationNeed,
   FocusArea,
+  IntegrationNeed,
   QuizAnswers,
+  ToolPreference,
+  UseCase,
 } from '@/src/lib/schemas/recommender.schema';
 
 /**
@@ -120,7 +120,7 @@ const FOCUS_AREA_TAG_MAP: Record<FocusArea, string[]> = {
  */
 export function calculateUseCaseScore(item: UnifiedContentItem, useCase: UseCase): number {
   const relevantTags = USE_CASE_TAG_MAP[useCase];
-  if (!relevantTags || !item.tags || item.tags.length === 0) {
+  if (!(relevantTags && item.tags) || item.tags.length === 0) {
     return 0;
   }
 
@@ -236,10 +236,7 @@ export function calculateIntegrationScore(
  * Calculate focus area match score
  * Checks if configuration aligns with user's focus areas
  */
-export function calculateFocusAreaScore(
-  item: UnifiedContentItem,
-  focusAreas: FocusArea[]
-): number {
+export function calculateFocusAreaScore(item: UnifiedContentItem, focusAreas: FocusArea[]): number {
   if (focusAreas.length === 0) {
     return 100; // No specific focus
   }

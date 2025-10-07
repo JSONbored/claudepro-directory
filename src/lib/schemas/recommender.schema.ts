@@ -16,8 +16,8 @@
  */
 
 import { z } from 'zod';
-import { nonEmptyString, shortString, mediumString } from './primitives/base-strings';
 import { percentage, positiveInt } from './primitives/base-numbers';
+import { mediumString, nonEmptyString, shortString } from './primitives/base-strings';
 
 /**
  * Primary Use Case Options
@@ -64,15 +64,7 @@ export type ToolPreference = z.infer<typeof toolPreferenceSchema>;
  * Used for tag-based filtering and scoring
  */
 export const integrationNeedSchema = z
-  .enum([
-    'github',
-    'database',
-    'cloud-aws',
-    'cloud-gcp',
-    'cloud-azure',
-    'communication',
-    'none',
-  ])
+  .enum(['github', 'database', 'cloud-aws', 'cloud-gcp', 'cloud-azure', 'communication', 'none'])
   .describe('Required integration capabilities');
 
 export type IntegrationNeed = z.infer<typeof integrationNeedSchema>;
@@ -82,14 +74,7 @@ export type IntegrationNeed = z.infer<typeof integrationNeedSchema>;
  * Additional filtering dimension for precise recommendations
  */
 export const focusAreaSchema = z
-  .enum([
-    'security',
-    'performance',
-    'documentation',
-    'testing',
-    'code-quality',
-    'automation',
-  ])
+  .enum(['security', 'performance', 'documentation', 'testing', 'code-quality', 'automation'])
   .describe('Primary focus area for configuration selection');
 
 export type FocusArea = z.infer<typeof focusAreaSchema>;
@@ -133,11 +118,7 @@ export const quizAnswersSchema = z
     teamSize: teamSizeSchema.optional().describe('Team size (optional)'),
 
     // Metadata
-    timestamp: z
-      .string()
-      .datetime()
-      .optional()
-      .describe('Submission timestamp for analytics'),
+    timestamp: z.string().datetime().optional().describe('Submission timestamp for analytics'),
   })
   .describe('Complete quiz answer set for recommendation generation');
 
@@ -367,8 +348,6 @@ export type RecommenderAnalyticsEvent = z.infer<typeof recommenderAnalyticsEvent
 export function encodeQuizAnswers(answers: QuizAnswers): string {
   try {
     const json = JSON.stringify(answers);
-    // Use Buffer in Node.js environment (this is server-only code)
-    // @ts-expect-error - Buffer is available in Node.js environment
     return Buffer.from(json).toString('base64url');
   } catch (error) {
     throw new Error('Failed to encode quiz answers');
@@ -382,8 +361,6 @@ export function encodeQuizAnswers(answers: QuizAnswers): string {
  */
 export function decodeQuizAnswers(encoded: string): QuizAnswers {
   try {
-    // Use Buffer in Node.js environment (this is server-only code)
-    // @ts-expect-error - Buffer is available in Node.js environment
     const json: string = Buffer.from(encoded, 'base64url').toString('utf-8');
     const parsed = JSON.parse(json);
     return quizAnswersSchema.parse(parsed);
@@ -412,7 +389,7 @@ export function generateResultId(answers: QuizAnswers): string {
   for (let i = 0; i < key.length; i++) {
     const char = key.charCodeAt(i);
     hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32-bit integer
+    hash &= hash; // Convert to 32-bit integer
   }
 
   return `rec_${Math.abs(hash).toString(36)}`;

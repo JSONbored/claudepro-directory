@@ -21,14 +21,12 @@ export function QuestionCard({ question, description, required, children }: Ques
         <h3 className="text-lg font-semibold flex items-center gap-2">
           {question}
           {required && (
-            <span className="text-destructive text-sm" aria-label="Required">
+            <span className="text-destructive text-sm" title="Required">
               *
             </span>
           )}
         </h3>
-        {description && (
-          <p className="text-sm text-muted-foreground mt-1">{description}</p>
-        )}
+        {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
       </div>
       {children}
     </div>
