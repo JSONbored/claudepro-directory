@@ -24,7 +24,7 @@ const bookmarkSchema = z.object({
       /^[a-zA-Z0-9-_/]+$/,
       'Slug can only contain letters, numbers, hyphens, underscores, and forward slashes'
     )
-    .transform((val) => val.toLowerCase().trim()),
+    .transform((val: string) => val.toLowerCase().trim()),
   notes: z.string().max(500).optional(),
 });
 
@@ -37,7 +37,8 @@ export const addBookmark = rateLimitedAction
     category: 'user',
   })
   .schema(bookmarkSchema)
-  .action(async ({ parsedInput: { content_type, content_slug, notes } }) => {
+  .action(async ({ parsedInput }: { parsedInput: z.infer<typeof bookmarkSchema> }) => {
+    const { content_type, content_slug, notes } = parsedInput;
     const supabase = await createClient();
 
     // Get current user
@@ -99,18 +100,19 @@ export const addBookmark = rateLimitedAction
 /**
  * Remove a bookmark
  */
+const removeBookmarkSchema = z.object({
+  content_type: contentCategorySchema,
+  content_slug: nonEmptyString,
+});
+
 export const removeBookmark = rateLimitedAction
   .metadata({
     actionName: 'removeBookmark',
     category: 'user',
   })
-  .schema(
-    z.object({
-      content_type: contentCategorySchema,
-      content_slug: nonEmptyString,
-    })
-  )
-  .action(async ({ parsedInput: { content_type, content_slug } }) => {
+  .schema(removeBookmarkSchema)
+  .action(async ({ parsedInput }: { parsedInput: z.infer<typeof removeBookmarkSchema> }) => {
+    const { content_type, content_slug } = parsedInput;
     const supabase = await createClient();
 
     // Get current user

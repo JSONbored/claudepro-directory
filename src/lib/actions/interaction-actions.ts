@@ -9,7 +9,6 @@
  * - bookmark-actions.ts (user data management)
  */
 
-import { revalidatePath } from 'next/cache';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
 import {
@@ -179,13 +178,13 @@ export async function getUserInteractionSummary(): Promise<{
       };
     }
 
-    const views = interactions.filter((i) => i.interaction_type === 'view').length;
-    const copies = interactions.filter((i) => i.interaction_type === 'copy').length;
-    const bookmarks = interactions.filter((i) => i.interaction_type === 'bookmark').length;
+    const views = interactions.filter((i: { interaction_type: string }) => i.interaction_type === 'view').length;
+    const copies = interactions.filter((i: { interaction_type: string }) => i.interaction_type === 'copy').length;
+    const bookmarks = interactions.filter((i: { interaction_type: string }) => i.interaction_type === 'bookmark').length;
 
     // Count unique content items
     const uniqueItems = new Set(
-      interactions.map((i) => `${i.content_type}:${i.content_slug}`)
+      interactions.map((i: { content_type: string; content_slug: string }) => `${i.content_type}:${i.content_slug}`)
     ).size;
 
     return {

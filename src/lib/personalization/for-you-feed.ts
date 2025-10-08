@@ -75,7 +75,11 @@ export function generateForYouFeed(
   collaborativeRecs: Map<string, number>, // content_key -> score
   trendingItems: Set<string>, // content_keys
   options: Partial<ForYouOptions> = {}
-): PersonalizedContentItem[] {
+): Array<UnifiedContentItem & {
+  recommendation_source: PersonalizedContentItem['recommendation_source'];
+  recommendation_reason: string;
+  affinity_score: number;
+}> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
   const scoredItems: Array<{
     item: UnifiedContentItem;
@@ -321,7 +325,10 @@ export function generateColdStartRecommendations(
   profileInterests: string[],
   trendingItems: Set<string>,
   limit: number
-): PersonalizedContentItem[] {
+): Array<UnifiedContentItem & {
+  recommendation_source: 'trending';
+  recommendation_reason: string;
+}> {
   const scoredItems: Array<{
     item: UnifiedContentItem;
     score: number;

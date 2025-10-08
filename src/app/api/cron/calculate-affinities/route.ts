@@ -8,7 +8,6 @@
  */
 
 import { NextResponse } from 'next/server';
-import { headers } from 'next/headers';
 import { logger } from '@/src/lib/logger';
 import {
   aggregateInteractions,
@@ -16,6 +15,10 @@ import {
   validateAffinityScore,
 } from '@/src/lib/personalization/affinity-scorer';
 import { createClient } from '@/src/lib/supabase/server';
+
+// Runtime configuration
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 /**
  * Verify cron secret to prevent unauthorized access
@@ -57,7 +60,7 @@ export async function GET(request: Request) {
     }
 
     // Get unique user IDs
-    const uniqueUserIds = [...new Set(activeUsers?.map((u) => u.user_id) || [])];
+    const uniqueUserIds = [...new Set(activeUsers?.map((u: { user_id: string }) => u.user_id) || [])];
 
     logger.info('Starting affinity calculation', {
       total_users: uniqueUserIds.length,

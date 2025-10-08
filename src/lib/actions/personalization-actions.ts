@@ -22,8 +22,8 @@ import {
   generateForYouFeed,
   hasPersonalizationData,
 } from '@/src/lib/personalization/for-you-feed';
-import { findSimilarConfigs } from '@/src/lib/personalization/similar-configs';
 import { getUsageBasedRecommendations } from '@/src/lib/personalization/usage-based-recommender';
+import type { PersonalizedContentItem } from '@/src/lib/personalization/types';
 import { statsRedis } from '@/src/lib/redis';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import {
@@ -49,7 +49,7 @@ export const getForYouFeed = rateLimitedAction
   })
   .schema(forYouQuerySchema)
   .outputSchema(forYouFeedResponseSchema)
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput }: { parsedInput: z.infer<typeof forYouQuerySchema> }) => {
     const supabase = await createClient();
 
     const {
@@ -84,13 +84,13 @@ export const getForYouFeed = rateLimitedAction
           ]);
 
           const allContent: UnifiedContentItem[] = [
-            ...agentsData.map((item) => ({ ...item, category: 'agents' as const })),
-            ...mcpData.map((item) => ({ ...item, category: 'mcp' as const })),
-            ...rulesData.map((item) => ({ ...item, category: 'rules' as const })),
-            ...commandsData.map((item) => ({ ...item, category: 'commands' as const })),
-            ...hooksData.map((item) => ({ ...item, category: 'hooks' as const })),
-            ...statuslinesData.map((item) => ({ ...item, category: 'statuslines' as const })),
-            ...collectionsData.map((item) => ({ ...item, category: 'collections' as const })),
+            ...agentsData.map((item: Record<string, unknown>) => ({ ...item, category: 'agents' as const })),
+            ...mcpData.map((item: Record<string, unknown>) => ({ ...item, category: 'mcp' as const })),
+            ...rulesData.map((item: Record<string, unknown>) => ({ ...item, category: 'rules' as const })),
+            ...commandsData.map((item: Record<string, unknown>) => ({ ...item, category: 'commands' as const })),
+            ...hooksData.map((item: Record<string, unknown>) => ({ ...item, category: 'hooks' as const })),
+            ...statuslinesData.map((item: Record<string, unknown>) => ({ ...item, category: 'statuslines' as const })),
+            ...collectionsData.map((item: Record<string, unknown>) => ({ ...item, category: 'collections' as const })),
           ] as UnifiedContentItem[];
 
           // Enrich with view counts
@@ -162,13 +162,13 @@ export const getForYouFeed = rateLimitedAction
           // Get trending items
           const trendingKeys = await Promise.all(
             ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'].map(
-              async (cat) => {
+              async (cat: string) => {
                 const trending = await statsRedis.getTrending(cat, 10);
-                return trending.map((slug) => `${cat}:${slug}`);
+                return trending.map((slug: string) => `${cat}:${slug}`);
               }
             )
           );
-          const trendingSet = new Set(trendingKeys.flat());
+          const trendingSet = new Set<string>(trendingKeys.flat());
 
           // Check if user has sufficient personalization data
           const hasHistory = hasPersonalizationData(userContext);
@@ -201,7 +201,11 @@ export const getForYouFeed = rateLimitedAction
           }
 
           const response: ForYouFeedResponse = {
-            recommendations: recommendations.map((rec, index) => ({
+            recommendations: recommendations.map((rec: UnifiedContentItem & {
+              recommendation_source?: PersonalizedContentItem['recommendation_source'];
+              recommendation_reason?: string;
+              affinity_score?: number;
+            }) => ({
               slug: rec.slug,
               title: rec.title || rec.name || rec.slug,
               description: rec.description,
@@ -210,13 +214,13 @@ export const getForYouFeed = rateLimitedAction
               score: rec.affinity_score || 50,
               source: rec.recommendation_source || 'trending',
               reason: rec.recommendation_reason,
-              view_count: rec.viewCount,
+              view_count: (rec as UnifiedContentItem & { viewCount?: number }).viewCount,
               popularity: rec.popularity,
               author: rec.author,
               tags: rec.tags || [],
             })),
             total_count: recommendations.length,
-            sources_used: [...new Set(recommendations.map((r) => r.recommendation_source || 'trending'))],
+            sources_used: [...new Set(recommendations.map((r: UnifiedContentItem & { recommendation_source?: PersonalizedContentItem['recommendation_source'] }) => r.recommendation_source || 'trending'))],
             user_has_history: hasHistory,
             generated_at: new Date().toISOString(),
           };
@@ -250,7 +254,7 @@ export const getSimilarConfigs = rateLimitedAction
   })
   .schema(similarConfigsQuerySchema)
   .outputSchema(similarConfigsResponseSchema)
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput }: { parsedInput: z.infer<typeof similarConfigsQuerySchema> }) => {
     const supabase = await createClient();
 
     try {
@@ -271,7 +275,11 @@ export const getSimilarConfigs = rateLimitedAction
       if (similarities && similarities.length > 0) {
         // Return pre-computed similarities
         const response: SimilarConfigsResponse = {
-          similar_items: similarities.map((sim) => ({
+          similar_items: similarities.map((sim: {
+            content_b_slug: string;
+            content_b_type: string;
+            similarity_score: number;
+          }) => ({
             slug: sim.content_b_slug,
             title: sim.content_b_slug, // Will be enriched by client
             description: '',
@@ -313,22 +321,22 @@ export const getSimilarConfigs = rateLimitedAction
  * Get usage-based recommendations
  * Triggered by specific user actions
  */
+const usageRecommendationInputSchema = z.object({
+  trigger: z.enum(['after_bookmark', 'after_copy', 'extended_time', 'category_browse']),
+  content_type: z.string().optional(),
+  content_slug: z.string().optional(),
+  category: z.string().optional(),
+  time_spent: z.number().optional(),
+});
+
 export const getUsageRecommendations = rateLimitedAction
   .metadata({
     actionName: 'getUsageRecommendations',
     category: 'personalization',
   })
-  .schema(
-    z.object({
-      trigger: z.enum(['after_bookmark', 'after_copy', 'extended_time', 'category_browse']),
-      content_type: z.string().optional(),
-      content_slug: z.string().optional(),
-      category: z.string().optional(),
-      time_spent: z.number().optional(),
-    })
-  )
+  .schema(usageRecommendationInputSchema)
   .outputSchema(usageRecommendationResponseSchema)
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput }: { parsedInput: z.infer<typeof usageRecommendationInputSchema> }) => {
     const supabase = await createClient();
 
     const {
@@ -356,13 +364,13 @@ export const getUsageRecommendations = rateLimitedAction
       ]);
 
       const allContent: UnifiedContentItem[] = [
-        ...agentsData.map((item) => ({ ...item, category: 'agents' as const })),
-        ...mcpData.map((item) => ({ ...item, category: 'mcp' as const })),
-        ...rulesData.map((item) => ({ ...item, category: 'rules' as const })),
-        ...commandsData.map((item) => ({ ...item, category: 'commands' as const })),
-        ...hooksData.map((item) => ({ ...item, category: 'hooks' as const })),
-        ...statuslinesData.map((item) => ({ ...item, category: 'statuslines' as const })),
-        ...collectionsData.map((item) => ({ ...item, category: 'collections' as const })),
+        ...agentsData.map((item: Record<string, unknown>) => ({ ...item, category: 'agents' as const })),
+        ...mcpData.map((item: Record<string, unknown>) => ({ ...item, category: 'mcp' as const })),
+        ...rulesData.map((item: Record<string, unknown>) => ({ ...item, category: 'rules' as const })),
+        ...commandsData.map((item: Record<string, unknown>) => ({ ...item, category: 'commands' as const })),
+        ...hooksData.map((item: Record<string, unknown>) => ({ ...item, category: 'hooks' as const })),
+        ...statuslinesData.map((item: Record<string, unknown>) => ({ ...item, category: 'statuslines' as const })),
+        ...collectionsData.map((item: Record<string, unknown>) => ({ ...item, category: 'collections' as const })),
       ] as UnifiedContentItem[];
 
       // Find current item if provided
@@ -399,19 +407,19 @@ export const getUsageRecommendations = rateLimitedAction
       });
 
       const response: UsageRecommendationResponse = {
-        recommendations: recommendations.map((rec) => ({
-          slug: rec.slug,
-          title: rec.title || rec.name || rec.slug,
-          description: rec.description,
-          category: rec.category,
-          url: `/${rec.category}/${rec.slug}`,
+        recommendations: recommendations.map((rec: PersonalizedContentItem) => ({
+          slug: (rec as UnifiedContentItem).slug,
+          title: (rec as UnifiedContentItem).title || (rec as UnifiedContentItem).name || (rec as UnifiedContentItem).slug,
+          description: (rec as UnifiedContentItem).description,
+          category: (rec as UnifiedContentItem).category,
+          url: `/${(rec as UnifiedContentItem).category}/${(rec as UnifiedContentItem).slug}`,
           score: rec.affinity_score || 50,
           source: rec.recommendation_source || 'usage',
           reason: rec.recommendation_reason,
-          view_count: rec.viewCount,
-          popularity: rec.popularity,
-          author: rec.author,
-          tags: rec.tags || [],
+          view_count: (rec as UnifiedContentItem & { viewCount?: number }).viewCount,
+          popularity: (rec as UnifiedContentItem).popularity,
+          author: (rec as UnifiedContentItem).author,
+          tags: (rec as UnifiedContentItem).tags || [],
         })),
         trigger: parsedInput.trigger,
         context: {

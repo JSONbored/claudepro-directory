@@ -15,8 +15,6 @@ import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
 import {
-  aggregateInteractions,
-  calculateAffinityScore,
   calculateUserAffinities,
   validateAffinityScore,
 } from '@/src/lib/personalization/affinity-scorer';
@@ -43,7 +41,8 @@ export const getUserAffinities = rateLimitedAction
     })
   )
   .outputSchema(userAffinitiesResponseSchema)
-  .action(async ({ parsedInput: { limit, min_score } }) => {
+  .action(async ({ parsedInput }: { parsedInput: { limit: number; min_score: number } }) => {
+    const { limit, min_score } = parsedInput;
     const supabase = await createClient();
 
     const {

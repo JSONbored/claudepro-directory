@@ -19,6 +19,10 @@ import {
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { createClient } from '@/src/lib/supabase/server';
 
+// Runtime configuration
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 /**
  * Verify cron secret
  */
@@ -65,15 +69,15 @@ export async function GET(request: Request) {
       lazyContentLoaders.collections(),
     ]);
 
-    const allContent: UnifiedContentItem[] = [
-      ...agentsData.map((item) => ({ ...item, category: 'agents' as const })),
-      ...mcpData.map((item) => ({ ...item, category: 'mcp' as const })),
-      ...rulesData.map((item) => ({ ...item, category: 'rules' as const })),
-      ...commandsData.map((item) => ({ ...item, category: 'commands' as const })),
-      ...hooksData.map((item) => ({ ...item, category: 'hooks' as const })),
-      ...statuslinesData.map((item) => ({ ...item, category: 'statuslines' as const })),
-      ...collectionsData.map((item) => ({ ...item, category: 'collections' as const })),
-    ] as UnifiedContentItem[];
+      const allContent: UnifiedContentItem[] = [
+        ...agentsData.map((item: Record<string, unknown>) => ({ ...item, category: 'agents' as const })),
+        ...mcpData.map((item: Record<string, unknown>) => ({ ...item, category: 'mcp' as const })),
+        ...rulesData.map((item: Record<string, unknown>) => ({ ...item, category: 'rules' as const })),
+        ...commandsData.map((item: Record<string, unknown>) => ({ ...item, category: 'commands' as const })),
+        ...hooksData.map((item: Record<string, unknown>) => ({ ...item, category: 'hooks' as const })),
+        ...statuslinesData.map((item: Record<string, unknown>) => ({ ...item, category: 'statuslines' as const })),
+        ...collectionsData.map((item: Record<string, unknown>) => ({ ...item, category: 'collections' as const })),
+      ] as UnifiedContentItem[];
 
     logger.info('Content loaded', { total_items: allContent.length });
 
