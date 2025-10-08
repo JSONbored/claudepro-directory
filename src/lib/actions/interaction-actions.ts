@@ -12,8 +12,8 @@
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
 import {
-  trackInteractionSchema,
   type TrackInteractionInput,
+  trackInteractionSchema,
 } from '@/src/lib/schemas/personalization.schema';
 import { createClient } from '@/src/lib/supabase/server';
 
@@ -178,13 +178,21 @@ export async function getUserInteractionSummary(): Promise<{
       };
     }
 
-    const views = interactions.filter((i: { interaction_type: string }) => i.interaction_type === 'view').length;
-    const copies = interactions.filter((i: { interaction_type: string }) => i.interaction_type === 'copy').length;
-    const bookmarks = interactions.filter((i: { interaction_type: string }) => i.interaction_type === 'bookmark').length;
+    const views = interactions.filter(
+      (i: { interaction_type: string }) => i.interaction_type === 'view'
+    ).length;
+    const copies = interactions.filter(
+      (i: { interaction_type: string }) => i.interaction_type === 'copy'
+    ).length;
+    const bookmarks = interactions.filter(
+      (i: { interaction_type: string }) => i.interaction_type === 'bookmark'
+    ).length;
 
     // Count unique content items
     const uniqueItems = new Set(
-      interactions.map((i: { content_type: string; content_slug: string }) => `${i.content_type}:${i.content_slug}`)
+      interactions.map(
+        (i: { content_type: string; content_slug: string }) => `${i.content_type}:${i.content_slug}`
+      )
     ).size;
 
     return {

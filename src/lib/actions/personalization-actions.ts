@@ -22,11 +22,10 @@ import {
   generateForYouFeed,
   hasPersonalizationData,
 } from '@/src/lib/personalization/for-you-feed';
-import { getUsageBasedRecommendations } from '@/src/lib/personalization/usage-based-recommender';
 import type { PersonalizedContentItem } from '@/src/lib/personalization/types';
+import { getUsageBasedRecommendations } from '@/src/lib/personalization/usage-based-recommender';
 import { statsRedis } from '@/src/lib/redis';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import {
   type ForYouFeedResponse,
   forYouFeedResponseSchema,
@@ -37,6 +36,7 @@ import {
   type UsageRecommendationResponse,
   usageRecommendationResponseSchema,
 } from '@/src/lib/schemas/personalization.schema';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
 
 /**
@@ -85,13 +85,34 @@ export const getForYouFeed = rateLimitedAction
           ]);
 
           const allContent: UnifiedContentItem[] = [
-            ...agentsData.map((item: Record<string, unknown>) => ({ ...item, category: 'agents' as const })),
-            ...mcpData.map((item: Record<string, unknown>) => ({ ...item, category: 'mcp' as const })),
-            ...rulesData.map((item: Record<string, unknown>) => ({ ...item, category: 'rules' as const })),
-            ...commandsData.map((item: Record<string, unknown>) => ({ ...item, category: 'commands' as const })),
-            ...hooksData.map((item: Record<string, unknown>) => ({ ...item, category: 'hooks' as const })),
-            ...statuslinesData.map((item: Record<string, unknown>) => ({ ...item, category: 'statuslines' as const })),
-            ...collectionsData.map((item: Record<string, unknown>) => ({ ...item, category: 'collections' as const })),
+            ...agentsData.map((item: Record<string, unknown>) => ({
+              ...item,
+              category: 'agents' as const,
+            })),
+            ...mcpData.map((item: Record<string, unknown>) => ({
+              ...item,
+              category: 'mcp' as const,
+            })),
+            ...rulesData.map((item: Record<string, unknown>) => ({
+              ...item,
+              category: 'rules' as const,
+            })),
+            ...commandsData.map((item: Record<string, unknown>) => ({
+              ...item,
+              category: 'commands' as const,
+            })),
+            ...hooksData.map((item: Record<string, unknown>) => ({
+              ...item,
+              category: 'hooks' as const,
+            })),
+            ...statuslinesData.map((item: Record<string, unknown>) => ({
+              ...item,
+              category: 'statuslines' as const,
+            })),
+            ...collectionsData.map((item: Record<string, unknown>) => ({
+              ...item,
+              category: 'collections' as const,
+            })),
           ] as UnifiedContentItem[];
 
           // Enrich with view counts
@@ -174,7 +195,13 @@ export const getForYouFeed = rateLimitedAction
           // Check if user has sufficient personalization data
           const hasHistory = hasPersonalizationData(userContext);
 
-          let recommendations;
+          let recommendations: Array<
+            UnifiedContentItem & {
+              recommendation_source?: PersonalizedContentItem['recommendation_source'];
+              recommendation_reason?: string;
+              affinity_score?: number;
+            }
+          >;
           if (hasHistory) {
             // Generate personalized recommendations
             // Note: Collaborative recommendations would require pre-computed data
@@ -202,26 +229,40 @@ export const getForYouFeed = rateLimitedAction
           }
 
           const response: ForYouFeedResponse = {
-            recommendations: recommendations.map((rec: UnifiedContentItem & {
-              recommendation_source?: PersonalizedContentItem['recommendation_source'];
-              recommendation_reason?: string;
-              affinity_score?: number;
-            }) => ({
-              slug: rec.slug,
-              title: rec.title || rec.name || rec.slug,
-              description: rec.description,
-              category: rec.category,
-              url: `/${rec.category}/${rec.slug}`,
-              score: rec.affinity_score || 50,
-              source: rec.recommendation_source || 'trending',
-              reason: rec.recommendation_reason,
-              view_count: (rec as UnifiedContentItem & { viewCount?: number }).viewCount,
-              popularity: rec.popularity,
-              author: rec.author,
-              tags: rec.tags || [],
-            })),
+            recommendations: recommendations.map(
+              (
+                rec: UnifiedContentItem & {
+                  recommendation_source?: PersonalizedContentItem['recommendation_source'];
+                  recommendation_reason?: string;
+                  affinity_score?: number;
+                }
+              ) => ({
+                slug: rec.slug,
+                title: rec.title || rec.name || rec.slug,
+                description: rec.description,
+                category: rec.category,
+                url: `/${rec.category}/${rec.slug}`,
+                score: rec.affinity_score || 50,
+                source: rec.recommendation_source || 'trending',
+                reason: rec.recommendation_reason,
+                view_count: (rec as UnifiedContentItem & { viewCount?: number }).viewCount,
+                popularity: rec.popularity,
+                author: rec.author,
+                tags: rec.tags || [],
+              })
+            ),
             total_count: recommendations.length,
-            sources_used: [...new Set(recommendations.map((r: UnifiedContentItem & { recommendation_source?: PersonalizedContentItem['recommendation_source'] }) => r.recommendation_source || 'trending'))],
+            sources_used: [
+              ...new Set(
+                recommendations.map(
+                  (
+                    r: UnifiedContentItem & {
+                      recommendation_source?: PersonalizedContentItem['recommendation_source'];
+                    }
+                  ) => r.recommendation_source || 'trending'
+                )
+              ),
+            ],
             user_has_history: hasHistory,
             generated_at: new Date().toISOString(),
           };
@@ -276,21 +317,23 @@ export const getSimilarConfigs = rateLimitedAction
       if (similarities && similarities.length > 0) {
         // Return pre-computed similarities
         const response: SimilarConfigsResponse = {
-          similar_items: similarities.map((sim: {
-            content_b_slug: string;
-            content_b_type: string;
-            similarity_score: number;
-          }) => ({
-            slug: sim.content_b_slug,
-            title: sim.content_b_slug, // Will be enriched by client
-            description: '',
-            category: sim.content_b_type as ContentCategory,
-            url: `/${sim.content_b_type}/${sim.content_b_slug}`,
-            score: Math.round(sim.similarity_score * 100),
-            source: 'similar' as const,
-            reason: 'Similar to this config',
-            tags: [],
-          })),
+          similar_items: similarities.map(
+            (sim: {
+              content_b_slug: string;
+              content_b_type: string;
+              similarity_score: number;
+            }) => ({
+              slug: sim.content_b_slug,
+              title: sim.content_b_slug, // Will be enriched by client
+              description: '',
+              category: sim.content_b_type as ContentCategory,
+              url: `/${sim.content_b_type}/${sim.content_b_slug}`,
+              score: Math.round(sim.similarity_score * 100),
+              source: 'similar' as const,
+              reason: 'Similar to this config',
+              tags: [],
+            })
+          ),
           source_item: {
             slug: parsedInput.content_slug,
             category: parsedInput.content_type,
@@ -338,105 +381,131 @@ export const getUsageRecommendations = rateLimitedAction
   })
   .schema(usageRecommendationInputSchema)
   .outputSchema(usageRecommendationResponseSchema)
-  .action(async ({ parsedInput }: { parsedInput: z.infer<typeof usageRecommendationInputSchema> }) => {
-    const supabase = await createClient();
+  .action(
+    async ({ parsedInput }: { parsedInput: z.infer<typeof usageRecommendationInputSchema> }) => {
+      const supabase = await createClient();
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    try {
-      // Load all content
-      const [
-        agentsData,
-        mcpData,
-        rulesData,
-        commandsData,
-        hooksData,
-        statuslinesData,
-        collectionsData,
-      ] = await Promise.all([
-        lazyContentLoaders.agents(),
-        lazyContentLoaders.mcp(),
-        lazyContentLoaders.rules(),
-        lazyContentLoaders.commands(),
-        lazyContentLoaders.hooks(),
-        lazyContentLoaders.statuslines(),
-        lazyContentLoaders.collections(),
-      ]);
+      try {
+        // Load all content
+        const [
+          agentsData,
+          mcpData,
+          rulesData,
+          commandsData,
+          hooksData,
+          statuslinesData,
+          collectionsData,
+        ] = await Promise.all([
+          lazyContentLoaders.agents(),
+          lazyContentLoaders.mcp(),
+          lazyContentLoaders.rules(),
+          lazyContentLoaders.commands(),
+          lazyContentLoaders.hooks(),
+          lazyContentLoaders.statuslines(),
+          lazyContentLoaders.collections(),
+        ]);
 
-      const allContent: UnifiedContentItem[] = [
-        ...agentsData.map((item: Record<string, unknown>) => ({ ...item, category: 'agents' as const })),
-        ...mcpData.map((item: Record<string, unknown>) => ({ ...item, category: 'mcp' as const })),
-        ...rulesData.map((item: Record<string, unknown>) => ({ ...item, category: 'rules' as const })),
-        ...commandsData.map((item: Record<string, unknown>) => ({ ...item, category: 'commands' as const })),
-        ...hooksData.map((item: Record<string, unknown>) => ({ ...item, category: 'hooks' as const })),
-        ...statuslinesData.map((item: Record<string, unknown>) => ({ ...item, category: 'statuslines' as const })),
-        ...collectionsData.map((item: Record<string, unknown>) => ({ ...item, category: 'collections' as const })),
-      ] as UnifiedContentItem[];
+        const allContent: UnifiedContentItem[] = [
+          ...agentsData.map((item: Record<string, unknown>) => ({
+            ...item,
+            category: 'agents' as const,
+          })),
+          ...mcpData.map((item: Record<string, unknown>) => ({
+            ...item,
+            category: 'mcp' as const,
+          })),
+          ...rulesData.map((item: Record<string, unknown>) => ({
+            ...item,
+            category: 'rules' as const,
+          })),
+          ...commandsData.map((item: Record<string, unknown>) => ({
+            ...item,
+            category: 'commands' as const,
+          })),
+          ...hooksData.map((item: Record<string, unknown>) => ({
+            ...item,
+            category: 'hooks' as const,
+          })),
+          ...statuslinesData.map((item: Record<string, unknown>) => ({
+            ...item,
+            category: 'statuslines' as const,
+          })),
+          ...collectionsData.map((item: Record<string, unknown>) => ({
+            ...item,
+            category: 'collections' as const,
+          })),
+        ] as UnifiedContentItem[];
 
-      // Find current item if provided
-      let currentItem: UnifiedContentItem | undefined;
-      if (parsedInput.content_type && parsedInput.content_slug) {
-        currentItem = allContent.find(
-          (item) =>
-            item.category === parsedInput.content_type && item.slug === parsedInput.content_slug
-        );
-      }
+        // Find current item if provided
+        let currentItem: UnifiedContentItem | undefined;
+        if (parsedInput.content_type && parsedInput.content_slug) {
+          currentItem = allContent.find(
+            (item) =>
+              item.category === parsedInput.content_type && item.slug === parsedInput.content_slug
+          );
+        }
 
-      // Get user affinities if authenticated
-      let userAffinities = new Map<string, number>();
-      if (user) {
-        const { data: affinities } = await supabase
-          .from('user_affinities')
-          .select('content_type, content_slug, affinity_score')
-          .eq('user_id', user.id);
+        // Get user affinities if authenticated
+        const userAffinities = new Map<string, number>();
+        if (user) {
+          const { data: affinities } = await supabase
+            .from('user_affinities')
+            .select('content_type, content_slug, affinity_score')
+            .eq('user_id', user.id);
 
-        if (affinities) {
-          for (const aff of affinities) {
-            userAffinities.set(`${aff.content_type}:${aff.content_slug}`, aff.affinity_score);
+          if (affinities) {
+            for (const aff of affinities) {
+              userAffinities.set(`${aff.content_type}:${aff.content_slug}`, aff.affinity_score);
+            }
           }
         }
+
+        // Generate recommendations
+        const recommendations = getUsageBasedRecommendations(parsedInput.trigger, {
+          ...(currentItem ? { current_item: currentItem } : {}),
+          ...(parsedInput.category ? { category: parsedInput.category } : {}),
+          ...(parsedInput.time_spent !== undefined ? { time_spent: parsedInput.time_spent } : {}),
+          all_content: allContent,
+          ...(userAffinities.size > 0 ? { user_affinities: userAffinities } : {}),
+        });
+
+        const response: UsageRecommendationResponse = {
+          recommendations: recommendations.map((rec: PersonalizedContentItem) => ({
+            slug: (rec as UnifiedContentItem).slug,
+            title:
+              (rec as UnifiedContentItem).title ||
+              (rec as UnifiedContentItem).name ||
+              (rec as UnifiedContentItem).slug,
+            description: (rec as UnifiedContentItem).description,
+            category: (rec as UnifiedContentItem).category,
+            url: `/${(rec as UnifiedContentItem).category}/${(rec as UnifiedContentItem).slug}`,
+            score: rec.affinity_score || 50,
+            source: rec.recommendation_source || 'usage',
+            reason: rec.recommendation_reason,
+            view_count: (rec as UnifiedContentItem & { viewCount?: number }).viewCount,
+            popularity: (rec as UnifiedContentItem).popularity,
+            author: (rec as UnifiedContentItem).author,
+            tags: (rec as UnifiedContentItem).tags || [],
+          })),
+          trigger: parsedInput.trigger,
+          context: {
+            content_type: parsedInput.content_type,
+            content_slug: parsedInput.content_slug,
+            category: parsedInput.category,
+          },
+        };
+
+        return response;
+      } catch (error) {
+        logger.error(
+          'Failed to generate usage recommendations',
+          error instanceof Error ? error : new Error(String(error))
+        );
+        throw new Error('Failed to generate recommendations');
       }
-
-      // Generate recommendations
-      const recommendations = getUsageBasedRecommendations(parsedInput.trigger, {
-        ...(currentItem ? { current_item: currentItem } : {}),
-        ...(parsedInput.category ? { category: parsedInput.category } : {}),
-        ...(parsedInput.time_spent !== undefined ? { time_spent: parsedInput.time_spent } : {}),
-        all_content: allContent,
-        ...(userAffinities.size > 0 ? { user_affinities: userAffinities } : {}),
-      });
-
-      const response: UsageRecommendationResponse = {
-        recommendations: recommendations.map((rec: PersonalizedContentItem) => ({
-          slug: (rec as UnifiedContentItem).slug,
-          title: (rec as UnifiedContentItem).title || (rec as UnifiedContentItem).name || (rec as UnifiedContentItem).slug,
-          description: (rec as UnifiedContentItem).description,
-          category: (rec as UnifiedContentItem).category,
-          url: `/${(rec as UnifiedContentItem).category}/${(rec as UnifiedContentItem).slug}`,
-          score: rec.affinity_score || 50,
-          source: rec.recommendation_source || 'usage',
-          reason: rec.recommendation_reason,
-          view_count: (rec as UnifiedContentItem & { viewCount?: number }).viewCount,
-          popularity: (rec as UnifiedContentItem).popularity,
-          author: (rec as UnifiedContentItem).author,
-          tags: (rec as UnifiedContentItem).tags || [],
-        })),
-        trigger: parsedInput.trigger,
-        context: {
-          content_type: parsedInput.content_type,
-          content_slug: parsedInput.content_slug,
-          category: parsedInput.category,
-        },
-      };
-
-      return response;
-    } catch (error) {
-      logger.error(
-        'Failed to generate usage recommendations',
-        error instanceof Error ? error : new Error(String(error))
-      );
-      throw new Error('Failed to generate recommendations');
     }
-  });
+  );

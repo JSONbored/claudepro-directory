@@ -79,7 +79,7 @@ export const addBookmark = rateLimitedAction
         interaction_type: 'bookmark',
         metadata: {},
       });
-    } catch (err) {
+    } catch (_err) {
       // Non-critical - log but don't fail
       logger.warn('Failed to track bookmark interaction', undefined, {
         content_type,

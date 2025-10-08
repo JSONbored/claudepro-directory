@@ -108,7 +108,7 @@ function calculateDescriptionSimilarity(descA: string, descB: string): number {
  * Calculate author match bonus
  */
 function calculateAuthorMatch(authorA: string | undefined, authorB: string | undefined): number {
-  if (!authorA || !authorB) {
+  if (!(authorA && authorB)) {
     return 0;
   }
   return authorA.toLowerCase() === authorB.toLowerCase() ? 1.0 : 0;
@@ -215,10 +215,7 @@ export function findSimilarConfigs(
 
   for (const candidateItem of allItems) {
     // Skip the source item itself
-    if (
-      candidateItem.slug === sourceItem.slug &&
-      candidateItem.category === sourceItem.category
-    ) {
+    if (candidateItem.slug === sourceItem.slug && candidateItem.category === sourceItem.category) {
       continue;
     }
 

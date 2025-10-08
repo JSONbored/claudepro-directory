@@ -10,9 +10,9 @@
  */
 
 import { z } from 'zod';
-import { contentCategorySchema } from './shared.schema';
-import { nonEmptyString } from './primitives/base-strings';
 import { percentage, positiveInt } from './primitives/base-numbers';
+import { nonEmptyString } from './primitives/base-strings';
+import { contentCategorySchema } from './shared.schema';
 
 // =====================================================
 // USER INTERACTIONS
@@ -141,12 +141,12 @@ export const personalizedRecommendationSchema = z.object({
   description: z.string(),
   category: contentCategorySchema,
   url: z.string().url(),
-  
+
   // Scoring
   score: percentage,
   source: recommendationSourceSchema,
   reason: z.string().optional(), // Human-readable explanation
-  
+
   // Metadata
   view_count: positiveInt.optional(),
   popularity: percentage.optional(),

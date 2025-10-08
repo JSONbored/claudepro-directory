@@ -11,7 +11,8 @@ export default function ForYouLoading() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Array.from({ length: 12 }).map((_, i) => (
+        {Array.from({ length: 12 }, (_, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: Static loading skeletons with fixed order and count
           <div key={i} className="animate-pulse">
             <div className="h-48 bg-muted rounded-lg" />
           </div>

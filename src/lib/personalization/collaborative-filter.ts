@@ -211,10 +211,7 @@ export function getCollaborativeRecommendations(
       // Weight similarity by user's affinity for source item
       const weightedScore = similarity * (userAffinity / 100);
 
-      candidateScores.set(
-        candidateItem,
-        (candidateScores.get(candidateItem) || 0) + weightedScore
-      );
+      candidateScores.set(candidateItem, (candidateScores.get(candidateItem) || 0) + weightedScore);
     }
   }
 
@@ -232,10 +229,7 @@ export function getCollaborativeRecommendations(
  * @param userBItems - Items user B has interacted with
  * @returns Similarity score (0-1)
  */
-export function calculateUserSimilarity(
-  userAItems: Set<string>,
-  userBItems: Set<string>
-): number {
+export function calculateUserSimilarity(userAItems: Set<string>, userBItems: Set<string>): number {
   return calculateJaccardSimilarity(userAItems, userBItems);
 }
 

@@ -60,7 +60,9 @@ export async function GET(request: Request) {
     }
 
     // Get unique user IDs
-    const uniqueUserIds = [...new Set(activeUsers?.map((u: { user_id: string }) => u.user_id) || [])];
+    const uniqueUserIds = [
+      ...new Set(activeUsers?.map((u: { user_id: string }) => u.user_id) || []),
+    ];
 
     logger.info('Starting affinity calculation', {
       total_users: uniqueUserIds.length,

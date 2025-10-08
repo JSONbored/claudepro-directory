@@ -17,7 +17,8 @@ import { createClient } from '@/src/lib/supabase/server';
 
 export const metadata: Metadata = {
   title: 'For You | ClaudePro Directory',
-  description: 'Personalized Claude configurations recommended just for you based on your interests and activity.',
+  description:
+    'Personalized Claude configurations recommended just for you based on your interests and activity.',
   openGraph: {
     title: 'For You | ClaudePro Directory',
     description: 'Discover Claude configurations tailored to your interests',

@@ -11,7 +11,13 @@ import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-it
 export interface PersonalizedContentItem extends UnifiedContentItem {
   affinity_score?: number;
   similarity_score?: number;
-  recommendation_source?: 'affinity' | 'collaborative' | 'trending' | 'interest' | 'similar' | 'usage';
+  recommendation_source?:
+    | 'affinity'
+    | 'collaborative'
+    | 'trending'
+    | 'interest'
+    | 'similar'
+    | 'usage';
   recommendation_reason?: string;
 }
 

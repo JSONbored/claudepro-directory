@@ -6,10 +6,10 @@
  */
 
 import { useEffect, useState } from 'react';
-import { trackEvent } from '@/src/lib/analytics/tracker';
-import { EVENTS } from '@/src/lib/analytics/events.config';
-import type { ForYouFeedResponse } from '@/src/lib/schemas/personalization.schema';
 import { ConfigCard } from '@/src/components/features/content/config-card';
+import { EVENTS } from '@/src/lib/analytics/events.config';
+import { trackEvent } from '@/src/lib/analytics/tracker';
+import type { ForYouFeedResponse } from '@/src/lib/schemas/personalization.schema';
 
 interface ForYouFeedClientProps {
   initialData: ForYouFeedResponse;
@@ -97,18 +97,14 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
             };
 
             return (
-              <div
-                key={`${rec.category}:${rec.slug}`}
-                onClick={() => handleClick(rec.slug, rec.category, index, rec.source)}
-              >
-                <ConfigCard
-                  item={item}
-                  showCategory
-                />
+              <div key={`${rec.category}:${rec.slug}`}>
+                {/* biome-ignore lint/a11y/useKeyWithClickEvents: Click bubbles from interactive ConfigCard */}
+                {/* biome-ignore lint/a11y/noStaticElementInteractions: ConfigCard handles keyboard navigation */}
+                <div onClick={() => handleClick(rec.slug, rec.category, index, rec.source)}>
+                  <ConfigCard item={item} showCategory />
+                </div>
                 {rec.reason && (
-                  <p className="mt-2 text-xs text-muted-foreground italic">
-                    {rec.reason}
-                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground italic">{rec.reason}</p>
                 )}
               </div>
             );
@@ -116,9 +112,7 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
         </div>
       ) : (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">
-            No recommendations found for this category.
-          </p>
+          <p className="text-muted-foreground">No recommendations found for this category.</p>
         </div>
       )}
 

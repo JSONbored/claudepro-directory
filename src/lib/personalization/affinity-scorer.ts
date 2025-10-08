@@ -51,10 +51,7 @@ export function calculateAffinityScore(interactions: InteractionSummary): Affini
 
   // Calculate individual component scores (0-1 range)
   const viewScore = Math.min(interactions.views / THRESHOLDS.max_views, 1);
-  const timeScore = Math.min(
-    interactions.time_spent_seconds / THRESHOLDS.max_time_spent,
-    1
-  );
+  const timeScore = Math.min(interactions.time_spent_seconds / THRESHOLDS.max_time_spent, 1);
   const bookmarkScore = Math.min(interactions.bookmarks / THRESHOLDS.max_bookmarks, 1);
   const copyScore = Math.min(interactions.copies / THRESHOLDS.max_copies, 1);
 

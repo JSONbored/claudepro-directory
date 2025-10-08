@@ -9,10 +9,10 @@
  * 4. Category Browse - "Since you're exploring [category]..."
  */
 
-import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { logger } from '@/src/lib/logger';
-import type { PersonalizedContentItem } from './types';
+import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { findSimilarConfigs } from './similar-configs';
+import type { PersonalizedContentItem } from './types';
 
 /**
  * Recommendation trigger types
@@ -84,8 +84,7 @@ export function generateAfterBookmarkRecommendations(
       recommendation_reason: 'Users who saved this also saved...',
       similarity_score: similar.similarity_score,
       // Boost items with high collaborative signal
-      final_score:
-        similar.similarity_score * (1 + (similar.factors.co_bookmark || 0) * 0.5),
+      final_score: similar.similarity_score * (1 + (similar.factors.co_bookmark || 0) * 0.5),
     }))
     .sort((a, b) => b.final_score - a.final_score)
     .slice(0, limit);
@@ -117,9 +116,7 @@ export function generateAfterCopyRecommendations(
       if (item.category !== rule.type) return false;
 
       // Check tag overlap for relevance
-      const sourceTags = new Set(
-        (copiedItem.tags || []).map((t) => t.toLowerCase())
-      );
+      const sourceTags = new Set((copiedItem.tags || []).map((t) => t.toLowerCase()));
       const candidateTags = (item.tags || []).map((t) => t.toLowerCase());
       const hasOverlap = candidateTags.some((tag) => sourceTags.has(tag));
 
@@ -295,12 +292,13 @@ export function getUsageBasedRecommendations(
     bookmarked_items?: UnifiedContentItem[];
   }
 ): PersonalizedContentItem[] {
-  const { current_item, category, time_spent, all_content, user_affinities, co_bookmark_data } = context;
+  const { current_item, category, time_spent, all_content, user_affinities, co_bookmark_data } =
+    context;
 
   try {
     switch (trigger) {
       case 'after_bookmark':
-        if (!current_item || !co_bookmark_data) return [];
+        if (!(current_item && co_bookmark_data)) return [];
         return generateAfterBookmarkRecommendations(current_item, all_content, co_bookmark_data);
 
       case 'after_copy':
@@ -308,7 +306,7 @@ export function getUsageBasedRecommendations(
         return generateAfterCopyRecommendations(current_item, all_content);
 
       case 'extended_time':
-        if (!current_item || !time_spent) return [];
+        if (!(current_item && time_spent)) return [];
         return generateExtendedTimeRecommendations(current_item, all_content, time_spent);
 
       case 'category_browse':

@@ -11,8 +11,8 @@ import { NextResponse } from 'next/server';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 import { logger } from '@/src/lib/logger';
 import {
-  calculateContentSimilarity,
   calculateCoBookmarkFrequencies,
+  calculateContentSimilarity,
   normalizeCoBookmarkFrequencies,
   validateSimilarityScore,
 } from '@/src/lib/personalization/similar-configs';
@@ -69,15 +69,33 @@ export async function GET(request: Request) {
       lazyContentLoaders.collections(),
     ]);
 
-      const allContent: UnifiedContentItem[] = [
-        ...agentsData.map((item: Record<string, unknown>) => ({ ...item, category: 'agents' as const })),
-        ...mcpData.map((item: Record<string, unknown>) => ({ ...item, category: 'mcp' as const })),
-        ...rulesData.map((item: Record<string, unknown>) => ({ ...item, category: 'rules' as const })),
-        ...commandsData.map((item: Record<string, unknown>) => ({ ...item, category: 'commands' as const })),
-        ...hooksData.map((item: Record<string, unknown>) => ({ ...item, category: 'hooks' as const })),
-        ...statuslinesData.map((item: Record<string, unknown>) => ({ ...item, category: 'statuslines' as const })),
-        ...collectionsData.map((item: Record<string, unknown>) => ({ ...item, category: 'collections' as const })),
-      ] as UnifiedContentItem[];
+    const allContent: UnifiedContentItem[] = [
+      ...agentsData.map((item: Record<string, unknown>) => ({
+        ...item,
+        category: 'agents' as const,
+      })),
+      ...mcpData.map((item: Record<string, unknown>) => ({ ...item, category: 'mcp' as const })),
+      ...rulesData.map((item: Record<string, unknown>) => ({
+        ...item,
+        category: 'rules' as const,
+      })),
+      ...commandsData.map((item: Record<string, unknown>) => ({
+        ...item,
+        category: 'commands' as const,
+      })),
+      ...hooksData.map((item: Record<string, unknown>) => ({
+        ...item,
+        category: 'hooks' as const,
+      })),
+      ...statuslinesData.map((item: Record<string, unknown>) => ({
+        ...item,
+        category: 'statuslines' as const,
+      })),
+      ...collectionsData.map((item: Record<string, unknown>) => ({
+        ...item,
+        category: 'collections' as const,
+      })),
+    ] as UnifiedContentItem[];
 
     logger.info('Content loaded', { total_items: allContent.length });
 
@@ -87,9 +105,13 @@ export async function GET(request: Request) {
       .select('user_id, content_type, content_slug');
 
     if (bookmarksError) {
-      logger.warn('Failed to fetch bookmarks, will calculate without collaborative signal', undefined, {
-        error_message: bookmarksError.message,
-      });
+      logger.warn(
+        'Failed to fetch bookmarks, will calculate without collaborative signal',
+        undefined,
+        {
+          error_message: bookmarksError.message,
+        }
+      );
     }
 
     // Calculate co-bookmark frequencies

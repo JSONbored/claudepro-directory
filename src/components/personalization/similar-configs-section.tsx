@@ -5,13 +5,13 @@
  * Displays similar configurations on content detail pages
  */
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { trackEvent } from '@/src/lib/analytics/tracker';
-import { EVENTS } from '@/src/lib/analytics/events.config';
-import { getSimilarConfigs } from '@/src/lib/actions/personalization-actions';
-import type { SimilarConfigsResponse } from '@/src/lib/schemas/personalization.schema';
+import { useEffect, useState } from 'react';
 import { ConfigCard } from '@/src/components/features/content/config-card';
+import { getSimilarConfigs } from '@/src/lib/actions/personalization-actions';
+import { EVENTS } from '@/src/lib/analytics/events.config';
+import { trackEvent } from '@/src/lib/analytics/tracker';
+import type { SimilarConfigsResponse } from '@/src/lib/schemas/personalization.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 
 interface SimilarConfigsSectionProps {
@@ -35,14 +35,16 @@ export function SimilarConfigsSection({ contentType, contentSlug }: SimilarConfi
         if (result?.data) {
           setSimilarItems(result.data.similar_items);
         }
-      } catch (error) {
-        console.error('Failed to load similar configs:', error);
+      } catch {
+        // Silently fail - similar configs are optional enhancement
       } finally {
         setLoading(false);
       }
     }
 
-    loadSimilarConfigs();
+    loadSimilarConfigs().catch(() => {
+      // Error already handled inside loadSimilarConfigs
+    });
   }, [contentType, contentSlug]);
 
   const handleClick = (targetSlug: string, score: number) => {
@@ -89,15 +91,9 @@ export function SimilarConfigsSection({ contentType, contentSlug }: SimilarConfi
           };
 
           return (
-            <div
-              key={`${rec.category}:${rec.slug}`}
-              onClick={() => handleClick(rec.slug, rec.score)}
-            >
-              <Link href={rec.url}>
-                <ConfigCard
-                  item={item}
-                  showCategory
-                />
+            <div key={`${rec.category}:${rec.slug}`}>
+              <Link href={rec.url} onClick={() => handleClick(rec.slug, rec.score)}>
+                <ConfigCard item={item} showCategory />
                 <div className="mt-2 text-xs text-muted-foreground">
                   {Math.round(rec.score)}% match
                 </div>
