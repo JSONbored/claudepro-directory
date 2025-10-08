@@ -36,6 +36,7 @@
     "type-check": "tsc --noEmit",
     "lint": "ultracite check",
     "format": "ultracite fix",
+    "email:dev": "email dev --dir src/emails --port 3001",
     "validate:content": "tsx scripts/validate-content.ts",
     "optimize:titles": "tsx scripts/optimize-titles.ts",
     "optimize:titles:dry": "tsx scripts/optimize-titles.ts --dry-run",
