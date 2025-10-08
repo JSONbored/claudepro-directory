@@ -32,6 +32,7 @@
     "generate:sitemap": "tsx scripts/generate-sitemap.ts",
     "generate:static-apis": "tsx scripts/generate-static-apis.ts",
     "generate:openapi": "tsx scripts/generate-openapi.ts",
+    "indexnow:submit": "tsx scripts/submit-indexnow.ts",
     "start": "next start",
     "type-check": "tsc --noEmit",
     "lint": "ultracite check",
