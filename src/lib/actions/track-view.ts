@@ -2,9 +2,11 @@
 
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { logger } from '@/src/lib/logger';
 import { statsRedis } from '@/src/lib/redis';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
+import { createClient } from '@/src/lib/supabase/server';
 
 /**
  * Tracking parameters schema for view and copy events
@@ -53,6 +55,32 @@ export const trackView = rateLimitedAction
 
     const viewCount = await statsRedis.incrementView(category, slug);
 
+    // Track interaction for personalization (non-blocking)
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      supabase
+        .from('user_interactions')
+        .insert({
+          user_id: user.id,
+          content_type: category,
+          content_slug: slug,
+          interaction_type: 'view',
+          metadata: {},
+        })
+        .then(({ error }) => {
+          if (error) {
+            logger.warn('Failed to track view interaction', undefined, {
+              category,
+              slug,
+            });
+          }
+        });
+    }
+
     return {
       success: true,
       viewCount: viewCount ?? 0,
@@ -91,6 +119,32 @@ export const trackCopy = rateLimitedAction
     }
 
     await statsRedis.trackCopy(category, slug);
+
+    // Track interaction for personalization (non-blocking)
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      supabase
+        .from('user_interactions')
+        .insert({
+          user_id: user.id,
+          content_type: category,
+          content_slug: slug,
+          interaction_type: 'copy',
+          metadata: {},
+        })
+        .then(({ error }) => {
+          if (error) {
+            logger.warn('Failed to track copy interaction', undefined, {
+              category,
+              slug,
+            });
+          }
+        });
+    }
 
     return {
       success: true,

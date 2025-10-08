@@ -10,6 +10,7 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { logger } from '@/src/lib/logger';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
@@ -66,6 +67,23 @@ export const addBookmark = rateLimitedAction
         throw new Error('You have already bookmarked this content');
       }
       throw new Error(error.message);
+    }
+
+    // Track interaction for personalization
+    try {
+      await supabase.from('user_interactions').insert({
+        user_id: user.id,
+        content_type,
+        content_slug,
+        interaction_type: 'bookmark',
+        metadata: {},
+      });
+    } catch (err) {
+      // Non-critical - log but don't fail
+      logger.warn('Failed to track bookmark interaction', undefined, {
+        content_type,
+        content_slug,
+      });
     }
 
     // Revalidate account pages
