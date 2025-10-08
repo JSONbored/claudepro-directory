@@ -12,7 +12,6 @@
  */
 
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
-import { logger } from '@/src/lib/logger';
 import { calculateJaccardSimilarity } from './collaborative-filter';
 
 /**

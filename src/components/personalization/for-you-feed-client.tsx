@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { EVENTS } from '@/src/lib/analytics/events.config';
 import type { ForYouFeedResponse } from '@/src/lib/schemas/personalization.schema';
-import { ContentCard } from '@/src/components/shared/content-card';
+import { ConfigCard } from '@/src/components/features/content/config-card';
 
 interface ForYouFeedClientProps {
   initialData: ForYouFeedResponse;
@@ -82,29 +82,37 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
       {/* Recommendations grid */}
       {filteredRecommendations.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredRecommendations.map((rec, index) => (
-            <div
-              key={`${rec.category}:${rec.slug}`}
-              onClick={() => handleClick(rec.slug, rec.category, index, rec.source)}
-            >
-              <ContentCard
-                title={rec.title}
-                description={rec.description}
-                category={rec.category}
-                slug={rec.slug}
-                url={rec.url}
-                tags={rec.tags}
-                author={rec.author}
-                viewCount={rec.view_count}
-                showCategory
-              />
-              {rec.reason && (
-                <p className="mt-2 text-xs text-muted-foreground italic">
-                  {rec.reason}
-                </p>
-              )}
-            </div>
-          ))}
+          {filteredRecommendations.map((rec, index) => {
+            // Convert recommendation to UnifiedContentItem format
+            const item = {
+              slug: rec.slug,
+              title: rec.title,
+              name: rec.title,
+              description: rec.description,
+              category: rec.category,
+              tags: rec.tags || [],
+              author: rec.author || 'Unknown',
+              popularity: rec.popularity,
+              viewCount: rec.view_count,
+            };
+
+            return (
+              <div
+                key={`${rec.category}:${rec.slug}`}
+                onClick={() => handleClick(rec.slug, rec.category, index, rec.source)}
+              >
+                <ConfigCard
+                  item={item}
+                  showCategory
+                />
+                {rec.reason && (
+                  <p className="mt-2 text-xs text-muted-foreground italic">
+                    {rec.reason}
+                  </p>
+                )}
+              </div>
+            );
+          })}
         </div>
       ) : (
         <div className="text-center py-12">

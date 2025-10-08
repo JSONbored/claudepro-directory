@@ -28,7 +28,7 @@ export const userInteractionSchema = z.object({
   content_slug: nonEmptyString,
   interaction_type: interactionTypeSchema,
   session_id: z.string().optional(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.string(), z.unknown()).default({}),
   created_at: z.string().datetime().optional(),
 });
 
@@ -41,7 +41,7 @@ export const trackInteractionSchema = z.object({
   interaction_type: interactionTypeSchema,
   session_id: z.string().optional(),
   metadata: z
-    .record(z.union([z.string(), z.number(), z.boolean()]))
+    .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
     .optional()
     .default({}),
 });
@@ -183,7 +183,7 @@ export type SimilarConfigsResponse = z.infer<typeof similarConfigsResponseSchema
 export const usageRecommendationResponseSchema = z.object({
   recommendations: z.array(personalizedRecommendationSchema),
   trigger: z.enum(['after_bookmark', 'after_copy', 'extended_time', 'category_browse']),
-  context: z.record(z.unknown()).optional(),
+  context: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type UsageRecommendationResponse = z.infer<typeof usageRecommendationResponseSchema>;

@@ -11,9 +11,7 @@
  */
 
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
-import { logger } from '@/src/lib/logger';
 import type { PersonalizedContentItem } from './types';
-import { findSimilarConfigs } from './similar-configs';
 
 /**
  * Recommendation weight configuration
@@ -129,13 +127,8 @@ export function generateForYouFeed(
         affinityScore = directAffinity;
         reason = 'Based on your past interactions';
       } else {
-        // Calculate similarity to high-affinity items
-        const highAffinityItems = Array.from(userContext.affinities.entries())
-          .filter(([_, score]) => score >= 60)
-          .map(([key]) => key);
-
-        // Find similar items and use max similarity
-        // Note: This is simplified - in production, would use pre-computed similarities
+        // For items without direct affinity, use base score for similar content
+        // Note: In production, would calculate similarity to user's high-affinity items
         affinityScore = 30; // Base score for items similar to liked content
         reason = 'Similar to content you like';
       }

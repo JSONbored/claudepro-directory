@@ -32,7 +32,7 @@ import { createClient } from '@/src/lib/supabase/server';
 export const getUserAffinities = rateLimitedAction
   .metadata({
     actionName: 'getUserAffinities',
-    category: 'personalization',
+    category: 'user',
   })
   .schema(
     z.object({
@@ -97,7 +97,7 @@ export const getUserAffinities = rateLimitedAction
 export const calculateUserAffinitiesAction = rateLimitedAction
   .metadata({
     actionName: 'calculateUserAffinities',
-    category: 'personalization',
+    category: 'user',
     rateLimit: {
       maxRequests: 5, // Very limited - expensive operation
       windowSeconds: 3600, // Per hour

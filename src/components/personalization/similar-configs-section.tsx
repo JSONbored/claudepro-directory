@@ -11,10 +11,11 @@ import { trackEvent } from '@/src/lib/analytics/tracker';
 import { EVENTS } from '@/src/lib/analytics/events.config';
 import { getSimilarConfigs } from '@/src/lib/actions/personalization-actions';
 import type { SimilarConfigsResponse } from '@/src/lib/schemas/personalization.schema';
-import { ContentCard } from '@/src/components/shared/content-card';
+import { ConfigCard } from '@/src/components/features/content/config-card';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 
 interface SimilarConfigsSectionProps {
-  contentType: string;
+  contentType: ContentCategory;
   contentSlug: string;
 }
 
@@ -75,28 +76,35 @@ export function SimilarConfigsSection({ contentType, contentSlug }: SimilarConfi
     <section className="mt-12 py-8 border-t">
       <h2 className="text-2xl font-bold mb-6">Similar Configurations</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {similarItems.map((item) => (
-          <div
-            key={`${item.category}:${item.slug}`}
-            onClick={() => handleClick(item.slug, item.score)}
-          >
-            <Link href={item.url}>
-              <ContentCard
-                title={item.title}
-                description={item.description}
-                category={item.category}
-                slug={item.slug}
-                url={item.url}
-                tags={item.tags || []}
-                author={item.author}
-                showCategory
-              />
-              <div className="mt-2 text-xs text-muted-foreground">
-                {Math.round(item.score)}% match
-              </div>
-            </Link>
-          </div>
-        ))}
+        {similarItems.map((rec) => {
+          // Convert recommendation to UnifiedContentItem format
+          const item = {
+            slug: rec.slug,
+            title: rec.title,
+            name: rec.title,
+            description: rec.description,
+            category: rec.category,
+            tags: rec.tags || [],
+            author: rec.author || 'Unknown',
+          };
+
+          return (
+            <div
+              key={`${rec.category}:${rec.slug}`}
+              onClick={() => handleClick(rec.slug, rec.score)}
+            >
+              <Link href={rec.url}>
+                <ConfigCard
+                  item={item}
+                  showCategory
+                />
+                <div className="mt-2 text-xs text-muted-foreground">
+                  {Math.round(rec.score)}% match
+                </div>
+              </Link>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

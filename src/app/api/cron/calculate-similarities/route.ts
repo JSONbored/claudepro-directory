@@ -87,7 +87,9 @@ export async function GET(request: Request) {
       .select('user_id, content_type, content_slug');
 
     if (bookmarksError) {
-      logger.warn('Failed to fetch bookmarks, will calculate without collaborative signal', bookmarksError);
+      logger.warn('Failed to fetch bookmarks, will calculate without collaborative signal', undefined, {
+        error_message: bookmarksError.message,
+      });
     }
 
     // Calculate co-bookmark frequencies

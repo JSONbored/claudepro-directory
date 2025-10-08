@@ -105,7 +105,7 @@ export function generateAfterBookmarkRecommendations(
 export function generateAfterCopyRecommendations(
   copiedItem: UnifiedContentItem,
   allContent: UnifiedContentItem[],
-  userContext?: { favorite_categories: string[]; interests: string[] },
+  _userContext?: { favorite_categories: string[]; interests: string[] },
   limit = 3
 ): PersonalizedContentItem[] {
   const complementaryTypes = COMPLEMENTARITY_RULES[copiedItem.category] || [];
@@ -249,7 +249,7 @@ export function detectMissingComplementaryItems(
   // Find gaps - categories they should have but don't
   const recommendations: PersonalizedContentItem[] = [];
 
-  for (const [category, count] of categoryCounts.entries()) {
+  for (const [category, _count] of categoryCounts.entries()) {
     const rules = COMPLEMENTARITY_RULES[category] || [];
 
     for (const rule of rules) {
@@ -295,7 +295,7 @@ export function getUsageBasedRecommendations(
     bookmarked_items?: UnifiedContentItem[];
   }
 ): PersonalizedContentItem[] {
-  const { current_item, category, time_spent, all_content, user_affinities, co_bookmark_data, bookmarked_items } = context;
+  const { current_item, category, time_spent, all_content, user_affinities, co_bookmark_data } = context;
 
   try {
     switch (trigger) {

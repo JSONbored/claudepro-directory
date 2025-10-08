@@ -13,8 +13,6 @@
  * - Scales well with user growth
  */
 
-import { logger } from '@/src/lib/logger';
-
 /**
  * Calculate Jaccard similarity coefficient between two sets
  *

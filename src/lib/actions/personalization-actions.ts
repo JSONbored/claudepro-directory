@@ -26,6 +26,7 @@ import { getUsageBasedRecommendations } from '@/src/lib/personalization/usage-ba
 import type { PersonalizedContentItem } from '@/src/lib/personalization/types';
 import { statsRedis } from '@/src/lib/redis';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import {
   type ForYouFeedResponse,
   forYouFeedResponseSchema,
@@ -45,7 +46,7 @@ import { createClient } from '@/src/lib/supabase/server';
 export const getForYouFeed = rateLimitedAction
   .metadata({
     actionName: 'getForYouFeed',
-    category: 'personalization',
+    category: 'content',
   })
   .schema(forYouQuerySchema)
   .outputSchema(forYouFeedResponseSchema)
@@ -186,7 +187,7 @@ export const getForYouFeed = rateLimitedAction
               trendingSet,
               {
                 limit: parsedInput.limit,
-                category_filter: parsedInput.category,
+                ...(parsedInput.category ? { category_filter: parsedInput.category } : {}),
                 exclude_bookmarked: parsedInput.exclude_bookmarked,
               }
             );
@@ -250,7 +251,7 @@ export const getForYouFeed = rateLimitedAction
 export const getSimilarConfigs = rateLimitedAction
   .metadata({
     actionName: 'getSimilarConfigs',
-    category: 'personalization',
+    category: 'content',
   })
   .schema(similarConfigsQuerySchema)
   .outputSchema(similarConfigsResponseSchema)
@@ -283,11 +284,12 @@ export const getSimilarConfigs = rateLimitedAction
             slug: sim.content_b_slug,
             title: sim.content_b_slug, // Will be enriched by client
             description: '',
-            category: sim.content_b_type,
+            category: sim.content_b_type as ContentCategory,
             url: `/${sim.content_b_type}/${sim.content_b_slug}`,
             score: Math.round(sim.similarity_score * 100),
-            source: 'similar',
+            source: 'similar' as const,
             reason: 'Similar to this config',
+            tags: [],
           })),
           source_item: {
             slug: parsedInput.content_slug,
@@ -332,7 +334,7 @@ const usageRecommendationInputSchema = z.object({
 export const getUsageRecommendations = rateLimitedAction
   .metadata({
     actionName: 'getUsageRecommendations',
-    category: 'personalization',
+    category: 'content',
   })
   .schema(usageRecommendationInputSchema)
   .outputSchema(usageRecommendationResponseSchema)
@@ -399,11 +401,11 @@ export const getUsageRecommendations = rateLimitedAction
 
       // Generate recommendations
       const recommendations = getUsageBasedRecommendations(parsedInput.trigger, {
-        current_item: currentItem,
-        category: parsedInput.category,
-        time_spent: parsedInput.time_spent,
+        ...(currentItem ? { current_item: currentItem } : {}),
+        ...(parsedInput.category ? { category: parsedInput.category } : {}),
+        ...(parsedInput.time_spent !== undefined ? { time_spent: parsedInput.time_spent } : {}),
         all_content: allContent,
-        user_affinities: userAffinities,
+        ...(userAffinities.size > 0 ? { user_affinities: userAffinities } : {}),
       });
 
       const response: UsageRecommendationResponse = {
