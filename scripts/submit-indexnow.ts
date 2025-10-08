@@ -67,7 +67,16 @@ async function getAllUrls(): Promise<string[]> {
   });
 
   // Static pages
-  const staticPages = ['jobs', 'community', 'trending', 'submit', 'partner', 'guides', 'api-docs', 'changelog'];
+  const staticPages = [
+    'jobs',
+    'community',
+    'trending',
+    'submit',
+    'partner',
+    'guides',
+    'api-docs',
+    'changelog',
+  ];
   staticPages.forEach((page) => {
     urls.push({
       loc: `${baseUrl || ''}/${page}`,
@@ -100,7 +109,15 @@ async function getAllUrls(): Promise<string[]> {
   });
 
   // Guide pages
-  const seoCategories = ['use-cases', 'tutorials', 'collections', 'categories', 'workflows', 'comparisons', 'troubleshooting'];
+  const seoCategories = [
+    'use-cases',
+    'tutorials',
+    'collections',
+    'categories',
+    'workflows',
+    'comparisons',
+    'troubleshooting',
+  ];
   seoCategories.forEach((category) => {
     try {
       const categoryPath = join(CONTENT_PATHS.guides || '', category);
@@ -287,7 +304,9 @@ async function submitToIndexNow(urls: string[]): Promise<void> {
       });
 
       if (response.ok) {
-        logger.success(`✅ Batch ${i + 1}/${batches.length} submitted successfully (HTTP ${response.status})`);
+        logger.success(
+          `✅ Batch ${i + 1}/${batches.length} submitted successfully (HTTP ${response.status})`
+        );
       } else {
         const errorText = await response.text();
         logger.failure(
@@ -300,7 +319,7 @@ async function submitToIndexNow(urls: string[]): Promise<void> {
         } else if (response.status === 403) {
           logger.log('   Reason: Key not valid - verify key file is accessible');
         } else if (response.status === 422) {
-          logger.log('   Reason: URLs don\'t belong to host or key mismatch');
+          logger.log("   Reason: URLs don't belong to host or key mismatch");
         } else if (response.status === 429) {
           logger.log('   Reason: Too many requests - wait before retrying');
         }
@@ -345,7 +364,7 @@ async function main() {
 
     logger.log('\n✅ IndexNow submission complete!');
     logger.log(`   Submitted: ${urls.length} URLs`);
-    logger.log(`   Verify at: https://www.bing.com/webmasters`);
+    logger.log('   Verify at: https://www.bing.com/webmasters');
   } catch (error) {
     logger.failure(
       `Failed to submit to IndexNow: ${error instanceof Error ? error.message : String(error)}`

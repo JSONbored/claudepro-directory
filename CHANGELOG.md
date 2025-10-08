@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 **Latest Features:**
 
+- [Recommender Enhancements](#2025-10-08---configuration-recommender-enhancements) - OG images, bulk bookmarks, refine results, For You integration
 - [Personalized Recommendations](#2025-10-08---personalized-recommendation-engine) - AI-powered "For You" feed with similar configs and usage-based suggestions
 - [Configuration Recommender Tool](#2025-10-07---configuration-recommender-tool) - AI-powered quiz that generates personalized configuration recommendations
 - [User Collections & Library](#2025-10-07---user-collections-and-my-library) - Create, organize, and share custom collections of bookmarked configurations

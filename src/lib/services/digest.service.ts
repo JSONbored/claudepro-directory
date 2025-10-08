@@ -26,6 +26,7 @@ export interface WeeklyDigestData {
   weekOf: string;
   newContent: DigestContentItem[];
   trendingContent: DigestTrendingItem[];
+  personalizedContent?: DigestContentItem[]; // Optional: based on user interests
 }
 
 /**
@@ -200,6 +201,92 @@ class DigestService {
     } catch (error) {
       logger.error(
         'Failed to get trending content for digest',
+        error instanceof Error ? error : new Error(String(error))
+      );
+      return [];
+    }
+  }
+
+  /**
+   * Get personalized recommendations for user based on their interests
+   * Used in email digests for "Recommended for You" section
+   *
+   * @param userInterests - User's interest tags from profile
+   * @param limit - Maximum items to return
+   * @returns Personalized content items
+   */
+  async getPersonalizedRecommendations(
+    userInterests: string[],
+    limit = 3
+  ): Promise<DigestContentItem[]> {
+    if (!userInterests || userInterests.length === 0) {
+      return [];
+    }
+
+    try {
+      // Get all content
+      const [
+        agentsData,
+        mcpData,
+        rulesData,
+        commandsData,
+        hooksData,
+        statuslinesData,
+        collectionsData,
+      ] = await Promise.all([agents, mcp, rules, commands, hooks, statuslines, collections]);
+
+      const allContent = [
+        ...(agentsData as ContentItem[]).map((item) => ({ ...item, category: 'agents' as const })),
+        ...(mcpData as ContentItem[]).map((item) => ({ ...item, category: 'mcp' as const })),
+        ...(rulesData as ContentItem[]).map((item) => ({ ...item, category: 'rules' as const })),
+        ...(commandsData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'commands' as const,
+        })),
+        ...(hooksData as ContentItem[]).map((item) => ({ ...item, category: 'hooks' as const })),
+        ...(statuslinesData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'statuslines' as const,
+        })),
+        ...(collectionsData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'collections' as const,
+        })),
+      ];
+
+      // Score items based on interest matching
+      const scoredItems = allContent
+        .map((item) => {
+          const itemWithTags = item as ContentItem & { tags?: string[] };
+          const itemTags = (itemWithTags.tags || []).map((t: string) => t.toLowerCase());
+          const itemText = `${item.title} ${item.description || ''}`.toLowerCase();
+
+          // Count interest matches
+          const matchCount = userInterests.filter(
+            (interest) =>
+              itemTags.some((tag) => tag.includes(interest.toLowerCase())) ||
+              itemText.includes(interest.toLowerCase())
+          ).length;
+
+          const score = matchCount > 0 ? (matchCount / userInterests.length) * 100 : 0;
+
+          return { item, score };
+        })
+        .filter((scored) => scored.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit);
+
+      // Map to digest format
+      return scoredItems.map((scored) => ({
+        title: scored.item.title,
+        description: scored.item.description || '',
+        category: scored.item.category,
+        slug: scored.item.slug,
+        url: `${APP_CONFIG.url}/${scored.item.category}/${scored.item.slug}`,
+      }));
+    } catch (error) {
+      logger.error(
+        'Failed to get personalized recommendations for digest',
         error instanceof Error ? error : new Error(String(error))
       );
       return [];

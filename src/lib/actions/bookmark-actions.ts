@@ -171,3 +171,114 @@ export async function isBookmarked(content_type: string, content_slug: string): 
 
   return !error && !!data;
 }
+
+/**
+ * Add multiple bookmarks at once (bulk operation)
+ * Useful for "save all recommendations" feature
+ */
+export const addBookmarkBatch = rateLimitedAction
+  .metadata({
+    actionName: 'addBookmarkBatch',
+    category: 'user',
+    rateLimit: {
+      maxRequests: 10, // Limited to prevent abuse
+      windowSeconds: 60,
+    },
+  })
+  .schema(
+    z.object({
+      items: z
+        .array(
+          z.object({
+            content_type: contentCategorySchema,
+            content_slug: nonEmptyString,
+          })
+        )
+        .min(1)
+        .max(20), // Max 20 bookmarks at once
+    })
+  )
+  .action(
+    async ({
+      parsedInput,
+    }: {
+      parsedInput: { items: Array<{ content_type: string; content_slug: string }> };
+    }) => {
+      const supabase = await createClient();
+
+      // Get current user
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error('You must be signed in to bookmark content');
+      }
+
+      try {
+        // Prepare batch insert
+        const bookmarksToInsert = parsedInput.items.map((item) => ({
+          user_id: user.id,
+          content_type: item.content_type,
+          content_slug: item.content_slug,
+          notes: null,
+        }));
+
+        // Batch insert (will skip duplicates due to unique constraint)
+        const { data, error } = await supabase
+          .from('bookmarks')
+          .upsert(bookmarksToInsert, {
+            onConflict: 'user_id,content_type,content_slug',
+            ignoreDuplicates: true,
+          })
+          .select();
+
+        if (error) {
+          logger.error('Failed to batch bookmark', error);
+          throw new Error('Failed to save bookmarks');
+        }
+
+        // Track interactions for each bookmark (non-blocking)
+        const interactionPromises = parsedInput.items.map((item) =>
+          supabase
+            .from('user_interactions')
+            .insert({
+              user_id: user.id,
+              content_type: item.content_type,
+              content_slug: item.content_slug,
+              interaction_type: 'bookmark',
+              metadata: { source: 'bulk_save' },
+            })
+            .then(({ error: intError }) => {
+              if (intError) {
+                logger.warn('Failed to track batch bookmark interaction', undefined, {
+                  content_type: item.content_type,
+                  content_slug: item.content_slug,
+                });
+              }
+            })
+        );
+
+        // Fire and forget interaction tracking
+        Promise.all(interactionPromises).catch(() => {
+          // Non-critical
+        });
+
+        // Revalidate pages
+        revalidatePath('/account');
+        revalidatePath('/account/library');
+
+        return {
+          success: true,
+          saved_count: data?.length || 0,
+          total_requested: parsedInput.items.length,
+        };
+      } catch (error) {
+        logger.error(
+          'Batch bookmark failed',
+          error instanceof Error ? error : new Error(String(error))
+        );
+        throw new Error('Failed to save bookmarks');
+      }
+    }
+  );

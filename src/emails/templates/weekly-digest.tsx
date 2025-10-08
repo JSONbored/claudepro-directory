@@ -55,6 +55,11 @@ export interface WeeklyDigestProps {
    * Trending content (top 3 by views)
    */
   trendingContent: DigestTrendingItem[];
+
+  /**
+   * Personalized recommendations based on user interests (optional)
+   */
+  personalizedContent?: DigestContentItem[];
 }
 
 /**
@@ -72,7 +77,13 @@ export interface WeeklyDigestProps {
  * />
  * ```
  */
-export function WeeklyDigest({ email, weekOf, newContent, trendingContent }: WeeklyDigestProps) {
+export function WeeklyDigest({
+  email,
+  weekOf,
+  newContent,
+  trendingContent,
+  personalizedContent,
+}: WeeklyDigestProps) {
   return (
     <BaseLayout preview={`This Week in Claude - ${weekOf} | New tools, trending content, and more`}>
       {/* Hero section */}
@@ -86,6 +97,29 @@ export function WeeklyDigest({ email, weekOf, newContent, trendingContent }: Wee
       </Section>
 
       <Hr style={dividerStyle} />
+
+      {/* Personalized Content Section */}
+      {personalizedContent && personalizedContent.length > 0 && (
+        <>
+          <Section style={contentSection}>
+            <Text style={sectionTitleStyle}>✨ Recommended for You</Text>
+            <Text style={paragraphStyle}>Based on your interests and preferences:</Text>
+
+            {personalizedContent.map((item) => (
+              <Section key={`personalized-${item.category}-${item.slug}`} style={itemCardStyle}>
+                <Text style={itemCategoryStyle}>{item.category.toUpperCase()}</Text>
+                <Text style={itemTitleStyle}>{item.title}</Text>
+                <Text style={itemDescriptionStyle}>{item.description}</Text>
+                <Button href={item.url} style={itemButtonStyle}>
+                  View {item.category}
+                </Button>
+              </Section>
+            ))}
+          </Section>
+
+          <Hr style={dividerStyle} />
+        </>
+      )}
 
       {/* New Content Section */}
       {newContent && newContent.length > 0 && (

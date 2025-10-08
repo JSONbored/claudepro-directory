@@ -6,6 +6,7 @@
  */
 
 import Link from 'next/link';
+import { BookmarkButton } from '@/src/components/shared/bookmark-button';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -80,6 +81,15 @@ export function RecommendationCard({ result }: RecommendationCardProps) {
           </Badge>
         </div>
       )}
+
+      {/* Bookmark button (bottom right) */}
+      <div className="absolute bottom-4 right-4 z-10">
+        <BookmarkButton
+          contentType={result.category}
+          contentSlug={result.slug}
+          initialBookmarked={false}
+        />
+      </div>
 
       {/* Gradient overlay */}
       <div
