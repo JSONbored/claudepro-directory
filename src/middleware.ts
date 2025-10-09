@@ -23,8 +23,12 @@ import {
 } from '@/src/lib/schemas/middleware.schema';
 
 // Initialize Arcjet with comprehensive security rules
+if (!securityConfig.arcjetKey) {
+  throw new Error('ARCJET_KEY is required for security middleware');
+}
+
 const aj = arcjet({
-  key: securityConfig.arcjetKey!,
+  key: securityConfig.arcjetKey,
   // In development, Arcjet uses 127.0.0.1 when no real IP is available - this is expected behavior
   rules: [
     // Shield WAF - protect against common attacks

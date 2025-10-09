@@ -158,11 +158,14 @@ export const calculateUserAffinitiesAction = rateLimitedAction
             interactions: [],
           });
         }
-        interactionsByContent.get(key)!.interactions.push({
-          interaction_type: interaction.interaction_type,
-          metadata: interaction.metadata as Record<string, unknown>,
-          created_at: interaction.created_at,
-        });
+        const contentData = interactionsByContent.get(key);
+        if (contentData) {
+          contentData.interactions.push({
+            interaction_type: interaction.interaction_type,
+            metadata: interaction.metadata as Record<string, unknown>,
+            created_at: interaction.created_at,
+          });
+        }
       }
 
       // Calculate affinities
@@ -281,9 +284,11 @@ export async function getUserFavoriteCategories(): Promise<string[]> {
     if (!categoryScores.has(item.content_type)) {
       categoryScores.set(item.content_type, { sum: 0, count: 0 });
     }
-    const scores = categoryScores.get(item.content_type)!;
-    scores.sum += item.affinity_score;
-    scores.count += 1;
+    const scores = categoryScores.get(item.content_type);
+    if (scores) {
+      scores.sum += item.affinity_score;
+      scores.count += 1;
+    }
   }
 
   // Sort by average score

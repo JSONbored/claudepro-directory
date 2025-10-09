@@ -20,7 +20,7 @@
   ],
   "type": "module",
   "engines": {
-    "node": "22.x",
+    "node": ">=22.0.0",
     "npm": ">=10.0.0"
   },
   "scripts": {
@@ -48,7 +48,9 @@
     "analyze:unused": "npx knip -c config/tools/knip.json",
     "analyze:circular": "npx madge --circular --extensions ts,tsx src/",
     "analyze:circular-graph": "npx madge --circular --extensions ts,tsx --image circular-deps.svg src/",
-    "analyze:all": "npm run analyze:unused && npm run analyze:circular"
+    "analyze:all": "npm run analyze:unused && npm run analyze:circular",
+    "a11y:audit": "lhci autorun --config=config/tools/lighthouserc.cjs",
+    "a11y:ci": "lhci autorun --config=config/tools/lighthouserc.cjs --assert"
   },
   "dependencies": {
     "@arcjet/next": "^1.0.0-beta.12",
@@ -113,6 +115,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.5",
+    "@lhci/cli": "^0.15.1",
     "@next/bundle-analyzer": "^15.5.4",
     "knip": "^5.64.1",
     "lefthook": "^1.13.5",

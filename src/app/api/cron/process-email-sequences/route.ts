@@ -20,14 +20,27 @@ export const dynamic = 'force-dynamic';
 /**
  * GET handler for email sequence processing cron job
  *
+ * Protected by CRON_SECRET - only Vercel Cron can trigger this.
  * Processes all due emails in the onboarding sequence.
  * Runs daily to check for subscribers who need their next email.
  *
  * @param request - Next.js request object
  * @returns JSON response with processing results
  */
-export async function GET(_request: Request) {
+export async function GET(request: Request) {
   try {
+    // Verify CRON_SECRET for security
+    const authHeader = request.headers.get('authorization');
+    const cronSecret = process.env.CRON_SECRET;
+
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+      logger.warn('Unauthorized cron request attempt', {
+        hasAuthHeader: !!authHeader,
+        hasCronSecret: !!cronSecret,
+      });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     logger.info('Email sequence cron job started');
 
     // Process all due emails

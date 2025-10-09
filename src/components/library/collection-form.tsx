@@ -187,6 +187,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
           onChange={(e) => setIsPublic(e.target.checked)}
           disabled={isPending}
           className="h-5 w-5 rounded border-gray-300"
+          aria-checked={isPublic}
         />
         <div className="flex-1">
           <Label htmlFor={isPublicId} className="text-base font-medium cursor-pointer">
@@ -228,6 +229,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                   }}
                   disabled={isPending}
                   className="h-4 w-4 mt-0.5 rounded border-gray-300"
+                  aria-checked={selectedBookmarks.includes(bookmark.id)}
                 />
                 <div className="flex-1">
                   <Label

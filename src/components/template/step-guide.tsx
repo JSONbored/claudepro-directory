@@ -105,11 +105,11 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
                     {step.content || step.description}
                   </div>
 
-                  {step.highlightedHtml && (
+                  {step.highlightedHtml && step.code && (
                     <div className={UI_CLASSES.MB_6}>
                       <ProductionCodeBlock
                         html={step.highlightedHtml}
-                        code={step.code!}
+                        code={step.code}
                         language="bash"
                         filename={`step-${index + 1}.sh`}
                         maxLines={20}

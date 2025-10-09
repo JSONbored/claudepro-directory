@@ -266,7 +266,10 @@ export function calculateCoBookmarkFrequencies(
     if (!userItems.has(bookmark.user_id)) {
       userItems.set(bookmark.user_id, new Set());
     }
-    userItems.get(bookmark.user_id)!.add(itemKey);
+    const userSet = userItems.get(bookmark.user_id);
+    if (userSet) {
+      userSet.add(itemKey);
+    }
   }
 
   // Calculate co-occurrence frequencies
@@ -289,13 +292,19 @@ export function calculateCoBookmarkFrequencies(
         if (!itemB) continue;
 
         // Increment co-occurrence count
-        const countAB = (coOccurrences.get(itemA)!.get(itemB) || 0) + 1;
-        coOccurrences.get(itemA)!.set(itemB, countAB);
+        const mapA = coOccurrences.get(itemA);
+        const countAB = (mapA?.get(itemB) || 0) + 1;
+        if (mapA) {
+          mapA.set(itemB, countAB);
+        }
 
         if (!coOccurrences.has(itemB)) {
           coOccurrences.set(itemB, new Map());
         }
-        coOccurrences.get(itemB)!.set(itemA, countAB);
+        const mapB = coOccurrences.get(itemB);
+        if (mapB) {
+          mapB.set(itemA, countAB);
+        }
       }
     }
   }
@@ -325,7 +334,10 @@ export function normalizeCoBookmarkFrequencies(
 
       // Normalize by min of the two item counts (Jaccard-like)
       const frequency = count / Math.min(countA, countB);
-      normalized.get(itemA)!.set(itemB, Math.min(frequency, 1));
+      const normalizedMapA = normalized.get(itemA);
+      if (normalizedMapA) {
+        normalizedMapA.set(itemB, Math.min(frequency, 1));
+      }
     }
   }
 

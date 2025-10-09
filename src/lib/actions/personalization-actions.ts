@@ -159,7 +159,10 @@ export const getForYouFeed = rateLimitedAction
             if (!categoryScores.has(aff.content_type)) {
               categoryScores.set(aff.content_type, []);
             }
-            categoryScores.get(aff.content_type)!.push(aff.affinity_score);
+            const scores = categoryScores.get(aff.content_type);
+            if (scores) {
+              scores.push(aff.affinity_score);
+            }
           }
 
           const favoriteCategories = Array.from(categoryScores.entries())

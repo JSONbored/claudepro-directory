@@ -64,12 +64,14 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   const clicksMap = new Map<string, number>();
 
   impressionsByDay?.forEach((imp) => {
-    const day = new Date(imp.created_at).toISOString().split('T')[0]!;
+    const isoDate = new Date(imp.created_at).toISOString();
+    const day = isoDate.substring(0, 10); // Extract YYYY-MM-DD
     impressionsMap.set(day, (impressionsMap.get(day) || 0) + 1);
   });
 
   clicksByDay?.forEach((click) => {
-    const day = new Date(click.created_at).toISOString().split('T')[0]!;
+    const isoDate = new Date(click.created_at).toISOString();
+    const day = isoDate.substring(0, 10); // Extract YYYY-MM-DD
     clicksMap.set(day, (clicksMap.get(day) || 0) + 1);
   });
 
@@ -229,7 +231,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             {Array.from({ length: 30 }).map((_, i) => {
               const date = new Date();
               date.setDate(date.getDate() - (29 - i));
-              const dayKey = date.toISOString().split('T')[0]!;
+              const dayKey = date.toISOString().substring(0, 10); // Extract YYYY-MM-DD
               const impressions = impressionsMap.get(dayKey) || 0;
               const clicks = clicksMap.get(dayKey) || 0;
               const maxImpressions = Math.max(...Array.from(impressionsMap.values()), 1);

@@ -331,7 +331,9 @@ export async function buildCategory(
     const failed = results.filter((r) => !r.success);
 
     // Extract valid content and metadata
-    const validContent = successful.map((r) => r.content!);
+    const validContent = successful
+      .map((r) => r.content)
+      .filter((c): c is NonNullable<typeof c> => c !== null);
     const metadata = validContent.map((content) => extractMetadata(content, config));
 
     // Calculate metrics
@@ -359,7 +361,7 @@ export async function buildCategory(
       items: validContent,
       metadata,
       metrics,
-      errors: failed.map((r) => r.error!),
+      errors: failed.map((r) => r.error).filter((e): e is Error => e !== null),
     };
   } catch (error) {
     logger.error(

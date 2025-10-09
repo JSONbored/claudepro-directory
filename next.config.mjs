@@ -1,5 +1,5 @@
-import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
 
 // Get __dirname in ES module
 const __filename = fileURLToPath(import.meta.url);
@@ -97,7 +97,8 @@ const nextConfig = {
     // Danger: allow SVG (we trust our sources - GitHub, our own domain)
     dangerouslyAllowSVG: true,
     // CSP for image optimization API - allows images but no scripts/objects
-    contentSecurityPolicy: "default-src 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline';",
+    contentSecurityPolicy:
+      "default-src 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline';",
   },
 
   // Turbopack-specific optimizations (modern approach)
@@ -126,10 +127,7 @@ const nextConfig = {
       'node_modules/typescript/**/*',
     ],
     // Specific exclusions for guide pages
-    '/guides/**': [
-      './docs/**/*',
-      './scripts/**/*',
-    ]
+    '/guides/**': ['./docs/**/*', './scripts/**/*'],
   },
 
   experimental: {
@@ -145,8 +143,8 @@ const nextConfig = {
 
     // ✨ Client-side router cache optimization (Next.js 15+)
     staleTimes: {
-      dynamic: 30,   // 30 seconds for dynamic routes
-      static: 300,   // 5 minutes for static routes
+      dynamic: 30, // 30 seconds for dynamic routes
+      static: 300, // 5 minutes for static routes
     },
 
     // ✨ Server Components HMR cache (faster development reloads)
@@ -223,17 +221,23 @@ const nextConfig = {
   // SWC minification is now the default in Next.js 15
   compiler: {
     // Remove console logs in production
-    removeConsole: process.env.NODE_ENV === 'production' ? {
-      exclude: ['error', 'warn'],
-    } : false,
+    removeConsole:
+      process.env.NODE_ENV === 'production'
+        ? {
+            exclude: ['error', 'warn'],
+          }
+        : false,
     // Strip specific data attributes in production to reduce HTML size
-    reactRemoveProperties: process.env.NODE_ENV === 'production' ? {
-      properties: ['^data-test'],
-    } : false,
+    reactRemoveProperties:
+      process.env.NODE_ENV === 'production'
+        ? {
+            properties: ['^data-test'],
+          }
+        : false,
   },
 
   // Simplified webpack config - let Turbopack handle most optimization
-  webpack: (config, { dev, isServer, webpack }) => {
+  webpack: (config, { dev, webpack }) => {
     // Only keep essential overrides for compatibility
     if (!dev) {
       // Keep template file exclusion (this is useful)
@@ -263,11 +267,11 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=14400, stale-while-revalidate=86400' // 4 hours cache, 24 hours stale
+            value: 'public, max-age=14400, stale-while-revalidate=86400', // 4 hours cache, 24 hours stale
           },
           {
             key: 'Vary',
-            value: 'Accept-Encoding, Accept'
+            value: 'Accept-Encoding, Accept',
           },
         ],
       },
@@ -276,11 +280,11 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=31536000, stale-while-revalidate=86400, immutable' // 1 year cache for pre-generated APIs
+            value: 'public, max-age=31536000, stale-while-revalidate=86400, immutable', // 1 year cache for pre-generated APIs
           },
           {
             key: 'Vary',
-            value: 'Accept-Encoding, Accept'
+            value: 'Accept-Encoding, Accept',
           },
         ],
       },
@@ -289,11 +293,11 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable' // 1 year cache for static assets
+            value: 'public, max-age=31536000, immutable', // 1 year cache for static assets
           },
           {
             key: 'Vary',
-            value: 'Accept-Encoding'
+            value: 'Accept-Encoding',
           },
         ],
       },
@@ -302,7 +306,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=3600, stale-while-revalidate=86400' // 1 hour cache
+            value: 'public, max-age=3600, stale-while-revalidate=86400', // 1 hour cache
           },
         ],
       },
@@ -311,7 +315,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable' // 1 year cache for Next.js static files
+            value: 'public, max-age=31536000, immutable', // 1 year cache for Next.js static files
           },
         ],
       },
@@ -320,11 +324,11 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=3600, stale-while-revalidate=86400' // 1 hour cache for content pages
+            value: 'public, max-age=3600, stale-while-revalidate=86400', // 1 hour cache for content pages
           },
           {
             key: 'Vary',
-            value: 'Accept-Encoding'
+            value: 'Accept-Encoding',
           },
         ],
       },
@@ -333,7 +337,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=1800, stale-while-revalidate=3600' // 30 min cache for search page
+            value: 'public, max-age=1800, stale-while-revalidate=3600', // 30 min cache for search page
           },
         ],
       },
@@ -342,7 +346,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=300, stale-while-revalidate=1800' // 5 min cache for trending
+            value: 'public, max-age=300, stale-while-revalidate=1800', // 5 min cache for trending
           },
         ],
       },
@@ -351,11 +355,11 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=86400, stale-while-revalidate=604800' // 1 day cache for sitemap
+            value: 'public, max-age=86400, stale-while-revalidate=604800', // 1 day cache for sitemap
           },
           {
             key: 'Content-Type',
-            value: 'application/xml'
+            value: 'application/xml',
           },
         ],
       },
@@ -364,11 +368,11 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=86400, stale-while-revalidate=604800' // 1 day cache for robots.txt
+            value: 'public, max-age=86400, stale-while-revalidate=604800', // 1 day cache for robots.txt
           },
           {
             key: 'Content-Type',
-            value: 'text/plain'
+            value: 'text/plain',
           },
         ],
       },
@@ -377,11 +381,11 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=86400, stale-while-revalidate=604800' // 1 day cache for manifest
+            value: 'public, max-age=86400, stale-while-revalidate=604800', // 1 day cache for manifest
           },
           {
             key: 'Content-Type',
-            value: 'application/manifest+json'
+            value: 'application/manifest+json',
           },
         ],
       },
@@ -390,11 +394,11 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=0, must-revalidate' // Always revalidate service worker
+            value: 'public, max-age=0, must-revalidate', // Always revalidate service worker
           },
           {
             key: 'Content-Type',
-            value: 'application/javascript'
+            value: 'application/javascript',
           },
         ],
       },

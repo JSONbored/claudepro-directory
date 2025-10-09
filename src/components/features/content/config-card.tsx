@@ -141,7 +141,7 @@ export const ConfigCard = memo(
                 >
                   <Eye className="h-3.5 w-3.5" aria-hidden="true" />
                   <span className="text-xs">
-                    {formatViewCount((item as { viewCount?: number }).viewCount!)}
+                    {formatViewCount((item as { viewCount?: number }).viewCount ?? 0)}
                   </span>
                 </Badge>
               )}

@@ -143,7 +143,7 @@ function configToExtended(config: MiddlewareRateLimitConfig): ExtendedRateLimitC
 /**
  * Generate rate limit key for Redis storage with validation
  */
-async function generateKey(request: NextRequest, prefix: string = 'rate_limit'): Promise<string> {
+async function generateKey(request: NextRequest, prefix = 'rate_limit'): Promise<string> {
   // Priority order for client identification:
   // 1. CF-Connecting-IP (Cloudflare)
   // 2. X-Forwarded-For (proxy)

@@ -62,9 +62,11 @@
 
   --dark-text-primary: oklch(94% 0.005 60);
   --dark-text-secondary: oklch(78% 0.008 60);
-  --dark-text-tertiary: oklch(62% 0.01 60);
-  --dark-text-disabled: oklch(48% 0.012 60);
-  --dark-text-inverse: oklch(98% 0.003 90);
+  --dark-text-tertiary: oklch(
+    69% 0.01 60
+  ); /* Increased from 68% to ensure 4.5:1 contrast for tabs */
+  --dark-text-disabled: oklch(57% 0.012 60);
+  --dark-text-inverse: oklch(100% 0 0);
 
   --dark-border-default: oklch(30% 0.005 60 / 0.5);
   --dark-border-light: oklch(28% 0.005 60 / 0.3);
@@ -82,9 +84,9 @@
 
   --light-text-primary: oklch(18% 0.014 75);
   --light-text-secondary: oklch(42% 0.012 70);
-  --light-text-tertiary: oklch(58% 0.01 65);
+  --light-text-tertiary: oklch(67% 0.01 65);
   --light-text-disabled: oklch(68% 0.008 60);
-  --light-text-inverse: oklch(98% 0.003 90);
+  --light-text-inverse: oklch(100% 0 0);
 
   --light-border-default: oklch(92% 0.006 75);
   --light-border-light: oklch(95% 0.004 80);
@@ -95,7 +97,9 @@
   --claude-orange: oklch(62% 0.155 42);
   --claude-orange-hover: oklch(66% 0.145 42);
   --claude-orange-active: oklch(57% 0.16 42);
-  --claude-orange-light: oklch(70% 0.135 45);
+  --claude-orange-light: oklch(
+    74% 0.135 45
+  ); /* Increased from 70% for WCAG AA contrast (4.5:1) on hero badge */
   --claude-orange-muted: oklch(48% 0.142 37);
 
   /* Light mode adjustments for orange */
@@ -105,16 +109,18 @@
   --light-accent-subtle: oklch(95% 0.035 42);
 
   /* Semantic Colors - Dark Mode */
-  --dark-success: oklch(64% 0.19 145);
+  --dark-success: oklch(72% 0.19 145); /* Increased from 64% for WCAG AA contrast (4.5:1) */
   --dark-success-bg: oklch(35% 0.08 145 / 0.15);
   --dark-success-border: oklch(64% 0.19 145 / 0.3);
-  --dark-warning: oklch(68% 0.155 65);
+  --dark-warning: oklch(75% 0.155 65); /* Increased from 68% for WCAG AA contrast (4.5:1) */
   --dark-warning-bg: oklch(45% 0.08 65 / 0.15);
   --dark-warning-border: oklch(68% 0.155 65 / 0.3);
-  --dark-error: oklch(63% 0.195 25);
+  --dark-error: oklch(70% 0.195 25); /* Increased from 63% for WCAG AA contrast (4.5:1) */
   --dark-error-bg: oklch(40% 0.08 25 / 0.15);
   --dark-error-border: oklch(63% 0.195 25 / 0.3);
-  --dark-info: oklch(65% 0.168 250);
+  --dark-info: oklch(
+    78% 0.168 250
+  ); /* Increased from 65% for WCAG AA contrast (4.5:1) - was worst at 2.82:1 */
   --dark-info-bg: oklch(40% 0.08 250 / 0.15);
   --dark-info-border: oklch(65% 0.168 250 / 0.3);
 
@@ -268,6 +274,9 @@
   --color-text-inverse: var(--dark-text-inverse);
 
   --color-accent: var(--claude-orange);
+  --color-accent-foreground: oklch(
+    20% 0 0
+  ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
   --color-accent-hover: var(--claude-orange-hover);
   --color-accent-active: var(--claude-orange-active);
   --color-accent-light: var(--claude-orange-light);
@@ -483,6 +492,9 @@
   --color-text-inverse: var(--light-text-inverse);
 
   --color-accent: var(--light-accent);
+  --color-accent-foreground: oklch(
+    20% 0 0
+  ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
   --color-accent-hover: var(--light-accent-hover);
   --color-accent-active: var(--light-accent-active);
   --color-accent-subtle: var(--light-accent-subtle);
@@ -534,6 +546,9 @@
   --color-text-inverse: var(--dark-text-inverse);
 
   --color-accent: var(--claude-orange);
+  --color-accent-foreground: oklch(
+    20% 0 0
+  ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
   --color-accent-hover: var(--claude-orange-hover);
   --color-accent-active: var(--claude-orange-active);
   --color-accent-subtle: oklch(33% 0.045 35);

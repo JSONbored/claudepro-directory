@@ -116,11 +116,14 @@ export async function GET(request: Request) {
                 interactions: [],
               });
             }
-            interactionsByContent.get(key)!.interactions.push({
-              interaction_type: interaction.interaction_type,
-              metadata: interaction.metadata as Record<string, unknown>,
-              created_at: interaction.created_at,
-            });
+            const contentData = interactionsByContent.get(key);
+            if (contentData) {
+              contentData.interactions.push({
+                interaction_type: interaction.interaction_type,
+                metadata: interaction.metadata as Record<string, unknown>,
+                created_at: interaction.created_at,
+              });
+            }
           }
 
           // Calculate affinities

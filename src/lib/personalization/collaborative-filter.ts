@@ -88,7 +88,10 @@ export function buildUserItemMatrix(
     if (!matrix.has(interaction.user_id)) {
       matrix.set(interaction.user_id, new Set());
     }
-    matrix.get(interaction.user_id)!.add(itemKey);
+    const userSet = matrix.get(interaction.user_id);
+    if (userSet) {
+      userSet.add(itemKey);
+    }
   }
 
   return matrix;
@@ -111,7 +114,10 @@ export function calculateItemSimilarities(
       if (!itemUserIndex.has(item)) {
         itemUserIndex.set(item, new Set());
       }
-      itemUserIndex.get(item)!.add(userId);
+      const itemSet = itemUserIndex.get(item);
+      if (itemSet) {
+        itemSet.add(userId);
+      }
     }
   }
 
@@ -123,7 +129,8 @@ export function calculateItemSimilarities(
     const itemA = items[i];
     if (!itemA) continue;
 
-    const usersA = itemUserIndex.get(itemA)!;
+    const usersA = itemUserIndex.get(itemA);
+    if (!usersA) continue;
 
     if (!similarities.has(itemA)) {
       similarities.set(itemA, new Map());
@@ -133,7 +140,8 @@ export function calculateItemSimilarities(
       const itemB = items[j];
       if (!itemB) continue;
 
-      const usersB = itemUserIndex.get(itemB)!;
+      const usersB = itemUserIndex.get(itemB);
+      if (!usersB) continue;
 
       // Calculate Jaccard similarity
       const similarity = calculateJaccardSimilarity(usersA, usersB);
@@ -141,12 +149,18 @@ export function calculateItemSimilarities(
       // Only store meaningful similarities (above threshold)
       if (similarity >= 0.05) {
         // 5% threshold
-        similarities.get(itemA)!.set(itemB, similarity);
+        const simMapA = similarities.get(itemA);
+        if (simMapA) {
+          simMapA.set(itemB, similarity);
+        }
 
         if (!similarities.has(itemB)) {
           similarities.set(itemB, new Map());
         }
-        similarities.get(itemB)!.set(itemA, similarity);
+        const simMapB = similarities.get(itemB);
+        if (simMapB) {
+          simMapB.set(itemA, similarity);
+        }
       }
     }
   }

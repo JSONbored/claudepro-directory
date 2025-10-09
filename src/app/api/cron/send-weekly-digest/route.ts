@@ -29,8 +29,20 @@ export const dynamic = 'force-dynamic';
  * @param request - Next.js request object
  * @returns JSON response with send results
  */
-export async function GET(_request: Request) {
+export async function GET(request: Request) {
   try {
+    // Verify CRON_SECRET for security
+    const authHeader = request.headers.get('authorization');
+    const cronSecret = env.CRON_SECRET;
+
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+      logger.warn('Unauthorized cron request attempt', {
+        hasAuthHeader: !!authHeader,
+        hasCronSecret: !!cronSecret,
+      });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     logger.info('Weekly digest cron job started');
 
     // Generate digest content for previous week
