@@ -454,7 +454,26 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    // User is authenticated - continue
+    // User is authenticated - check if session needs refresh
+    // Refresh tokens that expire within 1 hour to prevent unexpected logouts
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (session?.expires_at) {
+      const expiresIn = session.expires_at - Math.floor(Date.now() / 1000);
+
+      if (expiresIn < 3600) {
+        // Less than 1 hour until expiration - refresh the session
+        logger.debug('Refreshing session (expires soon)', {
+          userId: user.id,
+          expiresIn: `${expiresIn}s`,
+        });
+
+        await supabase.auth.refreshSession();
+      }
+    }
+
     logger.debug('Authenticated request to account page', {
       userId: user.id,
       path: sanitizePathForLogging(pathname),

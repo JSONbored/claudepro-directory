@@ -3,6 +3,8 @@
 -- =====================================================
 -- PRODUCTION SCHEMA - LAST UPDATED: October 8, 2025
 -- Latest Changes:
+--   - Fixed: RLS performance optimization (47 policies use auth.uid subquery pattern)
+--   - Added: 6 missing foreign key indexes (sponsored content & user_mcps)
 --   - Added: Personalization Engine (user_interactions, user_affinities, similarity matrices)
 --   - Optimized: Database indexes for 2-8x query performance improvement
 --   - Added: Performance-optimized bookmark indexes (covering indexes)
@@ -626,6 +628,22 @@ CREATE INDEX IF NOT EXISTS idx_content_similarities_content_b
 CREATE INDEX IF NOT EXISTS idx_content_similarities_score
   ON public.content_similarities(similarity_score DESC) WHERE similarity_score >= 0.3;
 
+-- Sponsored Content Analytics (missing foreign key indexes)
+CREATE INDEX IF NOT EXISTS idx_sponsored_clicks_sponsored_id
+  ON public.sponsored_clicks(sponsored_id);
+CREATE INDEX IF NOT EXISTS idx_sponsored_clicks_user_id
+  ON public.sponsored_clicks(user_id);
+CREATE INDEX IF NOT EXISTS idx_sponsored_content_user_id
+  ON public.sponsored_content(user_id);
+CREATE INDEX IF NOT EXISTS idx_sponsored_impressions_sponsored_id
+  ON public.sponsored_impressions(sponsored_id);
+CREATE INDEX IF NOT EXISTS idx_sponsored_impressions_user_id
+  ON public.sponsored_impressions(user_id);
+
+-- User MCPs (missing company_id index)
+CREATE INDEX IF NOT EXISTS idx_user_mcps_company_id
+  ON public.user_mcps(company_id);
+
 -- Query planner statistics for better execution plans
 CREATE STATISTICS IF NOT EXISTS stats_user_interactions_user_time_type
   (dependencies)
@@ -1235,65 +1253,65 @@ ALTER TABLE public.content_similarities ENABLE ROW LEVEL SECURITY;
 -- Users: Public profiles visible to all, own profile editable
 CREATE POLICY "Public users are viewable by everyone"
   ON public.users FOR SELECT
-  USING (public = true OR auth.uid() = id);
+  USING (public = true OR (SELECT auth.uid()) = id);
 
 CREATE POLICY "Users can update their own profile"
   ON public.users FOR UPDATE
-  USING (auth.uid() = id);
+  USING ((SELECT auth.uid()) = id);
 
 -- Bookmarks: Users can only see and manage their own
 CREATE POLICY "Users can view their own bookmarks"
   ON public.bookmarks FOR SELECT
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can insert their own bookmarks"
   ON public.bookmarks FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can delete their own bookmarks"
   ON public.bookmarks FOR DELETE
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 -- User Collections: Public collections viewable by all, users can manage their own
 CREATE POLICY "Public collections are viewable by everyone"
   ON public.user_collections FOR SELECT
-  USING (is_public = true OR auth.uid() = user_id);
+  USING (is_public = true OR (SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can create their own collections"
   ON public.user_collections FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can update their own collections"
   ON public.user_collections FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can delete their own collections"
   ON public.user_collections FOR DELETE
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 -- Collection Items: Inherit visibility from parent collection, users can manage their own
 CREATE POLICY "Users can view items in their collections"
   ON public.collection_items FOR SELECT
   USING (
-    auth.uid() = user_id OR
+    (SELECT auth.uid()) = user_id OR
     EXISTS (
-      SELECT 1 FROM public.user_collections 
-      WHERE id = collection_items.collection_id 
+      SELECT 1 FROM public.user_collections
+      WHERE id = collection_items.collection_id
       AND is_public = true
     )
   );
 
 CREATE POLICY "Users can add items to their collections"
   ON public.collection_items FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can update items in their collections"
   ON public.collection_items FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can delete items from their collections"
   ON public.collection_items FOR DELETE
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 -- Followers: Anyone can view, users can manage their own follows
 CREATE POLICY "Followers are viewable by everyone"
@@ -1302,11 +1320,11 @@ CREATE POLICY "Followers are viewable by everyone"
 
 CREATE POLICY "Users can follow others"
   ON public.followers FOR INSERT
-  WITH CHECK (auth.uid() = follower_id);
+  WITH CHECK ((SELECT auth.uid()) = follower_id);
 
 CREATE POLICY "Users can unfollow others"
   ON public.followers FOR DELETE
-  USING (auth.uid() = follower_id);
+  USING ((SELECT auth.uid()) = follower_id);
 
 -- Companies: Public viewable, owners can manage
 CREATE POLICY "Companies are viewable by everyone"
@@ -1315,50 +1333,50 @@ CREATE POLICY "Companies are viewable by everyone"
 
 CREATE POLICY "Users can create companies"
   ON public.companies FOR INSERT
-  WITH CHECK (auth.uid() = owner_id);
+  WITH CHECK ((SELECT auth.uid()) = owner_id);
 
 CREATE POLICY "Company owners can update their companies"
   ON public.companies FOR UPDATE
-  USING (auth.uid() = owner_id);
+  USING ((SELECT auth.uid()) = owner_id);
 
 -- Jobs: Active jobs viewable by all, users can manage their own
 CREATE POLICY "Active jobs are viewable by everyone"
   ON public.jobs FOR SELECT
-  USING (status = 'active' OR auth.uid() = user_id);
+  USING (status = 'active' OR (SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can create jobs"
   ON public.jobs FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can update their own jobs"
   ON public.jobs FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 -- User MCPs: Active MCPs viewable by all, users can manage their own
 CREATE POLICY "Active MCPs are viewable by everyone"
   ON public.user_mcps FOR SELECT
-  USING (active = true OR auth.uid() = user_id);
+  USING (active = true OR (SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can create MCPs"
   ON public.user_mcps FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can update their own MCPs"
   ON public.user_mcps FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 -- User Content: Active content viewable by all, users can manage their own
 CREATE POLICY "Active user content is viewable by everyone"
   ON public.user_content FOR SELECT
-  USING (active = true OR auth.uid() = user_id);
+  USING (active = true OR (SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can create content"
   ON public.user_content FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can update their own content"
   ON public.user_content FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 -- Posts: All posts viewable, users can create/update their own
 CREATE POLICY "Posts are viewable by everyone"
@@ -1367,15 +1385,15 @@ CREATE POLICY "Posts are viewable by everyone"
 
 CREATE POLICY "Authenticated users can create posts"
   ON public.posts FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can update their own posts"
   ON public.posts FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can delete their own posts"
   ON public.posts FOR DELETE
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 -- Votes: Users can vote and see all votes
 CREATE POLICY "Votes are viewable by everyone"
@@ -1384,11 +1402,11 @@ CREATE POLICY "Votes are viewable by everyone"
 
 CREATE POLICY "Authenticated users can vote"
   ON public.votes FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can remove their own votes"
   ON public.votes FOR DELETE
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 -- Comments: All comments viewable, users can create/manage their own
 CREATE POLICY "Comments are viewable by everyone"
@@ -1397,30 +1415,30 @@ CREATE POLICY "Comments are viewable by everyone"
 
 CREATE POLICY "Authenticated users can comment"
   ON public.comments FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can update their own comments"
   ON public.comments FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can delete their own comments"
   ON public.comments FOR DELETE
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 -- Payments: Users can only see their own payments
 CREATE POLICY "Users can view their own payments"
   ON public.payments FOR SELECT
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 -- Subscriptions: Users can only see their own subscriptions
 CREATE POLICY "Users can view their own subscriptions"
   ON public.subscriptions FOR SELECT
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 -- Sponsored Content: Active sponsored content viewable by all, users can view their own campaigns
 CREATE POLICY "Active sponsored content is viewable by everyone"
   ON public.sponsored_content FOR SELECT
-  USING (active = true OR auth.uid() = user_id);
+  USING (active = true OR (SELECT auth.uid()) = user_id);
 
 -- Sponsored Impressions: Anyone can record impressions
 CREATE POLICY "Anyone can record sponsored impressions"
@@ -1436,12 +1454,12 @@ CREATE POLICY "Anyone can record sponsored clicks"
 CREATE POLICY "Users can view own submissions"
   ON public.submissions FOR SELECT
   TO authenticated
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can create submissions"
   ON public.submissions FOR INSERT
   TO authenticated
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Service role has full access to submissions"
   ON public.submissions FOR ALL
@@ -1462,16 +1480,16 @@ CREATE POLICY "User badges are viewable by everyone"
 -- User Badges: Users can feature their own badges
 CREATE POLICY "Users can feature their own badges"
   ON public.user_badges FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 -- User Interactions: Users can only see and manage their own interactions
 CREATE POLICY "Users can view their own interactions"
   ON public.user_interactions FOR SELECT
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Users can insert their own interactions"
   ON public.user_interactions FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Service role has full access to interactions"
   ON public.user_interactions FOR ALL
@@ -1482,7 +1500,7 @@ CREATE POLICY "Service role has full access to interactions"
 -- User Affinities: Users can only see their own affinity scores
 CREATE POLICY "Users can view their own affinities"
   ON public.user_affinities FOR SELECT
-  USING (auth.uid() = user_id);
+  USING ((SELECT auth.uid()) = user_id);
 
 CREATE POLICY "Service role has full access to affinities"
   ON public.user_affinities FOR ALL
@@ -1493,7 +1511,7 @@ CREATE POLICY "Service role has full access to affinities"
 -- User Similarities: Users can see similarities involving themselves
 CREATE POLICY "Users can view their own similarities"
   ON public.user_similarities FOR SELECT
-  USING (auth.uid() = user_a_id OR auth.uid() = user_b_id);
+  USING ((SELECT auth.uid()) = user_a_id OR (SELECT auth.uid()) = user_b_id);
 
 CREATE POLICY "Service role has full access to user similarities"
   ON public.user_similarities FOR ALL
