@@ -9,11 +9,13 @@
  * - Match score visualization
  * - Filter/sort capabilities
  * - Share results functionality
+ * - Bulk bookmark functionality
  * - Responsive grid layout
  */
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -23,8 +25,26 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/src/components/ui/collapsible';
+import { Separator } from '@/src/components/ui/separator';
+import { Slider } from '@/src/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
-import { ArrowRight, BarChart, RefreshCw, Share2, Sparkles, TrendingUp } from '@/src/lib/icons';
+import { addBookmarkBatch } from '@/src/lib/actions/bookmark-actions';
+import {
+  ArrowRight,
+  BarChart,
+  Bookmark,
+  ChevronDown,
+  RefreshCw,
+  Settings,
+  Share2,
+  Sparkles,
+  TrendingUp,
+} from '@/src/lib/icons';
 import type { RecommendationResponse } from '@/src/lib/schemas/recommender.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { RecommendationCard } from './recommendation-card';
@@ -38,12 +58,53 @@ interface ResultsDisplayProps {
 export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProps) {
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [isPending, startTransition] = useTransition();
+
+  // Refine results state
+  const [minScore, setMinScore] = useState(60);
+  const [maxResults, setMaxResults] = useState(10);
+  const [showRefinePanel, setShowRefinePanel] = useState(false);
 
   const { results, summary, totalMatches, answers } = recommendations;
 
-  // Filter results by category
-  const filteredResults =
-    selectedCategory === 'all' ? results : results.filter((r) => r.category === selectedCategory);
+  // Handle bulk bookmark
+  const handleSaveAll = () => {
+    startTransition(async () => {
+      try {
+        const items = results.map((result) => ({
+          content_type: result.category,
+          content_slug: result.slug,
+        }));
+
+        const response = await addBookmarkBatch({ items });
+
+        if (response?.data?.success) {
+          toast.success(
+            `Saved ${response.data.saved_count} of ${response.data.total_requested} recommendations to your library`,
+            {
+              description: 'View them in your library',
+              action: {
+                label: 'View Library',
+                onClick: () => {
+                  window.location.href = '/account/library';
+                },
+              },
+            }
+          );
+        } else {
+          toast.error('Failed to save recommendations. Please try again.');
+        }
+      } catch {
+        toast.error('Failed to save recommendations. Please try again.');
+      }
+    });
+  };
+
+  // Apply filters and refinements
+  const filteredResults = results
+    .filter((r) => selectedCategory === 'all' || r.category === selectedCategory)
+    .filter((r) => r.matchScore >= minScore)
+    .slice(0, maxResults);
 
   // Get unique categories from results
   const categories = ['all', ...new Set(results.map((r) => r.category))];
@@ -81,6 +142,16 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         {/* Actions */}
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Button
+            variant="default"
+            size="sm"
+            onClick={handleSaveAll}
+            disabled={isPending}
+            className="gap-2"
+          >
+            <Bookmark className="h-4 w-4" />
+            {isPending ? 'Saving...' : 'Save All to Library'}
+          </Button>
+          <Button
             variant="outline"
             size="sm"
             onClick={() => setShowShareModal(true)}
@@ -97,6 +168,81 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
           </Button>
         </div>
       </div>
+
+      {/* Refine Results Panel */}
+      <Collapsible open={showRefinePanel} onOpenChange={setShowRefinePanel}>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" size="sm" className="w-full gap-2">
+            <Settings className="h-4 w-4" />
+            Adjust Preferences
+            <ChevronDown
+              className={`h-4 w-4 transition-transform ${showRefinePanel ? 'rotate-180' : ''}`}
+            />
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle className="text-lg">Refine Your Results</CardTitle>
+              <CardDescription>
+                Adjust these settings to fine-tune your recommendations
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Minimum Score Slider */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Minimum Match Score</span>
+                  <span className="text-sm text-muted-foreground">{minScore}%</span>
+                </div>
+                <Slider
+                  value={[minScore]}
+                  onValueChange={(value) => setMinScore(value[0] || 60)}
+                  min={0}
+                  max={100}
+                  step={5}
+                  className="w-full"
+                  aria-label="Minimum match score"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Only show configurations with at least {minScore}% match
+                </p>
+              </div>
+
+              {/* Max Results Slider */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Maximum Results</span>
+                  <span className="text-sm text-muted-foreground">{maxResults}</span>
+                </div>
+                <Slider
+                  value={[maxResults]}
+                  onValueChange={(value) => setMaxResults(value[0] || 10)}
+                  min={3}
+                  max={20}
+                  step={1}
+                  className="w-full"
+                  aria-label="Maximum number of results"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Show up to {maxResults} recommendations
+                </p>
+              </div>
+
+              {/* Stats */}
+              <div className="pt-4">
+                <Separator className="mb-4" />
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Showing results:</span>
+                  <span className="font-medium">
+                    {filteredResults.length} of {results.length}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Your Selections Summary */}
       <Card className="bg-accent/5">

@@ -65,6 +65,14 @@ export const EVENTS = {
   FILTER_TOGGLED: 'filter_toggled',
   SORT_CHANGED: 'sort_changed',
   PAGINATION_CLICKED: 'pagination_clicked',
+
+  // Personalization Events
+  PERSONALIZATION_AFFINITY_CALCULATED: 'personalization_affinity_calculated',
+  PERSONALIZATION_RECOMMENDATION_SHOWN: 'personalization_recommendation_shown',
+  PERSONALIZATION_RECOMMENDATION_CLICKED: 'personalization_recommendation_clicked',
+  PERSONALIZATION_SIMILAR_CONFIG_CLICKED: 'personalization_similar_config_clicked',
+  PERSONALIZATION_FOR_YOU_VIEWED: 'personalization_for_you_viewed',
+  PERSONALIZATION_USAGE_RECOMMENDATION_SHOWN: 'personalization_usage_recommendation_shown',
 } as const;
 
 // Type for event names
@@ -318,6 +326,45 @@ export interface EventPayloads {
     items_per_page: number;
     section: string;
   };
+
+  [EVENTS.PERSONALIZATION_AFFINITY_CALCULATED]: {
+    user_id: string;
+    content_type: string;
+    affinity_score: number;
+    based_on_interactions: number;
+  };
+
+  [EVENTS.PERSONALIZATION_RECOMMENDATION_SHOWN]: {
+    recommendation_source: string;
+    position: number;
+    content_slug: string;
+    content_type: string;
+  };
+
+  [EVENTS.PERSONALIZATION_RECOMMENDATION_CLICKED]: {
+    content_slug: string;
+    content_type: string;
+    position: number;
+    recommendation_source: string;
+  };
+
+  [EVENTS.PERSONALIZATION_SIMILAR_CONFIG_CLICKED]: {
+    source_slug: string;
+    target_slug: string;
+    similarity_score: number;
+  };
+
+  [EVENTS.PERSONALIZATION_FOR_YOU_VIEWED]: {
+    items_shown: number;
+    algorithm_version: string;
+    user_has_history: boolean;
+  };
+
+  [EVENTS.PERSONALIZATION_USAGE_RECOMMENDATION_SHOWN]: {
+    trigger: string;
+    recommendations_count: number;
+    context_type?: string;
+  };
 }
 
 // Event categories for grouping and permissions
@@ -360,6 +407,14 @@ export const EVENT_CATEGORIES = {
     EVENTS.FILTER_TOGGLED,
     EVENTS.SORT_CHANGED,
     EVENTS.PAGINATION_CLICKED,
+  ],
+  PERSONALIZATION: [
+    EVENTS.PERSONALIZATION_AFFINITY_CALCULATED,
+    EVENTS.PERSONALIZATION_RECOMMENDATION_SHOWN,
+    EVENTS.PERSONALIZATION_RECOMMENDATION_CLICKED,
+    EVENTS.PERSONALIZATION_SIMILAR_CONFIG_CLICKED,
+    EVENTS.PERSONALIZATION_FOR_YOU_VIEWED,
+    EVENTS.PERSONALIZATION_USAGE_RECOMMENDATION_SHOWN,
   ],
 } as const;
 
@@ -556,6 +611,37 @@ export const EVENT_CONFIG: Record<
   [EVENTS.EMAIL_MODAL_DISMISSED]: {
     description: 'User dismissed email capture modal',
     category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.PERSONALIZATION_AFFINITY_CALCULATED]: {
+    description: 'User affinity score calculated',
+    category: 'PERSONALIZATION',
+    enabled: true,
+    sampleRate: 0.1, // Sample 10% (high volume)
+  },
+  [EVENTS.PERSONALIZATION_RECOMMENDATION_SHOWN]: {
+    description: 'Personalized recommendation displayed',
+    category: 'PERSONALIZATION',
+    enabled: true,
+  },
+  [EVENTS.PERSONALIZATION_RECOMMENDATION_CLICKED]: {
+    description: 'User clicked personalized recommendation',
+    category: 'PERSONALIZATION',
+    enabled: true,
+  },
+  [EVENTS.PERSONALIZATION_SIMILAR_CONFIG_CLICKED]: {
+    description: 'User clicked similar config suggestion',
+    category: 'PERSONALIZATION',
+    enabled: true,
+  },
+  [EVENTS.PERSONALIZATION_FOR_YOU_VIEWED]: {
+    description: 'User viewed For You feed',
+    category: 'PERSONALIZATION',
+    enabled: true,
+  },
+  [EVENTS.PERSONALIZATION_USAGE_RECOMMENDATION_SHOWN]: {
+    description: 'Usage-based recommendation displayed',
+    category: 'PERSONALIZATION',
     enabled: true,
   },
 };

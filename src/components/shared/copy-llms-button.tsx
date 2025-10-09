@@ -2,6 +2,8 @@
  * Copy LLMs.txt Button Component
  * Provides one-click copying of llms.txt content for AI assistant usage
  *
+ * Refactored to use centralized useCopyToClipboard hook for consistent behavior.
+ *
  * @module components/shared/copy-llms-button
  */
 
@@ -10,10 +12,10 @@
 import { useState } from 'react';
 import { Button } from '@/src/components/ui/button';
 import { toast } from '@/src/components/ui/sonner';
+import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
 import { Check, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { cn } from '@/src/lib/utils';
-import { copyToClipboard } from '@/src/lib/utils/clipboard-utils';
 
 /**
  * Props for CopyLLMsButton component
@@ -81,15 +83,34 @@ export function CopyLLMsButton({
   className,
   showIcon = true,
 }: CopyLLMsButtonProps) {
-  const [isCopied, setIsCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Use centralized clipboard hook
+  const { copied, copy } = useCopyToClipboard({
+    onSuccess: () => {
+      toast.success('Copied to clipboard!', {
+        description: 'AI-optimized content ready to paste',
+        duration: 3000,
+      });
+    },
+    onError: () => {
+      toast.error('Failed to copy', {
+        description: 'Please try again or copy the URL manually',
+        duration: 4000,
+      });
+    },
+    context: {
+      component: 'CopyLLMsButton',
+      action: 'copy_llmstxt',
+    },
+  });
 
   /**
    * Handle copy button click
    * Fetches llms.txt content and copies to clipboard
    */
   const handleCopy = async () => {
-    if (isLoading || isCopied) return;
+    if (isLoading || copied) return;
 
     setIsLoading(true);
 
@@ -103,31 +124,11 @@ export function CopyLLMsButton({
 
       const content = await response.text();
 
-      // Copy to clipboard
-      const success = await copyToClipboard(content, {
-        component: 'CopyLLMsButton',
-        action: 'copy_llmstxt',
-      });
-
-      if (success) {
-        setIsCopied(true);
-
-        // Show success toast
-        toast.success('Copied to clipboard!', {
-          description: 'AI-optimized content ready to paste',
-          duration: 3000,
-        });
-
-        // Reset icon after 2 seconds
-        setTimeout(() => {
-          setIsCopied(false);
-        }, 2000);
-      } else {
-        throw new Error('Clipboard API failed');
-      }
+      // Copy to clipboard using hook
+      await copy(content);
     } catch (error) {
       logger.error(
-        'Failed to copy llms.txt content',
+        'Failed to fetch llms.txt content',
         error instanceof Error ? error : new Error(String(error)),
         {
           component: 'CopyLLMsButton',
@@ -150,23 +151,23 @@ export function CopyLLMsButton({
       variant={variant}
       size={size}
       onClick={handleCopy}
-      disabled={isLoading || isCopied}
+      disabled={isLoading || copied}
       className={cn(
         'gap-2 transition-all',
-        isCopied && 'border-green-500/50 bg-green-500/10 text-green-400',
+        copied && 'border-green-500/50 bg-green-500/10 text-green-400',
         className
       )}
-      aria-label={isCopied ? 'Content copied' : 'Copy AI-optimized content'}
+      aria-label={copied ? 'Content copied' : 'Copy AI-optimized content'}
     >
       {showIcon &&
-        (isCopied ? (
+        (copied ? (
           <Check className="h-4 w-4" aria-hidden="true" />
         ) : isLoading ? (
           <Sparkles className="h-4 w-4 animate-pulse" aria-hidden="true" />
         ) : (
           <Sparkles className="h-4 w-4" aria-hidden="true" />
         ))}
-      <span className="text-sm">{isCopied ? 'Copied!' : isLoading ? 'Loading...' : label}</span>
+      <span className="text-sm">{copied ? 'Copied!' : isLoading ? 'Loading...' : label}</span>
     </Button>
   );
 }
@@ -187,11 +188,24 @@ export function CopyLLMsButtonIcon({
   className,
   variant = 'ghost',
 }: Omit<CopyLLMsButtonProps, 'label' | 'size' | 'showIcon'>) {
-  const [isCopied, setIsCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Use centralized clipboard hook
+  const { copied, copy } = useCopyToClipboard({
+    onSuccess: () => {
+      toast.success('Copied for AI!');
+    },
+    onError: () => {
+      toast.error('Failed to copy');
+    },
+    context: {
+      component: 'CopyLLMsButtonIcon',
+      action: 'copy_llmstxt',
+    },
+  });
+
   const handleCopy = async () => {
-    if (isLoading || isCopied) return;
+    if (isLoading || copied) return;
 
     setIsLoading(true);
 
@@ -204,21 +218,11 @@ export function CopyLLMsButtonIcon({
 
       const content = await response.text();
 
-      const success = await copyToClipboard(content, {
-        component: 'CopyLLMsButtonIcon',
-        action: 'copy_llmstxt',
-      });
-
-      if (success) {
-        setIsCopied(true);
-        toast.success('Copied for AI!');
-        setTimeout(() => setIsCopied(false), 2000);
-      } else {
-        throw new Error('Clipboard failed');
-      }
+      // Copy using hook
+      await copy(content);
     } catch (error) {
       logger.error(
-        'Failed to copy llms.txt',
+        'Failed to fetch llms.txt',
         error instanceof Error ? error : new Error(String(error)),
         { component: 'CopyLLMsButtonIcon', llmsTxtUrl }
       );
@@ -234,16 +238,16 @@ export function CopyLLMsButtonIcon({
       variant={variant}
       size="icon"
       onClick={handleCopy}
-      disabled={isLoading || isCopied}
+      disabled={isLoading || copied}
       className={cn(
         'transition-all',
-        isCopied && 'border-green-500/50 bg-green-500/10 text-green-400',
+        copied && 'border-green-500/50 bg-green-500/10 text-green-400',
         className
       )}
       aria-label="Copy AI-optimized content"
       title="Copy for AI"
     >
-      {isCopied ? (
+      {copied ? (
         <Check className="h-4 w-4" />
       ) : isLoading ? (
         <Sparkles className="h-4 w-4 animate-pulse" />

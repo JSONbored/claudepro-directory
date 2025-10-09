@@ -33,7 +33,11 @@ async function updateJsonFile(filePath: string, seoTitle: string): Promise<void>
   const data = JSON.parse(content);
 
   // Add or update seoTitle field (insert after title if exists)
-  if (!data.seoTitle) {
+  if (data.seoTitle) {
+    // Update existing seoTitle
+    data.seoTitle = seoTitle;
+    await fs.writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8');
+  } else {
     // Parse and rebuild to insert seoTitle in correct position
     const lines = content.split('\n');
     const titleIndex = lines.findIndex((line) => line.includes('"title":'));
@@ -46,10 +50,6 @@ async function updateJsonFile(filePath: string, seoTitle: string): Promise<void>
       data.seoTitle = seoTitle;
       await fs.writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8');
     }
-  } else {
-    // Update existing seoTitle
-    data.seoTitle = seoTitle;
-    await fs.writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8');
   }
 }
 

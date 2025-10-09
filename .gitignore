@@ -52,6 +52,10 @@ coverage/
 .turbo/
 .temp/
 
+# Lighthouse CI reports (regenerated on each run)
+.lighthouseci/
+config/reports/lighthouse/
+
 # Environment files
 .env*
 !.env.example
@@ -70,3 +74,5 @@ SEO-WORKFLOW.md
 tsconfig.tsbuildinfo
 .env*.local
 core
+
+manifest.json

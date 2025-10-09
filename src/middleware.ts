@@ -23,8 +23,12 @@ import {
 } from '@/src/lib/schemas/middleware.schema';
 
 // Initialize Arcjet with comprehensive security rules
+if (!securityConfig.arcjetKey) {
+  throw new Error('ARCJET_KEY is required for security middleware');
+}
+
 const aj = arcjet({
-  key: securityConfig.arcjetKey!,
+  key: securityConfig.arcjetKey,
   // In development, Arcjet uses 127.0.0.1 when no real IP is available - this is expected behavior
   rules: [
     // Shield WAF - protect against common attacks
@@ -450,7 +454,26 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    // User is authenticated - continue
+    // User is authenticated - check if session needs refresh
+    // Refresh tokens that expire within 1 hour to prevent unexpected logouts
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (session?.expires_at) {
+      const expiresIn = session.expires_at - Math.floor(Date.now() / 1000);
+
+      if (expiresIn < 3600) {
+        // Less than 1 hour until expiration - refresh the session
+        logger.debug('Refreshing session (expires soon)', {
+          userId: user.id,
+          expiresIn: `${expiresIn}s`,
+        });
+
+        await supabase.auth.refreshSession();
+      }
+    }
+
     logger.debug('Authenticated request to account page', {
       userId: user.id,
       path: sanitizePathForLogging(pathname),
@@ -617,13 +640,13 @@ export const config = {
      * - favicon.ico (favicon file)
      * - robots.txt (robots file)
      * - sitemap.xml (sitemap file)
-     * - manifest.json (PWA manifest)
+     * - manifest.json|manifest.webmanifest (PWA manifest)
      * - .well-known (well-known files for verification)
      * - /js/ (public JavaScript files)
      * - /scripts/ (public script files - service workers, etc.)
      * - /css/ (public CSS files)
      * - *.png, *.jpg, *.jpeg, *.gif, *.webp, *.svg, *.ico (image files)
      */
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.json|\\.well-known|js/|scripts/|css/|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest\\.json|manifest\\.webmanifest|\\.well-known|js/|scripts/|css/|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
   ],
 };

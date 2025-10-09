@@ -480,7 +480,10 @@ function interleaveSponsored<T extends UnifiedContentItem>(
 
   for (let i = 0; i < organic.length; i++) {
     // Add organic content
-    result.push(organic[i]!);
+    const organicItem = organic[i];
+    if (organicItem) {
+      result.push(organicItem);
+    }
 
     // Inject sponsored every 5 items (if available)
     if ((i + 1) % INJECTION_RATIO === 0 && sponsoredIndex < sponsored.length) {

@@ -341,11 +341,14 @@ export function classifyApiEndpoint(
 export function validateSearchQuery(
   searchParams: URLSearchParams
 ): z.infer<typeof searchQueryValidationSchema> {
+  const pageParam = searchParams.get('page');
+  const limitParam = searchParams.get('limit');
+
   const params = {
     q: searchParams.get('q') || undefined,
     category: searchParams.get('category') || undefined,
-    page: searchParams.get('page') ? Number.parseInt(searchParams.get('page')!, 10) : undefined,
-    limit: searchParams.get('limit') ? Number.parseInt(searchParams.get('limit')!, 10) : undefined,
+    page: pageParam ? Number.parseInt(pageParam, 10) : undefined,
+    limit: limitParam ? Number.parseInt(limitParam, 10) : undefined,
   };
 
   return searchQueryValidationSchema.parse(params);

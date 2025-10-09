@@ -139,14 +139,12 @@ async function* createStreamingResponse(
       { name: 'collections', data: transformedCollections },
     ];
 
-    for (let categoryIndex = 0; categoryIndex < categories.length; categoryIndex++) {
-      const category = categories[categoryIndex]!;
+    for (const [categoryIndex, category] of categories.entries()) {
       yield `    "${category.name}": [\n`;
 
       for (let i = 0; i < category.data.length; i += batchSize) {
         const batch = category.data.slice(i, i + batchSize);
-        for (let j = 0; j < batch.length; j++) {
-          const item = batch[j]!;
+        for (const [j, item] of batch.entries()) {
           const isLastInBatch = j === batch.length - 1;
           const isLastBatch = i + batchSize >= category.data.length;
           const isLastItem = isLastInBatch && isLastBatch;

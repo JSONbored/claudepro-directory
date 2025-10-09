@@ -34,13 +34,26 @@ interface ExpiredJob {
 /**
  * GET handler for job expiration cron job
  *
- * Protected by Vercel Cron - only Vercel's cron service can trigger this.
- * No additional auth needed as Vercel validates the request origin.
+ * Protected by CRON_SECRET - only Vercel Cron can trigger this.
+ * Validates authorization header before processing.
  *
+ * @param request - Next.js request object
  * @returns JSON response with expiration results
  */
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // Verify CRON_SECRET for security
+    const authHeader = request.headers.get('authorization');
+    const cronSecret = process.env.CRON_SECRET;
+
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+      logger.warn('Unauthorized cron request attempt', {
+        hasAuthHeader: !!authHeader,
+        hasCronSecret: !!cronSecret,
+      });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     logger.info('Job expiration cron started');
 
     const supabase = await createClient();

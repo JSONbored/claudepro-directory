@@ -6,6 +6,7 @@
  */
 
 import Link from 'next/link';
+import { BookmarkButton } from '@/src/components/shared/bookmark-button';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -15,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { Separator } from '@/src/components/ui/separator';
 import {
   Tooltip,
   TooltipContent,
@@ -81,6 +83,15 @@ export function RecommendationCard({ result }: RecommendationCardProps) {
         </div>
       )}
 
+      {/* Bookmark button (bottom right) */}
+      <div className="absolute bottom-4 right-4 z-10">
+        <BookmarkButton
+          contentType={result.category}
+          contentSlug={result.slug}
+          initialBookmarked={false}
+        />
+      </div>
+
       {/* Gradient overlay */}
       <div
         className={`absolute inset-0 bg-gradient-to-br ${getMatchGradient(result.matchScore)} opacity-50`}
@@ -141,7 +152,8 @@ export function RecommendationCard({ result }: RecommendationCardProps) {
           )}
 
           {/* Metadata row */}
-          <div className="flex items-center justify-between text-sm text-muted-foreground pt-2 border-t">
+          <Separator className="my-2" />
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
             <div className="flex items-center gap-3">
               <span>by {result.author}</span>
               {result.viewCount !== undefined && (

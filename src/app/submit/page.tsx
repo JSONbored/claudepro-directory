@@ -8,7 +8,11 @@ import {
   getSubmissionStats,
   getTopContributors,
 } from '@/src/lib/actions/submission-stats-actions';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+
+// SEO Metadata - SHA-2961
+export const metadata = await generatePageMetadata('/submit');
 
 /**
  * Submit Page - Server Component

@@ -107,7 +107,10 @@ export async function commitFile(params: {
     });
 
     logger.info(`Committed file: ${params.path} to ${params.branch}`);
-    return data.commit.sha!;
+    if (!data.commit.sha) {
+      throw new Error('GitHub API did not return commit SHA');
+    }
+    return data.commit.sha;
   } catch (error) {
     logger.error(
       'Failed to commit file',

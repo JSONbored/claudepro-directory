@@ -8,10 +8,38 @@ import { getDisplayTitle } from '@/src/lib/utils';
 export const runtime = 'nodejs';
 export const maxDuration = 10;
 
-// OG image metadata
-export const alt = 'Claude Pro Directory';
+// OG image size and type
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
+
+/**
+ * Generate dynamic alt text based on content
+ * SHA-2966: Accessibility improvement for OpenGraph images
+ */
+export async function alt({ params }: { params: Promise<{ category: string; slug: string }> }) {
+  try {
+    const { category, slug } = await params;
+
+    if (!isValidCategory(category)) {
+      return 'Invalid category - Claude Pro Directory';
+    }
+
+    const config = getCategoryConfig(category);
+    if (!config) {
+      return 'Category not found - Claude Pro Directory';
+    }
+
+    const item = await getContentBySlug(category, slug);
+    if (!item) {
+      return `${config.title} not found - Claude Pro Directory`;
+    }
+
+    // Dynamic alt text: "{Title} - {Category} - Claude Pro Directory"
+    return `${getDisplayTitle(item)} - ${config.singularName} - Claude Pro Directory`;
+  } catch {
+    return 'Claude Pro Directory - Community configurations for Claude AI';
+  }
+}
 
 // Category-specific gradient colors
 const CATEGORY_GRADIENTS: Record<string, { start: string; end: string }> = {

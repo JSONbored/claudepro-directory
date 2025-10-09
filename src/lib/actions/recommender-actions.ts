@@ -23,6 +23,7 @@ import { generateRecommendations } from '@/src/lib/recommender/algorithm';
 import { statsRedis } from '@/src/lib/redis';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { type QuizAnswers, quizAnswersSchema } from '@/src/lib/schemas/recommender.schema';
+import { createClient } from '@/src/lib/supabase/server';
 import { rateLimitedAction } from './safe-action';
 
 /**
@@ -99,6 +100,38 @@ export const generateConfigRecommendations = rateLimitedAction
         avgMatchScore: response.summary.avgMatchScore,
         diversityScore: response.summary.diversityScore,
       });
+
+      // Store quiz answers in user profile (for For You feed personalization)
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        // Build interest tags from quiz answers
+        const interestTags = [
+          answers.useCase,
+          answers.experienceLevel,
+          ...answers.toolPreferences,
+          ...(answers.integrations || []),
+          ...(answers.focusAreas || []),
+        ].filter(Boolean);
+
+        // Update user interests (non-blocking, don't fail if it errors)
+        supabase
+          .from('users')
+          .update({
+            interests: Array.from(new Set(interestTags)).slice(0, 10), // Max 10 interests
+          })
+          .eq('id', user.id)
+          .then(({ error }) => {
+            if (error) {
+              logger.warn('Failed to update user interests from quiz', undefined, {
+                user_id: user.id,
+              });
+            }
+          });
+      }
 
       return {
         success: true,

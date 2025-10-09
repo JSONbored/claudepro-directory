@@ -13,6 +13,7 @@ import { useId, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
+import { Checkbox } from '@/src/components/ui/checkbox';
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
@@ -56,7 +57,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
   const [name, setName] = useState(collection?.name || '');
   const [slug, setSlug] = useState(collection?.slug || '');
   const [description, setDescription] = useState(collection?.description || '');
-  const [isPublic, setIsPublic] = useState(collection?.is_public);
+  const [isPublic, setIsPublic] = useState(collection?.is_public ?? false);
 
   // Auto-generate slug from name
   const handleNameChange = (value: string) => {
@@ -180,13 +181,11 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
 
       {/* Public Toggle */}
       <div className="flex items-center gap-3 rounded-lg border p-4">
-        <input
-          type="checkbox"
+        <Checkbox
           id={isPublicId}
           checked={isPublic}
-          onChange={(e) => setIsPublic(e.target.checked)}
+          onCheckedChange={(checked) => setIsPublic(checked === true)}
           disabled={isPending}
-          className="h-5 w-5 rounded border-gray-300"
         />
         <div className="flex-1">
           <Label htmlFor={isPublicId} className="text-base font-medium cursor-pointer">
@@ -213,12 +212,11 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                 key={bookmark.id}
                 className="flex items-start space-x-3 rounded-md p-2 hover:bg-accent"
               >
-                <input
-                  type="checkbox"
+                <Checkbox
                   id={bookmark.id}
                   checked={selectedBookmarks.includes(bookmark.id)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
+                  onCheckedChange={(checked) => {
+                    if (checked === true) {
                       setSelectedBookmarks([...selectedBookmarks, bookmark.id]);
                     } else {
                       setSelectedBookmarks(
@@ -227,7 +225,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                     }
                   }}
                   disabled={isPending}
-                  className="h-4 w-4 mt-0.5 rounded border-gray-300"
+                  className="mt-0.5"
                 />
                 <div className="flex-1">
                   <Label

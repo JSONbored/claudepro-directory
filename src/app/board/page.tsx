@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
+import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -130,17 +130,15 @@ export default async function BoardPage() {
                         className={`flex items-center gap-3 ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-3`}
                       >
                         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                          {post.user_avatar ? (
-                            <Image
-                              src={post.user_avatar}
+                          <Avatar className="w-4 h-4">
+                            <AvatarImage
+                              src={post.user_avatar ?? undefined}
                               alt={post.user_name || 'User'}
-                              width={16}
-                              height={16}
-                              className="w-4 h-4 rounded-full object-cover"
                             />
-                          ) : (
-                            <UserIcon className="w-4 h-4" />
-                          )}
+                            <AvatarFallback>
+                              <UserIcon className="w-3 h-3" />
+                            </AvatarFallback>
+                          </Avatar>
                           <Link href={`/u/${post.user_slug}`} className="hover:underline">
                             {post.user_name || 'Anonymous'}
                           </Link>
