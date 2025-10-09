@@ -25,7 +25,7 @@
   },
   "scripts": {
     "dev": "npm run build:content && next dev --turbopack",
-    "build": "npm run build:content && npm run generate:sitemap && npm run generate:static-apis && npm run generate:openapi && npm run build:api-docs && next build --turbopack",
+    "build": "npm run build:content && npm run generate:sitemap && npm run generate:openapi && npm run build:api-docs && next build --turbopack",
     "build:analyze": "TURBOPACK_STATS=1 npm run build",
     "build:content": "tsx scripts/build-content.ts",
     "build:api-docs": "tsx scripts/generate-fumadocs-api.ts",

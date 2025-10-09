@@ -3,9 +3,11 @@
 /**
  * SEO Title Verification Script
  * Verifies that all page titles meet SEO character requirements (<60 chars)
+ *
+ * Refactored to use TypeScript metadata files instead of JSON
+ * @see generated/*-metadata.ts - Source of truth for content
  */
 
-import { existsSync } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -72,12 +74,25 @@ async function main() {
   }
 
   // 3. Category pages
-  const contentDir = path.join(process.cwd(), 'public/static-api/generated');
+  // Import all metadata files dynamically
+  const { agentsMetadata } = await import('../generated/agents-metadata.js');
+  const { mcpMetadata } = await import('../generated/mcp-metadata.js');
+  const { rulesMetadata } = await import('../generated/rules-metadata.js');
+  const { commandsMetadata } = await import('../generated/commands-metadata.js');
+  const { hooksMetadata } = await import('../generated/hooks-metadata.js');
+  const { statuslinesMetadata } = await import('../generated/statuslines-metadata.js');
 
-  // Load all content types
-  const categories = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'];
+  // Map category names to their metadata
+  const metadataMap = {
+    agents: agentsMetadata,
+    mcp: mcpMetadata,
+    rules: rulesMetadata,
+    commands: commandsMetadata,
+    hooks: hooksMetadata,
+    statuslines: statuslinesMetadata,
+  };
 
-  for (const category of categories) {
+  for (const [category, items] of Object.entries(metadataMap)) {
     // Category page
     await verifyTitle(
       `/${category}`,
@@ -90,44 +105,35 @@ async function main() {
       'category'
     );
 
-    // Load content items
-    const apiFile = path.join(contentDir, `${category}.json`);
-    if (existsSync(apiFile)) {
-      const items = JSON.parse(await fs.readFile(apiFile, 'utf-8'));
-
-      // Content pages
-      for (const item of items) {
-        await verifyTitle(
-          `/${category}/${item.slug}`,
-          {
-            item: {
-              ...item,
-              category,
-            },
-            categoryConfig: {
-              title: getDisplayTitle({ slug: category, category }) as string,
-              slug: category,
-            },
+    // Content pages
+    for (const item of items) {
+      await verifyTitle(
+        `/${category}/${item.slug}`,
+        {
+          item: {
+            ...item,
+            category,
           },
-          'content'
-        );
-      }
+          categoryConfig: {
+            title: getDisplayTitle({ slug: category, category }) as string,
+            slug: category,
+          },
+        },
+        'content'
+      );
     }
   }
 
   // 4. Collections
-  const collectionsFile = path.join(contentDir, 'collections.json');
-  if (existsSync(collectionsFile)) {
-    const collections = JSON.parse(await fs.readFile(collectionsFile, 'utf-8'));
-    for (const collection of collections) {
-      await verifyTitle(
-        `/collections/${collection.slug}`,
-        {
-          item: collection,
-        },
-        'collection'
-      );
-    }
+  const { collectionsMetadata } = await import('../generated/collections-metadata.js');
+  for (const collection of collectionsMetadata) {
+    await verifyTitle(
+      `/collections/${collection.slug}`,
+      {
+        item: collection,
+      },
+      'collection'
+    );
   }
 
   // 5. Guides

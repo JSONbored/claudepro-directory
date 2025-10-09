@@ -3,9 +3,11 @@
 /**
  * Comprehensive SEO Title Verification
  * Verifies ALL page titles from generated content and guides
+ *
+ * Refactored to use TypeScript metadata files instead of JSON
+ * @see generated/*-metadata.ts - Source of truth for content
  */
 
-import { existsSync } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -62,8 +64,6 @@ async function main() {
   console.log('🔍 COMPREHENSIVE SEO TITLE VERIFICATION\n');
   console.log('='.repeat(100));
 
-  const contentDir = path.join(process.cwd(), 'public/static-api');
-
   // 1. Guides - check all MDX files
   console.log('\n📚 Checking Guides...');
   const guidesDir = path.join(process.cwd(), 'content/guides');
@@ -115,45 +115,53 @@ async function main() {
 
   // 2. Collections
   console.log('\n📦 Checking Collections...');
-  const collectionsFile = path.join(contentDir, 'collections.json');
-  if (existsSync(collectionsFile)) {
-    const collectionsData = JSON.parse(await fs.readFile(collectionsFile, 'utf-8'));
-    const collections = collectionsData.collections || collectionsData;
-    for (const collection of collections) {
-      await checkTitle(
-        `/collections/${collection.slug}`,
-        collection.title,
-        collection.seoTitle,
-        'collection',
-        SECTION_SUFFIXES.collections
-      );
-    }
-    console.log(`✓ Checked ${collections.length} collections`);
+  // Import from generated TypeScript metadata
+  const { collectionsMetadata } = await import('../generated/collections-metadata.js');
+  for (const collection of collectionsMetadata) {
+    await checkTitle(
+      `/collections/${collection.slug}`,
+      collection.title,
+      collection.seoTitle,
+      'collection',
+      SECTION_SUFFIXES.collections
+    );
   }
+  console.log(`✓ Checked ${collectionsMetadata.length} collections`);
 
   // 3. Content pages (agents, mcp, rules, commands, hooks, statuslines)
   console.log('\n⚙️  Checking Content Pages...');
-  const categories = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'];
   let contentCount = 0;
 
-  for (const category of categories) {
-    const apiFile = path.join(contentDir, `${category}.json`);
-    if (existsSync(apiFile)) {
-      const itemsData = JSON.parse(await fs.readFile(apiFile, 'utf-8'));
-      const items = itemsData[category] || itemsData;
+  // Import all metadata files dynamically
+  const { agentsMetadata } = await import('../generated/agents-metadata.js');
+  const { mcpMetadata } = await import('../generated/mcp-metadata.js');
+  const { rulesMetadata } = await import('../generated/rules-metadata.js');
+  const { commandsMetadata } = await import('../generated/commands-metadata.js');
+  const { hooksMetadata } = await import('../generated/hooks-metadata.js');
+  const { statuslinesMetadata } = await import('../generated/statuslines-metadata.js');
 
-      for (const item of items) {
-        const categoryDisplay = category.charAt(0).toUpperCase() + category.slice(1);
+  // Map category names to their metadata
+  const metadataMap = {
+    agents: agentsMetadata,
+    mcp: mcpMetadata,
+    rules: rulesMetadata,
+    commands: commandsMetadata,
+    hooks: hooksMetadata,
+    statuslines: statuslinesMetadata,
+  };
 
-        await checkTitle(
-          `/${category}/${item.slug}`,
-          item.title || item.name || item.slug,
-          item.seoTitle,
-          category,
-          ` - ${categoryDisplay}${SITE_SUFFIX}`
-        );
-        contentCount++;
-      }
+  for (const [category, items] of Object.entries(metadataMap)) {
+    for (const item of items) {
+      const categoryDisplay = category.charAt(0).toUpperCase() + category.slice(1);
+
+      await checkTitle(
+        `/${category}/${item.slug}`,
+        item.title || item.name || item.slug,
+        item.seoTitle,
+        category,
+        ` - ${categoryDisplay}${SITE_SUFFIX}`
+      );
+      contentCount++;
     }
   }
   console.log(`✓ Checked ${contentCount} content pages`);
