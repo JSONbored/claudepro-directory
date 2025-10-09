@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { SearchTrigger } from '@/src/components/features/search/search-trigger';
 import { ThemeToggle } from '@/src/components/layout/theme-toggle';
+import { UserMenu } from '@/src/components/layout/user-menu';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -48,7 +49,7 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   // Only spread onClick if it's defined to avoid exactOptionalPropertyTypes issues
   const linkProps = {
     href,
-    className: `${active ? `ring-2 ring-accent/30 ${UI_CLASSES.BG_ACCENT_10} border-accent/50 text-primary` : 'text-muted-foreground hover:text-foreground'} transition-colors ${UI_CLASSES.DURATION_200} ${className}`,
+    className: `${active ? `ring-2 ring-accent/30 ${UI_CLASSES.BG_ACCENT_10} border-accent/50 text-primary before:content-[''] before:absolute before:left-1/2 before:-translate-x-1/2 before:bottom-[-2px] before:w-1 before:h-1 before:rounded-full before:bg-accent` : 'text-muted-foreground hover:text-foreground'} transition-colors ${UI_CLASSES.DURATION_200} relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-accent after:transition-all after:duration-300 hover:after:w-full ${className}`,
     ...(onClick && { onClick }),
   };
 
@@ -131,7 +132,7 @@ export const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-2 md:gap-3 lg:gap-4 text-sm lg:text-base">
+          <nav className="hidden lg:flex items-center gap-3 lg:gap-4 text-sm lg:text-base">
             <NavLink href="/agents" isActive={isActive} onClick={() => setIsOpen(false)}>
               Agents
             </NavLink>
@@ -229,6 +230,36 @@ export const Navigation = () => {
                     <div className={UI_CLASSES.TEXT_XS_MUTED}>Share your configurations</div>
                   </Link>
                 </DropdownMenuItem>
+
+                <DropdownMenuItem>
+                  <Link
+                    href="/tools/config-recommender"
+                    className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
+                  >
+                    <div>Config Recommender</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Find your perfect setup</div>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem>
+                  <Link
+                    href="/companies"
+                    className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
+                  >
+                    <div>Companies</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Companies building with Claude</div>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem>
+                  <Link
+                    href="/board"
+                    className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
+                  >
+                    <div>Board</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Discussion board</div>
+                  </Link>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </nav>
@@ -277,6 +308,9 @@ export const Navigation = () => {
               <span className={`${UI_CLASSES.HIDDEN} xl:inline`}>GitHub</span>
             </Button>
 
+            {/* User Menu - Authentication-aware dropdown */}
+            <UserMenu />
+
             <ThemeToggle />
 
             <Badge
@@ -290,7 +324,12 @@ export const Navigation = () => {
             {/* Mobile Menu - Lazy loaded with Suspense for better performance */}
             <Suspense
               fallback={
-                <Button variant="ghost" size="sm" className="md:hidden" aria-label="Loading menu">
+                <Button
+                  variant="ghost"
+                  size="default"
+                  className="lg:hidden min-h-[44px] min-w-[44px]"
+                  aria-label="Loading menu"
+                >
                   <Menu className="h-5 w-5 opacity-50" />
                 </Button>
               }
@@ -299,8 +338,8 @@ export const Navigation = () => {
                 <SheetTrigger asChild>
                   <Button
                     variant="ghost"
-                    size="sm"
-                    className="md:hidden"
+                    size="default"
+                    className="lg:hidden min-h-[44px] min-w-[44px]"
                     aria-label="Open mobile menu"
                   >
                     <Menu className="h-5 w-5" />
@@ -456,6 +495,33 @@ export const Navigation = () => {
                               className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
                             >
                               Submit Config
+                            </NavLink>
+
+                            <NavLink
+                              href="/tools/config-recommender"
+                              isActive={isActive}
+                              onClick={() => setIsOpen(false)}
+                              className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                            >
+                              Config Recommender
+                            </NavLink>
+
+                            <NavLink
+                              href="/companies"
+                              isActive={isActive}
+                              onClick={() => setIsOpen(false)}
+                              className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                            >
+                              Companies
+                            </NavLink>
+
+                            <NavLink
+                              href="/board"
+                              isActive={isActive}
+                              onClick={() => setIsOpen(false)}
+                              className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                            >
+                              Board
                             </NavLink>
                           </div>
                         </div>

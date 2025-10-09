@@ -37,12 +37,13 @@ export function ThemeToggle() {
   if (!theme) return null;
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 min-h-[44px] min-w-[44px] justify-center">
       <Sun className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
       <Switch
         checked={theme === 'dark'}
         onCheckedChange={toggleTheme}
         aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+        className="min-h-[44px]"
       />
       <Moon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
     </div>
