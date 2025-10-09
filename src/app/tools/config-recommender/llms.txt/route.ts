@@ -16,7 +16,9 @@
 
 import { APP_CONFIG } from '@/src/lib/constants';
 
-export const runtime = 'edge';
+// Use Node.js runtime to enable ISR (Incremental Static Regeneration)
+// Edge runtime disables static generation, causing build warnings
+export const runtime = 'nodejs';
 export const revalidate = 86400; // 24 hours
 
 export async function GET() {

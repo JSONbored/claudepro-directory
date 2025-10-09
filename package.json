@@ -20,7 +20,7 @@
   ],
   "type": "module",
   "engines": {
-    "node": ">=22.0.0",
+    "node": "22.x",
     "npm": ">=10.0.0"
   },
   "scripts": {
