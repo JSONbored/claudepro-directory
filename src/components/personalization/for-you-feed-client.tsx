@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { ConfigCard } from '@/src/components/features/content/config-card';
+import { MasonryGrid } from '@/src/components/shared/masonry-grid';
 import { EVENTS } from '@/src/lib/analytics/events.config';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import type { ForYouFeedResponse } from '@/src/lib/schemas/personalization.schema';
@@ -79,10 +80,11 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
         </div>
       )}
 
-      {/* Recommendations grid */}
+      {/* Recommendations grid - MasonryGrid for consistent spacing */}
       {filteredRecommendations.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredRecommendations.map((rec, index) => {
+        <MasonryGrid
+          items={filteredRecommendations}
+          renderItem={(rec, index) => {
             // Convert recommendation to UnifiedContentItem format
             const item = {
               slug: rec.slug,
@@ -97,7 +99,7 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
             };
 
             return (
-              <div key={`${rec.category}:${rec.slug}`}>
+              <div>
                 {/* biome-ignore lint/a11y/useKeyWithClickEvents: Click bubbles from interactive ConfigCard */}
                 {/* biome-ignore lint/a11y/noStaticElementInteractions: ConfigCard handles keyboard navigation */}
                 <div onClick={() => handleClick(rec.slug, rec.category, index, rec.source)}>
@@ -108,8 +110,10 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
                 )}
               </div>
             );
-          })}
-        </div>
+          }}
+          keyExtractor={(rec) => `${rec.category}:${rec.slug}`}
+          gap={24}
+        />
       ) : (
         <div className="text-center py-12">
           <p className="text-muted-foreground">No recommendations found for this category.</p>

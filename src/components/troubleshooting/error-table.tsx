@@ -5,6 +5,7 @@
  * Used in 1 MDX file across the codebase - Specialized for troubleshooting documentation
  */
 
+import { AlertTriangle, Info } from 'lucide-react';
 import { Badge } from '@/src/components/ui/badge';
 import {
   Card,
@@ -13,7 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { AlertTriangle, Info } from '@/src/lib/icons';
 import { type ErrorTableProps, errorTablePropsSchema } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

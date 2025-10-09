@@ -1,3 +1,4 @@
+import { CheckCircle, Clock, ExternalLink, GitPullRequest, Send, XCircle } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Badge } from '@/src/components/ui/badge';
@@ -10,7 +11,6 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { getUserSubmissions } from '@/src/lib/actions/submission-actions';
-import { CheckCircle, Clock, ExternalLink, GitPullRequest, Send, XCircle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {

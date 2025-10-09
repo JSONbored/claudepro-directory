@@ -1,14 +1,3 @@
-import Link from 'next/link';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/src/components/ui/card';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
 import {
   ArrowRight,
   Briefcase,
@@ -22,7 +11,18 @@ import {
   TrendingUp,
   Users,
   Zap,
-} from '@/src/lib/icons';
+} from 'lucide-react';
+import Link from 'next/link';
+import { Badge } from '@/src/components/ui/badge';
+import { Button } from '@/src/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
+import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

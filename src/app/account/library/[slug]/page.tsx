@@ -1,3 +1,4 @@
+import { ArrowLeft, Edit, Share2 } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -11,7 +12,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { ArrowLeft, Edit, Share2 } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

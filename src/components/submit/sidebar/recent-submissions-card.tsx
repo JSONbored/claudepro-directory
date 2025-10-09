@@ -1,7 +1,7 @@
+import { CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/src/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { CheckCircle } from '@/src/lib/icons';
 import type { RecentMerged } from '@/src/lib/schemas/submission-stats.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

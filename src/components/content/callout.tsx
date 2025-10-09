@@ -6,8 +6,8 @@
  * Used in 27+ MDX files across the codebase
  */
 
+import { AlertTriangle, CheckCircle, Info, Zap } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/src/components/ui/alert';
-import { AlertTriangle, CheckCircle, Info, Zap } from '@/src/lib/icons';
 import { type CalloutProps, calloutPropsSchema } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

@@ -15,6 +15,7 @@
 
 'use client';
 
+import { Mail } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -22,7 +23,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { Mail } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 import { NewsletterForm } from './newsletter-form';

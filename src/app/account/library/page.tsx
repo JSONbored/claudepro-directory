@@ -1,3 +1,4 @@
+import { Bookmark, ExternalLink, FolderOpen, Layers, Plus } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Badge } from '@/src/components/ui/badge';
@@ -10,7 +11,6 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
-import { Bookmark, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

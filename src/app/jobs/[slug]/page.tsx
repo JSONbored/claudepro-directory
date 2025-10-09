@@ -1,12 +1,3 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
-import { Badge } from '@/src/components/ui/badge';
-import { Button } from '@/src/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { APP_CONFIG } from '@/src/lib/constants';
-import { jobs } from '@/src/lib/data/jobs';
 import {
   ArrowLeft,
   Building2,
@@ -16,7 +7,16 @@ import {
   ExternalLink,
   MapPin,
   Users,
-} from '@/src/lib/icons';
+} from 'lucide-react';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
+import { Badge } from '@/src/components/ui/badge';
+import { Button } from '@/src/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { APP_CONFIG } from '@/src/lib/constants';
+import { jobs } from '@/src/lib/data/jobs';
 import { logger } from '@/src/lib/logger';
 import type { PageProps } from '@/src/lib/schemas/app.schema';
 import { slugParamsSchema } from '@/src/lib/schemas/app.schema';

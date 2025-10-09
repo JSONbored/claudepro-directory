@@ -5,7 +5,7 @@
  * Used in 8 MDX files across the codebase - General-purpose informational component
  */
 
-import { AlertTriangle, CheckCircle, Info, Star } from '@/src/lib/icons';
+import { AlertTriangle, CheckCircle, Info, Star } from 'lucide-react';
 import { type InfoBoxProps, infoBoxPropsSchema } from '@/src/lib/schemas/shared.schema';
 
 export function InfoBox(props: InfoBoxProps) {

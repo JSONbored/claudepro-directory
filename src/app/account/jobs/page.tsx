@@ -1,3 +1,4 @@
+import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { JobActions } from '@/src/components/jobs/job-actions';
@@ -11,7 +12,6 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { getUserJobs } from '@/src/lib/actions/job-actions';
-import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/date-utils';
 

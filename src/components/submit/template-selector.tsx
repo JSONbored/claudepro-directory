@@ -1,5 +1,6 @@
 'use client';
 
+import { ChevronDown, FileText } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
 import {
   DropdownMenu,
@@ -7,7 +8,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/src/components/ui/dropdown-menu';
-import { ChevronDown, FileText } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // Curated templates (top 3 per type)

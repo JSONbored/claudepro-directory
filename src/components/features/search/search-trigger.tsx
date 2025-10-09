@@ -1,7 +1,7 @@
 'use client';
 
+import { Search } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
-import { Search } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface SearchTriggerProps {

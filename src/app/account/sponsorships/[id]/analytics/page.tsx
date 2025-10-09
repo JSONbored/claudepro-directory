@@ -1,3 +1,4 @@
+import { BarChart, Eye, MousePointer, TrendingUp } from 'lucide-react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Badge } from '@/src/components/ui/badge';
@@ -9,7 +10,6 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
-import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

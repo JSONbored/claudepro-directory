@@ -21,12 +21,13 @@
  * @see components/features/content/collection-card.tsx - Collection card component
  */
 
+import { Layers } from 'lucide-react';
 import { Suspense } from 'react';
 import type { CollectionMetadata } from '@/generated/collections-metadata';
 import { getCollections } from '@/generated/content';
 import { CollectionCard } from '@/src/components/features/content/collection-card';
+import { MasonryGrid } from '@/src/components/shared/masonry-grid';
 import { Badge } from '@/src/components/ui/badge';
-import { Layers } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
@@ -103,11 +104,12 @@ export default async function CollectionsPage() {
           }
         >
           {collections.length > 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {collections.map((collection: CollectionMetadata) => (
-                <CollectionCard key={collection.slug} item={collection} />
-              ))}
-            </div>
+            <MasonryGrid
+              items={collections}
+              renderItem={(collection: CollectionMetadata) => <CollectionCard item={collection} />}
+              keyExtractor={(collection) => collection.slug}
+              gap={24}
+            />
           ) : (
             <div className="text-center py-12">
               <Layers className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />

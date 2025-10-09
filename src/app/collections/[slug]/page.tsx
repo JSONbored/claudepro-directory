@@ -22,6 +22,7 @@
  * @see components/features/content/config-card.tsx - Reused for embedded items
  */
 
+import { AlertTriangle, CheckCircle, Clock, Layers } from 'lucide-react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
@@ -32,7 +33,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/ca
 import { SourceBadge, TagBadge } from '@/src/components/ui/config-badge';
 import { trackView } from '@/src/lib/actions/track-view';
 import { getContentBySlug } from '@/src/lib/content/content-loaders';
-import { AlertTriangle, CheckCircle, Clock, Layers } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import type { CollectionItemReference } from '@/src/lib/schemas/content/collection.schema';

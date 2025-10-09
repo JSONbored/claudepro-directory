@@ -11,6 +11,7 @@
  * - Mobile: Single column, optimized spacing
  */
 
+import { CheckCircle, ExternalLink, Github, Send } from 'lucide-react';
 import Link from 'next/link';
 import { useId, useState, useTransition } from 'react';
 import { toast } from 'sonner';
@@ -26,7 +27,6 @@ import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
 import { submitConfiguration } from '@/src/lib/actions/submission-actions';
-import { CheckCircle, ExternalLink, Github, Send } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { DuplicateWarning } from './duplicate-warning';
 import { TemplateSelector } from './template-selector';

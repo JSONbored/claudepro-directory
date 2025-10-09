@@ -1,3 +1,4 @@
+import { Bookmark, Calendar } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Badge } from '@/src/components/ui/badge';
 import {
@@ -7,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { Bookmark, Calendar } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

@@ -1,12 +1,12 @@
 'use client';
 
+import { Building, Clock, DollarSign, ExternalLink, MapPin, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Building, Clock, DollarSign, ExternalLink, MapPin, Star } from '@/src/lib/icons';
 import type { JobCardProps } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/date-utils';

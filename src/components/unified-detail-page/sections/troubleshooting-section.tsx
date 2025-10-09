@@ -11,6 +11,7 @@
  * @see components/unified-detail-page.tsx - Original implementation
  */
 
+import { Copy } from 'lucide-react';
 import { z } from 'zod';
 import {
   Card,
@@ -19,7 +20,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { Copy } from '@/src/lib/icons';
 import { componentDescriptionString } from '@/src/lib/schemas/primitives/ui-component-primitives';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

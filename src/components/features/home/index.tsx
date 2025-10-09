@@ -20,17 +20,16 @@
  * Result: Main component reduced from 370 lines to ~150 lines
  */
 
+import { BookOpen, Layers, Server, Sparkles } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FeaturedSections } from '@/src/components/features/home/featured-sections';
 import { SearchSection } from '@/src/components/features/home/search-section';
-import { TabsSection } from '@/src/components/features/home/tabs-section';
 import { useSearch } from '@/src/hooks/use-search';
 import { HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
-import { BookOpen, Layers, Server, Sparkles } from '@/src/lib/icons';
 import type { HomePageClientProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
+// Lazy load heavy components to reduce initial bundle size
 const UnifiedSearch = dynamic(
   () =>
     import('@/src/components/features/search/unified-search').then((mod) => ({
@@ -40,6 +39,62 @@ const UnifiedSearch = dynamic(
     ssr: false,
     loading: () => (
       <div className={`h-14 ${UI_CLASSES.BG_MUTED_50} ${UI_CLASSES.ROUNDED_LG} animate-pulse`} />
+    ),
+  }
+);
+
+// Generate stable skeleton keys (prevents unnecessary re-renders)
+const featuredSectionKeys = Array.from({ length: 5 }, () => ({
+  sectionId: crypto.randomUUID(),
+  cardIds: Array.from({ length: 3 }, () => crypto.randomUUID()),
+}));
+
+const FeaturedSections = dynamic(
+  () =>
+    import('@/src/components/features/home/featured-sections').then((mod) => ({
+      default: mod.FeaturedSections,
+    })),
+  {
+    loading: () => (
+      <div className="space-y-12 py-8">
+        {featuredSectionKeys.map(({ sectionId, cardIds }) => (
+          <div key={sectionId} className="space-y-4">
+            <div className="h-8 w-48 bg-muted/50 rounded animate-pulse" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {cardIds.map((cardId) => (
+                <div key={cardId} className="h-32 bg-card/50 rounded-lg animate-pulse" />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
+  }
+);
+
+// Generate stable skeleton keys for tabs
+const tabKeys = Array.from({ length: 6 }, () => crypto.randomUUID());
+const tabCardKeys = Array.from({ length: 9 }, () => crypto.randomUUID());
+
+const TabsSection = dynamic(
+  () =>
+    import('@/src/components/features/home/tabs-section').then((mod) => ({
+      default: mod.TabsSection,
+    })),
+  {
+    loading: () => (
+      <div className="space-y-6">
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {tabKeys.map((key) => (
+            <div key={key} className="h-10 w-24 bg-muted/50 rounded-md animate-pulse shrink-0" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {tabCardKeys.map((key) => (
+            <div key={key} className="h-48 bg-card/50 rounded-lg animate-pulse" />
+          ))}
+        </div>
+      </div>
     ),
   }
 );

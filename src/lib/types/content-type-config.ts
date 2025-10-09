@@ -7,8 +7,8 @@
  * @see components/unified-detail-page.tsx - Main consumer of these configs
  */
 
+import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
-import type { LucideIcon } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 

@@ -1,18 +1,24 @@
 'use client';
 
 /**
- * Unified Search Component (SHA-2087 Refactored)
+ * Unified Search Component (SHA-2087 Refactored + React 19.2 Optimized)
  *
  * CONSOLIDATION: Now uses shared hook and filter panel component
  * - useUnifiedSearch hook for state management (~80 lines removed)
  * - SearchFilterPanel for filter UI (~200 lines removed)
  *
+ * PERFORMANCE (React 19.2):
+ * - useTransition for non-blocking search/filter updates
+ * - Keeps input responsive during heavy filtering
+ * - Visual feedback with isPending state
+ *
  * Previous: 420 lines of duplicated logic
- * Current: 180 lines (57% reduction)
+ * Current: ~185 lines (56% reduction)
  */
 
+import { ChevronDown, ChevronUp, Filter, Search } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { useCallback, useEffect, useId, useState } from 'react';
+import { Suspense, useCallback, useEffect, useId, useState, useTransition } from 'react';
 import { SearchFilterPanel } from '@/src/components/features/search/search-filter-panel';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import { Badge } from '@/src/components/ui/badge';
@@ -29,7 +35,6 @@ import {
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
 import { EVENTS } from '@/src/lib/analytics/events.config';
 import { trackEvent } from '@/src/lib/analytics/tracker';
-import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/src/lib/schemas/component.schema';
 import { sanitizers } from '@/src/lib/security/validators';
 
@@ -46,7 +51,20 @@ const SearchErrorFallback = () => (
   <div className="p-4 text-center text-muted-foreground">Error loading search</div>
 );
 
-export function UnifiedSearch({
+// Suspense fallback for search component
+const SearchLoadingFallback = () => (
+  <div className="w-full space-y-3">
+    <div className="relative">
+      <div className="h-12 w-full rounded-md border border-border/50 bg-card/50 animate-pulse" />
+    </div>
+    <div className="flex gap-2 justify-end">
+      <div className="h-10 w-24 rounded-md bg-card/50 animate-pulse" />
+      <div className="h-10 w-24 rounded-md bg-card/50 animate-pulse" />
+    </div>
+  </div>
+);
+
+function UnifiedSearchInner({
   placeholder = 'Search...',
   onSearch,
   onFiltersChange,
@@ -58,6 +76,7 @@ export function UnifiedSearch({
   className,
 }: UnifiedSearchProps) {
   const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const [isPending, startTransition] = useTransition();
   const pathname = usePathname();
 
   // Use consolidated search hook
@@ -82,39 +101,48 @@ export function UnifiedSearch({
   const sortSelectId = useId();
 
   // Debounced search with sanitization and analytics tracking
+  // Uses React 19.2 useTransition to mark search updates as non-urgent
   useEffect(() => {
     const timer = setTimeout(() => {
-      const sanitized = sanitizeSearchQuery(localSearchQuery);
-      onSearch(sanitized);
+      startTransition(() => {
+        const sanitized = sanitizeSearchQuery(localSearchQuery);
+        onSearch(sanitized);
 
-      // Track search event (only for non-empty queries)
-      if (sanitized && sanitized.length > 0) {
-        const category = pathname?.split('/')[1] || 'unknown';
+        // Track search event (only for non-empty queries)
+        if (sanitized && sanitized.length > 0) {
+          const category = pathname?.split('/')[1] || 'unknown';
 
-        trackEvent(EVENTS.SEARCH_PERFORMED, {
-          query: sanitized.substring(0, 100), // Truncate for privacy
-          results_count: resultCount,
-          category,
-          filters_applied: activeFilterCount > 0 ? 'yes' : 'no',
-          time_to_results: 0, // Could add performance timing if needed
-        });
-      }
+          trackEvent(EVENTS.SEARCH_PERFORMED, {
+            query: sanitized.substring(0, 100), // Truncate for privacy
+            results_count: resultCount,
+            category,
+            filters_applied: activeFilterCount > 0 ? 'yes' : 'no',
+            time_to_results: 0, // Could add performance timing if needed
+          });
+        }
+      });
     }, 300);
 
     return () => clearTimeout(timer);
   }, [localSearchQuery, onSearch, resultCount, pathname, activeFilterCount]);
 
   // Apply filters and close panel
+  // Uses React 19.2 useTransition to mark filter updates as non-urgent
   const applyFilters = useCallback(() => {
-    handleFiltersChange(filters);
-    setIsFilterOpen(false);
+    startTransition(() => {
+      handleFiltersChange(filters);
+      setIsFilterOpen(false);
+    });
   }, [filters, handleFiltersChange, setIsFilterOpen]);
 
   // Handle sort change directly (no need to apply)
+  // Uses React 19.2 useTransition to mark sort updates as non-urgent
   const handleSortChange = useCallback(
     (value: FilterState['sort']) => {
-      const newFilters = { ...filters, sort: value || 'trending' };
-      handleFiltersChange(newFilters);
+      startTransition(() => {
+        const newFilters = { ...filters, sort: value || 'trending' };
+        handleFiltersChange(newFilters);
+      });
     },
     [filters, handleFiltersChange]
   );
@@ -133,9 +161,15 @@ export function UnifiedSearch({
               value={localSearchQuery}
               onChange={(e) => setLocalSearchQuery(e.target.value)}
               placeholder={placeholder}
-              className={`pl-10 pr-4 h-12 text-base ${UI_CLASSES.BG_CARD_50} backdrop-blur-sm border-border/50 focus:border-primary/50 focus:${UI_CLASSES.BG_CARD} transition-smooth w-full`}
+              className={cn(
+                'pl-10 pr-4 h-12 text-base backdrop-blur-sm border-border/50 focus:border-primary/50 transition-smooth w-full',
+                UI_CLASSES.BG_CARD_50,
+                `focus:${UI_CLASSES.BG_CARD}`,
+                isPending && 'opacity-60'
+              )}
               aria-label="Search configurations"
               aria-describedby={resultCount > 0 && localSearchQuery ? searchResultsId : undefined}
+              aria-busy={isPending}
               autoComplete="search"
             />
           </div>
@@ -229,5 +263,14 @@ export function UnifiedSearch({
         </Collapsible>
       </search>
     </ErrorBoundary>
+  );
+}
+
+// Export wrapped in Suspense for better loading UX
+export function UnifiedSearch(props: UnifiedSearchProps) {
+  return (
+    <Suspense fallback={<SearchLoadingFallback />}>
+      <UnifiedSearchInner {...props} />
+    </Suspense>
   );
 }

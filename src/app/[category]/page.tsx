@@ -199,7 +199,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     <ContentListServer
       title={config.pluralTitle}
       description={config.description}
-      icon={config.icon.displayName?.toLowerCase() || 'sparkles'}
+      icon={config.icon}
       items={items}
       type={category as 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides'}
       searchPlaceholder={config.listPage.searchPlaceholder}

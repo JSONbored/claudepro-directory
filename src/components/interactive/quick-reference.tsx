@@ -5,6 +5,7 @@
  * Used in 17+ MDX files across the codebase
  */
 
+import { BookOpen } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -12,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { BookOpen } from '@/src/lib/icons';
 import {
   type QuickReferenceProps,
   quickReferencePropsSchema,

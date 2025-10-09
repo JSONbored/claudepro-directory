@@ -17,6 +17,7 @@
  * - Serverless-friendly architecture
  */
 
+import { BarChart, Clock, Sparkles, Target, Zap } from 'lucide-react';
 import type { Metadata } from 'next';
 import { QuizForm } from '@/src/components/tools/recommender/quiz-form';
 import { Badge } from '@/src/components/ui/badge';
@@ -27,7 +28,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { BarChart, Clock, Sparkles, Target, Zap } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

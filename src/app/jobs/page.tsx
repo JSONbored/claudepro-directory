@@ -1,5 +1,7 @@
+import { Briefcase, Clock, Filter, MapPin, Plus, Search } from 'lucide-react';
 import Link from 'next/link';
 import { JobCard } from '@/src/components/shared/job-card';
+import { MasonryGrid } from '@/src/components/shared/masonry-grid';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent } from '@/src/components/ui/card';
@@ -12,7 +14,6 @@ import {
   SelectValue,
 } from '@/src/components/ui/select';
 import { getJobs, type Job } from '@/src/lib/data/jobs';
-import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
 import {
@@ -394,11 +395,12 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                 </div>
               </div>
 
-              <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
-                {filteredJobs.map((job) => (
-                  <JobCard key={job.slug} job={job} />
-                ))}
-              </div>
+              <MasonryGrid
+                items={filteredJobs}
+                renderItem={(job) => <JobCard job={job} />}
+                keyExtractor={(job) => job.slug}
+                gap={24}
+              />
             </>
           )}
         </div>

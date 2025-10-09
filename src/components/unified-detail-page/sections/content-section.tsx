@@ -13,6 +13,7 @@
  * @see components/unified-detail-page.tsx - Original implementation
  */
 
+import { Copy } from 'lucide-react';
 import { CodeBlockServer } from '@/src/components/shared/code-block-server';
 import {
   Card,
@@ -22,7 +23,6 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { detectLanguage } from '@/src/lib/content/language-detection';
-import { Copy } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { generateFilename } from '@/src/lib/utils/filename-generator';

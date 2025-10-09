@@ -1,9 +1,9 @@
 'use client';
 
+import { Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
 import { Switch } from '@/src/components/ui/switch';
-import { Moon, Sun } from '@/src/lib/icons';
 
 const themeSchema = z.enum(['light', 'dark']);
 

@@ -1,9 +1,9 @@
 'use client';
 
+import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { NewsletterForm } from '@/src/components/shared/newsletter-form';
 import { Button } from '@/src/components/ui/button';
-import { X } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**

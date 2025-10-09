@@ -110,7 +110,7 @@ export type ViewTrackerProps = z.infer<typeof viewTrackerPropsSchema>;
 export type ContentListServerProps<T extends UnifiedContentItem = UnifiedContentItem> = {
   title: string;
   description: string;
-  icon: string;
+  icon: React.ComponentType<{ className?: string }>;
   items: readonly T[] | T[];
   type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides';
   searchPlaceholder?: string;
@@ -148,7 +148,7 @@ export type ContentSearchClientProps<T extends UnifiedContentItem = UnifiedConte
   type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides';
   searchPlaceholder: string;
   title: string;
-  icon: string;
+  icon: React.ComponentType<{ className?: string }>;
 };
 
 /**

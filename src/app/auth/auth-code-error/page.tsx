@@ -1,3 +1,4 @@
+import { AlertCircle } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/src/components/ui/button';
@@ -8,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { AlertCircle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {

@@ -1,5 +1,6 @@
 'use client';
 
+import { Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/src/components/ui/badge';
@@ -8,7 +9,6 @@ import {
   trackRelatedContentClick,
   trackRelatedContentView,
 } from '@/src/lib/analytics/events/related-content';
-import { Sparkles } from '@/src/lib/icons';
 import type {
   RelatedCarouselClientProps,
   RelatedContentItem,

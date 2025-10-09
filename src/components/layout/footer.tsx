@@ -5,9 +5,10 @@
  * @module components/layout/footer
  */
 
+import { Github, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
-import { DiscordIcon, Github, Sparkles } from '@/src/lib/icons';
+import { DiscordIcon } from '@/src/lib/custom-icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**

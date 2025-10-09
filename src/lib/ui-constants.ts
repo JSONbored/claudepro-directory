@@ -672,27 +672,6 @@ export const UI_CLASSES = {
   ISOLATION_AUTO: 'isolation-auto',
 
   /**
-   * Mix Blend Mode
-   */
-  MIX_BLEND_NORMAL: 'mix-blend-normal',
-  MIX_BLEND_MULTIPLY: 'mix-blend-multiply',
-  MIX_BLEND_SCREEN: 'mix-blend-screen',
-  MIX_BLEND_OVERLAY: 'mix-blend-overlay',
-  MIX_BLEND_DARKEN: 'mix-blend-darken',
-  MIX_BLEND_LIGHTEN: 'mix-blend-lighten',
-  MIX_BLEND_COLOR_DODGE: 'mix-blend-color-dodge',
-  MIX_BLEND_COLOR_BURN: 'mix-blend-color-burn',
-  MIX_BLEND_HARD_LIGHT: 'mix-blend-hard-light',
-  MIX_BLEND_SOFT_LIGHT: 'mix-blend-soft-light',
-  MIX_BLEND_DIFFERENCE: 'mix-blend-difference',
-  MIX_BLEND_EXCLUSION: 'mix-blend-exclusion',
-  MIX_BLEND_HUE: 'mix-blend-hue',
-  MIX_BLEND_SATURATION: 'mix-blend-saturation',
-  MIX_BLEND_COLOR: 'mix-blend-color',
-  MIX_BLEND_LUMINOSITY: 'mix-blend-luminosity',
-  MIX_BLEND_PLUS_LIGHTER: 'mix-blend-plus-lighter',
-
-  /**
    * Will Change
    */
   WILL_CHANGE_AUTO: 'will-change-auto',

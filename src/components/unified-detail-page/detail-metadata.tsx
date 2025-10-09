@@ -9,10 +9,10 @@
  * @see components/unified-detail-page.tsx - Original implementation
  */
 
+import { Calendar, Eye, Tag, User } from 'lucide-react';
 import { z } from 'zod';
 import { Badge } from '@/src/components/ui/badge';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
-import { Calendar, Eye, Tag, User } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatDate } from '@/src/lib/utils/date-utils';

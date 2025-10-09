@@ -1,3 +1,4 @@
+import { FolderOpen, Globe, MessageSquare, Users } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -10,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { FolderOpen, Globe, MessageSquare, Users } from '@/src/lib/icons';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

@@ -1,9 +1,3 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { SignOutButton } from '@/src/components/auth/auth-buttons';
-import { Button } from '@/src/components/ui/button';
-import { Card } from '@/src/components/ui/card';
 import {
   Activity,
   Bookmark,
@@ -13,7 +7,13 @@ import {
   Settings,
   TrendingUp,
   User,
-} from '@/src/lib/icons';
+} from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { SignOutButton } from '@/src/components/auth/auth-buttons';
+import { Button } from '@/src/components/ui/button';
+import { Card } from '@/src/components/ui/card';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

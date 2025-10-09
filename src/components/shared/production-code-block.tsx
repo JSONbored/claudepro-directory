@@ -16,12 +16,12 @@
  */
 
 import { AnimatePresence, domAnimation, LazyMotion, m } from 'framer-motion';
+import { Check, ChevronDown, Copy } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { EVENTS } from '@/src/lib/analytics/events.config';
 import { trackEvent } from '@/src/lib/analytics/tracker';
-import { Check, ChevronDown, Copy } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export interface ProductionCodeBlockProps {

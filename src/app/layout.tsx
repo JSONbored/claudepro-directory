@@ -1,11 +1,11 @@
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import { Inter } from 'next/font/google';
 import { headers } from 'next/headers';
 import { connection } from 'next/server';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
-import { Toaster } from 'sonner';
 import { Footer } from '@/src/components/layout/footer';
 import { Navigation } from '@/src/components/layout/navigation';
 import { PostCopyEmailProvider } from '@/src/components/providers/post-copy-email-provider';
@@ -19,6 +19,10 @@ import { OrganizationStructuredData } from '@/src/components/structured-data/org
 import { APP_CONFIG } from '@/src/lib/constants';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+
+// Lazy load Sonner Toaster - saves 66 KB from initial bundle
+// Loaded only when toast is triggered
+const Toaster = dynamic(() => import('sonner').then((mod) => ({ default: mod.Toaster })));
 
 // Configure Inter font with optimizations
 const inter = Inter({

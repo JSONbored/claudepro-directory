@@ -12,6 +12,7 @@
  * Performance: Only the interactive buttons are client-side, rest is server-rendered
  */
 
+import { ArrowLeft, Copy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { CopyLLMsButton } from '@/src/components/shared/copy-llms-button';
@@ -21,7 +22,6 @@ import type { CopyType } from '@/src/components/shared/post-copy-email-modal';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
-import { ArrowLeft, Copy } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

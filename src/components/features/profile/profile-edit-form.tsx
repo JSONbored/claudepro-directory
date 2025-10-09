@@ -5,6 +5,7 @@
  * Form for editing user profile information
  */
 
+import { X } from 'lucide-react';
 import { useId, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/src/components/ui/badge';
@@ -13,7 +14,6 @@ import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
 import { updateProfile } from '@/src/lib/actions/profile-actions';
-import { X } from '@/src/lib/icons';
 import type { ProfileData } from '@/src/lib/schemas/profile.schema';
 
 interface ProfileEditFormProps {

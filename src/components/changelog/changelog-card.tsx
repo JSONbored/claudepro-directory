@@ -19,6 +19,7 @@
 
 'use client';
 
+import { ArrowRight, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { memo } from 'react';
 import { Badge } from '@/src/components/ui/badge';
@@ -35,7 +36,6 @@ import {
   getNonEmptyCategories,
   getRelativeTime,
 } from '@/src/lib/changelog/utils';
-import { ArrowRight, Calendar } from '@/src/lib/icons';
 import type { ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

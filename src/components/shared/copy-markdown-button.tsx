@@ -16,6 +16,7 @@
 
 'use client';
 
+import { Check, FileText } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
 import { useState } from 'react';
 import { Button } from '@/src/components/ui/button';
@@ -24,7 +25,6 @@ import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture
 import { copyMarkdownAction } from '@/src/lib/actions/markdown-actions';
 import { EVENTS } from '@/src/lib/analytics/events.config';
 import { trackEvent } from '@/src/lib/analytics/tracker';
-import { Check, FileText } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { cn } from '@/src/lib/utils';
 

@@ -5,6 +5,7 @@
  * Modal for sharing recommendation results
  */
 
+import { Check, Copy, Facebook, Linkedin, Mail, Share2, Twitter } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
@@ -16,7 +17,6 @@ import {
   DialogTitle,
 } from '@/src/components/ui/dialog';
 import { Input } from '@/src/components/ui/input';
-import { Check, Copy, Facebook, Linkedin, Mail, Share2, Twitter } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

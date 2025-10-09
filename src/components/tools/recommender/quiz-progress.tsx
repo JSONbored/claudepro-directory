@@ -5,8 +5,8 @@
  * Displays progress bar and question counter for quiz
  */
 
+import { CheckCircle } from 'lucide-react';
 import { Badge } from '@/src/components/ui/badge';
-import { CheckCircle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface QuizProgressProps {

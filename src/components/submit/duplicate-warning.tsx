@@ -1,8 +1,8 @@
 'use client';
 
+import { AlertTriangle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/src/components/ui/alert';
-import { AlertTriangle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface DuplicateWarningProps {

@@ -5,9 +5,9 @@
  * Used in 1 MDX file across the codebase - Specialized component for business case studies
  */
 
+import { BookOpen } from 'lucide-react';
 import { Badge } from '@/src/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { BookOpen } from '@/src/lib/icons';
 import { type CaseStudyProps, caseStudyPropsSchema } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

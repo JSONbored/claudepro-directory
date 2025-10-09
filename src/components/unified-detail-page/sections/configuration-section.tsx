@@ -10,6 +10,7 @@
  * Handles: JSON configs, multi-format MCP configs, hook configs
  */
 
+import { Copy } from 'lucide-react';
 import { ProductionCodeBlock } from '@/src/components/shared/production-code-block';
 import {
   Card,
@@ -19,7 +20,6 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
-import { Copy } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import {

@@ -3,7 +3,14 @@
     "baseUrl": "../..",
     "paths": {
       "@/*": ["./*"],
-      "@/src/*": ["./src/*"]
+      "@/src/*": ["./src/*"],
+      "@components/*": ["./components/*"],
+      "@lib/*": ["./lib/*"],
+      "@hooks/*": ["./hooks/*"],
+      "@types/*": ["./types/*"],
+      "@utils/*": ["./lib/utils/*"],
+      "@content/*": ["./content/*"],
+      "@generated/*": ["./generated/*"]
     },
     "target": "ES2022",
     "lib": ["dom", "dom.iterable", "esnext"],

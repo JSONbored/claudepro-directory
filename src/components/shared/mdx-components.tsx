@@ -1,11 +1,11 @@
 'use client';
 
+import { CheckCircle, Copy, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 import { z } from 'zod';
 import { useMDXContent } from '@/src/components/providers/mdx-content-provider';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
-import { CheckCircle, Copy, ExternalLink } from '@/src/lib/icons';
 import type {
   MdxElementProps,
   MdxHeadingProps,

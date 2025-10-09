@@ -1,15 +1,16 @@
+import { ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense, useId } from 'react';
 import { ContentSearchClient } from '@/src/components/content-search-client';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
-import { ExternalLink, getIconByName } from '@/src/lib/icons';
 import type {
   ContentListServerProps,
   UnifiedContentItem,
 } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { getIconByName } from '@/src/lib/utils/dynamic-icon-resolver';
 
 function ContentHeroSection<T extends UnifiedContentItem>({
   title,
@@ -38,8 +39,8 @@ function ContentHeroSection<T extends UnifiedContentItem>({
               aria-hidden="true"
             >
               {(() => {
-                const IconComponent = getIconByName(icon);
-                return <IconComponent className="h-8 w-8 text-primary" />;
+                const IconComponent = icon;
+                return <IconComponent className="h-8 w-8 text-primary" aria-hidden="true" />;
               })()}
             </div>
           </div>

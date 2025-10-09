@@ -8,6 +8,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ConfigCard } from '@/src/components/features/content/config-card';
+import { MasonryGrid } from '@/src/components/shared/masonry-grid';
 import { Separator } from '@/src/components/ui/separator';
 import { getSimilarConfigs } from '@/src/lib/actions/personalization-actions';
 import { EVENTS } from '@/src/lib/analytics/events.config';
@@ -80,8 +81,10 @@ export function SimilarConfigsSection({ contentType, contentSlug }: SimilarConfi
     <section className="mt-12 py-8">
       <Separator className="mb-8" />
       <h2 className="text-2xl font-bold mb-6">Similar Configurations</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {similarItems.map((rec) => {
+      {/* MasonryGrid for consistent spacing */}
+      <MasonryGrid
+        items={similarItems}
+        renderItem={(rec) => {
           // Convert recommendation to UnifiedContentItem format
           const item = {
             slug: rec.slug,
@@ -94,7 +97,7 @@ export function SimilarConfigsSection({ contentType, contentSlug }: SimilarConfi
           };
 
           return (
-            <div key={`${rec.category}:${rec.slug}`}>
+            <div>
               <Link href={rec.url} onClick={() => handleClick(rec.slug, rec.score)}>
                 <ConfigCard item={item} showCategory />
                 <div className="mt-2 text-xs text-muted-foreground">
@@ -103,8 +106,10 @@ export function SimilarConfigsSection({ contentType, contentSlug }: SimilarConfi
               </Link>
             </div>
           );
-        })}
-      </div>
+        }}
+        keyExtractor={(rec) => `${rec.category}:${rec.slug}`}
+        gap={24}
+      />
     </section>
   );
 }

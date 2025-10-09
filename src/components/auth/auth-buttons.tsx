@@ -7,10 +7,10 @@
  * Reuses existing UI components (Button, icons)
  */
 
+import { Chrome, Github, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
-import { Chrome, Github, LogOut } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
 
 interface AuthButtonsProps {

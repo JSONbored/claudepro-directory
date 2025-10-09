@@ -9,12 +9,13 @@
  * Adding a new featured category now only requires updating HOMEPAGE_FEATURED_CATEGORIES
  */
 
+import { Briefcase, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
 import { LazyConfigCard } from '@/src/components/shared/lazy-config-card';
+import { MasonryGrid } from '@/src/components/shared/masonry-grid';
 import { Button } from '@/src/components/ui/button';
 import { CATEGORY_CONFIGS, HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
-import { Briefcase, ExternalLink } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -48,8 +49,10 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
             View all <ExternalLink className="h-4 w-4" />
           </Link>
         </div>
-        <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
-          {featuredItems.map((item) => (
+        {/* Use MasonryGrid for consistent card spacing (fixes uneven gaps) */}
+        <MasonryGrid
+          items={featuredItems}
+          renderItem={(item) => (
             <LazyConfigCard
               key={item.slug}
               item={item}
@@ -57,8 +60,10 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
               showCategory={true}
               showActions={true}
             />
-          ))}
-        </div>
+          )}
+          keyExtractor={(item) => item.slug}
+          gap={24}
+        />
       </div>
     );
   }

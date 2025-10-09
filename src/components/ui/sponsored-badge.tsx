@@ -1,6 +1,6 @@
 import { cva, type VariantProps } from 'class-variance-authority';
+import { Star, TrendingUp, Zap } from 'lucide-react';
 import type * as React from 'react';
-import { Star, TrendingUp, Zap } from '@/src/lib/icons';
 import { cn } from '@/src/lib/utils';
 
 /**

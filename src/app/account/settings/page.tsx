@@ -1,3 +1,4 @@
+import { RefreshCw } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -10,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { RefreshCw } from '@/src/lib/icons';
 import type { ProfileData } from '@/src/lib/schemas/profile.schema';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

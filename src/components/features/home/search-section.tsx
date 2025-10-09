@@ -7,11 +7,11 @@
  * Handles search UI and results display for the homepage
  */
 
+import { Search } from 'lucide-react';
 import { type FC, memo } from 'react';
 import { ConfigCard } from '@/src/components/features/content/config-card';
 import { InfiniteScrollContainer } from '@/src/components/shared/infinite-scroll-container';
 import { Button } from '@/src/components/ui/button';
-import { Search } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

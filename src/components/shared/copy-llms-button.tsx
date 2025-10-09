@@ -9,11 +9,11 @@
 
 'use client';
 
+import { Check, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/src/components/ui/button';
 import { toast } from '@/src/components/ui/sonner';
 import { useCopyToClipboard } from '@/src/hooks/use-copy-to-clipboard';
-import { Check, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { cn } from '@/src/lib/utils';
 

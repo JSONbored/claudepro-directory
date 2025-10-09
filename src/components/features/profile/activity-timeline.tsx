@@ -5,11 +5,11 @@
  * Displays user's activity history with filtering
  */
 
+import { ExternalLink, FileText, GitPullRequest, MessageSquare, ThumbsUp } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent } from '@/src/components/ui/card';
-import { ExternalLink, FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
 import type { Activity, ActivityType } from '@/src/lib/schemas/activity.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

@@ -8,6 +8,7 @@
  * Following existing UI patterns from the codebase
  */
 
+import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
@@ -26,7 +27,6 @@ import {
   removeItemFromCollection,
   reorderCollectionItems,
 } from '@/src/lib/actions/collection-actions';
-import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@/src/lib/icons';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

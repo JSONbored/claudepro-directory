@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { SearchTrigger } from '@/src/components/features/search/search-trigger';
 import { ThemeToggle } from '@/src/components/layout/theme-toggle';
 import { Badge } from '@/src/components/ui/badge';
@@ -13,10 +13,25 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/src/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/src/components/ui/sheet';
+
+// Lazy load Sheet components (mobile menu) - not needed on initial load
+const Sheet = lazy(() =>
+  import('@/src/components/ui/sheet').then((mod) => ({ default: mod.Sheet }))
+);
+const SheetContent = lazy(() =>
+  import('@/src/components/ui/sheet').then((mod) => ({ default: mod.SheetContent }))
+);
+const SheetTitle = lazy(() =>
+  import('@/src/components/ui/sheet').then((mod) => ({ default: mod.SheetTitle }))
+);
+const SheetTrigger = lazy(() =>
+  import('@/src/components/ui/sheet').then((mod) => ({ default: mod.SheetTrigger }))
+);
+
+import { ChevronDown, ExternalLink, Github, Menu } from 'lucide-react';
 import { useSearchShortcut } from '@/src/hooks/use-search-shortcut';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
-import { ChevronDown, DiscordIcon, ExternalLink, Github, LogoIcon, Menu } from '@/src/lib/icons';
+import { DiscordIcon, LogoIcon } from '@/src/lib/custom-icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface NavLinkProps {
@@ -272,211 +287,219 @@ export const Navigation = () => {
               Open Source
             </Badge>
 
-            {/* Mobile Menu */}
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="md:hidden"
-                  aria-label="Open mobile menu"
-                >
-                  <Menu className="h-5 w-5" />
+            {/* Mobile Menu - Lazy loaded with Suspense for better performance */}
+            <Suspense
+              fallback={
+                <Button variant="ghost" size="sm" className="md:hidden" aria-label="Loading menu">
+                  <Menu className="h-5 w-5 opacity-50" />
                 </Button>
-              </SheetTrigger>
-              <SheetContent
-                side="right"
-                className="w-[300px] sm:w-[380px] border-l border-border/50"
-              >
-                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                <div className={`${UI_CLASSES.FLEX_COL} h-full`}>
-                  {/* Header */}
-                  <div
-                    className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3 ${UI_CLASSES.PT_6} ${UI_CLASSES.PB_8} px-1`}
+              }
+            >
+              <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="md:hidden"
+                    aria-label="Open mobile menu"
                   >
-                    <LogoIcon className="h-8 w-8 flex-shrink-0" />
-                    <span className={`font-semibold ${UI_CLASSES.TEXT_LG} text-foreground`}>
-                      {APP_CONFIG.domain}
-                    </span>
-                  </div>
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent
+                  side="right"
+                  className="w-[300px] sm:w-[380px] border-l border-border/50"
+                >
+                  <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                  <div className={`${UI_CLASSES.FLEX_COL} h-full`}>
+                    {/* Header */}
+                    <div
+                      className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3 ${UI_CLASSES.PT_6} ${UI_CLASSES.PB_8} px-1`}
+                    >
+                      <LogoIcon className="h-8 w-8 flex-shrink-0" />
+                      <span className={`font-semibold ${UI_CLASSES.TEXT_LG} text-foreground`}>
+                        {APP_CONFIG.domain}
+                      </span>
+                    </div>
 
-                  {/* Main Navigation */}
-                  <div className={`flex-1 ${UI_CLASSES.OVERFLOW_Y_AUTO}`}>
-                    <nav className={`${UI_CLASSES.SPACE_Y_4} ${UI_CLASSES.PX_3}`}>
-                      <div className={UI_CLASSES.SPACE_Y_3}>
-                        <NavLink
-                          href="/agents"
-                          isActive={isActive}
-                          onClick={() => setIsOpen(false)}
-                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
-                        >
-                          Agents
-                        </NavLink>
-
-                        <NavLink
-                          href="/commands"
-                          isActive={isActive}
-                          onClick={() => setIsOpen(false)}
-                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
-                        >
-                          Commands
-                        </NavLink>
-
-                        <NavLink
-                          href="/hooks"
-                          isActive={isActive}
-                          onClick={() => setIsOpen(false)}
-                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
-                        >
-                          Hooks
-                        </NavLink>
-
-                        <NavLink
-                          href="/mcp"
-                          isActive={isActive}
-                          onClick={() => setIsOpen(false)}
-                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
-                        >
-                          MCP
-                        </NavLink>
-
-                        <NavLink
-                          href="/rules"
-                          isActive={isActive}
-                          onClick={() => setIsOpen(false)}
-                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
-                        >
-                          Rules
-                        </NavLink>
-
-                        <NavLink
-                          href="/statuslines"
-                          isActive={isActive}
-                          onClick={() => setIsOpen(false)}
-                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
-                        >
-                          Statuslines
-                        </NavLink>
-
-                        <NavLink
-                          href="/collections"
-                          isActive={isActive}
-                          onClick={() => setIsOpen(false)}
-                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
-                        >
-                          Collections
-                        </NavLink>
-
-                        <NavLink
-                          href="/guides"
-                          isActive={isActive}
-                          onClick={() => setIsOpen(false)}
-                          className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
-                        >
-                          Guides
-                        </NavLink>
-                      </div>
-
-                      {/* Secondary Navigation */}
-                      <div
-                        className={`${UI_CLASSES.PT_6} mt-4 ${UI_CLASSES.BORDER_T} border-border/30`}
-                      >
+                    {/* Main Navigation */}
+                    <div className={`flex-1 ${UI_CLASSES.OVERFLOW_Y_AUTO}`}>
+                      <nav className={`${UI_CLASSES.SPACE_Y_4} ${UI_CLASSES.PX_3}`}>
                         <div className={UI_CLASSES.SPACE_Y_3}>
                           <NavLink
-                            href="/trending"
+                            href="/agents"
                             isActive={isActive}
                             onClick={() => setIsOpen(false)}
-                            className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                            className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
                           >
-                            Trending
+                            Agents
                           </NavLink>
 
                           <NavLink
-                            href="/changelog"
+                            href="/commands"
                             isActive={isActive}
                             onClick={() => setIsOpen(false)}
-                            className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                            className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
                           >
-                            Changelog
+                            Commands
                           </NavLink>
 
                           <NavLink
-                            href="/jobs"
+                            href="/hooks"
                             isActive={isActive}
                             onClick={() => setIsOpen(false)}
-                            className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                            className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
                           >
-                            Jobs
+                            Hooks
                           </NavLink>
 
                           <NavLink
-                            href="/community"
+                            href="/mcp"
                             isActive={isActive}
                             onClick={() => setIsOpen(false)}
-                            className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                            className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
                           >
-                            Community
+                            MCP
                           </NavLink>
 
                           <NavLink
-                            href="/partner"
+                            href="/rules"
                             isActive={isActive}
                             onClick={() => setIsOpen(false)}
-                            className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                            className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
                           >
-                            Partner
+                            Rules
                           </NavLink>
 
                           <NavLink
-                            href="/submit"
+                            href="/statuslines"
                             isActive={isActive}
                             onClick={() => setIsOpen(false)}
-                            className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                            className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
                           >
-                            Submit Config
+                            Statuslines
+                          </NavLink>
+
+                          <NavLink
+                            href="/collections"
+                            isActive={isActive}
+                            onClick={() => setIsOpen(false)}
+                            className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
+                          >
+                            Collections
+                          </NavLink>
+
+                          <NavLink
+                            href="/guides"
+                            isActive={isActive}
+                            onClick={() => setIsOpen(false)}
+                            className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
+                          >
+                            Guides
                           </NavLink>
                         </div>
-                      </div>
-                    </nav>
-                  </div>
 
-                  {/* Footer Actions */}
-                  <div
-                    className={`${UI_CLASSES.BORDER_T} border-border/30 ${UI_CLASSES.PT_6} pb-6 ${UI_CLASSES.PX_6}`}
-                  >
+                        {/* Secondary Navigation */}
+                        <div
+                          className={`${UI_CLASSES.PT_6} mt-4 ${UI_CLASSES.BORDER_T} border-border/30`}
+                        >
+                          <div className={UI_CLASSES.SPACE_Y_3}>
+                            <NavLink
+                              href="/trending"
+                              isActive={isActive}
+                              onClick={() => setIsOpen(false)}
+                              className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                            >
+                              Trending
+                            </NavLink>
+
+                            <NavLink
+                              href="/changelog"
+                              isActive={isActive}
+                              onClick={() => setIsOpen(false)}
+                              className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                            >
+                              Changelog
+                            </NavLink>
+
+                            <NavLink
+                              href="/jobs"
+                              isActive={isActive}
+                              onClick={() => setIsOpen(false)}
+                              className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                            >
+                              Jobs
+                            </NavLink>
+
+                            <NavLink
+                              href="/community"
+                              isActive={isActive}
+                              onClick={() => setIsOpen(false)}
+                              className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                            >
+                              Community
+                            </NavLink>
+
+                            <NavLink
+                              href="/partner"
+                              isActive={isActive}
+                              onClick={() => setIsOpen(false)}
+                              className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                            >
+                              Partner
+                            </NavLink>
+
+                            <NavLink
+                              href="/submit"
+                              isActive={isActive}
+                              onClick={() => setIsOpen(false)}
+                              className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                            >
+                              Submit Config
+                            </NavLink>
+                          </div>
+                        </div>
+                      </nav>
+                    </div>
+
+                    {/* Footer Actions */}
                     <div
-                      className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} gap-6`}
+                      className={`${UI_CLASSES.BORDER_T} border-border/30 ${UI_CLASSES.PT_6} pb-6 ${UI_CLASSES.PX_6}`}
                     >
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        className={`w-16 h-16 ${UI_CLASSES.ROUNDED_2XL} border-border/40 ${UI_CLASSES.BG_CARD} hover:bg-discord/10 hover:border-discord/30 transition-all duration-200 active:scale-[0.95]`}
-                        onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
-                        aria-label="Join our Discord community"
-                      >
-                        <DiscordIcon className="h-7 w-7 text-discord" />
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        className={`w-16 h-16 ${UI_CLASSES.ROUNDED_2XL} border-border/40 ${UI_CLASSES.BG_CARD} ${UI_CLASSES.HOVER_BG_ACCENT_10} hover:border-accent/30 transition-all duration-200 active:scale-[0.95]`}
-                        onClick={() => window.open(SOCIAL_LINKS.github, '_blank')}
-                        aria-label="View source code on GitHub"
-                      >
-                        <Github className="h-7 w-7" />
-                      </Button>
-
                       <div
-                        className={`w-16 h-16 ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.ROUNDED_2XL} border border-border/40 ${UI_CLASSES.BG_CARD}`}
+                        className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} gap-6`}
                       >
-                        <ThemeToggle />
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          className={`w-16 h-16 ${UI_CLASSES.ROUNDED_2XL} border-border/40 ${UI_CLASSES.BG_CARD} hover:bg-discord/10 hover:border-discord/30 transition-all duration-200 active:scale-[0.95]`}
+                          onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
+                          aria-label="Join our Discord community"
+                        >
+                          <DiscordIcon className="h-7 w-7 text-discord" />
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          className={`w-16 h-16 ${UI_CLASSES.ROUNDED_2XL} border-border/40 ${UI_CLASSES.BG_CARD} ${UI_CLASSES.HOVER_BG_ACCENT_10} hover:border-accent/30 transition-all duration-200 active:scale-[0.95]`}
+                          onClick={() => window.open(SOCIAL_LINKS.github, '_blank')}
+                          aria-label="View source code on GitHub"
+                        >
+                          <Github className="h-7 w-7" />
+                        </Button>
+
+                        <div
+                          className={`w-16 h-16 ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.ROUNDED_2XL} border border-border/40 ${UI_CLASSES.BG_CARD}`}
+                        >
+                          <ThemeToggle />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+                </SheetContent>
+              </Sheet>
+            </Suspense>
           </div>
         </div>
       </div>

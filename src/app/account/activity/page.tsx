@@ -1,3 +1,4 @@
+import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from 'lucide-react';
 import type { Metadata } from 'next';
 import { ActivityTimeline } from '@/src/components/features/profile/activity-timeline';
 import {
@@ -8,7 +9,6 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { getActivitySummary, getActivityTimeline } from '@/src/lib/actions/activity-actions';
-import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {

@@ -1,3 +1,4 @@
+import { ArrowLeft, ExternalLink } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -12,7 +13,6 @@ import {
 } from '@/src/components/ui/card';
 import { Separator } from '@/src/components/ui/separator';
 import { trackView } from '@/src/lib/actions/track-view';
-import { ArrowLeft, ExternalLink } from '@/src/lib/icons';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

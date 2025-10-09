@@ -8,8 +8,8 @@
  * @see components/unified-detail-page.tsx - Component consumer
  */
 
+import { BookOpen, Bot, Layers, Server, Terminal, Webhook } from 'lucide-react';
 import { toast } from 'sonner';
-import { BookOpen, Bot, Layers, Server, Terminal, Webhook } from '@/src/lib/icons';
 import type { ContentTypeConfigRegistry } from '@/src/lib/types/content-type-config';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';

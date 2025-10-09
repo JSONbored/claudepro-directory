@@ -13,6 +13,7 @@
  * - Easier to maintain and extend
  */
 
+import { ExternalLink, Eye, Github } from 'lucide-react';
 import { memo } from 'react';
 import { BaseCard } from '@/src/components/shared/base-card';
 import { BookmarkButton } from '@/src/components/shared/bookmark-button';
@@ -21,7 +22,6 @@ import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { TypeBadge } from '@/src/components/ui/config-badge';
 import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
-import { ExternalLink, Eye, Github } from '@/src/lib/icons';
 import type { ConfigCardProps } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';

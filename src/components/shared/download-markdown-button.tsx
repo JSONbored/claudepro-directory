@@ -16,6 +16,7 @@
 
 'use client';
 
+import { Check, Download } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
 import { useState } from 'react';
 import { Button } from '@/src/components/ui/button';
@@ -23,7 +24,6 @@ import { toast } from '@/src/components/ui/sonner';
 import { downloadMarkdownAction } from '@/src/lib/actions/markdown-actions';
 import { EVENTS } from '@/src/lib/analytics/events.config';
 import { trackEvent } from '@/src/lib/analytics/tracker';
-import { Check, Download } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { cn } from '@/src/lib/utils';
 

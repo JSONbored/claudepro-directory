@@ -13,6 +13,17 @@
  * - Responsive grid layout
  */
 
+import {
+  ArrowRight,
+  BarChart,
+  Bookmark,
+  ChevronDown,
+  RefreshCw,
+  Settings,
+  Share2,
+  Sparkles,
+  TrendingUp,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
@@ -34,17 +45,6 @@ import { Separator } from '@/src/components/ui/separator';
 import { Slider } from '@/src/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
 import { addBookmarkBatch } from '@/src/lib/actions/bookmark-actions';
-import {
-  ArrowRight,
-  BarChart,
-  Bookmark,
-  ChevronDown,
-  RefreshCw,
-  Settings,
-  Share2,
-  Sparkles,
-  TrendingUp,
-} from '@/src/lib/icons';
 import type { RecommendationResponse } from '@/src/lib/schemas/recommender.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { RecommendationCard } from './recommendation-card';

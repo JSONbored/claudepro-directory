@@ -1,8 +1,8 @@
+import { Clock, Star, TrendingUp, Users } from 'lucide-react';
 import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { TrendingContent } from '@/src/components/shared/trending-content';
 import { Badge } from '@/src/components/ui/badge';
-import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
 import {

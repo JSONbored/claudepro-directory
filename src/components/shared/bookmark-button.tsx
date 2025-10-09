@@ -7,12 +7,12 @@
  * Follows existing patterns from card-copy-action.tsx
  */
 
+import { Bookmark, BookmarkCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
 import { addBookmark, removeBookmark } from '@/src/lib/actions/bookmark-actions';
-import { Bookmark, BookmarkCheck } from '@/src/lib/icons';
 
 interface BookmarkButtonProps {
   contentType: string;

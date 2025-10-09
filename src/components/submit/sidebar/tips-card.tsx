@@ -1,5 +1,5 @@
+import { Lightbulb } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Lightbulb } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 const TIPS = [

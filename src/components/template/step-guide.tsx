@@ -8,12 +8,12 @@
  * - Performant: Pre-rendered on server
  */
 
+import { Zap } from 'lucide-react';
 import { Callout } from '@/src/components/content/callout';
 import { ProductionCodeBlock } from '@/src/components/shared/production-code-block';
 import { Badge } from '@/src/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
-import { Zap } from '@/src/lib/icons';
 import { type StepByStepGuideProps, stepGuidePropsSchema } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

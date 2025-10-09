@@ -5,6 +5,7 @@
  * Displays individual configuration recommendation with match score
  */
 
+import { ArrowRight, Award, Eye, Info, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { BookmarkButton } from '@/src/components/shared/bookmark-button';
 import { Badge } from '@/src/components/ui/badge';
@@ -23,7 +24,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/src/components/ui/tooltip';
-import { ArrowRight, Award, Eye, Info, Sparkles } from '@/src/lib/icons';
 import type { RecommendationResult } from '@/src/lib/schemas/recommender.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl } from '@/src/lib/utils/url-helpers';

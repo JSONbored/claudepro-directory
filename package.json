@@ -25,8 +25,13 @@
   },
   "scripts": {
     "dev": "npm run build:content && next dev --turbopack",
-    "build": "npm run build:content && npx run-p generate:sitemap generate:openapi && npm run build:api-docs && next build --turbopack",
+    "build": "npm run build:content && npx run-p generate:sitemap generate:openapi && npm run build:api-docs && TURBOPACK_STATS=1 next build --turbopack && npx tsx scripts/analyze-bundle-size.ts",
     "build:analyze": "TURBOPACK_STATS=1 npm run build",
+    "bundle:size": "npx tsx scripts/analyze-bundle-size.ts",
+    "analyze": "ANALYZE=true npm run build",
+    "analyze:client": "ANALYZE=client npm run build",
+    "analyze:server": "ANALYZE=server npm run build",
+    "analyze:both": "ANALYZE=both npm run build",
     "build:content": "tsx scripts/build-content.ts",
     "build:api-docs": "tsx scripts/generate-fumadocs-api.ts",
     "generate:sitemap": "tsx scripts/generate-sitemap.ts",
@@ -99,7 +104,7 @@
     "isomorphic-dompurify": "^2.28.0",
     "lucide-react": "^0.545.0",
     "marked": "^16.3.0",
-    "next": "^15.5.4",
+    "next": "^15.6.0-canary.54",
     "next-mdx-remote": "^5.0.0",
     "next-safe-action": "^8.0.11",
     "next-themes": "^0.4.6",
@@ -128,5 +133,9 @@
     "knip": "^5.64.1",
     "lefthook": "^1.13.5",
     "ultracite": "^5.4.6"
+  },
+  "overrides": {
+    "next": "$next",
+    "tmp": "^0.2.5"
   }
 }

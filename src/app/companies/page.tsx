@@ -1,3 +1,4 @@
+import { Building, ExternalLink, Plus, Star } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -10,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { Building, ExternalLink, Plus, Star } from '@/src/lib/icons';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

@@ -1,3 +1,4 @@
+import { MessageSquare, Plus, TrendingUp, User as UserIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Avatar, AvatarFallback } from '@/src/components/ui/avatar';
@@ -10,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { MessageSquare, Plus, TrendingUp, User as UserIcon } from '@/src/lib/icons';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/date-utils';

@@ -6,6 +6,7 @@
  */
 
 import fs from 'fs/promises';
+import { BookOpen } from 'lucide-react';
 import type { Metadata } from 'next';
 import path from 'path';
 import { ContentListServer } from '@/src/components/content-list-server';
@@ -113,7 +114,7 @@ export default async function GuidesPage() {
     <ContentListServer
       title="Guides"
       description="Comprehensive guides, tutorials, and best practices for getting the most out of Claude and MCP servers"
-      icon="book-open"
+      icon={BookOpen}
       items={guides}
       type="guides"
       searchPlaceholder="Search guides..."

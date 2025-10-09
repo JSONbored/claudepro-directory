@@ -1,6 +1,6 @@
+import { Medal, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Medal, Trophy } from '@/src/lib/icons';
 import type { TopContributor } from '@/src/lib/schemas/submission-stats.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

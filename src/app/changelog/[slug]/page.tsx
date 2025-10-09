@@ -22,6 +22,7 @@
  * - Responsive design
  */
 
+import { ArrowLeft, Calendar } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -33,7 +34,6 @@ import { Separator } from '@/src/components/ui/separator';
 import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { ArrowLeft, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generateContentMetadata } from '@/src/lib/seo/metadata-generator';
 

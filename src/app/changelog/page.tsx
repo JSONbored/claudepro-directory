@@ -22,12 +22,12 @@
  * - Responsive design
  */
 
+import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ChangelogListClient } from '@/src/components/changelog/changelog-list-client';
 import { ChangelogBlogStructuredData } from '@/src/components/structured-data/changelog-structured-data';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
-import { ArrowLeft } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 

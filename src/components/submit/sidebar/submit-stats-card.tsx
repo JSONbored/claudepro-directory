@@ -1,5 +1,5 @@
+import { CheckCircle, Clock, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { CheckCircle, Clock, TrendingUp } from '@/src/lib/icons';
 import type { SubmissionStats } from '@/src/lib/schemas/submission-stats.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

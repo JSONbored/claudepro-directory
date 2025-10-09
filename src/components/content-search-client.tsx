@@ -19,7 +19,6 @@ const UnifiedSearch = dynamic(
   }
 );
 
-import { getIconByName } from '@/src/lib/icons';
 import type {
   ContentSearchClientProps,
   UnifiedContentItem,
@@ -96,7 +95,7 @@ export function ContentSearchClient<T extends UnifiedContentItem>({
       ) : (
         <output className={`text-center py-12 ${UI_CLASSES.BLOCK}`}>
           {(() => {
-            const IconComponent = getIconByName(icon);
+            const IconComponent = icon;
             return (
               <IconComponent
                 className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50"

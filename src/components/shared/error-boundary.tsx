@@ -1,5 +1,6 @@
 'use client';
 
+import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
 import { useCallback } from 'react';
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary';
 import { Button } from '@/src/components/ui/button';
@@ -11,7 +12,6 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { createErrorBoundaryFallback } from '@/src/lib/error-handler';
-import { AlertTriangle, Home, RefreshCw } from '@/src/lib/icons';
 import { umamiEventDataSchema } from '@/src/lib/schemas/analytics.schema';
 import type { ErrorBoundaryProps, ErrorFallbackProps } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

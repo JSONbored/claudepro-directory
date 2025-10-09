@@ -14,7 +14,7 @@
  */
 
 import type { LucideIcon } from 'lucide-react';
-import { BookOpen, Code, Layers, Sparkles, Terminal, Webhook } from '@/src/lib/icons';
+import { BookOpen, Code, Layers, Sparkles, Terminal, Webhook } from 'lucide-react';
 
 /**
  * Category metadata and display configuration

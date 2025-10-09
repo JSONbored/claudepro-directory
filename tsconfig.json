@@ -9,10 +9,9 @@
     ]
   },
   "include": [
-    "config/build/../../src/**/*.ts",
-    "config/build/../../src/**/*.tsx",
-    "config/build/../../src/types/**/*.d.ts",
-    "config/build/../../.next/types/**/*.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/types/**/*.d.ts",
     ".next/types/**/*.ts"
   ]
 }

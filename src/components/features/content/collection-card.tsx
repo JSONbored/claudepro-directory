@@ -15,13 +15,13 @@
  * @see components/shared/base-card.tsx - Base card pattern
  */
 
+import { Clock, Layers } from 'lucide-react';
 import { memo } from 'react';
 import { BaseCard } from '@/src/components/shared/base-card';
 import { BookmarkButton } from '@/src/components/shared/bookmark-button';
 import { CardCopyAction } from '@/src/components/shared/card-copy-action';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
-import { Clock, Layers } from '@/src/lib/icons';
 import type { CollectionContent } from '@/src/lib/schemas/content/collection.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';

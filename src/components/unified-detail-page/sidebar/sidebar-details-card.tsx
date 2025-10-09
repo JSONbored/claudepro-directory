@@ -14,9 +14,9 @@
  * @see lib/config/custom-sidebars.tsx - Original implementations
  */
 
+import { Thermometer } from 'lucide-react';
 import { Badge } from '@/src/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { Thermometer } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

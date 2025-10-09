@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 **Platform Improvements:**
 
+- [Unified Card Layout System](#2025-10-09---unified-card-layout-system-with-masonry-grid) - Reusable MasonryGrid component for consistent spacing sitewide
 - [React 19 Component Migration](#2025-10-08---react-19-component-migration-for-shadcnui) - Migrated shadcn/ui components to React 19 ref-as-prop pattern
 - [Component Architecture](#2025-10-08---component-architecture-improvements) - Refactored cards and forms to eliminate code duplication
 - [Email Templates](#2025-10-06---email-templates-infrastructure) - React Email templates for transactional emails
@@ -39,7 +40,92 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - [Reddit MCP Server](#2025-10-04---reddit-mcp-server-community-contribution) - Browse Reddit from Claude
 
-[View All Updates ↓](#2025-10-09---card-grid-layout-and-infinite-scroll-improvements)
+[View All Updates ↓](#2025-10-09---unified-card-layout-system-with-masonry-grid)
+
+---
+
+## 2025-10-09 - Unified Card Layout System with Masonry Grid
+
+**TL;DR:** Created a reusable `MasonryGrid` component that provides consistent card spacing across all content displays sitewide. Eliminates spacing inconsistencies between featured sections and search results, with zero code duplication and improved maintainability.
+
+### What Changed
+
+Introduced a unified masonry grid system to ensure consistent card spacing across homepage featured sections, collections pages, jobs board, and personalized recommendation feeds. The new `MasonryGrid` component uses dynamic height calculation with ResizeObserver to maintain perfect spacing regardless of card content.
+
+### Added
+
+- **MasonryGrid Component** (`src/components/shared/masonry-grid.tsx`)
+  - Generic TypeScript component supporting any content type
+  - Dynamic row span calculation based on actual content height
+  - ResizeObserver integration for responsive layout updates
+  - Built-in error boundary support for graceful failure handling
+  - Configurable gap spacing (default 24px)
+  - Zero duplication of masonry layout logic
+
+### Fixed
+
+- **Card Spacing Consistency Across Site**
+  - Homepage featured sections now match search results spacing quality
+  - Collections page cards properly aligned
+  - Jobs board listings evenly distributed
+  - Personalized recommendations grid spacing uniform
+  - Eliminates "Tetris gap" visual artifacts with variable-height cards
+
+- **Code Quality Improvements**
+  - Removed unused variables in error handlers (no underscore prefixes)
+  - Fixed React hook dependency arrays (removed stable function references)
+  - Replaced array index keys with crypto.randomUUID() for stable keys
+  - Cleaned up unused imports and interface definitions
+
+### Changed
+
+- **5 Component Updates for Unified Layout**
+  - `src/components/features/home/featured-sections.tsx` - Featured content sections
+  - `src/components/personalization/for-you-feed-client.tsx` - Personalized recommendations
+  - `src/components/personalization/similar-configs-section.tsx` - Similar configurations
+  - `src/app/collections/page.tsx` - Collections listing page
+  - `src/app/jobs/page.tsx` - Jobs board page
+
+### Technical Implementation
+
+**Masonry Grid Architecture:**
+```typescript
+// Fine-grained row control with auto-rows-[1px]
+const rowHeight = 1;
+const rowGap = 24; // Configurable gap spacing
+const contentHeight = content.getBoundingClientRect().height;
+const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
+```
+
+**ResizeObserver Pattern:**
+- Automatically recalculates on window resize
+- Observes grid container for content changes
+- Proper cleanup prevents memory leaks
+- Performance optimized with single effect dependency
+
+**Component Usage:**
+```typescript
+<MasonryGrid
+  items={collections}
+  renderItem={(item) => <ConfigCard item={item} />}
+  keyExtractor={(item) => item.slug}
+  gap={24}
+/>
+```
+
+### Performance Impact
+
+- **Bundle Size:** Minimal impact (~2KB for new component)
+- **Runtime Performance:** ResizeObserver native API, no layout thrashing
+- **Maintainability:** Eliminated 100+ lines of duplicate masonry logic
+- **Type Safety:** Generic component supports any content type with full TypeScript safety
+
+### Community Benefits
+
+- More polished, professional appearance across all pages
+- Consistent user experience when browsing any content type
+- Improved accessibility with proper error boundaries
+- Foundation for future card-based UI additions
 
 ---
 

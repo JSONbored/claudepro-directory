@@ -5,6 +5,7 @@
  * Used in 16+ MDX files across the codebase
  */
 
+import { CheckCircle } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -12,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { CheckCircle } from '@/src/lib/icons';
 import {
   type ComparisonTableProps,
   comparisonTablePropsSchema,

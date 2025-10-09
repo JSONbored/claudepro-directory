@@ -17,6 +17,7 @@
  * @see components/unified-detail-page.tsx - Original implementation
  */
 
+import type { LucideIcon } from 'lucide-react';
 import { z } from 'zod';
 import {
   Card,
@@ -25,7 +26,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import type { LucideIcon } from '@/src/lib/icons';
 import {
   componentDescriptionString,
   componentTitleString,

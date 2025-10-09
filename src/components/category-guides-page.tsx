@@ -1,5 +1,17 @@
 'use client';
 
+import {
+  AlertTriangle,
+  ArrowLeft,
+  BookOpen,
+  Eye,
+  FileText,
+  GitCompare,
+  Search,
+  Users,
+  Workflow,
+  Zap,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useId, useMemo, useState } from 'react';
 import { Badge } from '@/src/components/ui/badge';
@@ -14,18 +26,6 @@ import {
   SelectValue,
 } from '@/src/components/ui/select';
 import { createSearchIndex, performLocalSearch } from '@/src/hooks/use-search';
-import {
-  AlertTriangle,
-  ArrowLeft,
-  BookOpen,
-  Eye,
-  FileText,
-  GitCompare,
-  Search,
-  Users,
-  Workflow,
-  Zap,
-} from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { GuideItemWithCategory } from '@/src/lib/utils/guide-helpers';
 

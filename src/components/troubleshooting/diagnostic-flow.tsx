@@ -5,6 +5,7 @@
  * Used in 1 MDX file across the codebase - Specialized for troubleshooting workflows
  */
 
+import { CheckCircle } from 'lucide-react';
 import React from 'react';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -14,7 +15,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { CheckCircle } from '@/src/lib/icons';
 import {
   type DiagnosticFlowProps,
   diagnosticFlowPropsSchema,

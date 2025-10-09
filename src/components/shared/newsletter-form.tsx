@@ -1,10 +1,10 @@
 'use client';
 
+import { Mail } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import type { NewsletterSource } from '@/src/hooks/use-newsletter';
 import { useNewsletter } from '@/src/hooks/use-newsletter';
-import { Mail } from '@/src/lib/icons';
 
 /**
  * Newsletter signup form component

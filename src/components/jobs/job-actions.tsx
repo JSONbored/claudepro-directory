@@ -7,12 +7,12 @@
  * Provides interactive buttons with optimistic UI updates and toast notifications
  */
 
+import { Pause, Play, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
 import { deleteJob, toggleJobStatus } from '@/src/lib/actions/job-actions';
-import { Pause, Play, Trash } from '@/src/lib/icons';
 
 interface JobActionsProps {
   jobId: string;
