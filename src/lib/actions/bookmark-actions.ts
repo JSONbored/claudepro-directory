@@ -7,7 +7,7 @@
  * Follows existing pattern from email-capture.ts and track-view.ts
  */
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
@@ -91,6 +91,11 @@ export const addBookmark = rateLimitedAction
     revalidatePath('/account');
     revalidatePath('/account/library');
 
+    // OPTIMIZATION: Invalidate personalization caches
+    // User bookmarked content → For You feed should update recommendations
+    revalidateTag(`user-${user.id}`); // Invalidates getUserAffinities cache
+    revalidatePath('/for-you'); // Invalidates For You feed page
+
     return {
       success: true,
       bookmark: data,
@@ -139,6 +144,11 @@ export const removeBookmark = rateLimitedAction
     // Revalidate account pages
     revalidatePath('/account');
     revalidatePath('/account/library');
+
+    // OPTIMIZATION: Invalidate personalization caches
+    // User removed bookmark → For You feed should update recommendations
+    revalidateTag(`user-${user.id}`); // Invalidates getUserAffinities cache
+    revalidatePath('/for-you'); // Invalidates For You feed page
 
     return {
       success: true,
@@ -267,6 +277,11 @@ export const addBookmarkBatch = rateLimitedAction
         // Revalidate pages
         revalidatePath('/account');
         revalidatePath('/account/library');
+
+        // OPTIMIZATION: Invalidate personalization caches
+        // Bulk bookmark operation → For You feed should update recommendations
+        revalidateTag(`user-${user.id}`); // Invalidates getUserAffinities cache
+        revalidatePath('/for-you'); // Invalidates For You feed page
 
         return {
           success: true,

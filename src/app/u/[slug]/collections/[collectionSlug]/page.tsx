@@ -24,22 +24,20 @@ export async function generateMetadata({ params }: PublicCollectionPageProps): P
   const { slug, collectionSlug } = await params;
   const supabase = await createAdminClient();
 
-  // Get user
-  const { data: user } = await supabase.from('users').select('name').eq('slug', slug).single();
+  // Get user data in single query (optimization: avoid N+1)
+  const { data: user } = await supabase.from('users').select('id, name').eq('slug', slug).single();
 
-  // Get collection
-  const { data: userData } = await supabase.from('users').select('id').eq('slug', slug).single();
-
-  if (!userData) {
+  if (!user) {
     return {
       title: 'Collection Not Found',
     };
   }
 
+  // Get collection
   const { data: collection } = await supabase
     .from('user_collections')
     .select('name, description')
-    .eq('user_id', userData.id)
+    .eq('user_id', user.id)
     .eq('slug', collectionSlug)
     .eq('is_public', true)
     .single();
@@ -51,7 +49,7 @@ export async function generateMetadata({ params }: PublicCollectionPageProps): P
   }
 
   return {
-    title: `${collection.name} by ${user?.name || slug} - ClaudePro Directory`,
+    title: `${collection.name} by ${user.name || slug} - ClaudePro Directory`,
     description: collection.description || `View ${collection.name} collection`,
   };
 }
@@ -66,7 +64,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
     data: { user: currentUser },
   } = await currentUserClient.auth.getUser();
 
-  // Get profile owner
+  // Get profile owner (single query optimization - fetch all needed fields at once)
   const { data: profileUser } = await supabase.from('users').select('*').eq('slug', slug).single();
 
   if (!profileUser) {

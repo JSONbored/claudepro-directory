@@ -78,18 +78,63 @@ export async function GET(request: Request) {
     for (let i = 0; i < uniqueUserIds.length; i += BATCH_SIZE) {
       const batch = uniqueUserIds.slice(i, i + BATCH_SIZE);
 
+      // OPTIMIZATION: Fetch all interactions for batch in single query (N+1 → 1 query)
+      // Previous: 50 separate queries per batch (2500+ total queries)
+      // New: 1 query per batch (50 total queries) = 50x reduction
+      const { data: allBatchInteractions, error: batchError } = await supabase
+        .from('user_interactions')
+        .select('user_id, content_type, content_slug, interaction_type, metadata, created_at')
+        .in(
+          'user_id',
+          batch.filter((id): id is string => id !== null)
+        )
+        .order('created_at', { ascending: false });
+
+      if (batchError) {
+        logger.error('Failed to fetch batch interactions', batchError, {
+          batch_size: batch.length,
+          batch_index: i / BATCH_SIZE,
+        });
+        errors += batch.length;
+        continue;
+      }
+
+      // Group interactions by user_id for processing
+      const interactionsByUserId = new Map<
+        string,
+        Array<{
+          content_type: string;
+          content_slug: string;
+          interaction_type: string;
+          metadata: Record<string, unknown>;
+          created_at: string;
+        }>
+      >();
+
+      for (const interaction of allBatchInteractions || []) {
+        if (!interactionsByUserId.has(interaction.user_id)) {
+          interactionsByUserId.set(interaction.user_id, []);
+        }
+        const userInteractions = interactionsByUserId.get(interaction.user_id);
+        if (userInteractions) {
+          userInteractions.push({
+            content_type: interaction.content_type,
+            content_slug: interaction.content_slug,
+            interaction_type: interaction.interaction_type,
+            metadata: interaction.metadata as Record<string, unknown>,
+            created_at: interaction.created_at,
+          });
+        }
+      }
+
       const batchResults = await Promise.allSettled(
         batch.map(async (userId) => {
           if (!userId) return;
 
-          // Fetch user interactions
-          const { data: interactions, error: intError } = await supabase
-            .from('user_interactions')
-            .select('content_type, content_slug, interaction_type, metadata, created_at')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false });
+          // Get interactions from pre-fetched batch data
+          const interactions = interactionsByUserId.get(userId);
 
-          if (intError || !interactions || interactions.length === 0) {
+          if (!interactions || interactions.length === 0) {
             return;
           }
 
