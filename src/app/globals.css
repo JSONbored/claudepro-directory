@@ -102,10 +102,10 @@
   ); /* Increased from 70% for WCAG AA contrast (4.5:1) on hero badge */
   --claude-orange-muted: oklch(48% 0.142 37);
 
-  /* Light mode adjustments for orange */
-  --light-accent: oklch(58% 0.165 41);
-  --light-accent-hover: oklch(54% 0.17 40);
-  --light-accent-active: oklch(50% 0.175 39);
+  /* Light mode adjustments for orange - matches logo exactly */
+  --light-accent: oklch(62% 0.155 42);
+  --light-accent-hover: oklch(66% 0.145 42);
+  --light-accent-active: oklch(57% 0.16 42);
   --light-accent-subtle: oklch(95% 0.035 42);
 
   /* Semantic Colors - Dark Mode */

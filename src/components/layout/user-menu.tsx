@@ -148,9 +148,9 @@ export function UserMenu() {
     return (
       <Button
         asChild
-        variant="default"
+        variant="ghost"
         size="sm"
-        className="min-h-[44px] min-w-[44px]"
+        className="min-h-[44px] min-w-[44px] text-accent hover:text-accent-foreground hover:bg-accent/10 border border-accent/30 hover:border-accent/50"
         aria-label="Sign in to your account"
       >
         <Link href="/login">Sign In</Link>
