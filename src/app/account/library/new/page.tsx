@@ -50,7 +50,10 @@ export default async function NewCollectionPage() {
           <CardTitle>Collection Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <CollectionForm bookmarks={bookmarks || []} mode="create" />
+          <CollectionForm
+            bookmarks={(bookmarks || []).map((b) => ({ ...b, notes: b.notes ?? '' }))}
+            mode="create"
+          />
         </CardContent>
       </Card>
     </div>

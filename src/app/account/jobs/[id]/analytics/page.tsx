@@ -15,12 +15,13 @@ export const metadata: Metadata = {
 };
 
 interface JobAnalyticsPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps) {
+  const resolvedParams = await params;
   const supabase = await createClient();
 
   // Get current user
@@ -36,7 +37,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
   const { data: job, error } = await supabase
     .from('jobs')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', resolvedParams.id)
     .eq('user_id', user.id)
     .single();
 
@@ -44,8 +45,10 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
     notFound();
   }
 
-  // Calculate CTR (Click-Through Rate)
-  const ctr = job.view_count > 0 ? ((job.click_count / job.view_count) * 100).toFixed(2) : '0.00';
+  // Calculate CTR (Click-Through Rate) with null safety
+  const viewCount = job.view_count ?? 0;
+  const clickCount = job.click_count ?? 0;
+  const ctr = viewCount > 0 ? ((clickCount / viewCount) * 100).toFixed(2) : '0.00';
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -89,8 +92,8 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
         <CardHeader>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <CardTitle>Listing Details</CardTitle>
-            <Badge className={getStatusColor(job.status)} variant="outline">
-              {job.status}
+            <Badge className={getStatusColor(job.status ?? 'draft')} variant="outline">
+              {job.status ?? 'draft'}
             </Badge>
           </div>
         </CardHeader>
@@ -136,7 +139,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
             <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{job.view_count.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{viewCount.toLocaleString()}</div>
             <p className={`text-xs ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
               Since {job.posted_at ? formatRelativeDate(job.posted_at) : 'creation'}
             </p>
@@ -149,7 +152,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
             <ExternalLink className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{job.click_count.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{clickCount.toLocaleString()}</div>
             <p className={`text-xs ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>Applications started</p>
           </CardContent>
         </Card>
@@ -175,7 +178,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
         </CardHeader>
         <CardContent>
           <div className={UI_CLASSES.SPACE_Y_4}>
-            {job.view_count === 0 && (
+            {viewCount === 0 && (
               <div className="p-4 bg-muted/50 rounded-lg">
                 <p className="text-sm">
                   Your job listing hasn't received any views yet. Try sharing it on social media or
@@ -184,7 +187,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
               </div>
             )}
 
-            {job.view_count > 0 && job.click_count === 0 && (
+            {viewCount > 0 && clickCount === 0 && (
               <div className="p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
                 <p className="text-sm text-yellow-400">
                   Your listing is getting views but no clicks. Consider:

@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
+import { buildRateLimitConfig, isLLMsTxtRoute } from '@/src/lib/middleware/rate-limit-rules';
 import { rateLimiters } from '@/src/lib/rate-limiter';
 import { env, securityConfig } from '@/src/lib/schemas/env.schema';
 
@@ -218,35 +219,19 @@ async function applyEndpointRateLimit(
   // Classify the API endpoint type
   const endpointType: ApiEndpointType = classifyApiEndpoint(pathname, request.method);
 
-  // Define route-specific rate limiting rules
-  const rateLimit = {
-    // Cache warming endpoint - admin operations (extremely restrictive)
-    '/api/cache/warm': rateLimiters.admin, // 5 requests per hour
-
-    // All configurations endpoint - heavy dataset (moderate restrictions)
-    '/api/all-configurations.json': rateLimiters.heavyApi, // 50 requests per 15 minutes
-
-    // Trending guides endpoint - moderate usage (balanced restrictions)
-    '/api/guides/trending': rateLimiters.heavyApi, // 50 requests per 15 minutes
-
-    // Individual content type APIs - standard usage (generous)
-    '/api/agents.json': rateLimiters.api, // 1000 requests per hour
-    '/api/mcp.json': rateLimiters.api,
-    '/api/rules.json': rateLimiters.api,
-    '/api/commands.json': rateLimiters.api,
-    '/api/hooks.json': rateLimiters.api,
-    '/api/statuslines.json': rateLimiters.api,
-    '/api/collections.json': rateLimiters.api,
-  };
+  // Use centralized rate limit configuration
+  const rateLimitConfig = buildRateLimitConfig(rateLimiters);
 
   // Check for exact path matches first
-  if (pathname in rateLimit) {
-    const limiter = rateLimit[pathname as keyof typeof rateLimit];
-    return limiter.middleware(request);
+  if (pathname in rateLimitConfig) {
+    const limiter = rateLimitConfig[pathname];
+    if (limiter) {
+      return limiter.middleware(request);
+    }
   }
 
   // LLMs.txt routes - moderate rate limiting to prevent scraping abuse
-  if (pathname === '/llms.txt' || pathname.endsWith('/llms.txt')) {
+  if (isLLMsTxtRoute(pathname)) {
     return rateLimiters.llmstxt.middleware(request);
   }
 

@@ -16,11 +16,11 @@ import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface UserProfilePageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: UserProfilePageProps): Promise<Metadata> {
-  const { slug } = params;
+  const { slug } = await params;
 
   return {
     title: `${slug} - ClaudePro Directory`,
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: UserProfilePageProps): Promis
 }
 
 export default async function UserProfilePage({ params }: UserProfilePageProps) {
-  const { slug } = params;
+  const { slug } = await params;
   const supabase = await createAdminClient();
 
   // Get current user (if logged in)
@@ -150,15 +150,18 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 </div>
 
                 {/* Interests/Skills Tags */}
-                {profile.interests && profile.interests.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {profile.interests.map((interest: string) => (
-                      <Badge key={interest} variant="secondary">
-                        {interest}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
+                {profile.interests &&
+                  Array.isArray(profile.interests) &&
+                  profile.interests.length > 0 &&
+                  profile.interests.every((item): item is string => typeof item === 'string') && (
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {profile.interests.map((interest) => (
+                        <Badge key={interest} variant="secondary">
+                          {interest}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
               </div>
             </div>
 
@@ -192,7 +195,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Tier</span>
                   <Badge variant={profile.tier === 'pro' ? 'default' : 'secondary'}>
-                    {profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)}
+                    {profile.tier
+                      ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
+                      : 'Free'}
                   </Badge>
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>

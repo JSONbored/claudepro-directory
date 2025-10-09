@@ -19,11 +19,11 @@ export const metadata: Metadata = {
 };
 
 interface AnalyticsPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPageProps) {
-  const { id } = params;
+  const { id } = await params;
   const supabase = await createClient();
   const {
     data: { user },
@@ -75,17 +75,16 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
     clicksMap.set(day, (clicksMap.get(day) || 0) + 1);
   });
 
-  const ctr =
-    sponsorship.impression_count > 0
-      ? ((sponsorship.click_count / sponsorship.impression_count) * 100).toFixed(2)
-      : '0.00';
+  const impressionCount = sponsorship.impression_count ?? 0;
+  const clickCount = sponsorship.click_count ?? 0;
+
+  const ctr = impressionCount > 0 ? ((clickCount / impressionCount) * 100).toFixed(2) : '0.00';
 
   const daysActive = Math.floor(
     (Date.now() - new Date(sponsorship.start_date).getTime()) / (1000 * 60 * 60 * 24)
   );
 
-  const avgImpressionsPerDay =
-    daysActive > 0 ? (sponsorship.impression_count / daysActive).toFixed(0) : '0';
+  const avgImpressionsPerDay = daysActive > 0 ? (impressionCount / daysActive).toFixed(0) : '0';
 
   return (
     <div className={UI_CLASSES.SPACE_Y_6}>
@@ -109,9 +108,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Eye className="h-5 w-5 text-primary" />
-              <span className="text-3xl font-bold">
-                {sponsorship.impression_count.toLocaleString()}
-              </span>
+              <span className="text-3xl font-bold">{impressionCount.toLocaleString()}</span>
             </div>
             {sponsorship.impression_limit && (
               <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
@@ -128,7 +125,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <MousePointer className="h-5 w-5 text-primary" />
-              <span className="text-3xl font-bold">{sponsorship.click_count.toLocaleString()}</span>
+              <span className="text-3xl font-bold">{clickCount.toLocaleString()}</span>
             </div>
             <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
               User engagements

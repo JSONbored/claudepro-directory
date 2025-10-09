@@ -25,6 +25,7 @@ import {
 import type { PersonalizedContentItem } from '@/src/lib/personalization/types';
 import { getUsageBasedRecommendations } from '@/src/lib/personalization/usage-based-recommender';
 import { statsRedis } from '@/src/lib/redis';
+import { toContentId } from '@/src/lib/schemas/branded-types.schema';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import {
   type ForYouFeedResponse,
@@ -240,7 +241,7 @@ export const getForYouFeed = rateLimitedAction
                   affinity_score?: number;
                 }
               ) => ({
-                slug: rec.slug,
+                slug: toContentId(rec.slug),
                 title: rec.title || rec.name || rec.slug,
                 description: rec.description,
                 category: rec.category,
@@ -326,7 +327,7 @@ export const getSimilarConfigs = rateLimitedAction
               content_b_type: string;
               similarity_score: number;
             }) => ({
-              slug: sim.content_b_slug,
+              slug: toContentId(sim.content_b_slug),
               title: sim.content_b_slug, // Will be enriched by client
               description: '',
               category: sim.content_b_type as ContentCategory,
@@ -478,7 +479,7 @@ export const getUsageRecommendations = rateLimitedAction
 
         const response: UsageRecommendationResponse = {
           recommendations: recommendations.map((rec: PersonalizedContentItem) => ({
-            slug: (rec as UnifiedContentItem).slug,
+            slug: toContentId((rec as UnifiedContentItem).slug),
             title:
               (rec as UnifiedContentItem).title ||
               (rec as UnifiedContentItem).name ||

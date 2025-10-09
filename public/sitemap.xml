@@ -121,10 +121,64 @@
     <priority>0.85</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/hooks/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/mcp/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/commands/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/rules/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/agents/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/statuslines/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/collections/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/guides/use-cases/business-process-automation</loc>
     <lastmod>2025-10-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/use-cases/business-process-automation/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/use-cases/financial-services-guide</loc>
@@ -133,10 +187,22 @@
     <priority>0.65</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/guides/use-cases/financial-services-guide/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/guides/use-cases/healthcare-hipaa-guide</loc>
     <lastmod>2025-10-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/use-cases/healthcare-hipaa-guide/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/tutorials/build-mcp-server</loc>
@@ -145,10 +211,22 @@
     <priority>0.65</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/guides/tutorials/build-mcp-server/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/guides/tutorials/claude-4-extended-thinking-tutorial</loc>
     <lastmod>2025-10-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/tutorials/claude-4-extended-thinking-tutorial/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/tutorials/claude-agent-development-framework</loc>
@@ -157,10 +235,22 @@
     <priority>0.65</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/guides/tutorials/claude-agent-development-framework/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/guides/tutorials/claude-mcp-server-setup-guide</loc>
     <lastmod>2025-10-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/tutorials/claude-mcp-server-setup-guide/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/tutorials/claude-rate-limits-fix</loc>
@@ -169,10 +259,22 @@
     <priority>0.65</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/guides/tutorials/claude-rate-limits-fix/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/guides/tutorials/desktop-mcp-setup</loc>
     <lastmod>2025-10-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/tutorials/desktop-mcp-setup/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/tutorials/multi-directory-setup</loc>
@@ -181,10 +283,22 @@
     <priority>0.65</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/guides/tutorials/multi-directory-setup/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/guides/tutorials/wsl-setup-guide</loc>
     <lastmod>2025-10-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/tutorials/wsl-setup-guide/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/workflows/chatgpt-migration-guide</loc>
@@ -193,10 +307,22 @@
     <priority>0.65</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/guides/workflows/chatgpt-migration-guide/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/guides/workflows/migration-workflow-guide</loc>
     <lastmod>2025-10-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/workflows/migration-workflow-guide/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/comparisons/claude-vs-codewhisperer-gemini</loc>
@@ -205,10 +331,22 @@
     <priority>0.65</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/guides/comparisons/claude-vs-codewhisperer-gemini/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/guides/comparisons/claude-vs-copilot-python</loc>
     <lastmod>2025-10-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/comparisons/claude-vs-copilot-python/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/comparisons/claude-vs-cursor-codeium</loc>
@@ -217,10 +355,22 @@
     <priority>0.65</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/guides/comparisons/claude-vs-cursor-codeium/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/guides/troubleshooting/fix-environment-variables</loc>
     <lastmod>2025-10-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/troubleshooting/fix-environment-variables/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/guides/troubleshooting/fix-installation-errors</loc>
@@ -229,16 +379,34 @@
     <priority>0.65</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/guides/troubleshooting/fix-installation-errors/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/guides/troubleshooting/fix-mcp-connection-errors</loc>
     <lastmod>2025-10-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/guides/troubleshooting/fix-mcp-connection-errors/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/guides/troubleshooting/fix-memory-leak-performance</loc>
     <lastmod>2025-10-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/guides/troubleshooting/fix-memory-leak-performance/llms.txt</loc>
+    <lastmod>2025-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/changelog/2025-10-08-react-19-component-migration-for-shadcnui</loc>
@@ -401,6 +569,162 @@
     <lastmod>2025-10-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/llms.txt</loc>
+    <lastmod>2025-10-08</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-08-react-19-component-migration-for-shadcnui/llms.txt</loc>
+    <lastmod>2025-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-08-component-architecture-improvements/llms.txt</loc>
+    <lastmod>2025-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-08-production-code-quality-and-accessibility-improvements/llms.txt</loc>
+    <lastmod>2025-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-08-personalized-recommendation-engine/llms.txt</loc>
+    <lastmod>2025-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-07-configuration-recommender-tool/llms.txt</loc>
+    <lastmod>2025-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-07-user-collections-and-my-library/llms.txt</loc>
+    <lastmod>2025-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-07-reputation-system-and-automatic-badge-awarding/llms.txt</loc>
+    <lastmod>2025-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-07-user-profile-system-with-oauth-avatar-sync/llms.txt</loc>
+    <lastmod>2025-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-06-automated-submission-tracking-and-analytics/llms.txt</loc>
+    <lastmod>2025-10-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-06-user-authentication-and-account-management/llms.txt</loc>
+    <lastmod>2025-10-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-06-sponsorship-analytics-dashboard/llms.txt</loc>
+    <lastmod>2025-10-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-06-submit-page-sidebar-and-statistics/llms.txt</loc>
+    <lastmod>2025-10-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-06-email-templates-infrastructure/llms.txt</loc>
+    <lastmod>2025-10-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-05-resend-newsletter-integration-with-sticky-footer-bar/llms.txt</loc>
+    <lastmod>2025-10-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-05-homepage-infinite-scroll-bug-fix/llms.txt</loc>
+    <lastmod>2025-10-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-04-llmstxt-complete-content-generation-for-ai-discovery/llms.txt</loc>
+    <lastmod>2025-10-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-04-seo-title-optimization-system-with-automated-enhancement/llms.txt</loc>
+    <lastmod>2025-10-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-04-production-hardened-trending-algorithm-with-security-performance-optimizations/llms.txt</loc>
+    <lastmod>2025-10-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-04-view-counter-ui-redesign-with-prominent-badge-display/llms.txt</loc>
+    <lastmod>2025-10-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-04-trending-page-infinite-loading-fix-with-isr/llms.txt</loc>
+    <lastmod>2025-10-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-04-content-security-policy-strict-dynamic-implementation/llms.txt</loc>
+    <lastmod>2025-10-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-04-reddit-mcp-server-community-contribution/llms.txt</loc>
+    <lastmod>2025-10-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-04-submit-form-github-api-elimination/llms.txt</loc>
+    <lastmod>2025-10-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-04-github-actions-ci-optimization-for-community-contributors/llms.txt</loc>
+    <lastmod>2025-10-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-03-nosecone-csp-migration-navigation-menu-fixes/llms.txt</loc>
+    <lastmod>2025-10-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/rules/api-design-expert</loc>
@@ -1237,108 +1561,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/collections/api-development-starter-kit</loc>
-    <lastmod>2025-10-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/collections/aws-cloud-infrastructure-bundle</loc>
-    <lastmod>2025-10-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/collections/backend-development-suite</loc>
-    <lastmod>2025-10-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/collections/code-quality-toolkit</loc>
-    <lastmod>2025-10-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/collections/content-creation-workflow</loc>
-    <lastmod>2025-10-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/collections/data-engineering-suite</loc>
-    <lastmod>2025-10-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/collections/debugging-troubleshooting-system</loc>
-    <lastmod>2025-10-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/collections/developer-productivity-booster</loc>
-    <lastmod>2025-10-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/collections/production-readiness-toolkit</loc>
-    <lastmod>2025-10-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/hooks/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/mcp/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/commands/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/rules/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/agents/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/statuslines/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/collections/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
     <loc>https://claudepro.directory/rules/api-design-expert/llms.txt</loc>
     <lastmod>2025-09-16</lastmod>
     <changefreq>daily</changefreq>
@@ -2173,122 +2395,56 @@
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/guides/use-cases/business-process-automation/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
+    <loc>https://claudepro.directory/collections/api-development-starter-kit</loc>
+    <lastmod>2025-10-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/guides/use-cases/financial-services-guide/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
+    <loc>https://claudepro.directory/collections/aws-cloud-infrastructure-bundle</loc>
+    <lastmod>2025-10-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/guides/use-cases/healthcare-hipaa-guide/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
+    <loc>https://claudepro.directory/collections/backend-development-suite</loc>
+    <lastmod>2025-10-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/guides/tutorials/build-mcp-server/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
+    <loc>https://claudepro.directory/collections/code-quality-toolkit</loc>
+    <lastmod>2025-10-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/guides/tutorials/claude-4-extended-thinking-tutorial/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
+    <loc>https://claudepro.directory/collections/content-creation-workflow</loc>
+    <lastmod>2025-10-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/guides/tutorials/claude-agent-development-framework/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
+    <loc>https://claudepro.directory/collections/data-engineering-suite</loc>
+    <lastmod>2025-10-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/guides/tutorials/claude-mcp-server-setup-guide/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
+    <loc>https://claudepro.directory/collections/debugging-troubleshooting-system</loc>
+    <lastmod>2025-10-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/guides/tutorials/claude-rate-limits-fix/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
+    <loc>https://claudepro.directory/collections/developer-productivity-booster</loc>
+    <lastmod>2025-10-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://claudepro.directory/guides/tutorials/desktop-mcp-setup/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/guides/tutorials/multi-directory-setup/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/guides/tutorials/wsl-setup-guide/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/guides/workflows/chatgpt-migration-guide/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/guides/workflows/migration-workflow-guide/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/guides/comparisons/claude-vs-codewhisperer-gemini/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/guides/comparisons/claude-vs-copilot-python/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/guides/comparisons/claude-vs-cursor-codeium/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/guides/troubleshooting/fix-environment-variables/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/guides/troubleshooting/fix-installation-errors/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/guides/troubleshooting/fix-mcp-connection-errors/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/guides/troubleshooting/fix-memory-leak-performance/llms.txt</loc>
-    <lastmod>2025-10-09</lastmod>
+    <loc>https://claudepro.directory/collections/production-readiness-toolkit</loc>
+    <lastmod>2025-10-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2343,162 +2499,6 @@
   <url>
     <loc>https://claudepro.directory/collections/production-readiness-toolkit/llms.txt</loc>
     <lastmod>2025-10-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/llms.txt</loc>
-    <lastmod>2025-10-08</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-08-react-19-component-migration-for-shadcnui/llms.txt</loc>
-    <lastmod>2025-10-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-08-component-architecture-improvements/llms.txt</loc>
-    <lastmod>2025-10-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-08-production-code-quality-and-accessibility-improvements/llms.txt</loc>
-    <lastmod>2025-10-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-08-personalized-recommendation-engine/llms.txt</loc>
-    <lastmod>2025-10-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-07-configuration-recommender-tool/llms.txt</loc>
-    <lastmod>2025-10-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-07-user-collections-and-my-library/llms.txt</loc>
-    <lastmod>2025-10-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-07-reputation-system-and-automatic-badge-awarding/llms.txt</loc>
-    <lastmod>2025-10-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-07-user-profile-system-with-oauth-avatar-sync/llms.txt</loc>
-    <lastmod>2025-10-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-06-automated-submission-tracking-and-analytics/llms.txt</loc>
-    <lastmod>2025-10-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-06-user-authentication-and-account-management/llms.txt</loc>
-    <lastmod>2025-10-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-06-sponsorship-analytics-dashboard/llms.txt</loc>
-    <lastmod>2025-10-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-06-submit-page-sidebar-and-statistics/llms.txt</loc>
-    <lastmod>2025-10-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-06-email-templates-infrastructure/llms.txt</loc>
-    <lastmod>2025-10-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-05-resend-newsletter-integration-with-sticky-footer-bar/llms.txt</loc>
-    <lastmod>2025-10-05</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-05-homepage-infinite-scroll-bug-fix/llms.txt</loc>
-    <lastmod>2025-10-05</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-llmstxt-complete-content-generation-for-ai-discovery/llms.txt</loc>
-    <lastmod>2025-10-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-seo-title-optimization-system-with-automated-enhancement/llms.txt</loc>
-    <lastmod>2025-10-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-production-hardened-trending-algorithm-with-security-performance-optimizations/llms.txt</loc>
-    <lastmod>2025-10-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-view-counter-ui-redesign-with-prominent-badge-display/llms.txt</loc>
-    <lastmod>2025-10-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-trending-page-infinite-loading-fix-with-isr/llms.txt</loc>
-    <lastmod>2025-10-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-content-security-policy-strict-dynamic-implementation/llms.txt</loc>
-    <lastmod>2025-10-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-reddit-mcp-server-community-contribution/llms.txt</loc>
-    <lastmod>2025-10-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-submit-form-github-api-elimination/llms.txt</loc>
-    <lastmod>2025-10-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-04-github-actions-ci-optimization-for-community-contributors/llms.txt</loc>
-    <lastmod>2025-10-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://claudepro.directory/changelog/2025-10-03-nosecone-csp-migration-navigation-menu-fixes/llms.txt</loc>
-    <lastmod>2025-10-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>

@@ -7,6 +7,7 @@
 import { z } from 'zod';
 import { nonNegativeInt, positiveInt } from './primitives/base-numbers';
 import { nonEmptyString } from './primitives/base-strings';
+import { parseContentType } from './primitives/sanitization-transforms';
 
 /**
  * Security constants for middleware
@@ -86,7 +87,7 @@ const userAgentSchema = z
  */
 const httpContentTypeSchema = z
   .string()
-  .transform((value) => value?.split(';')[0]?.trim().toLowerCase() || '')
+  .transform(parseContentType)
   .refine(
     (value) =>
       [

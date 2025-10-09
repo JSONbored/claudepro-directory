@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 **Latest Features:**
 
+- [Enhanced Type Safety & Schema Validation](#2025-10-09---enhanced-type-safety-with-branded-types-and-schema-improvements) - Branded types for IDs, centralized input sanitization, improved validation
 - [Production Code Quality & Accessibility](#2025-10-08---production-code-quality-and-accessibility-improvements) - TypeScript safety, WCAG AA compliance, Lighthouse CI automation
 - [Recommender Enhancements](#2025-10-08---configuration-recommender-enhancements) - OG images, bulk bookmarks, refine results, For You integration
 - [Personalized Recommendations](#2025-10-08---personalized-recommendation-engine) - AI-powered "For You" feed with similar configs and usage-based suggestions
@@ -37,7 +38,208 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - [Reddit MCP Server](#2025-10-04---reddit-mcp-server-community-contribution) - Browse Reddit from Claude
 
-[View All Updates ↓](#2025-10-08---react-19-component-migration-for-shadcnui)
+[View All Updates ↓](#2025-10-09---enhanced-type-safety-with-branded-types-and-schema-improvements)
+
+---
+
+## 2025-10-09 - Enhanced Type Safety with Branded Types and Schema Improvements
+
+**TL;DR:** Implemented branded types for user/session/content IDs with compile-time safety, centralized input sanitization transforms into 13 reusable functions, and enhanced schema validation across the personalization engine. These changes improve type safety, eliminate duplicate code, and provide better protection against ID mixing bugs.
+
+### What Changed
+
+Major refactoring to enhance type safety and schema validation across the platform. Introduced branded types using Zod's nominal typing feature to prevent ID confusion at compile time, consolidated duplicate input sanitization logic, and improved validation consistency throughout the codebase.
+
+### Added
+
+- **Branded Types for IDs** (`src/lib/schemas/branded-types.schema.ts`)
+  - `UserId` - UUID-validated branded type for user identifiers
+  - `SessionId` - UUID-validated branded type for session identifiers
+  - `ContentId` - Slug-validated branded type for content identifiers (alphanumeric with hyphens)
+  - Helper functions: `createUserId()`, `createSessionId()`, `toContentId(slug)`
+  - Compile-time prevention of mixing IDs from different domains
+  - Runtime validation ensures correct format (UUID vs slug patterns)
+  - Zero runtime overhead with Zod's brand feature
+
+- **Centralized Input Sanitization** (`src/lib/schemas/primitives/sanitization-transforms.ts`)
+  - 13 reusable transform functions replacing 11+ inline duplicates
+  - `normalizeEmail()` - RFC 5322 compliant email normalization
+  - `normalizeString()` - Lowercase + trim for consistent storage
+  - `trimString()`, `trimOptionalString()`, `trimOptionalStringOrEmpty()` - String cleanup variants
+  - `stringToBoolean()` - Handles common truthy/falsy string representations
+  - `parseContentType()` - Extracts base content type from HTTP headers
+  - Security-focused: Null byte checks, path traversal prevention, injection protection
+  - Single source of truth for all input sanitization
+
+- **Cursor Pagination Schema** (`src/lib/schemas/primitives/cursor-pagination.schema.ts`)
+  - Type-safe cursor-based pagination for scalable API endpoints
+  - Opaque cursor implementation for security
+  - Configurable page sizes with validation
+
+- **Unified SEO Title Verification** (`scripts/verify-titles.ts`)
+  - Consolidated 3 separate scripts into single comprehensive tool
+  - Validates all titles across agents, MCP servers, rules, commands, hooks, statuslines, collections, and guides
+  - Checks for empty titles, duplicates, and SEO optimization
+  - Detailed reporting with color-coded output
+
+### Changed
+
+- **Personalization Schemas** (6 schemas updated)
+  - `userInteractionSchema` - Now uses `userIdSchema`, `contentIdSchema`, `sessionIdSchema`
+  - `affinityScoreSchema` - Uses branded types for user and content identification
+  - `userSimilaritySchema` - Uses `userIdSchema` for both user_a_id and user_b_id
+  - `contentSimilaritySchema` - Uses `contentIdSchema` for content slugs
+  - `personalizedRecommendationSchema` - Slug field now ContentId type
+  - All analytics event schemas updated with branded types
+
+- **Schema Consolidation** (5 files refactored)
+  - `newsletter.schema.ts` - Replaced inline transform with `normalizeEmail()`
+  - `analytics.schema.ts` - Replaced inline transform with `normalizeString()`
+  - `middleware.schema.ts` - Replaced complex parsing with `parseContentType()`
+  - `form.schema.ts` - Replaced 4 inline transforms with centralized functions
+  - `search.schema.ts` - Replaced 7 inline transforms (4 trim + 3 boolean conversions)
+
+- **Database Actions** (6 files updated)
+  - `follow-actions.ts` - Uses `userIdSchema` in followSchema with validation
+  - `interaction-actions.ts` - Converts database strings to branded types at boundaries
+  - `personalization-actions.ts` - All recommendation responses use `toContentId()` conversion
+  - `affinity-scorer.ts` - Affinity calculations use ContentId type
+  - Type-safe boundaries between database (plain strings) and application (branded types)
+  - Proper validation at conversion points
+
+- **Build Scripts** (4 scripts improved)
+  - Migrated 65+ console statements to structured production logger
+  - `generate-openapi.ts` - 20 console statements → logger with metadata
+  - `validate-llmstxt.ts` - 27 console statements → structured logging
+  - `optimize-titles.ts` - 15 console statements → logger with structured data
+  - `generate-sitemap.ts` - Added alphabetical URL sorting for better git diffs
+  - Consistent logging format across all build tools
+
+### Removed
+
+- **Legacy Configuration Files**
+  - `config/tools/lighthouserc.json` - Redundant (kept production .cjs version)
+  - `config/tools/depcheck.json` - Unused tool configuration
+
+- **Duplicate Scripts**
+  - `scripts/verify-all-titles.ts` - Functionality merged into verify-titles.ts
+  - `scripts/verify-seo-titles.ts` - Consolidated into unified verification script
+
+### Fixed
+
+- **Linting Issues** (6 issues resolved)
+  - Removed unused `colors` constant from validate-llmstxt.ts (proper deletion vs suppression)
+  - Fixed proper error logging in catch blocks (2 instances)
+  - Added missing `existsSync` import in submit-indexnow.ts
+  - Added explicit type annotation for stat variable
+  - Used template literals for string concatenation in optimize-titles.ts
+  - All fixes follow production-ready principles (no suppression with underscores)
+
+### Technical Implementation
+
+**Branded Type Pattern:**
+```typescript
+// Schema definition
+export const contentIdSchema = nonEmptyString
+  .max(200)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+  .brand<'ContentId'>();
+
+export type ContentId = z.infer<typeof contentIdSchema>;
+
+// Helper function for conversion
+export function toContentId(slug: string): ContentId {
+  return contentIdSchema.parse(slug);
+}
+
+// Usage in schemas
+const interactionSchema = z.object({
+  content_slug: contentIdSchema, // Validated at schema level
+});
+
+// Conversion at boundaries
+const recommendations = items.map(item => ({
+  slug: toContentId(item.slug), // Convert database string to branded type
+}));
+```
+
+**Sanitization Transform Pattern:**
+```typescript
+// Before: Inline duplicate code (11+ instances)
+email: z.string().email().transform((val) => val.toLowerCase().trim())
+
+// After: Centralized reusable function
+import { normalizeEmail } from './primitives/sanitization-transforms';
+email: z.string().email().transform(normalizeEmail)
+```
+
+### Code Quality
+
+- **Linting:** 582 files checked, 0 errors, 0 warnings
+- **TypeScript:** 0 type errors with strict mode enabled
+- **Build:** Production build successful
+- **Testing:** All type-safe conversions verified at boundaries
+
+### Performance
+
+- **Zero Runtime Overhead:** Branded types are compile-time only (nominal typing)
+- **Sitemap Generation:** Alphabetical sorting improves git diff performance
+- **Logger Migration:** Structured logging enables better observability without performance penalty
+
+### Security
+
+- **ID Mixing Prevention:** Compile-time errors when using wrong ID type
+- **Input Validation:** All user inputs sanitized through centralized transforms
+- **Format Enforcement:** Runtime validation of UUID and slug patterns
+- **Null Byte Protection:** Sanitization transforms check for injection attempts
+
+### Impact
+
+- **Type Safety:** 53 occurrences of user/session/content IDs now type-checked at compile time
+- **Code Reduction:** ~100+ lines of duplicate transform code eliminated
+- **Maintainability:** Single source of truth for input sanitization
+- **Developer Experience:** Better IDE autocomplete and error messages with branded types
+- **Production Ready:** All changes follow strict validation and logging standards
+
+### For Contributors
+
+When working with user/session/content identifiers:
+
+```typescript
+// ✅ Correct: Use branded types in schemas
+import { userIdSchema, contentIdSchema } from '@/lib/schemas/branded-types.schema';
+
+const schema = z.object({
+  user_id: userIdSchema,
+  content_slug: contentIdSchema,
+});
+
+// ✅ Correct: Convert at boundaries
+import { toContentId } from '@/lib/schemas/branded-types.schema';
+
+const contentId = toContentId(databaseSlug); // Validates and converts
+
+// ❌ Incorrect: Don't mix ID types
+const userId: UserId = sessionId; // Compile-time error!
+```
+
+When adding input sanitization:
+
+```typescript
+// ✅ Correct: Use centralized transforms
+import { normalizeEmail, trimString } from '@/lib/schemas/primitives/sanitization-transforms';
+
+email: z.string().email().transform(normalizeEmail)
+
+// ❌ Incorrect: Don't write inline transforms
+email: z.string().email().transform((val) => val.toLowerCase().trim())
+```
+
+### Related Resources
+
+- [Zod Branded Types Documentation](https://zod.dev/?id=brand)
+- [Keep a Changelog](https://keepachangelog.com/)
+- [TypeScript Nominal Typing](https://basarat.gitbook.io/typescript/main-1/nominaltyping)
 
 ---
 

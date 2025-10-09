@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/src/components/ui/avatar';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -22,19 +22,19 @@ export const metadata: Metadata = {
 
 export const revalidate = 60; // Revalidate every minute
 
-interface PopularPost {
-  id: string;
-  user_id: string;
-  title: string;
-  content: string | null;
-  url: string | null;
-  vote_count: number;
+// Use the actual return type from the database function
+type PopularPost = {
+  body: string;
   comment_count: number;
+  content_slug: string;
+  content_type: string;
   created_at: string;
-  user_name: string | null;
-  user_avatar: string | null;
-  user_slug: string | null;
-}
+  id: string;
+  title: string;
+  updated_at: string;
+  user_id: string;
+  vote_count: number;
+};
 
 export default async function BoardPage() {
   const supabase = await createAdminClient();
@@ -104,25 +104,12 @@ export default async function BoardPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className={UI_CLASSES.TEXT_LG}>
-                        {post.url ? (
-                          <a
-                            href={post.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={UI_CLASSES.HOVER_TEXT_ACCENT}
-                          >
-                            {post.title}
-                          </a>
-                        ) : (
-                          <span>{post.title}</span>
-                        )}
+                        <span>{post.title}</span>
                       </CardTitle>
 
-                      {post.content && (
+                      {post.body && (
                         <CardDescription className="mt-2 whitespace-pre-wrap">
-                          {post.content.length > 200
-                            ? `${post.content.slice(0, 200)}...`
-                            : post.content}
+                          {post.body.length > 200 ? `${post.body.slice(0, 200)}...` : post.body}
                         </CardDescription>
                       )}
 
@@ -131,17 +118,11 @@ export default async function BoardPage() {
                       >
                         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                           <Avatar className="w-4 h-4">
-                            <AvatarImage
-                              src={post.user_avatar ?? undefined}
-                              alt={post.user_name || 'User'}
-                            />
                             <AvatarFallback>
                               <UserIcon className="w-3 h-3" />
                             </AvatarFallback>
                           </Avatar>
-                          <Link href={`/u/${post.user_slug}`} className="hover:underline">
-                            {post.user_name || 'Anonymous'}
-                          </Link>
+                          <span>User</span>
                         </div>
                         <span>•</span>
                         <span>{formatRelativeDate(post.created_at)}</span>

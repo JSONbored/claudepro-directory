@@ -2,11 +2,10 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 import { rateLimiters, withRateLimit } from '@/src/lib/rate-limiter';
 import { contentCache } from '@/src/lib/redis';
-import { createRequestId } from '@/src/lib/schemas/branded-types.schema';
-import { sanitizeApiError } from '@/src/lib/security/error-sanitizer';
 import { apiSchemas, ValidationError } from '@/src/lib/security/validators';
 
 export const runtime = 'nodejs';
@@ -315,63 +314,14 @@ async function handleGET(request: NextRequest) {
       },
     });
   } catch (error) {
-    // Handle Zod validation errors from streaming query schema
-    if (error instanceof z.ZodError) {
-      requestLogger.warn('Streaming query validation error in all-configurations API', {
-        error: 'Invalid query parameters',
-        issuesCount: error.issues.length,
-        firstIssue: error.issues[0]?.message || 'Validation error',
-      });
-
-      return NextResponse.json(
-        {
-          error: 'Query validation failed',
-          message: 'Invalid query parameters for streaming API',
-          details: error.issues.map((issue) => ({
-            path: issue.path.join('.'),
-            message: issue.message,
-            code: issue.code,
-          })),
-          timestamp: new Date().toISOString(),
-          availableParams: {
-            stream: 'true|false (default: false)',
-            format: 'json|ndjson (default: json)',
-            batchSize: 'number 10-100 (default: 50)',
-          },
-        },
-        { status: 400 }
-      );
-    }
-
-    // Handle validation errors specifically
-    if (error instanceof ValidationError) {
-      requestLogger.warn('Validation error in all-configurations API', {
-        error: error.message,
-        detailsCount: error.details.issues.length,
-      });
-
-      return NextResponse.json(
-        {
-          error: 'Validation failed',
-          message: error.message,
-          details: error.details.issues.map((e) => ({
-            path: e.path.join('.'),
-            message: e.message,
-            code: e.code,
-          })),
-          timestamp: new Date().toISOString(),
-        },
-        { status: 400 }
-      );
-    }
-
-    // Handle other errors with sanitization
-    const sanitizedError = sanitizeApiError(error, createRequestId(), {
-      route: 'all-configurations',
+    // Use centralized error handler for all errors
+    return handleApiError(error instanceof Error ? error : new Error(String(error)), {
+      route: '/api/all-configurations.json',
+      method: 'GET',
       operation: 'generate_dataset',
+      logLevel: 'error',
+      includeDetails: error instanceof z.ZodError || error instanceof ValidationError,
     });
-
-    return NextResponse.json(sanitizedError, { status: 500 });
   }
 }
 

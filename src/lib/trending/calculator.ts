@@ -532,7 +532,10 @@ async function getActiveSponsored(): Promise<
 
     // Filter out items that hit impression limit
     return data
-      .filter((item) => !item.impression_limit || item.impression_count < item.impression_limit)
+      .filter((item) => {
+        const impressionCount = item.impression_count ?? 0;
+        return !item.impression_limit || impressionCount < item.impression_limit;
+      })
       .map((item) => ({
         content_id: item.content_id,
         content_type: item.content_type,

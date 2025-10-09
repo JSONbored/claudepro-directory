@@ -16,6 +16,7 @@
  */
 
 import { logger } from '@/src/lib/logger';
+import { toContentId } from '@/src/lib/schemas/branded-types.schema';
 import type { AffinityCalculation, InteractionSummary } from './types';
 
 /**
@@ -85,7 +86,7 @@ export function calculateAffinityScore(interactions: InteractionSummary): Affini
 
   return {
     content_type: '', // Will be filled by caller
-    content_slug: '', // Will be filled by caller
+    content_slug: toContentId('placeholder'), // Will be replaced by caller
     affinity_score: finalScore,
     breakdown,
   };
@@ -161,7 +162,7 @@ export function calculateUserAffinities(
       // Calculate affinity score
       const affinity = calculateAffinityScore(summary);
       affinity.content_type = data.content_type;
-      affinity.content_slug = data.content_slug;
+      affinity.content_slug = toContentId(data.content_slug);
 
       // Only include if score is above threshold (meaningful affinity)
       if (affinity.affinity_score >= 10) {

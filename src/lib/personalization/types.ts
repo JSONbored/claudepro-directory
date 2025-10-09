@@ -3,6 +3,7 @@
  * Shared types for personalization features
  */
 
+import type { ContentId } from '@/src/lib/schemas/branded-types.schema';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 
 /**
@@ -38,7 +39,7 @@ export interface InteractionSummary {
  */
 export interface AffinityCalculation {
   content_type: string;
-  content_slug: string;
+  content_slug: ContentId;
   affinity_score: number;
   breakdown: {
     views: number;

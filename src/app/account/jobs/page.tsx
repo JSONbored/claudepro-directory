@@ -82,10 +82,10 @@ export default async function MyJobsPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                      <Badge className={getStatusColor(job.status)} variant="outline">
-                        {job.status}
+                      <Badge className={getStatusColor(job.status ?? 'draft')} variant="outline">
+                        {job.status ?? 'draft'}
                       </Badge>
-                      {getPlanBadge(job.plan)}
+                      {getPlanBadge(job.plan ?? 'standard')}
                     </div>
                     <CardTitle className="mt-2">{job.title}</CardTitle>
                     <CardDescription>
@@ -101,7 +101,7 @@ export default async function MyJobsPage() {
                 >
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                     <Eye className="h-4 w-4" />
-                    {job.viewCount || 0} views
+                    {job.view_count ?? 0} views
                   </div>
                   {job.posted_at && <div>Posted {formatRelativeDate(job.posted_at)}</div>}
                   {job.expires_at && <div>Expires {formatRelativeDate(job.expires_at)}</div>}
@@ -131,7 +131,7 @@ export default async function MyJobsPage() {
                     </Button>
                   )}
 
-                  <JobActions jobId={job.id} currentStatus={job.status} />
+                  <JobActions jobId={job.id} currentStatus={job.status ?? 'draft'} />
                 </div>
               </CardContent>
             </Card>

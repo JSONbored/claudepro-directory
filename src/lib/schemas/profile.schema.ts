@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod';
+import type { Tables } from '@/src/types/database.types';
 
 /**
  * Profile update schema
@@ -33,24 +34,9 @@ export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 
 /**
  * Profile data type from database
+ * Uses generated Supabase types as the source of truth
+ *
+ * The database schema allows nulls and uses Json for interests.
+ * This type accurately reflects what comes from the database.
  */
-export type ProfileData = {
-  id: string;
-  email: string | null;
-  name: string | null;
-  slug: string | null;
-  image: string | null;
-  hero: string | null;
-  bio: string | null;
-  work: string | null;
-  website: string | null;
-  social_x_link: string | null;
-  interests: string[];
-  reputation_score: number;
-  tier: 'free' | 'pro' | 'enterprise';
-  status: string;
-  public: boolean;
-  follow_email: boolean;
-  created_at: string;
-  updated_at: string;
-};
+export type ProfileData = Tables<'users'>;

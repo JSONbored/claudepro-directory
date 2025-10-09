@@ -11,6 +11,7 @@
 
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
+import { sessionIdSchema, toContentId } from '@/src/lib/schemas/branded-types.schema';
 import {
   type TrackInteractionInput,
   trackInteractionSchema,
@@ -130,7 +131,18 @@ export async function getUserRecentInteractions(limit = 20): Promise<TrackIntera
     return [];
   }
 
-  return data || [];
+  // Transform database results to match TrackInteractionInput type
+  // Database has Json type for metadata, but schema expects Record<string, string | number | boolean>
+  return (data || []).map((item) => ({
+    content_type: item.content_type as TrackInteractionInput['content_type'],
+    content_slug: toContentId(item.content_slug),
+    interaction_type: item.interaction_type as TrackInteractionInput['interaction_type'],
+    session_id: item.session_id ? sessionIdSchema.parse(item.session_id) : undefined,
+    metadata:
+      typeof item.metadata === 'object' && item.metadata !== null && !Array.isArray(item.metadata)
+        ? (item.metadata as Record<string, string | number | boolean>)
+        : {},
+  }));
 }
 
 /**
