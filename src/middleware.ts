@@ -24,12 +24,18 @@ import {
 } from '@/src/lib/schemas/middleware.schema';
 
 // Initialize Arcjet with comprehensive security rules
-if (!securityConfig.arcjetKey) {
-  throw new Error('ARCJET_KEY is required for security middleware');
+// SECURITY: Require ARCJET_KEY in production for LIVE mode protection
+// DEVELOPMENT: Allow DRY_RUN mode without key (Arcjet SDK handles gracefully)
+if (isProduction && !securityConfig.arcjetKey) {
+  throw new Error(
+    'ARCJET_KEY is required for security middleware in production (LIVE mode requires valid key)'
+  );
 }
 
+// DRY_RUN mode (development): Arcjet performs rule evaluation but doesn't enforce blocks
+// LIVE mode (production): Full enforcement requires valid key
 const aj = arcjet({
-  key: securityConfig.arcjetKey,
+  key: securityConfig.arcjetKey || 'ak_dry_run_placeholder', // Placeholder for DRY_RUN mode
   // In development, Arcjet uses 127.0.0.1 when no real IP is available - this is expected behavior
   rules: [
     // Shield WAF - protect against common attacks

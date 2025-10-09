@@ -12,7 +12,9 @@ import {
   type ContentItem,
   contentIndexSchema,
 } from '@/src/lib/schemas/related-content.schema';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { viewCountService } from '@/src/lib/services/view-count.service';
+import { getContentItemUrl } from '@/src/lib/utils/url-helpers';
 
 // Clean, production Zod schemas
 
@@ -397,7 +399,10 @@ class RelatedContentService {
         title: result.item.title,
         description: result.item.description,
         category: result.item.category,
-        url: `/${result.item.category}/${result.item.slug}`,
+        url: getContentItemUrl({
+          category: result.item.category as ContentCategory,
+          slug: result.item.slug,
+        }),
         score: result.score,
         matchType: result.matchType,
         views: viewCountResult?.views || 0, // Use real/deterministic view count

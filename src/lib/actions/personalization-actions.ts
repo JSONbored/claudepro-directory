@@ -39,6 +39,7 @@ import {
 } from '@/src/lib/schemas/personalization.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
+import { getContentItemUrl } from '@/src/lib/utils/url-helpers';
 
 /**
  * Get personalized "For You" feed
@@ -245,7 +246,7 @@ export const getForYouFeed = rateLimitedAction
                 title: rec.title || rec.name || rec.slug,
                 description: rec.description,
                 category: rec.category,
-                url: `/${rec.category}/${rec.slug}`,
+                url: getContentItemUrl({ category: rec.category, slug: rec.slug }),
                 score: rec.affinity_score || 50,
                 source: rec.recommendation_source || 'trending',
                 reason: rec.recommendation_reason,
@@ -331,7 +332,10 @@ export const getSimilarConfigs = rateLimitedAction
               title: sim.content_b_slug, // Will be enriched by client
               description: '',
               category: sim.content_b_type as ContentCategory,
-              url: `/${sim.content_b_type}/${sim.content_b_slug}`,
+              url: getContentItemUrl({
+                category: sim.content_b_type as ContentCategory,
+                slug: sim.content_b_slug,
+              }),
               score: Math.round(sim.similarity_score * 100),
               source: 'similar' as const,
               reason: 'Similar to this config',
@@ -486,7 +490,10 @@ export const getUsageRecommendations = rateLimitedAction
               (rec as UnifiedContentItem).slug,
             description: (rec as UnifiedContentItem).description,
             category: (rec as UnifiedContentItem).category,
-            url: `/${(rec as UnifiedContentItem).category}/${(rec as UnifiedContentItem).slug}`,
+            url: getContentItemUrl({
+              category: (rec as UnifiedContentItem).category,
+              slug: (rec as UnifiedContentItem).slug,
+            }),
             score: rec.affinity_score || 50,
             source: rec.recommendation_source || 'usage',
             reason: rec.recommendation_reason,

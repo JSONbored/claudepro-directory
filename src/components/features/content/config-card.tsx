@@ -26,11 +26,12 @@ import type { ConfigCardProps } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { formatViewCount } from '@/src/lib/utils/transformers';
+import { getContentItemUrl } from '@/src/lib/utils/url-helpers';
 
 export const ConfigCard = memo(
   ({ item, variant = 'default', showCategory = true, showActions = true }: ConfigCardProps) => {
     const displayTitle = getDisplayTitle(item);
-    const targetPath = `/${item.category}/${item.slug}`;
+    const targetPath = getContentItemUrl(item);
 
     // Extract sponsored metadata
     const isSponsored = (item as { isSponsored?: boolean }).isSponsored;

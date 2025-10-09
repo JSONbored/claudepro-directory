@@ -101,46 +101,75 @@ function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
   // Use ref to track filtered results for stable pagination
   const filteredResultsRef = useRef(filteredResults);
   const currentPageRef = useRef(1);
+  const loadingRef = useRef(false);
+  const activeTabRef = useRef(activeTab);
 
-  useEffect(() => {
-    filteredResultsRef.current = filteredResults;
-  }, [filteredResults]);
+  // ✅ FIX: Update refs synchronously during render (not in useEffect)
+  // This prevents race condition where loadMore executes with stale ref data
+  filteredResultsRef.current = filteredResults;
+  activeTabRef.current = activeTab;
 
-  // Update displayed items only when tab or search changes (not on every filteredResults reference change)
-  // Using activeTab and isSearching as dependencies instead of filteredResults to avoid resetting
-  // pagination when the same data is re-filtered (which creates a new array reference)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Intentionally using activeTab/isSearching to avoid pagination reset on re-renders
+  // Update displayed items when filtered results change
   useEffect(() => {
-    setDisplayedItems(filteredResults.slice(0, pageSize) as UnifiedContentItem[]);
+    // Reset pagination state before updating displayed items
     currentPageRef.current = 1;
-  }, [activeTab, isSearching]);
+    loadingRef.current = false;
+
+    setDisplayedItems(filteredResults.slice(0, pageSize) as UnifiedContentItem[]);
+  }, [filteredResults]);
 
   // Load more function for infinite scroll
   // Uses refs to avoid stale closures when filteredResults changes
   const loadMore = useCallback(async () => {
-    const nextPage = currentPageRef.current + 1;
-    const startIndex = (nextPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const nextItems = filteredResultsRef.current.slice(startIndex, endIndex);
+    // Concurrency protection - prevent multiple simultaneous loads
+    if (loadingRef.current) {
+      return [];
+    }
 
-    let uniqueNextItems: UnifiedContentItem[] = [];
+    loadingRef.current = true;
 
-    // Deduplicate using functional setState to get latest state
-    setDisplayedItems((prev) => {
-      const prevSlugs = new Set(prev.map((item) => item.slug));
-      uniqueNextItems = nextItems.filter(
-        (item) => !prevSlugs.has(item.slug)
-      ) as UnifiedContentItem[];
-      return [...prev, ...uniqueNextItems] as UnifiedContentItem[];
-    });
+    try {
+      const nextPage = currentPageRef.current + 1;
+      const startIndex = (nextPage - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const nextItems = filteredResultsRef.current.slice(startIndex, endIndex);
 
-    currentPageRef.current = nextPage;
+      // Validate we're still on the same tab before appending items
+      const currentTab = activeTabRef.current;
 
-    // Return the new items so infinite scroll knows items were loaded
-    return uniqueNextItems;
+      let uniqueNextItems: UnifiedContentItem[] = [];
+
+      // Deduplicate using functional setState to get latest state
+      setDisplayedItems((prev) => {
+        // Additional validation - if tab changed, don't append items
+        if (activeTabRef.current !== currentTab) {
+          return prev; // Tab changed during load, abort update
+        }
+
+        const prevSlugs = new Set(prev.map((item) => item.slug));
+        uniqueNextItems = nextItems.filter(
+          (item) => !prevSlugs.has(item.slug)
+        ) as UnifiedContentItem[];
+
+        return [...prev, ...uniqueNextItems] as UnifiedContentItem[];
+      });
+
+      // Only increment page if items were actually added
+      if (uniqueNextItems.length > 0) {
+        currentPageRef.current = nextPage;
+      }
+
+      // Return the new items so infinite scroll knows items were loaded
+      return uniqueNextItems;
+    } finally {
+      loadingRef.current = false;
+    }
   }, []);
 
-  const hasMore = displayedItems.length < filteredResults.length;
+  // Memoize hasMore to prevent unnecessary re-renders
+  const hasMore = useMemo(() => {
+    return displayedItems.length < filteredResults.length;
+  }, [displayedItems.length, filteredResults.length]);
 
   // Handle tab change
   const handleTabChange = useCallback((value: string) => {
@@ -149,8 +178,12 @@ function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
 
   // Handle clear search
   const handleClearSearch = useCallback(() => {
+    // Reset pagination state when clearing search
+    currentPageRef.current = 1;
+    loadingRef.current = false;
+
     handleSearch('');
-    setDisplayedItems([]);
+    // Don't manually set displayedItems - let useEffect handle it when filteredResults updates
   }, [handleSearch]);
 
   return (

@@ -13,6 +13,7 @@ import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { logger } from '@/src/lib/logger';
 import { statsRedis } from '@/src/lib/redis';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 // ISR Configuration - 5 minutes like other category pages
@@ -55,14 +56,17 @@ async function getAllGuides(): Promise<UnifiedContentItem[]> {
           const content = await fs.readFile(filePath, 'utf-8');
           const { frontmatter } = parseMDXFrontmatter(content);
 
-          const slug = file.replace('.mdx', '');
+          const filename = file.replace('.mdx', '');
 
           // Transform to UnifiedContentItem format
+          // IMPORTANT: Use guide subcategory as category (tutorials, workflows, etc.)
+          // This allows proper URL construction via getContentItemUrl() helper
+          // URLs: /guides/[category]/[slug] where category is the guide subcategory
           guides.push({
-            title: frontmatter.title || slug,
+            title: frontmatter.title || filename,
             description: frontmatter.description || '',
-            slug,
-            category: 'guides',
+            slug: filename, // Just the filename, not the full path
+            category: category as ContentCategory, // Use subcategory as category (tutorials, workflows, etc.)
             author: frontmatter.author || 'ClaudePro Directory',
             tags: [
               category.replace('-', ' '),

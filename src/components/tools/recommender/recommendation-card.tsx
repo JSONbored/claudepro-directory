@@ -26,13 +26,14 @@ import {
 import { ArrowRight, Award, Eye, Info, Sparkles } from '@/src/lib/icons';
 import type { RecommendationResult } from '@/src/lib/schemas/recommender.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { getContentItemUrl } from '@/src/lib/utils/url-helpers';
 
 interface RecommendationCardProps {
   result: RecommendationResult;
 }
 
 export function RecommendationCard({ result }: RecommendationCardProps) {
-  const targetPath = `/${result.category}/${result.slug}`;
+  const targetPath = getContentItemUrl(result);
 
   // Match score color coding
   const getMatchScoreColor = (score: number) => {

@@ -89,7 +89,6 @@ export function ContentSearchClient<T extends UnifiedContentItem>({
             )}
             loadMore={loadMore}
             hasMore={hasMore}
-            gridClassName={UI_CLASSES.GRID_RESPONSIVE_3}
             emptyMessage={`No ${title.toLowerCase()} found`}
             keyExtractor={(item) => item.slug}
           />

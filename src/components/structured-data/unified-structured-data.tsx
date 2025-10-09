@@ -23,6 +23,7 @@ import {
   type UnifiedContent,
   type UnifiedStructuredDataProps,
 } from '@/src/lib/structured-data/schema-types';
+import { getContentItemUrl } from '@/src/lib/utils/url-helpers';
 
 /**
  * Unified Structured Data Component
@@ -122,7 +123,7 @@ export async function UnifiedStructuredData({ item }: UnifiedStructuredDataProps
     const breadcrumbSchema = buildBreadcrumb([
       { name: 'Home', url: '/' },
       { name: getCategoryName(item.category), url: `/${item.category}` },
-      { name: displayTitle, url: `/${item.category}/${item.slug}` },
+      { name: displayTitle, url: getContentItemUrl({ category: item.category, slug: item.slug }) },
     ]);
     schemas.push(breadcrumbSchema);
   }
