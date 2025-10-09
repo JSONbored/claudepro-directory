@@ -17,15 +17,17 @@
  * - ResizeObserver tracks size changes and recalculates
  * - Responsive: 1 column (mobile), 2 columns (tablet), 3 columns (desktop)
  *
- * PERFORMANCE:
- * - Lightweight: Only calculates when content changes
- * - Efficient: Uses native ResizeObserver API
- * - No layout thrashing: Batches calculations
+ * PERFORMANCE OPTIMIZATIONS:
+ * - Image load detection: Waits for all images to load before calculating
+ * - Debounced ResizeObserver: Batches callbacks to prevent cascade
+ * - IntersectionObserver: Only calculates visible cards initially
+ * - Cached measurements: Prevents unnecessary recalculations
+ * - RAF scheduling: Aligns with browser render cycle
  *
  * @module components/shared/masonry-grid
  */
 
-import { type ReactNode, useEffect, useRef } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef } from 'react';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import { cn } from '@/src/lib/utils';
 
@@ -91,12 +93,13 @@ export function MasonryGrid<T>({
   useErrorBoundary = true,
 }: MasonryGridProps<T>) {
   const gridRef = useRef<HTMLDivElement>(null);
+  const itemHeightsRef = useRef<Map<Element, number>>(new Map());
+  const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const rafIdRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    const grid = gridRef.current;
-    if (!grid) return;
-
-    const resizeGridItem = (item: Element) => {
+  // Memoized resize function with caching to prevent unnecessary recalculations
+  const resizeGridItem = useCallback(
+    (item: Element) => {
       const content = item.querySelector('[data-grid-content]') as HTMLElement;
       if (!content) return;
 
@@ -110,48 +113,145 @@ export function MasonryGrid<T>({
       content.offsetHeight;
 
       const contentHeight = content.getBoundingClientRect().height;
-      const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
 
+      // Check cache to avoid unnecessary DOM writes
+      const cachedHeight = itemHeightsRef.current.get(item);
+      if (cachedHeight === contentHeight) {
+        // Height hasn't changed, restore previous span
+        const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
+        (item as HTMLElement).style.gridRowEnd = `span ${rowSpan}`;
+        return;
+      }
+
+      // Update cache
+      itemHeightsRef.current.set(item, contentHeight);
+
+      const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
       (item as HTMLElement).style.gridRowEnd = `span ${rowSpan}`;
-    };
+    },
+    [gap]
+  );
+
+  // Debounced resize handler to batch multiple ResizeObserver callbacks
+  const debouncedResizeAllItems = useCallback(() => {
+    if (resizeTimeoutRef.current) {
+      clearTimeout(resizeTimeoutRef.current);
+    }
+
+    resizeTimeoutRef.current = setTimeout(() => {
+      const grid = gridRef.current;
+      if (!grid) return;
+
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+
+      rafIdRef.current = requestAnimationFrame(() => {
+        const gridItems = grid.querySelectorAll('[data-grid-item]');
+        gridItems.forEach(resizeGridItem);
+      });
+    }, 100); // 100ms debounce to batch rapid changes
+  }, [resizeGridItem]);
+
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+
+    // Clear cache when items change
+    itemHeightsRef.current.clear();
 
     const resizeAllGridItems = () => {
-      const items = grid.querySelectorAll('[data-grid-item]');
-      items.forEach(resizeGridItem);
-    };
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
 
-    // Use RAF for initial calculation
-    let rafId: number;
-    const scheduleResize = () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(resizeAllGridItems);
-    };
-
-    // Initial resize
-    scheduleResize();
-
-    // Handle window resize
-    window.addEventListener('resize', scheduleResize);
-
-    // Use ResizeObserver for each grid item
-    const observer = new ResizeObserver((entries) => {
-      entries.forEach((entry) => {
-        resizeGridItem(entry.target);
+      rafIdRef.current = requestAnimationFrame(() => {
+        const gridItems = grid.querySelectorAll('[data-grid-item]');
+        gridItems.forEach(resizeGridItem);
       });
+    };
+
+    // Wait for all images to load before initial calculation
+    const waitForImages = async () => {
+      const images = grid.querySelectorAll('img');
+      const imagePromises = Array.from(images).map((img) => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve) => {
+          img.addEventListener('load', () => resolve(null));
+          img.addEventListener('error', () => resolve(null)); // Resolve even on error
+        });
+      });
+
+      await Promise.all(imagePromises);
+      resizeAllGridItems();
+    };
+
+    // Initial calculation after images load
+    waitForImages().catch(() => {
+      // Silently handle image load errors - layout will still work
     });
 
-    // Observe all grid items
+    // Handle window resize with debouncing
+    window.addEventListener('resize', debouncedResizeAllItems);
+
+    // Use ResizeObserver for each grid item with debouncing
+    const observer = new ResizeObserver((entries) => {
+      // Batch all resize events together
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+
+      resizeTimeoutRef.current = setTimeout(() => {
+        if (rafIdRef.current) {
+          cancelAnimationFrame(rafIdRef.current);
+        }
+
+        rafIdRef.current = requestAnimationFrame(() => {
+          entries.forEach((entry) => {
+            resizeGridItem(entry.target);
+          });
+        });
+      }, 50); // 50ms debounce for ResizeObserver to prevent cascades
+    });
+
+    // Use IntersectionObserver to only calculate visible items initially
+    const intersectionObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Start observing this item for resizes
+            observer.observe(entry.target);
+            // Calculate initial layout
+            resizeGridItem(entry.target);
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '50px', // Start calculating 50px before item enters viewport
+        threshold: 0,
+      }
+    );
+
+    // Observe all grid items for visibility
     const gridItems = grid.querySelectorAll('[data-grid-item]');
     for (const item of gridItems) {
-      observer.observe(item);
+      intersectionObserver.observe(item);
     }
 
     return () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      window.removeEventListener('resize', scheduleResize);
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+      window.removeEventListener('resize', debouncedResizeAllItems);
       observer.disconnect();
+      intersectionObserver.disconnect();
+      itemHeightsRef.current.clear();
     };
-  }, [gap]);
+  }, [resizeGridItem, debouncedResizeAllItems]);
 
   return (
     <div

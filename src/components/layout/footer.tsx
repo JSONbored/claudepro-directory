@@ -5,11 +5,47 @@
  * @module components/layout/footer
  */
 
-import { Github, Sparkles } from 'lucide-react';
+import { ExternalLink, Github, Sparkles, Star } from 'lucide-react';
 import Link from 'next/link';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { DiscordIcon } from '@/src/lib/custom-icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+
+/**
+ * Fetches GitHub repository stars count
+ * Uses GitHub API with revalidation every 1 hour
+ */
+async function getGitHubStars(): Promise<number | null> {
+  try {
+    // Extract owner/repo from SOCIAL_LINKS.github
+    const githubUrl = SOCIAL_LINKS.github;
+    const match = githubUrl.match(/github\.com\/([^/]+)\/([^/]+)/);
+
+    if (!match) {
+      return null;
+    }
+
+    const [, owner, repo] = match;
+
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+      },
+      next: {
+        revalidate: 3600, // Revalidate every 1 hour
+      },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    return data.stargazers_count || null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Footer Component
@@ -19,8 +55,9 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
  * @remarks
  * Includes llms.txt link for AI assistant discoverability per LLMs.txt specification
  */
-export function Footer() {
+export async function Footer() {
   const currentYear = new Date().getFullYear();
+  const stars = await getGitHubStars();
 
   return (
     <footer className={`${UI_CLASSES.BORDER_T} border-border/50 bg-background/95 backdrop-blur`}>
@@ -32,25 +69,61 @@ export function Footer() {
             <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED} ${UI_CLASSES.MB_4}`}>
               {APP_CONFIG.description}
             </p>
-            <div className={`flex ${UI_CLASSES.GAP_4}`}>
-              <Link
-                href={SOCIAL_LINKS.github || '#'}
+
+            {/* Social Links */}
+            <div className={`flex flex-col ${UI_CLASSES.GAP_3} ${UI_CLASSES.MB_4}`}>
+              <div className={`flex ${UI_CLASSES.GAP_3}`}>
+                <Link
+                  href={SOCIAL_LINKS.github || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
+                  aria-label="GitHub"
+                >
+                  <Github className="h-5 w-5" />
+                </Link>
+                <Link
+                  href={SOCIAL_LINKS.discord || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
+                  aria-label="Discord"
+                >
+                  <DiscordIcon className="h-5 w-5" />
+                </Link>
+              </div>
+
+              {/* GitHub Stars Badge */}
+              <a
+                href={SOCIAL_LINKS.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
-                aria-label="GitHub"
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md border border-border/50 bg-card hover:bg-accent/10 hover:border-accent/30 transition-colors w-fit"
+                aria-label={stars ? `Star us on GitHub - ${stars} stars` : 'Star us on GitHub'}
               >
-                <Github className="h-5 w-5" />
-              </Link>
-              <Link
-                href={SOCIAL_LINKS.discord || '#'}
+                <Star className="h-3.5 w-3.5 fill-current" />
+                {stars !== null ? (
+                  <>
+                    <span className="font-semibold">{stars.toLocaleString()}</span>
+                    <span className="text-muted-foreground">stars</span>
+                  </>
+                ) : (
+                  <span>Star us on GitHub</span>
+                )}
+                <Github className="h-3.5 w-3.5" />
+              </a>
+
+              {/* Open Source Badge */}
+              <a
+                href={SOCIAL_LINKS.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
-                aria-label="Discord"
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-accent/20 ${UI_CLASSES.BG_ACCENT_5} text-accent hover:bg-accent/10 hover:border-accent/30 transition-colors w-fit`}
+                aria-label="View source code on GitHub"
               >
-                <DiscordIcon className="h-5 w-5" />
-              </Link>
+                <ExternalLink className="h-3 w-3" />
+                <span>Open Source</span>
+              </a>
             </div>
           </div>
 

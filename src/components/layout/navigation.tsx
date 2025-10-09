@@ -28,7 +28,7 @@ const SheetTrigger = lazy(() =>
   import('@/src/components/ui/sheet').then((mod) => ({ default: mod.SheetTrigger }))
 );
 
-import { ChevronDown, ExternalLink, Github, Menu } from 'lucide-react';
+import { ChevronDown, Github, Menu } from 'lucide-react';
 import { useSearchShortcut } from '@/src/hooks/use-search-shortcut';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { DiscordIcon, LogoIcon } from '@/src/lib/custom-icons';
@@ -292,8 +292,7 @@ export const Navigation = () => {
               className={`${UI_CLASSES.HIDDEN_SM_FLEX} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
               aria-label="Join our Discord community"
             >
-              <DiscordIcon className="h-4 w-4 xl:mr-2" />
-              <span className={`${UI_CLASSES.HIDDEN} xl:inline`}>Discord</span>
+              <DiscordIcon className="h-4 w-4" />
             </Button>
 
             <Button
@@ -303,8 +302,7 @@ export const Navigation = () => {
               className={`${UI_CLASSES.HIDDEN_SM_FLEX} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
               aria-label="View source code on GitHub"
             >
-              <Github className="h-4 w-4 xl:mr-2" />
-              <span className={`${UI_CLASSES.HIDDEN} xl:inline`}>GitHub</span>
+              <Github className="h-4 w-4" />
             </Button>
 
             {/* User Menu - Authentication-aware dropdown */}
@@ -314,17 +312,6 @@ export const Navigation = () => {
             <div className="flex items-center justify-center rounded-lg bg-muted/30 px-2 py-1.5 border border-border/40">
               <ThemeToggle />
             </div>
-
-            <a
-              href="https://github.com/shadowbook-systems/claudepro-directory"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${UI_CLASSES.HIDDEN} lg:flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md border border-accent/20 ${UI_CLASSES.BG_ACCENT_5} text-accent hover:bg-accent/10 hover:border-accent/30 transition-colors`}
-              aria-label="View source code on GitHub"
-            >
-              <ExternalLink className="h-3 w-3 text-accent" />
-              Open Source
-            </a>
 
             {/* Mobile Menu - Lazy loaded with Suspense for better performance */}
             <Suspense
