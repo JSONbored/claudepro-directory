@@ -8,6 +8,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ConfigCard } from '@/src/components/features/content/config-card';
+import { Separator } from '@/src/components/ui/separator';
 import { getSimilarConfigs } from '@/src/lib/actions/personalization-actions';
 import { EVENTS } from '@/src/lib/analytics/events.config';
 import { trackEvent } from '@/src/lib/analytics/tracker';
@@ -57,7 +58,8 @@ export function SimilarConfigsSection({ contentType, contentSlug }: SimilarConfi
 
   if (loading) {
     return (
-      <section className="mt-12 py-8 border-t">
+      <section className="mt-12 py-8">
+        <Separator className="mb-8" />
         <h2 className="text-2xl font-bold mb-6">Similar Configurations</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
@@ -75,7 +77,8 @@ export function SimilarConfigsSection({ contentType, contentSlug }: SimilarConfi
   }
 
   return (
-    <section className="mt-12 py-8 border-t">
+    <section className="mt-12 py-8">
+      <Separator className="mb-8" />
       <h2 className="text-2xl font-bold mb-6">Similar Configurations</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {similarItems.map((rec) => {

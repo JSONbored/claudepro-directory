@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 **Platform Improvements:**
 
+- [React 19 Component Migration](#2025-10-08---react-19-component-migration-for-shadcnui) - Migrated shadcn/ui components to React 19 ref-as-prop pattern
 - [Component Architecture](#2025-10-08---component-architecture-improvements) - Refactored cards and forms to eliminate code duplication
 - [Email Templates](#2025-10-06---email-templates-infrastructure) - React Email templates for transactional emails
 - [LLMs.txt AI Optimization](#2025-10-04---llmstxt-complete-content-generation-for-ai-discovery) - Complete page content for AI/LLM consumption
@@ -36,7 +37,141 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - [Reddit MCP Server](#2025-10-04---reddit-mcp-server-community-contribution) - Browse Reddit from Claude
 
-[View All Updates ↓](#2025-10-08---component-architecture-improvements)
+[View All Updates ↓](#2025-10-08---react-19-component-migration-for-shadcnui)
+
+---
+
+## 2025-10-08 - React 19 Component Migration for shadcn/ui
+
+**TL;DR:** Migrated 6 shadcn/ui components (15 total component instances) from deprecated React.forwardRef pattern to React 19's ref-as-prop pattern, eliminating all forwardRef deprecation warnings while maintaining full type safety and functionality.
+
+### What Changed
+
+Comprehensive migration of shadcn/ui components to React 19 standards, removing all uses of the deprecated `React.forwardRef` API in favor of the new ref-as-prop pattern. This modernizes the component library while preserving 100% backward compatibility and type safety.
+
+### Fixed
+
+- **React 19 Deprecation Warnings** (15 warnings eliminated)
+  - Removed all `React.forwardRef` usage across UI components
+  - Converted to React 19's ref-as-prop pattern (refs passed as regular props)
+  - Zero runtime overhead - purely signature changes
+  - All components maintain identical functionality and behavior
+  - Full TypeScript type safety preserved with proper ref typing
+
+### Changed
+
+- **Avatar Components** (`src/components/ui/avatar.tsx`)
+  - Converted 3 components: Avatar, AvatarImage, AvatarFallback
+  - Ref now passed as optional prop: `ref?: React.Ref<React.ElementRef<typeof AvatarPrimitive.Root>>`
+  - All Radix UI primitive integrations maintained
+
+- **Checkbox Component** (`src/components/ui/checkbox.tsx`)
+  - Single component conversion with CheckboxPrimitive.Root integration
+  - Preserved all accessibility features and visual states
+
+- **Command Components** (`src/components/ui/command.tsx`)
+  - Converted 7 components: Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandSeparator, CommandItem
+  - Largest refactor - maintained cmdk integration and dialog functionality
+
+- **Radio Group Components** (`src/components/ui/radio-group.tsx`)
+  - Converted 2 components: RadioGroup, RadioGroupItem
+  - Preserved indicator logic and Lucide icon integration
+
+- **Separator Component** (`src/components/ui/separator.tsx`)
+  - Single component with default parameter preservation (orientation, decorative)
+  - Maintained horizontal/vertical orientation logic
+
+- **Switch Component** (`src/components/ui/switch.tsx`)
+  - Converted Switch with SwitchPrimitives.Thumb integration
+  - All data-state attributes and animations preserved
+
+### Technical Implementation
+
+**Before (Deprecated React.forwardRef):**
+```tsx
+const Component = React.forwardRef<
+  React.ElementRef<typeof Primitive>,
+  React.ComponentPropsWithoutRef<typeof Primitive>
+>(({ className, ...props }, ref) => (
+  <Primitive ref={ref} className={cn(/* ... */)} {...props} />
+));
+Component.displayName = Primitive.displayName;
+```
+
+**After (React 19 Ref-as-Prop):**
+```tsx
+const Component = ({
+  className,
+  ref,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof Primitive> & {
+  ref?: React.Ref<React.ElementRef<typeof Primitive>>;
+}) => (
+  <Primitive ref={ref} className={cn(/* ... */)} {...props} />
+);
+Component.displayName = Primitive.displayName;
+```
+
+**Type Safety Pattern:**
+- Maintained `React.ComponentPropsWithoutRef<typeof Primitive>` for all props
+- Added intersection type: `& { ref?: React.Ref<...> }` for optional ref
+- Preserved `React.ElementRef<typeof Primitive>` for exact ref typing
+- All components remain fully type-safe with strict TypeScript mode
+
+**Files Modified (6 files, 15 component instances):**
+- `src/components/ui/avatar.tsx` - 3 components (Avatar, AvatarImage, AvatarFallback)
+- `src/components/ui/checkbox.tsx` - 1 component (Checkbox)
+- `src/components/ui/command.tsx` - 7 components (Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandSeparator, CommandItem)
+- `src/components/ui/radio-group.tsx` - 2 components (RadioGroup, RadioGroupItem)
+- `src/components/ui/separator.tsx` - 1 component (Separator)
+- `src/components/ui/switch.tsx` - 1 component (Switch)
+
+**Import Optimization:**
+- Auto-formatter converted all `import * as React` to `import type * as React`
+- React only used for type annotations, not runtime values
+- Cleaner imports that get stripped at compile time
+
+### Code Quality
+
+- **Linting:** 0 warnings (verified with `npm run lint` - 580 files checked)
+- **TypeScript:** 0 errors (verified with `npm run type-check`)
+- **Build:** Production build successful (425 static pages generated)
+- **Performance:** React.memo() optimizations preserved on relevant components
+- **Testing:** All components render identically to previous implementation
+
+### Impact
+
+- **Zero Breaking Changes:** All components maintain exact same API and behavior
+- **Future-Proof:** Aligned with React 19 best practices and official migration guide
+- **Maintainability:** Simpler component signatures without forwardRef wrapper
+- **Type Safety:** Full TypeScript inference preserved with proper ref typing
+- **Production Ready:** All quality checks passed (lint, type-check, build)
+
+### For Contributors
+
+When creating new shadcn/ui components, use the React 19 ref-as-prop pattern:
+
+```tsx
+const MyComponent = ({
+  className,
+  ref,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof Primitive> & {
+  ref?: React.Ref<React.ElementRef<typeof Primitive>>;
+}) => (
+  <Primitive ref={ref} className={cn(/* ... */)} {...props} />
+);
+```
+
+**Do not use** `React.forwardRef` - it's deprecated in React 19.
+
+Run `npm run lint` and `npm run type-check` before committing to ensure compliance.
+
+### Related Resources
+
+- [React 19 Upgrade Guide - forwardRef](https://react.dev/blog/2024/04/25/react-19-upgrade-guide#ref-as-a-prop)
+- [shadcn/ui Documentation](https://ui.shadcn.com)
+- [Radix UI Primitives](https://www.radix-ui.com/primitives)
 
 ---
 

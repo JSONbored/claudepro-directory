@@ -29,6 +29,7 @@ import { ChangelogContent } from '@/src/components/changelog/changelog-content';
 import { ViewTracker } from '@/src/components/shared/view-tracker';
 import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
 import { ChangelogArticleStructuredData } from '@/src/components/structured-data/changelog-structured-data';
+import { Separator } from '@/src/components/ui/separator';
 import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
@@ -156,7 +157,7 @@ export default async function ChangelogEntryPage({
           </Link>
 
           {/* Header */}
-          <header className="space-y-4 border-b pb-6">
+          <header className="space-y-4 pb-6">
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
               <Calendar className="h-4 w-4" />
               <time dateTime={entry.date}>{formatChangelogDate(entry.date)}</time>
@@ -175,6 +176,8 @@ export default async function ChangelogEntryPage({
               </a>
             </div>
           </header>
+
+          <Separator className="my-6" />
 
           {/* Content */}
           <ChangelogContent entry={entry} />

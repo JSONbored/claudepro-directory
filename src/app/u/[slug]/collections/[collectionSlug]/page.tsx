@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { Separator } from '@/src/components/ui/separator';
 import { trackView } from '@/src/lib/actions/track-view';
 import { ArrowLeft, ExternalLink } from '@/src/lib/icons';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
@@ -197,7 +198,8 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
           </div>
 
           {/* Stats */}
-          <div className="grid gap-4 sm:grid-cols-3 pt-6 border-t">
+          <Separator className="my-6" />
+          <div className="grid gap-4 sm:grid-cols-3">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium">Total Items</CardTitle>

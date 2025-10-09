@@ -21,6 +21,7 @@ import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { Separator } from '@/src/components/ui/separator';
 import { generateConfigRecommendations } from '@/src/lib/actions/recommender-actions';
 import { ArrowLeft, ArrowRight, Loader2, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -538,7 +539,8 @@ export function QuizForm() {
           )}
 
           {/* Navigation buttons */}
-          <div className="flex items-center justify-between pt-6 border-t">
+          <Separator className="my-6" />
+          <div className="flex items-center justify-between">
             <Button
               type="button"
               variant="outline"

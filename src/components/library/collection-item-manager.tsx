@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/ui/select';
+import { Separator } from '@/src/components/ui/separator';
 import {
   addItemToCollection,
   removeItemFromCollection,
@@ -187,7 +188,7 @@ export function CollectionItemManager({
   return (
     <div className={UI_CLASSES.SPACE_Y_4}>
       {/* Add Item Section */}
-      <div className="flex items-end gap-2 pb-4 border-b">
+      <div className="flex items-end gap-2 pb-4">
         <div className="flex-1">
           <div className={`${UI_CLASSES.TEXT_SM} font-medium mb-2 block`}>
             Add Bookmark to Collection
@@ -225,6 +226,8 @@ export function CollectionItemManager({
           Add
         </Button>
       </div>
+
+      <Separator className="my-4" />
 
       {/* Items List */}
       {items.length === 0 ? (

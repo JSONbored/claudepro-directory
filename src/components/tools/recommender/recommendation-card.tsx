@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { Separator } from '@/src/components/ui/separator';
 import {
   Tooltip,
   TooltipContent,
@@ -151,7 +152,8 @@ export function RecommendationCard({ result }: RecommendationCardProps) {
           )}
 
           {/* Metadata row */}
-          <div className="flex items-center justify-between text-sm text-muted-foreground pt-2 border-t">
+          <Separator className="my-2" />
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
             <div className="flex items-center gap-3">
               <span>by {result.author}</span>
               {result.viewCount !== undefined && (

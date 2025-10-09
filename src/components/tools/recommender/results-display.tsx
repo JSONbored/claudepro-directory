@@ -30,6 +30,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/src/components/ui/collapsible';
+import { Separator } from '@/src/components/ui/separator';
 import { Slider } from '@/src/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
 import { addBookmarkBatch } from '@/src/lib/actions/bookmark-actions';
@@ -229,7 +230,8 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
               </div>
 
               {/* Stats */}
-              <div className="pt-4 border-t">
+              <div className="pt-4">
+                <Separator className="mb-4" />
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Showing results:</span>
                   <span className="font-medium">

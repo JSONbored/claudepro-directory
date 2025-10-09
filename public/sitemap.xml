@@ -241,6 +241,12 @@
     <priority>0.65</priority>
   </url>
   <url>
+    <loc>https://claudepro.directory/changelog/2025-10-08-component-architecture-improvements</loc>
+    <lastmod>2025-10-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://claudepro.directory/changelog/2025-10-08-production-code-quality-and-accessibility-improvements</loc>
     <lastmod>2025-10-08</lastmod>
     <changefreq>monthly</changefreq>
@@ -2339,6 +2345,12 @@
     <lastmod>2025-10-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://claudepro.directory/changelog/2025-10-08-component-architecture-improvements/llms.txt</loc>
+    <lastmod>2025-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
   </url>
   <url>
     <loc>https://claudepro.directory/changelog/2025-10-08-production-code-quality-and-accessibility-improvements/llms.txt</loc>
