@@ -1,4 +1,3 @@
-import withBundleAnalyzer from '@next/bundle-analyzer';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -9,15 +8,21 @@ const __dirname = dirname(__filename);
 // Set browserslist config path
 process.env.BROWSERSLIST_CONFIG = resolve(__dirname, 'config/tools/browserslist');
 
-// Configure bundle analyzer (Next.js 15.6.0-canary.54)
-const bundleAnalyzer = withBundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true' || process.env.ANALYZE === 'both',
-  // Separate client/server analysis for granular insights
-  analyzeServer: ['server', 'both'].includes(process.env.ANALYZE),
-  analyzeClient: ['client', 'both', 'true'].includes(process.env.ANALYZE),
-  openAnalyzer: true,
-  generateStatsFile: true,
-});
+// Conditionally import bundle analyzer only when needed (devDependency)
+// This prevents Vercel production builds from failing when dev deps are omitted
+let bundleAnalyzer = (config) => config; // Default passthrough function
+
+if (process.env.ANALYZE) {
+  const { default: withBundleAnalyzer } = await import('@next/bundle-analyzer');
+  bundleAnalyzer = withBundleAnalyzer({
+    enabled: process.env.ANALYZE === 'true' || process.env.ANALYZE === 'both',
+    // Separate client/server analysis for granular insights
+    analyzeServer: ['server', 'both'].includes(process.env.ANALYZE),
+    analyzeClient: ['client', 'both', 'true'].includes(process.env.ANALYZE),
+    openAnalyzer: true,
+    generateStatsFile: true,
+  });
+}
 
 /**
  * Next.js 15.6.0-canary.54 Configuration (October 2025 - Canary Features Enabled)
