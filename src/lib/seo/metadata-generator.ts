@@ -222,6 +222,10 @@ async function resolveValue<T>(
 /**
  * Build canonical URL from route and context
  * Handles both static and dynamic routes
+ *
+ * @param route - Route pattern (e.g., '/:category/:slug' or '/submit')
+ * @param context - Optional context with params
+ * @returns Fully qualified canonical URL (no trailing slash)
  */
 function buildCanonicalUrl(route: string, context?: MetadataContext): string {
   let path = route;
@@ -242,6 +246,12 @@ function buildCanonicalUrl(route: string, context?: MetadataContext): string {
   // Ensure path starts with /
   if (!path.startsWith('/')) {
     path = `/${path}`;
+  }
+
+  // Remove trailing slash (except for homepage)
+  // SEO best practice: consistent URL format prevents duplicate content
+  if (path !== '/' && path.endsWith('/')) {
+    path = path.slice(0, -1);
   }
 
   return `${APP_CONFIG.url}${path}`;

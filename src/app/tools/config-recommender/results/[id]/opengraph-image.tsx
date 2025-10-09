@@ -17,10 +17,37 @@ import { decodeQuizAnswers, type QuizAnswers } from '@/src/lib/schemas/recommend
 export const runtime = 'nodejs';
 export const maxDuration = 10;
 
-// OG image metadata
-export const alt = 'Your Personalized Claude Configuration Recommendations';
+// OG image size and type
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
+
+/**
+ * Generate dynamic alt text based on quiz results
+ * SHA-2966: Accessibility improvement for OpenGraph images
+ */
+export async function alt({
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ answers?: string }>;
+}) {
+  try {
+    const resolvedSearchParams = await searchParams;
+
+    if (!resolvedSearchParams.answers) {
+      return 'Personalized Claude Configuration Recommendations - Claude Pro Directory';
+    }
+
+    const answers = decodeQuizAnswers(resolvedSearchParams.answers);
+    const useCaseLabel = USE_CASE_LABELS[answers.useCase] || answers.useCase;
+    const experienceLabel = EXPERIENCE_LABELS[answers.experienceLevel] || answers.experienceLevel;
+
+    // Dynamic alt text: "Your {UseCase} Recommendations - {Experience} Level - Claude Pro Directory"
+    return `Your ${useCaseLabel} Recommendations - ${experienceLabel} Level - Claude Pro Directory`;
+  } catch {
+    return 'Personalized Claude Configuration Recommendations - Claude Pro Directory';
+  }
+}
 
 // Recommender gradient (purple theme)
 const RECOMMENDER_GRADIENT = {

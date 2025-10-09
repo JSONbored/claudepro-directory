@@ -31,10 +31,29 @@ import { logger } from '@/src/lib/logger';
 export const runtime = 'nodejs';
 export const maxDuration = 10;
 
-// OG image metadata
-export const alt = 'Claude Pro Directory Changelog';
+// OG image size and type
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
+
+/**
+ * Generate dynamic alt text based on changelog entry
+ * SHA-2966: Accessibility improvement for OpenGraph images
+ */
+export async function alt({ params }: { params: Promise<{ slug: string }> }) {
+  try {
+    const { slug } = await params;
+    const entry = await getChangelogEntryBySlug(slug);
+
+    if (!entry) {
+      return 'Changelog entry not found - Claude Pro Directory';
+    }
+
+    // Dynamic alt text: "{Title} - Changelog - Claude Pro Directory"
+    return `${entry.title} - Changelog - Claude Pro Directory`;
+  } catch {
+    return 'Claude Pro Directory Changelog - Platform Updates';
+  }
+}
 
 // Changelog gradient (purple-blue)
 const CHANGELOG_GRADIENT = {
