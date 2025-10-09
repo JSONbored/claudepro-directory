@@ -87,7 +87,6 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
                 )}
                 loadMore={loadMore}
                 hasMore={hasMore}
-                gridClassName={UI_CLASSES.GRID_RESPONSIVE_3}
                 emptyMessage={`No ${categoryName} found`}
                 keyExtractor={(item: UnifiedContentItem, _index: number) => item.slug}
                 showLoadMoreButton={false}

@@ -81,12 +81,7 @@ export const DetailSidebar = memo(function DetailSidebar({
 
       {/* Related Items Card */}
       {relatedItems.length > 0 && (
-        <SidebarRelatedItemsCard
-          items={relatedItems}
-          typeName={config.typeName}
-          category={item.category}
-          maxItems={5}
-        />
+        <SidebarRelatedItemsCard items={relatedItems} typeName={config.typeName} maxItems={5} />
       )}
     </div>
   );

@@ -30,7 +30,8 @@ export const UI_CLASSES = {
    */
   GRID_RESPONSIVE_2: 'grid gap-4 md:grid-cols-2',
   GRID_RESPONSIVE_2_GAP_8: 'grid gap-8 md:grid-cols-2',
-  GRID_RESPONSIVE_3: 'grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+  GRID_RESPONSIVE_3:
+    'grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-start auto-rows-fr',
   GRID_RESPONSIVE_3_GAP_8: 'grid gap-8 lg:grid-cols-3',
   GRID_RESPONSIVE_3_NO_LG: 'grid gap-6 md:grid-cols-3',
   GRID_RESPONSIVE_3_TIGHT: 'grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3',

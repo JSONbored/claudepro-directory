@@ -62,14 +62,40 @@ export const createCompany = rateLimitedAction
       throw new Error('You must be signed in to create a company profile');
     }
 
-    const { data, error } = await supabase
-      .from('companies')
-      .insert({
-        owner_id: user.id,
-        ...parsedInput,
-      })
-      .select()
-      .single();
+    // Build insert object conditionally to handle exactOptionalPropertyTypes
+    // Generate slug from name if not provided (database requires slug)
+    const generatedSlug =
+      parsedInput.slug ??
+      parsedInput.name
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
+
+    const insertData: {
+      owner_id: string;
+      name: string;
+      slug: string;
+      logo?: string | null;
+      website?: string | null;
+      description?: string | null;
+      size?: string | null;
+      industry?: string | null;
+      using_cursor_since?: string | null;
+    } = {
+      owner_id: user.id,
+      name: parsedInput.name,
+      slug: generatedSlug,
+    };
+
+    if (parsedInput.logo !== undefined) insertData.logo = parsedInput.logo;
+    if (parsedInput.website !== undefined) insertData.website = parsedInput.website;
+    if (parsedInput.description !== undefined) insertData.description = parsedInput.description;
+    if (parsedInput.size !== undefined) insertData.size = parsedInput.size;
+    if (parsedInput.industry !== undefined) insertData.industry = parsedInput.industry;
+    if (parsedInput.using_cursor_since !== undefined)
+      insertData.using_cursor_since = parsedInput.using_cursor_since;
+
+    const { data, error } = await supabase.from('companies').insert(insertData).select().single();
 
     if (error) {
       if (error.code === '23505') {
@@ -109,9 +135,29 @@ export const updateCompany = rateLimitedAction
 
     const { id, ...updates } = parsedInput;
 
+    // Build update object conditionally to handle exactOptionalPropertyTypes
+    const updateData: {
+      name?: string;
+      logo?: string | null;
+      website?: string | null;
+      description?: string | null;
+      size?: string | null;
+      industry?: string | null;
+      using_cursor_since?: string | null;
+    } = {};
+
+    if (updates.name !== undefined) updateData.name = updates.name;
+    if (updates.logo !== undefined) updateData.logo = updates.logo;
+    if (updates.website !== undefined) updateData.website = updates.website;
+    if (updates.description !== undefined) updateData.description = updates.description;
+    if (updates.size !== undefined) updateData.size = updates.size;
+    if (updates.industry !== undefined) updateData.industry = updates.industry;
+    if (updates.using_cursor_since !== undefined)
+      updateData.using_cursor_since = updates.using_cursor_since;
+
     const { data, error } = await supabase
       .from('companies')
-      .update(updates)
+      .update(updateData)
       .eq('id', id)
       .eq('owner_id', user.id)
       .select()

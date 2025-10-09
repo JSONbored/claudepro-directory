@@ -480,7 +480,10 @@ function interleaveSponsored<T extends UnifiedContentItem>(
 
   for (let i = 0; i < organic.length; i++) {
     // Add organic content
-    result.push(organic[i]!);
+    const organicItem = organic[i];
+    if (organicItem) {
+      result.push(organicItem);
+    }
 
     // Inject sponsored every 5 items (if available)
     if ((i + 1) % INJECTION_RATIO === 0 && sponsoredIndex < sponsored.length) {
@@ -529,7 +532,10 @@ async function getActiveSponsored(): Promise<
 
     // Filter out items that hit impression limit
     return data
-      .filter((item) => !item.impression_limit || item.impression_count < item.impression_limit)
+      .filter((item) => {
+        const impressionCount = item.impression_count ?? 0;
+        return !item.impression_limit || impressionCount < item.impression_limit;
+      })
       .map((item) => ({
         content_id: item.content_id,
         content_type: item.content_type,

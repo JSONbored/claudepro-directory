@@ -20,6 +20,7 @@ import { ExternalLink } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
+import { getContentItemUrl } from '@/src/lib/utils/url-helpers';
 
 /**
  * Props for SidebarRelatedItemsCard
@@ -27,7 +28,6 @@ import { getDisplayTitle } from '@/src/lib/utils';
 export interface SidebarRelatedItemsCardProps {
   items: UnifiedContentItem[];
   typeName: string;
-  category: string;
   maxItems?: number;
 }
 
@@ -40,7 +40,6 @@ export interface SidebarRelatedItemsCardProps {
 export const SidebarRelatedItemsCard = memo(function SidebarRelatedItemsCard({
   items,
   typeName,
-  category,
   maxItems = 5,
 }: SidebarRelatedItemsCardProps) {
   const router = useRouter();
@@ -61,7 +60,7 @@ export const SidebarRelatedItemsCard = memo(function SidebarRelatedItemsCard({
             key={relatedItem.slug}
             type="button"
             className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} p-3 rounded-lg border border-border ${UI_CLASSES.HOVER_BG_MUTED_50} ${UI_CLASSES.TRANSITION_COLORS} cursor-pointer w-full text-left`}
-            onClick={() => router.push(`/${category}/${relatedItem.slug}`)}
+            onClick={() => router.push(getContentItemUrl(relatedItem))}
           >
             <div className={`${UI_CLASSES.FLEX_1} ${UI_CLASSES.MIN_W_0}`}>
               <h4 className="font-medium text-sm truncate">{getDisplayTitle(relatedItem)}</h4>

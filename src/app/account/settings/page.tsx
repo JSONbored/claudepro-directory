@@ -98,7 +98,9 @@ export default async function SettingsPage() {
             <div>
               <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}>Tier</p>
               <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
-                {profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)}
+                {profile.tier
+                  ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
+                  : 'Free'}
               </p>
             </div>
 

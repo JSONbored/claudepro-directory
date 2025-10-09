@@ -7,7 +7,6 @@ import { z } from 'zod';
 import { metadataLoader } from '@/src/lib/content/lazy-content-loaders';
 import { logger } from '@/src/lib/logger';
 import { contentCache, statsRedis } from '@/src/lib/redis';
-import { contentIndexer } from '@/src/lib/related-content/indexer';
 import { relatedContentService } from '@/src/lib/related-content/service';
 import { isProduction } from '@/src/lib/schemas/env.schema';
 import { stringArray } from '@/src/lib/schemas/primitives/base-arrays';
@@ -294,14 +293,12 @@ class CacheWarmer {
 
   /**
    * Warm search indexes
+   * Note: Content index generation removed - we now use metadata loaders directly
+   * This method is kept for potential future search index warming
    */
   private async warmSearchIndexes(): Promise<void> {
     try {
-      // Build and cache the content index
-      const index = await contentIndexer.buildIndex();
-      await contentIndexer.saveIndex(index);
-
-      // Cache common search queries
+      // Cache common search queries for faster search responses
       const rawQueries = [
         'ai',
         'agent',

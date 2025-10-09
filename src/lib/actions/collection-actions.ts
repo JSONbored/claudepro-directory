@@ -106,8 +106,8 @@ export const createCollection = rateLimitedAction
       .insert({
         user_id: user.id,
         name,
-        slug: slug || undefined, // Let trigger generate if not provided
-        description: description || null,
+        slug: slug ?? name.toLowerCase().replace(/\s+/g, '-'),
+        description: description ?? null,
         is_public,
       })
       .select()
@@ -165,15 +165,27 @@ export const updateCollection = rateLimitedAction
     }
 
     // Update collection (RLS ensures user owns it)
+    // Build update object conditionally to avoid exactOptionalPropertyTypes issues
+    const updateData: {
+      name: string;
+      slug?: string;
+      description: string | null;
+      is_public: boolean;
+      updated_at: string;
+    } = {
+      name,
+      description: description ?? null,
+      is_public,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (slug !== undefined) {
+      updateData.slug = slug;
+    }
+
     const { data, error } = await supabase
       .from('user_collections')
-      .update({
-        name,
-        slug,
-        description: description || null,
-        is_public,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq('id', id)
       .eq('user_id', user.id)
       .select()

@@ -13,7 +13,9 @@ import type {
   RelatedCarouselClientProps,
   RelatedContentItem,
 } from '@/src/lib/schemas/related-content.schema';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { getContentItemUrl } from '@/src/lib/utils/url-helpers';
 
 export function RelatedCarouselClient({
   items,
@@ -51,8 +53,11 @@ export function RelatedCarouselClient({
   const handleItemClick = (item: RelatedContentItem, index: number) => {
     if (!trackingEnabled) return;
 
-    // Generate URL from category and slug (modern approach)
-    const itemUrl = `/${item.category}/${item.slug}`;
+    // Generate URL from category and slug using centralized helper
+    const itemUrl = getContentItemUrl({
+      category: item.category as ContentCategory,
+      slug: item.slug,
+    });
 
     // Track click event
     trackRelatedContentClick(window.location.pathname, itemUrl, index + 1, item.score);
@@ -213,7 +218,10 @@ export function RelatedCarouselClient({
               />
 
               <Link
-                href={`/${item.category}/${item.slug}`}
+                href={getContentItemUrl({
+                  category: item.category as ContentCategory,
+                  slug: item.slug,
+                })}
                 onClick={() => handleItemClick(item, index)}
                 className={`block ${UI_CLASSES.FLEX_1} ${UI_CLASSES.P_4} sm:${UI_CLASSES.P_6} hover:bg-accent/20 ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.FLEX_COL}`}
               >

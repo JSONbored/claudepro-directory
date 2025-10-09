@@ -17,6 +17,7 @@
 
 import { NextResponse } from 'next/server';
 import { logger } from '@/src/lib/logger';
+import { withCronAuth } from '@/src/lib/middleware/cron-auth';
 import { createClient } from '@/src/lib/supabase/admin-client';
 
 export const runtime = 'nodejs';
@@ -34,103 +35,106 @@ interface ExpiredJob {
 /**
  * GET handler for job expiration cron job
  *
- * Protected by Vercel Cron - only Vercel's cron service can trigger this.
- * No additional auth needed as Vercel validates the request origin.
+ * Protected by CRON_SECRET - only Vercel Cron can trigger this.
+ * Validates authorization header before processing.
  *
+ * @param request - Next.js request object
  * @returns JSON response with expiration results
  */
-export async function GET() {
-  try {
-    logger.info('Job expiration cron started');
+export async function GET(request: Request) {
+  return withCronAuth(request, async () => {
+    try {
+      logger.info('Job expiration cron started');
 
-    const supabase = await createClient();
-    const now = new Date().toISOString();
+      const supabase = await createClient();
+      const now = new Date().toISOString();
 
-    // Find all active jobs that have expired
-    const { data: expiredJobs, error: selectError } = await supabase
-      .from('jobs')
-      .select('id, slug, title, company, expires_at, user_id')
-      .eq('status', 'active')
-      .lt('expires_at', now)
-      .not('expires_at', 'is', null);
+      // Find all active jobs that have expired
+      const { data: expiredJobs, error: selectError } = await supabase
+        .from('jobs')
+        .select('id, slug, title, company, expires_at, user_id')
+        .eq('status', 'active')
+        .lt('expires_at', now)
+        .not('expires_at', 'is', null);
 
-    if (selectError) {
-      logger.error(`Failed to query expired jobs: ${selectError.message}`);
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Failed to query expired jobs',
-        },
-        { status: 500 }
+      if (selectError) {
+        logger.error(`Failed to query expired jobs: ${selectError.message}`);
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Failed to query expired jobs',
+          },
+          { status: 500 }
+        );
+      }
+
+      // If no jobs to expire, return early
+      if (!expiredJobs || expiredJobs.length === 0) {
+        logger.info('No jobs to expire');
+        return NextResponse.json({
+          success: true,
+          expiredCount: 0,
+          message: 'No jobs needed expiration',
+        });
+      }
+
+      const typedExpiredJobs = expiredJobs as ExpiredJob[];
+
+      logger.info(
+        `Found ${typedExpiredJobs.length} jobs to expire: ${typedExpiredJobs.map((j) => j.slug).join(', ')}`
       );
-    }
 
-    // If no jobs to expire, return early
-    if (!expiredJobs || expiredJobs.length === 0) {
-      logger.info('No jobs to expire');
+      // Update all expired jobs to 'expired' status
+      const { error: updateError } = await supabase
+        .from('jobs')
+        .update({
+          status: 'expired',
+          active: false,
+        })
+        .in(
+          'id',
+          typedExpiredJobs.map((j) => j.id)
+        );
+
+      if (updateError) {
+        logger.error(`Failed to update expired jobs: ${updateError.message}`);
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Failed to update expired jobs',
+          },
+          { status: 500 }
+        );
+      }
+
+      logger.info(
+        `Successfully expired ${typedExpiredJobs.length} jobs: ${typedExpiredJobs.map((j) => `${j.slug} (${j.company})`).join(', ')}`
+      );
+
+      // TODO: Future enhancement - send expiration notification emails
+      // For now, just log successful expiration
+
       return NextResponse.json({
         success: true,
-        expiredCount: 0,
-        message: 'No jobs needed expiration',
+        expiredCount: typedExpiredJobs.length,
+        jobs: typedExpiredJobs.map((j) => ({
+          id: j.id,
+          slug: j.slug,
+          title: j.title,
+        })),
       });
-    }
-
-    const typedExpiredJobs = expiredJobs as ExpiredJob[];
-
-    logger.info(
-      `Found ${typedExpiredJobs.length} jobs to expire: ${typedExpiredJobs.map((j) => j.slug).join(', ')}`
-    );
-
-    // Update all expired jobs to 'expired' status
-    const { error: updateError } = await supabase
-      .from('jobs')
-      .update({
-        status: 'expired',
-        active: false,
-      })
-      .in(
-        'id',
-        typedExpiredJobs.map((j) => j.id)
+    } catch (error) {
+      logger.error(
+        `Job expiration cron failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
 
-    if (updateError) {
-      logger.error(`Failed to update expired jobs: ${updateError.message}`);
       return NextResponse.json(
         {
           success: false,
-          error: 'Failed to update expired jobs',
+          error: 'Internal server error',
         },
         { status: 500 }
       );
     }
-
-    logger.info(
-      `Successfully expired ${typedExpiredJobs.length} jobs: ${typedExpiredJobs.map((j) => `${j.slug} (${j.company})`).join(', ')}`
-    );
-
-    // TODO: Future enhancement - send expiration notification emails
-    // For now, just log successful expiration
-
-    return NextResponse.json({
-      success: true,
-      expiredCount: typedExpiredJobs.length,
-      jobs: typedExpiredJobs.map((j) => ({
-        id: j.id,
-        slug: j.slug,
-        title: j.title,
-      })),
-    });
-  } catch (error) {
-    logger.error(
-      `Job expiration cron failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-    );
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Internal server error',
-      },
-      { status: 500 }
-    );
-  }
+  });
 }

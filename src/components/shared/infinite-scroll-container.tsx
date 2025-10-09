@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useCallback, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import { Button } from '@/src/components/ui/button';
 import { useInfiniteScroll } from '@/src/hooks/use-infinite-scroll';
@@ -15,7 +15,6 @@ export interface InfiniteScrollContainerProps<T> {
   loadMore: () => Promise<T[]>;
   hasMore: boolean;
   className?: string;
-  gridClassName?: string;
   loadingClassName?: string;
   showLoadMoreButton?: boolean;
   emptyMessage?: string;
@@ -28,7 +27,6 @@ export function InfiniteScrollContainer<T>({
   loadMore,
   hasMore,
   className,
-  gridClassName = UI_CLASSES.GRID_RESPONSIVE_3_TIGHT,
   loadingClassName,
   showLoadMoreButton = true,
   emptyMessage = 'No items found',
@@ -36,17 +34,18 @@ export function InfiniteScrollContainer<T>({
 }: InfiniteScrollContainerProps<T>) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const handleLoadMore = useCallback(async () => {
-    if (loading || !hasMore) return;
+    if (loading || !hasMore) {
+      return;
+    }
 
     setLoading(true);
     setError(null);
 
     try {
       await loadMore();
-      // Trust parent's hasMore prop for pagination state
-      // No need to manage local state
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load more items';
       setError(errorMessage);
@@ -80,6 +79,44 @@ export function InfiniteScrollContainer<T>({
     });
   }, [handleLoadMore]);
 
+  // Masonry layout effect - calculates row spans based on content height
+  // MUST be before early return to satisfy Rules of Hooks
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+
+    const resizeGridItems = () => {
+      const rowGap = 24; // gap-6 = 24px
+      const rowHeight = 1; // auto-rows-[1px] - Fine-grained control for consistent spacing
+      const items = grid.querySelectorAll('[data-grid-item]');
+
+      items.forEach((item) => {
+        const content = item.querySelector('[data-grid-content]');
+        if (content) {
+          const contentHeight = content.getBoundingClientRect().height;
+          const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
+          (item as HTMLElement).style.gridRowEnd = `span ${rowSpan}`;
+        }
+      });
+    };
+
+    // Initial calculation
+    resizeGridItems();
+
+    // Recalculate on window resize
+    window.addEventListener('resize', resizeGridItems);
+
+    // Recalculate when items change
+    const observer = new ResizeObserver(resizeGridItems);
+    observer.observe(grid);
+
+    return () => {
+      window.removeEventListener('resize', resizeGridItems);
+      observer.disconnect();
+    };
+  }, []);
+
+  // Early return AFTER all hooks
   if (items.length === 0 && !loading) {
     return (
       <div className={UI_CLASSES.CONTAINER_CENTER}>
@@ -89,14 +126,19 @@ export function InfiniteScrollContainer<T>({
   }
 
   return (
-    <div className={cn('space-y-8', className)}>
-      {/* Items Grid */}
-      <div className={gridClassName}>
+    <div className={className}>
+      {/* Items Grid - Masonry with dynamic row spanning */}
+      <div
+        ref={gridRef}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[1px]"
+      >
         {items.map((item, index) => {
           const key = keyExtractor ? keyExtractor(item, index) : `item-${index}`;
           return (
-            <div key={key}>
-              <ErrorBoundary>{renderItem(item, index)}</ErrorBoundary>
+            <div key={key} data-grid-item>
+              <div data-grid-content>
+                <ErrorBoundary>{renderItem(item, index)}</ErrorBoundary>
+              </div>
             </div>
           );
         })}
@@ -104,7 +146,7 @@ export function InfiniteScrollContainer<T>({
 
       {/* Error Message */}
       {error && (
-        <div className={`${UI_CLASSES.FLEX_COL_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} py-8`}>
+        <div className={`${UI_CLASSES.FLEX_COL_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} py-8 mt-8`}>
           <p className="text-destructive text-sm mb-4">{error}</p>
           <Button onClick={handleManualLoadMore} variant="outline" size="sm">
             Try Again
@@ -116,7 +158,7 @@ export function InfiniteScrollContainer<T>({
       {loading && (
         <div
           className={cn(
-            `flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} py-8`,
+            `flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} py-8 mt-8`,
             loadingClassName
           )}
         >
@@ -127,12 +169,17 @@ export function InfiniteScrollContainer<T>({
 
       {/* Infinite Scroll Trigger */}
       {!loading && hasMore && (
-        <div ref={observerTarget} className={`h-4 ${UI_CLASSES.W_FULL}`} aria-hidden="true" />
+        <div
+          ref={observerTarget}
+          className={`h-4 ${UI_CLASSES.W_FULL} mt-8`}
+          aria-hidden="true"
+          data-testid="infinite-scroll-target"
+        />
       )}
 
       {/* Manual Load More Button (Optional) */}
       {!loading && hasMore && showLoadMoreButton && (
-        <div className={`flex ${UI_CLASSES.JUSTIFY_CENTER} pt-4 pb-8`}>
+        <div className={`flex ${UI_CLASSES.JUSTIFY_CENTER} pt-4 pb-8 mt-8`}>
           <Button
             onClick={handleManualLoadMore}
             variant="outline"
@@ -146,7 +193,7 @@ export function InfiniteScrollContainer<T>({
 
       {/* End of List Message */}
       {!hasMore && items.length > 0 && (
-        <div className={`flex ${UI_CLASSES.JUSTIFY_CENTER} py-8`}>
+        <div className={`flex ${UI_CLASSES.JUSTIFY_CENTER} py-8 mt-8`}>
           <p className="text-muted-foreground text-sm">
             You've reached the end • {items.length} total items
           </p>

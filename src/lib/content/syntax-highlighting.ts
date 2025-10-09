@@ -75,8 +75,8 @@ async function getHighlighter() {
  */
 export async function highlightCode(
   code: string,
-  language: string = 'text',
-  showLineNumbers: boolean = true
+  language = 'text',
+  showLineNumbers = true
 ): Promise<string> {
   try {
     const highlighter = await getHighlighter();

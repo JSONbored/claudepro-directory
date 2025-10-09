@@ -19,11 +19,11 @@ export const metadata: Metadata = {
 };
 
 interface AnalyticsPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPageProps) {
-  const { id } = params;
+  const { id } = await params;
   const supabase = await createClient();
   const {
     data: { user },
@@ -64,26 +64,27 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
   const clicksMap = new Map<string, number>();
 
   impressionsByDay?.forEach((imp) => {
-    const day = new Date(imp.created_at).toISOString().split('T')[0]!;
+    const isoDate = new Date(imp.created_at).toISOString();
+    const day = isoDate.substring(0, 10); // Extract YYYY-MM-DD
     impressionsMap.set(day, (impressionsMap.get(day) || 0) + 1);
   });
 
   clicksByDay?.forEach((click) => {
-    const day = new Date(click.created_at).toISOString().split('T')[0]!;
+    const isoDate = new Date(click.created_at).toISOString();
+    const day = isoDate.substring(0, 10); // Extract YYYY-MM-DD
     clicksMap.set(day, (clicksMap.get(day) || 0) + 1);
   });
 
-  const ctr =
-    sponsorship.impression_count > 0
-      ? ((sponsorship.click_count / sponsorship.impression_count) * 100).toFixed(2)
-      : '0.00';
+  const impressionCount = sponsorship.impression_count ?? 0;
+  const clickCount = sponsorship.click_count ?? 0;
+
+  const ctr = impressionCount > 0 ? ((clickCount / impressionCount) * 100).toFixed(2) : '0.00';
 
   const daysActive = Math.floor(
     (Date.now() - new Date(sponsorship.start_date).getTime()) / (1000 * 60 * 60 * 24)
   );
 
-  const avgImpressionsPerDay =
-    daysActive > 0 ? (sponsorship.impression_count / daysActive).toFixed(0) : '0';
+  const avgImpressionsPerDay = daysActive > 0 ? (impressionCount / daysActive).toFixed(0) : '0';
 
   return (
     <div className={UI_CLASSES.SPACE_Y_6}>
@@ -107,9 +108,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <Eye className="h-5 w-5 text-primary" />
-              <span className="text-3xl font-bold">
-                {sponsorship.impression_count.toLocaleString()}
-              </span>
+              <span className="text-3xl font-bold">{impressionCount.toLocaleString()}</span>
             </div>
             {sponsorship.impression_limit && (
               <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
@@ -126,7 +125,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
           <CardContent>
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <MousePointer className="h-5 w-5 text-primary" />
-              <span className="text-3xl font-bold">{sponsorship.click_count.toLocaleString()}</span>
+              <span className="text-3xl font-bold">{clickCount.toLocaleString()}</span>
             </div>
             <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-2`}>
               User engagements
@@ -229,7 +228,7 @@ export default async function SponsorshipAnalyticsPage({ params }: AnalyticsPage
             {Array.from({ length: 30 }).map((_, i) => {
               const date = new Date();
               date.setDate(date.getDate() - (29 - i));
-              const dayKey = date.toISOString().split('T')[0]!;
+              const dayKey = date.toISOString().substring(0, 10); // Extract YYYY-MM-DD
               const impressions = impressionsMap.get(dayKey) || 0;
               const clicks = clicksMap.get(dayKey) || 0;
               const maxImpressions = Math.max(...Array.from(impressionsMap.values()), 1);

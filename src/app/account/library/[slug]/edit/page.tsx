@@ -71,7 +71,11 @@ export default async function EditCollectionPage({ params }: EditCollectionPageP
           <CardTitle>Collection Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <CollectionForm bookmarks={bookmarks || []} mode="edit" collection={collection} />
+          <CollectionForm
+            bookmarks={(bookmarks || []).map((b) => ({ ...b, notes: b.notes ?? '' }))}
+            mode="edit"
+            collection={{ ...collection, description: collection.description ?? '' }}
+          />
         </CardContent>
       </Card>
     </div>

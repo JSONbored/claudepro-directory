@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod';
+import { normalizeEmail } from '@/src/lib/schemas/primitives/sanitization-transforms';
 import { VALIDATION_PATTERNS } from '@/src/lib/security/patterns';
 
 /**
@@ -27,7 +28,7 @@ export const newsletterSignupSchema = z.object({
     .max(254, 'Email address is too long')
     .email('Please enter a valid email address')
     .regex(VALIDATION_PATTERNS.EMAIL, 'Email format is invalid')
-    .transform((val) => val.toLowerCase().trim())
+    .transform(normalizeEmail)
     .describe('Subscriber email address (RFC 5322 compliant, normalized)'),
 
   // Optional: Signup source for analytics

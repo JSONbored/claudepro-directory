@@ -134,8 +134,8 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
         <CardContent>
           <CollectionItemManager
             collectionId={collection.id}
-            items={items || []}
-            availableBookmarks={bookmarks || []}
+            items={(items || []).map((item) => ({ ...item, notes: item.notes ?? '' }))}
+            availableBookmarks={(bookmarks || []).map((b) => ({ ...b, notes: b.notes ?? '' }))}
           />
         </CardContent>
       </Card>

@@ -109,7 +109,7 @@ class SearchCache {
   }
 
   // Invalidate cache for a specific pattern
-  async invalidateSearchCache(pattern: string = 'search:*'): Promise<void> {
+  async invalidateSearchCache(pattern = 'search:*'): Promise<void> {
     try {
       await contentCache.invalidatePattern(pattern);
       logger.info('Search cache invalidated', { pattern });

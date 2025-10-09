@@ -102,7 +102,9 @@ async function generateAPIDocs(): Promise<void> {
 
 // Execute immediately
 generateAPIDocs().catch((error: unknown) => {
-  console.error('Failed to generate API docs:', error);
+  logger.failure(
+    `Failed to generate API docs: ${error instanceof Error ? error.message : String(error)}`
+  );
   process.exit(1);
 });
 

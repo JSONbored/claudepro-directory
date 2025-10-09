@@ -12,7 +12,9 @@ import {
   type ContentItem,
   contentIndexSchema,
 } from '@/src/lib/schemas/related-content.schema';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { viewCountService } from '@/src/lib/services/view-count.service';
+import { getContentItemUrl } from '@/src/lib/utils/url-helpers';
 
 // Clean, production Zod schemas
 
@@ -177,6 +179,7 @@ class RelatedContentService {
 
   /**
    * Load content index with simple in-memory caching
+   * Modern approach: Uses existing metadata loaders instead of redundant indexer
    */
   private async loadContentIndex(): Promise<ContentIndex> {
     const now = Date.now();
@@ -187,20 +190,35 @@ class RelatedContentService {
     }
 
     try {
-      // Load from indexer
-      const { contentIndexer } = await import('./indexer');
-      const rawData = await contentIndexer.loadIndex();
+      // Load from metadata loaders (already lazy-loaded and cached)
+      const { metadataLoader } = await import('@/src/lib/content/lazy-content-loaders');
+      const { getAllBuildCategoryConfigs } = await import('@/src/lib/config/build-category-config');
+
+      // Get all category metadata keys
+      const categoryKeys = getAllBuildCategoryConfigs().map((config) => {
+        const varName = config.id.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+        return `${varName}Metadata` as const;
+      });
+
+      // Load all metadata in parallel (metadataLoader handles caching)
+      const allMetadata = await metadataLoader.getMany(categoryKeys);
+
+      // Flatten all metadata arrays into single items array
+      const items = Object.values(allMetadata).flat() as ContentItem[];
 
       if (isDevelopment) {
-        logger.debug('RAW INDEX DATA', {
-          exists: !!rawData,
-          itemsCount: rawData?.items?.length || 0,
-          keysPresent: rawData ? Object.keys(rawData).join(', ') : 'none',
+        logger.debug('Loaded content from metadata loaders', {
+          itemsCount: items.length,
+          categoriesLoaded: Object.keys(allMetadata).length,
         });
       }
 
-      // Validate with Zod schema
-      const validatedIndex = contentIndexSchema.parse(rawData);
+      // Build ContentIndex structure
+      const validatedIndex = contentIndexSchema.parse({
+        items,
+        generated: new Date().toISOString(),
+        version: '2.0.0', // Bumped version for new metadata-based system
+      });
 
       // Cache result
       contentCache = validatedIndex;
@@ -218,7 +236,7 @@ class RelatedContentService {
       const emptyIndex = contentIndexSchema.parse({
         items: [],
         generated: new Date().toISOString(),
-        version: '1.0.0',
+        version: '2.0.0',
       });
 
       contentCache = emptyIndex;
@@ -381,7 +399,10 @@ class RelatedContentService {
         title: result.item.title,
         description: result.item.description,
         category: result.item.category,
-        url: `/${result.item.category}/${result.item.slug}`,
+        url: getContentItemUrl({
+          category: result.item.category as ContentCategory,
+          slug: result.item.slug,
+        }),
         score: result.score,
         matchType: result.matchType,
         views: viewCountResult?.views || 0, // Use real/deterministic view count
