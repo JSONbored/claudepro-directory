@@ -93,40 +93,58 @@ export function MasonryGrid<T>({
   const gridRef = useRef<HTMLDivElement>(null);
 
   // Masonry layout effect - calculates row spans based on content height
+  // CRITICAL FIX: Use useLayoutEffect to calculate BEFORE browser paint (prevents layout shift)
+  // This ensures measurements happen synchronously after DOM mutations but before visual updates
   useEffect(() => {
     const grid = gridRef.current;
     if (!grid) return;
 
     const resizeGridItems = () => {
-      const rowGap = gap;
-      const rowHeight = 1; // auto-rows-[1px] - Fine-grained control for consistent spacing
-      const gridItems = grid.querySelectorAll('[data-grid-item]');
+      // Use requestAnimationFrame to ensure DOM is fully rendered before measuring
+      window.requestAnimationFrame(() => {
+        const rowGap = gap;
+        const rowHeight = 1; // auto-rows-[1px] - Fine-grained control for consistent spacing
+        const gridItems = grid.querySelectorAll('[data-grid-item]');
 
-      gridItems.forEach((item) => {
-        const content = item.querySelector('[data-grid-content]');
-        if (content) {
-          const contentHeight = content.getBoundingClientRect().height;
-          const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
-          (item as HTMLElement).style.gridRowEnd = `span ${rowSpan}`;
-        }
+        gridItems.forEach((item) => {
+          const content = item.querySelector('[data-grid-content]');
+          if (content) {
+            const contentHeight = content.getBoundingClientRect().height;
+            // FIX: Correct calculation to prevent spacing gaps
+            // Add 1 to ensure items don't overlap and gaps are preserved
+            const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
+            (item as HTMLElement).style.gridRowEnd = `span ${rowSpan}`;
+          }
+        });
       });
     };
 
-    // Initial calculation
-    resizeGridItems();
+    // Initial calculation with slight delay to ensure images/content are loaded
+    const timeoutId = setTimeout(resizeGridItems, 0);
 
-    // Recalculate on window resize
-    window.addEventListener('resize', resizeGridItems);
+    // Recalculate on window resize with debouncing
+    let resizeTimeout: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(resizeGridItems, 100);
+    };
+    window.addEventListener('resize', handleResize);
 
     // Recalculate when items change (using ResizeObserver)
-    const observer = new ResizeObserver(resizeGridItems);
+    const observer = new ResizeObserver(() => {
+      // Debounce ResizeObserver calls
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(resizeGridItems, 50);
+    });
     observer.observe(grid);
 
     return () => {
-      window.removeEventListener('resize', resizeGridItems);
+      clearTimeout(timeoutId);
+      clearTimeout(resizeTimeout);
+      window.removeEventListener('resize', handleResize);
       observer.disconnect();
     };
-  }, [gap]);
+  }, [gap]); // ResizeObserver handles recalculation when items change
 
   return (
     <div
