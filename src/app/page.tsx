@@ -119,18 +119,23 @@ export default async function HomePage() {
     <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
       {/* Static Hero Section - Server Rendered */}
       <section
-        className={`relative overflow-hidden ${UI_CLASSES.BORDER_B} border-border/50`}
+        className={`relative ${UI_CLASSES.BORDER_B} border-border/50 min-h-[60vh] flex items-center`}
         aria-label="Homepage hero"
+        style={{ overflow: 'hidden' }}
       >
-        {/* Animated background meteors */}
-        <Meteors number={20} />
+        {/* Animated background meteors - covers entire section */}
+        <div className="absolute inset-0 overflow-hidden">
+          <Meteors number={30} />
+        </div>
 
-        <div className={`relative container ${UI_CLASSES.MX_AUTO} px-4 py-10 sm:py-16 lg:py-24`}>
+        <div
+          className={`relative container ${UI_CLASSES.MX_AUTO} px-4 py-10 sm:py-16 lg:py-24 z-10`}
+        >
           <div className={`text-center ${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 text-foreground tracking-tight">
-              The home for{' '}
+              The home for Claude{' '}
               <TextRoll
-                words={['Claude enthusiasts', 'AI builders', 'power users', 'developers']}
+                words={['enthusiasts', 'developers', 'power users', 'beginners', 'builders']}
                 duration={3000}
                 className="text-accent"
               />
