@@ -13,8 +13,8 @@ import { Briefcase, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
 import { LazyConfigCard } from '@/src/components/shared/lazy-config-card';
-import { MasonryGrid } from '@/src/components/shared/masonry-grid';
 import { Button } from '@/src/components/ui/button';
+import { BentoCard, BentoGrid } from '@/src/components/ui/magic/bento-grid';
 import { CATEGORY_CONFIGS, HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -26,12 +26,32 @@ interface FeaturedSectionProps {
 }
 
 /**
- * Memoized Featured Section Component (SHA-2086 Fix)
+ * Bento Grid Layout Pattern for 6 items
+ * Creates visual hierarchy with varying card sizes
+ *
+ * Layout:
+ * Row 1: [Large (2x2)] [Medium (1x1)] [Medium (1x1)]
+ * Row 2: [Medium (1x1)] [Medium (1x1)] [Large (2x2)]
+ *
+ * This creates an asymmetric, visually interesting layout
+ */
+const BENTO_LAYOUT_PATTERN = [
+  { colSpan: 2, rowSpan: 2, gradient: 'to-br' as const }, // Item 0 - Featured large
+  { colSpan: 1, rowSpan: 1, gradient: 'none' as const }, // Item 1
+  { colSpan: 1, rowSpan: 1, gradient: 'none' as const }, // Item 2
+  { colSpan: 1, rowSpan: 1, gradient: 'none' as const }, // Item 3
+  { colSpan: 1, rowSpan: 1, gradient: 'none' as const }, // Item 4
+  { colSpan: 2, rowSpan: 2, gradient: 'to-tl' as const }, // Item 5 - Featured large
+];
+
+/**
+ * Memoized Featured Section Component (SHA-2086 Fix + Bento Grid Enhancement)
  *
  * PERFORMANCE: Prevents 30 card re-renders on every parent state change
  * Previously: All featured cards re-rendered on search/tab/filter changes
  * Now: Only re-renders when items prop actually changes
  *
+ * VISUAL: Uses Bento Grid for modern, visually striking layout
  * Impact: ~180ms savings per state change (30 cards × 6ms each)
  */
 const FeaturedSection: FC<FeaturedSectionProps> = memo(
@@ -49,21 +69,34 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
             View all <ExternalLink className="h-4 w-4" />
           </Link>
         </div>
-        {/* Use MasonryGrid for consistent card spacing (fixes uneven gaps) */}
-        <MasonryGrid
-          items={featuredItems}
-          renderItem={(item) => (
-            <LazyConfigCard
-              key={item.slug}
-              item={item}
-              variant="default"
-              showCategory={true}
-              showActions={true}
-            />
-          )}
-          keyExtractor={(item) => item.slug}
-          gap={24}
-        />
+
+        {/* Bento Grid for modern, visually striking layout */}
+        <BentoGrid columns={4} gap={6}>
+          {featuredItems.map((item, index) => {
+            const layout = BENTO_LAYOUT_PATTERN[index] || {
+              colSpan: 1,
+              rowSpan: 1,
+              gradient: 'none' as const,
+            };
+
+            return (
+              <BentoCard
+                key={item.slug}
+                colSpan={layout.colSpan}
+                rowSpan={layout.rowSpan}
+                gradient={layout.gradient}
+                className="p-0 overflow-hidden"
+              >
+                <LazyConfigCard
+                  item={item}
+                  variant="default"
+                  showCategory={true}
+                  showActions={true}
+                />
+              </BentoCard>
+            );
+          })}
+        </BentoGrid>
       </div>
     );
   }

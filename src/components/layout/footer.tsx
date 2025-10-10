@@ -5,8 +5,9 @@
  * @module components/layout/footer
  */
 
-import { ExternalLink, Github, Sparkles, Star } from 'lucide-react';
+import { ExternalLink, Github, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { GitHubStarsButton } from '@/src/components/layout/github-stars-button';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
 import { DiscordIcon } from '@/src/lib/custom-icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -93,25 +94,8 @@ export async function Footer() {
                 </Link>
               </div>
 
-              {/* GitHub Stars Badge */}
-              <a
-                href={SOCIAL_LINKS.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md border border-border/50 bg-card hover:bg-accent/10 hover:border-accent/30 transition-colors w-fit"
-                aria-label={stars ? `Star us on GitHub - ${stars} stars` : 'Star us on GitHub'}
-              >
-                <Star className="h-3.5 w-3.5 fill-current" />
-                {stars !== null ? (
-                  <>
-                    <span className="font-semibold">{stars.toLocaleString()}</span>
-                    <span className="text-muted-foreground">stars</span>
-                  </>
-                ) : (
-                  <span>Star us on GitHub</span>
-                )}
-                <Github className="h-3.5 w-3.5" />
-              </a>
+              {/* GitHub Stars Badge with Shimmer Effect */}
+              <GitHubStarsButton stars={stars} />
 
               {/* Open Source Badge */}
               <a

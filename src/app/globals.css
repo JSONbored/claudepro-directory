@@ -108,6 +108,10 @@
   --light-accent-active: oklch(57% 0.16 42);
   --light-accent-subtle: oklch(95% 0.035 42);
 
+  /* Accent glow variants for visual effects (shimmer, borders, highlights) */
+  --dark-accent-glow: oklch(62% 0.155 42 / 0.3);
+  --light-accent-glow: oklch(62% 0.155 42 / 0.3);
+
   /* Semantic Colors - Dark Mode */
   --dark-success: oklch(72% 0.19 145); /* Increased from 64% for WCAG AA contrast (4.5:1) */
   --dark-success-bg: oklch(35% 0.08 145 / 0.15);
@@ -282,6 +286,7 @@
   --color-accent-light: var(--claude-orange-light);
   --color-accent-muted: var(--claude-orange-muted);
   --color-accent-subtle: oklch(33% 0.045 35);
+  --color-accent-glow: var(--dark-accent-glow);
 
   --color-border-default: var(--dark-border-default);
   --color-border-light: var(--dark-border-light);
@@ -445,6 +450,7 @@
     --color-accent-subtle: var(--light-accent-subtle);
     --color-accent-light: var(--claude-orange-light);
     --color-accent-muted: var(--claude-orange-muted);
+    --color-accent-glow: var(--light-accent-glow);
 
     --color-border-default: var(--light-border-default);
     --color-border-light: var(--light-border-light);
@@ -500,6 +506,7 @@
   --color-accent-subtle: var(--light-accent-subtle);
   --color-accent-light: var(--claude-orange-light);
   --color-accent-muted: var(--claude-orange-muted);
+  --color-accent-glow: var(--light-accent-glow);
 
   --color-border-default: var(--light-border-default);
   --color-border-light: var(--light-border-light);
@@ -554,6 +561,7 @@
   --color-accent-subtle: oklch(33% 0.045 35);
   --color-accent-light: var(--claude-orange-light);
   --color-accent-muted: var(--claude-orange-muted);
+  --color-accent-glow: var(--dark-accent-glow);
 
   --color-border-default: var(--dark-border-default);
   --color-border-light: var(--dark-border-light);
@@ -688,6 +696,15 @@
   }
   .bg-accent-subtle {
     background-color: var(--color-accent-subtle);
+  }
+  .bg-accent-glow {
+    background-color: var(--color-accent-glow);
+  }
+  .text-accent-glow {
+    color: var(--color-accent-glow);
+  }
+  .border-accent-glow {
+    border-color: var(--color-accent-glow);
   }
 
   /* Border Utilities */
@@ -1184,6 +1201,137 @@
     font-size: var(--font-size-2xs);
   }
 
+  /* ========================================
+     ENHANCED TYPOGRAPHY HIERARCHY
+     Modern type scale with semantic naming
+     ======================================== */
+
+  /* Display Text - Hero sections */
+  .display-2xl {
+    font-size: clamp(3rem, 5vw + 1rem, 4.5rem);
+    line-height: var(--leading-tight);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--tracking-tighter);
+  }
+
+  .display-xl {
+    font-size: clamp(2.5rem, 4vw + 1rem, 3.75rem);
+    line-height: var(--leading-tight);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--tracking-tighter);
+  }
+
+  .display-lg {
+    font-size: clamp(2rem, 3vw + 1rem, 3rem);
+    line-height: var(--leading-tight);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  /* Headings - Section titles */
+  .heading-h1 {
+    font-size: clamp(2rem, 3vw + 0.5rem, 2.5rem);
+    line-height: var(--leading-tight);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .heading-h2 {
+    font-size: clamp(1.5rem, 2.5vw + 0.5rem, 2rem);
+    line-height: var(--leading-snug);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .heading-h3 {
+    font-size: clamp(1.25rem, 2vw + 0.25rem, 1.5rem);
+    line-height: var(--leading-snug);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  .heading-h4 {
+    font-size: var(--font-size-xl);
+    line-height: var(--leading-normal);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  .heading-h5 {
+    font-size: var(--font-size-lg);
+    line-height: var(--leading-normal);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  .heading-h6 {
+    font-size: var(--font-size-base);
+    line-height: var(--leading-normal);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  /* Body Text - Content */
+  .body-lg {
+    font-size: var(--font-size-lg);
+    line-height: var(--leading-relaxed);
+    font-weight: var(--font-weight-normal);
+  }
+
+  .body-base {
+    font-size: var(--font-size-base);
+    line-height: var(--leading-normal);
+    font-weight: var(--font-weight-normal);
+  }
+
+  .body-sm {
+    font-size: var(--font-size-sm);
+    line-height: var(--leading-normal);
+    font-weight: var(--font-weight-normal);
+  }
+
+  /* Labels & UI Text */
+  .label-lg {
+    font-size: var(--font-size-sm);
+    line-height: var(--leading-tight);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .label-base {
+    font-size: var(--font-size-xs);
+    line-height: var(--leading-tight);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+  }
+
+  .label-sm {
+    font-size: var(--font-size-xs);
+    line-height: var(--leading-tight);
+    font-weight: var(--font-weight-medium);
+  }
+
+  /* Code & Monospace */
+  .code-lg {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-base);
+    line-height: var(--leading-relaxed);
+  }
+
+  .code-base {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    line-height: var(--leading-normal);
+  }
+
+  .code-sm {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    line-height: var(--leading-normal);
+  }
+
   /* Animations */
   .animate-fade-in {
     animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1373,8 +1521,107 @@
   }
 }
 
+/* Magic UI Shimmer Animation */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Magic UI Marquee Animations */
+@keyframes marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
+}
+
+@keyframes marquee-right {
+  from {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Magic UI Meteor Animation */
+@keyframes meteor {
+  0% {
+    transform: rotate(215deg) translateX(0);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(215deg) translateX(-500px);
+    opacity: 0;
+  }
+}
+
+/* Magic UI Border Beam Animation */
+@keyframes border-beam {
+  0% {
+    --x: 0%;
+    --y: 0%;
+  }
+  25% {
+    --x: 100%;
+    --y: 0%;
+  }
+  50% {
+    --x: 100%;
+    --y: 100%;
+  }
+  75% {
+    --x: 0%;
+    --y: 100%;
+  }
+  100% {
+    --x: 0%;
+    --y: 0%;
+  }
+}
+
+/* Magic UI Grid Pattern Animation */
+@keyframes grid-pulse {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: var(--max-opacity, 0.5);
+  }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-shimmer {
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.animate-marquee-left {
+  animation: marquee-left linear infinite;
+}
+
+.animate-marquee-right {
+  animation: marquee-right linear infinite;
+}
+
+.animate-meteor {
+  animation: meteor linear infinite;
+}
+
+.animate-border-beam {
+  animation: border-beam linear infinite;
 }
 
 /* ========================================
@@ -1398,4 +1645,108 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========================================
+   GRADIENT TEXT UTILITIES
+   ======================================== */
+
+/* Gradient text with clip-path for modern browsers */
+.text-gradient {
+  background: linear-gradient(to right, var(--color-accent), var(--color-accent-hover));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Animated gradient text */
+.text-gradient-animate {
+  background: linear-gradient(
+    90deg,
+    var(--color-accent),
+    var(--color-accent-hover),
+    var(--color-accent)
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%,
+  100% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+}
+
+/* Magic UI Ripple Animation */
+@keyframes ripple-expand {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+
+.animate-ripple-expand {
+  animation: ripple-expand var(--ripple-duration, 600ms) ease-out;
+}
+
+/* ========================================
+   ACCESSIBILITY - REDUCED MOTION SUPPORT
+   Respects user's motion preferences
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Disable all animations */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Specific animation utilities */
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-scale-in,
+  .animate-pulse,
+  .animate-fadeIn,
+  .animate-shimmer,
+  .animate-marquee-left,
+  .animate-marquee-right,
+  .animate-meteor,
+  .animate-border-beam,
+  .animate-ripple-expand {
+    animation: none !important;
+  }
+
+  /* Gradient text - keep gradient but disable animation */
+  .text-gradient-animate {
+    animation: none !important;
+    background-position: 0% center;
+  }
+
+  /* Hover effects - keep them but make instant */
+  .hover-lift:hover {
+    transform: none;
+  }
+
+  /* Theme transitions */
+  .theme-transition,
+  .theme-transition *,
+  .theme-transition *::before,
+  .theme-transition *::after {
+    transition: none !important;
+  }
 }
