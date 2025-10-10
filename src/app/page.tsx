@@ -118,20 +118,14 @@ export default async function HomePage() {
   return (
     <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
       {/* Hero + Search Section with Meteors Background */}
-      <div className="relative">
+      <div className="relative isolate">
         {/* Animated meteors covering entire hero + search area */}
-        <div
-          className="absolute inset-0 overflow-hidden pointer-events-none"
-          style={{ height: '100%' }}
-        >
+        <div className="absolute inset-0 -z-10 overflow-hidden">
           <Meteors number={30} />
         </div>
 
         {/* Static Hero Section - Server Rendered */}
-        <section
-          className={`relative ${UI_CLASSES.BORDER_B} border-border/50`}
-          aria-label="Homepage hero"
-        >
+        <section className={`relative ${UI_CLASSES.BORDER_B} border-border/50`} aria-label="Homepage hero">
           <div
             className={`relative container ${UI_CLASSES.MX_AUTO} px-4 py-10 sm:py-16 lg:py-24 z-10`}
           >
