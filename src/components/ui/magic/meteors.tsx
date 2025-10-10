@@ -7,21 +7,52 @@
  * Performance optimizations:
  * - Pure CSS animations (no JavaScript for animation)
  * - GPU acceleration with transform
- * - Randomized delays and durations via CSS variables
+ * - Client-side only rendering to avoid hydration mismatches
  * - Uses absolute positioning for layout containment
  *
  * @module components/ui/magic/meteors
  */
 
-import { memo, useMemo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { cn } from '@/src/lib/utils';
 
 interface MeteorsProps {
   /**
    * Number of meteors to display
+   * Optimal range: 10-50 (higher values impact performance)
    * @default 20
    */
   number?: number;
+
+  /**
+   * Minimum animation delay in seconds
+   * @default 0
+   */
+  minDelay?: number;
+
+  /**
+   * Maximum animation delay in seconds
+   * @default 5
+   */
+  maxDelay?: number;
+
+  /**
+   * Minimum animation duration in seconds
+   * @default 3
+   */
+  minDuration?: number;
+
+  /**
+   * Maximum animation duration in seconds
+   * @default 8
+   */
+  maxDuration?: number;
+
+  /**
+   * Meteor trajectory angle in degrees
+   * @default 215
+   */
+  angle?: number;
 
   /**
    * Custom class name for container
@@ -29,34 +60,70 @@ interface MeteorsProps {
   className?: string;
 }
 
-function MeteorsComponent({ number = 20, className }: MeteorsProps) {
-  // Generate meteor configurations once using useMemo
-  const meteors = useMemo(() => {
-    return Array.from({ length: number }, (_, i) => ({
+function MeteorsComponent({
+  number = 20,
+  minDelay = 0,
+  maxDelay = 5,
+  minDuration = 3,
+  maxDuration = 8,
+  angle = 215,
+  className,
+}: MeteorsProps) {
+  const [meteors, setMeteors] = useState<
+    Array<{
+      id: number;
+      left: string;
+      top: string;
+      animationDelay: string;
+      animationDuration: string;
+    }>
+  >([]);
+
+  // Generate meteors on client-side only to avoid hydration mismatch
+  useEffect(() => {
+    const generatedMeteors = Array.from({ length: number }, (_, i) => ({
       id: i,
-      // Random left position (0-100%)
       left: `${Math.random() * 100}%`,
-      // Random animation delay (0-5s)
-      animationDelay: `${Math.random() * 5}s`,
-      // Random animation duration (3-8s)
-      animationDuration: `${3 + Math.random() * 5}s`,
+      top: `${Math.random() * 100}%`, // Distribute across entire height
+      animationDelay: `${minDelay + Math.random() * (maxDelay - minDelay)}s`,
+      animationDuration: `${minDuration + Math.random() * (maxDuration - minDuration)}s`,
     }));
-  }, [number]);
+    setMeteors(generatedMeteors);
+  }, [number, minDelay, maxDelay, minDuration, maxDuration]);
+
+  // Don't render anything on server
+  if (meteors.length === 0) {
+    return null;
+  }
 
   return (
-    <div className={cn('pointer-events-none absolute inset-0 -z-10 overflow-hidden', className)}>
+    <div
+      className={cn('pointer-events-none absolute inset-0 overflow-hidden z-[1]', className)}
+      aria-hidden="true"
+    >
       {meteors.map((meteor) => (
         <span
           key={meteor.id}
-          className="meteor absolute top-0 h-px w-px rotate-[215deg] animate-meteor bg-gradient-to-r from-accent to-transparent will-change-transform"
+          className="absolute animate-meteor"
           style={{
             left: meteor.left,
+            top: meteor.top,
             animationDelay: meteor.animationDelay,
             animationDuration: meteor.animationDuration,
           }}
         >
-          {/* Meteor tail */}
-          <span className="absolute top-1/2 h-px w-12 -translate-y-1/2 bg-gradient-to-r from-accent to-transparent" />
+          {/* Meteor comet with tail */}
+          <span
+            className="block relative h-[1.5px] w-[80px]"
+            style={{
+              transform: `rotate(${angle}deg)`,
+            }}
+          >
+            {/* Bright head (leading edge) */}
+            <span className="absolute right-0 h-full w-[30%] rounded-full bg-accent shadow-[0_0_8px_2px_hsl(var(--accent)/0.5)]" />
+            {/* Fading tail (trailing behind) */}
+            <span className="absolute right-[25%] h-full w-[75%] rounded-full bg-gradient-to-l from-accent/80 via-accent/40 to-transparent" />
+          </span>
         </span>
       ))}
     </div>

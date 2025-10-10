@@ -190,7 +190,7 @@ function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
   return (
     <>
       {/* Search Section */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 pt-4 pb-6`}>
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 pt-8 pb-12`}>
         <div className={`${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
           <UnifiedSearch
             placeholder="Search for rules, MCP servers, agents, commands, and more..."
@@ -201,6 +201,7 @@ function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
             availableAuthors={filterOptions.authors}
             availableCategories={filterOptions.categories}
             resultCount={filteredResults.length}
+            showFilters={false}
           />
 
           {/* Quick Stats - Below Search Bar */}

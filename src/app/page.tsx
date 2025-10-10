@@ -10,7 +10,7 @@ import { HomePageClient } from '@/src/components/features/home';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 import { Meteors } from '@/src/components/ui/magic/meteors';
-import { TextRoll } from '@/src/components/ui/magic/text-roll';
+import { RollingText } from '@/src/components/ui/magic/rolling-text';
 import { statsRedis } from '@/src/lib/redis';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { transformForHomePage } from '@/src/lib/utils/transformers';
@@ -117,23 +117,31 @@ export default async function HomePage() {
 
   return (
     <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
-      {/* Hero + Search Section with Meteors Background */}
-      <div className="relative">
-        {/* Animated meteors covering entire hero + search area */}
-        <Meteors number={30} />
+      {/* Hero + Search Section */}
+      <div className="relative overflow-hidden">
+        {/* Meteors Background Layer - Constrained to viewport height */}
+        <div className="absolute inset-0 max-h-screen pointer-events-none z-[1]">
+          <Meteors
+            number={20}
+            minDelay={0}
+            maxDelay={3}
+            minDuration={3}
+            maxDuration={8}
+            angle={35}
+          />
+        </div>
 
         {/* Static Hero Section - Server Rendered */}
         <section
-          className={`relative ${UI_CLASSES.BORDER_B} border-border/50`}
+          className={`relative ${UI_CLASSES.Z_10} ${UI_CLASSES.BORDER_B} border-border/50`}
           aria-label="Homepage hero"
         >
-          <div
-            className={`relative container ${UI_CLASSES.MX_AUTO} px-4 py-10 sm:py-16 lg:py-24 z-10`}
-          >
+          {/* Content Layer - Above meteors */}
+          <div className={`relative container ${UI_CLASSES.MX_AUTO} px-4 py-10 sm:py-16 lg:py-24`}>
             <div className={`text-center ${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
               <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 text-foreground tracking-tight">
                 The home for Claude{' '}
-                <TextRoll
+                <RollingText
                   words={['enthusiasts', 'developers', 'power users', 'beginners', 'builders']}
                   duration={3000}
                   className="text-accent"
@@ -151,19 +159,21 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Client Component for Interactive Features - Inside meteors wrapper */}
-        <HomePageClient
-          initialData={initialData}
-          stats={{
-            rules: rules.length,
-            mcp: mcp.length,
-            agents: agents.length,
-            commands: commands.length,
-            hooks: hooks.length,
-            statuslines: statuslines.length,
-            collections: collections.length,
-          }}
-        />
+        {/* Client Component for Interactive Features (Search, etc) */}
+        <div className={`relative ${UI_CLASSES.Z_10}`}>
+          <HomePageClient
+            initialData={initialData}
+            stats={{
+              rules: rules.length,
+              mcp: mcp.length,
+              agents: agents.length,
+              commands: commands.length,
+              hooks: hooks.length,
+              statuslines: statuslines.length,
+              collections: collections.length,
+            }}
+          />
+        </div>
       </div>
 
       {/* Email CTA - Moved to bottom of page */}

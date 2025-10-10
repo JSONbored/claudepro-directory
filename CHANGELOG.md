@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 **Latest Features:**
 
+- [Hero Section Animations](#2025-10-09---hero-section-animations-and-search-enhancements) - Meteor background effect, rolling text animation, enhanced search UI
 - [Card Grid Layout & Infinite Scroll](#2025-10-09---card-grid-layout-and-infinite-scroll-improvements) - CSS masonry layout, 95% spacing consistency, infinite scroll reliability
 - [Enhanced Type Safety & Schema Validation](#2025-10-09---enhanced-type-safety-with-branded-types-and-schema-improvements) - Branded types for IDs, centralized input sanitization, improved validation
 - [Production Code Quality & Accessibility](#2025-10-08---production-code-quality-and-accessibility-improvements) - TypeScript safety, WCAG AA compliance, Lighthouse CI automation
@@ -39,7 +40,111 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - [Reddit MCP Server](#2025-10-04---reddit-mcp-server-community-contribution) - Browse Reddit from Claude
 
-[View All Updates ↓](#2025-10-09---card-grid-layout-and-infinite-scroll-improvements)
+[View All Updates ↓](#2025-10-09---hero-section-animations-and-search-enhancements)
+
+---
+
+## 2025-10-09 - Hero Section Animations and Search Enhancements
+
+**TL;DR:** Transformed the homepage with dynamic meteor background animations, character-by-character rolling text effects, and streamlined search UI. These enhancements create a more engaging first impression while improving search discoverability and reducing visual clutter.
+
+### What Changed
+
+Redesigned the hero section with modern animations and refined the search experience. The homepage now features a subtle meteor shower effect, smooth text transitions, and a cleaner search interface that emphasizes content discovery over filtering options.
+
+### Added
+
+- **Meteor Background Animation** (`src/components/ui/magic/meteors.tsx`)
+  - Animated shooting stars effect across hero section
+  - 20 meteors with randomized timing and positioning
+  - Constrained to above-the-fold viewport (max-h-screen)
+  - GPU-accelerated CSS animations for 60fps performance
+  - Comet-style design with gradient tails and accent color glow
+  - Configurable angle (35°), speed (3-8s), and delay (0-3s)
+
+- **Rolling Text Animation** (`src/components/ui/magic/rolling-text.tsx`)
+  - Character-by-character 3D rotation effect (shadcn-style)
+  - Cycles through words: enthusiasts → developers → power users → beginners → builders
+  - Hardware-accelerated transforms with proper perspective
+  - Smooth easing with custom cubic-bezier curve [0.16, 1, 0.3, 1]
+  - 600ms rotation duration with 50ms character delays
+  - Accessibility support with screen reader announcements
+
+### Changed
+
+- **Search Bar Enhancement**
+  - Prominent orange search icon (h-5 w-5) positioned left with z-10 layering
+  - Increased input height from 12 to 14 (h-14) for better touch targets
+  - Accent color focus border (focus:border-accent/50)
+  - Improved spacing with pl-12 padding for icon clearance
+
+- **Hero Section Layout** (`src/app/page.tsx`)
+  - Moved search bar closer to hero text (pt-8 pb-12)
+  - Removed sort/filter controls from homepage search
+  - Cleaner first impression with focus on search discovery
+  - Sort and filter remain available on category pages
+
+### Fixed
+
+- **Rolling Text Hydration** - Prevented SSR/client mismatch by rendering static placeholder during server-side rendering
+- **Linting Compliance** - Resolved array index key warnings with unique character IDs
+- **Supabase Mock Client** - Added proper biome-ignore comments for intentional development warnings
+
+### Technical Implementation
+
+**Meteor Animation System:**
+```typescript
+<Meteors
+  number={20}
+  minDelay={0}
+  maxDelay={3}
+  minDuration={3}
+  maxDuration={8}
+  angle={35}
+/>
+```
+
+**Character Animation:**
+- Each character rotates independently with rotateX transforms
+- Entry: rotateX(90deg) → rotateX(0deg)
+- Exit: rotateX(0deg) → rotateX(90deg)
+- Transform origin: bottom center for natural rolling effect
+
+**Search Icon Positioning:**
+```tsx
+<div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+  <Search className="h-5 w-5 text-accent" />
+</div>
+```
+
+### Performance Impact
+
+- **Meteor Animation:** Pure CSS transforms, no JavaScript during animation
+- **Rolling Text:** Framer Motion with GPU acceleration
+- **Layout Shift:** Zero CLS with fixed container dimensions
+- **Accessibility:** ARIA live regions for text changes, reduced motion support
+
+### For Contributors
+
+When implementing similar animations:
+
+```tsx
+// ✅ Constrain animations to viewport
+<div className="absolute inset-0 max-h-screen">
+  <YourAnimation />
+</div>
+
+// ✅ Prevent hydration mismatches
+const [isMounted, setIsMounted] = useState(false);
+useEffect(() => setIsMounted(true), []);
+
+// ✅ Use stable keys for animated lists
+characters.map((item) => (
+  <motion.span key={item.id}>
+    {item.char}
+  </motion.span>
+))
+```
 
 ---
 

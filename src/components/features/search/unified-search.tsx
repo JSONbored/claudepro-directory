@@ -56,7 +56,8 @@ export function UnifiedSearch({
   availableCategories = [],
   resultCount = 0,
   className,
-}: UnifiedSearchProps) {
+  showFilters = true,
+}: UnifiedSearchProps & { showFilters?: boolean }) {
   const [localSearchQuery, setLocalSearchQuery] = useState('');
   const pathname = usePathname();
 
@@ -125,7 +126,9 @@ export function UnifiedSearch({
         {/* Search Bar */}
         <div className={UI_CLASSES.SPACE_Y_3}>
           <div className="relative">
-            <Search className={UI_CLASSES.ICON_ABSOLUTE_LEFT} aria-hidden="true" />
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+              <Search className="h-5 w-5 text-accent" aria-hidden="true" />
+            </div>
             <Input
               id={searchInputId}
               name="search"
@@ -133,7 +136,7 @@ export function UnifiedSearch({
               value={localSearchQuery}
               onChange={(e) => setLocalSearchQuery(e.target.value)}
               placeholder={placeholder}
-              className={`pl-10 pr-4 h-12 text-base ${UI_CLASSES.BG_CARD_50} backdrop-blur-sm border-border/50 focus:border-primary/50 focus:${UI_CLASSES.BG_CARD} transition-smooth w-full`}
+              className={`pl-12 pr-4 h-14 text-base ${UI_CLASSES.BG_CARD_50} backdrop-blur-sm border-border/50 focus:border-accent/50 focus:${UI_CLASSES.BG_CARD} transition-smooth w-full`}
               aria-label="Search configurations"
               aria-describedby={resultCount > 0 && localSearchQuery ? searchResultsId : undefined}
               autoComplete="search"
@@ -141,59 +144,61 @@ export function UnifiedSearch({
           </div>
 
           {/* Sort and Filter Controls */}
-          <div className={`flex gap-2 ${UI_CLASSES.JUSTIFY_END}`}>
-            {/* Sort Dropdown styled as button */}
-            <Select
-              value={filters.sort || 'trending'}
-              onValueChange={(value) => handleSortChange(value as FilterState['sort'])}
-              name="sort"
-            >
-              <SelectTrigger
-                id={sortSelectId}
-                className={`w-auto h-10 px-4 bg-background border-border ${UI_CLASSES.HOVER_BG_ACCENT_10} transition-smooth`}
-                aria-label="Sort configurations"
+          {showFilters && (
+            <div className={`flex gap-2 ${UI_CLASSES.JUSTIFY_END}`}>
+              {/* Sort Dropdown styled as button */}
+              <Select
+                value={filters.sort || 'trending'}
+                onValueChange={(value) => handleSortChange(value as FilterState['sort'])}
+                name="sort"
               >
-                <span className="text-sm">Sort: </span>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="trending">Trending</SelectItem>
-                <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="alphabetical">A-Z</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Filter Button */}
-            <Button
-              variant="outline"
-              size="default"
-              onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className={cn(
-                'h-10 px-4 gap-2 transition-smooth',
-                isFilterOpen && `${UI_CLASSES.BG_ACCENT_10} border-accent`
-              )}
-              aria-expanded={isFilterOpen}
-              aria-controls={filterPanelId}
-              aria-label={`${isFilterOpen ? 'Close' : 'Open'} filter panel${activeFilterCount > 0 ? ` (${activeFilterCount} active filters)` : ''}`}
-            >
-              <Filter className="h-4 w-4" aria-hidden="true" />
-              <span>Filter</span>
-              {activeFilterCount > 0 && (
-                <Badge
-                  variant="secondary"
-                  className="ml-1 px-1.5 py-0 h-5"
-                  aria-label={`${activeFilterCount} active filters`}
+                <SelectTrigger
+                  id={sortSelectId}
+                  className={`w-auto h-10 px-4 bg-background border-border ${UI_CLASSES.HOVER_BG_ACCENT_10} transition-smooth`}
+                  aria-label="Sort configurations"
                 >
-                  {activeFilterCount}
-                </Badge>
-              )}
-              {isFilterOpen ? (
-                <ChevronUp className="h-3 w-3 ml-1" aria-hidden="true" />
-              ) : (
-                <ChevronDown className="h-3 w-3 ml-1" aria-hidden="true" />
-              )}
-            </Button>
-          </div>
+                  <span className="text-sm">Sort: </span>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="trending">Trending</SelectItem>
+                  <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="alphabetical">A-Z</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Filter Button */}
+              <Button
+                variant="outline"
+                size="default"
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                className={cn(
+                  'h-10 px-4 gap-2 transition-smooth',
+                  isFilterOpen && `${UI_CLASSES.BG_ACCENT_10} border-accent`
+                )}
+                aria-expanded={isFilterOpen}
+                aria-controls={filterPanelId}
+                aria-label={`${isFilterOpen ? 'Close' : 'Open'} filter panel${activeFilterCount > 0 ? ` (${activeFilterCount} active filters)` : ''}`}
+              >
+                <Filter className="h-4 w-4" aria-hidden="true" />
+                <span>Filter</span>
+                {activeFilterCount > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-1 px-1.5 py-0 h-5"
+                    aria-label={`${activeFilterCount} active filters`}
+                  >
+                    {activeFilterCount}
+                  </Badge>
+                )}
+                {isFilterOpen ? (
+                  <ChevronUp className="h-3 w-3 ml-1" aria-hidden="true" />
+                ) : (
+                  <ChevronDown className="h-3 w-3 ml-1" aria-hidden="true" />
+                )}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Result Count */}
