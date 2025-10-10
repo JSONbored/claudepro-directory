@@ -9,6 +9,7 @@ import type { StatuslineMetadata } from '@/generated/statuslines-metadata';
 import { HomePageClient } from '@/src/components/features/home';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
+import { Meteors } from '@/src/components/ui/magic/meteors';
 import { statsRedis } from '@/src/lib/redis';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { transformForHomePage } from '@/src/lib/utils/transformers';
@@ -120,6 +121,9 @@ export default async function HomePage() {
         className={`relative overflow-hidden ${UI_CLASSES.BORDER_B} border-border/50`}
         aria-label="Homepage hero"
       >
+        {/* Animated background meteors */}
+        <Meteors number={20} />
+
         <div className={`relative container ${UI_CLASSES.MX_AUTO} px-4 py-10 sm:py-16 lg:py-24`}>
           <div className={`text-center ${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 text-foreground tracking-tight">

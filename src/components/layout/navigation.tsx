@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { SearchTrigger } from '@/src/components/features/search/search-trigger';
 import { ThemeToggle } from '@/src/components/layout/theme-toggle';
-import { Badge } from '@/src/components/ui/badge';
+import { UserMenu } from '@/src/components/layout/user-menu';
 import { Button } from '@/src/components/ui/button';
 import {
   DropdownMenu,
@@ -16,7 +16,7 @@ import {
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/src/components/ui/sheet';
 import { useSearchShortcut } from '@/src/hooks/use-search-shortcut';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
-import { ChevronDown, DiscordIcon, ExternalLink, Github, LogoIcon, Menu } from '@/src/lib/icons';
+import { ChevronDown, DiscordIcon, Github, LogoIcon, Menu } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface NavLinkProps {
@@ -116,7 +116,7 @@ export const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-2 md:gap-3 lg:gap-4 text-sm lg:text-base">
+          <nav className="hidden lg:flex items-center gap-2 lg:gap-3 xl:gap-4 text-sm xl:text-base">
             <NavLink href="/agents" isActive={isActive} onClick={() => setIsOpen(false)}>
               Agents
             </NavLink>
@@ -131,9 +131,6 @@ export const Navigation = () => {
             </NavLink>
             <NavLink href="/rules" isActive={isActive} onClick={() => setIsOpen(false)}>
               Rules
-            </NavLink>
-            <NavLink href="/statuslines" isActive={isActive} onClick={() => setIsOpen(false)}>
-              Statuslines
             </NavLink>
             <NavLink href="/collections" isActive={isActive} onClick={() => setIsOpen(false)}>
               Collections
@@ -157,6 +154,16 @@ export const Navigation = () => {
               <DropdownMenuContent align="end" className="w-52 md:w-56">
                 <DropdownMenuItem>
                   <Link
+                    href="/for-you"
+                    className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
+                  >
+                    <div>For You</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Personalized recommendations</div>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem>
+                  <Link
                     href="/trending"
                     className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
                   >
@@ -167,11 +174,31 @@ export const Navigation = () => {
 
                 <DropdownMenuItem>
                   <Link
+                    href="/board"
+                    className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
+                  >
+                    <div>Board</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Community board</div>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem>
+                  <Link
+                    href="/companies"
+                    className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
+                  >
+                    <div>Companies</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Browse companies</div>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem>
+                  <Link
                     href="/changelog"
                     className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
                   >
                     <div>Changelog</div>
-                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Latest updates & releases</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Latest updates</div>
                   </Link>
                 </DropdownMenuItem>
 
@@ -191,7 +218,7 @@ export const Navigation = () => {
                     className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
                   >
                     <div>Community</div>
-                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Join the Claude community</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Join the community</div>
                   </Link>
                 </DropdownMenuItem>
 
@@ -201,7 +228,7 @@ export const Navigation = () => {
                     className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
                   >
                     <div>Partner</div>
-                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Post job listings & more</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Partner program</div>
                   </Link>
                 </DropdownMenuItem>
 
@@ -211,7 +238,7 @@ export const Navigation = () => {
                     className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} ${UI_CLASSES.W_FULL}`}
                   >
                     <div>Submit Config</div>
-                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Share your configurations</div>
+                    <div className={UI_CLASSES.TEXT_XS_MUTED}>Share configurations</div>
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -262,15 +289,9 @@ export const Navigation = () => {
               <span className={`${UI_CLASSES.HIDDEN} xl:inline`}>GitHub</span>
             </Button>
 
-            <ThemeToggle />
+            <UserMenu className={`${UI_CLASSES.HIDDEN} md:${UI_CLASSES.FLEX}`} />
 
-            <Badge
-              variant="outline"
-              className={`${UI_CLASSES.HIDDEN} 2xl:flex border-accent/20 ${UI_CLASSES.BG_ACCENT_5} text-accent`}
-            >
-              <ExternalLink className="h-3 w-3 mr-1 text-accent" />
-              Open Source
-            </Badge>
+            <ThemeToggle />
 
             {/* Mobile Menu */}
             <Sheet open={isOpen} onOpenChange={setIsOpen}>

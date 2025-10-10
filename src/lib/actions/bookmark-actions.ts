@@ -93,7 +93,6 @@ export const addBookmark = rateLimitedAction
 
     // OPTIMIZATION: Invalidate personalization caches
     // User bookmarked content → For You feed should update recommendations
-    revalidateTag(`user-${user.id}`); // Invalidates getUserAffinities cache
     revalidatePath('/for-you'); // Invalidates For You feed page
 
     return {

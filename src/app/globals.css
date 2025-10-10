@@ -1323,6 +1323,95 @@
   }
 }
 
+/* Magic UI Component Animations */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes meteor {
+  0% {
+    transform: translateY(0) translateX(0) rotate(215deg);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(300px) translateX(-300px) rotate(215deg);
+    opacity: 0;
+  }
+}
+
+@keyframes borderBeamSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rippleEffect {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes marqueeLeft {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes marqueeRight {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes marqueeUp {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes marqueeDown {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes gridMove {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(40px, 40px);
+  }
+}
+
 /* Animation Utilities */
 .animate-fade-in {
   animation: fadeIn var(--duration-200) var(--ease-out) both;
@@ -1338,6 +1427,18 @@
 
 .animate-pulse {
   animation: pulse-accent var(--duration-1000) var(--ease-in-out) infinite;
+}
+
+.animate-meteor {
+  animation: meteor 3s linear infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+}
+
+.animate-gridMove {
+  animation: gridMove 20s linear infinite;
 }
 
 /* Additional animations for enhanced components */

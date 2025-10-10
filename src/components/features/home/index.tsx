@@ -25,6 +25,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FeaturedSections } from '@/src/components/features/home/featured-sections';
 import { SearchSection } from '@/src/components/features/home/search-section';
 import { TabsSection } from '@/src/components/features/home/tabs-section';
+import { NumberTicker } from '@/src/components/ui/magic/number-ticker';
 import { useSearch } from '@/src/hooks/use-search';
 import { HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
 import { BookOpen, Layers, Server, Sparkles } from '@/src/lib/icons';
@@ -209,31 +210,31 @@ function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
             >
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <BookOpen className="h-4 w-4" />
-                {stats.rules} Expert Rules
+                <NumberTicker value={stats.rules} duration={1500} /> Expert Rules
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Server className="h-4 w-4" />
-                {stats.mcp} MCP Servers
+                <NumberTicker value={stats.mcp} duration={1500} delay={100} /> MCP Servers
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Sparkles className="h-4 w-4" />
-                {stats.agents} AI Agents
+                <NumberTicker value={stats.agents} duration={1500} delay={200} /> AI Agents
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Sparkles className="h-4 w-4" />
-                {stats.commands} Commands
+                <NumberTicker value={stats.commands} duration={1500} delay={300} /> Commands
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Sparkles className="h-4 w-4" />
-                {stats.hooks} Automation Hooks
+                <NumberTicker value={stats.hooks} duration={1500} delay={400} /> Automation Hooks
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Sparkles className="h-4 w-4" />
-                {stats.statuslines} Statuslines
+                <NumberTicker value={stats.statuslines} duration={1500} delay={500} /> Statuslines
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Layers className="h-4 w-4" />
-                {stats.collections} Collections
+                <NumberTicker value={stats.collections} duration={1500} delay={600} /> Collections
               </div>
             </div>
           )}
