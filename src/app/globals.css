@@ -1340,7 +1340,7 @@
     opacity: 1;
   }
   100% {
-    transform: translateY(300px) translateX(-300px) rotate(215deg);
+    transform: translateY(100dvh) translateX(-100dvh) rotate(215deg);
     opacity: 0;
   }
 }

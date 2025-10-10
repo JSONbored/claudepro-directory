@@ -125,7 +125,10 @@ export default async function HomePage() {
         </div>
 
         {/* Static Hero Section - Server Rendered */}
-        <section className={`relative ${UI_CLASSES.BORDER_B} border-border/50`} aria-label="Homepage hero">
+        <section
+          className={`relative ${UI_CLASSES.BORDER_B} border-border/50`}
+          aria-label="Homepage hero"
+        >
           <div
             className={`relative container ${UI_CLASSES.MX_AUTO} px-4 py-10 sm:py-16 lg:py-24 z-10`}
           >
