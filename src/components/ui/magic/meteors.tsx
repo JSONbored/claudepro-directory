@@ -44,7 +44,7 @@ function MeteorsComponent({ number = 20, className }: MeteorsProps) {
   }, [number]);
 
   return (
-    <div className={cn('pointer-events-none absolute inset-0 overflow-hidden', className)}>
+    <div className={cn('pointer-events-none absolute inset-0 -z-10 overflow-hidden', className)}>
       {meteors.map((meteor) => (
         <span
           key={meteor.id}

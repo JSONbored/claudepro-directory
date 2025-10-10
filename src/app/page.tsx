@@ -118,11 +118,9 @@ export default async function HomePage() {
   return (
     <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
       {/* Hero + Search Section with Meteors Background */}
-      <div className="relative isolate">
+      <div className="relative">
         {/* Animated meteors covering entire hero + search area */}
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <Meteors number={30} />
-        </div>
+        <Meteors number={30} />
 
         {/* Static Hero Section - Server Rendered */}
         <section

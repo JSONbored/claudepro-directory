@@ -287,8 +287,7 @@ export const Navigation = () => {
               className={`${UI_CLASSES.HIDDEN_SM_FLEX} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
               aria-label="Join our Discord community"
             >
-              <DiscordIcon className="h-4 w-4 xl:mr-2" />
-              <span className={`${UI_CLASSES.HIDDEN} xl:inline`}>Discord</span>
+              <DiscordIcon className="h-4 w-4" />
             </Button>
 
             <GitHubStarsButton className={`${UI_CLASSES.HIDDEN_SM_FLEX}`} />
