@@ -14,9 +14,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import { ShimmerButton } from '@/src/components/ui/magic/shimmer-button';
+import { Button } from '@/src/components/ui/button';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
-import { Github, Star } from '@/src/lib/icons';
+import { Github } from '@/src/lib/icons';
 
 interface GitHubStarsButtonProps {
   className?: string;
@@ -61,24 +61,17 @@ export function GitHubStarsButton({ className }: GitHubStarsButtonProps) {
   };
 
   return (
-    <ShimmerButton
+    <Button
+      variant="outline"
+      size="sm"
       onClick={handleClick}
-      className={className}
-      shimmerSpeed="normal"
-      background="var(--color-accent)"
+      className={`gap-2 ${className}`}
       aria-label={`Star us on GitHub${stars ? ` - ${stars} stars` : ''}`}
     >
       <Github className="h-4 w-4" aria-hidden="true" />
-      <span className="font-medium">Star on GitHub</span>
       {!loading && stars !== null && (
-        <>
-          <span className="mx-1 opacity-50" aria-hidden="true">
-            |
-          </span>
-          <Star className="h-3 w-3" aria-hidden="true" />
-          <span className="font-semibold">{stars.toLocaleString()}</span>
-        </>
+        <span className="font-medium tabular-nums">{stars.toLocaleString()}</span>
       )}
-    </ShimmerButton>
+    </Button>
   );
 }

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { SearchTrigger } from '@/src/components/features/search/search-trigger';
+import { GitHubStarsButton } from '@/src/components/layout/github-stars-button';
 import { ThemeToggle } from '@/src/components/layout/theme-toggle';
 import { UserMenu } from '@/src/components/layout/user-menu';
 import { Button } from '@/src/components/ui/button';
@@ -33,11 +34,23 @@ const NavLink = ({ href, children, className = '', isActive, onClick }: NavLinkP
   // Only spread onClick if it's defined to avoid exactOptionalPropertyTypes issues
   const linkProps = {
     href,
-    className: `${active ? `ring-2 ring-accent/30 ${UI_CLASSES.BG_ACCENT_10} border-accent/50 text-primary` : 'text-muted-foreground hover:text-foreground'} transition-colors ${UI_CLASSES.DURATION_200} ${className}`,
+    className: `group relative px-2 py-1 text-sm font-medium transition-colors ${UI_CLASSES.DURATION_200} ${
+      active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+    } ${className}`,
     ...(onClick && { onClick }),
   };
 
-  return <Link {...linkProps}>{children}</Link>;
+  return (
+    <Link {...linkProps}>
+      {children}
+      {/* Animated underline */}
+      <span
+        className={`absolute bottom-0 left-0 h-[2px] bg-accent transition-all ${UI_CLASSES.DURATION_300} ${
+          active ? 'w-full' : 'w-0 group-hover:w-full'
+        }`}
+      />
+    </Link>
+  );
 };
 
 export const Navigation = () => {
@@ -278,16 +291,7 @@ export const Navigation = () => {
               <span className={`${UI_CLASSES.HIDDEN} xl:inline`}>Discord</span>
             </Button>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => window.open(SOCIAL_LINKS.github, '_blank')}
-              className={`${UI_CLASSES.HIDDEN_SM_FLEX} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-              aria-label="View source code on GitHub"
-            >
-              <Github className="h-4 w-4 xl:mr-2" />
-              <span className={`${UI_CLASSES.HIDDEN} xl:inline`}>GitHub</span>
-            </Button>
+            <GitHubStarsButton className={`${UI_CLASSES.HIDDEN_SM_FLEX}`} />
 
             <UserMenu className={`${UI_CLASSES.HIDDEN} md:${UI_CLASSES.FLEX}`} />
 

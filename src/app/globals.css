@@ -71,7 +71,7 @@
   --dark-border-default: oklch(30% 0.005 60 / 0.5);
   --dark-border-light: oklch(28% 0.005 60 / 0.3);
   --dark-border-medium: oklch(34% 0.008 60 / 0.6);
-  --dark-border-strong: oklch(62% 0.155 42);
+  --dark-border-strong: oklch(74% 0.2 35);
 
   /* Light Mode Colors - Claude Desktop Light */
   --light-bg-primary: oklch(99% 0.003 90);
@@ -91,19 +91,17 @@
   --light-border-default: oklch(92% 0.006 75);
   --light-border-light: oklch(95% 0.004 80);
   --light-border-medium: oklch(88% 0.008 70);
-  --light-border-strong: oklch(58% 0.165 41);
+  --light-border-strong: oklch(70% 0.2 35);
 
-  /* Shared Brand Colors */
-  --claude-orange: oklch(62% 0.155 42);
-  --claude-orange-hover: oklch(66% 0.145 42);
-  --claude-orange-active: oklch(57% 0.16 42);
-  --claude-orange-light: oklch(
-    74% 0.135 45
-  ); /* Increased from 70% for WCAG AA contrast (4.5:1) on hero badge */
-  --claude-orange-muted: oklch(48% 0.142 37);
+  /* Shared Brand Colors - EXACT match to logo icon (#F97316 / #FB923C range) */
+  --claude-orange: oklch(74% 0.2 35);
+  --claude-orange-hover: oklch(78% 0.19 35);
+  --claude-orange-active: oklch(70% 0.21 35);
+  --claude-orange-light: oklch(82% 0.17 37);
+  --claude-orange-muted: oklch(65% 0.18 33);
 
   /* Light mode adjustments for orange */
-  --light-accent: oklch(58% 0.165 41);
+  --light-accent: oklch(70% 0.2 35);
   --light-accent-hover: oklch(54% 0.17 40);
   --light-accent-active: oklch(50% 0.175 39);
   --light-accent-subtle: oklch(95% 0.035 42);
@@ -166,7 +164,7 @@
   --color-syntax-keyword: oklch(65% 0.17 45); /* #ff8c00 - Orange */
   --color-syntax-function: oklch(68% 0.14 220); /* #00bcd4 - Cyan */
   --color-syntax-number: oklch(64% 0.15 140); /* #4caf50 - Green */
-  --color-syntax-string: oklch(62% 0.155 42); /* Claude orange */
+  --color-syntax-string: oklch(74% 0.2 35); /* Claude orange - matches logo */
   --color-syntax-comment: oklch(62% 0.01 60); /* Muted gray */
 
   /* ========================================
@@ -192,11 +190,11 @@
   --color-category-rules-border: oklch(58% 0.19 250 / 0.3);
   --color-category-rules-hover: oklch(58% 0.19 250 / 0.6);
 
-  /* Commands - Orange */
-  --color-category-commands: oklch(65% 0.17 45);
-  --color-category-commands-bg: oklch(65% 0.17 45 / 0.2);
-  --color-category-commands-border: oklch(65% 0.17 45 / 0.3);
-  --color-category-commands-hover: oklch(65% 0.17 45 / 0.6);
+  /* Commands - Orange (proportionally brighter +12%) */
+  --color-category-commands: oklch(77% 0.2 38);
+  --color-category-commands-bg: oklch(77% 0.2 38 / 0.2);
+  --color-category-commands-border: oklch(77% 0.2 38 / 0.3);
+  --color-category-commands-hover: oklch(77% 0.2 38 / 0.6);
 
   /* Hooks - Pink */
   --color-category-hooks: oklch(65% 0.24 350);
@@ -281,7 +279,7 @@
   --color-accent-active: var(--claude-orange-active);
   --color-accent-light: var(--claude-orange-light);
   --color-accent-muted: var(--claude-orange-muted);
-  --color-accent-subtle: oklch(33% 0.045 35);
+  --color-accent-subtle: oklch(45% 0.08 35);
 
   --color-border-default: var(--dark-border-default);
   --color-border-light: var(--dark-border-light);
@@ -551,7 +549,7 @@
   ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
   --color-accent-hover: var(--claude-orange-hover);
   --color-accent-active: var(--claude-orange-active);
-  --color-accent-subtle: oklch(33% 0.045 35);
+  --color-accent-subtle: oklch(45% 0.08 35);
   --color-accent-light: var(--claude-orange-light);
   --color-accent-muted: var(--claude-orange-muted);
 
@@ -1439,6 +1437,30 @@
 
 .animate-gridMove {
   animation: gridMove 20s linear infinite;
+}
+
+/* Text Roll Animation - Apple Hello Effect */
+@keyframes textRoll {
+  0% {
+    transform: translateY(0) rotateX(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-20px) rotateX(90deg);
+    opacity: 0;
+  }
+  51% {
+    transform: translateY(20px) rotateX(-90deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+.animate-textRoll {
+  animation: textRoll 600ms ease-in-out;
 }
 
 /* Additional animations for enhanced components */
