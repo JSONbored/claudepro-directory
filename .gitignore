@@ -48,6 +48,7 @@ content/api-docs/*.mdx
 .eslintcache
 *.tsbuildinfo
 coverage/
+.vitest/
 .parcel-cache/
 .turbo/
 .temp/

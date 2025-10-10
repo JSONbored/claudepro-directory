@@ -9,65 +9,10 @@
  * - No browser main thread blocking
  * - Instant page loads with pre-rendered HTML
  * - Beautiful Shiki syntax highlighting
+ * - Shared singleton with MDX processing (no duplicate instances)
  */
 
-import { createHighlighterCore } from 'shiki/core';
-import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
-
-// Singleton highlighter instance (cached in memory)
-let highlighterInstance: Awaited<ReturnType<typeof createHighlighterCore>> | null = null;
-
-/**
- * Get or create the Shiki highlighter instance
- * Singleton pattern - created once, reused for all highlighting
- */
-async function getHighlighter() {
-  if (highlighterInstance) {
-    return highlighterInstance;
-  }
-
-  // Import themes and commonly used languages
-  const [
-    githubDarkDimmed,
-    githubLight,
-    typescript,
-    javascript,
-    json,
-    bash,
-    python,
-    markdown,
-    jsx,
-    tsx,
-  ] = await Promise.all([
-    import('shiki/themes/github-dark-dimmed.mjs'),
-    import('shiki/themes/github-light.mjs'),
-    import('shiki/langs/typescript.mjs'),
-    import('shiki/langs/javascript.mjs'),
-    import('shiki/langs/json.mjs'),
-    import('shiki/langs/bash.mjs'),
-    import('shiki/langs/python.mjs'),
-    import('shiki/langs/markdown.mjs'),
-    import('shiki/langs/jsx.mjs'),
-    import('shiki/langs/tsx.mjs'),
-  ]);
-
-  highlighterInstance = await createHighlighterCore({
-    themes: [githubDarkDimmed.default, githubLight.default],
-    langs: [
-      typescript.default,
-      javascript.default,
-      json.default,
-      bash.default,
-      python.default,
-      markdown.default,
-      jsx.default,
-      tsx.default,
-    ],
-    engine: createJavaScriptRegexEngine(),
-  });
-
-  return highlighterInstance;
-}
+import { getSharedHighlighter } from './shiki-singleton';
 
 /**
  * Highlight code on the server with optional line numbers
@@ -79,7 +24,7 @@ export async function highlightCode(
   showLineNumbers = true
 ): Promise<string> {
   try {
-    const highlighter = await getHighlighter();
+    const highlighter = await getSharedHighlighter();
 
     const html = highlighter.codeToHtml(code, {
       lang: language,

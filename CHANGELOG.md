@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 **Latest Features:**
 
+- [Navigation & Announcement System](#2025-10-10---navigation-overhaul-and-announcement-system) - Configuration-driven navigation, ⌘K command palette, site-wide announcements, new indicators, enhanced accessibility
 - [Hero Section Animations](#2025-10-09---hero-section-animations-and-search-enhancements) - Meteor background effect, rolling text animation, enhanced search UI
 - [Card Grid Layout & Infinite Scroll](#2025-10-09---card-grid-layout-and-infinite-scroll-improvements) - CSS masonry layout, 95% spacing consistency, infinite scroll reliability
 - [Enhanced Type Safety & Schema Validation](#2025-10-09---enhanced-type-safety-with-branded-types-and-schema-improvements) - Branded types for IDs, centralized input sanitization, improved validation
@@ -40,7 +41,267 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - [Reddit MCP Server](#2025-10-04---reddit-mcp-server-community-contribution) - Browse Reddit from Claude
 
-[View All Updates ↓](#2025-10-09---hero-section-animations-and-search-enhancements)
+[View All Updates ↓](#2025-10-10---navigation-overhaul-and-announcement-system)
+
+---
+
+## 2025-10-10 - Navigation Overhaul and Announcement System
+
+**TL;DR:** Completely refactored navigation with configuration-driven architecture, added global command palette (⌘K), implemented site-wide announcement system with dismissal tracking, and enhanced accessibility to WCAG 2.1 AA standards. Navigation is now DRY, maintainable, and keyboard-first.
+
+### What Changed
+
+Rebuilt the entire navigation system from the ground up with a focus on developer experience, accessibility, and user engagement. The new architecture eliminates code duplication, enables rapid navigation updates, and provides multiple ways to navigate the site (traditional nav, command palette, keyboard shortcuts).
+
+### Added
+
+- **Configuration-Driven Navigation** (`src/config/navigation.ts`)
+  - Single source of truth for all navigation links
+  - PRIMARY_NAVIGATION: Main category links (Agents, Commands, Hooks, MCP, Rules, Statuslines, Collections, Guides)
+  - SECONDARY_NAVIGATION: Grouped dropdown sections (Discover, Resources, Actions)
+  - Structured with icons, descriptions, and new item indicators
+  - Zero code duplication across desktop/mobile/command menu
+  - Type-safe with TypeScript interfaces
+
+- **Global Command Menu** (`src/components/layout/navigation-command-menu.tsx`)
+  - Keyboard shortcut: ⌘K (Mac) / Ctrl+K (Windows/Linux)
+  - Searchable navigation to all site sections
+  - Grouped by category (Primary, More, Actions)
+  - Instant navigation on selection
+  - shadcn/ui Command component with accessibility
+  - Descriptions and emojis for visual scanning
+
+- **Announcement System** (`src/config/announcements.ts`, `src/components/layout/announcement-banner.tsx`)
+  - Site-wide announcement banner above navigation
+  - Configuration-based with date ranges and priority sorting
+  - Persistent dismissal tracking via localStorage
+  - Multiple variants (default, outline, secondary, destructive)
+  - Category tags (New, Beta, Update, Maintenance)
+  - Optional links and Lucide icons
+  - Keyboard navigation (Escape to dismiss)
+  - WCAG 2.1 AA compliant
+
+- **Announcement UI Components** (`src/components/ui/announcement.tsx`)
+  - Compound component architecture (Announcement, AnnouncementTag, AnnouncementTitle)
+  - Built on Badge component with themed enhancements
+  - Hover effects and scale animations (opt-in)
+  - Responsive design (mobile + desktop)
+  - Semantic HTML (<output> element)
+
+- **New Indicator Component** (`src/components/ui/new-indicator.tsx`)
+  - Animated pulsing dot for highlighting new features
+  - Tooltip on hover with accessible label
+  - Screen reader support (sr-only text)
+  - Reduced motion support
+  - Alternative NewBadge component for explicit "NEW" text
+
+- **Dismissal Hook** (`src/hooks/use-announcement-dismissal.ts`)
+  - Manages announcement dismissal state
+  - localStorage persistence with ISO timestamps
+  - Per-announcement tracking (not global)
+  - Reset functionality
+  - Analytics helper functions
+  - SSR-safe implementation
+
+### Changed
+
+- **Navigation Component Refactor** (`src/components/layout/navigation.tsx`)
+  - Imports navigation data from centralized config
+  - Maps over PRIMARY_NAVIGATION for main links
+  - Maps over SECONDARY_NAVIGATION for grouped dropdown
+  - Eliminated 200+ lines of duplicated link definitions
+  - New indicators on Statuslines and Collections
+  - Enhanced dropdown with icons and descriptions
+  - Improved mobile menu with better visual hierarchy
+
+- **Dropdown Menu Enhancement**
+  - Added DropdownMenuLabel for section headers
+  - Added DropdownMenuGroup for logical grouping
+  - Added DropdownMenuSeparator between sections
+  - Icons next to each link (Sparkles, TrendingUp, MessageSquare, Building2, etc.)
+  - Two-line layout: Label + description
+  - Submit Config as prominent CTA in accent color
+
+- **Accessibility Improvements**
+  - aria-current="page" on active navigation items
+  - aria-label on navigation landmarks and icon buttons
+  - aria-hidden="true" on decorative elements (underline bars, icons)
+  - aria-live="polite" on announcement banner
+  - Semantic HTML throughout (<nav>, <header>, <output>)
+  - Focus management with Radix UI primitives
+  - Keyboard navigation documentation
+
+### Technical Implementation
+
+**Navigation Configuration Pattern:**
+```typescript
+export const PRIMARY_NAVIGATION: NavigationLink[] = [
+  {
+    label: 'Statuslines',
+    href: '/statuslines',
+    icon: Monitor,
+    description: 'Editor status bar configs',
+    isNew: true,
+  },
+  // ... more links
+];
+
+export const SECONDARY_NAVIGATION: NavigationSection[] = [
+  {
+    heading: 'Discover',
+    links: [
+      {
+        label: 'For You',
+        href: '/for-you',
+        icon: Sparkles,
+        description: 'Personalized recommendations',
+      },
+      // ... more links
+    ],
+  },
+];
+```
+
+**Announcement Configuration:**
+```typescript
+{
+  id: 'statuslines-launch-2025-10',
+  variant: 'default',
+  tag: 'New',
+  title: 'Introducing Statuslines - Customize your editor status bar',
+  href: '/statuslines',
+  icon: 'ArrowUpRight',
+  startDate: '2025-10-10T00:00:00Z',
+  endDate: '2025-10-17T23:59:59Z',
+  priority: 'high',
+  dismissible: true,
+}
+```
+
+**Command Menu Usage:**
+- Press ⌘K/Ctrl+K anywhere on the site
+- Type to search (e.g., "agents", "trending", "submit")
+- Arrow keys to navigate results
+- Enter to navigate to selected item
+- Escape to close menu
+
+**Dismissal Hook:**
+```tsx
+const { isDismissed, dismiss, reset, getDismissalTime } = useAnnouncementDismissal('announcement-id');
+
+// Check if dismissed
+if (!isDismissed) {
+  // Show announcement
+}
+
+// Dismiss announcement
+dismiss(); // Stores timestamp in localStorage
+
+// Reset dismissal
+reset(); // Removes from localStorage
+
+// Get dismissal time
+const timestamp = getDismissalTime(); // Returns ISO string or null
+```
+
+### Performance Impact
+
+- **Navigation Rendering:** No performance change (same JSX, just config-driven)
+- **Command Menu:** Lazy loaded (not rendered until ⌘K pressed)
+- **Announcement Banner:** Conditional rendering (null if no active announcement)
+- **localStorage:** Synchronous reads/writes (minimal impact, <1ms)
+- **Bundle Size:** +8KB (Command dialog + announcement components)
+
+### Accessibility Features (WCAG 2.1 AA)
+
+- **Keyboard Navigation:**
+  - ⌘K/Ctrl+K: Global command palette
+  - Tab: Navigate interactive elements
+  - Arrow keys: Dropdown menu navigation
+  - Enter/Space: Activate links/buttons
+  - Escape: Close menus and dismiss announcements
+
+- **Screen Reader Support:**
+  - aria-current="page" on active links
+  - aria-label on icon buttons and navigation landmarks
+  - Screen reader announcements for new indicators
+  - Semantic HTML structure
+
+- **Visual Accessibility:**
+  - Focus visible indicators (ring-2, ring-accent)
+  - Reduced motion support (motion-reduce:animate-none)
+  - High contrast borders and colors
+  - Touch targets 44×44px minimum
+
+### For Contributors
+
+**Adding New Navigation Links:**
+
+```typescript
+// src/config/navigation.ts
+
+// Primary navigation
+export const PRIMARY_NAVIGATION: NavigationLink[] = [
+  // ... existing links
+  {
+    label: 'Your New Category',
+    href: '/new-category',
+    icon: YourIcon,
+    description: 'Description for command menu',
+    isNew: true, // Optional: Shows pulsing dot
+  },
+];
+
+// Secondary navigation (dropdown)
+export const SECONDARY_NAVIGATION: NavigationSection[] = [
+  {
+    heading: 'Your Section',
+    links: [
+      {
+        label: 'Your Link',
+        href: '/your-link',
+        icon: YourIcon,
+        description: 'Short description',
+      },
+    ],
+  },
+];
+```
+
+**Adding Announcements:**
+
+```typescript
+// src/config/announcements.ts
+
+export const announcements: AnnouncementConfig[] = [
+  {
+    id: 'unique-announcement-id-2025-10',
+    variant: 'default', // default | outline | secondary | destructive
+    tag: 'New', // Optional badge
+    title: 'Your announcement text (max 100 chars recommended)',
+    href: '/optional-link', // Optional
+    icon: 'ArrowUpRight', // Optional Lucide icon name
+    startDate: '2025-10-10T00:00:00Z',
+    endDate: '2025-10-17T23:59:59Z',
+    priority: 'high', // high | medium | low
+    dismissible: true, // false for critical alerts
+  },
+];
+```
+
+**Announcement Priority Rules:**
+1. Only ONE announcement shows at a time
+2. Must be within start/end date range
+3. Highest priority wins (high > medium > low)
+4. Most recent startDate if same priority
+5. Dismissal state tracked per-user in localStorage
+
+**Testing Navigation Changes:**
+- Verify links work in all contexts (desktop nav, mobile menu, command menu)
+- Test keyboard navigation (Tab, Enter, Escape, ⌘K)
+- Check screen reader announcements
+- Validate responsive behavior (mobile + desktop)
+- Ensure new indicators appear correctly
 
 ---
 

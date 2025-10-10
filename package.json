@@ -52,7 +52,12 @@
     "analyze:circular-graph": "npx madge --circular --extensions ts,tsx --image circular-deps.svg src/",
     "analyze:all": "npm run analyze:unused && npm run analyze:circular",
     "a11y:audit": "lhci autorun --config=config/tools/lighthouserc.cjs",
-    "a11y:ci": "lhci autorun --config=config/tools/lighthouserc.cjs --assert"
+    "a11y:ci": "lhci autorun --config=config/tools/lighthouserc.cjs --assert",
+    "test": "vitest",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@arcjet/next": "^1.0.0-beta.12",
@@ -125,8 +130,16 @@
     "@biomejs/biome": "2.2.5",
     "@lhci/cli": "^0.15.1",
     "@next/bundle-analyzer": "^15.5.4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@vitejs/plugin-react": "^5.0.4",
+    "@vitest/ui": "^3.2.4",
+    "happy-dom": "^20.0.0",
     "knip": "^5.64.1",
     "lefthook": "^1.13.5",
-    "ultracite": "^5.4.6"
+    "ultracite": "^5.4.6",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
   }
 }

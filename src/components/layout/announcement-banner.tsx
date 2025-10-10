@@ -1,0 +1,177 @@
+'use client';
+
+import {
+  AlertTriangle,
+  ArrowRight,
+  ArrowUpRight,
+  BookOpen,
+  Calendar,
+  Sparkles,
+  X,
+} from 'lucide-react';
+import Link from 'next/link';
+import { useEffect } from 'react';
+
+import { Announcement, AnnouncementTag, AnnouncementTitle } from '@/src/components/ui/announcement';
+import { getActiveAnnouncement } from '@/src/config/announcements';
+import { useAnnouncementDismissal } from '@/src/hooks/use-announcement-dismissal';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+
+/**
+ * Icon mapping for announcements
+ * Maps icon names from config to Lucide icon components
+ */
+const ICON_MAP = {
+  ArrowUpRight,
+  ArrowRight,
+  AlertTriangle,
+  Calendar,
+  BookOpen,
+  Sparkles,
+} as const;
+
+type IconName = keyof typeof ICON_MAP;
+
+/**
+ * AnnouncementBanner Component
+ *
+ * Global announcement banner displayed above navigation.
+ * Automatically manages visibility, dismissal state, and responsive behavior.
+ *
+ * Features:
+ * - Automatic announcement selection based on date and priority
+ * - Persistent dismissal tracking (localStorage)
+ * - Responsive design (mobile + desktop)
+ * - Accessibility (WCAG 2.1 AA compliant)
+ * - Keyboard navigation (Escape to dismiss)
+ * - Reduced motion support
+ * - Touch-friendly dismiss button (44x44px minimum)
+ *
+ * Usage: Include once in root layout above navigation.
+ *
+ * @example
+ * ```tsx
+ * // In layout.tsx
+ * <body>
+ *   <AnnouncementBanner />
+ *   <Navigation />
+ *   <main>{children}</main>
+ * </body>
+ * ```
+ *
+ * @see Research Report: "shadcn Announcement Component Integration - Section 5"
+ */
+export function AnnouncementBanner() {
+  // Get current active announcement
+  const announcement = getActiveAnnouncement();
+
+  // Get dismissal state for this announcement
+  const { isDismissed, dismiss } = useAnnouncementDismissal(announcement?.id || '');
+
+  // Keyboard navigation: Escape key dismisses announcement
+  useEffect(() => {
+    if (!announcement?.dismissible) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        dismiss();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [announcement, dismiss]);
+
+  // Don't render if no announcement or already dismissed
+  if (!announcement || isDismissed) {
+    return null;
+  }
+
+  // Get icon component if specified
+  const IconComponent = announcement.icon ? ICON_MAP[announcement.icon as IconName] : null;
+
+  return (
+    <section
+      aria-label="Site announcement"
+      aria-live="polite"
+      aria-atomic="true"
+      className={`
+        ${UI_CLASSES.W_FULL}
+        ${UI_CLASSES.BORDER_B}
+        border-border/50
+        bg-accent/5
+        backdrop-blur-sm
+        transition-all
+        ${UI_CLASSES.DURATION_300}
+        motion-reduce:transition-none
+      `}
+    >
+      <div className="container mx-auto px-4 py-2.5 md:py-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
+          {/* Announcement Content */}
+          <Announcement
+            variant={announcement.variant}
+            className="flex-1 border-none bg-transparent shadow-none"
+          >
+            {announcement.tag && (
+              <AnnouncementTag className="text-[10px] sm:text-xs flex-shrink-0">
+                {announcement.tag}
+              </AnnouncementTag>
+            )}
+
+            <AnnouncementTitle className="text-xs sm:text-sm">
+              {announcement.href ? (
+                <Link
+                  href={announcement.href}
+                  className="hover:underline flex items-center gap-1.5 transition-colors duration-200"
+                >
+                  <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
+                  {IconComponent && (
+                    <IconComponent
+                      className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0"
+                      aria-hidden="true"
+                    />
+                  )}
+                </Link>
+              ) : (
+                <span className="flex items-center gap-1.5">
+                  <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
+                  {IconComponent && (
+                    <IconComponent
+                      className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0"
+                      aria-hidden="true"
+                    />
+                  )}
+                </span>
+              )}
+            </AnnouncementTitle>
+          </Announcement>
+
+          {/* Dismiss Button */}
+          {announcement.dismissible && (
+            <button
+              type="button"
+              onClick={dismiss}
+              aria-label="Dismiss announcement"
+              className={`
+                flex items-center justify-center
+                min-w-[44px] min-h-[44px]
+                sm:min-w-[40px] sm:min-h-[40px]
+                hover:bg-accent/10
+                rounded-md
+                transition-colors
+                ${UI_CLASSES.DURATION_200}
+                focus-visible:ring-2
+                focus-visible:ring-accent
+                focus-visible:ring-offset-2
+                flex-shrink-0
+              `}
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
