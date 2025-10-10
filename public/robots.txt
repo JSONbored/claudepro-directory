@@ -100,7 +100,10 @@ Allow: /llms.txt
 Allow: /*/llms.txt
 Allow: /*/*/llms.txt
 
-# Block admin areas if they exist
+# Block authenticated user areas and admin pages
+Disallow: /account*
+Disallow: /login*
+Disallow: /auth*
 Disallow: /admin*
 Disallow: /private*
 

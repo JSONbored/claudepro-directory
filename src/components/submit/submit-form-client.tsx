@@ -75,85 +75,86 @@ export function SubmitFormClient() {
   // Handle template selection
   // biome-ignore lint/suspicious/noExplicitAny: Templates have dynamic fields based on content type
   const handleTemplateSelect = (template: any) => {
-    // Pre-fill form with template data
+    // Pre-fill form with template data using name attributes
+    // NOTE: Cannot use querySelector('#id') because useId() generates dynamic IDs like ':r0:'
     const form = document.querySelector('form') as HTMLFormElement;
     if (!form) return;
 
     // Set name
     if (template.name) {
       setName(template.name);
-      const nameInput = form.querySelector('#name') as HTMLInputElement;
+      const nameInput = form.querySelector('[name="name"]') as HTMLInputElement;
       if (nameInput) nameInput.value = template.name;
     }
 
     // Set description
     if (template.description) {
-      const descInput = form.querySelector('#description') as HTMLTextAreaElement;
+      const descInput = form.querySelector('[name="description"]') as HTMLTextAreaElement;
       if (descInput) descInput.value = template.description;
     }
 
     // Set category
     if (template.category) {
-      const categoryInput = form.querySelector('#category') as HTMLInputElement;
+      const categoryInput = form.querySelector('[name="category"]') as HTMLInputElement;
       if (categoryInput) categoryInput.value = template.category;
     }
 
     // Set tags
     if (template.tags) {
-      const tagsInput = form.querySelector('#tags') as HTMLInputElement;
+      const tagsInput = form.querySelector('[name="tags"]') as HTMLInputElement;
       if (tagsInput) tagsInput.value = template.tags;
     }
 
     // Type-specific fields
     if (contentType === 'agents' && template.systemPrompt) {
-      const promptInput = form.querySelector('#systemPrompt') as HTMLTextAreaElement;
+      const promptInput = form.querySelector('[name="systemPrompt"]') as HTMLTextAreaElement;
       if (promptInput) promptInput.value = template.systemPrompt;
 
       if (template.temperature !== undefined) {
-        const tempInput = form.querySelector('#temperature') as HTMLInputElement;
+        const tempInput = form.querySelector('[name="temperature"]') as HTMLInputElement;
         if (tempInput) tempInput.value = template.temperature.toString();
       }
 
       if (template.maxTokens !== undefined) {
-        const tokensInput = form.querySelector('#maxTokens') as HTMLInputElement;
+        const tokensInput = form.querySelector('[name="maxTokens"]') as HTMLInputElement;
         if (tokensInput) tokensInput.value = template.maxTokens.toString();
       }
     }
 
     if (contentType === 'rules' && template.rulesContent) {
-      const rulesInput = form.querySelector('#rulesContent') as HTMLTextAreaElement;
+      const rulesInput = form.querySelector('[name="rulesContent"]') as HTMLTextAreaElement;
       if (rulesInput) rulesInput.value = template.rulesContent;
     }
 
     if (contentType === 'mcp') {
       if (template.npmPackage) {
-        const npmInput = form.querySelector('#npmPackage') as HTMLInputElement;
+        const npmInput = form.querySelector('[name="npmPackage"]') as HTMLInputElement;
         if (npmInput) npmInput.value = template.npmPackage;
       }
       if (template.serverType) {
-        const typeInput = form.querySelector('#serverType') as HTMLSelectElement;
+        const typeInput = form.querySelector('[name="serverType"]') as HTMLSelectElement;
         if (typeInput) typeInput.value = template.serverType;
       }
       if (template.installCommand) {
-        const installInput = form.querySelector('#installCommand') as HTMLInputElement;
+        const installInput = form.querySelector('[name="installCommand"]') as HTMLInputElement;
         if (installInput) installInput.value = template.installCommand;
       }
       if (template.configCommand) {
-        const configInput = form.querySelector('#configCommand') as HTMLInputElement;
+        const configInput = form.querySelector('[name="configCommand"]') as HTMLInputElement;
         if (configInput) configInput.value = template.configCommand;
       }
       if (template.toolsDescription) {
-        const toolsInput = form.querySelector('#toolsDescription') as HTMLTextAreaElement;
+        const toolsInput = form.querySelector('[name="toolsDescription"]') as HTMLTextAreaElement;
         if (toolsInput) toolsInput.value = template.toolsDescription;
       }
       if (template.envVars) {
-        const envInput = form.querySelector('#envVars') as HTMLTextAreaElement;
+        const envInput = form.querySelector('[name="envVars"]') as HTMLTextAreaElement;
         if (envInput) envInput.value = template.envVars;
       }
     }
 
     if (contentType === 'commands' && template.commandContent) {
-      const cmdInput = form.querySelector('#commandContent') as HTMLTextAreaElement;
+      const cmdInput = form.querySelector('[name="commandContent"]') as HTMLTextAreaElement;
       if (cmdInput) cmdInput.value = template.commandContent;
     }
 

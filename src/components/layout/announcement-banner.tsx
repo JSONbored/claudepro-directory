@@ -1,5 +1,10 @@
 'use client';
 
+import Link from 'next/link';
+import { useEffect } from 'react';
+import { Announcement, AnnouncementTag, AnnouncementTitle } from '@/src/components/ui/announcement';
+import { getActiveAnnouncement } from '@/src/config/announcements';
+import { useAnnouncementDismissal } from '@/src/hooks/use-announcement-dismissal';
 import {
   AlertTriangle,
   ArrowRight,
@@ -8,13 +13,7 @@ import {
   Calendar,
   Sparkles,
   X,
-} from 'lucide-react';
-import Link from 'next/link';
-import { useEffect } from 'react';
-
-import { Announcement, AnnouncementTag, AnnouncementTitle } from '@/src/components/ui/announcement';
-import { getActiveAnnouncement } from '@/src/config/announcements';
-import { useAnnouncementDismissal } from '@/src/hooks/use-announcement-dismissal';
+} from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**

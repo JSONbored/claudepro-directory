@@ -275,6 +275,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         <Link
                           href={buildFilterUrl({ search: undefined })}
                           className="ml-1 hover:text-destructive"
+                          aria-label="Remove search filter"
                         >
                           ×
                         </Link>
@@ -286,6 +287,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         <Link
                           href={buildFilterUrl({ category: undefined })}
                           className="ml-1 hover:text-destructive"
+                          aria-label="Remove category filter"
                         >
                           ×
                         </Link>
@@ -298,6 +300,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         <Link
                           href={buildFilterUrl({ employment: undefined })}
                           className="ml-1 hover:text-destructive"
+                          aria-label="Remove employment type filter"
                         >
                           ×
                         </Link>
@@ -309,6 +312,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         <Link
                           href={buildFilterUrl({ remote: undefined })}
                           className="ml-1 hover:text-destructive"
+                          aria-label="Remove remote filter"
                         >
                           ×
                         </Link>

@@ -30,7 +30,7 @@ import {
   TrendingUp,
   Users,
   Zap,
-} from 'lucide-react';
+} from '@/src/lib/icons';
 
 /**
  * Navigation Link Interface

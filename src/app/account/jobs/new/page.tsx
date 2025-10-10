@@ -5,8 +5,9 @@ import { createJob } from '@/src/lib/actions/job-actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
-  title: 'Post a Job - ClaudePro Directory',
+  title: 'Post a Job - Claude Pro Directory',
   description: 'Create a new job listing',
+  robots: { index: false, follow: false },
 };
 
 export default function NewJobPage() {

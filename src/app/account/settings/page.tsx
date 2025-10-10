@@ -16,8 +16,12 @@ import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
-  title: 'Settings - ClaudePro Directory',
+  title: 'Settings - Claude Pro Directory',
   description: 'Manage your account settings and preferences',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function SettingsPage() {

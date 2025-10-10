@@ -285,6 +285,7 @@ function UnifiedSidebarComponent({
                       type="button"
                       onClick={() => setSearchQuery('')}
                       className="ml-1 hover:text-destructive"
+                      aria-label="Clear search query"
                     >
                       ×
                     </button>

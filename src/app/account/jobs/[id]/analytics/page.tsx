@@ -10,8 +10,9 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/date-utils';
 
 export const metadata: Metadata = {
-  title: 'Job Analytics - ClaudePro Directory',
+  title: 'Job Analytics - Claude Pro Directory',
   description: 'View analytics for your job listing',
+  robots: { index: false, follow: false },
 };
 
 interface JobAnalyticsPageProps {

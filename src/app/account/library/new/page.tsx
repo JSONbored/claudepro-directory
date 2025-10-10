@@ -9,8 +9,9 @@ import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
-  title: 'Create Collection - ClaudePro Directory',
+  title: 'Create Collection - Claude Pro Directory',
   description: 'Create a new collection of bookmarked configurations',
+  robots: { index: false, follow: false },
 };
 
 export default async function NewCollectionPage() {

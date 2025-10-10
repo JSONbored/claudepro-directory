@@ -16,8 +16,9 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/date-utils';
 
 export const metadata: Metadata = {
-  title: 'My Jobs - ClaudePro Directory',
+  title: 'My Jobs - Claude Pro Directory',
   description: 'Manage your job listings',
+  robots: { index: false, follow: false },
 };
 
 export default async function MyJobsPage() {

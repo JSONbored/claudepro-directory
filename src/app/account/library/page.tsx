@@ -15,8 +15,9 @@ import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
-  title: 'My Library - ClaudePro Directory',
+  title: 'My Library - Claude Pro Directory',
   description: 'View and manage your bookmarked configurations and collections',
+  robots: { index: false, follow: false },
 };
 
 export default async function LibraryPage() {

@@ -24,6 +24,7 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
   return {
     title: `${slug} - My Library`,
     description: 'View and manage your collection',
+    robots: { index: false, follow: false },
   };
 }
 

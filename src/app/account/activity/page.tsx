@@ -12,8 +12,12 @@ import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/ico
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
-  title: 'Activity - ClaudePro Directory',
+  title: 'Activity - Claude Pro Directory',
   description: 'View your contribution history and activity',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function ActivityPage() {

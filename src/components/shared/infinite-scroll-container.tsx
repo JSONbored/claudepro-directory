@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import { Button } from '@/src/components/ui/button';
 import { useInfiniteScroll } from '@/src/hooks/use-infinite-scroll';
@@ -21,7 +21,31 @@ export interface InfiniteScrollContainerProps<T> {
   keyExtractor?: (item: T, index: number) => string;
 }
 
-export function InfiniteScrollContainer<T>({
+/**
+ * Debounce utility for resize operations
+ * Prevents excessive recalculations during window resize
+ */
+function debounce<T extends (...args: unknown[]) => void>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout | null = null;
+  return (...args: Parameters<T>) => {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+
+/**
+ * Infinite Scroll Container Component
+ *
+ * Performance Optimizations:
+ * - Memoized to prevent re-renders when parent state changes
+ * - Debounced resize calculations (150ms) to reduce layout thrashing
+ * - useCallback on event handlers to prevent re-creation
+ * - Masonry layout with dynamic row spanning
+ */
+function InfiniteScrollContainerComponent<T>({
   items,
   renderItem,
   loadMore,
@@ -100,18 +124,22 @@ export function InfiniteScrollContainer<T>({
       });
     };
 
-    // Initial calculation
+    // Initial calculation (immediate, no debounce)
     resizeGridItems();
 
-    // Recalculate on window resize
-    window.addEventListener('resize', resizeGridItems);
+    // Debounced version for resize events (150ms delay)
+    // Prevents excessive recalculations during continuous resize
+    const debouncedResize = debounce(resizeGridItems, 150);
 
-    // Recalculate when items change
+    // Recalculate on window resize (debounced)
+    window.addEventListener('resize', debouncedResize);
+
+    // Recalculate when items change (immediate, via ResizeObserver)
     const observer = new ResizeObserver(resizeGridItems);
     observer.observe(grid);
 
     return () => {
-      window.removeEventListener('resize', resizeGridItems);
+      window.removeEventListener('resize', debouncedResize);
       observer.disconnect();
     };
   }, []);
@@ -202,3 +230,8 @@ export function InfiniteScrollContainer<T>({
     </div>
   );
 }
+
+// Export memoized component - generic type preserved
+export const InfiniteScrollContainer = memo(
+  InfiniteScrollContainerComponent
+) as typeof InfiniteScrollContainerComponent;

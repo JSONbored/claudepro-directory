@@ -20,7 +20,6 @@ import { join } from 'path';
 import { parseChangelog } from '@/src/lib/changelog/parser';
 import { APP_CONFIG, CONTENT_PATHS, MAIN_CONTENT_CATEGORIES } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
-import type { ContentItem } from '@/src/lib/schemas/content/content-item-union.schema';
 
 /**
  * Sitemap URL interface matching sitemap.xml specification
@@ -34,15 +33,18 @@ export interface SitemapUrl {
 
 /**
  * Metadata required for URL generation
+ *
+ * NOTE: Uses minimal metadata types from generated files (Pick<> subsets for performance)
+ * All metadata exports include: slug, category, dateAdded (at minimum)
  */
 export interface UrlGeneratorMetadata {
-  agentsMetadata: ContentItem[];
-  collectionsMetadata: ContentItem[];
-  commandsMetadata: ContentItem[];
-  hooksMetadata: ContentItem[];
-  mcpMetadata: ContentItem[];
-  rulesMetadata: ContentItem[];
-  statuslinesMetadata: ContentItem[];
+  agentsMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
+  collectionsMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
+  commandsMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
+  hooksMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
+  mcpMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
+  rulesMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
+  statuslinesMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
 }
 
 /**
@@ -298,7 +300,7 @@ export async function generateAllSiteUrls(
   // CONTENT ITEMS (Agents, MCP, Rules, Commands, Hooks, Statuslines)
   // ============================================================================
 
-  const allContent: ContentItem[] = [
+  const allContent = [
     ...metadata.rulesMetadata,
     ...metadata.mcpMetadata,
     ...metadata.agentsMetadata,

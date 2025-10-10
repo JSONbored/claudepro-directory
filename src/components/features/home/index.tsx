@@ -45,7 +45,7 @@ const UnifiedSearch = dynamic(
   }
 );
 
-function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
+function HomePageClientComponent({ initialData, initialSearchQuery, stats }: HomePageClientProps) {
   const { allConfigs } = initialData;
 
   const [activeTab, setActiveTab] = useState('all');
@@ -63,11 +63,12 @@ function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
     []
   );
 
-  // Use React 19 optimized search hook
+  // Use React 19 optimized search hook with initial query from URL
   const { filters, searchResults, filterOptions, handleSearch, handleFiltersChange, isSearching } =
     useSearch({
       data: allConfigs,
       searchOptions,
+      ...(initialSearchQuery ? { initialQuery: initialSearchQuery } : {}),
     });
 
   // Create lookup maps dynamically for all featured categories

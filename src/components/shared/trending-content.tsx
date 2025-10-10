@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { memo, useId } from 'react';
 import { ConfigCard } from '@/src/components/features/content/config-card';
 import { Badge } from '@/src/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
@@ -8,7 +8,15 @@ import { Clock, Star, TrendingUp } from '@/src/lib/icons';
 import type { TrendingContentProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export function TrendingContent({ trending, popular, recent }: TrendingContentProps) {
+/**
+ * Trending Content Component
+ *
+ * Performance Optimizations:
+ * - Memoized to prevent unnecessary re-renders when parent state changes
+ * - Only re-renders when trending/popular/recent data actually changes
+ * - Renders 10-20+ ConfigCard items per tab (expensive DOM operations)
+ */
+function TrendingContentComponent({ trending, popular, recent }: TrendingContentProps) {
   // Generate unique IDs for headings
   const trendingHeadingId = useId();
   const popularHeadingId = useId();
@@ -147,3 +155,6 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
     </Tabs>
   );
 }
+
+// Export memoized component
+export const TrendingContent = memo(TrendingContentComponent);

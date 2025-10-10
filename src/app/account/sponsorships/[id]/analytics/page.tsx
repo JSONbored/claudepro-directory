@@ -14,8 +14,9 @@ import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
-  title: 'Sponsorship Analytics - ClaudePro Directory',
+  title: 'Sponsorship Analytics - Claude Pro Directory',
   description: 'Detailed analytics for your sponsored content',
+  robots: { index: false, follow: false },
 };
 
 interface AnalyticsPageProps {

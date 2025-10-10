@@ -37,6 +37,10 @@ const homePagePropsSchema = z
 const homePageClientPropsSchema = z
   .object({
     initialData: homePagePropsSchema.describe('Initial server-side data for client hydration'),
+    initialSearchQuery: z
+      .string()
+      .optional()
+      .describe('Initial search query from URL parameter (for SearchAction schema integration)'),
     stats: z
       .object({
         rules: z.number().describe('Number of rules'),

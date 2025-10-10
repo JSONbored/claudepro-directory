@@ -241,6 +241,30 @@ export const statsRedis = {
     );
   },
 
+  getCopyCount: (cat: string, slug: string) =>
+    redis(
+      async (c) => (await c.get<number>(`copies:${cat}:${slug}`)) || 0,
+      () => 0,
+      'getCopyCount'
+    ),
+
+  getCopyCounts: async (items: Array<{ category: string; slug: string }>) => {
+    if (!items.length) return {};
+    const keys = items.map((i) => `copies:${i.category}:${i.slug}`);
+    const counts = await redis(
+      async (c) => await c.mget<(number | null)[]>(...keys),
+      () => new Array(items.length).fill(0) as (number | null)[],
+      'getCopyCounts'
+    );
+    return items.reduce(
+      (acc, item, i) => {
+        acc[`${item.category}:${item.slug}`] = (counts as (number | null)[])[i] || 0;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+  },
+
   cleanupOldTrending: () =>
     redis(
       async (c) => {
@@ -292,6 +316,83 @@ export const statsRedis = {
       );
       // Return items without view counts on error
       return items.map((item) => ({ ...item, viewCount: 0 }));
+    }
+  },
+
+  /**
+   * Enrich content items with Redis copy counts
+   *
+   * @param items - Array of content items (must have category and slug)
+   * @returns Same array with copyCount property added to each item
+   *
+   * @example
+   * ```typescript
+   * const enriched = await statsRedis.enrichWithCopyCounts(agents);
+   * // Returns: [{ ...agent1, copyCount: 45 }, { ...agent2, copyCount: 67 }]
+   * ```
+   */
+  enrichWithCopyCounts: async <T extends { category: string; slug: string }>(
+    items: T[]
+  ): Promise<(T & { copyCount: number })[]> => {
+    if (!items.length) return [];
+
+    try {
+      // Batch fetch copy counts
+      const copyCounts = await statsRedis.getCopyCounts(items);
+
+      // Merge copy counts with items
+      return items.map((item) => ({
+        ...item,
+        copyCount: copyCounts[`${item.category}:${item.slug}`] || 0,
+      }));
+    } catch (error) {
+      logger.error(
+        'Failed to enrich with copy counts',
+        error instanceof Error ? error : new Error(String(error))
+      );
+      // Return items without copy counts on error
+      return items.map((item) => ({ ...item, copyCount: 0 }));
+    }
+  },
+
+  /**
+   * Enrich content items with both view and copy counts
+   * Optimized to run both operations in parallel
+   *
+   * @param items - Array of content items (must have category and slug)
+   * @returns Same array with viewCount and copyCount properties added
+   *
+   * @example
+   * ```typescript
+   * const enriched = await statsRedis.enrichWithAllCounts(agents);
+   * // Returns: [{ ...agent1, viewCount: 123, copyCount: 45 }, ...]
+   * ```
+   */
+  enrichWithAllCounts: async <T extends { category: string; slug: string }>(
+    items: T[]
+  ): Promise<(T & { viewCount: number; copyCount: number })[]> => {
+    if (!items.length) return [];
+
+    try {
+      // Batch fetch both counts in parallel
+      const [viewCounts, copyCounts] = await Promise.all([
+        statsRedis.getViewCounts(items),
+        statsRedis.getCopyCounts(items),
+      ]);
+
+      // Merge both counts with items
+      return items.map((item) => ({
+        ...item,
+        viewCount: viewCounts[`${item.category}:${item.slug}`] || 0,
+        copyCount: copyCounts[`${item.category}:${item.slug}`] || 0,
+      }));
+    } catch (error) {
+      logger.error(
+        'Failed to enrich with all counts',
+        error instanceof Error ? error : new Error(String(error))
+      );
+      // Return items without counts on error
+      return items.map((item) => ({ ...item, viewCount: 0, copyCount: 0 }));
     }
   },
 };

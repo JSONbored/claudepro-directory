@@ -10,8 +10,9 @@ import {
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
-  title: 'Sign In - ClaudePro Directory',
+  title: 'Sign In - Claude Pro Directory',
   description: 'Sign in to save bookmarks, submit content, and join the community',
+  robots: { index: false, follow: false },
 };
 
 export default async function LoginPage({

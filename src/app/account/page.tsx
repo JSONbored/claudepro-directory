@@ -12,8 +12,12 @@ import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
-  title: 'Account Dashboard - ClaudePro Directory',
+  title: 'Account Dashboard - Claude Pro Directory',
   description: 'Manage your ClaudePro account and view your activity',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function AccountDashboard() {

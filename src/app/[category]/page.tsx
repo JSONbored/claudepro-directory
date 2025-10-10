@@ -176,8 +176,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   // Load content for this category
   const itemsData = await getContentByCategory(category);
 
-  // Enrich with view counts from Redis
-  const items = await statsRedis.enrichWithViewCounts(
+  // Enrich with view and copy counts from Redis (parallel batch operation)
+  const items = await statsRedis.enrichWithAllCounts(
     itemsData.map((item) => ({
       ...item,
       category: category as typeof item.category,

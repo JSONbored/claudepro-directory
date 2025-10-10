@@ -14,8 +14,9 @@ import { CheckCircle, Clock, ExternalLink, GitPullRequest, Send, XCircle } from 
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
-  title: 'My Submissions - ClaudePro Directory',
+  title: 'My Submissions - Claude Pro Directory',
   description: 'Track your community content submissions',
+  robots: { index: false, follow: false },
 };
 
 export default async function SubmissionsPage() {

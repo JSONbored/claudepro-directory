@@ -6,8 +6,9 @@ import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
-  title: 'Edit Job - ClaudePro Directory',
+  title: 'Edit Job - Claude Pro Directory',
   description: 'Edit your job listing',
+  robots: { index: false, follow: false },
 };
 
 interface EditJobPageProps {

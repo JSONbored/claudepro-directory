@@ -21,7 +21,7 @@ import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { TypeBadge } from '@/src/components/ui/config-badge';
 import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
-import { ExternalLink, Eye, Github } from '@/src/lib/icons';
+import { Copy as CopyIcon, ExternalLink, Eye, Github } from '@/src/lib/icons';
 import type { ConfigCardProps } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
@@ -39,6 +39,7 @@ export const ConfigCard = memo(
     const sponsorTier = (item as { sponsorTier?: string }).sponsorTier;
     const position = (item as { position?: number }).position;
     const viewCount = (item as { viewCount?: number }).viewCount;
+    const copyCount = (item as { copyCount?: number }).copyCount;
 
     return (
       <BaseCard
@@ -80,7 +81,7 @@ export const ConfigCard = memo(
         )}
         renderMetadataBadges={() => (
           <>
-            {/* View count badge - prominent on bottom right */}
+            {/* View count badge */}
             {viewCount !== undefined && (
               <Badge
                 variant="secondary"
@@ -89,6 +90,18 @@ export const ConfigCard = memo(
               >
                 <Eye className="h-3.5 w-3.5" aria-hidden="true" />
                 <span className="text-xs">{formatViewCount(viewCount)}</span>
+              </Badge>
+            )}
+
+            {/* Copy count badge - social proof for engagement */}
+            {copyCount !== undefined && copyCount > 0 && (
+              <Badge
+                variant="secondary"
+                className="h-7 px-2.5 gap-1.5 bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 hover:bg-green-500/15 transition-colors font-medium"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <CopyIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="text-xs">{formatViewCount(copyCount)}</span>
               </Badge>
             )}
           </>

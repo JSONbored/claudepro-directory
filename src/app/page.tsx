@@ -24,13 +24,23 @@ type ContentMetadataWithCategory =
   | (StatuslineMetadata & { category: 'statuslines' })
   | (CollectionMetadata & { category: 'collections' });
 
-type EnrichedMetadata = ContentMetadataWithCategory & { viewCount: number };
+type EnrichedMetadata = ContentMetadataWithCategory & { viewCount: number; copyCount: number };
 
 // Enable ISR - revalidate every 5 minutes for fresh view counts
 export const revalidate = 300;
 
+interface HomePageProps {
+  searchParams: Promise<{
+    q?: string;
+  }>;
+}
+
 // Server component that loads data
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: HomePageProps) {
+  // Extract and sanitize search query from URL
+  const resolvedParams = await searchParams;
+  const initialSearchQuery = resolvedParams.q || '';
+
   // Load all content server-side for better SEO and initial page load
   const [
     rulesData,
@@ -50,33 +60,33 @@ export default async function HomePage() {
     lazyContentLoaders.collections(),
   ]);
 
-  // Enrich with view counts from Redis
+  // Enrich with view and copy counts from Redis (parallel batch operation)
   const [rules, mcp, agents, commands, hooks, statuslines, collections] = await Promise.all([
-    statsRedis.enrichWithViewCounts(
+    statsRedis.enrichWithAllCounts(
       rulesData.map((item: RuleMetadata) => ({ ...item, category: 'rules' as const }))
     ),
-    statsRedis.enrichWithViewCounts(
+    statsRedis.enrichWithAllCounts(
       mcpData.map((item: McpMetadata) => ({ ...item, category: 'mcp' as const }))
     ),
-    statsRedis.enrichWithViewCounts(
+    statsRedis.enrichWithAllCounts(
       agentsData.map((item: AgentMetadata) => ({ ...item, category: 'agents' as const }))
     ),
-    statsRedis.enrichWithViewCounts(
+    statsRedis.enrichWithAllCounts(
       commandsData.map((item: CommandMetadata) => ({
         ...item,
         category: 'commands' as const,
       }))
     ),
-    statsRedis.enrichWithViewCounts(
+    statsRedis.enrichWithAllCounts(
       hooksData.map((item: HookMetadata) => ({ ...item, category: 'hooks' as const }))
     ),
-    statsRedis.enrichWithViewCounts(
+    statsRedis.enrichWithAllCounts(
       statuslinesData.map((item: StatuslineMetadata) => ({
         ...item,
         category: 'statuslines' as const,
       }))
     ),
-    statsRedis.enrichWithViewCounts(
+    statsRedis.enrichWithAllCounts(
       collectionsData.map((item: CollectionMetadata) => ({
         ...item,
         category: 'collections' as const,
@@ -163,6 +173,7 @@ export default async function HomePage() {
         <div className={`relative ${UI_CLASSES.Z_10}`}>
           <HomePageClient
             initialData={initialData}
+            initialSearchQuery={initialSearchQuery}
             stats={{
               rules: rules.length,
               mcp: mcp.length,

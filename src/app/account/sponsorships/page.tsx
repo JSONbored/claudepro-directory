@@ -15,8 +15,9 @@ import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
-  title: 'Sponsorships - ClaudePro Directory',
+  title: 'Sponsorships - Claude Pro Directory',
   description: 'Manage your sponsored content and view analytics',
+  robots: { index: false, follow: false },
 };
 
 export default async function SponsorshipsPage() {

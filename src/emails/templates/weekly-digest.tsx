@@ -12,6 +12,22 @@
 import { Button, Hr, Section, Text } from '@react-email/components';
 import type * as React from 'react';
 import { BaseLayout } from '../layouts/base-layout';
+import {
+  contentSection,
+  ctaSection,
+  ctaTitleStyle,
+  dividerStyle,
+  footerNoteSection,
+  footerNoteStyle,
+  headingStyle,
+  heroSection,
+  paragraphStyle,
+  primaryButtonStyle,
+  secondaryButtonStyle,
+  sectionTitleStyle,
+  strongStyle,
+  subheadingStyle,
+} from '../utils/common-styles';
 import { borderRadius, brandColors, emailTheme, spacing, typography } from '../utils/theme';
 
 /**
@@ -214,48 +230,9 @@ function formatViewCount(count: number): string {
 }
 
 /**
- * Email-safe inline styles
+ * Template-specific custom styles
+ * (Styles for digest item cards and trending view counts)
  */
-
-const heroSection: React.CSSProperties = {
-  textAlign: 'center',
-  marginBottom: spacing.lg,
-};
-
-const headingStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['3xl'],
-  fontWeight: typography.fontWeight.bold,
-  color: emailTheme.textPrimary,
-  margin: `0 0 ${spacing.sm} 0`,
-  lineHeight: typography.lineHeight.tight,
-};
-
-const subheadingStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.lg,
-  color: brandColors.primary,
-  fontWeight: typography.fontWeight.semibold,
-  margin: `0 0 ${spacing.md} 0`,
-  lineHeight: typography.lineHeight.normal,
-};
-
-const contentSection: React.CSSProperties = {
-  marginTop: spacing.lg,
-  marginBottom: spacing.lg,
-};
-
-const sectionTitleStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['2xl'],
-  fontWeight: typography.fontWeight.bold,
-  color: emailTheme.textPrimary,
-  margin: `0 0 ${spacing.md} 0`,
-};
-
-const paragraphStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.base,
-  color: emailTheme.textPrimary,
-  lineHeight: typography.lineHeight.relaxed,
-  margin: `0 0 ${spacing.md} 0`,
-};
 
 const itemCardStyle: React.CSSProperties = {
   backgroundColor: emailTheme.bgTertiary,
@@ -311,72 +288,6 @@ const viewCountStyle: React.CSSProperties = {
   fontSize: typography.fontSize.xs,
   color: emailTheme.textTertiary,
   fontWeight: typography.fontWeight.medium,
-};
-
-const dividerStyle: React.CSSProperties = {
-  borderColor: emailTheme.borderDefault,
-  margin: `${spacing.xl} 0`,
-};
-
-const ctaSection: React.CSSProperties = {
-  textAlign: 'center',
-  marginTop: spacing.lg,
-  marginBottom: spacing.lg,
-};
-
-const ctaTitleStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['2xl'],
-  fontWeight: typography.fontWeight.bold,
-  color: emailTheme.textPrimary,
-  margin: `0 0 ${spacing.md} 0`,
-};
-
-const primaryButtonStyle: React.CSSProperties = {
-  backgroundColor: brandColors.primary,
-  color: '#ffffff',
-  fontWeight: typography.fontWeight.semibold,
-  fontSize: typography.fontSize.base,
-  padding: `${spacing.md} ${spacing.xl}`,
-  borderRadius: borderRadius.md,
-  textDecoration: 'none',
-  display: 'inline-block',
-  marginTop: spacing.md,
-  marginBottom: spacing.sm,
-  marginLeft: spacing.sm,
-  marginRight: spacing.sm,
-  border: 'none',
-};
-
-const secondaryButtonStyle: React.CSSProperties = {
-  backgroundColor: emailTheme.bgTertiary,
-  color: emailTheme.textPrimary,
-  fontWeight: typography.fontWeight.medium,
-  fontSize: typography.fontSize.base,
-  padding: `${spacing.md} ${spacing.xl}`,
-  borderRadius: borderRadius.md,
-  textDecoration: 'none',
-  display: 'inline-block',
-  marginTop: spacing.sm,
-  marginBottom: spacing.md,
-  marginLeft: spacing.sm,
-  marginRight: spacing.sm,
-  border: `1px solid ${emailTheme.borderDefault}`,
-};
-
-const footerNoteSection: React.CSSProperties = {
-  marginTop: spacing.lg,
-};
-
-const footerNoteStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.sm,
-  color: emailTheme.textTertiary,
-  lineHeight: typography.lineHeight.relaxed,
-  margin: `${spacing.xs} 0`,
-};
-
-const strongStyle: React.CSSProperties = {
-  fontWeight: typography.fontWeight.semibold,
-  color: emailTheme.textPrimary,
 };
 
 /**

@@ -264,11 +264,12 @@ export function useLocalSearch<
   };
 }
 
-export function useSearch({ data, searchOptions }: UseSearchProps) {
+export function useSearch({ data, searchOptions, initialQuery }: UseSearchProps) {
   // PERFORMANCE: Create stable reference for data array to prevent unnecessary re-renders
   const stableData = useMemo(() => data as ContentItem[], [data]);
 
-  const [searchQuery, setSearchQuery] = useState('');
+  // Initialize with query from URL if provided (for SearchAction schema integration)
+  const [searchQuery, setSearchQuery] = useState(initialQuery || '');
   const [filters, setFilters] = useState<FilterState>({
     sort: 'trending',
   });

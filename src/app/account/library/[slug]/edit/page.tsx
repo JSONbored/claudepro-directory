@@ -17,6 +17,7 @@ export async function generateMetadata({ params }: EditCollectionPageProps): Pro
   return {
     title: `Edit ${slug} - My Library`,
     description: 'Edit your collection',
+    robots: { index: false, follow: false },
   };
 }
 
