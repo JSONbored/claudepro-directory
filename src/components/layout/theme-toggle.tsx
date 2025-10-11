@@ -72,21 +72,52 @@ export function ThemeToggle() {
   /**
    * Handle theme toggle with View Transition animation
    * Captures click position for circular reveal effect
+   *
+   * Performance optimizations:
+   * - DOM updates before React state (prevents blocking)
+   * - Deferred React state update (after animation starts)
+   * - localStorage write happens async
+   *
+   * Performance monitoring (development only):
+   * - Tracks animation start/end timing
+   * - Measures total interaction latency
    */
   const handleToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
-    const checked = theme === 'light'; // Toggle to opposite
-    const newTheme = checked ? 'dark' : 'light';
+    const startTime = performance.now();
+    const newTheme = theme === 'light' ? 'dark' : 'light';
 
     // If View Transitions API is supported, use it
     if (isSupported) {
       const { x, y } = getClickPosition(event);
       setAnimationOrigin(x, y);
 
-      startTransition(() => {
-        setTheme(newTheme);
-        localStorage.setItem('theme', newTheme);
+      // Start view transition with DOM-only updates (no React state yet)
+      const transition = startTransition(() => {
+        // Update DOM immediately (this is what the animation sees)
         document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
       });
+
+      // Update React state after animation starts (non-blocking)
+      // This prevents React re-render from blocking the animation
+      requestAnimationFrame(() => {
+        setTheme(newTheme);
+      });
+
+      // Performance monitoring (development only)
+      if (process.env.NODE_ENV === 'development' && transition) {
+        transition.finished
+          .then(() => {
+            const endTime = performance.now();
+            // biome-ignore lint/suspicious/noConsole: Development-only performance monitoring
+            console.log(
+              `[Theme Toggle] Animation completed in ${(endTime - startTime).toFixed(2)}ms`
+            );
+          })
+          .catch(() => {
+            // Silently ignore animation errors
+          });
+      }
     } else {
       // Fallback: Use CSS transition for smooth color change
       document.documentElement.classList.add('theme-transition');
@@ -111,13 +142,33 @@ export function ThemeToggle() {
         onCheckedChange={(checked) => {
           // Fallback for keyboard/programmatic changes without click event
           const newTheme = checked ? 'dark' : 'light';
-          document.documentElement.classList.add('theme-transition');
-          setTheme(newTheme);
-          localStorage.setItem('theme', newTheme);
-          document.documentElement.setAttribute('data-theme', newTheme);
-          setTimeout(() => {
-            document.documentElement.classList.remove('theme-transition');
-          }, 300);
+
+          if (isSupported) {
+            // Use center of switch for keyboard navigation
+            const rect = containerRef.current?.getBoundingClientRect();
+            if (rect) {
+              const x = ((rect.left + rect.width / 2) / window.innerWidth) * 100;
+              const y = ((rect.top + rect.height / 2) / window.innerHeight) * 100;
+              setAnimationOrigin(x, y);
+            }
+
+            startTransition(() => {
+              document.documentElement.setAttribute('data-theme', newTheme);
+              localStorage.setItem('theme', newTheme);
+            });
+
+            requestAnimationFrame(() => {
+              setTheme(newTheme);
+            });
+          } else {
+            document.documentElement.classList.add('theme-transition');
+            setTheme(newTheme);
+            localStorage.setItem('theme', newTheme);
+            document.documentElement.setAttribute('data-theme', newTheme);
+            setTimeout(() => {
+              document.documentElement.classList.remove('theme-transition');
+            }, 300);
+          }
         }}
         onClick={handleToggle}
         aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}

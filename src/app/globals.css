@@ -1249,25 +1249,28 @@
   /**
    * Circle Blur Animation for Theme Toggle
    *
-   * Creates a circular expanding reveal with blur effect
+   * Creates a dramatic circular expanding reveal with enhanced visual effects
    * - Animates from click position (set via --x, --y CSS variables)
-   * - Expands from 0% to 150% to cover entire viewport
-   * - Blur fades from 4px to 0 for smooth reveal
+   * - Expands from 0% to 200% to ensure full viewport coverage
+   * - Enhanced blur effect (8px to 0) for more prominent visual feedback
+   * - Scale transformation for added depth and emphasis
+   * - Slower duration (700ms) for smoother, more noticeable transition
    *
    * Browser Support:
-   * - Chrome/Edge 111+: Full animation
-   * - Firefox/Safari: Graceful fallback (instant transition)
+   * - Chrome/Edge 111+: Full animation with all effects
+   * - Firefox/Safari: Graceful fallback (instant transition with CSS fade)
    */
   @supports (view-transition-name: root) {
-    /* Disable old view animation (fade out) */
+    /* Disable old view animation (fade out instantly) */
     ::view-transition-old(root) {
       animation: none;
       opacity: 0;
     }
 
-    /* Animate new view with circle blur expansion */
+    /* Animate new view with enhanced circle blur expansion */
     ::view-transition-new(root) {
-      animation: circle-blur-expand 500ms ease-out;
+      animation: circle-blur-expand 700ms cubic-bezier(0.22, 1, 0.36, 1);
+      mix-blend-mode: normal;
       /* Animation origin set dynamically via inline style */
     }
   }
@@ -1275,11 +1278,13 @@
   @keyframes circle-blur-expand {
     from {
       clip-path: circle(0% at var(--x, 50%) var(--y, 50%));
-      filter: blur(4px);
+      filter: blur(8px) brightness(0.95);
+      transform: scale(1.02);
     }
     to {
-      clip-path: circle(150% at var(--x, 50%) var(--y, 50%));
-      filter: blur(0);
+      clip-path: circle(200% at var(--x, 50%) var(--y, 50%));
+      filter: blur(0) brightness(1);
+      transform: scale(1);
     }
   }
 }

@@ -100,7 +100,7 @@ export async function loadCurrentFeaturedContentByCategory(): Promise<
     if (featuredRecords.length === 0) {
       logger.info('No featured configs for current week - using popular content fallback');
 
-      // Fallback: Load all content and use trending calculator to get popular items per category
+      // Fallback: Load all content and get top 6 per category
       const [
         rulesData,
         mcpData,
@@ -119,8 +119,7 @@ export async function loadCurrentFeaturedContentByCategory(): Promise<
         getContentByCategory('collections'),
       ]);
 
-      // Use trending calculator to get popular content (same algorithm as /trending Popular tab)
-      // Returns top 12 popular items by default across all categories
+      // Use trending calculator to get popular content per category
       const trendingData = await getBatchTrendingData({
         rules: rulesData,
         mcp: mcpData,
@@ -131,17 +130,49 @@ export async function loadCurrentFeaturedContentByCategory(): Promise<
         collections: collectionsData,
       });
 
-      // Group popular items by category
+      // Group popular items by category - ensure all 7 categories are represented
       const fallbackResult: Record<string, readonly UnifiedContentItem[]> = {};
+
+      // Map of category to its raw data for fallback
+      const categoryDataMap = {
+        rules: rulesData,
+        mcp: mcpData,
+        agents: agentsData,
+        commands: commandsData,
+        hooks: hooksData,
+        statuslines: statuslinesData,
+        collections: collectionsData,
+      };
+
       for (const category of contentCategories) {
-        // Filter popular items for this category and take top 6
-        const categoryItems = trendingData.popular.filter((item) => item.category === category);
-        if (categoryItems.length > 0) {
-          fallbackResult[category] = categoryItems.slice(0, 6);
+        // First try to get items from trending data
+        const trendingItems = trendingData.popular.filter((item) => item.category === category);
+
+        if (trendingItems.length >= 6) {
+          // We have enough trending items
+          fallbackResult[category] = trendingItems.slice(0, 6);
+        } else {
+          // Not enough trending items, supplement with raw data sorted alphabetically
+          const rawData = categoryDataMap[category] || [];
+          const combined = [...trendingItems];
+
+          // Add non-trending items alphabetically until we have 6
+          const trendingSlugs = new Set(trendingItems.map((item) => item.slug));
+          const additionalItems = rawData
+            .filter((item) => !trendingSlugs.has(item.slug))
+            .sort((a, b) => {
+              const titleA = a.title || a.name || '';
+              const titleB = b.title || b.name || '';
+              return titleA.localeCompare(titleB);
+            })
+            .slice(0, 6 - trendingItems.length);
+
+          combined.push(...additionalItems);
+          fallbackResult[category] = combined.slice(0, 6);
         }
       }
 
-      logger.info('Loaded fallback featured content using popular algorithm', {
+      logger.info('Loaded fallback featured content with all categories', {
         categories: Object.keys(fallbackResult).join(', '),
         totalItems: Object.values(fallbackResult).reduce((sum, items) => sum + items.length, 0),
       });

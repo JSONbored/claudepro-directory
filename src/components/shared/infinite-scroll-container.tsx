@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, type ReactNode, useCallback, useState } from 'react';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import { Button } from '@/src/components/ui/button';
 import { useInfiniteScroll } from '@/src/hooks/use-infinite-scroll';
@@ -22,28 +22,12 @@ export interface InfiniteScrollContainerProps<T> {
 }
 
 /**
- * Debounce utility for resize operations
- * Prevents excessive recalculations during window resize
- */
-function debounce<T extends (...args: unknown[]) => void>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
-  return (...args: Parameters<T>) => {
-    if (timeout) clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
-
-/**
  * Infinite Scroll Container Component
  *
  * Performance Optimizations:
  * - Memoized to prevent re-renders when parent state changes
- * - Debounced resize calculations (150ms) to reduce layout thrashing
  * - useCallback on event handlers to prevent re-creation
- * - Masonry layout with dynamic row spanning
+ * - Standard CSS Grid for consistent card spacing
  */
 function InfiniteScrollContainerComponent<T>({
   items,
@@ -58,7 +42,6 @@ function InfiniteScrollContainerComponent<T>({
 }: InfiniteScrollContainerProps<T>) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
 
   const handleLoadMore = useCallback(async () => {
     if (loading || !hasMore) {
@@ -103,47 +86,6 @@ function InfiniteScrollContainerComponent<T>({
     });
   }, [handleLoadMore]);
 
-  // Masonry layout effect - calculates row spans based on content height
-  // MUST be before early return to satisfy Rules of Hooks
-  useEffect(() => {
-    const grid = gridRef.current;
-    if (!grid) return;
-
-    const resizeGridItems = () => {
-      const rowGap = 24; // gap-6 = 24px
-      const rowHeight = 1; // auto-rows-[1px] - Fine-grained control for consistent spacing
-      const items = grid.querySelectorAll('[data-grid-item]');
-
-      items.forEach((item) => {
-        const content = item.querySelector('[data-grid-content]');
-        if (content) {
-          const contentHeight = content.getBoundingClientRect().height;
-          const rowSpan = Math.ceil((contentHeight + rowGap) / rowHeight);
-          (item as HTMLElement).style.gridRowEnd = `span ${rowSpan}`;
-        }
-      });
-    };
-
-    // Initial calculation (immediate, no debounce)
-    resizeGridItems();
-
-    // Debounced version for resize events (150ms delay)
-    // Prevents excessive recalculations during continuous resize
-    const debouncedResize = debounce(resizeGridItems, 150);
-
-    // Recalculate on window resize (debounced)
-    window.addEventListener('resize', debouncedResize);
-
-    // Recalculate when items change (immediate, via ResizeObserver)
-    const observer = new ResizeObserver(resizeGridItems);
-    observer.observe(grid);
-
-    return () => {
-      window.removeEventListener('resize', debouncedResize);
-      observer.disconnect();
-    };
-  }, []);
-
   // Early return AFTER all hooks
   if (items.length === 0 && !loading) {
     return (
@@ -155,18 +97,13 @@ function InfiniteScrollContainerComponent<T>({
 
   return (
     <div className={className}>
-      {/* Items Grid - Masonry with dynamic row spanning */}
-      <div
-        ref={gridRef}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[1px]"
-      >
+      {/* Items Grid - Standard responsive grid with consistent spacing */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map((item, index) => {
           const key = keyExtractor ? keyExtractor(item, index) : `item-${index}`;
           return (
-            <div key={key} data-grid-item>
-              <div data-grid-content>
-                <ErrorBoundary>{renderItem(item, index)}</ErrorBoundary>
-              </div>
+            <div key={key} className="flex">
+              <ErrorBoundary>{renderItem(item, index)}</ErrorBoundary>
             </div>
           );
         })}

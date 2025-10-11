@@ -41,6 +41,9 @@ generated/
 # Build-generated API files
 public/static-api/
 
+# Dynamic sitemap served by src/app/sitemap.ts (do not commit generated file)
+public/sitemap.xml
+
 # Fumadocs generated API documentation (regenerated at build time)
 content/api-docs/*.mdx
 

@@ -25,11 +25,10 @@
   },
   "scripts": {
     "dev": "npm run build:content && next dev --turbopack",
-    "build": "npm run build:content && npx run-p generate:sitemap generate:openapi && npm run build:api-docs && next build --turbopack",
+    "build": "npm run build:content && npm run generate:openapi && npm run build:api-docs && next build --turbopack",
     "build:analyze": "TURBOPACK_STATS=1 npm run build",
     "build:content": "tsx scripts/build-content.ts",
     "build:api-docs": "tsx scripts/generate-fumadocs-api.ts",
-    "generate:sitemap": "tsx scripts/generate-sitemap.ts",
     "generate:static-apis": "tsx scripts/generate-static-apis.ts",
     "generate:openapi": "tsx scripts/generate-openapi.ts",
     "generate:types": "vercel env pull .env.local --yes && supabase gen types typescript --db-url \"$POSTGRES_URL_NON_POOLING\" --schema public > src/types/database.types.ts && rm .env.local",

@@ -1,21 +1,22 @@
 /**
- * Sitemap Parity Test
+ * Sitemap URL Generation Test
  *
- * **CRITICAL**: Verifies dynamic sitemap matches static sitemap exactly
+ * **CRITICAL**: Validates centralized URL generator used by dynamic sitemap
  *
  * Purpose:
- * - Ensure migration from public/sitemap.xml to src/app/sitemap.ts is safe
- * - Verify ALL URLs are present in both versions
- * - Confirm URL structure, priorities, and change frequencies match
+ * - Verify ALL URLs are generated correctly for src/app/sitemap.ts
+ * - Confirm URL structure, priorities, and change frequencies are valid
+ * - Ensure no duplicate URLs
+ * - Validate SEO metadata (dates, priorities, frequencies)
  *
  * Test Strategy:
- * 1. Generate static sitemap using existing script
- * 2. Generate dynamic sitemap using new Next.js function
- * 3. Compare URL counts, structure, and metadata
- * 4. Report any discrepancies
+ * 1. Generate URLs using centralized url-generator.ts
+ * 2. Validate URL structure and metadata
+ * 3. Ensure all categories and content types are included
+ * 4. Verify critical routes exist
  *
- * @see scripts/generate-sitemap.ts (static generation)
- * @see src/app/sitemap.ts (dynamic generation)
+ * @see src/lib/build/url-generator.ts (centralized URL generation)
+ * @see src/app/sitemap.ts (dynamic sitemap using url-generator)
  */
 
 import { describe, expect, it } from 'vitest';
@@ -242,8 +243,8 @@ describe('Sitemap Parity Test', () => {
     });
   });
 
-  describe('Static Sitemap Comparison', () => {
-    it('matches static sitemap URL count (±10 tolerance for growth)', async () => {
+  describe('URL Count Validation', () => {
+    it('generates expected number of URLs (±10 tolerance for growth)', async () => {
       const dynamicUrls = await generateAllSiteUrls(
         {
           agentsMetadata,
@@ -263,10 +264,10 @@ describe('Sitemap Parity Test', () => {
         }
       );
 
-      // Static sitemap baseline: 425 URLs (2025-10-10)
+      // Baseline: 427 URLs (2025-10-11 - verified from last static generation)
       // NOTE: Update this baseline when you add significant new content sections
       // (e.g., new category pages, guide sections, etc.)
-      const baselineCount = 425;
+      const baselineCount = 427;
       const tolerance = 10; // Allow ±10 URLs for organic content growth
 
       const actualCount = dynamicUrls.length;
@@ -276,7 +277,7 @@ describe('Sitemap Parity Test', () => {
       expect(isWithinTolerance).toBe(true);
     });
 
-    it('includes all critical routes from static sitemap', async () => {
+    it('includes all critical routes', async () => {
       const urls = await generateAllSiteUrls(
         {
           agentsMetadata,
