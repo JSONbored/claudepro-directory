@@ -94,81 +94,90 @@ export function AnnouncementBanner() {
       aria-label="Site announcement"
       aria-live="polite"
       aria-atomic="true"
-      className={`
-        ${UI_CLASSES.W_FULL}
-        ${UI_CLASSES.BORDER_B}
-        border-border/50
-        bg-accent/5
-        backdrop-blur-sm
-        transition-all
-        ${UI_CLASSES.DURATION_300}
-        motion-reduce:transition-none
-      `}
+      className="w-full pt-3 px-4"
     >
-      <div className="container mx-auto px-4 py-2.5 md:py-3">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
-          {/* Announcement Content */}
-          <Announcement
-            variant={announcement.variant}
-            className="flex-1 border-none bg-transparent shadow-none"
-          >
-            {announcement.tag && (
-              <AnnouncementTag className="text-[10px] sm:text-xs flex-shrink-0">
-                {announcement.tag}
-              </AnnouncementTag>
-            )}
+      {/* Rounded pill container */}
+      <div className="container mx-auto">
+        <div
+          className={`
+            rounded-full
+            border border-accent/20
+            bg-accent/10
+            backdrop-blur-sm
+            transition-all
+            ${UI_CLASSES.DURATION_300}
+            motion-reduce:transition-none
+            shadow-sm
+            hover:shadow-md
+            hover:border-accent/30
+          `}
+        >
+          <div className="px-6 py-2.5 md:py-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
+              {/* Announcement Content */}
+              <Announcement
+                variant={announcement.variant}
+                className="flex-1 border-none bg-transparent shadow-none"
+              >
+                {announcement.tag && (
+                  <AnnouncementTag className="text-[10px] sm:text-xs flex-shrink-0 font-bold">
+                    {announcement.tag}
+                  </AnnouncementTag>
+                )}
 
-            <AnnouncementTitle className="text-xs sm:text-sm">
-              {announcement.href ? (
-                <Link
-                  href={announcement.href}
-                  className="hover:underline flex items-center gap-1.5 transition-colors duration-200"
+                <AnnouncementTitle className="text-xs sm:text-sm font-semibold text-foreground">
+                  {announcement.href ? (
+                    <Link
+                      href={announcement.href}
+                      className="hover:underline flex items-center gap-1.5 transition-colors duration-200"
+                    >
+                      <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
+                      {IconComponent && (
+                        <IconComponent
+                          className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0"
+                          aria-hidden="true"
+                        />
+                      )}
+                    </Link>
+                  ) : (
+                    <span className="flex items-center gap-1.5">
+                      <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
+                      {IconComponent && (
+                        <IconComponent
+                          className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0"
+                          aria-hidden="true"
+                        />
+                      )}
+                    </span>
+                  )}
+                </AnnouncementTitle>
+              </Announcement>
+
+              {/* Dismiss Button */}
+              {announcement.dismissible && (
+                <button
+                  type="button"
+                  onClick={dismiss}
+                  aria-label="Dismiss announcement"
+                  className={`
+                    flex items-center justify-center
+                    min-w-[44px] min-h-[44px]
+                    sm:min-w-[40px] sm:min-h-[40px]
+                    hover:bg-accent/20
+                    rounded-full
+                    transition-colors
+                    ${UI_CLASSES.DURATION_200}
+                    focus-visible:ring-2
+                    focus-visible:ring-accent
+                    focus-visible:ring-offset-2
+                    flex-shrink-0
+                  `}
                 >
-                  <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
-                  {IconComponent && (
-                    <IconComponent
-                      className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0"
-                      aria-hidden="true"
-                    />
-                  )}
-                </Link>
-              ) : (
-                <span className="flex items-center gap-1.5">
-                  <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
-                  {IconComponent && (
-                    <IconComponent
-                      className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0"
-                      aria-hidden="true"
-                    />
-                  )}
-                </span>
+                  <X className="h-4 w-4 text-foreground" aria-hidden="true" />
+                </button>
               )}
-            </AnnouncementTitle>
-          </Announcement>
-
-          {/* Dismiss Button */}
-          {announcement.dismissible && (
-            <button
-              type="button"
-              onClick={dismiss}
-              aria-label="Dismiss announcement"
-              className={`
-                flex items-center justify-center
-                min-w-[44px] min-h-[44px]
-                sm:min-w-[40px] sm:min-h-[40px]
-                hover:bg-accent/10
-                rounded-md
-                transition-colors
-                ${UI_CLASSES.DURATION_200}
-                focus-visible:ring-2
-                focus-visible:ring-accent
-                focus-visible:ring-offset-2
-                flex-shrink-0
-              `}
-            >
-              <X className="h-4 w-4" aria-hidden="true" />
-            </button>
-          )}
+            </div>
+          </div>
         </div>
       </div>
     </section>

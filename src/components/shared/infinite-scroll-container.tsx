@@ -118,7 +118,7 @@ function InfiniteScrollContainerComponent<T>({
         const content = item.querySelector('[data-grid-content]');
         if (content) {
           const contentHeight = content.getBoundingClientRect().height;
-          const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
+          const rowSpan = Math.ceil((contentHeight + rowGap) / rowHeight);
           (item as HTMLElement).style.gridRowEnd = `span ${rowSpan}`;
         }
       });

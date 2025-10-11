@@ -9,6 +9,7 @@ import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { createClient } from '@/src/lib/supabase/server';
+import { getBatchTrendingData } from '@/src/lib/trending/calculator';
 
 /**
  * Featured config record from database
@@ -97,8 +98,55 @@ export async function loadCurrentFeaturedContentByCategory(): Promise<
     const featuredRecords = await fetchCurrentFeaturedConfigs();
 
     if (featuredRecords.length === 0) {
-      logger.info('No featured configs for current week');
-      return {};
+      logger.info('No featured configs for current week - using popular content fallback');
+
+      // Fallback: Load all content and use trending calculator to get popular items per category
+      const [
+        rulesData,
+        mcpData,
+        agentsData,
+        commandsData,
+        hooksData,
+        statuslinesData,
+        collectionsData,
+      ] = await Promise.all([
+        getContentByCategory('rules'),
+        getContentByCategory('mcp'),
+        getContentByCategory('agents'),
+        getContentByCategory('commands'),
+        getContentByCategory('hooks'),
+        getContentByCategory('statuslines'),
+        getContentByCategory('collections'),
+      ]);
+
+      // Use trending calculator to get popular content (same algorithm as /trending Popular tab)
+      // Returns top 12 popular items by default across all categories
+      const trendingData = await getBatchTrendingData({
+        rules: rulesData,
+        mcp: mcpData,
+        agents: agentsData,
+        commands: commandsData,
+        hooks: hooksData,
+        statuslines: statuslinesData,
+        collections: collectionsData,
+      });
+
+      // Group popular items by category
+      const fallbackResult: Record<string, readonly UnifiedContentItem[]> = {};
+      for (const category of contentCategories) {
+        // Filter popular items for this category and take top 6
+        const categoryItems = trendingData.popular.filter((item) => item.category === category);
+        if (categoryItems.length > 0) {
+          fallbackResult[category] = categoryItems.slice(0, 6);
+        }
+      }
+
+      logger.info('Loaded fallback featured content using popular algorithm', {
+        categories: Object.keys(fallbackResult).join(', '),
+        totalItems: Object.values(fallbackResult).reduce((sum, items) => sum + items.length, 0),
+      });
+
+      return fallbackResult;
     }
 
     // Step 2: Load all content in parallel

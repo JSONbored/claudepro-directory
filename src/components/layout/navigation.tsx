@@ -141,308 +141,324 @@ export const Navigation = () => {
       <NavigationCommandMenu />
 
       <header
-        className={`sticky ${UI_CLASSES.TOP_0} ${UI_CLASSES.Z_50} ${UI_CLASSES.W_FULL} ${UI_CLASSES.BORDER_B} border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all ${UI_CLASSES.DURATION_300} will-change-transform contain-layout ${
-          isScrolled ? 'shadow-sm' : ''
-        }`}
+        className={`sticky ${UI_CLASSES.TOP_0} ${UI_CLASSES.Z_50} ${UI_CLASSES.W_FULL} pt-3 px-4 transition-all ${UI_CLASSES.DURATION_300} will-change-transform contain-layout`}
       >
-        <div className="container mx-auto px-4">
-          <div
-            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} transition-all ${UI_CLASSES.DURATION_300} will-change-transform ${
-              isScrolled ? 'h-12' : 'h-16'
+        <div className="container mx-auto">
+          <nav
+            className={`rounded-2xl border border-border/50 bg-card/95 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all ${UI_CLASSES.DURATION_300} ${
+              isScrolled ? 'shadow-xl' : ''
             }`}
+            aria-label="Main navigation container"
           >
-            {/* Logo */}
-            <Link
-              href="/"
-              className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 ${UI_CLASSES.MIN_W_0} flex-shrink`}
-              aria-label="Claude Pro Directory - Go to homepage"
-            >
-              <LogoIcon
-                className={`transition-all ${UI_CLASSES.DURATION_300} flex-shrink-0 ${UI_CLASSES.HIDDEN} xl:${UI_CLASSES.BLOCK} ${
-                  isScrolled ? 'h-6 w-6' : 'h-8 w-8'
-                }`}
-              />
-              <span
-                className={`font-medium text-foreground transition-all ${UI_CLASSES.DURATION_300} ${UI_CLASSES.HIDDEN} xl:inline ${
-                  isScrolled ? 'text-base' : 'text-lg'
+            <div className="px-4">
+              <div
+                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} transition-all ${UI_CLASSES.DURATION_300} will-change-transform ${
+                  isScrolled ? 'h-12' : 'h-16'
                 }`}
               >
-                {APP_CONFIG.domain}
-              </span>
-            </Link>
-
-            {/* Desktop Navigation */}
-            <nav
-              className="hidden lg:flex items-center gap-2 lg:gap-3 xl:gap-4 text-sm xl:text-base"
-              aria-label="Primary navigation"
-            >
-              {PRIMARY_NAVIGATION.map((link) => (
-                <NavLink
-                  key={link.href}
-                  href={link.href}
-                  isActive={isActive}
-                  onClick={() => setIsOpen(false)}
+                {/* Logo */}
+                <Link
+                  href="/"
+                  className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 ${UI_CLASSES.MIN_W_0} flex-shrink`}
+                  aria-label="Claude Pro Directory - Go to homepage"
                 >
-                  {link.isNew ? (
-                    <span className="flex items-center gap-1.5">
-                      {link.label}
-                      <NewIndicator label={`New: ${link.label}`} />
-                    </span>
-                  ) : (
-                    link.label
-                  )}
-                </NavLink>
-              ))}
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors"
-                    aria-label="Open additional navigation menu"
+                  <LogoIcon
+                    className={`transition-all ${UI_CLASSES.DURATION_300} flex-shrink-0 ${UI_CLASSES.HIDDEN} xl:${UI_CLASSES.BLOCK} ${
+                      isScrolled ? 'h-6 w-6' : 'h-8 w-8'
+                    }`}
+                  />
+                  <span
+                    className={`font-medium text-foreground transition-all ${UI_CLASSES.DURATION_300} ${UI_CLASSES.HIDDEN} xl:inline ${
+                      isScrolled ? 'text-base' : 'text-lg'
+                    }`}
                   >
-                    More
-                    <ChevronDown className="ml-1 h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 md:w-64">
-                  {SECONDARY_NAVIGATION.map((group, groupIndex) => (
-                    <div key={group.heading}>
-                      {groupIndex > 0 && <DropdownMenuSeparator />}
-                      <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground">
-                        {group.heading}
-                      </DropdownMenuLabel>
-                      <DropdownMenuGroup>
-                        {group.links.map((link) => {
-                          const IconComponent = link.icon;
-                          return (
-                            <DropdownMenuItem key={link.href} asChild>
-                              <Link
-                                href={link.href}
-                                className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} gap-3 ${UI_CLASSES.W_FULL} cursor-pointer`}
-                              >
-                                {IconComponent && (
-                                  <IconComponent
-                                    className="h-4 w-4 mt-0.5 flex-shrink-0 text-muted-foreground"
-                                    aria-hidden="true"
-                                  />
-                                )}
-                                <div
-                                  className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} flex-1`}
-                                >
-                                  <div className="font-medium">{link.label}</div>
-                                  {link.description && (
-                                    <div className={`${UI_CLASSES.TEXT_XS_MUTED} line-clamp-1`}>
-                                      {link.description}
-                                    </div>
-                                  )}
-                                </div>
-                              </Link>
-                            </DropdownMenuItem>
-                          );
-                        })}
-                      </DropdownMenuGroup>
-                    </div>
+                    {APP_CONFIG.domain}
+                  </span>
+                </Link>
+
+                {/* Desktop Navigation */}
+                <nav
+                  className="hidden lg:flex items-center gap-2 lg:gap-3 xl:gap-4 text-sm xl:text-base"
+                  aria-label="Primary navigation"
+                >
+                  {PRIMARY_NAVIGATION.map((link) => (
+                    <NavLink
+                      key={link.href}
+                      href={link.href}
+                      isActive={isActive}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {link.isNew ? (
+                        <span className="flex items-center gap-1.5">
+                          {link.label}
+                          <NewIndicator label={`New: ${link.label}`} />
+                        </span>
+                      ) : (
+                        link.label
+                      )}
+                    </NavLink>
                   ))}
 
-                  {/* Submit Config - Standalone CTA */}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/submit"
-                      className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} gap-3 ${UI_CLASSES.W_FULL} cursor-pointer font-medium text-accent`}
-                    >
-                      <svg
-                        className="h-4 w-4 mt-0.5 flex-shrink-0"
-                        aria-hidden="true"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors"
+                        aria-label="Open additional navigation menu"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 4v16m8-8H4"
-                        />
-                      </svg>
-                      <div
-                        className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.SPACE_Y_1} flex-1`}
-                      >
-                        <div>Submit Config</div>
-                        <div className={`${UI_CLASSES.TEXT_XS_MUTED} line-clamp-1`}>
-                          Share your configuration
-                        </div>
+                        More
+                        <ChevronDown className="ml-1 h-3 w-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-[600px] p-4">
+                      <div className="grid gap-6 md:grid-cols-2">
+                        {SECONDARY_NAVIGATION.map((group) => (
+                          <div key={group.heading} className="space-y-3">
+                            <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
+                              {group.heading}
+                            </DropdownMenuLabel>
+                            <DropdownMenuGroup className="space-y-1">
+                              {group.links.map((link) => {
+                                const IconComponent = link.icon;
+                                return (
+                                  <DropdownMenuItem key={link.href} asChild>
+                                    <Link
+                                      href={link.href}
+                                      className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} gap-3 ${UI_CLASSES.W_FULL} cursor-pointer p-3 rounded-lg hover:bg-accent/10 hover:scale-[1.02] transition-all duration-200 group`}
+                                    >
+                                      {IconComponent && (
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted group-hover:bg-accent/20 transition-colors flex-shrink-0">
+                                          <IconComponent
+                                            className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors"
+                                            aria-hidden="true"
+                                          />
+                                        </div>
+                                      )}
+                                      <div
+                                        className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} gap-1 flex-1`}
+                                      >
+                                        <div className="font-medium group-hover:text-accent transition-colors">
+                                          {link.label}
+                                        </div>
+                                        {link.description && (
+                                          <div className="text-xs text-muted-foreground line-clamp-2">
+                                            {link.description}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </Link>
+                                  </DropdownMenuItem>
+                                );
+                              })}
+                            </DropdownMenuGroup>
+                          </div>
+                        ))}
                       </div>
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </nav>
 
-            {/* Right Side Actions */}
-            <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 md:gap-3`}>
-              {/* Global Search Trigger */}
-              <div className={`${UI_CLASSES.HIDDEN} lg:${UI_CLASSES.BLOCK}`}>
-                <SearchTrigger
-                  variant="ghost"
-                  size="sm"
-                  showShortcut={!isScrolled}
-                  onClick={() => {
-                    // Trigger same behavior as ⌘K shortcut
-                    const searchInput = document.querySelector<HTMLInputElement>(
-                      'input[name="search"], input[type="search"]'
-                    );
-                    searchInput?.focus();
-                    searchInput?.scrollIntoView({
-                      behavior: 'smooth',
-                      block: 'center',
-                    });
-                  }}
-                />
-              </div>
+                      {/* Submit Config - Standalone CTA */}
+                      <DropdownMenuSeparator className="my-4" />
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href="/submit"
+                          className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} gap-3 ${UI_CLASSES.W_FULL} cursor-pointer p-3 rounded-lg bg-accent/5 hover:bg-accent/10 hover:scale-[1.01] transition-all duration-200 group`}
+                        >
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20 group-hover:bg-accent/30 transition-colors flex-shrink-0">
+                            <svg
+                              className="h-5 w-5 text-accent"
+                              aria-hidden="true"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 4v16m8-8H4"
+                              />
+                            </svg>
+                          </div>
+                          <div
+                            className={`${UI_CLASSES.FLEX_COL} ${UI_CLASSES.ITEMS_START} gap-1 flex-1`}
+                          >
+                            <div className="font-medium text-accent">Submit Config</div>
+                            <div className="text-xs text-muted-foreground">
+                              Share your configuration with the community
+                            </div>
+                          </div>
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </nav>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
-                className={`${UI_CLASSES.HIDDEN_SM_FLEX} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
-                aria-label="Join our Discord community"
-              >
-                <DiscordIcon className="h-4 w-4" />
-              </Button>
+                {/* Right Side Actions */}
+                <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 md:gap-3`}>
+                  {/* Global Search Trigger */}
+                  <div className={`${UI_CLASSES.HIDDEN} lg:${UI_CLASSES.BLOCK}`}>
+                    <SearchTrigger
+                      variant="ghost"
+                      size="sm"
+                      showShortcut={!isScrolled}
+                      onClick={() => {
+                        // Trigger same behavior as ⌘K shortcut
+                        const searchInput = document.querySelector<HTMLInputElement>(
+                          'input[name="search"], input[type="search"]'
+                        );
+                        searchInput?.focus();
+                        searchInput?.scrollIntoView({
+                          behavior: 'smooth',
+                          block: 'center',
+                        });
+                      }}
+                    />
+                  </div>
 
-              <GitHubStarsButton className={`${UI_CLASSES.HIDDEN_SM_FLEX}`} />
-
-              <UserMenu className={`${UI_CLASSES.HIDDEN} md:${UI_CLASSES.FLEX}`} />
-
-              <ThemeToggle />
-
-              {/* Mobile Menu */}
-              <Sheet open={isOpen} onOpenChange={setIsOpen}>
-                <SheetTrigger asChild>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="md:hidden"
-                    aria-label="Open mobile menu"
+                    onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
+                    className={`${UI_CLASSES.HIDDEN_SM_FLEX} ${UI_CLASSES.BUTTON_GHOST_ICON}`}
+                    aria-label="Join our Discord community"
                   >
-                    <Menu className="h-5 w-5" />
+                    <DiscordIcon className="h-4 w-4" />
                   </Button>
-                </SheetTrigger>
-                <SheetContent
-                  side="right"
-                  className="w-[300px] sm:w-[380px] border-l border-border/50"
-                >
-                  <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                  <div className={`${UI_CLASSES.FLEX_COL} h-full`}>
-                    {/* Header */}
-                    <div
-                      className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3 ${UI_CLASSES.PT_6} ${UI_CLASSES.PB_8} px-1`}
-                    >
-                      <LogoIcon className="h-8 w-8 flex-shrink-0" />
-                      <span className={`font-semibold ${UI_CLASSES.TEXT_LG} text-foreground`}>
-                        {APP_CONFIG.domain}
-                      </span>
-                    </div>
 
-                    {/* Main Navigation */}
-                    <div className={`flex-1 ${UI_CLASSES.OVERFLOW_Y_AUTO}`}>
-                      <nav
-                        className={`${UI_CLASSES.SPACE_Y_4} ${UI_CLASSES.PX_3}`}
-                        aria-label="Primary navigation"
+                  <GitHubStarsButton className={`${UI_CLASSES.HIDDEN_SM_FLEX}`} />
+
+                  <UserMenu className={`${UI_CLASSES.HIDDEN} md:${UI_CLASSES.FLEX}`} />
+
+                  <ThemeToggle />
+
+                  {/* Mobile Menu */}
+                  <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                    <SheetTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="md:hidden"
+                        aria-label="Open mobile menu"
                       >
-                        <div className={UI_CLASSES.SPACE_Y_3}>
-                          {PRIMARY_NAVIGATION.map((link) => (
-                            <NavLink
-                              key={link.href}
-                              href={link.href}
-                              isActive={isActive}
-                              onClick={() => setIsOpen(false)}
-                              className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
-                            >
-                              {link.isNew ? (
-                                <span className="flex items-center gap-2">
-                                  {link.label}
-                                  <NewIndicator label={`New: ${link.label}`} />
-                                </span>
-                              ) : (
-                                link.label
-                              )}
-                            </NavLink>
-                          ))}
+                        <Menu className="h-5 w-5" />
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent
+                      side="right"
+                      className="w-[300px] sm:w-[380px] border-l border-border/50"
+                    >
+                      <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                      <div className={`${UI_CLASSES.FLEX_COL} h-full`}>
+                        {/* Header */}
+                        <div
+                          className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-3 ${UI_CLASSES.PT_6} ${UI_CLASSES.PB_8} px-1`}
+                        >
+                          <LogoIcon className="h-8 w-8 flex-shrink-0" />
+                          <span className={`font-semibold ${UI_CLASSES.TEXT_LG} text-foreground`}>
+                            {APP_CONFIG.domain}
+                          </span>
                         </div>
 
-                        {/* Secondary Navigation */}
-                        <nav
-                          className={`${UI_CLASSES.PT_6} mt-4 ${UI_CLASSES.BORDER_T} border-border/30`}
-                          aria-label="Secondary navigation"
-                        >
-                          <div className={UI_CLASSES.SPACE_Y_3}>
-                            {SECONDARY_NAVIGATION.flatMap((group) => group.links).map((link) => (
-                              <NavLink
-                                key={link.href}
-                                href={link.href}
-                                isActive={isActive}
-                                onClick={() => setIsOpen(false)}
-                                className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
-                              >
-                                {link.label}
-                              </NavLink>
-                            ))}
-                            <NavLink
-                              href="/submit"
-                              isActive={isActive}
-                              onClick={() => setIsOpen(false)}
-                              className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                        {/* Main Navigation */}
+                        <div className={`flex-1 ${UI_CLASSES.OVERFLOW_Y_AUTO}`}>
+                          <nav
+                            className={`${UI_CLASSES.SPACE_Y_4} ${UI_CLASSES.PX_3}`}
+                            aria-label="Primary navigation"
+                          >
+                            <div className={UI_CLASSES.SPACE_Y_3}>
+                              {PRIMARY_NAVIGATION.map((link) => (
+                                <NavLink
+                                  key={link.href}
+                                  href={link.href}
+                                  isActive={isActive}
+                                  onClick={() => setIsOpen(false)}
+                                  className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
+                                >
+                                  {link.isNew ? (
+                                    <span className="flex items-center gap-2">
+                                      {link.label}
+                                      <NewIndicator label={`New: ${link.label}`} />
+                                    </span>
+                                  ) : (
+                                    link.label
+                                  )}
+                                </NavLink>
+                              ))}
+                            </div>
+
+                            {/* Secondary Navigation */}
+                            <nav
+                              className={`${UI_CLASSES.PT_6} mt-4 ${UI_CLASSES.BORDER_T} border-border/30`}
+                              aria-label="Secondary navigation"
                             >
-                              Submit Config
-                            </NavLink>
-                          </div>
-                        </nav>
-                      </nav>
-                    </div>
+                              <div className={UI_CLASSES.SPACE_Y_3}>
+                                {SECONDARY_NAVIGATION.flatMap((group) => group.links).map(
+                                  (link) => (
+                                    <NavLink
+                                      key={link.href}
+                                      href={link.href}
+                                      isActive={isActive}
+                                      onClick={() => setIsOpen(false)}
+                                      className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                                    >
+                                      {link.label}
+                                    </NavLink>
+                                  )
+                                )}
+                                <NavLink
+                                  href="/submit"
+                                  isActive={isActive}
+                                  onClick={() => setIsOpen(false)}
+                                  className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}
+                                >
+                                  Submit Config
+                                </NavLink>
+                              </div>
+                            </nav>
+                          </nav>
+                        </div>
 
-                    {/* Footer Actions */}
-                    <div
-                      className={`${UI_CLASSES.BORDER_T} border-border/30 ${UI_CLASSES.PT_6} pb-6 ${UI_CLASSES.PX_6}`}
-                    >
-                      <div
-                        className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} gap-6`}
-                      >
-                        <Button
-                          variant="outline"
-                          size="lg"
-                          className={`w-16 h-16 ${UI_CLASSES.ROUNDED_2XL} border-border/40 ${UI_CLASSES.BG_CARD} hover:bg-discord/10 hover:border-discord/30 transition-all duration-200 active:scale-[0.95]`}
-                          onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
-                          aria-label="Join our Discord community"
-                        >
-                          <DiscordIcon className="h-7 w-7 text-discord" />
-                        </Button>
-
-                        <Button
-                          variant="outline"
-                          size="lg"
-                          className={`w-16 h-16 ${UI_CLASSES.ROUNDED_2XL} border-border/40 ${UI_CLASSES.BG_CARD} ${UI_CLASSES.HOVER_BG_ACCENT_10} hover:border-accent/30 transition-all duration-200 active:scale-[0.95]`}
-                          onClick={() => window.open(SOCIAL_LINKS.github, '_blank')}
-                          aria-label="View source code on GitHub"
-                        >
-                          <Github className="h-7 w-7" />
-                        </Button>
-
+                        {/* Footer Actions */}
                         <div
-                          className={`w-16 h-16 ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.ROUNDED_2XL} border border-border/40 ${UI_CLASSES.BG_CARD}`}
+                          className={`${UI_CLASSES.BORDER_T} border-border/30 ${UI_CLASSES.PT_6} pb-6 ${UI_CLASSES.PX_6}`}
                         >
-                          <ThemeToggle />
+                          <div
+                            className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} gap-6`}
+                          >
+                            <Button
+                              variant="outline"
+                              size="lg"
+                              className={`w-16 h-16 ${UI_CLASSES.ROUNDED_2XL} border-border/40 ${UI_CLASSES.BG_CARD} hover:bg-discord/10 hover:border-discord/30 transition-all duration-200 active:scale-[0.95]`}
+                              onClick={() => window.open('https://discord.gg/Ax3Py4YDrq', '_blank')}
+                              aria-label="Join our Discord community"
+                            >
+                              <DiscordIcon className="h-7 w-7 text-discord" />
+                            </Button>
+
+                            <Button
+                              variant="outline"
+                              size="lg"
+                              className={`w-16 h-16 ${UI_CLASSES.ROUNDED_2XL} border-border/40 ${UI_CLASSES.BG_CARD} ${UI_CLASSES.HOVER_BG_ACCENT_10} hover:border-accent/30 transition-all duration-200 active:scale-[0.95]`}
+                              onClick={() => window.open(SOCIAL_LINKS.github, '_blank')}
+                              aria-label="View source code on GitHub"
+                            >
+                              <Github className="h-7 w-7" />
+                            </Button>
+
+                            <div
+                              className={`w-16 h-16 ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.ROUNDED_2XL} border border-border/40 ${UI_CLASSES.BG_CARD}`}
+                            >
+                              <ThemeToggle />
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </SheetContent>
-              </Sheet>
+                    </SheetContent>
+                  </Sheet>
+                </div>
+              </div>
             </div>
-          </div>
+          </nav>
         </div>
       </header>
     </>
