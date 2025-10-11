@@ -57,6 +57,48 @@ module.exports = {
         // Performance - Core Web Vitals and metrics
         'categories:performance': ['warn', { minScore: 0.8 }],
 
+        // Core Web Vitals - Performance Budgets
+        // LCP (Largest Contentful Paint): Good < 2.5s, Needs Improvement < 4s
+        'largest-contentful-paint': ['warn', { maxNumericValue: 2500 }],
+
+        // FID is deprecated, INP (Interaction to Next Paint) replaces it: Good < 200ms
+        'max-potential-fid': ['warn', { maxNumericValue: 200 }],
+
+        // CLS (Cumulative Layout Shift): Good < 0.1, Needs Improvement < 0.25
+        'cumulative-layout-shift': ['warn', { maxNumericValue: 0.1 }],
+
+        // Additional Performance Metrics
+        // FCP (First Contentful Paint): Good < 1.8s
+        'first-contentful-paint': ['warn', { maxNumericValue: 1800 }],
+
+        // Speed Index: Good < 3.4s
+        'speed-index': ['warn', { maxNumericValue: 3400 }],
+
+        // TBT (Total Blocking Time): Good < 200ms
+        'total-blocking-time': ['warn', { maxNumericValue: 200 }],
+
+        // TTI (Time to Interactive): Good < 3.8s
+        interactive: ['warn', { maxNumericValue: 3800 }],
+
+        // Resource Budgets
+        // Total JavaScript size budget: 300KB (uncompressed)
+        'resource-summary:script:size': ['warn', { maxNumericValue: 307200 }],
+
+        // Total CSS size budget: 100KB (uncompressed)
+        'resource-summary:stylesheet:size': ['warn', { maxNumericValue: 102400 }],
+
+        // Total Image size budget: 500KB (uncompressed)
+        'resource-summary:image:size': ['warn', { maxNumericValue: 512000 }],
+
+        // Total Font size budget: 100KB
+        'resource-summary:font:size': ['warn', { maxNumericValue: 102400 }],
+
+        // Total Third-party size budget: 200KB
+        'resource-summary:third-party:size': ['warn', { maxNumericValue: 204800 }],
+
+        // Network requests budget: < 50 requests
+        'resource-summary:total:count': ['warn', { maxNumericValue: 50 }],
+
         // Specific accessibility audits (axe-core rules)
         'aria-allowed-attr': 'error',
         'aria-required-attr': 'error',
@@ -77,6 +119,20 @@ module.exports = {
         'td-headers-attr': 'error',
         'th-has-data-cells': 'error',
         'valid-lang': 'error',
+
+        // Performance Best Practices
+        'uses-long-cache-ttl': 'warn',
+        'uses-optimized-images': 'warn',
+        'uses-text-compression': 'warn',
+        'uses-responsive-images': 'warn',
+        'offscreen-images': 'warn',
+        'unminified-css': 'warn',
+        'unminified-javascript': 'warn',
+        'unused-css-rules': 'warn',
+        'unused-javascript': 'warn',
+        'modern-image-formats': 'warn',
+        'uses-rel-preconnect': 'warn',
+        'server-response-time': ['warn', { maxNumericValue: 600 }],
       },
     },
 

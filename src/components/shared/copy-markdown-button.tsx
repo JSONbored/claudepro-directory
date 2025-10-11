@@ -22,11 +22,30 @@ import { Button } from '@/src/components/ui/button';
 import { toast } from '@/src/components/ui/sonner';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { copyMarkdownAction } from '@/src/lib/actions/markdown-actions';
+import type { EventName } from '@/src/lib/analytics/events.config';
 import { EVENTS } from '@/src/lib/analytics/events.config';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { Check, FileText } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { cn } from '@/src/lib/utils';
+
+/**
+ * Get content-type-specific copy_markdown event based on category
+ */
+function getCopyMarkdownEvent(category: string): EventName {
+  const eventMap: Record<string, EventName> = {
+    agents: EVENTS.COPY_MARKDOWN_AGENT,
+    mcp: EVENTS.COPY_MARKDOWN_MCP,
+    'mcp-servers': EVENTS.COPY_MARKDOWN_MCP,
+    commands: EVENTS.COPY_MARKDOWN_COMMAND,
+    rules: EVENTS.COPY_MARKDOWN_RULE,
+    hooks: EVENTS.COPY_MARKDOWN_HOOK,
+    statuslines: EVENTS.COPY_MARKDOWN_STATUSLINE,
+    collections: EVENTS.COPY_MARKDOWN_COLLECTION,
+  };
+
+  return eventMap[category] || EVENTS.COPY_MARKDOWN_OTHER;
+}
 
 /**
  * Props for CopyMarkdownButton component
@@ -148,10 +167,10 @@ export function CopyMarkdownButton({
         // Copy the markdown to clipboard
         await copy(result.data.markdown);
 
-        // Track analytics event
-        trackEvent(EVENTS.COPY_MARKDOWN, {
-          content_category: category,
-          content_slug: slug,
+        // Track analytics event with content-type-specific event
+        const eventName = getCopyMarkdownEvent(category);
+        trackEvent(eventName, {
+          slug,
           include_metadata: includeMetadata,
           include_footer: includeFooter,
           content_length: result.data.markdown.length,

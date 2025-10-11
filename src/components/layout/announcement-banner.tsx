@@ -94,7 +94,7 @@ export function AnnouncementBanner() {
       aria-label="Site announcement"
       aria-live="polite"
       aria-atomic="true"
-      className="w-full pt-3 px-4"
+      className="w-full pt-2 px-3 pb-2 hidden md:block"
     >
       {/* Rounded pill container */}
       <div className="container mx-auto">
@@ -112,7 +112,7 @@ export function AnnouncementBanner() {
             hover:border-accent/30
           `}
         >
-          <div className="px-6 py-2.5 md:py-3">
+          <div className="px-4 py-2 md:px-6 md:py-2.5">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
               {/* Announcement Content */}
               <Announcement
@@ -120,12 +120,12 @@ export function AnnouncementBanner() {
                 className="flex-1 border-none bg-transparent shadow-none"
               >
                 {announcement.tag && (
-                  <AnnouncementTag className="text-[10px] sm:text-xs flex-shrink-0 font-bold">
+                  <AnnouncementTag className="text-[9px] sm:text-xs flex-shrink-0 font-bold">
                     {announcement.tag}
                   </AnnouncementTag>
                 )}
 
-                <AnnouncementTitle className="text-xs sm:text-sm font-semibold text-foreground">
+                <AnnouncementTitle className="text-[11px] sm:text-sm font-semibold text-foreground">
                   {announcement.href ? (
                     <Link
                       href={announcement.href}
@@ -161,7 +161,7 @@ export function AnnouncementBanner() {
                   aria-label="Dismiss announcement"
                   className={`
                     flex items-center justify-center
-                    min-w-[44px] min-h-[44px]
+                    min-w-[36px] min-h-[36px]
                     sm:min-w-[40px] sm:min-h-[40px]
                     hover:bg-accent/20
                     rounded-full
@@ -173,7 +173,7 @@ export function AnnouncementBanner() {
                     flex-shrink-0
                   `}
                 >
-                  <X className="h-4 w-4 text-foreground" aria-hidden="true" />
+                  <X className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-foreground" aria-hidden="true" />
                 </button>
               )}
             </div>

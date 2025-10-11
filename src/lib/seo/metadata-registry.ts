@@ -289,7 +289,7 @@ export const METADATA_REGISTRY = {
   '/': {
     title: { tier: 'home' as const },
     description:
-      'Open-source directory of 150+ Claude AI configurations in October 2025. Community-driven collection of MCP servers, AI agents, automation hooks, custom commands, and development rules.',
+      'Directory of 150+ Claude AI configurations for October 2025. Community collection of MCP servers, agents, hooks, commands, and rules for AI development.',
     keywords: [
       'claude ai',
       'claude pro',
@@ -327,7 +327,7 @@ export const METADATA_REGISTRY = {
   '/trending': {
     title: { tier: 'section' as const, title: 'Trending Configurations' },
     description:
-      'Discover trending Claude AI configurations updated daily in October 2025. View real-time growth velocity and popularity metrics for MCP servers, agents, and tools.',
+      'Trending Claude AI configurations updated daily in October 2025. Track real-time growth velocity and popularity metrics for MCP servers, agents, and tools.',
     keywords: [
       'trending claude configs',
       'popular mcp servers 2025',
@@ -514,7 +514,7 @@ export const METADATA_REGISTRY = {
       title: 'Claude Configuration Collections 2025',
     },
     description:
-      'Browse curated collections of Claude AI tools and configurations in October 2025. Hand-picked MCP servers, agents, and workflows organized by use case and expertise level.',
+      'Curated Claude AI collections for October 2025. Hand-picked MCP servers, agents, and workflows organized by use case, expertise level, and development needs.',
     keywords: [
       'claude collections',
       'curated ai tools 2025',
@@ -676,6 +676,110 @@ export const METADATA_REGISTRY = {
       recencySignal: false,
       useArticleSchema: false,
       generateFAQSchema: true,
+      wikipediaStyle: true,
+    },
+  },
+
+  /**
+   * API Documentation Endpoint Pages (/api-docs/:slug)
+   * Individual API endpoint documentation with schemas and examples
+   */
+  '/api-docs/:slug': {
+    title: {
+      tier: 'content' as const,
+      title: (context?: MetadataContext) => context?.item?.title || 'API Endpoint',
+      section: 'API',
+    },
+    description: (context?: MetadataContext) => {
+      // Map slug to SEO-optimized descriptions (150-160 chars)
+      const slug = (context?.item as { slug?: string })?.slug || '';
+      const descriptions: Record<string, string> = {
+        getContentByCategory:
+          'Retrieve paginated content items by category with REST API. Get agents, MCP servers, rules, commands, hooks, and statuslines with full filtering support.',
+        getContentBySlug:
+          'Fetch single content item by category and slug. REST API endpoint for retrieving detailed configuration data with full metadata, schemas, and examples.',
+        searchContent:
+          'Full-text search across all Claude configurations. REST API with advanced filtering, pagination, sorting, relevance ranking, and category-based discovery.',
+        getTrendingContent:
+          'Get trending Claude configurations with real-time analytics. REST API endpoint for popular content discovery with views, rankings, and time-based filtering.',
+        getTrendingGuides:
+          'Discover trending Claude guides and tutorials. REST API for popular educational content with category filtering, views tracking, rankings, and analytics.',
+        getAllConfigurations:
+          'Stream all Claude configurations in JSON/NDJSON format. REST API with batch processing, streaming support, comprehensive dataset export, and statistics.',
+        getCacheStatus:
+          'Check API cache status and performance metrics. REST API endpoint for monitoring cache health, response times, system optimization, and uptime status.',
+        triggerCacheWarming:
+          'Trigger cache warming for improved API performance. REST API endpoint for pre-loading data, reducing latency, optimizing response times, and throughput.',
+      };
+      return (
+        descriptions[slug] ||
+        context?.item?.description ||
+        'REST API endpoint documentation with request/response schemas, examples, and integration guides for Claude Pro Directory.'
+      );
+    },
+    keywords: (context?: MetadataContext): string[] => {
+      const slug = (context?.item as { slug?: string })?.slug || '';
+      const keywordMap: Record<string, string[]> = {
+        getContentByCategory: [
+          'rest api content by category',
+          'claude api pagination',
+          'api category endpoint 2025',
+        ],
+        getContentBySlug: [
+          'rest api get by slug',
+          'claude api single item',
+          'api detail endpoint 2025',
+        ],
+        searchContent: [
+          'rest api full-text search',
+          'claude api search endpoint',
+          'api search filtering 2025',
+        ],
+        getTrendingContent: [
+          'rest api trending content',
+          'claude api analytics',
+          'api trending endpoint 2025',
+        ],
+        getTrendingGuides: [
+          'rest api trending guides',
+          'claude api guides endpoint',
+          'api tutorials trending 2025',
+        ],
+        getAllConfigurations: [
+          'rest api stream all data',
+          'claude api bulk export',
+          'api dataset endpoint 2025',
+        ],
+        getCacheStatus: [
+          'rest api cache status',
+          'claude api performance',
+          'api monitoring endpoint 2025',
+        ],
+        triggerCacheWarming: [
+          'rest api cache warming',
+          'claude api optimization',
+          'api performance endpoint 2025',
+        ],
+      };
+      return keywordMap[slug] || ['claude pro api', 'rest api endpoint 2025', 'api documentation'];
+    },
+    openGraph: {
+      type: 'article' as const,
+    },
+    twitter: {
+      card: 'summary_large_image' as const,
+    },
+    structuredData: {
+      type: 'TechArticle' as const,
+      breadcrumbs: true,
+      dateModified: true,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: true,
+      recencySignal: false,
+      useArticleSchema: true,
+      generateFAQSchema: false,
       wikipediaStyle: true,
     },
   },

@@ -143,16 +143,19 @@ export function useLocalStorage<T>(
 
     try {
       const item = window.localStorage.getItem(key);
-      if (item === null) {
+      // Handle null or empty string
+      if (item === null || item === '') {
         return defaultValue as T;
       }
       return deserialize(item);
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error(String(err));
+      const itemValue = window.localStorage.getItem(key);
       logger.error('Failed to read from localStorage', errorObj, {
         component: 'useLocalStorage',
         action: 'initialize',
         key,
+        item: itemValue ?? 'null',
       });
       setError(errorObj);
       return defaultValue as T;
@@ -226,7 +229,7 @@ export function useLocalStorage<T>(
     }
 
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === key && e.newValue !== null) {
+      if (e.key === key && e.newValue !== null && e.newValue !== '') {
         try {
           const newValue = deserialize(e.newValue);
           setValue(newValue);
@@ -237,11 +240,14 @@ export function useLocalStorage<T>(
             component: 'useLocalStorage',
             action: 'sync',
             key,
+            newValue: e.newValue,
           });
           setError(errorObj);
+          // Fallback to default value on parse error
+          setValue(defaultValue as T);
         }
-      } else if (e.key === key && e.newValue === null) {
-        // Value was removed in another tab
+      } else if (e.key === key && (e.newValue === null || e.newValue === '')) {
+        // Value was removed or empty in another tab
         setValue(defaultValue as T);
       }
     };

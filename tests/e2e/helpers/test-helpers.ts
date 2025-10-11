@@ -66,7 +66,8 @@ export async function navigateToSearch(page: Page, query?: string): Promise<void
   const url = query ? `/search?q=${encodeURIComponent(query)}` : '/search';
   await page.goto(url);
   await page.waitForLoadState('networkidle');
-  await expect(page).toHaveURL(new RegExp('^/search'));
+  // Allow query parameters in URL check
+  await expect(page).toHaveURL(new RegExp(`^/search`));
 }
 
 /**

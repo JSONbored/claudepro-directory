@@ -56,6 +56,11 @@ coverage/
 .turbo/
 .temp/
 
+# Test artifacts
+test-results/
+playwright-report/
+playwright/.cache/
+
 # Lighthouse CI reports (regenerated on each run)
 .lighthouseci/
 config/reports/lighthouse/

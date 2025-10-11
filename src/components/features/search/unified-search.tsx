@@ -27,13 +27,12 @@ import {
   SelectValue,
 } from '@/src/components/ui/select';
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
+import type { EventName } from '@/src/lib/analytics/events.config';
 import { EVENTS } from '@/src/lib/analytics/events.config';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/src/lib/schemas/component.schema';
 import { sanitizers } from '@/src/lib/security/validators';
-
-const { sanitizeSearchQuery } = sanitizers;
 
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
@@ -45,6 +44,25 @@ export type { FilterState };
 const SearchErrorFallback = () => (
   <div className="p-4 text-center text-muted-foreground">Error loading search</div>
 );
+
+/**
+ * Get context-specific search event based on current page category
+ */
+function getSearchEvent(category: string): EventName {
+  const eventMap: Record<string, EventName> = {
+    agents: EVENTS.SEARCH_AGENTS,
+    mcp: EVENTS.SEARCH_MCP,
+    'mcp-servers': EVENTS.SEARCH_MCP,
+    commands: EVENTS.SEARCH_COMMANDS,
+    rules: EVENTS.SEARCH_RULES,
+    hooks: EVENTS.SEARCH_HOOKS,
+    statuslines: EVENTS.SEARCH_STATUSLINES,
+    collections: EVENTS.SEARCH_COLLECTIONS,
+    guides: EVENTS.SEARCH_GUIDES,
+    docs: EVENTS.SEARCH_GUIDES,
+  };
+  return eventMap[category] || EVENTS.SEARCH_GLOBAL; // Fallback to global search
+}
 
 export function UnifiedSearch({
   placeholder = 'Search...',
@@ -85,18 +103,19 @@ export function UnifiedSearch({
   // Debounced search with sanitization and analytics tracking
   useEffect(() => {
     const timer = setTimeout(() => {
-      const sanitized = sanitizeSearchQuery(localSearchQuery);
+      // Use sync version for client-side sanitization
+      const sanitized = sanitizers.sanitizeSearchQuerySync(localSearchQuery);
       onSearch(sanitized);
 
-      // Track search event (only for non-empty queries)
+      // Track search event with context-specific analytics (only for non-empty queries)
       if (sanitized && sanitized.length > 0) {
-        const category = pathname?.split('/')[1] || 'unknown';
+        const category = pathname?.split('/')[1] || 'global';
+        const eventName = getSearchEvent(category);
 
-        trackEvent(EVENTS.SEARCH_PERFORMED, {
+        trackEvent(eventName, {
           query: sanitized.substring(0, 100), // Truncate for privacy
           results_count: resultCount,
-          category,
-          filters_applied: activeFilterCount > 0 ? 'yes' : 'no',
+          filters_applied: activeFilterCount > 0,
           time_to_results: 0, // Could add performance timing if needed
         });
       }
@@ -132,14 +151,14 @@ export function UnifiedSearch({
             <Input
               id={searchInputId}
               name="search"
-              type="text"
+              type="search"
               value={localSearchQuery}
               onChange={(e) => setLocalSearchQuery(e.target.value)}
               placeholder={placeholder}
               className={`pl-12 pr-4 h-14 text-base ${UI_CLASSES.BG_CARD_50} backdrop-blur-sm border-border/50 focus:border-accent/50 focus:${UI_CLASSES.BG_CARD} transition-smooth w-full`}
               aria-label="Search configurations"
               aria-describedby={resultCount > 0 && localSearchQuery ? searchResultsId : undefined}
-              autoComplete="search"
+              autoComplete="off"
             />
           </div>
 

@@ -59,8 +59,14 @@ export function RelatedCarouselClient({
       slug: item.slug,
     });
 
-    // Track click event
-    trackRelatedContentClick(window.location.pathname, itemUrl, index + 1, item.score);
+    // Track click event with source-specific analytics
+    trackRelatedContentClick(
+      window.location.pathname,
+      itemUrl,
+      index + 1,
+      item.score,
+      item.matchType
+    );
   };
 
   // Get match type badge color

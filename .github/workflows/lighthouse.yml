@@ -47,15 +47,9 @@ jobs:
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v11
         with:
-          urls: |
-            http://localhost:3000/
-            http://localhost:3000/agents
-            http://localhost:3000/mcp
-            http://localhost:3000/commands
-            http://localhost:3000/submit
+          configPath: './config/tools/lighthouserc.cjs'
           uploadArtifacts: true
           temporaryPublicStorage: true
-          runs: 3
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

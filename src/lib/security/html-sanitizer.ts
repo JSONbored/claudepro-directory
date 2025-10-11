@@ -14,56 +14,95 @@
  * - Works in both browser and Node.js environments (isomorphic-dompurify)
  */
 
-import createDOMPurify from 'isomorphic-dompurify';
+// Lazy import DOMPurify to avoid build-time issues with Next.js Turbopack
+// DOMPurify uses browser/Node APIs that cannot be statically analyzed during build
+let _purify: ReturnType<typeof import('isomorphic-dompurify').default> | null = null;
+let _purifyPromise: Promise<ReturnType<typeof import('isomorphic-dompurify').default>> | null =
+  null;
 
-/**
- * Initialize DOMPurify for isomorphic use (browser + Node.js)
- */
-const purify = createDOMPurify();
-
-/**
- * Add security hook to enforce script tag removal
- * This provides defense-in-depth beyond FORBID_TAGS
- */
-purify.addHook('uponSanitizeElement', (node, data) => {
-  // Forcibly remove script and style tags
-  if (data.tagName === 'script' || data.tagName === 'style') {
-    // Use parentNode.removeChild for compatibility
-    if (node.parentNode) {
-      node.parentNode.removeChild(node);
-    }
+async function getDOMPurify() {
+  // Return existing promise if initialization is in progress
+  if (_purifyPromise) {
+    return _purifyPromise;
   }
-});
 
-/**
- * Add security hook to sanitize dangerous URL protocols in attributes
- * Blocks data:, javascript:, vbscript:, and URL-encoded variants
- */
-purify.addHook('afterSanitizeAttributes', (node) => {
-  // Check all attributes that can contain URLs
-  const urlAttributes = ['href', 'src', 'action', 'formaction', 'data', 'poster', 'xlink:href'];
+  // Return existing instance if already initialized
+  if (_purify) {
+    return _purify;
+  }
 
-  for (const attr of urlAttributes) {
-    if (node.hasAttribute(attr)) {
-      const value = node.getAttribute(attr) || '';
-      const lowerValue = value.toLowerCase();
+  // Start new initialization
+  _purifyPromise = (async () => {
+    try {
+      const createDOMPurify = (await import('isomorphic-dompurify')).default;
+      const purify = createDOMPurify();
 
-      // Block dangerous protocols (including URL-encoded variants)
-      const isDangerous =
-        lowerValue.includes('javascript:') ||
-        lowerValue.includes('data:') ||
-        lowerValue.includes('vbscript:') ||
-        lowerValue.includes('java%0a') || // URL-encoded newline
-        lowerValue.includes('java%0d') || // URL-encoded carriage return
-        lowerValue.includes('data%3a') || // URL-encoded colon
-        lowerValue.includes('%6a%61%76%61'); // URL-encoded "java"
+      // Only add hooks if purify is properly initialized
+      if (purify && typeof purify.addHook === 'function') {
+        /**
+         * Add security hook to enforce script tag removal
+         * This provides defense-in-depth beyond FORBID_TAGS
+         */
+        purify.addHook('uponSanitizeElement', (node, data) => {
+          // Forcibly remove script and style tags
+          if (data.tagName === 'script' || data.tagName === 'style') {
+            // Use parentNode.removeChild for compatibility
+            if (node.parentNode) {
+              node.parentNode.removeChild(node);
+            }
+          }
+        });
 
-      if (isDangerous) {
-        node.removeAttribute(attr);
+        /**
+         * Add security hook to sanitize dangerous URL protocols in attributes
+         * Blocks data:, javascript:, vbscript:, and URL-encoded variants
+         */
+        purify.addHook('afterSanitizeAttributes', (node) => {
+          // Check all attributes that can contain URLs
+          const urlAttributes = [
+            'href',
+            'src',
+            'action',
+            'formaction',
+            'data',
+            'poster',
+            'xlink:href',
+          ];
+
+          for (const attr of urlAttributes) {
+            if (node.hasAttribute(attr)) {
+              const value = node.getAttribute(attr) || '';
+              const lowerValue = value.toLowerCase();
+
+              // Block dangerous protocols (including URL-encoded variants)
+              const isDangerous =
+                lowerValue.includes('javascript:') ||
+                lowerValue.includes('data:') ||
+                lowerValue.includes('vbscript:') ||
+                lowerValue.includes('java%0a') || // URL-encoded newline
+                lowerValue.includes('java%0d') || // URL-encoded carriage return
+                lowerValue.includes('data%3a') || // URL-encoded colon
+                lowerValue.includes('%6a%61%76%61'); // URL-encoded "java"
+
+              if (isDangerous) {
+                node.removeAttribute(attr);
+              }
+            }
+          }
+        });
       }
+
+      _purify = purify;
+      return purify;
+    } catch (error) {
+      // Reset promise on error so retry is possible
+      _purifyPromise = null;
+      throw error;
     }
-  }
-});
+  })();
+
+  return _purifyPromise;
+}
 
 /**
  * DOMPurify configuration type
@@ -123,7 +162,9 @@ export const DOMPurify = {
    * @param config - DOMPurify configuration options
    * @returns Sanitized HTML string
    */
-  sanitize(html: string, config?: DOMPurifyConfig): string {
+  async sanitize(html: string, config?: DOMPurifyConfig): Promise<string> {
+    const purify = await getDOMPurify();
+
     // Apply secure defaults
     const secureDefaults: DOMPurifyConfig = {
       // Block dangerous protocols, allow safe ones
@@ -151,7 +192,9 @@ export const DOMPurify = {
    * @param html - The HTML string to sanitize
    * @returns Plain text with all HTML removed
    */
-  sanitizeToText(html: string): string {
+  async sanitizeToText(html: string): Promise<string> {
+    const purify = await getDOMPurify();
+
     // First pass: remove script/style tags and their content
     const withoutScripts = purify.sanitize(html, {
       FORBID_TAGS: ['script', 'style'],
@@ -170,7 +213,8 @@ export const DOMPurify = {
    *
    * @returns true if DOMPurify is supported, false otherwise
    */
-  isSupported(): boolean {
+  async isSupported(): Promise<boolean> {
+    const purify = await getDOMPurify();
     return purify.isSupported;
   },
 };

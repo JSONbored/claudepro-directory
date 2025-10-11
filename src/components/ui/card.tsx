@@ -28,9 +28,18 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
   );
 }
 
-function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
+type CardTitleProps = React.ComponentProps<'div'> & {
+  /**
+   * The HTML element to render as (default: 'div')
+   * Use 'h1', 'h2', 'h3', etc. for semantic heading hierarchy
+   * @example <CardTitle as="h2">Title</CardTitle>
+   */
+  as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'div';
+};
+
+function CardTitle({ className, as: Component = 'div', ...props }: CardTitleProps) {
   return (
-    <div
+    <Component
       data-slot="card-title"
       className={cn('leading-none font-semibold', className)}
       {...props}

@@ -141,9 +141,11 @@ export const postCopyEmailCaptureAction = rateLimitedAction
           message: result.message,
           contactId: result.contactId,
           // Return analytics data for client-side tracking
+          // Track successful subscription with EMAIL_SUBSCRIBED_POST_COPY
           analytics: {
-            event: EVENTS.EMAIL_CAPTURED,
-            trigger_source: 'post_copy' as const,
+            event: EVENTS.EMAIL_SUBSCRIBED_POST_COPY,
+            ...(result.contactId && { contact_id: result.contactId }),
+            ...(referrer && { referrer }),
             ...(copyType && { copy_type: copyType }),
             ...(copyCategory && { content_category: copyCategory }),
             ...(copySlug && { content_slug: copySlug }),

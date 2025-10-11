@@ -37,8 +37,10 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
       <Card className={`${UI_CLASSES.MAX_W_2XL} w-full`}>
         <CardHeader>
           <div className="flex items-center gap-3">
-            <AlertTriangle className="h-8 w-8 text-destructive" />
-            <CardTitle className="text-2xl">Something went wrong</CardTitle>
+            <AlertTriangle className="h-8 w-8 text-destructive" aria-hidden="true" />
+            <CardTitle as="h1" className="text-2xl">
+              Something went wrong
+            </CardTitle>
           </div>
           <CardDescription className={UI_CLASSES.MT_2}>
             An unexpected error occurred. The error has been logged and we&apos;ll look into it.

@@ -49,18 +49,12 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       ...homeMetadata.openGraph,
       locale: 'en_US',
-      images: [
-        {
-          url: '/opengraph-image',
-          width: 1200,
-          height: 630,
-          alt: `${APP_CONFIG.name} - Community Configurations`,
-        },
-      ],
+      // OG images now generated via unified /api/og endpoint (included in homeMetadata)
     },
     twitter: {
       ...homeMetadata.twitter,
       creator: '@JSONbored',
+      // Twitter images now generated via unified /api/og endpoint (included in homeMetadata)
     },
     alternates: {
       ...homeMetadata.alternates,

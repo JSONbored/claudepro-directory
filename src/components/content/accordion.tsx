@@ -1,8 +1,12 @@
 'use client';
 
 /**
- * Accordion - Collapsible content sections with Schema.org FAQPage support
+ * Accordion - Collapsible content sections with Schema.org Question/Answer support
  * Used in 27+ MDX files across the codebase
+ *
+ * NOTE: This component provides Question/Answer microdata but does NOT declare FAQPage schema.
+ * Use AIOptimizedFAQ component for pages requiring FAQPage structured data.
+ * Per Schema.org spec, only ONE FAQPage declaration should exist per page.
  */
 
 import React from 'react';
@@ -34,17 +38,11 @@ export function Accordion(props: AccordionProps) {
   };
 
   return (
-    <section itemScope itemType="https://schema.org/FAQPage" className="my-8">
+    <section className="my-8" aria-label={title || 'Accordion section'}>
       {title && (
         <div className={UI_CLASSES.MB_6}>
-          <h3 className={`text-xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`} itemProp="name">
-            {title}
-          </h3>
-          {description && (
-            <p className="text-muted-foreground" itemProp="description">
-              {description}
-            </p>
-          )}
+          <h3 className={`text-xl ${UI_CLASSES.FONT_BOLD} ${UI_CLASSES.MB_2}`}>{title}</h3>
+          {description && <p className="text-muted-foreground">{description}</p>}
         </div>
       )}
 

@@ -53,6 +53,9 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
         index: false, // Don't index individual search result pages
         follow: true,
       },
+      alternates: {
+        canonical: null, // No canonical URL for dynamic search results
+      },
       openGraph: {
         title: `Search: ${sanitizedQuery}`,
         description: `Search results for "${sanitizedQuery}"`,
@@ -68,6 +71,9 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
     robots: {
       index: false,
       follow: true,
+    },
+    alternates: {
+      canonical: null, // No canonical URL for search page
     },
   };
 }
@@ -95,7 +101,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   // - Removes HTML/script tags
   // - Limits length to 200 characters
   // - Trims whitespace
-  const sanitizedQuery = sanitizers.sanitizeSearchQuery(rawQuery).slice(0, 200);
+  const sanitizedQuery = (await sanitizers.sanitizeSearchQuery(rawQuery)).slice(0, 200);
 
   // Redirect to homepage with search query
   // The homepage client component will:

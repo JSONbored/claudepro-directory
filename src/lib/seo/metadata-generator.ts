@@ -14,6 +14,7 @@
 
 import type { Metadata } from 'next';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { generateOGImageUrl, OG_IMAGE_DIMENSIONS } from '@/src/lib/og/url-generator';
 import type { MetadataContext, RouteMetadata } from '@/src/lib/seo/metadata-registry';
 import { METADATA_DEFAULTS, METADATA_REGISTRY } from '@/src/lib/seo/metadata-registry';
 import { buildPageTitle } from '@/src/lib/seo/title-builder';
@@ -107,11 +108,28 @@ export async function generatePageMetadata(
       type: ogType,
       url: canonicalUrl,
       siteName: METADATA_DEFAULTS.siteName,
+      images: [
+        {
+          url: generateOGImageUrl(canonicalUrl),
+          width: OG_IMAGE_DIMENSIONS.width,
+          height: OG_IMAGE_DIMENSIONS.height,
+          alt: ogTitle,
+          type: 'image/png',
+        },
+      ],
     },
     twitter: {
       card: twitterCard,
       title: twitterTitle,
       description: twitterDescription,
+      images: [
+        {
+          url: generateOGImageUrl(canonicalUrl),
+          width: OG_IMAGE_DIMENSIONS.width,
+          height: OG_IMAGE_DIMENSIONS.height,
+          alt: twitterTitle,
+        },
+      ],
     },
     robots: {
       index: true,

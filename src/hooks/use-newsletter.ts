@@ -25,12 +25,30 @@
 import { useCallback, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { subscribeToNewsletter } from '@/src/lib/actions/newsletter-signup';
+import type { EventName } from '@/src/lib/analytics/events.config';
+import { EVENTS } from '@/src/lib/analytics/events.config';
+import { trackEvent } from '@/src/lib/analytics/tracker';
 import { logger } from '@/src/lib/logger';
 
 /**
  * Newsletter source types for analytics tracking
  */
 export type NewsletterSource = 'footer' | 'homepage' | 'modal' | 'content_page' | 'inline';
+
+/**
+ * Get location-specific email subscription event based on source
+ */
+function getEmailSubscriptionEvent(source: NewsletterSource): EventName {
+  const eventMap: Record<NewsletterSource, EventName> = {
+    footer: EVENTS.EMAIL_SUBSCRIBED_FOOTER,
+    homepage: EVENTS.EMAIL_SUBSCRIBED_HOMEPAGE,
+    modal: EVENTS.EMAIL_SUBSCRIBED_MODAL,
+    content_page: EVENTS.EMAIL_SUBSCRIBED_CONTENT_PAGE,
+    inline: EVENTS.EMAIL_SUBSCRIBED_INLINE,
+  };
+
+  return eventMap[source];
+}
 
 /**
  * Options for newsletter subscription hook
@@ -199,6 +217,13 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
               description: successMessage,
             });
           }
+
+          // Track successful subscription with location-specific event
+          const eventName = getEmailSubscriptionEvent(source);
+          trackEvent(eventName, {
+            ...(result.data.contactId && { contact_id: result.data.contactId }),
+            ...(referrer && { referrer }),
+          });
 
           // Reset form
           reset();

@@ -79,7 +79,7 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
     icon: Sparkles,
     keywords: 'Claude agents, AI agents, specialized assistants, workflow automation, Claude AI',
     metaDescription:
-      'Specialized Claude AI agents for coding, writing, research, and workflow automation. Community-contributed configurations with copy-paste setup for Claude Desktop and Code.',
+      'Specialized Claude AI agents for October 2025. Community-contributed coding, writing, research, and automation configurations ready for Claude Desktop and Code.',
 
     listPage: {
       searchPlaceholder: 'Search AI agents...',
@@ -111,7 +111,7 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
     icon: Code,
     keywords: 'MCP servers, Model Context Protocol, Claude tools, API integration',
     metaDescription:
-      'Ever-growing collection of Model Context Protocol servers extending Claude with GitHub, databases, APIs, and file systems. Official MCP integrations with setup guides.',
+      'Model Context Protocol servers for October 2025. Extend Claude with GitHub, databases, APIs, and file systems. Official MCP integrations with setup guides.',
 
     listPage: {
       searchPlaceholder: 'Search MCP servers...',
@@ -139,7 +139,7 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
     icon: Terminal,
     keywords: 'Claude commands, slash commands, CLI tools, workflow automation',
     metaDescription:
-      'Custom Claude Code slash commands for workflow automation, code review, testing, and documentation. Community-built reusable prompts ready to enhance your development.',
+      'Claude Code slash commands for October 2025. Workflow automation, code review, testing, and documentation. Community-built reusable prompts for development.',
 
     listPage: {
       searchPlaceholder: 'Search commands...',
@@ -166,7 +166,7 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
     icon: BookOpen,
     keywords: 'Claude rules, AI guidelines, project rules, behavior customization',
     metaDescription:
-      'Project-specific rules controlling Claude AI behavior for coding standards, security, testing, and documentation. Community-curated guidelines for better AI assistance.',
+      'Claude AI rules for October 2025. Control behavior for coding standards, security, testing, and documentation. Community-curated guidelines for AI assistance.',
 
     listPage: {
       searchPlaceholder: 'Search rules...',
@@ -193,7 +193,7 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
     icon: Webhook,
     keywords: 'Claude hooks, automation, webhooks, event triggers, CI/CD',
     metaDescription:
-      'Event-driven Claude Code automation hooks for git commits, testing, linting, and CI/CD integration. Ever-growing library of shell scripts for development workflows.',
+      'Claude Code automation hooks for October 2025. Event-driven scripts for git commits, testing, linting, and CI/CD integration. Shell scripts for dev workflows.',
 
     listPage: {
       searchPlaceholder: 'Search hooks...',
@@ -221,7 +221,7 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
     icon: Terminal,
     keywords: 'Claude statuslines, CLI customization, terminal themes, status bar',
     metaDescription:
-      'Beautiful Claude Code CLI statusline themes displaying git info, project details, and session stats. Customize your terminal with community-designed status bars.',
+      'Claude Code CLI statuslines for October 2025. Beautiful terminal themes showing git info, project details, and session stats. Community-designed status bars.',
 
     listPage: {
       searchPlaceholder: 'Search statuslines...',

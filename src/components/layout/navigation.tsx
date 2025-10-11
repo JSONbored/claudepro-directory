@@ -141,7 +141,7 @@ export const Navigation = () => {
       <NavigationCommandMenu />
 
       <header
-        className={`sticky ${UI_CLASSES.TOP_0} ${UI_CLASSES.Z_50} ${UI_CLASSES.W_FULL} pt-3 px-4 transition-all ${UI_CLASSES.DURATION_300} will-change-transform contain-layout`}
+        className={`sticky ${UI_CLASSES.TOP_0} ${UI_CLASSES.Z_50} ${UI_CLASSES.W_FULL} pt-1 px-3 pb-3 transition-all ${UI_CLASSES.DURATION_300} will-change-transform contain-layout`}
       >
         <div className="container mx-auto">
           <nav
@@ -150,10 +150,10 @@ export const Navigation = () => {
             }`}
             aria-label="Main navigation container"
           >
-            <div className="px-4">
+            <div className="px-3 md:px-4">
               <div
                 className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} transition-all ${UI_CLASSES.DURATION_300} will-change-transform ${
-                  isScrolled ? 'h-12' : 'h-16'
+                  isScrolled ? 'h-11 md:h-12' : 'h-14 md:h-16'
                 }`}
               >
                 {/* Logo */}

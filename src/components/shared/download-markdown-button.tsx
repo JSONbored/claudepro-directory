@@ -21,11 +21,30 @@ import { useState } from 'react';
 import { Button } from '@/src/components/ui/button';
 import { toast } from '@/src/components/ui/sonner';
 import { downloadMarkdownAction } from '@/src/lib/actions/markdown-actions';
+import type { EventName } from '@/src/lib/analytics/events.config';
 import { EVENTS } from '@/src/lib/analytics/events.config';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { Check, Download } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { cn } from '@/src/lib/utils';
+
+/**
+ * Get content-type-specific download_markdown event based on category
+ */
+function getDownloadMarkdownEvent(category: string): EventName {
+  const eventMap: Record<string, EventName> = {
+    agents: EVENTS.DOWNLOAD_MARKDOWN_AGENT,
+    mcp: EVENTS.DOWNLOAD_MARKDOWN_MCP,
+    'mcp-servers': EVENTS.DOWNLOAD_MARKDOWN_MCP,
+    commands: EVENTS.DOWNLOAD_MARKDOWN_COMMAND,
+    rules: EVENTS.DOWNLOAD_MARKDOWN_RULE,
+    hooks: EVENTS.DOWNLOAD_MARKDOWN_HOOK,
+    statuslines: EVENTS.DOWNLOAD_MARKDOWN_STATUSLINE,
+    collections: EVENTS.DOWNLOAD_MARKDOWN_COLLECTION,
+  };
+
+  return eventMap[category] || EVENTS.DOWNLOAD_MARKDOWN_OTHER;
+}
 
 /**
  * Props for DownloadMarkdownButton component
@@ -126,10 +145,10 @@ export function DownloadMarkdownButton({
           duration: 3000,
         });
 
-        // Track analytics event
-        trackEvent(EVENTS.DOWNLOAD_MARKDOWN, {
-          content_category: category,
-          content_slug: slug,
+        // Track analytics event with content-type-specific event
+        const eventName = getDownloadMarkdownEvent(category);
+        trackEvent(eventName, {
+          slug,
           filename: result.data.filename,
           file_size: blob.size,
         });
@@ -253,10 +272,10 @@ export function DownloadMarkdownButtonIcon({
         setIsDownloaded(true);
         toast.success('Downloaded!');
 
-        // Track analytics event
-        trackEvent(EVENTS.DOWNLOAD_MARKDOWN, {
-          content_category: category,
-          content_slug: slug,
+        // Track analytics event with content-type-specific event
+        const eventName = getDownloadMarkdownEvent(category);
+        trackEvent(eventName, {
+          slug,
           filename: result.data.filename,
           file_size: blob.size,
         });
