@@ -20,6 +20,10 @@
     {
       "path": "/api/cron/expire-jobs",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/calculate-weekly-featured",
+      "schedule": "0 0 * * 1"
     }
   ]
 }

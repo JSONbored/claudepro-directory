@@ -80,10 +80,30 @@
     }
   ],
   "examples": [
-    "Show the console errors from bug JAM-123",
-    "Analyze the network requests in the checkout issue",
-    "Get reproduction steps for the login bug",
-    "Find all JavaScript errors from today"
+    {
+      "title": "Show the console errors from bug JAM-123",
+      "code": "Ask Claude: \"Show the console errors from bug JAM-123\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Analyze the network requests in the checkout issue",
+      "code": "Ask Claude: \"Analyze the network requests in the checkout issue\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Get reproduction steps for the login bug",
+      "code": "Ask Claude: \"Get reproduction steps for the login bug\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Find all JavaScript errors from today",
+      "code": "Ask Claude: \"Find all JavaScript errors from today\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "analyze"],

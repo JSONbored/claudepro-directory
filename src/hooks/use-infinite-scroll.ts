@@ -69,6 +69,7 @@ export function useInfiniteScroll(
   const { threshold = 0.1, rootMargin = '100px', hasMore, loading } = options;
   const observerTarget = useRef<HTMLDivElement>(null);
   const [isIntersecting, setIsIntersecting] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
     const [target] = entries;
@@ -88,24 +89,34 @@ export function useInfiniteScroll(
     }
   }, [isIntersecting, hasMore, loading, onLoadMore]);
 
+  // Set up observer whenever hasMore or loading changes (indicates element may have been remounted)
   useEffect(() => {
     const element = observerTarget.current;
-    if (!element) return;
 
-    const observer = new IntersectionObserver(handleObserver, {
-      threshold,
-      rootMargin,
-    });
+    // Clean up existing observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
 
-    observer.observe(element);
+    // Set up new observer if element exists and conditions are right
+    if (element && hasMore && !loading) {
+      const observer = new IntersectionObserver(handleObserver, {
+        threshold,
+        rootMargin,
+      });
+
+      observer.observe(element);
+      observerRef.current = observer;
+    }
 
     return () => {
-      if (element) {
-        observer.unobserve(element);
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
       }
-      observer.disconnect();
     };
-  }, [handleObserver, threshold, rootMargin]);
+  }, [handleObserver, threshold, rootMargin, hasMore, loading]);
 
   return observerTarget;
 }

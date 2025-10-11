@@ -325,6 +325,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
                     variant="ghost"
                     size="sm"
                     onClick={() => removeRequirement(requirements.indexOf(req))}
+                    aria-label={`Remove requirement: ${req}`}
                   >
                     ×
                   </Button>
@@ -372,6 +373,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
                     type="button"
                     onClick={() => removeBenefit(benefits.indexOf(benefit))}
                     className="ml-1 hover:text-destructive"
+                    aria-label={`Remove benefit: ${benefit}`}
                   >
                     ×
                   </button>
@@ -419,6 +421,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
                     type="button"
                     onClick={() => removeTag(tag)}
                     className="ml-1 hover:text-destructive"
+                    aria-label={`Remove tag: ${tag}`}
                   >
                     ×
                   </button>

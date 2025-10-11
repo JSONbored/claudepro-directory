@@ -181,6 +181,7 @@ export function TagBadge({
               e.stopPropagation();
               onRemove();
             }}
+            aria-label={`Remove ${tag}`}
           >
             ×
           </button>
@@ -208,6 +209,7 @@ export function TagBadge({
             e.stopPropagation();
             onRemove();
           }}
+          aria-label={`Remove ${tag}`}
         >
           ×
         </button>

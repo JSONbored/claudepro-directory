@@ -7,6 +7,10 @@
 
 import { z } from 'zod';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
+import {
+  trimOptionalStringOrEmpty,
+  trimString,
+} from '@/src/lib/schemas/primitives/sanitization-transforms';
 import { VALIDATION_PATTERNS } from '@/src/lib/security/patterns';
 
 /**
@@ -21,13 +25,13 @@ const baseSubmissionFields = {
       /^[a-zA-Z0-9\s\-_.]+$/,
       'Name can only contain letters, numbers, spaces, hyphens, underscores, and dots'
     )
-    .transform((val) => val.trim()),
+    .transform(trimString),
 
   description: z
     .string()
     .min(10, 'Description must be at least 10 characters')
     .max(500, 'Description must be less than 500 characters')
-    .transform((val) => val.trim()),
+    .transform(trimString),
 
   category: z
     .string()
@@ -38,7 +42,7 @@ const baseSubmissionFields = {
     .string()
     .min(2, 'Author name must be at least 2 characters')
     .max(100, 'Author name must be less than 100 characters')
-    .transform((val) => val.trim()),
+    .transform(trimString),
 
   github: z
     .string()
@@ -51,7 +55,7 @@ const baseSubmissionFields = {
   tags: z
     .string()
     .optional()
-    .transform((val) => val?.trim() || '')
+    .transform(trimOptionalStringOrEmpty)
     .transform((val) => {
       if (!val) return [];
       return val

@@ -177,10 +177,16 @@ function formatBulletList(title: string, items: string[]): string {
 /**
  * Format installation instructions
  */
-function formatInstallation(installation: Record<string, unknown> | unknown): string {
-  // Type guard: ensure installation is an object
-  // Check for null first before typeof check to satisfy CodeQL
-  if (installation === null || typeof installation !== 'object' || Array.isArray(installation)) {
+function formatInstallation(installation: unknown): string {
+  // Type guard: ensure installation is a plain object (not null, array, Date, RegExp, etc.)
+  if (
+    installation === null ||
+    installation === undefined ||
+    typeof installation !== 'object' ||
+    Array.isArray(installation) ||
+    installation instanceof Date ||
+    installation instanceof RegExp
+  ) {
     return '';
   }
 

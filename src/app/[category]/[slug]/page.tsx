@@ -60,6 +60,7 @@
 import { notFound } from 'next/navigation';
 import { PageViewTracker } from '@/src/components/shared/page-view-tracker';
 import { ViewTracker } from '@/src/components/shared/view-tracker';
+import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
 import { UnifiedStructuredData } from '@/src/components/structured-data/unified-structured-data';
 import { UnifiedDetailPage } from '@/src/components/unified-detail-page';
 import {
@@ -67,6 +68,7 @@ import {
   isValidCategory,
   VALID_CATEGORIES,
 } from '@/src/lib/config/category-config';
+import { APP_CONFIG } from '@/src/lib/constants';
 import {
   getContentByCategory,
   getContentBySlug,
@@ -298,6 +300,22 @@ export default async function DetailPage({
         await UnifiedStructuredData({
           item: itemData as Parameters<typeof UnifiedStructuredData>[0]['item'],
         })
+      }
+      {
+        await (
+          <BreadcrumbSchema
+            items={[
+              {
+                name: config.title || category,
+                url: `${APP_CONFIG.url}/${category}`,
+              },
+              {
+                name: item.title || slug,
+                url: `${APP_CONFIG.url}/${category}/${slug}`,
+              },
+            ]}
+          />
+        )
       }
       <UnifiedDetailPage item={item} relatedItems={relatedItems} viewCount={viewCount} />
     </>

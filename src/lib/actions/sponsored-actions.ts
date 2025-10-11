@@ -124,7 +124,8 @@ export async function getActiveSponsoredContent(limit = 5) {
 
   // Filter out items that hit impression limit
   return (data || []).filter((item) => {
-    if (item.impression_limit && item.impression_count >= item.impression_limit) {
+    const impressionCount = item.impression_count ?? 0;
+    if (item.impression_limit && impressionCount >= item.impression_limit) {
       return false;
     }
     return true;

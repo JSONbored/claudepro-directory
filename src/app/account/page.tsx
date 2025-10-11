@@ -12,8 +12,12 @@ import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
-  title: 'Account Dashboard - ClaudePro Directory',
+  title: 'Account Dashboard - Claude Pro Directory',
   description: 'Manage your ClaudePro account and view your activity',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function AccountDashboard() {
@@ -131,9 +135,10 @@ export default async function AccountDashboard() {
           </p>
           <p className={UI_CLASSES.TEXT_SM}>
             • View your{' '}
-            <a href="/account/bookmarks" className="text-primary hover:underline">
-              saved bookmarks
-            </a>
+            <a href="/account/library" className="text-primary hover:underline">
+              library
+            </a>{' '}
+            with saved bookmarks and collections
           </p>
           <p className={UI_CLASSES.TEXT_SM}>
             • Update your profile in{' '}

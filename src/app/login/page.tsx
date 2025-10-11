@@ -10,11 +10,17 @@ import {
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
-  title: 'Sign In - ClaudePro Directory',
+  title: 'Sign In - Claude Pro Directory',
   description: 'Sign in to save bookmarks, submit content, and join the community',
+  robots: { index: false, follow: false },
 };
 
-export default function LoginPage({ searchParams }: { searchParams: { redirect?: string } }) {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ redirect?: string }>;
+}) {
+  const resolvedSearchParams = await searchParams;
   return (
     <div
       className={`${UI_CLASSES.MIN_H_SCREEN} ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} bg-background px-4`}
@@ -27,7 +33,11 @@ export default function LoginPage({ searchParams }: { searchParams: { redirect?:
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AuthButtons {...(searchParams.redirect ? { redirectTo: searchParams.redirect } : {})} />
+          <AuthButtons
+            {...(resolvedSearchParams.redirect
+              ? { redirectTo: resolvedSearchParams.redirect }
+              : {})}
+          />
 
           <p
             className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} text-center mt-4`}

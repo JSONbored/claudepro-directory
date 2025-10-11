@@ -197,22 +197,22 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
         </div>
       </section>
 
-      {/* Email CTA */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-8`}>
-        <InlineEmailCTA
-          variant="minimal"
-          context="trending-page"
-          headline="Never Miss Trending Tools"
-          description="Get weekly updates on what's hot in the Claude community."
-        />
-      </section>
-
       {/* Trending Content */}
       <section
         className={`container ${UI_CLASSES.MX_AUTO} px-4 py-16`}
         aria-label="Trending configurations content"
       >
         <TrendingContent trending={trending} popular={popular} recent={recent} />
+      </section>
+
+      {/* Email CTA - Moved to footer section to match homepage pattern */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <InlineEmailCTA
+          variant="hero"
+          context="trending-page"
+          headline="Never Miss Trending Tools"
+          description="Get weekly updates on what's hot in the Claude community. No spam, unsubscribe anytime."
+        />
       </section>
     </div>
   );

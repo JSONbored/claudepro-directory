@@ -121,10 +121,24 @@
     }
   ],
   "examples": [
-    "Example query: Ask Claude to [COMMON_ACTION_1]",
-    "Example request: [TYPICAL_USER_REQUEST]",
-    "Example workflow: [COMPLETE_USAGE_SCENARIO]",
-    "Advanced usage: [COMPLEX_INTEGRATION_EXAMPLE]"
+    {
+      "title": "Basic Query Example",
+      "code": "Ask Claude: 'Can you list all [RESOURCE_TYPE] from [SERVICE_NAME]?'",
+      "language": "plaintext",
+      "description": "Simple query to retrieve resources from the MCP server"
+    },
+    {
+      "title": "Configuration Example",
+      "code": "{\n  \"mcpServers\": {\n    \"your-server\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@your-org/server\"],\n      \"env\": {\n        \"API_KEY\": \"${API_KEY}\"\n      }\n    }\n  }\n}",
+      "language": "json",
+      "description": "Complete MCP server configuration for Claude Code"
+    },
+    {
+      "title": "Advanced Workflow",
+      "code": "// Example: Automated data sync workflow\n1. Ask Claude to fetch data from [SERVICE]\n2. Process and transform the data\n3. Store results using another MCP tool",
+      "language": "markdown",
+      "description": "Multi-step workflow combining multiple MCP capabilities"
+    }
   ],
   "requiresAuth": true,
   "authType": "api_key | oauth | connection_string | basic_auth",

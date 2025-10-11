@@ -9,7 +9,7 @@
 # Documentation files (safe to exclude)
 README.md
 CONTRIBUTING.md
-CHANGELOG.md
+# CHANGELOG.md - REQUIRED: Used by changelog parser (/changelog page)
 docs/
 
 # GitHub files (safe to exclude - not needed for build)

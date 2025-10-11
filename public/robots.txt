@@ -84,6 +84,7 @@ Allow: /guides*
 Allow: /trending*
 Allow: /community*
 Allow: /jobs*
+Allow: /tools*
 
 # API Documentation & Discovery (RFC 9727, OpenAPI 3.1)
 Allow: /api-docs*

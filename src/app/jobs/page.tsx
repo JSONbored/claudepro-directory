@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { JobCard } from '@/src/components/shared/job-card';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
@@ -275,6 +276,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         <Link
                           href={buildFilterUrl({ search: undefined })}
                           className="ml-1 hover:text-destructive"
+                          aria-label="Remove search filter"
                         >
                           ×
                         </Link>
@@ -286,6 +288,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         <Link
                           href={buildFilterUrl({ category: undefined })}
                           className="ml-1 hover:text-destructive"
+                          aria-label="Remove category filter"
                         >
                           ×
                         </Link>
@@ -298,6 +301,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         <Link
                           href={buildFilterUrl({ employment: undefined })}
                           className="ml-1 hover:text-destructive"
+                          aria-label="Remove employment type filter"
                         >
                           ×
                         </Link>
@@ -309,6 +313,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         <Link
                           href={buildFilterUrl({ remote: undefined })}
                           className="ml-1 hover:text-destructive"
+                          aria-label="Remove remote filter"
                         >
                           ×
                         </Link>
@@ -402,6 +407,16 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
             </>
           )}
         </div>
+      </section>
+
+      {/* Email CTA - Footer section (matching homepage pattern) */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <InlineEmailCTA
+          variant="hero"
+          context="jobs-page"
+          headline="Join 1,000+ Claude Power Users"
+          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+        />
       </section>
     </div>
   );

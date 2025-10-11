@@ -76,10 +76,30 @@
     }
   ],
   "examples": [
-    "Show open conversations from today",
-    "Find customer by email",
-    "Update ticket status to resolved",
-    "Generate weekly support metrics"
+    {
+      "title": "Show open conversations from today",
+      "code": "Ask Claude: \"Show open conversations from today\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Find customer by email",
+      "code": "Ask Claude: \"Find customer by email\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Update ticket status to resolved",
+      "code": "Ask Claude: \"Update ticket status to resolved\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Generate weekly support metrics",
+      "code": "Ask Claude: \"Generate weekly support metrics\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "respond"],

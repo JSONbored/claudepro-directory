@@ -19,26 +19,9 @@ import {
   baseTroubleshootingSchema,
 } from '@/src/lib/schemas/content/base-content.schema';
 import { limitedMediumStringArray } from '@/src/lib/schemas/primitives/base-arrays';
-import { codeString, mediumString } from '@/src/lib/schemas/primitives/base-strings';
-
-/**
- * Rule Example Schema
- *
- * Structured example showing how to use a rule effectively.
- * Includes prompt and expected outcome for demonstration purposes.
- */
-const ruleExampleSchema = z
-  .object({
-    title: z.string().max(200).describe('Example title or name'),
-    description: mediumString.describe('Description of what the example demonstrates'),
-    prompt: codeString.describe('Example prompt or input that uses the rule'),
-    expectedOutcome: codeString.describe('Expected result or outcome from using the rule'),
-  })
-  .describe(
-    'Structured example demonstrating how to use a rule effectively with prompt and expected outcome.'
-  );
 
 // Rule troubleshooting now uses baseTroubleshootingSchema from base-content.schema.ts
+// Rule examples now use baseUsageExampleSchema from base-content.schema.ts
 // Removed local ruleTroubleshootingSchema definition to reduce duplication
 // Note: Previously supported union[string, object] but now standardized to object only
 
@@ -107,14 +90,7 @@ export const ruleContentSchema = z
       .optional()
       .describe('Optional list of prerequisites or dependencies required to use this rule'),
 
-    // Examples and troubleshooting guidance
-    examples: z
-      .array(z.union([codeString, ruleExampleSchema]))
-      .max(10)
-      .optional()
-      .describe(
-        'Optional array of usage examples (simple strings or structured example objects, max 10)'
-      ),
+    // Troubleshooting guidance
     troubleshooting: z
       .array(baseTroubleshootingSchema)
       .max(20)

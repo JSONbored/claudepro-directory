@@ -27,6 +27,66 @@ import {
 } from '@/src/lib/schemas/primitives/base-strings';
 
 /**
+ * Base Usage Example Schema
+ *
+ * GitHub-style code examples with syntax highlighting
+ * Used across all content types to provide practical usage demonstrations
+ *
+ * Example Fields:
+ * - title: Name/description of the example ("Basic Configuration", "Advanced Setup")
+ * - code: The actual code snippet
+ * - language: Programming language for syntax highlighting ("typescript", "javascript", "json", "bash")
+ * - description: Optional context explaining the example
+ *
+ * Usage:
+ * ```typescript
+ * const agentExamplesField = z.array(baseUsageExampleSchema).max(10).optional();
+ * ```
+ *
+ * @example
+ * ```json
+ * {
+ *   "title": "Basic Configuration",
+ *   "language": "typescript",
+ *   "code": "export default { rules: ['code-review'] }",
+ *   "description": "Minimal setup for code reviews"
+ * }
+ * ```
+ */
+export const baseUsageExampleSchema = z
+  .object({
+    title: nonEmptyString
+      .max(100)
+      .describe('Example name or title (e.g., "Basic Usage", "Advanced Configuration")'),
+    code: z
+      .string()
+      .min(1)
+      .max(10000)
+      .describe('The code snippet to display (max 10,000 characters)'),
+    language: z
+      .enum([
+        'typescript',
+        'javascript',
+        'json',
+        'bash',
+        'shell',
+        'python',
+        'yaml',
+        'markdown',
+        'plaintext',
+      ])
+      .describe('Programming language for syntax highlighting'),
+    description: z
+      .string()
+      .max(500)
+      .optional()
+      .describe('Optional context or explanation for this example'),
+  })
+  .describe(
+    'Base usage example schema for code snippets with syntax highlighting. Used across all content types to provide practical implementation examples.'
+  );
+
+/**
  * Base Content Metadata Schema
  *
  * Shared metadata fields used across all content types:
@@ -91,9 +151,14 @@ export const baseContentMetadataSchema = z
     useCases: largeContentArray
       .optional()
       .describe('Optional list of common use cases or applications'),
+    examples: z
+      .array(baseUsageExampleSchema)
+      .max(10)
+      .optional()
+      .describe('Optional array of usage examples with code snippets (max 10 examples per config)'),
   })
   .describe(
-    'Base content metadata schema shared across all content types (agents, commands, rules, mcp, hooks, guides). Provides standard fields for slug, description, author, dates, tags, and content body.'
+    'Base content metadata schema shared across all content types (agents, commands, rules, mcp, hooks, guides). Provides standard fields for slug, description, author, dates, tags, content body, and usage examples.'
   );
 
 /**
@@ -234,3 +299,4 @@ export type BaseContentMetadata = z.infer<typeof baseContentMetadataSchema>;
 export type BaseConfiguration = z.infer<typeof baseConfigurationSchema>;
 export type BaseInstallation = z.infer<typeof baseInstallationSchema>;
 export type BaseTroubleshooting = z.infer<typeof baseTroubleshootingSchema>;
+export type BaseUsageExample = z.infer<typeof baseUsageExampleSchema>;

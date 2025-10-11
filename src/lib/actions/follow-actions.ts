@@ -8,11 +8,12 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { userIdSchema } from '@/src/lib/schemas/branded-types.schema';
 import { createClient } from '@/src/lib/supabase/server';
 
 const followSchema = z.object({
   action: z.enum(['follow', 'unfollow']),
-  user_id: z.string().uuid(),
+  user_id: userIdSchema,
   slug: z.string(), // User slug for revalidation
 });
 
@@ -91,11 +92,14 @@ export async function isFollowing(user_id: string): Promise<boolean> {
     return false;
   }
 
+  // Validate user_id at boundary
+  const validatedUserId = userIdSchema.parse(user_id);
+
   const { data } = await supabase
     .from('followers')
     .select('id')
     .eq('follower_id', user.id)
-    .eq('following_id', user_id)
+    .eq('following_id', validatedUserId)
     .single();
 
   return !!data;

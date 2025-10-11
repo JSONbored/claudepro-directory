@@ -13,6 +13,23 @@
 import { Button, Hr, Section, Text } from '@react-email/components';
 import type * as React from 'react';
 import { BaseLayout } from '../layouts/base-layout';
+import {
+  dividerStyle,
+  headingStyle,
+  heroSection,
+  labelCellStyle,
+  paragraphStyle,
+  primaryButtonStyle,
+  secondaryButtonStyle,
+  sectionTitleStyle,
+  strongStyle,
+  subheadingStyle,
+  successBadgeStyle,
+  tipsItemStyle,
+  tipsListStyle,
+  tipsTitleStyle,
+  valueCellStyle,
+} from '../utils/common-styles';
 import { borderRadius, brandColors, emailTheme, spacing, typography } from '../utils/theme';
 
 /**
@@ -356,37 +373,6 @@ function formatExperienceLevel(level: ExperienceLevel): string {
  * Email-safe inline styles
  */
 
-const heroSection: React.CSSProperties = {
-  textAlign: 'center',
-  marginBottom: spacing.lg,
-};
-
-const successBadgeStyle: React.CSSProperties = {
-  display: 'inline-block',
-  backgroundColor: brandColors.success,
-  color: '#ffffff',
-  fontSize: typography.fontSize.sm,
-  fontWeight: typography.fontWeight.semibold,
-  padding: `${spacing.xs} ${spacing.md}`,
-  borderRadius: borderRadius.full,
-  marginBottom: spacing.md,
-};
-
-const headingStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['3xl'],
-  fontWeight: typography.fontWeight.bold,
-  color: emailTheme.textPrimary,
-  margin: `0 0 ${spacing.sm} 0`,
-  lineHeight: typography.lineHeight.tight,
-};
-
-const subheadingStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.base,
-  color: emailTheme.textSecondary,
-  margin: 0,
-  lineHeight: typography.lineHeight.normal,
-};
-
 const jobSummaryCard: React.CSSProperties = {
   backgroundColor: emailTheme.bgTertiary,
   border: `2px solid ${brandColors.primary}`,
@@ -464,32 +450,9 @@ const detailsSection: React.CSSProperties = {
   marginBottom: spacing.lg,
 };
 
-const sectionTitleStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.lg,
-  fontWeight: typography.fontWeight.semibold,
-  color: emailTheme.textPrimary,
-  margin: `0 0 ${spacing.md} 0`,
-};
-
 const detailsTableStyle: React.CSSProperties = {
   width: '100%',
   borderCollapse: 'collapse',
-};
-
-const labelCellStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.sm,
-  color: emailTheme.textSecondary,
-  paddingTop: spacing.sm,
-  paddingBottom: spacing.sm,
-  paddingRight: spacing.md,
-  width: '35%',
-};
-
-const valueCellStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.sm,
-  color: emailTheme.textPrimary,
-  paddingTop: spacing.sm,
-  paddingBottom: spacing.sm,
 };
 
 const actionsSection: React.CSSProperties = {
@@ -505,63 +468,12 @@ const actionsTitleStyle: React.CSSProperties = {
   margin: `0 0 ${spacing.md} 0`,
 };
 
-const primaryButtonStyle: React.CSSProperties = {
-  backgroundColor: brandColors.primary,
-  color: '#ffffff',
-  fontWeight: typography.fontWeight.semibold,
-  fontSize: typography.fontSize.base,
-  padding: `${spacing.md} ${spacing.xl}`,
-  borderRadius: borderRadius.md,
-  textDecoration: 'none',
-  display: 'inline-block',
-  marginTop: spacing.sm,
-  marginBottom: spacing.sm,
-  marginLeft: spacing.sm,
-  marginRight: spacing.sm,
-  border: 'none',
-};
-
-const secondaryButtonStyle: React.CSSProperties = {
-  backgroundColor: emailTheme.bgTertiary,
-  color: emailTheme.textPrimary,
-  fontWeight: typography.fontWeight.medium,
-  fontSize: typography.fontSize.base,
-  padding: `${spacing.md} ${spacing.xl}`,
-  borderRadius: borderRadius.md,
-  textDecoration: 'none',
-  display: 'inline-block',
-  marginTop: spacing.sm,
-  marginBottom: spacing.sm,
-  marginLeft: spacing.sm,
-  marginRight: spacing.sm,
-  border: `1px solid ${emailTheme.borderDefault}`,
-};
-
 const tipsSection: React.CSSProperties = {
   backgroundColor: emailTheme.bgTertiary,
   borderRadius: borderRadius.md,
   padding: spacing.lg,
   marginTop: spacing.lg,
   marginBottom: spacing.lg,
-};
-
-const tipsTitleStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.lg,
-  fontWeight: typography.fontWeight.semibold,
-  color: emailTheme.textPrimary,
-  margin: `0 0 ${spacing.md} 0`,
-};
-
-const tipsListStyle: React.CSSProperties = {
-  margin: `${spacing.md} 0 0 0`,
-  paddingLeft: spacing.lg,
-};
-
-const tipsItemStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.sm,
-  color: emailTheme.textPrimary,
-  lineHeight: typography.lineHeight.relaxed,
-  marginBottom: spacing.md,
 };
 
 const shareSection: React.CSSProperties = {
@@ -575,13 +487,6 @@ const shareTitleStyle: React.CSSProperties = {
   fontWeight: typography.fontWeight.semibold,
   color: emailTheme.textPrimary,
   margin: `0 0 ${spacing.sm} 0`,
-};
-
-const paragraphStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.sm,
-  color: emailTheme.textSecondary,
-  lineHeight: typography.lineHeight.relaxed,
-  margin: `0 0 ${spacing.md} 0`,
 };
 
 const shareButtonsSection: React.CSSProperties = {
@@ -604,11 +509,6 @@ const shareButtonStyle: React.CSSProperties = {
   border: `1px solid ${emailTheme.borderDefault}`,
 };
 
-const dividerStyle: React.CSSProperties = {
-  borderColor: emailTheme.borderDefault,
-  margin: `${spacing.xl} 0`,
-};
-
 const supportSection: React.CSSProperties = {
   marginTop: spacing.lg,
   textAlign: 'center',
@@ -624,11 +524,6 @@ const supportTextStyle: React.CSSProperties = {
 const linkStyle: React.CSSProperties = {
   color: brandColors.primary,
   textDecoration: 'none',
-};
-
-const strongStyle: React.CSSProperties = {
-  fontWeight: typography.fontWeight.semibold,
-  color: emailTheme.textPrimary,
 };
 
 /**

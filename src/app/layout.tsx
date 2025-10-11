@@ -6,6 +6,7 @@ import { connection } from 'next/server';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { Toaster } from 'sonner';
+import { AnnouncementBanner } from '@/src/components/layout/announcement-banner';
 import { Footer } from '@/src/components/layout/footer';
 import { Navigation } from '@/src/components/layout/navigation';
 import { PostCopyEmailProvider } from '@/src/components/providers/post-copy-email-provider';
@@ -170,6 +171,7 @@ export default async function RootLayout({
                 Skip to main content
               </a>
               <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background flex flex-col`}>
+                <AnnouncementBanner />
                 <Navigation />
                 {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
                 <main id="main-content" className="flex-1">

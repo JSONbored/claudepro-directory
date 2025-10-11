@@ -6,8 +6,9 @@
  */
 
 import Link from 'next/link';
+import { Badge } from '@/src/components/ui/badge';
 import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
-import { DiscordIcon, Github, Sparkles } from '@/src/lib/icons';
+import { DiscordIcon, ExternalLink, Github, Sparkles } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
@@ -31,7 +32,7 @@ export function Footer() {
             <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED} ${UI_CLASSES.MB_4}`}>
               {APP_CONFIG.description}
             </p>
-            <div className={`flex ${UI_CLASSES.GAP_4}`}>
+            <div className={`flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.GAP_4}`}>
               <Link
                 href={SOCIAL_LINKS.github || '#'}
                 target="_blank"
@@ -50,6 +51,10 @@ export function Footer() {
               >
                 <DiscordIcon className="h-5 w-5" />
               </Link>
+              <Badge variant="outline" className="border-accent/20 bg-accent/5 text-accent ml-2">
+                <ExternalLink className="h-3 w-3 mr-1 text-accent" />
+                Open Source
+              </Badge>
             </div>
           </div>
 

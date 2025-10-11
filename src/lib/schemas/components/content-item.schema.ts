@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { baseUsageExampleSchema } from '@/src/lib/schemas/content/base-content.schema';
 import { stringArray } from '@/src/lib/schemas/primitives/base-arrays';
 import { optionalUrlString } from '@/src/lib/schemas/primitives/base-strings';
 
@@ -157,26 +158,12 @@ export const unifiedContentItemSchema = z
       .optional()
       .describe('List of common issues and their solutions'),
 
-    // Examples and related content (supports both string and object formats)
+    // Examples - GitHub-style code snippets with syntax highlighting
+    // NEW: Updated to use baseUsageExampleSchema for consistent usage examples across all content types
     examples: z
-      .array(
-        z.union([
-          z
-            .string()
-            .describe('Simple example usage as plain text'), // MCP uses string format
-          z
-            .object({
-              // Rules use object format
-              title: z.string().describe('Short title or name for the example'),
-              description: z.string().describe('Explanation of what the example demonstrates'),
-              prompt: z.string().describe('Example input, prompt, or code snippet'),
-              expectedOutcome: z.string().describe('Expected result or output from the example'),
-            })
-            .describe('Detailed example with title, description, prompt, and outcome'),
-        ])
-      )
+      .array(baseUsageExampleSchema)
       .optional()
-      .describe('Usage examples in simple or structured format'),
+      .describe('Usage examples with code snippets and syntax highlighting (max 10 per config)'),
 
     // MCP-specific properties
     package: z

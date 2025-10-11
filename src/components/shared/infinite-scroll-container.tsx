@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useCallback, useState } from 'react';
+import { memo, type ReactNode, useCallback, useState } from 'react';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import { Button } from '@/src/components/ui/button';
 import { useInfiniteScroll } from '@/src/hooks/use-infinite-scroll';
@@ -15,20 +15,26 @@ export interface InfiniteScrollContainerProps<T> {
   loadMore: () => Promise<T[]>;
   hasMore: boolean;
   className?: string;
-  gridClassName?: string;
   loadingClassName?: string;
   showLoadMoreButton?: boolean;
   emptyMessage?: string;
   keyExtractor?: (item: T, index: number) => string;
 }
 
-export function InfiniteScrollContainer<T>({
+/**
+ * Infinite Scroll Container Component
+ *
+ * Performance Optimizations:
+ * - Memoized to prevent re-renders when parent state changes
+ * - useCallback on event handlers to prevent re-creation
+ * - Standard CSS Grid for consistent card spacing
+ */
+function InfiniteScrollContainerComponent<T>({
   items,
   renderItem,
   loadMore,
   hasMore,
   className,
-  gridClassName = UI_CLASSES.GRID_RESPONSIVE_3_TIGHT,
   loadingClassName,
   showLoadMoreButton = true,
   emptyMessage = 'No items found',
@@ -38,15 +44,15 @@ export function InfiniteScrollContainer<T>({
   const [error, setError] = useState<string | null>(null);
 
   const handleLoadMore = useCallback(async () => {
-    if (loading || !hasMore) return;
+    if (loading || !hasMore) {
+      return;
+    }
 
     setLoading(true);
     setError(null);
 
     try {
       await loadMore();
-      // Trust parent's hasMore prop for pagination state
-      // No need to manage local state
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load more items';
       setError(errorMessage);
@@ -80,6 +86,7 @@ export function InfiniteScrollContainer<T>({
     });
   }, [handleLoadMore]);
 
+  // Early return AFTER all hooks
   if (items.length === 0 && !loading) {
     return (
       <div className={UI_CLASSES.CONTAINER_CENTER}>
@@ -89,13 +96,13 @@ export function InfiniteScrollContainer<T>({
   }
 
   return (
-    <div className={cn('space-y-8', className)}>
-      {/* Items Grid */}
-      <div className={gridClassName}>
+    <div className={className}>
+      {/* Items Grid - Standard responsive grid with consistent spacing */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map((item, index) => {
           const key = keyExtractor ? keyExtractor(item, index) : `item-${index}`;
           return (
-            <div key={key}>
+            <div key={key} className="flex">
               <ErrorBoundary>{renderItem(item, index)}</ErrorBoundary>
             </div>
           );
@@ -104,7 +111,7 @@ export function InfiniteScrollContainer<T>({
 
       {/* Error Message */}
       {error && (
-        <div className={`${UI_CLASSES.FLEX_COL_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} py-8`}>
+        <div className={`${UI_CLASSES.FLEX_COL_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} py-8 mt-8`}>
           <p className="text-destructive text-sm mb-4">{error}</p>
           <Button onClick={handleManualLoadMore} variant="outline" size="sm">
             Try Again
@@ -116,7 +123,7 @@ export function InfiniteScrollContainer<T>({
       {loading && (
         <div
           className={cn(
-            `flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} py-8`,
+            `flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} py-8 mt-8`,
             loadingClassName
           )}
         >
@@ -127,12 +134,17 @@ export function InfiniteScrollContainer<T>({
 
       {/* Infinite Scroll Trigger */}
       {!loading && hasMore && (
-        <div ref={observerTarget} className={`h-4 ${UI_CLASSES.W_FULL}`} aria-hidden="true" />
+        <div
+          ref={observerTarget}
+          className={`h-4 ${UI_CLASSES.W_FULL} mt-8`}
+          aria-hidden="true"
+          data-testid="infinite-scroll-target"
+        />
       )}
 
       {/* Manual Load More Button (Optional) */}
       {!loading && hasMore && showLoadMoreButton && (
-        <div className={`flex ${UI_CLASSES.JUSTIFY_CENTER} pt-4 pb-8`}>
+        <div className={`flex ${UI_CLASSES.JUSTIFY_CENTER} pt-4 pb-8 mt-8`}>
           <Button
             onClick={handleManualLoadMore}
             variant="outline"
@@ -146,7 +158,7 @@ export function InfiniteScrollContainer<T>({
 
       {/* End of List Message */}
       {!hasMore && items.length > 0 && (
-        <div className={`flex ${UI_CLASSES.JUSTIFY_CENTER} py-8`}>
+        <div className={`flex ${UI_CLASSES.JUSTIFY_CENTER} py-8 mt-8`}>
           <p className="text-muted-foreground text-sm">
             You've reached the end • {items.length} total items
           </p>
@@ -155,3 +167,8 @@ export function InfiniteScrollContainer<T>({
     </div>
   );
 }
+
+// Export memoized component - generic type preserved
+export const InfiniteScrollContainer = memo(
+  InfiniteScrollContainerComponent
+) as typeof InfiniteScrollContainerComponent;

@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useCallback, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { ConfigCard } from '@/src/components/features/content/config-card';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import { InfiniteScrollContainer } from '@/src/components/shared/infinite-scroll-container';
@@ -25,7 +25,16 @@ import type {
   UnifiedContentItem,
 } from '@/src/lib/schemas/component.schema';
 
-export function ContentSearchClient<T extends UnifiedContentItem>({
+/**
+ * Content Search Client Component
+ *
+ * Performance Optimizations:
+ * - Memoized to prevent re-renders when parent state changes
+ * - Only re-renders when items/searchPlaceholder/title/icon props change
+ * - Renders infinite scroll container with 20-100+ items (expensive)
+ * - useCallback on loadMore to prevent infinite re-creation
+ */
+function ContentSearchClientComponent<T extends UnifiedContentItem>({
   items,
   searchPlaceholder,
   title,
@@ -89,7 +98,6 @@ export function ContentSearchClient<T extends UnifiedContentItem>({
             )}
             loadMore={loadMore}
             hasMore={hasMore}
-            gridClassName={UI_CLASSES.GRID_RESPONSIVE_3}
             emptyMessage={`No ${title.toLowerCase()} found`}
             keyExtractor={(item) => item.slug}
           />
@@ -114,3 +122,8 @@ export function ContentSearchClient<T extends UnifiedContentItem>({
     </div>
   );
 }
+
+// Export memoized component - generic type preserved
+export const ContentSearchClient = memo(
+  ContentSearchClientComponent
+) as typeof ContentSearchClientComponent;

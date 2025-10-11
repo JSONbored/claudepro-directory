@@ -16,15 +16,15 @@ class LRUCache<K, V> {
   private cache = new Map<K, V>();
   private maxSize: number;
 
-  constructor(maxSize: number = 1000) {
+  constructor(maxSize = 1000) {
     this.maxSize = maxSize;
   }
 
   get(key: K): V | undefined {
-    if (!this.cache.has(key)) return undefined;
+    const value = this.cache.get(key);
+    if (!value) return undefined;
 
     // Move to end (most recently used)
-    const value = this.cache.get(key)!;
     this.cache.delete(key);
     this.cache.set(key, value);
     return value;

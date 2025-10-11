@@ -391,6 +391,85 @@ export const METADATA_REGISTRY = {
   },
 
   /**
+   * Configuration Recommender Landing Page - Tier 2
+   * Interactive tool for personalized configuration recommendations
+   */
+  '/tools/config-recommender': {
+    title: { tier: 'section' as const, title: 'Config Recommender' },
+    description:
+      'Find your perfect Claude configuration in 2 minutes. Answer 7 questions and get personalized recommendations from 147+ configs. Instant, AI-powered matching for your exact needs.',
+    keywords: [
+      'claude config recommender',
+      'claude configuration quiz',
+      'personalized claude setup',
+      'claude ai recommendations 2025',
+      'find best claude config',
+      'claude tool finder',
+    ],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary_large_image' as const,
+    },
+    structuredData: {
+      type: 'HowTo' as const, // Quiz is a how-to process
+      breadcrumbs: true,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: true,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: true, // FAQ about recommendation process
+      wikipediaStyle: false,
+    },
+  },
+
+  /**
+   * Configuration Recommender Results Page - Tier 3
+   * Dynamic results with personalized recommendations
+   */
+  '/tools/config-recommender/results/:id': {
+    title: {
+      tier: 'content' as const,
+      title: (ctx?: MetadataContext) =>
+        ctx?.item?.title ? String(ctx.item.title) : 'Your Configuration Recommendations',
+      section: 'Config Recommender',
+    },
+    description: (ctx?: MetadataContext) =>
+      ctx?.item?.description
+        ? String(ctx.item.description)
+        : 'View your personalized Claude configuration recommendations. Discover the best configs matched to your specific needs and use case.',
+    keywords: [
+      'claude config results',
+      'personalized recommendations',
+      'claude configuration matches',
+      'ai config suggestions',
+    ],
+    openGraph: {
+      type: 'article' as const, // Results are user-specific content
+    },
+    twitter: {
+      card: 'summary_large_image' as const,
+    },
+    structuredData: {
+      type: 'Article' as const,
+      breadcrumbs: true,
+      dateModified: false,
+      author: true,
+    },
+    aiOptimization: {
+      includeYear: true,
+      recencySignal: false,
+      useArticleSchema: true,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  /**
    * Partner Page - Tier 2
    * Business-focused description
    */

@@ -22,11 +22,7 @@ export type SortDirection = 'asc' | 'desc';
  * Helper to safely extract string arrays from content data
  * Used internally by extractFilterOptions
  */
-function extractStringArray(
-  values: unknown[],
-  fieldName: string,
-  maxLength: number = 100
-): string[] {
+function extractStringArray(values: unknown[], fieldName: string, maxLength = 100): string[] {
   try {
     const stringSchema = nonEmptyString.max(maxLength);
     const uniqueValues = [...new Set(values)];

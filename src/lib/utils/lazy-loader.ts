@@ -227,13 +227,15 @@ export class PaginatedLazyLoader<T> {
    */
   async getPage(page: number): Promise<T[]> {
     // Check cache
-    if (this.pages.has(page)) {
-      return this.pages.get(page)!;
+    const cachedPage = this.pages.get(page);
+    if (cachedPage) {
+      return cachedPage;
     }
 
     // Check if already loading
-    if (this.loadingPages.has(page)) {
-      return this.loadingPages.get(page)!;
+    const loadingPromise = this.loadingPages.get(page);
+    if (loadingPromise) {
+      return loadingPromise;
     }
 
     // Load page

@@ -12,7 +12,7 @@ import {
   type NewsletterWelcomeProps,
 } from '@/src/emails/templates/newsletter-welcome';
 import { renderEmailHtml } from '@/src/emails/utils/render';
-import { logger } from '@/src/lib/logger';
+import { handleApiError } from '@/src/lib/error-handler';
 
 /**
  * Available email templates for preview
@@ -45,10 +45,12 @@ const sampleProps: Record<TemplateName, NewsletterWelcomeProps> = {
 export async function GET(request: NextRequest) {
   // Security: Only allow in development
   if (process.env.NODE_ENV === 'production') {
-    return NextResponse.json(
-      { error: 'Email preview is only available in development' },
-      { status: 403 }
-    );
+    return handleApiError(new Error('Email preview is only available in development'), {
+      route: '/api/emails/preview',
+      method: 'GET',
+      operation: 'email_preview_access_check',
+      logLevel: 'warn',
+    });
   }
 
   try {
@@ -66,13 +68,17 @@ export async function GET(request: NextRequest) {
 
     // Validate template exists
     if (!templates[templateName]) {
-      return NextResponse.json(
-        {
-          error: `Template '${templateName}' not found`,
-          availableTemplates: Object.keys(templates),
+      return handleApiError(new Error(`Template '${templateName}' not found`), {
+        route: '/api/emails/preview',
+        method: 'GET',
+        operation: 'email_template_lookup',
+        customMessage: `Template '${templateName}' not found`,
+        logContext: {
+          templateName,
+          availableTemplates: Object.keys(templates).join(', '),
         },
-        { status: 404 }
-      );
+        logLevel: 'warn',
+      });
     }
 
     // Get template component and props
@@ -91,11 +97,13 @@ export async function GET(request: NextRequest) {
     const html = await renderEmailHtml(TemplateComponent(props));
 
     if (!html) {
-      logger.error('Failed to render email template for preview', undefined, {
-        template: templateName,
+      return handleApiError(new Error('Failed to render email template'), {
+        route: '/api/emails/preview',
+        method: 'GET',
+        operation: 'email_template_render',
+        logContext: { template: templateName },
+        logLevel: 'error',
       });
-
-      return NextResponse.json({ error: 'Failed to render email template' }, { status: 500 });
     }
 
     // Return HTML response
@@ -106,16 +114,11 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    logger.error('Email preview error', error instanceof Error ? error : undefined, {
-      errorMessage: error instanceof Error ? error.message : String(error),
+    return handleApiError(error instanceof Error ? error : new Error(String(error)), {
+      route: '/api/emails/preview',
+      method: 'GET',
+      operation: 'email_preview',
+      logLevel: 'error',
     });
-
-    return NextResponse.json(
-      {
-        error: 'Internal server error',
-        message: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    );
   }
 }

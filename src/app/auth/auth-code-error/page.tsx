@@ -12,8 +12,9 @@ import { AlertCircle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
-  title: 'Authentication Error - ClaudePro Directory',
+  title: 'Authentication Error - Claude Pro Directory',
   description: 'There was an error signing in',
+  robots: { index: false, follow: false },
 };
 
 export default function AuthCodeError() {

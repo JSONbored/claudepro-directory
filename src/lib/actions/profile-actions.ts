@@ -32,12 +32,17 @@ export const updateProfile = rateLimitedAction
     }
 
     // Update profile in database
-    const { data, error } = await supabase
-      .from('users')
-      .update({
+    // Filter out undefined values to avoid exactOptionalPropertyTypes issues
+    const updateData = Object.fromEntries(
+      Object.entries({
         ...parsedInput,
         updated_at: new Date().toISOString(),
-      })
+      }).filter(([_, value]) => value !== undefined)
+    );
+
+    const { data, error } = await supabase
+      .from('users')
+      .update(updateData)
       .eq('id', user.id)
       .select()
       .single();

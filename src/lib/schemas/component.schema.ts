@@ -196,4 +196,5 @@ export interface SearchOptions {
 export interface UseSearchProps {
   data: UnifiedContentItem[];
   searchOptions?: SearchOptions;
+  initialQuery?: string; // Initial search query from URL (for SearchAction schema integration)
 }

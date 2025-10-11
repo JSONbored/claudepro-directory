@@ -47,7 +47,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
   const navigation = [
     { name: 'Dashboard', href: '/account', icon: Home },
     { name: 'Activity', href: '/account/activity', icon: Activity },
-    { name: 'Bookmarks', href: '/account/bookmarks', icon: Bookmark },
+    { name: 'Library', href: '/account/library', icon: Bookmark },
     { name: 'Jobs', href: '/account/jobs', icon: Briefcase },
     { name: 'Submissions', href: '/account/submissions', icon: Send },
     // Only show Sponsorships if user has campaigns (admin grants access after payment)

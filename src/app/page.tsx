@@ -9,7 +9,11 @@ import type { StatuslineMetadata } from '@/generated/statuslines-metadata';
 import { HomePageClient } from '@/src/components/features/home';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
+import { Meteors } from '@/src/components/ui/magic/meteors';
+import { RollingText } from '@/src/components/ui/magic/rolling-text';
 import { statsRedis } from '@/src/lib/redis';
+import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import { featuredLoaderService } from '@/src/lib/services/featured-loader.service';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { transformForHomePage } from '@/src/lib/utils/transformers';
 
@@ -22,14 +26,25 @@ type ContentMetadataWithCategory =
   | (StatuslineMetadata & { category: 'statuslines' })
   | (CollectionMetadata & { category: 'collections' });
 
-type EnrichedMetadata = ContentMetadataWithCategory & { viewCount: number };
+type EnrichedMetadata = ContentMetadataWithCategory & { viewCount: number; copyCount: number };
 
 // Enable ISR - revalidate every 5 minutes for fresh view counts
 export const revalidate = 300;
 
+interface HomePageProps {
+  searchParams: Promise<{
+    q?: string;
+  }>;
+}
+
 // Server component that loads data
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: HomePageProps) {
+  // Extract and sanitize search query from URL
+  const resolvedParams = await searchParams;
+  const initialSearchQuery = resolvedParams.q || '';
+
   // Load all content server-side for better SEO and initial page load
+  // Also load weekly featured content by category (replaces static alphabetical featured)
   const [
     rulesData,
     mcpData,
@@ -38,6 +53,7 @@ export default async function HomePage() {
     hooksData,
     statuslinesData,
     collectionsData,
+    featuredByCategory,
   ] = await Promise.all([
     lazyContentLoaders.rules(),
     lazyContentLoaders.mcp(),
@@ -46,35 +62,36 @@ export default async function HomePage() {
     lazyContentLoaders.hooks(),
     lazyContentLoaders.statuslines(),
     lazyContentLoaders.collections(),
+    featuredLoaderService.loadCurrentFeaturedContentByCategory(),
   ]);
 
-  // Enrich with view counts from Redis
+  // Enrich with view and copy counts from Redis (parallel batch operation)
   const [rules, mcp, agents, commands, hooks, statuslines, collections] = await Promise.all([
-    statsRedis.enrichWithViewCounts(
+    statsRedis.enrichWithAllCounts(
       rulesData.map((item: RuleMetadata) => ({ ...item, category: 'rules' as const }))
     ),
-    statsRedis.enrichWithViewCounts(
+    statsRedis.enrichWithAllCounts(
       mcpData.map((item: McpMetadata) => ({ ...item, category: 'mcp' as const }))
     ),
-    statsRedis.enrichWithViewCounts(
+    statsRedis.enrichWithAllCounts(
       agentsData.map((item: AgentMetadata) => ({ ...item, category: 'agents' as const }))
     ),
-    statsRedis.enrichWithViewCounts(
+    statsRedis.enrichWithAllCounts(
       commandsData.map((item: CommandMetadata) => ({
         ...item,
         category: 'commands' as const,
       }))
     ),
-    statsRedis.enrichWithViewCounts(
+    statsRedis.enrichWithAllCounts(
       hooksData.map((item: HookMetadata) => ({ ...item, category: 'hooks' as const }))
     ),
-    statsRedis.enrichWithViewCounts(
+    statsRedis.enrichWithAllCounts(
       statuslinesData.map((item: StatuslineMetadata) => ({
         ...item,
         category: 'statuslines' as const,
       }))
     ),
-    statsRedis.enrichWithViewCounts(
+    statsRedis.enrichWithAllCounts(
       collectionsData.map((item: CollectionMetadata) => ({
         ...item,
         category: 'collections' as const,
@@ -115,41 +132,66 @@ export default async function HomePage() {
 
   return (
     <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
-      {/* Static Hero Section - Server Rendered */}
-      <section
-        className={`relative overflow-hidden ${UI_CLASSES.BORDER_B} border-border/50`}
-        aria-label="Homepage hero"
-      >
-        <div className={`relative container ${UI_CLASSES.MX_AUTO} px-4 py-10 sm:py-16 lg:py-24`}>
-          <div className={`text-center ${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 text-foreground tracking-tight">
-              The home for Claude enthusiasts
-            </h1>
-
-            <p
-              className={`text-base sm:text-lg lg:text-xl text-muted-foreground ${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO}`}
-            >
-              Discover and share the best Claude configurations. Explore expert rules, browse
-              powerful MCP servers, find specialized agents and commands, discover automation hooks,
-              and connect with the community building the future of AI.
-            </p>
-          </div>
+      {/* Hero + Search Section */}
+      <div className="relative overflow-hidden">
+        {/* Meteors Background Layer - Constrained to viewport height */}
+        <div className="absolute inset-0 max-h-screen pointer-events-none z-[1]">
+          <Meteors
+            number={20}
+            minDelay={0}
+            maxDelay={3}
+            minDuration={3}
+            maxDuration={8}
+            angle={35}
+          />
         </div>
-      </section>
 
-      {/* Client Component for Interactive Features */}
-      <HomePageClient
-        initialData={initialData}
-        stats={{
-          rules: rules.length,
-          mcp: mcp.length,
-          agents: agents.length,
-          commands: commands.length,
-          hooks: hooks.length,
-          statuslines: statuslines.length,
-          collections: collections.length,
-        }}
-      />
+        {/* Static Hero Section - Server Rendered */}
+        <section
+          className={`relative ${UI_CLASSES.Z_10} ${UI_CLASSES.BORDER_B} border-border/50`}
+          aria-label="Homepage hero"
+        >
+          {/* Content Layer - Above meteors */}
+          <div className={`relative container ${UI_CLASSES.MX_AUTO} px-4 py-10 sm:py-16 lg:py-24`}>
+            <div className={`text-center ${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
+              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 text-foreground tracking-tight">
+                The home for Claude{' '}
+                <RollingText
+                  words={['enthusiasts', 'developers', 'power users', 'beginners', 'builders']}
+                  duration={3000}
+                  className="text-accent"
+                />
+              </h1>
+
+              <p
+                className={`text-base sm:text-lg lg:text-xl text-muted-foreground ${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO}`}
+              >
+                Discover and share the best Claude configurations. Explore expert rules, browse
+                powerful MCP servers, find specialized agents and commands, discover automation
+                hooks, and connect with the community building the future of AI.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Client Component for Interactive Features (Search, etc) */}
+        <div className={`relative ${UI_CLASSES.Z_10}`}>
+          <HomePageClient
+            initialData={initialData}
+            initialSearchQuery={initialSearchQuery}
+            featuredByCategory={featuredByCategory as Record<string, UnifiedContentItem[]>}
+            stats={{
+              rules: rules.length,
+              mcp: mcp.length,
+              agents: agents.length,
+              commands: commands.length,
+              hooks: hooks.length,
+              statuslines: statuslines.length,
+              collections: collections.length,
+            }}
+          />
+        </div>
+      </div>
 
       {/* Email CTA - Moved to bottom of page */}
       <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>

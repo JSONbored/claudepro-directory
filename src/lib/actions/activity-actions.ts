@@ -156,8 +156,8 @@ export const getActivityTimeline = rateLimitedAction
               type: 'post',
               title: post.title,
               url: post.url,
-              vote_count: post.vote_count,
-              comment_count: post.comment_count,
+              vote_count: post.vote_count ?? 0,
+              comment_count: post.comment_count ?? 0,
               created_at: post.created_at,
             })
           )

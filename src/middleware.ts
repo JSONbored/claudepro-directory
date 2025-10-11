@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
+import { buildRateLimitConfig, isLLMsTxtRoute } from '@/src/lib/middleware/rate-limit-rules';
 import { rateLimiters } from '@/src/lib/rate-limiter';
 import { env, securityConfig } from '@/src/lib/schemas/env.schema';
 
@@ -23,8 +24,18 @@ import {
 } from '@/src/lib/schemas/middleware.schema';
 
 // Initialize Arcjet with comprehensive security rules
+// SECURITY: Require ARCJET_KEY in production for LIVE mode protection
+// DEVELOPMENT: Allow DRY_RUN mode without key (Arcjet SDK handles gracefully)
+if (isProduction && !securityConfig.arcjetKey) {
+  throw new Error(
+    'ARCJET_KEY is required for security middleware in production (LIVE mode requires valid key)'
+  );
+}
+
+// DRY_RUN mode (development): Arcjet performs rule evaluation but doesn't enforce blocks
+// LIVE mode (production): Full enforcement requires valid key
 const aj = arcjet({
-  key: securityConfig.arcjetKey!,
+  key: securityConfig.arcjetKey || 'ak_dry_run_placeholder', // Placeholder for DRY_RUN mode
   // In development, Arcjet uses 127.0.0.1 when no real IP is available - this is expected behavior
   rules: [
     // Shield WAF - protect against common attacks
@@ -214,35 +225,19 @@ async function applyEndpointRateLimit(
   // Classify the API endpoint type
   const endpointType: ApiEndpointType = classifyApiEndpoint(pathname, request.method);
 
-  // Define route-specific rate limiting rules
-  const rateLimit = {
-    // Cache warming endpoint - admin operations (extremely restrictive)
-    '/api/cache/warm': rateLimiters.admin, // 5 requests per hour
-
-    // All configurations endpoint - heavy dataset (moderate restrictions)
-    '/api/all-configurations.json': rateLimiters.heavyApi, // 50 requests per 15 minutes
-
-    // Trending guides endpoint - moderate usage (balanced restrictions)
-    '/api/guides/trending': rateLimiters.heavyApi, // 50 requests per 15 minutes
-
-    // Individual content type APIs - standard usage (generous)
-    '/api/agents.json': rateLimiters.api, // 1000 requests per hour
-    '/api/mcp.json': rateLimiters.api,
-    '/api/rules.json': rateLimiters.api,
-    '/api/commands.json': rateLimiters.api,
-    '/api/hooks.json': rateLimiters.api,
-    '/api/statuslines.json': rateLimiters.api,
-    '/api/collections.json': rateLimiters.api,
-  };
+  // Use centralized rate limit configuration
+  const rateLimitConfig = buildRateLimitConfig(rateLimiters);
 
   // Check for exact path matches first
-  if (pathname in rateLimit) {
-    const limiter = rateLimit[pathname as keyof typeof rateLimit];
-    return limiter.middleware(request);
+  if (pathname in rateLimitConfig) {
+    const limiter = rateLimitConfig[pathname];
+    if (limiter) {
+      return limiter.middleware(request);
+    }
   }
 
   // LLMs.txt routes - moderate rate limiting to prevent scraping abuse
-  if (pathname === '/llms.txt' || pathname.endsWith('/llms.txt')) {
+  if (isLLMsTxtRoute(pathname)) {
     return rateLimiters.llmstxt.middleware(request);
   }
 
@@ -450,7 +445,26 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    // User is authenticated - continue
+    // User is authenticated - check if session needs refresh
+    // Refresh tokens that expire within 1 hour to prevent unexpected logouts
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (session?.expires_at) {
+      const expiresIn = session.expires_at - Math.floor(Date.now() / 1000);
+
+      if (expiresIn < 3600) {
+        // Less than 1 hour until expiration - refresh the session
+        logger.debug('Refreshing session (expires soon)', {
+          userId: user.id,
+          expiresIn: `${expiresIn}s`,
+        });
+
+        await supabase.auth.refreshSession();
+      }
+    }
+
     logger.debug('Authenticated request to account page', {
       userId: user.id,
       path: sanitizePathForLogging(pathname),
@@ -617,13 +631,14 @@ export const config = {
      * - favicon.ico (favicon file)
      * - robots.txt (robots file)
      * - sitemap.xml (sitemap file)
-     * - manifest.json (PWA manifest)
+     * - manifest.json|manifest.webmanifest (PWA manifest)
      * - .well-known (well-known files for verification)
      * - /js/ (public JavaScript files)
      * - /scripts/ (public script files - service workers, etc.)
      * - /css/ (public CSS files)
+     * - 863ad0a5c1124f59a060aa77f0861518.txt (IndexNow key file)
      * - *.png, *.jpg, *.jpeg, *.gif, *.webp, *.svg, *.ico (image files)
      */
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.json|\\.well-known|js/|scripts/|css/|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest\\.json|manifest\\.webmanifest|\\.well-known|js/|scripts/|css/|863ad0a5c1124f59a060aa77f0861518\\.txt|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
   ],
 };

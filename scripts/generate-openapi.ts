@@ -23,6 +23,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { logger } from '../src/lib/logger.js';
 import { generateOpenAPISpec, type OpenAPISpec } from '../src/lib/openapi/spec';
 
 // Get current directory in ES module
@@ -73,53 +74,49 @@ function validateOpenAPISpec(spec: OpenAPISpec): void {
  * Main generation function
  */
 async function main(): Promise<void> {
-  console.log('🔨 Generating OpenAPI 3.1 specification...\n');
+  logger.progress('Generating OpenAPI 3.1 specification...');
 
   try {
     // Ensure public directory exists
     await mkdir(PUBLIC_DIR, { recursive: true });
 
     // Generate OpenAPI spec
-    console.log('📝 Generating spec from Zod schemas...');
+    logger.progress('Generating spec from Zod schemas...');
     const spec = generateOpenAPISpec();
 
     // Validate spec
-    console.log('✅ Validating OpenAPI spec structure...');
+    logger.progress('Validating OpenAPI spec structure...');
     validateOpenAPISpec(spec);
 
     // Count endpoints
     const endpointCount = Object.keys(spec.paths || {}).length;
     const tagCount = spec.tags?.length || 0;
 
-    console.log('\n📊 Spec Statistics:');
-    console.log(`   - OpenAPI version: ${spec.openapi}`);
-    console.log(`   - API title: ${spec.info.title}`);
-    console.log(`   - API version: ${spec.info.version}`);
-    console.log(`   - Endpoints: ${endpointCount}`);
-    console.log(`   - Tags: ${tagCount}`);
-    console.log(`   - Servers: ${spec.servers?.length || 0}`);
+    logger.log('Spec Statistics:', {
+      openapi_version: spec.openapi,
+      api_title: spec.info.title,
+      api_version: spec.info.version,
+      endpoints: endpointCount,
+      tags: tagCount,
+      servers: spec.servers?.length || 0,
+    });
 
     // Convert to JSON with pretty-printing
-    console.log('\n📄 Writing OpenAPI spec to disk...');
+    logger.progress('Writing OpenAPI spec to disk...');
     const specJSON = JSON.stringify(spec, null, 2);
 
     // Write spec to public directory
     await writeFile(OUTPUT_FILE, specJSON, 'utf-8');
 
-    console.log('✨ OpenAPI spec generated successfully!');
-    console.log(`   File: ${OUTPUT_FILE}`);
-    console.log(`   Size: ${(specJSON.length / 1024).toFixed(2)} KB`);
-
-    console.log('\n✅ OpenAPI generation complete!\n');
+    logger.success('OpenAPI spec generated successfully', {
+      file: OUTPUT_FILE,
+      size_kb: (specJSON.length / 1024).toFixed(2),
+    });
   } catch (error) {
-    console.error('\n❌ OpenAPI generation failed:\n');
-
-    if (error instanceof Error) {
-      console.error(`   Error: ${error.message}`);
-      console.error(`   Stack: ${error.stack}`);
-    } else {
-      console.error(`   Unknown error: ${String(error)}`);
-    }
+    logger.failure('OpenAPI generation failed', undefined, {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
 
     process.exit(1);
   }
@@ -127,6 +124,6 @@ async function main(): Promise<void> {
 
 // Run the script
 main().catch((error) => {
-  console.error('Fatal error:', error);
+  logger.failure(`Fatal error: ${error instanceof Error ? error.message : String(error)}`);
   process.exit(1);
 });

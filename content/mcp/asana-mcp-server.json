@@ -76,10 +76,30 @@
     }
   ],
   "examples": [
-    "Create a task for the new feature",
-    "Show all tasks due this week",
-    "Update project status to on-track",
-    "Assign task to team member"
+    {
+      "title": "Create a task for the new feature",
+      "code": "Ask Claude: \"Create a task for the new feature\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Show all tasks due this week",
+      "code": "Ask Claude: \"Show all tasks due this week\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Update project status to on-track",
+      "code": "Ask Claude: \"Update project status to on-track\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Assign task to team member",
+      "code": "Ask Claude: \"Assign task to team member\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "create"],

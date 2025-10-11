@@ -45,24 +45,74 @@ export const createJob = rateLimitedAction
       throw new Error('You must be signed in to create a job listing');
     }
 
-    // Insert job
-    const { data, error } = await supabase
-      .from('jobs')
-      .insert({
-        user_id: user.id,
-        ...parsedInput,
-        // For free tier, activate immediately if standard plan
-        active: parsedInput.plan === 'standard',
-        status: parsedInput.plan === 'standard' ? 'active' : 'draft',
-        posted_at: parsedInput.plan === 'standard' ? new Date().toISOString() : null,
-        // Set expiry to 30 days for standard, null for paid (manual activation)
-        expires_at:
-          parsedInput.plan === 'standard'
-            ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-            : null,
-      })
-      .select()
-      .single();
+    // Insert job - build object conditionally to handle exactOptionalPropertyTypes
+    // Generate slug from title (database requires slug)
+    const generatedSlug = parsedInput.title
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .substring(0, 100);
+
+    const insertData: {
+      user_id: string;
+      title: string;
+      slug: string;
+      company: string;
+      location?: string | null;
+      description: string;
+      salary?: string | null;
+      remote: boolean;
+      type: string;
+      workplace?: string | null;
+      experience?: string | null;
+      category: string;
+      tags: string[];
+      requirements: string[];
+      benefits: string[];
+      link: string;
+      contact_email?: string | null;
+      company_logo?: string | null;
+      company_id?: string | null;
+      plan: string;
+      active: boolean;
+      status: string;
+      posted_at: string | null;
+      expires_at: string | null;
+    } = {
+      user_id: user.id,
+      title: parsedInput.title,
+      slug: generatedSlug,
+      company: parsedInput.company,
+      description: parsedInput.description,
+      remote: parsedInput.remote,
+      type: parsedInput.type,
+      category: parsedInput.category,
+      tags: parsedInput.tags,
+      requirements: parsedInput.requirements,
+      benefits: parsedInput.benefits,
+      link: parsedInput.link,
+      plan: parsedInput.plan,
+      // For free tier, activate immediately if standard plan
+      active: parsedInput.plan === 'standard',
+      status: parsedInput.plan === 'standard' ? 'active' : 'draft',
+      posted_at: parsedInput.plan === 'standard' ? new Date().toISOString() : null,
+      // Set expiry to 30 days for standard, null for paid (manual activation)
+      expires_at:
+        parsedInput.plan === 'standard'
+          ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+          : null,
+    };
+
+    if (parsedInput.location !== undefined) insertData.location = parsedInput.location;
+    if (parsedInput.salary !== undefined) insertData.salary = parsedInput.salary;
+    if (parsedInput.workplace !== undefined) insertData.workplace = parsedInput.workplace;
+    if (parsedInput.experience !== undefined) insertData.experience = parsedInput.experience;
+    if (parsedInput.contact_email !== undefined)
+      insertData.contact_email = parsedInput.contact_email;
+    if (parsedInput.company_logo !== undefined) insertData.company_logo = parsedInput.company_logo;
+    if (parsedInput.company_id !== undefined) insertData.company_id = parsedInput.company_id;
+
+    const { data, error } = await supabase.from('jobs').insert(insertData).select().single();
 
     if (error) {
       throw new Error(error.message);
@@ -104,10 +154,15 @@ export const updateJob = rateLimitedAction
 
     const { id, ...updates } = parsedInput;
 
+    // Filter out undefined values to avoid exactOptionalPropertyTypes issues
+    const updateData = Object.fromEntries(
+      Object.entries(updates).filter(([_, value]) => value !== undefined)
+    );
+
     // Update job (RLS ensures user owns this job)
     const { data, error } = await supabase
       .from('jobs')
-      .update(updates)
+      .update(updateData)
       .eq('id', id)
       .eq('user_id', user.id) // Double-check ownership
       .select()

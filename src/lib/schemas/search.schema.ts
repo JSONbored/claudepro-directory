@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
 import { nonNegativeInt, percentage, positiveInt } from './primitives/base-numbers';
 import { mediumString, nonEmptyString, shortString } from './primitives/base-strings';
+import { stringToBoolean, trimOptionalString } from './primitives/sanitization-transforms';
 
 /**
  * Searchable item schema for search cache
@@ -115,7 +116,7 @@ const searchQuerySchema = z
     q: z
       .string()
       .optional()
-      .transform((val) => val?.trim())
+      .transform(trimOptionalString)
       .refine((val) => !val || val.length >= 2, 'Search query must be at least 2 characters')
       .refine((val) => !val || val.length <= 200, 'Search query is too long')
       .transform((val) => {
@@ -131,7 +132,7 @@ const searchQuerySchema = z
     query: z
       .string()
       .optional()
-      .transform((val) => val?.trim())
+      .transform(trimOptionalString)
       .refine((val) => !val || val.length >= 2, 'Search query must be at least 2 characters')
       .refine((val) => !val || val.length <= 200, 'Search query is too long')
       .transform((val) => {
@@ -147,7 +148,7 @@ const searchQuerySchema = z
     search: z
       .string()
       .optional()
-      .transform((val) => val?.trim())
+      .transform(trimOptionalString)
       .refine((val) => !val || val.length >= 2, 'Search term must be at least 2 characters')
       .refine((val) => !val || val.length <= 200, 'Search term is too long')
       .transform((val) => {
@@ -297,7 +298,7 @@ const filterSchema = z
         z.boolean().describe('Featured flag as boolean'),
         z
           .string()
-          .transform((val) => val.toLowerCase() === 'true')
+          .transform(stringToBoolean)
           .describe('Featured flag as string converted to boolean'),
         z
           .literal('true')
@@ -316,7 +317,7 @@ const filterSchema = z
         z.boolean().describe('Trending flag as boolean'),
         z
           .string()
-          .transform((val) => val.toLowerCase() === 'true')
+          .transform(stringToBoolean)
           .describe('Trending flag as string converted to boolean'),
         z
           .literal('true')
@@ -357,17 +358,14 @@ export const jobsSearchSchema = searchAPIParamsSchema
     location: z
       .string()
       .optional()
-      .transform((val) => val?.trim())
+      .transform(trimOptionalString)
       .refine((val) => !val || val.length <= 100, 'Location is too long')
       .describe('Job location filter, max 100 characters'),
 
     remote: z
       .union([
         z.boolean().describe('Remote flag as boolean'),
-        z
-          .string()
-          .transform((val) => val.toLowerCase() === 'true')
-          .describe('Remote flag as string'),
+        z.string().transform(stringToBoolean).describe('Remote flag as string'),
       ])
       .optional()
       .describe('Filter for remote jobs only'),

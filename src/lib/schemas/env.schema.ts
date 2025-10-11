@@ -118,6 +118,13 @@ const serverEnvSchema = z
       .optional()
       .describe('Secret key for webhook signature validation (minimum 32 characters)'),
 
+    // Cron job security
+    CRON_SECRET: z
+      .string()
+      .min(32)
+      .optional()
+      .describe('Secret key for cron job authorization (minimum 32 characters)'),
+
     // Email provider (Resend)
     RESEND_API_KEY: nonEmptyString
       .optional()
@@ -244,6 +251,7 @@ const productionRequiredEnvs = [
   'CACHE_WARM_AUTH_TOKEN', // Cache warming authorization
   'VIEW_COUNT_SALT', // Secure view count generation
   'WEBHOOK_SECRET', // Webhook signature validation
+  'CRON_SECRET', // Cron job authorization
 ] as const;
 
 /**

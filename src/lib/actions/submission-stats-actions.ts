@@ -127,27 +127,50 @@ export const getRecentMerged = rateLimitedAction
           if (error) throw error;
 
           // Define type for Supabase query result with joined users table
-          type SubmissionWithUser = {
+          type SubmissionWithMergedAt = {
             id: string;
             content_name: string;
-            content_type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines';
+            content_type: string;
             merged_at: string;
-            users: { name: string; slug: string }[] | null;
+            users: { name: string | null; slug: string | null };
           };
 
           // Transform to match schema
-          const transformed: RecentMerged[] = (data || []).map((item: SubmissionWithUser) => ({
-            id: item.id,
-            content_name: item.content_name,
-            content_type: item.content_type,
-            merged_at: item.merged_at,
-            user: item.users?.[0]
-              ? {
-                  name: item.users[0].name,
-                  slug: item.users[0].slug,
-                }
-              : null,
-          }));
+          // Cast is safe because we filter by .not('merged_at', 'is', null) in query
+          const transformed: RecentMerged[] = ((data || []) as SubmissionWithMergedAt[]).map(
+            (item) => {
+              const validContentType = [
+                'agents',
+                'mcp',
+                'rules',
+                'commands',
+                'hooks',
+                'statuslines',
+              ].includes(item.content_type)
+                ? (item.content_type as
+                    | 'agents'
+                    | 'mcp'
+                    | 'rules'
+                    | 'commands'
+                    | 'hooks'
+                    | 'statuslines')
+                : 'agents';
+
+              return {
+                id: item.id,
+                content_name: item.content_name,
+                content_type: validContentType,
+                merged_at: item.merged_at,
+                user:
+                  item.users?.name && item.users?.slug
+                    ? {
+                        name: item.users.name,
+                        slug: item.users.slug,
+                      }
+                    : null,
+              };
+            }
+          );
 
           return transformed;
         } catch (error) {
@@ -202,12 +225,12 @@ export const getTopContributors = rateLimitedAction
 
           // Define type for Supabase query result with joined users table
           type TopContributorSubmission = {
-            users: { name: string; slug: string }[] | null;
+            users: { name: string | null; slug: string | null };
           };
 
           for (const submission of data || []) {
-            const user = (submission as TopContributorSubmission).users?.[0];
-            if (!user) continue;
+            const user = (submission as TopContributorSubmission).users;
+            if (!(user?.name && user?.slug)) continue;
 
             const existing = userCounts.get(user.slug) || {
               name: user.name,

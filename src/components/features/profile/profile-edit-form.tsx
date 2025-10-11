@@ -38,7 +38,15 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const [work, setWork] = useState(profile.work || '');
   const [website, setWebsite] = useState(profile.website || '');
   const [socialXLink, setSocialXLink] = useState(profile.social_x_link || '');
-  const [interests, setInterests] = useState<string[]>(profile.interests || []);
+  const [interests, setInterests] = useState<string[]>(() => {
+    if (
+      Array.isArray(profile.interests) &&
+      profile.interests.every((item): item is string => typeof item === 'string')
+    ) {
+      return profile.interests;
+    }
+    return [];
+  });
   const [newInterest, setNewInterest] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -237,7 +245,12 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
               setWork(profile.work || '');
               setWebsite(profile.website || '');
               setSocialXLink(profile.social_x_link || '');
-              setInterests(profile.interests || []);
+              setInterests(
+                Array.isArray(profile.interests) &&
+                  profile.interests.every((item): item is string => typeof item === 'string')
+                  ? profile.interests
+                  : []
+              );
               setHasChanges(false);
             }}
           >

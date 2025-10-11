@@ -15,8 +15,9 @@ import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
-  title: 'Sponsorships - ClaudePro Directory',
+  title: 'Sponsorships - Claude Pro Directory',
   description: 'Manage your sponsored content and view analytics',
+  robots: { index: false, follow: false },
 };
 
 export default async function SponsorshipsPage() {
@@ -65,14 +66,14 @@ export default async function SponsorshipsPage() {
             new Date(sponsorship.start_date) <= new Date() &&
             new Date(sponsorship.end_date) >= new Date();
 
+          const impressionCount = sponsorship.impression_count ?? 0;
+          const clickCount = sponsorship.click_count ?? 0;
+
           const hasHitLimit =
-            sponsorship.impression_limit &&
-            sponsorship.impression_count >= sponsorship.impression_limit;
+            sponsorship.impression_limit && impressionCount >= sponsorship.impression_limit;
 
           const ctr =
-            sponsorship.impression_count > 0
-              ? ((sponsorship.click_count / sponsorship.impression_count) * 100).toFixed(2)
-              : '0.00';
+            impressionCount > 0 ? ((clickCount / impressionCount) * 100).toFixed(2) : '0.00';
 
           return (
             <Card key={sponsorship.id}>
@@ -123,9 +124,7 @@ export default async function SponsorshipsPage() {
                       <Eye className="h-3 w-3" />
                       Impressions
                     </div>
-                    <div className="text-2xl font-bold">
-                      {sponsorship.impression_count.toLocaleString()}
-                    </div>
+                    <div className="text-2xl font-bold">{impressionCount.toLocaleString()}</div>
                     {sponsorship.impression_limit && (
                       <div className={UI_CLASSES.TEXT_XS_MUTED}>
                         of {sponsorship.impression_limit.toLocaleString()}
@@ -140,9 +139,7 @@ export default async function SponsorshipsPage() {
                       <MousePointer className="h-3 w-3" />
                       Clicks
                     </div>
-                    <div className="text-2xl font-bold">
-                      {sponsorship.click_count.toLocaleString()}
-                    </div>
+                    <div className="text-2xl font-bold">{clickCount.toLocaleString()}</div>
                   </div>
 
                   <div>
@@ -162,7 +159,7 @@ export default async function SponsorshipsPage() {
                     <div
                       className="bg-primary h-2 rounded-full transition-all"
                       style={{
-                        width: `${Math.min(100, (sponsorship.impression_count / sponsorship.impression_limit) * 100)}%`,
+                        width: `${Math.min(100, (impressionCount / sponsorship.impression_limit) * 100)}%`,
                       }}
                     />
                   </div>

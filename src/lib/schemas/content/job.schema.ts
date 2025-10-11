@@ -142,7 +142,7 @@ export const jobContentSchema = jobDatabaseSchema.transform((data) => ({
   description: data.description,
   category: data.category,
   author: data.company, // Company name as author
-  dateAdded: data.created_at.split('T')[0]!, // ISO date string
+  dateAdded: data.created_at.substring(0, 10), // ISO date string (YYYY-MM-DD)
   tags: data.tags,
   title: data.title,
   company: data.company,

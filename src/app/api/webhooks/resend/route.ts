@@ -18,6 +18,7 @@
 
 import { type NextRequest, NextResponse } from 'next/server';
 import { Webhook } from 'svix';
+import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 import { rateLimiters } from '@/src/lib/rate-limiter';
 import { env } from '@/src/lib/schemas/env.schema';
@@ -39,13 +40,16 @@ export async function POST(request: NextRequest) {
 
   // Verify required headers are present
   if (!(svixId && svixTimestamp && svixSignature)) {
-    logger.warn('Webhook request missing Svix headers', {
+    logger.warn('Webhook request missing Svix headers', undefined, {
       hasSvixId: !!svixId,
       hasSvixTimestamp: !!svixTimestamp,
       hasSvixSignature: !!svixSignature,
     });
-    return new Response('Bad Request: Missing signature headers', {
-      status: 400,
+    return handleApiError(new Error('Missing signature headers'), {
+      route: '/api/webhooks/resend',
+      method: 'POST',
+      operation: 'webhook_signature_validation',
+      customMessage: 'Bad Request: Missing signature headers',
     });
   }
 
@@ -55,8 +59,12 @@ export async function POST(request: NextRequest) {
   // Verify webhook signature using Svix
   const webhookSecret = env.RESEND_WEBHOOK_SECRET;
   if (!webhookSecret) {
-    logger.error('RESEND_WEBHOOK_SECRET not configured', new Error('Missing webhook secret'));
-    return new Response('Internal Server Error', { status: 500 });
+    return handleApiError(new Error('RESEND_WEBHOOK_SECRET not configured'), {
+      route: '/api/webhooks/resend',
+      method: 'POST',
+      operation: 'webhook_config_check',
+      logLevel: 'error',
+    });
   }
 
   const wh = new Webhook(webhookSecret);
@@ -69,23 +77,27 @@ export async function POST(request: NextRequest) {
       'svix-signature': svixSignature,
     }) as unknown;
   } catch (err) {
-    logger.error(
-      'Webhook signature verification failed',
-      err instanceof Error ? err : new Error(String(err)),
-      {
-        svixId,
-      }
-    );
-    return new Response('Unauthorized: Invalid signature', { status: 401 });
+    return handleApiError(err instanceof Error ? err : new Error(String(err)), {
+      route: '/api/webhooks/resend',
+      method: 'POST',
+      operation: 'webhook_signature_verification',
+      customMessage: 'Unauthorized: Invalid signature',
+      logContext: { svixId },
+      logLevel: 'error',
+    });
   }
 
   // Parse and validate webhook payload
   const validatedEvent = resendWebhookEventSchema.safeParse(payload);
   if (!validatedEvent.success) {
-    logger.error('Invalid webhook payload schema', validatedEvent.error, {
-      svixId,
+    return handleApiError(validatedEvent.error, {
+      route: '/api/webhooks/resend',
+      method: 'POST',
+      operation: 'webhook_payload_validation',
+      customMessage: 'Bad Request: Invalid payload',
+      logContext: { svixId },
+      logLevel: 'error',
     });
-    return new Response('Bad Request: Invalid payload', { status: 400 });
   }
 
   const event = validatedEvent.data;

@@ -95,31 +95,63 @@ export async function findSimilarContent(
  * Used for fuzzy matching of slugs
  */
 function levenshteinDistance(str1: string, str2: string): number {
-  const matrix: number[][] = [];
+  // Initialize matrix with proper dimensions - create 2D array filled with zeros
+  const matrix: number[][] = Array.from({ length: str2.length + 1 }, () =>
+    Array.from({ length: str1.length + 1 }, () => 0)
+  );
 
+  // Helper to safely get matrix value with bounds checking
+  const getCell = (i: number, j: number): number => {
+    const row = matrix[i];
+    if (!row) {
+      throw new Error(`Matrix row ${i} undefined - bounds: 0-${str2.length}`);
+    }
+    const value = row[j];
+    if (value === undefined) {
+      throw new Error(`Matrix cell [${i}][${j}] undefined - bounds: 0-${str1.length}`);
+    }
+    return value;
+  };
+
+  // Helper to safely set matrix value with bounds checking
+  const setCell = (i: number, j: number, value: number): void => {
+    const row = matrix[i];
+    if (!row) {
+      throw new Error(`Matrix row ${i} undefined - bounds: 0-${str2.length}`);
+    }
+    row[j] = value;
+  };
+
+  // Initialize first column
   for (let i = 0; i <= str2.length; i++) {
-    matrix[i] = [i];
+    setCell(i, 0, i);
   }
 
+  // Initialize first row
   for (let j = 0; j <= str1.length; j++) {
-    matrix[0]![j] = j;
+    setCell(0, j, j);
   }
 
+  // Fill in the rest of the matrix
   for (let i = 1; i <= str2.length; i++) {
     for (let j = 1; j <= str1.length; j++) {
       if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-        matrix[i]![j] = matrix[i - 1]![j - 1]!;
+        setCell(i, j, getCell(i - 1, j - 1));
       } else {
-        matrix[i]![j] = Math.min(
-          matrix[i - 1]![j - 1]! + 1, // substitution
-          matrix[i]![j - 1]! + 1, // insertion
-          matrix[i - 1]![j]! + 1 // deletion
+        setCell(
+          i,
+          j,
+          Math.min(
+            getCell(i - 1, j - 1) + 1, // substitution
+            getCell(i, j - 1) + 1, // insertion
+            getCell(i - 1, j) + 1 // deletion
+          )
         );
       }
     }
   }
 
-  return matrix[str2.length]![str1.length]!;
+  return getCell(str2.length, str1.length);
 }
 
 /**

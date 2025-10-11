@@ -242,7 +242,7 @@ export async function getFullContentBySlug(
 export async function getRelatedContent(
   category: string,
   currentSlug: string,
-  limit: number = 3
+  limit = 3
 ): Promise<UnifiedContentItem[]> {
   const allContent = await getContentByCategory(category);
 
