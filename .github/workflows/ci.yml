@@ -113,9 +113,6 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
             ${{ runner.os }}-nextjs-
 
-      - name: Generate sitemap
-        run: npm run generate:sitemap
-
       - name: Build project
         run: npm run build
         env:

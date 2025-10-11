@@ -8,6 +8,7 @@
  * never included in production bundle.
  *
  * **Key Features:**
+ * - MSW (Mock Service Worker) for API mocking
  * - Mock Next.js 15 navigation APIs (async headers, cookies)
  * - Mock Next.js Image and Link components
  * - Auto-cleanup after each test (prevents memory leaks)
@@ -18,8 +19,50 @@
  */
 
 import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
+import { server } from './mocks/server';
+import { toHaveNoViolations } from 'jest-axe';
+
+// =============================================================================
+// jest-axe Setup
+// =============================================================================
+
+/**
+ * Extend Vitest matchers with jest-axe
+ * Adds toHaveNoViolations() matcher for accessibility testing
+ */
+expect.extend(toHaveNoViolations);
+
+// =============================================================================
+// MSW Setup
+// =============================================================================
+
+/**
+ * Start MSW server before all tests
+ * Intercepts HTTP requests and provides mock responses
+ */
+beforeAll(() => {
+  server.listen({
+    onUnhandledRequest: 'warn', // Warn about unmocked requests
+  });
+});
+
+/**
+ * Reset MSW handlers after each test
+ * Ensures test isolation and prevents handler leakage
+ */
+afterEach(() => {
+  server.resetHandlers();
+});
+
+/**
+ * Close MSW server after all tests
+ * Clean shutdown of mock server
+ */
+afterAll(() => {
+  server.close();
+});
 
 // =============================================================================
 // Cleanup Hook

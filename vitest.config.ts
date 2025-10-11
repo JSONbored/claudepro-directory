@@ -40,9 +40,16 @@ export default defineConfig({
     setupFiles: ['./tests/setup.tsx'],
 
     // Test file patterns
+    // Supports both:
+    // - Collocated tests: src/**/__tests__/**/*.test.ts
+    // - Centralized tests: tests/unit/**/*.test.ts, tests/integration/**/*.test.ts
+    // - Factory tests: tests/factories/**/*.test.ts
     include: [
       'src/**/__tests__/**/*.{test,spec}.{js,ts,jsx,tsx}',
       'src/**/*.{test,spec}.{js,ts,jsx,tsx}',
+      'tests/unit/**/*.{test,spec}.{js,ts,jsx,tsx}',
+      'tests/integration/**/*.{test,spec}.{js,ts,jsx,tsx}',
+      'tests/factories/**/*.{test,spec}.{js,ts,jsx,tsx}',
     ],
 
     // Exclude patterns (production-safe)

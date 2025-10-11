@@ -51,10 +51,11 @@ jobs:
             http://localhost:3000/
             http://localhost:3000/agents
             http://localhost:3000/mcp
+            http://localhost:3000/commands
+            http://localhost:3000/submit
           uploadArtifacts: true
           temporaryPublicStorage: true
           runs: 3
-          configPath: ./config/tools/lighthouserc.json
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

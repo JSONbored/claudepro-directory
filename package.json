@@ -56,7 +56,17 @@
     "test:unit": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test --config=config/tools/playwright.config.ts",
+    "test:e2e:ui": "playwright test --config=config/tools/playwright.config.ts --ui",
+    "test:e2e:debug": "playwright test --config=config/tools/playwright.config.ts --debug",
+    "test:e2e:headed": "playwright test --config=config/tools/playwright.config.ts --headed",
+    "test:e2e:chromium": "playwright test --config=config/tools/playwright.config.ts --project=chromium",
+    "test:e2e:mobile": "playwright test --config=config/tools/playwright.config.ts --project=mobile-chrome",
+    "test:e2e:a11y": "playwright test --config=config/tools/playwright.config.ts --project=accessibility",
+    "test:e2e:report": "playwright show-report playwright-report",
+    "test:e2e:codegen": "playwright codegen http://localhost:3000",
+    "test:all": "npm run test:unit && npm run test:e2e"
   },
   "dependencies": {
     "@arcjet/next": "^1.0.0-beta.12",
@@ -126,18 +136,24 @@
     "zod": "^4.1.11"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
     "@biomejs/biome": "2.2.5",
+    "@faker-js/faker": "^10.0.0",
     "@lhci/cli": "^0.15.1",
     "@next/bundle-analyzer": "^15.5.4",
+    "@playwright/test": "^1.56.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@vitejs/plugin-react": "^5.0.4",
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
+    "fishery": "^2.3.1",
     "happy-dom": "^20.0.0",
+    "jest-axe": "^8.0.0",
     "knip": "^5.64.1",
     "lefthook": "^1.13.5",
+    "msw": "^2.11.5",
     "ultracite": "^5.4.6",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"

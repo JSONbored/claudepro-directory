@@ -15,16 +15,16 @@ module.exports = {
     collect: {
       // URLs to audit - add more critical pages as needed
       url: [
-        'http://localhost:3024', // Homepage
-        'http://localhost:3024/agents', // Agents category
-        'http://localhost:3024/mcp', // MCP Servers category
-        'http://localhost:3024/commands', // Commands category
-        'http://localhost:3024/submit', // Submit page
-        'http://localhost:3024/collections', // Collections
-        'http://localhost:3024/jobs', // Job board
-        'http://localhost:3024/community', // Community page
-        'http://localhost:3024/trending', // Trending
-        'http://localhost:3024/for-you', // Personalization
+        'http://localhost:3000', // Homepage
+        'http://localhost:3000/agents', // Agents category
+        'http://localhost:3000/mcp', // MCP Servers category
+        'http://localhost:3000/commands', // Commands category
+        'http://localhost:3000/submit', // Submit page
+        'http://localhost:3000/collections', // Collections
+        'http://localhost:3000/jobs', // Job board
+        'http://localhost:3000/community', // Community page
+        'http://localhost:3000/trending', // Trending
+        'http://localhost:3000/for-you', // Personalization
       ],
 
       // Run multiple times and take median to reduce variance
