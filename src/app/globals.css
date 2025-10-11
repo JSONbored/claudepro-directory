@@ -1240,6 +1240,48 @@
       color 300ms ease-in-out,
       box-shadow 300ms ease-in-out !important;
   }
+
+  /* ========================================
+     VIEW TRANSITIONS API - CIRCLE BLUR ANIMATION
+     Modern theme toggle animation for Chrome/Edge 111+
+     ======================================== */
+
+  /**
+   * Circle Blur Animation for Theme Toggle
+   *
+   * Creates a circular expanding reveal with blur effect
+   * - Animates from click position (set via --x, --y CSS variables)
+   * - Expands from 0% to 150% to cover entire viewport
+   * - Blur fades from 4px to 0 for smooth reveal
+   *
+   * Browser Support:
+   * - Chrome/Edge 111+: Full animation
+   * - Firefox/Safari: Graceful fallback (instant transition)
+   */
+  @supports (view-transition-name: root) {
+    /* Disable old view animation (fade out) */
+    ::view-transition-old(root) {
+      animation: none;
+      opacity: 0;
+    }
+
+    /* Animate new view with circle blur expansion */
+    ::view-transition-new(root) {
+      animation: circle-blur-expand 500ms ease-out;
+      /* Animation origin set dynamically via inline style */
+    }
+  }
+
+  @keyframes circle-blur-expand {
+    from {
+      clip-path: circle(0% at var(--x, 50%) var(--y, 50%));
+      filter: blur(4px);
+    }
+    to {
+      clip-path: circle(150% at var(--x, 50%) var(--y, 50%));
+      filter: blur(0);
+    }
+  }
 }
 
 /* ========================================

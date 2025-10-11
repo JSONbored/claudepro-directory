@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 **Latest Features:**
 
+- [Theme Toggle Animation & Navigation Polish](#2025-10-11---theme-toggle-animation-and-navigation-polish) - Smooth Circle Blur animation for theme switching, rounded navigation containers, enhanced mega-menu design
 - [Navigation & Announcement System](#2025-10-10---navigation-overhaul-and-announcement-system) - Configuration-driven navigation, ⌘K command palette, site-wide announcements, new indicators, enhanced accessibility
 - [Hero Section Animations](#2025-10-09---hero-section-animations-and-search-enhancements) - Meteor background effect, rolling text animation, enhanced search UI
 - [Card Grid Layout & Infinite Scroll](#2025-10-09---card-grid-layout-and-infinite-scroll-improvements) - CSS masonry layout, 95% spacing consistency, infinite scroll reliability
@@ -41,7 +42,63 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - [Reddit MCP Server](#2025-10-04---reddit-mcp-server-community-contribution) - Browse Reddit from Claude
 
-[View All Updates ↓](#2025-10-10---navigation-overhaul-and-announcement-system)
+[View All Updates ↓](#2025-10-11---theme-toggle-animation-and-navigation-polish)
+
+---
+
+## 2025-10-11 - Theme Toggle Animation and Navigation Polish
+
+**TL;DR:** Added smooth Circle Blur animation to theme switching using the View Transitions API, creating a delightful circular reveal effect from your click position. Enhanced navigation visual design with rounded containers, updated announcement banner styling, and refined mega-menu dropdown for improved aesthetics and user experience.
+
+### What Changed
+
+Elevated the visual polish of core UI elements with modern animations and refined styling. The theme toggle now features a smooth circular blur expansion animation that follows your cursor, making dark/light mode switching feel magical. Navigation components received styling updates for better visual hierarchy and consistency.
+
+### Added
+
+- **Circle Blur Theme Animation**
+  - Smooth circular reveal animation when switching between light and dark themes
+  - Animation expands from exact click position with blur fade effect
+  - Progressive enhancement: Full animation in Chrome/Edge 111+, instant transition in Firefox/Safari
+  - 500ms ease-out timing for natural, polished feel
+  - View Transitions API integration with automatic feature detection
+  - Reusable `useViewTransition` hook for future animations
+
+- **View Transitions Infrastructure**
+  - TypeScript type declarations for View Transitions API (`src/types/view-transitions.d.ts`)
+  - Reusable hook with browser support detection (`src/hooks/use-view-transition.ts`)
+  - Progressive enhancement pattern with graceful fallback
+  - Click position tracking for animation origin
+  - Keyboard accessibility (animation from element center)
+
+### Changed
+
+- **Theme Toggle Component** (`src/components/layout/theme-toggle.tsx`)
+  - Enhanced with View Transitions API for smooth theme switching
+  - Click position tracking for natural animation flow
+  - Maintains localStorage persistence and accessibility
+  - Works seamlessly with existing Switch component
+
+- **Navigation Visual Design** (`src/components/layout/navigation.tsx`)
+  - Added rounded containers with border styling
+  - Enhanced spacing and padding for better visual balance
+  - Refined mega-menu dropdown with improved grouping
+  - Updated announcement banner styling for consistency
+
+- **Announcement Banner** (`src/components/layout/announcement-banner.tsx`)
+  - Refined styling to match rounded navigation design
+  - Improved visual hierarchy and spacing
+  - Enhanced dismissal button positioning
+
+### User Experience
+
+When you toggle between light and dark themes, you'll notice:
+- A smooth circular expansion that follows your cursor
+- Subtle blur effect that creates depth during transition
+- Natural, polished animation that feels responsive and delightful
+- Zero disruption if your browser doesn't support the animation
+
+The navigation now has a more cohesive, modern appearance with refined spacing and rounded corners that complement the overall design system.
 
 ---
 
