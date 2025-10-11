@@ -12,6 +12,8 @@ import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders
 import { Meteors } from '@/src/components/ui/magic/meteors';
 import { RollingText } from '@/src/components/ui/magic/rolling-text';
 import { statsRedis } from '@/src/lib/redis';
+import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import { featuredLoaderService } from '@/src/lib/services/featured-loader.service';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { transformForHomePage } from '@/src/lib/utils/transformers';
 
@@ -42,6 +44,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const initialSearchQuery = resolvedParams.q || '';
 
   // Load all content server-side for better SEO and initial page load
+  // Also load weekly featured content by category (replaces static alphabetical featured)
   const [
     rulesData,
     mcpData,
@@ -50,6 +53,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     hooksData,
     statuslinesData,
     collectionsData,
+    featuredByCategory,
   ] = await Promise.all([
     lazyContentLoaders.rules(),
     lazyContentLoaders.mcp(),
@@ -58,6 +62,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     lazyContentLoaders.hooks(),
     lazyContentLoaders.statuslines(),
     lazyContentLoaders.collections(),
+    featuredLoaderService.loadCurrentFeaturedContentByCategory(),
   ]);
 
   // Enrich with view and copy counts from Redis (parallel batch operation)
@@ -174,6 +179,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <HomePageClient
             initialData={initialData}
             initialSearchQuery={initialSearchQuery}
+            featuredByCategory={featuredByCategory as Record<string, UnifiedContentItem[]>}
             stats={{
               rules: rules.length,
               mcp: mcp.length,

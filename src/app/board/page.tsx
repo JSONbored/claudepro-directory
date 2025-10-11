@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { Avatar, AvatarFallback } from '@/src/components/ui/avatar';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
@@ -151,6 +152,16 @@ export default async function BoardPage() {
             ))}
           </div>
         )}
+      </section>
+
+      {/* Email CTA - Footer section (matching homepage pattern) */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <InlineEmailCTA
+          variant="hero"
+          context="board-page"
+          headline="Join 1,000+ Claude Power Users"
+          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+        />
       </section>
     </div>
   );

@@ -1219,6 +1219,134 @@ export type Database = {
           },
         ];
       };
+      featured_configs: {
+        Row: {
+          id: string;
+          content_type: string;
+          content_slug: string;
+          week_start: string;
+          week_end: string;
+          rank: number;
+          trending_score: number | null;
+          rating_score: number | null;
+          engagement_score: number | null;
+          freshness_score: number | null;
+          final_score: number;
+          calculation_metadata: Json | null;
+          calculated_at: string;
+        };
+        Insert: {
+          id?: string;
+          content_type: string;
+          content_slug: string;
+          week_start: string;
+          week_end: string;
+          rank: number;
+          trending_score?: number | null;
+          rating_score?: number | null;
+          engagement_score?: number | null;
+          freshness_score?: number | null;
+          final_score: number;
+          calculation_metadata?: Json | null;
+          calculated_at?: string;
+        };
+        Update: {
+          id?: string;
+          content_type?: string;
+          content_slug?: string;
+          week_start?: string;
+          week_end?: string;
+          rank?: number;
+          trending_score?: number | null;
+          rating_score?: number | null;
+          engagement_score?: number | null;
+          freshness_score?: number | null;
+          final_score?: number;
+          calculation_metadata?: Json | null;
+          calculated_at?: string;
+        };
+        Relationships: [];
+      };
+      review_ratings: {
+        Row: {
+          id: string;
+          user_id: string;
+          content_type: string;
+          content_slug: string;
+          rating: number;
+          review_text: string | null;
+          helpful_count: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          content_type: string;
+          content_slug: string;
+          rating: number;
+          review_text?: string | null;
+          helpful_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          content_type?: string;
+          content_slug?: string;
+          rating?: number;
+          review_text?: string | null;
+          helpful_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'review_ratings_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      review_helpful_votes: {
+        Row: {
+          id: string;
+          review_id: string;
+          user_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          review_id: string;
+          user_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          review_id?: string;
+          user_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'review_helpful_votes_review_id_fkey';
+            columns: ['review_id'];
+            isOneToOne: false;
+            referencedRelation: 'review_ratings';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'review_helpful_votes_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;

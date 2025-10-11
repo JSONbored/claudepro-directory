@@ -428,6 +428,33 @@ CREATE TABLE IF NOT EXISTS public.user_badges (
   UNIQUE(user_id, badge_id)
 );
 
+-- Featured Configs table
+-- Weekly curated featured content with multi-factor scoring
+-- Algorithm: trending_score * 0.4 + rating * 0.3 + engagement * 0.2 + freshness * 0.1
+CREATE TABLE IF NOT EXISTS public.featured_configs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  content_type TEXT NOT NULL CHECK (content_type IN ('agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections')),
+  content_slug TEXT NOT NULL,
+  week_start DATE NOT NULL, -- Monday of the week (e.g., 2025-10-07)
+  week_end DATE NOT NULL, -- Sunday of the week (e.g., 2025-10-13)
+  rank INTEGER NOT NULL CHECK (rank >= 1 AND rank <= 10), -- Top 10 featured per week
+
+  -- Score components (0-100 scale)
+  trending_score NUMERIC(5,2) DEFAULT 0 CHECK (trending_score >= 0 AND trending_score <= 100),
+  rating_score NUMERIC(5,2) DEFAULT 0 CHECK (rating_score >= 0 AND rating_score <= 100),
+  engagement_score NUMERIC(5,2) DEFAULT 0 CHECK (engagement_score >= 0 AND engagement_score <= 100),
+  freshness_score NUMERIC(5,2) DEFAULT 0 CHECK (freshness_score >= 0 AND freshness_score <= 100),
+
+  -- Final weighted score
+  final_score NUMERIC(5,2) NOT NULL CHECK (final_score >= 0 AND final_score <= 100),
+
+  -- Metadata for transparency
+  calculation_metadata JSONB DEFAULT '{}', -- { views: N, growth_rate: N, rating_avg: N, etc }
+  calculated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+
+  UNIQUE(content_type, content_slug, week_start)
+);
+
 -- =====================================================
 -- PERSONALIZATION ENGINE
 -- =====================================================
@@ -470,6 +497,32 @@ CREATE TABLE IF NOT EXISTS public.user_similarities (
   calculated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   UNIQUE(user_a_id, user_b_id),
   CHECK (user_a_id < user_b_id) -- Ensures only one direction stored (A→B, not B→A)
+);
+
+-- Reviews and ratings for content items
+-- Allows users to rate and review configurations
+CREATE TABLE IF NOT EXISTS public.review_ratings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  content_type TEXT NOT NULL CHECK (content_type IN ('agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections', 'guides')),
+  content_slug TEXT NOT NULL,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  review_text TEXT, -- Optional review text
+  helpful_count INTEGER DEFAULT 0 NOT NULL CHECK (helpful_count >= 0),
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  -- One review per user per content item
+  UNIQUE(user_id, content_type, content_slug)
+);
+
+-- Track which users marked a review as helpful
+-- Prevents duplicate helpful votes and enables un-helpful action
+CREATE TABLE IF NOT EXISTS public.review_helpful_votes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  review_id UUID NOT NULL REFERENCES public.review_ratings(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  UNIQUE(review_id, user_id)
 );
 
 -- Content similarity matrix (for "similar configs" feature)
@@ -588,6 +641,17 @@ CREATE INDEX IF NOT EXISTS idx_user_badges_user_id ON public.user_badges(user_id
 CREATE INDEX IF NOT EXISTS idx_user_badges_badge_id ON public.user_badges(badge_id);
 CREATE INDEX IF NOT EXISTS idx_user_badges_featured ON public.user_badges(featured) WHERE featured = true;
 
+-- Featured Configs (optimized for weekly featured queries and archives)
+CREATE INDEX IF NOT EXISTS idx_featured_configs_week
+  ON public.featured_configs(week_start DESC, week_end DESC);
+CREATE INDEX IF NOT EXISTS idx_featured_configs_current_week
+  ON public.featured_configs(week_start, rank)
+  WHERE week_start >= CURRENT_DATE - INTERVAL '7 days'; -- Partial index for current week lookups
+CREATE INDEX IF NOT EXISTS idx_featured_configs_content
+  ON public.featured_configs(content_type, content_slug);
+CREATE INDEX IF NOT EXISTS idx_featured_configs_rank
+  ON public.featured_configs(rank, final_score DESC);
+
 -- User Interactions (optimized for 5x speedup on For You feed queries)
 CREATE INDEX IF NOT EXISTS idx_user_interactions_user_id
   ON public.user_interactions(user_id, created_at DESC);
@@ -619,6 +683,22 @@ CREATE INDEX IF NOT EXISTS idx_user_similarities_user_b
   ON public.user_similarities(user_b_id, similarity_score DESC);
 CREATE INDEX IF NOT EXISTS idx_user_similarities_score
   ON public.user_similarities(similarity_score DESC) WHERE similarity_score >= 0.5;
+
+-- Review Ratings (optimized for review display and aggregation)
+CREATE INDEX IF NOT EXISTS idx_review_ratings_content
+  ON public.review_ratings(content_type, content_slug, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_review_ratings_user
+  ON public.review_ratings(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_review_ratings_helpful
+  ON public.review_ratings(helpful_count DESC) WHERE helpful_count > 0;
+CREATE INDEX IF NOT EXISTS idx_review_ratings_rating
+  ON public.review_ratings(rating, created_at DESC);
+
+-- Review Helpful Votes
+CREATE INDEX IF NOT EXISTS idx_review_helpful_votes_review
+  ON public.review_helpful_votes(review_id);
+CREATE INDEX IF NOT EXISTS idx_review_helpful_votes_user
+  ON public.review_helpful_votes(user_id);
 
 -- Content Similarities
 CREATE INDEX IF NOT EXISTS idx_content_similarities_content_a
@@ -1199,6 +1279,78 @@ CREATE TRIGGER trigger_check_badges_on_reputation
   WHEN (OLD.reputation_score IS DISTINCT FROM NEW.reputation_score)
   EXECUTE FUNCTION public.check_badges_after_reputation();
 
+-- Function to update helpful_count on review_ratings when helpful votes change
+CREATE OR REPLACE FUNCTION public.update_review_helpful_count()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    UPDATE public.review_ratings
+    SET helpful_count = helpful_count + 1
+    WHERE id = NEW.review_id;
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE public.review_ratings
+    SET helpful_count = GREATEST(0, helpful_count - 1)
+    WHERE id = OLD.review_id;
+    RETURN OLD;
+  END IF;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trigger_update_helpful_count_on_insert ON public.review_helpful_votes;
+CREATE TRIGGER trigger_update_helpful_count_on_insert
+  AFTER INSERT ON public.review_helpful_votes
+  FOR EACH ROW EXECUTE FUNCTION public.update_review_helpful_count();
+
+DROP TRIGGER IF EXISTS trigger_update_helpful_count_on_delete ON public.review_helpful_votes;
+CREATE TRIGGER trigger_update_helpful_count_on_delete
+  AFTER DELETE ON public.review_helpful_votes
+  FOR EACH ROW EXECUTE FUNCTION public.update_review_helpful_count();
+
+-- Function to award reputation points for helpful reviews
+-- +5 points when a review reaches 5 helpful votes (milestone)
+CREATE OR REPLACE FUNCTION public.update_reputation_on_helpful_review()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  -- Award +5 reputation when review reaches 5 helpful votes
+  IF NEW.helpful_count = 5 AND OLD.helpful_count < 5 THEN
+    UPDATE public.users
+    SET reputation_score = reputation_score + 5
+    WHERE id = NEW.user_id;
+  END IF;
+
+  -- Award +10 reputation when review reaches 10 helpful votes (another milestone)
+  IF NEW.helpful_count = 10 AND OLD.helpful_count < 10 THEN
+    UPDATE public.users
+    SET reputation_score = reputation_score + 10
+    WHERE id = NEW.user_id;
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trigger_reputation_on_helpful_review ON public.review_ratings;
+CREATE TRIGGER trigger_reputation_on_helpful_review
+  AFTER UPDATE OF helpful_count ON public.review_ratings
+  FOR EACH ROW
+  WHEN (OLD.helpful_count IS DISTINCT FROM NEW.helpful_count)
+  EXECUTE FUNCTION public.update_reputation_on_helpful_review();
+
+-- Trigger to update updated_at timestamp on review edits
+DROP TRIGGER IF EXISTS update_review_ratings_updated_at ON public.review_ratings;
+CREATE TRIGGER update_review_ratings_updated_at
+  BEFORE UPDATE ON public.review_ratings
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
 -- Function to clean up old interaction data (>90 days)
 -- Keeps database size manageable while preserving recent data
 CREATE OR REPLACE FUNCTION public.cleanup_old_interactions()
@@ -1245,10 +1397,13 @@ ALTER TABLE public.sponsored_clicks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.submissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.badges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_badges ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.featured_configs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_interactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_affinities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_similarities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.content_similarities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.review_ratings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.review_helpful_votes ENABLE ROW LEVEL SECURITY;
 
 -- Users: Public profiles visible to all, own profile editable
 CREATE POLICY "Public users are viewable by everyone"
@@ -1482,6 +1637,17 @@ CREATE POLICY "Users can feature their own badges"
   ON public.user_badges FOR UPDATE
   USING ((SELECT auth.uid()) = user_id);
 
+-- Featured Configs: Public read access, service role write access
+CREATE POLICY "Featured configs are viewable by everyone"
+  ON public.featured_configs FOR SELECT
+  USING (true);
+
+CREATE POLICY "Service role has full access to featured configs"
+  ON public.featured_configs FOR ALL
+  TO service_role
+  USING (true)
+  WITH CHECK (true);
+
 -- User Interactions: Users can only see and manage their own interactions
 CREATE POLICY "Users can view their own interactions"
   ON public.user_interactions FOR SELECT
@@ -1526,6 +1692,54 @@ CREATE POLICY "Content similarities are viewable by everyone"
 
 CREATE POLICY "Service role has full access to content similarities"
   ON public.content_similarities FOR ALL
+  TO service_role
+  USING (true)
+  WITH CHECK (true);
+
+-- Review Ratings: Public read, authenticated write (own reviews only)
+CREATE POLICY "Reviews are viewable by everyone"
+  ON public.review_ratings FOR SELECT
+  USING (true);
+
+CREATE POLICY "Authenticated users can create reviews"
+  ON public.review_ratings FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own reviews"
+  ON public.review_ratings FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own reviews"
+  ON public.review_ratings FOR DELETE
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Service role has full access to reviews"
+  ON public.review_ratings FOR ALL
+  TO service_role
+  USING (true)
+  WITH CHECK (true);
+
+-- Review Helpful Votes: Public read, authenticated write (prevent duplicate votes)
+CREATE POLICY "Helpful votes are viewable by everyone"
+  ON public.review_helpful_votes FOR SELECT
+  USING (true);
+
+CREATE POLICY "Authenticated users can mark reviews helpful"
+  ON public.review_helpful_votes FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can remove their helpful votes"
+  ON public.review_helpful_votes FOR DELETE
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Service role has full access to helpful votes"
+  ON public.review_helpful_votes FOR ALL
   TO service_role
   USING (true)
   WITH CHECK (true);

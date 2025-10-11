@@ -76,10 +76,30 @@
     }
   ],
   "examples": [
-    "Create a new contact for John Doe",
-    "Update deal stage to closed-won",
-    "Find all contacts from Microsoft",
-    "Generate pipeline report"
+    {
+      "title": "Create a new contact for John Doe",
+      "code": "Ask Claude: \"Create a new contact for John Doe\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Update deal stage to closed-won",
+      "code": "Ask Claude: \"Update deal stage to closed-won\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Find all contacts from Microsoft",
+      "code": "Ask Claude: \"Find all contacts from Microsoft\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Generate pipeline report",
+      "code": "Ask Claude: \"Generate pipeline report\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "create"],

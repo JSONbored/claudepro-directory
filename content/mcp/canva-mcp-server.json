@@ -76,10 +76,30 @@
     }
   ],
   "examples": [
-    "Create an Instagram post about our product launch",
-    "Generate a presentation slide template",
-    "Export all logo variations",
-    "Update brand colors in templates"
+    {
+      "title": "Create an Instagram post about our product launch",
+      "code": "Ask Claude: \"Create an Instagram post about our product launch\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Generate a presentation slide template",
+      "code": "Ask Claude: \"Generate a presentation slide template\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Export all logo variations",
+      "code": "Ask Claude: \"Export all logo variations\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Update brand colors in templates",
+      "code": "Ask Claude: \"Update brand colors in templates\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "create", "export"],

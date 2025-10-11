@@ -82,10 +82,30 @@
     }
   ],
   "examples": [
-    "Read all records from the Projects table",
-    "Add a new contact with these details to Airtable",
-    "Update the status field for all overdue tasks",
-    "Filter records where status='active' AND priority='high'"
+    {
+      "title": "Read all records from the Projects table",
+      "code": "Ask Claude: \"Read all records from the Projects table\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Add a new contact with these details to Airtable",
+      "code": "Ask Claude: \"Add a new contact with these details to Airtable\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Update the status field for all overdue tasks",
+      "code": "Ask Claude: \"Update the status field for all overdue tasks\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Filter records where status='active' AND priority=...",
+      "code": "Ask Claude: \"Filter records where status='active' AND priority='high'\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "schema"],

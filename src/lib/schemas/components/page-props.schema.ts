@@ -41,6 +41,12 @@ const homePageClientPropsSchema = z
       .string()
       .optional()
       .describe('Initial search query from URL parameter (for SearchAction schema integration)'),
+    featuredByCategory: z
+      .record(z.string(), z.array(unifiedContentItemSchema))
+      .optional()
+      .describe(
+        'Weekly featured content grouped by category (algorithm-selected, max 6 per category)'
+      ),
     stats: z
       .object({
         rules: z.number().describe('Number of rules'),

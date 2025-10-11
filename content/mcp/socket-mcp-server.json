@@ -76,10 +76,30 @@
     }
   ],
   "examples": [
-    "Scan my package.json for vulnerabilities",
-    "Check the security score of lodash",
-    "Find risky dependencies in my project",
-    "Generate a security report"
+    {
+      "title": "Scan my package.json for vulnerabilities",
+      "code": "Ask Claude: \"Scan my package.json for vulnerabilities\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Check the security score of lodash",
+      "code": "Ask Claude: \"Check the security score of lodash\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Find risky dependencies in my project",
+      "code": "Ask Claude: \"Find risky dependencies in my project\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Generate a security report",
+      "code": "Ask Claude: \"Generate a security report\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "scan"],

@@ -111,12 +111,42 @@
     }
   ],
   "examples": [
-    "Launch a new EC2 instance with custom tags",
-    "Create an S3 bucket with versioning enabled",
-    "Deploy a Lambda function with environment variables",
-    "Set up CloudWatch alarms for application monitoring",
-    "Create an RDS instance with automated backups",
-    "Deploy a complete web application stack via CloudFormation"
+    {
+      "title": "Launch a new EC2 instance with custom tags",
+      "code": "Ask Claude: \"Launch a new EC2 instance with custom tags\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Create an S3 bucket with versioning enabled",
+      "code": "Ask Claude: \"Create an S3 bucket with versioning enabled\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Deploy a Lambda function with environment variable...",
+      "code": "Ask Claude: \"Deploy a Lambda function with environment variables\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Set up CloudWatch alarms for application monitorin...",
+      "code": "Ask Claude: \"Set up CloudWatch alarms for application monitoring\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Create an RDS instance with automated backups",
+      "code": "Ask Claude: \"Create an RDS instance with automated backups\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Deploy a complete web application stack via CloudF...",
+      "code": "Ask Claude: \"Deploy a complete web application stack via CloudFormation\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["ec2:*", "s3:*", "lambda:*", "rds:*", "cloudwatch:*"],

@@ -53,7 +53,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
       >
         <div>
           <h2 id={trendingHeadingId} className={`text-2xl ${UI_CLASSES.FONT_BOLD} mb-4`}>
-            🔥 Trending This Week
+            Trending This Week
           </h2>
           <ul className={UI_CLASSES.GRID_RESPONSIVE_LIST}>
             {trending.length === 0 ? (
@@ -95,7 +95,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
       >
         <div>
           <h2 id={popularHeadingId} className={`text-2xl ${UI_CLASSES.FONT_BOLD} mb-4`}>
-            ⭐ Most Popular
+            Most Popular
           </h2>
           <ul className={UI_CLASSES.GRID_RESPONSIVE_LIST}>
             {popular.length === 0 ? (
@@ -128,7 +128,7 @@ function TrendingContentComponent({ trending, popular, recent }: TrendingContent
       >
         <div>
           <h2 id={recentHeadingId} className={`text-2xl ${UI_CLASSES.FONT_BOLD} mb-4`}>
-            🆕 Recently Added
+            Recently Added
           </h2>
           <ul className={UI_CLASSES.GRID_RESPONSIVE_LIST}>
             {recent.length === 0 ? (

@@ -29,6 +29,7 @@ import { submitConfiguration } from '@/src/lib/actions/submission-actions';
 import { CheckCircle, ExternalLink, Github, Send } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { DuplicateWarning } from './duplicate-warning';
+import { ExamplesArrayInput } from './examples-array-input';
 import { TemplateSelector } from './template-selector';
 
 type ContentType = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines';
@@ -179,6 +180,15 @@ export function SubmitFormClient() {
           author: formData.get('author') as string,
           github: (formData.get('github') as string) || undefined,
           tags: (formData.get('tags') as string) || undefined,
+          examples: (() => {
+            const examplesJson = formData.get('examples') as string;
+            if (!examplesJson || examplesJson === '[]') return undefined;
+            try {
+              return JSON.parse(examplesJson);
+            } catch {
+              return undefined;
+            }
+          })(),
         };
 
         // biome-ignore lint/suspicious/noExplicitAny: Dynamic form data with type-specific fields added in switch statement
@@ -679,6 +689,9 @@ export function SubmitFormClient() {
                 Separate multiple tags with commas (max 10)
               </p>
             </div>
+
+            {/* Usage Examples (All Types - Optional) */}
+            <ExamplesArrayInput name="examples" maxExamples={10} />
 
             {/* Submit Button */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 sm:pt-4">

@@ -80,10 +80,30 @@
     }
   ],
   "examples": [
-    "Debug why account linking is failing",
-    "Show recent API errors",
-    "Verify webhook configuration",
-    "Check transaction categorization accuracy"
+    {
+      "title": "Debug why account linking is failing",
+      "code": "Ask Claude: \"Debug why account linking is failing\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Show recent API errors",
+      "code": "Ask Claude: \"Show recent API errors\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Verify webhook configuration",
+      "code": "Ask Claude: \"Verify webhook configuration\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Check transaction categorization accuracy",
+      "code": "Ask Claude: \"Check transaction categorization accuracy\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "debug", "test"],

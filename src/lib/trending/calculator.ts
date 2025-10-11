@@ -373,7 +373,7 @@ async function getPopularContent(
 
 /**
  * Get recent content based on dateAdded field
- * No Redis dependency - pure metadata sorting
+ * Enriches with view counts from Redis for consistent display
  */
 async function getRecentContent(
   allContent: UnifiedContentItem[],
@@ -392,7 +392,34 @@ async function getRecentContent(
       })
       .slice(0, limit);
 
-    logger.info('Recent content sorted by dateAdded', {
+    // Enrich with view counts from Redis (consistent with trending/popular)
+    if (statsRedis.isConnected() && sorted.length > 0) {
+      const items = sorted.map((item) => ({
+        category: item.category,
+        slug: item.slug,
+      }));
+
+      const viewCounts = await statsRedis.getViewCounts(items);
+
+      const enriched: TrendingContentItem[] = sorted.map((item) => {
+        const key = `${item.category}:${item.slug}`;
+        const viewCount = viewCounts[key] || 0;
+
+        return {
+          ...item,
+          viewCount,
+        };
+      });
+
+      logger.info('Recent content sorted by dateAdded with view counts', {
+        totalItems: allContent.length,
+        withDates: enriched.length,
+      });
+
+      return enriched;
+    }
+
+    logger.info('Recent content sorted by dateAdded (no Redis)', {
       totalItems: allContent.length,
       withDates: sorted.length,
     });

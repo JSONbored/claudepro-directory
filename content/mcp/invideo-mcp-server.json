@@ -80,10 +80,30 @@
     }
   ],
   "examples": [
-    "Create a 30-second product video",
-    "Add subtitles to my video",
-    "Generate a video from this blog post",
-    "Export video in 1080p MP4"
+    {
+      "title": "Create a 30-second product video",
+      "code": "Ask Claude: \"Create a 30-second product video\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Add subtitles to my video",
+      "code": "Ask Claude: \"Add subtitles to my video\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Generate a video from this blog post",
+      "code": "Ask Claude: \"Generate a video from this blog post\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Export video in 1080p MP4",
+      "code": "Ask Claude: \"Export video in 1080p MP4\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "create", "export"],

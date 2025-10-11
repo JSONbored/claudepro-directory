@@ -18,6 +18,7 @@
  */
 
 import type { Metadata } from 'next';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { QuizForm } from '@/src/components/tools/recommender/quiz-form';
 import { Badge } from '@/src/components/ui/badge';
 import {
@@ -188,6 +189,16 @@ export default function ConfigRecommenderPage() {
             </CardContent>
           </Card>
         </div>
+      </section>
+
+      {/* Email CTA - Footer section (matching homepage pattern) */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <InlineEmailCTA
+          variant="hero"
+          context="config-recommender-page"
+          headline="Join 1,000+ Claude Power Users"
+          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+        />
       </section>
     </div>
   );

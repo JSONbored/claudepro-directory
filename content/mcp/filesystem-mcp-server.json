@@ -83,11 +83,42 @@
     }
   ],
   "examples": [
-    "Read the contents of package.json",
-    "Create a new file called README.md",
-    "Show me all JavaScript files in the src folder",
-    "List all directories in my project",
-    "Find all files containing the word TODO"
+    {
+      "title": "Reading Project Configuration Files",
+      "code": "// Read package.json and analyze dependencies\n\"Show me the contents of package.json and explain the dependencies\"\n\n// Read TypeScript config\n\"Read tsconfig.json and suggest improvements for a Next.js project\"",
+      "language": "javascript",
+      "description": "Access configuration files to understand project setup, dependencies, and build configurations. Claude can analyze and suggest optimizations."
+    },
+    {
+      "title": "Creating New Files and Directories",
+      "code": "// Create a new React component\n\"Create src/components/Button.tsx with a reusable Button component using TypeScript\"\n\n// Create multiple related files\n\"Set up a new feature module:\n- Create src/features/auth/\n- Add index.ts, types.ts, and hooks.ts files\"",
+      "language": "javascript",
+      "description": "Generate new files and directory structures. Perfect for scaffolding components, modules, or configuration files."
+    },
+    {
+      "title": "Searching and Analyzing Codebase",
+      "code": "// Find specific patterns\n\"Find all TypeScript files in src/ that use useState\"\n\n// Search for TODOs and FIXMEs\n\"List all files containing TODO or FIXME comments\"\n\n// Analyze imports\n\"Show me all files that import from 'react-query'\"",
+      "language": "javascript",
+      "description": "Search through your codebase for patterns, imports, comments, or specific code structures. Essential for code reviews and refactoring."
+    },
+    {
+      "title": "Reading and Modifying Multiple Files",
+      "code": "// Update multiple related files\n\"Update all API client files in src/api/ to use the new authentication header\"\n\n// Read project structure\n\"Show me the directory structure of src/ and list all component files\"",
+      "language": "javascript",
+      "description": "Work with multiple files simultaneously. Perfect for refactoring, updating configurations, or analyzing project architecture."
+    },
+    {
+      "title": "Project Setup and Configuration",
+      "code": "// Initialize new configuration\n\"Create .env.example file with all required environment variables from the codebase\"\n\n// Setup linting\n\"Create .eslintrc.json with React and TypeScript rules\"",
+      "language": "javascript",
+      "description": "Set up project configuration files, environment templates, and development tools. Claude can generate properly structured config files."
+    },
+    {
+      "title": "Code Migration and Refactoring",
+      "code": "// Migrate file structure\n\"Move all files from src/old-components/ to src/components/ and update all imports\"\n\n// Refactor code style\n\"Convert all CommonJS requires in src/ to ES6 imports\"",
+      "language": "javascript",
+      "description": "Perform large-scale code migrations and refactoring operations. The filesystem server handles file moves and updates safely."
+    }
   ],
   "requiresAuth": false,
   "permissions": ["filesystem"],

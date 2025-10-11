@@ -118,11 +118,13 @@ export const UI_CLASSES = {
   /**
    * Flexbox Layouts - Common patterns
    */
-  FLEX_ITEMS_CENTER_GAP_2: 'flex items-center gap-2',
-  FLEX_GAP_2: 'flex gap-2',
-  FLEX_ITEMS_START_GAP_3: 'flex items-start gap-3',
-  FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN: 'flex items-center justify-between',
   FLEX_ITEMS_CENTER_GAP_1: 'flex items-center gap-1',
+  FLEX_ITEMS_CENTER_GAP_2: 'flex items-center gap-2',
+  FLEX_ITEMS_CENTER_GAP_3: 'flex items-center gap-3',
+  FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN: 'flex items-center justify-between',
+  FLEX_ITEMS_START_GAP_3: 'flex items-start gap-3',
+  FLEX_ITEMS_START_JUSTIFY_BETWEEN: 'flex items-start justify-between',
+  FLEX_GAP_2: 'flex gap-2',
   FLEX_GAP_3: 'flex gap-3',
   FLEX_GAP_4: 'flex gap-4',
   FLEX_WRAP_GAP_1: 'flex flex-wrap gap-1',

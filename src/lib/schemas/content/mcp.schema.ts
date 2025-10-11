@@ -11,7 +11,7 @@ import {
   baseInstallationSchema,
   baseTroubleshootingSchema,
 } from '@/src/lib/schemas/content/base-content.schema';
-import { examplesArray, limitedMediumStringArray } from '@/src/lib/schemas/primitives/base-arrays';
+import { limitedMediumStringArray } from '@/src/lib/schemas/primitives/base-arrays';
 import {
   codeString,
   mediumString,
@@ -237,7 +237,6 @@ export const mcpContentSchema = z
       .max(20)
       .optional()
       .describe('Optional array of common issues and solutions (max 20)'), // Changed from string array to object array for consistency
-    examples: examplesArray.optional().describe('Optional usage examples for the MCP server'),
 
     // Authentication and permissions
     requiresAuth: z.boolean().optional().describe('Whether the MCP server requires authentication'),

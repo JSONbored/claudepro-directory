@@ -45,7 +45,12 @@ const UnifiedSearch = dynamic(
   }
 );
 
-function HomePageClientComponent({ initialData, initialSearchQuery, stats }: HomePageClientProps) {
+function HomePageClientComponent({
+  initialData,
+  initialSearchQuery,
+  featuredByCategory,
+  stats,
+}: HomePageClientProps) {
   const { allConfigs } = initialData;
 
   const [activeTab, setActiveTab] = useState('all');
@@ -255,7 +260,8 @@ function HomePageClientComponent({ initialData, initialSearchQuery, stats }: Hom
         />
 
         {/* Featured Content Sections - Only show when not searching */}
-        {!isSearching && <FeaturedSections categories={initialData} />}
+        {/* Use weekly featured (algorithm-selected) if available, otherwise fall back to static alphabetical */}
+        {!isSearching && <FeaturedSections categories={featuredByCategory || initialData} />}
 
         {/* Tabs Section - Only show when not searching */}
         {!isSearching && (

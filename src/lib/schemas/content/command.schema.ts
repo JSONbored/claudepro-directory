@@ -12,7 +12,6 @@ import {
   baseContentMetadataSchema,
   baseInstallationSchema,
 } from '@/src/lib/schemas/content/base-content.schema';
-import { examplesArray } from '@/src/lib/schemas/primitives/base-arrays';
 
 // argumentTypes and frontmatterOptions removed - unused fields (only in 1 content file + template)
 // Previously defined commandArgumentTypeSchema and commandFrontmatterOptionsSchema
@@ -64,9 +63,6 @@ export const commandContentSchema = z
     installation: baseInstallationSchema
       .optional()
       .describe('Optional platform-specific installation instructions'),
-
-    // Examples
-    examples: examplesArray.optional().describe('Optional usage examples for the command'),
 
     // argumentTypes and frontmatterOptions removed - unused fields
   })

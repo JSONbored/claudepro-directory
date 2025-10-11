@@ -82,10 +82,30 @@
     }
   ],
   "examples": [
-    "Find all contracts from 2024",
-    "Summarize the quarterly reports in the finance folder",
-    "Extract key data from invoice documents",
-    "Organize project files by client and date"
+    {
+      "title": "Find all contracts from 2024",
+      "code": "Ask Claude: \"Find all contracts from 2024\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Summarize the quarterly reports in the finance fol...",
+      "code": "Ask Claude: \"Summarize the quarterly reports in the finance folder\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Extract key data from invoice documents",
+      "code": "Ask Claude: \"Extract key data from invoice documents\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Organize project files by client and date",
+      "code": "Ask Claude: \"Organize project files by client and date\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "delete"],

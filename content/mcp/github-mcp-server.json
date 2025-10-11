@@ -94,11 +94,42 @@
     }
   ],
   "examples": [
-    "Show me the README from my main project repository",
-    "List all repositories in my organization",
-    "Search for functions that use authentication",
-    "Create a new component file in src/components",
-    "Find all open issues with the bug label"
+    {
+      "title": "Reading Repository Files",
+      "code": "// Ask Claude to read a specific file\n\"Can you show me the contents of src/lib/utils.ts from my-org/my-repo?\"\n\n// Or read multiple files\n\"Show me all TypeScript files in the src/components directory of my-org/my-repo\"",
+      "language": "javascript",
+      "description": "Read files and directories from any GitHub repository you have access to. Claude will fetch the content and help you understand or modify it."
+    },
+    {
+      "title": "Creating and Updating Files",
+      "code": "// Create a new React component\n\"Create a new Button component in my-org/my-repo at src/components/Button.tsx with TypeScript and proper props\"\n\n// Update existing file\n\"Update the README.md in my-org/my-repo to include installation instructions for the new Button component\"",
+      "language": "javascript",
+      "description": "Create new files or update existing ones. The MCP server automatically creates branches and maintains proper Git history for all changes."
+    },
+    {
+      "title": "Searching Code Across Repositories",
+      "code": "// Search for specific patterns\n\"Find all files in my-org/my-repo that use the 'useState' hook\"\n\n// Search across multiple repos\n\"Search all my repositories for functions that handle authentication\"",
+      "language": "javascript",
+      "description": "Search code using GitHub's powerful search API. Find functions, classes, patterns, or specific implementations across your repositories."
+    },
+    {
+      "title": "Managing Issues and Pull Requests",
+      "code": "// List issues\n\"Show me all open issues with the 'bug' label in my-org/my-repo\"\n\n// Find pull requests\n\"Find all pull requests that mention 'authentication' in my-org/my-repo\"",
+      "language": "javascript",
+      "description": "Query issues and pull requests using GitHub's search syntax. Filter by labels, status, author, and more."
+    },
+    {
+      "title": "Repository Information and Statistics",
+      "code": "// Get repository details\n\"Show me information about my-org/my-repo including stars, forks, and main language\"\n\n// List all repositories\n\"List all repositories in my-org organization sorted by stars\"",
+      "language": "javascript",
+      "description": "Access repository metadata, statistics, and insights. Useful for analyzing project health and contributor activity."
+    },
+    {
+      "title": "Batch File Operations",
+      "code": "// Create multiple related files at once\n\"Create a new feature in my-org/my-repo:\n- Component file at src/components/Feature.tsx\n- Test file at src/components/Feature.test.tsx  \n- Export it from src/components/index.ts\"",
+      "language": "javascript",
+      "description": "Perform multiple file operations atomically. The MCP server handles branch creation and ensures all changes are committed together."
+    }
   ],
   "requiresAuth": true,
   "permissions": ["repo", "public_repo", "read:user"],

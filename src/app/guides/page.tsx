@@ -9,12 +9,14 @@ import fs from 'fs/promises';
 import type { Metadata } from 'next';
 import path from 'path';
 import { ContentListServer } from '@/src/components/content-list-server';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { logger } from '@/src/lib/logger';
 import { statsRedis } from '@/src/lib/redis';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // ISR Configuration - 5 minutes like other category pages
 export const revalidate = 300;
@@ -110,18 +112,30 @@ export default async function GuidesPage() {
   });
 
   return (
-    <ContentListServer
-      title="Guides"
-      description="Comprehensive guides, tutorials, and best practices for getting the most out of Claude and MCP servers"
-      icon="book-open"
-      items={guides}
-      type="guides"
-      searchPlaceholder="Search guides..."
-      badges={[
-        { icon: 'book-open', text: `${guides.length} Guides Available` },
-        { text: 'Production Ready' },
-        { text: 'Community Driven' },
-      ]}
-    />
+    <>
+      <ContentListServer
+        title="Guides"
+        description="Comprehensive guides, tutorials, and best practices for getting the most out of Claude and MCP servers"
+        icon="book-open"
+        items={guides}
+        type="guides"
+        searchPlaceholder="Search guides..."
+        badges={[
+          { icon: 'book-open', text: `${guides.length} Guides Available` },
+          { text: 'Production Ready' },
+          { text: 'Community Driven' },
+        ]}
+      />
+
+      {/* Email CTA - Footer section (matching homepage pattern) */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <InlineEmailCTA
+          variant="hero"
+          context="guides-page"
+          headline="Join 1,000+ Claude Power Users"
+          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+        />
+      </section>
+    </>
   );
 }

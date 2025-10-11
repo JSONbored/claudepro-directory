@@ -32,6 +32,7 @@
   /* Animation Keyframes */
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-border-beam: border-beam linear infinite;
 
   /* Performance Optimizations - GPU Acceleration & Paint Isolation */
   /* will-change utilities for GPU acceleration */
@@ -1354,6 +1355,15 @@
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes border-beam {
+  0% {
+    offset-distance: 0%;
+  }
+  100% {
+    offset-distance: 100%;
   }
 }
 

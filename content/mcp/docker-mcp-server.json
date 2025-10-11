@@ -95,11 +95,36 @@
     }
   ],
   "examples": [
-    "List all running containers and their status",
-    "Build a Docker image from a Dockerfile",
-    "Start a new container with custom configuration",
-    "View real-time logs from a specific container",
-    "Deploy a multi-service application using Docker Compose"
+    {
+      "title": "List all running containers and their status",
+      "code": "Ask Claude: \"List all running containers and their status\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Build a Docker image from a Dockerfile",
+      "code": "Ask Claude: \"Build a Docker image from a Dockerfile\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Start a new container with custom configuration",
+      "code": "Ask Claude: \"Start a new container with custom configuration\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "View real-time logs from a specific container",
+      "code": "Ask Claude: \"View real-time logs from a specific container\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Deploy a multi-service application using Docker Co...",
+      "code": "Ask Claude: \"Deploy a multi-service application using Docker Compose\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": false,
   "permissions": ["containers", "images", "volumes", "networks"],

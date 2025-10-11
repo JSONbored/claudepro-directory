@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { NewPostForm } from '@/src/components/board/new-post-form';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { createPost } from '@/src/lib/actions/post-actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -41,6 +42,16 @@ export default function NewPostPage() {
 
           <NewPostForm onSubmit={handleSubmit} />
         </div>
+
+        {/* Email CTA - Footer section (matching homepage pattern) */}
+        <section className={`${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+          <InlineEmailCTA
+            variant="hero"
+            context="board-new-page"
+            headline="Join 1,000+ Claude Power Users"
+            description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+          />
+        </section>
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { RecentSubmissionsCard } from '@/src/components/submit/sidebar/recent-submissions-card';
 import { SubmitStatsCard } from '@/src/components/submit/sidebar/submit-stats-card';
 import { TipsCard } from '@/src/components/submit/sidebar/tips-card';
@@ -79,6 +80,16 @@ export default async function SubmitPage() {
           <TipsCard />
         </aside>
       </div>
+
+      {/* Email CTA - Footer section (matching homepage pattern) */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <InlineEmailCTA
+          variant="hero"
+          context="submit-page"
+          headline="Join 1,000+ Claude Power Users"
+          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+        />
+      </section>
     </div>
   );
 }

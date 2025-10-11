@@ -12,8 +12,10 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { ForYouFeedClient } from '@/src/components/personalization/for-you-feed-client';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { getForYouFeed } from '@/src/lib/actions/personalization-actions';
 import { createClient } from '@/src/lib/supabase/server';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
   title: 'For You | ClaudePro Directory',
@@ -63,6 +65,16 @@ export default async function ForYouPage() {
       </div>
 
       <ForYouFeedClient initialData={result.data} />
+
+      {/* Email CTA - Footer section (matching homepage pattern) */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <InlineEmailCTA
+          variant="hero"
+          context="for-you-page"
+          headline="Join 1,000+ Claude Power Users"
+          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+        />
+      </section>
     </div>
   );
 }

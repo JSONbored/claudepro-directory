@@ -76,10 +76,30 @@
     }
   ],
   "examples": [
-    "Deploy my site to production",
-    "Update the API_KEY environment variable",
-    "Show recent form submissions",
-    "Configure domain redirect"
+    {
+      "title": "Deploy my site to production",
+      "code": "Ask Claude: \"Deploy my site to production\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Update the API_KEY environment variable",
+      "code": "Ask Claude: \"Update the API_KEY environment variable\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Show recent form submissions",
+      "code": "Ask Claude: \"Show recent form submissions\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Configure domain redirect",
+      "code": "Ask Claude: \"Configure domain redirect\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "deploy"],
