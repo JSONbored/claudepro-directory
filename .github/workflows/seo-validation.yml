@@ -60,22 +60,23 @@ jobs:
 
             const status = (!seoFailed && !titlesFailed) ? '✅ PASSED' : '❌ FAILED';
 
-            const body = `## SEO Validation ${status}
-
-### SEO Standards
-${seoFailed ? '❌ Failed' : '✅ Passed'}
-\`\`\`
-${seoReport.slice(-2000)}
-\`\`\`
-
-### Title Lengths
-${titlesFailed ? '❌ Failed' : '✅ Passed'}
-\`\`\`
-${titlesReport.slice(-1000)}
-\`\`\`
-
-${(seoFailed || titlesFailed) ? '**Please fix SEO issues before merging.**' : ''}
-`;
+            const body = [
+              '## SEO Validation ' + status,
+              '',
+              '### SEO Standards',
+              seoFailed ? '❌ Failed' : '✅ Passed',
+              '```',
+              seoReport.slice(-2000),
+              '```',
+              '',
+              '### Title Lengths',
+              titlesFailed ? '❌ Failed' : '✅ Passed',
+              '```',
+              titlesReport.slice(-1000),
+              '```',
+              '',
+              (seoFailed || titlesFailed) ? '**Please fix SEO issues before merging.**' : ''
+            ].join('\n');
 
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
