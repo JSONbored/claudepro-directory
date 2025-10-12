@@ -20,7 +20,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 import { ResultsDisplay } from '@/src/components/tools/recommender/results-display';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import { generateRecommendations } from '@/src/lib/recommender/algorithm';
 import { statsRedis } from '@/src/lib/redis';
@@ -212,7 +212,7 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
             We encountered an error while generating your recommendations. Please try again.
           </p>
           <a
-            href="/tools/config-recommender"
+            href={ROUTES.CONFIG_RECOMMENDER}
             className="inline-block px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
           >
             Start Over

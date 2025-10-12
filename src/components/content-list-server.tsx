@@ -4,6 +4,7 @@ import { ContentSearchClient } from '@/src/components/content-search-client';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
+import { ROUTES } from '@/src/lib/constants';
 import { ExternalLink, getIconByName } from '@/src/lib/icons';
 import type {
   ContentListServerProps,
@@ -73,7 +74,7 @@ function ContentHeroSection<T extends UnifiedContentItem>({
 
           <Button variant="outline" size="sm" asChild>
             <Link
-              href="/submit"
+              href={ROUTES.SUBMIT}
               className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
               aria-label={`Submit a new ${title.slice(0, -1).toLowerCase()}`}
             >

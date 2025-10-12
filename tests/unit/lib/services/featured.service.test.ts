@@ -1,25 +1,25 @@
 /**
- * Featured Loader Service Tests
+ * Featured Service Tests
+ * SHA-3152: Tests for unified featured content service
  *
- * Tests for the featured content loader service which handles:
+ * Tests for the featured content service which handles:
  * - Loading current week's featured configs from database
  * - Fallback logic when no featured configs exist
  * - Ensuring all 7 categories are represented
  * - Mixing trending and alphabetical content
  *
  * Coverage:
- * - getCurrentWeekStart calculation
  * - Featured content loading with database records
  * - Fallback logic (trending + alphabetical)
  * - Category grouping and limiting
  * - Error handling
  *
- * @see src/lib/services/featured-loader.service.ts
+ * @see src/lib/services/featured.service.ts
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
-import { featuredLoaderService } from '@/src/lib/services/featured-loader.service';
+import { featuredService } from '@/src/lib/services/featured.service';
 
 // Mock dependencies
 vi.mock('@/src/lib/content/content-loaders', () => ({
@@ -62,14 +62,14 @@ function createMockItem(category: string, slug: string, title: string): UnifiedC
   } as UnifiedContentItem;
 }
 
-describe('featuredLoaderService', () => {
+describe('featuredService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('getCurrentWeekStart', () => {
     it('returns Monday of current week in YYYY-MM-DD format', () => {
-      const weekStart = featuredLoaderService.getCurrentWeekStart();
+      const weekStart = featuredService.getCurrentWeekStart();
 
       // Verify format
       expect(weekStart).toMatch(/^\d{4}-\d{2}-\d{2}$/);
@@ -86,7 +86,7 @@ describe('featuredLoaderService', () => {
       vi.useFakeTimers();
       vi.setSystemTime(monday);
 
-      const weekStart = featuredLoaderService.getCurrentWeekStart();
+      const weekStart = featuredService.getCurrentWeekStart();
       expect(weekStart).toBe('2025-01-06');
 
       vi.useRealTimers();
@@ -98,7 +98,7 @@ describe('featuredLoaderService', () => {
       vi.useFakeTimers();
       vi.setSystemTime(wednesday);
 
-      const weekStart = featuredLoaderService.getCurrentWeekStart();
+      const weekStart = featuredService.getCurrentWeekStart();
       expect(weekStart).toBe('2025-01-06'); // Previous Monday
 
       vi.useRealTimers();
@@ -110,7 +110,7 @@ describe('featuredLoaderService', () => {
       vi.useFakeTimers();
       vi.setSystemTime(sunday);
 
-      const weekStart = featuredLoaderService.getCurrentWeekStart();
+      const weekStart = featuredService.getCurrentWeekStart();
       expect(weekStart).toBe('2025-01-06'); // Previous Monday
 
       vi.useRealTimers();
@@ -159,7 +159,7 @@ describe('featuredLoaderService', () => {
         return [];
       });
 
-      const result = await featuredLoaderService.loadCurrentFeaturedContentByCategory();
+      const result = await featuredService.loadCurrentFeaturedContentByCategory();
 
       expect(result).toHaveProperty('rules');
       expect(result).toHaveProperty('agents');
@@ -204,7 +204,7 @@ describe('featuredLoaderService', () => {
         totalUniqueVisitors: 50,
       } as never);
 
-      const result = await featuredLoaderService.loadCurrentFeaturedContentByCategory();
+      const result = await featuredService.loadCurrentFeaturedContentByCategory();
 
       expect(result).toBeDefined();
       expect(Object.keys(result).length).toBeGreaterThan(0);
@@ -258,7 +258,7 @@ describe('featuredLoaderService', () => {
         totalUniqueVisitors: 500,
       } as never);
 
-      const result = await featuredLoaderService.loadCurrentFeaturedContentByCategory();
+      const result = await featuredService.loadCurrentFeaturedContentByCategory();
 
       // All 7 categories should be present
       expect(result).toHaveProperty('rules');
@@ -336,7 +336,7 @@ describe('featuredLoaderService', () => {
         totalUniqueVisitors: 500,
       } as never);
 
-      const result = await featuredLoaderService.loadCurrentFeaturedContentByCategory();
+      const result = await featuredService.loadCurrentFeaturedContentByCategory();
 
       // Rules should have 6 items: 2 trending + 4 alphabetical
       expect(result.rules).toHaveLength(6);
@@ -403,7 +403,7 @@ describe('featuredLoaderService', () => {
         totalUniqueVisitors: 1000,
       } as never);
 
-      const result = await featuredLoaderService.loadCurrentFeaturedContentByCategory();
+      const result = await featuredService.loadCurrentFeaturedContentByCategory();
 
       // Each category should have exactly 6 items max
       expect(result.rules?.length).toBeLessThanOrEqual(6);
@@ -445,7 +445,7 @@ describe('featuredLoaderService', () => {
       } as never);
 
       // Should not throw, should use fallback
-      const result = await featuredLoaderService.loadCurrentFeaturedContentByCategory();
+      const result = await featuredService.loadCurrentFeaturedContentByCategory();
 
       expect(result).toBeDefined();
     });
@@ -488,7 +488,7 @@ describe('featuredLoaderService', () => {
         return [];
       });
 
-      const result = await featuredLoaderService.loadCurrentFeaturedContentByCategory();
+      const result = await featuredService.loadCurrentFeaturedContentByCategory();
 
       // Should only include rule-1, skip non-existent
       expect(result.rules).toHaveLength(1);
@@ -514,7 +514,7 @@ describe('featuredLoaderService', () => {
 
       vi.mocked(createClient).mockResolvedValue(mockSupabase as never);
 
-      const result = await featuredLoaderService.loadCurrentFeaturedContent();
+      const result = await featuredService.loadCurrentFeaturedContent();
 
       expect(result).toEqual([]);
     });
@@ -551,7 +551,7 @@ describe('featuredLoaderService', () => {
         return [];
       });
 
-      const result = await featuredLoaderService.loadCurrentFeaturedContent();
+      const result = await featuredService.loadCurrentFeaturedContent();
 
       expect(result).toHaveLength(1);
       expect(result[0]).toHaveProperty('_featured');
@@ -562,7 +562,7 @@ describe('featuredLoaderService', () => {
       // Mock createClient to throw error
       vi.mocked(createClient).mockRejectedValue(new Error('Connection failed'));
 
-      const result = await featuredLoaderService.loadCurrentFeaturedContent();
+      const result = await featuredService.loadCurrentFeaturedContent();
 
       expect(result).toEqual([]);
     });

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/jobs/job-form';
-import { createJob } from '@/src/lib/actions/job-actions';
+import { createJob } from '@/src/lib/actions/business.actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {

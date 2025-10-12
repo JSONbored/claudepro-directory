@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
+import { ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
 import {
   ArrowRight,
   Briefcase,
@@ -438,7 +438,7 @@ Best regards,
                 </a>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/submit">
+                <Link href={ROUTES.SUBMIT}>
                   Submit Configuration
                   <ArrowRight className={`h-4 w-4 ${UI_CLASSES.ML_2}`} />
                 </Link>

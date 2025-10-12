@@ -35,7 +35,7 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { SourceBadge, TagBadge } from '@/src/components/ui/config-badge';
-import { useCardNavigation } from '@/src/hooks/use-card-navigation';
+import { type UseCardNavigationOptions, useCardNavigation } from '@/src/hooks/use-card-navigation';
 import { SOCIAL_LINKS } from '@/src/lib/constants';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -44,10 +44,10 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
  */
 export interface BaseCardProps {
   /**
-   * Target path for card navigation
+   * Target path for card navigation (optional for review cards)
    * @example "/agents/code-reviewer"
    */
-  targetPath: string;
+  targetPath?: string;
 
   /**
    * Display title for the card
@@ -55,14 +55,14 @@ export interface BaseCardProps {
   displayTitle: string;
 
   /**
-   * Card description text
+   * Card description text (optional for some variants)
    */
-  description: string;
+  description?: string;
 
   /**
-   * Author name
+   * Author name (optional for review/changelog variants)
    */
-  author: string;
+  author?: string;
 
   /**
    * Content source (e.g., "official", "community")
@@ -81,10 +81,10 @@ export interface BaseCardProps {
   maxVisibleTags?: number;
 
   /**
-   * Display variant (default or detailed)
+   * Display variant
    * @default "default"
    */
-  variant?: 'default' | 'detailed';
+  variant?: 'default' | 'detailed' | 'review' | 'changelog';
 
   /**
    * Whether to show action buttons
@@ -98,10 +98,22 @@ export interface BaseCardProps {
   ariaLabel: string;
 
   /**
+   * Custom render function for header content
+   * Used by review cards for avatar/rating, changelog for date
+   */
+  renderHeader?: () => ReactNode;
+
+  /**
    * Custom render function for top badges
    * (e.g., TypeBadge, CollectionTypeBadge, DifficultyBadge)
    */
   renderTopBadges?: () => ReactNode;
+
+  /**
+   * Custom render function for content section
+   * Used by review cards for expandable text
+   */
+  renderContent?: () => ReactNode;
 
   /**
    * Custom render function for metadata badges
@@ -142,6 +154,17 @@ export interface BaseCardProps {
   onBeforeNavigate?: () => void;
 
   /**
+   * Disable navigation (for review cards that don't link)
+   */
+  disableNavigation?: boolean;
+
+  /**
+   * Show author in footer
+   * @default true
+   */
+  showAuthor?: boolean;
+
+  /**
    * Additional CSS classes
    */
   className?: string;
@@ -175,7 +198,9 @@ export const BaseCard = memo(
     variant = 'default',
     showActions = true,
     ariaLabel,
+    renderHeader,
     renderTopBadges,
+    renderContent,
     renderMetadataBadges,
     renderActions,
     customMetadataText,
@@ -183,15 +208,22 @@ export const BaseCard = memo(
     sponsoredId,
     position,
     onBeforeNavigate,
+    disableNavigation = false,
+    showAuthor = true,
     className,
   }: BaseCardProps) => {
+    const navigationParam: string | UseCardNavigationOptions | undefined =
+      disableNavigation || !targetPath
+        ? undefined
+        : onBeforeNavigate
+          ? {
+              path: targetPath,
+              onBeforeNavigate,
+            }
+          : targetPath;
+
     const { handleCardClick, handleKeyDown } = useCardNavigation(
-      onBeforeNavigate
-        ? {
-            path: targetPath,
-            onBeforeNavigate,
-          }
-        : targetPath
+      navigationParam as string | UseCardNavigationOptions
     );
 
     // Calculate visible and overflow tags
@@ -200,50 +232,61 @@ export const BaseCard = memo(
 
     const cardContent = (
       <Card
-        className={`${UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? 'p-6' : ''} ${className || ''}`}
-        onClick={handleCardClick}
+        className={`${disableNavigation ? '' : UI_CLASSES.CARD_INTERACTIVE} ${variant === 'detailed' ? 'p-6' : ''} ${variant === 'review' ? 'p-4 rounded-lg border' : ''} ${className || ''}`}
+        onClick={disableNavigation ? undefined : handleCardClick}
         role="article"
         aria-label={ariaLabel}
-        tabIndex={0}
-        onKeyDown={handleKeyDown}
+        tabIndex={disableNavigation ? undefined : 0}
+        onKeyDown={disableNavigation ? undefined : handleKeyDown}
       >
-        <CardHeader className="pb-3">
-          <div
-            className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN}`}
-          >
-            <div className={UI_CLASSES.FLEX_1}>
-              {/* Top badges slot (type, difficulty, sponsored, etc.) */}
-              {renderTopBadges && (
-                <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 mb-1`}>
-                  {renderTopBadges()}
+        <CardHeader className={variant === 'review' ? 'p-0 mb-3' : 'pb-3'}>
+          {/* Custom header slot (for review avatar/rating, changelog date) */}
+          {renderHeader?.()}
+
+          {/* Standard header (config/collection cards) */}
+          {!renderHeader && (
+            <div
+              className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} ${UI_CLASSES.JUSTIFY_BETWEEN}`}
+            >
+              <div className={UI_CLASSES.FLEX_1}>
+                {/* Top badges slot (type, difficulty, sponsored, etc.) */}
+                {renderTopBadges && (
+                  <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 mb-1`}>
+                    {renderTopBadges()}
+                  </div>
+                )}
+
+                {/* Title */}
+                <CardTitle
+                  className={`${UI_CLASSES.TEXT_LG} font-semibold text-foreground ${disableNavigation ? '' : UI_CLASSES.HOVER_TEXT_ACCENT}`}
+                >
+                  {displayTitle}
+                </CardTitle>
+
+                {/* Description */}
+                {description && (
+                  <CardDescription
+                    className={`text-sm text-muted-foreground mt-1 ${UI_CLASSES.LINE_CLAMP_2}`}
+                  >
+                    {description}
+                  </CardDescription>
+                )}
+              </div>
+
+              {/* Source badge (right side of header) */}
+              {source && (
+                <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-1 ml-2`}>
+                  <SourceBadge source={source} />
                 </div>
               )}
-
-              {/* Title */}
-              <CardTitle
-                className={`${UI_CLASSES.TEXT_LG} font-semibold text-foreground ${UI_CLASSES.HOVER_TEXT_ACCENT}`}
-              >
-                {displayTitle}
-              </CardTitle>
-
-              {/* Description */}
-              <CardDescription
-                className={`text-sm text-muted-foreground mt-1 ${UI_CLASSES.LINE_CLAMP_2}`}
-              >
-                {description}
-              </CardDescription>
             </div>
-
-            {/* Source badge (right side of header) */}
-            {source && (
-              <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-1 ml-2`}>
-                <SourceBadge source={source} />
-              </div>
-            )}
-          </div>
+          )}
         </CardHeader>
 
-        <CardContent className="pt-0">
+        <CardContent className={variant === 'review' ? 'p-0' : 'pt-0'}>
+          {/* Custom content slot (for review expandable text) */}
+          {renderContent && <div className="mb-3">{renderContent()}</div>}
+
           {/* Tags */}
           {tags && tags.length > 0 && (
             <div className={`${UI_CLASSES.FLEX_WRAP_GAP_1} ${UI_CLASSES.MB_4}`}>
@@ -264,23 +307,29 @@ export const BaseCard = memo(
           {/* Footer: Metadata and Actions */}
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             {/* Left side: Author and custom metadata */}
-            <div
-              className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 ${UI_CLASSES.TEXT_XS} text-muted-foreground`}
-            >
-              <span>
-                by{' '}
-                <a
-                  href={SOCIAL_LINKS.authorProfile}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline hover:text-foreground transition-colors"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {author}
-                </a>
-              </span>
-              {customMetadataText}
-            </div>
+            {(showAuthor && author) || customMetadataText ? (
+              <div
+                className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 ${UI_CLASSES.TEXT_XS} text-muted-foreground`}
+              >
+                {showAuthor && author && (
+                  <span>
+                    by{' '}
+                    <a
+                      href={SOCIAL_LINKS.authorProfile}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:underline hover:text-foreground transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {author}
+                    </a>
+                  </span>
+                )}
+                {customMetadataText}
+              </div>
+            ) : (
+              <div />
+            )}
 
             {/* Right side: Metadata badges and actions */}
             <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>

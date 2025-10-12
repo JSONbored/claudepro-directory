@@ -376,11 +376,11 @@ const nextConfig = {
         ],
       },
       {
-        source: '/manifest.webmanifest',
+        source: '/manifest',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=86400, stale-while-revalidate=604800', // 1 day cache for manifest
+            value: 'public, max-age=86400, stale-while-revalidate=604800', // 1 day cache for PWA manifest (Next.js generates from src/app/manifest.ts)
           },
           {
             key: 'Content-Type',

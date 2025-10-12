@@ -4,10 +4,11 @@ import { notFound, redirect } from 'next/navigation';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, BarChart, ExternalLink, Eye } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/server';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { formatRelativeDate } from '@/src/lib/utils/date-utils';
+import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
+import { formatRelativeDate } from '@/src/lib/utils/date.utils';
 
 export const metadata: Metadata = {
   title: 'Job Analytics - Claude Pro Directory',
@@ -52,13 +53,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
   const ctr = viewCount > 0 ? ((clickCount / viewCount) * 100).toFixed(2) : '0.00';
 
   const getStatusColor = (status: string) => {
-    const colors = {
-      active: 'bg-green-500/10 text-green-400 border-green-500/20',
-      draft: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-      paused: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-      expired: 'bg-red-500/10 text-red-400 border-red-500/20',
-    };
-    return colors[status as keyof typeof colors] || 'bg-muted';
+    return BADGE_COLORS.jobStatus[status as JobStatusType] || 'bg-muted';
   };
 
   return (
@@ -66,7 +61,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
       {/* Header */}
       <div>
         <Button variant="ghost" size="sm" asChild className="mb-4">
-          <Link href="/account/jobs">
+          <Link href={ROUTES.ACCOUNT_JOBS}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Jobs
           </Link>

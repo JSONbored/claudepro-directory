@@ -6,7 +6,7 @@ import path from 'path';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card } from '@/src/components/ui/card';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { markdownToSafeHtml } from '@/src/lib/content/markdown-utils';
 import { ArrowLeft, Tags } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -192,11 +192,11 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
         <nav
           className={`flex items-center space-x-2 text-sm text-muted-foreground ${UI_CLASSES.MB_6}`}
         >
-          <Link href="/" className={UI_CLASSES.HOVER_TEXT_PRIMARY}>
+          <Link href={ROUTES.HOME} className={UI_CLASSES.HOVER_TEXT_PRIMARY}>
             Home
           </Link>
           <span>/</span>
-          <Link href="/compare" className={UI_CLASSES.HOVER_TEXT_PRIMARY}>
+          <Link href={ROUTES.COMPARE} className={UI_CLASSES.HOVER_TEXT_PRIMARY}>
             Compare
           </Link>
           <span>/</span>
@@ -204,7 +204,7 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
         </nav>
 
         {/* Back Button */}
-        <Link href="/">
+        <Link href={ROUTES.HOME}>
           <Button variant="ghost" size="sm" className={UI_CLASSES.MB_6}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Directory
@@ -242,12 +242,12 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
                 Browse {data.category1}
               </Button>
             </Link>
-            <Link href="/trending">
+            <Link href={ROUTES.TRENDING}>
               <Button variant="outline" size="sm">
                 Trending Tools
               </Button>
             </Link>
-            <Link href="/submit">
+            <Link href={ROUTES.SUBMIT}>
               <Button size="sm">Submit Your Tool</Button>
             </Link>
           </div>

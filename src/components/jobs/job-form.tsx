@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from '@/src/components/ui/select';
 import { Textarea } from '@/src/components/ui/textarea';
+import { ROUTES } from '@/src/lib/constants';
 import type { CreateJobInput } from '@/src/lib/schemas/content/job.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -528,7 +529,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           {isPending ? 'Saving...' : submitLabel}
         </Button>
         <Button type="button" variant="outline" asChild>
-          <a href="/account/jobs">Cancel</a>
+          <a href={ROUTES.ACCOUNT_JOBS}>Cancel</a>
         </Button>
       </div>
     </form>

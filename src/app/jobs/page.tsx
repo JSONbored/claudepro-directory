@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/ui/select';
+import { ROUTES } from '@/src/lib/constants';
 import { getJobs, type Job } from '@/src/lib/data/jobs';
 import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -176,7 +177,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
             </div>
 
             <Button variant="outline" size="sm" asChild>
-              <Link href="/partner" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+              <Link href={ROUTES.PARTNER} className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Plus className="h-3 w-3" />
                 Post a Job
               </Link>
@@ -320,7 +321,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                       </Badge>
                     )}
                     <Button variant="ghost" size="sm" asChild>
-                      <Link href="/jobs" className={UI_CLASSES.TEXT_XS}>
+                      <Link href={ROUTES.JOBS} className={UI_CLASSES.TEXT_XS}>
                         Clear All
                       </Link>
                     </Button>
@@ -354,13 +355,13 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                 </p>
                 <div className={UI_CLASSES.FLEX_GAP_4}>
                   <Button asChild>
-                    <Link href="/partner">
+                    <Link href={ROUTES.PARTNER}>
                       <Plus className="h-4 w-4 mr-2" />
                       Post the First Job
                     </Link>
                   </Button>
                   <Button variant="outline" asChild>
-                    <Link href="/community">Join Community</Link>
+                    <Link href={ROUTES.COMMUNITY}>Join Community</Link>
                   </Button>
                 </div>
               </CardContent>
@@ -381,7 +382,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                   No jobs match your current filters. Try adjusting your search criteria.
                 </p>
                 <Button variant="outline" asChild>
-                  <Link href="/jobs">Clear All Filters</Link>
+                  <Link href={ROUTES.JOBS}>Clear All Filters</Link>
                 </Button>
               </CardContent>
             </Card>

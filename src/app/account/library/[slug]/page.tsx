@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, Edit, Share2 } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -74,7 +75,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
     <div className={UI_CLASSES.SPACE_Y_6}>
       {/* Header */}
       <div>
-        <Link href="/account/library">
+        <Link href={ROUTES.ACCOUNT_LIBRARY}>
           <Button variant="ghost" className="mb-4 flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
             Back to Library

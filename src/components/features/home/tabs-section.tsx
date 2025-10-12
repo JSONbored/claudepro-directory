@@ -16,6 +16,7 @@ import { InfiniteScrollContainer } from '@/src/components/shared/infinite-scroll
 import { Button } from '@/src/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
 import { CATEGORY_CONFIGS, HOMEPAGE_TAB_CATEGORIES } from '@/src/lib/config/category-config';
+import { ROUTES } from '@/src/lib/constants';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -126,7 +127,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
 
         <div className={`${UI_CLASSES.TEXT_CENTER} pt-8`}>
           <Button variant="outline" asChild>
-            <Link href="/community">View All Contributors</Link>
+            <Link href={ROUTES.COMMUNITY}>View All Contributors</Link>
           </Button>
         </div>
       </TabsContent>

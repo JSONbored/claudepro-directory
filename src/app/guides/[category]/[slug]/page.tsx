@@ -14,7 +14,7 @@ import { ViewTracker } from '@/src/components/shared/view-tracker';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent } from '@/src/components/ui/card';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { ArrowLeft, BookOpen, Calendar, Eye, FileText, Tag, Users, Zap } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -472,7 +472,7 @@ export default async function SEOGuidePage({
                   className="-ml-2 text-muted-foreground hover:text-foreground"
                   asChild
                 >
-                  <Link href="/guides">
+                  <Link href={ROUTES.GUIDES}>
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     All Guides
                   </Link>

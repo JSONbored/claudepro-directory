@@ -19,6 +19,7 @@ import {
   shortString,
   urlString,
 } from '@/src/lib/schemas/primitives/base-strings';
+import { authTypeSchema } from '@/src/lib/schemas/primitives/content-enums';
 
 /**
  * MCP Transport Configuration Schema
@@ -240,8 +241,7 @@ export const mcpContentSchema = z
 
     // Authentication and permissions
     requiresAuth: z.boolean().optional().describe('Whether the MCP server requires authentication'),
-    authType: z
-      .enum(['api_key', 'oauth', 'connection_string', 'basic_auth'])
+    authType: authTypeSchema
       .optional()
       .describe(
         'Type of authentication required (API key, OAuth, connection string, or basic auth)'

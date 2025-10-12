@@ -9,9 +9,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { getUserSubmissions } from '@/src/lib/actions/submission-actions';
+import { getUserSubmissions } from '@/src/lib/actions/business.actions';
+import { ROUTES } from '@/src/lib/constants';
 import { CheckCircle, Clock, ExternalLink, GitPullRequest, Send, XCircle } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { BADGE_COLORS, type SubmissionStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {
   title: 'My Submissions - Claude Pro Directory',
@@ -24,33 +25,20 @@ export default async function SubmissionsPage() {
 
   const getStatusBadge = (status: string) => {
     const variants = {
-      pending: {
-        icon: Clock,
-        label: 'Pending Review',
-        className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-      },
-      approved: {
-        icon: CheckCircle,
-        label: 'Approved',
-        className: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-      },
-      merged: {
-        icon: CheckCircle,
-        label: 'Merged ✓',
-        className: 'bg-green-500/10 text-green-400 border-green-500/20',
-      },
-      rejected: {
-        icon: XCircle,
-        label: 'Rejected',
-        className: 'bg-red-500/10 text-red-400 border-red-500/20',
-      },
+      pending: { icon: Clock, label: 'Pending Review' },
+      approved: { icon: CheckCircle, label: 'Approved' },
+      merged: { icon: CheckCircle, label: 'Merged ✓' },
+      rejected: { icon: XCircle, label: 'Rejected' },
     };
 
     const variant = variants[status as keyof typeof variants] || variants.pending;
     const Icon = variant.icon;
+    const colorClass =
+      BADGE_COLORS.submissionStatus[status as SubmissionStatusType] ||
+      BADGE_COLORS.submissionStatus.pending;
 
     return (
-      <Badge variant="outline" className={variant.className}>
+      <Badge variant="outline" className={colorClass}>
         <Icon className="h-3 w-3 mr-1" />
         {variant.label}
       </Badge>
@@ -79,7 +67,7 @@ export default async function SubmissionsPage() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/submit">
+          <Link href={ROUTES.SUBMIT}>
             <Send className="h-4 w-4 mr-2" />
             New Submission
           </Link>
@@ -96,7 +84,7 @@ export default async function SubmissionsPage() {
               build better AI workflows.
             </p>
             <Button asChild>
-              <Link href="/submit">
+              <Link href={ROUTES.SUBMIT}>
                 <Send className="h-4 w-4 mr-2" />
                 Submit Your First Configuration
               </Link>

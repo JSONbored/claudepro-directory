@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '@/src/components/ui/select';
 import { createSearchIndex, performLocalSearch } from '@/src/hooks/use-search';
+import { ROUTES } from '@/src/lib/constants';
 import {
   AlertTriangle,
   BookOpen,
@@ -438,10 +439,10 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
               <Card className={UI_CLASSES.P_4}>
                 <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} mb-3`}>Quick Actions</h3>
                 <div className={UI_CLASSES.SPACE_Y_2}>
-                  <Link href="/" className={UI_CLASSES.LIST_ITEM_HOVER}>
+                  <Link href={ROUTES.HOME} className={UI_CLASSES.LIST_ITEM_HOVER}>
                     Browse Directory
                   </Link>
-                  <Link href="/submit" className={UI_CLASSES.LIST_ITEM_HOVER}>
+                  <Link href={ROUTES.SUBMIT} className={UI_CLASSES.LIST_ITEM_HOVER}>
                     Submit Content
                   </Link>
                 </div>
@@ -459,7 +460,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
             Browse our complete directory or submit your own content
           </p>
           <div className={`${UI_CLASSES.FLEX} gap-4 ${UI_CLASSES.JUSTIFY_CENTER}`}>
-            <Link href="/">
+            <Link href={ROUTES.HOME}>
               <button
                 type="button"
                 className={`${UI_CLASSES.PX_6} py-2 bg-primary text-primary-foreground ${UI_CLASSES.ROUNDED_LG} hover:bg-primary/90`}
@@ -467,7 +468,7 @@ export function EnhancedGuidesPage({ guides }: EnhancedGuidesPageProps) {
                 Browse Directory
               </button>
             </Link>
-            <Link href="/submit">
+            <Link href={ROUTES.SUBMIT}>
               <button
                 type="button"
                 className={`${UI_CLASSES.PX_6} py-2 border border-border ${UI_CLASSES.ROUNDED_LG} ${UI_CLASSES.HOVER_BG_ACCENT}`}

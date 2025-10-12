@@ -25,7 +25,7 @@ const Meteors = dynamic(
 import { logger } from '@/src/lib/logger';
 import { statsRedis } from '@/src/lib/redis';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
-import { featuredLoaderService } from '@/src/lib/services/featured-loader.service';
+import { featuredService } from '@/src/lib/services/featured.service';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { transformForHomePage } from '@/src/lib/utils/transformers';
 
@@ -77,7 +77,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       lazyContentLoaders.hooks(),
       lazyContentLoaders.statuslines(),
       lazyContentLoaders.collections(),
-      featuredLoaderService.loadCurrentFeaturedContentByCategory(),
+      featuredService.loadCurrentFeaturedContentByCategory(),
     ]);
 
     [

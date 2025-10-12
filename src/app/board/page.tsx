@@ -11,10 +11,11 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { ROUTES } from '@/src/lib/constants';
 import { MessageSquare, Plus, TrendingUp, User as UserIcon } from '@/src/lib/icons';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { formatRelativeDate } from '@/src/lib/utils/date-utils';
+import { formatRelativeDate } from '@/src/lib/utils/date.utils';
 
 export const metadata: Metadata = {
   title: 'Community Board - ClaudePro Directory',
@@ -70,7 +71,7 @@ export default async function BoardPage() {
             </div>
 
             <Button asChild>
-              <Link href="/board/new">
+              <Link href={ROUTES.BOARD_NEW}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Post
               </Link>
@@ -90,7 +91,7 @@ export default async function BoardPage() {
                 Be the first to share something with the community!
               </p>
               <Button asChild>
-                <Link href="/board/new">
+                <Link href={ROUTES.BOARD_NEW}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create First Post
                 </Link>

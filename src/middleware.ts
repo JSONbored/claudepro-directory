@@ -631,7 +631,7 @@ export const config = {
      * - favicon.ico (favicon file)
      * - robots.txt (robots file)
      * - sitemap.xml (sitemap file)
-     * - manifest.json|manifest.webmanifest (PWA manifest)
+     * - manifest (PWA manifest - Next.js generates from src/app/manifest.ts)
      * - .well-known (well-known files for verification)
      * - /js/ (public JavaScript files)
      * - /scripts/ (public script files - service workers, etc.)
@@ -639,6 +639,6 @@ export const config = {
      * - 863ad0a5c1124f59a060aa77f0861518.txt (IndexNow key file)
      * - *.png, *.jpg, *.jpeg, *.gif, *.webp, *.svg, *.ico (image files)
      */
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest\\.json|manifest\\.webmanifest|\\.well-known|js/|scripts/|css/|863ad0a5c1124f59a060aa77f0861518\\.txt|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest$|\\.well-known|js/|scripts/|css/|863ad0a5c1124f59a060aa77f0861518\\.txt|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)',
   ],
 };

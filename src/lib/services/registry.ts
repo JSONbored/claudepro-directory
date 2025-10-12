@@ -23,10 +23,7 @@ const getEmailSequenceService = async () =>
   (await import('./email-sequence.service')).emailSequenceService;
 const getDigestService = async () => (await import('./digest.service')).digestService;
 const getViewCountService = async () => (await import('./view-count.service')).viewCountService;
-const getFeaturedLoaderService = async () =>
-  (await import('./featured-loader.service')).featuredLoaderService;
-const getFeaturedCalculatorService = async () =>
-  (await import('./featured-calculator.service')).featuredCalculatorService;
+const getFeaturedService = async () => (await import('./featured.service')).featuredService;
 
 // =====================================================
 // SERVICE REGISTRATIONS
@@ -108,18 +105,13 @@ export async function registerServices(): Promise<void> {
   );
 
   // Featured Content Services
-  registerSingleton('featuredLoaderService', async () => {
-    const service = await getFeaturedLoaderService();
-    return service;
-  });
-
+  // SHA-3152: Consolidated into single unified service
   registerSingleton(
-    'featuredCalculatorService',
+    'featuredService',
     async () => {
-      return await getFeaturedCalculatorService();
+      return await getFeaturedService();
     },
     {
-      dependencies: ['featuredLoaderService'],
       config: {
         calculationIntervalHours: Number.parseInt(
           process.env.FEATURED_CALCULATION_INTERVAL || '24',
@@ -170,6 +162,5 @@ export const Services = {
   emailSequence: () => getEmailSequenceService(),
   digest: () => getDigestService(),
   viewCount: () => getViewCountService(),
-  featuredLoader: () => getFeaturedLoaderService(),
-  featuredCalculator: () => getFeaturedCalculatorService(),
+  featured: () => getFeaturedService(),
 } as const;

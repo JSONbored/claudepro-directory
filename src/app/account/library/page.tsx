@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
+import { ROUTES } from '@/src/lib/constants';
 import { Bookmark, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -54,7 +55,7 @@ export default async function LibraryPage() {
             {bookmarkCount} bookmarks • {collectionCount} collections
           </p>
         </div>
-        <Link href="/account/library/new">
+        <Link href={ROUTES.ACCOUNT_LIBRARY_NEW}>
           <Button className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             New Collection
@@ -137,7 +138,7 @@ export default async function LibraryPage() {
                   Organize your bookmarks into custom collections! Group related configurations
                   together and share them with others.
                 </p>
-                <Link href="/account/library/new">
+                <Link href={ROUTES.ACCOUNT_LIBRARY_NEW}>
                   <Button className="flex items-center gap-2">
                     <Plus className="h-4 w-4" />
                     Create Your First Collection

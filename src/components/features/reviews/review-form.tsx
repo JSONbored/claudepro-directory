@@ -20,7 +20,7 @@ import { StarRating } from '@/src/components/features/reviews/star-rating';
 import { Button } from '@/src/components/ui/button';
 import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
-import { createReview, updateReview } from '@/src/lib/actions/review-actions';
+import { createReview, updateReview } from '@/src/lib/actions/content.actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface ReviewFormProps {

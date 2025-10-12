@@ -52,7 +52,7 @@ import { NewIndicator } from '@/src/components/ui/new-indicator';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/src/components/ui/sheet';
 import { PRIMARY_NAVIGATION, SECONDARY_NAVIGATION } from '@/src/config/navigation';
 import { useSearchShortcut } from '@/src/hooks/use-search-shortcut';
-import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
+import { APP_CONFIG, ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
 import { ChevronDown, DiscordIcon, Github, LogoIcon, Menu } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -166,7 +166,7 @@ export const Navigation = () => {
               >
                 {/* Logo */}
                 <Link
-                  href="/"
+                  href={ROUTES.HOME}
                   className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-2 ${UI_CLASSES.MIN_W_0} flex-shrink`}
                   aria-label="Claude Pro Directory - Go to homepage"
                 >
@@ -268,7 +268,7 @@ export const Navigation = () => {
                       <DropdownMenuSeparator className="my-4" />
                       <DropdownMenuItem asChild>
                         <Link
-                          href="/submit"
+                          href={ROUTES.SUBMIT}
                           className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} gap-3 ${UI_CLASSES.W_FULL} cursor-pointer p-3 rounded-lg bg-accent/5 hover:bg-accent/10 hover:scale-[1.01] transition-all duration-200 group`}
                         >
                           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20 group-hover:bg-accent/30 transition-colors flex-shrink-0">
@@ -414,7 +414,7 @@ export const Navigation = () => {
                                   )
                                 )}
                                 <NavLink
-                                  href="/submit"
+                                  href={ROUTES.SUBMIT}
                                   isActive={isActive}
                                   onClick={() => setIsOpen(false)}
                                   className={UI_CLASSES.BUTTON_SECONDARY_MEDIUM}

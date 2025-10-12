@@ -238,46 +238,66 @@ export const rateLimitedAction = actionClient.use(async ({ next, metadata, ctx }
 });
 
 /**
- * Authenticated action client (Phase 1 - Stub)
+ * Authenticated action client
+ * SHA-3153: Implemented with Supabase auth integration
  *
  * Extends rateLimitedAction with authentication middleware.
+ * Automatically validates user session and attaches userId to context.
  *
- * TODO Phase 1 Implementation:
- * - Integrate with NextAuth.js v5 or Clerk
- * - Extract session from request
- * - Validate user authentication
- * - Attach userId to context
- * - Support role-based authorization
- *
- * Usage (after Phase 1):
+ * Usage:
  * ```ts
- * export const updateProfile = authedAction(
- *   updateProfileSchema,
- *   async ({ userId, name, email }) => {
- *     // userId is automatically available from session
+ * export const updateProfile = authedAction
+ *   .metadata({
+ *     actionName: 'updateProfile',
+ *     category: 'user',
+ *   })
+ *   .schema(updateProfileSchema)
+ *   .action(async ({ parsedInput: { name, email }, ctx }) => {
+ *     const { userId } = ctx; // userId automatically available
  *     await db.user.update({ where: { id: userId }, data: { name, email } });
  *     return { success: true };
- *   },
- *   { metadata: { actionName: 'updateProfile', category: 'user' } }
- * );
+ *   });
  * ```
  */
 export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => {
-  // Phase 1 TODO: Implement authentication
-  // const session = await getSession();
-  // if (!session) {
-  //   throw new Error('Unauthorized. Please sign in to continue.');
-  // }
+  // Import Supabase client dynamically to avoid circular dependencies
+  const { createClient } = await import('@/src/lib/supabase/server');
+  const supabase = await createClient();
 
-  // For now, this is a pass-through that still applies rate limiting
-  logger.debug('Auth middleware called (stub - Phase 1 implementation pending)', {
-    actionName: metadata?.actionName,
+  // Get authenticated user from Supabase session
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    const warnData: Record<string, string> = {
+      actionName: metadata?.actionName || 'unknown',
+    };
+    if (error?.message) warnData.error = error.message;
+
+    logger.warn('Unauthorized action attempt', warnData);
+    throw new Error('Unauthorized. Please sign in to continue.');
+  }
+
+  // Log authenticated action
+  const logData: Record<string, string> = {
+    actionName: metadata?.actionName || 'unknown',
+    userId: user.id,
+  };
+  if (user.email) logData.userEmail = user.email;
+
+  logger.info(`Authenticated action: ${metadata?.actionName}`, logData);
+
+  // Attach userId to context for use in action handler
+  const authCtx: { userId: string; userEmail?: string } = {
+    userId: user.id,
+  };
+  if (user.email) authCtx.userEmail = user.email;
+
+  return next({
+    ctx: authCtx,
   });
-
-  // TODO: After Phase 1, attach userId to context
-  // return next({ ctx: { userId: session.id } });
-
-  return next();
 });
 
 /**
@@ -324,15 +344,18 @@ export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => 
  * );
  * ```
  *
- * Authenticated action (Phase 1):
+ * Authenticated action:
  * ```ts
- * export const deleteAccount = authedAction(
- *   z.object({ confirm: z.literal(true) }),
- *   async ({ userId, confirm }) => {
+ * export const deleteAccount = authedAction
+ *   .metadata({
+ *     actionName: 'deleteAccount',
+ *     category: 'user',
+ *   })
+ *   .schema(z.object({ confirm: z.literal(true) }))
+ *   .action(async ({ parsedInput: { confirm }, ctx }) => {
+ *     const { userId } = ctx; // Auto-populated from Supabase session
  *     await db.user.delete({ where: { id: userId } });
  *     return { success: true };
- *   },
- *   { metadata: { actionName: 'deleteAccount', category: 'user' } }
- * );
+ *   });
  * ```
  */

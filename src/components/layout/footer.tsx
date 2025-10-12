@@ -7,7 +7,7 @@
 
 import Link from 'next/link';
 import { Badge } from '@/src/components/ui/badge';
-import { APP_CONFIG, SOCIAL_LINKS } from '@/src/lib/constants';
+import { APP_CONFIG, ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
 import { DiscordIcon, ExternalLink, Github, Sparkles } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -64,7 +64,7 @@ export function Footer() {
             <ul className={`space-y-2 ${UI_CLASSES.TEXT_SM}`}>
               <li>
                 <Link
-                  href="/guides"
+                  href={ROUTES.GUIDES}
                   className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
                 >
                   Guides
@@ -72,7 +72,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/collections"
+                  href={ROUTES.COLLECTIONS}
                   className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
                 >
                   Collections
@@ -80,7 +80,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/changelog"
+                  href={ROUTES.CHANGELOG}
                   className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
                 >
                   Changelog
@@ -88,7 +88,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/community"
+                  href={ROUTES.COMMUNITY}
                   className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
                 >
                   Community
@@ -96,7 +96,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/submit"
+                  href={ROUTES.SUBMIT}
                   className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
                 >
                   Submit
@@ -111,7 +111,7 @@ export function Footer() {
             <ul className={`space-y-2 ${UI_CLASSES.TEXT_SM}`}>
               <li>
                 <Link
-                  href="/llms.txt"
+                  href={ROUTES.LLMS_TXT}
                   className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH} inline-flex items-center ${UI_CLASSES.GAP_2}`}
                   aria-label="LLMs.txt - AI-optimized content"
                 >
@@ -121,7 +121,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/api-docs"
+                  href={ROUTES.API_DOCS}
                   className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
                 >
                   API Docs
@@ -129,7 +129,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/partner"
+                  href={ROUTES.PARTNER}
                   className={`${UI_CLASSES.TEXT_MUTED} hover:text-foreground ${UI_CLASSES.TRANSITION_COLORS_SMOOTH}`}
                 >
                   Partner Program
@@ -148,7 +148,7 @@ export function Footer() {
           </p>
           <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED}`}>
             <Link
-              href="/llms.txt"
+              href={ROUTES.LLMS_TXT}
               className="hover:text-foreground transition-colors inline-flex items-center gap-1"
             >
               <Sparkles className="h-3 w-3" />

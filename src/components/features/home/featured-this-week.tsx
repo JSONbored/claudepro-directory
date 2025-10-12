@@ -23,6 +23,7 @@ import { type FC, memo } from 'react';
 import { ConfigCard } from '@/src/components/features/content/config-card';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
+import { ROUTES } from '@/src/lib/constants';
 import { Award, ChevronRight, Sparkles, TrendingUp } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -78,7 +79,7 @@ const FeaturedThisWeekComponent: FC<FeaturedThisWeekProps> = ({ featuredItems, w
             </p>
           </div>
         </div>
-        <Link href="/featured" className={UI_CLASSES.LINK_ACCENT_UNDERLINE}>
+        <Link href={ROUTES.FEATURED} className={UI_CLASSES.LINK_ACCENT_UNDERLINE}>
           View Archive <ChevronRight className="h-4 w-4" />
         </Link>
       </div>
@@ -139,7 +140,7 @@ const FeaturedThisWeekComponent: FC<FeaturedThisWeekProps> = ({ featuredItems, w
       {featuredItems.length > 10 && (
         <div className="mt-8 flex justify-center">
           <Button asChild variant="outline" size="lg">
-            <Link href="/featured">
+            <Link href={ROUTES.FEATURED}>
               <TrendingUp className="mr-2 h-4 w-4" />
               View All {featuredItems.length} Featured Configs
             </Link>

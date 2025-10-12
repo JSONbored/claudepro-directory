@@ -5,7 +5,7 @@ import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-sc
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { jobs } from '@/src/lib/data/jobs';
 import {
   ArrowLeft,
@@ -139,7 +139,7 @@ export default async function JobPage({ params }: PageProps) {
         <div className={`${UI_CLASSES.BORDER_B} border-border/50 ${UI_CLASSES.BG_CARD}/30`}>
           <div className="container mx-auto px-4 py-8">
             <Button variant="ghost" asChild className={UI_CLASSES.MB_6}>
-              <Link href="/jobs">
+              <Link href={ROUTES.JOBS}>
                 <ArrowLeft className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />
                 Back to Jobs
               </Link>

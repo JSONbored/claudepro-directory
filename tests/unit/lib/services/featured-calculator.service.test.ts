@@ -1,5 +1,6 @@
 /**
- * Featured Calculator Service Tests
+ * Featured Service Calculator Tests
+ * SHA-3152: Tests for unified featured content service (calculation functions)
  *
  * Tests for the multi-factor featured content scoring algorithm.
  * This is BUSINESS-CRITICAL - determines which content gets featured weekly.
@@ -14,18 +15,17 @@
  * - Multi-factor scoring calculations
  * - Redis view count integration
  * - Database engagement metrics
- * - Week start/end calculations
  * - Edge cases (zero views, missing data, Redis errors)
  *
- * @see src/lib/services/featured-calculator.service.ts
+ * @see src/lib/services/featured.service.ts
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import {
   calculateFeaturedForCategory,
-  featuredCalculatorService,
-} from '@/src/lib/services/featured-calculator.service';
+  featuredService,
+} from '@/src/lib/services/featured.service';
 
 // Mock dependencies
 vi.mock('@/src/lib/logger', () => ({
@@ -70,7 +70,7 @@ function createMockContentItem(
   } as UnifiedContentItem;
 }
 
-describe('featuredCalculatorService', () => {
+describe('featuredService', () => {
   let mockSupabase: {
     from: ReturnType<typeof vi.fn>;
   };
@@ -111,7 +111,7 @@ describe('featuredCalculatorService', () => {
 
   describe('Week Calculations', () => {
     it('gets current week start (Monday)', () => {
-      const weekStart = featuredCalculatorService.getCurrentWeekStart();
+      const weekStart = featuredService.getCurrentWeekStart();
 
       expect(weekStart.getDay()).toBe(1); // Monday
       expect(weekStart.getHours()).toBe(0);
@@ -123,7 +123,7 @@ describe('featuredCalculatorService', () => {
     it('calculates week end (Sunday) from week start', () => {
       const weekStart = new Date('2025-01-06T00:00:00'); // Monday (local time)
       weekStart.setHours(0, 0, 0, 0); // Ensure midnight
-      const weekEnd = featuredCalculatorService.getWeekEnd(weekStart);
+      const weekEnd = featuredService.getWeekEnd(weekStart);
 
       // Week end should be 6 days later
       const daysDiff = Math.floor(
@@ -146,7 +146,7 @@ describe('featuredCalculatorService', () => {
       vi.useFakeTimers();
       vi.setSystemTime(mockedDate);
 
-      const weekStart = featuredCalculatorService.getCurrentWeekStart();
+      const weekStart = featuredService.getCurrentWeekStart();
 
       // Should return previous Monday (Dec 30)
       expect(weekStart.getDay()).toBe(1);
@@ -169,7 +169,7 @@ describe('featuredCalculatorService', () => {
 
       for (const date of testDates) {
         vi.setSystemTime(new Date(date));
-        const weekStart = featuredCalculatorService.getCurrentWeekStart();
+        const weekStart = featuredService.getCurrentWeekStart();
         // All should return Monday (day 1)
         expect(weekStart.getDay()).toBe(1);
       }

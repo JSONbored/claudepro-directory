@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { getActivitySummary, getActivityTimeline } from '@/src/lib/actions/activity-actions';
+import { getActivitySummary, getActivityTimeline } from '@/src/lib/actions/user.actions';
 import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 

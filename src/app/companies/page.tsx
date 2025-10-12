@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { ROUTES } from '@/src/lib/constants';
 import { Building, ExternalLink, Plus, Star } from '@/src/lib/icons';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -58,7 +59,7 @@ export default async function CompaniesPage() {
             </div>
 
             <Button variant="outline" asChild>
-              <Link href="/account/companies">
+              <Link href={ROUTES.ACCOUNT_COMPANIES}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Your Company
               </Link>
@@ -78,7 +79,7 @@ export default async function CompaniesPage() {
                 Be the first company to join the directory!
               </p>
               <Button asChild>
-                <Link href="/account/companies">
+                <Link href={ROUTES.ACCOUNT_COMPANIES}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Your Company
                 </Link>

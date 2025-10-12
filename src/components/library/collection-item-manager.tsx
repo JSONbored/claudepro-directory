@@ -25,7 +25,7 @@ import {
   addItemToCollection,
   removeItemFromCollection,
   reorderCollectionItems,
-} from '@/src/lib/actions/collection-actions';
+} from '@/src/lib/actions/content.actions';
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@/src/lib/icons';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

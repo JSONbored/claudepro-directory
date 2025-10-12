@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { ROUTES } from '@/src/lib/constants';
 import { AlertCircle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -34,10 +35,10 @@ export default function AuthCodeError() {
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           <Button asChild>
-            <Link href="/login">Try Again</Link>
+            <Link href={ROUTES.LOGIN}>Try Again</Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link href="/">Return Home</Link>
+            <Link href={ROUTES.HOME}>Return Home</Link>
           </Button>
         </CardContent>
       </Card>

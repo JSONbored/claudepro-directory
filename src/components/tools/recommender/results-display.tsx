@@ -16,6 +16,8 @@
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { BaseCard } from '@/src/components/shared/base-card';
+import { BookmarkButton } from '@/src/components/shared/bookmark-button';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -33,12 +35,22 @@ import {
 import { Separator } from '@/src/components/ui/separator';
 import { Slider } from '@/src/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
-import { addBookmarkBatch } from '@/src/lib/actions/bookmark-actions';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/src/components/ui/tooltip';
+import { addBookmarkBatch } from '@/src/lib/actions/user.actions';
+import { ROUTES } from '@/src/lib/constants';
 import {
   ArrowRight,
+  Award,
   BarChart,
   Bookmark,
   ChevronDown,
+  Eye,
+  Info,
   RefreshCw,
   Settings,
   Share2,
@@ -47,7 +59,7 @@ import {
 } from '@/src/lib/icons';
 import type { RecommendationResponse } from '@/src/lib/schemas/recommender.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { RecommendationCard } from './recommendation-card';
+import { getContentItemUrl } from '@/src/lib/utils/url-helpers';
 import { ShareResults } from './share-results';
 
 interface ResultsDisplayProps {
@@ -161,7 +173,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             Share Results
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link href="/tools/config-recommender" className="gap-2">
+            <Link href={ROUTES.CONFIG_RECOMMENDER} className="gap-2">
               <RefreshCw className="h-4 w-4" />
               Start Over
             </Link>
@@ -315,9 +327,133 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         <TabsContent value={selectedCategory} className="mt-6">
           {/* Results Grid */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredResults.map((result) => (
-              <RecommendationCard key={result.slug} result={result} />
-            ))}
+            {filteredResults.map((result) => {
+              const targetPath = getContentItemUrl(result);
+              const getMatchScoreColor = (score: number) => {
+                if (score >= 90) return 'text-green-600 dark:text-green-400';
+                if (score >= 75) return 'text-blue-600 dark:text-blue-400';
+                if (score >= 60) return 'text-yellow-600 dark:text-yellow-400';
+                return 'text-muted-foreground';
+              };
+              const getMatchGradient = (score: number) => {
+                if (score >= 90) return 'from-green-500/20 to-transparent';
+                if (score >= 75) return 'from-blue-500/20 to-transparent';
+                if (score >= 60) return 'from-yellow-500/20 to-transparent';
+                return 'from-muted/20 to-transparent';
+              };
+
+              return (
+                <div key={result.slug} className="relative">
+                  {/* Match score badge (top right) */}
+                  <div className="absolute top-4 right-4 z-10">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge
+                            variant="secondary"
+                            className={`${getMatchScoreColor(result.matchScore)} font-bold text-base px-3 py-1`}
+                          >
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            {result.matchScore}%
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Match Score: How well this fits your needs</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+
+                  {/* Rank badge (top left) */}
+                  {result.rank <= 3 && (
+                    <div className="absolute top-4 left-4 z-10">
+                      <Badge variant="outline" className="bg-background/80 backdrop-blur-sm">
+                        <Award className="h-3 w-3 mr-1" />#{result.rank}
+                      </Badge>
+                    </div>
+                  )}
+
+                  {/* Bookmark button (bottom right) */}
+                  <div className="absolute bottom-4 right-4 z-10">
+                    <BookmarkButton
+                      contentType={result.category}
+                      contentSlug={result.slug}
+                      initialBookmarked={false}
+                    />
+                  </div>
+
+                  {/* Gradient overlay */}
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${getMatchGradient(result.matchScore)} opacity-50 pointer-events-none`}
+                  />
+
+                  <Link href={targetPath}>
+                    <BaseCard
+                      targetPath={targetPath}
+                      displayTitle={result.title}
+                      description={result.description}
+                      ariaLabel={`${result.title} - ${result.matchScore}% match`}
+                      tags={result.tags}
+                      maxVisibleTags={4}
+                      author={result.author}
+                      className="relative overflow-hidden hover:shadow-lg transition-all"
+                      renderTopBadges={() => (
+                        <Badge variant="outline" className="w-fit capitalize">
+                          {result.category}
+                        </Badge>
+                      )}
+                      renderContent={() => (
+                        <>
+                          {/* Primary reason for recommendation */}
+                          <div className="flex items-start gap-2 p-3 bg-accent/50 rounded-lg mb-3">
+                            <Info className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                            <div>
+                              <p className="text-sm font-medium">Why recommended:</p>
+                              <p className="text-sm text-muted-foreground">
+                                {result.primaryReason}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Additional reasons */}
+                          {result.reasons.length > 1 && (
+                            <div className="flex flex-wrap gap-1">
+                              {result.reasons.slice(1, 4).map((reason) => (
+                                <Badge key={reason.message} variant="secondary" className="text-xs">
+                                  {reason.message}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
+                      renderMetadataBadges={() =>
+                        result.viewCount !== undefined ? (
+                          <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Eye className="h-3 w-3" />
+                            {result.viewCount}
+                          </span>
+                        ) : null
+                      }
+                      customMetadataText={
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full group -mx-4 -mb-4 mt-2"
+                          asChild
+                        >
+                          <span className="flex items-center justify-center gap-2">
+                            View Details
+                            <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                          </span>
+                        </Button>
+                      }
+                      showActions={false}
+                    />
+                  </Link>
+                </div>
+              );
+            })}
           </div>
 
           {filteredResults.length === 0 && (
@@ -351,7 +487,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
               </Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link href="/guides">View Setup Guides</Link>
+              <Link href={ROUTES.GUIDES}>View Setup Guides</Link>
             </Button>
           </div>
         </CardContent>

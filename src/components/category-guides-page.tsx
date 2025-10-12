@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '@/src/components/ui/select';
 import { createSearchIndex, performLocalSearch } from '@/src/hooks/use-search';
+import { ROUTES } from '@/src/lib/constants';
 import {
   AlertTriangle,
   ArrowLeft,
@@ -122,7 +123,7 @@ export function CategoryGuidesPage({ category, guides }: CategoryGuidesPageProps
         {/* Back Button */}
         <div className={UI_CLASSES.MB_6}>
           <Button variant="ghost" size="sm" className="-ml-2" asChild>
-            <Link href="/guides">
+            <Link href={ROUTES.GUIDES}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               All Guides
             </Link>
@@ -289,13 +290,13 @@ export function CategoryGuidesPage({ category, guides }: CategoryGuidesPageProps
               <Card className={UI_CLASSES.P_4}>
                 <h3 className={`${UI_CLASSES.FONT_SEMIBOLD} mb-3`}>Quick Actions</h3>
                 <div className={UI_CLASSES.SPACE_Y_2}>
-                  <Link href="/guides" className={UI_CLASSES.LIST_ITEM_HOVER}>
+                  <Link href={ROUTES.GUIDES} className={UI_CLASSES.LIST_ITEM_HOVER}>
                     All Guides
                   </Link>
-                  <Link href="/" className={UI_CLASSES.LIST_ITEM_HOVER}>
+                  <Link href={ROUTES.HOME} className={UI_CLASSES.LIST_ITEM_HOVER}>
                     Browse Directory
                   </Link>
-                  <Link href="/submit" className={UI_CLASSES.LIST_ITEM_HOVER}>
+                  <Link href={ROUTES.SUBMIT} className={UI_CLASSES.LIST_ITEM_HOVER}>
                     Submit Content
                   </Link>
                 </div>

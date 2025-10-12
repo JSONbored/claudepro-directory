@@ -8,6 +8,10 @@
 import { z } from 'zod';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 import {
+  hookTypeFormSchema,
+  statuslineTypeFormSchema,
+} from '@/src/lib/schemas/primitives/content-enums';
+import {
   trimOptionalStringOrEmpty,
   trimString,
 } from '@/src/lib/schemas/primitives/sanitization-transforms';
@@ -123,7 +127,7 @@ export const hooksSubmissionSchema = z.object({
     .min(20, 'Hook script must be at least 20 characters')
     .max(5000, 'Hook script is too long'),
 
-  hookType: z.enum(['pre-tool-use', 'post-tool-use', 'pre-command', 'post-command']),
+  hookType: hookTypeFormSchema,
   triggeredBy: z
     .string()
     .optional()
@@ -148,7 +152,7 @@ export const statuslinesSubmissionSchema = z.object({
     .min(20, 'Statusline script must be at least 20 characters')
     .max(5000, 'Statusline script is too long'),
 
-  statuslineType: z.enum(['custom', 'minimal', 'extended']).default('custom'),
+  statuslineType: statuslineTypeFormSchema,
   refreshInterval: z.coerce.number().min(100).max(10000).default(1000),
   position: z.enum(['left', 'right']).default('left'),
 });

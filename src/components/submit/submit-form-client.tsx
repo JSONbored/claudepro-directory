@@ -25,7 +25,8 @@ import {
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
-import { submitConfiguration } from '@/src/lib/actions/submission-actions';
+import { submitConfiguration } from '@/src/lib/actions/business.actions';
+import { ROUTES } from '@/src/lib/constants';
 import { CheckCircle, ExternalLink, Github, Send } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { DuplicateWarning } from './duplicate-warning';
@@ -285,7 +286,7 @@ export function SubmitFormClient() {
                     </a>
                   </Button>
                   <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
-                    <Link href="/account/submissions">Track Status</Link>
+                    <Link href={ROUTES.ACCOUNT_SUBMISSIONS}>Track Status</Link>
                   </Button>
                 </div>
               </div>

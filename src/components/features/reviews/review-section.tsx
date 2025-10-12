@@ -19,7 +19,13 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useId, useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { ReviewCard } from '@/src/components/features/reviews/review-card';
+import { StarRating } from '@/src/components/features/reviews/star-rating';
+import { BaseCard } from '@/src/components/shared/base-card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
+import { Badge } from '@/src/components/ui/badge';
+import { markReviewHelpful } from '@/src/lib/actions/content.actions';
+import { ThumbsUp } from '@/src/lib/icons';
+import { formatDistanceToNow } from '@/src/lib/utils/date.utils';
 
 // Lazy load RatingHistogram component with recharts dependency (~100KB)
 const RatingHistogram = dynamic(
@@ -43,7 +49,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/ui/select';
-import { deleteReview, getAggregateRating, getReviews } from '@/src/lib/actions/review-actions';
+import { deleteReview, getAggregateRating, getReviews } from '@/src/lib/actions/content.actions';
 import { ChevronDown, Edit, Loader2, MessageCircle } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -87,6 +93,152 @@ interface ReviewSectionProps {
 }
 
 type SortOption = 'recent' | 'helpful' | 'rating_high' | 'rating_low';
+
+/**
+ * Individual Review Card Item - uses BaseCard directly for optimal tree shaking
+ */
+function ReviewCardItem({
+  review,
+  currentUserId,
+  onEdit,
+  onDelete,
+}: {
+  review: ReviewItem;
+  currentUserId?: string;
+  onEdit?: () => void;
+  onDelete?: () => void;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [hasVoted, setHasVoted] = useState(review.user_has_voted_helpful ?? false);
+  const [helpfulCount, setHelpfulCount] = useState(review.helpful_count);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const user = review.users;
+  const displayName = user?.name || 'Anonymous';
+  const isOwnReview = currentUserId && user && currentUserId === user.slug;
+  const reviewText = review.review_text || '';
+  const shouldTruncate = reviewText.length > 300;
+  const displayText = shouldTruncate && !isExpanded ? `${reviewText.slice(0, 300)}...` : reviewText;
+
+  const handleHelpfulClick = async () => {
+    startTransition(async () => {
+      try {
+        const result = await markReviewHelpful({
+          review_id: review.id,
+          helpful: !hasVoted,
+        });
+
+        if (result?.data?.success) {
+          setHasVoted(!hasVoted);
+          setHelpfulCount((prev) => (hasVoted ? prev - 1 : prev + 1));
+          toast.success(hasVoted ? 'Vote removed' : 'Marked as helpful');
+          router.refresh();
+        }
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('signed in')) {
+          toast.error('Please sign in to vote on reviews', {
+            action: {
+              label: 'Sign In',
+              onClick: () => router.push(`/login?redirect=${window.location.pathname}`),
+            },
+          });
+        } else {
+          toast.error(error instanceof Error ? error.message : 'Failed to update vote');
+        }
+      }
+    });
+  };
+
+  if (!user) return null;
+
+  return (
+    <BaseCard
+      variant="review"
+      displayTitle={displayName}
+      ariaLabel={`Review by ${displayName} - ${review.rating} stars`}
+      disableNavigation
+      showAuthor={false}
+      renderHeader={() => (
+        <div className={`${UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN} mb-3`}>
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
+            <Avatar>
+              {user.image && <AvatarImage src={user.image} alt={displayName} />}
+              <AvatarFallback>{displayName[0]?.toUpperCase() || '?'}</AvatarFallback>
+            </Avatar>
+            <div>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                <span className={`${UI_CLASSES.TEXT_SM} font-semibold`}>{displayName}</span>
+                {user.tier && user.tier !== 'free' && (
+                  <Badge variant="secondary" className="text-xs capitalize">
+                    {user.tier}
+                  </Badge>
+                )}
+              </div>
+              <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mt-1`}>
+                <StarRating value={review.rating} size="sm" />
+                <span className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                  {formatDistanceToNow(new Date(review.created_at))}
+                </span>
+              </div>
+            </div>
+          </div>
+          {isOwnReview && (
+            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+              {onEdit && (
+                <Button variant="ghost" size="sm" onClick={onEdit}>
+                  Edit
+                </Button>
+              )}
+              {onDelete && (
+                <Button variant="ghost" size="sm" onClick={onDelete}>
+                  Delete
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+      renderContent={() =>
+        reviewText ? (
+          <>
+            <p
+              className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} whitespace-pre-wrap`}
+            >
+              {displayText}
+            </p>
+            {shouldTruncate && (
+              <button
+                type="button"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className={`${UI_CLASSES.TEXT_XS} text-primary hover:underline mt-1`}
+              >
+                {isExpanded ? 'Show less' : 'Read more'}
+              </button>
+            )}
+          </>
+        ) : null
+      }
+      renderActions={() => (
+        <Button
+          variant={hasVoted ? 'default' : 'outline'}
+          size="sm"
+          onClick={handleHelpfulClick}
+          disabled={isPending || !!isOwnReview}
+          className="gap-1.5"
+        >
+          <ThumbsUp
+            className={`h-3.5 w-3.5 ${hasVoted ? 'fill-current' : ''}`}
+            aria-hidden="true"
+          />
+          <span className={UI_CLASSES.TEXT_XS}>
+            Helpful {helpfulCount > 0 && `(${helpfulCount})`}
+          </span>
+        </Button>
+      )}
+    />
+  );
+}
 
 export function ReviewSection({
   contentType,
@@ -298,30 +450,27 @@ export function ReviewSection({
 
           {/* Review Cards */}
           <div className="space-y-3">
-            {reviews.map((review) => (
-              <ReviewCard
-                key={review.id}
-                review={review}
-                currentUserId={currentUserId}
-                onEdit={
-                  review.users?.slug === currentUserId
-                    ? () => {
-                        setEditingReview({
-                          id: review.id,
-                          rating: review.rating,
-                          review_text: review.review_text,
-                        });
-                        setShowForm(false);
-                      }
-                    : undefined
-                }
-                onDelete={
-                  review.users?.slug === currentUserId
-                    ? () => handleDeleteReview(review.id)
-                    : undefined
-                }
-              />
-            ))}
+            {reviews.map((review) => {
+              const isOwnReview = review.users?.slug === currentUserId;
+              return (
+                <ReviewCardItem
+                  key={review.id}
+                  review={review}
+                  {...(currentUserId && { currentUserId })}
+                  {...(isOwnReview && {
+                    onEdit: () => {
+                      setEditingReview({
+                        id: review.id,
+                        rating: review.rating,
+                        review_text: review.review_text,
+                      });
+                      setShowForm(false);
+                    },
+                    onDelete: () => handleDeleteReview(review.id),
+                  })}
+                />
+              );
+            })}
           </div>
 
           {/* Load More Button */}

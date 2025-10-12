@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
+import { ROUTES } from '@/src/lib/constants';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -52,7 +53,7 @@ export default async function SponsorshipsPage() {
           </p>
         </div>
         <Button variant="outline" asChild>
-          <Link href="/partner">
+          <Link href={ROUTES.PARTNER}>
             <TrendingUp className="h-4 w-4 mr-2" />
             Become a Sponsor
           </Link>

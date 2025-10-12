@@ -23,7 +23,7 @@ import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Clock, Copy as CopyIcon, Eye, Layers } from '@/src/lib/icons';
 import type { CollectionContent } from '@/src/lib/schemas/content/collection.schema';
-import { CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { BADGE_COLORS, CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { formatViewCount } from '@/src/lib/utils/transformers';
 
@@ -45,15 +45,6 @@ export interface CollectionCardProps {
   /** Show action buttons (copy, view) */
   showActions?: boolean;
 }
-
-/**
- * Difficulty badge variant mapping
- */
-const DIFFICULTY_COLORS = {
-  beginner: 'bg-green-500/10 text-green-400 border-green-500/20',
-  intermediate: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-  advanced: 'bg-red-500/10 text-red-400 border-red-500/20',
-} as const;
 
 /**
  * Collection type label mapping
@@ -110,7 +101,7 @@ export const CollectionCard = memo(
             {/* Difficulty Badge */}
             <Badge
               variant="outline"
-              className={`${UI_CLASSES.TEXT_XS} ${DIFFICULTY_COLORS[item.difficulty]}`}
+              className={`${UI_CLASSES.TEXT_XS} ${BADGE_COLORS.difficulty[item.difficulty]}`}
             >
               {item.difficulty}
             </Badge>

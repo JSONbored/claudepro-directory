@@ -1,6 +1,10 @@
 /**
- * Featured Content Selection Algorithm
- * Multi-factor scoring system for weekly featured configs
+ * Featured Content Service
+ * SHA-3152: Unified featured content calculation and loading service
+ *
+ * Consolidates:
+ * - featured-calculator.service.ts (418 LOC)
+ * - featured-loader.service.ts (329 LOC)
  *
  * ## Algorithm Overview:
  *
@@ -35,14 +39,77 @@
  * - Stores results in `featured_configs` table
  * - Archives previous weeks for historical tracking
  *
- * @module lib/services/featured-calculator
+ * @module lib/services/featured
  */
 
 import { z } from 'zod';
+import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
 import { statsRedis } from '@/src/lib/redis';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { createClient } from '@/src/lib/supabase/server';
+import { getBatchTrendingData } from '@/src/lib/trending/calculator';
+import {
+  getCurrentWeekStart,
+  getCurrentWeekStartISO,
+  getWeekEnd,
+} from '@/src/lib/utils/date.utils';
+
+/**
+ * Configuration: Content categories
+ */
+const CONTENT_CATEGORIES = [
+  'rules',
+  'mcp',
+  'agents',
+  'commands',
+  'hooks',
+  'statuslines',
+  'collections',
+] as const;
+
+/**
+ * Configuration: Score weights for multi-factor algorithm
+ */
+const SCORE_WEIGHTS = {
+  TRENDING: 0.4,
+  RATING: 0.3,
+  ENGAGEMENT: 0.2,
+  FRESHNESS: 0.1,
+} as const;
+
+/**
+ * Configuration: Engagement metric weights
+ */
+const ENGAGEMENT_WEIGHTS = {
+  BOOKMARK: 5,
+  COPY: 3,
+  COMMENT: 2,
+  VIEW_DIVISOR: 10,
+} as const;
+
+/**
+ * Configuration: Loader defaults
+ */
+const LOADER_CONFIG = {
+  MAX_ITEMS_PER_CATEGORY: 6,
+  DEFAULT_CALCULATION_LIMIT: 10,
+  MIN_RATING_COUNT: 3,
+} as const;
+
+// ============================================
+// TYPES & INTERFACES
+// ============================================
+
+/**
+ * Featured config record from database
+ */
+export interface FeaturedConfigRecord {
+  content_type: string;
+  content_slug: string;
+  rank: number;
+  final_score: number;
+}
 
 /**
  * Featured content item with multi-factor scoring
@@ -76,31 +143,15 @@ export interface FeaturedCalculatorOptions {
 
 const featuredCalculatorOptionsSchema = z
   .object({
-    limit: z.number().int().positive().max(50).default(10),
+    limit: z.number().int().positive().max(50).default(LOADER_CONFIG.DEFAULT_CALCULATION_LIMIT),
     weekStart: z.date().optional(),
-    minRatingCount: z.number().int().nonnegative().default(3),
+    minRatingCount: z.number().int().nonnegative().default(LOADER_CONFIG.MIN_RATING_COUNT),
   })
   .partial();
 
-/**
- * Score weights for multi-factor algorithm
- */
-const SCORE_WEIGHTS = {
-  TRENDING: 0.4,
-  RATING: 0.3,
-  ENGAGEMENT: 0.2,
-  FRESHNESS: 0.1,
-} as const;
-
-/**
- * Engagement metric weights
- */
-const ENGAGEMENT_WEIGHTS = {
-  BOOKMARK: 5,
-  COPY: 3,
-  COMMENT: 2,
-  VIEW_DIVISOR: 10,
-} as const;
+// ============================================
+// SCORING ALGORITHMS
+// ============================================
 
 /**
  * Calculate trending score (0-100) from growth rate
@@ -175,28 +226,9 @@ function calculateFreshnessScore(dateAdded: string): number {
   return Math.max(0, 100 - daysOld * 2);
 }
 
-/**
- * Get start of current week (Monday)
- */
-function getCurrentWeekStart(): Date {
-  const now = new Date();
-  const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ...
-  const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Adjust to Monday
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diff);
-  monday.setHours(0, 0, 0, 0);
-  return monday;
-}
-
-/**
- * Get end of week (Sunday)
- */
-function getWeekEnd(weekStart: Date): Date {
-  const sunday = new Date(weekStart);
-  sunday.setDate(weekStart.getDate() + 6);
-  sunday.setHours(23, 59, 59, 999);
-  return sunday;
-}
+// ============================================
+// CALCULATION (Write Operations)
+// ============================================
 
 /**
  * Calculate featured content selections for a specific category
@@ -215,7 +247,7 @@ export async function calculateFeaturedForCategory(
 
   logger.info(`Calculating featured ${category}`, {
     itemCount: items.length,
-    limit: opts.limit ?? 10,
+    limit: opts.limit ?? LOADER_CONFIG.DEFAULT_CALCULATION_LIMIT,
   });
 
   // Step 1: Fetch Redis view counts and growth rates
@@ -299,7 +331,7 @@ export async function calculateFeaturedForCategory(
     const ratingScore = calculateRatingScore(
       rating?.avg,
       rating?.count || 0,
-      opts.minRatingCount || 3
+      opts.minRatingCount || LOADER_CONFIG.MIN_RATING_COUNT
     );
     const engagementScore = calculateEngagementScore(engagement, allEngagementScores);
     const freshnessScore = calculateFreshnessScore(item.dateAdded ?? new Date().toISOString());
@@ -333,7 +365,7 @@ export async function calculateFeaturedForCategory(
   // Step 6: Sort by final score and return top N
   const topItems = scoredItems
     .sort((a, b) => b.finalScore - a.finalScore)
-    .slice(0, opts.limit ?? 10);
+    .slice(0, opts.limit ?? LOADER_CONFIG.DEFAULT_CALCULATION_LIMIT);
 
   logger.info(`Featured ${category} calculation complete`, {
     totalItems: items.length,
@@ -387,20 +419,19 @@ export async function storeFeaturedSelections(
   });
 }
 
+// ============================================
+// DATA ACCESS (Read Operations)
+// ============================================
+
 /**
- * Get featured configs for current week
+ * Get featured configs for current week from database
  *
  * @param category - Optional category filter
  * @returns Featured items for current week
  */
-export async function getCurrentFeaturedConfigs(category?: string): Promise<
-  Array<{
-    content_type: string;
-    content_slug: string;
-    rank: number;
-    final_score: number;
-  }>
-> {
+export async function getCurrentFeaturedConfigs(
+  category?: string
+): Promise<FeaturedConfigRecord[]> {
   const supabase = await createClient();
   const weekStart = getCurrentWeekStart();
 
@@ -427,10 +458,276 @@ export async function getCurrentFeaturedConfigs(category?: string): Promise<
   return data || [];
 }
 
-export const featuredCalculatorService = {
+/**
+ * Load and enrich current week's featured content items grouped by category
+ *
+ * - Fetches featured config records from database
+ * - Loads full content items from content files
+ * - Enriches with featured metadata (rank, score)
+ * - Groups by category (rules, mcp, agents, etc.)
+ * - Returns top 6 per category for featured sections
+ *
+ * @returns Record of category -> featured items (max 6 per category)
+ */
+export async function loadCurrentFeaturedContentByCategory(): Promise<
+  Record<string, readonly UnifiedContentItem[]>
+> {
+  try {
+    // Step 1: Fetch featured records from database
+    const featuredRecords = await getCurrentFeaturedConfigs();
+
+    if (featuredRecords.length === 0) {
+      logger.info('No featured configs for current week - using popular content fallback');
+
+      // Fallback: Load all content and get top 6 per category
+      const [
+        rulesData,
+        mcpData,
+        agentsData,
+        commandsData,
+        hooksData,
+        statuslinesData,
+        collectionsData,
+      ] = await Promise.all([
+        getContentByCategory('rules'),
+        getContentByCategory('mcp'),
+        getContentByCategory('agents'),
+        getContentByCategory('commands'),
+        getContentByCategory('hooks'),
+        getContentByCategory('statuslines'),
+        getContentByCategory('collections'),
+      ]);
+
+      // Use trending calculator to get popular content per category
+      const trendingData = await getBatchTrendingData({
+        rules: rulesData,
+        mcp: mcpData,
+        agents: agentsData,
+        commands: commandsData,
+        hooks: hooksData,
+        statuslines: statuslinesData,
+        collections: collectionsData,
+      });
+
+      // Group popular items by category - ensure all 7 categories are represented
+      const fallbackResult: Record<string, readonly UnifiedContentItem[]> = {};
+
+      // Map of category to its raw data for fallback
+      const categoryDataMap = {
+        rules: rulesData,
+        mcp: mcpData,
+        agents: agentsData,
+        commands: commandsData,
+        hooks: hooksData,
+        statuslines: statuslinesData,
+        collections: collectionsData,
+      };
+
+      for (const category of CONTENT_CATEGORIES) {
+        // First try to get items from trending data
+        const trendingItems = trendingData.popular.filter((item) => item.category === category);
+
+        if (trendingItems.length >= LOADER_CONFIG.MAX_ITEMS_PER_CATEGORY) {
+          // We have enough trending items
+          fallbackResult[category] = trendingItems.slice(0, LOADER_CONFIG.MAX_ITEMS_PER_CATEGORY);
+        } else {
+          // Not enough trending items, supplement with raw data sorted alphabetically
+          const rawData = categoryDataMap[category] || [];
+          const combined = [...trendingItems];
+
+          // Add non-trending items alphabetically until we have 6
+          const trendingSlugs = new Set(trendingItems.map((item) => item.slug));
+          const additionalItems = rawData
+            .filter((item) => !trendingSlugs.has(item.slug))
+            .sort((a, b) => {
+              const titleA = a.title || a.name || '';
+              const titleB = b.title || b.name || '';
+              return titleA.localeCompare(titleB);
+            })
+            .slice(0, LOADER_CONFIG.MAX_ITEMS_PER_CATEGORY - trendingItems.length);
+
+          combined.push(...additionalItems);
+          fallbackResult[category] = combined.slice(0, LOADER_CONFIG.MAX_ITEMS_PER_CATEGORY);
+        }
+      }
+
+      logger.info('Loaded fallback featured content with all categories', {
+        categories: Object.keys(fallbackResult).join(', '),
+        totalItems: Object.values(fallbackResult).reduce((sum, items) => sum + items.length, 0),
+      });
+
+      return fallbackResult;
+    }
+
+    // Step 2: Load all content in parallel
+    const contentByCategory = await Promise.all(
+      CONTENT_CATEGORIES.map(async (category) => ({
+        category,
+        items: await getContentByCategory(category),
+      }))
+    );
+
+    // Step 3: Create lookup map: category:slug -> content item
+    const contentMap = new Map<string, UnifiedContentItem>();
+    for (const { category, items } of contentByCategory) {
+      for (const item of items) {
+        contentMap.set(`${category}:${item.slug}`, item);
+      }
+    }
+
+    // Step 4: Group featured records by category
+    const featuredByCategory: Record<string, UnifiedContentItem[]> = {};
+
+    for (const record of featuredRecords) {
+      const key = `${record.content_type}:${record.content_slug}`;
+      const item = contentMap.get(key);
+
+      if (!item) {
+        logger.warn('Featured item not found in content', {
+          category: record.content_type,
+          slug: record.content_slug,
+        });
+        continue;
+      }
+
+      // Initialize category array if needed
+      if (!featuredByCategory[record.content_type]) {
+        featuredByCategory[record.content_type] = [];
+      }
+
+      // Add featured metadata
+      const enrichedItem = {
+        ...item,
+        _featured: {
+          rank: record.rank,
+          score: record.final_score,
+        },
+      } as UnifiedContentItem;
+
+      featuredByCategory[record.content_type]?.push(enrichedItem);
+    }
+
+    // Step 5: Limit to top 6 per category and sort by rank
+    const result: Record<string, readonly UnifiedContentItem[]> = {};
+    for (const [category, items] of Object.entries(featuredByCategory)) {
+      result[category] = items
+        .sort((a, b) => {
+          const aRank =
+            (a as UnifiedContentItem & { _featured?: { rank: number } })._featured?.rank ?? 999;
+          const bRank =
+            (b as UnifiedContentItem & { _featured?: { rank: number } })._featured?.rank ?? 999;
+          return aRank - bRank;
+        })
+        .slice(0, LOADER_CONFIG.MAX_ITEMS_PER_CATEGORY);
+    }
+
+    logger.info('Loaded featured content by category', {
+      categories: Object.keys(result).join(', '),
+      totalItems: Object.values(result).reduce((sum, items) => sum + items.length, 0),
+      weekStart: getCurrentWeekStartISO(),
+    });
+
+    return result;
+  } catch (error) {
+    logger.error(
+      'Failed to load featured content by category',
+      error instanceof Error ? error.message : String(error)
+    );
+    return {};
+  }
+}
+
+/**
+ * Load and enrich current week's featured content items (all categories combined)
+ *
+ * - Fetches featured config records from database
+ * - Loads full content items from content files
+ * - Enriches with featured metadata (rank, score)
+ * - Returns sorted by rank
+ *
+ * @returns Array of featured content items with metadata
+ */
+export async function loadCurrentFeaturedContent(): Promise<readonly UnifiedContentItem[]> {
+  try {
+    // Step 1: Fetch featured records from database
+    const featuredRecords = await getCurrentFeaturedConfigs();
+
+    if (featuredRecords.length === 0) {
+      logger.info('No featured configs for current week');
+      return [];
+    }
+
+    // Step 2: Load all content in parallel
+    const contentByCategory = await Promise.all(
+      CONTENT_CATEGORIES.map(async (category) => ({
+        category,
+        items: await getContentByCategory(category),
+      }))
+    );
+
+    // Step 3: Create lookup map: category:slug -> content item
+    const contentMap = new Map<string, UnifiedContentItem>();
+    for (const { category, items } of contentByCategory) {
+      for (const item of items) {
+        contentMap.set(`${category}:${item.slug}`, item);
+      }
+    }
+
+    // Step 4: Resolve featured items and add metadata
+    const featuredItems = featuredRecords
+      .map((record) => {
+        const key = `${record.content_type}:${record.content_slug}`;
+        const item = contentMap.get(key);
+
+        if (!item) {
+          logger.warn('Featured item not found in content', {
+            category: record.content_type,
+            slug: record.content_slug,
+          });
+          return null;
+        }
+
+        return {
+          ...item,
+          // Add featured metadata (not in schema, but can be used by components)
+          _featured: {
+            rank: record.rank,
+            score: record.final_score,
+          },
+        } as UnifiedContentItem;
+      })
+      .filter((item): item is UnifiedContentItem => item !== null);
+
+    logger.info('Loaded featured content', {
+      count: featuredItems.length,
+      weekStart: getCurrentWeekStartISO(),
+    });
+
+    return featuredItems;
+  } catch (error) {
+    logger.error(
+      'Failed to load featured content',
+      error instanceof Error ? error.message : String(error)
+    );
+    return [];
+  }
+}
+
+// ============================================
+// SERVICE EXPORTS
+// ============================================
+
+/**
+ * Unified featured service
+ * Replaces: featuredCalculatorService + featuredLoaderService
+ */
+export const featuredService = {
+  // Calculation (write)
   calculateFeaturedForCategory,
   storeFeaturedSelections,
+
+  // Data access (read)
   getCurrentFeaturedConfigs,
-  getCurrentWeekStart,
-  getWeekEnd,
+  loadCurrentFeaturedContent,
+  loadCurrentFeaturedContentByCategory,
 };

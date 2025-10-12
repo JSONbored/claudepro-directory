@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import { ConfigCard } from '@/src/components/features/content/config-card';
 import { ConfigCardSkeleton } from '@/src/components/ui/loading-skeleton';
 import { Separator } from '@/src/components/ui/separator';
-import { getSimilarConfigs } from '@/src/lib/actions/personalization-actions';
+import { getSimilarConfigs } from '@/src/lib/actions/analytics.actions';
 import { EVENTS } from '@/src/lib/analytics/events.config';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import type { SimilarConfigsResponse } from '@/src/lib/schemas/personalization.schema';

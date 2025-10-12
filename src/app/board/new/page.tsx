@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { NewPostForm } from '@/src/components/board/new-post-form';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
-import { createPost } from '@/src/lib/actions/post-actions';
+import { createPost } from '@/src/lib/actions/content.actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata: Metadata = {

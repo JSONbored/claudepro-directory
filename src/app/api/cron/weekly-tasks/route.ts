@@ -26,11 +26,9 @@ import { logger } from '@/src/lib/logger';
 import { withCronAuth } from '@/src/lib/middleware/cron-auth';
 import { env } from '@/src/lib/schemas/env.schema';
 import { digestService } from '@/src/lib/services/digest.service';
-import {
-  type FeaturedContentItem,
-  featuredCalculatorService,
-} from '@/src/lib/services/featured-calculator.service';
+import { type FeaturedContentItem, featuredService } from '@/src/lib/services/featured.service';
 import { resendService } from '@/src/lib/services/resend.service';
+import { getCurrentWeekStart, getWeekEnd } from '@/src/lib/utils/date.utils';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -66,8 +64,8 @@ export async function GET(request: Request) {
       const taskStart = performance.now();
       logger.info('Task 1/2: Starting weekly featured calculation');
 
-      const weekStart = featuredCalculatorService.getCurrentWeekStart();
-      const weekEnd = featuredCalculatorService.getWeekEnd(weekStart);
+      const weekStart = getCurrentWeekStart();
+      const weekEnd = getWeekEnd(weekStart);
 
       logger.info('Calculating featured for week', {
         weekStart: weekStart.toISOString().split('T')[0] ?? '',
@@ -121,14 +119,12 @@ export async function GET(request: Request) {
             continue;
           }
 
-          const featured = await featuredCalculatorService.calculateFeaturedForCategory(
-            name,
-            items,
-            { limit: 10 }
-          );
+          const featured = await featuredService.calculateFeaturedForCategory(name, items, {
+            limit: 10,
+          });
 
           // Store featured selections in database
-          await featuredCalculatorService.storeFeaturedSelections(name, featured, weekStart);
+          await featuredService.storeFeaturedSelections(name, featured, weekStart);
 
           featuredResults.push({ category: name, featured });
           logger.info(`Featured ${name} calculated and stored`, {

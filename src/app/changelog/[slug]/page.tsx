@@ -32,7 +32,7 @@ import { ChangelogArticleStructuredData } from '@/src/components/structured-data
 import { Separator } from '@/src/components/ui/separator';
 import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generateContentMetadata } from '@/src/lib/seo/metadata-generator';
@@ -149,7 +149,7 @@ export default async function ChangelogEntryPage({
         <article className="container max-w-4xl py-8 space-y-8">
           {/* Navigation */}
           <Link
-            href="/changelog"
+            href={ROUTES.CHANGELOG}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -195,7 +195,7 @@ export default async function ChangelogEntryPage({
       <div className="container max-w-4xl py-8">
         <div className="space-y-4">
           <Link
-            href="/changelog"
+            href={ROUTES.CHANGELOG}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />

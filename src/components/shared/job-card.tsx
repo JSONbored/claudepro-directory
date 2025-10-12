@@ -8,19 +8,13 @@ import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { Building, Clock, DollarSign, ExternalLink, MapPin, Star } from '@/src/lib/icons';
 import type { JobCardProps } from '@/src/lib/schemas/component.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { formatRelativeDate } from '@/src/lib/utils/date-utils';
+import { BADGE_COLORS, type JobType, UI_CLASSES } from '@/src/lib/ui-constants';
+import { formatRelativeDate } from '@/src/lib/utils/date.utils';
 
 export const JobCard = memo(({ job }: JobCardProps) => {
+  // Use centralized badge colors from ui-constants.ts
   const getTypeColor = (type: string) => {
-    const colors = {
-      'full-time': 'bg-green-500/10 text-green-400 border-green-500/20',
-      'part-time': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-      contract: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-      freelance: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-      remote: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    };
-    return colors[type as keyof typeof colors] || 'bg-muted text-muted-foreground';
+    return BADGE_COLORS.jobType[type as JobType] || 'bg-muted text-muted-foreground';
   };
 
   return (

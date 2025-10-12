@@ -22,7 +22,7 @@ import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { Separator } from '@/src/components/ui/separator';
-import { generateConfigRecommendations } from '@/src/lib/actions/recommender-actions';
+import { generateConfigRecommendations } from '@/src/lib/actions/analytics.actions';
 import { ArrowLeft, ArrowRight, Loader2, Sparkles } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import {

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { CollectionForm } from '@/src/components/library/collection-form';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { ROUTES } from '@/src/lib/constants';
 import { ArrowLeft } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -34,7 +35,7 @@ export default async function NewCollectionPage() {
   return (
     <div className={UI_CLASSES.SPACE_Y_6}>
       <div>
-        <Link href="/account/library">
+        <Link href={ROUTES.ACCOUNT_LIBRARY}>
           <Button variant="ghost" className="mb-4 flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
             Back to Library

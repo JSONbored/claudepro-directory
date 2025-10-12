@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/jobs/job-form';
-import { updateJob } from '@/src/lib/actions/job-actions';
+import { updateJob } from '@/src/lib/actions/business.actions';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
