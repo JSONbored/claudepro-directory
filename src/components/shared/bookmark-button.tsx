@@ -18,7 +18,7 @@ import {
   showAuthRequiredToast,
   showBookmarkError,
   showBookmarkSuccess,
-} from '@/src/lib/utils/toast-helpers';
+} from '@/src/lib/utils/browser.utils';
 
 /**
  * Type guard to validate ContentCategory at runtime

@@ -59,7 +59,7 @@ import {
 } from '@/src/lib/icons';
 import type { RecommendationResponse } from '@/src/lib/schemas/recommender.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { getContentItemUrl } from '@/src/lib/utils/url-helpers';
+import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 import { ShareResults } from './share-results';
 
 interface ResultsDisplayProps {

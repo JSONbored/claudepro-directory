@@ -21,7 +21,7 @@ import { logger } from '@/src/lib/logger';
 import { contentCache, statsRedis } from '@/src/lib/redis';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { GuideItemWithCategory } from '@/src/lib/utils/guide-helpers';
+import type { GuideItemWithCategory } from '@/src/lib/utils/content.utils';
 
 // ISR Configuration - Revalidate every 5 minutes for fresh view counts
 export const revalidate = 300;
@@ -130,6 +130,10 @@ async function _getCategoryGuides(category: string): Promise<GuideItemWithCatego
                 slug: `/guides/${category}/${file.replace('.mdx', '')}`,
                 category,
                 dateUpdated: frontmatter.dateUpdated || '',
+                frontmatter: {
+                  title: frontmatter.title || file.replace('.mdx', ''),
+                  description: frontmatter.description || '',
+                },
               });
             } catch {
               // Skip files that fail to parse

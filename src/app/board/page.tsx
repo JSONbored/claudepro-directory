@@ -15,7 +15,7 @@ import { ROUTES } from '@/src/lib/constants';
 import { MessageSquare, Plus, TrendingUp, User as UserIcon } from '@/src/lib/icons';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { formatRelativeDate } from '@/src/lib/utils/date.utils';
+import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
 export const metadata: Metadata = {
   title: 'Community Board - ClaudePro Directory',

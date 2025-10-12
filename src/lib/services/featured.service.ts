@@ -53,7 +53,7 @@ import {
   getCurrentWeekStart,
   getCurrentWeekStartISO,
   getWeekEnd,
-} from '@/src/lib/utils/date.utils';
+} from '@/src/lib/utils/data.utils';
 
 /**
  * Configuration: Content categories

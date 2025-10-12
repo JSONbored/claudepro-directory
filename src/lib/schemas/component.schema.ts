@@ -46,7 +46,7 @@ export interface ContentViewerProps {
 
 // EnhancedGuidesPage component props
 export interface EnhancedGuidesPageProps {
-  guides: Record<string, import('@/src/lib/utils/guide-helpers').GuideItemWithCategory[]>;
+  guides: Record<string, import('@/src/lib/utils/content.utils').GuideItemWithCategory[]>;
 }
 
 // ErrorBoundary component props

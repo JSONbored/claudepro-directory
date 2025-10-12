@@ -25,7 +25,7 @@ import { Clock, Copy as CopyIcon, Eye, Layers } from '@/src/lib/icons';
 import type { CollectionContent } from '@/src/lib/schemas/content/collection.schema';
 import { BADGE_COLORS, CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
-import { formatViewCount } from '@/src/lib/utils/transformers';
+import { formatViewCount } from '@/src/lib/utils/content.utils';
 
 /**
  * CollectionCard Props

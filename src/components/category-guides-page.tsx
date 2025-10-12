@@ -28,7 +28,7 @@ import {
   Zap,
 } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { GuideItemWithCategory } from '@/src/lib/utils/guide-helpers';
+import type { GuideItemWithCategory } from '@/src/lib/utils/content.utils';
 
 const categoryInfo = {
   'use-cases': {

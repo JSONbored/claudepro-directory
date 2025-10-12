@@ -28,7 +28,7 @@ import { env } from '@/src/lib/schemas/env.schema';
 import { digestService } from '@/src/lib/services/digest.service';
 import { type FeaturedContentItem, featuredService } from '@/src/lib/services/featured.service';
 import { resendService } from '@/src/lib/services/resend.service';
-import { getCurrentWeekStart, getWeekEnd } from '@/src/lib/utils/date.utils';
+import { getCurrentWeekStart, getWeekEnd } from '@/src/lib/utils/data.utils';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

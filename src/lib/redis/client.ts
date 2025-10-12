@@ -7,7 +7,7 @@ import { Redis } from '@upstash/redis';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
 import type { RedisConnectionStatus } from '@/src/lib/schemas/cache.schema';
-import { ParseStrategy, safeParse } from '@/src/lib/utils/safe-json';
+import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
 
 // Re-export Redis type for consumers
 export type { Redis };

@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/ca
 import { Building, Clock, DollarSign, ExternalLink, MapPin, Star } from '@/src/lib/icons';
 import type { JobCardProps } from '@/src/lib/schemas/component.schema';
 import { BADGE_COLORS, type JobType, UI_CLASSES } from '@/src/lib/ui-constants';
-import { formatRelativeDate } from '@/src/lib/utils/date.utils';
+import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
 export const JobCard = memo(({ job }: JobCardProps) => {
   // Use centralized badge colors from ui-constants.ts

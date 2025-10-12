@@ -27,8 +27,7 @@ import { Award, Copy as CopyIcon, ExternalLink, Eye, Github, Sparkles } from '@/
 import type { ConfigCardProps } from '@/src/lib/schemas/component.schema';
 import { CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
-import { formatViewCount } from '@/src/lib/utils/transformers';
-import { getContentItemUrl } from '@/src/lib/utils/url-helpers';
+import { formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 export const ConfigCard = memo(
   ({ item, variant = 'default', showCategory = true, showActions = true }: ConfigCardProps) => {

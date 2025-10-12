@@ -21,7 +21,7 @@ import { ExternalLink, Github, Thermometer } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { BADGE_COLORS, type CategoryType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
-import { getContentItemUrl } from '@/src/lib/utils/url-helpers';
+import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 /**
  * Props for DetailSidebar

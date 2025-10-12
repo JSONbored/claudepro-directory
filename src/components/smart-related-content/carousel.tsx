@@ -15,7 +15,7 @@ import type {
 } from '@/src/lib/schemas/related-content.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { getContentItemUrl } from '@/src/lib/utils/url-helpers';
+import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 export function RelatedCarouselClient({
   items,

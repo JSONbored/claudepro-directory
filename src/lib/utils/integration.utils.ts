@@ -1,13 +1,200 @@
 /**
- * Lazy Loading Utility for Large Generated Files
- * Optimizes memory usage by loading data only when needed
+ * Integration Utilities
+ * Consolidated external service integration and lazy loading utilities
+ * SHA-2101: Part of consolidation effort
+ *
+ * Consolidates:
+ * - github-issue-url.ts (219 LOC) - GitHub issue URL generation
+ * - lazy-loader.ts (324 LOC) - Memory-efficient lazy loading
+ *
+ * Total: 543 LOC consolidated
+ *
+ * Features:
+ * - GitHub issue pre-fill URL generation
+ * - Lazy loading for large data sets
+ * - Batch loading and pagination support
+ * - Memory-efficient caching
  */
 
 import { logger } from '@/src/lib/logger';
 import type { LazyLoadedData, LazyLoaderOptions } from '@/src/lib/schemas/app.schema';
+import type { ConfigSubmissionData } from '@/src/lib/schemas/form.schema';
+
+// ============================================
+// GITHUB INTEGRATION
+// ============================================
 
 /**
- * Creates a lazy-loaded data wrapper that loads data only when accessed
+ * GitHub repository configuration
+ * Hardcoded for security - prevents tampering via environment variables
+ */
+const GITHUB_CONFIG = {
+  owner: 'JSONbored',
+  repo: 'claudepro-directory',
+  baseUrl: 'https://github.com',
+} as const;
+
+/**
+ * Content type display names for issue titles
+ */
+const CONTENT_TYPE_LABELS: Record<ConfigSubmissionData['type'], string> = {
+  agents: 'Agent',
+  mcp: 'MCP Server',
+  rules: 'Rule',
+  commands: 'Command',
+  hooks: 'Hook',
+  statuslines: 'Statusline',
+} as const;
+
+/**
+ * Generate formatted issue body from submission data
+ */
+function generateIssueBody(data: ConfigSubmissionData): string {
+  const sections: string[] = [
+    '## New Configuration Submission',
+    '',
+    `**Submission Type:** ${CONTENT_TYPE_LABELS[data.type]}`,
+    `**Name:** ${data.name}`,
+    `**Author:** ${data.author}`,
+    `**Category:** ${data.category}`,
+    '',
+  ];
+
+  // Description section
+  sections.push('### Description');
+  sections.push(data.description);
+  sections.push('');
+
+  // GitHub URL if provided
+  if (data.github?.trim()) {
+    sections.push('### Repository');
+    sections.push(`**GitHub URL:** ${data.github}`);
+    sections.push('');
+  }
+
+  // Configuration content
+  sections.push('### Configuration');
+  sections.push('```');
+  sections.push('Type-specific content fields - see PR for details');
+  sections.push('```');
+  sections.push('');
+
+  // Tags if provided
+  if (data.tags && data.tags.length > 0) {
+    const tagList = data.tags.map((tag) => `\`${tag}\``).join(', ');
+    sections.push('### Tags');
+    sections.push(tagList);
+    sections.push('');
+  }
+
+  // Review checklist
+  sections.push('---');
+  sections.push('### Review Checklist');
+  sections.push('- [ ] Configuration format is valid JSON');
+  sections.push('- [ ] All required fields are present');
+  sections.push('- [ ] Content follows community guidelines');
+  sections.push('- [ ] No security concerns identified');
+  sections.push('- [ ] GitHub repository is accessible (if provided)');
+  sections.push('- [ ] Appropriate labels have been added');
+  sections.push('');
+
+  // Metadata
+  sections.push('### Submission Metadata');
+  sections.push(`**Submitted:** ${new Date().toISOString()}`);
+  sections.push(`**Type:** ${data.type}`);
+  sections.push('**Status:** Pending Review');
+  sections.push('');
+
+  // Footer
+  sections.push('---');
+  sections.push('');
+  sections.push(
+    '*This issue was generated automatically from the ClaudePro Directory submission form.*'
+  );
+
+  return sections.join('\n');
+}
+
+/**
+ * Generate GitHub issue creation URL with pre-filled data
+ *
+ * @param data - Validated submission data
+ * @returns Complete GitHub issue URL
+ *
+ * @example
+ * const url = generateGitHubIssueUrl({
+ *   type: 'agents',
+ *   name: 'Code Review Agent',
+ *   description: 'AI-powered code reviewer',
+ *   category: 'Development',
+ *   author: 'johndoe',
+ *   github: 'https://github.com/user/repo',
+ *   content: '{"name": "code-reviewer"}',
+ *   tags: ['productivity', 'code-review'],
+ * });
+ */
+export function generateGitHubIssueUrl(data: ConfigSubmissionData): string {
+  const title = `New ${CONTENT_TYPE_LABELS[data.type]} Submission: ${data.name}`;
+  const body = generateIssueBody(data);
+  const labels = ['submission', `type:${data.type}`, 'needs-review'].join(',');
+
+  const baseUrl = `${GITHUB_CONFIG.baseUrl}/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/issues/new`;
+  const params = new URLSearchParams({
+    title,
+    body,
+    labels,
+  });
+
+  return `${baseUrl}?${params.toString()}`;
+}
+
+/**
+ * Validate GitHub issue URL length
+ */
+export function validateIssueUrlLength(url: string): boolean {
+  const MAX_URL_LENGTH = 8000;
+  return url.length <= MAX_URL_LENGTH;
+}
+
+/**
+ * Open GitHub issue in new tab
+ */
+export function openGitHubIssue(url: string): boolean {
+  if (!validateIssueUrlLength(url)) {
+    throw new Error('Issue content is too large. Please reduce the configuration size.');
+  }
+
+  const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+
+  if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+    return false; // Popup blocked
+  }
+
+  return true;
+}
+
+/**
+ * Generate direct link element for GitHub issue
+ */
+export function createGitHubIssueLink(data: ConfigSubmissionData): HTMLAnchorElement {
+  const url = generateGitHubIssueUrl(data);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.textContent = 'Open GitHub Issue';
+
+  return link;
+}
+
+// ============================================
+// LAZY LOADING UTILITIES
+// ============================================
+
+/**
+ * Lazy loader for large data sets
+ * Loads data only when accessed to optimize memory usage
  */
 export class LazyLoader<T> {
   private cache: LazyLoadedData<T> = {
@@ -226,19 +413,16 @@ export class PaginatedLazyLoader<T> {
    * Get items for a specific page
    */
   async getPage(page: number): Promise<T[]> {
-    // Check cache
     const cachedPage = this.pages.get(page);
     if (cachedPage) {
       return cachedPage;
     }
 
-    // Check if already loading
     const loadingPromise = this.loadingPages.get(page);
     if (loadingPromise) {
       return loadingPromise;
     }
 
-    // Load page
     const loadPromise = this.loader(page, this.options.pageSize)
       .then((data) => {
         this.pages.set(page, data);
@@ -270,7 +454,6 @@ export class PaginatedLazyLoader<T> {
     const pages = await Promise.all(pagePromises);
     const allItems = pages.flat();
 
-    // Calculate the exact slice needed
     const startOffset = startIndex % this.options.pageSize;
     const itemsNeeded = endIndex - startIndex + 1;
 
@@ -285,7 +468,6 @@ export class PaginatedLazyLoader<T> {
       return;
     }
 
-    // Remove oldest pages (assuming Map maintains insertion order)
     const pagesToRemove = this.pages.size - this.options.maxCachedPages;
     const pageNumbers = Array.from(this.pages.keys());
 

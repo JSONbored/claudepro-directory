@@ -12,7 +12,7 @@ import {
   cacheStatsSchema,
 } from '@/src/lib/schemas/cache.schema';
 import { validateCacheKey, validateTTL } from '@/src/lib/schemas/primitives/api-cache-primitives';
-import { ParseStrategy, safeParse, safeStringify } from '@/src/lib/utils/safe-json';
+import { ParseStrategy, safeParse, safeStringify } from '@/src/lib/utils/data.utils';
 import { redisClient } from './client';
 
 // Compression algorithms

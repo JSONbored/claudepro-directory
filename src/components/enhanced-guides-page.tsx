@@ -28,7 +28,7 @@ import {
 } from '@/src/lib/icons';
 import type { EnhancedGuidesPageProps } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { GuideItemWithCategory } from '@/src/lib/utils/guide-helpers';
+import type { GuideItemWithCategory } from '@/src/lib/utils/content.utils';
 
 const categoryInfo = {
   'use-cases': {

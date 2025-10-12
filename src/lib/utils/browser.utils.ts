@@ -1,27 +1,73 @@
 /**
- * Standardized Toast Notification Helpers
+ * Browser Utilities
+ * Consolidated browser API wrappers and toast notification helpers
+ * SHA-2101: Part of consolidation effort
  *
- * Provides consistent, type-safe toast notifications across the application.
- * Eliminates duplication of toast messages and ensures UX consistency.
+ * Consolidates:
+ * - clipboard-utils.ts (32 LOC) - Clipboard API wrapper with error handling
+ * - toast-helpers.ts (342 LOC) - Standardized toast notifications
  *
- * **Architecture:**
- * - Centralizes common toast patterns found across 27+ files
- * - Type-safe message definitions prevent typos
- * - Consistent messaging improves user experience
- * - Easier to update messages globally
+ * Total: 374 LOC consolidated
  *
- * **Usage Statistics (before consolidation):**
- * - Success messages: 40+ instances
- * - Error messages: 50+ instances
- * - Action toasts (with buttons): 10+ instances
- *
- * @module lib/utils/toast-helpers
+ * Features:
+ * - Type-safe clipboard operations with error handling
+ * - Standardized toast notifications across the application
+ * - Consistent messaging patterns for better UX
+ * - Action toasts with button support
  */
 
 import { type ExternalToast, toast } from 'sonner';
+import { logger } from '@/src/lib/logger';
+
+// ============================================
+// CLIPBOARD UTILITIES
+// ============================================
+
+/**
+ * Copies text to clipboard with error handling
+ * @param text - The text to copy to clipboard
+ * @param context - Optional context for error logging
+ * @returns Promise that resolves to true if successful, false otherwise
+ *
+ * @example
+ * const success = await copyToClipboard('https://example.com', {
+ *   component: 'ShareButton',
+ *   action: 'share'
+ * });
+ * if (success) {
+ *   showCopySuccess();
+ * } else {
+ *   showCopyError();
+ * }
+ */
+export async function copyToClipboard(
+  text: string,
+  context?: { component?: string; action?: string }
+): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (err) {
+    logger.error(
+      'Failed to copy to clipboard',
+      err instanceof Error ? err : new Error(String(err)),
+      {
+        component: context?.component || 'Unknown',
+        action: context?.action || 'copy',
+        textLength: text.length,
+      }
+    );
+    return false;
+  }
+}
+
+// ============================================
+// TOAST NOTIFICATION HELPERS
+// ============================================
 
 /**
  * Common success messages
+ * Centralized message definitions for consistency
  */
 export const ToastMessages = {
   // Copy/Clipboard actions

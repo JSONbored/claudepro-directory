@@ -23,7 +23,7 @@ import {
   type UnifiedContent,
   type UnifiedStructuredDataProps,
 } from '@/src/lib/structured-data/schema-types';
-import { getContentItemUrl } from '@/src/lib/utils/url-helpers';
+import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 /**
  * Unified Structured Data Component

@@ -1,22 +1,29 @@
 /**
- * Production-Grade Secure JSON Parsing Utilities
+ * Data Utilities
+ * Consolidated data parsing, formatting, and manipulation utilities
+ * SHA-2101: Part of consolidation effort
  *
- * Provides type-safe, performant, and secure JSON serialization/deserialization
- * with multiple strategies optimized for different use cases.
+ * Consolidates:
+ * - safe-json.ts (441 LOC) - Secure JSON parsing with devalue
+ * - date.utils.ts (296 LOC) - Date formatting and manipulation
+ *
+ * Total: 737 LOC consolidated
  *
  * Features:
- * - XSS-safe parsing with `devalue` (primary strategy)
- * - Zod schema validation (fallback strategy)
- * - Performance monitoring and error tracking
- * - Automatic compression detection
- * - Type preservation (Date, Map, Set, RegExp, etc.)
- *
- * @see https://github.com/Rich-Harris/devalue - Secure serialization
+ * - Production-grade secure JSON parsing with XSS protection
+ * - Multiple parsing strategies (devalue, validated, unsafe)
+ * - Comprehensive date formatting and manipulation
+ * - Week calculations for analytics
+ * - Type-safe error handling
  */
 
 import { parse as devalueParse, stringify as devalueStringify } from 'devalue';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
+
+// ============================================
+// JSON PARSING UTILITIES
+// ============================================
 
 /**
  * Parse strategy enum
@@ -89,15 +96,6 @@ const MAX_SAFE_SIZE = 10_000_000;
 
 /**
  * Safely parse a string using devalue (XSS-safe, type-preserving)
- *
- * @param str - String to parse
- * @returns Parsed value
- * @throws Error if parsing fails
- *
- * @example
- * ```ts
- * const data = parseWithDevalue('{"name":"test","date":new Date()}');
- * ```
  */
 function parseWithDevalue<T = unknown>(str: string): T {
   try {
@@ -111,17 +109,6 @@ function parseWithDevalue<T = unknown>(str: string): T {
 
 /**
  * Safely parse a string using JSON.parse with Zod validation
- *
- * @param str - String to parse
- * @param schema - Zod schema to validate against
- * @returns Validated parsed value
- * @throws Error if parsing or validation fails
- *
- * @example
- * ```ts
- * const schema = z.object({ name: z.string() });
- * const data = parseWithValidation('{"name":"test"}', schema);
- * ```
  */
 function parseWithValidation<T>(str: string, schema: z.ZodType<T>): T {
   try {
@@ -136,12 +123,6 @@ function parseWithValidation<T>(str: string, schema: z.ZodType<T>): T {
 
 /**
  * Safely parse a string using JSON.parse (unsafe - for trusted data only)
- *
- * @param str - String to parse
- * @returns Parsed value (type-unsafe)
- * @throws Error if parsing fails
- *
- * @deprecated Use parseWithDevalue or parseWithValidation instead
  */
 function parseWithUnsafeJSON<T = unknown>(str: string): T {
   try {
@@ -156,31 +137,15 @@ function parseWithUnsafeJSON<T = unknown>(str: string): T {
 /**
  * Production-grade safe JSON parsing with multiple strategies
  *
- * Provides XSS-safe, type-preserving parsing with automatic fallback
- * and comprehensive error handling.
- *
  * @param str - String to parse
- * @param schema - Optional Zod schema for validation (required for VALIDATED_JSON strategy)
+ * @param schema - Optional Zod schema for validation
  * @param options - Parsing options
  * @returns Safely parsed value
  * @throws Error if all parsing strategies fail
  *
  * @example
- * ```ts
- * // Using devalue (recommended for untrusted data)
  * const data = safeParse<UserData>(redisValue);
- *
- * // Using validated JSON
- * const data = safeParse(apiResponse, userSchema, {
- *   strategy: ParseStrategy.VALIDATED_JSON
- * });
- *
- * // With fallback
- * const data = safeParse(cacheValue, undefined, {
- *   strategy: ParseStrategy.DEVALUE,
- *   fallbackStrategy: ParseStrategy.UNSAFE_JSON
- * });
- * ```
+ * const validated = safeParse(apiResponse, userSchema, { strategy: ParseStrategy.VALIDATED_JSON });
  */
 export function safeParse<T = unknown>(
   str: string,
@@ -305,20 +270,11 @@ export function safeParse<T = unknown>(
 /**
  * Safe parse with detailed result (doesn't throw)
  *
- * @param str - String to parse
- * @param schema - Optional Zod schema for validation
- * @param options - Parsing options
- * @returns Parse result with success/error information
- *
  * @example
- * ```ts
  * const result = safeParseSafe<User>(input);
  * if (result.success) {
  *   console.log(result.data);
- * } else {
- *   console.error(result.error);
  * }
- * ```
  */
 export function safeParseSafe<T = unknown>(
   str: string,
@@ -349,22 +305,8 @@ export function safeParseSafe<T = unknown>(
 /**
  * Production-grade safe JSON stringification
  *
- * @param value - Value to stringify
- * @param options - Stringify options
- * @returns Stringified value
- * @throws Error if stringification fails
- *
  * @example
- * ```ts
- * // Using devalue (preserves types)
  * const str = safeStringify({ date: new Date(), map: new Map() });
- *
- * // Using JSON.stringify
- * const str = safeStringify(data, {
- *   strategy: ParseStrategy.UNSAFE_JSON,
- *   space: 2
- * });
- * ```
  */
 export function safeStringify<T = unknown>(value: T, options?: Partial<StringifyOptions>): string {
   const opts = stringifyOptionsSchema.parse(options || {});
@@ -396,16 +338,6 @@ export function safeStringify<T = unknown>(value: T, options?: Partial<Stringify
 
 /**
  * Check if a string is valid JSON without parsing
- *
- * @param str - String to check
- * @returns True if valid JSON
- *
- * @example
- * ```ts
- * if (isValidJSON(input)) {
- *   const data = safeParse(input);
- * }
- * ```
  */
 export function isValidJSON(str: string): boolean {
   try {
@@ -418,17 +350,6 @@ export function isValidJSON(str: string): boolean {
 
 /**
  * Estimate memory size of a value when stringified
- *
- * @param value - Value to measure
- * @returns Approximate size in bytes
- *
- * @example
- * ```ts
- * const size = estimateSize(largeObject);
- * if (size > MAX_CACHE_SIZE) {
- *   throw new Error('Object too large for cache');
- * }
- * ```
  */
 export function estimateSize<T = unknown>(value: T): number {
   try {
@@ -438,4 +359,213 @@ export function estimateSize<T = unknown>(value: T): number {
   } catch {
     return 0;
   }
+}
+
+// ============================================
+// DATE UTILITIES
+// ============================================
+
+/**
+ * Format Options
+ */
+export type DateFormatStyle = 'short' | 'long' | 'iso';
+export type RelativeDateStyle = 'simple' | 'detailed';
+
+export interface RelativeDateOptions {
+  /** Style of relative date output */
+  style?: RelativeDateStyle;
+  /** Maximum days before showing absolute date */
+  maxDays?: number;
+}
+
+/**
+ * Formats a date to a localized format
+ *
+ * @example
+ * formatDate('2024-01-15') // "January 15, 2024"
+ * formatDate('2024-01-15', 'short') // "Jan 15, 2024"
+ * formatDate('2024-01-15', 'iso') // "2024-01-15"
+ */
+export function formatDate(date: string | Date, style: DateFormatStyle = 'long'): string {
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+    if (style === 'iso') {
+      const isoDate = dateObj.toISOString().split('T')[0];
+      return isoDate ?? '';
+    }
+
+    return dateObj.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: style === 'long' ? 'long' : 'short',
+      day: 'numeric',
+    });
+  } catch {
+    return typeof date === 'string' ? date : date.toString();
+  }
+}
+
+/**
+ * Formats a date as relative time with granular time units
+ *
+ * @example
+ * formatRelativeDate(new Date()) // "just now"
+ * formatRelativeDate(yesterday) // "1 day ago"
+ * formatRelativeDate(lastWeek, { style: 'simple' }) // "1 week ago"
+ */
+export function formatRelativeDate(date: string | Date, options: RelativeDateOptions = {}): string {
+  const { style = 'detailed', maxDays } = options;
+
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    const now = new Date();
+    const diffMs = now.getTime() - dateObj.getTime();
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    const diffWeeks = Math.floor(diffDays / 7);
+    const diffMonths = Math.floor(diffDays / 30);
+    const diffYears = Math.floor(diffDays / 365);
+
+    // If maxDays is set and exceeded, return absolute date
+    if (maxDays && diffDays > maxDays) {
+      return formatDate(dateObj);
+    }
+
+    // Simple style (existing formatRelativeDate behavior)
+    if (style === 'simple') {
+      if (diffDays === 0) return 'Today';
+      if (diffDays === 1) return 'Yesterday';
+      if (diffDays < 7) return `${diffDays} days ago`;
+      if (diffDays < 30) return `${diffWeeks} weeks ago`;
+      if (diffDays < 365) return `${diffMonths} months ago`;
+      return `${diffYears} years ago`;
+    }
+
+    // Detailed style (existing formatDistanceToNow behavior)
+    if (diffSeconds < 60) {
+      return 'just now';
+    }
+    if (diffMinutes < 60) {
+      return `${diffMinutes} ${diffMinutes === 1 ? 'minute' : 'minutes'} ago`;
+    }
+    if (diffHours < 24) {
+      return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
+    }
+    if (diffDays < 7) {
+      return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
+    }
+    if (diffWeeks < 4) {
+      return `${diffWeeks} ${diffWeeks === 1 ? 'week' : 'weeks'} ago`;
+    }
+    if (diffMonths < 12) {
+      return `${diffMonths} ${diffMonths === 1 ? 'month' : 'months'} ago`;
+    }
+    return `${diffYears} ${diffYears === 1 ? 'year' : 'years'} ago`;
+  } catch {
+    return typeof date === 'string' ? date : date.toString();
+  }
+}
+
+/**
+ * Alias for detailed relative date formatting
+ */
+export function formatDistanceToNow(date: Date): string {
+  return formatRelativeDate(date, { style: 'detailed' });
+}
+
+/**
+ * Safely parses a date string
+ */
+export function parseDate(input: string): Date | null {
+  try {
+    const date = new Date(input);
+    return Number.isNaN(date.getTime()) ? null : date;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Checks if a value is a valid date
+ */
+export function isValidDate(date: unknown): boolean {
+  if (date instanceof Date) {
+    return !Number.isNaN(date.getTime());
+  }
+  if (typeof date === 'string') {
+    return parseDate(date) !== null;
+  }
+  return false;
+}
+
+/**
+ * Gets the number of days between a date and now
+ */
+export function getDaysAgo(date: string | Date): number {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const now = new Date();
+  const diffMs = now.getTime() - dateObj.getTime();
+  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+}
+
+/**
+ * Checks if a date is in the past
+ */
+export function isInPast(date: string | Date): boolean {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return dateObj.getTime() < Date.now();
+}
+
+/**
+ * Checks if a date is in the future
+ */
+export function isInFuture(date: string | Date): boolean {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return dateObj.getTime() > Date.now();
+}
+
+/**
+ * Gets the start of the current week (Monday at 00:00:00)
+ */
+export function getCurrentWeekStart(): Date {
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ...
+  const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Adjust to Monday
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + diff);
+  monday.setHours(0, 0, 0, 0);
+  return monday;
+}
+
+/**
+ * Gets the start of the current week as ISO date string (YYYY-MM-DD)
+ */
+export function getCurrentWeekStartISO(): string {
+  return getCurrentWeekStart().toISOString().split('T')[0] as string;
+}
+
+/**
+ * Gets the end of a week (Sunday at 23:59:59)
+ */
+export function getWeekEnd(weekStart: Date): Date {
+  const sunday = new Date(weekStart);
+  sunday.setDate(weekStart.getDate() + 6); // Add 6 days to get Sunday
+  sunday.setHours(23, 59, 59, 999);
+  return sunday;
+}
+
+/**
+ * Formats a week range for display
+ *
+ * @example
+ * formatWeekRange(new Date('2025-01-06')) // "Jan 6-12"
+ */
+export function formatWeekRange(weekStart: Date): string {
+  const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'short' });
+  const monthName = monthFormatter.format(weekStart);
+  const startDay = weekStart.getDate();
+  const endDay = getWeekEnd(weekStart).getDate();
+  return `${monthName} ${startDay}-${endDay}`;
 }

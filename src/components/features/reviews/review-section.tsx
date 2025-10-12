@@ -25,7 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar'
 import { Badge } from '@/src/components/ui/badge';
 import { markReviewHelpful } from '@/src/lib/actions/content.actions';
 import { ThumbsUp } from '@/src/lib/icons';
-import { formatDistanceToNow } from '@/src/lib/utils/date.utils';
+import { formatDistanceToNow } from '@/src/lib/utils/data.utils';
 
 // Lazy load RatingHistogram component with recharts dependency (~100KB)
 const RatingHistogram = dynamic(

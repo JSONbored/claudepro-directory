@@ -14,7 +14,7 @@ import { getUserJobs } from '@/src/lib/actions/business.actions';
 import { ROUTES } from '@/src/lib/constants';
 import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
-import { formatRelativeDate } from '@/src/lib/utils/date.utils';
+import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
 export const metadata: Metadata = {
   title: 'My Jobs - Claude Pro Directory',

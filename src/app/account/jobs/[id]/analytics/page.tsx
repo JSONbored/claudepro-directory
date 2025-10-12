@@ -8,7 +8,7 @@ import { ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, BarChart, ExternalLink, Eye } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
-import { formatRelativeDate } from '@/src/lib/utils/date.utils';
+import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
 export const metadata: Metadata = {
   title: 'Job Analytics - Claude Pro Directory',

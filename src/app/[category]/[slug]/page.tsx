@@ -78,7 +78,7 @@ import {
 import { logger } from '@/src/lib/logger';
 import { statsRedis } from '@/src/lib/redis';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { transformForDetailPage } from '@/src/lib/utils/transformers';
+import { transformForDetailPage } from '@/src/lib/utils/content.utils';
 
 /**
  * Dynamic Rendering (No ISR)

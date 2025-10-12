@@ -51,7 +51,7 @@ import {
 import { type QuizAnswers, quizAnswersSchema } from '@/src/lib/schemas/recommender.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
-import { getContentItemUrl } from '@/src/lib/utils/url-helpers';
+import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 // ============================================
 // PERSONALIZATION ACTIONS

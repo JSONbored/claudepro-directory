@@ -26,7 +26,7 @@ import {
   generateFilename,
   generateHookFilename,
   generateMultiFormatFilename,
-} from '@/src/lib/utils/filename-generator';
+} from '@/src/lib/utils/content.utils';
 
 /**
  * Props for ConfigurationSection

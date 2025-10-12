@@ -14,7 +14,7 @@ import {
 } from '@/src/lib/schemas/related-content.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { viewCountService } from '@/src/lib/services/view-count.service';
-import { getContentItemUrl } from '@/src/lib/utils/url-helpers';
+import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 // Clean, production Zod schemas
 

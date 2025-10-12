@@ -15,7 +15,7 @@ import { trackCopy } from '@/src/lib/actions/track-view';
 import { Check, Copy } from '@/src/lib/icons';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { showCopyError, showCopySuccess } from '@/src/lib/utils/toast-helpers';
+import { showCopyError, showCopySuccess } from '@/src/lib/utils/browser.utils';
 
 export interface CardCopyActionProps {
   /** Full URL to copy to clipboard */

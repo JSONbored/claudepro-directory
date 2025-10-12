@@ -27,7 +27,7 @@ import { statsRedis } from '@/src/lib/redis';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { featuredService } from '@/src/lib/services/featured.service';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { transformForHomePage } from '@/src/lib/utils/transformers';
+import { transformForHomePage } from '@/src/lib/utils/content.utils';
 
 type ContentMetadataWithCategory =
   | (AgentMetadata & { category: 'agents' })
