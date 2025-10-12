@@ -11,7 +11,7 @@
 
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
-import { LazyConfigCard } from '@/src/components/shared/lazy-config-card';
+import { ConfigCard } from '@/src/components/features/content/config-card';
 import { Button } from '@/src/components/ui/button';
 import { CATEGORY_CONFIGS, HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
 import { Briefcase, ExternalLink } from '@/src/lib/icons';
@@ -50,7 +50,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
         </div>
         <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
           {featuredItems.map((item) => (
-            <LazyConfigCard
+            <ConfigCard
               key={item.slug}
               item={item}
               variant="default"

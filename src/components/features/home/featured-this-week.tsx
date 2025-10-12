@@ -20,7 +20,7 @@
 
 import Link from 'next/link';
 import { type FC, memo } from 'react';
-import { LazyConfigCard } from '@/src/components/shared/lazy-config-card';
+import { ConfigCard } from '@/src/components/features/content/config-card';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Award, ChevronRight, Sparkles, TrendingUp } from '@/src/lib/icons';
@@ -128,7 +128,7 @@ const FeaturedThisWeekComponent: FC<FeaturedThisWeekProps> = ({ featuredItems, w
 
               {/* Card content */}
               <div className="p-4">
-                <LazyConfigCard
+                <ConfigCard
                   item={item}
                   variant="default"
                   showCategory={true}

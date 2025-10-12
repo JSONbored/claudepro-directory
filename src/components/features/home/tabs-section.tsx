@@ -11,8 +11,8 @@
 
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
+import { ConfigCard } from '@/src/components/features/content/config-card';
 import { InfiniteScrollContainer } from '@/src/components/shared/infinite-scroll-container';
-import { LazyConfigCard } from '@/src/components/shared/lazy-config-card';
 import { Button } from '@/src/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
 import { CATEGORY_CONFIGS, HOMEPAGE_TAB_CATEGORIES } from '@/src/lib/config/category-config';
@@ -77,7 +77,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
               <InfiniteScrollContainer<UnifiedContentItem>
                 items={displayedItems}
                 renderItem={(item: UnifiedContentItem, _index: number) => (
-                  <LazyConfigCard
+                  <ConfigCard
                     key={item.slug}
                     item={item}
                     variant="default"
