@@ -15,11 +15,24 @@
  * - No fake data - shows empty states
  */
 
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useId, useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { RatingHistogram } from '@/src/components/features/reviews/rating-histogram';
 import { ReviewCard } from '@/src/components/features/reviews/review-card';
+
+// Lazy load RatingHistogram component with recharts dependency (~100KB)
+const RatingHistogram = dynamic(
+  () =>
+    import('@/src/components/features/reviews/rating-histogram').then((mod) => ({
+      default: mod.RatingHistogram,
+    })),
+  {
+    loading: () => <div className="h-64 bg-muted/50 animate-pulse rounded-xl" />,
+    ssr: true, // Server-render for SEO
+  }
+);
+
 import { ReviewForm } from '@/src/components/features/reviews/review-form';
 import { Button } from '@/src/components/ui/button';
 import { Card } from '@/src/components/ui/card';

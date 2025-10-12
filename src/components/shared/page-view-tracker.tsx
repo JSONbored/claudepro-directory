@@ -10,32 +10,13 @@
  */
 
 import { useEffect } from 'react';
-import type { EventName } from '@/src/lib/analytics/events.config';
-import { EVENTS } from '@/src/lib/analytics/events.config';
+import { getContentViewEvent } from '@/src/lib/analytics/event-mapper';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 
 interface PageViewTrackerProps {
   category: string;
   slug: string;
   sourcePage?: string;
-}
-
-/**
- * Get content-type-specific event name based on category
- */
-function getContentViewEvent(category: string): EventName {
-  const eventMap: Record<string, EventName> = {
-    agents: EVENTS.CONTENT_VIEW_AGENT,
-    mcp: EVENTS.CONTENT_VIEW_MCP,
-    'mcp-servers': EVENTS.CONTENT_VIEW_MCP,
-    commands: EVENTS.CONTENT_VIEW_COMMAND,
-    rules: EVENTS.CONTENT_VIEW_RULE,
-    hooks: EVENTS.CONTENT_VIEW_HOOK,
-    statuslines: EVENTS.CONTENT_VIEW_STATUSLINE,
-    collections: EVENTS.CONTENT_VIEW_COLLECTION,
-  };
-
-  return eventMap[category] || EVENTS.CONTENT_VIEW; // Fallback to legacy event
 }
 
 export function PageViewTracker({ category, slug, sourcePage }: PageViewTrackerProps) {

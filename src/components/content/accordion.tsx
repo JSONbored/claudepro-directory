@@ -9,8 +9,9 @@
  * Per Schema.org spec, only ONE FAQPage declaration should exist per page.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { ChevronDown, ChevronUp } from '@/src/lib/icons';
 import { type AccordionProps, accordionPropsSchema } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -24,18 +25,21 @@ export function Accordion(props: AccordionProps) {
     )
   );
 
-  const toggleItem = (index: number) => {
-    const newOpenItems = new Set(openItems);
-    if (openItems.has(index)) {
-      newOpenItems.delete(index);
-    } else {
-      if (!allowMultiple) {
-        newOpenItems.clear();
+  const toggleItem = useCallback(
+    (index: number) => {
+      const newOpenItems = new Set(openItems);
+      if (openItems.has(index)) {
+        newOpenItems.delete(index);
+      } else {
+        if (!allowMultiple) {
+          newOpenItems.clear();
+        }
+        newOpenItems.add(index);
       }
-      newOpenItems.add(index);
-    }
-    setOpenItems(newOpenItems);
-  };
+      setOpenItems(newOpenItems);
+    },
+    [allowMultiple, openItems]
+  );
 
   return (
     <section className="my-8" aria-label={title || 'Accordion section'}>
@@ -65,9 +69,15 @@ export function Accordion(props: AccordionProps) {
                   <span>{item.title}</span>
                   <div className="ml-4 flex-shrink-0">
                     {openItems.has(index) ? (
-                      <div className="w-4 h-4 text-muted-foreground">−</div>
+                      <ChevronUp
+                        className="h-4 w-4 text-muted-foreground transition-transform"
+                        aria-hidden="true"
+                      />
                     ) : (
-                      <div className="w-4 h-4 text-muted-foreground">+</div>
+                      <ChevronDown
+                        className="h-4 w-4 text-muted-foreground transition-transform"
+                        aria-hidden="true"
+                      />
                     )}
                   </div>
                 </CardTitle>

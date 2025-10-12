@@ -4,6 +4,9 @@
  * Configuration Recommender Actions
  * Server actions for generating personalized configuration recommendations
  *
+ * Refactored to use Repository pattern for cleaner separation of concerns.
+ * User profile updates delegated to UserRepository.
+ *
  * Architecture:
  * - Uses next-safe-action for type-safe server actions
  * - Rate limited to prevent abuse (20 requests per minute per IP)
@@ -21,6 +24,7 @@ import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders
 import { logger } from '@/src/lib/logger';
 import { generateRecommendations } from '@/src/lib/recommender/algorithm';
 import { statsRedis } from '@/src/lib/redis';
+import { userRepository } from '@/src/lib/repositories/user.repository';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { type QuizAnswers, quizAnswersSchema } from '@/src/lib/schemas/recommender.schema';
 import { createClient } from '@/src/lib/supabase/server';
@@ -117,19 +121,15 @@ export const generateConfigRecommendations = rateLimitedAction
           ...(answers.focusAreas || []),
         ].filter(Boolean);
 
-        // Update user interests (non-blocking, don't fail if it errors)
-        supabase
-          .from('users')
-          .update({
+        // Update user interests via repository (non-blocking fire-and-forget)
+        userRepository
+          .update(user.id, {
             interests: Array.from(new Set(interestTags)).slice(0, 10), // Max 10 interests
           })
-          .eq('id', user.id)
-          .then(({ error }) => {
-            if (error) {
-              logger.warn('Failed to update user interests from quiz', undefined, {
-                user_id: user.id,
-              });
-            }
+          .catch(() => {
+            logger.warn('Failed to update user interests from quiz', undefined, {
+              user_id: user.id,
+            });
           });
       }
 

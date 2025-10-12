@@ -123,6 +123,10 @@ function NumberTickerComponent({
       ref={nodeRef}
       className={cn('inline-block tabular-nums will-change-transform', className)}
       aria-live="polite"
+      style={{
+        // Prevent CLS by reserving space for final value
+        minWidth: `${String(value).length + prefix.length + suffix.length}ch`,
+      }}
     >
       {prefix}0{suffix}
     </span>

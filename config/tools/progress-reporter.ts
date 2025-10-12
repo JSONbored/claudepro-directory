@@ -36,28 +36,33 @@ class ProgressReporter implements Reporter {
     this.originalErrWrite = process.stderr.write.bind(process.stderr);
 
     // Suppress all output except our progress bar
-    process.stdout.write = ((chunk: any, encoding?: any, callback?: any) => {
+    process.stdout.write = ((
+      chunk: string | Uint8Array,
+      encodingOrCallback?: BufferEncoding | ((error?: Error | null) => void),
+      callback?: (error?: Error | null) => void
+    ) => {
       // Only allow our own output (progress bar and summary)
-      if (typeof chunk === 'string' && (
-        chunk.includes('█') ||
-        chunk.includes('📊') ||
-        chunk.includes('🧪') ||
-        chunk.includes('✅') ||
-        chunk.includes('❌')
-      )) {
-        return this.originalWrite(chunk, encoding, callback);
+      if (
+        typeof chunk === 'string' &&
+        (chunk.includes('█') ||
+          chunk.includes('📊') ||
+          chunk.includes('🧪') ||
+          chunk.includes('✅') ||
+          chunk.includes('❌'))
+      ) {
+        return this.originalWrite(chunk, encodingOrCallback, callback);
       }
       // Suppress everything else
       return true;
-    }) as any;
+    }) as typeof process.stdout.write;
 
     process.stderr.write = (() => {
       // Suppress all stderr (Playwright error output)
       return true;
-    }) as any;
+    }) as typeof process.stderr.write;
   }
 
-  onBegin(config: FullConfig, suite: Suite) {
+  onBegin(_config: FullConfig, suite: Suite) {
     this.totalTests = suite.allTests().length;
     this.startTime = Date.now();
     this.originalWrite(`\n🧪 Running ${this.totalTests} SEO tests...\n\n`);
@@ -119,7 +124,7 @@ class ProgressReporter implements Reporter {
     );
   }
 
-  onEnd(result: FullResult) {
+  onEnd(_result: FullResult) {
     const elapsed = Date.now() - this.startTime;
     const elapsedSeconds = Math.round(elapsed / 1000);
     const elapsedMinutes = Math.floor(elapsedSeconds / 60);
@@ -141,7 +146,7 @@ class ProgressReporter implements Reporter {
     this.originalWrite(`   ⏭️  Skipped: ${this.skipped}\n`);
     this.originalWrite(`   📈 Total:   ${this.totalTests}\n`);
     this.originalWrite(`   ⏱️  Time:    ${timeElapsed}\n`);
-    this.originalWrite(`\n📄 Full report: npx playwright show-report\n\n`);
+    this.originalWrite('\n📄 Full report: npx playwright show-report\n\n');
 
     // Exit code based on result
     if (this.failed > 0) {

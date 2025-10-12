@@ -3,11 +3,15 @@
 /**
  * Company Actions
  * Server actions for company profile management
+ *
+ * Refactored to use Repository pattern for cleaner separation of concerns.
+ * All database operations delegated to CompanyRepository.
  */
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { type Company, companyRepository } from '@/src/lib/repositories/company.repository';
 import { nonEmptyString, slugString, urlString } from '@/src/lib/schemas/primitives/base-strings';
 import { createClient } from '@/src/lib/supabase/server';
 
@@ -62,8 +66,7 @@ export const createCompany = rateLimitedAction
       throw new Error('You must be signed in to create a company profile');
     }
 
-    // Build insert object conditionally to handle exactOptionalPropertyTypes
-    // Generate slug from name if not provided (database requires slug)
+    // Generate slug from name if not provided
     const generatedSlug =
       parsedInput.slug ??
       parsedInput.name
@@ -71,37 +74,21 @@ export const createCompany = rateLimitedAction
         .replace(/\s+/g, '-')
         .replace(/[^a-z0-9-]/g, '');
 
-    const insertData: {
-      owner_id: string;
-      name: string;
-      slug: string;
-      logo?: string | null;
-      website?: string | null;
-      description?: string | null;
-      size?: string | null;
-      industry?: string | null;
-      using_cursor_since?: string | null;
-    } = {
+    // Create via repository (includes caching and automatic error handling)
+    const result = await companyRepository.create({
       owner_id: user.id,
       name: parsedInput.name,
       slug: generatedSlug,
-    };
+      logo: parsedInput.logo ?? null,
+      website: parsedInput.website ?? null,
+      description: parsedInput.description ?? null,
+      size: parsedInput.size ?? null,
+      industry: parsedInput.industry ?? null,
+      using_cursor_since: parsedInput.using_cursor_since ?? null,
+    });
 
-    if (parsedInput.logo !== undefined) insertData.logo = parsedInput.logo;
-    if (parsedInput.website !== undefined) insertData.website = parsedInput.website;
-    if (parsedInput.description !== undefined) insertData.description = parsedInput.description;
-    if (parsedInput.size !== undefined) insertData.size = parsedInput.size;
-    if (parsedInput.industry !== undefined) insertData.industry = parsedInput.industry;
-    if (parsedInput.using_cursor_since !== undefined)
-      insertData.using_cursor_since = parsedInput.using_cursor_since;
-
-    const { data, error } = await supabase.from('companies').insert(insertData).select().single();
-
-    if (error) {
-      if (error.code === '23505') {
-        throw new Error('A company with this name already exists');
-      }
-      throw new Error(error.message);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to create company');
     }
 
     revalidatePath('/companies');
@@ -109,7 +96,7 @@ export const createCompany = rateLimitedAction
 
     return {
       success: true,
-      company: data,
+      company: result.data,
     };
   });
 
@@ -135,37 +122,23 @@ export const updateCompany = rateLimitedAction
 
     const { id, ...updates } = parsedInput;
 
-    // Build update object conditionally to handle exactOptionalPropertyTypes
-    const updateData: {
-      name?: string;
-      logo?: string | null;
-      website?: string | null;
-      description?: string | null;
-      size?: string | null;
-      industry?: string | null;
-      using_cursor_since?: string | null;
-    } = {};
+    // Filter out undefined values to avoid exactOptionalPropertyTypes issues
+    const updateData = Object.fromEntries(
+      Object.entries(updates).filter(([_, value]) => value !== undefined)
+    ) as Partial<Company>;
 
-    if (updates.name !== undefined) updateData.name = updates.name;
-    if (updates.logo !== undefined) updateData.logo = updates.logo;
-    if (updates.website !== undefined) updateData.website = updates.website;
-    if (updates.description !== undefined) updateData.description = updates.description;
-    if (updates.size !== undefined) updateData.size = updates.size;
-    if (updates.industry !== undefined) updateData.industry = updates.industry;
-    if (updates.using_cursor_since !== undefined)
-      updateData.using_cursor_since = updates.using_cursor_since;
+    // Update via repository with ownership verification (includes caching)
+    const result = await companyRepository.updateByOwner(id, user.id, updateData);
 
-    const { data, error } = await supabase
-      .from('companies')
-      .update(updateData)
-      .eq('id', id)
-      .eq('owner_id', user.id)
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(error.message);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to update company');
     }
+
+    if (!result.data) {
+      throw new Error('Company data not returned');
+    }
+
+    const data = result.data;
 
     revalidatePath('/companies');
     revalidatePath(`/companies/${data.slug}`);
@@ -191,15 +164,15 @@ export async function getUserCompanies() {
     return [];
   }
 
-  const { data, error } = await supabase
-    .from('companies')
-    .select('*')
-    .eq('owner_id', user.id)
-    .order('created_at', { ascending: false });
+  // Fetch via repository (includes caching)
+  const result = await companyRepository.findByOwner(user.id, {
+    sortBy: 'created_at',
+    sortOrder: 'desc',
+  });
 
-  if (error) {
-    throw new Error(error.message);
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to fetch user companies');
   }
 
-  return data || [];
+  return result.data || [];
 }

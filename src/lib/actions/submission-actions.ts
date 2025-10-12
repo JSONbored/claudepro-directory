@@ -4,6 +4,9 @@
  * Content Submission Actions
  * Server actions for community content submissions
  *
+ * Refactored to use Repository pattern for cleaner separation of concerns.
+ * All database operations delegated to SubmissionRepository and UserRepository.
+ *
  * Flow:
  * 1. Validate user is authenticated
  * 2. Check for duplicates
@@ -14,6 +17,8 @@
  * 7. Create PR
  * 8. Track in database
  * 9. Return PR URL
+ *
+ * Security: Rate limited, auth required, RLS enforced
  */
 
 import { revalidatePath } from 'next/cache';
@@ -33,6 +38,8 @@ import {
   generatePRTitle,
 } from '@/src/lib/github/pr-template';
 import { logger } from '@/src/lib/logger';
+import { submissionRepository } from '@/src/lib/repositories/submission.repository';
+import { userRepository } from '@/src/lib/repositories/user.repository';
 import { configSubmissionSchema } from '@/src/lib/schemas/form.schema';
 import { createClient } from '@/src/lib/supabase/server';
 
@@ -58,12 +65,9 @@ export const submitConfiguration = rateLimitedAction
       throw new Error('You must be signed in to submit content');
     }
 
-    // Get user profile for attribution
-    const { data: profile } = await supabase
-      .from('users')
-      .select('name, slug')
-      .eq('id', user.id)
-      .single();
+    // Get user profile for attribution via repository (includes caching)
+    const profileResult = await userRepository.findById(user.id);
+    const profile = profileResult.success ? profileResult.data : null;
 
     // 2. Generate slug from name
     const slug = generateSlug(parsedInput.name);
@@ -182,8 +186,8 @@ export const submitConfiguration = rateLimitedAction
       );
     }
 
-    // 10. Track submission in database
-    const { error: dbError } = await supabase.from('submissions').insert({
+    // 10. Track submission in database via repository (includes caching)
+    const submissionResult = await submissionRepository.create({
       user_id: user.id,
       content_type: parsedInput.type,
       content_slug: slug,
@@ -192,6 +196,8 @@ export const submitConfiguration = rateLimitedAction
       pr_url: prUrl,
       branch_name: branchName,
       status: 'pending',
+      merged_at: null,
+      rejection_reason: null,
       submission_data: {
         ...parsedInput,
         slug,
@@ -199,8 +205,8 @@ export const submitConfiguration = rateLimitedAction
       },
     });
 
-    if (dbError) {
-      logger.error('Failed to track submission in database', dbError);
+    if (!submissionResult.success) {
+      logger.error('Failed to track submission in database', new Error(submissionResult.error));
       // Don't throw - PR was created successfully, just log the error
     }
 
@@ -233,16 +239,13 @@ export async function getUserSubmissions() {
     return [];
   }
 
-  const { data, error } = await supabase
-    .from('submissions')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  // Fetch via repository (includes caching and automatic sorting)
+  const result = await submissionRepository.findByUser(user.id);
 
-  if (error) {
-    logger.error('Failed to fetch user submissions', error);
+  if (!result.success) {
+    logger.error('Failed to fetch user submissions', new Error(result.error));
     return [];
   }
 
-  return data || [];
+  return result.data || [];
 }

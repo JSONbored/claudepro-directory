@@ -32,6 +32,10 @@ interface StarRatingProps {
   showValue?: boolean | undefined;
   /** Custom className */
   className?: string | undefined;
+  /** ARIA describedby for error associations */
+  'aria-describedby'?: string | undefined;
+  /** ARIA invalid state for validation */
+  'aria-invalid'?: boolean | 'true' | 'false' | undefined;
 }
 
 export function StarRating({
@@ -42,6 +46,8 @@ export function StarRating({
   size = 'md',
   showValue = false,
   className = '',
+  'aria-describedby': ariaDescribedby,
+  'aria-invalid': ariaInvalid,
 }: StarRatingProps) {
   const sizeMap = {
     sm: 14,
@@ -58,6 +64,8 @@ export function StarRating({
         onValueChange={onChange}
         readOnly={!interactive}
         className={interactive ? 'gap-1' : 'gap-0.5'}
+        aria-describedby={ariaDescribedby}
+        aria-invalid={ariaInvalid}
       >
         {Array.from({ length: max }, (_, i) => (
           <RatingButton key={`star-${i + 1}`} size={iconSize} icon={<Star />} />

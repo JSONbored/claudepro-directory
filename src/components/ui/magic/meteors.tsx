@@ -97,36 +97,57 @@ function MeteorsComponent({
   }
 
   return (
-    <div
-      className={cn('pointer-events-none absolute inset-0 overflow-hidden z-[1]', className)}
-      aria-hidden="true"
-    >
-      {meteors.map((meteor) => (
-        <span
-          key={meteor.id}
-          className="absolute animate-meteor"
-          style={{
-            left: meteor.left,
-            top: meteor.top,
-            animationDelay: meteor.animationDelay,
-            animationDuration: meteor.animationDuration,
-          }}
-        >
-          {/* Meteor comet with tail */}
+    <>
+      {/* Global keyframes styles - only render once per angle */}
+      <style>{`
+        @keyframes meteor-${angle} {
+          0% {
+            transform: translateY(-200%) translateX(-200%) rotate(${angle}deg);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(100vh) translateX(100vh) rotate(${angle}deg);
+            opacity: 0;
+          }
+        }
+      `}</style>
+      <div
+        className={cn('pointer-events-none absolute inset-0 overflow-hidden z-[1]', className)}
+        aria-hidden="true"
+      >
+        {meteors.map((meteor) => (
           <span
-            className="block relative h-[1.5px] w-[80px]"
+            key={meteor.id}
+            className="absolute"
             style={{
-              transform: `rotate(${angle}deg)`,
+              left: meteor.left,
+              top: meteor.top,
+              animation: `meteor-${angle} ${meteor.animationDuration} linear infinite`,
+              animationDelay: meteor.animationDelay,
             }}
           >
-            {/* Bright head (leading edge) */}
-            <span className="absolute right-0 h-full w-[30%] rounded-full bg-accent shadow-[0_0_8px_2px_hsl(var(--accent)/0.5)]" />
-            {/* Fading tail (trailing behind) */}
-            <span className="absolute right-[25%] h-full w-[75%] rounded-full bg-gradient-to-l from-accent/80 via-accent/40 to-transparent" />
+            {/* Meteor comet with tail */}
+            <span
+              className="block relative h-[1.5px] w-[80px]"
+              style={{
+                transform: `rotate(${angle}deg)`,
+              }}
+            >
+              {/* Bright head (leading edge) */}
+              <span className="absolute right-0 h-full w-[30%] rounded-full bg-accent shadow-[0_0_8px_2px_hsl(var(--accent)/0.5)]" />
+              {/* Fading tail (trailing behind) */}
+              <span className="absolute right-[25%] h-full w-[75%] rounded-full bg-gradient-to-l from-accent/80 via-accent/40 to-transparent" />
+            </span>
           </span>
-        </span>
-      ))}
-    </div>
+        ))}
+      </div>
+    </>
   );
 }
 

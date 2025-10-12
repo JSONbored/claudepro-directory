@@ -3,11 +3,15 @@
 /**
  * Profile Actions
  * Server actions for user profile management
+ *
+ * Refactored to use Repository pattern for cleaner separation of concerns.
+ * All database operations delegated to UserRepository.
  */
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { type User, userRepository } from '@/src/lib/repositories/user.repository';
 import { updateProfileSchema } from '@/src/lib/schemas/profile.schema';
 import { createClient } from '@/src/lib/supabase/server';
 
@@ -31,25 +35,23 @@ export const updateProfile = rateLimitedAction
       throw new Error('You must be signed in to update your profile');
     }
 
-    // Update profile in database
     // Filter out undefined values to avoid exactOptionalPropertyTypes issues
     const updateData = Object.fromEntries(
-      Object.entries({
-        ...parsedInput,
-        updated_at: new Date().toISOString(),
-      }).filter(([_, value]) => value !== undefined)
-    );
+      Object.entries(parsedInput).filter(([_, value]) => value !== undefined)
+    ) as Partial<User>;
 
-    const { data, error } = await supabase
-      .from('users')
-      .update(updateData)
-      .eq('id', user.id)
-      .select()
-      .single();
+    // Update via repository (includes caching and automatic error handling)
+    const result = await userRepository.update(user.id, updateData);
 
-    if (error) {
-      throw new Error(`Failed to update profile: ${error.message}`);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to update profile');
     }
+
+    if (!result.data) {
+      throw new Error('Profile data not returned');
+    }
+
+    const data = result.data;
 
     // Revalidate relevant paths
     revalidatePath(`/u/${data.slug}`);
@@ -87,21 +89,14 @@ export const refreshProfileFromOAuth = rateLimitedAction
       throw new Error('You must be signed in to refresh your profile');
     }
 
-    // Call the database function that syncs from auth.users
-    const { error } = await supabase.rpc('refresh_profile_from_oauth', {
-      user_id: user.id,
-    });
+    // Refresh via repository (includes cache invalidation and syncing)
+    const result = await userRepository.refreshFromOAuth(user.id);
 
-    if (error) {
-      throw new Error(`Failed to refresh profile: ${error.message}`);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to refresh profile');
     }
 
-    // Get updated profile data
-    const { data: profile } = await supabase
-      .from('users')
-      .select('slug')
-      .eq('id', user.id)
-      .single();
+    const profile = result.data;
 
     // Revalidate paths
     if (profile?.slug) {

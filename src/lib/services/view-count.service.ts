@@ -34,7 +34,17 @@ type ViewCountResponse = z.infer<typeof viewCountResponseSchema>;
 class ViewCountService {
   private cache = new Map<string, { views: number; timestamp: number }>();
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-  private readonly VIEW_COUNT_SALT = process.env.VIEW_COUNT_SALT || 'claudepro-view-salt-2024';
+  private readonly VIEW_COUNT_SALT: string;
+
+  constructor() {
+    // Validate VIEW_COUNT_SALT is configured (no fallback allowed in production)
+    if (!process.env.VIEW_COUNT_SALT) {
+      throw new Error(
+        'VIEW_COUNT_SALT environment variable is required for secure view count generation'
+      );
+    }
+    this.VIEW_COUNT_SALT = process.env.VIEW_COUNT_SALT;
+  }
 
   /**
    * Get view count with proper fallback strategy

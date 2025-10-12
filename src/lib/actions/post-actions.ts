@@ -4,12 +4,18 @@
  * Post Actions (Community Board)
  * Server actions for creating, voting, and managing posts
  *
+ * Refactored to use Repository pattern for cleaner separation of concerns.
+ * All database operations delegated to PostRepository, VoteRepository, and CommentRepository.
+ *
  * Similar to Hacker News - users can post links, text, or both
  */
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { commentRepository } from '@/src/lib/repositories/comment.repository';
+import { postRepository } from '@/src/lib/repositories/post.repository';
+import { voteRepository } from '@/src/lib/repositories/vote.repository';
 import { nonEmptyString, urlString } from '@/src/lib/schemas/primitives/base-strings';
 import { createClient } from '@/src/lib/supabase/server';
 
@@ -54,40 +60,31 @@ export const createPost = rateLimitedAction
       throw new Error('You must be signed in to create posts');
     }
 
-    // Check for duplicate URL submissions
+    // Check for duplicate URL submissions via repository (includes caching)
     if (url) {
-      const { data: existing } = await supabase
-        .from('posts')
-        .select('id')
-        .eq('url', url)
-        .limit(1)
-        .single();
-
-      if (existing) {
+      const existingResult = await postRepository.findByUrl(url);
+      if (existingResult.success && existingResult.data) {
         throw new Error('This URL has already been submitted');
       }
     }
 
-    const { data, error } = await supabase
-      .from('posts')
-      .insert({
-        user_id: user.id,
-        title,
-        content: content || null,
-        url: url || null,
-      })
-      .select()
-      .single();
+    // Create via repository (includes caching and automatic error handling)
+    const result = await postRepository.create({
+      user_id: user.id,
+      title,
+      content: content || null,
+      url: url || null,
+    });
 
-    if (error) {
-      throw new Error(error.message);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to create post');
     }
 
     revalidatePath('/board');
 
     return {
       success: true,
-      post: data,
+      post: result.data,
     };
   });
 
@@ -111,26 +108,21 @@ export const updatePost = rateLimitedAction
       throw new Error('You must be signed in to edit posts');
     }
 
-    const { data, error } = await supabase
-      .from('posts')
-      .update({
-        ...(title && { title }),
-        ...(content !== undefined && { content }),
-      })
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .select()
-      .single();
+    // Update via repository with ownership verification (includes caching)
+    const result = await postRepository.updateByOwner(id, user.id, {
+      ...(title && { title }),
+      ...(content !== undefined && { content }),
+    });
 
-    if (error) {
-      throw new Error(error.message);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to update post');
     }
 
     revalidatePath('/board');
 
     return {
       success: true,
-      post: data,
+      post: result.data,
     };
   });
 
@@ -154,10 +146,11 @@ export const deletePost = rateLimitedAction
       throw new Error('You must be signed in to delete posts');
     }
 
-    const { error } = await supabase.from('posts').delete().eq('id', id).eq('user_id', user.id);
+    // Delete via repository with ownership verification (includes cache invalidation)
+    const result = await postRepository.deleteByOwner(id, user.id);
 
-    if (error) {
-      throw new Error(error.message);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to delete post');
     }
 
     revalidatePath('/board');
@@ -193,28 +186,21 @@ export const votePost = rateLimitedAction
     }
 
     if (action === 'vote') {
-      // Add vote
-      const { error } = await supabase.from('votes').insert({
+      // Add vote via repository (includes duplicate detection)
+      const result = await voteRepository.create({
         user_id: user.id,
         post_id,
       });
 
-      if (error) {
-        if (error.code === '23505') {
-          throw new Error('You have already voted on this post');
-        }
-        throw new Error(error.message);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to vote');
       }
     } else {
-      // Remove vote
-      const { error } = await supabase
-        .from('votes')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('post_id', post_id);
+      // Remove vote via repository (includes cache invalidation)
+      const result = await voteRepository.deleteByUserAndPost(user.id, post_id);
 
-      if (error) {
-        throw new Error(error.message);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to remove vote');
       }
     }
 
@@ -251,25 +237,22 @@ export const createComment = rateLimitedAction
       throw new Error('You must be signed in to comment');
     }
 
-    const { data, error } = await supabase
-      .from('comments')
-      .insert({
-        user_id: user.id,
-        post_id,
-        content,
-      })
-      .select()
-      .single();
+    // Create via repository (includes caching and automatic error handling)
+    const result = await commentRepository.create({
+      user_id: user.id,
+      post_id,
+      content,
+    });
 
-    if (error) {
-      throw new Error(error.message);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to create comment');
     }
 
     revalidatePath('/board');
 
     return {
       success: true,
-      comment: data,
+      comment: result.data,
     };
   });
 
@@ -293,10 +276,11 @@ export const deleteComment = rateLimitedAction
       throw new Error('You must be signed in to delete comments');
     }
 
-    const { error } = await supabase.from('comments').delete().eq('id', id).eq('user_id', user.id);
+    // Delete via repository with ownership verification (includes cache invalidation)
+    const result = await commentRepository.deleteByOwner(id, user.id);
 
-    if (error) {
-      throw new Error(error.message);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to delete comment');
     }
 
     revalidatePath('/board');

@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { StarRating } from '@/src/components/features/reviews/star-rating';
 import { Button } from '@/src/components/ui/button';
 import { Label } from '@/src/components/ui/label';
+import { Textarea } from '@/src/components/ui/textarea';
 import { createReview, updateReview } from '@/src/lib/actions/review-actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -48,20 +49,27 @@ export function ReviewForm({
   const [rating, setRating] = useState(existingReview?.rating || 0);
   const [reviewText, setReviewText] = useState(existingReview?.review_text || '');
   const [isPending, startTransition] = useTransition();
+  const [showRatingError, setShowRatingError] = useState(false);
   const router = useRouter();
   const textareaId = useId();
+  const ratingErrorId = useId();
+  const textareaErrorId = useId();
 
   const isEditing = !!existingReview;
   const charactersRemaining = MAX_REVIEW_LENGTH - reviewText.length;
   const isValid = rating > 0; // At minimum, must have a rating
+  const hasTextError = reviewText.length > MAX_REVIEW_LENGTH;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!isValid) {
+      setShowRatingError(true);
       toast.error('Please select a star rating');
       return;
     }
+
+    setShowRatingError(false);
 
     startTransition(async () => {
       try {
@@ -127,10 +135,21 @@ export function ReviewForm({
           size="lg"
           showValue
           className="mt-2"
+          aria-describedby={showRatingError ? ratingErrorId : undefined}
+          aria-invalid={showRatingError ? 'true' : undefined}
         />
-        {rating === 0 && (
+        {rating === 0 && !showRatingError && (
           <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
             Click a star to rate
+          </p>
+        )}
+        {showRatingError && (
+          <p
+            id={ratingErrorId}
+            className={`${UI_CLASSES.TEXT_SM} text-destructive mt-1`}
+            role="alert"
+          >
+            Please select a star rating before submitting
           </p>
         )}
       </div>
@@ -143,16 +162,26 @@ export function ReviewForm({
             (optional)
           </span>
         </Label>
-        <textarea
+        <Textarea
           id={textareaId}
           value={reviewText}
           onChange={(e) => setReviewText(e.target.value)}
           placeholder="Share your experience with this configuration..."
           maxLength={MAX_REVIEW_LENGTH}
           rows={4}
-          className={`w-full rounded-md border ${UI_CLASSES.BG_BACKGROUND} px-3 py-2 ${UI_CLASSES.TEXT_SM} placeholder:${UI_CLASSES.TEXT_MUTED_FOREGROUND} focus:outline-none focus:ring-2 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50`}
           disabled={isPending}
+          error={hasTextError}
+          {...(hasTextError ? { errorId: textareaErrorId } : {})}
         />
+        {hasTextError && (
+          <p
+            id={textareaErrorId}
+            className={`${UI_CLASSES.TEXT_SM} text-destructive mt-1`}
+            role="alert"
+          >
+            Review text cannot exceed {MAX_REVIEW_LENGTH} characters
+          </p>
+        )}
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} mt-1`}>
           <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
             Help others by sharing details about your experience

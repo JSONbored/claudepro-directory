@@ -22,9 +22,12 @@
 
 import dynamic from 'next/dynamic';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FeaturedSections } from '@/src/components/features/home/featured-sections';
-import { SearchSection } from '@/src/components/features/home/search-section';
-import { TabsSection } from '@/src/components/features/home/tabs-section';
+import {
+  LazyFeaturedSections,
+  LazySearchSection,
+  LazyTabsSection,
+} from '@/src/components/features/home/lazy-homepage-sections';
+import { HomepageStatsSkeleton } from '@/src/components/ui/loading-skeleton';
 import { NumberTicker } from '@/src/components/ui/magic/number-ticker';
 import { useSearch } from '@/src/hooks/use-search';
 import { HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
@@ -211,46 +214,48 @@ function HomePageClientComponent({
           />
 
           {/* Quick Stats - Below Search Bar */}
-          {stats && (
+          {stats ? (
             <div
               className={`flex flex-wrap ${UI_CLASSES.JUSTIFY_CENTER} gap-4 lg:gap-6 text-xs lg:text-sm text-muted-foreground mt-6`}
             >
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <BookOpen className="h-4 w-4" />
+                <BookOpen className="h-4 w-4" aria-hidden="true" />
                 <NumberTicker value={stats.rules} duration={1500} /> Expert Rules
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Server className="h-4 w-4" />
+                <Server className="h-4 w-4" aria-hidden="true" />
                 <NumberTicker value={stats.mcp} duration={1500} delay={100} /> MCP Servers
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" />
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
                 <NumberTicker value={stats.agents} duration={1500} delay={200} /> AI Agents
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" />
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
                 <NumberTicker value={stats.commands} duration={1500} delay={300} /> Commands
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" />
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
                 <NumberTicker value={stats.hooks} duration={1500} delay={400} /> Automation Hooks
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" />
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
                 <NumberTicker value={stats.statuslines} duration={1500} delay={500} /> Statuslines
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Layers className="h-4 w-4" />
+                <Layers className="h-4 w-4" aria-hidden="true" />
                 <NumberTicker value={stats.collections} duration={1500} delay={600} /> Collections
               </div>
             </div>
+          ) : (
+            <HomepageStatsSkeleton className="mt-6" />
           )}
         </div>
       </section>
 
       <section className={`container ${UI_CLASSES.MX_AUTO} px-4 pb-16`}>
         {/* Search Results Section */}
-        <SearchSection
+        <LazySearchSection
           isSearching={isSearching}
           filteredResults={filteredResults}
           displayedItems={displayedItems}
@@ -261,11 +266,11 @@ function HomePageClientComponent({
 
         {/* Featured Content Sections - Only show when not searching */}
         {/* Use weekly featured (algorithm-selected) if available, otherwise fall back to static alphabetical */}
-        {!isSearching && <FeaturedSections categories={featuredByCategory || initialData} />}
+        {!isSearching && <LazyFeaturedSections categories={featuredByCategory || initialData} />}
 
         {/* Tabs Section - Only show when not searching */}
         {!isSearching && (
-          <TabsSection
+          <LazyTabsSection
             activeTab={activeTab}
             displayedItems={displayedItems}
             filteredResults={filteredResults}

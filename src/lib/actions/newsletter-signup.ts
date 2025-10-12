@@ -65,19 +65,21 @@ export const subscribeToNewsletter = rateLimitedAction
     if (result.success) {
       // Send welcome email asynchronously (don't block on email send)
       // If email fails, subscription still succeeded
-      resendService
-        .sendEmail(
-          email,
-          'Welcome to ClaudePro Directory! 🎉',
-          NewsletterWelcome({ email, ...(source && { source }) }),
-          {
-            tags: [
-              { name: 'template', value: 'newsletter_welcome' },
-              { name: 'source', value: source || 'unknown' },
-            ],
-          }
-        )
-        .then((emailResult) => {
+      // Properly wrapped in async IIFE to prevent unhandled rejections
+      (async () => {
+        try {
+          const emailResult = await resendService.sendEmail(
+            email,
+            'Welcome to ClaudePro Directory! 🎉',
+            NewsletterWelcome({ email, ...(source && { source }) }),
+            {
+              tags: [
+                { name: 'template', value: 'newsletter_welcome' },
+                { name: 'source', value: source || 'unknown' },
+              ],
+            }
+          );
+
           if (emailResult.success) {
             logger.info('Welcome email sent successfully', {
               email,
@@ -86,15 +88,17 @@ export const subscribeToNewsletter = rateLimitedAction
             });
 
             // Enroll in onboarding sequence (async, don't block)
-            emailSequenceService.enrollInSequence(email).catch((seqError) => {
+            try {
+              await emailSequenceService.enrollInSequence(email);
+            } catch (seqError) {
               logger.error(
                 'Failed to enroll in sequence',
-                seqError instanceof Error ? seqError : undefined,
+                seqError instanceof Error ? seqError : new Error(String(seqError)),
                 {
                   email,
                 }
               );
-            });
+            }
           } else {
             logger.error('Failed to send welcome email', undefined, {
               email,
@@ -102,13 +106,27 @@ export const subscribeToNewsletter = rateLimitedAction
               ...(source && { source }),
             });
           }
-        })
-        .catch((error) => {
-          logger.error('Welcome email send error', error instanceof Error ? error : undefined, {
+        } catch (error) {
+          logger.error(
+            'Welcome email send error',
+            error instanceof Error ? error : new Error(String(error)),
+            {
+              email,
+              ...(source && { source }),
+            }
+          );
+        }
+      })().catch((error) => {
+        // Final catch to ensure absolutely no unhandled rejections
+        logger.error(
+          'Unhandled error in welcome email flow',
+          error instanceof Error ? error : new Error(String(error)),
+          {
             email,
             ...(source && { source }),
-          });
-        });
+          }
+        );
+      });
 
       return {
         success: true,

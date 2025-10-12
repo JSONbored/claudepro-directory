@@ -92,6 +92,7 @@ export const RatingButton = ({
 
   return (
     <button
+      aria-label={`${index + 1} ${index + 1 === 1 ? 'star' : 'stars'}`}
       className={cn(
         'rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         'p-0.5',
@@ -133,6 +134,9 @@ export type RatingProps = {
   readOnly?: boolean | undefined;
   className?: string | undefined;
   children?: ReactNode | undefined;
+  'aria-describedby'?: string | undefined;
+  'aria-invalid'?: boolean | 'true' | 'false' | undefined;
+  'aria-label'?: string | undefined;
 };
 
 export const Rating = ({
@@ -220,15 +224,22 @@ export const Rating = ({
     setFocusedStar,
   };
 
+  // Create descriptive aria-label with current rating
+  const total = Children.count(children);
+  const defaultAriaLabel = readOnly
+    ? `Rating: ${value || 0} out of ${total} stars`
+    : `Rate this item: ${value || 0} out of ${total} stars selected`;
+
   return (
     <RatingContext.Provider value={contextValue}>
       <div
-        aria-label="Rating"
+        aria-label={props['aria-label'] || defaultAriaLabel}
+        aria-describedby={props['aria-describedby']}
+        aria-invalid={props['aria-invalid']}
         className={cn('inline-flex items-center gap-0.5', className)}
         onMouseLeave={() => setHoverValue(null)}
         ref={containerRef}
         role="radiogroup"
-        {...props}
       >
         {Children.map(children, (child, index) => {
           if (!child) {

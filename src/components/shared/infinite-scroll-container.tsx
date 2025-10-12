@@ -119,15 +119,16 @@ function InfiniteScrollContainerComponent<T>({
         </div>
       )}
 
-      {/* Loading Indicator */}
+      {/* Loading Indicator - Fixed height to prevent CLS */}
       {loading && (
         <div
           className={cn(
             `flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} py-8 mt-8`,
             loadingClassName
           )}
+          style={{ minHeight: '80px' }} // Prevent CLS by reserving space
         >
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
           <span className="ml-3 text-muted-foreground">Loading more...</span>
         </div>
       )}

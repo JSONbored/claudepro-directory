@@ -27,8 +27,7 @@ import {
   SelectValue,
 } from '@/src/components/ui/select';
 import { useUnifiedSearch } from '@/src/hooks/use-unified-search';
-import type { EventName } from '@/src/lib/analytics/events.config';
-import { EVENTS } from '@/src/lib/analytics/events.config';
+import { getSearchEvent } from '@/src/lib/analytics/event-mapper';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { ChevronDown, ChevronUp, Filter, Search } from '@/src/lib/icons';
 import type { FilterState, UnifiedSearchProps } from '@/src/lib/schemas/component.schema';
@@ -45,25 +44,6 @@ const SearchErrorFallback = () => (
   <div className="p-4 text-center text-muted-foreground">Error loading search</div>
 );
 
-/**
- * Get context-specific search event based on current page category
- */
-function getSearchEvent(category: string): EventName {
-  const eventMap: Record<string, EventName> = {
-    agents: EVENTS.SEARCH_AGENTS,
-    mcp: EVENTS.SEARCH_MCP,
-    'mcp-servers': EVENTS.SEARCH_MCP,
-    commands: EVENTS.SEARCH_COMMANDS,
-    rules: EVENTS.SEARCH_RULES,
-    hooks: EVENTS.SEARCH_HOOKS,
-    statuslines: EVENTS.SEARCH_STATUSLINES,
-    collections: EVENTS.SEARCH_COLLECTIONS,
-    guides: EVENTS.SEARCH_GUIDES,
-    docs: EVENTS.SEARCH_GUIDES,
-  };
-  return eventMap[category] || EVENTS.SEARCH_GLOBAL; // Fallback to global search
-}
-
 export function UnifiedSearch({
   placeholder = 'Search...',
   onSearch,
@@ -77,6 +57,7 @@ export function UnifiedSearch({
   showFilters = true,
 }: UnifiedSearchProps & { showFilters?: boolean }) {
   const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const [announcement, setAnnouncement] = useState('');
   const pathname = usePathname();
 
   // Use consolidated search hook
@@ -123,6 +104,23 @@ export function UnifiedSearch({
 
     return () => clearTimeout(timer);
   }, [localSearchQuery, onSearch, resultCount, pathname, activeFilterCount]);
+
+  // Update ARIA live announcement for all search result scenarios
+  useEffect(() => {
+    if (!localSearchQuery) {
+      // Search cleared
+      setAnnouncement('Search cleared. Showing all results.');
+    } else if (resultCount === 0) {
+      // No results found
+      setAnnouncement(`No results found for "${localSearchQuery}".`);
+    } else if (resultCount === 1) {
+      // Single result
+      setAnnouncement(`1 result found for "${localSearchQuery}".`);
+    } else {
+      // Multiple results
+      setAnnouncement(`${resultCount} results found for "${localSearchQuery}".`);
+    }
+  }, [localSearchQuery, resultCount]);
 
   // Apply filters and close panel
   const applyFilters = useCallback(() => {
@@ -220,16 +218,24 @@ export function UnifiedSearch({
           )}
         </div>
 
-        {/* Result Count */}
-        {resultCount > 0 && localSearchQuery && (
-          <div
-            className={`${UI_CLASSES.TEXT_SM} text-muted-foreground`}
-            id={searchResultsId}
-            aria-live="polite"
-          >
-            {resultCount} {resultCount === 1 ? 'result' : 'results'} found
-          </div>
-        )}
+        {/* Comprehensive ARIA live announcements for all search scenarios */}
+        <div
+          className={`${UI_CLASSES.TEXT_SM} text-muted-foreground`}
+          id={searchResultsId}
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {announcement && <span className="sr-only">{announcement}</span>}
+          {/* Visual display (different from screen reader announcement) */}
+          {localSearchQuery && resultCount > 0 && (
+            <span aria-hidden="true">
+              {resultCount} {resultCount === 1 ? 'result' : 'results'} found
+            </span>
+          )}
+          {localSearchQuery && resultCount === 0 && (
+            <span aria-hidden="true">No results found</span>
+          )}
+        </div>
 
         {/* Collapsible Filter Panel */}
         <Collapsible open={isFilterOpen} onOpenChange={setIsFilterOpen}>

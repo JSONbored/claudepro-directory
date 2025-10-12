@@ -4,11 +4,20 @@
  * Sponsored Content Actions
  * Server actions for tracking sponsored impressions and clicks
  *
- * Similar pattern to track-view.ts but for sponsored content
+ * Refactored to use Repository pattern for cleaner separation of concerns.
+ * All database operations delegated to SponsoredContentRepository.
+ *
+ * PERFORMANCE:
+ * - Repository-level caching (5-minute TTL)
+ * - Fire-and-forget tracking (don't block on errors)
+ * - Minimal data transfer
+ *
+ * Security: Rate limited, analytics category
  */
 
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { sponsoredContentRepository } from '@/src/lib/repositories/sponsored-content.repository';
 import { createClient } from '@/src/lib/supabase/server';
 
 const trackImpressionSchema = z.object({
@@ -40,27 +49,15 @@ export const trackSponsoredImpression = rateLimitedAction
       data: { user },
     } = await supabase.auth.getUser();
 
-    // Insert impression
-    const { error } = await supabase.from('sponsored_impressions').insert({
+    // Track impression via repository (fire-and-forget)
+    const result = await sponsoredContentRepository.trackImpression({
       sponsored_id,
       user_id: user?.id || null,
       page_url: page_url || null,
       position: position || null,
     });
 
-    if (error) {
-      // Don't throw - impressions are best-effort
-      return { success: false };
-    }
-
-    // Increment count on sponsored_content
-    await supabase.rpc('increment', {
-      table_name: 'sponsored_content',
-      row_id: sponsored_id,
-      column_name: 'impression_count',
-    });
-
-    return { success: true };
+    return { success: result.success ? result.data : false };
   });
 
 /**
@@ -80,54 +77,26 @@ export const trackSponsoredClick = rateLimitedAction
       data: { user },
     } = await supabase.auth.getUser();
 
-    // Insert click
-    const { error } = await supabase.from('sponsored_clicks').insert({
+    // Track click via repository (fire-and-forget)
+    const result = await sponsoredContentRepository.trackClick({
       sponsored_id,
       user_id: user?.id || null,
       target_url,
     });
 
-    if (error) {
-      return { success: false };
-    }
-
-    // Increment count on sponsored_content
-    await supabase.rpc('increment', {
-      table_name: 'sponsored_content',
-      row_id: sponsored_id,
-      column_name: 'click_count',
-    });
-
-    return { success: true };
+    return { success: result.success ? result.data : false };
   });
 
 /**
  * Get active sponsored content for injection
  */
 export async function getActiveSponsoredContent(limit = 5) {
-  const supabase = await createClient();
+  // Fetch via repository (includes caching, date filtering, and impression limit filtering)
+  const result = await sponsoredContentRepository.findActive(limit);
 
-  const now = new Date().toISOString();
-
-  const { data, error } = await supabase
-    .from('sponsored_content')
-    .select('*')
-    .eq('active', true)
-    .lte('start_date', now)
-    .gte('end_date', now)
-    .order('tier', { ascending: true }) // Premium first
-    .limit(limit);
-
-  if (error) {
+  if (!result.success) {
     return [];
   }
 
-  // Filter out items that hit impression limit
-  return (data || []).filter((item) => {
-    const impressionCount = item.impression_count ?? 0;
-    if (item.impression_limit && impressionCount >= item.impression_limit) {
-      return false;
-    }
-    return true;
-  });
+  return result.data || [];
 }

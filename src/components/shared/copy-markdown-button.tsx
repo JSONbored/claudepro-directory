@@ -2,12 +2,12 @@
  * Copy Markdown Button Component
  *
  * Provides one-click copying of markdown-formatted content using next-safe-action.
- * Extends existing CopyLLMsButton pattern with server action integration.
+ * Refactored to use BaseActionButton for consistency and reduced code duplication.
  *
  * October 2025 Production Standards:
- * - Leverages existing useCopyToClipboard hook
+ * - Leverages BaseActionButton for unified state management
  * - Uses copyMarkdownAction server action (rate-limited)
- * - Consistent UI patterns with CopyLLMsButton
+ * - Consistent UI patterns with other action buttons
  * - Toast notifications and loading states
  * - Accessibility compliant
  *
@@ -17,109 +17,36 @@
 'use client';
 
 import { useAction } from 'next-safe-action/hooks';
-import { useState } from 'react';
-import { Button } from '@/src/components/ui/button';
-import { toast } from '@/src/components/ui/sonner';
+import { BaseActionButton, BaseActionButtonIcon } from '@/src/components/shared/base-action-button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { copyMarkdownAction } from '@/src/lib/actions/markdown-actions';
-import type { EventName } from '@/src/lib/analytics/events.config';
-import { EVENTS } from '@/src/lib/analytics/events.config';
+import { getCopyMarkdownEvent } from '@/src/lib/analytics/event-mapper';
 import { trackEvent } from '@/src/lib/analytics/tracker';
-import { Check, FileText } from '@/src/lib/icons';
-import { logger } from '@/src/lib/logger';
-import { cn } from '@/src/lib/utils';
-
-/**
- * Get content-type-specific copy_markdown event based on category
- */
-function getCopyMarkdownEvent(category: string): EventName {
-  const eventMap: Record<string, EventName> = {
-    agents: EVENTS.COPY_MARKDOWN_AGENT,
-    mcp: EVENTS.COPY_MARKDOWN_MCP,
-    'mcp-servers': EVENTS.COPY_MARKDOWN_MCP,
-    commands: EVENTS.COPY_MARKDOWN_COMMAND,
-    rules: EVENTS.COPY_MARKDOWN_RULE,
-    hooks: EVENTS.COPY_MARKDOWN_HOOK,
-    statuslines: EVENTS.COPY_MARKDOWN_STATUSLINE,
-    collections: EVENTS.COPY_MARKDOWN_COLLECTION,
-  };
-
-  return eventMap[category] || EVENTS.COPY_MARKDOWN_OTHER;
-}
+import { FileText } from '@/src/lib/icons';
 
 /**
  * Props for CopyMarkdownButton component
  */
 export interface CopyMarkdownButtonProps {
-  /**
-   * Content category (agents, mcp, commands, etc.)
-   */
   category: string;
-
-  /**
-   * Content slug identifier
-   */
   slug: string;
-
-  /**
-   * Optional label for the button
-   * @default "Copy as Markdown"
-   */
   label?: string;
-
-  /**
-   * Button size variant
-   * @default "sm"
-   */
   size?: 'default' | 'sm' | 'lg' | 'icon';
-
-  /**
-   * Button style variant
-   * @default "outline"
-   */
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-
-  /**
-   * Additional CSS classes
-   */
   className?: string;
-
-  /**
-   * Whether to show the FileText icon
-   * @default true
-   */
   showIcon?: boolean;
-
-  /**
-   * Include frontmatter metadata
-   * @default true
-   */
   includeMetadata?: boolean;
-
-  /**
-   * Include attribution footer
-   * @default false (cleaner for most use cases)
-   */
   includeFooter?: boolean;
 }
 
 /**
  * Button component for copying markdown content to clipboard
  *
- * Uses next-safe-action server action with built-in rate limiting and caching.
- * Provides consistent UX with existing copy buttons while using modern server actions.
+ * Uses BaseActionButton for unified state management and UX.
+ * Integrates with server action and email capture hook.
  *
  * @param props - Component props
  * @returns Button that fetches markdown and copies to clipboard
- *
- * @example
- * ```tsx
- * <CopyMarkdownButton
- *   category="agents"
- *   slug="api-builder-agent"
- *   label="Copy as Markdown"
- * />
- * ```
  */
 export function CopyMarkdownButton({
   category,
@@ -132,27 +59,13 @@ export function CopyMarkdownButton({
   includeMetadata = true,
   includeFooter = false,
 }: CopyMarkdownButtonProps) {
-  const [isExecuting, setIsExecuting] = useState(false);
-
   const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
-  const { copied, copy } = useCopyWithEmailCapture({
+  const { copy } = useCopyWithEmailCapture({
     emailContext: {
       copyType: 'markdown',
       category,
       slug,
       ...(referrer ? { referrer } : {}),
-    },
-    onSuccess: () => {
-      toast.success('Copied to clipboard!', {
-        description: 'Markdown content ready to paste',
-        duration: 3000,
-      });
-    },
-    onError: () => {
-      toast.error('Failed to copy', {
-        description: 'Please try again',
-        duration: 4000,
-      });
     },
     context: {
       component: 'CopyMarkdownButton',
@@ -160,108 +73,66 @@ export function CopyMarkdownButton({
     },
   });
 
-  // Use next-safe-action hook
-  const { execute, status } = useAction(copyMarkdownAction, {
-    onSuccess: async (result) => {
-      if (result.data?.success && result.data.markdown) {
-        // Copy the markdown to clipboard
-        await copy(result.data.markdown);
-
-        // Track analytics event with content-type-specific event
-        const eventName = getCopyMarkdownEvent(category);
-        trackEvent(eventName, {
-          slug,
-          include_metadata: includeMetadata,
-          include_footer: includeFooter,
-          content_length: result.data.markdown.length,
-        });
-      } else {
-        throw new Error(result.data?.error || 'Failed to generate markdown');
-      }
-    },
-    onError: (error) => {
-      const serverError = error.error?.serverError;
-      const errorMessage =
-        serverError &&
-        typeof serverError === 'object' &&
-        'message' in serverError &&
-        typeof (serverError as { message?: unknown }).message === 'string'
-          ? (serverError as { message: string }).message
-          : typeof serverError === 'string'
-            ? serverError
-            : 'Failed to copy';
-
-      logger.error('Copy markdown action failed', new Error(errorMessage), {
-        component: 'CopyMarkdownButton',
-        category,
-        slug,
-      });
-
-      toast.error('Failed to copy markdown', {
-        description: errorMessage,
-        duration: 4000,
-      });
-    },
-  });
-
-  /**
-   * Handle copy button click
-   */
-  const handleCopy = async () => {
-    if (isExecuting || copied || status === 'executing') return;
-
-    setIsExecuting(true);
-
-    try {
-      await execute({
-        category,
-        slug,
-        includeMetadata,
-        includeFooter,
-      });
-    } finally {
-      setIsExecuting(false);
-    }
-  };
-
-  const isLoading = status === 'executing' || isExecuting;
+  const { executeAsync, status } = useAction(copyMarkdownAction);
 
   return (
-    <Button
-      variant={variant}
+    <BaseActionButton
+      label={label}
+      loadingLabel="Loading..."
+      successLabel="Copied!"
+      icon={FileText}
       size={size}
-      onClick={handleCopy}
-      disabled={isLoading || copied}
-      className={cn(
-        'gap-2 transition-all',
-        copied && 'border-green-500/50 bg-green-500/10 text-green-400',
-        className
-      )}
-      aria-label={copied ? 'Markdown copied' : 'Copy as markdown'}
-    >
-      {showIcon &&
-        (copied ? (
-          <Check className="h-4 w-4" aria-hidden="true" />
-        ) : isLoading ? (
-          <FileText className="h-4 w-4 animate-pulse" aria-hidden="true" />
-        ) : (
-          <FileText className="h-4 w-4" aria-hidden="true" />
-        ))}
-      <span className="text-sm">{copied ? 'Copied!' : isLoading ? 'Loading...' : label}</span>
-    </Button>
+      variant={variant}
+      showIcon={showIcon}
+      ariaLabel="Copy as markdown"
+      ariaLabelSuccess="Markdown copied"
+      componentName="CopyMarkdownButton"
+      {...(className && { className })}
+      onClick={async ({ setLoading, setSuccess, showSuccess, showError, logError }) => {
+        if (status === 'executing') return;
+
+        setLoading(true);
+
+        try {
+          // executeAsync returns a Promise with the action's result
+          const result = await executeAsync({
+            category,
+            slug,
+            includeMetadata,
+            includeFooter,
+          });
+
+          // next-safe-action properly infers the type from the action's return
+          if (result?.data?.success && result.data.markdown) {
+            await copy(result.data.markdown);
+            setSuccess(true);
+            showSuccess('Copied to clipboard!', 'Markdown content ready to paste');
+
+            // Track analytics event
+            const eventName = getCopyMarkdownEvent(category);
+            trackEvent(eventName, {
+              slug,
+              include_metadata: includeMetadata,
+              include_footer: includeFooter,
+              content_length: result.data.markdown.length,
+            });
+          } else {
+            throw new Error(result?.data?.error || 'Failed to generate markdown');
+          }
+        } catch (error) {
+          const err = error instanceof Error ? error : new Error(String(error));
+          logError('Copy markdown action failed', err, { category, slug });
+          showError('Failed to copy markdown', err.message);
+        } finally {
+          setLoading(false);
+        }
+      }}
+    />
   );
 }
 
 /**
  * Compact icon-only variant of CopyMarkdownButton
- *
- * @param props - Component props (excluding size)
- * @returns Icon button for copying markdown content
- *
- * @example
- * ```tsx
- * <CopyMarkdownButtonIcon category="agents" slug="code-reviewer" />
- * ```
  */
 export function CopyMarkdownButtonIcon({
   category,
@@ -271,21 +142,13 @@ export function CopyMarkdownButtonIcon({
   includeMetadata = true,
   includeFooter = false,
 }: Omit<CopyMarkdownButtonProps, 'label' | 'size' | 'showIcon'>) {
-  const [isExecuting, setIsExecuting] = useState(false);
-
   const referrer = typeof window !== 'undefined' ? window.location.pathname : undefined;
-  const { copied, copy } = useCopyWithEmailCapture({
+  const { copy } = useCopyWithEmailCapture({
     emailContext: {
       copyType: 'markdown',
       category,
       slug,
       ...(referrer ? { referrer } : {}),
-    },
-    onSuccess: () => {
-      toast.success('Copied as Markdown!');
-    },
-    onError: () => {
-      toast.error('Failed to copy');
     },
     context: {
       component: 'CopyMarkdownButtonIcon',
@@ -293,78 +156,51 @@ export function CopyMarkdownButtonIcon({
     },
   });
 
-  const { execute, status } = useAction(copyMarkdownAction, {
-    onSuccess: async (result) => {
-      if (result.data?.success && result.data.markdown) {
-        await copy(result.data.markdown);
-
-        // Track analytics event
-        trackEvent(EVENTS.COPY_MARKDOWN, {
-          content_category: category,
-          content_slug: slug,
-          include_metadata: includeMetadata,
-          include_footer: includeFooter,
-          content_length: result.data.markdown.length,
-        });
-      } else {
-        throw new Error(result.data?.error || 'Failed to generate markdown');
-      }
-    },
-    onError: (error) => {
-      const serverError = error.error?.serverError;
-      const errorMessage =
-        serverError &&
-        typeof serverError === 'object' &&
-        'message' in serverError &&
-        typeof (serverError as { message?: unknown }).message === 'string'
-          ? (serverError as { message: string }).message
-          : typeof serverError === 'string'
-            ? serverError
-            : 'Failed to copy';
-
-      logger.error('Copy markdown failed', new Error(errorMessage), {
-        component: 'CopyMarkdownButtonIcon',
-        category,
-        slug,
-      });
-      toast.error('Failed to copy');
-    },
-  });
-
-  const handleCopy = async () => {
-    if (isExecuting || copied || status === 'executing') return;
-
-    setIsExecuting(true);
-    try {
-      await execute({ category, slug, includeMetadata, includeFooter });
-    } finally {
-      setIsExecuting(false);
-    }
-  };
-
-  const isLoading = status === 'executing' || isExecuting;
+  const { executeAsync, status } = useAction(copyMarkdownAction);
 
   return (
-    <Button
+    <BaseActionButtonIcon
+      icon={FileText}
       variant={variant}
-      size="icon"
-      onClick={handleCopy}
-      disabled={isLoading || copied}
-      className={cn(
-        'transition-all',
-        copied && 'border-green-500/50 bg-green-500/10 text-green-400',
-        className
-      )}
-      aria-label="Copy as markdown"
+      ariaLabel="Copy as markdown"
+      ariaLabelSuccess="Markdown copied"
       title="Copy as Markdown"
-    >
-      {copied ? (
-        <Check className="h-4 w-4" />
-      ) : isLoading ? (
-        <FileText className="h-4 w-4 animate-pulse" />
-      ) : (
-        <FileText className="h-4 w-4" />
-      )}
-    </Button>
+      componentName="CopyMarkdownButtonIcon"
+      {...(className && { className })}
+      onClick={async ({ setLoading, setSuccess, showSuccess, showError, logError }) => {
+        if (status === 'executing') return;
+
+        setLoading(true);
+
+        try {
+          // executeAsync returns a Promise with the action's result
+          const result = await executeAsync({ category, slug, includeMetadata, includeFooter });
+
+          // next-safe-action properly infers the type from the action's return
+          if (result?.data?.success && result.data.markdown) {
+            await copy(result.data.markdown);
+            setSuccess(true);
+            showSuccess('Copied as Markdown!');
+
+            // Track analytics event
+            const eventName = getCopyMarkdownEvent(category);
+            trackEvent(eventName, {
+              slug,
+              include_metadata: includeMetadata,
+              include_footer: includeFooter,
+              content_length: result.data.markdown.length,
+            });
+          } else {
+            throw new Error(result?.data?.error || 'Failed to generate markdown');
+          }
+        } catch (error) {
+          const err = error instanceof Error ? error : new Error(String(error));
+          logError('Copy markdown failed', err, { category, slug });
+          showError('Failed to copy');
+        } finally {
+          setLoading(false);
+        }
+      }}
+    />
   );
 }

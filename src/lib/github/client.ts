@@ -75,10 +75,81 @@ export async function createBranch(branchName: string): Promise<string> {
     logger.info(`Created branch: ${branchName} from ${mainSha}`);
     return mainSha;
   } catch (error) {
-    if (error instanceof Error && 'status' in error && error.status === 422) {
-      throw new Error(`Branch "${branchName}" already exists. Please try again.`);
+    // Comprehensive error handling for all GitHub API status codes
+    if (error instanceof Error && 'status' in error) {
+      const status = (error as { status: number }).status;
+
+      switch (status) {
+        case 401:
+          logger.error('GitHub authentication failed', error, {
+            source: 'createBranch',
+            branch: branchName,
+          });
+          throw new Error('GitHub authentication failed. Please check your API token.');
+
+        case 403:
+          logger.error('GitHub API rate limit or insufficient permissions', error, {
+            source: 'createBranch',
+            branch: branchName,
+          });
+          throw new Error(
+            'Insufficient permissions or rate limit exceeded. Please check your token permissions.'
+          );
+
+        case 404:
+          logger.error('GitHub repository or branch not found', error, {
+            source: 'createBranch',
+            branch: branchName,
+          });
+          throw new Error(`Base branch "${REPO_CONFIG.defaultBranch}" not found in repository.`);
+
+        case 422:
+          logger.warn('Branch already exists', {
+            source: 'createBranch',
+            branch: branchName,
+          });
+          throw new Error(
+            `Branch "${branchName}" already exists. Please try again with a different name.`
+          );
+
+        case 500:
+        case 502:
+        case 503:
+        case 504:
+          logger.error('GitHub API server error', error, {
+            source: 'createBranch',
+            branch: branchName,
+            status,
+          });
+          throw new Error(
+            `GitHub API is temporarily unavailable (${status}). Please try again later.`
+          );
+
+        default:
+          logger.error('Unknown GitHub API error', error, {
+            source: 'createBranch',
+            branch: branchName,
+            status,
+          });
+          throw new Error(
+            `Failed to create branch: ${error.message || 'Unknown error'} (status: ${status})`
+          );
+      }
     }
-    throw error;
+
+    // Handle non-HTTP errors
+    logger.error(
+      'Unexpected error creating branch',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        source: 'createBranch',
+        branch: branchName,
+      }
+    );
+
+    throw new Error(
+      `Failed to create branch: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 }
 

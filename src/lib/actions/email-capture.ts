@@ -75,20 +75,22 @@ export const postCopyEmailCaptureAction = rateLimitedAction
       // If subscription successful, send welcome email and enroll in sequence
       if (result.success) {
         // Send welcome email asynchronously (don't block on email send)
-        resendService
-          .sendEmail(
-            email,
-            'Welcome to ClaudePro Directory! 🎉',
-            NewsletterWelcome({ email, ...(source && { source }) }),
-            {
-              tags: [
-                { name: 'template', value: 'newsletter_welcome' },
-                { name: 'source', value: source || 'post_copy' },
-                ...(copyType ? [{ name: 'copy_type', value: copyType }] : []),
-              ],
-            }
-          )
-          .then((emailResult) => {
+        // Properly wrapped in async IIFE to prevent unhandled rejections
+        (async () => {
+          try {
+            const emailResult = await resendService.sendEmail(
+              email,
+              'Welcome to ClaudePro Directory! 🎉',
+              NewsletterWelcome({ email, ...(source && { source }) }),
+              {
+                tags: [
+                  { name: 'template', value: 'newsletter_welcome' },
+                  { name: 'source', value: source || 'post_copy' },
+                  ...(copyType ? [{ name: 'copy_type', value: copyType }] : []),
+                ],
+              }
+            );
+
             if (emailResult.success) {
               logger.info('Welcome email sent successfully (post-copy)', {
                 email,
@@ -98,15 +100,17 @@ export const postCopyEmailCaptureAction = rateLimitedAction
               });
 
               // Enroll in onboarding sequence (async, don't block)
-              emailSequenceService.enrollInSequence(email).catch((seqError) => {
+              try {
+                await emailSequenceService.enrollInSequence(email);
+              } catch (seqError) {
                 logger.error(
                   'Failed to enroll in sequence (post-copy)',
-                  seqError instanceof Error ? seqError : undefined,
+                  seqError instanceof Error ? seqError : new Error(String(seqError)),
                   {
                     email,
                   }
                 );
-              });
+              }
             } else {
               logger.error('Failed to send welcome email (post-copy)', undefined, {
                 email,
@@ -114,17 +118,27 @@ export const postCopyEmailCaptureAction = rateLimitedAction
                 ...(source && { source }),
               });
             }
-          })
-          .catch((error) => {
+          } catch (error) {
             logger.error(
               'Welcome email send error (post-copy)',
-              error instanceof Error ? error : undefined,
+              error instanceof Error ? error : new Error(String(error)),
               {
                 email,
                 ...(source && { source }),
               }
             );
-          });
+          }
+        })().catch((error) => {
+          // Final catch to ensure absolutely no unhandled rejections
+          logger.error(
+            'Unhandled error in welcome email flow (post-copy)',
+            error instanceof Error ? error : new Error(String(error)),
+            {
+              email,
+              ...(source && { source }),
+            }
+          );
+        });
 
         // Log successful capture with context
         logger.info('Post-copy email captured successfully', {

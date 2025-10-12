@@ -23,6 +23,7 @@
 import { headers } from 'next/headers';
 import { createSafeActionClient, DEFAULT_SERVER_ERROR_MESSAGE } from 'next-safe-action';
 import { z } from 'zod';
+import { SERVER_ACTION_RATE_LIMITS } from '@/src/lib/config/rate-limits.config';
 import { logger } from '@/src/lib/logger';
 import { redisClient } from '@/src/lib/redis';
 
@@ -199,11 +200,14 @@ export const rateLimitedAction = actionClient.use(async ({ next, metadata, ctx }
 
   const { actionName, category, rateLimit } = parsedMetadata.data;
 
-  // Apply rate limiting
+  // Apply rate limiting with centralized defaults
+  const defaultConfig =
+    SERVER_ACTION_RATE_LIMITS[category as keyof typeof SERVER_ACTION_RATE_LIMITS] ??
+    SERVER_ACTION_RATE_LIMITS.default;
   const allowed = await checkRateLimit(
     actionName,
-    rateLimit?.maxRequests ?? 100,
-    rateLimit?.windowSeconds ?? 60
+    rateLimit?.maxRequests ?? defaultConfig.maxRequests,
+    rateLimit?.windowSeconds ?? defaultConfig.windowSeconds
   );
 
   if (!allowed) {

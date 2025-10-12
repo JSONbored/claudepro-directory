@@ -365,7 +365,20 @@ class RedisClientManager {
             pipeline.get(key);
           }
 
-          const results = (await pipeline.exec()) as (string | null)[];
+          const results = await pipeline.exec();
+
+          // Null check: Pipeline exec can return null on connection failure
+          if (!(results && Array.isArray(results))) {
+            logger.warn('Pipeline exec returned null or invalid results', {
+              component: 'getBatchPipeline',
+              keysRequested: chunk.length,
+            });
+            // Set all keys to null in result map
+            for (const key of chunk) {
+              resultMap.set(key, null);
+            }
+            return results;
+          }
 
           // Map results back to keys
           for (let index = 0; index < chunk.length; index++) {
@@ -378,11 +391,17 @@ class RedisClientManager {
             if (rawValue !== null && rawValue !== undefined) {
               if (deserialize) {
                 try {
-                  value = safeParse<T>(rawValue, undefined, {
-                    strategy: ParseStrategy.DEVALUE,
-                    fallbackStrategy: ParseStrategy.UNSAFE_JSON,
-                    enableLogging: false,
-                  });
+                  // safeParse requires string input - add type guard
+                  if (typeof rawValue === 'string') {
+                    value = safeParse<T>(rawValue, undefined, {
+                      strategy: ParseStrategy.DEVALUE,
+                      fallbackStrategy: ParseStrategy.UNSAFE_JSON,
+                      enableLogging: false,
+                    });
+                  } else {
+                    // Non-string value, use as-is (should not happen with pipeline.get())
+                    value = rawValue as T;
+                  }
                 } catch {
                   value = rawValue as T;
                 }

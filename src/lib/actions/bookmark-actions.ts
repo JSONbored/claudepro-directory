@@ -4,13 +4,16 @@
  * Bookmark Actions
  * Server actions for managing user bookmarks
  *
- * Follows existing pattern from email-capture.ts and track-view.ts
+ * Refactored to use Repository pattern for cleaner separation of concerns.
+ * All database operations delegated to BookmarkRepository and UserInteractionRepository.
  */
 
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
+import { bookmarkRepository } from '@/src/lib/repositories/bookmark.repository';
+import { userInteractionRepository } from '@/src/lib/repositories/user-interaction.repository';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
@@ -50,42 +53,29 @@ export const addBookmark = rateLimitedAction
       throw new Error('You must be signed in to bookmark content');
     }
 
-    // Insert bookmark (unique constraint will prevent duplicates)
-    const { data, error } = await supabase
-      .from('bookmarks')
-      .insert({
-        user_id: user.id,
-        content_type,
-        content_slug,
-        notes: notes || null,
-      })
-      .select()
-      .single();
+    // Create bookmark via repository
+    const result = await bookmarkRepository.create({
+      user_id: user.id,
+      content_type,
+      content_slug,
+      notes: notes || null,
+      created_at: new Date().toISOString(),
+    });
 
-    if (error) {
-      // Check if it's a duplicate (unique constraint violation)
-      if (error.code === '23505') {
-        throw new Error('You have already bookmarked this content');
-      }
-      throw new Error(error.message);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to create bookmark');
     }
 
-    // Track interaction for personalization
-    try {
-      await supabase.from('user_interactions').insert({
-        user_id: user.id,
-        content_type,
-        content_slug,
-        interaction_type: 'bookmark',
-        metadata: {},
+    // Track interaction for personalization (fire-and-forget)
+    userInteractionRepository
+      .track(content_type, content_slug, 'bookmark', user.id, undefined, {})
+      .catch((err) => {
+        logger.warn('Failed to track bookmark interaction', undefined, {
+          content_type,
+          content_slug,
+          error: err instanceof Error ? err.message : String(err),
+        });
       });
-    } catch (_err) {
-      // Non-critical - log but don't fail
-      logger.warn('Failed to track bookmark interaction', undefined, {
-        content_type,
-        content_slug,
-      });
-    }
 
     // Revalidate account pages
     revalidatePath('/account');
@@ -93,11 +83,11 @@ export const addBookmark = rateLimitedAction
 
     // OPTIMIZATION: Invalidate personalization caches
     // User bookmarked content → For You feed should update recommendations
-    revalidatePath('/for-you'); // Invalidates For You feed page
+    revalidatePath('/for-you');
 
     return {
       success: true,
-      bookmark: data,
+      bookmark: result.data,
     };
   });
 
@@ -128,16 +118,15 @@ export const removeBookmark = rateLimitedAction
       throw new Error('You must be signed in to remove bookmarks');
     }
 
-    // Delete bookmark
-    const { error } = await supabase
-      .from('bookmarks')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('content_type', content_type)
-      .eq('content_slug', content_slug);
+    // Delete bookmark via repository
+    const result = await bookmarkRepository.deleteByUserAndContent(
+      user.id,
+      content_type,
+      content_slug
+    );
 
-    if (error) {
-      throw new Error(error.message);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to remove bookmark');
     }
 
     // Revalidate account pages
@@ -146,8 +135,8 @@ export const removeBookmark = rateLimitedAction
 
     // OPTIMIZATION: Invalidate personalization caches
     // User removed bookmark → For You feed should update recommendations
-    revalidateTag(`user-${user.id}`); // Invalidates getUserAffinities cache
-    revalidatePath('/for-you'); // Invalidates For You feed page
+    revalidateTag(`user-${user.id}`);
+    revalidatePath('/for-you');
 
     return {
       success: true,
@@ -170,15 +159,10 @@ export async function isBookmarked(content_type: string, content_slug: string): 
     return false;
   }
 
-  const { data, error } = await supabase
-    .from('bookmarks')
-    .select('id')
-    .eq('user_id', user.id)
-    .eq('content_type', content_type)
-    .eq('content_slug', content_slug)
-    .single();
+  // Check via repository
+  const result = await bookmarkRepository.findByUserAndContent(user.id, content_type, content_slug);
 
-  return !error && !!data;
+  return result.success && result.data !== null;
 }
 
 /**

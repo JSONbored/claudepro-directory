@@ -4,6 +4,9 @@
  * Personalization Actions
  * Server actions for personalized recommendations and similar configs
  *
+ * Refactored to use Repository pattern for cleaner separation of concerns.
+ * Database operations delegated to repositories for affinities, bookmarks, and interactions.
+ *
  * Features:
  * - For You feed generation
  * - Similar configs recommendations
@@ -25,6 +28,10 @@ import {
 import type { PersonalizedContentItem } from '@/src/lib/personalization/types';
 import { getUsageBasedRecommendations } from '@/src/lib/personalization/usage-based-recommender';
 import { statsRedis } from '@/src/lib/redis';
+import { bookmarkRepository } from '@/src/lib/repositories/bookmark.repository';
+import { contentSimilarityRepository } from '@/src/lib/repositories/content-similarity.repository';
+import { userAffinityRepository } from '@/src/lib/repositories/user-affinity.repository';
+import { userInteractionRepository } from '@/src/lib/repositories/user-interaction.repository';
 import { toContentId } from '@/src/lib/schemas/branded-types.schema';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import {
@@ -120,31 +127,53 @@ export const getForYouFeed = rateLimitedAction
           // Enrich with view counts
           const enrichedContent = await statsRedis.enrichWithViewCounts(allContent);
 
-          // Fetch user affinities
-          const { data: affinities } = await supabase
-            .from('user_affinities')
-            .select('content_type, content_slug, affinity_score')
-            .eq('user_id', userId)
-            .gte('affinity_score', 20)
-            .order('affinity_score', { ascending: false })
-            .limit(50);
+          // Fetch user affinities via repository (includes caching)
+          const affinitiesResult = await userAffinityRepository.findByUser(userId, {
+            minScore: 20,
+            limit: 50,
+            sortBy: 'affinity_score',
+            sortOrder: 'desc',
+          });
 
-          // Fetch bookmarks
-          const { data: bookmarks } = await supabase
-            .from('bookmarks')
-            .select('content_type, content_slug')
-            .eq('user_id', userId);
+          const affinities = affinitiesResult.success
+            ? (affinitiesResult.data || []).map((a) => ({
+                content_type: a.content_type,
+                content_slug: a.content_slug,
+                affinity_score: a.affinity_score,
+              }))
+            : [];
 
-          // Fetch recent views (last 7 days)
+          // Fetch bookmarks via repository (includes caching)
+          const bookmarksResult = await bookmarkRepository.findByUser(userId);
+          const bookmarks = bookmarksResult.success
+            ? (bookmarksResult.data || []).map((b) => ({
+                content_type: b.content_type,
+                content_slug: b.content_slug,
+              }))
+            : [];
+
+          // Fetch recent views (last 7 days) via repository (includes caching)
           const sevenDaysAgo = new Date();
           sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-          const { data: recentViews } = await supabase
-            .from('user_interactions')
-            .select('content_type, content_slug')
-            .eq('user_id', userId)
-            .eq('interaction_type', 'view')
-            .gte('created_at', sevenDaysAgo.toISOString());
+          const recentViewsResult = await userInteractionRepository.findByUser(userId, {
+            limit: 1000, // Large limit to capture all recent views
+            sortBy: 'created_at',
+            sortOrder: 'desc',
+          });
+
+          const recentViews = recentViewsResult.success
+            ? (recentViewsResult.data || [])
+                .filter(
+                  (interaction) =>
+                    interaction.interaction_type === 'view' &&
+                    new Date(interaction.created_at) >= sevenDaysAgo
+                )
+                .map((interaction) => ({
+                  content_type: interaction.content_type,
+                  content_slug: interaction.content_slug,
+                }))
+            : [];
 
           // Fetch user profile interests
           const { data: profile } = await supabase
@@ -302,46 +331,37 @@ export const getSimilarConfigs = rateLimitedAction
   .schema(similarConfigsQuerySchema)
   .outputSchema(similarConfigsResponseSchema)
   .action(async ({ parsedInput }: { parsedInput: z.infer<typeof similarConfigsQuerySchema> }) => {
-    const supabase = await createClient();
-
     try {
-      // Check database for pre-computed similarities
-      const { data: similarities, error } = await supabase
-        .from('content_similarities')
-        .select('*')
-        .eq('content_a_type', parsedInput.content_type)
-        .eq('content_a_slug', parsedInput.content_slug)
-        .order('similarity_score', { ascending: false })
-        .limit(parsedInput.limit);
+      // Check database for pre-computed similarities via repository (includes caching)
+      const similaritiesResult = await contentSimilarityRepository.findSimilarContent(
+        parsedInput.content_type,
+        parsedInput.content_slug,
+        {
+          limit: parsedInput.limit,
+          sortBy: 'similarity_score',
+          sortOrder: 'desc',
+        }
+      );
 
-      if (error) {
-        logger.error('Failed to fetch similarities from database', error);
-        // Fall back to real-time calculation
-      }
+      const similarities = similaritiesResult.success ? similaritiesResult.data : null;
 
       if (similarities && similarities.length > 0) {
         // Return pre-computed similarities
         const response: SimilarConfigsResponse = {
-          similar_items: similarities.map(
-            (sim: {
-              content_b_slug: string;
-              content_b_type: string;
-              similarity_score: number;
-            }) => ({
-              slug: toContentId(sim.content_b_slug),
-              title: sim.content_b_slug, // Will be enriched by client
-              description: '',
-              category: sim.content_b_type as ContentCategory,
-              url: getContentItemUrl({
-                category: sim.content_b_type as ContentCategory,
-                slug: sim.content_b_slug,
-              }),
-              score: Math.round(sim.similarity_score * 100),
-              source: 'similar' as const,
-              reason: 'Similar to this config',
-              tags: [],
-            })
-          ),
+          similar_items: similarities.map((sim) => ({
+            slug: toContentId(sim.content_slug),
+            title: sim.content_slug, // Will be enriched by client
+            description: '',
+            category: sim.content_type as ContentCategory,
+            url: getContentItemUrl({
+              category: sim.content_type as ContentCategory,
+              slug: sim.content_slug,
+            }),
+            score: Math.round(sim.similarity_score * 100),
+            source: 'similar' as const,
+            reason: 'Similar to this config',
+            tags: [],
+          })),
           source_item: {
             slug: parsedInput.content_slug,
             category: parsedInput.content_type,
@@ -457,16 +477,13 @@ export const getUsageRecommendations = rateLimitedAction
           );
         }
 
-        // Get user affinities if authenticated
+        // Get user affinities if authenticated via repository (includes caching)
         const userAffinities = new Map<string, number>();
         if (user) {
-          const { data: affinities } = await supabase
-            .from('user_affinities')
-            .select('content_type, content_slug, affinity_score')
-            .eq('user_id', user.id);
+          const affinitiesResult = await userAffinityRepository.findByUser(user.id);
 
-          if (affinities) {
-            for (const aff of affinities) {
+          if (affinitiesResult.success && affinitiesResult.data) {
+            for (const aff of affinitiesResult.data) {
               userAffinities.set(`${aff.content_type}:${aff.content_slug}`, aff.affinity_score);
             }
           }

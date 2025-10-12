@@ -2,25 +2,26 @@
  * Hook Factory
  *
  * Generates realistic Git hook configurations.
+ * Refactored to use base content factory to reduce code duplication.
+ *
+ * **Code Reduction:**
+ * - Before: 94 lines
+ * - After: 70 lines
+ * - **Savings: 24 lines (~26% reduction)**
  *
  * @see src/lib/schemas/content/hook.schema.ts
  */
 
 import { faker } from '@faker-js/faker';
-import { Factory } from 'fishery';
 import type { HookContent } from '@/src/lib/schemas/content/hook.schema';
-import { usageExampleFactory } from '../shared/usage-example.factory';
+import {
+  createContentFactory,
+  type BaseContentTransientParams,
+} from '../shared/base-content.factory';
 
-interface HookFactoryTransientParams {
-  tagCount?: number;
-  exampleCount?: number;
-}
-
-export const hookFactory = Factory.define<HookContent, HookFactoryTransientParams>(
-  ({ sequence, transientParams }) => {
-    const { tagCount = faker.number.int({ min: 1, max: 4 }), exampleCount = faker.number.int({ min: 0, max: 2 }) } =
-      transientParams;
-
+export const hookFactory = createContentFactory<HookContent>({
+  category: 'hooks',
+  nameGenerator: () => {
     const hookType = faker.helpers.arrayElement([
       'PostToolUse',
       'PreToolUse',
@@ -32,51 +33,27 @@ export const hookFactory = Factory.define<HookContent, HookFactoryTransientParam
       'Stop',
       'SubagentStop',
     ] as const);
-
-    const action = faker.helpers.arrayElement([
-      'lint',
-      'test',
-      'format',
-      'type-check',
-      'install',
-      'build',
-    ]);
-
-    const slug = `${faker.helpers.slugify(hookType).toLowerCase()}-${action}` + (sequence > 1 ? `-${sequence}` : '');
+    const action = faker.helpers.arrayElement(['lint', 'test', 'format', 'type-check', 'install', 'build']);
+    return `${hookType} ${action.charAt(0).toUpperCase() + action.slice(1)}`;
+  },
+  slugGenerator: (name, sequence) => {
+    const parts = name.split(' ');
+    const hookType = parts.slice(0, -1).join(' ');
+    const action = parts[parts.length - 1].toLowerCase();
+    return `${faker.helpers.slugify(hookType).toLowerCase()}-${action}` + (sequence > 1 ? `-${sequence}` : '');
+  },
+  tagPool: ['git', 'pre-commit', 'post-merge', 'linting', 'testing', 'automation', 'ci-cd', 'quality'],
+  contentGenerator: (name) => {
+    const action = name.split(' ').pop()?.toLowerCase() || 'lint';
+    return `npm run ${action}`;
+  },
+  extendFields: ({ name }) => {
+    const parts = name.split(' ');
+    const hookType = parts.slice(0, -1).join('') as HookContent['hookType'];
+    const action = parts[parts.length - 1].toLowerCase();
 
     return {
-      slug,
-      category: 'hooks' as const,
       hookType,
-      title: `${hookType} ${action.charAt(0).toUpperCase() + action.slice(1)}`,
-      description: faker.lorem.sentence({ min: 8, max: 18 }),
-      author: faker.internet.username().toLowerCase(),
-      dateAdded: faker.date.past({ years: 1 }).toISOString(),
-      tags: faker.helpers.arrayElements(
-        ['git', 'pre-commit', 'post-merge', 'linting', 'testing', 'automation', 'ci-cd', 'quality'],
-        { min: tagCount, max: tagCount }
-      ),
-      content: `npm run ${action}`,
-      source: faker.helpers.maybe(
-        () => faker.helpers.arrayElement(['community', 'official', 'verified', 'claudepro'] as const),
-        { probability: 0.5 }
-      ),
-      documentationUrl: faker.helpers.maybe(() => faker.internet.url() + '/docs', { probability: 0.3 }),
-      features: faker.helpers.maybe(
-        () =>
-          Array.from({ length: faker.number.int({ min: 2, max: 4 }) }, () =>
-            faker.lorem.sentence({ min: 3, max: 7 })
-          ),
-        { probability: 0.6 }
-      ),
-      useCases: faker.helpers.maybe(
-        () =>
-          Array.from({ length: faker.number.int({ min: 1, max: 3 }) }, () =>
-            faker.lorem.sentence({ min: 4, max: 9 })
-          ),
-        { probability: 0.5 }
-      ),
-      usageExamples: exampleCount > 0 ? usageExampleFactory.buildList(exampleCount) : undefined,
       configuration: {
         hookConfig: {
           hooks: {
@@ -89,5 +66,5 @@ export const hookFactory = Factory.define<HookContent, HookFactoryTransientParam
         },
       },
     };
-  }
-);
+  },
+});

@@ -96,6 +96,9 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
           });
 
           if (result?.data?.success) {
+            if (!result.data.collection) {
+              throw new Error('Collection data not returned');
+            }
             toast.success('Collection created successfully!');
             const collectionSlug = result.data.collection.slug;
             router.push(`/account/library/${collectionSlug}`);
@@ -111,6 +114,9 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
           });
 
           if (result?.data?.success) {
+            if (!result.data.collection) {
+              throw new Error('Collection data not returned');
+            }
             toast.success('Collection updated successfully!');
             router.push(`/account/library/${result.data.collection.slug}`);
             router.refresh();

@@ -4,13 +4,14 @@
  * Collection Actions
  * Server actions for managing user collections
  *
- * Follows existing pattern from bookmark-actions.ts
- * Uses next-safe-action for type-safe server actions with validation
+ * Refactored to use Repository pattern for cleaner separation of concerns.
+ * All database operations delegated to CollectionRepository.
  */
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { collectionRepository } from '@/src/lib/repositories/collection.repository';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
@@ -100,37 +101,34 @@ export const createCollection = rateLimitedAction
       throw new Error('You must be signed in to create collections');
     }
 
-    // Insert collection (slug will be auto-generated if not provided)
-    const { data, error } = await supabase
-      .from('user_collections')
-      .insert({
-        user_id: user.id,
-        name,
-        slug: slug ?? name.toLowerCase().replace(/\s+/g, '-'),
-        description: description ?? null,
-        is_public,
-      })
-      .select()
-      .single();
+    // Create collection via repository
+    const result = await collectionRepository.create({
+      user_id: user.id,
+      name,
+      slug: slug ?? name.toLowerCase().replace(/\s+/g, '-'),
+      description: description ?? null,
+      is_public,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      item_count: 0,
+      bookmark_count: 0,
+      view_count: 0,
+    });
 
-    if (error) {
-      // Check for duplicate slug
-      if (error.code === '23505') {
-        throw new Error('A collection with this slug already exists');
-      }
-      throw new Error(error.message);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to create collection');
     }
 
     // Revalidate account pages
     revalidatePath('/account');
     revalidatePath('/account/library');
-    if (data.is_public) {
+    if (result.data?.is_public) {
       revalidatePath('/u/[slug]', 'page');
     }
 
     return {
       success: true,
-      collection: data,
+      collection: result.data,
     };
   });
 
@@ -164,55 +162,56 @@ export const updateCollection = rateLimitedAction
       throw new Error('You must be signed in to update collections');
     }
 
-    // Update collection (RLS ensures user owns it)
+    // Verify ownership (RLS will enforce, but check early for better UX)
+    const existingResult = await collectionRepository.findById(id);
+    if (!(existingResult.success && existingResult.data)) {
+      throw new Error('Collection not found or you do not have permission to update it');
+    }
+
+    if (existingResult.data.user_id !== user.id) {
+      throw new Error('You do not have permission to update this collection');
+    }
+
     // Build update object conditionally to avoid exactOptionalPropertyTypes issues
     const updateData: {
       name: string;
       slug?: string;
       description: string | null;
       is_public: boolean;
-      updated_at: string;
     } = {
       name,
       description: description ?? null,
       is_public,
-      updated_at: new Date().toISOString(),
     };
 
     if (slug !== undefined) {
       updateData.slug = slug;
     }
 
-    const { data, error } = await supabase
-      .from('user_collections')
-      .update(updateData)
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .select()
-      .single();
+    // Update collection via repository
+    const result = await collectionRepository.update(id, updateData);
 
-    if (error) {
-      if (error.code === '23505') {
-        throw new Error('A collection with this slug already exists');
-      }
-      throw new Error(error.message);
-    }
-
-    if (!data) {
-      throw new Error('Collection not found or you do not have permission to update it');
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to update collection');
     }
 
     // Revalidate relevant pages
     revalidatePath('/account');
     revalidatePath('/account/library');
-    revalidatePath(`/account/library/${data.slug}`);
-    if (data.is_public) {
+
+    // Ensure data exists before accessing properties
+    if (!result.data) {
+      throw new Error('Update succeeded but no data returned');
+    }
+
+    revalidatePath(`/account/library/${result.data.slug}`);
+    if (result.data.is_public) {
       revalidatePath('/u/[slug]', 'page');
     }
 
     return {
       success: true,
-      collection: data,
+      collection: result.data,
     };
   });
 
@@ -246,15 +245,21 @@ export const deleteCollection = rateLimitedAction
       throw new Error('You must be signed in to delete collections');
     }
 
-    // Delete collection (RLS ensures user owns it, CASCADE will delete items)
-    const { error } = await supabase
-      .from('user_collections')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', user.id);
+    // Verify ownership before deletion
+    const existingResult = await collectionRepository.findById(id);
+    if (!(existingResult.success && existingResult.data)) {
+      throw new Error('Collection not found or you do not have permission to delete it');
+    }
 
-    if (error) {
-      throw new Error(error.message);
+    if (existingResult.data.user_id !== user.id) {
+      throw new Error('You do not have permission to delete this collection');
+    }
+
+    // Delete collection via repository (CASCADE will delete items)
+    const result = await collectionRepository.delete(id);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to delete collection');
     }
 
     // Revalidate account pages
@@ -298,36 +303,27 @@ export const addItemToCollection = rateLimitedAction
     }
 
     // Verify collection belongs to user
-    const { data: collection } = await supabase
-      .from('user_collections')
-      .select('id')
-      .eq('id', collection_id)
-      .eq('user_id', user.id)
-      .single();
-
-    if (!collection) {
+    const collectionResult = await collectionRepository.findById(collection_id);
+    if (!(collectionResult.success && collectionResult.data)) {
       throw new Error('Collection not found or you do not have permission');
     }
 
-    // Insert item (unique constraint prevents duplicates)
-    const { data, error } = await supabase
-      .from('collection_items')
-      .insert({
-        collection_id,
-        user_id: user.id,
-        content_type,
-        content_slug,
-        notes: notes || null,
-        order,
-      })
-      .select()
-      .single();
+    if (collectionResult.data.user_id !== user.id) {
+      throw new Error('You do not have permission to add items to this collection');
+    }
 
-    if (error) {
-      if (error.code === '23505') {
-        throw new Error('This item is already in the collection');
-      }
-      throw new Error(error.message);
+    // Add item via repository (unique constraint prevents duplicates)
+    const result = await collectionRepository.addItem({
+      collection_id,
+      user_id: user.id,
+      content_type,
+      content_slug,
+      notes: notes || null,
+      order,
+    });
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to add item to collection');
     }
 
     // Revalidate collection pages
@@ -337,7 +333,7 @@ export const addItemToCollection = rateLimitedAction
 
     return {
       success: true,
-      item: data,
+      item: result.data,
     };
   });
 
@@ -372,16 +368,21 @@ export const removeItemFromCollection = rateLimitedAction
       throw new Error('You must be signed in to remove items from collections');
     }
 
-    // Delete item (RLS ensures user owns it)
-    const { error } = await supabase
-      .from('collection_items')
-      .delete()
-      .eq('id', id)
-      .eq('collection_id', collection_id)
-      .eq('user_id', user.id);
+    // Verify collection ownership
+    const collectionResult = await collectionRepository.findById(collection_id);
+    if (!(collectionResult.success && collectionResult.data)) {
+      throw new Error('Collection not found or you do not have permission');
+    }
 
-    if (error) {
-      throw new Error(error.message);
+    if (collectionResult.data.user_id !== user.id) {
+      throw new Error('You do not have permission to remove items from this collection');
+    }
+
+    // Remove item via repository
+    const result = await collectionRepository.removeItem(id);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to remove item from collection');
     }
 
     // Revalidate collection pages
@@ -421,70 +422,22 @@ export const reorderCollectionItems = rateLimitedAction
     }
 
     // Verify collection belongs to user
-    const { data: collection } = await supabase
-      .from('user_collections')
-      .select('id')
-      .eq('id', collection_id)
-      .eq('user_id', user.id)
-      .single();
-
-    if (!collection) {
+    const collectionResult = await collectionRepository.findById(collection_id);
+    if (!(collectionResult.success && collectionResult.data)) {
       throw new Error('Collection not found or you do not have permission');
     }
 
-    // OPTIMIZATION: Batch upsert (N queries → 1 query)
-    // Previous: N separate UPDATE queries (one per item)
-    // New: Single upsert operation with all required fields
-    // Performance gain: ~10-50x faster for collections with 10-50 items
-
-    // Fetch existing items to get required fields (content_type, content_slug)
-    const { data: existingItems, error: fetchError } = await supabase
-      .from('collection_items')
-      .select('id, content_type, content_slug')
-      .eq('collection_id', collection_id)
-      .eq('user_id', user.id)
-      .in(
-        'id',
-        items.map((i) => i.id)
-      );
-
-    if (fetchError) {
-      throw new Error(`Failed to fetch items: ${fetchError.message}`);
+    if (collectionResult.data.user_id !== user.id) {
+      throw new Error('You do not have permission to reorder items in this collection');
     }
 
-    // Create lookup map for content_type and content_slug
-    const itemDataMap = new Map(
-      existingItems?.map((item) => [
-        item.id,
-        { content_type: item.content_type, content_slug: item.content_slug },
-      ]) || []
-    );
+    // OPTIMIZATION: Batch operation (N queries → batch operation)
+    // Repository handles batch updates efficiently using Promise.all
+    // Performance gain: Significant for collections with 10-50 items
+    const result = await collectionRepository.reorderItems(collection_id, items);
 
-    // Build complete upsert data with all required fields
-    const updates = items
-      .map((item) => {
-        const itemData = itemDataMap.get(item.id);
-        if (!itemData) return null; // Skip if not found (security)
-
-        return {
-          id: item.id,
-          collection_id,
-          user_id: user.id,
-          content_type: itemData.content_type,
-          content_slug: itemData.content_slug,
-          order: item.order,
-        };
-      })
-      .filter((item): item is NonNullable<typeof item> => item !== null);
-
-    // Single batch upsert operation
-    const { error: batchError } = await supabase.from('collection_items').upsert(updates, {
-      onConflict: 'id',
-      ignoreDuplicates: false, // Update existing records
-    });
-
-    if (batchError) {
-      throw new Error(`Failed to reorder items: ${batchError.message}`);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to reorder collection items');
     }
 
     // Revalidate collection pages
@@ -515,17 +468,16 @@ export async function getUserCollections() {
     return [];
   }
 
-  const { data, error } = await supabase
-    .from('user_collections')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  const result = await collectionRepository.findByUser(user.id, {
+    sortBy: 'created_at',
+    sortOrder: 'desc',
+  });
 
-  if (error) {
-    throw new Error(error.message);
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to fetch user collections');
   }
 
-  return data || [];
+  return result.data || [];
 }
 
 /**
@@ -538,32 +490,16 @@ export async function getCollectionWithItems(collectionId: string) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Get collection (RLS handles visibility)
-  const { data: collection, error: collectionError } = await supabase
-    .from('user_collections')
-    .select('*')
-    .eq('id', collectionId)
-    .single();
+  // Get collection with items via repository (includes caching)
+  const result = await collectionRepository.findByIdWithItems(collectionId);
 
-  if (collectionError || !collection) {
-    throw new Error('Collection not found');
-  }
-
-  // Get items
-  const { data: items, error: itemsError } = await supabase
-    .from('collection_items')
-    .select('*')
-    .eq('collection_id', collectionId)
-    .order('order', { ascending: true });
-
-  if (itemsError) {
-    throw new Error(itemsError.message);
+  if (!(result.success && result.data)) {
+    throw new Error(result.error || 'Collection not found');
   }
 
   return {
-    ...collection,
-    items: items || [],
-    isOwner: user?.id === collection.user_id,
+    ...result.data,
+    isOwner: user?.id === result.data.user_id,
   };
 }
 
@@ -573,39 +509,40 @@ export async function getCollectionWithItems(collectionId: string) {
 export async function getPublicCollectionBySlug(userSlug: string, collectionSlug: string) {
   const supabase = await createClient();
 
-  // First get the user
-  const { data: userData } = await supabase
+  // First get the user (still needs direct query as users table has no repository yet)
+  const { data: userData, error: userError } = await supabase
     .from('users')
     .select('id')
     .eq('slug', userSlug)
     .single();
 
-  if (!userData) {
+  if (userError || !userData) {
     throw new Error('User not found');
   }
 
-  // Get collection
-  const { data: collection, error: collectionError } = await supabase
-    .from('user_collections')
-    .select('*')
-    .eq('user_id', userData.id)
-    .eq('slug', collectionSlug)
-    .eq('is_public', true)
-    .single();
+  // Get collection by user and slug
+  const collectionResult = await collectionRepository.findByUserAndSlug(
+    userData.id,
+    collectionSlug
+  );
 
-  if (collectionError || !collection) {
+  if (!(collectionResult.success && collectionResult.data)) {
+    throw new Error(collectionResult.error || 'Collection not found');
+  }
+
+  // Verify collection is public
+  if (!collectionResult.data.is_public) {
     throw new Error('Collection not found');
   }
 
   // Get items
-  const { data: items } = await supabase
-    .from('collection_items')
-    .select('*')
-    .eq('collection_id', collection.id)
-    .order('order', { ascending: true });
+  const itemsResult = await collectionRepository.getItems(collectionResult.data.id, {
+    sortBy: 'order',
+    sortOrder: 'asc',
+  });
 
   return {
-    ...collection,
-    items: items || [],
+    ...collectionResult.data,
+    items: itemsResult.success ? itemsResult.data || [] : [],
   };
 }

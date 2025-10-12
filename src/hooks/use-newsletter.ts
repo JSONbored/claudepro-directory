@@ -182,9 +182,26 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
    * Subscribe to newsletter
    */
   const subscribe = useCallback(async () => {
-    // Client-side validation
+    // Client-side validation: Check if email is provided
     if (!email) {
       const errorMsg = 'Please enter your email address';
+      setError(errorMsg);
+
+      if (showToasts) {
+        toast.error(errorMsg);
+      }
+
+      onError?.(errorMsg);
+      return;
+    }
+
+    // Client-side validation: Check email format
+    // RFC 5322 compliant email regex (simplified for common use cases)
+    const emailRegex =
+      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+
+    if (!emailRegex.test(email.trim())) {
+      const errorMsg = 'Please enter a valid email address';
       setError(errorMsg);
 
       if (showToasts) {

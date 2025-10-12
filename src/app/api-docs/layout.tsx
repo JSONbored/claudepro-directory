@@ -32,7 +32,17 @@ const DocsLayout = dynamic(
     import('fumadocs-ui/layouts/docs').then((mod) => ({
       default: mod.DocsLayout,
     })),
-  { ssr: true }
+  {
+    ssr: true,
+    loading: () => (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-muted-foreground text-sm">Loading documentation...</p>
+        </div>
+      </div>
+    ),
+  }
 );
 
 const RootProvider = dynamic(
@@ -40,7 +50,10 @@ const RootProvider = dynamic(
     import('fumadocs-ui/provider').then((mod) => ({
       default: mod.RootProvider,
     })),
-  { ssr: true }
+  {
+    ssr: true,
+    loading: () => null, // RootProvider wraps DocsLayout, use DocsLayout skeleton
+  }
 );
 
 /**

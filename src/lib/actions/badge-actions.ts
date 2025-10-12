@@ -3,35 +3,17 @@
 /**
  * Badge Actions
  * Server actions for badge management
+ *
+ * Refactored to use Repository pattern for cleaner separation of concerns.
+ * All database operations delegated to BadgeRepository and UserBadgeRepository.
+ *
+ * Security: Rate limited, auth required, RLS enforced
  */
 
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { userBadgeRepository } from '@/src/lib/repositories/user-badge.repository';
 import { createClient } from '@/src/lib/supabase/server';
-
-// Supabase query result types
-type UserBadgeWithBadge = {
-  id: string;
-  badge_id: string;
-  earned_at: string;
-  featured: boolean;
-  badges: {
-    slug: string;
-    name: string;
-    description: string;
-    icon: string | null;
-    category: string;
-  };
-};
-
-type BadgeEarnedItem = {
-  earned_at: string;
-  badge: {
-    name: string;
-    description: string;
-    icon: string | null;
-  };
-};
 
 /**
  * Get user's badges with details
@@ -76,33 +58,15 @@ export const getUserBadges = rateLimitedAction
       targetUserId = user.id;
     }
 
-    // Fetch user's badges with badge details
-    const { data, error } = await supabase
-      .from('user_badges')
-      .select(
-        `
-        id,
-        badge_id,
-        earned_at,
-        featured,
-        badges!inner (
-          slug,
-          name,
-          description,
-          icon,
-          category
-        )
-      `
-      )
-      .eq('user_id', targetUserId)
-      .order('earned_at', { ascending: false });
+    // Fetch via repository (includes caching and badge details join)
+    const result = await userBadgeRepository.findByUserWithBadgeDetails(targetUserId);
 
-    if (error) {
-      throw new Error(`Failed to fetch badges: ${error.message}`);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to fetch badges');
     }
 
-    // Transform the data to match expected type
-    const badges = ((data as unknown as UserBadgeWithBadge[]) || []).map((item) => ({
+    // Transform the data to match expected output format
+    const badges = (result.data || []).map((item) => ({
       id: item.id,
       badge_id: item.badge_id,
       earned_at: item.earned_at,
@@ -154,30 +118,14 @@ export const checkNewBadges = rateLimitedAction
       throw new Error('You must be signed in');
     }
 
-    // Default to badges earned in last 5 minutes
-    const sinceTime = since || new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    // Fetch via repository (includes caching and badge details join)
+    const result = await userBadgeRepository.findRecentlyEarned(user.id, since);
 
-    const { data, error } = await supabase
-      .from('user_badges')
-      .select(
-        `
-        earned_at,
-        badge:badges (
-          name,
-          description,
-          icon
-        )
-      `
-      )
-      .eq('user_id', user.id)
-      .gte('earned_at', sinceTime)
-      .order('earned_at', { ascending: false });
-
-    if (error) {
-      throw new Error(`Failed to check badges: ${error.message}`);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to check badges');
     }
 
-    const newBadges = ((data as unknown as BadgeEarnedItem[]) || []).map((item) => ({
+    const newBadges = (result.data || []).map((item) => ({
       name: item.badge.name,
       description: item.badge.description,
       icon: item.badge.icon,

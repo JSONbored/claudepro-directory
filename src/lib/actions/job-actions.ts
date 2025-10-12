@@ -4,19 +4,23 @@
  * Job Actions
  * Server actions for job listing CRUD operations
  *
+ * Refactored to use Repository pattern for cleaner separation of concerns.
+ * All database operations delegated to JobRepository.
+ *
  * Security: Rate limited, auth required, RLS enforced
- * Follows patterns from bookmark-actions.ts
  */
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { jobRepository } from '@/src/lib/repositories/job.repository';
 import {
   createJobSchema,
   toggleJobStatusSchema,
   updateJobSchema,
 } from '@/src/lib/schemas/content/job.schema';
 import { createClient } from '@/src/lib/supabase/server';
+import type { Database } from '@/src/types/database.types';
 
 /**
  * Create a new job listing
@@ -45,78 +49,51 @@ export const createJob = rateLimitedAction
       throw new Error('You must be signed in to create a job listing');
     }
 
-    // Insert job - build object conditionally to handle exactOptionalPropertyTypes
-    // Generate slug from title (database requires slug)
+    // Generate slug from title
     const generatedSlug = parsedInput.title
       .toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^a-z0-9-]/g, '')
       .substring(0, 100);
 
-    const insertData: {
-      user_id: string;
-      title: string;
-      slug: string;
-      company: string;
-      location?: string | null;
-      description: string;
-      salary?: string | null;
-      remote: boolean;
-      type: string;
-      workplace?: string | null;
-      experience?: string | null;
-      category: string;
-      tags: string[];
-      requirements: string[];
-      benefits: string[];
-      link: string;
-      contact_email?: string | null;
-      company_logo?: string | null;
-      company_id?: string | null;
-      plan: string;
-      active: boolean;
-      status: string;
-      posted_at: string | null;
-      expires_at: string | null;
-    } = {
+    // Create via repository (includes caching and automatic error handling)
+    const result = await jobRepository.create({
       user_id: user.id,
       title: parsedInput.title,
       slug: generatedSlug,
       company: parsedInput.company,
+      location: parsedInput.location ?? null,
       description: parsedInput.description,
+      salary: parsedInput.salary ?? null,
       remote: parsedInput.remote,
       type: parsedInput.type,
+      workplace: parsedInput.workplace ?? null,
+      experience: parsedInput.experience ?? null,
       category: parsedInput.category,
-      tags: parsedInput.tags,
-      requirements: parsedInput.requirements,
-      benefits: parsedInput.benefits,
+      tags: parsedInput.tags as unknown as Database['public']['Tables']['jobs']['Row']['tags'],
+      requirements:
+        parsedInput.requirements as unknown as Database['public']['Tables']['jobs']['Row']['requirements'],
+      benefits:
+        parsedInput.benefits as unknown as Database['public']['Tables']['jobs']['Row']['benefits'],
       link: parsedInput.link,
+      contact_email: parsedInput.contact_email ?? null,
+      company_logo: parsedInput.company_logo ?? null,
+      company_id: parsedInput.company_id ?? null,
       plan: parsedInput.plan,
-      // For free tier, activate immediately if standard plan
       active: parsedInput.plan === 'standard',
       status: parsedInput.plan === 'standard' ? 'active' : 'draft',
       posted_at: parsedInput.plan === 'standard' ? new Date().toISOString() : null,
-      // Set expiry to 30 days for standard, null for paid (manual activation)
       expires_at:
         parsedInput.plan === 'standard'
           ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
           : null,
-    };
+    });
 
-    if (parsedInput.location !== undefined) insertData.location = parsedInput.location;
-    if (parsedInput.salary !== undefined) insertData.salary = parsedInput.salary;
-    if (parsedInput.workplace !== undefined) insertData.workplace = parsedInput.workplace;
-    if (parsedInput.experience !== undefined) insertData.experience = parsedInput.experience;
-    if (parsedInput.contact_email !== undefined)
-      insertData.contact_email = parsedInput.contact_email;
-    if (parsedInput.company_logo !== undefined) insertData.company_logo = parsedInput.company_logo;
-    if (parsedInput.company_id !== undefined) insertData.company_id = parsedInput.company_id;
-
-    const { data, error } = await supabase.from('jobs').insert(insertData).select().single();
-
-    if (error) {
-      throw new Error(error.message);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to create job');
     }
+
+    const data = result.data;
 
     // Revalidate jobs pages
     revalidatePath('/jobs');
@@ -159,18 +136,18 @@ export const updateJob = rateLimitedAction
       Object.entries(updates).filter(([_, value]) => value !== undefined)
     );
 
-    // Update job (RLS ensures user owns this job)
-    const { data, error } = await supabase
-      .from('jobs')
-      .update(updateData)
-      .eq('id', id)
-      .eq('user_id', user.id) // Double-check ownership
-      .select()
-      .single();
+    // Update via repository with ownership verification (includes caching)
+    const result = await jobRepository.updateByOwner(id, user.id, updateData);
 
-    if (error) {
-      throw new Error(error.message);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to update job');
     }
+
+    if (!result.data) {
+      throw new Error('Job data not returned');
+    }
+
+    const data = result.data;
 
     // Revalidate pages
     revalidatePath('/jobs');
@@ -203,21 +180,15 @@ export const toggleJobStatus = rateLimitedAction
       throw new Error('You must be signed in to manage jobs');
     }
 
-    // Update status
-    const { data, error } = await supabase
-      .from('jobs')
-      .update({
-        status,
-        // If activating, set posted_at if not already set
-        ...(status === 'active' ? { posted_at: new Date().toISOString() } : {}),
-      })
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .select()
-      .single();
+    // Update via repository with ownership verification (includes caching)
+    const result = await jobRepository.updateByOwner(id, user.id, {
+      status,
+      // If activating, set posted_at if not already set
+      ...(status === 'active' ? { posted_at: new Date().toISOString() } : {}),
+    });
 
-    if (error) {
-      throw new Error(error.message);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to update job status');
     }
 
     revalidatePath('/jobs');
@@ -225,7 +196,7 @@ export const toggleJobStatus = rateLimitedAction
 
     return {
       success: true,
-      job: data,
+      job: result.data,
     };
   });
 
@@ -249,15 +220,21 @@ export const deleteJob = rateLimitedAction
       throw new Error('You must be signed in to delete jobs');
     }
 
-    // Soft delete
-    const { error } = await supabase
-      .from('jobs')
-      .update({ status: 'deleted' })
-      .eq('id', id)
-      .eq('user_id', user.id);
+    // First verify ownership
+    const jobResult = await jobRepository.findById(id);
+    if (!(jobResult.success && jobResult.data)) {
+      throw new Error('Job not found');
+    }
 
-    if (error) {
-      throw new Error(error.message);
+    if (jobResult.data.user_id !== user.id) {
+      throw new Error('You do not have permission to delete this job');
+    }
+
+    // Soft delete via repository (includes cache invalidation)
+    const result = await jobRepository.delete(id, true);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to delete job');
     }
 
     revalidatePath('/jobs');
@@ -283,16 +260,15 @@ export async function getUserJobs() {
     return [];
   }
 
-  const { data, error } = await supabase
-    .from('jobs')
-    .select('*')
-    .eq('user_id', user.id)
-    .neq('status', 'deleted')
-    .order('created_at', { ascending: false });
+  // Fetch via repository (includes caching and automatic filtering)
+  const result = await jobRepository.findActiveByUser(user.id, {
+    sortBy: 'created_at',
+    sortOrder: 'desc',
+  });
 
-  if (error) {
-    throw new Error(error.message);
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to fetch user jobs');
   }
 
-  return data || [];
+  return result.data || [];
 }

@@ -8,12 +8,13 @@
  * - 3D character rotation with proper perspective
  * - Cycles through multiple words/phrases
  * - Hardware-accelerated animations
+ * - LazyMotion with domAnimation for reduced bundle size (~15-20KB savings)
  * - Accessibility support
  *
  * @module components/ui/magic/rolling-text
  */
 
-import { motion, type Transition, useInView } from 'framer-motion';
+import { domAnimation, LazyMotion, m, type Transition, useInView } from 'framer-motion';
 import * as React from 'react';
 import { cn } from '@/src/lib/utils';
 
@@ -102,51 +103,53 @@ export function RollingText({
   );
 
   return (
-    <span
-      ref={localRef}
-      className={cn('inline-block relative', className)}
-      aria-live="polite"
-      aria-atomic="true"
-      style={{
-        minWidth: '12ch', // Prevent layout shift for word changes
-      }}
-      {...props}
-    >
-      <span className="sr-only">{currentWord}</span>
-      <span aria-hidden="true" className="inline-flex">
-        {isMounted ? (
-          characters.map((item, idx) => (
-            <motion.span
-              key={item.id}
-              className="inline-block"
-              initial={isExiting ? EXIT_ANIMATION.initial : ENTRY_ANIMATION.initial}
-              animate={
-                isInView
-                  ? isExiting
-                    ? EXIT_ANIMATION.animate
-                    : ENTRY_ANIMATION.animate
-                  : ENTRY_ANIMATION.initial
-              }
-              transition={{
-                ...transition,
-                delay: (transition.delay as number) * idx,
-              }}
-              style={{
-                perspective: '1000px',
-                transformStyle: 'preserve-3d',
-                backfaceVisibility: 'hidden',
-                transformOrigin: 'bottom center',
-                willChange: 'transform',
-              }}
-            >
-              {formatCharacter(item.char)}
-            </motion.span>
-          ))
-        ) : (
-          <span className="inline-block">{words[0]}</span>
-        )}
+    <LazyMotion features={domAnimation} strict>
+      <span
+        ref={localRef}
+        className={cn('inline-block relative', className)}
+        aria-live="polite"
+        aria-atomic="true"
+        style={{
+          minWidth: '12ch', // Prevent layout shift for word changes
+        }}
+        {...props}
+      >
+        <span className="sr-only">{currentWord}</span>
+        <span aria-hidden="true" className="inline-flex">
+          {isMounted ? (
+            characters.map((item, idx) => (
+              <m.span
+                key={item.id}
+                className="inline-block"
+                initial={isExiting ? EXIT_ANIMATION.initial : ENTRY_ANIMATION.initial}
+                animate={
+                  isInView
+                    ? isExiting
+                      ? EXIT_ANIMATION.animate
+                      : ENTRY_ANIMATION.animate
+                    : ENTRY_ANIMATION.initial
+                }
+                transition={{
+                  ...transition,
+                  delay: (transition.delay as number) * idx,
+                }}
+                style={{
+                  perspective: '1000px',
+                  transformStyle: 'preserve-3d',
+                  backfaceVisibility: 'hidden',
+                  transformOrigin: 'bottom center',
+                  willChange: 'transform',
+                }}
+              >
+                {formatCharacter(item.char)}
+              </m.span>
+            ))
+          ) : (
+            <span className="inline-block">{words[0]}</span>
+          )}
+        </span>
       </span>
-    </span>
+    </LazyMotion>
   );
 }
 

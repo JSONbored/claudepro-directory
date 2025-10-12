@@ -3,11 +3,18 @@
 /**
  * Reputation Actions
  * Server actions for reputation management and calculation
+ *
+ * Refactored to use Repository pattern for cleaner separation of concerns.
+ * All database operations delegated to ReputationRepository and UserRepository.
+ *
+ * Security: Rate limited, auth required, RLS enforced
  */
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { reputationRepository } from '@/src/lib/repositories/reputation.repository';
+import { userRepository } from '@/src/lib/repositories/user.repository';
 import { reputationBreakdownSchema } from '@/src/lib/schemas/activity.schema';
 import { createClient } from '@/src/lib/supabase/server';
 
@@ -37,21 +44,16 @@ export const recalculateReputation = rateLimitedAction
       throw new Error('You must be signed in to recalculate reputation');
     }
 
-    // Call the database function
-    const { data, error } = await supabase.rpc('calculate_user_reputation', {
-      target_user_id: user.id,
-    });
+    // Recalculate via repository (includes caching and error handling)
+    const result = await reputationRepository.recalculate(user.id);
 
-    if (error) {
-      throw new Error(`Failed to recalculate reputation: ${error.message}`);
+    if (!result.success || result.data === undefined) {
+      throw new Error(result.error || 'Failed to recalculate reputation');
     }
 
-    // Get updated profile
-    const { data: profile } = await supabase
-      .from('users')
-      .select('slug')
-      .eq('id', user.id)
-      .single();
+    // Get updated profile via repository (includes caching)
+    const profileResult = await userRepository.findById(user.id);
+    const profile = profileResult.success ? profileResult.data : null;
 
     // Revalidate paths
     if (profile?.slug) {
@@ -61,7 +63,7 @@ export const recalculateReputation = rateLimitedAction
     revalidatePath('/account/activity');
 
     return {
-      new_score: data as number,
+      new_score: result.data,
     };
   });
 
@@ -87,48 +89,12 @@ export const getReputationBreakdown = rateLimitedAction
       throw new Error('You must be signed in to view reputation breakdown');
     }
 
-    // Get counts for each activity type
-    const [postsResult, votesResult, commentsResult, submissionsResult] = await Promise.all([
-      // Posts count
-      supabase
-        .from('posts')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id),
+    // Get breakdown via repository (includes caching and parallel queries)
+    const result = await reputationRepository.getBreakdown(user.id);
 
-      // Total votes received on user's posts
-      supabase
-        .from('posts')
-        .select('vote_count')
-        .eq('user_id', user.id),
+    if (!(result.success && result.data)) {
+      throw new Error(result.error || 'Failed to fetch reputation breakdown');
+    }
 
-      // Comments count
-      supabase
-        .from('comments')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id),
-
-      // Merged submissions count
-      supabase
-        .from('submissions')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .eq('status', 'merged'),
-    ]);
-
-    // Calculate points
-    const postCount = postsResult.count || 0;
-    const totalVotes =
-      votesResult.data?.reduce((sum, post) => sum + (post.vote_count || 0), 0) || 0;
-    const commentCount = commentsResult.count || 0;
-    const mergedCount = submissionsResult.count || 0;
-
-    const breakdown = {
-      from_posts: postCount * 10,
-      from_votes_received: totalVotes * 5,
-      from_comments: commentCount * 2,
-      from_submissions: mergedCount * 20,
-      total: postCount * 10 + totalVotes * 5 + commentCount * 2 + mergedCount * 20,
-    };
-
-    return breakdown;
+    return result.data;
   });

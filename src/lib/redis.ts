@@ -134,7 +134,20 @@ export const statsRedis = {
             pipeline.zincrby(`popular:${cat}:all`, 1, slug);
 
             const results = await pipeline.exec();
-            return results?.[0] as number | null; // Return total view count
+
+            // Null check: Pipeline exec can return null on connection failure
+            if (!(results && Array.isArray(results)) || results.length === 0) {
+              logger.warn('Pipeline exec returned null or empty results', {
+                component: 'incrementView',
+                key,
+                dailyKey,
+              });
+              return null;
+            }
+
+            // Type-safe access to first result with null check
+            const viewCount = results[0];
+            return typeof viewCount === 'number' ? viewCount : null;
           },
           () => null,
           'incrementView'

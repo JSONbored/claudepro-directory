@@ -64,8 +64,8 @@
   --dark-text-primary: oklch(94% 0.005 60);
   --dark-text-secondary: oklch(78% 0.008 60);
   --dark-text-tertiary: oklch(
-    69% 0.01 60
-  ); /* Increased from 68% to ensure 4.5:1 contrast for tabs */
+    72% 0.01 60
+  ); /* Increased from 69% to 72% for improved WCAG AA contrast (4.5:1 minimum) */
   --dark-text-disabled: oklch(57% 0.012 60);
   --dark-text-inverse: oklch(100% 0 0);
 
@@ -85,7 +85,9 @@
 
   --light-text-primary: oklch(18% 0.014 75);
   --light-text-secondary: oklch(42% 0.012 70);
-  --light-text-tertiary: oklch(67% 0.01 65);
+  --light-text-tertiary: oklch(
+    44% 0.01 65
+  ); /* Decreased from 67% to 44% for improved WCAG AA contrast (4.5:1 minimum) on light backgrounds */
   --light-text-disabled: oklch(68% 0.008 60);
   --light-text-inverse: oklch(100% 0 0);
 

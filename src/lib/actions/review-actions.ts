@@ -4,6 +4,9 @@
  * Review Actions
  * Server actions for managing user reviews and ratings
  *
+ * Refactored to use Repository pattern for cleaner separation of concerns.
+ * All database operations delegated to ReviewRepository.
+ *
  * Features:
  * - Create/update/delete reviews with star ratings (1-5)
  * - Mark reviews as helpful (collaborative filtering)
@@ -21,6 +24,8 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
+import { reviewRepository } from '@/src/lib/repositories/review.repository';
+import { userInteractionRepository } from '@/src/lib/repositories/user-interaction.repository';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
@@ -136,70 +141,65 @@ export const createReview = rateLimitedAction
     }
 
     // Check if user has already reviewed this content
-    const { data: existingReview } = await supabase
-      .from('review_ratings')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('content_type', content_type)
-      .eq('content_slug', content_slug)
-      .single();
+    const existingResult = await reviewRepository.findByUserAndContent(
+      user.id,
+      content_type,
+      content_slug
+    );
 
-    if (existingReview) {
+    if (existingResult.success && existingResult.data) {
       throw new Error(
         'You have already reviewed this content. Use the update action to modify your review.'
       );
     }
 
-    // Insert review
-    const { data, error } = await supabase
-      .from('review_ratings')
-      .insert({
-        user_id: user.id,
-        content_type,
-        content_slug,
-        rating,
-        review_text: review_text || null,
-      })
-      .select()
-      .single();
+    // Create review via repository
+    const result = await reviewRepository.create({
+      user_id: user.id,
+      content_type,
+      content_slug,
+      rating,
+      review_text: review_text || null,
+      helpful_count: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
 
-    if (error) {
-      logger.error('Failed to create review', new Error(error.message), {
+    if (!result.success) {
+      logger.error('Failed to create review', new Error(result.error || 'Unknown error'), {
         userId: user.id,
         content_type,
         content_slug,
-        error: error.message,
+        error: result.error ?? '',
       });
-      throw new Error('Failed to create review. Please try again.');
+      throw new Error(result.error || 'Failed to create review. Please try again.');
     }
 
-    // Track interaction for personalization
-    try {
-      await supabase.from('user_interactions').insert({
-        user_id: user.id,
-        content_type,
-        content_slug,
-        interaction_type: 'view', // Review implies viewing
-        metadata: { source: 'review_creation' },
+    // Track interaction for personalization (fire-and-forget)
+    userInteractionRepository
+      .track(content_type, content_slug, 'view', user.id, undefined, { source: 'review_creation' })
+      .catch((err) => {
+        logger.warn('Failed to track interaction for review', undefined, {
+          userId: user.id,
+          content_type,
+          content_slug,
+          error: err instanceof Error ? err.message : String(err),
+        });
       });
-    } catch (error) {
-      // Non-critical, don't fail the review creation
-      logger.warn('Failed to track interaction for review', {
-        userId: user.id,
-        content_type,
-        content_slug,
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
 
     // Revalidate detail page and list pages
     revalidatePath(`/${content_type}/${content_slug}`);
     revalidatePath(`/${content_type}`);
     revalidateTag(`reviews:${content_type}:${content_slug}`);
 
+    // Ensure data exists before accessing properties
+    if (!result.data) {
+      throw new Error('Review created but no data returned');
+    }
+
     logger.info('Review created', {
       userId: user.id,
-      reviewId: data.id,
+      reviewId: result.data.id,
       content_type,
       content_slug,
       rating,
@@ -208,7 +208,7 @@ export const createReview = rateLimitedAction
 
     return {
       success: true,
-      review: data,
+      review: result.data,
     };
   });
 
@@ -244,18 +244,14 @@ export const updateReview = rateLimitedAction
       throw new Error('You must be signed in to update a review');
     }
 
-    // Fetch existing review to verify ownership and get content info
-    const { data: existingReview, error: fetchError } = await supabase
-      .from('review_ratings')
-      .select('user_id, content_type, content_slug')
-      .eq('id', review_id)
-      .single();
+    // Fetch existing review to verify ownership
+    const existingResult = await reviewRepository.findById(review_id);
 
-    if (fetchError || !existingReview) {
+    if (!(existingResult.success && existingResult.data)) {
       throw new Error('Review not found');
     }
 
-    if (existingReview.user_id !== user.id) {
+    if (existingResult.data.user_id !== user.id) {
       throw new Error('You can only update your own reviews');
     }
 
@@ -273,39 +269,36 @@ export const updateReview = rateLimitedAction
       throw new Error('No updates provided');
     }
 
-    // Update review (triggers updated_at trigger)
-    const { data, error } = await supabase
-      .from('review_ratings')
-      .update(updateData)
-      .eq('id', review_id)
-      .select()
-      .single();
+    // Update review via repository
+    const result = await reviewRepository.update(review_id, updateData);
 
-    if (error) {
-      logger.error('Failed to update review', new Error(error.message), {
+    if (!result.success) {
+      logger.error('Failed to update review', new Error(result.error || 'Unknown error'), {
         userId: user.id,
         reviewId: review_id,
-        error: error.message,
+        error: result.error ?? '',
       });
-      throw new Error('Failed to update review. Please try again.');
+      throw new Error(result.error || 'Failed to update review. Please try again.');
     }
 
     // Revalidate detail page and list pages
-    revalidatePath(`/${existingReview.content_type}/${existingReview.content_slug}`);
-    revalidatePath(`/${existingReview.content_type}`);
-    revalidateTag(`reviews:${existingReview.content_type}:${existingReview.content_slug}`);
+    revalidatePath(`/${existingResult.data.content_type}/${existingResult.data.content_slug}`);
+    revalidatePath(`/${existingResult.data.content_type}`);
+    revalidateTag(
+      `reviews:${existingResult.data.content_type}:${existingResult.data.content_slug}`
+    );
 
     logger.info('Review updated', {
       userId: user.id,
       reviewId: review_id,
-      content_type: existingReview.content_type,
-      content_slug: existingReview.content_slug,
+      content_type: existingResult.data.content_type,
+      content_slug: existingResult.data.content_slug,
       updatedFields: Object.keys(updateData).join(', '),
     });
 
     return {
       success: true,
-      review: data,
+      review: result.data,
     };
   });
 
@@ -341,43 +334,41 @@ export const deleteReview = rateLimitedAction
       throw new Error('You must be signed in to delete a review');
     }
 
-    // Fetch existing review to verify ownership and get content info
-    const { data: existingReview, error: fetchError } = await supabase
-      .from('review_ratings')
-      .select('user_id, content_type, content_slug')
-      .eq('id', review_id)
-      .single();
+    // Fetch existing review to verify ownership
+    const existingResult = await reviewRepository.findById(review_id);
 
-    if (fetchError || !existingReview) {
+    if (!(existingResult.success && existingResult.data)) {
       throw new Error('Review not found');
     }
 
-    if (existingReview.user_id !== user.id) {
+    if (existingResult.data.user_id !== user.id) {
       throw new Error('You can only delete your own reviews');
     }
 
-    // Delete review (cascades to helpful votes)
-    const { error } = await supabase.from('review_ratings').delete().eq('id', review_id);
+    // Delete review via repository (cascades to helpful votes)
+    const result = await reviewRepository.delete(review_id);
 
-    if (error) {
-      logger.error('Failed to delete review', new Error(error.message), {
+    if (!result.success) {
+      logger.error('Failed to delete review', new Error(result.error || 'Unknown error'), {
         userId: user.id,
         reviewId: review_id,
-        error: error.message,
+        error: result.error ?? '',
       });
-      throw new Error('Failed to delete review. Please try again.');
+      throw new Error(result.error || 'Failed to delete review. Please try again.');
     }
 
     // Revalidate detail page and list pages
-    revalidatePath(`/${existingReview.content_type}/${existingReview.content_slug}`);
-    revalidatePath(`/${existingReview.content_type}`);
-    revalidateTag(`reviews:${existingReview.content_type}:${existingReview.content_slug}`);
+    revalidatePath(`/${existingResult.data.content_type}/${existingResult.data.content_slug}`);
+    revalidatePath(`/${existingResult.data.content_type}`);
+    revalidateTag(
+      `reviews:${existingResult.data.content_type}:${existingResult.data.content_slug}`
+    );
 
     logger.info('Review deleted', {
       userId: user.id,
       reviewId: review_id,
-      content_type: existingReview.content_type,
-      content_slug: existingReview.content_slug,
+      content_type: existingResult.data.content_type,
+      content_slug: existingResult.data.content_slug,
     });
 
     return {
@@ -417,62 +408,47 @@ export const markReviewHelpful = rateLimitedAction
       throw new Error('You must be signed in to vote on reviews');
     }
 
-    // Get review to verify it exists and get content info for revalidation
-    const { data: review, error: reviewError } = await supabase
-      .from('review_ratings')
-      .select('id, user_id, content_type, content_slug')
-      .eq('id', review_id)
-      .single();
+    // Get review to verify it exists
+    const reviewResult = await reviewRepository.findById(review_id);
 
-    if (reviewError || !review) {
+    if (!(reviewResult.success && reviewResult.data)) {
       throw new Error('Review not found');
     }
 
     // Prevent users from voting on their own reviews
-    if (review.user_id === user.id) {
+    if (reviewResult.data.user_id === user.id) {
       throw new Error('You cannot vote on your own review');
     }
 
     if (helpful) {
-      // Add helpful vote
-      const { error } = await supabase.from('review_helpful_votes').insert({
-        review_id,
-        user_id: user.id,
-      });
+      // Add helpful vote via repository
+      const result = await reviewRepository.addHelpfulVote(review_id, user.id);
 
-      if (error) {
-        // Check if it's a duplicate (unique constraint violation)
-        if (error.code === '23505') {
-          throw new Error('You have already marked this review as helpful');
-        }
-        logger.error('Failed to add helpful vote', new Error(error.message), {
+      if (!result.success) {
+        logger.error('Failed to add helpful vote', new Error(result.error || 'Unknown error'), {
           userId: user.id,
           reviewId: review_id,
-          error: error.message,
+          error: result.error ?? '',
         });
-        throw new Error('Failed to mark review as helpful. Please try again.');
+        throw new Error(result.error || 'Failed to mark review as helpful. Please try again.');
       }
 
       logger.info('Review marked helpful', {
         userId: user.id,
         reviewId: review_id,
-        reviewAuthor: review.user_id,
+        reviewAuthor: reviewResult.data.user_id,
       });
     } else {
-      // Remove helpful vote
-      const { error } = await supabase
-        .from('review_helpful_votes')
-        .delete()
-        .eq('review_id', review_id)
-        .eq('user_id', user.id);
+      // Remove helpful vote via repository
+      const result = await reviewRepository.removeHelpfulVote(review_id, user.id);
 
-      if (error) {
-        logger.error('Failed to remove helpful vote', new Error(error.message), {
+      if (!result.success) {
+        logger.error('Failed to remove helpful vote', new Error(result.error || 'Unknown error'), {
           userId: user.id,
           reviewId: review_id,
-          error: error.message,
+          error: result.error ?? '',
         });
-        throw new Error('Failed to remove helpful vote. Please try again.');
+        throw new Error(result.error || 'Failed to remove helpful vote. Please try again.');
       }
 
       logger.info('Helpful vote removed', {
@@ -482,8 +458,8 @@ export const markReviewHelpful = rateLimitedAction
     }
 
     // Revalidate detail page (helpful count changed)
-    revalidatePath(`/${review.content_type}/${review.content_slug}`);
-    revalidateTag(`reviews:${review.content_type}:${review.content_slug}`);
+    revalidatePath(`/${reviewResult.data.content_type}/${reviewResult.data.content_slug}`);
+    revalidateTag(`reviews:${reviewResult.data.content_type}:${reviewResult.data.content_slug}`);
 
     return {
       success: true,

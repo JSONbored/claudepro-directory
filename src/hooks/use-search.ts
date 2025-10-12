@@ -284,6 +284,9 @@ export function useSearch({ data, searchOptions, initialQuery }: UseSearchProps)
 
   // Update search results when data, query, or filters change
   useEffect(() => {
+    // Mounted flag to prevent state updates after unmount
+    let isMounted = true;
+
     const updateResults = async () => {
       try {
         // PERFORMANCE FIX (SHA-2085): Use stableData instead of [...data]
@@ -298,16 +301,29 @@ export function useSearch({ data, searchOptions, initialQuery }: UseSearchProps)
           filters,
           memoizedSearchOptions
         );
-        setSearchResults(results);
+
+        // Only update state if component is still mounted
+        if (isMounted) {
+          setSearchResults(results);
+        }
       } catch (error) {
         logger.error('Search failed, falling back to original data', error as Error);
-        setSearchResults(stableData);
+
+        // Only update state if component is still mounted
+        if (isMounted) {
+          setSearchResults(stableData);
+        }
       }
     };
 
     // Debounce search for better UX
     const timeoutId = setTimeout(updateResults, searchQuery ? 150 : 0);
-    return () => clearTimeout(timeoutId);
+
+    // Cleanup: clear timeout and mark as unmounted
+    return () => {
+      clearTimeout(timeoutId);
+      isMounted = false;
+    };
   }, [stableData, searchQuery, filters, memoizedSearchOptions]);
 
   // Stable callbacks that don't cause re-renders

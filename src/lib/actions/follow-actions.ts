@@ -3,11 +3,15 @@
 /**
  * Follow Actions
  * Server actions for following/unfollowing users
+ *
+ * Refactored to use Repository pattern for cleaner separation of concerns.
+ * All database operations delegated to FollowerRepository.
  */
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { followerRepository } from '@/src/lib/repositories/follower.repository';
 import { userIdSchema } from '@/src/lib/schemas/branded-types.schema';
 import { createClient } from '@/src/lib/supabase/server';
 
@@ -43,29 +47,24 @@ export const toggleFollow = rateLimitedAction
     }
 
     if (action === 'follow') {
-      const { error } = await supabase.from('followers').insert({
+      // Create follow relationship via repository (includes caching)
+      const result = await followerRepository.create({
         follower_id: user.id,
         following_id: user_id,
       });
 
-      if (error) {
-        if (error.code === '23505') {
-          throw new Error('You are already following this user');
-        }
-        throw new Error(error.message);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to follow user');
       }
 
       // TODO: Send email notification (if user has follow_email enabled)
       // This would use resendService similar to existing email flows
     } else {
-      const { error } = await supabase
-        .from('followers')
-        .delete()
-        .eq('follower_id', user.id)
-        .eq('following_id', user_id);
+      // Delete follow relationship via repository (includes cache invalidation)
+      const result = await followerRepository.deleteByUserIds(user.id, user_id);
 
-      if (error) {
-        throw new Error(error.message);
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to unfollow user');
       }
     }
 
@@ -79,7 +78,7 @@ export const toggleFollow = rateLimitedAction
   });
 
 /**
- * Check if current user follows another user
+ * Check if current user follows another user via repository (includes caching)
  */
 export async function isFollowing(user_id: string): Promise<boolean> {
   const supabase = await createClient();
@@ -95,12 +94,8 @@ export async function isFollowing(user_id: string): Promise<boolean> {
   // Validate user_id at boundary
   const validatedUserId = userIdSchema.parse(user_id);
 
-  const { data } = await supabase
-    .from('followers')
-    .select('id')
-    .eq('follower_id', user.id)
-    .eq('following_id', validatedUserId)
-    .single();
+  // Check via repository (includes caching)
+  const result = await followerRepository.isFollowing(user.id, validatedUserId);
 
-  return !!data;
+  return result.success ? (result.data ?? false) : false;
 }

@@ -23,17 +23,150 @@ export const CONTENT_PATHS = {
 } as const;
 
 /**
- * Generate slug from name
+ * Reserved slug words that should not be used
+ * Prevents collision with system routes and API endpoints
+ */
+const RESERVED_SLUGS = new Set([
+  // System routes
+  'api',
+  'admin',
+  'auth',
+  'login',
+  'logout',
+  'signup',
+  'dashboard',
+  'settings',
+  'profile',
+  'search',
+  'changelog',
+  'about',
+  'contact',
+  'privacy',
+  'terms',
+  'help',
+  'docs',
+  'guides',
+  'blog',
+
+  // Content type routes
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'collections',
+
+  // Special/reserved
+  'new',
+  'edit',
+  'delete',
+  'create',
+  'update',
+  'submit',
+  'test',
+  'preview',
+  'draft',
+
+  // Common web paths
+  'assets',
+  'static',
+  'public',
+  'images',
+  'files',
+  'uploads',
+
+  // HTTP methods
+  'get',
+  'post',
+  'put',
+  'patch',
+  'delete',
+]);
+
+/**
+ * Slug length constraints for URL safety and usability
+ */
+const SLUG_MIN_LENGTH = 3;
+const SLUG_MAX_LENGTH = 100;
+
+/**
+ * Validation error types for slug generation
+ */
+export class SlugValidationError extends Error {
+  constructor(
+    message: string,
+    public readonly code: 'EMPTY' | 'TOO_SHORT' | 'TOO_LONG' | 'RESERVED' | 'INVALID'
+  ) {
+    super(message);
+    this.name = 'SlugValidationError';
+  }
+}
+
+/**
+ * Generate slug from name with comprehensive validation
  * Converts "My Awesome Agent" → "my-awesome-agent"
+ *
+ * @param name - Input name to convert to slug
+ * @returns URL-safe slug string
+ * @throws {SlugValidationError} If slug validation fails
+ *
+ * Validation rules:
+ * - Length: 3-100 characters
+ * - Format: lowercase alphanumeric + hyphens
+ * - Not reserved: Prevents collision with system routes
+ * - No leading/trailing hyphens
+ *
+ * @example
+ * generateSlug("My Awesome Agent") // Returns: "my-awesome-agent"
+ * generateSlug("API") // Throws: SlugValidationError (reserved word)
+ * generateSlug("AB") // Throws: SlugValidationError (too short)
  */
 export function generateSlug(name: string): string {
-  return name
+  // Validate input is not empty
+  const trimmedName = name.trim();
+  if (!trimmedName) {
+    throw new SlugValidationError('Slug cannot be generated from empty string', 'EMPTY');
+  }
+
+  // Generate slug
+  const slug = trimmedName
     .toLowerCase()
-    .trim()
     .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
     .replace(/\s+/g, '-') // Replace spaces with hyphens
     .replace(/-+/g, '-') // Replace multiple hyphens with single
     .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+
+  // Validate slug is not empty after sanitization
+  if (!slug) {
+    throw new SlugValidationError(
+      `Slug cannot be generated from input: "${trimmedName}" (contains no valid characters)`,
+      'INVALID'
+    );
+  }
+
+  // Validate minimum length
+  if (slug.length < SLUG_MIN_LENGTH) {
+    throw new SlugValidationError(
+      `Slug must be at least ${SLUG_MIN_LENGTH} characters (got: "${slug}", length: ${slug.length})`,
+      'TOO_SHORT'
+    );
+  }
+
+  // Validate maximum length
+  if (slug.length > SLUG_MAX_LENGTH) {
+    throw new SlugValidationError(
+      `Slug must be at most ${SLUG_MAX_LENGTH} characters (got length: ${slug.length})`,
+      'TOO_LONG'
+    );
+  }
+
+  // Validate slug is not reserved
+  if (RESERVED_SLUGS.has(slug)) {
+    throw new SlugValidationError(`Slug "${slug}" is reserved and cannot be used`, 'RESERVED');
+  }
+
+  return slug;
 }
 
 /**

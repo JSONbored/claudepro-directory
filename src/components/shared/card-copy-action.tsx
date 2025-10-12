@@ -9,13 +9,13 @@
  * Used in: ConfigCard, CollectionCard
  */
 
-import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { trackCopy } from '@/src/lib/actions/track-view';
 import { Check, Copy } from '@/src/lib/icons';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { showCopyError, showCopySuccess } from '@/src/lib/utils/toast-helpers';
 
 export interface CardCopyActionProps {
   /** Full URL to copy to clipboard */
@@ -45,14 +45,10 @@ export function CardCopyAction({ url, category, slug, title, componentName }: Ca
         // Silent fail - don't break UX
       });
 
-      toast.success('Link copied!', {
-        description: 'The link has been copied to your clipboard.',
-      });
+      showCopySuccess();
     },
     onError: () => {
-      toast.error('Failed to copy', {
-        description: 'Could not copy the link to clipboard.',
-      });
+      showCopyError();
     },
     context: {
       component: componentName,

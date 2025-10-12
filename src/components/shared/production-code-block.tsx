@@ -19,8 +19,7 @@ import { AnimatePresence, domAnimation, LazyMotion, m } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import type { EventName } from '@/src/lib/analytics/events.config';
-import { EVENTS } from '@/src/lib/analytics/events.config';
+import { getCopyCodeEvent } from '@/src/lib/analytics/event-mapper';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { Check, ChevronDown, Copy } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -40,25 +39,6 @@ export interface ProductionCodeBlockProps {
   showLineNumbers?: boolean | undefined;
   /** Additional CSS classes */
   className?: string | undefined;
-}
-
-/**
- * Get content-type-specific copy_code event based on category
- */
-function getCopyCodeEvent(category: string): EventName {
-  const eventMap: Record<string, EventName> = {
-    agents: EVENTS.COPY_CODE_AGENT,
-    mcp: EVENTS.COPY_CODE_MCP,
-    'mcp-servers': EVENTS.COPY_CODE_MCP,
-    commands: EVENTS.COPY_CODE_COMMAND,
-    rules: EVENTS.COPY_CODE_RULE,
-    hooks: EVENTS.COPY_CODE_HOOK,
-    statuslines: EVENTS.COPY_CODE_STATUSLINE,
-    guides: EVENTS.COPY_CODE_GUIDE,
-    docs: EVENTS.COPY_CODE_GUIDE,
-  };
-
-  return eventMap[category] || EVENTS.COPY_CODE_OTHER;
 }
 
 export function ProductionCodeBlock({

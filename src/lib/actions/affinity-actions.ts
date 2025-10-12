@@ -4,13 +4,15 @@
  * Affinity Score Actions
  * Server actions for calculating and retrieving user affinity scores
  *
+ * Refactored to use Repository pattern for cleaner separation of concerns.
+ * Database operations delegated to UserAffinityRepository and UserInteractionRepository.
+ *
  * Features:
  * - Calculate affinity scores from interaction history
  * - Fetch top affinities for personalization
  * - Batch processing for performance
  */
 
-import { unstable_cache } from 'next/cache';
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { logger } from '@/src/lib/logger';
@@ -18,6 +20,8 @@ import {
   calculateUserAffinities,
   validateAffinityScore,
 } from '@/src/lib/personalization/affinity-scorer';
+import { userAffinityRepository } from '@/src/lib/repositories/user-affinity.repository';
+import { userInteractionRepository } from '@/src/lib/repositories/user-interaction.repository';
 import {
   type AffinityScore,
   type UserAffinitiesResponse,
@@ -53,32 +57,20 @@ export const getUserAffinities = rateLimitedAction
       throw new Error('You must be signed in to view affinities');
     }
 
-    // Use cached function with 5 minute revalidation
-    const getCachedAffinities = unstable_cache(
-      async (userId: string) => {
-        const { data, error } = await supabase
-          .from('user_affinities')
-          .select('*')
-          .eq('user_id', userId)
-          .gte('affinity_score', min_score)
-          .order('affinity_score', { ascending: false })
-          .limit(limit);
+    // Fetch via repository (includes 5-minute caching automatically)
+    const result = await userAffinityRepository.findByUser(user.id, {
+      minScore: min_score,
+      limit,
+      sortBy: 'affinity_score',
+      sortOrder: 'desc',
+    });
 
-        if (error) {
-          logger.error('Failed to fetch user affinities', error);
-          throw new Error('Failed to fetch affinities');
-        }
+    if (!result.success) {
+      logger.error('Failed to fetch user affinities', undefined, { error: result.error ?? '' });
+      throw new Error('Failed to fetch affinities');
+    }
 
-        return data || [];
-      },
-      [`user-affinities-${user.id}-${limit}-${min_score}`],
-      {
-        revalidate: 300, // 5 minutes
-        tags: ['affinities', `user-${user.id}`],
-      }
-    );
-
-    const affinities = await getCachedAffinities(user.id);
+    const affinities = result.data || [];
 
     const response: UserAffinitiesResponse = {
       affinities: affinities as AffinityScore[],
@@ -116,18 +108,21 @@ export const calculateUserAffinitiesAction = rateLimitedAction
     }
 
     try {
-      // Fetch all user interactions
-      const { data: interactions, error } = await supabase
-        .from('user_interactions')
-        .select('content_type, content_slug, interaction_type, metadata, created_at')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      // Fetch all user interactions via repository (includes caching)
+      const interactionsResult = await userInteractionRepository.findByUser(user.id, {
+        sortBy: 'created_at',
+        sortOrder: 'desc',
+      });
 
-      if (error) {
-        throw new Error(`Failed to fetch interactions: ${error.message}`);
+      if (!interactionsResult.success) {
+        throw new Error(
+          `Failed to fetch interactions: ${interactionsResult.error || 'Unknown error'}`
+        );
       }
 
-      if (!interactions || interactions.length === 0) {
+      const interactions = interactionsResult.data || [];
+
+      if (interactions.length === 0) {
         return {
           success: true,
           message: 'No interactions found',
@@ -171,30 +166,32 @@ export const calculateUserAffinitiesAction = rateLimitedAction
       // Calculate affinities
       const affinities = calculateUserAffinities(interactionsByContent);
 
-      // Upsert to database
-      const upsertPromises = affinities.map((affinity) => {
+      // Upsert to database via repository
+      const upsertPromises = affinities.map(async (affinity) => {
         if (!validateAffinityScore(affinity.affinity_score)) {
-          logger.warn('Invalid affinity score calculated', {
+          logger.warn('Invalid affinity score calculated', undefined, {
             content_type: affinity.content_type,
             content_slug: affinity.content_slug,
             score: affinity.affinity_score,
           });
-          return Promise.resolve();
+          return;
         }
 
-        return supabase.from('user_affinities').upsert(
-          {
-            user_id: user.id,
+        const result = await userAffinityRepository.upsert(
+          user.id,
+          affinity.content_type,
+          affinity.content_slug,
+          affinity.affinity_score,
+          affinity.breakdown as Record<string, unknown>
+        );
+
+        if (!result.success) {
+          logger.error('Failed to upsert affinity', undefined, {
             content_type: affinity.content_type,
             content_slug: affinity.content_slug,
-            affinity_score: affinity.affinity_score,
-            based_on: affinity.breakdown,
-            calculated_at: new Date().toISOString(),
-          },
-          {
-            onConflict: 'user_id,content_type,content_slug',
-          }
-        );
+            error: result.error ?? '',
+          });
+        }
       });
 
       await Promise.all(upsertPromises);
@@ -237,19 +234,18 @@ export async function getContentAffinity(
     return null;
   }
 
-  const { data, error } = await supabase
-    .from('user_affinities')
-    .select('affinity_score')
-    .eq('user_id', user.id)
-    .eq('content_type', contentType)
-    .eq('content_slug', contentSlug)
-    .single();
+  // Fetch via repository (includes caching)
+  const result = await userAffinityRepository.findByUserAndContent(
+    user.id,
+    contentType,
+    contentSlug
+  );
 
-  if (error || !data) {
+  if (!(result.success && result.data)) {
     return null;
   }
 
-  return data.affinity_score;
+  return result.data.affinity_score;
 }
 
 /**
@@ -267,13 +263,18 @@ export async function getUserFavoriteCategories(): Promise<string[]> {
     return [];
   }
 
-  const { data, error } = await supabase
-    .from('user_affinities')
-    .select('content_type, affinity_score')
-    .eq('user_id', user.id)
-    .gte('affinity_score', 30); // Only meaningful affinities
+  // Fetch via repository (includes caching)
+  const result = await userAffinityRepository.findByUser(user.id, {
+    minScore: 30, // Only meaningful affinities
+  });
 
-  if (error || !data) {
+  if (!result.success) {
+    return [];
+  }
+
+  const data = result.data || [];
+
+  if (data.length === 0) {
     return [];
   }
 

@@ -9,10 +9,43 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
 import { addBookmark, removeBookmark } from '@/src/lib/actions/bookmark-actions';
 import { Bookmark, BookmarkCheck } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import {
+  showAuthRequiredToast,
+  showBookmarkError,
+  showBookmarkSuccess,
+} from '@/src/lib/utils/toast-helpers';
+
+/**
+ * Type guard to validate ContentCategory at runtime
+ * Ensures only valid content types are passed to bookmark actions
+ */
+const VALID_CONTENT_CATEGORIES: readonly ContentCategory[] = [
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'guides',
+  'tutorials',
+  'comparisons',
+  'workflows',
+  'use-cases',
+  'troubleshooting',
+  'categories',
+  'collections',
+  'jobs',
+  'changelog',
+] as const;
+
+function isContentCategory(value: string): value is ContentCategory {
+  return VALID_CONTENT_CATEGORIES.includes(value as ContentCategory);
+}
 
 interface BookmarkButtonProps {
   contentType: string;
@@ -36,31 +69,43 @@ export function BookmarkButton({
   const handleToggle = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card navigation
 
+    // Validate content type at runtime using type guard
+    if (!isContentCategory(contentType)) {
+      logger.error(
+        'Invalid content type provided to BookmarkButton',
+        new Error('Invalid content type'),
+        {
+          contentType,
+          contentSlug,
+        }
+      );
+      showBookmarkError(new Error(`Invalid content type: ${contentType}`));
+      return;
+    }
+
     startTransition(async () => {
       try {
         if (isBookmarked) {
-          // Remove bookmark
+          // Remove bookmark - type is now validated by type guard
           const result = await removeBookmark({
-            // biome-ignore lint/suspicious/noExplicitAny: contentType is validated by server action schema
-            content_type: contentType as any,
+            content_type: contentType,
             content_slug: contentSlug,
           });
 
           if (result?.data?.success) {
             setIsBookmarked(false);
-            toast.success('Bookmark removed');
+            showBookmarkSuccess(false);
           }
         } else {
-          // Add bookmark
+          // Add bookmark - type is now validated by type guard
           const result = await addBookmark({
-            // biome-ignore lint/suspicious/noExplicitAny: contentType is validated by server action schema
-            content_type: contentType as any,
+            content_type: contentType,
             content_slug: contentSlug,
           });
 
           if (result?.data?.success) {
             setIsBookmarked(true);
-            toast.success('Bookmarked!');
+            showBookmarkSuccess(true);
           }
         }
 
@@ -69,14 +114,9 @@ export function BookmarkButton({
       } catch (error) {
         // Check if it's an auth error
         if (error instanceof Error && error.message.includes('signed in')) {
-          toast.error('Please sign in to bookmark content', {
-            action: {
-              label: 'Sign In',
-              onClick: () => router.push(`/login?redirect=${window.location.pathname}`),
-            },
-          });
+          showAuthRequiredToast('Please sign in to bookmark content', window.location.pathname);
         } else {
-          toast.error(error instanceof Error ? error.message : 'Failed to update bookmark');
+          showBookmarkError(error instanceof Error ? error : undefined);
         }
       }
     });

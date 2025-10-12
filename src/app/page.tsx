@@ -1,4 +1,6 @@
 // Import types for metadata
+
+import dynamic from 'next/dynamic';
 import type { AgentMetadata } from '@/generated/agents-metadata';
 import type { CollectionMetadata } from '@/generated/collections-metadata';
 import type { CommandMetadata } from '@/generated/commands-metadata';
@@ -9,8 +11,18 @@ import type { StatuslineMetadata } from '@/generated/statuslines-metadata';
 import { HomePageClient } from '@/src/components/features/home';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
-import { Meteors } from '@/src/components/ui/magic/meteors';
 import { RollingText } from '@/src/components/ui/magic/rolling-text';
+
+// Lazy load Meteors animation to improve LCP (decorative only, not critical)
+const Meteors = dynamic(
+  () => import('@/src/components/ui/magic/meteors').then((mod) => ({ default: mod.Meteors })),
+  {
+    ssr: false, // Client-only rendering
+    loading: () => null, // No loading state needed for decorative animation
+  }
+);
+
+import { logger } from '@/src/lib/logger';
 import { statsRedis } from '@/src/lib/redis';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { featuredLoaderService } from '@/src/lib/services/featured-loader.service';
@@ -45,59 +57,153 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   // Load all content server-side for better SEO and initial page load
   // Also load weekly featured content by category (replaces static alphabetical featured)
-  const [
-    rulesData,
-    mcpData,
-    agentsData,
-    commandsData,
-    hooksData,
-    statuslinesData,
-    collectionsData,
-    featuredByCategory,
-  ] = await Promise.all([
-    lazyContentLoaders.rules(),
-    lazyContentLoaders.mcp(),
-    lazyContentLoaders.agents(),
-    lazyContentLoaders.commands(),
-    lazyContentLoaders.hooks(),
-    lazyContentLoaders.statuslines(),
-    lazyContentLoaders.collections(),
-    featuredLoaderService.loadCurrentFeaturedContentByCategory(),
-  ]);
+  let rulesData: RuleMetadata[] = [];
+  let mcpData: McpMetadata[] = [];
+  let agentsData: AgentMetadata[] = [];
+  let commandsData: CommandMetadata[] = [];
+  let hooksData: HookMetadata[] = [];
+  let statuslinesData: StatuslineMetadata[] = [];
+  let collectionsData: CollectionMetadata[] = [];
+  let featuredByCategory:
+    | Record<string, readonly UnifiedContentItem[]>
+    | Record<string, UnifiedContentItem[]> = {};
+
+  try {
+    const results = await Promise.all([
+      lazyContentLoaders.rules(),
+      lazyContentLoaders.mcp(),
+      lazyContentLoaders.agents(),
+      lazyContentLoaders.commands(),
+      lazyContentLoaders.hooks(),
+      lazyContentLoaders.statuslines(),
+      lazyContentLoaders.collections(),
+      featuredLoaderService.loadCurrentFeaturedContentByCategory(),
+    ]);
+
+    [
+      rulesData,
+      mcpData,
+      agentsData,
+      commandsData,
+      hooksData,
+      statuslinesData,
+      collectionsData,
+      featuredByCategory,
+    ] = results;
+  } catch (error) {
+    // Log error but continue with empty fallbacks to prevent page crash
+    logger.error(
+      'Failed to load homepage content',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        source: 'HomePage',
+        operation: 'loadContentMetadata',
+      }
+    );
+
+    // Graceful degradation: page will render with empty content
+    // Featured content defaults to empty object, other arrays to empty
+  }
 
   // Enrich with view and copy counts from Redis (parallel batch operation)
-  const [rules, mcp, agents, commands, hooks, statuslines, collections] = await Promise.all([
-    statsRedis.enrichWithAllCounts(
-      rulesData.map((item: RuleMetadata) => ({ ...item, category: 'rules' as const }))
-    ),
-    statsRedis.enrichWithAllCounts(
-      mcpData.map((item: McpMetadata) => ({ ...item, category: 'mcp' as const }))
-    ),
-    statsRedis.enrichWithAllCounts(
-      agentsData.map((item: AgentMetadata) => ({ ...item, category: 'agents' as const }))
-    ),
-    statsRedis.enrichWithAllCounts(
-      commandsData.map((item: CommandMetadata) => ({
-        ...item,
-        category: 'commands' as const,
-      }))
-    ),
-    statsRedis.enrichWithAllCounts(
-      hooksData.map((item: HookMetadata) => ({ ...item, category: 'hooks' as const }))
-    ),
-    statsRedis.enrichWithAllCounts(
-      statuslinesData.map((item: StatuslineMetadata) => ({
-        ...item,
-        category: 'statuslines' as const,
-      }))
-    ),
-    statsRedis.enrichWithAllCounts(
-      collectionsData.map((item: CollectionMetadata) => ({
-        ...item,
-        category: 'collections' as const,
-      }))
-    ),
-  ]);
+  let rules: EnrichedMetadata[] = [];
+  let mcp: EnrichedMetadata[] = [];
+  let agents: EnrichedMetadata[] = [];
+  let commands: EnrichedMetadata[] = [];
+  let hooks: EnrichedMetadata[] = [];
+  let statuslines: EnrichedMetadata[] = [];
+  let collections: EnrichedMetadata[] = [];
+
+  try {
+    const enrichedResults = await Promise.all([
+      statsRedis.enrichWithAllCounts(
+        rulesData.map((item: RuleMetadata) => ({ ...item, category: 'rules' as const }))
+      ),
+      statsRedis.enrichWithAllCounts(
+        mcpData.map((item: McpMetadata) => ({ ...item, category: 'mcp' as const }))
+      ),
+      statsRedis.enrichWithAllCounts(
+        agentsData.map((item: AgentMetadata) => ({ ...item, category: 'agents' as const }))
+      ),
+      statsRedis.enrichWithAllCounts(
+        commandsData.map((item: CommandMetadata) => ({
+          ...item,
+          category: 'commands' as const,
+        }))
+      ),
+      statsRedis.enrichWithAllCounts(
+        hooksData.map((item: HookMetadata) => ({ ...item, category: 'hooks' as const }))
+      ),
+      statsRedis.enrichWithAllCounts(
+        statuslinesData.map((item: StatuslineMetadata) => ({
+          ...item,
+          category: 'statuslines' as const,
+        }))
+      ),
+      statsRedis.enrichWithAllCounts(
+        collectionsData.map((item: CollectionMetadata) => ({
+          ...item,
+          category: 'collections' as const,
+        }))
+      ),
+    ]);
+
+    [rules, mcp, agents, commands, hooks, statuslines, collections] = enrichedResults;
+  } catch (error) {
+    // Log error and fallback to data without enrichment
+    logger.error(
+      'Failed to enrich content with stats',
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        source: 'HomePage',
+        operation: 'enrichWithStats',
+      }
+    );
+
+    // Graceful degradation: use base metadata with default counts (0)
+    rules = rulesData.map((item) => ({
+      ...item,
+      category: 'rules' as const,
+      viewCount: 0,
+      copyCount: 0,
+    }));
+    mcp = mcpData.map((item) => ({
+      ...item,
+      category: 'mcp' as const,
+      viewCount: 0,
+      copyCount: 0,
+    }));
+    agents = agentsData.map((item) => ({
+      ...item,
+      category: 'agents' as const,
+      viewCount: 0,
+      copyCount: 0,
+    }));
+    commands = commandsData.map((item) => ({
+      ...item,
+      category: 'commands' as const,
+      viewCount: 0,
+      copyCount: 0,
+    }));
+    hooks = hooksData.map((item) => ({
+      ...item,
+      category: 'hooks' as const,
+      viewCount: 0,
+      copyCount: 0,
+    }));
+    statuslines = statuslinesData.map((item) => ({
+      ...item,
+      category: 'statuslines' as const,
+      viewCount: 0,
+      copyCount: 0,
+    }));
+    collections = collectionsData.map((item) => ({
+      ...item,
+      category: 'collections' as const,
+      viewCount: 0,
+      copyCount: 0,
+    }));
+  }
 
   // Create stable allConfigs array to prevent infinite re-renders
   // Deduplicate by slug to prevent duplicate keys in React rendering

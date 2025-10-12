@@ -19,18 +19,46 @@ import { env } from '@/src/lib/schemas/env.schema';
 
 /**
  * Resend API response schemas for type safety
- * Based on official API docs: https://resend.com/docs/api-reference/contacts/create-contact
+ * Based on official API docs: https://resend.com/docs/api-reference
+ *
+ * Comprehensive validation for all external API responses to ensure type safety
+ * and catch unexpected API changes early.
  */
+
+// Contact schema - contacts.create response
 const resendContactSchema = z.object({
   object: z.literal('contact'),
-  id: z.string(),
+  id: z.string().min(1),
 });
 
+// Error schema - any error response
 const resendErrorSchema = z.object({
   name: z.string(),
   message: z.string(),
 });
 
+// Email send response - emails.send success response
+const resendEmailSendSchema = z.object({
+  id: z.string().min(1),
+});
+
+// Contact list item schema - single contact in list
+const resendContactListItemSchema = z.object({
+  id: z.string().min(1),
+  email: z.string().email(),
+  first_name: z.string().nullable().optional(),
+  last_name: z.string().nullable().optional(),
+  created_at: z.string().optional(),
+  unsubscribed: z.boolean().optional(),
+});
+
+// Contact list response with pagination - contacts.list response
+const resendContactListResponseSchema = z.object({
+  data: z.array(resendContactListItemSchema),
+  next_cursor: z.string().nullable().optional(),
+});
+
+// Internal types for Zod inference (not exported)
 type ResendError = z.infer<typeof resendErrorSchema>;
 
 /**
@@ -368,16 +396,32 @@ class ResendService {
         };
       }
 
-      // Success
+      // Validate email send response with Zod
+      const emailSendResult = resendEmailSendSchema.safeParse(response.data);
+
+      if (!emailSendResult.success) {
+        logger.error('Resend email send response validation failed', undefined, {
+          responseData: JSON.stringify(response.data),
+          zodErrors: JSON.stringify(emailSendResult.error.format()),
+          expectedSchema: 'id: string (min 1)',
+        });
+
+        return {
+          success: false,
+          error: 'Invalid API response format',
+        };
+      }
+
+      // Success - email sent and validated
       logger.info('Email sent successfully', {
-        emailId: response.data?.id,
+        emailId: emailSendResult.data.id,
         recipients: Array.isArray(to) ? to.join(', ') : to,
         subject,
       });
 
       return {
         success: true,
-        emailId: response.data?.id,
+        emailId: emailSendResult.data.id,
         metadata: {
           recipients: to,
           subject,
@@ -447,18 +491,23 @@ class ResendService {
           break;
         }
 
-        if (response.data?.data) {
-          // Extract email addresses
-          const emails = response.data.data
-            .map((contact) => contact.email)
-            .filter((email): email is string => typeof email === 'string');
+        // Validate contacts list response with Zod
+        const contactsList = resendContactListResponseSchema.safeParse(response.data);
+
+        if (contactsList.success) {
+          // Extract email addresses from validated response
+          const emails = contactsList.data.data.map((contact) => contact.email);
           contacts.push(...emails);
 
-          // Check for next page
-          const responseData = response.data as unknown as Record<string, unknown>;
-          hasMore = !!responseData.next_cursor;
-          cursor = (responseData.next_cursor as string | undefined) || undefined;
+          // Check for next page cursor
+          hasMore = !!contactsList.data.next_cursor;
+          cursor = contactsList.data.next_cursor || undefined;
         } else {
+          logger.error('Resend contacts list response validation failed', undefined, {
+            responseData: JSON.stringify(response.data),
+            zodErrors: JSON.stringify(contactsList.error.format()),
+            expectedSchema: 'data: array, next_cursor: string | null',
+          });
           hasMore = false;
         }
       }
