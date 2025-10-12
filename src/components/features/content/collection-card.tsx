@@ -21,10 +21,11 @@ import { BookmarkButton } from '@/src/components/shared/bookmark-button';
 import { CardCopyAction } from '@/src/components/shared/card-copy-action';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
-import { Clock, Layers } from '@/src/lib/icons';
+import { Clock, Copy as CopyIcon, Eye, Layers } from '@/src/lib/icons';
 import type { CollectionContent } from '@/src/lib/schemas/content/collection.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
+import { formatViewCount } from '@/src/lib/utils/transformers';
 
 /**
  * CollectionCard Props
@@ -76,6 +77,13 @@ export const CollectionCard = memo(
     const targetPath = `/collections/${item.slug}`;
     const itemCount = item.items?.length || 0;
 
+    // Get behavior configuration for collections
+    const behavior = CARD_BEHAVIORS.collections;
+
+    // Extract view/copy counts
+    const viewCount = (item as { viewCount?: number }).viewCount;
+    const copyCount = (item as { copyCount?: number }).copyCount;
+
     return (
       <BaseCard
         targetPath={targetPath}
@@ -114,6 +122,33 @@ export const CollectionCard = memo(
             >
               {itemCount} {itemCount === 1 ? 'item' : 'items'}
             </Badge>
+          </>
+        )}
+        renderMetadataBadges={() => (
+          <>
+            {/* View count badge */}
+            {behavior.showViewCount && viewCount !== undefined && (
+              <Badge
+                variant="secondary"
+                className="h-7 px-2.5 gap-1.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors font-medium"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="text-xs">{formatViewCount(viewCount)}</span>
+              </Badge>
+            )}
+
+            {/* Copy count badge */}
+            {behavior.showCopyCount && copyCount !== undefined && copyCount > 0 && (
+              <Badge
+                variant="secondary"
+                className="h-7 px-2.5 gap-1.5 bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 hover:bg-green-500/15 transition-colors font-medium"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <CopyIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="text-xs">{formatViewCount(copyCount)}</span>
+              </Badge>
+            )}
           </>
         )}
         renderActions={() => (

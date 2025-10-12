@@ -10,6 +10,7 @@ import { ConfigCard } from '@/src/components/features/content/config-card';
 import { EVENTS } from '@/src/lib/analytics/events.config';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import type { ForYouFeedResponse } from '@/src/lib/schemas/personalization.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface ForYouFeedClientProps {
   initialData: ForYouFeedResponse;
@@ -81,7 +82,7 @@ export function ForYouFeedClient({ initialData }: ForYouFeedClientProps) {
 
       {/* Recommendations grid */}
       {filteredRecommendations.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
           {filteredRecommendations.map((rec, index) => {
             // Convert recommendation to UnifiedContentItem format
             const item = {

@@ -25,7 +25,7 @@ import { BorderBeam } from '@/src/components/ui/magic/border-beam';
 import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
 import { Award, Copy as CopyIcon, ExternalLink, Eye, Github, Sparkles } from '@/src/lib/icons';
 import type { ConfigCardProps } from '@/src/lib/schemas/component.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
 import { formatViewCount } from '@/src/lib/utils/transformers';
 import { getContentItemUrl } from '@/src/lib/utils/url-helpers';
@@ -34,6 +34,10 @@ export const ConfigCard = memo(
   ({ item, variant = 'default', showCategory = true, showActions = true }: ConfigCardProps) => {
     const displayTitle = getDisplayTitle(item);
     const targetPath = getContentItemUrl(item);
+
+    // Get behavior configuration for this content type
+    const behavior =
+      CARD_BEHAVIORS[item.category as keyof typeof CARD_BEHAVIORS] || CARD_BEHAVIORS.default;
 
     // Extract sponsored metadata
     const isSponsored = (item as { isSponsored?: boolean }).isSponsored;
@@ -120,7 +124,7 @@ export const ConfigCard = memo(
           renderMetadataBadges={() => (
             <>
               {/* View count badge */}
-              {viewCount !== undefined && (
+              {behavior.showViewCount && viewCount !== undefined && (
                 <Badge
                   variant="secondary"
                   className="h-7 px-2.5 gap-1.5 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors font-medium"
@@ -132,7 +136,7 @@ export const ConfigCard = memo(
               )}
 
               {/* Copy count badge - social proof for engagement */}
-              {copyCount !== undefined && copyCount > 0 && (
+              {behavior.showCopyCount && copyCount !== undefined && copyCount > 0 && (
                 <Badge
                   variant="secondary"
                   className="h-7 px-2.5 gap-1.5 bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 hover:bg-green-500/15 transition-colors font-medium"
@@ -144,7 +148,7 @@ export const ConfigCard = memo(
               )}
 
               {/* Rating badge - shows average rating and count */}
-              {hasRating && ratingData && (
+              {behavior.showRating && hasRating && ratingData && (
                 <button
                   type="button"
                   onClick={(e) => e.stopPropagation()}
@@ -198,13 +202,15 @@ export const ConfigCard = memo(
 
               <BookmarkButton contentType={item.category || 'agents'} contentSlug={item.slug} />
 
-              <CardCopyAction
-                url={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
-                category={item.category || ''}
-                slug={item.slug}
-                title={displayTitle}
-                componentName="config-card"
-              />
+              {behavior.showCopyButton && (
+                <CardCopyAction
+                  url={`${typeof window !== 'undefined' ? window.location.origin : ''}${targetPath}`}
+                  category={item.category || ''}
+                  slug={item.slug}
+                  title={displayTitle}
+                  componentName="config-card"
+                />
+              )}
 
               <Button
                 variant="ghost"

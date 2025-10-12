@@ -98,14 +98,10 @@ function InfiniteScrollContainerComponent<T>({
   return (
     <div className={className}>
       {/* Items Grid - Standard responsive grid with consistent spacing */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
         {items.map((item, index) => {
           const key = keyExtractor ? keyExtractor(item, index) : `item-${index}`;
-          return (
-            <div key={key} className="flex">
-              <ErrorBoundary>{renderItem(item, index)}</ErrorBoundary>
-            </div>
-          );
+          return <ErrorBoundary key={key}>{renderItem(item, index)}</ErrorBoundary>;
         })}
       </div>
 

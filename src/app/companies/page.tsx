@@ -86,7 +86,7 @@ export default async function CompaniesPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className={'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}>
+          <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
             {companies.map((company) => (
               <Card key={company.id} className={UI_CLASSES.CARD_GRADIENT_HOVER}>
                 {company.featured && (

@@ -15,6 +15,7 @@ import { EVENTS } from '@/src/lib/analytics/events.config';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import type { SimilarConfigsResponse } from '@/src/lib/schemas/personalization.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface SimilarConfigsSectionProps {
   contentType: ContentCategory;
@@ -62,7 +63,7 @@ export function SimilarConfigsSection({ contentType, contentSlug }: SimilarConfi
       <section className="mt-12 py-8" style={{ minHeight: '400px' }}>
         <Separator className="mb-8" />
         <h2 className="text-2xl font-bold mb-6">Similar Configurations</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
           {[1, 2, 3].map((i) => (
             <ConfigCardSkeleton key={`similar-skeleton-${i}`} />
           ))}
@@ -79,7 +80,7 @@ export function SimilarConfigsSection({ contentType, contentSlug }: SimilarConfi
     <section className="mt-12 py-8">
       <Separator className="mb-8" />
       <h2 className="text-2xl font-bold mb-6">Similar Configurations</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
         {similarItems.map((rec) => {
           // Convert recommendation to UnifiedContentItem format
           const item = {

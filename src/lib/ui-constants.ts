@@ -733,7 +733,7 @@ export const UI_CLASSES = {
   /**
    * Touch Targets (Mobile-optimized)
    */
-  TOUCH_TARGET_48: 'min-w-[48px] min-h-[48px]',
+  TOUCH_TARGET_48: 'min-w-[48px] min-h-[44px]',
   TOUCH_TARGET_44: 'min-w-[44px] min-h-[44px]',
 } as const;
 
@@ -741,3 +741,98 @@ export const UI_CLASSES = {
  * Type-safe UI class constant keys
  */
 export type UIClassKey = keyof typeof UI_CLASSES;
+
+/**
+ * Content Card Behavior Configuration
+ *
+ * Defines which UI elements to show/hide for different content types.
+ * This eliminates the need for separate card components per content type.
+ *
+ * Tree-shakeable: Only the configuration is imported, not additional components.
+ * Type-safe: Enforces valid content types at compile time.
+ *
+ * @example
+ * ```typescript
+ * const behavior = CARD_BEHAVIORS[item.category] || CARD_BEHAVIORS.default;
+ * if (behavior.showCopyButton) {
+ *   // Render copy button
+ * }
+ * ```
+ */
+export const CARD_BEHAVIORS = {
+  /**
+   * Default behavior for configuration items
+   * (agents, mcp, commands, rules, hooks, statuslines)
+   */
+  default: {
+    showCopyButton: true,
+    showViewCount: true,
+    showCopyCount: true,
+    showRating: true,
+    showFeaturedBadge: true,
+  },
+
+  /**
+   * Guide content behavior (tutorials, workflows, etc.)
+   * Guides are educational content, not copyable configurations
+   */
+  guides: {
+    showCopyButton: false, // Guides aren't copyable
+    showViewCount: true,
+    showCopyCount: false, // Guides don't track copies
+    showRating: true,
+    showFeaturedBadge: true,
+  },
+  tutorials: {
+    showCopyButton: false,
+    showViewCount: true,
+    showCopyCount: false,
+    showRating: true,
+    showFeaturedBadge: true,
+  },
+  workflows: {
+    showCopyButton: false,
+    showViewCount: true,
+    showCopyCount: false,
+    showRating: true,
+    showFeaturedBadge: true,
+  },
+  comparisons: {
+    showCopyButton: false,
+    showViewCount: true,
+    showCopyCount: false,
+    showRating: true,
+    showFeaturedBadge: true,
+  },
+  'use-cases': {
+    showCopyButton: false,
+    showViewCount: true,
+    showCopyCount: false,
+    showRating: true,
+    showFeaturedBadge: true,
+  },
+  troubleshooting: {
+    showCopyButton: false,
+    showViewCount: true,
+    showCopyCount: false,
+    showRating: true,
+    showFeaturedBadge: true,
+  },
+
+  /**
+   * Collection behavior
+   * Collections group multiple items, show engagement metrics
+   */
+  collections: {
+    showCopyButton: true,
+    showViewCount: true,
+    showCopyCount: true,
+    showRating: false, // Collections don't have ratings (yet)
+    showFeaturedBadge: false, // Collections have their own type badges
+  },
+} as const;
+
+/**
+ * Type-safe card behavior keys
+ */
+export type CardBehaviorKey = keyof typeof CARD_BEHAVIORS;
