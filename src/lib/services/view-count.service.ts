@@ -327,8 +327,28 @@ class ViewCountService {
   }
 }
 
-// Export singleton instance
-export const viewCountService = new ViewCountService();
+/**
+ * Lazy singleton instance - only instantiate when first accessed
+ * This avoids requiring VIEW_COUNT_SALT during build time
+ */
+let instance: ViewCountService | null = null;
+
+function getInstance(): ViewCountService {
+  if (!instance) {
+    instance = new ViewCountService();
+  }
+  return instance;
+}
+
+/**
+ * Singleton instance with lazy initialization
+ * All property access goes through getter to ensure lazy loading
+ */
+export const viewCountService = new Proxy({} as ViewCountService, {
+  get(_target, prop) {
+    return getInstance()[prop as keyof ViewCountService];
+  },
+});
 
 // Export types for external use
 export type { ViewCountRequest, ViewCountResponse, BatchViewCountRequest };

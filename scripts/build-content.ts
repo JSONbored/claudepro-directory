@@ -26,13 +26,13 @@ import {
   saveBuildCache,
   writeBuildOutput,
 } from '../src/lib/build/category-processor.js';
+import { onBuildComplete } from '../src/lib/cache.js';
 import {
   BUILD_CATEGORY_CONFIGS,
   type BuildCategoryId,
   getAllBuildCategoryConfigs,
 } from '../src/lib/config/build-category-config.js';
 import { logger } from '../src/lib/logger.js';
-import { onBuildComplete } from '../src/lib/related-content/cache-invalidation.js';
 import type { ContentStats } from '../src/lib/schemas/content/content-types.js';
 
 // Paths
