@@ -128,12 +128,7 @@ const FeaturedThisWeekComponent: FC<FeaturedThisWeekProps> = ({ featuredItems, w
 
               {/* Card content */}
               <div className="p-4">
-                <ConfigCard
-                  item={item}
-                  variant="default"
-                  showCategory={true}
-                  showActions={false}
-                />
+                <ConfigCard item={item} variant="default" showCategory={true} showActions={false} />
               </div>
             </div>
           </div>
