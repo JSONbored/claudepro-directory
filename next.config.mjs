@@ -1,3 +1,4 @@
+import bundleAnalyzer from '@next/bundle-analyzer';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -7,6 +8,11 @@ const __dirname = dirname(__filename);
 
 // Set browserslist config path
 process.env.BROWSERSLIST_CONFIG = resolve(__dirname, 'config/tools/browserslist');
+
+// Bundle analyzer configuration
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
 
 /**
  * Next.js 15.5.4 Configuration (2025 Best Practices)
@@ -405,5 +411,5 @@ const nextConfig = {
   },
 };
 
-// Export the configuration
-export default nextConfig;
+// Export the configuration with bundle analyzer wrapper
+export default withBundleAnalyzer(nextConfig);

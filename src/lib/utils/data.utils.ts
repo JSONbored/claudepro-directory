@@ -569,3 +569,83 @@ export function formatWeekRange(weekStart: Date): string {
   const endDay = getWeekEnd(weekStart).getDate();
   return `${monthName} ${startDay}-${endDay}`;
 }
+
+// ============================================
+// RETRY UTILITIES (Extracted from di/service-factory.ts)
+// ============================================
+
+/**
+ * Retry configuration options
+ */
+export interface RetryOptions {
+  /** Maximum number of retry attempts (default: 3) */
+  maxAttempts?: number;
+  /** Initial delay between retries in ms (default: 1000) */
+  initialDelay?: number;
+  /** Whether to use exponential backoff (default: true) */
+  exponentialBackoff?: boolean;
+  /** Maximum delay between retries in ms (default: 10000) */
+  maxDelay?: number;
+  /** Operation name for logging */
+  operationName?: string;
+}
+
+/**
+ * Execute operation with automatic retry and exponential backoff
+ * Extracted from di/service-factory.ts during DI consolidation
+ *
+ * @example
+ * const result = await withRetry(
+ *   () => fetch('https://api.example.com/data'),
+ *   { maxAttempts: 3, operationName: 'fetch-data' }
+ * );
+ */
+export async function withRetry<T>(
+  operation: () => Promise<T>,
+  options: RetryOptions = {}
+): Promise<T> {
+  const {
+    maxAttempts = 3,
+    initialDelay = 1000,
+    exponentialBackoff = true,
+    maxDelay = 10000,
+    operationName = 'operation',
+  } = options;
+
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= maxAttempts; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+
+      if (attempt < maxAttempts) {
+        const baseDelay = exponentialBackoff ? initialDelay * 2 ** attempt : initialDelay;
+        const delay = Math.min(baseDelay, maxDelay);
+
+        logger.warn('Operation failed, retrying', {
+          operation: operationName,
+          attempt: attempt + 1,
+          maxAttempts: maxAttempts + 1,
+          nextRetryIn: `${delay}ms`,
+          error: lastError.message,
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  // If we reach here, lastError must be set
+  if (!lastError) {
+    lastError = new Error('Operation failed with unknown error');
+  }
+
+  logger.error('Operation failed after all retries', lastError, {
+    operation: operationName,
+    attempts: maxAttempts + 1,
+  });
+
+  throw lastError;
+}

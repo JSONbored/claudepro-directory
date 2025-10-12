@@ -1209,3 +1209,189 @@ export const METADATA_REGISTRY = {
  */
 export type MetadataRegistryKey = keyof typeof METADATA_REGISTRY;
 export type MetadataRegistryValue = (typeof METADATA_REGISTRY)[MetadataRegistryKey];
+
+// ============================================
+// AI SEARCH OPTIMIZATION UTILITIES
+// ============================================
+// Consolidated from ai-optimization.ts for tree-shaking
+// October 2025 AI citation optimization for ChatGPT, Perplexity, Claude
+
+/**
+ * Get current year for AI search optimization
+ * ChatGPT often includes the current year when issuing Bing queries
+ */
+export function getCurrentYear(): string {
+  return new Date().getFullYear().toString();
+}
+
+/**
+ * Get current month and year (e.g., "October 2025")
+ * Useful for seasonal/time-sensitive content
+ */
+export function getCurrentMonthYear(): string {
+  const date = new Date();
+  const month = date.toLocaleString('en-US', { month: 'long' });
+  const year = date.getFullYear();
+  return `${month} ${year}`;
+}
+
+/**
+ * Add year to description for AI citation optimization
+ * Research: Including current year increases ChatGPT citation likelihood
+ *
+ * @example
+ * addYearToDescription("Browse Claude AI tools")
+ * // → "Browse Claude AI tools. Updated October 2025."
+ */
+export function addYearToDescription(
+  description: string,
+  options: {
+    fullDate?: boolean;
+    position?: 'end' | 'beginning';
+  } = {}
+): string {
+  const { fullDate = true, position = 'end' } = options;
+  const yearText = fullDate ? getCurrentMonthYear() : getCurrentYear();
+
+  // Don't add if already contains year
+  if (description.includes(yearText) || description.includes(getCurrentYear())) {
+    return description;
+  }
+
+  if (position === 'beginning') {
+    return `${yearText}: ${description}`;
+  }
+
+  // Add year at end naturally
+  const endsWithPeriod = description.trim().endsWith('.');
+  const separator = endsWithPeriod ? '' : '.';
+  return `${description.trim()}${separator} Updated ${yearText}.`;
+}
+
+/**
+ * Check if content is fresh (updated within 30 days)
+ * Research: Fresh content gets 3.2x more AI citations
+ */
+export function isContentFresh(dateString: string | Date): boolean {
+  try {
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+    const now = new Date();
+    const daysDiff = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    return daysDiff <= 30;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Generate recency signal for metadata
+ * Returns ISO timestamp if content is fresh, undefined otherwise
+ */
+export function getRecencySignal(lastModified?: string): string | undefined {
+  if (!lastModified) return undefined;
+  return isContentFresh(lastModified) ? lastModified : undefined;
+}
+
+/**
+ * Optimize keywords for AI search
+ * Adds current year and common LLM search patterns
+ *
+ * @example
+ * optimizeKeywordsForAI(['claude ai', 'mcp servers'])
+ * // → ['claude ai', 'mcp servers', 'claude ai 2025', 'mcp servers 2025', 'ai tools 2025']
+ */
+export function optimizeKeywordsForAI(
+  baseKeywords: string[],
+  options: {
+    addYear?: boolean;
+    addAITools?: boolean;
+    maxKeywords?: number;
+  } = {}
+): string[] {
+  const { addYear = true, addAITools = true, maxKeywords = 10 } = options;
+  const year = getCurrentYear();
+  const optimized = [...baseKeywords];
+
+  if (addYear) {
+    const topKeywords = baseKeywords.slice(0, 3);
+    for (const keyword of topKeywords) {
+      if (!keyword.includes(year)) {
+        optimized.push(`${keyword} ${year}`);
+      }
+    }
+  }
+
+  if (addAITools && !baseKeywords.some((k) => k.includes('ai tools'))) {
+    optimized.push(`ai tools ${year}`);
+  }
+
+  return optimized.slice(0, maxKeywords);
+}
+
+/**
+ * Calculate content freshness score
+ * Used to prioritize fresh content in search results
+ * @returns Freshness score (0-100, higher = fresher)
+ */
+export function calculateFreshnessScore(lastModified: string | Date): number {
+  try {
+    const date = typeof lastModified === 'string' ? new Date(lastModified) : lastModified;
+    const now = new Date();
+    const daysSinceUpdate = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Scoring: 100 (today) → 50 (30 days) → 0 (90+ days)
+    if (daysSinceUpdate <= 0) return 100;
+    if (daysSinceUpdate <= 30) return 100 - Math.floor((daysSinceUpdate / 30) * 50);
+    if (daysSinceUpdate <= 90) return 50 - Math.floor(((daysSinceUpdate - 30) / 60) * 50);
+    return 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Generate AI-optimized meta description
+ * Combines best practices from Google SEO + AI citation research
+ * @returns Optimized description (120-160 chars)
+ */
+export function optimizeDescriptionForAI(
+  base: string,
+  options: {
+    includeYear?: boolean;
+    targetLength?: number;
+    addCTA?: boolean;
+  } = {}
+): string {
+  const { includeYear = true, targetLength = 150, addCTA = false } = options;
+  let description = base.trim();
+
+  // Add year if requested and not already present
+  if (includeYear && !description.includes(getCurrentYear())) {
+    const year = getCurrentMonthYear();
+    if (description.length + year.length + 4 <= targetLength) {
+      description = `${description} in ${year}`;
+    }
+  }
+
+  // Add CTA if requested and space allows
+  if (addCTA && description.length + 15 <= targetLength) {
+    description = `${description}. Browse now.`;
+  }
+
+  // Truncate if too long (preserve sentence structure)
+  if (description.length > targetLength) {
+    const truncated = description.substring(0, targetLength - 3);
+    const lastPeriod = truncated.lastIndexOf('.');
+    const lastSpace = truncated.lastIndexOf(' ');
+
+    if (lastPeriod > targetLength * 0.8) {
+      description = truncated.substring(0, lastPeriod + 1);
+    } else if (lastSpace > targetLength * 0.9) {
+      description = `${truncated.substring(0, lastSpace)}...`;
+    } else {
+      description = `${truncated}...`;
+    }
+  }
+
+  return description;
+}

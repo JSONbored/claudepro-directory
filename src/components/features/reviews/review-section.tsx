@@ -28,6 +28,8 @@ import { ThumbsUp } from '@/src/lib/icons';
 import { formatDistanceToNow } from '@/src/lib/utils/data.utils';
 
 // Lazy load RatingHistogram component with recharts dependency (~100KB)
+// SSR disabled: Charts are visual decorations, not critical for SEO/accessibility
+// This prevents lodash (via recharts) from bloating the initial bundle
 const RatingHistogram = dynamic(
   () =>
     import('@/src/components/features/reviews/rating-histogram').then((mod) => ({
@@ -35,7 +37,7 @@ const RatingHistogram = dynamic(
     })),
   {
     loading: () => <div className="h-64 bg-muted/50 animate-pulse rounded-xl" />,
-    ssr: true, // Server-render for SEO
+    ssr: false, // Client-only: Prevents 100KB+ recharts/lodash in initial bundle
   }
 );
 
