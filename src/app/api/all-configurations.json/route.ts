@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
+import { contentCache } from '@/src/lib/cache';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 import { rateLimiters, withRateLimit } from '@/src/lib/rate-limiter';
-import { contentCache } from '@/src/lib/redis';
 import { apiSchemas, ValidationError } from '@/src/lib/security/validators';
 
 export const runtime = 'nodejs';

@@ -23,9 +23,9 @@
 import { headers } from 'next/headers';
 import { createSafeActionClient, DEFAULT_SERVER_ERROR_MESSAGE } from 'next-safe-action';
 import { z } from 'zod';
+import { redisClient } from '@/src/lib/cache';
 import { SERVER_ACTION_RATE_LIMITS } from '@/src/lib/config/rate-limits.config';
 import { logger } from '@/src/lib/logger';
-import { redisClient } from '@/src/lib/redis';
 
 /**
  * Action metadata schema for tracking and observability

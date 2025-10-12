@@ -17,10 +17,10 @@
 'use server';
 
 import { z } from 'zod';
+import { contentCache } from '@/src/lib/cache';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { getContentBySlug } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
-import { contentCache } from '@/src/lib/redis';
 import { rateLimitedAction } from './safe-action';
 
 /**

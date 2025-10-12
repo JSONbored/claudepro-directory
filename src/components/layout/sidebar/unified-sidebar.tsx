@@ -29,6 +29,9 @@ import {
   TooltipTrigger,
 } from '@/src/components/ui/tooltip';
 import { CategoryNavigationCard } from '@/src/components/unified-detail-page/sidebar/category-navigation-card';
+// Removed logger import - client components should not use server-side logger
+// Dynamic imports for server-side functions
+import { statsRedis } from '@/src/lib/cache';
 import { ROUTES } from '@/src/lib/constants';
 import {
   BookOpen,
@@ -43,9 +46,6 @@ import {
   Workflow,
   Zap,
 } from '@/src/lib/icons';
-// Removed logger import - client components should not use server-side logger
-// Dynamic imports for server-side functions
-import { statsRedis } from '@/src/lib/redis';
 import { viewCountService } from '@/src/lib/services/view-count.service';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { shallowEqual, slugToTitle } from '@/src/lib/utils';

@@ -21,8 +21,8 @@
  * - app/[category]/[slug]/page.tsx (detail pages)
  */
 
+import { contentCache } from '@/src/lib/cache';
 import { logger } from '@/src/lib/logger';
-import { contentCache } from '@/src/lib/redis';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 
 /**

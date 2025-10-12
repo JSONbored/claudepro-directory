@@ -6,9 +6,9 @@
 import { headers } from 'next/headers';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { redisClient } from '@/src/lib/cache';
 import { ENDPOINT_RATE_LIMITS } from '@/src/lib/config/rate-limits.config';
 import { logger } from '@/src/lib/logger';
-import { redisClient } from '@/src/lib/redis';
 import { createRequestId } from '@/src/lib/schemas/branded-types.schema';
 import {
   ipAddressSchema,

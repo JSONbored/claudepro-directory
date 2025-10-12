@@ -11,6 +11,7 @@ import { unstable_cache } from 'next/cache';
 import { z } from 'zod';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
+import { statsRedis } from '@/src/lib/cache';
 import { logger } from '@/src/lib/logger';
 import {
   calculateUserAffinities,
@@ -25,7 +26,6 @@ import {
 import type { PersonalizedContentItem } from '@/src/lib/personalization/types';
 import { getUsageBasedRecommendations } from '@/src/lib/personalization/usage-based-recommender';
 import { generateRecommendations } from '@/src/lib/recommender/algorithm';
-import { statsRedis } from '@/src/lib/redis';
 import { bookmarkRepository } from '@/src/lib/repositories/bookmark.repository';
 import { contentSimilarityRepository } from '@/src/lib/repositories/content-similarity.repository';
 import { userRepository } from '@/src/lib/repositories/user.repository';

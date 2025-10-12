@@ -21,7 +21,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { cacheWarmer } from '@/src/lib/cache/cache-warmer';
+import { cacheWarmer } from '@/src/lib/cache';
 import { logger } from '@/src/lib/logger';
 import { withCronAuth } from '@/src/lib/middleware/cron-auth';
 import { emailSequenceService } from '@/src/lib/services/email-sequence.service';

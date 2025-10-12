@@ -26,7 +26,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { type SearchableItem, type SearchFilters, searchCache } from '@/src/lib/cache/search-cache';
+import { type SearchableItem, type SearchFilters, searchCache } from '@/src/lib/cache';
 import { logger } from '@/src/lib/logger';
 import type {
   FilterState,

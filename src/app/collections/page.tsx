@@ -26,9 +26,9 @@ import type { CollectionMetadata } from '@/generated/collections-metadata';
 import { getCollections } from '@/generated/content';
 import { CollectionCard } from '@/src/components/features/content/collection-card';
 import { Badge } from '@/src/components/ui/badge';
+import { statsRedis } from '@/src/lib/cache';
 import { Layers } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/redis';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 /**

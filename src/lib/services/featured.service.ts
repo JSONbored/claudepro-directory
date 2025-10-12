@@ -43,9 +43,9 @@
  */
 
 import { z } from 'zod';
+import { statsRedis } from '@/src/lib/cache';
 import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/redis';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { createClient } from '@/src/lib/supabase/server';
 import { getBatchTrendingData } from '@/src/lib/trending/calculator';

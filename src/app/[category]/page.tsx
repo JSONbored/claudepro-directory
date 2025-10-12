@@ -40,10 +40,10 @@
 
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content-list-server';
+import { statsRedis } from '@/src/lib/cache';
 import { getCategoryConfig, isValidCategory } from '@/src/lib/config/category-config';
 import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/redis';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 // ISR - revalidate every 5 minutes for fresh view counts

@@ -32,9 +32,9 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { chromium } from 'playwright';
+import { redisClient } from '@/src/lib/cache';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
-import { redisClient } from '@/src/lib/redis/client';
 
 // Route configuration
 export const runtime = 'nodejs'; // Required for Playwright

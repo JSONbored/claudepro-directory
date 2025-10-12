@@ -15,9 +15,9 @@
 
 import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
 import type { DigestContentItem, DigestTrendingItem } from '@/src/emails/templates/weekly-digest';
+import { contentCache, statsRedis } from '@/src/lib/cache';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
-import { contentCache, statsRedis } from '@/src/lib/redis';
 
 /**
  * Digest data for a specific week

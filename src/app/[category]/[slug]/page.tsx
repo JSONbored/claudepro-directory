@@ -63,6 +63,7 @@ import { ViewTracker } from '@/src/components/shared/view-tracker';
 import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
 import { UnifiedStructuredData } from '@/src/components/structured-data/unified-structured-data';
 import { UnifiedDetailPage } from '@/src/components/unified-detail-page';
+import { statsRedis } from '@/src/lib/cache';
 import {
   getCategoryConfig,
   isValidCategory,
@@ -76,7 +77,6 @@ import {
   getRelatedContent,
 } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/redis';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { transformForDetailPage } from '@/src/lib/utils/content.utils';
 

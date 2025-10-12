@@ -30,8 +30,8 @@
  */
 
 import { z } from 'zod';
+import { statsRedis } from '@/src/lib/cache';
 import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/redis';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 
 /**

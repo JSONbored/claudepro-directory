@@ -22,8 +22,8 @@ const Meteors = dynamic(
   }
 );
 
+import { statsRedis } from '@/src/lib/cache';
 import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/redis';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { featuredService } from '@/src/lib/services/featured.service';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

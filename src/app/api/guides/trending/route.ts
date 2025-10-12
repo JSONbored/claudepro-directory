@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { statsRedis } from '@/src/lib/cache';
 import { CACHE_HEADERS } from '@/src/lib/constants';
 import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/redis';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 import {
   createCursor,
