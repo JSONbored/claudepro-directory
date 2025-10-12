@@ -14,10 +14,10 @@ import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders
 import { RollingText } from '@/src/components/ui/magic/rolling-text';
 
 // Lazy load Meteors animation to improve LCP (decorative only, not critical)
+// The component handles client-side rendering internally via useEffect
 const Meteors = dynamic(
   () => import('@/src/components/ui/magic/meteors').then((mod) => ({ default: mod.Meteors })),
   {
-    ssr: false, // Client-only rendering
     loading: () => null, // No loading state needed for decorative animation
   }
 );
