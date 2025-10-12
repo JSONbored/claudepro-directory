@@ -23,7 +23,7 @@ import {
   type UnifiedContent,
   type UnifiedStructuredDataProps,
 } from '@/src/lib/structured-data/schema-types';
-import { getContentItemUrl } from '@/src/lib/utils/content.utils';
+import { getContentItemUrl, transformMcpConfigForDisplay } from '@/src/lib/utils/content.utils';
 
 /**
  * Unified Structured Data Component
@@ -313,6 +313,12 @@ function getSourceCodeSchemas(item: UnifiedContent): SchemaObject[] {
   // MCP configurations
   if (isMcpContent(item)) {
     if (item.configuration?.claudeDesktop) {
+      // Transform MCP config for Claude Desktop display
+      // Internal: uses 'mcp', External: transforms to 'mcpServers'
+      const displayConfig = transformMcpConfigForDisplay(
+        item.configuration.claudeDesktop as Record<string, unknown>
+      );
+
       schemas.push(
         buildSoftwareSourceCode({
           slug: item.slug,
@@ -320,7 +326,7 @@ function getSourceCodeSchemas(item: UnifiedContent): SchemaObject[] {
           name: `${displayName} - Claude Desktop Config`,
           description: 'Configuration for Claude Desktop',
           programmingLanguage: 'JSON',
-          code: JSON.stringify(item.configuration.claudeDesktop, null, 2),
+          code: JSON.stringify(displayConfig, null, 2),
           encodingFormat: 'application/json',
           githubUrl: itemGithubUrl,
           fragmentId: 'claude-desktop-config',
@@ -329,6 +335,11 @@ function getSourceCodeSchemas(item: UnifiedContent): SchemaObject[] {
     }
 
     if (item.configuration?.claudeCode) {
+      // Transform MCP config for Claude Code display
+      const displayConfig = transformMcpConfigForDisplay(
+        item.configuration.claudeCode as Record<string, unknown>
+      );
+
       schemas.push(
         buildSoftwareSourceCode({
           slug: item.slug,
@@ -336,7 +347,7 @@ function getSourceCodeSchemas(item: UnifiedContent): SchemaObject[] {
           name: `${displayName} - Claude Code Config`,
           description: 'Configuration for Claude Code',
           programmingLanguage: 'JSON',
-          code: JSON.stringify(item.configuration.claudeCode, null, 2),
+          code: JSON.stringify(displayConfig, null, 2),
           encodingFormat: 'application/json',
           githubUrl: itemGithubUrl,
           fragmentId: 'claude-code-config',

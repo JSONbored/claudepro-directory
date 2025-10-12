@@ -13,7 +13,7 @@
   "content": "Detailed description of the MCP server's functionality, what it connects to, and how it enhances Claude's capabilities. Explain the value proposition and key benefits.",
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "your-server-name": {
           "command": "npx",
           "args": ["-y", "@your-org/your-mcp-server"],
@@ -25,7 +25,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "your-server-name": {
           "command": "npx",
           "args": ["-y", "@your-org/your-mcp-server"],

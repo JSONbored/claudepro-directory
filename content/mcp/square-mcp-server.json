@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "square": {
           "transport": "sse",
           "url": "https://mcp.squareup.com/sse"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "square": {
           "transport": "sse",
           "url": "https://mcp.squareup.com/sse"

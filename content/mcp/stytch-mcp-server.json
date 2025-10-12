@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "stytch": {
           "transport": "http",
           "url": "http://mcp.stytch.dev/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "stytch": {
           "transport": "http",
           "url": "http://mcp.stytch.dev/mcp"

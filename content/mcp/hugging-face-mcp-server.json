@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "huggingface": {
           "transport": "http",
           "url": "https://huggingface.co/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "huggingface": {
           "transport": "http",
           "url": "https://huggingface.co/mcp"

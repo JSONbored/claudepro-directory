@@ -31,7 +31,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "git": {
           "command": "npx",
           "args": ["-y", "@modelcontextprotocol/server-git"]
@@ -39,7 +39,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "git": {
           "command": "npx",
           "args": ["-y", "@modelcontextprotocol/server-git"]

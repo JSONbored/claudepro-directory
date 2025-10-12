@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "jam": {
           "transport": "http",
           "url": "https://mcp.jam.dev/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "jam": {
           "transport": "http",
           "url": "https://mcp.jam.dev/mcp"

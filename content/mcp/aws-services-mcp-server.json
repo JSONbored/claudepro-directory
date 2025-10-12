@@ -36,7 +36,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "aws": {
           "command": "uvx",
           "args": ["awslabs.core-mcp-server@latest"],
@@ -49,7 +49,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "aws": {
           "command": "uvx",
           "args": ["awslabs.core-mcp-server@latest"],

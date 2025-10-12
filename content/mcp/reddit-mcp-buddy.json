@@ -32,7 +32,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "reddit": {
           "command": "npx",
           "args": ["reddit-mcp-buddy"]
@@ -40,7 +40,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "reddit": {
           "command": "npx",
           "args": ["reddit-mcp-buddy"]
@@ -48,7 +48,7 @@
       }
     },
     "withAuth": {
-      "mcpServers": {
+      "mcp": {
         "reddit": {
           "command": "npx",
           "args": ["reddit-mcp-buddy"],

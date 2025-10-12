@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "airtable": {
           "command": "npx",
           "args": ["-y", "airtable-mcp-server"],
@@ -41,7 +41,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "airtable": {
           "command": "npx",
           "args": ["-y", "airtable-mcp-server"],

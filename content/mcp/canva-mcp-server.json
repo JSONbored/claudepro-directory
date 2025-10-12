@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "canva": {
           "transport": "http",
           "url": "https://mcp.canva.com/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "canva": {
           "transport": "http",
           "url": "https://mcp.canva.com/mcp"

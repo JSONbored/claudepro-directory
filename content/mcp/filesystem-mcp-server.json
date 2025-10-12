@@ -31,7 +31,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "filesystem": {
           "command": "npx",
           "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/directory"]
@@ -39,7 +39,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "filesystem": {
           "command": "npx",
           "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/directory"]

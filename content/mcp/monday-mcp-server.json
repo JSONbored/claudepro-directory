@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "monday": {
           "transport": "sse",
           "url": "https://mcp.monday.com/sse"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "monday": {
           "transport": "sse",
           "url": "https://mcp.monday.com/sse"

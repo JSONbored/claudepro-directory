@@ -74,20 +74,19 @@ export async function GET(request: Request) {
       });
 
       // Load all content for each category
-      const [rules, mcpServers, agents, commands, hooks, statuslines, collections] =
-        await batchFetch([
-          getContentByCategory('rules'),
-          getContentByCategory('mcp'),
-          getContentByCategory('agents'),
-          getContentByCategory('commands'),
-          getContentByCategory('hooks'),
-          getContentByCategory('statuslines'),
-          getContentByCategory('collections'),
-        ]);
+      const [rules, mcp, agents, commands, hooks, statuslines, collections] = await batchFetch([
+        getContentByCategory('rules'),
+        getContentByCategory('mcp'),
+        getContentByCategory('agents'),
+        getContentByCategory('commands'),
+        getContentByCategory('hooks'),
+        getContentByCategory('statuslines'),
+        getContentByCategory('collections'),
+      ]);
 
       logger.info('Content loaded', {
         rules: rules.length,
-        mcp: mcpServers.length,
+        mcp: mcp.length,
         agents: agents.length,
         commands: commands.length,
         hooks: hooks.length,
@@ -98,7 +97,7 @@ export async function GET(request: Request) {
       // Calculate featured for each category
       const categories = [
         { name: 'rules', items: rules },
-        { name: 'mcp', items: mcpServers },
+        { name: 'mcp', items: mcp },
         { name: 'agents', items: agents },
         { name: 'commands', items: commands },
         { name: 'hooks', items: hooks },

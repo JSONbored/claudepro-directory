@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "socket": {
           "transport": "http",
           "url": "https://mcp.socket.dev/"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "socket": {
           "transport": "http",
           "url": "https://mcp.socket.dev/"

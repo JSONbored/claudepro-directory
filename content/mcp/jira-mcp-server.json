@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "atlassian": {
           "transport": "sse",
           "url": "https://mcp.atlassian.com/v1/sse"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "atlassian": {
           "transport": "sse",
           "url": "https://mcp.atlassian.com/v1/sse"

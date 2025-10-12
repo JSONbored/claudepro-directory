@@ -31,7 +31,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "clickup": {
           "command": "npx",
           "args": ["-y", "@hauptsache.net/clickup-mcp"],

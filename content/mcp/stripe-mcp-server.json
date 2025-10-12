@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "stripe": {
           "transport": "http",
           "url": "https://mcp.stripe.com"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "stripe": {
           "transport": "http",
           "url": "https://mcp.stripe.com"

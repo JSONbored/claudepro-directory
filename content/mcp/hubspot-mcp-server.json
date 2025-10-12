@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "hubspot": {
           "transport": "http",
           "url": "https://mcp.hubspot.com/anthropic"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "hubspot": {
           "transport": "http",
           "url": "https://mcp.hubspot.com/anthropic"

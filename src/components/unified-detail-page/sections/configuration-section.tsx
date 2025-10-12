@@ -27,6 +27,7 @@ import {
   generateFilename,
   generateHookFilename,
   generateMultiFormatFilename,
+  transformMcpConfigForDisplay,
 } from '@/src/lib/utils/content.utils';
 
 /**
@@ -74,7 +75,14 @@ export async function ConfigurationSection({
     const highlightedConfigs = await batchMap(Object.entries(config), async ([key, value]) => {
       if (!value) return null;
 
-      const code = JSON.stringify(value, null, 2);
+      // Transform MCP config for Claude Desktop display
+      // Internal: uses 'mcp', External: transforms to 'mcpServers'
+      const displayValue =
+        key === 'claudeDesktop' || key === 'claudeCode'
+          ? transformMcpConfigForDisplay(value as Record<string, unknown>)
+          : value;
+
+      const code = JSON.stringify(displayValue, null, 2);
       const html = await highlightCode(code, 'json');
       const filename = generateMultiFormatFilename(item, key, 'json');
 

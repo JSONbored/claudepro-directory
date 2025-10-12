@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "asana": {
           "transport": "sse",
           "url": "https://mcp.asana.com/sse"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "asana": {
           "transport": "sse",
           "url": "https://mcp.asana.com/sse"

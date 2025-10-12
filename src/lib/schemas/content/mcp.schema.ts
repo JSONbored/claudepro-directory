@@ -101,15 +101,18 @@ const mcpStdioConfigSchema = z
  * Note: This differs from baseConfigurationSchema as MCP has unique configuration needs.
  *
  * Structure:
- * - claudeDesktop: Desktop app configuration with mcpServers record
- * - claudeCode: CLI configuration with mcpServers record
+ * - claudeDesktop: Desktop app configuration with mcp record
+ * - claudeCode: CLI configuration with mcp record
  * - http/sse: Optional transport-specific configurations
+ *
+ * Internal naming uses 'mcp' consistently with our category convention.
+ * External output (llms.txt) transforms to 'mcpServers' for Claude Desktop compatibility.
  */
 const mcpConfigurationSchema = z
   .object({
     claudeDesktop: z
       .object({
-        mcpServers: z
+        mcp: z
           .record(z.string(), mcpTransportConfigSchema)
           .describe('Record of MCP server configurations by server name'),
       })
@@ -117,7 +120,7 @@ const mcpConfigurationSchema = z
       .describe('Claude Desktop application MCP server configuration'),
     claudeCode: z
       .object({
-        mcpServers: z
+        mcp: z
           .record(z.string(), mcpTransportConfigSchema)
           .describe('Record of MCP server configurations by server name'),
       })
@@ -127,7 +130,7 @@ const mcpConfigurationSchema = z
     sse: mcpSseConfigSchema.optional().describe('Optional SSE transport configuration'),
   })
   .describe(
-    'MCP-specific configuration structure for Claude Desktop and Claude Code with platform-specific mcpServers configurations and transport settings.'
+    'MCP-specific configuration structure for Claude Desktop and Claude Code with platform-specific mcp configurations and transport settings.'
   );
 
 /**
@@ -198,7 +201,7 @@ const mcpServerInfoSchema = z
  *
  * MCP-specific additions:
  * - category: 'mcp' literal
- * - configuration: MCP-specific config (claudeDesktop/claudeCode with mcpServers)
+ * - configuration: MCP-specific config (claudeDesktop/claudeCode with mcp)
  * - package: NPM package identifier
  * - installation: Installation instructions (uses baseInstallationSchema)
  * - security: Security guidelines and best practices

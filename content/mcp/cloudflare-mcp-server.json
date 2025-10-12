@@ -31,7 +31,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "cloudflare": {
           "command": "npx",
           "args": ["-y", "@cloudflare/mcp-server-cloudflare"],
@@ -43,7 +43,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "cloudflare": {
           "command": "npx",
           "args": ["-y", "@cloudflare/mcp-server-cloudflare"],

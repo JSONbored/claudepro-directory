@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "linear": {
           "transport": "sse",
           "url": "https://mcp.linear.app/sse"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "linear": {
           "transport": "sse",
           "url": "https://mcp.linear.app/sse"

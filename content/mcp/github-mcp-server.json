@@ -32,7 +32,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "github": {
           "command": "npx",
           "args": ["-y", "@modelcontextprotocol/server-github"],
@@ -43,7 +43,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "github": {
           "command": "npx",
           "args": ["-y", "@modelcontextprotocol/server-github"],

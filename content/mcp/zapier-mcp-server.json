@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "zapier": {
           "transport": "http",
           "url": "https://mcp.zapier.com/YOUR_GENERATED_URL"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "zapier": {
           "transport": "http",
           "url": "https://mcp.zapier.com/YOUR_GENERATED_URL"

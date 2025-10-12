@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "netlify": {
           "transport": "http",
           "url": "https://netlify-mcp.netlify.app/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "netlify": {
           "transport": "http",
           "url": "https://netlify-mcp.netlify.app/mcp"

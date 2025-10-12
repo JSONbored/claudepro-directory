@@ -49,7 +49,7 @@ export const mcpFactory = createContentFactory<MCPContent>({
   extendFields: ({ slug }) => ({
     configuration: {
       claudeDesktop: {
-        mcpServers: {
+        mcp: {
           [slug]: {
             command: faker.helpers.arrayElement(['npx', 'node', 'python', 'docker']),
             args: ['-y', slug],

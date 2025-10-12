@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "plaid": {
           "transport": "sse",
           "url": "https://api.dashboard.plaid.com/mcp/sse"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "plaid": {
           "transport": "sse",
           "url": "https://api.dashboard.plaid.com/mcp/sse"

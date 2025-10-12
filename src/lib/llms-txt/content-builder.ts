@@ -45,6 +45,7 @@ interface Installation {
 
 /**
  * Type-safe MCP configuration types
+ * Internal structure uses 'mcp' for consistency with schema
  */
 interface MCPServerConfig {
   command?: string;
@@ -56,10 +57,10 @@ interface MCPServerConfig {
 
 interface MCPConfiguration {
   claudeDesktop?: {
-    mcpServers: Record<string, MCPServerConfig>;
+    mcp: Record<string, MCPServerConfig>;
   };
   claudeCode?: {
-    mcpServers: Record<string, MCPServerConfig>;
+    mcp: Record<string, MCPServerConfig>;
   };
   http?: {
     url: string;
@@ -393,15 +394,16 @@ function formatConfiguration(config: Record<string, unknown>, category: string):
 
 /**
  * Format MCP server configuration with type safety
+ * Internal: reads from 'mcp' field (consistent with schema)
  */
 function formatMcpConfiguration(config: MCPConfiguration): string {
   const lines = ['CONFIGURATION', '-------------', ''];
 
   // Claude Desktop MCP Servers
-  if (config.claudeDesktop?.mcpServers) {
+  if (config.claudeDesktop?.mcp) {
     lines.push('Claude Desktop MCP Servers:', '');
 
-    for (const [serverName, serverConfig] of Object.entries(config.claudeDesktop.mcpServers)) {
+    for (const [serverName, serverConfig] of Object.entries(config.claudeDesktop.mcp)) {
       lines.push(`Server: ${serverName}`);
 
       if (serverConfig.command) lines.push(`  Command: ${serverConfig.command}`);
@@ -422,10 +424,10 @@ function formatMcpConfiguration(config: MCPConfiguration): string {
   }
 
   // Claude Code MCP Servers
-  if (config.claudeCode?.mcpServers) {
+  if (config.claudeCode?.mcp) {
     lines.push('Claude Code MCP Servers:', '');
 
-    for (const [serverName, serverConfig] of Object.entries(config.claudeCode.mcpServers)) {
+    for (const [serverName, serverConfig] of Object.entries(config.claudeCode.mcp)) {
       lines.push(`Server: ${serverName}`);
 
       if (serverConfig.command) lines.push(`  Command: ${serverConfig.command}`);

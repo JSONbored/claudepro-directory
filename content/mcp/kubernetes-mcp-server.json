@@ -32,7 +32,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "kubernetes": {
           "command": "uvx",
           "args": ["mcp-kubernetes-server"],
@@ -43,7 +43,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "kubernetes": {
           "command": "uvx",
           "args": ["mcp-kubernetes-server"],

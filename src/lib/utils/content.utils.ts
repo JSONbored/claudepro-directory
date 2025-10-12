@@ -768,3 +768,42 @@ export function getContentItemUrl(item: {
   // Standard pattern: /[category]/[slug]
   return `/${category}/${slug}`;
 }
+
+// ============================================
+// MCP CONFIGURATION TRANSFORMATION
+// ============================================
+
+/**
+ * Transform MCP configuration for Claude Desktop display
+ *
+ * Internal: Uses 'mcp' for consistency with schema and codebase conventions
+ * External: Transforms to 'mcpServers' for Claude Desktop compatibility
+ *
+ * This transformation is ONLY applied when displaying configuration to users
+ * for copy-paste purposes. All internal processing uses 'mcp'.
+ *
+ * @param config - MCP configuration object (claudeDesktop or claudeCode)
+ * @returns Transformed configuration with 'mcpServers' key for Claude Desktop
+ *
+ * @example
+ * ```ts
+ * const internal = { mcp: { "server": {...} } };
+ * const external = transformMcpConfigForDisplay(internal);
+ * // Returns: { mcpServers: { "server": {...} } }
+ * ```
+ */
+export function transformMcpConfigForDisplay(
+  config: Record<string, unknown>
+): Record<string, unknown> {
+  // If config has 'mcp' key, transform to 'mcpServers' for Claude Desktop
+  if ('mcp' in config && config.mcp) {
+    const { mcp, ...rest } = config;
+    return {
+      mcpServers: mcp,
+      ...rest,
+    };
+  }
+
+  // If already has 'mcpServers', return as-is
+  return config;
+}

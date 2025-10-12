@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "vercel": {
           "transport": "http",
           "url": "https://mcp.vercel.com/"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "vercel": {
           "transport": "http",
           "url": "https://mcp.vercel.com/"

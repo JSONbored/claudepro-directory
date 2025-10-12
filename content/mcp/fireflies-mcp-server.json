@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "fireflies": {
           "transport": "http",
           "url": "https://api.fireflies.ai/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "fireflies": {
           "transport": "http",
           "url": "https://api.fireflies.ai/mcp"

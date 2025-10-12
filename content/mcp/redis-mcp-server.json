@@ -33,7 +33,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "redis": {
           "command": "uvx",
           "args": [
@@ -47,7 +47,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "redis": {
           "command": "uvx",
           "args": [

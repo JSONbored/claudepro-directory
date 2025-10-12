@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "intercom": {
           "transport": "sse",
           "url": "https://mcp.intercom.com/sse"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "intercom": {
           "transport": "sse",
           "url": "https://mcp.intercom.com/sse"

@@ -31,7 +31,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "cloudinary": {
           "transport": "http",
           "url": "https://mcp.cloudinary.com/",
@@ -44,7 +44,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "cloudinary": {
           "transport": "http",
           "url": "https://mcp.cloudinary.com/",

@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "workato": {
           "transport": "http",
           "url": "https://your-workspace.workato.com/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "workato": {
           "transport": "http",
           "url": "https://your-workspace.workato.com/mcp"

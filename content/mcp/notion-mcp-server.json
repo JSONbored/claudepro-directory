@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "notion": {
           "transport": "http",
           "url": "https://mcp.notion.com/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "notion": {
           "transport": "http",
           "url": "https://mcp.notion.com/mcp"

@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "invideo": {
           "transport": "sse",
           "url": "https://mcp.invideo.io/sse"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "invideo": {
           "transport": "sse",
           "url": "https://mcp.invideo.io/sse"

@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "daloopa": {
           "transport": "http",
           "url": "https://mcp.daloopa.com/server/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "daloopa": {
           "transport": "http",
           "url": "https://mcp.daloopa.com/server/mcp"

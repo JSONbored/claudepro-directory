@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "figma": {
           "transport": "http",
           "url": "http://127.0.0.1:3845/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "figma": {
           "transport": "http",
           "url": "http://127.0.0.1:3845/mcp"

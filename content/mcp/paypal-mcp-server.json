@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "paypal": {
           "transport": "sse",
           "url": "https://mcp.paypal.com/sse"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "paypal": {
           "transport": "sse",
           "url": "https://mcp.paypal.com/sse"

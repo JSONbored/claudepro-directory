@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "sentry": {
           "transport": "http",
           "url": "https://mcp.sentry.dev/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "sentry": {
           "transport": "http",
           "url": "https://mcp.sentry.dev/mcp"
