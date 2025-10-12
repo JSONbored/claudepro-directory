@@ -19,6 +19,7 @@
 import { logger } from '@/src/lib/logger';
 import type { LazyLoadedData, LazyLoaderOptions } from '@/src/lib/schemas/app.schema';
 import type { ConfigSubmissionData } from '@/src/lib/schemas/form.schema';
+import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
 
 // ============================================
 // GITHUB INTEGRATION
@@ -364,7 +365,7 @@ export class BatchLazyLoader<T extends Record<string, unknown>> {
    * Get multiple keys at once
    */
   async getMany<K extends keyof T>(keys: K[]): Promise<Pick<T, K>> {
-    const results = await Promise.all(keys.map(async (key) => [key, await this.get(key)] as const));
+    const results = await batchMap(keys, async (key) => [key, await this.get(key)] as const);
 
     return Object.fromEntries(results) as Pick<T, K>;
   }
@@ -451,7 +452,7 @@ export class PaginatedLazyLoader<T> {
       pagePromises.push(this.getPage(page));
     }
 
-    const pages = await Promise.all(pagePromises);
+    const pages = await batchFetch(pagePromises);
     const allItems = pages.flat();
 
     const startOffset = startIndex % this.options.pageSize;

@@ -15,6 +15,7 @@
 
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
+import { batchAllSettled } from '@/src/lib/utils/batch.utils';
 
 /**
  * Base service configuration schema
@@ -202,9 +203,13 @@ export async function removeService(name: string): Promise<void> {
 export async function destroyAllServices(): Promise<void> {
   const promises = Array.from(services.values())
     .filter((service) => service.destroy)
-    .map((service) => service.destroy?.());
+    .map((service) => service.destroy?.()) // Optional chaining - safe after filter
+    .filter((p): p is Promise<void> => p !== undefined);
 
-  await Promise.allSettled(promises);
+  if (promises.length > 0) {
+    await batchAllSettled(promises, 'service-cleanup');
+  }
+
   services.clear();
   logger.debug('All services destroyed');
 }

@@ -33,6 +33,7 @@ import { z } from 'zod';
 import { statsRedis } from '@/src/lib/cache';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import { batchFetch } from '@/src/lib/utils/batch.utils';
 
 /**
  * Content item with view count and growth rate data from Redis
@@ -172,7 +173,7 @@ async function getTrendingContent(
     const yesterdayStr = yesterdayUtc.toISOString().split('T')[0];
 
     // Batch fetch: today's views, yesterday's views, and total views
-    const [todayViews, yesterdayViews, totalViews] = await Promise.all([
+    const [todayViews, yesterdayViews, totalViews] = await batchFetch([
       statsRedis.getDailyViewCounts(items, todayStr),
       statsRedis.getDailyViewCounts(items, yesterdayStr),
       statsRedis.getViewCounts(items),
@@ -606,7 +607,7 @@ export async function getBatchTrendingData(
   ];
 
   // Run all calculations in parallel (including sponsored fetch)
-  const [trending, popular, recent, sponsored] = await Promise.all([
+  const [trending, popular, recent, sponsored] = await batchFetch([
     getTrendingContent(allContent),
     getPopularContent(allContent),
     getRecentContent(allContent),

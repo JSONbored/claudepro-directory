@@ -49,6 +49,7 @@ import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { createClient } from '@/src/lib/supabase/server';
 import { getBatchTrendingData } from '@/src/lib/trending/calculator';
+import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
 import {
   getCurrentWeekStart,
   getCurrentWeekStartISO,
@@ -261,7 +262,7 @@ export async function calculateFeaturedForCategory(
   let totalViews: Record<string, number> = {};
 
   try {
-    [todayViews, yesterdayViews, totalViews] = await Promise.all([
+    [todayViews, yesterdayViews, totalViews] = await batchFetch([
       statsRedis.getDailyViewCounts(itemsWithCategory, today),
       statsRedis.getDailyViewCounts(itemsWithCategory, yesterday),
       statsRedis.getViewCounts(itemsWithCategory),
@@ -488,7 +489,7 @@ export async function loadCurrentFeaturedContentByCategory(): Promise<
         hooksData,
         statuslinesData,
         collectionsData,
-      ] = await Promise.all([
+      ] = await batchFetch([
         getContentByCategory('rules'),
         getContentByCategory('mcp'),
         getContentByCategory('agents'),
@@ -560,12 +561,10 @@ export async function loadCurrentFeaturedContentByCategory(): Promise<
     }
 
     // Step 2: Load all content in parallel
-    const contentByCategory = await Promise.all(
-      CONTENT_CATEGORIES.map(async (category) => ({
-        category,
-        items: await getContentByCategory(category),
-      }))
-    );
+    const contentByCategory = await batchMap(CONTENT_CATEGORIES, async (category) => ({
+      category,
+      items: await getContentByCategory(category),
+    }));
 
     // Step 3: Create lookup map: category:slug -> content item
     const contentMap = new Map<string, UnifiedContentItem>();
@@ -658,12 +657,10 @@ export async function loadCurrentFeaturedContent(): Promise<readonly UnifiedCont
     }
 
     // Step 2: Load all content in parallel
-    const contentByCategory = await Promise.all(
-      CONTENT_CATEGORIES.map(async (category) => ({
-        category,
-        items: await getContentByCategory(category),
-      }))
-    );
+    const contentByCategory = await batchMap(CONTENT_CATEGORIES, async (category) => ({
+      category,
+      items: await getContentByCategory(category),
+    }));
 
     // Step 3: Create lookup map: category:slug -> content item
     const contentMap = new Map<string, UnifiedContentItem>();

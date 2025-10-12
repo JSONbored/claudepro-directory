@@ -18,6 +18,7 @@ import type { DigestContentItem, DigestTrendingItem } from '@/src/emails/templat
 import { contentCache, statsRedis } from '@/src/lib/cache';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
+import { batchFetch, batchLoadContent } from '@/src/lib/utils/batch.utils';
 
 /**
  * Digest data for a specific week
@@ -56,15 +57,23 @@ class DigestService {
   async getNewContent(since: Date, limit = 5): Promise<DigestContentItem[]> {
     try {
       // Get all content from all categories
-      const [
-        agentsData,
-        mcpData,
-        rulesData,
-        commandsData,
-        hooksData,
-        statuslinesData,
-        collectionsData,
-      ] = await Promise.all([agents, mcp, rules, commands, hooks, statuslines, collections]);
+      const {
+        agents: agentsData,
+        mcp: mcpData,
+        rules: rulesData,
+        commands: commandsData,
+        hooks: hooksData,
+        statuslines: statuslinesData,
+        collections: collectionsData,
+      } = await batchLoadContent({
+        agents,
+        mcp,
+        rules,
+        commands,
+        hooks,
+        statuslines,
+        collections,
+      });
 
       const allContent = [
         ...(agentsData as ContentItem[]).map((item) => ({
@@ -139,15 +148,23 @@ class DigestService {
   async getTrendingContent(_since: Date, limit = 3): Promise<DigestTrendingItem[]> {
     try {
       // Get all content
-      const [
-        agentsData,
-        mcpData,
-        rulesData,
-        commandsData,
-        hooksData,
-        statuslinesData,
-        collectionsData,
-      ] = await Promise.all([agents, mcp, rules, commands, hooks, statuslines, collections]);
+      const {
+        agents: agentsData,
+        mcp: mcpData,
+        rules: rulesData,
+        commands: commandsData,
+        hooks: hooksData,
+        statuslines: statuslinesData,
+        collections: collectionsData,
+      } = await batchLoadContent({
+        agents,
+        mcp,
+        rules,
+        commands,
+        hooks,
+        statuslines,
+        collections,
+      });
 
       const allContent = [
         ...(agentsData as ContentItem[]).map((item) => ({
@@ -225,15 +242,23 @@ class DigestService {
 
     try {
       // Get all content
-      const [
-        agentsData,
-        mcpData,
-        rulesData,
-        commandsData,
-        hooksData,
-        statuslinesData,
-        collectionsData,
-      ] = await Promise.all([agents, mcp, rules, commands, hooks, statuslines, collections]);
+      const {
+        agents: agentsData,
+        mcp: mcpData,
+        rules: rulesData,
+        commands: commandsData,
+        hooks: hooksData,
+        statuslines: statuslinesData,
+        collections: collectionsData,
+      } = await batchLoadContent({
+        agents,
+        mcp,
+        rules,
+        commands,
+        hooks,
+        statuslines,
+        collections,
+      });
 
       const allContent = [
         ...(agentsData as ContentItem[]).map((item) => ({ ...item, category: 'agents' as const })),
@@ -313,7 +338,7 @@ class DigestService {
         const weekOf = this.formatWeekRange(weekStart, weekEnd);
 
         // Get new and trending content in parallel
-        const [newContent, trendingContent] = await Promise.all([
+        const [newContent, trendingContent] = await batchFetch([
           this.getNewContent(weekStart, 5),
           this.getTrendingContent(weekStart, 3),
         ]);

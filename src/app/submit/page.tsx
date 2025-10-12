@@ -11,6 +11,7 @@ import {
 import { CheckCircle, Clock, Lightbulb, Medal, TrendingUp, Trophy } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { batchFetch } from '@/src/lib/utils/batch.utils';
 
 const SUBMISSION_TIPS = [
   'Be specific in your descriptions - help users understand what your config does',
@@ -60,7 +61,7 @@ export const metadata = await generatePageMetadata('/submit');
  */
 export default async function SubmitPage() {
   // Fetch sidebar data in parallel (cached for 5-10 min)
-  const [statsResult, recentResult, contributorsResult] = await Promise.all([
+  const [statsResult, recentResult, contributorsResult] = await batchFetch([
     getSubmissionStats({}),
     getRecentMerged({ limit: 5 }),
     getTopContributors({ limit: 5 }),

@@ -27,6 +27,7 @@ import { generateRecommendations } from '@/src/lib/recommender/algorithm';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { decodeQuizAnswers } from '@/src/lib/schemas/recommender.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { batchFetch } from '@/src/lib/utils/batch.utils';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -148,7 +149,7 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
       hooksData,
       statuslinesData,
       collectionsData,
-    ] = await Promise.all([
+    ] = await batchFetch([
       lazyContentLoaders.agents(),
       lazyContentLoaders.mcp(),
       lazyContentLoaders.rules(),

@@ -46,6 +46,7 @@ import { userIdSchema } from '@/src/lib/schemas/branded-types.schema';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 import { updateProfileSchema } from '@/src/lib/schemas/profile.schema';
 import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
+import { batchAll } from '@/src/lib/utils/batch.utils';
 
 // ============================================
 // PROFILE ACTIONS
@@ -323,28 +324,30 @@ export const addBookmarkBatch = authedAction
 
       // Track interactions for each bookmark (non-blocking)
       const interactionPromises = parsedInput.items.map((item) =>
-        supabase
-          .from('user_interactions')
-          .insert({
-            user_id: userId,
-            content_type: item.content_type,
-            content_slug: item.content_slug,
-            interaction_type: 'bookmark',
-            metadata: { source: 'bulk_save' },
-          })
-          .then(({ error: intError }) => {
-            if (intError) {
-              logger.warn('Failed to track batch bookmark interaction', undefined, {
-                content_type: item.content_type,
-                content_slug: item.content_slug,
-              });
-            }
-          })
+        Promise.resolve(
+          supabase
+            .from('user_interactions')
+            .insert({
+              user_id: userId,
+              content_type: item.content_type,
+              content_slug: item.content_slug,
+              interaction_type: 'bookmark',
+              metadata: { source: 'bulk_save' },
+            })
+            .then(({ error: intError }) => {
+              if (intError) {
+                logger.warn('Failed to track batch bookmark interaction', undefined, {
+                  content_type: item.content_type,
+                  content_slug: item.content_slug,
+                });
+              }
+            })
+        )
       );
 
       // Fire and forget interaction tracking
-      Promise.all(interactionPromises).catch(() => {
-        // Non-critical
+      batchAll(interactionPromises, 'bookmark-interactions').catch(() => {
+        // Non-critical - don't block on tracking failures
       });
 
       // Revalidate pages

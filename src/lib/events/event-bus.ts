@@ -25,6 +25,7 @@
 
 import type { z } from 'zod';
 import { logger } from '@/src/lib/logger';
+import { batchMap } from '@/src/lib/utils/batch.utils';
 
 // =====================================================
 // TYPES & INTERFACES
@@ -205,10 +206,8 @@ export class EventBus {
       }
 
       // Execute handlers in priority order
-      await Promise.all(
-        handlers.map((registration) =>
-          this.executeHandler(event, registration as HandlerRegistration<T>)
-        )
+      await batchMap(handlers, (registration) =>
+        this.executeHandler(event, registration as HandlerRegistration<T>)
       );
 
       if (this.enableMonitoring) {

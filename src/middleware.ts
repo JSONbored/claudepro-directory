@@ -475,6 +475,7 @@ export async function middleware(request: NextRequest) {
   // Both operations are independent - Arcjet checks security rules while Nosecone generates headers
   // This saves 5-10ms per request by running concurrently instead of sequentially
   // SECURITY: Using Promise.allSettled for fail-closed behavior - if either fails, we handle gracefully
+  // NOTE: Cannot use batchAllSettled here due to heterogeneous tuple types (ArcjetDecision vs Response)
   let decision: Awaited<ReturnType<typeof aj.protect>>;
   let noseconeResponse: Response;
 

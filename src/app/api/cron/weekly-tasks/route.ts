@@ -28,6 +28,7 @@ import { env } from '@/src/lib/schemas/env.schema';
 import { digestService } from '@/src/lib/services/digest.service';
 import { type FeaturedContentItem, featuredService } from '@/src/lib/services/featured.service';
 import { resendService } from '@/src/lib/services/resend.service';
+import { batchFetch } from '@/src/lib/utils/batch.utils';
 import { getCurrentWeekStart, getWeekEnd } from '@/src/lib/utils/data.utils';
 
 export const runtime = 'nodejs';
@@ -74,7 +75,7 @@ export async function GET(request: Request) {
 
       // Load all content for each category
       const [rules, mcpServers, agents, commands, hooks, statuslines, collections] =
-        await Promise.all([
+        await batchFetch([
           getContentByCategory('rules'),
           getContentByCategory('mcp'),
           getContentByCategory('agents'),

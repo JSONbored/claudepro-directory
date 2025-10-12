@@ -16,6 +16,7 @@ import { z } from 'zod';
 import { renderEmail } from '@/src/emails/utils/render';
 import { logger } from '@/src/lib/logger';
 import { env } from '@/src/lib/schemas/env.schema';
+import { batchMapSettled } from '@/src/lib/utils/batch.utils';
 
 /**
  * Resend API response schemas for type safety
@@ -594,35 +595,32 @@ class ResendService {
       });
 
       // Send emails in batch
-      const batchResults = await Promise.allSettled(
-        batch.map((email) => {
-          const emailOptions: {
-            from?: string;
-            replyTo?: string;
-            tags?: Array<{ name: string; value: string }>;
-          } = {};
-          if (options?.from) emailOptions.from = options.from;
-          if (options?.replyTo) emailOptions.replyTo = options.replyTo;
-          if (options?.tags) emailOptions.tags = options.tags;
-          return this.sendEmail(email, subject, template, emailOptions);
-        })
-      );
+      const batchResult = await batchMapSettled(batch, (email) => {
+        const emailOptions: {
+          from?: string;
+          replyTo?: string;
+          tags?: Array<{ name: string; value: string }>;
+        } = {};
+        if (options?.from) emailOptions.from = options.from;
+        if (options?.replyTo) emailOptions.replyTo = options.replyTo;
+        if (options?.tags) emailOptions.tags = options.tags;
+        return this.sendEmail(email, subject, template, emailOptions);
+      });
 
-      // Count results
-      for (let j = 0; j < batchResults.length; j++) {
-        const result = batchResults[j];
-        const email = batch[j];
-
-        if (!(result && email)) continue;
-
-        if (result.status === 'fulfilled' && result.value.success) {
+      // Count successes
+      for (const emailResult of batchResult.successes) {
+        if (emailResult.success) {
           results.success++;
         } else {
           results.failed++;
-          const errorMsg =
-            result.status === 'rejected' ? result.reason : result.value.error || 'Unknown error';
-          results.errors.push(`${email}: ${errorMsg}`);
+          results.errors.push(`${emailResult.error || 'Unknown error'}`);
         }
+      }
+
+      // Count failures
+      for (const failure of batchResult.failures) {
+        results.failed++;
+        results.errors.push(failure.error.message);
       }
 
       // Rate limit: delay between batches (except for last batch)

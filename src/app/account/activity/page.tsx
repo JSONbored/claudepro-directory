@@ -10,6 +10,7 @@ import {
 import { getActivitySummary, getActivityTimeline } from '@/src/lib/actions/user.actions';
 import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { batchFetch } from '@/src/lib/utils/batch.utils';
 
 export const metadata: Metadata = {
   title: 'Activity - Claude Pro Directory',
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
 
 export default async function ActivityPage() {
   // Fetch activity data
-  const [summaryResult, timelineResult] = await Promise.all([
+  const [summaryResult, timelineResult] = await batchFetch([
     getActivitySummary(),
     getActivityTimeline({ limit: 50, offset: 0 }),
   ]);

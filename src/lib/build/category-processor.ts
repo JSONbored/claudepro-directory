@@ -29,6 +29,7 @@ import {
 import { logger } from '@/src/lib/logger';
 import { generateSlugFromFilename } from '@/src/lib/schemas/content-generation.schema';
 import { slugToTitle } from '@/src/lib/utils';
+import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
 
 /**
  * Build cache interface for incremental builds
@@ -166,7 +167,7 @@ async function processContentFile<T extends ContentType>(
 
   try {
     // Read file metadata for caching
-    const [content, fileStats] = await Promise.all([readFile(filePath, 'utf-8'), stat(filePath)]);
+    const [content, fileStats] = await batchFetch([readFile(filePath, 'utf-8'), stat(filePath)]);
 
     // Security: File size validation (prevent DoS)
     if (content.length > 1024 * 1024) {
@@ -283,8 +284,8 @@ async function processCategoryFiles<T extends ContentType>(
 
   for (let i = 0; i < jsonFiles.length; i += batchSize) {
     const batch = jsonFiles.slice(i, i + batchSize);
-    const batchResults = await Promise.all(
-      batch.map((file) => processContentFile<T>(file, contentDir, config, cache))
+    const batchResults = await batchMap(batch, (file) =>
+      processContentFile<T>(file, contentDir, config, cache)
     );
     results.push(...batchResults);
 

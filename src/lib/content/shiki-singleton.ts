@@ -22,6 +22,7 @@
  */
 
 import type { HighlighterCore } from 'shiki/core';
+import { batchFetch } from '@/src/lib/utils/batch.utils';
 
 /**
  * Singleton instance - created once, reused everywhere
@@ -58,7 +59,7 @@ export async function getSharedHighlighter(): Promise<HighlighterCore> {
     markdown,
     jsx,
     tsx,
-  ] = await Promise.all([
+  ] = await batchFetch([
     import('shiki/themes/github-dark-dimmed.mjs'),
     import('shiki/themes/github-light.mjs'),
     import('shiki/langs/typescript.mjs'),

@@ -16,6 +16,7 @@ import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import { Zap } from '@/src/lib/icons';
 import { type StepByStepGuideProps, stepGuidePropsSchema } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { batchMap } from '@/src/lib/utils/batch.utils';
 
 export async function StepByStepGuide(props: StepByStepGuideProps) {
   const validated = stepGuidePropsSchema.parse(props);
@@ -23,14 +24,12 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
   const validSteps = steps;
 
   // Pre-render all code blocks with Shiki on the server
-  const highlightedSteps = await Promise.all(
-    validSteps.map(async (step) => {
-      if (!step.code) return { ...step, highlightedHtml: null };
+  const highlightedSteps = await batchMap(validSteps, async (step) => {
+    if (!step.code) return { ...step, highlightedHtml: null };
 
-      const html = await highlightCode(step.code, 'bash');
-      return { ...step, highlightedHtml: html };
-    })
-  );
+    const html = await highlightCode(step.code, 'bash');
+    return { ...step, highlightedHtml: html };
+  });
 
   return (
     <section itemScope itemType="https://schema.org/HowTo" className="my-8">

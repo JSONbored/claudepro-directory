@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { batchMap } from '@/src/lib/utils/batch.utils';
 import { DOMPurify } from './html-sanitizer';
 import { VALIDATION_PATTERNS } from './patterns';
 
@@ -433,9 +434,7 @@ export const sanitizers = {
    * Ensures each tag is safe and valid
    */
   sanitizeTags: async (tags: string[]): Promise<string[]> => {
-    const sanitizedTags = await Promise.all(
-      tags.map((tag) => sanitizers.sanitizeFormInput(tag, 50))
-    );
+    const sanitizedTags = await batchMap(tags, (tag) => sanitizers.sanitizeFormInput(tag, 50));
     return sanitizedTags.filter((tag) => tag.length > 0 && tag.length <= 50).slice(0, 20); // Limit to 20 tags
   },
 

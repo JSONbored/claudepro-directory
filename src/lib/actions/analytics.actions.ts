@@ -51,6 +51,7 @@ import {
 import { type QuizAnswers, quizAnswersSchema } from '@/src/lib/schemas/recommender.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { createClient } from '@/src/lib/supabase/server';
+import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 // ============================================
@@ -92,7 +93,7 @@ export const getForYouFeed = rateLimitedAction
             hooksData,
             statuslinesData,
             collectionsData,
-          ] = await Promise.all([
+          ] = await batchFetch([
             lazyContentLoaders.agents(),
             lazyContentLoaders.mcp(),
             lazyContentLoaders.rules(),
@@ -225,13 +226,12 @@ export const getForYouFeed = rateLimitedAction
           );
 
           // Get trending items
-          const trendingKeys = await Promise.all(
-            ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'].map(
-              async (cat: string) => {
-                const trending = await statsRedis.getTrending(cat, 10);
-                return trending.map((slug: string) => `${cat}:${slug}`);
-              }
-            )
+          const trendingKeys = await batchMap(
+            ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'],
+            async (cat: string) => {
+              const trending = await statsRedis.getTrending(cat, 10);
+              return trending.map((slug: string) => `${cat}:${slug}`);
+            }
           );
           const trendingSet = new Set<string>(trendingKeys.flat());
 
@@ -436,7 +436,7 @@ export const getUsageRecommendations = rateLimitedAction
           hooksData,
           statuslinesData,
           collectionsData,
-        ] = await Promise.all([
+        ] = await batchFetch([
           lazyContentLoaders.agents(),
           lazyContentLoaders.mcp(),
           lazyContentLoaders.rules(),
@@ -716,7 +716,7 @@ export const calculateUserAffinitiesAction = rateLimitedAction
         }
       });
 
-      await Promise.all(upsertPromises);
+      await batchFetch(upsertPromises);
 
       logger.info('User affinities calculated', {
         user_id: user.id,
@@ -1062,7 +1062,7 @@ export const generateConfigRecommendations = rateLimitedAction
         hooksData,
         statuslinesData,
         collectionsData,
-      ] = await Promise.all([
+      ] = await batchFetch([
         lazyContentLoaders.agents(),
         lazyContentLoaders.mcp(),
         lazyContentLoaders.rules(),

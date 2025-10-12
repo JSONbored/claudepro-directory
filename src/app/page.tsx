@@ -27,6 +27,7 @@ import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { featuredService } from '@/src/lib/services/featured.service';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { batchFetch } from '@/src/lib/utils/batch.utils';
 import { transformForHomePage } from '@/src/lib/utils/content.utils';
 
 type ContentMetadataWithCategory =
@@ -69,17 +70,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     | Record<string, UnifiedContentItem[]> = {};
 
   try {
-    const results = await Promise.all([
-      lazyContentLoaders.rules(),
-      lazyContentLoaders.mcp(),
-      lazyContentLoaders.agents(),
-      lazyContentLoaders.commands(),
-      lazyContentLoaders.hooks(),
-      lazyContentLoaders.statuslines(),
-      lazyContentLoaders.collections(),
-      featuredService.loadCurrentFeaturedContentByCategory(),
-    ]);
-
     [
       rulesData,
       mcpData,
@@ -89,7 +79,16 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       statuslinesData,
       collectionsData,
       featuredByCategory,
-    ] = results;
+    ] = await batchFetch([
+      lazyContentLoaders.rules(),
+      lazyContentLoaders.mcp(),
+      lazyContentLoaders.agents(),
+      lazyContentLoaders.commands(),
+      lazyContentLoaders.hooks(),
+      lazyContentLoaders.statuslines(),
+      lazyContentLoaders.collections(),
+      featuredService.loadCurrentFeaturedContentByCategory(),
+    ]);
   } catch (error) {
     // Log error but continue with empty fallbacks to prevent page crash
     logger.error(
@@ -115,7 +114,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   let collections: EnrichedMetadata[] = [];
 
   try {
-    const enrichedResults = await Promise.all([
+    [rules, mcp, agents, commands, hooks, statuslines, collections] = await batchFetch([
       statsRedis.enrichWithAllCounts(
         rulesData.map((item: RuleMetadata) => ({ ...item, category: 'rules' as const }))
       ),
@@ -147,8 +146,6 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         }))
       ),
     ]);
-
-    [rules, mcp, agents, commands, hooks, statuslines, collections] = enrichedResults;
   } catch (error) {
     // Log error and fallback to data without enrichment
     logger.error(

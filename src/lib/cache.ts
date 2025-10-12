@@ -48,6 +48,7 @@ import { stringArray } from '@/src/lib/schemas/primitives/base-arrays';
 import { nonNegativeInt, positiveInt } from '@/src/lib/schemas/primitives/base-numbers';
 import { isoDatetimeString, nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import { batchFetch } from '@/src/lib/utils/batch.utils';
 import { ParseStrategy, safeParse, safeStringify } from '@/src/lib/utils/data.utils';
 
 // Re-export Redis type for consumers
@@ -1442,7 +1443,7 @@ export const statsRedis = {
     const v = cacheKeyParamsSchema.parse({ category: cat, slug });
     await redis(
       async (c) => {
-        await Promise.all([
+        await batchFetch([
           c.incr(`copies:${v.category}:${v.slug}`),
           c.zincrby(`copied:${v.category}:all`, 1, v.slug),
         ]);
@@ -1559,7 +1560,7 @@ export const statsRedis = {
 
     try {
       // Batch fetch both counts in parallel
-      const [viewCounts, copyCounts] = await Promise.all([
+      const [viewCounts, copyCounts] = await batchFetch([
         statsRedis.getViewCounts(items),
         statsRedis.getCopyCounts(items),
       ]);
@@ -1799,7 +1800,7 @@ class CacheWarmer {
         hooksMetadata,
         statuslinesMetadata,
         collectionsMetadata,
-      ] = await Promise.all([
+      ] = await batchFetch([
         metadataLoader.get('agentsMetadata'),
         metadataLoader.get('mcpMetadata'),
         metadataLoader.get('rulesMetadata'),

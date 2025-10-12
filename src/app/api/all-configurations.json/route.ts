@@ -7,6 +7,7 @@ import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 import { rateLimiters, withRateLimit } from '@/src/lib/rate-limiter';
 import { apiSchemas, ValidationError } from '@/src/lib/security/validators';
+import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 
 export const runtime = 'nodejs';
 
@@ -49,15 +50,15 @@ async function* createStreamingResponse(
   batchSize: number,
   format: 'json' | 'ndjson'
 ): AsyncGenerator<string, void, unknown> {
-  const [
-    agentsData,
-    mcpData,
-    rulesData,
-    commandsData,
-    hooksData,
-    statuslinesData,
-    collectionsData,
-  ] = await Promise.all([agents, mcp, rules, commands, hooks, statuslines, collections]);
+  const {
+    agents: agentsData,
+    mcp: mcpData,
+    rules: rulesData,
+    commands: commandsData,
+    hooks: hooksData,
+    statuslines: statuslinesData,
+    collections: collectionsData,
+  } = await batchLoadContent({ agents, mcp, rules, commands, hooks, statuslines, collections });
   const transformedAgents = transformContent(agentsData, 'agent', 'agents');
   const transformedMcp = transformContent(mcpData, 'mcp', 'mcp');
   const transformedRules = transformContent(rulesData, 'rule', 'rules');
@@ -239,15 +240,15 @@ async function handleGET(request: NextRequest) {
         },
       });
     }
-    const [
-      agentsData,
-      mcpData,
-      rulesData,
-      commandsData,
-      hooksData,
-      statuslinesData,
-      collectionsData,
-    ] = await Promise.all([agents, mcp, rules, commands, hooks, statuslines, collections]);
+    const {
+      agents: agentsData,
+      mcp: mcpData,
+      rules: rulesData,
+      commands: commandsData,
+      hooks: hooksData,
+      statuslines: statuslinesData,
+      collections: collectionsData,
+    } = await batchLoadContent({ agents, mcp, rules, commands, hooks, statuslines, collections });
     const transformedAgents = transformContent(agentsData, 'agent', 'agents');
     const transformedMcp = transformContent(mcpData, 'mcp', 'mcp');
     const transformedRules = transformContent(rulesData, 'rule', 'rules');

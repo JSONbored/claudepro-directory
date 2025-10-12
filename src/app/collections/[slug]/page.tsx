@@ -38,6 +38,7 @@ import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-it
 import type { CollectionItemReference } from '@/src/lib/schemas/content/collection.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { batchMap } from '@/src/lib/utils/batch.utils';
 
 interface ItemWithData extends CollectionItemReference {
   data: UnifiedContentItem;
@@ -146,8 +147,9 @@ export default async function CollectionDetailPage({
   });
 
   // Load all referenced items with full content
-  const itemsWithContent = await Promise.all(
-    collection.items.map(async (itemRef: CollectionItemReference): Promise<ItemWithData | null> => {
+  const itemsWithContent = await batchMap(
+    collection.items,
+    async (itemRef: CollectionItemReference): Promise<ItemWithData | null> => {
       try {
         const item = await getContentBySlug(itemRef.category as ContentCategory, itemRef.slug);
         return item ? { ...itemRef, data: item } : null;
@@ -158,7 +160,7 @@ export default async function CollectionDetailPage({
         });
         return null;
       }
-    })
+    }
   );
 
   // Filter out failed loads

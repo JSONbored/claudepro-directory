@@ -9,21 +9,20 @@
 
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import type { CodeGroupProps } from '@/src/lib/schemas/shared.schema';
+import { batchMap } from '@/src/lib/utils/batch.utils';
 import { CodeGroup } from './code-group';
 
 export async function CodeGroupServer(props: CodeGroupProps) {
   // Pre-render all code examples with Shiki on the server
-  const highlightedExamples = await Promise.all(
-    props.examples.map(async (example) => {
-      const html = await highlightCode(example.code, example.language);
-      return {
-        language: example.language,
-        filename: example.filename,
-        code: example.code,
-        highlightedHtml: html,
-      };
-    })
-  );
+  const highlightedExamples = await batchMap(props.examples, async (example) => {
+    const html = await highlightCode(example.code, example.language);
+    return {
+      language: example.language,
+      filename: example.filename,
+      code: example.code,
+      highlightedHtml: html,
+    };
+  });
 
   // Build props object with only defined values
   const codeGroupProps: {
