@@ -5,6 +5,7 @@ import { CollectionForm } from '@/src/components/library/collection-form';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { ArrowLeft } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -14,11 +15,7 @@ interface EditCollectionPageProps {
 
 export async function generateMetadata({ params }: EditCollectionPageProps): Promise<Metadata> {
   const { slug } = await params;
-  return {
-    title: `Edit ${slug} - My Library`,
-    description: 'Edit your collection',
-    robots: { index: false, follow: false },
-  };
+  return await generatePageMetadata('/account/library/:slug/edit', { params: { slug } });
 }
 
 export default async function EditCollectionPage({ params }: EditCollectionPageProps) {

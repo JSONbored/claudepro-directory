@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import { ActivityTimeline } from '@/src/components/features/profile/activity-timeline';
 import {
   Card,
@@ -9,17 +8,11 @@ import {
 } from '@/src/components/ui/card';
 import { getActivitySummary, getActivityTimeline } from '@/src/lib/actions/user.actions';
 import { FileText, GitPullRequest, MessageSquare, ThumbsUp } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
 
-export const metadata: Metadata = {
-  title: 'Activity - Claude Pro Directory',
-  description: 'View your contribution history and activity',
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
+export const metadata = await generatePageMetadata('/account/activity');
 
 export default async function ActivityPage() {
   // Fetch activity data

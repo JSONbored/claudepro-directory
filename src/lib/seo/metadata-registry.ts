@@ -1,8 +1,15 @@
 /**
  * Centralized Metadata Registry
  *
- * Single source of truth for all page metadata across the application.
- * Eliminates duplication, ensures consistency, and enables AI citation optimization.
+ * **SCHEMA-FIRST ARCHITECTURE (October 2025):**
+ * This registry is now a FALLBACK for explicit overrides only.
+ * Primary metadata source is schema-metadata-adapter.ts which derives metadata
+ * from content schemas automatically (NO manual configuration needed).
+ *
+ * Metadata Resolution Order:
+ * 1. **Schema Derivation** (Primary) - Automatic from content schemas
+ * 2. **Registry Config** (Fallback) - Explicit overrides defined here
+ * 3. **Smart Defaults** (Last Resort) - Generic metadata for unknown routes
  *
  * October 2025 SEO Optimization:
  * - AI citation optimization (ChatGPT, Perplexity, Claude search)
@@ -17,6 +24,12 @@
 import { z } from 'zod';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { getDisplayTitle } from '@/src/lib/utils';
+
+/**
+ * Metadata Source Type
+ * Indicates where metadata originated from
+ */
+export type RouteMetadataSource = 'registry' | 'schema' | 'smart-default';
 
 /**
  * Context type for metadata generation
@@ -157,6 +170,7 @@ export const structuredDataConfigSchema = z
         'CollectionPage',
         'Blog',
         'TechArticle',
+        'ProfilePage',
       ])
       .describe('Schema.org type for structured data generation'),
 
@@ -255,6 +269,16 @@ export interface RouteMetadata {
    * October 2025 settings for ChatGPT, Perplexity, Claude search
    */
   aiOptimization?: AIOptimization;
+
+  /**
+   * Robots meta directives (optional)
+   * Controls search engine crawler behavior
+   * Defaults to index: true, follow: true if not specified
+   */
+  robots?: {
+    index: boolean;
+    follow: boolean;
+  };
 }
 
 /**
@@ -789,8 +813,11 @@ export const METADATA_REGISTRY = {
    * User-friendly error messaging
    */
   '/404': {
-    title: { tier: 'section' as const, title: '404 - Page Not Found' },
-    description: `The page you're looking for doesn't exist on Claude Pro Directory. Browse our collection of AI agents, MCP servers, and configurations instead.`,
+    title: {
+      tier: 'section' as const,
+      title: '404 Page Not Found - Browse Claude AI Configurations Instead',
+    },
+    description: `The page you're looking for doesn't exist on Claude Pro Directory. Browse our collection of AI agents, MCP servers, rules, commands, and configurations instead.`,
     keywords: ['404', 'page not found', 'claude directory'],
     openGraph: {
       type: 'website' as const,
@@ -1201,6 +1228,797 @@ export const METADATA_REGISTRY = {
       wikipediaStyle: false,
     },
   },
+
+  '/search': {
+    title: {
+      tier: 'section' as const,
+      title: 'Search Results',
+    },
+    description:
+      'Search Claude AI configurations, agents, MCP servers, rules, commands, hooks, and guides.',
+    keywords: ['claude search', 'ai configuration search', 'claude tools search'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary_large_image' as const,
+    },
+    structuredData: {
+      type: 'WebPage' as const,
+      breadcrumbs: false,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/u/:slug': {
+    title: {
+      tier: 'content' as const,
+      title: (context?: MetadataContext) => {
+        const slug = context?.params?.slug as string | undefined;
+        return slug ? `${slug}'s Profile` : 'User Profile';
+      },
+      section: 'Community',
+    },
+    description: (context?: MetadataContext) => {
+      const slug = context?.params?.slug as string | undefined;
+      return `View ${slug ? `${slug}'s` : 'user'} contributions, collections, and activity on Claude Pro Directory.`;
+    },
+    keywords: ['claude user profile', 'community member', 'contributions'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    structuredData: {
+      type: 'WebPage' as const,
+      breadcrumbs: true,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/account/library/:slug': {
+    title: {
+      tier: 'content' as const,
+      title: 'My Collection',
+      section: 'Library',
+    },
+    description: 'Manage your personal collection of Claude configurations and saved items.',
+    keywords: ['my collection', 'saved configurations', 'personal library'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    structuredData: {
+      type: 'WebPage' as const,
+      breadcrumbs: false,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/account/library/:slug/edit': {
+    title: {
+      tier: 'content' as const,
+      title: 'Edit Collection',
+      section: 'Library',
+    },
+    description: 'Edit your collection details and settings.',
+    keywords: ['edit collection', 'manage library'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    structuredData: {
+      type: 'WebPage' as const,
+      breadcrumbs: false,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/u/:slug/collections/:collectionSlug': {
+    title: {
+      tier: 'content' as const,
+      title: (context?: MetadataContext) => {
+        const collectionSlug = context?.params?.collectionSlug as string | undefined;
+        return collectionSlug ? `${collectionSlug.replace(/-/g, ' ')}` : 'Collection';
+      },
+      section: (context?: MetadataContext) => {
+        const userSlug = context?.params?.slug as string | undefined;
+        return userSlug ? `by ${userSlug}` : 'Community Collection';
+      },
+    },
+    description: (context?: MetadataContext) => {
+      const slug = context?.params?.slug as string | undefined;
+      return `Explore this curated collection ${slug ? `by ${slug}` : ''} of Claude configurations and tools.`;
+    },
+    keywords: ['claude collection', 'curated configurations', 'community collection'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary_large_image' as const,
+    },
+    structuredData: {
+      type: 'CollectionPage' as const,
+      breadcrumbs: true,
+      dateModified: true,
+      author: true,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: true,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  /**
+   * Account Pages - Tier 3 (Private/Authenticated)
+   * User dashboard and account management pages
+   * All account pages have noindex/nofollow for privacy
+   */
+  '/account': {
+    title: {
+      tier: 'section' as const,
+      title: 'Account Dashboard - Manage Your Claude Pro Directory Account',
+    },
+    description:
+      'Manage your Claude Pro Directory account, view activity, bookmarks, submissions, and settings. Track your reputation score and community contributions.',
+    keywords: ['account dashboard', 'user profile', 'claude directory account'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    structuredData: {
+      type: 'WebPage' as const,
+      breadcrumbs: false,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/account/activity': {
+    title: { tier: 'section' as const, title: 'My Activity - Contributions & Engagement History' },
+    description:
+      'View your contribution history on Claude Pro Directory including submissions, comments, and community engagement. Track badges earned and reputation milestones achieved.',
+    keywords: ['user activity', 'contribution history', 'engagement tracking'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    structuredData: {
+      type: 'ProfilePage' as const,
+      breadcrumbs: true,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/account/bookmarks': {
+    title: {
+      tier: 'section' as const,
+      title: 'My Bookmarks - Saved Claude Configurations & Resources',
+    },
+    description:
+      'Browse your saved bookmarks of Claude AI agents, MCP servers, rules, commands, and hooks. Organize your favorite configurations and tools for quick access.',
+    keywords: ['bookmarks', 'saved items', 'favorites', 'claude configurations'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    structuredData: {
+      type: 'CollectionPage' as const,
+      breadcrumbs: true,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/account/library': {
+    title: {
+      tier: 'section' as const,
+      title: 'My Library - Personal Collection Management Dashboard',
+    },
+    description:
+      'Manage your personal library of Claude configurations including custom agents, MCP servers, and workflows. Create, edit, and organize your private collection.',
+    keywords: ['library', 'collection management', 'custom configurations'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    structuredData: {
+      type: 'CollectionPage' as const,
+      breadcrumbs: true,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/account/library/new': {
+    title: { tier: 'section' as const, title: 'Create Library Item - Add Custom Configuration' },
+    description:
+      'Create a new library item for your personal collection. Add custom Claude configurations, agents, MCP servers, rules, or workflows to your private library.',
+    keywords: ['create configuration', 'add library item', 'custom agent'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    structuredData: {
+      type: 'WebPage' as const,
+      breadcrumbs: true,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/account/settings': {
+    title: {
+      tier: 'section' as const,
+      title: 'Account Settings - Profile & Preferences Configuration',
+    },
+    description:
+      'Configure your Claude Pro Directory account settings including profile information, email preferences, notification settings, and privacy options.',
+    keywords: ['account settings', 'user preferences', 'profile configuration'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    structuredData: {
+      type: 'ProfilePage' as const,
+      breadcrumbs: true,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/account/submissions': {
+    title: {
+      tier: 'section' as const,
+      title: 'My Submissions - Published Configurations & Pending Reviews',
+    },
+    description:
+      'View all your submitted Claude configurations including published agents, MCP servers, rules, and commands. Track submission status and manage published content.',
+    keywords: ['user submissions', 'published configurations', 'content management'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    structuredData: {
+      type: 'CollectionPage' as const,
+      breadcrumbs: true,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/account/jobs': {
+    title: {
+      tier: 'section' as const,
+      title: 'Job Listings Management - Post & Track AI Developer Opportunities',
+    },
+    description:
+      'Manage your job postings on Claude Pro Directory. Create, edit, and track applications for AI developer positions, Claude integration roles, and technical opportunities.',
+    keywords: ['job management', 'job postings', 'AI developer jobs', 'recruitment'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    structuredData: {
+      type: 'CollectionPage' as const,
+      breadcrumbs: true,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/account/jobs/new': {
+    title: {
+      tier: 'section' as const,
+      title: 'Post New Job - Create AI Developer Position Listing',
+    },
+    description:
+      'Create a new job posting on Claude Pro Directory. Post AI developer positions, Claude integration roles, and technical opportunities to reach qualified candidates.',
+    keywords: ['post job', 'create job listing', 'AI recruitment', 'developer hiring'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    structuredData: {
+      type: 'WebPage' as const,
+      breadcrumbs: true,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/account/jobs/:id/edit': {
+    title: {
+      tier: 'content' as const,
+      title: 'Edit Job Posting',
+      section: 'Jobs Management',
+    },
+    description:
+      'Edit your job posting details including title, description, requirements, salary range, and application settings. Update job listing to attract qualified candidates.',
+    keywords: ['edit job', 'update job posting', 'modify job listing'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    structuredData: {
+      type: 'WebPage' as const,
+      breadcrumbs: true,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/account/jobs/:id/analytics': {
+    title: {
+      tier: 'content' as const,
+      title: 'Job Analytics Dashboard',
+      section: 'Jobs Management',
+    },
+    description:
+      'View detailed analytics for your job posting including views, applications, engagement metrics, and candidate demographics. Track recruiting performance and optimize listings.',
+    keywords: ['job analytics', 'recruiting metrics', 'application tracking', 'hiring insights'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    structuredData: {
+      type: 'WebPage' as const,
+      breadcrumbs: true,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/account/sponsorships': {
+    title: {
+      tier: 'section' as const,
+      title: 'Sponsorships Management - Track & Manage Directory Sponsorships',
+    },
+    description:
+      'Manage your Claude Pro Directory sponsorships. View active campaigns, track performance metrics, manage billing, and access detailed analytics for sponsored content.',
+    keywords: ['sponsorships', 'advertising management', 'campaign tracking', 'sponsored content'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    structuredData: {
+      type: 'CollectionPage' as const,
+      breadcrumbs: true,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/account/sponsorships/:id/analytics': {
+    title: {
+      tier: 'content' as const,
+      title: 'Sponsorship Analytics Dashboard',
+      section: 'Sponsorships Management',
+    },
+    description:
+      'View detailed analytics for your sponsorship campaign including impressions, clicks, conversions, engagement metrics, and ROI. Optimize sponsored content performance.',
+    keywords: [
+      'sponsorship analytics',
+      'campaign metrics',
+      'advertising performance',
+      'ROI tracking',
+    ],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    structuredData: {
+      type: 'WebPage' as const,
+      breadcrumbs: true,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  /**
+   * Discovery & Utility Pages - Tier 2 (Public)
+   * Personalized feeds and utility pages
+   */
+  '/for-you': {
+    title: {
+      tier: 'section' as const,
+      title: 'For You - Personalized Claude AI Configuration Recommendations',
+    },
+    description:
+      'Discover personalized Claude AI configurations recommended just for you based on your interests and activity. Get tailored suggestions for agents, MCP servers, rules, and workflows.',
+    keywords: [
+      'personalized recommendations',
+      'for you feed',
+      'claude discovery',
+      'ai suggestions',
+    ],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary_large_image' as const,
+    },
+    structuredData: {
+      type: 'WebPage' as const,
+      breadcrumbs: true,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: true,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/board': {
+    title: {
+      tier: 'section' as const,
+      title: 'Community Board - Claude AI Discussions & Feature Requests',
+    },
+    description:
+      'Browse community discussions, feature requests, and announcements for Claude Pro Directory. Share ideas, report issues, and connect with other Claude AI power users.',
+    keywords: ['community board', 'feature requests', 'discussions', 'claude community'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary_large_image' as const,
+    },
+    structuredData: {
+      type: 'CollectionPage' as const,
+      breadcrumbs: true,
+      dateModified: true,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: true,
+      recencySignal: true,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/board/new': {
+    title: {
+      tier: 'section' as const,
+      title: 'New Discussion - Create Community Post for Claude Directory',
+    },
+    description:
+      'Start a new discussion on Claude Pro Directory community board. Share feature requests, ask questions, or announce new Claude configurations and tools.',
+    keywords: ['new discussion', 'create post', 'community feedback', 'feature request'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    robots: {
+      index: false,
+      follow: true,
+    },
+    structuredData: {
+      type: 'WebPage' as const,
+      breadcrumbs: true,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/login': {
+    title: { tier: 'section' as const, title: 'Login - Access Your Claude Pro Directory Account' },
+    description:
+      'Sign in to Claude Pro Directory to access your personalized feed, manage bookmarks, track submissions, and connect with the Claude AI community.',
+    keywords: ['login', 'sign in', 'authentication', 'claude account'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    robots: {
+      index: false,
+      follow: true,
+    },
+    structuredData: {
+      type: 'WebPage' as const,
+      breadcrumbs: false,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/auth/auth-code-error': {
+    title: { tier: 'section' as const, title: 'Authentication Error - Unable to Sign In' },
+    description:
+      'Authentication error occurred while signing in to Claude Pro Directory. Please try again or contact support if the issue persists.',
+    keywords: ['auth error', 'sign in error', 'authentication failed'],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary' as const,
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    structuredData: {
+      type: 'WebPage' as const,
+      breadcrumbs: false,
+      dateModified: false,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: false,
+      recencySignal: false,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
+
+  '/companies': {
+    title: {
+      tier: 'section' as const,
+      title: 'Companies Using Claude - Discover Organizations Building with Claude AI',
+    },
+    description:
+      'Explore companies and organizations building with Claude AI and Cursor IDE. Discover industry leaders, startups, and enterprises leveraging Claude for AI-powered development and automation.',
+    keywords: [
+      'claude companies',
+      'companies using claude',
+      'claude ai organizations',
+      'cursor companies',
+      'ai development companies',
+    ],
+    openGraph: {
+      type: 'website' as const,
+    },
+    twitter: {
+      card: 'summary_large_image' as const,
+    },
+    structuredData: {
+      type: 'WebPage' as const,
+      breadcrumbs: true,
+      dateModified: true,
+      author: false,
+    },
+    aiOptimization: {
+      includeYear: true,
+      recencySignal: true,
+      useArticleSchema: false,
+      generateFAQSchema: false,
+      wikipediaStyle: false,
+    },
+  },
 } as const satisfies Record<string, RouteMetadata>;
 
 /**
@@ -1394,4 +2212,61 @@ export function optimizeDescriptionForAI(
   }
 
   return description;
+}
+
+// ============================================
+// AI OPTIMIZATION ORCHESTRATOR
+// ============================================
+
+/**
+ * Apply AI optimization to metadata
+ * Central orchestrator for all AI search engine optimizations
+ *
+ * @param metadata - Metadata object to optimize
+ * @param options - AI optimization configuration
+ * @param context - Optional context (item, category, etc.)
+ * @returns Optimized metadata
+ */
+export interface MetadataToOptimize {
+  title?: string;
+  description?: string;
+  keywords?: string[] | undefined; // Compatible with exactOptionalPropertyTypes: true
+  lastModified?: string;
+  [key: string]: unknown;
+}
+
+export function applyAIOptimization(
+  metadata: MetadataToOptimize,
+  options: AIOptimization,
+  context?: MetadataContext
+): MetadataToOptimize {
+  const optimized = { ...metadata };
+
+  // 1. Optimize description with year
+  if (options.includeYear && optimized.description) {
+    optimized.description = optimizeDescriptionForAI(optimized.description, {
+      includeYear: true,
+      targetLength: 155,
+      addCTA: false,
+    });
+  }
+
+  // 2. Optimize keywords with year variants
+  if (optimized.keywords && Array.isArray(optimized.keywords)) {
+    optimized.keywords = optimizeKeywordsForAI(optimized.keywords, {
+      addYear: options.includeYear,
+      addAITools: true,
+      maxKeywords: 10,
+    });
+  }
+
+  // 3. Add recency signal if content is fresh
+  if (options.recencySignal && context?.item?.lastModified) {
+    const recencySignal = getRecencySignal(context.item.lastModified);
+    if (recencySignal) {
+      optimized.lastModified = recencySignal;
+    }
+  }
+
+  return optimized;
 }

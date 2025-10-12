@@ -26,6 +26,12 @@
  * - buildCreativeWork() - CreativeWork schema for templates
  * - buildWebPageSpeakable() - WebPage with speakable for voice search
  * - buildFAQPage() - FAQPage schema for troubleshooting
+ * - buildReviewSchema() - Review schema for user reviews (Phase 3)
+ * - buildAggregateRatingSchema() - AggregateRating schema for rating snippets (Phase 3)
+ * - buildVideoObjectSchema() - VideoObject schema for tutorial videos (Phase 3)
+ * - buildCourseSchema() - Course schema for educational guides (Phase 3)
+ * - buildJobPostingSchema() - JobPosting schema for job listings (Phase 3)
+ * - buildCollectionPageSchema() - CollectionPage schema for collections (Phase 3)
  *
  * @see src/lib/structured-data/schema-builder.ts
  * @see https://schema.org/ - Schema.org documentation
@@ -40,11 +46,23 @@ import {
   buildCreativeWork,
   buildWebPageSpeakable,
   buildFAQPage,
+  buildReviewSchema,
+  buildAggregateRatingSchema,
+  buildVideoObjectSchema,
+  buildCourseSchema,
+  buildJobPostingSchema,
+  buildCollectionPageSchema,
   type SoftwareApplicationConfig,
   type SoftwareSourceCodeConfig,
   type HowToConfig,
   type CreativeWorkConfig,
   type FAQItem,
+  type ReviewConfig,
+  type AggregateRatingConfig,
+  type VideoObjectConfig,
+  type CourseConfig,
+  type JobPostingConfig,
+  type CollectionPageConfig,
 } from '@/src/lib/structured-data/schema-builder';
 import { APP_CONFIG } from '@/src/lib/constants';
 
@@ -836,6 +854,457 @@ describe('buildFAQPage()', () => {
 
       expect(schema.mainEntity[0].name).toContain('"Cannot find module"');
       expect(schema.mainEntity[0].acceptedAnswer.text).toContain('&&');
+    });
+  });
+});
+
+describe('buildReviewSchema()', () => {
+  const baseConfig: ReviewConfig = {
+    slug: 'code-reviewer',
+    category: 'agents',
+    itemName: 'Code Reviewer Agent',
+    reviewBody: 'Excellent agent for automated code review. Saves hours of manual review time.',
+    rating: 5,
+    author: 'John Developer',
+    datePublished: '2025-01-15',
+  };
+
+  describe('Required Properties', () => {
+    it('includes all required Review properties', () => {
+      const schema = buildReviewSchema(baseConfig);
+
+      expect(schema['@context']).toBe(SCHEMA_CONTEXT);
+      expect(schema['@type']).toBe('Review');
+      expect(schema['@id']).toBe(`${BASE_URL}/agents/code-reviewer#review`);
+      expect(schema.reviewBody).toBeDefined();
+      expect(schema.reviewRating).toBeDefined();
+      expect(schema.author).toBeDefined();
+    });
+
+    it('includes itemReviewed as SoftwareApplication', () => {
+      const schema = buildReviewSchema(baseConfig);
+
+      expect(schema.itemReviewed['@type']).toBe('SoftwareApplication');
+      expect(schema.itemReviewed.name).toBe('Code Reviewer Agent');
+    });
+  });
+
+  describe('Rating', () => {
+    it('creates Rating object with correct structure', () => {
+      const schema = buildReviewSchema(baseConfig);
+
+      expect(schema.reviewRating['@type']).toBe('Rating');
+      expect(schema.reviewRating.ratingValue).toBe(5);
+      expect(schema.reviewRating.bestRating).toBe(5);
+      expect(schema.reviewRating.worstRating).toBe(1);
+    });
+
+    it('handles different rating values', () => {
+      const config = { ...baseConfig, rating: 3 };
+      const schema = buildReviewSchema(config);
+
+      expect(schema.reviewRating.ratingValue).toBe(3);
+    });
+  });
+
+  describe('Author', () => {
+    it('creates Person author', () => {
+      const schema = buildReviewSchema(baseConfig);
+
+      expect(schema.author['@type']).toBe('Person');
+      expect(schema.author.name).toBe('John Developer');
+    });
+  });
+
+  describe('Date Published', () => {
+    it('uses provided datePublished', () => {
+      const schema = buildReviewSchema(baseConfig);
+
+      expect(schema.datePublished).toBe('2025-01-15');
+    });
+
+    it('generates current date when not provided', () => {
+      const config = { ...baseConfig, datePublished: undefined };
+      const schema = buildReviewSchema(config);
+
+      expect(schema.datePublished).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    });
+  });
+});
+
+describe('buildAggregateRatingSchema()', () => {
+  const baseConfig: AggregateRatingConfig = {
+    slug: 'code-reviewer',
+    category: 'agents',
+    itemName: 'Code Reviewer Agent',
+    ratingValue: 4.5,
+    reviewCount: 128,
+  };
+
+  describe('Required Properties', () => {
+    it('includes all required SoftwareApplication with AggregateRating properties', () => {
+      const schema = buildAggregateRatingSchema(baseConfig);
+
+      expect(schema['@context']).toBe(SCHEMA_CONTEXT);
+      expect(schema['@type']).toBe('SoftwareApplication');
+      expect(schema['@id']).toBe(`${BASE_URL}/agents/code-reviewer#aggregaterating`);
+      expect(schema.name).toBe('Code Reviewer Agent');
+      expect(schema.aggregateRating).toBeDefined();
+    });
+  });
+
+  describe('Aggregate Rating', () => {
+    it('creates AggregateRating object with correct structure', () => {
+      const schema = buildAggregateRatingSchema(baseConfig);
+
+      expect(schema.aggregateRating['@type']).toBe('AggregateRating');
+      expect(schema.aggregateRating.ratingValue).toBe(4.5);
+      expect(schema.aggregateRating.reviewCount).toBe(128);
+    });
+
+    it('uses default bestRating and worstRating', () => {
+      const schema = buildAggregateRatingSchema(baseConfig);
+
+      expect(schema.aggregateRating.bestRating).toBe(5);
+      expect(schema.aggregateRating.worstRating).toBe(1);
+    });
+
+    it('uses custom bestRating and worstRating when provided', () => {
+      const config = { ...baseConfig, bestRating: 10, worstRating: 2 };
+      const schema = buildAggregateRatingSchema(config);
+
+      expect(schema.aggregateRating.bestRating).toBe(10);
+      expect(schema.aggregateRating.worstRating).toBe(2);
+    });
+  });
+});
+
+describe('buildVideoObjectSchema()', () => {
+  const baseConfig: VideoObjectConfig = {
+    slug: 'setup-tutorial',
+    category: 'guides',
+    name: 'Claude Code Setup Tutorial',
+    description: 'Complete guide to setting up Claude Code for development',
+    thumbnailUrl: 'https://example.com/thumbnail.jpg',
+    uploadDate: '2025-01-15',
+    duration: 'PT10M30S',
+    contentUrl: 'https://example.com/video.mp4',
+    embedUrl: 'https://example.com/embed/video',
+  };
+
+  describe('Required Properties', () => {
+    it('includes all required VideoObject properties', () => {
+      const schema = buildVideoObjectSchema(baseConfig);
+
+      expect(schema['@context']).toBe(SCHEMA_CONTEXT);
+      expect(schema['@type']).toBe('VideoObject');
+      expect(schema['@id']).toBe(`${BASE_URL}/guides/setup-tutorial#video`);
+      expect(schema.name).toBe('Claude Code Setup Tutorial');
+      expect(schema.description).toBeDefined();
+      expect(schema.thumbnailUrl).toBe('https://example.com/thumbnail.jpg');
+      expect(schema.uploadDate).toBe('2025-01-15');
+    });
+  });
+
+  describe('Optional Properties', () => {
+    it('includes duration when provided', () => {
+      const schema = buildVideoObjectSchema(baseConfig);
+
+      expect(schema.duration).toBe('PT10M30S');
+    });
+
+    it('includes contentUrl when provided', () => {
+      const schema = buildVideoObjectSchema(baseConfig);
+
+      expect(schema.contentUrl).toBe('https://example.com/video.mp4');
+    });
+
+    it('includes embedUrl when provided', () => {
+      const schema = buildVideoObjectSchema(baseConfig);
+
+      expect(schema.embedUrl).toBe('https://example.com/embed/video');
+    });
+
+    it('omits optional properties when not provided', () => {
+      const config = {
+        ...baseConfig,
+        duration: undefined,
+        contentUrl: undefined,
+        embedUrl: undefined,
+      };
+      const schema = buildVideoObjectSchema(config);
+
+      expect(schema).not.toHaveProperty('duration');
+      expect(schema).not.toHaveProperty('contentUrl');
+      expect(schema).not.toHaveProperty('embedUrl');
+    });
+  });
+});
+
+describe('buildCourseSchema()', () => {
+  const baseConfig: CourseConfig = {
+    slug: 'mcp-mastery',
+    category: 'guides',
+    name: 'MCP Server Development Mastery',
+    description: 'Complete course on building production-ready MCP servers',
+    provider: 'Claude Pro Directory',
+    educationalLevel: 'Intermediate',
+    timeRequired: 'PT8H',
+    courseCode: 'MCP-101',
+  };
+
+  describe('Required Properties', () => {
+    it('includes all required Course properties', () => {
+      const schema = buildCourseSchema(baseConfig);
+
+      expect(schema['@context']).toBe(SCHEMA_CONTEXT);
+      expect(schema['@type']).toBe('Course');
+      expect(schema['@id']).toBe(`${BASE_URL}/guides/mcp-mastery#course`);
+      expect(schema.name).toBe('MCP Server Development Mastery');
+      expect(schema.description).toBeDefined();
+      expect(schema.provider).toBeDefined();
+    });
+
+    it('creates Organization provider', () => {
+      const schema = buildCourseSchema(baseConfig);
+
+      expect(schema.provider['@type']).toBe('Organization');
+      expect(schema.provider.name).toBe('Claude Pro Directory');
+    });
+  });
+
+  describe('Educational Level', () => {
+    it('uses provided educational level', () => {
+      const schema = buildCourseSchema(baseConfig);
+
+      expect(schema.educationalLevel).toBe('Intermediate');
+    });
+
+    it('defaults to Professional when not provided', () => {
+      const config = { ...baseConfig, educationalLevel: undefined };
+      const schema = buildCourseSchema(config);
+
+      expect(schema.educationalLevel).toBe('Professional');
+    });
+  });
+
+  describe('Course Instance', () => {
+    it('includes hasCourseInstance with online mode', () => {
+      const schema = buildCourseSchema(baseConfig);
+
+      expect(schema.hasCourseInstance['@type']).toBe('CourseInstance');
+      expect(schema.hasCourseInstance.courseMode).toBe('online');
+      expect(schema.hasCourseInstance.courseWorkload).toBe('PT8H');
+    });
+  });
+
+  describe('Optional Properties', () => {
+    it('includes timeRequired when provided', () => {
+      const schema = buildCourseSchema(baseConfig);
+
+      expect(schema.timeRequired).toBe('PT8H');
+    });
+
+    it('includes courseCode when provided', () => {
+      const schema = buildCourseSchema(baseConfig);
+
+      expect(schema.courseCode).toBe('MCP-101');
+    });
+  });
+});
+
+describe('buildJobPostingSchema()', () => {
+  const baseConfig: JobPostingConfig = {
+    slug: 'senior-ai-engineer',
+    title: 'Senior AI Engineer - MCP Development',
+    description: 'Build next-generation AI development tools using MCP protocol',
+    hiringOrganization: 'Claude Pro Directory',
+    datePosted: '2025-01-15',
+    validThrough: '2025-03-15',
+    employmentType: 'FULL_TIME',
+    jobLocation: {
+      city: 'San Francisco',
+      state: 'CA',
+      country: 'USA',
+      remote: false,
+    },
+    baseSalary: {
+      currency: 'USD',
+      value: 180000,
+      unitText: 'YEAR',
+    },
+  };
+
+  describe('Required Properties', () => {
+    it('includes all required JobPosting properties', () => {
+      const schema = buildJobPostingSchema(baseConfig);
+
+      expect(schema['@context']).toBe(SCHEMA_CONTEXT);
+      expect(schema['@type']).toBe('JobPosting');
+      expect(schema['@id']).toBe(`${BASE_URL}/jobs/senior-ai-engineer#jobposting`);
+      expect(schema.title).toBe('Senior AI Engineer - MCP Development');
+      expect(schema.description).toBeDefined();
+      expect(schema.datePosted).toBe('2025-01-15');
+      expect(schema.hiringOrganization).toBeDefined();
+    });
+
+    it('creates Organization for hiringOrganization', () => {
+      const schema = buildJobPostingSchema(baseConfig);
+
+      expect(schema.hiringOrganization['@type']).toBe('Organization');
+      expect(schema.hiringOrganization.name).toBe('Claude Pro Directory');
+    });
+  });
+
+  describe('Optional Properties', () => {
+    it('includes validThrough when provided', () => {
+      const schema = buildJobPostingSchema(baseConfig);
+
+      expect(schema.validThrough).toBe('2025-03-15');
+    });
+
+    it('includes employmentType when provided', () => {
+      const schema = buildJobPostingSchema(baseConfig);
+
+      expect(schema.employmentType).toBe('FULL_TIME');
+    });
+  });
+
+  describe('Job Location', () => {
+    it('creates Place with PostalAddress for on-site jobs', () => {
+      const schema = buildJobPostingSchema(baseConfig);
+
+      expect(schema.jobLocation['@type']).toBe('Place');
+      expect(schema.jobLocation.address['@type']).toBe('PostalAddress');
+      expect(schema.jobLocation.address.addressLocality).toBe('San Francisco');
+      expect(schema.jobLocation.address.addressRegion).toBe('CA');
+      expect(schema.jobLocation.address.addressCountry).toBe('USA');
+    });
+
+    it('creates remote Place for remote jobs', () => {
+      const config = {
+        ...baseConfig,
+        jobLocation: { remote: true },
+      };
+      const schema = buildJobPostingSchema(config);
+
+      expect(schema.jobLocation['@type']).toBe('Place');
+      expect(schema.jobLocation.address.addressCountry).toBe('Remote');
+    });
+  });
+
+  describe('Base Salary', () => {
+    it('includes baseSalary as MonetaryAmount', () => {
+      const schema = buildJobPostingSchema(baseConfig);
+
+      expect(schema.baseSalary['@type']).toBe('MonetaryAmount');
+      expect(schema.baseSalary.currency).toBe('USD');
+      expect(schema.baseSalary.value['@type']).toBe('QuantitativeValue');
+      expect(schema.baseSalary.value.value).toBe(180000);
+      expect(schema.baseSalary.value.unitText).toBe('YEAR');
+    });
+  });
+});
+
+describe('buildCollectionPageSchema()', () => {
+  const baseConfig: CollectionPageConfig = {
+    slug: 'top-mcp-servers',
+    name: 'Top MCP Servers 2025',
+    description: 'Curated collection of the best MCP servers for Claude development',
+    items: [
+      {
+        name: 'Filesystem Server',
+        url: '/mcp/filesystem-server',
+        description: 'Access local filesystem with MCP',
+      },
+      {
+        name: 'Database Server',
+        url: '/mcp/database-server',
+        description: 'Query databases via MCP',
+      },
+      {
+        name: 'External API',
+        url: 'https://example.com/api-server',
+        description: 'Call external APIs',
+      },
+    ],
+    collectionSize: 3,
+  };
+
+  describe('Required Properties', () => {
+    it('includes all required CollectionPage properties', () => {
+      const schema = buildCollectionPageSchema(baseConfig);
+
+      expect(schema['@context']).toBe(SCHEMA_CONTEXT);
+      expect(schema['@type']).toBe('CollectionPage');
+      expect(schema['@id']).toBe(`${BASE_URL}/collections/top-mcp-servers#collection`);
+      expect(schema.name).toBe('Top MCP Servers 2025');
+      expect(schema.description).toBeDefined();
+      expect(schema.mainEntity).toBeDefined();
+    });
+  });
+
+  describe('Item List', () => {
+    it('creates ItemList as mainEntity', () => {
+      const schema = buildCollectionPageSchema(baseConfig);
+
+      expect(schema.mainEntity['@type']).toBe('ItemList');
+      expect(schema.mainEntity.numberOfItems).toBe(3);
+      expect(schema.mainEntity.itemListElement).toHaveLength(3);
+    });
+
+    it('uses provided collectionSize', () => {
+      const schema = buildCollectionPageSchema(baseConfig);
+
+      expect(schema.mainEntity.numberOfItems).toBe(3);
+    });
+
+    it('defaults to items.length when collectionSize not provided', () => {
+      const config = { ...baseConfig, collectionSize: undefined };
+      const schema = buildCollectionPageSchema(config);
+
+      expect(schema.mainEntity.numberOfItems).toBe(3);
+    });
+  });
+
+  describe('List Items', () => {
+    it('creates ListItem for each item with correct structure', () => {
+      const schema = buildCollectionPageSchema(baseConfig);
+
+      const firstItem = schema.mainEntity.itemListElement[0];
+      expect(firstItem['@type']).toBe('ListItem');
+      expect(firstItem.position).toBe(1);
+      expect(firstItem.item['@type']).toBe('Thing');
+      expect(firstItem.item.name).toBe('Filesystem Server');
+    });
+
+    it('converts relative URLs to absolute URLs', () => {
+      const schema = buildCollectionPageSchema(baseConfig);
+
+      const firstItem = schema.mainEntity.itemListElement[0];
+      expect(firstItem.item.url).toBe(`${BASE_URL}/mcp/filesystem-server`);
+    });
+
+    it('preserves absolute URLs', () => {
+      const schema = buildCollectionPageSchema(baseConfig);
+
+      const thirdItem = schema.mainEntity.itemListElement[2];
+      expect(thirdItem.item.url).toBe('https://example.com/api-server');
+    });
+
+    it('includes description when provided', () => {
+      const schema = buildCollectionPageSchema(baseConfig);
+
+      const firstItem = schema.mainEntity.itemListElement[0];
+      expect(firstItem.item.description).toBe('Access local filesystem with MCP');
+    });
+
+    it('uses 1-based position indexing', () => {
+      const schema = buildCollectionPageSchema(baseConfig);
+
+      expect(schema.mainEntity.itemListElement[0].position).toBe(1);
+      expect(schema.mainEntity.itemListElement[1].position).toBe(2);
+      expect(schema.mainEntity.itemListElement[2].position).toBe(3);
     });
   });
 });

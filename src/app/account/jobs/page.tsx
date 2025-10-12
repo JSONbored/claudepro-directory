@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { JobActions } from '@/src/components/jobs/job-actions';
 import { Badge } from '@/src/components/ui/badge';
@@ -13,14 +12,11 @@ import {
 import { getUserJobs } from '@/src/lib/actions/business.actions';
 import { ROUTES } from '@/src/lib/constants';
 import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
-export const metadata: Metadata = {
-  title: 'My Jobs - Claude Pro Directory',
-  description: 'Manage your job listings',
-  robots: { index: false, follow: false },
-};
+export const metadata = await generatePageMetadata('/account/jobs');
 
 export default async function MyJobsPage() {
   const jobs = await getUserJobs();

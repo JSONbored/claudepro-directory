@@ -13,11 +13,263 @@
  */
 
 import type { Metadata } from 'next';
+import { z } from 'zod';
+import { type ValidatedMetadata, validatedMetadataSchema } from '@/src/lib/config/seo-config';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { logger } from '@/src/lib/logger';
 import { generateOGImageUrl, OG_IMAGE_DIMENSIONS } from '@/src/lib/og/url-generator';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import type { MetadataContext, RouteMetadata } from '@/src/lib/seo/metadata-registry';
-import { METADATA_DEFAULTS, METADATA_REGISTRY } from '@/src/lib/seo/metadata-registry';
+import {
+  applyAIOptimization,
+  METADATA_DEFAULTS,
+  METADATA_REGISTRY,
+} from '@/src/lib/seo/metadata-registry';
+import { deriveMetadataFromSchema } from '@/src/lib/seo/schema-metadata-adapter';
 import { buildPageTitle } from '@/src/lib/seo/title-builder';
+
+// ============================================
+// VALIDATION HELPERS
+// ============================================
+
+/**
+ * Validate metadata against SEO quality rules
+ * @throws ZodError if validation fails in development
+ * @returns Validated metadata or fallback in production
+ */
+function validateMetadata(
+  rawMetadata: Partial<ValidatedMetadata>,
+  route: string
+): ValidatedMetadata | null {
+  try {
+    const validated = validatedMetadataSchema.parse(rawMetadata);
+
+    // Log validation success in development
+    if (process.env.NODE_ENV === 'development') {
+      logger.info(`✅ Metadata validated for route: ${route}`, {
+        titleLength: validated.title.length,
+        descLength: validated.description.length,
+        keywordCount: validated.keywords?.length || 0,
+      });
+    }
+
+    return validated;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      // Format validation errors for logging
+      const errorSummary = error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
+
+      logger.error(
+        `❌ METADATA VALIDATION FAILED for route: ${route}`,
+        `Validation errors: ${errorSummary}`,
+        { route }
+      );
+
+      // In development: throw to catch issues immediately
+      if (process.env.NODE_ENV === 'development') {
+        throw new Error(
+          `Metadata validation failed for ${route}:\n${error.issues.map((e) => `- ${e.path.join('.')}: ${e.message}`).join('\n')}`
+        );
+      }
+
+      // In production: return null to use fallback
+      return null;
+    }
+    throw error;
+  }
+}
+
+/**
+ * Generate fallback metadata for production safety
+ * Used when validation fails to ensure pages always have metadata
+ */
+function generateFallbackMetadata(route: string): Metadata {
+  const siteName = METADATA_DEFAULTS.siteName;
+  const fallbackTitle = `${siteName} - Page`;
+  const fallbackDescription = `Browse content on ${siteName}. Discover AI agents, MCP servers, commands, rules, hooks, and more for Claude AI.`;
+
+  logger.warn(`⚠️ Using fallback metadata for route: ${route}`);
+
+  return {
+    title: fallbackTitle,
+    description: fallbackDescription,
+    openGraph: {
+      title: fallbackTitle,
+      description: fallbackDescription,
+      type: 'website',
+      siteName,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: fallbackTitle,
+      description: fallbackDescription,
+    },
+  };
+}
+
+/**
+ * Convert ValidatedMetadata to Next.js Metadata format
+ * Adds author, article schema, and other enhancements based on config
+ */
+function convertToNextMetadata(
+  validated: ValidatedMetadata,
+  route: string,
+  config: RouteMetadata,
+  context?: MetadataContext
+): Metadata {
+  const metadata: Metadata = {
+    title: validated.title,
+    description: validated.description,
+    keywords: validated.keywords?.join(', '),
+    alternates: {
+      canonical: validated.canonicalUrl,
+      types:
+        route === '/:category/:slug' && context?.params?.category && context?.params?.slug
+          ? {
+              'text/plain': `/${context.params.category}/${context.params.slug}/llms.txt`,
+            }
+          : undefined,
+    },
+    openGraph: {
+      title: validated.openGraph.title,
+      description: validated.openGraph.description,
+      type: validated.openGraph.type,
+      url: validated.canonicalUrl,
+      siteName: METADATA_DEFAULTS.siteName,
+      images: [
+        {
+          url: validated.openGraph.image.url,
+          width: validated.openGraph.image.width,
+          height: validated.openGraph.image.height,
+          alt: validated.openGraph.image.alt,
+          type: 'image/png',
+        },
+      ],
+    },
+    twitter: validated.twitter
+      ? {
+          card: validated.twitter.card,
+          title: validated.twitter.title,
+          description: validated.twitter.description,
+          images: [
+            {
+              url: validated.openGraph.image.url,
+              width: validated.openGraph.image.width,
+              height: validated.openGraph.image.height,
+              alt: validated.twitter.title,
+            },
+          ],
+        }
+      : undefined,
+    robots: validated.robots
+      ? {
+          index: validated.robots.index,
+          follow: validated.robots.follow,
+          googleBot: {
+            index: validated.robots.index,
+            follow: validated.robots.follow,
+            'max-video-preview': -1,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+          },
+        }
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            'max-video-preview': -1,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+          },
+        },
+  };
+
+  // Add author if specified and available in context
+  if (config.structuredData.author && context?.item?.author) {
+    metadata.authors = [{ name: context.item.author }];
+  }
+
+  // Add published/modified dates for Article schema
+  if (config.aiOptimization?.useArticleSchema && context?.item) {
+    const ogMetadata = metadata.openGraph as Record<string, unknown>;
+    ogMetadata.type = 'article';
+
+    if (context.item.dateAdded) {
+      ogMetadata.publishedTime = context.item.dateAdded;
+    }
+
+    if (context.item.lastModified) {
+      ogMetadata.modifiedTime = context.item.lastModified;
+    }
+
+    if (context.item.author) {
+      ogMetadata.authors = [context.item.author];
+    }
+  }
+
+  return metadata;
+}
+
+// ============================================
+// SCHEMA DERIVATION HELPERS
+// ============================================
+
+/**
+ * Get content schema for a given route
+ * Extracts category and item from context to derive metadata
+ */
+function getContentSchemaForRoute(
+  route: string,
+  context?: MetadataContext
+): { category: ContentCategory; schema: Record<string, unknown> } | null {
+  // Extract category from route pattern
+  if (route === '/:category/:slug' && context?.params?.category && context?.item) {
+    const category = context.params.category as ContentCategory;
+    return {
+      category,
+      schema: context.item as Record<string, unknown>,
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Generate smart default metadata for unknown routes
+ * Provides SEO-compliant fallback when schema + registry both miss
+ */
+function generateSmartDefaultMetadata(route: string): Metadata {
+  const siteName = METADATA_DEFAULTS.siteName;
+
+  // Parse route to generate sensible title
+  const pathParts = route.split('/').filter(Boolean);
+  const pageName = pathParts[pathParts.length - 1]?.replace(/-/g, ' ').replace(/:/g, '') || 'Page';
+  const title = `${pageName.charAt(0).toUpperCase() + pageName.slice(1)} - ${siteName}`;
+
+  const description = `Explore ${pageName} on ${siteName}. Discover AI agents, MCP servers, commands, rules, hooks, statuslines, collections, and guides for Claude AI development.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      siteName,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
+  };
+}
+
+// ============================================
+// MAIN METADATA GENERATOR
+// ============================================
 
 /**
  * Generate Next.js Metadata from registry configuration
@@ -42,15 +294,25 @@ export async function generatePageMetadata(
   route: string,
   context?: MetadataContext
 ): Promise<Metadata> {
-  // Get metadata config from registry
+  // TIER 1: Try schema derivation (primary for content detail pages)
+  const schemaData = getContentSchemaForRoute(route, context);
+  if (schemaData) {
+    const derived = deriveMetadataFromSchema(schemaData.category, schemaData.schema);
+    if (derived) {
+      // Schema-derived content - bypass registry, use derived values
+      logger.info(`📊 Schema-derived metadata for ${route}`, {
+        category: schemaData.category,
+      });
+      // Continue to registry config to get OG/Twitter structure
+    }
+  }
+
+  // TIER 2: Get metadata config from registry
   const config = METADATA_REGISTRY[route as keyof typeof METADATA_REGISTRY];
 
   if (!config) {
-    // Fallback for unknown routes
-    return {
-      title: METADATA_DEFAULTS.siteName,
-      description: `Page on ${METADATA_DEFAULTS.siteName}`,
-    };
+    // TIER 3: Smart defaults for unknown routes
+    return generateSmartDefaultMetadata(route);
   }
 
   // Build title
@@ -85,89 +347,55 @@ export async function generatePageMetadata(
   const twitterDescription = twitterConfig.description || description;
   const twitterCard = twitterConfig.card;
 
-  // Build metadata object with proper fallbacks
-  const metadata: Metadata = {
+  // Build raw metadata object for validation
+  const ogImageUrl = generateOGImageUrl(canonicalUrl);
+  const rawMetadata: Partial<ValidatedMetadata> = {
     title,
     description,
-    keywords: keywords?.join(', '),
-    alternates: {
-      canonical: canonicalUrl,
-      types:
-        route === '/:category/:slug' && context?.params?.category && context?.params?.slug
-          ? {
-              // Add llms.txt alternate link for content detail pages (AI-optimized plain text)
-              'text/plain': `/${context.params.category}/${context.params.slug}/llms.txt`,
-              // Note: Markdown export is available via server action, not as alternate link
-              // to avoid duplicate content penalties and maintain SEO best practices
-            }
-          : undefined,
-    },
+    ...(keywords !== undefined && { keywords }), // Only add if defined (exactOptionalPropertyTypes: true)
+    canonicalUrl,
     openGraph: {
       title: ogTitle,
       description: ogDescription,
       type: ogType,
-      url: canonicalUrl,
-      siteName: METADATA_DEFAULTS.siteName,
-      images: [
-        {
-          url: generateOGImageUrl(canonicalUrl),
-          width: OG_IMAGE_DIMENSIONS.width,
-          height: OG_IMAGE_DIMENSIONS.height,
-          alt: ogTitle,
-          type: 'image/png',
-        },
-      ],
+      image: {
+        url: ogImageUrl,
+        width: OG_IMAGE_DIMENSIONS.width,
+        height: OG_IMAGE_DIMENSIONS.height,
+        alt: ogTitle,
+      },
     },
     twitter: {
       card: twitterCard,
       title: twitterTitle,
       description: twitterDescription,
-      images: [
-        {
-          url: generateOGImageUrl(canonicalUrl),
-          width: OG_IMAGE_DIMENSIONS.width,
-          height: OG_IMAGE_DIMENSIONS.height,
-          alt: twitterTitle,
-        },
-      ],
     },
     robots: {
       index: true,
       follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
     },
   };
 
-  // Add author if specified and available in context
-  if (config.structuredData.author && context?.item?.author) {
-    metadata.authors = [{ name: context.item.author }];
+  // Validate metadata (throws in dev, returns null in prod on failure)
+  const validated = validateMetadata(rawMetadata, route);
+
+  // If validation failed in production, use fallback
+  if (!validated) {
+    return generateFallbackMetadata(route);
   }
 
-  // Add published/modified dates for Article schema
-  if (config.aiOptimization?.useArticleSchema && context?.item) {
-    const ogMetadata = metadata.openGraph as Record<string, unknown>;
-    ogMetadata.type = 'article';
-
-    if (context.item.dateAdded) {
-      ogMetadata.publishedTime = context.item.dateAdded;
-    }
-
-    if (context.item.lastModified) {
-      ogMetadata.modifiedTime = context.item.lastModified;
-    }
-
-    if (context.item.author) {
-      ogMetadata.authors = [context.item.author];
-    }
+  // Apply AI optimization if enabled
+  let optimizedMetadata = validated;
+  if (config.aiOptimization) {
+    optimizedMetadata = applyAIOptimization(
+      validated,
+      config.aiOptimization,
+      context
+    ) as ValidatedMetadata;
   }
 
-  return metadata;
+  // Convert validated metadata to Next.js format
+  return convertToNextMetadata(optimizedMetadata, route, config, context);
 }
 
 /**

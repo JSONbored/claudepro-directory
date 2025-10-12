@@ -45,6 +45,7 @@ describe('buildPageTitle()', () => {
 
     it('returns string within optimal length', () => {
       const result = buildPageTitle({ tier: 'home' });
+      expect(result.length).toBeGreaterThanOrEqual(55);
       expect(result.length).toBeLessThanOrEqual(60);
     });
   });
@@ -85,6 +86,7 @@ describe('buildPageTitle()', () => {
     it('handles short section titles', () => {
       const result = buildPageTitle({ tier: 'section', title: 'AI' });
       expect(result).toBe('AI - Claude Pro Directory');
+      expect(result.length).toBeGreaterThanOrEqual(55);
       expect(result.length).toBeLessThanOrEqual(60);
     });
 
@@ -95,7 +97,8 @@ describe('buildPageTitle()', () => {
       });
       expect(result).toBe('Claude AI Agent Templates 2025 - Claude Pro Directory');
       // Should be within max length (65 chars for Bing)
-      expect(result.length).toBeLessThanOrEqual(65);
+      expect(result.length).toBeGreaterThanOrEqual(55);
+      expect(result.length).toBeLessThanOrEqual(60);
     });
   });
 
@@ -331,6 +334,7 @@ describe('validateTitleLength()', () => {
       const result = validateTitleLength(title);
       expect(result.isValid).toBe(true);
       expect(result.length).toBe(title.length);
+      expect(result.length).toBeGreaterThanOrEqual(55);
       expect(result.length).toBeLessThanOrEqual(60);
       expect(result.recommendation).toBe('Optimal for all search engines');
     });
@@ -340,6 +344,7 @@ describe('validateTitleLength()', () => {
       const result = validateTitleLength(title);
       expect(result.isValid).toBe(true);
       expect(result.length).toBe(title.length);
+      expect(result.length).toBeGreaterThanOrEqual(55);
       expect(result.length).toBeLessThanOrEqual(60);
       expect(result.recommendation).toBe('Optimal for all search engines');
     });
@@ -349,6 +354,7 @@ describe('validateTitleLength()', () => {
       const result = validateTitleLength(title);
       expect(result.isValid).toBe(true);
       expect(result.length).toBe(title.length);
+      expect(result.length).toBeGreaterThanOrEqual(55);
       expect(result.length).toBeLessThanOrEqual(60);
       expect(result.recommendation).toBe('Optimal for all search engines');
     });

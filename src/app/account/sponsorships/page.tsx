@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
@@ -12,14 +11,11 @@ import {
 import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
 import { ROUTES } from '@/src/lib/constants';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: 'Sponsorships - Claude Pro Directory',
-  description: 'Manage your sponsored content and view analytics',
-  robots: { index: false, follow: false },
-};
+export const metadata = await generatePageMetadata('/account/sponsorships');
 
 export default async function SponsorshipsPage() {
   const supabase = await createClient();

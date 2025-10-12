@@ -6,7 +6,7 @@ import path from 'path';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card } from '@/src/components/ui/card';
-import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants';
 import { markdownToSafeHtml } from '@/src/lib/content/markdown-utils';
 import { ArrowLeft, Tags } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -83,28 +83,8 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const resolvedParams = await params;
-  const data = await getComparisonData(resolvedParams.slug);
-
-  if (!data) {
-    return {
-      title: 'Comparison Not Found',
-      description: 'The requested comparison could not be found.',
-    };
-  }
-
-  // Use centralized metadata system with AI citation optimization
-  // Comparison route uses Article schema for better AI indexing
-  return await generatePageMetadata('/compare/:slug', {
-    params: { slug: resolvedParams.slug },
-    item: {
-      title: data.title,
-      description: data.description,
-      dateAdded: data.lastUpdated,
-      lastModified: data.lastUpdated,
-      author: APP_CONFIG.author,
-    },
-  });
+  const { slug } = await params;
+  return generatePageMetadata('/compare/:slug', { params: { slug } });
 }
 
 export default async function ComparisonPage({ params }: { params: Promise<{ slug: string }> }) {

@@ -13,6 +13,7 @@ import {
 import { Separator } from '@/src/components/ui/separator';
 import { trackView } from '@/src/lib/actions/track-view';
 import { ArrowLeft, ExternalLink } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -23,36 +24,9 @@ interface PublicCollectionPageProps {
 
 export async function generateMetadata({ params }: PublicCollectionPageProps): Promise<Metadata> {
   const { slug, collectionSlug } = await params;
-  const supabase = await createAdminClient();
-
-  // Get user data in single query (optimization: avoid N+1)
-  const { data: user } = await supabase.from('users').select('id, name').eq('slug', slug).single();
-
-  if (!user) {
-    return {
-      title: 'Collection Not Found',
-    };
-  }
-
-  // Get collection
-  const { data: collection } = await supabase
-    .from('user_collections')
-    .select('name, description')
-    .eq('user_id', user.id)
-    .eq('slug', collectionSlug)
-    .eq('is_public', true)
-    .single();
-
-  if (!collection) {
-    return {
-      title: 'Collection Not Found',
-    };
-  }
-
-  return {
-    title: `${collection.name} by ${user.name || slug} - ClaudePro Directory`,
-    description: collection.description || `View ${collection.name} collection`,
-  };
+  return generatePageMetadata('/u/:slug/collections/:collectionSlug', {
+    params: { slug, collectionSlug },
+  });
 }
 
 export default async function PublicCollectionPage({ params }: PublicCollectionPageProps) {

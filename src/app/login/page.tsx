@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import { AuthButtons } from '@/src/components/auth/auth-buttons';
 import {
   Card,
@@ -7,13 +6,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: 'Sign In - Claude Pro Directory',
-  description: 'Sign in to save bookmarks, submit content, and join the community',
-  robots: { index: false, follow: false },
-};
+export const metadata = await generatePageMetadata('/login');
 
 export default async function LoginPage({
   searchParams,

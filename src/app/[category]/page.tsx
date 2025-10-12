@@ -111,30 +111,7 @@ export async function generateStaticParams() {
  */
 export async function generateMetadata({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params;
-
-  // Validate category
-  if (!isValidCategory(category)) {
-    return {
-      title: 'Category Not Found',
-      description: 'The requested content category could not be found.',
-    };
-  }
-
-  const config = getCategoryConfig(category);
-  if (!config) {
-    return {
-      title: 'Category Not Found',
-      description: 'The requested content category could not be found.',
-    };
-  }
-
-  // Use centralized metadata with category context
-  // Explicit context construction for exactOptionalPropertyTypes compatibility
-  return await generatePageMetadata('/:category', {
-    params: { category },
-    category,
-    categoryConfig: config,
-  });
+  return generatePageMetadata('/:category', { params: { category } });
 }
 
 /**

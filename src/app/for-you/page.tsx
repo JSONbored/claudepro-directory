@@ -9,23 +9,15 @@
  * - Analytics tracking
  */
 
-import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { ForYouFeedClient } from '@/src/components/personalization/for-you-feed-client';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { getForYouFeed } from '@/src/lib/actions/analytics.actions';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: 'For You | ClaudePro Directory',
-  description:
-    'Personalized Claude configurations recommended just for you based on your interests and activity.',
-  openGraph: {
-    title: 'For You | ClaudePro Directory',
-    description: 'Discover Claude configurations tailored to your interests',
-  },
-};
+export const metadata = await generatePageMetadata('/for-you');
 
 export default async function ForYouPage() {
   // Check authentication

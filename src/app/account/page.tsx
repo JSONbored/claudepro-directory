@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import { Badge } from '@/src/components/ui/badge';
 import {
   Card,
@@ -9,17 +8,11 @@ import {
 } from '@/src/components/ui/card';
 import { ROUTES } from '@/src/lib/constants';
 import { Bookmark, Calendar } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: 'Account Dashboard - Claude Pro Directory',
-  description: 'Manage your ClaudePro account and view your activity',
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
+export const metadata = await generatePageMetadata('/account');
 
 export default async function AccountDashboard() {
   const supabase = await createClient();

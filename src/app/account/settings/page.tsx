@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ProfileEditForm } from '@/src/components/features/profile/profile-edit-form';
@@ -12,17 +11,11 @@ import {
 } from '@/src/components/ui/card';
 import { RefreshCw } from '@/src/lib/icons';
 import type { ProfileData } from '@/src/lib/schemas/profile.schema';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: 'Settings - Claude Pro Directory',
-  description: 'Manage your account settings and preferences',
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
+export const metadata = await generatePageMetadata('/account/settings');
 
 export default async function SettingsPage() {
   const supabase = await createClient();

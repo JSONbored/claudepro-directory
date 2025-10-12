@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
@@ -12,13 +11,10 @@ import {
 import { getUserSubmissions } from '@/src/lib/actions/business.actions';
 import { ROUTES } from '@/src/lib/constants';
 import { CheckCircle, Clock, ExternalLink, GitPullRequest, Send, XCircle } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { BADGE_COLORS, type SubmissionStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: 'My Submissions - Claude Pro Directory',
-  description: 'Track your community content submissions',
-  robots: { index: false, follow: false },
-};
+export const metadata = await generatePageMetadata('/account/submissions');
 
 export default async function SubmissionsPage() {
   const submissions = await getUserSubmissions();

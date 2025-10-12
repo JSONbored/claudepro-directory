@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { Badge } from '@/src/components/ui/badge';
@@ -6,15 +5,12 @@ import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, BarChart, ExternalLink, Eye } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
-export const metadata: Metadata = {
-  title: 'Job Analytics - Claude Pro Directory',
-  description: 'View analytics for your job listing',
-  robots: { index: false, follow: false },
-};
+export const metadata = await generatePageMetadata('/account/jobs/:id/analytics');
 
 interface JobAnalyticsPageProps {
   params: Promise<{

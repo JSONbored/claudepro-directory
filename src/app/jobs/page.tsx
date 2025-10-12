@@ -29,33 +29,12 @@ export async function generateMetadata({ searchParams }: PagePropsWithSearchPara
   const rawParams = await searchParams;
   const params = parseSearchParams(jobsSearchSchema, rawParams, 'jobs page metadata');
 
-  // Use centralized metadata with dynamic filtering context
-  const baseMetadata = await generatePageMetadata('/jobs', {
+  return generatePageMetadata('/jobs', {
     filters: {
       category: (params as JobsSearchParams).category,
       remote: params.remote,
     },
   });
-
-  // Apply dynamic title/description modifications for filtering
-  let { title, description } = baseMetadata;
-
-  const category = (params as JobsSearchParams).category;
-  if (category && category !== 'all') {
-    title = `${category.charAt(0).toUpperCase() + category.slice(1)} ${title}`;
-    description = `Find ${category} positions. ${description || ''}`;
-  }
-
-  if (params.remote === true) {
-    title = `Remote ${title}`;
-    description = `Remote ${(description || '').toLowerCase()}`;
-  }
-
-  return {
-    ...baseMetadata,
-    title,
-    description,
-  };
 }
 
 // Enable ISR - revalidate every 4 hours for job listings

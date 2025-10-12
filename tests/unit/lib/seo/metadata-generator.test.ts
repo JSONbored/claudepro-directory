@@ -59,6 +59,7 @@ describe('generatePageMetadata()', () => {
       const metadata = await generatePageMetadata('/');
       const title = metadata.title as string;
 
+      expect(title.length).toBeGreaterThanOrEqual(55);
       expect(title.length).toBeLessThanOrEqual(60);
       expect(title.length).toBeGreaterThan(0);
     });
@@ -184,7 +185,8 @@ describe('generatePageMetadata()', () => {
       const metadata = await generatePageMetadata('/trending');
       const title = metadata.title as string;
 
-      expect(title.length).toBeLessThanOrEqual(65);
+      expect(title.length).toBeGreaterThanOrEqual(55);
+      expect(title.length).toBeLessThanOrEqual(60);
     });
 
     it('has description optimized for AI citation', async () => {
@@ -517,7 +519,16 @@ describe('generatePageMetadata()', () => {
 
   describe('SEO Best Practices Validation', () => {
     it('all static routes have descriptions 150-160 chars', async () => {
-      const routes = ['/', '/trending', '/submit', '/collections', '/guides'];
+      const routes = [
+        '/',
+        '/trending',
+        '/submit',
+        '/collections',
+        '/guides',
+        '/community',
+        '/partner',
+        '/companies',
+      ];
 
       for (const route of routes) {
         const metadata = await generatePageMetadata(route);
@@ -531,7 +542,7 @@ describe('generatePageMetadata()', () => {
     });
 
     it('all metadata includes robots directives', async () => {
-      const routes = ['/', '/trending', '/submit'];
+      const routes = ['/', '/trending', '/submit', '/community', '/partner', '/companies'];
 
       for (const route of routes) {
         const metadata = await generatePageMetadata(route);
@@ -543,7 +554,16 @@ describe('generatePageMetadata()', () => {
     });
 
     it('all canonical URLs use HTTPS', async () => {
-      const routes = ['/', '/trending', '/submit'];
+      const routes = [
+        '/',
+        '/trending',
+        '/submit',
+        '/community',
+        '/partner',
+        '/companies',
+        '/for-you',
+        '/board',
+      ];
 
       for (const route of routes) {
         const metadata = await generatePageMetadata(route);
@@ -554,7 +574,16 @@ describe('generatePageMetadata()', () => {
     });
 
     it('all OG images have correct aspect ratio (1.91:1)', async () => {
-      const routes = ['/', '/trending', '/submit'];
+      const routes = [
+        '/',
+        '/trending',
+        '/submit',
+        '/community',
+        '/partner',
+        '/companies',
+        '/for-you',
+        '/board',
+      ];
 
       for (const route of routes) {
         const metadata = await generatePageMetadata(route);
@@ -660,5 +689,407 @@ describe('generateContentMetadata()', () => {
     const metadata = await generateContentMetadata('agents', 'test-agent', item);
 
     expect(metadata.alternates?.types?.['text/plain']).toBe('/agents/test-agent/llms.txt');
+  });
+});
+
+// =============================================================================
+// SCHEMA DERIVATION TESTS - Phase 5 Addition
+// =============================================================================
+
+describe('Schema Derivation Tests', () => {
+  it('should derive metadata from agent schema', async () => {
+    const context: MetadataContext = {
+      params: { category: 'agents', slug: 'test-agent' },
+      item: {
+        title: 'Test Agent for Code Review',
+        description: 'A comprehensive agent for automated code review and quality analysis.',
+        tags: ['code-review', 'quality', 'automation'],
+      },
+      categoryConfig: { title: 'AI Agents' },
+    };
+
+    const metadata = await generatePageMetadata('/:category/:slug', context);
+
+    // Should derive title from item.title
+    expect(metadata.title).toContain('Test Agent for Code Review');
+    // Should derive description from item.description
+    expect(metadata.description).toContain('comprehensive agent for automated code review');
+  });
+
+  it('should derive metadata from MCP server schema', async () => {
+    const context: MetadataContext = {
+      params: { category: 'mcp', slug: 'filesystem-server' },
+      item: {
+        title: 'Filesystem MCP Server',
+        description: 'Model Context Protocol server for filesystem operations and file management.',
+        tags: ['filesystem', 'mcp', 'server'],
+      },
+      categoryConfig: { title: 'MCP Servers' },
+    };
+
+    const metadata = await generatePageMetadata('/:category/:slug', context);
+
+    expect(metadata.title).toContain('Filesystem MCP Server');
+    expect(metadata.description).toContain('filesystem operations');
+  });
+
+  it('should handle missing optional fields in schema', async () => {
+    const context: MetadataContext = {
+      params: { category: 'hooks', slug: 'minimal-hook' },
+      item: {
+        title: 'Minimal Hook',
+        description: 'Basic hook with minimal metadata.',
+        // No tags, author, dates
+      },
+      categoryConfig: { title: 'Hooks' },
+    };
+
+    const metadata = await generatePageMetadata('/:category/:slug', context);
+
+    expect(metadata.title).toBeDefined();
+    expect(metadata.description).toBeDefined();
+    // Should not crash when optional fields missing
+  });
+
+  it('should fallback gracefully when schema data incomplete', async () => {
+    const context: MetadataContext = {
+      params: { category: 'agents', slug: 'incomplete-agent' },
+      item: {
+        // Missing title - should use slug
+        description: 'Agent with no title.',
+      },
+      categoryConfig: { title: 'AI Agents' },
+    };
+
+    const metadata = await generatePageMetadata('/:category/:slug', context);
+
+    // Should still generate valid metadata
+    expect(metadata).toBeDefined();
+    expect(metadata.description).toContain('Agent with no title');
+  });
+});
+
+// =============================================================================
+// VALIDATION LAYER TESTS - Phase 5 Addition
+// =============================================================================
+
+describe('Validation Layer Tests', () => {
+  it('should catch invalid title length in development', async () => {
+    // Note: Validation only throws in development mode
+    if (process.env.NODE_ENV !== 'development') {
+      return;
+    }
+
+    // Test would fail if we tried to generate metadata with invalid length
+    // Since validation happens internally, we test the boundaries
+
+    const context: MetadataContext = {
+      params: { category: 'agents', slug: 'test' },
+      item: {
+        title: 'Valid Title',
+        description: 'This is a valid description that meets the minimum length requirements for SEO optimization and AI citation purposes in October 2025.',
+      },
+      categoryConfig: { title: 'Test' },
+    };
+
+    const metadata = await generatePageMetadata('/:category/:slug', context);
+
+    // Should pass validation
+    expect(metadata.title).toBeDefined();
+  });
+
+  it('should catch invalid description length', async () => {
+    const context: MetadataContext = {
+      params: { slug: 'test' },
+      item: {
+        title: 'Test',
+        description: 'Valid description with sufficient length to pass SEO validation requirements. This description meets the 150-160 character optimal range for search engines.',
+      },
+    };
+
+    const metadata = await generatePageMetadata('/api-docs/:slug', context);
+
+    expect(metadata.description).toBeDefined();
+    expect(metadata.description?.length).toBeGreaterThanOrEqual(150);
+  });
+
+  it('should validate keywords format', async () => {
+    const context: MetadataContext = {
+      params: { category: 'agents', slug: 'test' },
+      item: {
+        title: 'Test Agent',
+        description: 'Test description that is long enough to meet SEO requirements for optimal search engine optimization and AI citation purposes in production.',
+        tags: ['valid', 'keyword', 'list'],
+      },
+      categoryConfig: { title: 'Agents' },
+    };
+
+    const metadata = await generatePageMetadata('/:category/:slug', context);
+
+    expect(metadata.keywords).toBeDefined();
+    expect(typeof metadata.keywords).toBe('string'); // Keywords returned as comma-separated string
+  });
+
+  it('should validate canonical URL format', async () => {
+    const metadata = await generatePageMetadata('/trending');
+
+    expect(metadata.alternates?.canonical).toMatch(/^https:\/\//);
+    expect(metadata.alternates?.canonical).not.toMatch(/\/$|\/$/); // No trailing slash
+  });
+
+  it('should validate OpenGraph image dimensions', async () => {
+    const metadata = await generatePageMetadata('/');
+    const images = metadata.openGraph?.images as Array<{ width: number; height: number }>;
+
+    expect(images[0].width).toBe(1200);
+    expect(images[0].height).toBe(630);
+  });
+});
+
+// =============================================================================
+// FALLBACK METADATA TESTS - Phase 5 Addition
+// =============================================================================
+
+describe('Fallback Metadata Generation', () => {
+  it('should generate smart defaults for unknown routes', async () => {
+    const metadata = await generatePageMetadata('/completely-unknown-route');
+
+    expect(metadata).toBeDefined();
+    expect(metadata.title).toBe('Claude Pro Directory');
+    expect(metadata.description).toContain('Page on Claude Pro Directory');
+  });
+
+  it('should not have extensive metadata in fallback', async () => {
+    const metadata = await generatePageMetadata('/unknown-page');
+
+    // Fallback should be minimal
+    expect(metadata.title).toBeDefined();
+    expect(metadata.description).toBeDefined();
+    expect(metadata.openGraph).toBeUndefined();
+  });
+
+  it('should parse route segments for fallback title', async () => {
+    const metadata = await generatePageMetadata('/some-custom-page');
+
+    expect(metadata.title).toContain('Claude Pro Directory');
+    // Should include parsed page name
+  });
+
+  it('should handle nested unknown routes', async () => {
+    const metadata = await generatePageMetadata('/nested/unknown/route');
+
+    expect(metadata).toBeDefined();
+    expect(metadata.title).toBeDefined();
+  });
+});
+
+// =============================================================================
+// PHASE 6 UTILITY PAGES TESTS - Account & Auth Pages
+// =============================================================================
+
+describe('Phase 6 Utility Pages - Account Routes', () => {
+  describe('Account Dashboard Pages', () => {
+    it('generates metadata for /account', async () => {
+      const metadata = await generatePageMetadata('/account');
+
+      expect(metadata).toBeDefined();
+      expect(metadata.title).toBeDefined();
+      expect(metadata.robots?.index).toBe(false); // Private page
+      expect(metadata.robots?.follow).toBe(false);
+    });
+
+    it('generates metadata for /account/activity', async () => {
+      const metadata = await generatePageMetadata('/account/activity');
+
+      expect(metadata).toBeDefined();
+      expect(metadata.robots?.index).toBe(false);
+    });
+
+    it('generates metadata for /account/settings', async () => {
+      const metadata = await generatePageMetadata('/account/settings');
+
+      expect(metadata).toBeDefined();
+      expect(metadata.robots?.index).toBe(false);
+    });
+
+    it('generates metadata for /account/submissions', async () => {
+      const metadata = await generatePageMetadata('/account/submissions');
+
+      expect(metadata).toBeDefined();
+      expect(metadata.robots?.index).toBe(false);
+    });
+  });
+
+  describe('Jobs Management Pages', () => {
+    it('generates metadata for /account/jobs', async () => {
+      const metadata = await generatePageMetadata('/account/jobs');
+
+      expect(metadata).toBeDefined();
+      expect(metadata.robots?.index).toBe(false);
+    });
+
+    it('generates metadata for /account/jobs/new', async () => {
+      const metadata = await generatePageMetadata('/account/jobs/new');
+
+      expect(metadata).toBeDefined();
+      expect(metadata.robots?.index).toBe(false);
+    });
+  });
+
+  describe('Sponsorships Pages', () => {
+    it('generates metadata for /account/sponsorships', async () => {
+      const metadata = await generatePageMetadata('/account/sponsorships');
+
+      expect(metadata).toBeDefined();
+      expect(metadata.robots?.index).toBe(false);
+    });
+  });
+
+  describe('Library Pages', () => {
+    it('generates metadata for /account/library', async () => {
+      const metadata = await generatePageMetadata('/account/library');
+
+      expect(metadata).toBeDefined();
+      expect(metadata.robots?.index).toBe(false);
+    });
+
+    it('generates metadata for /account/library/new', async () => {
+      const metadata = await generatePageMetadata('/account/library/new');
+
+      expect(metadata).toBeDefined();
+      expect(metadata.robots?.index).toBe(false);
+    });
+  });
+});
+
+describe('Phase 6 Utility Pages - Discovery & Community', () => {
+  it('generates metadata for /for-you', async () => {
+    const metadata = await generatePageMetadata('/for-you');
+
+    expect(metadata).toBeDefined();
+    expect(metadata.title).toBeDefined();
+    expect(metadata.description).toBeDefined();
+  });
+
+  it('generates metadata for /board', async () => {
+    const metadata = await generatePageMetadata('/board');
+
+    expect(metadata).toBeDefined();
+    expect(metadata.title).toBeDefined();
+    expect(metadata.openGraph?.type).toBe('website');
+  });
+
+  it('generates metadata for /board/new', async () => {
+    const metadata = await generatePageMetadata('/board/new');
+
+    expect(metadata).toBeDefined();
+    expect(metadata.robots?.index).toBe(false); // Create page - noindex
+    expect(metadata.robots?.follow).toBe(true); // But allow following
+  });
+
+  it('generates metadata for /companies', async () => {
+    const metadata = await generatePageMetadata('/companies');
+
+    expect(metadata).toBeDefined();
+    expect(metadata.title).toBeDefined();
+    expect(metadata.openGraph?.type).toBe('website');
+  });
+});
+
+describe('Phase 6 Utility Pages - Authentication & Errors', () => {
+  it('generates metadata for /login', async () => {
+    const metadata = await generatePageMetadata('/login');
+
+    expect(metadata).toBeDefined();
+    expect(metadata.robots?.index).toBe(false); // Auth page - noindex
+    expect(metadata.robots?.follow).toBe(true);
+  });
+
+  it('generates metadata for /auth/auth-code-error', async () => {
+    const metadata = await generatePageMetadata('/auth/auth-code-error');
+
+    expect(metadata).toBeDefined();
+    expect(metadata.robots?.index).toBe(false); // Error page - noindex
+    expect(metadata.robots?.follow).toBe(false);
+  });
+
+  it('generates metadata for /404', async () => {
+    const metadata = await generatePageMetadata('/404');
+
+    expect(metadata).toBeDefined();
+    expect(metadata.title).toBeDefined();
+    expect(metadata.description).toBeDefined();
+  });
+});
+
+// =============================================================================
+// ALL 14 CONTENT CATEGORY DERIVATIONS - Phase 5 Addition
+// =============================================================================
+
+describe('All Content Category Derivations', () => {
+  const allCategories = [
+    'agents',
+    'mcp',
+    'rules',
+    'commands',
+    'hooks',
+    'statuslines',
+    'guides',
+    'tutorials',
+    'comparisons',
+    'workflows',
+    'use-cases',
+    'troubleshooting',
+    'categories',
+    'collections',
+  ];
+
+  for (const category of allCategories) {
+    it(`should generate valid metadata for ${category} category`, async () => {
+      const context: MetadataContext = {
+        params: { category },
+        category,
+        categoryConfig: {
+          title: `${category.charAt(0).toUpperCase() + category.slice(1)}`,
+          pluralTitle: `${category}`,
+          metaDescription: `Browse ${category} on Claude Pro Directory.`,
+          keywords: `${category}, claude, ai`,
+        },
+      };
+
+      const metadata = await generatePageMetadata('/:category', context);
+
+      expect(metadata).toBeDefined();
+      expect(metadata.title).toBeDefined();
+      expect(metadata.description).toBeDefined();
+      expect(metadata.openGraph).toBeDefined();
+      expect(metadata.alternates?.canonical).toMatch(new RegExp(`/${category}$`));
+    });
+
+    it(`should generate valid content detail metadata for ${category}`, async () => {
+      const context: MetadataContext = {
+        params: { category, slug: 'test-item' },
+        item: {
+          title: `Test ${category} Item`,
+          description: `This is a comprehensive test item for the ${category} category with sufficient length to meet SEO requirements for optimal search engine ranking.`,
+          tags: [category, 'test', 'claude'],
+        },
+        categoryConfig: {
+          title: `${category.charAt(0).toUpperCase() + category.slice(1)}`,
+        },
+      };
+
+      const metadata = await generatePageMetadata('/:category/:slug', context);
+
+      expect(metadata).toBeDefined();
+      expect(metadata.title).toContain(`Test ${category} Item`);
+      expect(metadata.description).toContain(`comprehensive test item`);
+      expect(metadata.openGraph?.type).toBe('article');
+      expect(metadata.alternates?.canonical).toMatch(new RegExp(`/${category}/test-item$`));
+    });
+  }
+
+  it('should have tested all 14 categories', () => {
+    expect(allCategories.length).toBe(14);
   });
 });

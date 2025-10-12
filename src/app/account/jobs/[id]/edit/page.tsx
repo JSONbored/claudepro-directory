@@ -1,15 +1,11 @@
-import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/jobs/job-form';
 import { updateJob } from '@/src/lib/actions/business.actions';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: 'Edit Job - Claude Pro Directory',
-  description: 'Edit your job listing',
-  robots: { index: false, follow: false },
-};
+export const metadata = await generatePageMetadata('/account/jobs/:id/edit');
 
 interface EditJobPageProps {
   params: Promise<{

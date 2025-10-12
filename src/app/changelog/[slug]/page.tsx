@@ -35,7 +35,7 @@ import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils'
 import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import { generateContentMetadata } from '@/src/lib/seo/metadata-generator';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 // ISR - revalidate every 10 minutes
 export const revalidate = 600;
@@ -67,38 +67,8 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  try {
-    const { slug } = await params;
-    const entry = await getChangelogEntryBySlug(slug);
-
-    if (!entry) {
-      return {
-        title: 'Changelog Entry Not Found',
-        description: 'The requested changelog entry could not be found.',
-      };
-    }
-
-    // Use tldr as description if available, otherwise truncate content
-    const description =
-      entry.tldr ||
-      (entry.content.length > 160 ? `${entry.content.slice(0, 157).trim()}...` : entry.content);
-
-    return await generateContentMetadata('changelog', slug, {
-      title: entry.title,
-      description,
-      dateAdded: entry.date,
-      author: 'Claude Pro Directory',
-    });
-  } catch (error) {
-    logger.error(
-      'Failed to generate changelog entry metadata',
-      error instanceof Error ? error : new Error(String(error))
-    );
-    return {
-      title: 'Changelog - Claude Pro Directory',
-      description: 'Platform update and release notes.',
-    };
-  }
+  const { slug } = await params;
+  return generatePageMetadata('/changelog/:slug', { params: { slug } });
 }
 
 /**

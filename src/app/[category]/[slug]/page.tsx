@@ -160,42 +160,7 @@ export async function generateMetadata({
   params: Promise<{ category: string; slug: string }>;
 }) {
   const { category, slug } = await params;
-
-  // Validate category
-  if (!isValidCategory(category)) {
-    return {
-      title: 'Not Found',
-      description: 'The requested content could not be found.',
-    };
-  }
-
-  const config = getCategoryConfig(category);
-  if (!config) {
-    return {
-      title: 'Not Found',
-      description: 'The requested content could not be found.',
-    };
-  }
-
-  // Load item metadata
-  const item = await getContentBySlug(category, slug);
-
-  if (!item) {
-    return {
-      title: `${config.title} Not Found`,
-      description: `The requested ${config.title.toLowerCase()} could not be found.`,
-    };
-  }
-
-  // Use centralized metadata with content detail context
-  // Explicit context construction for exactOptionalPropertyTypes compatibility
-  return await generatePageMetadata('/:category/:slug', {
-    params: { category, slug },
-    category,
-    slug,
-    item,
-    categoryConfig: config,
-  });
+  return generatePageMetadata('/:category/:slug', { params: { category, slug } });
 }
 
 /**

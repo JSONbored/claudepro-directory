@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Badge } from '@/src/components/ui/badge';
 import {
@@ -10,14 +9,11 @@ import {
 } from '@/src/components/ui/card';
 import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
 import { BarChart, Eye, MousePointer, TrendingUp } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: 'Sponsorship Analytics - Claude Pro Directory',
-  description: 'Detailed analytics for your sponsored content',
-  robots: { index: false, follow: false },
-};
+export const metadata = await generatePageMetadata('/account/sponsorships/:id/analytics');
 
 interface AnalyticsPageProps {
   params: Promise<{ id: string }>;

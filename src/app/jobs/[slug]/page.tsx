@@ -23,52 +23,13 @@ import { slugParamsSchema } from '@/src/lib/schemas/app.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  if (!params) {
-    return {
-      title: 'Job Not Found',
-      description: 'The requested job posting could not be found.',
-    };
-  }
-
-  const rawParams = await params;
-
-  // Validate slug parameter
-  const validationResult = slugParamsSchema.safeParse(rawParams);
-
-  if (!validationResult.success) {
-    logger.warn('Invalid slug parameter for job metadata', {
-      slug: String(rawParams.slug),
-      errorCount: validationResult.error.issues.length,
-      firstError: validationResult.error.issues[0]?.message || 'Unknown error',
-    });
-    return {
-      title: 'Job Not Found',
-      description: 'The requested job posting could not be found.',
-    };
-  }
-
-  const { slug } = validationResult.data;
-  const job = jobs.find((j) => j.slug === slug);
-
-  if (!job) {
-    return {
-      title: 'Job Not Found',
-      description: 'The requested job posting could not be found.',
-    };
-  }
-
-  // Use centralized metadata system with JobPosting schema
-  // Job pages use special structured data for job search engines
-  return await generatePageMetadata('/jobs/:slug', {
-    params: { slug },
-    item: {
-      title: `${job.title} at ${job.company}`,
-      description: job.description,
-      dateAdded: job.postedAt,
-      lastModified: job.postedAt,
-    },
-  });
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  return generatePageMetadata('/jobs/:slug', { params: { slug } });
 }
 
 export async function generateStaticParams() {

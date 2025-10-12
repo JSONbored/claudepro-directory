@@ -255,64 +255,10 @@ export async function generateMetadata({
 }: {
   params: Promise<{ category: string; slug: string }>;
 }): Promise<Metadata> {
-  try {
-    const rawParams = await params;
-    const validationResult = guideParamsSchema.safeParse(rawParams);
-
-    if (!validationResult.success) {
-      logger.warn('Invalid guide parameters for metadata', {
-        category: rawParams.category || 'unknown',
-        slug: rawParams.slug || 'unknown',
-        errorCount: validationResult.error.issues.length,
-        firstError: validationResult.error.issues[0]?.message || 'Unknown error',
-      });
-      return {
-        title: 'Guide Not Found',
-        description: 'The requested guide could not be found.',
-      };
-    }
-
-    const { category, slug } = validationResult.data;
-
-    const data = await getSEOPageData(category, slug);
-
-    if (!data) {
-      return {
-        title: 'Guide Not Found',
-        description: 'The requested guide could not be found.',
-      };
-    }
-
-    // Use centralized metadata system with AI citation optimization
-    // This route uses Article schema + recency signals for better AI citations
-    return await generatePageMetadata('/guides/:category/:slug', {
-      params: {
-        category: category || '',
-        slug: slug || '',
-      },
-      item: {
-        title: data.title,
-        seoTitle: data.seoTitle, // Short title for <title> tag, preserves longtail in H1
-        description: data.description,
-        tags: data.keywords,
-        author: data.author,
-        dateAdded: data.dateUpdated,
-        lastModified: data.dateUpdated,
-      },
-    });
-  } catch (error: unknown) {
-    logger.error(
-      'Error generating guide metadata',
-      error instanceof Error ? error : new Error(String(error)),
-      {
-        type: 'metadata_generation',
-      }
-    );
-    return {
-      title: 'Guide Error',
-      description: 'An error occurred while loading the guide.',
-    };
-  }
+  const { category, slug } = await params;
+  return generatePageMetadata('/guides/:category/:slug', {
+    params: { category, slug },
+  });
 }
 
 export default async function SEOGuidePage({

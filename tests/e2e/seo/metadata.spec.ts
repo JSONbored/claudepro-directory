@@ -216,6 +216,7 @@ test.describe('Homepage SEO - Static Route', () => {
     expect(title).toBeTruthy();
 
     const validation = validateTitleLength(title);
+    expect(validation.length, `Title: "${title}"\nLength: ${validation.length}\n${validation.recommendation}`).toBeGreaterThanOrEqual(55);
     expect(validation.length, `Title: "${title}"\nLength: ${validation.length}\n${validation.recommendation}`).toBeLessThanOrEqual(60);
   });
 
@@ -372,7 +373,8 @@ test.describe('Static Routes SEO', () => {
         expect(title).toBeTruthy();
 
         const titleValidation = validateTitleLength(title);
-        expect(titleValidation.length, `Title too long: ${title}`).toBeLessThanOrEqual(65);
+        expect(titleValidation.length, `Title too short: ${title}`).toBeGreaterThanOrEqual(55);
+        expect(titleValidation.length, `Title too long: ${title}`).toBeLessThanOrEqual(60);
 
         const description = await getMetaContent(page, 'description');
         expect(description, 'Description is required').toBeTruthy();
@@ -439,7 +441,8 @@ test.describe('Category Pages SEO', () => {
         expect(title).toBeTruthy();
 
         const titleValidation = validateTitleLength(title);
-        expect(titleValidation.length, `Title: ${title}`).toBeLessThanOrEqual(65);
+        expect(titleValidation.length, `Title too short: ${title}`).toBeGreaterThanOrEqual(55);
+        expect(titleValidation.length, `Title: ${title}`).toBeLessThanOrEqual(60);
 
         const description = await getMetaContent(page, 'description');
         expect(description).toBeTruthy();
@@ -778,14 +781,15 @@ async function validateCoreSEO(page: Page, pagePath: string) {
   // 1. Meta title must exist and be optimal length
   const title = await page.title();
   expect(title, `${pagePath}: Title must exist`).toBeTruthy();
-  expect(title.length, `${pagePath}: Title should be ≤60 chars (currently ${title.length})`).toBeLessThanOrEqual(65);
+  expect(title.length, `${pagePath}: Title should be 55-60 chars (currently ${title.length})`).toBeGreaterThanOrEqual(55);
+  expect(title.length, `${pagePath}: Title should be 55-60 chars (currently ${title.length})`).toBeLessThanOrEqual(60);
 
   // 2. Meta description must exist and be optimal length
   const description = await getMetaContent(page, 'description');
   expect(description, `${pagePath}: Description must exist`).toBeTruthy();
   if (description) {
-    expect(description.length, `${pagePath}: Description should be 150-160 chars (currently ${description.length})`).toBeGreaterThanOrEqual(140);
-    expect(description.length, `${pagePath}: Description should be 150-160 chars (currently ${description.length})`).toBeLessThanOrEqual(165);
+    expect(description.length, `${pagePath}: Description should be 150-160 chars (currently ${description.length})`).toBeGreaterThanOrEqual(150);
+    expect(description.length, `${pagePath}: Description should be 150-160 chars (currently ${description.length})`).toBeLessThanOrEqual(160);
   }
 
   // 3. Open Graph metadata must be complete
@@ -900,4 +904,301 @@ test.describe('Dynamic SEO: All Static Routes', () => {
       }
     });
   }
+});
+
+// =============================================================================
+// NEW ROUTES TESTING - Phase 5 Addition
+// =============================================================================
+
+test.describe('New Routes SEO - Phase 5', () => {
+  const newRoutes = [
+    { path: '/board', name: 'Board' },
+    { path: '/community', name: 'Community' },
+    { path: '/companies', name: 'Companies' },
+    { path: '/for-you', name: 'For You' },
+    { path: '/partner', name: 'Partner' },
+    { path: '/api-docs', name: 'API Documentation' },
+  ];
+
+  for (const route of newRoutes) {
+    test.describe(`${route.name} Page (${route.path})`, () => {
+      test('should have optimal meta title and description', async ({ page }) => {
+        await page.goto(route.path);
+        await waitForNetworkIdle(page);
+
+        const title = await page.title();
+        expect(title, `${route.path}: Title must exist`).toBeTruthy();
+        expect(title.length, `${route.path}: Title too short`).toBeGreaterThanOrEqual(55);
+        expect(title.length, `${route.path}: Title too long`).toBeLessThanOrEqual(60);
+
+        const description = await getMetaContent(page, 'description');
+        expect(description, `${route.path}: Description must exist`).toBeTruthy();
+
+        if (description) {
+          expect(description.length, `${route.path}: Description length`).toBeGreaterThanOrEqual(150);
+          expect(description.length, `${route.path}: Description length`).toBeLessThanOrEqual(160);
+        }
+      });
+
+      test('should have complete Open Graph metadata', async ({ page }) => {
+        await page.goto(route.path);
+        await waitForNetworkIdle(page);
+
+        const ogTitle = await getOGContent(page, 'title');
+        const ogDescription = await getOGContent(page, 'description');
+        const ogImage = await getOGContent(page, 'image');
+
+        expect(ogTitle, `${route.path}: og:title required`).toBeTruthy();
+        expect(ogDescription, `${route.path}: og:description required`).toBeTruthy();
+        expect(ogImage, `${route.path}: og:image required`).toBeTruthy();
+      });
+
+      test('should have proper canonical URL', async ({ page }) => {
+        await page.goto(route.path);
+        await waitForNetworkIdle(page);
+
+        const canonical = await getCanonicalUrl(page);
+        expect(canonical, `${route.path}: Canonical URL required`).toBeTruthy();
+        expect(canonical, `${route.path}: Canonical must use HTTPS`).toMatch(/^https:\/\//);
+        expect(canonical, `${route.path}: Canonical should not have trailing slash`).not.toMatch(/\/$/);
+      });
+    });
+  }
+});
+
+// =============================================================================
+// LLMS.TXT ALTERNATE LINKS TESTING - Phase 5 Addition
+// =============================================================================
+
+test.describe('llms.txt Alternate Links', () => {
+  test('should have llms.txt alternate link on content detail pages', async ({ page }) => {
+    await navigateToCategory(page, 'agents');
+    const firstItem = page.locator('[role="article"]').first();
+    await firstItem.waitFor({ state: 'visible', timeout: 30000 });
+    await firstItem.click();
+
+    await page.waitForURL(/\/agents\/.+/);
+    await waitForNetworkIdle(page);
+
+    // Check for llms.txt alternate link
+    const llmsTxtLink = await page
+      .locator('link[rel="alternate"][type="text/plain"]')
+      .getAttribute('href');
+
+    expect(llmsTxtLink, 'Content detail pages should have llms.txt alternate link').toBeTruthy();
+    expect(llmsTxtLink, 'llms.txt link should match pattern').toMatch(/\/agents\/.+\/llms\.txt$/);
+  });
+
+  test('should NOT have llms.txt alternate link on category pages', async ({ page }) => {
+    await navigateToCategory(page, 'mcp');
+
+    const llmsTxtLink = await page
+      .locator('link[rel="alternate"][type="text/plain"]')
+      .count();
+
+    expect(llmsTxtLink, 'Category pages should NOT have llms.txt alternate link').toBe(0);
+  });
+
+  test('should NOT have llms.txt alternate link on homepage', async ({ page }) => {
+    await navigateToHomepage(page);
+
+    const llmsTxtLink = await page
+      .locator('link[rel="alternate"][type="text/plain"]')
+      .count();
+
+    expect(llmsTxtLink, 'Homepage should NOT have llms.txt alternate link').toBe(0);
+  });
+
+  test('llms.txt alternate link should be accessible', async ({ page }) => {
+    await navigateToCategory(page, 'mcp');
+    const firstItem = page.locator('[role="article"]').first();
+    await firstItem.waitFor({ state: 'visible', timeout: 30000 });
+    await firstItem.click();
+
+    await page.waitForURL(/\/mcp\/.+/);
+    await waitForNetworkIdle(page);
+
+    const llmsTxtHref = await page
+      .locator('link[rel="alternate"][type="text/plain"]')
+      .getAttribute('href');
+
+    if (llmsTxtHref) {
+      // Navigate to llms.txt URL
+      const response = await page.goto(llmsTxtHref);
+      expect(response?.status(), 'llms.txt should be accessible (200 OK)').toBe(200);
+      expect(response?.headers()['content-type'], 'llms.txt should have text/plain content-type').toContain('text/plain');
+    }
+  });
+});
+
+// =============================================================================
+// CHANGELOG/JOBS/COLLECTIONS METADATA TESTING - Phase 5 Addition
+// =============================================================================
+
+test.describe('Changelog Pages SEO', () => {
+  test('should have optimal SEO metadata on changelog index', async ({ page }) => {
+    await page.goto('/changelog');
+    await waitForNetworkIdle(page);
+
+    const title = await page.title();
+    expect(title).toBeTruthy();
+    expect(title.length).toBeGreaterThanOrEqual(55);
+    expect(title.length).toBeLessThanOrEqual(60);
+
+    const description = await getMetaContent(page, 'description');
+    expect(description).toBeTruthy();
+
+    if (description) {
+      expect(description.length).toBeGreaterThanOrEqual(150);
+      expect(description.length).toBeLessThanOrEqual(160);
+    }
+
+    const canonical = await getCanonicalUrl(page);
+    expect(canonical).toMatch(/\/changelog$/);
+  });
+
+  test('should have Article type on changelog detail pages', async ({ page }) => {
+    await page.goto('/changelog');
+    await waitForNetworkIdle(page);
+
+    const firstChangelog = page.locator('[role="article"]').first();
+    await firstChangelog.waitFor({ state: 'visible', timeout: 30000 });
+
+    if ((await firstChangelog.count()) > 0) {
+      await firstChangelog.click();
+
+      await page.waitForURL(/\/changelog\/.+/);
+      await waitForNetworkIdle(page);
+
+      const ogType = await getOGContent(page, 'type');
+      expect(ogType, 'Changelog pages should use og:type="article"').toBe('article');
+
+      // Check for published time (freshness signal)
+      const publishedTime = await page
+        .locator('meta[property="article:published_time"]')
+        .getAttribute('content');
+
+      if (publishedTime) {
+        expect(publishedTime).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+      }
+    }
+  });
+
+  test('should include year for AI optimization on changelog pages', async ({ page }) => {
+    await page.goto('/changelog');
+    await waitForNetworkIdle(page);
+
+    const description = await getMetaContent(page, 'description');
+
+    if (description) {
+      expect(description, 'Changelog description should include year for AI optimization').toMatch(/2025|October 2025/i);
+    }
+  });
+});
+
+test.describe('Jobs Pages SEO', () => {
+  test('should have optimal SEO metadata on jobs index', async ({ page }) => {
+    await page.goto('/jobs');
+    await waitForNetworkIdle(page);
+
+    const title = await page.title();
+    expect(title).toBeTruthy();
+    expect(title.length).toBeGreaterThanOrEqual(55);
+    expect(title.length).toBeLessThanOrEqual(60);
+
+    const description = await getMetaContent(page, 'description');
+    expect(description).toBeTruthy();
+
+    if (description) {
+      expect(description.length).toBeGreaterThanOrEqual(150);
+      expect(description.length).toBeLessThanOrEqual(160);
+    }
+
+    const canonical = await getCanonicalUrl(page);
+    expect(canonical).toMatch(/\/jobs$/);
+  });
+
+  test('should have proper OpenGraph metadata on jobs page', async ({ page }) => {
+    await page.goto('/jobs');
+    await waitForNetworkIdle(page);
+
+    const ogTitle = await getOGContent(page, 'title');
+    const ogDescription = await getOGContent(page, 'description');
+    const ogImage = await getOGContent(page, 'image');
+    const ogType = await getOGContent(page, 'type');
+
+    expect(ogTitle).toBeTruthy();
+    expect(ogDescription).toBeTruthy();
+    expect(ogImage).toBeTruthy();
+    expect(ogType).toBe('website');
+  });
+});
+
+test.describe('Collections Pages SEO', () => {
+  test('should have optimal SEO metadata on collections index', async ({ page }) => {
+    await page.goto('/collections');
+    await waitForNetworkIdle(page);
+
+    const title = await page.title();
+    expect(title).toBeTruthy();
+    expect(title.length).toBeGreaterThanOrEqual(55);
+    expect(title.length).toBeLessThanOrEqual(60);
+
+    const description = await getMetaContent(page, 'description');
+    expect(description).toBeTruthy();
+
+    if (description) {
+      expect(description.length).toBeGreaterThanOrEqual(150);
+      expect(description.length).toBeLessThanOrEqual(160);
+    }
+
+    const canonical = await getCanonicalUrl(page);
+    expect(canonical).toMatch(/\/collections$/);
+  });
+
+  test('should have complete SEO metadata on collection detail pages', async ({ page }) => {
+    await page.goto('/collections');
+    await waitForNetworkIdle(page);
+
+    const firstCollection = page.locator('[role="article"]').first();
+    await firstCollection.waitFor({ state: 'visible', timeout: 30000 });
+
+    if ((await firstCollection.count()) > 0) {
+      await firstCollection.click();
+
+      await page.waitForURL(/\/collections\/.+/);
+      await waitForNetworkIdle(page);
+
+      // Validate title
+      const title = await page.title();
+      expect(title).toBeTruthy();
+      expect(title.length).toBeLessThanOrEqual(75); // Allow slightly longer for content pages
+
+      // Validate description
+      const description = await getMetaContent(page, 'description');
+      expect(description).toBeTruthy();
+
+      if (description) {
+        expect(description.length).toBeGreaterThanOrEqual(150);
+        expect(description.length).toBeLessThanOrEqual(160);
+      }
+
+      // Validate canonical
+      const canonical = await getCanonicalUrl(page);
+      expect(canonical).toBeTruthy();
+      expect(canonical).toMatch(/\/collections\/.+$/);
+      expect(canonical).not.toMatch(/\/$/);
+    }
+  });
+
+  test('should include year for AI optimization on collection pages', async ({ page }) => {
+    await page.goto('/collections');
+    await waitForNetworkIdle(page);
+
+    const description = await getMetaContent(page, 'description');
+
+    if (description) {
+      expect(description).toMatch(/2025|October 2025/i);
+    }
+  });
 });

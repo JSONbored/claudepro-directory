@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
@@ -12,14 +11,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
 import { ROUTES } from '@/src/lib/constants';
 import { Bookmark, ExternalLink, FolderOpen, Layers, Plus } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: 'My Library - Claude Pro Directory',
-  description: 'View and manage your bookmarked configurations and collections',
-  robots: { index: false, follow: false },
-};
+export const metadata = await generatePageMetadata('/account/library');
 
 export default async function LibraryPage() {
   const supabase = await createClient();

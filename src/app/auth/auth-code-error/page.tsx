@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -10,13 +9,10 @@ import {
 } from '@/src/components/ui/card';
 import { ROUTES } from '@/src/lib/constants';
 import { AlertCircle } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: 'Authentication Error - Claude Pro Directory',
-  description: 'There was an error signing in',
-  robots: { index: false, follow: false },
-};
+export const metadata = await generatePageMetadata('/auth/auth-code-error');
 
 export default function AuthCodeError() {
   return (

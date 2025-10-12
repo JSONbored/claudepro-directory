@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { FolderOpen, Globe, MessageSquare, Users } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -22,10 +23,10 @@ interface UserProfilePageProps {
 export async function generateMetadata({ params }: UserProfilePageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  return {
-    title: `${slug} - ClaudePro Directory`,
-    description: `View ${slug}'s profile, contributions, and activity`,
-  };
+  // Use generator with smart defaults for user profiles
+  return generatePageMetadata('/u/:slug', {
+    params: { slug },
+  });
 }
 
 export default async function UserProfilePage({ params }: UserProfilePageProps) {

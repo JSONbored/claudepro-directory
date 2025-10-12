@@ -13,6 +13,7 @@ import {
 } from '@/src/components/ui/card';
 import { ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, Edit, Share2 } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -22,11 +23,7 @@ interface CollectionPageProps {
 
 export async function generateMetadata({ params }: CollectionPageProps): Promise<Metadata> {
   const { slug } = await params;
-  return {
-    title: `${slug} - My Library`,
-    description: 'View and manage your collection',
-    robots: { index: false, follow: false },
-  };
+  return await generatePageMetadata('/account/library/:slug', { params: { slug } });
 }
 
 export default async function CollectionDetailPage({ params }: CollectionPageProps) {

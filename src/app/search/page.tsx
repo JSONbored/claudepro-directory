@@ -41,41 +41,7 @@ interface SearchPageProps {
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
   const resolvedParams = await searchParams;
   const query = resolvedParams.q || '';
-
-  // Sanitize query for display in metadata
-  const sanitizedQuery = sanitizers.sanitizeSearchQuery(query);
-
-  if (sanitizedQuery) {
-    return {
-      title: `Search: ${sanitizedQuery} - Claude Pro Directory`,
-      description: `Search results for "${sanitizedQuery}" in the Claude Pro Directory. Find agents, MCP servers, rules, commands, and more.`,
-      robots: {
-        index: false, // Don't index individual search result pages
-        follow: true,
-      },
-      alternates: {
-        canonical: null, // No canonical URL for dynamic search results
-      },
-      openGraph: {
-        title: `Search: ${sanitizedQuery}`,
-        description: `Search results for "${sanitizedQuery}"`,
-      },
-    };
-  }
-
-  // Default metadata for empty search
-  const baseMetadata = await generatePageMetadata('/');
-  return {
-    ...baseMetadata,
-    title: 'Search - Claude Pro Directory',
-    robots: {
-      index: false,
-      follow: true,
-    },
-    alternates: {
-      canonical: null, // No canonical URL for search page
-    },
-  };
+  return generatePageMetadata('/search', { params: { q: query } });
 }
 
 /**

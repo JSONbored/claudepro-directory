@@ -99,28 +99,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const collection = await getCollectionFullContent(slug);
-
-  if (!collection) {
-    return {
-      title: 'Collection Not Found',
-      description: 'The requested collection could not be found.',
-    };
-  }
-
-  // Use centralized metadata system with CollectionPage schema
-  // Collections use special structured data for better discovery
-  return await generatePageMetadata('/collections/:slug', {
-    params: { slug },
-    item: {
-      title: collection.title || collection.slug,
-      description: collection.description,
-      tags: collection.tags,
-      author: collection.author,
-      dateAdded: collection.dateAdded,
-      lastModified: collection.dateAdded,
-    },
-  });
+  return generatePageMetadata('/collections/:slug', { params: { slug } });
 }
 
 /**

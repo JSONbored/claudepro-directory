@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { CollectionForm } from '@/src/components/library/collection-form';
@@ -6,14 +5,11 @@ import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { ROUTES } from '@/src/lib/constants';
 import { ArrowLeft } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: 'Create Collection - Claude Pro Directory',
-  description: 'Create a new collection of bookmarked configurations',
-  robots: { index: false, follow: false },
-};
+export const metadata = await generatePageMetadata('/account/library/new');
 
 export default async function NewCollectionPage() {
   const supabase = await createClient();

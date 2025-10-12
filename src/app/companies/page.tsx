@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
@@ -13,13 +12,11 @@ import {
 } from '@/src/components/ui/card';
 import { ROUTES } from '@/src/lib/constants';
 import { Building, ExternalLink, Plus, Star } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: 'Companies Using Claude - ClaudePro Directory',
-  description: 'Discover companies building with Claude and Cursor',
-};
+export const metadata = await generatePageMetadata('/companies');
 
 export const revalidate = 3600; // Revalidate every hour
 

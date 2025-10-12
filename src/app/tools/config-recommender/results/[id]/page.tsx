@@ -42,77 +42,19 @@ export const revalidate = 3600;
  * NOINDEX strategy: Result pages are personalized and should not be indexed
  * to avoid thin content issues and infinite URL combinations
  */
-export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
-  const resolvedParams = await params;
-  const resolvedSearchParams = await searchParams;
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const baseMetadata = await generatePageMetadata('/tools/config-recommender/results/:id', {
+    params: { id },
+  });
 
-  try {
-    const answers = resolvedSearchParams.answers
-      ? decodeQuizAnswers(resolvedSearchParams.answers)
-      : null;
-
-    if (!answers) {
-      return {
-        title: 'Configuration Recommendations',
-        description: 'Your personalized Claude configuration recommendations',
-        robots: {
-          index: false,
-          follow: true,
-        },
-      };
-    }
-
-    const useCase = answers.useCase.replace('-', ' ');
-    const title = `${useCase} - Your Claude Config Recommendations`;
-    const description = `Discover personalized Claude configurations for ${useCase}. Get ${answers.experienceLevel}-friendly recommendations from 147+ configs.`;
-
-    // Use centralized metadata generator as base
-    const baseMetadata = await generatePageMetadata('/tools/config-recommender/results/:id', {
-      params: { id: resolvedParams.id },
-      item: {
-        title,
-        description,
-        dateAdded: new Date().toISOString(),
-        author: APP_CONFIG.author,
-      },
-    });
-
-    return {
-      ...baseMetadata,
-      title,
-      description,
-      // Prevent indexing of personalized result pages (avoid thin content penalty)
-      robots: {
-        index: false, // Don't index individual results
-        follow: true, // Do follow links to configurations
-      },
-      openGraph: {
-        ...baseMetadata.openGraph,
-        title,
-        description,
-        type: 'website',
-        url: `${APP_CONFIG.url}/tools/config-recommender/results/${resolvedParams.id}`,
-      },
-      twitter: {
-        ...baseMetadata.twitter,
-        title,
-        description,
-      },
-    };
-  } catch (error) {
-    logger.error(
-      'Failed to generate metadata for results page',
-      error instanceof Error ? error : new Error(String(error))
-    );
-    return {
-      title: 'Configuration Recommendations',
-      description: 'Your personalized Claude configuration recommendations',
-      robots: {
-        index: false,
-        follow: true,
-      },
-    };
-  }
+  return {
+    ...baseMetadata,
+    robots: {
+      index: false,
+      follow: true,
+    },
+  };
 }
 
 /**

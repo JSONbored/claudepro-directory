@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { Avatar, AvatarFallback } from '@/src/components/ui/avatar';
@@ -13,14 +12,12 @@ import {
 } from '@/src/components/ui/card';
 import { ROUTES } from '@/src/lib/constants';
 import { MessageSquare, Plus, TrendingUp, User as UserIcon } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
-export const metadata: Metadata = {
-  title: 'Community Board - ClaudePro Directory',
-  description: 'Share and discuss Claude configurations, tips, and news',
-};
+export const metadata = await generatePageMetadata('/board');
 
 export const revalidate = 60; // Revalidate every minute
 
