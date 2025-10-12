@@ -1,4 +1,3 @@
-import bundleAnalyzer from '@next/bundle-analyzer';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -9,10 +8,16 @@ const __dirname = dirname(__filename);
 // Set browserslist config path
 process.env.BROWSERSLIST_CONFIG = resolve(__dirname, 'config/tools/browserslist');
 
-// Bundle analyzer configuration
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-});
+// Bundle analyzer configuration (optional - only available in development)
+let withBundleAnalyzer = (config) => config;
+if (process.env.ANALYZE === 'true') {
+  try {
+    const bundleAnalyzer = (await import('@next/bundle-analyzer')).default;
+    withBundleAnalyzer = bundleAnalyzer({ enabled: true });
+  } catch (e) {
+    console.warn('⚠️  @next/bundle-analyzer not available - skipping bundle analysis');
+  }
+}
 
 /**
  * Next.js 15.5.4 Configuration (2025 Best Practices)
