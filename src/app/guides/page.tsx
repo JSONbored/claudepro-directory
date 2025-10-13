@@ -75,7 +75,7 @@ async function getAllGuides(): Promise<UnifiedContentItem[]> {
               ...(frontmatter.difficulty ? [frontmatter.difficulty] : []),
               ...(frontmatter.keywords || []),
             ].filter(Boolean),
-            source: 'official',
+            source: 'community',
             popularity: 85, // Default popularity for guides
           });
         }

@@ -112,6 +112,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   let hooks: EnrichedMetadata[] = [];
   let statuslines: EnrichedMetadata[] = [];
   let collections: EnrichedMetadata[] = [];
+  let enrichedFeaturedByCategory: Record<string, UnifiedContentItem[]> = {};
 
   try {
     [rules, mcp, agents, commands, hooks, statuslines, collections] = await batchFetch([
@@ -146,6 +147,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         }))
       ),
     ]);
+
+    // Enrich featured content with view/copy counts
+    // Featured items need Redis stats just like the main category arrays
+    for (const [category, items] of Object.entries(featuredByCategory)) {
+      const enrichedItems = await statsRedis.enrichWithAllCounts(items as UnifiedContentItem[]);
+      enrichedFeaturedByCategory[category] = enrichedItems as UnifiedContentItem[];
+    }
   } catch (error) {
     // Log error and fallback to data without enrichment
     logger.error(
@@ -156,6 +164,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         operation: 'enrichWithStats',
       }
     );
+
+    // Fallback for featured content - use unenriched data
+    enrichedFeaturedByCategory = featuredByCategory as Record<string, UnifiedContentItem[]>;
 
     // Graceful degradation: use base metadata with default counts (0)
     rules = rulesData.map((item) => ({
@@ -282,7 +293,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <HomePageClient
             initialData={initialData}
             initialSearchQuery={initialSearchQuery}
-            featuredByCategory={featuredByCategory as Record<string, UnifiedContentItem[]>}
+            featuredByCategory={enrichedFeaturedByCategory}
             stats={{
               rules: rules.length,
               mcp: mcp.length,
