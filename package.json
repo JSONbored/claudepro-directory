@@ -111,6 +111,6 @@
     "@next/bundle-analyzer": "^15.5.4",
     "knip": "^5.64.2",
     "lefthook": "^1.13.5",
-    "ultracite": "^5.4.6"
+    "ultracite": "^5.6.2"
   }
 }
