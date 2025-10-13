@@ -30,9 +30,10 @@
  */
 
 import { z } from 'zod';
+import { statsRedis } from '@/src/lib/cache';
 import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/redis';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import { batchFetch } from '@/src/lib/utils/batch.utils';
 
 /**
  * Content item with view count and growth rate data from Redis
@@ -50,8 +51,8 @@ import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-it
  * ```
  */
 export interface TrendingContentItem extends UnifiedContentItem {
-  viewCount?: number;
-  growthRate?: number;
+  viewCount?: number | undefined;
+  growthRate?: number | undefined;
 }
 
 /**
@@ -172,7 +173,7 @@ async function getTrendingContent(
     const yesterdayStr = yesterdayUtc.toISOString().split('T')[0];
 
     // Batch fetch: today's views, yesterday's views, and total views
-    const [todayViews, yesterdayViews, totalViews] = await Promise.all([
+    const [todayViews, yesterdayViews, totalViews] = await batchFetch([
       statsRedis.getDailyViewCounts(items, todayStr),
       statsRedis.getDailyViewCounts(items, yesterdayStr),
       statsRedis.getViewCounts(items),
@@ -373,7 +374,7 @@ async function getPopularContent(
 
 /**
  * Get recent content based on dateAdded field
- * No Redis dependency - pure metadata sorting
+ * Enriches with view counts from Redis for consistent display
  */
 async function getRecentContent(
   allContent: UnifiedContentItem[],
@@ -392,7 +393,34 @@ async function getRecentContent(
       })
       .slice(0, limit);
 
-    logger.info('Recent content sorted by dateAdded', {
+    // Enrich with view counts from Redis (consistent with trending/popular)
+    if (statsRedis.isConnected() && sorted.length > 0) {
+      const items = sorted.map((item) => ({
+        category: item.category,
+        slug: item.slug,
+      }));
+
+      const viewCounts = await statsRedis.getViewCounts(items);
+
+      const enriched: TrendingContentItem[] = sorted.map((item) => {
+        const key = `${item.category}:${item.slug}`;
+        const viewCount = viewCounts[key] || 0;
+
+        return {
+          ...item,
+          viewCount,
+        };
+      });
+
+      logger.info('Recent content sorted by dateAdded with view counts', {
+        totalItems: allContent.length,
+        withDates: enriched.length,
+      });
+
+      return enriched;
+    }
+
+    logger.info('Recent content sorted by dateAdded (no Redis)', {
       totalItems: allContent.length,
       withDates: sorted.length,
     });
@@ -445,17 +473,128 @@ function getFallbackPopular(
 }
 
 /**
- * Batch trending calculation for multiple categories
+ * Interleave sponsored content into organic results
+ * Maintains 1 sponsored per 5 organic ratio (20% max)
  */
-export async function getBatchTrendingData(contentByCategory: {
-  agents: UnifiedContentItem[];
-  mcp: UnifiedContentItem[];
-  rules: UnifiedContentItem[];
-  commands: UnifiedContentItem[];
-  hooks: UnifiedContentItem[];
-  statuslines?: UnifiedContentItem[];
-  collections?: UnifiedContentItem[];
-}) {
+function interleaveSponsored<T extends UnifiedContentItem>(
+  organic: T[],
+  sponsored: Array<{ content_id: string; tier: string; sponsored_id: string }>,
+  contentMap: Map<string, T>
+): Array<
+  T & {
+    isSponsored?: boolean | undefined;
+    sponsoredId?: string | undefined;
+    sponsorTier?: string | undefined;
+  }
+> {
+  if (sponsored.length === 0)
+    return organic as Array<
+      T & {
+        isSponsored?: boolean | undefined;
+        sponsoredId?: string | undefined;
+        sponsorTier?: string | undefined;
+      }
+    >;
+
+  const result: Array<
+    T & {
+      isSponsored?: boolean | undefined;
+      sponsoredId?: string | undefined;
+      sponsorTier?: string | undefined;
+    }
+  > = [];
+  let sponsoredIndex = 0;
+  const INJECTION_RATIO = 5; // 1 sponsored per 5 organic
+
+  for (let i = 0; i < organic.length; i++) {
+    // Add organic content
+    const organicItem = organic[i];
+    if (organicItem) {
+      result.push(organicItem);
+    }
+
+    // Inject sponsored every 5 items (if available)
+    if ((i + 1) % INJECTION_RATIO === 0 && sponsoredIndex < sponsored.length) {
+      const sponsoredItem = sponsored[sponsoredIndex];
+      const content = sponsoredItem && contentMap.get(sponsoredItem.content_id);
+
+      if (content) {
+        result.push({
+          ...content,
+          isSponsored: true,
+          sponsoredId: sponsoredItem.sponsored_id,
+          sponsorTier: sponsoredItem.tier,
+        });
+        sponsoredIndex++;
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Get active sponsored content from database
+ */
+async function getActiveSponsored(): Promise<
+  Array<{ content_id: string; content_type: string; tier: string; sponsored_id: string }>
+> {
+  try {
+    // Dynamic import to avoid circular dependency
+    const { createClient } = await import('@/src/lib/supabase/server');
+    const supabase = await createClient();
+
+    const now = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from('sponsored_content')
+      .select('id, content_id, content_type, tier, impression_limit, impression_count')
+      .eq('active', true)
+      .lte('start_date', now)
+      .gte('end_date', now)
+      .order('tier', { ascending: true }); // Featured first, then promoted, spotlight
+
+    if (error || !data) {
+      return [];
+    }
+
+    // Filter out items that hit impression limit
+    return data
+      .filter((item) => {
+        const impressionCount = item.impression_count ?? 0;
+        return !item.impression_limit || impressionCount < item.impression_limit;
+      })
+      .map((item) => ({
+        content_id: item.content_id,
+        content_type: item.content_type,
+        tier: item.tier,
+        sponsored_id: item.id,
+      }));
+  } catch (error) {
+    logger.error(
+      'Failed to fetch sponsored content',
+      error instanceof Error ? error : new Error(String(error))
+    );
+    return [];
+  }
+}
+
+/**
+ * Batch trending calculation for multiple categories
+ * Now includes sponsored content injection
+ */
+export async function getBatchTrendingData(
+  contentByCategory: {
+    agents: UnifiedContentItem[];
+    mcp: UnifiedContentItem[];
+    rules: UnifiedContentItem[];
+    commands: UnifiedContentItem[];
+    hooks: UnifiedContentItem[];
+    statuslines?: UnifiedContentItem[];
+    collections?: UnifiedContentItem[];
+  },
+  options?: { includeSponsored?: boolean }
+) {
   // Combine all content for batch Redis query
   const allContent = [
     ...contentByCategory.agents,
@@ -467,22 +606,41 @@ export async function getBatchTrendingData(contentByCategory: {
     ...(contentByCategory.collections || []),
   ];
 
-  // Run all calculations in parallel
-  const [trending, popular, recent] = await Promise.all([
+  // Run all calculations in parallel (including sponsored fetch)
+  const [trending, popular, recent, sponsored] = await batchFetch([
     getTrendingContent(allContent),
     getPopularContent(allContent),
     getRecentContent(allContent),
+    options?.includeSponsored !== false ? getActiveSponsored() : Promise.resolve([]),
   ]);
 
+  // Create content map for quick lookups
+  const contentMap = new Map<string, UnifiedContentItem>();
+  for (const item of allContent) {
+    contentMap.set(item.slug, item);
+  }
+
+  // Interleave sponsored content if enabled
+  const trendingWithSponsored =
+    options?.includeSponsored !== false
+      ? interleaveSponsored(trending, sponsored, contentMap)
+      : trending;
+
+  const popularWithSponsored =
+    options?.includeSponsored !== false
+      ? interleaveSponsored(popular, sponsored, contentMap)
+      : popular;
+
   return {
-    trending,
-    popular,
-    recent,
+    trending: trendingWithSponsored,
+    popular: popularWithSponsored,
+    recent, // Don't inject into recent (keep chronological)
     metadata: {
       algorithm: 'redis-views',
       generated: new Date().toISOString(),
       redisEnabled: statsRedis.isEnabled(),
       totalItems: allContent.length,
+      sponsoredItems: sponsored.length,
     },
   };
 }

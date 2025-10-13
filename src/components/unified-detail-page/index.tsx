@@ -19,10 +19,12 @@
  * @see components/unified-detail-page.tsx - Original 685-line implementation
  */
 
+import { ReviewSection } from '@/src/components/features/reviews/review-section';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { getContentTypeConfig } from '@/src/lib/config/content-type-configs';
 import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
+import { createClient } from '@/src/lib/supabase/server';
 import type { InstallationSteps } from '@/src/lib/types/content-type-config';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
@@ -33,6 +35,7 @@ import { ConfigurationSection } from './sections/configuration-section';
 import { ContentSection } from './sections/content-section';
 import { InstallationSection } from './sections/installation-section';
 import { TroubleshootingSection } from './sections/troubleshooting-section';
+import { UsageExamplesSection } from './sections/usage-examples-section';
 import { DetailSidebar } from './sidebar/detail-sidebar';
 
 export interface UnifiedDetailPageProps {
@@ -51,6 +54,13 @@ export async function UnifiedDetailPage({
 
   // Generate display title (Server Component - direct computation)
   const displayTitle = getDisplayTitle(item);
+
+  // Get current user for review functionality (Server Component - async)
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const currentUserId = user?.id;
 
   // Generate content using generators (Server Component - direct computation)
   const installation = (() => {
@@ -223,17 +233,42 @@ export async function UnifiedDetailPage({
               />
             )}
 
-            {/* Examples Section (MCP-specific) */}
-            {config.sections.examples && 'examples' in item && Array.isArray(item.examples) && (
-              <BulletListSection
-                title="Usage Examples"
-                description="Common queries and interactions"
-                items={item.examples as string[]}
-                icon={config.icon}
-                bulletColor="accent"
-                variant="mono"
+            {/* Usage Examples Section - GitHub-style code snippets with syntax highlighting */}
+            {config.sections.examples &&
+              'examples' in item &&
+              Array.isArray(item.examples) &&
+              item.examples.length > 0 &&
+              // Type guard: Check if examples use new structured format (objects with title/code/language)
+              item.examples.every((ex) => typeof ex === 'object' && 'code' in ex) && (
+                <UsageExamplesSection
+                  examples={
+                    item.examples as Array<{
+                      title: string;
+                      code: string;
+                      language:
+                        | 'typescript'
+                        | 'javascript'
+                        | 'json'
+                        | 'bash'
+                        | 'shell'
+                        | 'python'
+                        | 'yaml'
+                        | 'markdown'
+                        | 'plaintext';
+                      description?: string;
+                    }>
+                  }
+                />
+              )}
+
+            {/* Reviews & Ratings Section */}
+            <div className="mt-12 pt-12 border-t">
+              <ReviewSection
+                contentType={item.category}
+                contentSlug={item.slug}
+                currentUserId={currentUserId}
               />
-            )}
+            </div>
 
             {/* Email CTA - Inline variant */}
             <InlineEmailCTA variant="inline" context="content-detail" category={item.category} />

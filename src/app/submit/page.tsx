@@ -1,394 +1,264 @@
-'use client';
-
-import { useId, useState } from 'react';
-import { toast } from 'sonner';
-import { z } from 'zod';
-import { Button } from '@/src/components/ui/button';
+import Link from 'next/link';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
+import { SidebarCard } from '@/src/components/shared/sidebar-card';
+import { SubmitFormClient } from '@/src/components/submit/submit-form-client';
+import { Badge } from '@/src/components/ui/badge';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/src/components/ui/card';
-import { Input } from '@/src/components/ui/input';
-import { Label } from '@/src/components/ui/label';
-import { Textarea } from '@/src/components/ui/textarea';
-import { CheckCircle, ExternalLink, FileJson, Github, Send } from '@/src/lib/icons';
-import { type ConfigSubmissionInput, configSubmissionSchema } from '@/src/lib/schemas/form.schema';
+  getRecentMerged,
+  getSubmissionStats,
+  getTopContributors,
+} from '@/src/lib/actions/business.actions';
+import { CheckCircle, Clock, Lightbulb, Medal, TrendingUp, Trophy } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import {
-  generateGitHubIssueUrl,
-  openGitHubIssue,
-  validateIssueUrlLength,
-} from '@/src/lib/utils/github-issue-url';
+import { batchFetch } from '@/src/lib/utils/batch.utils';
 
-export default function SubmitPage() {
-  // Generate unique IDs for form elements
-  const typeId = useId();
-  const nameId = useId();
-  const descriptionId = useId();
-  const categoryId = useId();
-  const authorId = useId();
-  const githubId = useId();
-  const contentId = useId();
-  const tagsId = useId();
+const SUBMISSION_TIPS = [
+  'Be specific in your descriptions - help users understand what your config does',
+  'Add examples in your prompts - they make configs more useful',
+  'Test thoroughly before submitting - we review for quality',
+  'Use clear names - avoid abbreviations and jargon',
+  'Tag appropriately - tags help users discover your work',
+];
 
-  // Local form state with proper typing
-  const [formData, setFormData] = useState<ConfigSubmissionInput>({
-    type: 'agents', // Default to first valid enum value
-    name: '',
-    description: '',
-    category: '',
-    author: '',
-    github: '',
-    content: '',
-    tags: '',
-  });
+const TYPE_LABELS: Record<string, string> = {
+  agents: 'Agent',
+  mcp: 'MCP',
+  rules: 'Rule',
+  commands: 'Command',
+  hooks: 'Hook',
+  statuslines: 'Statusline',
+};
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isValidating, setIsValidating] = useState(false);
-  const [lastSubmittedUrl, setLastSubmittedUrl] = useState<string | null>(null);
+function formatTimeAgo(dateString: string): string {
+  const now = new Date();
+  const date = new Date(dateString);
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-  // Client-side validation with Zod
-  const validateField = (fieldName: string, value: string | undefined) => {
-    try {
-      // Validate individual field using Zod schema
-      const fieldSchema =
-        configSubmissionSchema.shape[fieldName as keyof typeof configSubmissionSchema.shape];
-      if (fieldSchema) {
-        fieldSchema.parse(value);
-        setErrors((prev) => {
-          const newErrors = { ...prev };
-          delete newErrors[fieldName];
-          return newErrors;
-        });
-      }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        setErrors((prev) => ({
-          ...prev,
-          [fieldName]: error.issues[0]?.message || 'Invalid value',
-        }));
-      }
-    }
-  };
+  if (seconds < 60) return 'just now';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+  return `${Math.floor(seconds / 604800)}w ago`;
+}
 
-  // Handle input changes with validation
-  const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    validateField(name, value);
-  };
+// SEO Metadata - SHA-2961
+export const metadata = await generatePageMetadata('/submit');
 
-  // Handle form submission - generate GitHub issue URL and redirect
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsValidating(true);
+/**
+ * Submit Page - Server Component
+ * Fetches sidebar data in parallel on server for performance
+ *
+ * RESPONSIVE DESIGN:
+ * - Desktop (≥1024px): Two-column layout (form + sticky sidebar)
+ * - Tablet (768-1023px): Single column, sidebar below form
+ * - Mobile (<768px): Single column, sidebar below form, optimized spacing
+ *
+ * PERFORMANCE:
+ * - Server-side data fetching (parallel queries)
+ * - Edge caching (5-10 min TTL)
+ * - Minimal client-side JavaScript
+ */
+export default async function SubmitPage() {
+  // Fetch sidebar data in parallel (cached for 5-10 min)
+  const [statsResult, recentResult, contributorsResult] = await batchFetch([
+    getSubmissionStats({}),
+    getRecentMerged({ limit: 5 }),
+    getTopContributors({ limit: 5 }),
+  ]);
 
-    try {
-      // Validate entire form
-      const validatedData = configSubmissionSchema.parse(formData);
-      setErrors({});
-
-      // Generate GitHub issue URL
-      const issueUrl = generateGitHubIssueUrl(validatedData);
-
-      // Validate URL length
-      if (!validateIssueUrlLength(issueUrl)) {
-        toast.error('Content Too Large', {
-          description: 'Please reduce the size of your configuration content.',
-        });
-        setIsValidating(false);
-        return;
-      }
-
-      // Store URL for display
-      setLastSubmittedUrl(issueUrl);
-
-      // Open GitHub issue in new tab
-      const opened = openGitHubIssue(issueUrl);
-
-      if (opened) {
-        toast.success('Redirecting to GitHub', {
-          description: 'Review and submit your configuration on GitHub.',
-        });
-      } else {
-        // Popup blocked - show fallback
-        toast.error('Popup Blocked', {
-          description: 'Please allow popups or use the link below.',
-          action: {
-            label: 'Open GitHub',
-            onClick: () => window.open(issueUrl, '_blank'),
-          },
-        });
-      }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const fieldErrors: Record<string, string> = {};
-        for (const issue of error.issues) {
-          const fieldName = issue.path.join('.');
-          fieldErrors[fieldName] = issue.message;
-        }
-        setErrors(fieldErrors);
-        toast.error('Validation Error', {
-          description: 'Please check the form for errors.',
-        });
-      } else if (error instanceof Error) {
-        toast.error('Submission Error', {
-          description: error.message,
-        });
-      }
-    }
-
-    setIsValidating(false);
-  };
+  const stats = statsResult?.data || { total: 0, pending: 0, mergedThisWeek: 0 };
+  const recentMerged = recentResult?.data || [];
+  const topContributors = contributorsResult?.data || [];
 
   return (
-    <div className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
-      {/* Header */}
-      <div
-        className={`${UI_CLASSES.MAX_W_3XL} ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.TEXT_CENTER} ${UI_CLASSES.MB_12}`}
-      >
-        <h1 className="text-4xl font-bold mb-4">Submit Your Configuration</h1>
-        <p className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-          Share your Claude configurations with the community
+    <div className="container mx-auto px-4 py-8 sm:py-12 max-w-7xl">
+      {/* Header - Responsive text sizes */}
+      <div className={`${UI_CLASSES.TEXT_CENTER} mb-6 sm:mb-8 lg:mb-12`}>
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4">
+          Submit Your Configuration
+        </h1>
+        <p
+          className={`text-base sm:text-lg ${UI_CLASSES.TEXT_MUTED_FOREGROUND} max-w-3xl mx-auto px-2 sm:px-4`}
+        >
+          Share your Claude configurations with the community - no JSON formatting required!
         </p>
       </div>
 
-      {/* Success Message with GitHub Link */}
-      {lastSubmittedUrl && (
-        <Card
-          className={`${UI_CLASSES.MAX_W_2XL} ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.MB_8} border-green-500/20 bg-green-500/5`}
-        >
-          <CardContent className={UI_CLASSES.PT_6}>
-            <div className={`flex ${UI_CLASSES.ITEMS_START} gap-3`}>
-              <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
-              <div className="flex-1">
-                <p className={UI_CLASSES.FONT_MEDIUM}>Ready to submit!</p>
-                <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
-                  Your configuration has been formatted. Click below to review and submit on GitHub.
-                </p>
-                <Button
-                  variant="link"
-                  size="sm"
-                  asChild
-                  className={`${UI_CLASSES.MT_2} p-0 h-auto`}
-                >
-                  <a href={lastSubmittedUrl} target="_blank" rel="noopener noreferrer">
-                    Open GitHub Issue
-                    <ExternalLink className="h-3 w-3 ml-1" />
-                  </a>
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Two-column layout: Form + Sidebar */}
+      {/* 
+        BREAKPOINTS:
+        - Mobile (<1024px): Single column, form first, sidebar second
+        - Desktop (≥1024px): Two columns, form left (flexible), sidebar right (380px fixed), sticky sidebar
+      */}
+      <div className="grid lg:grid-cols-[1fr_380px] gap-6 lg:gap-8 items-start">
+        {/* LEFT COLUMN: Form (appears first on all screen sizes) */}
+        <div className="w-full min-w-0">
+          <SubmitFormClient />
+        </div>
 
-      {/* Main Form Card */}
-      <Card className={`${UI_CLASSES.MAX_W_2XL} ${UI_CLASSES.MX_AUTO}`}>
-        <CardHeader>
-          <CardTitle>Configuration Details</CardTitle>
-          <CardDescription>
-            Fill out the form below to generate a pre-filled GitHub issue for review
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Type Selection */}
-            <div className="space-y-2">
-              <Label htmlFor={typeId}>Type *</Label>
-              <select
-                id={typeId}
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-                required
-                className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-                  errors.type ? 'border-destructive' : ''
-                }`}
+        {/* RIGHT COLUMN: Sidebar */}
+        {/* 
+          RESPONSIVE BEHAVIOR:
+          - Mobile/Tablet: Appears below form, full width
+          - Desktop: Sticky sidebar at top-24, fixed width 380px
+        */}
+        <aside className="w-full space-y-4 sm:space-y-6 lg:sticky lg:top-24 lg:h-fit">
+          {/* Stats Card */}
+          <SidebarCard
+            title="📊 Live Stats"
+            titleClassName={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}
+            contentClassName={UI_CLASSES.SPACE_Y_3}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-blue-400" />
+                <span className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                  Total Configs
+                </span>
+              </div>
+              <span className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.FONT_SEMIBOLD}`}>
+                {stats.total}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-yellow-400" />
+                <span className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                  Pending Review
+                </span>
+              </div>
+              <span className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.FONT_SEMIBOLD} text-yellow-400`}>
+                {stats.pending}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-green-400" />
+                <span className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                  Merged This Week
+                </span>
+              </div>
+              <span className={`${UI_CLASSES.TEXT_LG} ${UI_CLASSES.FONT_SEMIBOLD} text-green-400`}>
+                {stats.mergedThisWeek}
+              </span>
+            </div>
+          </SidebarCard>
+
+          {/* Recent Submissions Card */}
+          <SidebarCard
+            title="🔥 Recently Merged"
+            titleClassName={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}
+            contentClassName={UI_CLASSES.SPACE_Y_3}
+            show={recentMerged.length > 0}
+          >
+            {recentMerged.map((submission) => (
+              <div
+                key={submission.id}
+                className={`flex items-start gap-2 pb-3 ${UI_CLASSES.BORDER_B} border-border/50 last:border-0 last:pb-0`}
               >
-                <option value="agents">Agent</option>
-                <option value="mcp">MCP Server</option>
-                <option value="rules">Rule</option>
-                <option value="commands">Command</option>
-                <option value="hooks">Hook</option>
-                <option value="statuslines">Statusline</option>
-              </select>
-              {errors.type && (
-                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.type}</p>
-              )}
-            </div>
-
-            {/* Name */}
-            <div className="space-y-2">
-              <Label htmlFor={nameId}>Name *</Label>
-              <Input
-                id={nameId}
-                name="name"
-                placeholder="e.g., Code Review Assistant"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className={errors.name ? 'border-destructive' : ''}
-              />
-              {errors.name && (
-                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.name}</p>
-              )}
-            </div>
-
-            {/* Description */}
-            <div className="space-y-2">
-              <Label htmlFor={descriptionId}>Description *</Label>
-              <Textarea
-                id={descriptionId}
-                name="description"
-                placeholder="Brief description of what your configuration does..."
-                value={formData.description}
-                onChange={handleChange}
-                required
-                rows={3}
-                className={errors.description ? 'border-destructive' : ''}
-              />
-              {errors.description && (
-                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.description}</p>
-              )}
-            </div>
-
-            {/* Category */}
-            <div className="space-y-2">
-              <Label htmlFor={categoryId}>Category *</Label>
-              <Input
-                id={categoryId}
-                name="category"
-                placeholder="e.g., Development, Productivity, Writing"
-                value={formData.category}
-                onChange={handleChange}
-                required
-                className={errors.category ? 'border-destructive' : ''}
-              />
-              {errors.category && (
-                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.category}</p>
-              )}
-            </div>
-
-            {/* Author */}
-            <div className="space-y-2">
-              <Label htmlFor={authorId}>Author *</Label>
-              <Input
-                id={authorId}
-                name="author"
-                placeholder="Your name or GitHub username"
-                value={formData.author}
-                onChange={handleChange}
-                required
-                className={errors.author ? 'border-destructive' : ''}
-              />
-              {errors.author && (
-                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.author}</p>
-              )}
-            </div>
-
-            {/* GitHub URL */}
-            <div className="space-y-2">
-              <Label htmlFor={githubId}>GitHub URL (optional)</Label>
-              <div className="flex gap-2">
-                <Github className="h-5 w-5 mt-2.5 text-muted-foreground" />
-                <Input
-                  id={githubId}
-                  name="github"
-                  type="url"
-                  placeholder="https://github.com/username/repo"
-                  value={formData.github}
-                  onChange={handleChange}
-                  className={errors.github ? 'border-destructive' : ''}
-                />
-              </div>
-              {errors.github && (
-                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.github}</p>
-              )}
-            </div>
-
-            {/* Configuration Content */}
-            <div className="space-y-2">
-              <Label htmlFor={contentId}>Configuration (JSON) *</Label>
-              <div className="flex gap-2 items-start">
-                <FileJson className="h-5 w-5 mt-2.5 text-muted-foreground" />
-                <Textarea
-                  id={contentId}
-                  name="content"
-                  placeholder='{"name": "example", "version": "1.0.0"}'
-                  value={formData.content}
-                  onChange={handleChange}
-                  required
-                  rows={8}
-                  className={`font-mono text-sm ${errors.content ? 'border-destructive' : ''}`}
-                />
-              </div>
-              {errors.content && (
-                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.content}</p>
-              )}
-            </div>
-
-            {/* Tags */}
-            <div className="space-y-2">
-              <Label htmlFor={tagsId}>Tags (optional)</Label>
-              <Input
-                id={tagsId}
-                name="tags"
-                placeholder="productivity, ai, automation (comma-separated)"
-                value={formData.tags}
-                onChange={handleChange}
-                className={errors.tags ? 'border-destructive' : ''}
-              />
-              {errors.tags && (
-                <p className={`${UI_CLASSES.TEXT_SM} text-destructive`}>{errors.tags}</p>
-              )}
-              <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
-                Separate multiple tags with commas (max 10)
-              </p>
-            </div>
-
-            {/* Submit Button */}
-            <div className="flex gap-4 pt-4">
-              <Button type="submit" disabled={isValidating} className="flex-1">
-                {isValidating ? (
-                  <>
-                    <Github className="mr-2 h-4 w-4 animate-pulse" />
-                    Generating GitHub Issue...
-                  </>
-                ) : (
-                  <>
-                    <Send className="mr-2 h-4 w-4" />
-                    Create GitHub Issue
-                  </>
-                )}
-              </Button>
-            </div>
-
-            {/* Info Message */}
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-              <div className="flex gap-3">
-                <Github className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} text-blue-400`}>
-                    How submissions work
+                <CheckCircle className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} truncate`}>
+                    {submission.content_name}
                   </p>
-                  <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
-                    When you submit, we&apos;ll generate a pre-filled GitHub issue with your
-                    configuration. You&apos;ll be able to review and edit it before submitting. No
-                    GitHub account required to fill out this form, but you&apos;ll need one to
-                    create the issue.
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <Badge variant="outline" className="text-xs">
+                      {TYPE_LABELS[submission.content_type]}
+                    </Badge>
+                    {submission.user && (
+                      <span className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                        by{' '}
+                        <Link
+                          href={`/u/${submission.user.slug}`}
+                          className="hover:text-foreground transition-colors"
+                        >
+                          @{submission.user.name}
+                        </Link>
+                      </span>
+                    )}
+                  </div>
+                  <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
+                    {formatTimeAgo(submission.merged_at)}
                   </p>
                 </div>
               </div>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+            ))}
+          </SidebarCard>
+
+          {/* Top Contributors Card */}
+          <SidebarCard
+            title="🌟 Top Contributors"
+            titleClassName={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM}`}
+            contentClassName={UI_CLASSES.SPACE_Y_2}
+            show={topContributors.length > 0}
+          >
+            {topContributors.map((contributor) => {
+              const getMedalIcon = (rank: number) => {
+                if (rank === 1) return <Trophy className="h-4 w-4 text-yellow-400" />;
+                if (rank === 2) return <Medal className="h-4 w-4 text-gray-400" />;
+                if (rank === 3) return <Medal className="h-4 w-4 text-amber-600" />;
+                return null;
+              };
+
+              return (
+                <Link
+                  key={contributor.slug}
+                  href={`/u/${contributor.slug}`}
+                  className={`flex items-center justify-between ${UI_CLASSES.PY_2} hover:bg-accent/5 ${UI_CLASSES.PX_2} -mx-2 rounded transition-colors`}
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span
+                      className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} text-muted-foreground w-4 flex-shrink-0`}
+                    >
+                      {contributor.rank}.
+                    </span>
+                    {getMedalIcon(contributor.rank)}
+                    <span className={`${UI_CLASSES.TEXT_SM} truncate`}>@{contributor.name}</span>
+                  </div>
+                  <span
+                    className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_SEMIBOLD} text-green-400 flex-shrink-0 ml-2`}
+                  >
+                    {contributor.mergedCount}
+                  </span>
+                </Link>
+              );
+            })}
+          </SidebarCard>
+
+          {/* Tips Card */}
+          <SidebarCard
+            title={
+              <>
+                <Lightbulb className="h-4 w-4 text-blue-400" />💡 Tips for Success
+              </>
+            }
+            className="bg-blue-500/5 border-blue-500/20"
+            titleClassName={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} flex items-center gap-2`}
+          >
+            <ul className={`${UI_CLASSES.SPACE_Y_2} list-none`}>
+              {SUBMISSION_TIPS.map((tip) => (
+                <li key={tip} className="flex items-start gap-2">
+                  <span className="text-blue-400 text-xs mt-0.5">•</span>
+                  <span className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                    {tip}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </SidebarCard>
+        </aside>
+      </div>
+
+      {/* Email CTA - Footer section (matching homepage pattern) */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <InlineEmailCTA
+          variant="hero"
+          context="submit-page"
+          headline="Join 1,000+ Claude Power Users"
+          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+        />
+      </section>
     </div>
   );
 }

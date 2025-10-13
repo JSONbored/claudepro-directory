@@ -6,7 +6,7 @@ import path from 'path';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card } from '@/src/components/ui/card';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { ROUTES } from '@/src/lib/constants';
 import { markdownToSafeHtml } from '@/src/lib/content/markdown-utils';
 import { ArrowLeft, Tags } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -83,28 +83,8 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const resolvedParams = await params;
-  const data = await getComparisonData(resolvedParams.slug);
-
-  if (!data) {
-    return {
-      title: 'Comparison Not Found',
-      description: 'The requested comparison could not be found.',
-    };
-  }
-
-  // Use centralized metadata system with AI citation optimization
-  // Comparison route uses Article schema for better AI indexing
-  return await generatePageMetadata('/compare/:slug', {
-    params: { slug: resolvedParams.slug },
-    item: {
-      title: data.title,
-      description: data.description,
-      dateAdded: data.lastUpdated,
-      lastModified: data.lastUpdated,
-      author: APP_CONFIG.author,
-    },
-  });
+  const { slug } = await params;
+  return generatePageMetadata('/compare/:slug', { params: { slug } });
 }
 
 export default async function ComparisonPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -192,11 +172,11 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
         <nav
           className={`flex items-center space-x-2 text-sm text-muted-foreground ${UI_CLASSES.MB_6}`}
         >
-          <Link href="/" className={UI_CLASSES.HOVER_TEXT_PRIMARY}>
+          <Link href={ROUTES.HOME} className={UI_CLASSES.HOVER_TEXT_PRIMARY}>
             Home
           </Link>
           <span>/</span>
-          <Link href="/compare" className={UI_CLASSES.HOVER_TEXT_PRIMARY}>
+          <Link href={ROUTES.COMPARE} className={UI_CLASSES.HOVER_TEXT_PRIMARY}>
             Compare
           </Link>
           <span>/</span>
@@ -204,7 +184,7 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
         </nav>
 
         {/* Back Button */}
-        <Link href="/">
+        <Link href={ROUTES.HOME}>
           <Button variant="ghost" size="sm" className={UI_CLASSES.MB_6}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Directory
@@ -242,12 +222,12 @@ export default async function ComparisonPage({ params }: { params: Promise<{ slu
                 Browse {data.category1}
               </Button>
             </Link>
-            <Link href="/trending">
+            <Link href={ROUTES.TRENDING}>
               <Button variant="outline" size="sm">
                 Trending Tools
               </Button>
             </Link>
-            <Link href="/submit">
+            <Link href={ROUTES.SUBMIT}>
               <Button size="sm">Submit Your Tool</Button>
             </Link>
           </div>

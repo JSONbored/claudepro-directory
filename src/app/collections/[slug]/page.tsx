@@ -34,8 +34,15 @@ import { trackView } from '@/src/lib/actions/track-view';
 import { getContentBySlug } from '@/src/lib/content/content-loaders';
 import { AlertTriangle, CheckCircle, Clock, Layers } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
+import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import type { CollectionItemReference } from '@/src/lib/schemas/content/collection.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { batchMap } from '@/src/lib/utils/batch.utils';
+
+interface ItemWithData extends CollectionItemReference {
+  data: UnifiedContentItem;
+}
 
 /**
  * ISR revalidation (4 hours)
@@ -92,28 +99,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const collection = await getCollectionFullContent(slug);
-
-  if (!collection) {
-    return {
-      title: 'Collection Not Found',
-      description: 'The requested collection could not be found.',
-    };
-  }
-
-  // Use centralized metadata system with CollectionPage schema
-  // Collections use special structured data for better discovery
-  return await generatePageMetadata('/collections/:slug', {
-    params: { slug },
-    item: {
-      title: collection.title || collection.slug,
-      description: collection.description,
-      tags: collection.tags,
-      author: collection.author,
-      dateAdded: collection.dateAdded,
-      lastModified: collection.dateAdded,
-    },
-  });
+  return generatePageMetadata('/collections/:slug', { params: { slug } });
 }
 
 /**
@@ -140,8 +126,9 @@ export default async function CollectionDetailPage({
   });
 
   // Load all referenced items with full content
-  const itemsWithContent = await Promise.all(
-    collection.items.map(async (itemRef) => {
+  const itemsWithContent = await batchMap(
+    collection.items,
+    async (itemRef: CollectionItemReference): Promise<ItemWithData | null> => {
       try {
         const item = await getContentBySlug(itemRef.category as ContentCategory, itemRef.slug);
         return item ? { ...itemRef, data: item } : null;
@@ -152,15 +139,17 @@ export default async function CollectionDetailPage({
         });
         return null;
       }
-    })
+    }
   );
 
   // Filter out failed loads
-  const validItems = itemsWithContent.filter((item) => item !== null);
+  const validItems = itemsWithContent.filter(
+    (item: ItemWithData | null): item is ItemWithData => item !== null
+  );
 
   // Group items by category
   const itemsByCategory = validItems.reduce(
-    (acc, item) => {
+    (acc: Record<string, ItemWithData[]>, item: ItemWithData) => {
       if (!item) return acc;
       const category = item.category;
       if (!acc[category]) {
@@ -169,7 +158,7 @@ export default async function CollectionDetailPage({
       acc[category].push(item);
       return acc;
     },
-    {} as Record<string, typeof validItems>
+    {} as Record<string, ItemWithData[]>
   );
 
   const title = collection.title || collection.slug;
@@ -193,11 +182,13 @@ export default async function CollectionDetailPage({
                 className="text-sm border-blue-500/20 bg-blue-500/10 text-blue-400"
               >
                 <Layers className="h-3 w-3 mr-1" />
-                {COLLECTION_TYPE_LABELS[collection.collectionType]}
+                {COLLECTION_TYPE_LABELS[
+                  collection.collectionType as keyof typeof COLLECTION_TYPE_LABELS
+                ] || collection.collectionType}
               </Badge>
               <Badge
                 variant="outline"
-                className={`text-sm ${DIFFICULTY_COLORS[collection.difficulty]}`}
+                className={`text-sm ${DIFFICULTY_COLORS[collection.difficulty as keyof typeof DIFFICULTY_COLORS] || ''}`}
               >
                 {collection.difficulty}
               </Badge>
@@ -219,7 +210,7 @@ export default async function CollectionDetailPage({
             {/* Tags */}
             {collection.tags && collection.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
-                {collection.tags.map((tag) => (
+                {collection.tags.map((tag: string) => (
                   <TagBadge key={tag} tag={tag} />
                 ))}
               </div>
@@ -242,7 +233,7 @@ export default async function CollectionDetailPage({
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {collection.prerequisites.map((prereq) => (
+                  {collection.prerequisites.map((prereq: string) => (
                     <li key={prereq} className="flex items-start gap-2">
                       <CheckCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                       <span className="text-sm text-muted-foreground">{prereq}</span>
@@ -269,20 +260,23 @@ export default async function CollectionDetailPage({
               }
             >
               <div className="space-y-8">
-                {Object.entries(itemsByCategory).map(([category, items]) => (
-                  <div key={category}>
-                    <h3 className="text-lg font-semibold text-foreground mb-4">
-                      {CATEGORY_NAMES[category] || category} ({items.length})
-                    </h3>
-                    <div className="grid gap-4 sm:grid-cols-1">
-                      {items.map((item) =>
-                        item?.data ? (
-                          <ConfigCard key={item.slug} item={item.data} showCategory={false} />
-                        ) : null
-                      )}
+                {(Object.entries(itemsByCategory) as [string, ItemWithData[]][]).map(
+                  ([category, items]) => (
+                    <div key={category}>
+                      <h3 className="text-lg font-semibold text-foreground mb-4">
+                        {CATEGORY_NAMES[category as keyof typeof CATEGORY_NAMES] || category} (
+                        {items.length})
+                      </h3>
+                      <div className="grid gap-4 sm:grid-cols-1">
+                        {items.map((item: ItemWithData) =>
+                          item?.data ? (
+                            <ConfigCard key={item.slug} item={item.data} showCategory={false} />
+                          ) : null
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             </Suspense>
           </div>
@@ -295,8 +289,8 @@ export default async function CollectionDetailPage({
               </CardHeader>
               <CardContent>
                 <ol className="space-y-2">
-                  {collection.installationOrder.map((slug, index) => {
-                    const item = validItems.find((i) => i?.slug === slug);
+                  {collection.installationOrder.map((slug: string, index: number) => {
+                    const item = validItems.find((i: ItemWithData) => i?.slug === slug);
                     return (
                       <li key={slug} className="flex items-start gap-3">
                         <span className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-primary text-sm font-semibold">

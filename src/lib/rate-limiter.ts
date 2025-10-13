@@ -6,8 +6,9 @@
 import { headers } from 'next/headers';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { redisClient } from '@/src/lib/cache';
+import { ENDPOINT_RATE_LIMITS } from '@/src/lib/config/rate-limits.config';
 import { logger } from '@/src/lib/logger';
-import { redisClient } from '@/src/lib/redis';
 import { createRequestId } from '@/src/lib/schemas/branded-types.schema';
 import {
   ipAddressSchema,
@@ -75,59 +76,19 @@ export type RateLimitKey = z.infer<typeof rateLimitKeySchema>;
 
 /**
  * Default rate limit configurations for different endpoint types
- * All configurations are validated using Zod schemas
+ * All configurations are validated using Zod schemas in rate-limits.config.ts
  */
 const RATE_LIMIT_CONFIGS = {
-  // Public API endpoints - generous but protected
-  api: middlewareRateLimitConfigSchema.parse({
-    maxRequests: 1000,
-    windowMs: 3600000, // 1 hour in ms
-  }),
-  // Search endpoints - more restrictive due to computational cost
-  search: middlewareRateLimitConfigSchema.parse({
-    maxRequests: 100,
-    windowMs: 300000, // 5 minutes in ms
-  }),
-  // Submit endpoints - balanced to prevent abuse while allowing legitimate use
-  submit: middlewareRateLimitConfigSchema.parse({
-    maxRequests: 30, // Increased from 10 to allow form corrections
-    windowMs: 3600000, // 1 hour in ms
-  }),
-  // General pages - very generous
-  general: middlewareRateLimitConfigSchema.parse({
-    maxRequests: 10000,
-    windowMs: 3600000, // 1 hour in ms
-  }),
-  // LLMs.txt endpoints - moderate limit to prevent scraping abuse
-  llmstxt: middlewareRateLimitConfigSchema.parse({
-    maxRequests: 100,
-    windowMs: 3600000, // 1 hour in ms (100 requests per hour per IP)
-  }),
-  // Webhook endpoints - deliverability events (bounces, complaints)
-  webhookBounce: middlewareRateLimitConfigSchema.parse({
-    maxRequests: 100,
-    windowMs: 60000, // 1 minute in ms (100 bounce events per minute)
-  }),
-  // Webhook endpoints - analytics events (opens, clicks)
-  webhookAnalytics: middlewareRateLimitConfigSchema.parse({
-    maxRequests: 500,
-    windowMs: 60000, // 1 minute in ms (500 analytics events per minute)
-  }),
-  // Heavy API endpoints (large datasets) - reasonable for data access
-  heavyApi: middlewareRateLimitConfigSchema.parse({
-    maxRequests: 100, // Increased from 50 for legitimate data operations
-    windowMs: 900000, // 15 minutes in ms
-  }),
-  // Admin operations - reasonable for maintenance tasks
-  admin: middlewareRateLimitConfigSchema.parse({
-    maxRequests: 50, // Increased from 5 - needed for cache warming and maintenance
-    windowMs: 3600000, // 1 hour in ms
-  }),
-  // Bulk operations - balanced for legitimate bulk access
-  bulk: middlewareRateLimitConfigSchema.parse({
-    maxRequests: 50, // Increased from 20 for legitimate bulk operations
-    windowMs: 1800000, // 30 minutes in ms
-  }),
+  api: middlewareRateLimitConfigSchema.parse(ENDPOINT_RATE_LIMITS.api),
+  search: middlewareRateLimitConfigSchema.parse(ENDPOINT_RATE_LIMITS.search),
+  submit: middlewareRateLimitConfigSchema.parse(ENDPOINT_RATE_LIMITS.submit),
+  general: middlewareRateLimitConfigSchema.parse(ENDPOINT_RATE_LIMITS.general),
+  llmstxt: middlewareRateLimitConfigSchema.parse(ENDPOINT_RATE_LIMITS.llmstxt),
+  webhookBounce: middlewareRateLimitConfigSchema.parse(ENDPOINT_RATE_LIMITS.webhookBounce),
+  webhookAnalytics: middlewareRateLimitConfigSchema.parse(ENDPOINT_RATE_LIMITS.webhookAnalytics),
+  heavyApi: middlewareRateLimitConfigSchema.parse(ENDPOINT_RATE_LIMITS.heavyApi),
+  admin: middlewareRateLimitConfigSchema.parse(ENDPOINT_RATE_LIMITS.admin),
+  bulk: middlewareRateLimitConfigSchema.parse(ENDPOINT_RATE_LIMITS.bulk),
 } as const;
 
 /**
@@ -143,7 +104,7 @@ function configToExtended(config: MiddlewareRateLimitConfig): ExtendedRateLimitC
 /**
  * Generate rate limit key for Redis storage with validation
  */
-async function generateKey(request: NextRequest, prefix: string = 'rate_limit'): Promise<string> {
+async function generateKey(request: NextRequest, prefix = 'rate_limit'): Promise<string> {
   // Priority order for client identification:
   // 1. CF-Connecting-IP (Cloudflare)
   // 2. X-Forwarded-For (proxy)
@@ -284,13 +245,42 @@ export class RateLimiter {
 
           const results = await pipeline.exec();
 
-          if (!results || results.length < 3) {
-            throw new Error('Redis pipeline failed');
+          // Null check: Pipeline exec can return null on connection failure
+          if (!(results && Array.isArray(results))) {
+            logger.warn('Rate limiter pipeline exec returned null', {
+              component: 'rate_limiter',
+              key,
+              operation: 'checkLimit',
+            });
+            throw new Error('Redis pipeline exec returned null');
           }
 
-          // Get the count from zcard result (third command)
-          const count = results[2] as number;
-          return count || 0;
+          // Validate results array has expected length
+          if (results.length < 3) {
+            logger.warn('Rate limiter pipeline returned incomplete results', {
+              component: 'rate_limiter',
+              key,
+              expectedLength: 4,
+              actualLength: results.length,
+            });
+            throw new Error(
+              `Redis pipeline returned incomplete results: expected 4, got ${results.length}`
+            );
+          }
+
+          // Get the count from zcard result (third command) with type guard
+          const count = results[2];
+          if (typeof count !== 'number') {
+            logger.warn('Rate limiter zcard result is not a number', {
+              component: 'rate_limiter',
+              key,
+              resultType: typeof count,
+              result: String(count), // Convert to string for logging
+            });
+            return 0;
+          }
+
+          return count;
         },
         () => 0, // Fallback: allow request on failure
         'rate_limit_check'

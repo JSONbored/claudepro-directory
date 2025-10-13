@@ -11,11 +11,12 @@
 
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
-import { LazyConfigCard } from '@/src/components/shared/lazy-config-card';
-import { LazyInfiniteScrollContainer } from '@/src/components/shared/lazy-infinite-scroll';
+import { ConfigCard } from '@/src/components/features/content/config-card';
+import { InfiniteScrollContainer } from '@/src/components/shared/infinite-scroll-container';
 import { Button } from '@/src/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
 import { CATEGORY_CONFIGS, HOMEPAGE_TAB_CATEGORIES } from '@/src/lib/config/category-config';
+import { ROUTES } from '@/src/lib/constants';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -74,10 +75,10 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
         return (
           <TabsContent key={tab} value={tab} className={UI_CLASSES.SPACE_Y_6}>
             {filteredResults.length > 0 ? (
-              <LazyInfiniteScrollContainer<UnifiedContentItem>
+              <InfiniteScrollContainer<UnifiedContentItem>
                 items={displayedItems}
                 renderItem={(item: UnifiedContentItem, _index: number) => (
-                  <LazyConfigCard
+                  <ConfigCard
                     key={item.slug}
                     item={item}
                     variant="default"
@@ -87,7 +88,6 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
                 )}
                 loadMore={loadMore}
                 hasMore={hasMore}
-                gridClassName={UI_CLASSES.GRID_RESPONSIVE_3}
                 emptyMessage={`No ${categoryName} found`}
                 keyExtractor={(item: UnifiedContentItem, _index: number) => item.slug}
                 showLoadMoreButton={false}
@@ -127,7 +127,7 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
 
         <div className={`${UI_CLASSES.TEXT_CENTER} pt-8`}>
           <Button variant="outline" asChild>
-            <Link href="/community">View All Contributors</Link>
+            <Link href={ROUTES.COMMUNITY}>View All Contributors</Link>
           </Button>
         </div>
       </TabsContent>

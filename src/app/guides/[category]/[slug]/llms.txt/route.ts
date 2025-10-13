@@ -10,12 +10,12 @@ import fs from 'fs/promises';
 import { type NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import { z } from 'zod';
+import { contentCache } from '@/src/lib/cache';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { handleApiError } from '@/src/lib/error-handler';
 import { generateLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
-import { contentCache } from '@/src/lib/redis';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 
 /**

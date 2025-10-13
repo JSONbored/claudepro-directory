@@ -12,6 +12,7 @@ import { handleApiError } from '@/src/lib/error-handler';
 import { generateSiteLLMsTxt } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
+import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 
 /**
  * Runtime configuration
@@ -48,15 +49,15 @@ export async function GET(request: NextRequest): Promise<Response> {
     requestLogger.info('Site llms.txt generation started');
 
     // Gather category statistics - await all promises in parallel
-    const [
-      mcpItems,
-      commandsItems,
-      hooksItems,
-      rulesItems,
-      agentsItems,
-      statuslinesItems,
-      collectionsItems,
-    ] = await Promise.all([mcp, commands, hooks, rules, agents, statuslines, collections]);
+    const {
+      mcp: mcpItems,
+      commands: commandsItems,
+      hooks: hooksItems,
+      rules: rulesItems,
+      agents: agentsItems,
+      statuslines: statuslinesItems,
+      collections: collectionsItems,
+    } = await batchLoadContent({ mcp, commands, hooks, rules, agents, statuslines, collections });
 
     const categoryStats = [
       {

@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "stytch": {
           "transport": "http",
           "url": "http://mcp.stytch.dev/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "stytch": {
           "transport": "http",
           "url": "http://mcp.stytch.dev/mcp"
@@ -80,10 +80,30 @@
     }
   ],
   "examples": [
-    "Add new redirect URL for production",
-    "Update password reset email template",
-    "Configure MFA settings",
-    "Show authentication metrics for this week"
+    {
+      "title": "Add new redirect URL for production",
+      "code": "Ask Claude: \"Add new redirect URL for production\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Update password reset email template",
+      "code": "Ask Claude: \"Update password reset email template\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Configure MFA settings",
+      "code": "Ask Claude: \"Configure MFA settings\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Show authentication metrics for this week",
+      "code": "Ask Claude: \"Show authentication metrics for this week\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "configure"],

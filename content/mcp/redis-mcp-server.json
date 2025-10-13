@@ -33,7 +33,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "redis": {
           "command": "uvx",
           "args": [
@@ -47,7 +47,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "redis": {
           "command": "uvx",
           "args": [
@@ -102,11 +102,36 @@
     }
   ],
   "examples": [
-    "Store and retrieve cached data with expiration",
-    "Manage user sessions and preferences",
-    "Implement real-time chat with pub/sub",
-    "Create leaderboards with sorted sets",
-    "Process events using Redis streams"
+    {
+      "title": "Store and retrieve cached data with expiration",
+      "code": "Ask Claude: \"Store and retrieve cached data with expiration\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Manage user sessions and preferences",
+      "code": "Ask Claude: \"Manage user sessions and preferences\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Implement real-time chat with pub/sub",
+      "code": "Ask Claude: \"Implement real-time chat with pub/sub\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Create leaderboards with sorted sets",
+      "code": "Ask Claude: \"Create leaderboards with sorted sets\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Process events using Redis streams",
+      "code": "Ask Claude: \"Process events using Redis streams\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "admin"],

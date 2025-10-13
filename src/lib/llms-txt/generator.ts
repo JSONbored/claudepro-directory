@@ -158,52 +158,51 @@ export async function generateLLMsTxt(
     // Header
     sections.push(generateHeader(validatedItem.title, validatedItem.description));
 
-    // Metadata section
+    // Metadata section (H2 per llmstxt.org spec)
     if (opts.includeMetadata) {
       const metadata: string[] = [];
 
-      metadata.push('METADATA');
-      metadata.push('--------');
+      metadata.push('## Metadata');
+      metadata.push('');
 
       // Add Title field for validation compatibility
-      metadata.push(`Title: ${validatedItem.title}`);
+      metadata.push(`**Title:** ${validatedItem.title}`);
 
       if (validatedItem.category) {
-        metadata.push(`Category: ${validatedItem.category}`);
+        metadata.push(`**Category:** ${validatedItem.category}`);
       }
 
       if (validatedItem.author && opts.includeMetadata) {
-        metadata.push(`Author: ${validatedItem.author}`);
+        metadata.push(`**Author:** ${validatedItem.author}`);
       }
 
       if (validatedItem.dateAdded) {
-        metadata.push(`Added: ${formatDate(validatedItem.dateAdded)}`);
+        metadata.push(`**Added:** ${formatDate(validatedItem.dateAdded)}`);
       }
 
       if (validatedItem.tags && validatedItem.tags.length > 0 && opts.includeTags) {
-        metadata.push(`Tags: ${validatedItem.tags.join(', ')}`);
+        metadata.push(`**Tags:** ${validatedItem.tags.join(', ')}`);
       }
 
       if (validatedItem.url && opts.includeUrl) {
-        metadata.push(`URL: ${validatedItem.url}`);
+        metadata.push(`**URL:** ${validatedItem.url}`);
       }
 
       sections.push(metadata.join('\n'));
       sections.push(''); // Empty line
     }
 
-    // Description section (if not already in header)
+    // Description section (H2 per llmstxt.org spec)
     if (opts.includeDescription && validatedItem.description) {
-      sections.push('OVERVIEW');
-      sections.push('--------');
+      sections.push('## Overview');
+      sections.push('');
       sections.push(validatedItem.description);
       sections.push(''); // Empty line
     }
 
-    // Content section
+    // Content section (H2 per llmstxt.org spec)
     if (opts.includeContent && validatedItem.content) {
-      sections.push('CONTENT');
-      sections.push('-------');
+      sections.push('## Content');
       sections.push('');
 
       // Convert markdown to plain text
@@ -274,32 +273,63 @@ export async function generateCategoryLLMsTxt(
     sections.push(categoryDescription);
     sections.push('\n---\n');
 
-    // Index section
-    sections.push('INDEX');
-    sections.push('-----');
+    // Index section (H2 per llmstxt.org spec)
+    sections.push('## Index');
+    sections.push('');
     sections.push(`Total items: ${items.length}\n`);
 
-    // List each item
+    // List each item with enhanced details
     for (const item of items) {
       const validatedItem = llmsTxtItemSchema.parse(item);
 
-      sections.push(`• ${validatedItem.title}`);
+      // Item title as bullet point
+      sections.push(`• **${validatedItem.title}**`);
 
+      // Description (truncated for index)
       if (opts.includeDescription && validatedItem.description) {
         sections.push(
           `  ${validatedItem.description.substring(0, 150)}${validatedItem.description.length > 150 ? '...' : ''}`
         );
       }
 
+      // URL (for AI navigation)
       if (opts.includeUrl && validatedItem.url) {
-        sections.push(`  ${validatedItem.url}`);
+        sections.push(`  🔗 ${validatedItem.url}`);
       }
 
+      // Tags (for AI categorization)
       if (opts.includeTags && validatedItem.tags && validatedItem.tags.length > 0) {
-        sections.push(`  Tags: ${validatedItem.tags.slice(0, 5).join(', ')}`);
+        sections.push(`  🏷️ Tags: ${validatedItem.tags.slice(0, 5).join(', ')}`);
+      }
+
+      // Author (for AI attribution)
+      if (validatedItem.author) {
+        sections.push(`  👤 Author: ${validatedItem.author}`);
       }
 
       sections.push(''); // Empty line between items
+    }
+
+    // Popular Tags Section (AI categorization helper)
+    const allTags = items.flatMap((item) => item.tags || []);
+    const tagCounts = allTags.reduce(
+      (acc, tag) => {
+        acc[tag] = (acc[tag] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+    const topTags = Object.entries(tagCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 10)
+      .map(([tag]) => tag);
+
+    if (topTags.length > 0) {
+      sections.push('');
+      sections.push('## Popular Tags');
+      sections.push('');
+      sections.push(topTags.join(', '));
+      sections.push('');
     }
 
     // Footer
@@ -348,25 +378,31 @@ export async function generateSiteLLMsTxt(
     // Header
     sections.push(generateHeader(APP_CONFIG.name, SEO_CONFIG.defaultDescription));
 
-    // Categories section
-    sections.push('CATEGORIES');
-    sections.push('----------\n');
+    // Categories section (H2 per llmstxt.org spec) - Enhanced for AI
+    sections.push('## Categories');
+    sections.push('');
 
     for (const category of categoryStats) {
-      sections.push(`${category.name.toUpperCase()} (${category.count} items)`);
-      sections.push(`${category.description}`);
-      sections.push(`${APP_CONFIG.url}${category.url}`);
-      sections.push(`${APP_CONFIG.url}${category.url}/llms.txt`);
-      sections.push(''); // Empty line
+      sections.push(`### ${category.name} (${category.count} items)`);
+      sections.push('');
+      sections.push(category.description);
+      sections.push('');
+      sections.push(`- **Browse:** ${APP_CONFIG.url}${category.url}`);
+      sections.push(`- **LLMs.txt:** ${APP_CONFIG.url}${category.url}/llms.txt`);
+      sections.push('');
     }
 
-    // Navigation section
-    sections.push('\nNAVIGATION');
-    sections.push('----------');
-    sections.push(`Homepage: ${APP_CONFIG.url}`);
-    sections.push(`Trending: ${APP_CONFIG.url}/trending`);
-    sections.push(`Submit: ${APP_CONFIG.url}/submit`);
-    sections.push(`Guides: ${APP_CONFIG.url}/guides`);
+    // Navigation section (H2 per llmstxt.org spec) - Enhanced with descriptions
+    sections.push('## Navigation');
+    sections.push('');
+    sections.push(`- **[Homepage](${APP_CONFIG.url})** - Explore all configurations`);
+    sections.push(
+      `- **[Trending](${APP_CONFIG.url}/trending)** - Popular configurations this week`
+    );
+    sections.push(`- **[Submit](${APP_CONFIG.url}/submit)** - Contribute your own configuration`);
+    sections.push(`- **[Guides](${APP_CONFIG.url}/guides)** - Tutorials and best practices`);
+    sections.push(`- **[Changelog](${APP_CONFIG.url}/changelog)** - Latest updates`);
+    sections.push(`- **[Jobs](${APP_CONFIG.url}/jobs)** - Claude-related job opportunities`);
 
     // Footer
     sections.push(generateFooter(APP_CONFIG.url));

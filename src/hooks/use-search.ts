@@ -26,7 +26,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { type SearchableItem, type SearchFilters, searchCache } from '@/src/lib/cache/search-cache';
+import { type SearchableItem, type SearchFilters, searchCache } from '@/src/lib/cache';
 import { logger } from '@/src/lib/logger';
 import type {
   FilterState,
@@ -264,11 +264,12 @@ export function useLocalSearch<
   };
 }
 
-export function useSearch({ data, searchOptions }: UseSearchProps) {
+export function useSearch({ data, searchOptions, initialQuery }: UseSearchProps) {
   // PERFORMANCE: Create stable reference for data array to prevent unnecessary re-renders
   const stableData = useMemo(() => data as ContentItem[], [data]);
 
-  const [searchQuery, setSearchQuery] = useState('');
+  // Initialize with query from URL if provided (for SearchAction schema integration)
+  const [searchQuery, setSearchQuery] = useState(initialQuery || '');
   const [filters, setFilters] = useState<FilterState>({
     sort: 'trending',
   });
@@ -283,6 +284,9 @@ export function useSearch({ data, searchOptions }: UseSearchProps) {
 
   // Update search results when data, query, or filters change
   useEffect(() => {
+    // Mounted flag to prevent state updates after unmount
+    let isMounted = true;
+
     const updateResults = async () => {
       try {
         // PERFORMANCE FIX (SHA-2085): Use stableData instead of [...data]
@@ -297,16 +301,29 @@ export function useSearch({ data, searchOptions }: UseSearchProps) {
           filters,
           memoizedSearchOptions
         );
-        setSearchResults(results);
+
+        // Only update state if component is still mounted
+        if (isMounted) {
+          setSearchResults(results);
+        }
       } catch (error) {
         logger.error('Search failed, falling back to original data', error as Error);
-        setSearchResults(stableData);
+
+        // Only update state if component is still mounted
+        if (isMounted) {
+          setSearchResults(stableData);
+        }
       }
     };
 
     // Debounce search for better UX
     const timeoutId = setTimeout(updateResults, searchQuery ? 150 : 0);
-    return () => clearTimeout(timeoutId);
+
+    // Cleanup: clear timeout and mark as unmounted
+    return () => {
+      clearTimeout(timeoutId);
+      isMounted = false;
+    };
   }, [stableData, searchQuery, filters, memoizedSearchOptions]);
 
   // Stable callbacks that don't cause re-renders

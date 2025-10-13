@@ -31,7 +31,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "postgres": {
           "command": "npx",
           "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost/mydb"]
@@ -39,7 +39,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "postgres": {
           "command": "npx",
           "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost/mydb"]
@@ -87,11 +87,36 @@
     }
   ],
   "examples": [
-    "What tables exist in my database?",
-    "Describe the structure of the users table",
-    "How many records are in each table?",
-    "Write a query to find active users from last month",
-    "Generate documentation for my database schema"
+    {
+      "title": "What tables exist in my database?",
+      "code": "Ask Claude: \"What tables exist in my database?\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Describe the structure of the users table",
+      "code": "Ask Claude: \"Describe the structure of the users table\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "How many records are in each table?",
+      "code": "Ask Claude: \"How many records are in each table?\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Write a query to find active users from last month",
+      "code": "Ask Claude: \"Write a query to find active users from last month\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Generate documentation for my database schema",
+      "code": "Ask Claude: \"Generate documentation for my database schema\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "authType": "connection_string",

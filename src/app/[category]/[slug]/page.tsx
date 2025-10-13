@@ -60,13 +60,16 @@
 import { notFound } from 'next/navigation';
 import { PageViewTracker } from '@/src/components/shared/page-view-tracker';
 import { ViewTracker } from '@/src/components/shared/view-tracker';
+import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
 import { UnifiedStructuredData } from '@/src/components/structured-data/unified-structured-data';
 import { UnifiedDetailPage } from '@/src/components/unified-detail-page';
+import { statsRedis } from '@/src/lib/cache';
 import {
   getCategoryConfig,
   isValidCategory,
   VALID_CATEGORIES,
 } from '@/src/lib/config/category-config';
+import { APP_CONFIG } from '@/src/lib/constants';
 import {
   getContentByCategory,
   getContentBySlug,
@@ -74,9 +77,8 @@ import {
   getRelatedContent,
 } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/redis';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { transformForDetailPage } from '@/src/lib/utils/transformers';
+import { transformForDetailPage } from '@/src/lib/utils/content.utils';
 
 /**
  * Dynamic Rendering (No ISR)
@@ -158,42 +160,7 @@ export async function generateMetadata({
   params: Promise<{ category: string; slug: string }>;
 }) {
   const { category, slug } = await params;
-
-  // Validate category
-  if (!isValidCategory(category)) {
-    return {
-      title: 'Not Found',
-      description: 'The requested content could not be found.',
-    };
-  }
-
-  const config = getCategoryConfig(category);
-  if (!config) {
-    return {
-      title: 'Not Found',
-      description: 'The requested content could not be found.',
-    };
-  }
-
-  // Load item metadata
-  const item = await getContentBySlug(category, slug);
-
-  if (!item) {
-    return {
-      title: `${config.title} Not Found`,
-      description: `The requested ${config.title.toLowerCase()} could not be found.`,
-    };
-  }
-
-  // Use centralized metadata with content detail context
-  // Explicit context construction for exactOptionalPropertyTypes compatibility
-  return await generatePageMetadata('/:category/:slug', {
-    params: { category, slug },
-    category,
-    slug,
-    item,
-    categoryConfig: config,
-  });
+  return generatePageMetadata('/:category/:slug', { params: { category, slug } });
 }
 
 /**
@@ -298,6 +265,22 @@ export default async function DetailPage({
         await UnifiedStructuredData({
           item: itemData as Parameters<typeof UnifiedStructuredData>[0]['item'],
         })
+      }
+      {
+        await (
+          <BreadcrumbSchema
+            items={[
+              {
+                name: config.title || category,
+                url: `${APP_CONFIG.url}/${category}`,
+              },
+              {
+                name: item.title || slug,
+                url: `${APP_CONFIG.url}/${category}/${slug}`,
+              },
+            ]}
+          />
+        )
       }
       <UnifiedDetailPage item={item} relatedItems={relatedItems} viewCount={viewCount} />
     </>

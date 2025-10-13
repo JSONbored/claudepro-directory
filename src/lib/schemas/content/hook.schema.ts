@@ -18,6 +18,7 @@ import {
   mediumString,
   shortString,
 } from '@/src/lib/schemas/primitives/base-strings';
+import { hookTypeSchema } from '@/src/lib/schemas/primitives/content-enums';
 
 /**
  * Hook Configuration Schema
@@ -151,21 +152,9 @@ export const hookContentSchema = z
 
     // Hook-specific required fields
     category: z.literal('hooks').describe('Content category literal identifier: "hooks"'),
-    hookType: z
-      .enum([
-        'PostToolUse',
-        'PreToolUse',
-        'SessionStart',
-        'SessionEnd',
-        'UserPromptSubmit',
-        'Notification',
-        'PreCompact',
-        'Stop',
-        'SubagentStop',
-      ])
-      .describe(
-        'Type of hook determining when it executes: PostToolUse (after tool), PreToolUse (before tool), SessionStart/End, UserPromptSubmit, Notification, PreCompact (before context compaction), Stop, SubagentStop'
-      ),
+    hookType: hookTypeSchema.describe(
+      'Type of hook determining when it executes: PostToolUse (after tool), PreToolUse (before tool), SessionStart/End, UserPromptSubmit, Notification, PreCompact (before context compaction), Stop, SubagentStop'
+    ),
 
     // Hook configuration (complex hook setup)
     configuration: fullHookConfigSchema.describe(

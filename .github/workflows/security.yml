@@ -114,3 +114,29 @@ jobs:
         path: npm-audit.json
         retention-days: 30
         if-no-files-found: ignore
+
+  socket-security:
+    name: Socket Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+      statuses: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Socket Security Scan
+      uses: socketdev/socket-security-action@v1
+      with:
+        # Fail on high/critical issues
+        issue-severity: high
+        # Enable dependency analysis
+        enable-dependency-checks: true
+        # Enable license compliance checking
+        enable-license-checks: false
+        # Enable typosquatting detection
+        enable-typosquat-detection: true
+      continue-on-error: true  # Don't block PRs initially

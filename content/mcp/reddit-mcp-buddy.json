@@ -32,7 +32,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "reddit": {
           "command": "npx",
           "args": ["reddit-mcp-buddy"]
@@ -40,7 +40,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "reddit": {
           "command": "npx",
           "args": ["reddit-mcp-buddy"]
@@ -48,7 +48,7 @@
       }
     },
     "withAuth": {
-      "mcpServers": {
+      "mcp": {
         "reddit": {
           "command": "npx",
           "args": ["reddit-mcp-buddy"],
@@ -97,13 +97,48 @@
     }
   ],
   "examples": [
-    "What's trending in r/technology today?",
-    "Search for discussions about ChatGPT in r/programming",
-    "Get the top posts from r/MachineLearning this week",
-    "Find the most discussed topics in r/stocks",
-    "What is trending on reddit?",
-    "Search for discussions about AI",
-    "Show me the comments on this Reddit URL"
+    {
+      "title": "What's trending in r/technology today?",
+      "code": "Ask Claude: \"What's trending in r/technology today?\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Search for discussions about ChatGPT in r/programm...",
+      "code": "Ask Claude: \"Search for discussions about ChatGPT in r/programming\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Get the top posts from r/MachineLearning this week",
+      "code": "Ask Claude: \"Get the top posts from r/MachineLearning this week\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Find the most discussed topics in r/stocks",
+      "code": "Ask Claude: \"Find the most discussed topics in r/stocks\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "What is trending on reddit?",
+      "code": "Ask Claude: \"What is trending on reddit?\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Search for discussions about AI",
+      "code": "Ask Claude: \"Search for discussions about AI\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Show me the comments on this Reddit URL",
+      "code": "Ask Claude: \"Show me the comments on this Reddit URL\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": false,
   "permissions": ["read"],

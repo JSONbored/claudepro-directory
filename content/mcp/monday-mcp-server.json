@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "monday": {
           "transport": "sse",
           "url": "https://mcp.monday.com/sse"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "monday": {
           "transport": "sse",
           "url": "https://mcp.monday.com/sse"
@@ -76,10 +76,30 @@
     }
   ],
   "examples": [
-    "Create a new item in the Projects board",
-    "Update status to Done for item 12345",
-    "Assign this task to the design team",
-    "Add CRM activity for client meeting"
+    {
+      "title": "Create a new item in the Projects board",
+      "code": "Ask Claude: \"Create a new item in the Projects board\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Update status to Done for item 12345",
+      "code": "Ask Claude: \"Update status to Done for item 12345\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Assign this task to the design team",
+      "code": "Ask Claude: \"Assign this task to the design team\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Add CRM activity for client meeting",
+      "code": "Ask Claude: \"Add CRM activity for client meeting\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "create"],

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { cacheWarmer } from '@/src/lib/cache/cache-warmer';
+import { cacheWarmer } from '@/src/lib/cache';
 import { handleApiError, handleValidationError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';

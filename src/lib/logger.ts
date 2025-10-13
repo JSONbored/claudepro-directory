@@ -443,6 +443,80 @@ class Logger {
     // biome-ignore lint/suspicious/noConsole: CLI output for scripts
     console.error(`❌ ${message}`);
   }
+
+  /**
+   * Metadata Quality Monitoring
+   * Track metadata validation results for production observability
+   *
+   * October 2025 SEO Enhancement:
+   * - Monitors metadata quality across all routes
+   * - Alerts on validation failures
+   * - Tracks SEO compliance metrics
+   */
+  metadataValidation(
+    route: string,
+    success: boolean,
+    details?: {
+      titleLength?: number;
+      descLength?: number;
+      keywordCount?: number;
+      errors?: string[];
+    }
+  ): void {
+    if (success) {
+      this.debug(`✅ Metadata validated: ${route}`, {
+        route,
+        titleLength: details?.titleLength?.toString() || 'unknown',
+        descLength: details?.descLength?.toString() || 'unknown',
+        keywords: details?.keywordCount?.toString() || '0',
+      });
+    } else {
+      this.error(
+        `❌ Metadata validation failed: ${route}`,
+        details?.errors?.join(', ') || 'Unknown validation error',
+        { route }
+      );
+    }
+  }
+
+  /**
+   * Track metadata generation performance
+   * Monitors slow metadata generation that could impact page load times
+   */
+  metadataPerformance(route: string, durationMs: number): void {
+    const metadata = {
+      route,
+      duration: durationMs.toString(),
+    };
+
+    if (durationMs > 100) {
+      this.warn(`⚠️ Slow metadata generation: ${route} (${durationMs}ms)`, {}, metadata);
+    } else if (this.isDevelopment) {
+      this.debug(`⚡ Metadata generated: ${route} (${durationMs}ms)`, {}, metadata);
+    }
+  }
+
+  /**
+   * Track SEO compliance metrics
+   * Monitors overall SEO health of the application
+   */
+  seoMetrics(metrics: {
+    totalRoutes: number;
+    validatedRoutes: number;
+    failedRoutes: number;
+    avgTitleLength: number;
+    avgDescLength: number;
+  }): void {
+    const complianceRate = ((metrics.validatedRoutes / metrics.totalRoutes) * 100).toFixed(1);
+
+    this.info(`📊 SEO Compliance: ${complianceRate}%`, {
+      totalRoutes: metrics.totalRoutes.toString(),
+      validated: metrics.validatedRoutes.toString(),
+      failed: metrics.failedRoutes.toString(),
+      avgTitleLength: metrics.avgTitleLength.toString(),
+      avgDescLength: metrics.avgDescLength.toString(),
+    });
+  }
 }
 
 // Export singleton instance
