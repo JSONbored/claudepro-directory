@@ -1041,6 +1041,9 @@ function generateValidationReport(results: {
 function findMDXFiles(dir: string): string[] {
   const files: string[] = [];
 
+  // Directories to exclude from SEO validation (auto-generated content)
+  const EXCLUDED_DIRS = ['api-docs', 'node_modules'];
+
   function traverse(currentDir: string) {
     const entries = readdirSync(currentDir);
 
@@ -1049,7 +1052,7 @@ function findMDXFiles(dir: string): string[] {
       const stat = statSync(fullPath);
 
       if (stat.isDirectory()) {
-        if (!entry.startsWith('.') && entry !== 'node_modules') {
+        if (!(entry.startsWith('.') || EXCLUDED_DIRS.includes(entry))) {
           traverse(fullPath);
         }
       } else if (entry.endsWith('.mdx')) {
