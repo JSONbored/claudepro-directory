@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { trackSponsoredClick, trackSponsoredImpression } from '@/src/lib/actions/sponsored-actions';
+import { trackSponsoredClick, trackSponsoredImpression } from '@/src/lib/actions/business.actions';
 
 interface SponsoredTrackerProps {
   /** UUID of the sponsored campaign */

@@ -25,11 +25,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ChangelogListClient } from '@/src/components/changelog/changelog-list-client';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { ChangelogBlogStructuredData } from '@/src/components/structured-data/changelog-structured-data';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { ArrowLeft } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // ISR - revalidate every 5 minutes for fresh changelog entries
 export const revalidate = 300;
@@ -108,6 +110,16 @@ export default async function ChangelogPage() {
           {/* Client-side filtered list */}
           <ChangelogListClient entries={entries} />
         </div>
+
+        {/* Email CTA - Footer section (matching homepage pattern) */}
+        <section className={`${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+          <InlineEmailCTA
+            variant="hero"
+            context="changelog-page"
+            headline="Join 1,000+ Claude Power Users"
+            description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+          />
+        </section>
       </>
     );
   } catch (error) {

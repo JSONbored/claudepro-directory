@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "vercel": {
           "transport": "http",
           "url": "https://mcp.vercel.com/"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "vercel": {
           "transport": "http",
           "url": "https://mcp.vercel.com/"
@@ -80,10 +80,30 @@
     }
   ],
   "examples": [
-    "Deploy the latest commit to production",
-    "Show me the build logs for the failed deployment",
-    "Update the API_KEY environment variable",
-    "List all recent deployments"
+    {
+      "title": "Deploy the latest commit to production",
+      "code": "Ask Claude: \"Deploy the latest commit to production\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Show me the build logs for the failed deployment",
+      "code": "Ask Claude: \"Show me the build logs for the failed deployment\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Update the API_KEY environment variable",
+      "code": "Ask Claude: \"Update the API_KEY environment variable\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "List all recent deployments",
+      "code": "Ask Claude: \"List all recent deployments\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "deploy"],

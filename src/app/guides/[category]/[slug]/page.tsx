@@ -14,14 +14,14 @@ import { ViewTracker } from '@/src/components/shared/view-tracker';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent } from '@/src/components/ui/card';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { contentCache, statsRedis } from '@/src/lib/cache';
+import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { ArrowLeft, BookOpen, Calendar, Eye, FileText, Tag, Users, Zap } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import { contentCache, statsRedis } from '@/src/lib/redis';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import type { GuideItemWithCategory } from '@/src/lib/utils/guide-helpers';
+import type { GuideItemWithCategory } from '@/src/lib/utils/content.utils';
 
 // ISR Configuration - Revalidate every 5 minutes for fresh view counts
 export const revalidate = 300;
@@ -130,6 +130,10 @@ async function _getCategoryGuides(category: string): Promise<GuideItemWithCatego
                 slug: `/guides/${category}/${file.replace('.mdx', '')}`,
                 category,
                 dateUpdated: frontmatter.dateUpdated || '',
+                frontmatter: {
+                  title: frontmatter.title || file.replace('.mdx', ''),
+                  description: frontmatter.description || '',
+                },
               });
             } catch {
               // Skip files that fail to parse
@@ -251,64 +255,10 @@ export async function generateMetadata({
 }: {
   params: Promise<{ category: string; slug: string }>;
 }): Promise<Metadata> {
-  try {
-    const rawParams = await params;
-    const validationResult = guideParamsSchema.safeParse(rawParams);
-
-    if (!validationResult.success) {
-      logger.warn('Invalid guide parameters for metadata', {
-        category: rawParams.category || 'unknown',
-        slug: rawParams.slug || 'unknown',
-        errorCount: validationResult.error.issues.length,
-        firstError: validationResult.error.issues[0]?.message || 'Unknown error',
-      });
-      return {
-        title: 'Guide Not Found',
-        description: 'The requested guide could not be found.',
-      };
-    }
-
-    const { category, slug } = validationResult.data;
-
-    const data = await getSEOPageData(category, slug);
-
-    if (!data) {
-      return {
-        title: 'Guide Not Found',
-        description: 'The requested guide could not be found.',
-      };
-    }
-
-    // Use centralized metadata system with AI citation optimization
-    // This route uses Article schema + recency signals for better AI citations
-    return await generatePageMetadata('/guides/:category/:slug', {
-      params: {
-        category: category || '',
-        slug: slug || '',
-      },
-      item: {
-        title: data.title,
-        seoTitle: data.seoTitle, // Short title for <title> tag, preserves longtail in H1
-        description: data.description,
-        tags: data.keywords,
-        author: data.author,
-        dateAdded: data.dateUpdated,
-        lastModified: data.dateUpdated,
-      },
-    });
-  } catch (error: unknown) {
-    logger.error(
-      'Error generating guide metadata',
-      error instanceof Error ? error : new Error(String(error)),
-      {
-        type: 'metadata_generation',
-      }
-    );
-    return {
-      title: 'Guide Error',
-      description: 'An error occurred while loading the guide.',
-    };
-  }
+  const { category, slug } = await params;
+  return generatePageMetadata('/guides/:category/:slug', {
+    params: { category, slug },
+  });
 }
 
 export default async function SEOGuidePage({
@@ -472,7 +422,7 @@ export default async function SEOGuidePage({
                   className="-ml-2 text-muted-foreground hover:text-foreground"
                   asChild
                 >
-                  <Link href="/guides">
+                  <Link href={ROUTES.GUIDES}>
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     All Guides
                   </Link>

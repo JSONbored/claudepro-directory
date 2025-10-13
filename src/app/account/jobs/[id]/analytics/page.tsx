@@ -1,26 +1,25 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
+import { ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, BarChart, ExternalLink, Eye } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { formatRelativeDate } from '@/src/lib/utils/date-utils';
+import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
+import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
-export const metadata: Metadata = {
-  title: 'Job Analytics - ClaudePro Directory',
-  description: 'View analytics for your job listing',
-};
+export const metadata = await generatePageMetadata('/account/jobs/:id/analytics');
 
 interface JobAnalyticsPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps) {
+  const resolvedParams = await params;
   const supabase = await createClient();
 
   // Get current user
@@ -36,7 +35,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
   const { data: job, error } = await supabase
     .from('jobs')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', resolvedParams.id)
     .eq('user_id', user.id)
     .single();
 
@@ -44,17 +43,13 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
     notFound();
   }
 
-  // Calculate CTR (Click-Through Rate)
-  const ctr = job.view_count > 0 ? ((job.click_count / job.view_count) * 100).toFixed(2) : '0.00';
+  // Calculate CTR (Click-Through Rate) with null safety
+  const viewCount = job.view_count ?? 0;
+  const clickCount = job.click_count ?? 0;
+  const ctr = viewCount > 0 ? ((clickCount / viewCount) * 100).toFixed(2) : '0.00';
 
   const getStatusColor = (status: string) => {
-    const colors = {
-      active: 'bg-green-500/10 text-green-400 border-green-500/20',
-      draft: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-      paused: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-      expired: 'bg-red-500/10 text-red-400 border-red-500/20',
-    };
-    return colors[status as keyof typeof colors] || 'bg-muted';
+    return BADGE_COLORS.jobStatus[status as JobStatusType] || 'bg-muted';
   };
 
   return (
@@ -62,7 +57,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
       {/* Header */}
       <div>
         <Button variant="ghost" size="sm" asChild className="mb-4">
-          <Link href="/account/jobs">
+          <Link href={ROUTES.ACCOUNT_JOBS}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Jobs
           </Link>
@@ -89,8 +84,8 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
         <CardHeader>
           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <CardTitle>Listing Details</CardTitle>
-            <Badge className={getStatusColor(job.status)} variant="outline">
-              {job.status}
+            <Badge className={getStatusColor(job.status ?? 'draft')} variant="outline">
+              {job.status ?? 'draft'}
             </Badge>
           </div>
         </CardHeader>
@@ -136,7 +131,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
             <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{job.view_count.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{viewCount.toLocaleString()}</div>
             <p className={`text-xs ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
               Since {job.posted_at ? formatRelativeDate(job.posted_at) : 'creation'}
             </p>
@@ -149,7 +144,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
             <ExternalLink className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{job.click_count.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{clickCount.toLocaleString()}</div>
             <p className={`text-xs ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>Applications started</p>
           </CardContent>
         </Card>
@@ -175,7 +170,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
         </CardHeader>
         <CardContent>
           <div className={UI_CLASSES.SPACE_Y_4}>
-            {job.view_count === 0 && (
+            {viewCount === 0 && (
               <div className="p-4 bg-muted/50 rounded-lg">
                 <p className="text-sm">
                   Your job listing hasn't received any views yet. Try sharing it on social media or
@@ -184,7 +179,7 @@ export default async function JobAnalyticsPage({ params }: JobAnalyticsPageProps
               </div>
             )}
 
-            {job.view_count > 0 && job.click_count === 0 && (
+            {viewCount > 0 && clickCount === 0 && (
               <div className="p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
                 <p className="text-sm text-yellow-400">
                   Your listing is getting views but no clicks. Consider:

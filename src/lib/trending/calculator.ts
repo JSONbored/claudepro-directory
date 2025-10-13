@@ -30,9 +30,10 @@
  */
 
 import { z } from 'zod';
+import { statsRedis } from '@/src/lib/cache';
 import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/redis';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
+import { batchFetch } from '@/src/lib/utils/batch.utils';
 
 /**
  * Content item with view count and growth rate data from Redis
@@ -172,7 +173,7 @@ async function getTrendingContent(
     const yesterdayStr = yesterdayUtc.toISOString().split('T')[0];
 
     // Batch fetch: today's views, yesterday's views, and total views
-    const [todayViews, yesterdayViews, totalViews] = await Promise.all([
+    const [todayViews, yesterdayViews, totalViews] = await batchFetch([
       statsRedis.getDailyViewCounts(items, todayStr),
       statsRedis.getDailyViewCounts(items, yesterdayStr),
       statsRedis.getViewCounts(items),
@@ -373,7 +374,7 @@ async function getPopularContent(
 
 /**
  * Get recent content based on dateAdded field
- * No Redis dependency - pure metadata sorting
+ * Enriches with view counts from Redis for consistent display
  */
 async function getRecentContent(
   allContent: UnifiedContentItem[],
@@ -392,7 +393,34 @@ async function getRecentContent(
       })
       .slice(0, limit);
 
-    logger.info('Recent content sorted by dateAdded', {
+    // Enrich with view counts from Redis (consistent with trending/popular)
+    if (statsRedis.isConnected() && sorted.length > 0) {
+      const items = sorted.map((item) => ({
+        category: item.category,
+        slug: item.slug,
+      }));
+
+      const viewCounts = await statsRedis.getViewCounts(items);
+
+      const enriched: TrendingContentItem[] = sorted.map((item) => {
+        const key = `${item.category}:${item.slug}`;
+        const viewCount = viewCounts[key] || 0;
+
+        return {
+          ...item,
+          viewCount,
+        };
+      });
+
+      logger.info('Recent content sorted by dateAdded with view counts', {
+        totalItems: allContent.length,
+        withDates: enriched.length,
+      });
+
+      return enriched;
+    }
+
+    logger.info('Recent content sorted by dateAdded (no Redis)', {
       totalItems: allContent.length,
       withDates: sorted.length,
     });
@@ -480,7 +508,10 @@ function interleaveSponsored<T extends UnifiedContentItem>(
 
   for (let i = 0; i < organic.length; i++) {
     // Add organic content
-    result.push(organic[i]!);
+    const organicItem = organic[i];
+    if (organicItem) {
+      result.push(organicItem);
+    }
 
     // Inject sponsored every 5 items (if available)
     if ((i + 1) % INJECTION_RATIO === 0 && sponsoredIndex < sponsored.length) {
@@ -529,7 +560,10 @@ async function getActiveSponsored(): Promise<
 
     // Filter out items that hit impression limit
     return data
-      .filter((item) => !item.impression_limit || item.impression_count < item.impression_limit)
+      .filter((item) => {
+        const impressionCount = item.impression_count ?? 0;
+        return !item.impression_limit || impressionCount < item.impression_limit;
+      })
       .map((item) => ({
         content_id: item.content_id,
         content_type: item.content_type,
@@ -573,7 +607,7 @@ export async function getBatchTrendingData(
   ];
 
   // Run all calculations in parallel (including sponsored fetch)
-  const [trending, popular, recent, sponsored] = await Promise.all([
+  const [trending, popular, recent, sponsored] = await batchFetch([
     getTrendingContent(allContent),
     getPopularContent(allContent),
     getRecentContent(allContent),

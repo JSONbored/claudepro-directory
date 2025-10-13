@@ -25,10 +25,12 @@ import {
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
-import { submitConfiguration } from '@/src/lib/actions/submission-actions';
+import { submitConfiguration } from '@/src/lib/actions/business.actions';
+import { ROUTES } from '@/src/lib/constants';
 import { CheckCircle, ExternalLink, Github, Send } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { DuplicateWarning } from './duplicate-warning';
+import { ExamplesArrayInput } from './examples-array-input';
 import { TemplateSelector } from './template-selector';
 
 type ContentType = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines';
@@ -75,85 +77,86 @@ export function SubmitFormClient() {
   // Handle template selection
   // biome-ignore lint/suspicious/noExplicitAny: Templates have dynamic fields based on content type
   const handleTemplateSelect = (template: any) => {
-    // Pre-fill form with template data
+    // Pre-fill form with template data using name attributes
+    // NOTE: Cannot use querySelector('#id') because useId() generates dynamic IDs like ':r0:'
     const form = document.querySelector('form') as HTMLFormElement;
     if (!form) return;
 
     // Set name
     if (template.name) {
       setName(template.name);
-      const nameInput = form.querySelector('#name') as HTMLInputElement;
+      const nameInput = form.querySelector('[name="name"]') as HTMLInputElement;
       if (nameInput) nameInput.value = template.name;
     }
 
     // Set description
     if (template.description) {
-      const descInput = form.querySelector('#description') as HTMLTextAreaElement;
+      const descInput = form.querySelector('[name="description"]') as HTMLTextAreaElement;
       if (descInput) descInput.value = template.description;
     }
 
     // Set category
     if (template.category) {
-      const categoryInput = form.querySelector('#category') as HTMLInputElement;
+      const categoryInput = form.querySelector('[name="category"]') as HTMLInputElement;
       if (categoryInput) categoryInput.value = template.category;
     }
 
     // Set tags
     if (template.tags) {
-      const tagsInput = form.querySelector('#tags') as HTMLInputElement;
+      const tagsInput = form.querySelector('[name="tags"]') as HTMLInputElement;
       if (tagsInput) tagsInput.value = template.tags;
     }
 
     // Type-specific fields
     if (contentType === 'agents' && template.systemPrompt) {
-      const promptInput = form.querySelector('#systemPrompt') as HTMLTextAreaElement;
+      const promptInput = form.querySelector('[name="systemPrompt"]') as HTMLTextAreaElement;
       if (promptInput) promptInput.value = template.systemPrompt;
 
       if (template.temperature !== undefined) {
-        const tempInput = form.querySelector('#temperature') as HTMLInputElement;
+        const tempInput = form.querySelector('[name="temperature"]') as HTMLInputElement;
         if (tempInput) tempInput.value = template.temperature.toString();
       }
 
       if (template.maxTokens !== undefined) {
-        const tokensInput = form.querySelector('#maxTokens') as HTMLInputElement;
+        const tokensInput = form.querySelector('[name="maxTokens"]') as HTMLInputElement;
         if (tokensInput) tokensInput.value = template.maxTokens.toString();
       }
     }
 
     if (contentType === 'rules' && template.rulesContent) {
-      const rulesInput = form.querySelector('#rulesContent') as HTMLTextAreaElement;
+      const rulesInput = form.querySelector('[name="rulesContent"]') as HTMLTextAreaElement;
       if (rulesInput) rulesInput.value = template.rulesContent;
     }
 
     if (contentType === 'mcp') {
       if (template.npmPackage) {
-        const npmInput = form.querySelector('#npmPackage') as HTMLInputElement;
+        const npmInput = form.querySelector('[name="npmPackage"]') as HTMLInputElement;
         if (npmInput) npmInput.value = template.npmPackage;
       }
       if (template.serverType) {
-        const typeInput = form.querySelector('#serverType') as HTMLSelectElement;
+        const typeInput = form.querySelector('[name="serverType"]') as HTMLSelectElement;
         if (typeInput) typeInput.value = template.serverType;
       }
       if (template.installCommand) {
-        const installInput = form.querySelector('#installCommand') as HTMLInputElement;
+        const installInput = form.querySelector('[name="installCommand"]') as HTMLInputElement;
         if (installInput) installInput.value = template.installCommand;
       }
       if (template.configCommand) {
-        const configInput = form.querySelector('#configCommand') as HTMLInputElement;
+        const configInput = form.querySelector('[name="configCommand"]') as HTMLInputElement;
         if (configInput) configInput.value = template.configCommand;
       }
       if (template.toolsDescription) {
-        const toolsInput = form.querySelector('#toolsDescription') as HTMLTextAreaElement;
+        const toolsInput = form.querySelector('[name="toolsDescription"]') as HTMLTextAreaElement;
         if (toolsInput) toolsInput.value = template.toolsDescription;
       }
       if (template.envVars) {
-        const envInput = form.querySelector('#envVars') as HTMLTextAreaElement;
+        const envInput = form.querySelector('[name="envVars"]') as HTMLTextAreaElement;
         if (envInput) envInput.value = template.envVars;
       }
     }
 
     if (contentType === 'commands' && template.commandContent) {
-      const cmdInput = form.querySelector('#commandContent') as HTMLTextAreaElement;
+      const cmdInput = form.querySelector('[name="commandContent"]') as HTMLTextAreaElement;
       if (cmdInput) cmdInput.value = template.commandContent;
     }
 
@@ -178,6 +181,15 @@ export function SubmitFormClient() {
           author: formData.get('author') as string,
           github: (formData.get('github') as string) || undefined,
           tags: (formData.get('tags') as string) || undefined,
+          examples: (() => {
+            const examplesJson = formData.get('examples') as string;
+            if (!examplesJson || examplesJson === '[]') return undefined;
+            try {
+              return JSON.parse(examplesJson);
+            } catch {
+              return undefined;
+            }
+          })(),
         };
 
         // biome-ignore lint/suspicious/noExplicitAny: Dynamic form data with type-specific fields added in switch statement
@@ -274,7 +286,7 @@ export function SubmitFormClient() {
                     </a>
                   </Button>
                   <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
-                    <Link href="/account/submissions">Track Status</Link>
+                    <Link href={ROUTES.ACCOUNT_SUBMISSIONS}>Track Status</Link>
                   </Button>
                 </div>
               </div>
@@ -678,6 +690,9 @@ export function SubmitFormClient() {
                 Separate multiple tags with commas (max 10)
               </p>
             </div>
+
+            {/* Usage Examples (All Types - Optional) */}
+            <ExamplesArrayInput name="examples" maxExamples={10} />
 
             {/* Submit Button */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 sm:pt-4">

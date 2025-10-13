@@ -26,6 +26,7 @@ import type { CollectionMetadata } from '@/generated/collections-metadata';
 import { getCollections } from '@/generated/content';
 import { CollectionCard } from '@/src/components/features/content/collection-card';
 import { Badge } from '@/src/components/ui/badge';
+import { statsRedis } from '@/src/lib/cache';
 import { Layers } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -47,7 +48,12 @@ export const metadata = await generatePageMetadata('/collections');
  */
 export default async function CollectionsPage() {
   // Load all collections
-  const collections = await getCollections();
+  const collectionsData = await getCollections();
+
+  // Enrich with view and copy counts from Redis
+  const collections = (await statsRedis.enrichWithAllCounts(collectionsData)) as Array<
+    CollectionMetadata & { viewCount: number; copyCount: number }
+  >;
 
   logger.info('Collections page rendered', {
     collectionCount: collections.length,

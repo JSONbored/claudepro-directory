@@ -4,8 +4,8 @@
  */
 
 import { createHash } from 'node:crypto';
+import { redisClient } from '@/src/lib/cache';
 import { logger } from '@/src/lib/logger';
-import { redisClient } from '@/src/lib/redis';
 import type {
   BounceEvent,
   ClickEvent,

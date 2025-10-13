@@ -1,329 +1,52 @@
 /**
  * Centralized Umami Events Configuration
- * Single source of truth for all analytics events in the application
+ * Single source of truth for all analytics event names and configuration
+ *
+ * Split Architecture for Bundle Size Optimization:
+ * - events.constants.ts: EVENTS const (~160 lines, no dependencies)
+ * - events.config.ts (this file): EVENT_CONFIG, EVENT_CATEGORIES (~780 lines)
+ * - event-payloads.types.ts: EventPayloads interface type definitions (~725 lines, types-only)
+ *
+ * This split reduces bundle size by ~8-12KB for components that only need event names.
+ * Type definitions are stripped at runtime, so they add 0KB to production bundles.
+ *
+ * Import Cycle Prevention:
+ * - events.constants.ts contains ONLY the EVENTS object with no imports
+ * - This file imports and re-exports EVENTS from events.constants.ts
+ * - event-payloads.types.ts imports from events.constants.ts (breaking the cycle)
  *
  * To add new events:
- * 1. Add event definition to EVENTS object
- * 2. Add type to EventPayloads interface
- * 3. Use trackAnalyticsEvent() anywhere in the app
+ * 1. Add event definition to EVENTS object in events.constants.ts
+ * 2. Add payload type to EventPayloads interface in event-payloads.types.ts
+ * 3. Add event configuration to EVENT_CONFIG below
+ * 4. Use trackEvent() from tracker.ts anywhere in the app
+ *
+ * @module lib/analytics/events.config
  */
 
-// Event names as const for type safety
-export const EVENTS = {
-  // Content View Events
-  CONTENT_VIEW: 'content_view',
+import { EVENTS, type EventName } from './events.constants';
 
-  // Related Content Events
-  RELATED_CONTENT_VIEW: 'related_content_view',
-  RELATED_CONTENT_CLICK: 'related_content_click',
-  RELATED_CONTENT_IMPRESSION: 'related_content_impression',
-  CAROUSEL_NAVIGATION: 'carousel_navigation',
+// Re-export for backward compatibility - components import from this file
+export { EVENTS, type EventName };
 
-  // User Journey Events
-  CONTENT_JOURNEY: 'content_journey',
-  SESSION_START: 'session_start',
-  SESSION_DEPTH: 'session_depth',
-
-  // Performance Events
-  PERFORMANCE_METRIC: 'performance_metric',
-  CACHE_PERFORMANCE: 'cache_performance',
-  API_LATENCY: 'api_latency',
-  PAGE_LOAD_TIME: 'page_load_time',
-
-  // Algorithm Events
-  ALGORITHM_PERFORMANCE: 'algorithm_performance',
-  SEARCH_PERFORMED: 'search_performed',
-  FILTER_APPLIED: 'filter_applied',
-
-  // Interaction Events
-  COPY_CODE: 'copy_code',
-  COPY_MARKDOWN: 'copy_markdown',
-  DOWNLOAD_RESOURCE: 'download_resource',
-  DOWNLOAD_MARKDOWN: 'download_markdown',
-  SHARE_CONTENT: 'share_content',
-  FEEDBACK_SUBMITTED: 'feedback_submitted',
-
-  // Email Capture Events
-  EMAIL_CAPTURED: 'email_captured',
-  EMAIL_MODAL_SHOWN: 'email_modal_shown',
-  EMAIL_MODAL_DISMISSED: 'email_modal_dismissed',
-
-  // Error Events
-  ERROR_OCCURRED: 'error_occurred',
-  NOT_FOUND: 'not_found',
-  API_ERROR: 'api_error',
-
-  // MCP/Agent Events
-  MCP_INSTALLED: 'mcp_installed',
-  AGENT_ACTIVATED: 'agent_activated',
-  COMMAND_EXECUTED: 'command_executed',
-  RULE_APPLIED: 'rule_applied',
-  HOOK_TRIGGERED: 'hook_triggered',
-
-  // Navigation Events
-  TAB_SWITCHED: 'tab_switched',
-  FILTER_TOGGLED: 'filter_toggled',
-  SORT_CHANGED: 'sort_changed',
-  PAGINATION_CLICKED: 'pagination_clicked',
-} as const;
-
-// Type for event names
-export type EventName = (typeof EVENTS)[keyof typeof EVENTS];
-
-// Event payload definitions
-export interface EventPayloads {
-  [EVENTS.CONTENT_VIEW]: {
-    category: string;
-    slug: string;
-    page: string;
-    source?: string;
-  };
-
-  [EVENTS.RELATED_CONTENT_VIEW]: {
-    source_page: string;
-    source_category: string;
-    items_shown: number;
-    algorithm_version: string;
-    cache_hit: boolean;
-    render_time?: number;
-  };
-
-  [EVENTS.RELATED_CONTENT_CLICK]: {
-    source_page: string;
-    target_page: string;
-    source_category: string;
-    target_category: string;
-    position: number;
-    match_score: number;
-    match_type: string;
-    time_to_click?: number;
-  };
-
-  [EVENTS.RELATED_CONTENT_IMPRESSION]: {
-    source_page: string;
-    algorithm_version: string;
-    content_ids: string;
-    user_segment?: 'new' | 'returning';
-  };
-
-  [EVENTS.CAROUSEL_NAVIGATION]: {
-    action: 'next' | 'previous';
-    current_slide: number;
-    total_slides: number;
-    source_page: string;
-  };
-
-  [EVENTS.CONTENT_JOURNEY]: {
-    from_page: string;
-    to_page: string;
-    journey_step: number;
-    session_id?: string;
-  };
-
-  [EVENTS.SESSION_START]: {
-    entry_page: string;
-    referrer?: string;
-    utm_source?: string;
-    utm_medium?: string;
-    utm_campaign?: string;
-  };
-
-  [EVENTS.SESSION_DEPTH]: {
-    pages_viewed: number;
-    time_spent: number;
-    categories_explored: string;
-  };
-
-  [EVENTS.PERFORMANCE_METRIC]: {
-    metric: string;
-    value: number;
-    page?: string;
-    component?: string;
-  };
-
-  [EVENTS.CACHE_PERFORMANCE]: {
-    cache_hit: boolean;
-    latency_ms: number;
-    cache_key?: string;
-    cache_size?: number;
-  };
-
-  [EVENTS.API_LATENCY]: {
-    endpoint: string;
-    method: string;
-    duration_ms: number;
-    status_code: number;
-    cached: boolean;
-  };
-
-  [EVENTS.PAGE_LOAD_TIME]: {
-    page: string;
-    time_to_interactive: number;
-    time_to_first_byte: number;
-    dom_content_loaded: number;
-    fully_loaded: number;
-  };
-
-  [EVENTS.ALGORITHM_PERFORMANCE]: {
-    algorithm_version: string;
-    match_score: number;
-    user_clicked: boolean;
-    position?: number;
-  };
-
-  [EVENTS.SEARCH_PERFORMED]: {
-    query: string; // Sanitized, no PII
-    results_count: number;
-    category?: string;
-    filters_applied?: string;
-    time_to_results: number;
-  };
-
-  [EVENTS.FILTER_APPLIED]: {
-    filter_type: string;
-    filter_value: string;
-    page: string;
-    results_count: number;
-  };
-
-  [EVENTS.COPY_CODE]: {
-    content_type: 'code' | 'command' | 'config';
-    content_category: string;
-    content_slug: string;
-    content_length: number;
-  };
-
-  [EVENTS.COPY_MARKDOWN]: {
-    content_category: string;
-    content_slug: string;
-    include_metadata: boolean;
-    include_footer: boolean;
-    content_length: number;
-  };
-
-  [EVENTS.DOWNLOAD_RESOURCE]: {
-    resource_type: string;
-    resource_name: string;
-    file_size?: number;
-    page: string;
-  };
-
-  [EVENTS.DOWNLOAD_MARKDOWN]: {
-    content_category: string;
-    content_slug: string;
-    filename: string;
-    file_size: number;
-  };
-
-  [EVENTS.SHARE_CONTENT]: {
-    content_type: string;
-    content_slug: string;
-    share_method: 'twitter' | 'linkedin' | 'copy_link' | 'email';
-  };
-
-  [EVENTS.FEEDBACK_SUBMITTED]: {
-    feedback_type: 'helpful' | 'not_helpful' | 'report_issue';
-    page: string;
-    category?: string;
-  };
-
-  [EVENTS.EMAIL_CAPTURED]: {
-    trigger_source: 'post_copy' | 'cta' | 'footer' | 'modal';
-    copy_type?: 'llmstxt' | 'markdown' | 'code' | 'link';
-    content_category?: string;
-    content_slug?: string;
-  };
-
-  [EVENTS.EMAIL_MODAL_SHOWN]: {
-    trigger_source: string;
-    copy_type?: string;
-    session_copy_count: number;
-  };
-
-  [EVENTS.EMAIL_MODAL_DISMISSED]: {
-    trigger_source: string;
-    dismissal_method: 'close_button' | 'overlay_click' | 'maybe_later';
-    time_shown_ms: number;
-  };
-
-  [EVENTS.ERROR_OCCURRED]: {
-    error_type: string;
-    error_code?: string;
-    context?: string;
-    page?: string;
-  };
-
-  [EVENTS.NOT_FOUND]: {
-    requested_path: string;
-    referrer?: string;
-  };
-
-  [EVENTS.API_ERROR]: {
-    endpoint: string;
-    status_code: number;
-    error_message?: string; // Sanitized
-  };
-
-  [EVENTS.MCP_INSTALLED]: {
-    mcp_slug: string;
-    installation_method: string;
-    from_page: string;
-  };
-
-  [EVENTS.AGENT_ACTIVATED]: {
-    agent_slug: string;
-    activation_source: string;
-    configuration?: string;
-  };
-
-  [EVENTS.COMMAND_EXECUTED]: {
-    command_slug: string;
-    execution_context: string;
-    parameters?: string; // Sanitized
-  };
-
-  [EVENTS.RULE_APPLIED]: {
-    rule_slug: string;
-    application_context: string;
-  };
-
-  [EVENTS.HOOK_TRIGGERED]: {
-    hook_slug: string;
-    trigger_context: string;
-    execution_time?: number;
-  };
-
-  [EVENTS.TAB_SWITCHED]: {
-    from_tab: string;
-    to_tab: string;
-    page: string;
-  };
-
-  [EVENTS.FILTER_TOGGLED]: {
-    filter_name: string;
-    filter_state: boolean;
-    page: string;
-  };
-
-  [EVENTS.SORT_CHANGED]: {
-    sort_field: string;
-    sort_direction: 'asc' | 'desc';
-    page: string;
-  };
-
-  [EVENTS.PAGINATION_CLICKED]: {
-    from_page: number;
-    to_page: number;
-    total_pages: number;
-    items_per_page: number;
-    section: string;
-  };
-}
+/**
+ * Event payload type definitions moved to event-payloads.types.ts
+ * to reduce bundle size for components that only need event names.
+ *
+ * Import from: '@/src/lib/analytics/event-payloads.types'
+ */
 
 // Event categories for grouping and permissions
 export const EVENT_CATEGORIES = {
   CONTENT: [
     EVENTS.CONTENT_VIEW,
+    EVENTS.CONTENT_VIEW_AGENT,
+    EVENTS.CONTENT_VIEW_MCP,
+    EVENTS.CONTENT_VIEW_COMMAND,
+    EVENTS.CONTENT_VIEW_RULE,
+    EVENTS.CONTENT_VIEW_HOOK,
+    EVENTS.CONTENT_VIEW_STATUSLINE,
+    EVENTS.CONTENT_VIEW_COLLECTION,
     EVENTS.RELATED_CONTENT_VIEW,
     EVENTS.RELATED_CONTENT_CLICK,
     EVENTS.RELATED_CONTENT_IMPRESSION,
@@ -338,14 +61,44 @@ export const EVENT_CATEGORIES = {
   ],
   INTERACTION: [
     EVENTS.COPY_CODE,
+    EVENTS.COPY_CODE_AGENT,
+    EVENTS.COPY_CODE_MCP,
+    EVENTS.COPY_CODE_COMMAND,
+    EVENTS.COPY_CODE_RULE,
+    EVENTS.COPY_CODE_HOOK,
+    EVENTS.COPY_CODE_STATUSLINE,
+    EVENTS.COPY_CODE_GUIDE,
+    EVENTS.COPY_CODE_OTHER,
     EVENTS.COPY_MARKDOWN,
+    EVENTS.COPY_MARKDOWN_AGENT,
+    EVENTS.COPY_MARKDOWN_MCP,
+    EVENTS.COPY_MARKDOWN_COMMAND,
+    EVENTS.COPY_MARKDOWN_RULE,
+    EVENTS.COPY_MARKDOWN_HOOK,
+    EVENTS.COPY_MARKDOWN_STATUSLINE,
+    EVENTS.COPY_MARKDOWN_COLLECTION,
+    EVENTS.COPY_MARKDOWN_OTHER,
     EVENTS.DOWNLOAD_RESOURCE,
     EVENTS.DOWNLOAD_MARKDOWN,
+    EVENTS.DOWNLOAD_MARKDOWN_AGENT,
+    EVENTS.DOWNLOAD_MARKDOWN_MCP,
+    EVENTS.DOWNLOAD_MARKDOWN_COMMAND,
+    EVENTS.DOWNLOAD_MARKDOWN_RULE,
+    EVENTS.DOWNLOAD_MARKDOWN_HOOK,
+    EVENTS.DOWNLOAD_MARKDOWN_STATUSLINE,
+    EVENTS.DOWNLOAD_MARKDOWN_COLLECTION,
+    EVENTS.DOWNLOAD_MARKDOWN_OTHER,
     EVENTS.SHARE_CONTENT,
     EVENTS.FEEDBACK_SUBMITTED,
     EVENTS.EMAIL_CAPTURED,
     EVENTS.EMAIL_MODAL_SHOWN,
     EVENTS.EMAIL_MODAL_DISMISSED,
+    EVENTS.EMAIL_SUBSCRIBED_FOOTER,
+    EVENTS.EMAIL_SUBSCRIBED_INLINE,
+    EVENTS.EMAIL_SUBSCRIBED_POST_COPY,
+    EVENTS.EMAIL_SUBSCRIBED_HOMEPAGE,
+    EVENTS.EMAIL_SUBSCRIBED_MODAL,
+    EVENTS.EMAIL_SUBSCRIBED_CONTENT_PAGE,
   ],
   ERROR: [EVENTS.ERROR_OCCURRED, EVENTS.NOT_FOUND, EVENTS.API_ERROR],
   FEATURE: [
@@ -361,6 +114,14 @@ export const EVENT_CATEGORIES = {
     EVENTS.SORT_CHANGED,
     EVENTS.PAGINATION_CLICKED,
   ],
+  PERSONALIZATION: [
+    EVENTS.PERSONALIZATION_AFFINITY_CALCULATED,
+    EVENTS.PERSONALIZATION_RECOMMENDATION_SHOWN,
+    EVENTS.PERSONALIZATION_RECOMMENDATION_CLICKED,
+    EVENTS.PERSONALIZATION_SIMILAR_CONFIG_CLICKED,
+    EVENTS.PERSONALIZATION_FOR_YOU_VIEWED,
+    EVENTS.PERSONALIZATION_USAGE_RECOMMENDATION_SHOWN,
+  ],
 } as const;
 
 // Event configuration with metadata
@@ -375,17 +136,132 @@ export const EVENT_CONFIG: Record<
   }
 > = {
   [EVENTS.CONTENT_VIEW]: {
-    description: 'User views content detail page',
+    description: 'User views content detail page (legacy)',
+    category: 'CONTENT',
+    enabled: false, // Deprecated in favor of content-specific events
+  },
+  [EVENTS.CONTENT_VIEW_AGENT]: {
+    description: 'User views agent detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.CONTENT_VIEW_MCP]: {
+    description: 'User views MCP server detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.CONTENT_VIEW_COMMAND]: {
+    description: 'User views command detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.CONTENT_VIEW_RULE]: {
+    description: 'User views rule detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.CONTENT_VIEW_HOOK]: {
+    description: 'User views hook detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.CONTENT_VIEW_STATUSLINE]: {
+    description: 'User views statusline detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.CONTENT_VIEW_COLLECTION]: {
+    description: 'User views collection detail page',
     category: 'CONTENT',
     enabled: true,
   },
   [EVENTS.RELATED_CONTENT_VIEW]: {
-    description: 'User views related content section',
+    description: 'User views related content section (legacy)',
+    category: 'CONTENT',
+    enabled: false, // Deprecated in favor of source-specific events
+  },
+  [EVENTS.RELATED_CONTENT_CLICK]: {
+    description: 'User clicks on related content item (legacy)',
+    category: 'CONTENT',
+    enabled: false, // Deprecated in favor of source-specific events
+  },
+  [EVENTS.RELATED_VIEW_ON_AGENT]: {
+    description: 'Related content viewed on agent detail page',
     category: 'CONTENT',
     enabled: true,
   },
-  [EVENTS.RELATED_CONTENT_CLICK]: {
-    description: 'User clicks on related content item',
+  [EVENTS.RELATED_VIEW_ON_MCP]: {
+    description: 'Related content viewed on MCP server detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.RELATED_VIEW_ON_COMMAND]: {
+    description: 'Related content viewed on command detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.RELATED_VIEW_ON_RULE]: {
+    description: 'Related content viewed on rule detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.RELATED_VIEW_ON_HOOK]: {
+    description: 'Related content viewed on hook detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.RELATED_VIEW_ON_STATUSLINE]: {
+    description: 'Related content viewed on statusline detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.RELATED_VIEW_ON_COLLECTION]: {
+    description: 'Related content viewed on collection detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.RELATED_VIEW_ON_GUIDE]: {
+    description: 'Related content viewed on guide detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.RELATED_CLICK_FROM_AGENT]: {
+    description: 'User clicks related content from agent detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.RELATED_CLICK_FROM_MCP]: {
+    description: 'User clicks related content from MCP server detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.RELATED_CLICK_FROM_COMMAND]: {
+    description: 'User clicks related content from command detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.RELATED_CLICK_FROM_RULE]: {
+    description: 'User clicks related content from rule detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.RELATED_CLICK_FROM_HOOK]: {
+    description: 'User clicks related content from hook detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.RELATED_CLICK_FROM_STATUSLINE]: {
+    description: 'User clicks related content from statusline detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.RELATED_CLICK_FROM_COLLECTION]: {
+    description: 'User clicks related content from collection detail page',
+    category: 'CONTENT',
+    enabled: true,
+  },
+  [EVENTS.RELATED_CLICK_FROM_GUIDE]: {
+    description: 'User clicks related content from guide detail page',
     category: 'CONTENT',
     enabled: true,
   },
@@ -416,10 +292,10 @@ export const EVENT_CONFIG: Record<
     enabled: true,
   },
   [EVENTS.PERFORMANCE_METRIC]: {
-    description: 'Performance measurement',
+    description: 'Performance measurement (Core Web Vitals)',
     category: 'PERFORMANCE',
     enabled: true,
-    debugOnly: true,
+    sampleRate: 0.2, // Sample 20% of sessions to track Web Vitals
   },
   [EVENTS.CACHE_PERFORMANCE]: {
     description: 'Cache hit/miss metrics',
@@ -444,7 +320,52 @@ export const EVENT_CONFIG: Record<
     enabled: true,
   },
   [EVENTS.SEARCH_PERFORMED]: {
-    description: 'User performs search',
+    description: 'User performs search (legacy)',
+    category: 'INTERACTION',
+    enabled: false, // Deprecated in favor of context-specific search events
+  },
+  [EVENTS.SEARCH_GLOBAL]: {
+    description: 'User performs global search across all content types',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.SEARCH_AGENTS]: {
+    description: 'User searches within agents section',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.SEARCH_MCP]: {
+    description: 'User searches within MCP servers section',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.SEARCH_COMMANDS]: {
+    description: 'User searches within commands section',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.SEARCH_RULES]: {
+    description: 'User searches within rules section',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.SEARCH_HOOKS]: {
+    description: 'User searches within hooks section',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.SEARCH_STATUSLINES]: {
+    description: 'User searches within statuslines section',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.SEARCH_COLLECTIONS]: {
+    description: 'User searches within collections section',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.SEARCH_GUIDES]: {
+    description: 'User searches within guides section',
     category: 'INTERACTION',
     enabled: true,
   },
@@ -454,12 +375,92 @@ export const EVENT_CONFIG: Record<
     enabled: true,
   },
   [EVENTS.COPY_CODE]: {
-    description: 'User copies code/command',
+    description: 'User copies code/command (legacy)',
+    category: 'INTERACTION',
+    enabled: false, // Deprecated in favor of content-specific events
+  },
+  [EVENTS.COPY_CODE_AGENT]: {
+    description: 'User copies code from agent detail page',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.COPY_CODE_MCP]: {
+    description: 'User copies code from MCP server detail page',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.COPY_CODE_COMMAND]: {
+    description: 'User copies code from command detail page',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.COPY_CODE_RULE]: {
+    description: 'User copies code from rule detail page',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.COPY_CODE_HOOK]: {
+    description: 'User copies code from hook detail page',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.COPY_CODE_STATUSLINE]: {
+    description: 'User copies code from statusline detail page',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.COPY_CODE_GUIDE]: {
+    description: 'User copies code from guide/documentation',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.COPY_CODE_OTHER]: {
+    description: 'User copies code from other pages',
     category: 'INTERACTION',
     enabled: true,
   },
   [EVENTS.COPY_MARKDOWN]: {
-    description: 'User copies content as markdown',
+    description: 'User copies content as markdown (legacy)',
+    category: 'INTERACTION',
+    enabled: false, // Deprecated in favor of content-specific events
+  },
+  [EVENTS.COPY_MARKDOWN_AGENT]: {
+    description: 'User copies agent as markdown',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.COPY_MARKDOWN_MCP]: {
+    description: 'User copies MCP server as markdown',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.COPY_MARKDOWN_COMMAND]: {
+    description: 'User copies command as markdown',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.COPY_MARKDOWN_RULE]: {
+    description: 'User copies rule as markdown',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.COPY_MARKDOWN_HOOK]: {
+    description: 'User copies hook as markdown',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.COPY_MARKDOWN_STATUSLINE]: {
+    description: 'User copies statusline as markdown',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.COPY_MARKDOWN_COLLECTION]: {
+    description: 'User copies collection as markdown',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.COPY_MARKDOWN_OTHER]: {
+    description: 'User copies content as markdown from other pages',
     category: 'INTERACTION',
     enabled: true,
   },
@@ -469,7 +470,47 @@ export const EVENT_CONFIG: Record<
     enabled: true,
   },
   [EVENTS.DOWNLOAD_MARKDOWN]: {
-    description: 'User downloads content as markdown file',
+    description: 'User downloads content as markdown file (legacy)',
+    category: 'INTERACTION',
+    enabled: false, // Deprecated in favor of content-specific events
+  },
+  [EVENTS.DOWNLOAD_MARKDOWN_AGENT]: {
+    description: 'User downloads agent as markdown file',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.DOWNLOAD_MARKDOWN_MCP]: {
+    description: 'User downloads MCP server as markdown file',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.DOWNLOAD_MARKDOWN_COMMAND]: {
+    description: 'User downloads command as markdown file',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.DOWNLOAD_MARKDOWN_RULE]: {
+    description: 'User downloads rule as markdown file',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.DOWNLOAD_MARKDOWN_HOOK]: {
+    description: 'User downloads hook as markdown file',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.DOWNLOAD_MARKDOWN_STATUSLINE]: {
+    description: 'User downloads statusline as markdown file',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.DOWNLOAD_MARKDOWN_COLLECTION]: {
+    description: 'User downloads collection as markdown file',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.DOWNLOAD_MARKDOWN_OTHER]: {
+    description: 'User downloads content as markdown file from other pages',
     category: 'INTERACTION',
     enabled: true,
   },
@@ -558,9 +599,74 @@ export const EVENT_CONFIG: Record<
     category: 'INTERACTION',
     enabled: true,
   },
+  [EVENTS.EMAIL_SUBSCRIBED_FOOTER]: {
+    description: 'User subscribed via sticky footer bar',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.EMAIL_SUBSCRIBED_INLINE]: {
+    description: 'User subscribed via inline CTA',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.EMAIL_SUBSCRIBED_POST_COPY]: {
+    description: 'User subscribed via post-copy modal',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.EMAIL_SUBSCRIBED_HOMEPAGE]: {
+    description: 'User subscribed from homepage',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.EMAIL_SUBSCRIBED_MODAL]: {
+    description: 'User subscribed via modal',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.EMAIL_SUBSCRIBED_CONTENT_PAGE]: {
+    description: 'User subscribed from content detail page',
+    category: 'INTERACTION',
+    enabled: true,
+  },
+  [EVENTS.PERSONALIZATION_AFFINITY_CALCULATED]: {
+    description: 'User affinity score calculated',
+    category: 'PERSONALIZATION',
+    enabled: true,
+    sampleRate: 0.1, // Sample 10% (high volume)
+  },
+  [EVENTS.PERSONALIZATION_RECOMMENDATION_SHOWN]: {
+    description: 'Personalized recommendation displayed',
+    category: 'PERSONALIZATION',
+    enabled: true,
+  },
+  [EVENTS.PERSONALIZATION_RECOMMENDATION_CLICKED]: {
+    description: 'User clicked personalized recommendation',
+    category: 'PERSONALIZATION',
+    enabled: true,
+  },
+  [EVENTS.PERSONALIZATION_SIMILAR_CONFIG_CLICKED]: {
+    description: 'User clicked similar config suggestion',
+    category: 'PERSONALIZATION',
+    enabled: true,
+  },
+  [EVENTS.PERSONALIZATION_FOR_YOU_VIEWED]: {
+    description: 'User viewed For You feed',
+    category: 'PERSONALIZATION',
+    enabled: true,
+  },
+  [EVENTS.PERSONALIZATION_USAGE_RECOMMENDATION_SHOWN]: {
+    description: 'Usage-based recommendation displayed',
+    category: 'PERSONALIZATION',
+    enabled: true,
+  },
 };
 
-// Type helper for event payloads
-export type EventPayload<T extends EventName> = T extends keyof EventPayloads
-  ? EventPayloads[T]
-  : never;
+/**
+ * Type helper for event payloads
+ *
+ * Re-export from event-payloads.types.ts for convenience.
+ * Components using this should import directly from event-payloads.types.ts
+ * to avoid pulling in the full EVENT_CONFIG.
+ */
+export type { EventPayload, EventPayloads } from './event-payloads.types';

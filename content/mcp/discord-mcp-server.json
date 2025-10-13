@@ -32,7 +32,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "discord-mcp": {
           "command": "java",
           "args": ["-jar", "/absolute/path/to/discord-mcp-0.0.1-SNAPSHOT.jar"],
@@ -44,7 +44,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "discord-mcp": {
           "command": "java",
           "args": ["-jar", "/absolute/path/to/discord-mcp-0.0.1-SNAPSHOT.jar"],
@@ -90,10 +90,30 @@
     }
   ],
   "examples": [
-    "Get server information and member count",
-    "Create new text channels and categories",
-    "Manage member roles and permissions",
-    "Retrieve channel lists and configurations"
+    {
+      "title": "Get server information and member count",
+      "code": "Ask Claude: \"Get server information and member count\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Create new text channels and categories",
+      "code": "Ask Claude: \"Create new text channels and categories\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Manage member roles and permissions",
+      "code": "Ask Claude: \"Manage member roles and permissions\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Retrieve channel lists and configurations",
+      "code": "Ask Claude: \"Retrieve channel lists and configurations\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["bot", "send_messages", "manage_channels", "manage_roles"],

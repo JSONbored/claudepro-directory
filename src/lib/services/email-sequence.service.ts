@@ -15,8 +15,8 @@
  */
 
 import type { ReactElement } from 'react';
+import { redisClient } from '@/src/lib/cache';
 import { logger } from '@/src/lib/logger';
-import { redisClient } from '@/src/lib/redis';
 import { resendService } from '@/src/lib/services/resend.service';
 
 /**

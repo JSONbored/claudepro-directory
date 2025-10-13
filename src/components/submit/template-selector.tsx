@@ -10,10 +10,77 @@ import {
 import { ChevronDown, FileText } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-// Curated templates (top 3 per type)
+/**
+ * Template Type Definitions
+ * Discriminated union for type-safe template handling
+ */
+
+// Base template fields shared across all templates
+interface BaseTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  tags: string;
+}
+
+// Agent template with system prompt configuration
+interface AgentTemplate extends BaseTemplate {
+  type: 'agent';
+  systemPrompt: string;
+  temperature: number;
+  maxTokens: number;
+}
+
+// MCP server template with NPM package configuration
+interface MCPTemplate extends BaseTemplate {
+  type: 'mcp';
+  npmPackage: string;
+  serverType: 'stdio' | 'sse';
+  installCommand: string;
+  configCommand: string;
+  toolsDescription: string;
+  envVars?: string;
+}
+
+// Rules template with custom rules content
+interface RulesTemplate extends BaseTemplate {
+  type: 'rules';
+  rulesContent: string;
+  temperature: number;
+  maxTokens: number;
+}
+
+// Command template with command content
+interface CommandTemplate extends BaseTemplate {
+  type: 'command';
+  commandContent: string;
+}
+
+// Hook template (placeholder for future)
+interface HookTemplate extends BaseTemplate {
+  type: 'hook';
+}
+
+// Statusline template (placeholder for future)
+interface StatuslineTemplate extends BaseTemplate {
+  type: 'statusline';
+}
+
+// Discriminated union of all template types
+type Template =
+  | AgentTemplate
+  | MCPTemplate
+  | RulesTemplate
+  | CommandTemplate
+  | HookTemplate
+  | StatuslineTemplate;
+
+// Curated templates (top 3 per type) with proper discriminated types
 const TEMPLATES = {
   agents: [
     {
+      type: 'agent' as const,
       id: 'code-reviewer',
       name: 'Code Reviewer',
       description: 'Reviews code for quality and best practices',
@@ -25,6 +92,7 @@ const TEMPLATES = {
       maxTokens: 8000,
     },
     {
+      type: 'agent' as const,
       id: 'technical-writer',
       name: 'Technical Documentation Writer',
       description: 'Creates clear, comprehensive technical documentation',
@@ -36,6 +104,7 @@ const TEMPLATES = {
       maxTokens: 8000,
     },
     {
+      type: 'agent' as const,
       id: 'debugging-assistant',
       name: 'Debugging Assistant',
       description: 'Helps identify and fix bugs systematically',
@@ -46,13 +115,14 @@ const TEMPLATES = {
       temperature: 0.6,
       maxTokens: 8000,
     },
-  ],
+  ] satisfies AgentTemplate[],
   mcp: [
     {
+      type: 'mcp' as const,
       id: 'github-mcp',
       name: 'GitHub MCP Server',
       npmPackage: '@modelcontextprotocol/server-github',
-      serverType: 'stdio',
+      serverType: 'stdio' as const,
       installCommand: 'npm install -g @modelcontextprotocol/server-github',
       configCommand: 'mcp-server-github',
       description: 'Search repositories, manage issues, and read files',
@@ -62,10 +132,11 @@ const TEMPLATES = {
         'Access GitHub repositories, search code, manage issues, read file contents',
     },
     {
+      type: 'mcp' as const,
       id: 'postgres-mcp',
       name: 'PostgreSQL MCP Server',
       npmPackage: '@modelcontextprotocol/server-postgres',
-      serverType: 'stdio',
+      serverType: 'stdio' as const,
       installCommand: 'npm install -g @modelcontextprotocol/server-postgres',
       configCommand: 'mcp-server-postgres',
       description: 'Query and manage PostgreSQL databases',
@@ -74,9 +145,10 @@ const TEMPLATES = {
       envVars: 'POSTGRES_CONNECTION_STRING=postgresql://user:password@localhost:5432/dbname',
       toolsDescription: 'Execute SQL queries, manage schemas, inspect database structure',
     },
-  ],
+  ] satisfies MCPTemplate[],
   rules: [
     {
+      type: 'rules' as const,
       id: 'python-expert',
       name: 'Python Expert',
       rulesContent:
@@ -88,6 +160,7 @@ const TEMPLATES = {
       maxTokens: 8000,
     },
     {
+      type: 'rules' as const,
       id: 'react-expert',
       name: 'React Expert',
       rulesContent:
@@ -98,9 +171,10 @@ const TEMPLATES = {
       temperature: 0.5,
       maxTokens: 8000,
     },
-  ],
+  ] satisfies RulesTemplate[],
   commands: [
     {
+      type: 'command' as const,
       id: 'refactor-code',
       name: 'Refactor Code',
       commandContent:
@@ -109,17 +183,16 @@ const TEMPLATES = {
       category: 'Development',
       tags: 'refactor, code-quality, improvement',
     },
-  ],
-  hooks: [],
-  statuslines: [],
+  ] satisfies CommandTemplate[],
+  hooks: [] satisfies HookTemplate[],
+  statuslines: [] satisfies StatuslineTemplate[],
 } as const;
 
 type ContentType = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines';
 
 interface TemplateSelectorProps {
   contentType: ContentType;
-  // biome-ignore lint/suspicious/noExplicitAny: Templates have dynamic fields based on content type
-  onSelect: (template: any) => void;
+  onSelect: (template: Template) => void;
 }
 
 export function TemplateSelector({ contentType, onSelect }: TemplateSelectorProps) {

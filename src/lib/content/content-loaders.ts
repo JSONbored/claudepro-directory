@@ -21,8 +21,8 @@
  * - app/[category]/[slug]/page.tsx (detail pages)
  */
 
+import { contentCache } from '@/src/lib/cache';
 import { logger } from '@/src/lib/logger';
-import { contentCache } from '@/src/lib/redis';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 
 /**
@@ -242,9 +242,33 @@ export async function getFullContentBySlug(
 export async function getRelatedContent(
   category: string,
   currentSlug: string,
-  limit: number = 3
+  limit = 3
 ): Promise<UnifiedContentItem[]> {
   const allContent = await getContentByCategory(category);
 
   return allContent.filter((item) => item.slug !== currentSlug).slice(0, limit);
+}
+
+/**
+ * Get total count of all configurations across all categories
+ * Used for dynamic SEO metadata (e.g., "147+ configs")
+ *
+ * @returns Total count of all content items
+ */
+export async function getTotalContentCount(): Promise<number> {
+  const categories = ['agents', 'mcp', 'commands', 'rules', 'hooks', 'statuslines'];
+
+  try {
+    const counts = await Promise.all(
+      categories.map(async (category) => {
+        const content = await getContentByCategory(category);
+        return content.length;
+      })
+    );
+
+    return counts.reduce((sum, count) => sum + count, 0);
+  } catch (error) {
+    logger.error('Failed to get total content count', error as Error);
+    return 147; // Fallback to reasonable estimate
+  }
 }

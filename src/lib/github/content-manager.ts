@@ -23,17 +23,150 @@ export const CONTENT_PATHS = {
 } as const;
 
 /**
- * Generate slug from name
+ * Reserved slug words that should not be used
+ * Prevents collision with system routes and API endpoints
+ */
+const RESERVED_SLUGS = new Set([
+  // System routes
+  'api',
+  'admin',
+  'auth',
+  'login',
+  'logout',
+  'signup',
+  'dashboard',
+  'settings',
+  'profile',
+  'search',
+  'changelog',
+  'about',
+  'contact',
+  'privacy',
+  'terms',
+  'help',
+  'docs',
+  'guides',
+  'blog',
+
+  // Content type routes
+  'agents',
+  'mcp',
+  'rules',
+  'commands',
+  'hooks',
+  'statuslines',
+  'collections',
+
+  // Special/reserved
+  'new',
+  'edit',
+  'delete',
+  'create',
+  'update',
+  'submit',
+  'test',
+  'preview',
+  'draft',
+
+  // Common web paths
+  'assets',
+  'static',
+  'public',
+  'images',
+  'files',
+  'uploads',
+
+  // HTTP methods
+  'get',
+  'post',
+  'put',
+  'patch',
+  'delete',
+]);
+
+/**
+ * Slug length constraints for URL safety and usability
+ */
+const SLUG_MIN_LENGTH = 3;
+const SLUG_MAX_LENGTH = 100;
+
+/**
+ * Validation error types for slug generation
+ */
+export class SlugValidationError extends Error {
+  constructor(
+    message: string,
+    public readonly code: 'EMPTY' | 'TOO_SHORT' | 'TOO_LONG' | 'RESERVED' | 'INVALID'
+  ) {
+    super(message);
+    this.name = 'SlugValidationError';
+  }
+}
+
+/**
+ * Generate slug from name with comprehensive validation
  * Converts "My Awesome Agent" → "my-awesome-agent"
+ *
+ * @param name - Input name to convert to slug
+ * @returns URL-safe slug string
+ * @throws {SlugValidationError} If slug validation fails
+ *
+ * Validation rules:
+ * - Length: 3-100 characters
+ * - Format: lowercase alphanumeric + hyphens
+ * - Not reserved: Prevents collision with system routes
+ * - No leading/trailing hyphens
+ *
+ * @example
+ * generateSlug("My Awesome Agent") // Returns: "my-awesome-agent"
+ * generateSlug("API") // Throws: SlugValidationError (reserved word)
+ * generateSlug("AB") // Throws: SlugValidationError (too short)
  */
 export function generateSlug(name: string): string {
-  return name
+  // Validate input is not empty
+  const trimmedName = name.trim();
+  if (!trimmedName) {
+    throw new SlugValidationError('Slug cannot be generated from empty string', 'EMPTY');
+  }
+
+  // Generate slug
+  const slug = trimmedName
     .toLowerCase()
-    .trim()
     .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
     .replace(/\s+/g, '-') // Replace spaces with hyphens
     .replace(/-+/g, '-') // Replace multiple hyphens with single
     .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+
+  // Validate slug is not empty after sanitization
+  if (!slug) {
+    throw new SlugValidationError(
+      `Slug cannot be generated from input: "${trimmedName}" (contains no valid characters)`,
+      'INVALID'
+    );
+  }
+
+  // Validate minimum length
+  if (slug.length < SLUG_MIN_LENGTH) {
+    throw new SlugValidationError(
+      `Slug must be at least ${SLUG_MIN_LENGTH} characters (got: "${slug}", length: ${slug.length})`,
+      'TOO_SHORT'
+    );
+  }
+
+  // Validate maximum length
+  if (slug.length > SLUG_MAX_LENGTH) {
+    throw new SlugValidationError(
+      `Slug must be at most ${SLUG_MAX_LENGTH} characters (got length: ${slug.length})`,
+      'TOO_LONG'
+    );
+  }
+
+  // Validate slug is not reserved
+  if (RESERVED_SLUGS.has(slug)) {
+    throw new SlugValidationError(`Slug "${slug}" is reserved and cannot be used`, 'RESERVED');
+  }
+
+  return slug;
 }
 
 /**
@@ -95,31 +228,63 @@ export async function findSimilarContent(
  * Used for fuzzy matching of slugs
  */
 function levenshteinDistance(str1: string, str2: string): number {
-  const matrix: number[][] = [];
+  // Initialize matrix with proper dimensions - create 2D array filled with zeros
+  const matrix: number[][] = Array.from({ length: str2.length + 1 }, () =>
+    Array.from({ length: str1.length + 1 }, () => 0)
+  );
 
+  // Helper to safely get matrix value with bounds checking
+  const getCell = (i: number, j: number): number => {
+    const row = matrix[i];
+    if (!row) {
+      throw new Error(`Matrix row ${i} undefined - bounds: 0-${str2.length}`);
+    }
+    const value = row[j];
+    if (value === undefined) {
+      throw new Error(`Matrix cell [${i}][${j}] undefined - bounds: 0-${str1.length}`);
+    }
+    return value;
+  };
+
+  // Helper to safely set matrix value with bounds checking
+  const setCell = (i: number, j: number, value: number): void => {
+    const row = matrix[i];
+    if (!row) {
+      throw new Error(`Matrix row ${i} undefined - bounds: 0-${str2.length}`);
+    }
+    row[j] = value;
+  };
+
+  // Initialize first column
   for (let i = 0; i <= str2.length; i++) {
-    matrix[i] = [i];
+    setCell(i, 0, i);
   }
 
+  // Initialize first row
   for (let j = 0; j <= str1.length; j++) {
-    matrix[0]![j] = j;
+    setCell(0, j, j);
   }
 
+  // Fill in the rest of the matrix
   for (let i = 1; i <= str2.length; i++) {
     for (let j = 1; j <= str1.length; j++) {
       if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-        matrix[i]![j] = matrix[i - 1]![j - 1]!;
+        setCell(i, j, getCell(i - 1, j - 1));
       } else {
-        matrix[i]![j] = Math.min(
-          matrix[i - 1]![j - 1]! + 1, // substitution
-          matrix[i]![j - 1]! + 1, // insertion
-          matrix[i - 1]![j]! + 1 // deletion
+        setCell(
+          i,
+          j,
+          Math.min(
+            getCell(i - 1, j - 1) + 1, // substitution
+            getCell(i, j - 1) + 1, // insertion
+            getCell(i - 1, j) + 1 // deletion
+          )
         );
       }
     }
   }
 
-  return matrix[str2.length]![str1.length]!;
+  return getCell(str2.length, str1.length);
 }
 
 /**

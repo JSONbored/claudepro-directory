@@ -31,7 +31,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "cloudflare": {
           "command": "npx",
           "args": ["-y", "@cloudflare/mcp-server-cloudflare"],
@@ -43,7 +43,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "cloudflare": {
           "command": "npx",
           "args": ["-y", "@cloudflare/mcp-server-cloudflare"],
@@ -85,10 +85,30 @@
     }
   ],
   "examples": [
-    "Add DNS record for subdomain",
-    "Deploy Worker script",
-    "Show traffic analytics",
-    "Configure firewall rule"
+    {
+      "title": "Add DNS record for subdomain",
+      "code": "Ask Claude: \"Add DNS record for subdomain\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Deploy Worker script",
+      "code": "Ask Claude: \"Deploy Worker script\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Show traffic analytics",
+      "code": "Ask Claude: \"Show traffic analytics\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Configure firewall rule",
+      "code": "Ask Claude: \"Configure firewall rule\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "deploy"],

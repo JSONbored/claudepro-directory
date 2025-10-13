@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
+import { contentCache } from '@/src/lib/cache';
 import { handleApiError, handleValidationError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 import { rateLimiters, withRateLimit } from '@/src/lib/rate-limiter';
-import { contentCache } from '@/src/lib/redis';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 import { apiSchemas, ValidationError, validation } from '@/src/lib/security/validators';
 

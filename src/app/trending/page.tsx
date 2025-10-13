@@ -13,6 +13,7 @@ import {
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { getBatchTrendingData } from '@/src/lib/trending/calculator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 
 // Generate metadata from centralized registry
 export const metadata = await generatePageMetadata('/trending');
@@ -41,15 +42,15 @@ async function getTrendingData(params: TrendingParams) {
 
   try {
     // Await all content promises (single fetch for both trending data and total count)
-    const [
-      rulesData,
-      mcpData,
-      agentsData,
-      commandsData,
-      hooksData,
-      statuslinesData,
-      collectionsData,
-    ] = await Promise.all([rules, mcp, agents, commands, hooks, statuslines, collections]);
+    const {
+      rules: rulesData,
+      mcp: mcpData,
+      agents: agentsData,
+      commands: commandsData,
+      hooks: hooksData,
+      statuslines: statuslinesData,
+      collections: collectionsData,
+    } = await batchLoadContent({ rules, mcp, agents, commands, hooks, statuslines, collections });
 
     // Calculate total count
     const totalCount =
@@ -197,22 +198,22 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
         </div>
       </section>
 
-      {/* Email CTA */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-8`}>
-        <InlineEmailCTA
-          variant="minimal"
-          context="trending-page"
-          headline="Never Miss Trending Tools"
-          description="Get weekly updates on what's hot in the Claude community."
-        />
-      </section>
-
       {/* Trending Content */}
       <section
         className={`container ${UI_CLASSES.MX_AUTO} px-4 py-16`}
         aria-label="Trending configurations content"
       >
         <TrendingContent trending={trending} popular={popular} recent={recent} />
+      </section>
+
+      {/* Email CTA - Moved to footer section to match homepage pattern */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <InlineEmailCTA
+          variant="hero"
+          context="trending-page"
+          headline="Never Miss Trending Tools"
+          description="Get weekly updates on what's hot in the Claude community. No spam, unsubscribe anytime."
+        />
       </section>
     </div>
   );
