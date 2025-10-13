@@ -20,7 +20,7 @@
 import { faker } from '@faker-js/faker';
 import { Factory } from 'fishery';
 
-interface Bookmark {
+export interface Bookmark {
   id: string;
   user_id: string;
   content_type: 'agents' | 'mcp' | 'commands' | 'rules' | 'hooks' | 'statuslines';

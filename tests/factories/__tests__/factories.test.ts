@@ -23,6 +23,7 @@ import { mcpContentSchema } from '@/src/lib/schemas/content/mcp.schema';
 import { ruleContentSchema } from '@/src/lib/schemas/content/rule.schema';
 import { statuslineContentSchema } from '@/src/lib/schemas/content/statusline.schema';
 // Content Factories
+import type { AgentFactoryTransientParams } from '../content/agent.factory';
 // User Factories
 import {
   agentFactory,
@@ -73,7 +74,7 @@ describe('Content Factories', () => {
       const agentWithConfig = agentFactory.build(
         {},
         {
-          transient: { withConfiguration: true },
+          transient: { withConfiguration: true } as AgentFactoryTransientParams,
         }
       );
 
@@ -90,7 +91,7 @@ describe('Content Factories', () => {
       const agentWithInstall = agentFactory.build(
         {},
         {
-          transient: { withInstallation: true },
+          transient: { withInstallation: true } as AgentFactoryTransientParams,
         }
       );
 

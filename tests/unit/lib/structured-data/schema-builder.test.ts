@@ -1180,11 +1180,11 @@ describe('buildJobPostingSchema()', () => {
     it('creates Place with PostalAddress for on-site jobs', () => {
       const schema = buildJobPostingSchema(baseConfig);
 
-      expect(schema.jobLocation['@type']).toBe('Place');
-      expect(schema.jobLocation.address['@type']).toBe('PostalAddress');
-      expect(schema.jobLocation.address.addressLocality).toBe('San Francisco');
-      expect(schema.jobLocation.address.addressRegion).toBe('CA');
-      expect(schema.jobLocation.address.addressCountry).toBe('USA');
+      expect(schema.jobLocation!['@type']).toBe('Place');
+      expect(schema.jobLocation!.address['@type']).toBe('PostalAddress');
+      expect(schema.jobLocation!.address.addressLocality).toBe('San Francisco');
+      expect(schema.jobLocation!.address.addressRegion).toBe('CA');
+      expect(schema.jobLocation!.address.addressCountry).toBe('USA');
     });
 
     it('creates remote Place for remote jobs', () => {
@@ -1194,8 +1194,8 @@ describe('buildJobPostingSchema()', () => {
       };
       const schema = buildJobPostingSchema(config);
 
-      expect(schema.jobLocation['@type']).toBe('Place');
-      expect(schema.jobLocation.address.addressCountry).toBe('Remote');
+      expect(schema.jobLocation!['@type']).toBe('Place');
+      expect(schema.jobLocation!.address.addressCountry).toBe('Remote');
     });
   });
 
@@ -1203,11 +1203,11 @@ describe('buildJobPostingSchema()', () => {
     it('includes baseSalary as MonetaryAmount', () => {
       const schema = buildJobPostingSchema(baseConfig);
 
-      expect(schema.baseSalary['@type']).toBe('MonetaryAmount');
-      expect(schema.baseSalary.currency).toBe('USD');
-      expect(schema.baseSalary.value['@type']).toBe('QuantitativeValue');
-      expect(schema.baseSalary.value.value).toBe(180000);
-      expect(schema.baseSalary.value.unitText).toBe('YEAR');
+      expect(schema.baseSalary!['@type']).toBe('MonetaryAmount');
+      expect(schema.baseSalary!.currency).toBe('USD');
+      expect(schema.baseSalary!.value['@type']).toBe('QuantitativeValue');
+      expect(schema.baseSalary!.value.value).toBe(180000);
+      expect(schema.baseSalary!.value.unitText).toBe('YEAR');
     });
   });
 });
@@ -1266,8 +1266,8 @@ describe('buildCollectionPageSchema()', () => {
     });
 
     it('defaults to items.length when collectionSize not provided', () => {
-      const config = { ...baseConfig, collectionSize: undefined };
-      const schema = buildCollectionPageSchema(config);
+      const { collectionSize: _, ...configWithoutSize } = baseConfig;
+      const schema = buildCollectionPageSchema(configWithoutSize);
 
       expect(schema.mainEntity.numberOfItems).toBe(3);
     });
