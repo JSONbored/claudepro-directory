@@ -12,33 +12,16 @@
  */
 
 import { z } from 'zod';
-import { SECURITY_CONFIG } from '@/src/lib/constants';
 import {
   baseConfigurationSchema,
   baseContentMetadataSchema,
   baseTroubleshootingSchema,
 } from '@/src/lib/schemas/content/base-content.schema';
 import { limitedMediumStringArray } from '@/src/lib/schemas/primitives/base-arrays';
-import { codeString, mediumString } from '@/src/lib/schemas/primitives/base-strings';
-
-/**
- * Rule Example Schema
- *
- * Structured example showing how to use a rule effectively.
- * Includes prompt and expected outcome for demonstration purposes.
- */
-const ruleExampleSchema = z
-  .object({
-    title: z.string().max(200).describe('Example title or name'),
-    description: mediumString.describe('Description of what the example demonstrates'),
-    prompt: codeString.describe('Example prompt or input that uses the rule'),
-    expectedOutcome: codeString.describe('Expected result or outcome from using the rule'),
-  })
-  .describe(
-    'Structured example demonstrating how to use a rule effectively with prompt and expected outcome.'
-  );
+import { optionalGithubUrl } from '@/src/lib/schemas/primitives/base-strings';
 
 // Rule troubleshooting now uses baseTroubleshootingSchema from base-content.schema.ts
+// Rule examples now use baseUsageExampleSchema from base-content.schema.ts
 // Removed local ruleTroubleshootingSchema definition to reduce duplication
 // Note: Previously supported union[string, object] but now standardized to object only
 
@@ -82,39 +65,15 @@ export const ruleContentSchema = z
       .optional()
       .describe('Optional AI model configuration settings (temperature, maxTokens, systemPrompt)'),
 
-    // GitHub URL with strict hostname validation
-    githubUrl: z
-      .string()
-      .url()
-      .refine(
-        (url) => {
-          try {
-            const urlObj = new URL(url);
-            return SECURITY_CONFIG.trustedHostnames.github.includes(
-              urlObj.hostname as 'github.com' | 'www.github.com'
-            );
-          } catch {
-            return false;
-          }
-        },
-        { message: 'Must be a valid GitHub URL (github.com)' }
-      )
-      .optional()
-      .describe('Optional GitHub repository URL for rule source code or additional documentation'),
+    // GitHub URL with strict hostname validation (uses shared primitive)
+    githubUrl: optionalGithubUrl,
 
     // Prerequisites and dependencies
     requirements: limitedMediumStringArray
       .optional()
       .describe('Optional list of prerequisites or dependencies required to use this rule'),
 
-    // Examples and troubleshooting guidance
-    examples: z
-      .array(z.union([codeString, ruleExampleSchema]))
-      .max(10)
-      .optional()
-      .describe(
-        'Optional array of usage examples (simple strings or structured example objects, max 10)'
-      ),
+    // Troubleshooting guidance
     troubleshooting: z
       .array(baseTroubleshootingSchema)
       .max(20)

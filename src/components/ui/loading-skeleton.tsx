@@ -255,6 +255,43 @@ function ImageSkeleton({
   );
 }
 
+function FeaturedSectionSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={cn('space-y-8', className)} {...props}>
+      {/* Section Header */}
+      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} animate-pulse`}>
+        <Skeleton size="lg" width="lg" />
+        <Skeleton size="sm" width="sm" />
+      </div>
+      {/* Card Grid */}
+      <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
+        {[...Array(6)].map((_, i) => (
+          <ConfigCardSkeleton key={`featured-skeleton-${i + 1}`} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function HomepageStatsSkeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn(
+        'flex flex-wrap justify-center gap-4 lg:gap-6 text-xs lg:text-sm animate-pulse',
+        className
+      )}
+      {...props}
+    >
+      {[...Array(7)].map((_, i) => (
+        <div key={`stat-skeleton-${i + 1}`} className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+          <Skeleton size="sm" width="xs" rounded="full" />
+          <Skeleton size="sm" width="sm" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export {
   Skeleton,
   LoadingSkeleton,
@@ -267,5 +304,7 @@ export {
   TableSkeleton,
   ButtonSkeleton,
   ImageSkeleton,
+  FeaturedSectionSkeleton,
+  HomepageStatsSkeleton,
   skeletonVariants,
 };

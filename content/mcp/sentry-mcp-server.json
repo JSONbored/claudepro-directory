@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "sentry": {
           "transport": "http",
           "url": "https://mcp.sentry.dev/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "sentry": {
           "transport": "http",
           "url": "https://mcp.sentry.dev/mcp"
@@ -76,10 +76,30 @@
     }
   ],
   "examples": [
-    "What are the most common errors in the last 24 hours?",
-    "Show me the stack trace for error ID abc123",
-    "Which deployment introduced these new errors?",
-    "Find all errors affecting the checkout flow"
+    {
+      "title": "What are the most common errors in the last 24 hou...",
+      "code": "Ask Claude: \"What are the most common errors in the last 24 hours?\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Show me the stack trace for error ID abc123",
+      "code": "Ask Claude: \"Show me the stack trace for error ID abc123\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Which deployment introduced these new errors?",
+      "code": "Ask Claude: \"Which deployment introduced these new errors?\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Find all errors affecting the checkout flow",
+      "code": "Ask Claude: \"Find all errors affecting the checkout flow\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write"],

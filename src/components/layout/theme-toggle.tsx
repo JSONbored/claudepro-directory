@@ -1,15 +1,31 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
-import { Button } from '@/src/components/ui/button';
+import { Switch } from '@/src/components/ui/switch';
+import { useViewTransition } from '@/src/hooks/use-view-transition';
 import { Moon, Sun } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 const themeSchema = z.enum(['light', 'dark']);
 
+/**
+ * Theme Toggle Component with Circle Blur Animation
+ *
+ * Features:
+ * - View Transitions API for smooth circular reveal animation
+ * - Click position tracking for animation origin
+ * - Progressive enhancement (fallback to instant transition)
+ * - localStorage persistence
+ * - Accessibility support (keyboard, screen readers)
+ *
+ * Animation:
+ * - Chrome/Edge 111+: Circular blur expansion from click position
+ * - Firefox/Safari: Instant theme change (no animation)
+ */
 export function ThemeToggle() {
   const [theme, setTheme] = useState<'light' | 'dark' | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { startTransition, isSupported } = useViewTransition();
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -22,30 +38,142 @@ export function ThemeToggle() {
     document.documentElement.setAttribute('data-theme', initial);
   }, []);
 
-  const toggleTheme = () => {
-    document.documentElement.classList.add('theme-transition');
+  /**
+   * Calculate click position as percentage of viewport
+   * Used to set animation origin for circular reveal
+   */
+  const getClickPosition = (event: React.MouseEvent | React.KeyboardEvent) => {
+    // For keyboard events, use center of switch element
+    if (!('clientX' in event)) {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return { x: 50, y: 50 };
+      return {
+        x: ((rect.left + rect.width / 2) / window.innerWidth) * 100,
+        y: ((rect.top + rect.height / 2) / window.innerHeight) * 100,
+      };
+    }
 
+    // For mouse events, use actual click position
+    return {
+      x: (event.clientX / window.innerWidth) * 100,
+      y: (event.clientY / window.innerHeight) * 100,
+    };
+  };
+
+  /**
+   * Set CSS variables for animation origin
+   * Must be done before view transition starts
+   */
+  const setAnimationOrigin = (x: number, y: number) => {
+    document.documentElement.style.setProperty('--x', `${x}%`);
+    document.documentElement.style.setProperty('--y', `${y}%`);
+  };
+
+  /**
+   * Handle theme toggle with View Transition animation
+   * Captures click position for circular reveal effect
+   *
+   * Performance optimizations:
+   * - DOM updates before React state (prevents blocking)
+   * - Deferred React state update (after animation starts)
+   * - localStorage write happens async
+   *
+   * Performance monitoring (development only):
+   * - Tracks animation start/end timing
+   * - Measures total interaction latency
+   */
+  const handleToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const startTime = performance.now();
     const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
 
-    setTimeout(() => {
-      document.documentElement.classList.remove('theme-transition');
-    }, 300);
+    // If View Transitions API is supported, use it
+    if (isSupported) {
+      const { x, y } = getClickPosition(event);
+      setAnimationOrigin(x, y);
+
+      // Start view transition with DOM-only updates (no React state yet)
+      const transition = startTransition(() => {
+        // Update DOM immediately (this is what the animation sees)
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+      });
+
+      // Update React state after animation starts (non-blocking)
+      // This prevents React re-render from blocking the animation
+      requestAnimationFrame(() => {
+        setTheme(newTheme);
+      });
+
+      // Performance monitoring (development only)
+      if (process.env.NODE_ENV === 'development' && transition) {
+        transition.finished
+          .then(() => {
+            const endTime = performance.now();
+            // biome-ignore lint/suspicious/noConsole: Development-only performance monitoring
+            console.log(
+              `[Theme Toggle] Animation completed in ${(endTime - startTime).toFixed(2)}ms`
+            );
+          })
+          .catch(() => {
+            // Silently ignore animation errors
+          });
+      }
+    } else {
+      // Fallback: Use CSS transition for smooth color change
+      document.documentElement.classList.add('theme-transition');
+
+      setTheme(newTheme);
+      localStorage.setItem('theme', newTheme);
+      document.documentElement.setAttribute('data-theme', newTheme);
+
+      setTimeout(() => {
+        document.documentElement.classList.remove('theme-transition');
+      }, 300);
+    }
   };
 
   if (!theme) return null;
 
   return (
-    <Button
-      onClick={toggleTheme}
-      variant="ghost"
-      size="sm"
-      className={UI_CLASSES.BUTTON_GHOST_ICON}
-      aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-    >
-      {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-    </Button>
+    <div ref={containerRef} className="flex items-center gap-2">
+      <Sun className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+      <Switch
+        checked={theme === 'dark'}
+        onCheckedChange={(checked) => {
+          // Fallback for keyboard/programmatic changes without click event
+          const newTheme = checked ? 'dark' : 'light';
+
+          if (isSupported) {
+            // Use center of switch for keyboard navigation
+            const rect = containerRef.current?.getBoundingClientRect();
+            if (rect) {
+              const x = ((rect.left + rect.width / 2) / window.innerWidth) * 100;
+              const y = ((rect.top + rect.height / 2) / window.innerHeight) * 100;
+              setAnimationOrigin(x, y);
+            }
+
+            startTransition(() => {
+              document.documentElement.setAttribute('data-theme', newTheme);
+              localStorage.setItem('theme', newTheme);
+            });
+
+            requestAnimationFrame(() => {
+              setTheme(newTheme);
+            });
+          } else {
+            document.documentElement.classList.add('theme-transition');
+            setTheme(newTheme);
+            localStorage.setItem('theme', newTheme);
+            document.documentElement.setAttribute('data-theme', newTheme);
+            setTimeout(() => {
+              document.documentElement.classList.remove('theme-transition');
+            }, 300);
+          }
+        }}
+        onClick={handleToggle}
+        aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+      />
+      <Moon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+    </div>
   );
 }

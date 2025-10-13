@@ -2,6 +2,8 @@ import { headers } from 'next/headers';
 import Script from 'next/script';
 import { APP_CONFIG, SEO_CONFIG } from '@/src/lib/constants';
 import { serializeJsonLd } from '@/src/lib/schemas/form.schema';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 interface StructuredDataProps {
   type?: string;
@@ -79,7 +81,7 @@ export async function StructuredData({
           datePublished: data.dateAdded,
           dateModified: data.lastModified || data.dateAdded,
           keywords: data.tags?.join(', '),
-          url: `${baseUrl}/${data.category}/${data.slug}`,
+          url: `${baseUrl}${getContentItemUrl({ category: (data.category as ContentCategory) || 'agents', slug: data.slug || '' })}`,
         };
 
       case 'itemList':
@@ -97,7 +99,7 @@ export async function StructuredData({
               '@type': 'SoftwareApplication',
               name: item.title || item.name || 'Unknown',
               description: item.description,
-              url: `${baseUrl}/${item.category}/${item.slug}`,
+              url: `${baseUrl}${getContentItemUrl({ category: (item.category as ContentCategory) || 'agents', slug: item.slug || '' })}`,
               author: {
                 '@type': 'Person',
                 name: item.author,
@@ -126,7 +128,7 @@ export async function StructuredData({
           },
           mainEntityOfPage: {
             '@type': 'WebPage',
-            '@id': `${baseUrl}/${data.category}/${data.slug}`,
+            '@id': `${baseUrl}${getContentItemUrl({ category: (data.category as ContentCategory) || 'agents', slug: data.slug || '' })}`,
           },
           keywords: data.tags?.join(', '),
         };

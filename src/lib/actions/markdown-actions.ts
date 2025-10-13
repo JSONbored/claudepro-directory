@@ -17,10 +17,10 @@
 'use server';
 
 import { z } from 'zod';
+import { contentCache } from '@/src/lib/cache';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { getContentBySlug } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
-import { contentCache } from '@/src/lib/redis';
 import { rateLimitedAction } from './safe-action';
 
 /**
@@ -207,88 +207,93 @@ export const copyMarkdownAction = rateLimitedAction
     },
   })
   .schema(markdownExportSchema)
-  .action(async ({ parsedInput: { category, slug, includeMetadata, includeFooter }, ctx }) => {
-    try {
-      logger.info('Copy markdown action started', {
-        category,
-        slug,
-        clientIP: ctx.clientIP,
-      });
-
-      // Check cache first
-      const cacheKey = `markdown:copy:${category}:${slug}:${includeMetadata}:${includeFooter}`;
-      if (contentCache.isEnabled()) {
-        const cached = await contentCache.getAPIResponse<string>(cacheKey);
-        if (cached) {
-          logger.info('Serving cached markdown for copy', {
-            category,
-            slug,
-            source: 'redis-cache',
-          });
-          return {
-            success: true,
-            markdown: cached,
-            filename: `${slug}.md`,
-            length: cached.length,
-          };
-        }
-      }
-
-      // Load content
-      const item = await getContentBySlug(category, slug);
-
-      if (!item) {
-        logger.warn('Content not found for markdown copy', {
+  .action(
+    async ({
+      parsedInput: { category, slug, includeMetadata, includeFooter },
+      ctx,
+    }): Promise<MarkdownExportResponse> => {
+      try {
+        logger.info('Copy markdown action started', {
           category,
           slug,
+          clientIP: ctx.clientIP,
         });
-        return {
-          success: false,
-          error: `Content not found: ${category}/${slug}`,
-        };
-      }
 
-      // Generate markdown
-      const markdown = generateMarkdownContent(item, {
-        includeMetadata,
-        includeFooter,
-      });
+        // Check cache first
+        const cacheKey = `markdown:copy:${category}:${slug}:${includeMetadata}:${includeFooter}`;
+        if (contentCache.isEnabled()) {
+          const cached = await contentCache.getAPIResponse<string>(cacheKey);
+          if (cached) {
+            logger.info('Serving cached markdown for copy', {
+              category,
+              slug,
+              source: 'redis-cache',
+            });
+            return {
+              success: true,
+              markdown: cached,
+              filename: `${slug}.md`,
+              length: cached.length,
+            };
+          }
+        }
 
-      // Cache the result for 1 hour
-      if (contentCache.isEnabled()) {
-        await contentCache.cacheAPIResponse(cacheKey, markdown, 3600).catch((err) =>
-          logger.warn('Failed to cache markdown', {
+        // Load content
+        const item = await getContentBySlug(category, slug);
+
+        if (!item) {
+          logger.warn('Content not found for markdown copy', {
             category,
             slug,
-            error: err,
-          })
+          });
+          return {
+            success: false,
+            error: `Content not found: ${category}/${slug}`,
+          };
+        }
+
+        // Generate markdown
+        const markdown = generateMarkdownContent(item, {
+          includeMetadata,
+          includeFooter,
+        });
+
+        // Cache the result for 1 hour
+        if (contentCache.isEnabled()) {
+          await contentCache.cacheAPIResponse(cacheKey, markdown, 3600).catch((err) =>
+            logger.warn('Failed to cache markdown', {
+              category,
+              slug,
+              error: err,
+            })
+          );
+        }
+
+        logger.info('Markdown copy action completed', {
+          category,
+          slug,
+          length: markdown.length,
+        });
+
+        return {
+          success: true,
+          markdown,
+          filename: `${slug}.md`,
+          length: markdown.length,
+        };
+      } catch (error) {
+        logger.error(
+          'Copy markdown action failed',
+          error instanceof Error ? error : new Error(String(error)),
+          { category, slug }
         );
+        return {
+          success: false,
+          error: 'Failed to generate markdown content',
+        };
       }
-
-      logger.info('Markdown copy action completed', {
-        category,
-        slug,
-        length: markdown.length,
-      });
-
-      return {
-        success: true,
-        markdown,
-        filename: `${slug}.md`,
-        length: markdown.length,
-      };
-    } catch (error) {
-      logger.error(
-        'Copy markdown action failed',
-        error instanceof Error ? error : new Error(String(error)),
-        { category, slug }
-      );
-      return {
-        success: false,
-        error: 'Failed to generate markdown content',
-      };
     }
-  });
+  );
 
 /**
  * Download Markdown Action
@@ -324,7 +329,7 @@ export const downloadMarkdownAction = rateLimitedAction
     },
   })
   .schema(markdownExportSchema.omit({ includeMetadata: true, includeFooter: true }))
-  .action(async ({ parsedInput: { category, slug }, ctx }) => {
+  .action(async ({ parsedInput: { category, slug }, ctx }): Promise<MarkdownExportResponse> => {
     try {
       logger.info('Download markdown action started', {
         category,

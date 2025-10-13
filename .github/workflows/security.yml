@@ -54,7 +54,7 @@ jobs:
     - uses: ./.github/actions/setup-node-deps
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
+      uses: github/codeql-action/init@v4
       with:
         languages: javascript-typescript
         queries: +security-extended,security-and-quality
@@ -65,7 +65,7 @@ jobs:
         NEXT_TELEMETRY_DISABLED: 1
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+      uses: github/codeql-action/analyze@v4
       with:
         category: "/language:javascript-typescript"
         upload: true
@@ -114,3 +114,42 @@ jobs:
         path: npm-audit.json
         retention-days: 30
         if-no-files-found: ignore
+
+  socket-security:
+    name: Socket Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: vars.SOCKET_SECURITY_API_KEY != ''  # Only run if API key is configured
+    permissions:
+      contents: read
+      pull-requests: write
+      statuses: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Setup Python for Socket CLI
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install Socket CLI
+      run: pip install socketsecurity --upgrade
+
+    - name: Run Socket Security Scan
+      env:
+        SOCKET_SECURITY_API_KEY: ${{ secrets.SOCKET_SECURITY_API_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          socketcli \
+            --target-path $GITHUB_WORKSPACE \
+            --scm github \
+            --pr-number ${{ github.event.pull_request.number }}
+        else
+          socketcli \
+            --target-path $GITHUB_WORKSPACE \
+            --scm github
+        fi
+      continue-on-error: true  # Don't block PRs initially

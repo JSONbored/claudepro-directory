@@ -30,6 +30,126 @@ export type ContentItem =
   | StatuslineContent;
 
 /**
+ * Type-safe installation configuration types
+ */
+interface InstallationSteps {
+  steps: string[];
+  configPath?: Record<string, string>;
+}
+
+interface Installation {
+  claudeDesktop?: InstallationSteps;
+  claudeCode?: string | InstallationSteps;
+  requirements?: string[];
+}
+
+/**
+ * Type-safe MCP configuration types
+ * Internal structure uses 'mcp' for consistency with schema
+ */
+interface MCPServerConfig {
+  command?: string;
+  args?: string[];
+  env?: Record<string, string>;
+  url?: string;
+  transport?: string;
+}
+
+interface MCPConfiguration {
+  claudeDesktop?: {
+    mcp: Record<string, MCPServerConfig>;
+  };
+  claudeCode?: {
+    mcp: Record<string, MCPServerConfig>;
+  };
+  http?: {
+    url: string;
+    headers?: Record<string, string>;
+  };
+  sse?: {
+    url: string;
+    headers?: Record<string, string>;
+  };
+}
+
+/**
+ * Type-safe hook configuration types
+ */
+interface HookConfig {
+  script?: string;
+  matchers?: string[];
+  timeout?: number;
+  description?: string;
+}
+
+interface HookConfiguration {
+  hookConfig?: {
+    hooks: Record<string, HookConfig | HookConfig[]>;
+  };
+  scriptContent?: string;
+}
+
+/**
+ * Type-safe statusline configuration type
+ */
+interface StatuslineConfiguration {
+  format?: string;
+  refreshInterval?: number;
+  position?: string;
+  colorScheme?: string;
+}
+
+/**
+ * Type-safe AI configuration type
+ */
+interface AIConfiguration {
+  temperature?: number;
+  maxTokens?: number;
+  systemPrompt?: string;
+}
+
+/**
+ * Type-safe troubleshooting item types
+ */
+interface TroubleshootingItem {
+  issue: string;
+  solution: string;
+}
+
+type TroubleshootingEntry = TroubleshootingItem | string;
+
+/**
+ * Type-safe example types
+ */
+
+// Code example from baseUsageExampleSchema (used by MCP, hooks, etc.)
+interface CodeExample {
+  title: string;
+  code: string;
+  language:
+    | 'typescript'
+    | 'javascript'
+    | 'json'
+    | 'bash'
+    | 'shell'
+    | 'python'
+    | 'yaml'
+    | 'markdown'
+    | 'plaintext';
+  description?: string;
+}
+
+// Rule-specific example with prompt/outcome fields
+interface RuleExample {
+  title: string;
+  description?: string;
+  prompt?: string;
+  expectedOutcome?: string;
+}
+
+type Example = CodeExample | RuleExample | string;
+
+/**
  * Build complete rich content string from any content item
  * Extracts ALL available fields based on content type
  *
@@ -148,7 +268,9 @@ export function buildRichContent(item: ContentItem): string {
     Array.isArray(item.examples) &&
     item.examples.length > 0
   ) {
-    sections.push(formatExamples(item.examples, item.category));
+    // Type assertion: item.examples from baseUsageExampleSchema matches our Example type
+    // Safe because Example = CodeExample | RuleExample | string, and baseUsageExampleSchema = CodeExample
+    sections.push(formatExamples(item.examples as Example[], item.category));
   }
 
   // 10. TECHNICAL DETAILS SECTION (sidebar content - metadata, links, etc.)
@@ -175,31 +297,44 @@ function formatBulletList(title: string, items: string[]): string {
 }
 
 /**
- * Format installation instructions
+ * Type guard for Installation type
  */
-function formatInstallation(installation: Record<string, unknown> | unknown): string {
-  // Type guard: ensure installation is an object
-  if (typeof installation !== 'object' || installation === null || Array.isArray(installation)) {
+function isInstallation(value: unknown): value is Installation {
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return false;
+  }
+
+  if (Array.isArray(value) || value instanceof Date || value instanceof RegExp) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Format installation instructions with type-safe handling
+ */
+function formatInstallation(installation: unknown): string {
+  if (!isInstallation(installation)) {
     return '';
   }
 
-  const inst = installation as Record<string, unknown>;
+  const inst = installation as Installation;
   const lines = ['INSTALLATION', '------------', ''];
 
   // Claude Desktop installation
-  const claudeDesktop = inst.claudeDesktop as Record<string, unknown> | undefined;
-  if (claudeDesktop) {
+  if (inst.claudeDesktop) {
     lines.push('CLAUDE DESKTOP:', '');
 
-    if (claudeDesktop.steps && Array.isArray(claudeDesktop.steps)) {
-      claudeDesktop.steps.forEach((step: string, idx: number) => {
+    if (inst.claudeDesktop.steps) {
+      inst.claudeDesktop.steps.forEach((step, idx) => {
         lines.push(`${idx + 1}. ${step}`);
       });
     }
 
-    if (claudeDesktop.configPath && typeof claudeDesktop.configPath === 'object') {
+    if (inst.claudeDesktop.configPath) {
       lines.push('', 'Configuration file locations:');
-      for (const [os, pathValue] of Object.entries(claudeDesktop.configPath)) {
+      for (const [os, pathValue] of Object.entries(inst.claudeDesktop.configPath)) {
         lines.push(`  ${os}: ${pathValue}`);
       }
     }
@@ -208,21 +343,16 @@ function formatInstallation(installation: Record<string, unknown> | unknown): st
   }
 
   // Claude Code installation
-  const claudeCode = inst.claudeCode;
-  if (claudeCode) {
+  if (inst.claudeCode) {
     lines.push('CLAUDE CODE:', '');
 
     // For MCP servers, claudeCode is a string (simple command)
-    if (typeof claudeCode === 'string') {
-      lines.push(claudeCode);
+    if (typeof inst.claudeCode === 'string') {
+      lines.push(inst.claudeCode);
     }
-    // For hooks/commands, claudeCode might have steps
-    else if (
-      typeof claudeCode === 'object' &&
-      'steps' in claudeCode &&
-      Array.isArray(claudeCode.steps)
-    ) {
-      claudeCode.steps.forEach((step: string, idx: number) => {
+    // For hooks/commands, claudeCode has steps
+    else if (inst.claudeCode.steps) {
+      inst.claudeCode.steps.forEach((step, idx) => {
         lines.push(`${idx + 1}. ${step}`);
       });
     }
@@ -231,7 +361,7 @@ function formatInstallation(installation: Record<string, unknown> | unknown): st
   }
 
   // Requirements
-  if (inst.requirements && Array.isArray(inst.requirements)) {
+  if (inst.requirements) {
     lines.push('Requirements:');
     for (const req of inst.requirements) {
       lines.push(`• ${req}`);
@@ -243,73 +373,70 @@ function formatInstallation(installation: Record<string, unknown> | unknown): st
 }
 
 /**
- * Format configuration based on content type
+ * Format configuration based on content type with proper typing
  */
 function formatConfiguration(config: Record<string, unknown>, category: string): string {
   switch (category) {
     case 'mcp':
-      return formatMcpConfiguration(config);
+      return formatMcpConfiguration(config as MCPConfiguration);
     case 'hooks':
-      return formatHookConfiguration(config);
+      return formatHookConfiguration(config as HookConfiguration);
     case 'statuslines':
-      return formatStatuslineConfiguration(config);
+      return formatStatuslineConfiguration(config as StatuslineConfiguration);
     case 'agents':
     case 'commands':
     case 'rules':
-      return formatAiConfiguration(config);
+      return formatAiConfiguration(config as AIConfiguration);
     default:
       return '';
   }
 }
 
 /**
- * Format MCP server configuration
+ * Format MCP server configuration with type safety
+ * Internal: reads from 'mcp' field (consistent with schema)
  */
-function formatMcpConfiguration(config: Record<string, unknown>): string {
+function formatMcpConfiguration(config: MCPConfiguration): string {
   const lines = ['CONFIGURATION', '-------------', ''];
 
   // Claude Desktop MCP Servers
-  const claudeDesktop = config.claudeDesktop as Record<string, unknown> | undefined;
-  if (claudeDesktop?.mcpServers && typeof claudeDesktop.mcpServers === 'object') {
+  if (config.claudeDesktop?.mcp) {
     lines.push('Claude Desktop MCP Servers:', '');
 
-    for (const [serverName, serverConfig] of Object.entries(claudeDesktop.mcpServers)) {
-      const sc = serverConfig as Record<string, unknown>;
+    for (const [serverName, serverConfig] of Object.entries(config.claudeDesktop.mcp)) {
       lines.push(`Server: ${serverName}`);
 
-      if (sc.command) lines.push(`  Command: ${sc.command}`);
-      if (sc.args && Array.isArray(sc.args)) {
-        lines.push(`  Arguments: ${sc.args.join(' ')}`);
+      if (serverConfig.command) lines.push(`  Command: ${serverConfig.command}`);
+      if (serverConfig.args) {
+        lines.push(`  Arguments: ${serverConfig.args.join(' ')}`);
       }
-      if (sc.env && typeof sc.env === 'object' && sc.env !== null) {
+      if (serverConfig.env) {
         lines.push('  Environment:');
-        for (const [key, value] of Object.entries(sc.env)) {
+        for (const [key, value] of Object.entries(serverConfig.env)) {
           lines.push(`    ${key}=${value}`);
         }
       }
-      if (sc.url) lines.push(`  URL: ${sc.url}`);
-      if (sc.transport) lines.push(`  Transport: ${sc.transport}`);
+      if (serverConfig.url) lines.push(`  URL: ${serverConfig.url}`);
+      if (serverConfig.transport) lines.push(`  Transport: ${serverConfig.transport}`);
 
       lines.push('');
     }
   }
 
   // Claude Code MCP Servers
-  const claudeCode = config.claudeCode as Record<string, unknown> | undefined;
-  if (claudeCode?.mcpServers && typeof claudeCode.mcpServers === 'object') {
+  if (config.claudeCode?.mcp) {
     lines.push('Claude Code MCP Servers:', '');
 
-    for (const [serverName, serverConfig] of Object.entries(claudeCode.mcpServers)) {
-      const sc = serverConfig as Record<string, unknown>;
+    for (const [serverName, serverConfig] of Object.entries(config.claudeCode.mcp)) {
       lines.push(`Server: ${serverName}`);
 
-      if (sc.command) lines.push(`  Command: ${sc.command}`);
-      if (sc.args && Array.isArray(sc.args)) {
-        lines.push(`  Arguments: ${sc.args.join(' ')}`);
+      if (serverConfig.command) lines.push(`  Command: ${serverConfig.command}`);
+      if (serverConfig.args) {
+        lines.push(`  Arguments: ${serverConfig.args.join(' ')}`);
       }
-      if (sc.env && typeof sc.env === 'object' && sc.env !== null) {
+      if (serverConfig.env) {
         lines.push('  Environment:');
-        for (const [key, value] of Object.entries(sc.env)) {
+        for (const [key, value] of Object.entries(serverConfig.env)) {
           lines.push(`    ${key}=${value}`);
         }
       }
@@ -318,27 +445,26 @@ function formatMcpConfiguration(config: Record<string, unknown>): string {
     }
   }
 
-  // HTTP/SSE transport configs
-  const http = config.http as Record<string, unknown> | undefined;
-  if (http) {
+  // HTTP transport config
+  if (config.http) {
     lines.push('HTTP Transport:', '');
-    lines.push(`  URL: ${http.url}`);
-    if (http.headers && typeof http.headers === 'object') {
+    lines.push(`  URL: ${config.http.url}`);
+    if (config.http.headers) {
       lines.push('  Headers:');
-      for (const [key, value] of Object.entries(http.headers)) {
+      for (const [key, value] of Object.entries(config.http.headers)) {
         lines.push(`    ${key}: ${value}`);
       }
     }
     lines.push('');
   }
 
-  const sse = config.sse as Record<string, unknown> | undefined;
-  if (sse) {
+  // SSE transport config
+  if (config.sse) {
     lines.push('SSE Transport:', '');
-    lines.push(`  URL: ${sse.url}`);
-    if (sse.headers && typeof sse.headers === 'object') {
+    lines.push(`  URL: ${config.sse.url}`);
+    if (config.sse.headers) {
       lines.push('  Headers:');
-      for (const [key, value] of Object.entries(sse.headers)) {
+      for (const [key, value] of Object.entries(config.sse.headers)) {
         lines.push(`    ${key}: ${value}`);
       }
     }
@@ -349,30 +475,28 @@ function formatMcpConfiguration(config: Record<string, unknown>): string {
 }
 
 /**
- * Format hook configuration with script content
+ * Format hook configuration with script content and type safety
  */
-function formatHookConfiguration(config: Record<string, unknown>): string {
+function formatHookConfiguration(config: HookConfiguration): string {
   const lines = ['CONFIGURATION', '-------------', ''];
 
   // Hook Config
-  const hookConfig = config.hookConfig as Record<string, unknown> | undefined;
-  if (hookConfig?.hooks && typeof hookConfig.hooks === 'object') {
+  if (config.hookConfig?.hooks) {
     lines.push('Hook Configuration:', '');
 
-    for (const [hookType, hookConfigValue] of Object.entries(hookConfig.hooks)) {
+    for (const [hookType, hookConfigValue] of Object.entries(config.hookConfig.hooks)) {
       lines.push(`Hook Type: ${hookType}`);
 
       // Handle both single config and array of configs
       const configs = Array.isArray(hookConfigValue) ? hookConfigValue : [hookConfigValue];
 
-      for (const [idx, hc] of configs.entries()) {
-        const hook = hc as Record<string, unknown>;
+      for (const [idx, hook] of configs.entries()) {
         if (configs.length > 1) {
           lines.push(`  Config ${idx + 1}:`);
         }
 
         if (hook.script) lines.push(`  Script: ${hook.script}`);
-        if (hook.matchers && Array.isArray(hook.matchers)) {
+        if (hook.matchers) {
           lines.push(`  Matchers: ${hook.matchers.join(', ')}`);
         }
         if (hook.timeout) lines.push(`  Timeout: ${hook.timeout}ms`);
@@ -384,7 +508,7 @@ function formatHookConfiguration(config: Record<string, unknown>): string {
   }
 
   // Script Content (THE ACTUAL HOOK SCRIPT - CRITICAL!)
-  if (typeof config.scriptContent === 'string') {
+  if (config.scriptContent) {
     lines.push('HOOK SCRIPT', '-----------', '', config.scriptContent);
   }
 
@@ -392,9 +516,9 @@ function formatHookConfiguration(config: Record<string, unknown>): string {
 }
 
 /**
- * Format statusline configuration
+ * Format statusline configuration with type safety
  */
-function formatStatuslineConfiguration(config: Record<string, unknown>): string {
+function formatStatuslineConfiguration(config: StatuslineConfiguration): string {
   const lines = ['CONFIGURATION', '-------------', ''];
 
   if (config.format) lines.push(`Format: ${config.format}`);
@@ -406,9 +530,9 @@ function formatStatuslineConfiguration(config: Record<string, unknown>): string 
 }
 
 /**
- * Format AI configuration (agents, commands, rules)
+ * Format AI configuration (agents, commands, rules) with type safety
  */
-function formatAiConfiguration(config: Record<string, unknown>): string {
+function formatAiConfiguration(config: AIConfiguration): string {
   const lines = ['CONFIGURATION', '-------------', ''];
 
   if (config.temperature !== undefined) {
@@ -417,7 +541,7 @@ function formatAiConfiguration(config: Record<string, unknown>): string {
   if (config.maxTokens !== undefined) {
     lines.push(`Max Tokens: ${config.maxTokens}`);
   }
-  if (typeof config.systemPrompt === 'string') {
+  if (config.systemPrompt) {
     lines.push('', 'System Prompt:', config.systemPrompt);
   }
 
@@ -425,16 +549,29 @@ function formatAiConfiguration(config: Record<string, unknown>): string {
 }
 
 /**
- * Format troubleshooting section
+ * Type guard for TroubleshootingItem
  */
-function formatTroubleshooting(items: unknown[]): string {
+function isTroubleshootingItem(value: unknown): value is TroubleshootingItem {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'issue' in value &&
+    'solution' in value &&
+    typeof (value as TroubleshootingItem).issue === 'string' &&
+    typeof (value as TroubleshootingItem).solution === 'string'
+  );
+}
+
+/**
+ * Format troubleshooting section with type safety
+ */
+function formatTroubleshooting(items: TroubleshootingEntry[]): string {
   const lines = ['TROUBLESHOOTING', '---------------', ''];
 
   for (const [idx, item] of items.entries()) {
-    if (typeof item === 'object' && item !== null && 'issue' in item && 'solution' in item) {
-      const troubleItem = item as Record<string, unknown>;
-      lines.push(`${idx + 1}. ${troubleItem.issue}`);
-      lines.push(`   Solution: ${troubleItem.solution}`);
+    if (isTroubleshootingItem(item)) {
+      lines.push(`${idx + 1}. ${item.issue}`);
+      lines.push(`   Solution: ${item.solution}`);
       lines.push('');
     } else if (typeof item === 'string') {
       lines.push(`• ${item}`);
@@ -445,27 +582,59 @@ function formatTroubleshooting(items: unknown[]): string {
 }
 
 /**
- * Format examples section based on content type
+ * Type guard for CodeExample (baseUsageExampleSchema)
  */
-function formatExamples(examples: unknown[], category: string): string {
+function isCodeExample(value: unknown): value is CodeExample {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'code' in value &&
+    'language' in value &&
+    typeof (value as CodeExample).code === 'string' &&
+    typeof (value as CodeExample).language === 'string'
+  );
+}
+
+/**
+ * Type guard for RuleExample
+ */
+function isRuleExample(value: unknown): value is RuleExample {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'title' in value &&
+    !('code' in value) && // Distinguish from CodeExample
+    ('prompt' in value || 'expectedOutcome' in value) // Must have at least one rule-specific field
+  );
+}
+
+/**
+ * Format examples section based on content type with type safety
+ */
+function formatExamples(examples: Example[], category: string): string {
   const lines = ['USAGE EXAMPLES', '--------------', ''];
 
   for (const [idx, example] of examples.entries()) {
-    // Rules can have structured examples
-    if (
-      category === 'rules' &&
-      typeof example === 'object' &&
-      example !== null &&
-      'title' in example
-    ) {
-      const ex = example as Record<string, unknown>;
-      lines.push(`${idx + 1}. ${ex.title}`);
-      if (ex.description) lines.push(`   ${ex.description}`);
-      if (ex.prompt) lines.push(`   Prompt: ${ex.prompt}`);
-      if (ex.expectedOutcome) lines.push(`   Expected: ${ex.expectedOutcome}`);
+    // Code examples (MCP, hooks, etc.) - from baseUsageExampleSchema
+    if (isCodeExample(example)) {
+      lines.push(`${idx + 1}. ${example.title}`);
+      if (example.description) lines.push(`   ${example.description}`);
+      lines.push(`   Language: ${example.language}`);
+      lines.push('   Code:');
+      lines.push(`   \`\`\`${example.language}`);
+      lines.push(`   ${example.code}`);
+      lines.push('   ```');
       lines.push('');
     }
-    // Simple string examples
+    // Rule-specific examples with prompt/outcome
+    else if (category === 'rules' && isRuleExample(example)) {
+      lines.push(`${idx + 1}. ${example.title}`);
+      if (example.description) lines.push(`   ${example.description}`);
+      if (example.prompt) lines.push(`   Prompt: ${example.prompt}`);
+      if (example.expectedOutcome) lines.push(`   Expected: ${example.expectedOutcome}`);
+      lines.push('');
+    }
+    // Simple string examples (fallback)
     else if (typeof example === 'string') {
       lines.push(`• ${example}`);
     }

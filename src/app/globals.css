@@ -32,6 +32,7 @@
   /* Animation Keyframes */
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-border-beam: border-beam linear infinite;
 
   /* Performance Optimizations - GPU Acceleration & Paint Isolation */
   /* will-change utilities for GPU acceleration */
@@ -62,14 +63,16 @@
 
   --dark-text-primary: oklch(94% 0.005 60);
   --dark-text-secondary: oklch(78% 0.008 60);
-  --dark-text-tertiary: oklch(62% 0.01 60);
-  --dark-text-disabled: oklch(48% 0.012 60);
-  --dark-text-inverse: oklch(98% 0.003 90);
+  --dark-text-tertiary: oklch(
+    72% 0.01 60
+  ); /* Increased from 69% to 72% for improved WCAG AA contrast (4.5:1 minimum) */
+  --dark-text-disabled: oklch(57% 0.012 60);
+  --dark-text-inverse: oklch(100% 0 0);
 
   --dark-border-default: oklch(30% 0.005 60 / 0.5);
   --dark-border-light: oklch(28% 0.005 60 / 0.3);
   --dark-border-medium: oklch(34% 0.008 60 / 0.6);
-  --dark-border-strong: oklch(62% 0.155 42);
+  --dark-border-strong: oklch(74% 0.2 35);
 
   /* Light Mode Colors - Claude Desktop Light */
   --light-bg-primary: oklch(99% 0.003 90);
@@ -82,39 +85,43 @@
 
   --light-text-primary: oklch(18% 0.014 75);
   --light-text-secondary: oklch(42% 0.012 70);
-  --light-text-tertiary: oklch(58% 0.01 65);
+  --light-text-tertiary: oklch(
+    44% 0.01 65
+  ); /* Decreased from 67% to 44% for improved WCAG AA contrast (4.5:1 minimum) on light backgrounds */
   --light-text-disabled: oklch(68% 0.008 60);
-  --light-text-inverse: oklch(98% 0.003 90);
+  --light-text-inverse: oklch(100% 0 0);
 
   --light-border-default: oklch(92% 0.006 75);
   --light-border-light: oklch(95% 0.004 80);
   --light-border-medium: oklch(88% 0.008 70);
-  --light-border-strong: oklch(58% 0.165 41);
+  --light-border-strong: oklch(70% 0.2 35);
 
-  /* Shared Brand Colors */
-  --claude-orange: oklch(62% 0.155 42);
-  --claude-orange-hover: oklch(66% 0.145 42);
-  --claude-orange-active: oklch(57% 0.16 42);
-  --claude-orange-light: oklch(70% 0.135 45);
-  --claude-orange-muted: oklch(48% 0.142 37);
+  /* Shared Brand Colors - EXACT match to logo icon (#F97316 / #FB923C range) */
+  --claude-orange: oklch(74% 0.2 35);
+  --claude-orange-hover: oklch(78% 0.19 35);
+  --claude-orange-active: oklch(70% 0.21 35);
+  --claude-orange-light: oklch(82% 0.17 37);
+  --claude-orange-muted: oklch(65% 0.18 33);
 
   /* Light mode adjustments for orange */
-  --light-accent: oklch(58% 0.165 41);
+  --light-accent: oklch(70% 0.2 35);
   --light-accent-hover: oklch(54% 0.17 40);
   --light-accent-active: oklch(50% 0.175 39);
   --light-accent-subtle: oklch(95% 0.035 42);
 
   /* Semantic Colors - Dark Mode */
-  --dark-success: oklch(64% 0.19 145);
+  --dark-success: oklch(72% 0.19 145); /* Increased from 64% for WCAG AA contrast (4.5:1) */
   --dark-success-bg: oklch(35% 0.08 145 / 0.15);
   --dark-success-border: oklch(64% 0.19 145 / 0.3);
-  --dark-warning: oklch(68% 0.155 65);
+  --dark-warning: oklch(75% 0.155 65); /* Increased from 68% for WCAG AA contrast (4.5:1) */
   --dark-warning-bg: oklch(45% 0.08 65 / 0.15);
   --dark-warning-border: oklch(68% 0.155 65 / 0.3);
-  --dark-error: oklch(63% 0.195 25);
+  --dark-error: oklch(70% 0.195 25); /* Increased from 63% for WCAG AA contrast (4.5:1) */
   --dark-error-bg: oklch(40% 0.08 25 / 0.15);
   --dark-error-border: oklch(63% 0.195 25 / 0.3);
-  --dark-info: oklch(65% 0.168 250);
+  --dark-info: oklch(
+    78% 0.168 250
+  ); /* Increased from 65% for WCAG AA contrast (4.5:1) - was worst at 2.82:1 */
   --dark-info-bg: oklch(40% 0.08 250 / 0.15);
   --dark-info-border: oklch(65% 0.168 250 / 0.3);
 
@@ -160,7 +167,7 @@
   --color-syntax-keyword: oklch(65% 0.17 45); /* #ff8c00 - Orange */
   --color-syntax-function: oklch(68% 0.14 220); /* #00bcd4 - Cyan */
   --color-syntax-number: oklch(64% 0.15 140); /* #4caf50 - Green */
-  --color-syntax-string: oklch(62% 0.155 42); /* Claude orange */
+  --color-syntax-string: oklch(74% 0.2 35); /* Claude orange - matches logo */
   --color-syntax-comment: oklch(62% 0.01 60); /* Muted gray */
 
   /* ========================================
@@ -186,11 +193,11 @@
   --color-category-rules-border: oklch(58% 0.19 250 / 0.3);
   --color-category-rules-hover: oklch(58% 0.19 250 / 0.6);
 
-  /* Commands - Orange */
-  --color-category-commands: oklch(65% 0.17 45);
-  --color-category-commands-bg: oklch(65% 0.17 45 / 0.2);
-  --color-category-commands-border: oklch(65% 0.17 45 / 0.3);
-  --color-category-commands-hover: oklch(65% 0.17 45 / 0.6);
+  /* Commands - Orange (proportionally brighter +12%) */
+  --color-category-commands: oklch(77% 0.2 38);
+  --color-category-commands-bg: oklch(77% 0.2 38 / 0.2);
+  --color-category-commands-border: oklch(77% 0.2 38 / 0.3);
+  --color-category-commands-hover: oklch(77% 0.2 38 / 0.6);
 
   /* Hooks - Pink */
   --color-category-hooks: oklch(65% 0.24 350);
@@ -268,11 +275,14 @@
   --color-text-inverse: var(--dark-text-inverse);
 
   --color-accent: var(--claude-orange);
+  --color-accent-foreground: oklch(
+    20% 0 0
+  ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
   --color-accent-hover: var(--claude-orange-hover);
   --color-accent-active: var(--claude-orange-active);
   --color-accent-light: var(--claude-orange-light);
   --color-accent-muted: var(--claude-orange-muted);
-  --color-accent-subtle: oklch(33% 0.045 35);
+  --color-accent-subtle: oklch(45% 0.08 35);
 
   --color-border-default: var(--dark-border-default);
   --color-border-light: var(--dark-border-light);
@@ -483,6 +493,9 @@
   --color-text-inverse: var(--light-text-inverse);
 
   --color-accent: var(--light-accent);
+  --color-accent-foreground: oklch(
+    20% 0 0
+  ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
   --color-accent-hover: var(--light-accent-hover);
   --color-accent-active: var(--light-accent-active);
   --color-accent-subtle: var(--light-accent-subtle);
@@ -534,9 +547,12 @@
   --color-text-inverse: var(--dark-text-inverse);
 
   --color-accent: var(--claude-orange);
+  --color-accent-foreground: oklch(
+    20% 0 0
+  ); /* Near-black for WCAG AA contrast (>7:1 ratio) on orange buttons */
   --color-accent-hover: var(--claude-orange-hover);
   --color-accent-active: var(--claude-orange-active);
-  --color-accent-subtle: oklch(33% 0.045 35);
+  --color-accent-subtle: oklch(45% 0.08 35);
   --color-accent-light: var(--claude-orange-light);
   --color-accent-muted: var(--claude-orange-muted);
 
@@ -1226,6 +1242,53 @@
       color 300ms ease-in-out,
       box-shadow 300ms ease-in-out !important;
   }
+
+  /* ========================================
+     VIEW TRANSITIONS API - CIRCLE BLUR ANIMATION
+     Modern theme toggle animation for Chrome/Edge 111+
+     ======================================== */
+
+  /**
+   * Circle Blur Animation for Theme Toggle
+   *
+   * Creates a dramatic circular expanding reveal with enhanced visual effects
+   * - Animates from click position (set via --x, --y CSS variables)
+   * - Expands from 0% to 200% to ensure full viewport coverage
+   * - Enhanced blur effect (8px to 0) for more prominent visual feedback
+   * - Scale transformation for added depth and emphasis
+   * - Slower duration (700ms) for smoother, more noticeable transition
+   *
+   * Browser Support:
+   * - Chrome/Edge 111+: Full animation with all effects
+   * - Firefox/Safari: Graceful fallback (instant transition with CSS fade)
+   */
+  @supports (view-transition-name: root) {
+    /* Disable old view animation (fade out instantly) */
+    ::view-transition-old(root) {
+      animation: none;
+      opacity: 0;
+    }
+
+    /* Animate new view with enhanced circle blur expansion */
+    ::view-transition-new(root) {
+      animation: circle-blur-expand 700ms cubic-bezier(0.22, 1, 0.36, 1);
+      mix-blend-mode: normal;
+      /* Animation origin set dynamically via inline style */
+    }
+  }
+
+  @keyframes circle-blur-expand {
+    from {
+      clip-path: circle(0% at var(--x, 50%) var(--y, 50%));
+      filter: blur(8px) brightness(0.95);
+      transform: scale(1.02);
+    }
+    to {
+      clip-path: circle(200% at var(--x, 50%) var(--y, 50%));
+      filter: blur(0) brightness(1);
+      transform: scale(1);
+    }
+  }
 }
 
 /* ========================================
@@ -1308,6 +1371,107 @@
   }
 }
 
+/* Magic UI Component Animations */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes meteor {
+  0% {
+    transform: translateY(-200%) translateX(-200%) rotate(35deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) translateX(100vh) rotate(35deg);
+    opacity: 0;
+  }
+}
+
+@keyframes borderBeamSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes border-beam {
+  0% {
+    offset-distance: 0%;
+  }
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+@keyframes rippleEffect {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes marqueeLeft {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes marqueeRight {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes marqueeUp {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes marqueeDown {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes gridMove {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(40px, 40px);
+  }
+}
+
 /* Animation Utilities */
 .animate-fade-in {
   animation: fadeIn var(--duration-200) var(--ease-out) both;
@@ -1323,6 +1487,42 @@
 
 .animate-pulse {
   animation: pulse-accent var(--duration-1000) var(--ease-in-out) infinite;
+}
+
+.animate-meteor {
+  animation: meteor 3s linear infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+}
+
+.animate-gridMove {
+  animation: gridMove 20s linear infinite;
+}
+
+/* Text Roll Animation - Apple Hello Effect */
+@keyframes textRoll {
+  0% {
+    transform: translateY(0) rotateX(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-20px) rotateX(90deg);
+    opacity: 0;
+  }
+  51% {
+    transform: translateY(20px) rotateX(-90deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+.animate-textRoll {
+  animation: textRoll 600ms ease-in-out;
 }
 
 /* Additional animations for enhanced components */

@@ -1,5 +1,6 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { NewsletterForm } from '@/src/components/shared/newsletter-form';
 import { Button } from '@/src/components/ui/button';
@@ -27,8 +28,36 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
  * - High contrast border
  */
 export function FooterNewsletterBar() {
+  const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
   const [isClient, setIsClient] = useState(false);
+
+  // Pages that have their own InlineEmailCTA should not show sticky bar
+  // This prevents duplicate CTAs on the same page
+  const pagesWithInlineCTA = [
+    '/', // Homepage
+    '/trending', // Trending page
+    '/guides', // Guides listing
+    '/board', // Board listing + /board/new
+    '/changelog', // Changelog listing
+    '/community', // Community page
+    '/companies', // Companies page
+    '/for-you', // For You page
+    '/jobs', // Jobs listing
+    '/partner', // Partner page
+    '/submit', // Submit page
+    '/tools/config-recommender', // Config recommender
+    '/agents/', // Individual content pages (UnifiedDetailPage)
+    '/mcp/',
+    '/rules/',
+    '/commands/',
+    '/hooks/',
+    '/statuslines/',
+    '/collections/',
+  ];
+
+  // Check if current page has inline CTA (must happen before useEffect hook)
+  const hasInlineCTA = pagesWithInlineCTA.some((page) => pathname?.startsWith(page));
 
   useEffect(() => {
     setIsClient(true);
@@ -56,8 +85,8 @@ export function FooterNewsletterBar() {
     localStorage.setItem('newsletter-bar-dismissed', 'true');
   };
 
-  // Don't render on server or if dismissed
-  if (!(isClient && isVisible)) {
+  // Don't render on server, if dismissed, or if page has inline CTA
+  if (!(isClient && isVisible) || hasInlineCTA) {
     return null;
   }
 

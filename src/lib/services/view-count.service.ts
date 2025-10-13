@@ -5,8 +5,8 @@
  */
 
 import { z } from 'zod';
+import { statsRedis } from '@/src/lib/cache';
 import { logger } from '@/src/lib/logger';
-import { statsRedis } from '@/src/lib/redis';
 
 // Zod schemas for type safety
 const viewCountRequestSchema = z.object({
@@ -34,7 +34,17 @@ type ViewCountResponse = z.infer<typeof viewCountResponseSchema>;
 class ViewCountService {
   private cache = new Map<string, { views: number; timestamp: number }>();
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-  private readonly VIEW_COUNT_SALT = process.env.VIEW_COUNT_SALT || 'claudepro-view-salt-2024';
+  private readonly VIEW_COUNT_SALT: string;
+
+  constructor() {
+    // Validate VIEW_COUNT_SALT is configured (no fallback allowed in production)
+    if (!process.env.VIEW_COUNT_SALT) {
+      throw new Error(
+        'VIEW_COUNT_SALT environment variable is required for secure view count generation'
+      );
+    }
+    this.VIEW_COUNT_SALT = process.env.VIEW_COUNT_SALT;
+  }
 
   /**
    * Get view count with proper fallback strategy
@@ -317,8 +327,28 @@ class ViewCountService {
   }
 }
 
-// Export singleton instance
-export const viewCountService = new ViewCountService();
+/**
+ * Lazy singleton instance - only instantiate when first accessed
+ * This avoids requiring VIEW_COUNT_SALT during build time
+ */
+let instance: ViewCountService | null = null;
+
+function getInstance(): ViewCountService {
+  if (!instance) {
+    instance = new ViewCountService();
+  }
+  return instance;
+}
+
+/**
+ * Singleton instance with lazy initialization
+ * All property access goes through getter to ensure lazy loading
+ */
+export const viewCountService = new Proxy({} as ViewCountService, {
+  get(_target, prop) {
+    return getInstance()[prop as keyof ViewCountService];
+  },
+});
 
 // Export types for external use
 export type { ViewCountRequest, ViewCountResponse, BatchViewCountRequest };

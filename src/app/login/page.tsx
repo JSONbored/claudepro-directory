@@ -1,0 +1,47 @@
+import { AuthButtons } from '@/src/components/auth/auth-buttons';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/src/components/ui/card';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+
+export const metadata = await generatePageMetadata('/login');
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ redirect?: string }>;
+}) {
+  const resolvedSearchParams = await searchParams;
+  return (
+    <div
+      className={`${UI_CLASSES.MIN_H_SCREEN} ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} bg-background px-4`}
+    >
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">Welcome to ClaudePro</CardTitle>
+          <CardDescription>
+            Sign in to bookmark configurations, submit content, and join the community
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AuthButtons
+            {...(resolvedSearchParams.redirect
+              ? { redirectTo: resolvedSearchParams.redirect }
+              : {})}
+          />
+
+          <p
+            className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} text-center mt-4`}
+          >
+            By signing in, you agree to our Terms of Service and Privacy Policy
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

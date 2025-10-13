@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { batchMap } from '@/src/lib/utils/batch.utils';
 import { DOMPurify } from './html-sanitizer';
 import { VALIDATION_PATTERNS } from './patterns';
 
@@ -330,9 +331,9 @@ export const validation = {
  * - Actively maintained and used by major companies
  * - No performance issues with complex patterns
  */
-function stripHtmlTags(str: string): string {
+async function stripHtmlTags(str: string): Promise<string> {
   // Use DOMPurify to strip all HTML tags while keeping text content
-  return DOMPurify.sanitize(str, {
+  return await DOMPurify.sanitize(str, {
     ALLOWED_TAGS: [], // Strip all HTML tags
     ALLOWED_ATTR: [], // Strip all attributes
     KEEP_CONTENT: true, // Keep text content between tags
@@ -341,12 +342,12 @@ function stripHtmlTags(str: string): string {
 
 export const sanitizers = {
   /**
-   * Sanitize search queries to prevent XSS attacks
+   * Sanitize search queries to prevent XSS attacks (server-side with full DOMPurify)
    * Allows only alphanumeric characters, spaces, hyphens, and underscores
    */
-  sanitizeSearchQuery: (query: string): string => {
+  sanitizeSearchQuery: async (query: string): Promise<string> => {
     // First, remove any HTML/Script tags
-    const htmlSanitized = stripHtmlTags(query);
+    const htmlSanitized = await stripHtmlTags(query);
 
     // Then apply additional restrictions for search queries
     // Allow: letters, numbers, spaces, hyphens, underscores, dots, and common search operators
@@ -359,11 +360,26 @@ export const sanitizers = {
   },
 
   /**
+   * Sanitize search queries to prevent XSS attacks (client-side sync version)
+   * Uses simpler regex-based sanitization for client components
+   */
+  sanitizeSearchQuerySync: (query: string): string => {
+    // Client-side: Use regex-based sanitization (faster, no DOMPurify needed)
+    const sanitized = query
+      .replace(/[<>"'&]/g, '') // Remove HTML special characters
+      .replace(/[^a-zA-Z0-9\s\-_.+*]/g, '') // Remove other special characters
+      .trim()
+      .substring(0, 100); // Limit length
+
+    return sanitized;
+  },
+
+  /**
    * Sanitize form input fields
    * Strips all HTML and limits length
    */
-  sanitizeFormInput: (input: string, maxLength = 500): string => {
-    const sanitized = stripHtmlTags(input);
+  sanitizeFormInput: async (input: string, maxLength = 500): Promise<string> => {
+    const sanitized = await stripHtmlTags(input);
     return sanitized.trim().substring(0, maxLength);
   },
 
@@ -388,7 +404,7 @@ export const sanitizers = {
    * Validate and sanitize category input
    * Ensures only valid categories are accepted
    */
-  sanitizeCategory: (category: string): string | null => {
+  sanitizeCategory: async (category: string): Promise<string | null> => {
     const validCategories = [
       'agents',
       'mcp',
@@ -404,7 +420,7 @@ export const sanitizers = {
       'troubleshooting',
     ];
 
-    const sanitized = sanitizers.sanitizeFormInput(category, 50).toLowerCase();
+    const sanitized = (await sanitizers.sanitizeFormInput(category, 50)).toLowerCase();
 
     if (validCategories.includes(sanitized)) {
       return sanitized;
@@ -417,19 +433,17 @@ export const sanitizers = {
    * Sanitize array of tags
    * Ensures each tag is safe and valid
    */
-  sanitizeTags: (tags: string[]): string[] => {
-    return tags
-      .map((tag) => sanitizers.sanitizeFormInput(tag, 50))
-      .filter((tag) => tag.length > 0 && tag.length <= 50)
-      .slice(0, 20); // Limit to 20 tags
+  sanitizeTags: async (tags: string[]): Promise<string[]> => {
+    const sanitizedTags = await batchMap(tags, (tag) => sanitizers.sanitizeFormInput(tag, 50));
+    return sanitizedTags.filter((tag) => tag.length > 0 && tag.length <= 50).slice(0, 20); // Limit to 20 tags
   },
 
   /**
    * Create a sanitized excerpt from HTML content
    * Useful for meta descriptions and previews
    */
-  createSafeExcerpt: (html: string, maxLength = 160): string => {
-    const textOnly = stripHtmlTags(html);
+  createSafeExcerpt: async (html: string, maxLength = 160): Promise<string> => {
+    const textOnly = await stripHtmlTags(html);
 
     return textOnly
       .replace(/\s+/g, ' ') // Normalize whitespace

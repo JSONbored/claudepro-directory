@@ -312,7 +312,7 @@ export const endpointRegistry = {
     operationId: 'getContentByCategory',
     summary: 'Get content items by category',
     description:
-      'Retrieve a paginated list of content items for a specific category (agents, mcp, rules, commands, hooks, statuslines)',
+      'Retrieve paginated content items by category with REST API. Get agents, MCP servers, rules, commands, hooks, and statuslines with full filtering support.',
     tags: ['Content'],
     request: {
       params: categoryParamsSchema,
@@ -352,7 +352,8 @@ export const endpointRegistry = {
   'GET /api/{category}/{slug}.json': {
     operationId: 'getContentBySlug',
     summary: 'Get content item by slug',
-    description: 'Retrieve full details for a single content item by category and slug identifier',
+    description:
+      'Fetch single content item by category and slug. REST API endpoint for retrieving detailed configuration data with full metadata, schemas, and examples.',
     tags: ['Content'],
     request: {
       params: categorySlugParamsSchema,
@@ -392,7 +393,7 @@ export const endpointRegistry = {
     operationId: 'searchContent',
     summary: 'Search all content',
     description:
-      'Full-text search across all content categories with filtering, sorting, and pagination',
+      'Full-text search across all Claude configurations. REST API with advanced filtering, pagination, sorting, relevance ranking, and category-based discovery.',
     tags: ['Search'],
     request: {
       query: searchQueryParamsSchema,
@@ -424,7 +425,7 @@ export const endpointRegistry = {
     operationId: 'getTrendingContent',
     summary: 'Get trending content',
     description:
-      'Retrieve currently trending content items based on view counts and engagement metrics',
+      'Get trending Claude configurations with real-time analytics. REST API endpoint for popular content discovery with views, rankings, and time-based filtering.',
     tags: ['Analytics'],
     request: {
       query: trendingQuerySchema,
@@ -456,7 +457,7 @@ export const endpointRegistry = {
     operationId: 'triggerCacheWarming',
     summary: 'Trigger cache warming',
     description:
-      'Manually trigger cache warming to pre-load popular content into cache. Rate limited to 10 requests per hour.',
+      'Trigger cache warming for improved API performance. REST API endpoint for pre-loading data, reducing latency, optimizing response times, and throughput.',
     tags: ['Cache'],
     request: {
       body: {
@@ -498,7 +499,8 @@ export const endpointRegistry = {
   'GET /api/cache/warm': {
     operationId: 'getCacheStatus',
     summary: 'Get cache warming status',
-    description: 'Retrieve current cache warming status and statistics',
+    description:
+      'Check API cache status and performance metrics. REST API endpoint for monitoring cache health, response times, system optimization, and uptime status.',
     tags: ['Cache'],
     request: {
       query: z.object({
@@ -530,7 +532,7 @@ export const endpointRegistry = {
     operationId: 'getTrendingGuides',
     summary: 'Get trending guides',
     description:
-      'Retrieve currently trending guides filtered by category with view counts and rankings',
+      'Discover trending Claude guides and tutorials. REST API for popular educational content with category filtering, views tracking, rankings, and analytics.',
     tags: ['Analytics'],
     request: {
       query: guidesTrendingQuerySchema,

@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "atlassian": {
           "transport": "sse",
           "url": "https://mcp.atlassian.com/v1/sse"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "atlassian": {
           "transport": "sse",
           "url": "https://mcp.atlassian.com/v1/sse"
@@ -76,10 +76,30 @@
     }
   ],
   "examples": [
-    "Create a Jira bug for the login issue",
-    "Update the API documentation in Confluence",
-    "Find all issues assigned to me",
-    "Generate a sprint report"
+    {
+      "title": "Create a Jira bug for the login issue",
+      "code": "Ask Claude: \"Create a Jira bug for the login issue\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Update the API documentation in Confluence",
+      "code": "Ask Claude: \"Update the API documentation in Confluence\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Find all issues assigned to me",
+      "code": "Ask Claude: \"Find all issues assigned to me\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Generate a sprint report",
+      "code": "Ask Claude: \"Generate a sprint report\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "admin"],

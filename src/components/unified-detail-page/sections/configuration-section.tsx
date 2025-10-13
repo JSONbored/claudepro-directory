@@ -22,11 +22,13 @@ import { highlightCode } from '@/src/lib/content/syntax-highlighting';
 import { Copy } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
 import {
   generateFilename,
   generateHookFilename,
   generateMultiFormatFilename,
-} from '@/src/lib/utils/filename-generator';
+  transformMcpConfigForDisplay,
+} from '@/src/lib/utils/content.utils';
 
 /**
  * Props for ConfigurationSection
@@ -70,22 +72,27 @@ export async function ConfigurationSection({
     };
 
     // Pre-render ALL configurations with Shiki on the server
-    const highlightedConfigs = await Promise.all(
-      Object.entries(config).map(async ([key, value]) => {
-        if (!value) return null;
+    const highlightedConfigs = await batchMap(Object.entries(config), async ([key, value]) => {
+      if (!value) return null;
 
-        const code = JSON.stringify(value, null, 2);
-        const html = await highlightCode(code, 'json');
-        const filename = generateMultiFormatFilename(item, key, 'json');
+      // Transform MCP config for Claude Desktop display
+      // Internal: uses 'mcp', External: transforms to 'mcpServers'
+      const displayValue =
+        key === 'claudeDesktop' || key === 'claudeCode'
+          ? transformMcpConfigForDisplay(value as Record<string, unknown>)
+          : value;
 
-        return {
-          key,
-          html,
-          code,
-          filename,
-        };
-      })
-    );
+      const code = JSON.stringify(displayValue, null, 2);
+      const html = await highlightCode(code, 'json');
+      const filename = generateMultiFormatFilename(item, key, 'json');
+
+      return {
+        key,
+        html,
+        code,
+        filename,
+      };
+    });
 
     return (
       <Card data-section="configuration">
@@ -126,7 +133,7 @@ export async function ConfigurationSection({
     };
 
     // Pre-render hook config and script with Shiki
-    const [highlightedHookConfig, highlightedScript] = await Promise.all([
+    const [highlightedHookConfig, highlightedScript] = await batchFetch([
       config.hookConfig
         ? highlightCode(JSON.stringify(config.hookConfig, null, 2), 'json')
         : Promise.resolve(null),

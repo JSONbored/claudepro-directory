@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "daloopa": {
           "transport": "http",
           "url": "https://mcp.daloopa.com/server/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "daloopa": {
           "transport": "http",
           "url": "https://mcp.daloopa.com/server/mcp"
@@ -80,10 +80,30 @@
     }
   ],
   "examples": [
-    "Get Apple's latest 10-K filing data",
-    "Compare revenue growth across tech companies",
-    "Extract key metrics from investor presentation",
-    "Show historical EBITDA margins"
+    {
+      "title": "Get Apple's latest 10-K filing data",
+      "code": "Ask Claude: \"Get Apple's latest 10-K filing data\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Compare revenue growth across tech companies",
+      "code": "Ask Claude: \"Compare revenue growth across tech companies\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Extract key metrics from investor presentation",
+      "code": "Ask Claude: \"Extract key metrics from investor presentation\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Show historical EBITDA margins",
+      "code": "Ask Claude: \"Show historical EBITDA margins\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read"],

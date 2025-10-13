@@ -1,177 +1,208 @@
 /**
  * Production-grade form validation schemas
- * Security-first approach to prevent injection attacks and data corruption
+ * Type-specific schemas for plaintext content submission
  *
- * CLEANED - Removed 32 unused exports (74% waste eliminated)
+ * NO JSON REQUIRED - Users submit plaintext, we build JSON server-side
  */
 
 import { z } from 'zod';
-import { DOMPurify } from '@/src/lib/security/html-sanitizer';
+import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
+import {
+  hookTypeFormSchema,
+  statuslineTypeFormSchema,
+} from '@/src/lib/schemas/primitives/content-enums';
+import {
+  trimOptionalStringOrEmpty,
+  trimString,
+} from '@/src/lib/schemas/primitives/sanitization-transforms';
 import { VALIDATION_PATTERNS } from '@/src/lib/security/patterns';
 
 /**
- * Configuration submission form schema
- * Used for validating user-submitted configurations
+ * Base fields shared across all content types
  */
-export const configSubmissionSchema = z
-  .object({
-    // Content type selection (main content categories only, excludes guides)
-    type: z
-      .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'])
-      .describe('Type of configuration content being submitted'),
+const baseSubmissionFields = {
+  name: z
+    .string()
+    .min(2, 'Name must be at least 2 characters')
+    .max(100, 'Name must be less than 100 characters')
+    .regex(
+      /^[a-zA-Z0-9\s\-_.]+$/,
+      'Name can only contain letters, numbers, spaces, hyphens, underscores, and dots'
+    )
+    .transform(trimString),
 
-    // Basic information
-    name: z
-      .string()
-      .min(2, 'Name must be at least 2 characters')
-      .max(100, 'Name must be less than 100 characters')
-      .regex(
-        /^[a-zA-Z0-9\s\-_.]+$/,
-        'Name can only contain letters, numbers, spaces, hyphens, underscores, and dots'
-      )
-      .transform((val) => val.trim())
-      .describe(
-        'Configuration name (2-100 characters, alphanumeric with spaces/hyphens/underscores/dots)'
-      ),
+  description: z
+    .string()
+    .min(10, 'Description must be at least 10 characters')
+    .max(500, 'Description must be less than 500 characters')
+    .transform(trimString),
 
-    description: z
-      .string()
-      .min(10, 'Description must be at least 10 characters')
-      .max(500, 'Description must be less than 500 characters')
-      .transform((val) => val.trim())
-      .refine(
-        (val) => !/<script|javascript:|data:|vbscript:|onclick|onerror|onload/i.test(val),
-        'Description contains potentially malicious content'
-      )
-      .describe('Configuration description (10-500 characters, XSS-protected)'),
+  category: z
+    .string()
+    .min(2, 'Category is required')
+    .max(50, 'Category must be less than 50 characters'),
 
-    // Category selection
-    category: z
-      .string()
-      .min(2, 'Category is required')
-      .max(50, 'Category must be less than 50 characters')
-      .regex(/^[a-zA-Z0-9\s-]+$/, 'Category contains invalid characters')
-      .describe('Content category (2-50 characters, alphanumeric with spaces and hyphens)'),
+  author: z
+    .string()
+    .min(2, 'Author name must be at least 2 characters')
+    .max(100, 'Author name must be less than 100 characters')
+    .transform(trimString),
 
-    // Author information
-    author: z
-      .string()
-      .min(2, 'Author name must be at least 2 characters')
-      .max(100, 'Author name must be less than 100 characters')
-      .regex(/^[a-zA-Z0-9\s\-_.@]+$/, 'Author name contains invalid characters')
-      .transform((val) => val.trim())
-      .describe(
-        'Author name (2-100 characters, alphanumeric with spaces/hyphens/underscores/dots/@)'
-      ),
+  github: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || VALIDATION_PATTERNS.GITHUB_URL.test(val),
+      'Must be a valid GitHub URL'
+    ),
 
-    // Optional GitHub URL
-    github: z
-      .string()
-      .optional()
-      .refine(
-        (val) => !val || VALIDATION_PATTERNS.GITHUB_URL.test(val),
-        'Must be a valid GitHub URL (https://github.com/username/repo)'
-      )
-      .describe(
-        'Optional GitHub repository URL (must match https://github.com/username/repo format)'
-      ),
-
-    // Configuration content (JSON)
-    content: z
-      .string()
-      .min(2, 'Configuration content is required')
-      .max(50000, 'Configuration content is too large')
-      .transform((val) => val.trim())
-      .refine((val) => {
-        try {
-          JSON.parse(val);
-          return true;
-        } catch {
-          return false;
-        }
-      }, 'Configuration must be valid JSON')
-      .refine((val) => {
-        try {
-          const parsed = JSON.parse(val);
-          // Ensure it's an object, not an array or primitive
-          return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed);
-        } catch {
-          return false;
-        }
-      }, 'Configuration must be a JSON object')
-      .describe('Configuration content as valid JSON object string (2-50000 characters)'),
-
-    // Tags (comma-separated)
-    tags: z
-      .string()
-      .optional()
-      .transform((val) => val?.trim() || '')
-      .refine(
-        (val) => !val || /^[a-zA-Z0-9\s,-]+$/.test(val),
-        'Tags can only contain letters, numbers, spaces, commas, and hyphens'
-      )
-      .transform((val) => {
-        if (!val) return [];
-        return val
-          .split(',')
-          .map((tag) => tag.trim())
-          .filter((tag) => tag.length > 0)
-          .slice(0, 10); // Maximum 10 tags
-      })
-      .describe('Comma-separated tags (alphanumeric with spaces/commas/hyphens, max 10 tags)'),
-  })
-  .describe('User-submitted configuration form data with security validation');
+  tags: z
+    .string()
+    .optional()
+    .transform(trimOptionalStringOrEmpty)
+    .transform((val) => {
+      if (!val) return [];
+      return val
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0)
+        .slice(0, 10);
+    }),
+};
 
 /**
- * Type inference for form data
+ * Agent submission schema - PLAINTEXT system prompt
  */
+export const agentSubmissionSchema = z.object({
+  type: z.literal('agents'),
+  ...baseSubmissionFields,
+
+  // Plaintext system prompt (NO JSON!)
+  systemPrompt: nonEmptyString
+    .min(50, 'System prompt must be at least 50 characters')
+    .max(10000, 'System prompt is too long'),
+
+  temperature: z.coerce.number().min(0).max(1).default(0.7),
+  maxTokens: z.coerce.number().min(100).max(200000).default(8000),
+});
+
+/**
+ * Rules submission schema - PLAINTEXT Claude expertise rules
+ */
+export const rulesSubmissionSchema = z.object({
+  type: z.literal('rules'),
+  ...baseSubmissionFields,
+
+  // Plaintext Claude rules content (NO JSON!)
+  rulesContent: nonEmptyString
+    .min(50, 'Claude rules content must be at least 50 characters')
+    .max(10000, 'Claude rules content is too long'),
+
+  temperature: z.coerce.number().min(0).max(1).default(0.7),
+  maxTokens: z.coerce.number().min(100).max(200000).default(8000),
+});
+
+/**
+ * Commands submission schema - PLAINTEXT command markdown
+ */
+export const commandsSubmissionSchema = z.object({
+  type: z.literal('commands'),
+  ...baseSubmissionFields,
+
+  // Plaintext command content with frontmatter (NO JSON!)
+  commandContent: nonEmptyString
+    .min(50, 'Command content must be at least 50 characters')
+    .max(10000, 'Command content is too long'),
+});
+
+/**
+ * Hooks submission schema - PLAINTEXT bash script
+ */
+export const hooksSubmissionSchema = z.object({
+  type: z.literal('hooks'),
+  ...baseSubmissionFields,
+
+  // Plaintext bash script (NO JSON!)
+  hookScript: nonEmptyString
+    .min(20, 'Hook script must be at least 20 characters')
+    .max(5000, 'Hook script is too long'),
+
+  hookType: hookTypeFormSchema,
+  triggeredBy: z
+    .string()
+    .optional()
+    .transform((val) => {
+      if (!val) return [];
+      return val
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean);
+    }),
+});
+
+/**
+ * Statuslines submission schema - PLAINTEXT bash script
+ */
+export const statuslinesSubmissionSchema = z.object({
+  type: z.literal('statuslines'),
+  ...baseSubmissionFields,
+
+  // Plaintext bash script (NO JSON!)
+  statuslineScript: nonEmptyString
+    .min(20, 'Statusline script must be at least 20 characters')
+    .max(5000, 'Statusline script is too long'),
+
+  statuslineType: statuslineTypeFormSchema,
+  refreshInterval: z.coerce.number().min(100).max(10000).default(1000),
+  position: z.enum(['left', 'right']).default('left'),
+});
+
+/**
+ * MCP submission schema - Simplified fields (NO complex JSON!)
+ */
+export const mcpSubmissionSchema = z.object({
+  type: z.literal('mcp'),
+  ...baseSubmissionFields,
+
+  npmPackage: nonEmptyString.max(200),
+  serverType: z.enum(['stdio', 'sse', 'websocket']).default('stdio'),
+  installCommand: nonEmptyString.max(500),
+  configCommand: nonEmptyString.max(200),
+
+  // Simplified - users describe tools in plaintext
+  toolsDescription: z
+    .string()
+    .optional()
+    .describe('Describe what tools/capabilities this server provides (plaintext)'),
+
+  // Simplified - KEY=value format
+  envVars: z
+    .string()
+    .optional()
+    .describe('Environment variables in KEY=value format, one per line'),
+});
+
+/**
+ * Union of all submission types
+ */
+export const configSubmissionSchema = z.discriminatedUnion('type', [
+  agentSubmissionSchema,
+  rulesSubmissionSchema,
+  commandsSubmissionSchema,
+  hooksSubmissionSchema,
+  statuslinesSubmissionSchema,
+  mcpSubmissionSchema,
+]);
+
 export type ConfigSubmissionInput = z.input<typeof configSubmissionSchema>;
 export type ConfigSubmissionData = z.output<typeof configSubmissionSchema>;
 
 /**
- * FormData parser that safely extracts and validates form data
- */
-export function parseConfigSubmissionForm(formData: FormData): ConfigSubmissionData {
-  // Safely extract form data without type assertions
-  const rawData = {
-    type: formData.get('type'),
-    name: formData.get('name'),
-    description: formData.get('description'),
-    category: formData.get('category'),
-    author: formData.get('author'),
-    github: formData.get('github'),
-    content: formData.get('content'),
-    tags: formData.get('tags'),
-  };
-
-  // Convert FormDataEntryValue to strings safely
-  const stringData = Object.fromEntries(
-    Object.entries(rawData).map(([key, value]) => [key, value === null ? undefined : String(value)])
-  );
-
-  // Validate and parse
-  return configSubmissionSchema.parse(stringData);
-}
-
-/**
- * JSON-LD structured data validator
- * Production-grade XSS prevention for SSR environments
- *
- * Security Strategy:
- * - Validates JSON structure
- * - Blocks script injection attempts
- * - Escapes dangerous characters (< becomes \u003c per Next.js JSON-LD best practices)
- * - Pure function for Turbopack/SSR compatibility (no Zod in SSR path)
- *
- * @public - knip ignore tag (used by structured data components)
- * @see https://nextjs.org/docs/app/guides/json-ld
- * @see https://www.rapid7.com/blog/post/2022/05/04/xss-in-json-old-school-attacks-for-modern-applications/
+ * JSON-LD utilities (moved from previous version)
  */
 export function validateJsonLdSafe(data: unknown): unknown {
-  // Stringify with security validation
   const jsonString = JSON.stringify(data);
 
-  // Security checks (multi-layered defense)
   if (/<script\b/i.test(jsonString)) {
     throw new Error('Script tags are not allowed in JSON-LD data');
   }
@@ -180,50 +211,10 @@ export function validateJsonLdSafe(data: unknown): unknown {
     throw new Error('JavaScript protocol not allowed in JSON-LD data');
   }
 
-  if (/<iframe\b/i.test(jsonString)) {
-    throw new Error('Iframe tags are not allowed in JSON-LD data');
-  }
-
-  // Parse to ensure valid JSON structure
   return JSON.parse(jsonString);
 }
 
-/**
- * Serialize JSON-LD safely for SSR rendering
- * Escapes < characters to prevent XSS per security best practices
- *
- * Usage: dangerouslySetInnerHTML={{ __html: serializeJsonLd(data) }}
- */
 export function serializeJsonLd(data: unknown): string {
   const validated = validateJsonLdSafe(data);
-  // Escape < to \u003c to prevent XSS (industry standard for JSON in HTML)
   return JSON.stringify(validated).replace(/</g, '\\u003c');
 }
-
-/**
- * Syntax-highlighted code sanitizer
- * Validates that HTML comes from trusted syntax highlighter
- *
- * Pure function for SSR compatibility
- * @public - knip ignore tag (used via highlightedCodeSafeSchema transform)
- */
-export function sanitizeHighlightedCode(html: string): string {
-  // Allow specific classes and elements used by syntax highlighters
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: ['pre', 'code', 'span', 'div'],
-    ALLOWED_ATTR: ['class', 'style', 'data-language'],
-    FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input'],
-    FORBID_ATTR: ['onerror', 'onload', 'onclick'],
-    // Allow style attribute but sanitize its content
-    ALLOW_DATA_ATTR: false,
-  });
-}
-
-/**
- * Passthrough schema for Turbopack/SSR compatibility
- * @public - knip ignore tag (used in code highlighting components)
- */
-export const highlightedCodeSafeSchema = z
-  .string()
-  .describe('Raw HTML string containing syntax-highlighted code')
-  .transform(sanitizeHighlightedCode);

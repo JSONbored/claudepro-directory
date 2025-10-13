@@ -5,7 +5,8 @@
 
 import { logger } from '@/src/lib/logger';
 import { env, isDevelopment, isProduction } from '@/src/lib/schemas/env.schema';
-import { EVENT_CONFIG, type EventName, type EventPayload } from './events.config';
+import type { EventPayload } from './event-payloads.types';
+import { EVENT_CONFIG, type EventName } from './events.config';
 import { isUmamiAvailable } from './umami';
 
 // Environment checks using validated env schema
