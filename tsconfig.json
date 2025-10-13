@@ -12,13 +12,16 @@
     "config/build/../../src/**/*.ts",
     "config/build/../../src/**/*.tsx",
     "config/build/../../src/types/**/*.d.ts",
-    "config/build/../../tests/**/*.ts",
-    "config/build/../../tests/**/*.tsx",
     "config/build/../../.next/types/**/*.ts",
     ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
-    "vitest.config.ts"
+    "tests",
+    "vitest.config.ts",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
   ]
 }

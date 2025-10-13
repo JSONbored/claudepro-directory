@@ -36,7 +36,7 @@
     "generate:types": "vercel env pull .env.local --yes && supabase gen types typescript --db-url \"$POSTGRES_URL_NON_POOLING\" --schema public > src/types/database.types.ts && rm .env.local",
     "indexnow:submit": "tsx scripts/submit-indexnow.ts",
     "start": "next start",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --project tests/tsconfig.json --noEmit",
     "lint": "ultracite check",
     "format": "ultracite fix",
     "email:dev": "email dev --dir src/emails --port 3001",
