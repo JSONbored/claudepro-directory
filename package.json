@@ -49,9 +49,9 @@
     "analyze:all": "npm run analyze:unused && npm run analyze:circular"
   },
   "dependencies": {
-    "@arcjet/next": "^1.0.0-beta.12",
+    "@arcjet/next": "^1.0.0-beta.13",
     "@asteasolutions/zod-to-openapi": "^8.1.0",
-    "@nosecone/next": "^1.0.0-beta.12",
+    "@nosecone/next": "^1.0.0-beta.13",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
