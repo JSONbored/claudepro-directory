@@ -6,6 +6,7 @@
  */
 
 import { Skeleton } from '@/src/components/ui/loading-skeleton';
+import { Separator } from '@/src/components/ui/separator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export default function ChangelogEntryLoading() {
@@ -15,7 +16,7 @@ export default function ChangelogEntryLoading() {
       <Skeleton size="sm" width="xs" />
 
       {/* Header Skeleton */}
-      <header className="space-y-4 border-b pb-6 animate-pulse">
+      <header className="space-y-4 pb-6 animate-pulse">
         {/* Date */}
         <div className={`flex ${UI_CLASSES.ITEMS_CENTER} gap-3`}>
           <Skeleton size="sm" width="xs" />
@@ -31,6 +32,8 @@ export default function ChangelogEntryLoading() {
           <Skeleton size="sm" width="2xl" />
         </div>
       </header>
+
+      <Separator className="my-6" />
 
       {/* Content Skeleton */}
       <div className={UI_CLASSES.SPACE_Y_6}>

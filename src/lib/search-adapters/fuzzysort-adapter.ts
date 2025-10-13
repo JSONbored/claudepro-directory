@@ -21,6 +21,7 @@ import {
   sortByPopularity,
 } from '@/src/lib/content/content-sorting';
 import { logger } from '@/src/lib/logger';
+import type { ContentItem } from '@/src/lib/schemas/content/content-item-union.schema';
 import type { SearchableItem, SearchFilters } from '@/src/lib/schemas/search.schema';
 
 // Lazy-load fuzzysort module
@@ -225,25 +226,34 @@ export async function searchWithFilters<T extends SearchableItem>(
 
 /**
  * Apply sorting to search results using centralized sorting logic
+ *
+ * Type-safe implementation using controlled type assertions.
+ * The sorting functions have specific generic constraints that SearchableItem may not fully satisfy.
+ * We use explicit type assertions through `unknown` to maintain safety while satisfying TypeScript.
+ *
+ * This is safe because:
+ * 1. sortAlphabetically only requires {title?, name?, slug} - SearchableItem has all these
+ * 2. sortByNewest handles missing date fields with fallback (defaults to 1970-01-01)
+ * 3. sortByPopularity handles missing popularity field (defaults to 0)
  */
 function applySorting<T extends SearchableItem>(items: T[], sort: string): T[] {
   switch (sort) {
     case 'alphabetical':
-      // biome-ignore lint/suspicious/noExplicitAny: Type assertion needed for generic sorting
-      return sortAlphabetically(items as any) as unknown as T[];
+      // SearchableItem has {title, name, slug} - satisfies sortAlphabetically constraint
+      return sortAlphabetically(items);
 
     case 'newest':
-      // biome-ignore lint/suspicious/noExplicitAny: Type assertion needed for generic sorting
-      return sortByNewest(items as any) as unknown as T[];
+      // SearchableItem doesn't have createdAt/date, but sortByNewest has fallback logic
+      // Safe cast through unknown as sorting function handles undefined dates
+      return sortByNewest(
+        items as unknown as Array<T & { createdAt?: string; date?: string }>
+      ) as T[];
 
     case 'popularity':
-      // biome-ignore lint/suspicious/noExplicitAny: Type assertion needed for generic sorting
-      return sortByPopularity(items as any) as unknown as T[];
-
     case 'trending':
-      // Trending uses popularity with slight boost
-      // biome-ignore lint/suspicious/noExplicitAny: Type assertion needed for generic sorting
-      return sortByPopularity(items as any) as unknown as T[];
+      // SearchableItem has optional popularity field
+      // Safe cast through unknown as sorting function handles undefined popularity (defaults to 0)
+      return sortByPopularity(items as unknown as ContentItem[]) as unknown as T[];
 
     default:
       return items;

@@ -12,7 +12,7 @@ import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
-import { updateProfile } from '@/src/lib/actions/profile-actions';
+import { updateProfile } from '@/src/lib/actions/user.actions';
 import { X } from '@/src/lib/icons';
 import type { ProfileData } from '@/src/lib/schemas/profile.schema';
 
@@ -38,7 +38,15 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const [work, setWork] = useState(profile.work || '');
   const [website, setWebsite] = useState(profile.website || '');
   const [socialXLink, setSocialXLink] = useState(profile.social_x_link || '');
-  const [interests, setInterests] = useState<string[]>(profile.interests || []);
+  const [interests, setInterests] = useState<string[]>(() => {
+    if (
+      Array.isArray(profile.interests) &&
+      profile.interests.every((item): item is string => typeof item === 'string')
+    ) {
+      return profile.interests;
+    }
+    return [];
+  });
   const [newInterest, setNewInterest] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -237,7 +245,12 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
               setWork(profile.work || '');
               setWebsite(profile.website || '');
               setSocialXLink(profile.social_x_link || '');
-              setInterests(profile.interests || []);
+              setInterests(
+                Array.isArray(profile.interests) &&
+                  profile.interests.every((item): item is string => typeof item === 'string')
+                  ? profile.interests
+                  : []
+              );
               setHasChanges(false);
             }}
           >

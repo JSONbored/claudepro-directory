@@ -9,6 +9,23 @@
 import { Button, Hr, Section, Text } from '@react-email/components';
 import type * as React from 'react';
 import { BaseLayout } from '../layouts/base-layout';
+import {
+  cardStyle,
+  contentSection,
+  dividerStyle,
+  footerNoteSection,
+  footerNoteStyle,
+  headingStyle,
+  heroSection,
+  listItemStyle,
+  listStyle,
+  paragraphStyle,
+  primaryButtonStyle,
+  secondaryButtonStyle,
+  sectionTitleStyle,
+  strongStyle,
+  subheadingStyle,
+} from '../utils/common-styles';
 import { borderRadius, brandColors, emailTheme, spacing, typography } from '../utils/theme';
 
 export interface OnboardingCommunityProps {
@@ -84,7 +101,7 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
       <Section style={contentSection}>
         <Text style={sectionTitleStyle}>📝 How to Contribute</Text>
 
-        <Section style={stepCard}>
+        <Section style={cardStyle}>
           <Text style={stepNumberStyle}>1</Text>
           <Text style={stepDescStyle}>
             <strong style={strongStyle}>Test Your Configuration:</strong> Make sure it works
@@ -92,7 +109,7 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
           </Text>
         </Section>
 
-        <Section style={stepCard}>
+        <Section style={cardStyle}>
           <Text style={stepNumberStyle}>2</Text>
           <Text style={stepDescStyle}>
             <strong style={strongStyle}>Document It Well:</strong> Clear descriptions and examples
@@ -100,7 +117,7 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
           </Text>
         </Section>
 
-        <Section style={stepCard}>
+        <Section style={cardStyle}>
           <Text style={stepNumberStyle}>3</Text>
           <Text style={stepDescStyle}>
             <strong style={strongStyle}>Submit via GitHub:</strong> Open a pull request or create an
@@ -178,28 +195,9 @@ export function OnboardingCommunity({ email }: OnboardingCommunityProps) {
 }
 
 /**
- * Email-safe inline styles
+ * Template-specific custom styles
+ * (Styles for community stats grid, steps, and connect sections)
  */
-
-const heroSection: React.CSSProperties = {
-  textAlign: 'center',
-  marginBottom: spacing.lg,
-};
-
-const headingStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['3xl'],
-  fontWeight: typography.fontWeight.bold,
-  color: emailTheme.textPrimary,
-  margin: `0 0 ${spacing.sm} 0`,
-  lineHeight: typography.lineHeight.tight,
-};
-
-const subheadingStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.lg,
-  color: emailTheme.textSecondary,
-  margin: 0,
-  lineHeight: typography.lineHeight.normal,
-};
 
 const statsSection: React.CSSProperties = {
   marginTop: spacing.lg,
@@ -235,53 +233,6 @@ const statLabelStyle: React.CSSProperties = {
   display: 'block',
 };
 
-const contentSection: React.CSSProperties = {
-  marginTop: spacing.lg,
-  marginBottom: spacing.lg,
-};
-
-const sectionTitleStyle: React.CSSProperties = {
-  fontSize: typography.fontSize['2xl'],
-  fontWeight: typography.fontWeight.bold,
-  color: emailTheme.textPrimary,
-  margin: `0 0 ${spacing.md} 0`,
-};
-
-const paragraphStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.base,
-  color: emailTheme.textPrimary,
-  lineHeight: typography.lineHeight.relaxed,
-  margin: `0 0 ${spacing.md} 0`,
-};
-
-const listStyle: React.CSSProperties = {
-  margin: `${spacing.md} 0`,
-  paddingLeft: spacing.lg,
-};
-
-const listItemStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.base,
-  color: emailTheme.textPrimary,
-  lineHeight: typography.lineHeight.relaxed,
-  marginBottom: spacing.sm,
-};
-
-const strongStyle: React.CSSProperties = {
-  fontWeight: typography.fontWeight.semibold,
-  color: emailTheme.textPrimary,
-};
-
-const stepCard: React.CSSProperties = {
-  backgroundColor: emailTheme.bgTertiary,
-  border: `1px solid ${emailTheme.borderDefault}`,
-  borderRadius: borderRadius.md,
-  padding: spacing.md,
-  marginBottom: spacing.sm,
-  display: 'flex',
-  alignItems: 'flex-start',
-  gap: spacing.md,
-};
-
 const stepNumberStyle: React.CSSProperties = {
   fontSize: typography.fontSize.xl,
   fontWeight: typography.fontWeight.bold,
@@ -295,32 +246,6 @@ const stepDescStyle: React.CSSProperties = {
   color: emailTheme.textSecondary,
   lineHeight: typography.lineHeight.relaxed,
   margin: 0,
-};
-
-const primaryButtonStyle: React.CSSProperties = {
-  backgroundColor: brandColors.primary,
-  color: '#ffffff',
-  fontWeight: typography.fontWeight.semibold,
-  fontSize: typography.fontSize.base,
-  padding: `${spacing.md} ${spacing.xl}`,
-  borderRadius: borderRadius.md,
-  textDecoration: 'none',
-  display: 'inline-block',
-  marginTop: spacing.md,
-  border: 'none',
-};
-
-const secondaryButtonStyle: React.CSSProperties = {
-  backgroundColor: emailTheme.bgTertiary,
-  color: emailTheme.textPrimary,
-  fontWeight: typography.fontWeight.medium,
-  fontSize: typography.fontSize.base,
-  padding: `${spacing.md} ${spacing.xl}`,
-  borderRadius: borderRadius.md,
-  textDecoration: 'none',
-  display: 'inline-block',
-  marginTop: spacing.sm,
-  border: `1px solid ${emailTheme.borderDefault}`,
 };
 
 const featureSection: React.CSSProperties = {
@@ -368,23 +293,6 @@ const linkButtonStyle: React.CSSProperties = {
   textDecoration: 'none',
   display: 'inline-block',
   border: `1px solid ${emailTheme.borderDefault}`,
-};
-
-const dividerStyle: React.CSSProperties = {
-  borderColor: emailTheme.borderDefault,
-  margin: `${spacing.xl} 0`,
-};
-
-const footerNoteSection: React.CSSProperties = {
-  marginTop: spacing.lg,
-  textAlign: 'center',
-};
-
-const footerNoteStyle: React.CSSProperties = {
-  fontSize: typography.fontSize.sm,
-  color: emailTheme.textTertiary,
-  lineHeight: typography.lineHeight.relaxed,
-  margin: `${spacing.xs} 0`,
 };
 
 /**

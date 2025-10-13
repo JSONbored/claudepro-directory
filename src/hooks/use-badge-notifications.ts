@@ -5,7 +5,7 @@
 
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import { checkNewBadges } from '@/src/lib/actions/badge-actions';
+import { checkNewBadges } from '@/src/lib/actions/user.actions';
 
 /**
  * Hook to check for and display badge notifications

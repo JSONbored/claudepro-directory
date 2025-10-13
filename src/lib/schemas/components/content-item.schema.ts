@@ -5,8 +5,15 @@
  */
 
 import { z } from 'zod';
+import { baseUsageExampleSchema } from '@/src/lib/schemas/content/base-content.schema';
 import { stringArray } from '@/src/lib/schemas/primitives/base-arrays';
 import { optionalUrlString } from '@/src/lib/schemas/primitives/base-strings';
+import {
+  difficultyLevelSchema,
+  hookTypeSchema,
+  mcpServerTypeSchema,
+  statuslineTypeSchema,
+} from '@/src/lib/schemas/primitives/content-enums';
 
 /**
  * Unified content item schema for components
@@ -100,24 +107,12 @@ export const unifiedContentItemSchema = z
       .describe('Flexible configuration object with type-specific settings'),
 
     // Hook-specific properties
-    hookType: z
-      .enum([
-        'PostToolUse',
-        'PreToolUse',
-        'SessionStart',
-        'SessionEnd',
-        'UserPromptSubmit',
-        'Notification',
-        'PreCompact',
-        'Stop',
-        'SubagentStop',
-      ])
+    hookType: hookTypeSchema
       .optional()
       .describe('Type of hook lifecycle event for Claude Code extensions'),
 
     // Statusline-specific properties
-    statuslineType: z
-      .enum(['minimal', 'powerline', 'custom', 'rich', 'simple'])
+    statuslineType: statuslineTypeSchema
       .optional()
       .describe('Visual style or complexity level of the statusline display'),
     preview: z
@@ -157,26 +152,12 @@ export const unifiedContentItemSchema = z
       .optional()
       .describe('List of common issues and their solutions'),
 
-    // Examples and related content (supports both string and object formats)
+    // Examples - GitHub-style code snippets with syntax highlighting
+    // NEW: Updated to use baseUsageExampleSchema for consistent usage examples across all content types
     examples: z
-      .array(
-        z.union([
-          z
-            .string()
-            .describe('Simple example usage as plain text'), // MCP uses string format
-          z
-            .object({
-              // Rules use object format
-              title: z.string().describe('Short title or name for the example'),
-              description: z.string().describe('Explanation of what the example demonstrates'),
-              prompt: z.string().describe('Example input, prompt, or code snippet'),
-              expectedOutcome: z.string().describe('Expected result or output from the example'),
-            })
-            .describe('Detailed example with title, description, prompt, and outcome'),
-        ])
-      )
+      .array(baseUsageExampleSchema)
       .optional()
-      .describe('Usage examples in simple or structured format'),
+      .describe('Usage examples with code snippets and syntax highlighting (max 10 per config)'),
 
     // MCP-specific properties
     package: z
@@ -200,8 +181,7 @@ export const unifiedContentItemSchema = z
       .optional()
       .describe('File path or location where MCP configuration should be placed'),
     mcpVersion: z.string().optional().describe('MCP protocol version supported by the server'),
-    serverType: z
-      .enum(['stdio', 'http', 'sse'])
+    serverType: mcpServerTypeSchema
       .optional()
       .describe('Transport protocol used by the MCP server'),
     dataTypes: stringArray
@@ -238,8 +218,7 @@ export const unifiedContentItemSchema = z
     // Rule-specific properties
     relatedRules: stringArray.optional().describe('Slugs of related or complementary rules'),
     expertiseAreas: stringArray.optional().describe('Domains or topics where the rule applies'),
-    difficultyLevel: z
-      .enum(['Beginner', 'Intermediate', 'Advanced', 'Expert'])
+    difficultyLevel: difficultyLevelSchema
       .optional()
       .describe('Skill level required to understand and apply the rule'),
 
@@ -269,12 +248,8 @@ export const unifiedContentItemSchema = z
     readingTime: z.string().optional().describe('Estimated time to read the guide (e.g., "5 min")'),
     difficulty: z
       .union([
-        z
-          .enum(['beginner', 'intermediate', 'advanced', 'expert'])
-          .describe('Standard difficulty level'),
-        z
-          .string()
-          .describe('Custom difficulty description'), // Some guides use dynamic difficulty strings
+        difficultyLevelSchema.describe('Standard difficulty level'),
+        z.string().describe('Custom difficulty description'),
       ])
       .optional()
       .describe('Skill level required for the guide'),

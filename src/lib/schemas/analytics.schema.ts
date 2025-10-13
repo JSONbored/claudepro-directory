@@ -6,6 +6,7 @@
 import { z } from 'zod';
 import { viewCount } from '@/src/lib/schemas/primitives/base-numbers';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
+import { normalizeString } from '@/src/lib/schemas/primitives/sanitization-transforms';
 import { type ContentCategory, contentCategorySchema } from './shared.schema';
 
 /**
@@ -18,7 +19,7 @@ const contentSlugSchema = nonEmptyString
     /^[a-zA-Z0-9-_/]+$/,
     'Slug can only contain letters, numbers, hyphens, underscores, and forward slashes'
   )
-  .transform((val) => val.toLowerCase().trim())
+  .transform(normalizeString)
   .brand<'ContentSlug'>()
   .describe(
     'Validated content identifier slug with alphanumeric characters, hyphens, underscores, and slashes (max 200 chars)'

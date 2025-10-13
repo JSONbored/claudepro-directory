@@ -12,6 +12,7 @@ import {
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
+import { ROUTES } from '@/src/lib/constants';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface NewPostFormProps {
@@ -65,7 +66,7 @@ export function NewPostForm({ onSubmit }: NewPostFormProps) {
           <div className={UI_CLASSES.FLEX_GAP_4}>
             <Button type="submit">Create Post</Button>
             <Button type="button" variant="outline" asChild>
-              <a href="/board">Cancel</a>
+              <a href={ROUTES.BOARD}>Cancel</a>
             </Button>
           </div>
         </CardContent>

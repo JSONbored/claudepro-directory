@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "workato": {
           "transport": "http",
           "url": "https://your-workspace.workato.com/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "workato": {
           "transport": "http",
           "url": "https://your-workspace.workato.com/mcp"
@@ -80,10 +80,30 @@
     }
   ],
   "examples": [
-    "Sync Salesforce contacts to HubSpot",
-    "Execute the invoice processing workflow",
-    "Check status of overnight data sync",
-    "Trigger customer onboarding recipe"
+    {
+      "title": "Sync Salesforce contacts to HubSpot",
+      "code": "Ask Claude: \"Sync Salesforce contacts to HubSpot\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Execute the invoice processing workflow",
+      "code": "Ask Claude: \"Execute the invoice processing workflow\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Check status of overnight data sync",
+      "code": "Ask Claude: \"Check status of overnight data sync\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Trigger customer onboarding recipe",
+      "code": "Ask Claude: \"Trigger customer onboarding recipe\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "execute"],

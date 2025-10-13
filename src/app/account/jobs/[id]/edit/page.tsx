@@ -1,22 +1,20 @@
-import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/jobs/job-form';
-import { updateJob } from '@/src/lib/actions/job-actions';
+import { updateJob } from '@/src/lib/actions/business.actions';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: 'Edit Job - ClaudePro Directory',
-  description: 'Edit your job listing',
-};
+export const metadata = await generatePageMetadata('/account/jobs/:id/edit');
 
 interface EditJobPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function EditJobPage({ params }: EditJobPageProps) {
+  const resolvedParams = await params;
   const supabase = await createClient();
 
   // Get current user
@@ -32,7 +30,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
   const { data: job, error } = await supabase
     .from('jobs')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', resolvedParams.id)
     .eq('user_id', user.id)
     .single();
 
@@ -45,7 +43,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
 
     const result = await updateJob({
       ...data,
-      id: params.id,
+      id: resolvedParams.id,
     });
 
     if (result?.data?.success) {
@@ -69,18 +67,18 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
           location: job.location,
           description: job.description,
           salary: job.salary,
-          remote: job.remote,
-          type: job.type,
-          workplace: job.workplace,
-          experience: job.experience,
+          remote: job.remote ?? false,
+          type: job.type as 'full-time' | 'part-time' | 'contract' | 'internship' | 'freelance',
+          workplace: job.workplace as 'On site' | 'Remote' | 'Hybrid' | null,
+          experience: job.experience as 'Entry' | 'Mid' | 'Senior' | 'Lead' | 'Executive' | null,
           category: job.category,
-          tags: job.tags,
-          requirements: job.requirements,
-          benefits: job.benefits,
+          tags: Array.isArray(job.tags) ? (job.tags as string[]) : [],
+          requirements: Array.isArray(job.requirements) ? (job.requirements as string[]) : [],
+          benefits: Array.isArray(job.benefits) ? (job.benefits as string[]) : [],
           link: job.link,
           contact_email: job.contact_email,
           company_logo: job.company_logo,
-          plan: job.plan,
+          plan: job.plan as 'featured' | 'standard' | 'premium',
         }}
         onSubmit={handleSubmit}
         submitLabel="Update Job Listing"

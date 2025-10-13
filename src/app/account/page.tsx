@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import { Badge } from '@/src/components/ui/badge';
 import {
   Card,
@@ -7,14 +6,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { ROUTES } from '@/src/lib/constants';
 import { Bookmark, Calendar } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: 'Account Dashboard - ClaudePro Directory',
-  description: 'Manage your ClaudePro account and view your activity',
-};
+export const metadata = await generatePageMetadata('/account');
 
 export default async function AccountDashboard() {
   const supabase = await createClient();
@@ -117,27 +115,28 @@ export default async function AccountDashboard() {
         <CardContent className={UI_CLASSES.SPACE_Y_2}>
           <p className={UI_CLASSES.TEXT_SM}>
             • View your{' '}
-            <a href="/account/activity" className="text-primary hover:underline">
+            <a href={ROUTES.ACCOUNT_ACTIVITY} className="text-primary hover:underline">
               contribution history
             </a>{' '}
             and earn badges
           </p>
           <p className={UI_CLASSES.TEXT_SM}>
             • Browse the{' '}
-            <a href="/" className="text-primary hover:underline">
+            <a href={ROUTES.HOME} className="text-primary hover:underline">
               directory
             </a>{' '}
             and bookmark your favorite configurations
           </p>
           <p className={UI_CLASSES.TEXT_SM}>
             • View your{' '}
-            <a href="/account/bookmarks" className="text-primary hover:underline">
-              saved bookmarks
-            </a>
+            <a href={ROUTES.ACCOUNT_LIBRARY} className="text-primary hover:underline">
+              library
+            </a>{' '}
+            with saved bookmarks and collections
           </p>
           <p className={UI_CLASSES.TEXT_SM}>
             • Update your profile in{' '}
-            <a href="/account/settings" className="text-primary hover:underline">
+            <a href={ROUTES.ACCOUNT_SETTINGS} className="text-primary hover:underline">
               settings
             </a>
           </p>

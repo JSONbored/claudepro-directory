@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { JobActions } from '@/src/components/jobs/job-actions';
 import { Badge } from '@/src/components/ui/badge';
@@ -10,27 +9,20 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { getUserJobs } from '@/src/lib/actions/job-actions';
+import { getUserJobs } from '@/src/lib/actions/business.actions';
+import { ROUTES } from '@/src/lib/constants';
 import { BarChart, Briefcase, Edit, ExternalLink, Eye, Plus } from '@/src/lib/icons';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { formatRelativeDate } from '@/src/lib/utils/date-utils';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
+import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
-export const metadata: Metadata = {
-  title: 'My Jobs - ClaudePro Directory',
-  description: 'Manage your job listings',
-};
+export const metadata = await generatePageMetadata('/account/jobs');
 
 export default async function MyJobsPage() {
   const jobs = await getUserJobs();
 
   const getStatusColor = (status: string) => {
-    const colors = {
-      active: 'bg-green-500/10 text-green-400 border-green-500/20',
-      draft: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-      paused: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-      expired: 'bg-red-500/10 text-red-400 border-red-500/20',
-    };
-    return colors[status as keyof typeof colors] || 'bg-muted';
+    return BADGE_COLORS.jobStatus[status as JobStatusType] || 'bg-muted';
   };
 
   const getPlanBadge = (plan: string) => {
@@ -51,7 +43,7 @@ export default async function MyJobsPage() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/account/jobs/new">
+          <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
             <Plus className="h-4 w-4 mr-2" />
             Post a Job
           </Link>
@@ -67,7 +59,7 @@ export default async function MyJobsPage() {
               Post your first job listing to reach talented developers in the Claude community
             </p>
             <Button asChild>
-              <Link href="/account/jobs/new">
+              <Link href={ROUTES.ACCOUNT_JOBS_NEW}>
                 <Plus className="h-4 w-4 mr-2" />
                 Post Your First Job
               </Link>
@@ -82,10 +74,10 @@ export default async function MyJobsPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                      <Badge className={getStatusColor(job.status)} variant="outline">
-                        {job.status}
+                      <Badge className={getStatusColor(job.status ?? 'draft')} variant="outline">
+                        {job.status ?? 'draft'}
                       </Badge>
-                      {getPlanBadge(job.plan)}
+                      {getPlanBadge(job.plan ?? 'standard')}
                     </div>
                     <CardTitle className="mt-2">{job.title}</CardTitle>
                     <CardDescription>
@@ -101,7 +93,7 @@ export default async function MyJobsPage() {
                 >
                   <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                     <Eye className="h-4 w-4" />
-                    {job.viewCount || 0} views
+                    {job.view_count ?? 0} views
                   </div>
                   {job.posted_at && <div>Posted {formatRelativeDate(job.posted_at)}</div>}
                   {job.expires_at && <div>Expires {formatRelativeDate(job.expires_at)}</div>}
@@ -131,7 +123,7 @@ export default async function MyJobsPage() {
                     </Button>
                   )}
 
-                  <JobActions jobId={job.id} currentStatus={job.status} />
+                  <JobActions jobId={job.id} currentStatus={job.status ?? 'draft'} />
                 </div>
               </CardContent>
             </Card>

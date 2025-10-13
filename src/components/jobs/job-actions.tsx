@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
-import { deleteJob, toggleJobStatus } from '@/src/lib/actions/job-actions';
+import { deleteJob, toggleJobStatus } from '@/src/lib/actions/business.actions';
 import { Pause, Play, Trash } from '@/src/lib/icons';
 
 interface JobActionsProps {

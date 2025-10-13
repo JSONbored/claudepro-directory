@@ -13,7 +13,7 @@ import { BookOpen, Bot, Layers, Server, Terminal, Webhook } from '@/src/lib/icon
 import type { ContentTypeConfigRegistry } from '@/src/lib/types/content-type-config';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
-import { copyToClipboard } from '@/src/lib/utils/clipboard-utils';
+import { copyToClipboard } from '@/src/lib/utils/browser.utils';
 
 /**
  * Agent Configuration

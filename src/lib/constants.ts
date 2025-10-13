@@ -59,6 +59,58 @@ export const SOCIAL_LINKS = socialLinksSchema.parse({
 });
 
 /**
+ * Application Routes - Centralized route paths (SHA-3172)
+ * Single source of truth for all internal routes
+ *
+ * Usage: Replace hardcoded strings like "/submit" with ROUTES.SUBMIT
+ */
+export const ROUTES = {
+  // Core pages
+  HOME: '/',
+  SUBMIT: '/submit',
+  PARTNER: '/partner',
+  COMMUNITY: '/community',
+  CHANGELOG: '/changelog',
+  FEATURED: '/featured',
+  TRENDING: '/trending',
+  COMPARE: '/compare',
+  BOARD: '/board',
+  BOARD_NEW: '/board/new',
+
+  // Content categories
+  AGENTS: '/agents',
+  MCP: '/mcp',
+  RULES: '/rules',
+  COMMANDS: '/commands',
+  HOOKS: '/hooks',
+  STATUSLINES: '/statuslines',
+  GUIDES: '/guides',
+  COLLECTIONS: '/collections',
+  JOBS: '/jobs',
+
+  // Tools
+  CONFIG_RECOMMENDER: '/tools/config-recommender',
+
+  // Account pages
+  ACCOUNT_LIBRARY: '/account/library',
+  ACCOUNT_LIBRARY_NEW: '/account/library/new',
+  ACCOUNT_SUBMISSIONS: '/account/submissions',
+  ACCOUNT_ACTIVITY: '/account/activity',
+  ACCOUNT_SETTINGS: '/account/settings',
+  ACCOUNT_JOBS: '/account/jobs',
+  ACCOUNT_JOBS_NEW: '/account/jobs/new',
+  ACCOUNT_COMPANIES: '/account/companies',
+
+  // API/Docs
+  API_DOCS: '/api-docs',
+  LLMS_TXT: '/llms.txt',
+  MANIFEST: '/manifest',
+
+  // Auth
+  LOGIN: '/login',
+} as const;
+
+/**
  * API Configuration Schema
  */
 const apiConfigSchema = z.object({
@@ -340,6 +392,7 @@ export const DEV_CONFIG = {
 
 /**
  * Security Configuration
+ * Inlined to avoid barrel file pattern
  */
 export const SECURITY_CONFIG = {
   headers: {
@@ -433,6 +486,107 @@ export const SEARCH_CONFIG = {
   debounceMs: 150, // Debounce delay for search input
   threshold: 0.3, // Fuzzy search threshold (0-1, lower = more strict)
   maxResults: 50, // Maximum search results to display
+} as const;
+
+/**
+ * Service Delays Configuration
+ * Standardized delays for API calls, retries, and service interactions
+ */
+export const SERVICE_DELAYS = {
+  // API retry delays
+  retry: {
+    initial: 1000, // 1 second
+    exponential: 2000, // Base for exponential backoff
+    maximum: 10000, // 10 seconds max
+  },
+  // Email service delays
+  email: {
+    send: 1000, // 1 second between sends
+    retry: 2000, // 2 seconds on failure
+  },
+  // External API delays
+  api: {
+    github: 1000, // 1 second (respect GitHub rate limits)
+    resend: 1000, // 1 second between requests
+    external: 500, // 500ms default for external APIs
+  },
+  // Database operation delays
+  database: {
+    query: 100, // 100ms between queries
+    write: 200, // 200ms between writes
+    transaction: 500, // 500ms for transaction retry
+  },
+} as const;
+
+/**
+ * Polling Intervals Configuration
+ * Standardized intervals for periodic checks and updates
+ */
+export const POLLING_INTERVALS = {
+  // Real-time updates
+  realtime: 1000, // 1 second
+  // Badge notifications
+  badges: 30000, // 30 seconds
+  // Status checks
+  status: {
+    health: 60000, // 1 minute
+    api: 30000, // 30 seconds
+    database: 120000, // 2 minutes
+  },
+  // Analytics polling
+  analytics: {
+    views: 60000, // 1 minute
+    stats: 300000, // 5 minutes
+  },
+} as const;
+
+/**
+ * Timeout Configuration
+ * Standardized timeouts for various operations
+ */
+export const TIMEOUTS = {
+  // API timeouts
+  api: {
+    default: 5000, // 5 seconds
+    long: 10000, // 10 seconds
+    short: 2000, // 2 seconds
+  },
+  // UI interaction timeouts
+  ui: {
+    debounce: 150, // Search debounce
+    tooltip: 300, // Tooltip delay
+    animation: 300, // Animation duration
+    transition: 200, // Transition duration
+  },
+  // Test timeouts
+  test: {
+    default: 5000, // 5 seconds
+    long: 10000, // 10 seconds
+    network: 5000, // 5 seconds for network idle
+  },
+} as const;
+
+/**
+ * Animation Durations Configuration
+ * Standardized animation durations for consistent UX
+ */
+export const ANIMATION_DURATIONS = {
+  // Number ticker animations
+  ticker: {
+    default: 1500, // 1.5 seconds
+    fast: 1000, // 1 second
+    slow: 2000, // 2 seconds
+  },
+  // Stagger delays for sequential animations
+  stagger: {
+    fast: 100, // 100ms between items
+    medium: 200, // 200ms between items
+    slow: 300, // 300ms between items
+  },
+  // Border beam animations
+  beam: {
+    default: 15000, // 15 seconds (from border-beam component)
+  },
 } as const;
 
 /**
