@@ -399,7 +399,7 @@ export async function generateAllSiteUrls(
     jobs.forEach((job) => {
       urls.push({
         loc: `${baseUrl}/jobs/${job.slug}`,
-        lastmod: job.posted_at || currentDate,
+        lastmod: job.postedAt?.split('T')[0] || job.dateAdded,
         changefreq: 'weekly', // Job listings may update (remote/salary changes)
         priority: 0.65,
       });
