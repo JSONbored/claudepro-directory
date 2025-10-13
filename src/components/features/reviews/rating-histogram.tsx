@@ -117,7 +117,7 @@ export function RatingHistogram({
               <LabelList
                 dataKey="percentage"
                 position="right"
-                formatter={(value: number) => `${value}%`}
+                formatter={(value: React.ReactNode) => `${value}%`}
                 className="text-xs fill-muted-foreground"
               />
             </Bar>

@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 **Platform Improvements:**
 
+- [TypeScript Safety Improvements](#2025-10-13---typescript-safety-improvements-for-chart-components) - Enhanced type safety for chart components with proper TypeScript definitions
 - [React 19 Component Migration](#2025-10-08---react-19-component-migration-for-shadcnui) - Migrated shadcn/ui components to React 19 ref-as-prop pattern
 - [Component Architecture](#2025-10-08---component-architecture-improvements) - Refactored cards and forms to eliminate code duplication
 - [Email Templates](#2025-10-06---email-templates-infrastructure) - React Email templates for transactional emails
@@ -42,7 +43,75 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - [Reddit MCP Server](#2025-10-04---reddit-mcp-server-community-contribution) - Browse Reddit from Claude
 
-[View All Updates ↓](#2025-10-11---theme-toggle-animation-and-navigation-polish)
+[View All Updates ↓](#2025-10-13---dependency-updates-and-typescript-safety-improvements)
+
+---
+
+## 2025-10-13 - Dependency Updates and TypeScript Safety Improvements
+
+**TL;DR:** Updated core dependencies including React 19.2, Next.js 15.5.5, and Recharts 3.2, with enhanced TypeScript safety across chart components to ensure compatibility with the latest package versions.
+
+### What Changed
+
+Updated dependencies to latest stable versions and resolved TypeScript compatibility issues introduced by package updates, particularly with the Recharts library upgrade from v2 to v3.
+
+### Changed
+
+- **Core Framework Updates**
+  - React: 19.1.1 → 19.2.0
+  - React DOM: 19.1.1 → 19.2.0
+  - @types/react: 19.1.17 → 19.2.2
+  - @types/react-dom: 19.1.11 → 19.2.2
+  - @types/node: 24.6.0 → 24.7.2
+  - Next.js: 15.5.4 → 15.5.5
+
+- **UI Library Updates**
+  - Recharts: 2.15.4 → 3.2.1 (major version upgrade)
+  - Framer Motion: 12.23.22 → 12.23.24
+  - Fumadocs UI: 15.8.2 → 15.8.5
+  - Fumadocs OpenAPI: 9.4.0 → 9.5.1
+
+- **Security & Infrastructure**
+  - Arcjet Next: 1.0.0-beta.12 → 1.0.0-beta.13
+  - Nosecone Next: 1.0.0-beta.12 → 1.0.0-beta.13
+  - Supabase JS: 2.48.1 → 2.75.0
+
+- **Build Tools & Styling**
+  - TailwindCSS: 4.1.13 → 4.1.14
+  - TailwindCSS PostCSS: 4.1.13 → 4.1.14
+  - TSX: 4.20.5 → 4.20.6
+  - Biome: 2.2.5 → 2.2.6
+
+- **Development Dependencies**
+  - Jest Axe: 8.0.0 → 10.0.0
+  - Knip: 5.64.1 → 5.65.0
+  - Lefthook: 1.13.5 → 1.13.6
+  - Ultracite: 5.4.6 → 5.6.2
+  - Next Bundle Analyzer: 15.5.4 → 15.5.5
+
+- **Other Dependencies**
+  - Marked: 16.3.0 → 16.4.0
+  - Zod: 4.1.11 → 4.1.12
+  - Svix: 1.76.1 → 1.77.0
+  - Upstash Redis: 1.35.4 → 1.35.5
+  - React Email Render: 1.3.1 → 1.3.2
+
+### Fixed
+
+- **TypeScript Safety** (`src/components/ui/chart.tsx`)
+  - Enhanced type definitions for Recharts v3 compatibility
+  - Added explicit `TooltipPayload` type for better type inference
+  - Fixed implicit `any` types in chart tooltip and legend components
+  - Improved type safety for payload arrays and value rendering
+  - Added proper null checks and type guards for chart data
+
+- **Chart Components** (`src/components/features/reviews/rating-histogram.tsx`)
+  - Updated formatter function signature for Recharts v3 compatibility
+  - Ensured type-safe label formatting in rating distribution charts
+
+### Technical Details
+
+The TypeScript improvements ensure full compatibility with Recharts v3's stricter type definitions while maintaining backward compatibility with existing chart implementations. All components now use explicit type annotations and proper type guards for runtime safety.
 
 ---
 
