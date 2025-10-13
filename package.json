@@ -73,7 +73,10 @@
     "test:e2e:clean": "rm -rf playwright-report test-results",
     "test:e2e:report": "playwright show-report playwright-report",
     "test:e2e:codegen": "playwright codegen http://localhost:3000",
-    "test:all": "npm run test:unit && npm run test:e2e"
+    "test:all": "npm run test:unit && npm run test:e2e",
+    "tech-debt:baseline": "config/tools/tech-debt/tracker.sh baseline",
+    "tech-debt:check": "config/tools/tech-debt/tracker.sh check",
+    "tech-debt:report": "config/tools/tech-debt/tracker.sh report"
   },
   "dependencies": {
     "@arcjet/next": "^1.0.0-beta.13",

@@ -92,3 +92,7 @@ manifest.json
 
 # Lefthook creates this in root despite using config/tools/lefthook.yml
 lefthook.yml
+
+# Technical debt tracking (personal baseline, not committed)
+config/tools/tech-debt/.baseline.json
+config/tools/tech-debt/.history.json
