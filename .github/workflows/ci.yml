@@ -40,10 +40,62 @@ jobs:
       - name: Run ${{ matrix.check }}
         run: npm run ${{ matrix.check }}
 
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Only run coverage on main branch (production)
+    # PRs run tests without coverage for faster feedback
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - uses: ./.github/actions/setup-node-deps
+
+      - name: Run tests (with coverage on main)
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "Running tests with coverage (main branch)"
+            npm run test:coverage
+          else
+            echo "Running tests without coverage (PR/branch)"
+            npm run test:unit
+          fi
+
+      - name: Upload coverage reports to Codecov (main only)
+        if: github.ref == 'refs/heads/main'
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Generate coverage summary (main only)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          if [ -f ./coverage/coverage-summary.json ]; then
+            echo "## Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            node -e "
+              const summary = require('./coverage/coverage-summary.json');
+              const total = summary.total;
+              console.log('| Metric | Coverage |');
+              console.log('|--------|----------|');
+              console.log('| Lines | ' + total.lines.pct.toFixed(2) + '% |');
+              console.log('| Statements | ' + total.statements.pct.toFixed(2) + '% |');
+              console.log('| Functions | ' + total.functions.pct.toFixed(2) + '% |');
+              console.log('| Branches | ' + total.branches.pct.toFixed(2) + '% |');
+            " >> $GITHUB_STEP_SUMMARY
+          fi
+
   build:
     name: Build & Verify
     runs-on: ubuntu-latest
-    needs: quality
+    needs: [quality, test]
     timeout-minutes: 15
 
     steps:
@@ -60,9 +112,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}-
             ${{ runner.os }}-nextjs-
-
-      - name: Generate sitemap
-        run: npm run generate:sitemap
 
       - name: Build project
         run: npm run build

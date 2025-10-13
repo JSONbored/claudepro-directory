@@ -31,7 +31,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "clickup": {
           "command": "npx",
           "args": ["-y", "@hauptsache.net/clickup-mcp"],
@@ -77,10 +77,30 @@
     }
   ],
   "examples": [
-    "Create a new task in the Development space",
-    "Update task CL-123 to completed",
-    "List all my assigned tasks",
-    "Add time entry to current task"
+    {
+      "title": "Create a new task in the Development space",
+      "code": "Ask Claude: \"Create a new task in the Development space\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Update task CL-123 to completed",
+      "code": "Ask Claude: \"Update task CL-123 to completed\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "List all my assigned tasks",
+      "code": "Ask Claude: \"List all my assigned tasks\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Add time entry to current task",
+      "code": "Ask Claude: \"Add time entry to current task\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "delete"],

@@ -46,7 +46,7 @@ export interface ContentViewerProps {
 
 // EnhancedGuidesPage component props
 export interface EnhancedGuidesPageProps {
-  guides: Record<string, import('@/src/lib/utils/guide-helpers').GuideItemWithCategory[]>;
+  guides: Record<string, import('@/src/lib/utils/content.utils').GuideItemWithCategory[]>;
 }
 
 // ErrorBoundary component props
@@ -98,7 +98,7 @@ export interface TrendingContentProps {
  * View tracker props
  */
 const viewTrackerPropsSchema = z.object({
-  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'guides']),
+  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'guides', 'changelog']),
   slug: nonEmptyString.max(200),
 });
 
@@ -196,4 +196,5 @@ export interface SearchOptions {
 export interface UseSearchProps {
   data: UnifiedContentItem[];
   searchOptions?: SearchOptions;
+  initialQuery?: string; // Initial search query from URL (for SearchAction schema integration)
 }

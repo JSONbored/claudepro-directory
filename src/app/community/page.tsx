@@ -1,8 +1,9 @@
 import Link from 'next/link';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
+import { ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
 import { Github, MessageCircle, MessageSquare, Twitter, Users } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -139,12 +140,22 @@ export default function CommunityPage() {
               </div>
               <div className="pt-4">
                 <Button asChild>
-                  <Link href="/submit">Submit Your Configuration</Link>
+                  <Link href={ROUTES.SUBMIT}>Submit Your Configuration</Link>
                 </Button>
               </div>
             </CardContent>
           </Card>
         </div>
+      </section>
+
+      {/* Email CTA - Footer section (matching homepage pattern) */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <InlineEmailCTA
+          variant="hero"
+          context="community-page"
+          headline="Join 1,000+ Claude Power Users"
+          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+        />
       </section>
     </div>
   );

@@ -22,9 +22,13 @@
 
 import dynamic from 'next/dynamic';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FeaturedSections } from '@/src/components/features/home/featured-sections';
-import { SearchSection } from '@/src/components/features/home/search-section';
-import { TabsSection } from '@/src/components/features/home/tabs-section';
+import {
+  LazyFeaturedSections,
+  LazySearchSection,
+  LazyTabsSection,
+} from '@/src/components/features/home/lazy-homepage-sections';
+import { HomepageStatsSkeleton } from '@/src/components/ui/loading-skeleton';
+import { NumberTicker } from '@/src/components/ui/magic/number-ticker';
 import { useSearch } from '@/src/hooks/use-search';
 import { HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
 import { BookOpen, Layers, Server, Sparkles } from '@/src/lib/icons';
@@ -44,7 +48,12 @@ const UnifiedSearch = dynamic(
   }
 );
 
-function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
+function HomePageClientComponent({
+  initialData,
+  initialSearchQuery,
+  featuredByCategory,
+  stats,
+}: HomePageClientProps) {
   const { allConfigs } = initialData;
 
   const [activeTab, setActiveTab] = useState('all');
@@ -62,11 +71,12 @@ function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
     []
   );
 
-  // Use React 19 optimized search hook
+  // Use React 19 optimized search hook with initial query from URL
   const { filters, searchResults, filterOptions, handleSearch, handleFiltersChange, isSearching } =
     useSearch({
       data: allConfigs,
       searchOptions,
+      ...(initialSearchQuery ? { initialQuery: initialSearchQuery } : {}),
     });
 
   // Create lookup maps dynamically for all featured categories
@@ -101,46 +111,75 @@ function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
   // Use ref to track filtered results for stable pagination
   const filteredResultsRef = useRef(filteredResults);
   const currentPageRef = useRef(1);
+  const loadingRef = useRef(false);
+  const activeTabRef = useRef(activeTab);
 
-  useEffect(() => {
-    filteredResultsRef.current = filteredResults;
-  }, [filteredResults]);
+  // ✅ FIX: Update refs synchronously during render (not in useEffect)
+  // This prevents race condition where loadMore executes with stale ref data
+  filteredResultsRef.current = filteredResults;
+  activeTabRef.current = activeTab;
 
-  // Update displayed items only when tab or search changes (not on every filteredResults reference change)
-  // Using activeTab and isSearching as dependencies instead of filteredResults to avoid resetting
-  // pagination when the same data is re-filtered (which creates a new array reference)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Intentionally using activeTab/isSearching to avoid pagination reset on re-renders
+  // Update displayed items when filtered results change
   useEffect(() => {
-    setDisplayedItems(filteredResults.slice(0, pageSize) as UnifiedContentItem[]);
+    // Reset pagination state before updating displayed items
     currentPageRef.current = 1;
-  }, [activeTab, isSearching]);
+    loadingRef.current = false;
+
+    setDisplayedItems(filteredResults.slice(0, pageSize) as UnifiedContentItem[]);
+  }, [filteredResults]);
 
   // Load more function for infinite scroll
   // Uses refs to avoid stale closures when filteredResults changes
   const loadMore = useCallback(async () => {
-    const nextPage = currentPageRef.current + 1;
-    const startIndex = (nextPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const nextItems = filteredResultsRef.current.slice(startIndex, endIndex);
+    // Concurrency protection - prevent multiple simultaneous loads
+    if (loadingRef.current) {
+      return [];
+    }
 
-    let uniqueNextItems: UnifiedContentItem[] = [];
+    loadingRef.current = true;
 
-    // Deduplicate using functional setState to get latest state
-    setDisplayedItems((prev) => {
-      const prevSlugs = new Set(prev.map((item) => item.slug));
-      uniqueNextItems = nextItems.filter(
-        (item) => !prevSlugs.has(item.slug)
-      ) as UnifiedContentItem[];
-      return [...prev, ...uniqueNextItems] as UnifiedContentItem[];
-    });
+    try {
+      const nextPage = currentPageRef.current + 1;
+      const startIndex = (nextPage - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const nextItems = filteredResultsRef.current.slice(startIndex, endIndex);
 
-    currentPageRef.current = nextPage;
+      // Validate we're still on the same tab before appending items
+      const currentTab = activeTabRef.current;
 
-    // Return the new items so infinite scroll knows items were loaded
-    return uniqueNextItems;
+      let uniqueNextItems: UnifiedContentItem[] = [];
+
+      // Deduplicate using functional setState to get latest state
+      setDisplayedItems((prev) => {
+        // Additional validation - if tab changed, don't append items
+        if (activeTabRef.current !== currentTab) {
+          return prev; // Tab changed during load, abort update
+        }
+
+        const prevSlugs = new Set(prev.map((item) => item.slug));
+        uniqueNextItems = nextItems.filter(
+          (item) => !prevSlugs.has(item.slug)
+        ) as UnifiedContentItem[];
+
+        return [...prev, ...uniqueNextItems] as UnifiedContentItem[];
+      });
+
+      // Only increment page if items were actually added
+      if (uniqueNextItems.length > 0) {
+        currentPageRef.current = nextPage;
+      }
+
+      // Return the new items so infinite scroll knows items were loaded
+      return uniqueNextItems;
+    } finally {
+      loadingRef.current = false;
+    }
   }, []);
 
-  const hasMore = displayedItems.length < filteredResults.length;
+  // Memoize hasMore to prevent unnecessary re-renders
+  const hasMore = useMemo(() => {
+    return displayedItems.length < filteredResults.length;
+  }, [displayedItems.length, filteredResults.length]);
 
   // Handle tab change
   const handleTabChange = useCallback((value: string) => {
@@ -149,14 +188,18 @@ function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
 
   // Handle clear search
   const handleClearSearch = useCallback(() => {
+    // Reset pagination state when clearing search
+    currentPageRef.current = 1;
+    loadingRef.current = false;
+
     handleSearch('');
-    setDisplayedItems([]);
+    // Don't manually set displayedItems - let useEffect handle it when filteredResults updates
   }, [handleSearch]);
 
   return (
     <>
       {/* Search Section */}
-      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 pt-4 pb-6`}>
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 pt-8 pb-12`}>
         <div className={`${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
           <UnifiedSearch
             placeholder="Search for rules, MCP servers, agents, commands, and more..."
@@ -167,49 +210,52 @@ function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
             availableAuthors={filterOptions.authors}
             availableCategories={filterOptions.categories}
             resultCount={filteredResults.length}
+            showFilters={false}
           />
 
           {/* Quick Stats - Below Search Bar */}
-          {stats && (
+          {stats ? (
             <div
               className={`flex flex-wrap ${UI_CLASSES.JUSTIFY_CENTER} gap-4 lg:gap-6 text-xs lg:text-sm text-muted-foreground mt-6`}
             >
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <BookOpen className="h-4 w-4" />
-                {stats.rules} Expert Rules
+                <BookOpen className="h-4 w-4" aria-hidden="true" />
+                <NumberTicker value={stats.rules} duration={1500} /> Expert Rules
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Server className="h-4 w-4" />
-                {stats.mcp} MCP Servers
+                <Server className="h-4 w-4" aria-hidden="true" />
+                <NumberTicker value={stats.mcp} duration={1500} delay={100} /> MCP Servers
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" />
-                {stats.agents} AI Agents
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                <NumberTicker value={stats.agents} duration={1500} delay={200} /> AI Agents
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" />
-                {stats.commands} Commands
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                <NumberTicker value={stats.commands} duration={1500} delay={300} /> Commands
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" />
-                {stats.hooks} Automation Hooks
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                <NumberTicker value={stats.hooks} duration={1500} delay={400} /> Automation Hooks
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" />
-                {stats.statuslines} Statuslines
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                <NumberTicker value={stats.statuslines} duration={1500} delay={500} /> Statuslines
               </div>
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Layers className="h-4 w-4" />
-                {stats.collections} Collections
+                <Layers className="h-4 w-4" aria-hidden="true" />
+                <NumberTicker value={stats.collections} duration={1500} delay={600} /> Collections
               </div>
             </div>
+          ) : (
+            <HomepageStatsSkeleton className="mt-6" />
           )}
         </div>
       </section>
 
       <section className={`container ${UI_CLASSES.MX_AUTO} px-4 pb-16`}>
         {/* Search Results Section */}
-        <SearchSection
+        <LazySearchSection
           isSearching={isSearching}
           filteredResults={filteredResults}
           displayedItems={displayedItems}
@@ -219,11 +265,12 @@ function HomePageClientComponent({ initialData, stats }: HomePageClientProps) {
         />
 
         {/* Featured Content Sections - Only show when not searching */}
-        {!isSearching && <FeaturedSections categories={initialData} />}
+        {/* Use weekly featured (algorithm-selected) if available, otherwise fall back to static alphabetical */}
+        {!isSearching && <LazyFeaturedSections categories={featuredByCategory || initialData} />}
 
         {/* Tabs Section - Only show when not searching */}
         {!isSearching && (
-          <TabsSection
+          <LazyTabsSection
             activeTab={activeTab}
             displayedItems={displayedItems}
             filteredResults={filteredResults}

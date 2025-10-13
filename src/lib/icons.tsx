@@ -1,27 +1,33 @@
 /**
- * Centralized Icon Exports (SHA-2089)
+ * Centralized Icon Exports
  *
  * Single source of truth for all lucide-react icons used across the codebase
+ *
  * Benefits:
- * - Better tree-shaking: Bundler can optimize imports
- * - Consistent icon usage across components
- * - Easier to track and manage icon dependencies
- * - Potential 150-300KB bundle reduction
+ * - **Consistency**: Single import source across entire codebase
+ * - **Maintainability**: Change icon library once, not in 100+ files
+ * - **Discoverability**: Easy to see which icons are actively used
+ * - **Refactoring**: Swap icon implementations without touching consumers
+ *
+ * Tree-Shaking:
+ * - ✅ Modern bundlers (Webpack 5, esbuild, Rollup) tree-shake this equally well as direct imports
+ * - ✅ This is a re-export barrel (not a namespace import), so dead code elimination works
+ * - ⚠️ No bundle size improvement over direct imports - organizational benefit only
  *
  * Usage in components:
  * ```ts
- * // ✅ Correct - Import from centralized file
+ * // ✅ Recommended - Centralized import
  * import { Copy, ExternalLink } from '@/src/lib/icons';
  *
- * // ❌ Avoid - Direct imports bypass optimization
- * import { Copy } from '@/src/lib/icons';
+ * // ✅ Also fine - Direct import (same bundle output)
+ * import { Copy } from 'lucide-react';
  * ```
  *
- * Migration Status: 72 files need migration
  * Icons Exported: 61 unique icons
  */
 
 import {
+  Activity,
   AlertCircle,
   AlertTriangle,
   ArrowDown,
@@ -30,6 +36,8 @@ import {
   ArrowRight,
   ArrowUp,
   ArrowUpIcon,
+  ArrowUpRight,
+  Award,
   BarChart,
   Bookmark,
   BookmarkCheck,
@@ -56,9 +64,11 @@ import {
   Edit,
   ExternalLink,
   Eye,
+  Facebook,
   FileJson,
   FileText,
   Filter,
+  FolderOpen,
   GitCompare,
   Github,
   GitPullRequest,
@@ -70,6 +80,7 @@ import {
   Info,
   Layers,
   Lightbulb,
+  Linkedin,
   Loader2,
   LogOut,
   type LucideIcon,
@@ -90,13 +101,16 @@ import {
   Palette,
   Pause,
   Play,
+  Plug,
   Plus,
+  PlusCircle,
   RefreshCw,
   Rocket,
   Search,
   Send,
   Server,
   Settings,
+  Share2,
   Shield,
   Sparkles,
   Star,
@@ -106,6 +120,7 @@ import {
   Target,
   Terminal,
   Thermometer,
+  ThumbsUp,
   Trash,
   TrendingUp,
   Trophy,
@@ -249,6 +264,8 @@ export {
   ArrowRight,
   ArrowUp,
   ArrowUpIcon,
+  ArrowUpRight,
+  Award,
   Medal,
   Trophy,
   BarChart,
@@ -267,9 +284,11 @@ export {
   DollarSign,
   Download,
   Edit,
+  Facebook,
   FileJson,
   FileText,
   Filter,
+  FolderOpen,
   GitCompare,
   GitPullRequest,
   Globe,
@@ -279,6 +298,7 @@ export {
   Home,
   Layers,
   Lightbulb,
+  Linkedin,
   LogOut,
   Mail,
   MapPin,
@@ -296,12 +316,15 @@ export {
   Palette,
   Pause,
   Play,
+  Plug,
   Plus,
+  PlusCircle,
   RefreshCw,
   Rocket,
   Send,
   Server,
   Settings,
+  Share2,
   Shield,
   Sparkles,
   Sun,
@@ -316,6 +339,8 @@ export {
   Webhook,
   Workflow,
   XCircle,
+  ThumbsUp,
+  Activity,
 };
 
 // Export LucideIcon type for component props

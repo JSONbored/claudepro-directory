@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "paypal": {
           "transport": "sse",
           "url": "https://mcp.paypal.com/sse"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "paypal": {
           "transport": "sse",
           "url": "https://mcp.paypal.com/sse"
@@ -80,10 +80,30 @@
     }
   ],
   "examples": [
-    "Process a refund for transaction ID ABC123",
-    "Show today's payment activity",
-    "Generate monthly transaction report",
-    "Check account balance"
+    {
+      "title": "Process a refund for transaction ID ABC123",
+      "code": "Ask Claude: \"Process a refund for transaction ID ABC123\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Show today's payment activity",
+      "code": "Ask Claude: \"Show today's payment activity\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Generate monthly transaction report",
+      "code": "Ask Claude: \"Generate monthly transaction report\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Check account balance",
+      "code": "Ask Claude: \"Check account balance\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "refund"],

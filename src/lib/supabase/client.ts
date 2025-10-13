@@ -7,10 +7,46 @@
  */
 
 import { createBrowserClient } from '@supabase/ssr';
+import type { Database } from '@/src/types/database.types';
 
 export function createClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // In development without env vars, return a mock client that won't crash
+  if (!(supabaseUrl && supabaseAnonKey)) {
+    if (process.env.NODE_ENV === 'development') {
+      // biome-ignore lint/suspicious/noConsole: Intentional development warning for missing Supabase credentials
+      console.warn(
+        '⚠️  Supabase env vars not found - using mock client for development. Auth features will not work.'
+      );
+      // Return a mock client that matches the Supabase client interface
+      return {
+        auth: {
+          getUser: async () => ({ data: { user: null }, error: null }),
+          signOut: async () => ({ error: null }),
+          onAuthStateChange: () => ({
+            data: {
+              subscription: {
+                // biome-ignore lint/suspicious/noEmptyBlockStatements: Mock unsubscribe function for development
+                unsubscribe: () => {},
+              },
+            },
+          }),
+        },
+        from: () => ({
+          select: () => ({
+            eq: () => ({
+              single: async () => ({ data: null, error: null }),
+            }),
+          }),
+        }),
+      } as unknown as ReturnType<typeof createBrowserClient<Database>>;
+    }
+    throw new Error(
+      'Missing required Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY'
+    );
+  }
+
+  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey);
 }

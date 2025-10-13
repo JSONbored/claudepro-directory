@@ -17,22 +17,10 @@
 
 import fs from 'fs/promises';
 import path from 'path';
+import { logger } from '../src/lib/logger.js';
 
 const DEV_SERVER_URL = process.env.DEV_SERVER_URL || 'http://localhost:3000';
 const TIMEOUT_MS = 10000;
-
-/**
- * Color codes for terminal output
- */
-const colors = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  cyan: '\x1b[36m',
-};
 
 /**
  * Validation result interface
@@ -283,31 +271,27 @@ async function validateRoute(route: TestRoute): Promise<ValidationResult> {
  */
 function printResult(result: ValidationResult, index: number, total: number): void {
   const prefix = `[${index + 1}/${total}]`;
-  const status = result.success
-    ? `${colors.green}✓${colors.reset}`
-    : `${colors.red}✗${colors.reset}`;
 
-  console.log(`${prefix} ${status} ${result.url}`);
+  if (result.success) {
+    logger.success(`${prefix} ${result.url}`, {
+      size_bytes: result.contentLength,
+      cache_control: result.cacheControl || 'none',
+    });
+  } else {
+    logger.failure(`${prefix} ${result.url}`);
 
-  if (result.errors.length > 0) {
-    for (const error of result.errors) {
-      console.log(`  ${colors.red}ERROR:${colors.reset} ${error}`);
+    if (result.errors.length > 0) {
+      for (const error of result.errors) {
+        logger.log(`  ERROR: ${error}`);
+      }
     }
   }
 
   if (result.warnings.length > 0) {
     for (const warning of result.warnings) {
-      console.log(`  ${colors.yellow}WARNING:${colors.reset} ${warning}`);
+      logger.log(`  WARNING: ${warning}`);
     }
   }
-
-  if (result.success) {
-    console.log(
-      `  ${colors.cyan}Size:${colors.reset} ${result.contentLength} bytes | ${colors.cyan}Cache:${colors.reset} ${result.cacheControl || 'none'}`
-    );
-  }
-
-  console.log('');
 }
 
 /**
@@ -321,25 +305,20 @@ function printSummary(results: ValidationResult[]): void {
   const totalWarnings = results.reduce((sum, r) => sum + r.warnings.length, 0);
   const totalSize = results.reduce((sum, r) => sum + r.contentLength, 0);
 
-  console.log(`${colors.bright}=== Validation Summary ===${colors.reset}`);
-  console.log(`Total routes tested: ${total}`);
-  console.log(
-    `Successful: ${colors.green}${successful}${colors.reset} | Failed: ${failed > 0 ? colors.red : colors.green}${failed}${colors.reset}`
-  );
-  console.log(
-    `Total errors: ${totalErrors > 0 ? colors.red : colors.green}${totalErrors}${colors.reset}`
-  );
-  console.log(
-    `Total warnings: ${totalWarnings > 0 ? colors.yellow : colors.green}${totalWarnings}${colors.reset}`
-  );
-  console.log(`Total content size: ${(totalSize / 1024).toFixed(2)} KB`);
-  console.log('');
+  logger.log('Validation Summary', {
+    total_routes: total,
+    successful,
+    failed,
+    total_errors: totalErrors,
+    total_warnings: totalWarnings,
+    total_size_kb: (totalSize / 1024).toFixed(2),
+  });
 
   if (failed > 0) {
-    console.log(`${colors.red}${colors.bright}Validation FAILED${colors.reset}`);
+    logger.failure('Validation FAILED');
     process.exit(1);
   } else {
-    console.log(`${colors.green}${colors.bright}All validations PASSED${colors.reset}`);
+    logger.success('All validations PASSED');
     process.exit(0);
   }
 }
@@ -348,14 +327,11 @@ function printSummary(results: ValidationResult[]): void {
  * Main validation function
  */
 async function main(): Promise<void> {
-  console.log(`${colors.bright}${colors.cyan}`);
-  console.log('╔═══════════════════════════════════════════════════════╗');
-  console.log('║        LLMs.txt Route Validation Script              ║');
-  console.log('╚═══════════════════════════════════════════════════════╝');
-  console.log(`${colors.reset}\n`);
-
-  console.log(`${colors.cyan}Server:${colors.reset} ${DEV_SERVER_URL}`);
-  console.log(`${colors.cyan}Timeout:${colors.reset} ${TIMEOUT_MS}ms\n`);
+  logger.progress('LLMs.txt Route Validation Script');
+  logger.log('Configuration', {
+    server: DEV_SERVER_URL,
+    timeout_ms: TIMEOUT_MS,
+  });
 
   // Check if dev server is running
   try {
@@ -363,21 +339,19 @@ async function main(): Promise<void> {
       signal: AbortSignal.timeout(5000),
     });
     if (!healthCheck.ok) {
-      console.error(`${colors.red}ERROR: Dev server returned ${healthCheck.status}${colors.reset}`);
+      logger.failure(`Dev server returned ${healthCheck.status}`);
       process.exit(1);
     }
   } catch {
-    console.error(
-      `${colors.red}ERROR: Dev server not accessible at ${DEV_SERVER_URL}${colors.reset}`
-    );
-    console.error('Please start the dev server with: npm run dev\n');
+    logger.failure(`Dev server not accessible at ${DEV_SERVER_URL}`);
+    logger.log('Please start the dev server with: npm run dev');
     process.exit(1);
   }
 
   // Generate test routes
-  console.log('Generating test routes...');
+  logger.progress('Generating test routes...');
   const routes = await generateTestRoutes();
-  console.log(`Found ${routes.length} routes to test\n`);
+  logger.log(`Found ${routes.length} routes to test`);
 
   // Run validations
   const results: ValidationResult[] = [];
@@ -393,6 +367,6 @@ async function main(): Promise<void> {
 
 // Run validation
 main().catch((error: unknown) => {
-  console.error(`${colors.red}FATAL ERROR:${colors.reset}`, error);
+  logger.failure(`FATAL ERROR: ${error instanceof Error ? error.message : String(error)}`);
   process.exit(1);
 });

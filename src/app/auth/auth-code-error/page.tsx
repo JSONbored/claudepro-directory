@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -8,13 +7,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { ROUTES } from '@/src/lib/constants';
 import { AlertCircle } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: 'Authentication Error - ClaudePro Directory',
-  description: 'There was an error signing in',
-};
+export const metadata = await generatePageMetadata('/auth/auth-code-error');
 
 export default function AuthCodeError() {
   return (
@@ -33,10 +31,10 @@ export default function AuthCodeError() {
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           <Button asChild>
-            <Link href="/login">Try Again</Link>
+            <Link href={ROUTES.LOGIN}>Try Again</Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link href="/">Return Home</Link>
+            <Link href={ROUTES.HOME}>Return Home</Link>
           </Button>
         </CardContent>
       </Card>

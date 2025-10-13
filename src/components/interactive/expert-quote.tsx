@@ -3,9 +3,12 @@
 /**
  * ExpertQuote - Expert opinion component with attribution
  * Used in 11+ MDX files across the codebase
+ *
+ * Updated: Migrated from Next.js Image to ShadCN Avatar component
+ * Benefits: Better fallback handling, consistent avatar styling
  */
 
-import Image from 'next/image';
+import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
 import { type ExpertQuoteProps, expertQuotePropsSchema } from '@/src/lib/schemas/shared.schema';
 
 export function ExpertQuote(props: ExpertQuoteProps) {
@@ -22,13 +25,10 @@ export function ExpertQuote(props: ExpertQuoteProps) {
       </p>
       <footer className="flex items-center gap-4">
         {imageUrl && (
-          <Image
-            src={imageUrl}
-            alt={author}
-            width={48}
-            height={48}
-            className="rounded-full object-cover"
-          />
+          <Avatar className="h-12 w-12">
+            <AvatarImage src={imageUrl} alt={author} />
+            <AvatarFallback>{author.slice(0, 2).toUpperCase()}</AvatarFallback>
+          </Avatar>
         )}
         <div itemProp="author" itemScope itemType="https://schema.org/Person">
           <cite className="not-italic">

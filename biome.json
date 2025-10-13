@@ -1,15 +1,23 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.2.5/schema.json",
   "files": {
-    "includes": ["src/**/*", "scripts/**/*", "content/**/*", "config/**/*"],
+    "includes": [
+      "*.{ts,tsx,js,jsx,mjs,cjs}",
+      "src/**/*",
+      "scripts/**/*",
+      "content/**/*",
+      "config/**/*"
+    ],
     "experimentalScannerIgnores": [
       ".next/**/*",
       "out/**/*",
       "dist/**/*",
       "generated/**/*",
       "src/generated/**/*",
-      "public/static-api/**/*",
-      "node_modules/**/*"
+      "node_modules/**/*",
+      "test-results/**/*",
+      "playwright-report/**/*",
+      "playwright/.cache/**/*"
     ],
     "ignoreUnknown": false
   },
@@ -158,14 +166,14 @@
       "style": {
         "noDefaultExport": "off",
         "noImplicitBoolean": "off",
-        "noInferrableTypes": "off",
+        "noInferrableTypes": "warn",
         "noNamespace": "off",
-        "noNegationElse": "off",
-        "noNonNullAssertion": "off",
+        "noNegationElse": "warn",
+        "noNonNullAssertion": "warn",
         "noParameterAssign": "error",
         "noParameterProperties": "off",
         "noRestrictedGlobals": "off",
-        "noShoutyConstants": "off",
+        "noShoutyConstants": "warn",
         "noUnusedTemplateLiteral": "error",
         "noUselessElse": "error",
         "useAsConstAssertion": "error",

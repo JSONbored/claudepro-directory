@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -8,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { SOCIAL_LINKS } from '@/src/lib/constants';
+import { ROUTES, SOCIAL_LINKS } from '@/src/lib/constants';
 import {
   ArrowRight,
   Briefcase,
@@ -437,7 +438,7 @@ Best regards,
                 </a>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/submit">
+                <Link href={ROUTES.SUBMIT}>
                   Submit Configuration
                   <ArrowRight className={`h-4 w-4 ${UI_CLASSES.ML_2}`} />
                 </Link>
@@ -449,6 +450,16 @@ Best regards,
           </CardContent>
         </Card>
       </div>
+
+      {/* Email CTA - Footer section (matching homepage pattern) */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <InlineEmailCTA
+          variant="hero"
+          context="partner-page"
+          headline="Join 1,000+ Claude Power Users"
+          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+        />
+      </section>
     </div>
   );
 }

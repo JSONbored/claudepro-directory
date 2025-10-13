@@ -10,26 +10,27 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { Globe, MessageSquare, Users } from '@/src/lib/icons';
+import { FolderOpen, Globe, MessageSquare, Users } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface UserProfilePageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: UserProfilePageProps): Promise<Metadata> {
-  const { slug } = params;
+  const { slug } = await params;
 
-  return {
-    title: `${slug} - ClaudePro Directory`,
-    description: `View ${slug}'s profile, contributions, and activity`,
-  };
+  // Use generator with smart defaults for user profiles
+  return generatePageMetadata('/u/:slug', {
+    params: { slug },
+  });
 }
 
 export default async function UserProfilePage({ params }: UserProfilePageProps) {
-  const { slug } = params;
+  const { slug } = await params;
   const supabase = await createAdminClient();
 
   // Get current user (if logged in)
@@ -68,6 +69,15 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     .eq('user_id', profile.id)
     .order('created_at', { ascending: false })
     .limit(10);
+
+  // Get user's public collections
+  const { data: collections } = await supabase
+    .from('user_collections')
+    .select('*')
+    .eq('user_id', profile.id)
+    .eq('is_public', true)
+    .order('created_at', { ascending: false })
+    .limit(6);
 
   // Check if current user is following
   let isFollowing = false;
@@ -139,6 +149,20 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                     </>
                   )}
                 </div>
+
+                {/* Interests/Skills Tags */}
+                {profile.interests &&
+                  Array.isArray(profile.interests) &&
+                  profile.interests.length > 0 &&
+                  profile.interests.every((item): item is string => typeof item === 'string') && (
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {profile.interests.map((interest) => (
+                        <Badge key={interest} variant="secondary">
+                          {interest}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
               </div>
             </div>
 
@@ -162,8 +186,20 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
               </CardHeader>
               <CardContent className={UI_CLASSES.SPACE_Y_3}>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Reputation</span>
+                  <Badge variant="secondary">{profile.reputation_score || 0}</Badge>
+                </div>
+                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Posts</span>
                   <Badge variant="secondary">{posts?.length || 0}</Badge>
+                </div>
+                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+                  <span className={UI_CLASSES.TEXT_SM_MUTED}>Tier</span>
+                  <Badge variant={profile.tier === 'pro' ? 'default' : 'secondary'}>
+                    {profile.tier
+                      ? profile.tier.charAt(0).toUpperCase() + profile.tier.slice(1)
+                      : 'Free'}
+                  </Badge>
                 </div>
                 <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <span className={UI_CLASSES.TEXT_SM_MUTED}>Member since</span>
@@ -227,6 +263,48 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                           <span>{new Date(post.created_at).toLocaleDateString()}</span>
                         </div>
                       </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Public Collections */}
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Public Collections</h2>
+
+              {!collections || collections.length === 0 ? (
+                <Card>
+                  <CardContent className={`${UI_CLASSES.FLEX_COL_CENTER} py-12`}>
+                    <FolderOpen className="h-12 w-12 text-muted-foreground mb-4" />
+                    <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>No public collections yet</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {collections.map((collection) => (
+                    <Card key={collection.id} className={UI_CLASSES.CARD_INTERACTIVE}>
+                      <a href={`/u/${slug}/collections/${collection.slug}`}>
+                        <CardHeader>
+                          <CardTitle className={UI_CLASSES.TEXT_LG}>{collection.name}</CardTitle>
+                          {collection.description && (
+                            <CardDescription className="line-clamp-2">
+                              {collection.description}
+                            </CardDescription>
+                          )}
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+                              {collection.item_count}{' '}
+                              {collection.item_count === 1 ? 'item' : 'items'}
+                            </span>
+                            <span className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+                              {collection.view_count} views
+                            </span>
+                          </div>
+                        </CardContent>
+                      </a>
                     </Card>
                   ))}
                 </div>

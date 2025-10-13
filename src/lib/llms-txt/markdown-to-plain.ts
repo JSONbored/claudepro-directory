@@ -10,9 +10,19 @@
  */
 
 import { decode } from 'he';
-import DOMPurify from 'isomorphic-dompurify';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
+
+// Lazy import DOMPurify to avoid build-time issues with Next.js Turbopack
+// DOMPurify uses browser APIs that cannot be statically analyzed during build
+let _DOMPurify: typeof import('isomorphic-dompurify').default | null = null;
+async function getDOMPurify() {
+  if (!_DOMPurify) {
+    const module = await import('isomorphic-dompurify');
+    _DOMPurify = module.default;
+  }
+  return _DOMPurify;
+}
 
 /**
  * Schema for markdown content input
@@ -166,15 +176,18 @@ function convertListItem(line: string): string {
  * stripHtmlTags('<p>Text</p>') // "Text" (tags stripped)
  * ```
  */
-function stripHtmlTags(text: string): string {
-  // Step 1: Sanitize HTML with DOMPurify (removes ALL scripts, events, dangerous attributes)
+async function stripHtmlTags(text: string): Promise<string> {
+  // Step 1: Lazy load DOMPurify to avoid build-time issues
+  const DOMPurify = await getDOMPurify();
+
+  // Step 2: Sanitize HTML with DOMPurify (removes ALL scripts, events, dangerous attributes)
   // ALLOWED_TAGS: [] strips ALL tags while KEEP_CONTENT: true preserves text content
   const sanitized = DOMPurify.sanitize(text, {
     ALLOWED_TAGS: [], // Strip ALL HTML tags (including <script>, <img>, <iframe>, etc.)
     KEEP_CONTENT: true, // Keep text content only
   });
 
-  // Step 2: Decode HTML entities properly (one-pass decode prevents double-unescaping)
+  // Step 3: Decode HTML entities properly (one-pass decode prevents double-unescaping)
   // decode() safely handles: &nbsp; &amp; &lt; &gt; &quot; &#39; and all other entities
   return decode(sanitized);
 }
@@ -243,7 +256,7 @@ export async function markdownToPlainText(
 
     // Strip HTML if requested
     if (opts.removeHtml) {
-      text = stripHtmlTags(text);
+      text = await stripHtmlTags(text);
     }
 
     // Process line by line

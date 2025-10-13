@@ -4,7 +4,16 @@ import { redirect } from 'next/navigation';
 import { SignOutButton } from '@/src/components/auth/auth-buttons';
 import { Button } from '@/src/components/ui/button';
 import { Card } from '@/src/components/ui/card';
-import { Bookmark, Briefcase, Home, Send, Settings, User } from '@/src/lib/icons';
+import {
+  Activity,
+  Bookmark,
+  Briefcase,
+  Home,
+  Send,
+  Settings,
+  TrendingUp,
+  User,
+} from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -26,11 +35,25 @@ export default async function AccountLayout({ children }: { children: React.Reac
     .eq('id', user.id)
     .single();
 
+  // Check if user has any sponsored campaigns
+  const { data: sponsorships } = await supabase
+    .from('sponsored_content')
+    .select('id')
+    .eq('user_id', user.id)
+    .limit(1);
+
+  const hasSponsorships = sponsorships && sponsorships.length > 0;
+
   const navigation = [
     { name: 'Dashboard', href: '/account', icon: Home },
-    { name: 'Bookmarks', href: '/account/bookmarks', icon: Bookmark },
+    { name: 'Activity', href: '/account/activity', icon: Activity },
+    { name: 'Library', href: '/account/library', icon: Bookmark },
     { name: 'Jobs', href: '/account/jobs', icon: Briefcase },
     { name: 'Submissions', href: '/account/submissions', icon: Send },
+    // Only show Sponsorships if user has campaigns (admin grants access after payment)
+    ...(hasSponsorships
+      ? [{ name: 'Sponsorships', href: '/account/sponsorships', icon: TrendingUp }]
+      : []),
     { name: 'Settings', href: '/account/settings', icon: Settings },
   ];
 

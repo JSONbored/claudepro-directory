@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "linear": {
           "transport": "sse",
           "url": "https://mcp.linear.app/sse"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "linear": {
           "transport": "sse",
           "url": "https://mcp.linear.app/sse"
@@ -76,10 +76,30 @@
     }
   ],
   "examples": [
-    "Create a new bug issue for the login problem",
-    "Show me all issues assigned to me",
-    "Update issue LIN-123 to 'In Progress'",
-    "List all issues in the current sprint"
+    {
+      "title": "Create a new bug issue for the login problem",
+      "code": "Ask Claude: \"Create a new bug issue for the login problem\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Show me all issues assigned to me",
+      "code": "Ask Claude: \"Show me all issues assigned to me\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Update issue LIN-123 to 'In Progress'",
+      "code": "Ask Claude: \"Update issue LIN-123 to 'In Progress'\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "List all issues in the current sprint",
+      "code": "Ask Claude: \"List all issues in the current sprint\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "admin"],

@@ -16,6 +16,7 @@
  */
 
 import { z } from 'zod';
+import { SECURITY_CONFIG } from '@/src/lib/constants/security';
 
 /**
  * Non-empty string validator
@@ -165,3 +166,53 @@ export const massiveString = z
   .string()
   .max(1000000)
   .describe('Extremely large content block up to 1MB (hook scripts, massive data)');
+
+/**
+ * GitHub URL validator with strict hostname validation
+ *
+ * Validates URLs to ensure they point to github.com or www.github.com.
+ * Uses SECURITY_CONFIG.trustedHostnames.github for security.
+ *
+ * Used for: Repository links, source code URLs, project references
+ * Common in: Agent schemas, command schemas, rule schemas
+ *
+ * **Security:** Only allows whitelisted GitHub hostnames to prevent phishing
+ * **Replaces:** Duplicate validation logic in command.schema.ts and rule.schema.ts (32 lines)
+ *
+ * @example
+ * ```typescript
+ * // Valid
+ * githubUrl.parse('https://github.com/anthropics/claude-code')
+ * githubUrl.parse('https://www.github.com/org/repo')
+ *
+ * // Invalid - throws ZodError
+ * githubUrl.parse('https://github.evil.com/fake')
+ * githubUrl.parse('https://guthub.com/typo')
+ * ```
+ */
+export const githubUrl = z
+  .string()
+  .url()
+  .refine(
+    (url) => {
+      try {
+        const urlObj = new URL(url);
+        return SECURITY_CONFIG.trustedHostnames.github.includes(
+          urlObj.hostname as 'github.com' | 'www.github.com'
+        );
+      } catch {
+        return false;
+      }
+    },
+    { message: 'Must be a valid GitHub URL (github.com or www.github.com)' }
+  )
+  .describe('Validated GitHub repository URL (github.com or www.github.com only)');
+
+/**
+ * Optional GitHub URL validator
+ * Optional variant of githubUrl for fields where GitHub link is not required
+ *
+ * Used for: Optional repository links, optional source references
+ * Common in: Content schemas where GitHub URL is optional metadata
+ */
+export const optionalGithubUrl = githubUrl.optional();

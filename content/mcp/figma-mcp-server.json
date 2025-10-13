@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "figma": {
           "transport": "http",
           "url": "http://127.0.0.1:3845/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "figma": {
           "transport": "http",
           "url": "http://127.0.0.1:3845/mcp"
@@ -79,10 +79,30 @@
     }
   ],
   "examples": [
-    "Export all icons from the design system as SVG",
-    "Get the color palette from this Figma file",
-    "Extract component specifications for developers",
-    "List all text styles used in the design"
+    {
+      "title": "Export all icons from the design system as SVG",
+      "code": "Ask Claude: \"Export all icons from the design system as SVG\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Get the color palette from this Figma file",
+      "code": "Ask Claude: \"Get the color palette from this Figma file\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Extract component specifications for developers",
+      "code": "Ask Claude: \"Extract component specifications for developers\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "List all text styles used in the design",
+      "code": "Ask Claude: \"List all text styles used in the design\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": false,
   "permissions": ["read", "export"],

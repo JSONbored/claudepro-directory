@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { JobCard } from '@/src/components/shared/job-card';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
@@ -11,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/src/components/ui/select';
+import { ROUTES } from '@/src/lib/constants';
 import { getJobs, type Job } from '@/src/lib/data/jobs';
 import { Briefcase, Clock, Filter, MapPin, Plus, Search } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -27,33 +29,12 @@ export async function generateMetadata({ searchParams }: PagePropsWithSearchPara
   const rawParams = await searchParams;
   const params = parseSearchParams(jobsSearchSchema, rawParams, 'jobs page metadata');
 
-  // Use centralized metadata with dynamic filtering context
-  const baseMetadata = await generatePageMetadata('/jobs', {
+  return generatePageMetadata('/jobs', {
     filters: {
       category: (params as JobsSearchParams).category,
       remote: params.remote,
     },
   });
-
-  // Apply dynamic title/description modifications for filtering
-  let { title, description } = baseMetadata;
-
-  const category = (params as JobsSearchParams).category;
-  if (category && category !== 'all') {
-    title = `${category.charAt(0).toUpperCase() + category.slice(1)} ${title}`;
-    description = `Find ${category} positions. ${description || ''}`;
-  }
-
-  if (params.remote === true) {
-    title = `Remote ${title}`;
-    description = `Remote ${(description || '').toLowerCase()}`;
-  }
-
-  return {
-    ...baseMetadata,
-    title,
-    description,
-  };
 }
 
 // Enable ISR - revalidate every 4 hours for job listings
@@ -175,7 +156,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
             </div>
 
             <Button variant="outline" size="sm" asChild>
-              <Link href="/partner" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+              <Link href={ROUTES.PARTNER} className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Plus className="h-3 w-3" />
                 Post a Job
               </Link>
@@ -275,6 +256,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         <Link
                           href={buildFilterUrl({ search: undefined })}
                           className="ml-1 hover:text-destructive"
+                          aria-label="Remove search filter"
                         >
                           ×
                         </Link>
@@ -286,6 +268,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         <Link
                           href={buildFilterUrl({ category: undefined })}
                           className="ml-1 hover:text-destructive"
+                          aria-label="Remove category filter"
                         >
                           ×
                         </Link>
@@ -298,6 +281,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         <Link
                           href={buildFilterUrl({ employment: undefined })}
                           className="ml-1 hover:text-destructive"
+                          aria-label="Remove employment type filter"
                         >
                           ×
                         </Link>
@@ -309,13 +293,14 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                         <Link
                           href={buildFilterUrl({ remote: undefined })}
                           className="ml-1 hover:text-destructive"
+                          aria-label="Remove remote filter"
                         >
                           ×
                         </Link>
                       </Badge>
                     )}
                     <Button variant="ghost" size="sm" asChild>
-                      <Link href="/jobs" className={UI_CLASSES.TEXT_XS}>
+                      <Link href={ROUTES.JOBS} className={UI_CLASSES.TEXT_XS}>
                         Clear All
                       </Link>
                     </Button>
@@ -349,13 +334,13 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                 </p>
                 <div className={UI_CLASSES.FLEX_GAP_4}>
                   <Button asChild>
-                    <Link href="/partner">
+                    <Link href={ROUTES.PARTNER}>
                       <Plus className="h-4 w-4 mr-2" />
                       Post the First Job
                     </Link>
                   </Button>
                   <Button variant="outline" asChild>
-                    <Link href="/community">Join Community</Link>
+                    <Link href={ROUTES.COMMUNITY}>Join Community</Link>
                   </Button>
                 </div>
               </CardContent>
@@ -376,7 +361,7 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
                   No jobs match your current filters. Try adjusting your search criteria.
                 </p>
                 <Button variant="outline" asChild>
-                  <Link href="/jobs">Clear All Filters</Link>
+                  <Link href={ROUTES.JOBS}>Clear All Filters</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -402,6 +387,16 @@ export default async function JobsPage({ searchParams }: PagePropsWithSearchPara
             </>
           )}
         </div>
+      </section>
+
+      {/* Email CTA - Footer section (matching homepage pattern) */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <InlineEmailCTA
+          variant="hero"
+          context="jobs-page"
+          headline="Join 1,000+ Claude Power Users"
+          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+        />
       </section>
     </div>
   );

@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "notion": {
           "transport": "http",
           "url": "https://mcp.notion.com/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "notion": {
           "transport": "http",
           "url": "https://mcp.notion.com/mcp"
@@ -76,10 +76,30 @@
     }
   ],
   "examples": [
-    "Create a new page for today's meeting notes",
-    "Update the project status in Notion",
-    "Find all tasks due this week",
-    "Add this conversation summary to Notion"
+    {
+      "title": "Create a new page for today's meeting notes",
+      "code": "Ask Claude: \"Create a new page for today's meeting notes\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Update the project status in Notion",
+      "code": "Ask Claude: \"Update the project status in Notion\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Find all tasks due this week",
+      "code": "Ask Claude: \"Find all tasks due this week\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Add this conversation summary to Notion",
+      "code": "Ask Claude: \"Add this conversation summary to Notion\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "create"],
