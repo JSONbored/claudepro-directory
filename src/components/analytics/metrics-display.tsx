@@ -80,7 +80,7 @@ export function MetricsDisplay(props: MetricsDisplayProps) {
       )}
 
       {/* Grid layout - responsive columns */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
         {validMetrics.map((metric, index) => {
           // Support both new and old formats
           const metricLabel = metric.label || metric.metric || `Metric ${index + 1}`;

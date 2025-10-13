@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "huggingface": {
           "transport": "http",
           "url": "https://huggingface.co/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "huggingface": {
           "transport": "http",
           "url": "https://huggingface.co/mcp"
@@ -76,10 +76,30 @@
     }
   ],
   "examples": [
-    "Find the best text generation model",
-    "Access the IMDB dataset",
-    "Run the stable diffusion demo",
-    "Compare BERT model variants"
+    {
+      "title": "Find the best text generation model",
+      "code": "Ask Claude: \"Find the best text generation model\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Access the IMDB dataset",
+      "code": "Ask Claude: \"Access the IMDB dataset\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Run the stable diffusion demo",
+      "code": "Ask Claude: \"Run the stable diffusion demo\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Compare BERT model variants",
+      "code": "Ask Claude: \"Compare BERT model variants\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "run"],

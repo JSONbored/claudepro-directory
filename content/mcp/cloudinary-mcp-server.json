@@ -31,7 +31,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "cloudinary": {
           "transport": "http",
           "url": "https://mcp.cloudinary.com/",
@@ -44,7 +44,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "cloudinary": {
           "transport": "http",
           "url": "https://mcp.cloudinary.com/",
@@ -91,10 +91,30 @@
     }
   ],
   "examples": [
-    "Resize all product images to 800x600",
-    "Apply watermark to videos",
-    "Generate responsive image sets",
-    "Optimize images for web delivery"
+    {
+      "title": "Resize all product images to 800x600",
+      "code": "Ask Claude: \"Resize all product images to 800x600\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Apply watermark to videos",
+      "code": "Ask Claude: \"Apply watermark to videos\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Generate responsive image sets",
+      "code": "Ask Claude: \"Generate responsive image sets\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Optimize images for web delivery",
+      "code": "Ask Claude: \"Optimize images for web delivery\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "transform", "delete"],

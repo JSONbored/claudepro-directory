@@ -15,9 +15,10 @@
 
 import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
 import type { DigestContentItem, DigestTrendingItem } from '@/src/emails/templates/weekly-digest';
+import { contentCache, statsRedis } from '@/src/lib/cache';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
-import { contentCache, statsRedis } from '@/src/lib/redis';
+import { batchFetch, batchLoadContent } from '@/src/lib/utils/batch.utils';
 
 /**
  * Digest data for a specific week
@@ -26,6 +27,7 @@ export interface WeeklyDigestData {
   weekOf: string;
   newContent: DigestContentItem[];
   trendingContent: DigestTrendingItem[];
+  personalizedContent?: DigestContentItem[]; // Optional: based on user interests
 }
 
 /**
@@ -55,15 +57,23 @@ class DigestService {
   async getNewContent(since: Date, limit = 5): Promise<DigestContentItem[]> {
     try {
       // Get all content from all categories
-      const [
-        agentsData,
-        mcpData,
-        rulesData,
-        commandsData,
-        hooksData,
-        statuslinesData,
-        collectionsData,
-      ] = await Promise.all([agents, mcp, rules, commands, hooks, statuslines, collections]);
+      const {
+        agents: agentsData,
+        mcp: mcpData,
+        rules: rulesData,
+        commands: commandsData,
+        hooks: hooksData,
+        statuslines: statuslinesData,
+        collections: collectionsData,
+      } = await batchLoadContent({
+        agents,
+        mcp,
+        rules,
+        commands,
+        hooks,
+        statuslines,
+        collections,
+      });
 
       const allContent = [
         ...(agentsData as ContentItem[]).map((item) => ({
@@ -138,15 +148,23 @@ class DigestService {
   async getTrendingContent(_since: Date, limit = 3): Promise<DigestTrendingItem[]> {
     try {
       // Get all content
-      const [
-        agentsData,
-        mcpData,
-        rulesData,
-        commandsData,
-        hooksData,
-        statuslinesData,
-        collectionsData,
-      ] = await Promise.all([agents, mcp, rules, commands, hooks, statuslines, collections]);
+      const {
+        agents: agentsData,
+        mcp: mcpData,
+        rules: rulesData,
+        commands: commandsData,
+        hooks: hooksData,
+        statuslines: statuslinesData,
+        collections: collectionsData,
+      } = await batchLoadContent({
+        agents,
+        mcp,
+        rules,
+        commands,
+        hooks,
+        statuslines,
+        collections,
+      });
 
       const allContent = [
         ...(agentsData as ContentItem[]).map((item) => ({
@@ -207,6 +225,100 @@ class DigestService {
   }
 
   /**
+   * Get personalized recommendations for user based on their interests
+   * Used in email digests for "Recommended for You" section
+   *
+   * @param userInterests - User's interest tags from profile
+   * @param limit - Maximum items to return
+   * @returns Personalized content items
+   */
+  async getPersonalizedRecommendations(
+    userInterests: string[],
+    limit = 3
+  ): Promise<DigestContentItem[]> {
+    if (!userInterests || userInterests.length === 0) {
+      return [];
+    }
+
+    try {
+      // Get all content
+      const {
+        agents: agentsData,
+        mcp: mcpData,
+        rules: rulesData,
+        commands: commandsData,
+        hooks: hooksData,
+        statuslines: statuslinesData,
+        collections: collectionsData,
+      } = await batchLoadContent({
+        agents,
+        mcp,
+        rules,
+        commands,
+        hooks,
+        statuslines,
+        collections,
+      });
+
+      const allContent = [
+        ...(agentsData as ContentItem[]).map((item) => ({ ...item, category: 'agents' as const })),
+        ...(mcpData as ContentItem[]).map((item) => ({ ...item, category: 'mcp' as const })),
+        ...(rulesData as ContentItem[]).map((item) => ({ ...item, category: 'rules' as const })),
+        ...(commandsData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'commands' as const,
+        })),
+        ...(hooksData as ContentItem[]).map((item) => ({ ...item, category: 'hooks' as const })),
+        ...(statuslinesData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'statuslines' as const,
+        })),
+        ...(collectionsData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'collections' as const,
+        })),
+      ];
+
+      // Score items based on interest matching
+      const scoredItems = allContent
+        .map((item) => {
+          const itemWithTags = item as ContentItem & { tags?: string[] };
+          const itemTags = (itemWithTags.tags || []).map((t: string) => t.toLowerCase());
+          const itemText = `${item.title} ${item.description || ''}`.toLowerCase();
+
+          // Count interest matches
+          const matchCount = userInterests.filter(
+            (interest) =>
+              itemTags.some((tag) => tag.includes(interest.toLowerCase())) ||
+              itemText.includes(interest.toLowerCase())
+          ).length;
+
+          const score = matchCount > 0 ? (matchCount / userInterests.length) * 100 : 0;
+
+          return { item, score };
+        })
+        .filter((scored) => scored.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit);
+
+      // Map to digest format
+      return scoredItems.map((scored) => ({
+        title: scored.item.title,
+        description: scored.item.description || '',
+        category: scored.item.category,
+        slug: scored.item.slug,
+        url: `${APP_CONFIG.url}/${scored.item.category}/${scored.item.slug}`,
+      }));
+    } catch (error) {
+      logger.error(
+        'Failed to get personalized recommendations for digest',
+        error instanceof Error ? error : new Error(String(error))
+      );
+      return [];
+    }
+  }
+
+  /**
    * Generate complete digest for a specific week
    *
    * @param weekStart - Start date of the week
@@ -226,7 +338,7 @@ class DigestService {
         const weekOf = this.formatWeekRange(weekStart, weekEnd);
 
         // Get new and trending content in parallel
-        const [newContent, trendingContent] = await Promise.all([
+        const [newContent, trendingContent] = await batchFetch([
           this.getNewContent(weekStart, 5),
           this.getTrendingContent(weekStart, 3),
         ]);

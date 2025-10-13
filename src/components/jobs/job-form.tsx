@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from '@/src/components/ui/select';
 import { Textarea } from '@/src/components/ui/textarea';
+import { ROUTES } from '@/src/lib/constants';
 import type { CreateJobInput } from '@/src/lib/schemas/content/job.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -325,6 +326,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
                     variant="ghost"
                     size="sm"
                     onClick={() => removeRequirement(requirements.indexOf(req))}
+                    aria-label={`Remove requirement: ${req}`}
                   >
                     ×
                   </Button>
@@ -372,6 +374,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
                     type="button"
                     onClick={() => removeBenefit(benefits.indexOf(benefit))}
                     className="ml-1 hover:text-destructive"
+                    aria-label={`Remove benefit: ${benefit}`}
                   >
                     ×
                   </button>
@@ -419,6 +422,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
                     type="button"
                     onClick={() => removeTag(tag)}
                     className="ml-1 hover:text-destructive"
+                    aria-label={`Remove tag: ${tag}`}
                   >
                     ×
                   </button>
@@ -525,7 +529,7 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
           {isPending ? 'Saving...' : submitLabel}
         </Button>
         <Button type="button" variant="outline" asChild>
-          <a href="/account/jobs">Cancel</a>
+          <a href={ROUTES.ACCOUNT_JOBS}>Cancel</a>
         </Button>
       </div>
     </form>

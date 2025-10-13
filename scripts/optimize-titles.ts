@@ -33,7 +33,11 @@ async function updateJsonFile(filePath: string, seoTitle: string): Promise<void>
   const data = JSON.parse(content);
 
   // Add or update seoTitle field (insert after title if exists)
-  if (!data.seoTitle) {
+  if (data.seoTitle) {
+    // Update existing seoTitle
+    data.seoTitle = seoTitle;
+    await fs.writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8');
+  } else {
     // Parse and rebuild to insert seoTitle in correct position
     const lines = content.split('\n');
     const titleIndex = lines.findIndex((line) => line.includes('"title":'));
@@ -46,10 +50,6 @@ async function updateJsonFile(filePath: string, seoTitle: string): Promise<void>
       data.seoTitle = seoTitle;
       await fs.writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8');
     }
-  } else {
-    // Update existing seoTitle
-    data.seoTitle = seoTitle;
-    await fs.writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, 'utf-8');
   }
 }
 
@@ -244,9 +244,9 @@ async function optimizeGuides(contentDir: string): Promise<OptimizationStats> {
 async function main(): Promise<void> {
   const contentDir = path.join(process.cwd(), 'content');
 
-  console.log('🎯 SEO Title Optimization\n');
+  logger.progress('SEO Title Optimization');
   if (DRY_RUN) {
-    console.log('🔍 DRY RUN MODE - No files will be modified\n');
+    logger.log('DRY RUN MODE - No files will be modified');
   }
 
   const categories: ContentCategory[] = [
@@ -268,7 +268,7 @@ async function main(): Promise<void> {
 
   // Optimize each category
   for (const category of categories) {
-    console.log(`\n📁 Processing ${category}...`);
+    logger.progress(`Processing ${category}...`);
     const stats = await optimizeJsonContent(category, contentDir);
 
     allStats.total += stats.total;
@@ -277,14 +277,17 @@ async function main(): Promise<void> {
     allStats.failed += stats.failed;
 
     if (stats.total > 0) {
-      console.log(
-        `   Total: ${stats.total} | Enhanced: ${stats.enhanced} | Skipped: ${stats.skipped} | Failed: ${stats.failed}`
-      );
+      logger.log(`${category} processed`, {
+        total: stats.total,
+        enhanced: stats.enhanced,
+        skipped: stats.skipped,
+        failed: stats.failed,
+      });
     }
   }
 
   // Optimize guides
-  console.log('\n📁 Processing guides...');
+  logger.progress('Processing guides...');
   const guideStats = await optimizeGuides(contentDir);
   allStats.total += guideStats.total;
   allStats.enhanced += guideStats.enhanced;
@@ -292,26 +295,31 @@ async function main(): Promise<void> {
   allStats.failed += guideStats.failed;
 
   if (guideStats.total > 0) {
-    console.log(
-      `   Total: ${guideStats.total} | Enhanced: ${guideStats.enhanced} | Skipped: ${guideStats.skipped} | Failed: ${guideStats.failed}`
-    );
+    logger.log('Guides processed', {
+      total: guideStats.total,
+      enhanced: guideStats.enhanced,
+      skipped: guideStats.skipped,
+      failed: guideStats.failed,
+    });
   }
 
   // Final summary
-  console.log(`\n${'='.repeat(80)}`);
-  console.log('📊 OPTIMIZATION SUMMARY\n');
-  console.log(`Total files processed: ${allStats.total}`);
-  console.log(
-    `✅ Enhanced: ${allStats.enhanced} (${((allStats.enhanced / allStats.total) * 100).toFixed(1)}%)`
-  );
-  console.log(`⏭️  Skipped: ${allStats.skipped} (already optimal)`);
-  console.log(`❌ Failed: ${allStats.failed}`);
+  logger.log('Optimization Summary', {
+    total_files: allStats.total,
+    enhanced: allStats.enhanced,
+    enhancement_percentage: `${((allStats.enhanced / allStats.total) * 100).toFixed(1)}%`,
+    skipped: allStats.skipped,
+    failed: allStats.failed,
+  });
 
   if (DRY_RUN) {
-    console.log('\n💡 Run without --dry-run to apply changes');
+    logger.log('Run without --dry-run to apply changes');
   } else {
-    console.log('\n✨ Optimization complete! Run `npm run validate:titles` to verify.');
+    logger.success('Optimization complete! Run `npm run validate:titles` to verify.');
   }
 }
 
-main().catch(console.error);
+main().catch((error: unknown) => {
+  logger.failure(`Fatal error: ${error instanceof Error ? error.message : String(error)}`);
+  process.exit(1);
+});

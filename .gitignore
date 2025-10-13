@@ -34,11 +34,15 @@ lerna-debug.log*
 
 # Project specific
 .claude/
+.cursor/
 src/generated/
 generated/
 
 # Build-generated API files
 public/static-api/
+
+# Dynamic sitemap served by src/app/sitemap.ts (do not commit generated file)
+public/sitemap.xml
 
 # Fumadocs generated API documentation (regenerated at build time)
 content/api-docs/*.mdx
@@ -47,9 +51,19 @@ content/api-docs/*.mdx
 .eslintcache
 *.tsbuildinfo
 coverage/
+.vitest/
 .parcel-cache/
 .turbo/
 .temp/
+
+# Test artifacts
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Lighthouse CI reports (regenerated on each run)
+.lighthouseci/
+config/reports/lighthouse/
 
 # Environment files
 .env*
@@ -69,3 +83,5 @@ SEO-WORKFLOW.md
 tsconfig.tsbuildinfo
 .env*.local
 core
+
+manifest.json

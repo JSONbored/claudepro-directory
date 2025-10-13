@@ -277,24 +277,119 @@ export function getNonEmptyCategories(categories: {
 }
 
 /**
- * Generate slug from date and title (utility export from parser)
+ * Changelog slug length constraints
+ * Total format: YYYY-MM-DD-title (10 chars for date + 1 hyphen + title)
+ */
+const CHANGELOG_TITLE_MIN_LENGTH = 3;
+const CHANGELOG_TITLE_MAX_LENGTH = 80; // Allow up to 80 chars for title part
+const CHANGELOG_SLUG_MAX_LENGTH = 100; // Total slug length (date + title)
+
+/**
+ * Validation error types for changelog slug generation
+ */
+export class ChangelogSlugValidationError extends Error {
+  constructor(
+    message: string,
+    public readonly code: 'EMPTY' | 'INVALID_DATE' | 'TOO_SHORT' | 'TOO_LONG' | 'INVALID'
+  ) {
+    super(message);
+    this.name = 'ChangelogSlugValidationError';
+  }
+}
+
+/**
+ * Validate date format (YYYY-MM-DD)
+ */
+function isValidDateFormat(date: string): boolean {
+  // Check format YYYY-MM-DD
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(date)) return false;
+
+  // Validate it's a real date
+  const parsedDate = new Date(date);
+  return parsedDate instanceof Date && !Number.isNaN(parsedDate.getTime());
+}
+
+/**
+ * Generate slug from date and title with comprehensive validation
  *
  * @param date - ISO date string (YYYY-MM-DD)
  * @param title - Entry title
- * @returns URL-safe slug
+ * @returns URL-safe slug in format: YYYY-MM-DD-title-slug
+ * @throws {ChangelogSlugValidationError} If validation fails
+ *
+ * Validation rules:
+ * - Date format: YYYY-MM-DD (must be valid date)
+ * - Title length: 3-80 characters (after slug generation)
+ * - Total slug length: ≤ 100 characters
+ * - Format: lowercase alphanumeric + hyphens
  *
  * @example
  * generateSlug("2025-10-06", "Automated Submission Tracking")
  * // Returns: "2025-10-06-automated-submission-tracking"
+ *
+ * generateSlug("2025-13-45", "Invalid Date")
+ * // Throws: ChangelogSlugValidationError (invalid date)
+ *
+ * generateSlug("2025-10-06", "AB")
+ * // Throws: ChangelogSlugValidationError (title too short)
  */
 export function generateSlug(date: string, title: string): string {
-  const titleSlug = title
+  // Validate date format
+  if (!(date && isValidDateFormat(date))) {
+    throw new ChangelogSlugValidationError(
+      `Invalid date format: "${date}" (expected YYYY-MM-DD)`,
+      'INVALID_DATE'
+    );
+  }
+
+  // Validate title is not empty
+  const trimmedTitle = title.trim();
+  if (!trimmedTitle) {
+    throw new ChangelogSlugValidationError('Changelog title cannot be empty', 'EMPTY');
+  }
+
+  // Generate title slug
+  const titleSlug = trimmedTitle
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
     .replace(/\s+/g, '-') // Replace spaces with hyphens
     .replace(/-+/g, '-') // Replace multiple hyphens with single
-    .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
-    .slice(0, 50); // Truncate to 50 chars
+    .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
 
-  return `${date}-${titleSlug}`;
+  // Validate title slug is not empty after sanitization
+  if (!titleSlug) {
+    throw new ChangelogSlugValidationError(
+      `Title slug cannot be generated from input: "${trimmedTitle}" (contains no valid characters)`,
+      'INVALID'
+    );
+  }
+
+  // Validate minimum title slug length
+  if (titleSlug.length < CHANGELOG_TITLE_MIN_LENGTH) {
+    throw new ChangelogSlugValidationError(
+      `Title slug must be at least ${CHANGELOG_TITLE_MIN_LENGTH} characters (got: "${titleSlug}", length: ${titleSlug.length})`,
+      'TOO_SHORT'
+    );
+  }
+
+  // Truncate title slug if too long (respecting total slug length)
+  const maxTitleLength = Math.min(
+    CHANGELOG_TITLE_MAX_LENGTH,
+    CHANGELOG_SLUG_MAX_LENGTH - date.length - 1 // -1 for hyphen separator
+  );
+  const truncatedTitleSlug = titleSlug.slice(0, maxTitleLength);
+
+  // Generate final slug
+  const slug = `${date}-${truncatedTitleSlug}`;
+
+  // Validate total slug length (should always pass due to truncation, but verify)
+  if (slug.length > CHANGELOG_SLUG_MAX_LENGTH) {
+    throw new ChangelogSlugValidationError(
+      `Changelog slug must be at most ${CHANGELOG_SLUG_MAX_LENGTH} characters (got length: ${slug.length})`,
+      'TOO_LONG'
+    );
+  }
+
+  return slug;
 }

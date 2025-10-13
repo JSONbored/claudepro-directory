@@ -21,7 +21,7 @@ import { memo } from 'react';
 import { MDXRenderer } from '@/src/components/shared/mdx-renderer';
 import { Badge } from '@/src/components/ui/badge';
 import type { ChangelogEntry } from '@/src/lib/schemas/changelog.schema';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { BADGE_COLORS, UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Props for ChangelogContent component
@@ -30,18 +30,6 @@ export interface ChangelogContentProps {
   /** Changelog entry to render */
   entry: ChangelogEntry;
 }
-
-/**
- * Category badge color mapping (same as ChangelogCard)
- */
-const CATEGORY_COLORS: Record<string, string> = {
-  Added: 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20',
-  Changed: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
-  Deprecated: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20',
-  Removed: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20',
-  Fixed: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20',
-  Security: 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20',
-};
 
 /**
  * ChangelogContent Component
@@ -78,7 +66,7 @@ export const ChangelogContent = memo(({ entry }: ChangelogContentProps) => {
             <Badge
               key={category}
               variant="outline"
-              className={`${CATEGORY_COLORS[category]} font-medium`}
+              className={`${BADGE_COLORS.changelogCategory[category as keyof typeof BADGE_COLORS.changelogCategory]} font-medium`}
             >
               {category}
             </Badge>

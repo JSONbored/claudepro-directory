@@ -1,13 +1,10 @@
-import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { JobForm } from '@/src/components/jobs/job-form';
-import { createJob } from '@/src/lib/actions/job-actions';
+import { createJob } from '@/src/lib/actions/business.actions';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: 'Post a Job - ClaudePro Directory',
-  description: 'Create a new job listing',
-};
+export const metadata = await generatePageMetadata('/account/jobs/new');
 
 export default function NewJobPage() {
   const handleSubmit = async (data: Parameters<typeof createJob>[0]) => {

@@ -6,13 +6,12 @@
  */
 
 import { z } from 'zod';
-import { SECURITY_CONFIG } from '@/src/lib/constants';
 import {
   baseConfigurationSchema,
   baseContentMetadataSchema,
   baseInstallationSchema,
 } from '@/src/lib/schemas/content/base-content.schema';
-import { examplesArray } from '@/src/lib/schemas/primitives/base-arrays';
+import { optionalGithubUrl } from '@/src/lib/schemas/primitives/base-strings';
 
 // argumentTypes and frontmatterOptions removed - unused fields (only in 1 content file + template)
 // Previously defined commandArgumentTypeSchema and commandFrontmatterOptionsSchema
@@ -40,33 +39,13 @@ export const commandContentSchema = z
       .optional()
       .describe('Optional AI model configuration settings (temperature, maxTokens, systemPrompt)'),
 
-    // GitHub URL with strict hostname validation
-    githubUrl: z
-      .string()
-      .url()
-      .refine(
-        (url) => {
-          try {
-            const urlObj = new URL(url);
-            return SECURITY_CONFIG.trustedHostnames.github.includes(
-              urlObj.hostname as 'github.com' | 'www.github.com'
-            );
-          } catch {
-            return false;
-          }
-        },
-        { message: 'Must be a valid GitHub URL (github.com)' }
-      )
-      .optional()
-      .describe('Optional GitHub repository URL for command source code'),
+    // GitHub URL with strict hostname validation (uses shared primitive)
+    githubUrl: optionalGithubUrl,
 
     // Installation and setup
     installation: baseInstallationSchema
       .optional()
       .describe('Optional platform-specific installation instructions'),
-
-    // Examples
-    examples: examplesArray.optional().describe('Optional usage examples for the command'),
 
     // argumentTypes and frontmatterOptions removed - unused fields
   })

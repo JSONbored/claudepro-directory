@@ -1,6 +1,6 @@
-import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
+import { Avatar, AvatarFallback } from '@/src/components/ui/avatar';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -10,31 +10,30 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { ROUTES } from '@/src/lib/constants';
 import { MessageSquare, Plus, TrendingUp, User as UserIcon } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { formatRelativeDate } from '@/src/lib/utils/date-utils';
+import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
-export const metadata: Metadata = {
-  title: 'Community Board - ClaudePro Directory',
-  description: 'Share and discuss Claude configurations, tips, and news',
-};
+export const metadata = await generatePageMetadata('/board');
 
 export const revalidate = 60; // Revalidate every minute
 
-interface PopularPost {
-  id: string;
-  user_id: string;
-  title: string;
-  content: string | null;
-  url: string | null;
-  vote_count: number;
+// Use the actual return type from the database function
+type PopularPost = {
+  body: string;
   comment_count: number;
+  content_slug: string;
+  content_type: string;
   created_at: string;
-  user_name: string | null;
-  user_avatar: string | null;
-  user_slug: string | null;
-}
+  id: string;
+  title: string;
+  updated_at: string;
+  user_id: string;
+  vote_count: number;
+};
 
 export default async function BoardPage() {
   const supabase = await createAdminClient();
@@ -69,7 +68,7 @@ export default async function BoardPage() {
             </div>
 
             <Button asChild>
-              <Link href="/board/new">
+              <Link href={ROUTES.BOARD_NEW}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Post
               </Link>
@@ -89,7 +88,7 @@ export default async function BoardPage() {
                 Be the first to share something with the community!
               </p>
               <Button asChild>
-                <Link href="/board/new">
+                <Link href={ROUTES.BOARD_NEW}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create First Post
                 </Link>
@@ -104,25 +103,12 @@ export default async function BoardPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className={UI_CLASSES.TEXT_LG}>
-                        {post.url ? (
-                          <a
-                            href={post.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={UI_CLASSES.HOVER_TEXT_ACCENT}
-                          >
-                            {post.title}
-                          </a>
-                        ) : (
-                          <span>{post.title}</span>
-                        )}
+                        <span>{post.title}</span>
                       </CardTitle>
 
-                      {post.content && (
+                      {post.body && (
                         <CardDescription className="mt-2 whitespace-pre-wrap">
-                          {post.content.length > 200
-                            ? `${post.content.slice(0, 200)}...`
-                            : post.content}
+                          {post.body.length > 200 ? `${post.body.slice(0, 200)}...` : post.body}
                         </CardDescription>
                       )}
 
@@ -130,20 +116,12 @@ export default async function BoardPage() {
                         className={`flex items-center gap-3 ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-3`}
                       >
                         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
-                          {post.user_avatar ? (
-                            <Image
-                              src={post.user_avatar}
-                              alt={post.user_name || 'User'}
-                              width={16}
-                              height={16}
-                              className="w-4 h-4 rounded-full object-cover"
-                            />
-                          ) : (
-                            <UserIcon className="w-4 h-4" />
-                          )}
-                          <Link href={`/u/${post.user_slug}`} className="hover:underline">
-                            {post.user_name || 'Anonymous'}
-                          </Link>
+                          <Avatar className="w-4 h-4">
+                            <AvatarFallback>
+                              <UserIcon className="w-3 h-3" />
+                            </AvatarFallback>
+                          </Avatar>
+                          <span>User</span>
                         </div>
                         <span>•</span>
                         <span>{formatRelativeDate(post.created_at)}</span>
@@ -172,6 +150,16 @@ export default async function BoardPage() {
             ))}
           </div>
         )}
+      </section>
+
+      {/* Email CTA - Footer section (matching homepage pattern) */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <InlineEmailCTA
+          variant="hero"
+          context="board-page"
+          headline="Join 1,000+ Claude Power Users"
+          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+        />
       </section>
     </div>
   );

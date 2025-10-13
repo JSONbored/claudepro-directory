@@ -143,16 +143,19 @@ export function useLocalStorage<T>(
 
     try {
       const item = window.localStorage.getItem(key);
-      if (item === null) {
+      // Handle null or empty string
+      if (item === null || item === '') {
         return defaultValue as T;
       }
       return deserialize(item);
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error(String(err));
+      const itemValue = window.localStorage.getItem(key);
       logger.error('Failed to read from localStorage', errorObj, {
         component: 'useLocalStorage',
         action: 'initialize',
         key,
+        item: itemValue ?? 'null',
       });
       setError(errorObj);
       return defaultValue as T;
@@ -182,10 +185,22 @@ export function useLocalStorage<T>(
         setError(null);
       } catch (err) {
         const errorObj = err instanceof Error ? err : new Error(String(err));
+
+        // Enhanced error type detection
+        let errorType = 'UNKNOWN';
+        if (errorObj.name === 'QuotaExceededError' || errorObj.message.includes('quota')) {
+          errorType = 'QUOTA_EXCEEDED';
+        } else if (errorObj.name === 'SecurityError') {
+          errorType = 'SECURITY_ERROR';
+        } else if (errorObj.name === 'TypeError') {
+          errorType = 'SERIALIZATION_ERROR';
+        }
+
         logger.error('Failed to write to localStorage', errorObj, {
           component: 'useLocalStorage',
           action: 'setValue',
           key,
+          errorType,
         });
         setError(errorObj);
       }
@@ -225,31 +240,80 @@ export function useLocalStorage<T>(
       return;
     }
 
+    // Mounted flag to prevent state updates after unmount
+    let isMounted = true;
+
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === key && e.newValue !== null) {
+      // Ignore events from wrong key or if component is unmounted
+      if (e.key !== key || !isMounted) {
+        return;
+      }
+
+      if (e.newValue !== null && e.newValue !== '') {
         try {
           const newValue = deserialize(e.newValue);
-          setValue(newValue);
-          setError(null);
+
+          // Only update state if still mounted
+          if (isMounted) {
+            setValue(newValue);
+            setError(null);
+          }
         } catch (err) {
           const errorObj = err instanceof Error ? err : new Error(String(err));
+
+          // Enhanced error logging with error type detection
+          const errorType =
+            errorObj.name === 'SyntaxError' ? 'JSON_PARSE_ERROR' : 'DESERIALIZE_ERROR';
+
           logger.error('Failed to sync localStorage across tabs', errorObj, {
             component: 'useLocalStorage',
             action: 'sync',
             key,
+            errorType,
+            newValue: e.newValue?.substring(0, 100), // Truncate for privacy
           });
-          setError(errorObj);
+
+          // Only update state if still mounted
+          if (isMounted) {
+            setError(errorObj);
+            // Fallback to default value on parse error
+            setValue(defaultValue as T);
+          }
         }
-      } else if (e.key === key && e.newValue === null) {
-        // Value was removed in another tab
-        setValue(defaultValue as T);
+      } else if (e.newValue === null || e.newValue === '') {
+        // Value was removed or empty in another tab
+        if (isMounted) {
+          setValue(defaultValue as T);
+          setError(null);
+        }
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
+    // Wrap event listener in try/catch for SecurityError
+    try {
+      window.addEventListener('storage', handleStorageChange);
+    } catch (err) {
+      const errorObj = err instanceof Error ? err : new Error(String(err));
+      logger.error('Failed to add storage event listener', errorObj, {
+        component: 'useLocalStorage',
+        action: 'addEventListener',
+        key,
+        errorType: errorObj.name === 'SecurityError' ? 'SECURITY_ERROR' : 'UNKNOWN',
+      });
+      setError(errorObj);
+    }
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      isMounted = false;
+      try {
+        window.removeEventListener('storage', handleStorageChange);
+      } catch {
+        // Silently handle removeEventListener errors (should never happen)
+        logger.warn('Failed to remove storage event listener', {
+          component: 'useLocalStorage',
+          key,
+        });
+      }
     };
   }, [key, defaultValue, deserialize, syncAcrossTabs]);
 

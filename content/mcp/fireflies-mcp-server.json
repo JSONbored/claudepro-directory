@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "fireflies": {
           "transport": "http",
           "url": "https://api.fireflies.ai/mcp"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "fireflies": {
           "transport": "http",
           "url": "https://api.fireflies.ai/mcp"
@@ -80,10 +80,30 @@
     }
   ],
   "examples": [
-    "Get action items from today's standup",
-    "Search for discussions about Q4 planning",
-    "Generate summary of customer call",
-    "Find all mentions of budget in recent meetings"
+    {
+      "title": "Get action items from today's standup",
+      "code": "Ask Claude: \"Get action items from today's standup\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Search for discussions about Q4 planning",
+      "code": "Ask Claude: \"Search for discussions about Q4 planning\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Generate summary of customer call",
+      "code": "Ask Claude: \"Generate summary of customer call\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Find all mentions of budget in recent meetings",
+      "code": "Ask Claude: \"Find all mentions of budget in recent meetings\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "search"],

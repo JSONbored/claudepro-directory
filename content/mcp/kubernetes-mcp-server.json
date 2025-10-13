@@ -32,7 +32,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "kubernetes": {
           "command": "uvx",
           "args": ["mcp-kubernetes-server"],
@@ -43,7 +43,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "kubernetes": {
           "command": "uvx",
           "args": ["mcp-kubernetes-server"],
@@ -89,10 +89,30 @@
     }
   ],
   "examples": [
-    "List all pods in the default namespace",
-    "Create a new deployment with specified image",
-    "Scale a deployment to 5 replicas",
-    "Get cluster node information and status"
+    {
+      "title": "List all pods in the default namespace",
+      "code": "Ask Claude: \"List all pods in the default namespace\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Create a new deployment with specified image",
+      "code": "Ask Claude: \"Create a new deployment with specified image\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Scale a deployment to 5 replicas",
+      "code": "Ask Claude: \"Scale a deployment to 5 replicas\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Get cluster node information and status",
+      "code": "Ask Claude: \"Get cluster node information and status\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["cluster-admin", "view", "edit"],
