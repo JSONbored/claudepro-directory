@@ -59,8 +59,8 @@ function validateMetadata(
       // Log validation failure using dedicated metadata monitoring
       logger.metadataValidation(route, false, { errors });
 
-      // In development: throw to catch issues immediately
-      if (process.env.NODE_ENV === 'development') {
+      // In development/test: throw to catch issues immediately
+      if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
         throw new Error(
           `Metadata validation failed for ${route}:\n${errors.map((e) => `- ${e}`).join('\n')}`
         );
@@ -80,7 +80,7 @@ function validateMetadata(
 function generateFallbackMetadata(route: string, context?: MetadataContext): Metadata {
   const siteName = METADATA_DEFAULTS.siteName;
   const fallbackTitle = `${siteName} - Page`;
-  const fallbackDescription = `Browse content on ${siteName}. Discover AI agents, MCP servers, commands, rules, hooks, statuslines, collections, and guides for Claude AI and Claude Code development.`;
+  const fallbackDescription = `Browse ${siteName} for AI agents, MCP servers, commands, rules, hooks, statuslines, collections, and guides for Claude AI and Claude Code development.`;
 
   logger.warn(`⚠️ Using fallback metadata for route: ${route}`);
 
@@ -103,6 +103,17 @@ function generateFallbackMetadata(route: string, context?: MetadataContext): Met
       title: fallbackTitle,
       description: fallbackDescription,
     },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
   };
 }
 
@@ -119,7 +130,8 @@ function convertToNextMetadata(
   const metadata: Metadata = {
     title: validated.title,
     description: validated.description,
-    keywords: validated.keywords?.join(', '),
+    ...(validated.keywords &&
+      validated.keywords.length > 0 && { keywords: validated.keywords.join(', ') }),
     alternates: {
       canonical: validated.canonicalUrl,
       types:
@@ -268,6 +280,17 @@ function generateSmartDefaultMetadata(route: string, context?: MetadataContext):
       title,
       description,
     },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
   };
 }
 
@@ -357,7 +380,7 @@ export async function generatePageMetadata(
   const rawMetadata: Partial<ValidatedMetadata> = {
     title,
     description,
-    ...(keywords !== undefined && { keywords }), // Only add if defined (exactOptionalPropertyTypes: true)
+    ...(keywords && { keywords }), // Only add if defined - exactOptionalPropertyTypes requires explicit undefined handling
     canonicalUrl,
     openGraph: {
       title: ogTitle,

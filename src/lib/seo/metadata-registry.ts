@@ -738,9 +738,9 @@ export const METADATA_REGISTRY = {
    * Social engagement focus
    */
   '/community': {
-    title: buildPageTitle('Community'),
+    title: buildPageTitle('Community Hub - Connect & Collaborate'),
     description:
-      'Join the Claude Pro Directory community in October 2025. Connect with AI developers, share configurations, contribute to open-source projects, and get support.',
+      'Join the Claude community for October 2025. Connect with AI developers, share Claude configurations, contribute to projects, and get AI development support.',
     keywords: [
       'claude community 2025',
       'ai developers network',
@@ -1570,7 +1570,7 @@ export const METADATA_REGISTRY = {
   '/account/activity': {
     title: buildPageTitle('My Activity - Contribution History'),
     description:
-      'View your contribution history on Claude Pro Directory including submissions, comments, and community engagement. Track badges earned and reputation milestones achieved.',
+      'View your contribution history on Claude Pro Directory: submissions, comments, community engagement. Track badges earned, reputation milestones, activity stats.',
     keywords: ['user activity', 'contribution history', 'engagement tracking'],
     openGraph: {
       type: 'website' as const,
@@ -1690,7 +1690,7 @@ export const METADATA_REGISTRY = {
   '/account/settings': {
     title: buildPageTitle('Account Settings - Profile & Prefs'),
     description:
-      'Configure your Claude Pro Directory account settings including profile information, email preferences, notification settings, and privacy options.',
+      'Configure your Claude Pro Directory account: profile information, email preferences, notification settings, privacy options, and connected integrations.',
     keywords: ['account settings', 'user preferences', 'profile configuration'],
     openGraph: {
       type: 'website' as const,
@@ -1720,7 +1720,7 @@ export const METADATA_REGISTRY = {
   '/account/submissions': {
     title: buildPageTitle('My Submissions - Published & Pending'),
     description:
-      'View all your submitted Claude configurations including published agents, MCP servers, rules, and commands. Track submission status and manage published content.',
+      'View all your submitted Claude configurations including published agents, MCP servers, rules, and commands. Track submission status and manage your content.',
     keywords: ['user submissions', 'published configurations', 'content management'],
     openGraph: {
       type: 'website' as const,
@@ -1750,7 +1750,7 @@ export const METADATA_REGISTRY = {
   '/account/jobs': {
     title: buildPageTitle('Job Listings - Post & Track Jobs'),
     description:
-      'Manage your job postings on Claude Pro Directory. Create, edit, and track applications for AI developer positions, Claude integration roles, and technical opportunities.',
+      'Manage job postings on Claude Pro Directory. Create, edit, and track applications for AI developer positions, Claude integration roles, and technical jobs.',
     keywords: ['job management', 'job postings', 'AI developer jobs', 'recruitment'],
     openGraph: {
       type: 'website' as const,
@@ -1780,7 +1780,7 @@ export const METADATA_REGISTRY = {
   '/account/jobs/new': {
     title: buildPageTitle('Post New Job - Create AI Position'),
     description:
-      'Create a new job posting on Claude Pro Directory. Post AI developer positions, Claude integration roles, and technical opportunities to reach qualified candidates.',
+      'Create a new job posting on Claude Pro Directory. Post AI developer positions, integration roles, and technical opportunities to reach qualified talent.',
     keywords: ['post job', 'create job listing', 'AI recruitment', 'developer hiring'],
     openGraph: {
       type: 'website' as const,
@@ -1870,7 +1870,7 @@ export const METADATA_REGISTRY = {
   '/account/sponsorships': {
     title: buildPageTitle('Sponsorships Management - Track'),
     description:
-      'Manage your Claude Pro Directory sponsorships. View active campaigns, track performance metrics, manage billing, and access detailed analytics for sponsored content.',
+      'Manage Claude Pro Directory sponsorships. View active campaigns, track performance metrics, manage billing, and access detailed analytics for your content.',
     keywords: ['sponsorships', 'advertising management', 'campaign tracking', 'sponsored content'],
     openGraph: {
       type: 'website' as const,
@@ -1996,7 +1996,7 @@ export const METADATA_REGISTRY = {
   '/board/new': {
     title: buildPageTitle('New Discussion - Create AI Post'),
     description:
-      'Start a new discussion on Claude Pro Directory community board. Share feature requests, ask questions, or announce new Claude configurations and tools.',
+      'Start a discussion on Claude Pro Directory community board. Share feature requests, ask questions, or announce new Claude configurations and development tools.',
     keywords: ['new discussion', 'create post', 'community feedback', 'feature request'],
     openGraph: {
       type: 'website' as const,
@@ -2026,7 +2026,7 @@ export const METADATA_REGISTRY = {
   '/login': {
     title: buildPageTitle('Login - Access Claude Pro Account'),
     description:
-      'Sign in to Claude Pro Directory to access your personalized feed, manage bookmarks, track submissions, and connect with the Claude AI community.',
+      'Sign in to Claude Pro Directory to access personalized feed, manage bookmarks, track submissions, and connect with the Claude AI development community today.',
     keywords: ['login', 'sign in', 'authentication', 'claude account'],
     openGraph: {
       type: 'website' as const,
@@ -2056,7 +2056,7 @@ export const METADATA_REGISTRY = {
   '/auth/auth-code-error': {
     title: buildPageTitle('Authentication Error - Sign In Issue'),
     description:
-      'Authentication error occurred while signing in to Claude Pro Directory. Please try again or contact support if the issue persists.',
+      'Authentication error while signing in to Claude Pro Directory. Please try again or contact support if the issue persists. Check your email for sign-in link.',
     keywords: ['auth error', 'sign in error', 'authentication failed'],
     openGraph: {
       type: 'website' as const,

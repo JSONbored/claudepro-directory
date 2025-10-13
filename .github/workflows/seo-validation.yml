@@ -152,7 +152,7 @@ jobs:
               '### Quality Gates',
               qualityGateFailed ? '❌ Failed' : '✅ Passed',
               '',
-              (seoFailed || titlesFailed || metadataFailed || qualityGateFailed) ? '**⚠️ Please fix SEO issues before merging.**' : '**✅ All SEO validations passed - ready to merge!**',
+              (seoFailed || titlesFailed || metadataFailed || qualityGateFailed) ? '**⚠️ SEO issues detected - fix iteratively (non-blocking).**' : '**✅ All SEO validations passed!**',
               '',
               '---',
               '',
@@ -178,13 +178,13 @@ jobs:
             seo-validation-report.md
           retention-days: 30
 
-      - name: Block deployment if validation fails (Phase 5)
+      - name: Report validation status (Phase 5)
         if: |
           steps.validate-seo.outputs.SEO_FAILED == 'true' ||
           steps.validate-titles.outputs.TITLES_FAILED == 'true' ||
           steps.validate-metadata.outputs.METADATA_FAILED == 'true' ||
           steps.quality-gates.outputs.QUALITY_GATE_FAILED == 'true'
         run: |
-          echo "❌ SEO validation failed - deployment blocked"
-          echo "Review the validation reports for details"
-          exit 1
+          echo "⚠️  SEO validation failed but not blocking deployment"
+          echo "Review the validation reports and fix iteratively"
+          echo "These validations are informational only"

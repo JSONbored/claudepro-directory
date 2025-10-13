@@ -67,55 +67,8 @@ describe('featuredService', () => {
     vi.clearAllMocks();
   });
 
-  describe('getCurrentWeekStart', () => {
-    it('returns Monday of current week in YYYY-MM-DD format', () => {
-      const weekStart = featuredService.getCurrentWeekStart();
-
-      // Verify format
-      expect(weekStart).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-
-      // Verify it's a Monday by creating date with explicit local timezone
-      const [year, month, day] = weekStart.split('-').map(Number);
-      const date = new Date(year, month - 1, day);
-      expect(date.getDay()).toBe(1); // Monday = 1
-    });
-
-    it('returns same date when called on a Monday', () => {
-      // Mock a Monday at noon local time
-      const monday = new Date('2025-01-06T12:00:00');
-      vi.useFakeTimers();
-      vi.setSystemTime(monday);
-
-      const weekStart = featuredService.getCurrentWeekStart();
-      expect(weekStart).toBe('2025-01-06');
-
-      vi.useRealTimers();
-    });
-
-    it('returns previous Monday when called mid-week', () => {
-      // Mock a Wednesday at noon
-      const wednesday = new Date('2025-01-08T12:00:00');
-      vi.useFakeTimers();
-      vi.setSystemTime(wednesday);
-
-      const weekStart = featuredService.getCurrentWeekStart();
-      expect(weekStart).toBe('2025-01-06'); // Previous Monday
-
-      vi.useRealTimers();
-    });
-
-    it('returns previous Monday when called on Sunday', () => {
-      // Mock a Sunday at noon
-      const sunday = new Date('2025-01-12T12:00:00');
-      vi.useFakeTimers();
-      vi.setSystemTime(sunday);
-
-      const weekStart = featuredService.getCurrentWeekStart();
-      expect(weekStart).toBe('2025-01-06'); // Previous Monday
-
-      vi.useRealTimers();
-    });
-  });
+  // getCurrentWeekStart is now an internal utility function, not exposed on the service
+  // Tests removed as function is no longer part of the public API
 
   describe('loadCurrentFeaturedContentByCategory', () => {
     it('loads featured content from database when available', async () => {
