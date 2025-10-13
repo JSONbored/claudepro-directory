@@ -301,7 +301,6 @@ describe('useLocalStorage', () => {
           key: 'sync-key',
           newValue: JSON.stringify('updated-from-other-tab'),
           oldValue: JSON.stringify('initial'),
-          storageArea: localStorage,
         });
         window.dispatchEvent(storageEvent);
       });
@@ -325,7 +324,6 @@ describe('useLocalStorage', () => {
           key: 'sync-key',
           newValue: null,
           oldValue: JSON.stringify('value'),
-          storageArea: localStorage,
         });
         window.dispatchEvent(storageEvent);
       });
@@ -345,7 +343,6 @@ describe('useLocalStorage', () => {
         const storageEvent = new StorageEvent('storage', {
           key: 'key-b',
           newValue: JSON.stringify('value-b'),
-          storageArea: localStorage,
         });
         window.dispatchEvent(storageEvent);
       });
@@ -365,7 +362,6 @@ describe('useLocalStorage', () => {
         const storageEvent = new StorageEvent('storage', {
           key: 'no-sync-key',
           newValue: JSON.stringify('should-not-sync'),
-          storageArea: localStorage,
         });
         window.dispatchEvent(storageEvent);
       });
@@ -450,7 +446,6 @@ describe('useLocalStorage', () => {
         const storageEvent = new StorageEvent('storage', {
           key: 'sync-error-key',
           newValue: 'invalid-json{',
-          storageArea: localStorage,
         });
         window.dispatchEvent(storageEvent);
       });

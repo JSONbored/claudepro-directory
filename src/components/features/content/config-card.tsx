@@ -27,7 +27,7 @@ import { Award, Copy as CopyIcon, ExternalLink, Eye, Github, Sparkles } from '@/
 import type { ConfigCardProps } from '@/src/lib/schemas/component.schema';
 import { CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
-import { formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
+import { formatCopyCount, formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 export const ConfigCard = memo(
   ({ item, variant = 'default', showCategory = true, showActions = true }: ConfigCardProps) => {
@@ -142,7 +142,7 @@ export const ConfigCard = memo(
                   onClick={(e) => e.stopPropagation()}
                 >
                   <CopyIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span className="text-xs">{formatViewCount(copyCount)}</span>
+                  <span className="text-xs">{formatCopyCount(copyCount)}</span>
                 </Badge>
               )}
 

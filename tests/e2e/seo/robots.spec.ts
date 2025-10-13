@@ -357,10 +357,12 @@ test.describe('Robots.txt - General Crawler Configuration', () => {
     ];
 
     for (const route of apiRoutes) {
+      // Escape all special regex characters for safe pattern matching
+      const escapedRoute = route.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       expect(
         content,
         `Should allow ${route} for API discovery`
-      ).toMatch(new RegExp(`Allow:\\s+${route.replace(/\./g, '\\.')}`));
+      ).toMatch(new RegExp(`Allow:\\s+${escapedRoute}`));
     }
   });
 });

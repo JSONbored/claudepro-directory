@@ -942,7 +942,8 @@ export const METADATA_REGISTRY = {
    */
   '/404': {
     title: buildPageTitle('404 Not Found', 'Browse AI Configs'),
-    description: `The page you're looking for doesn't exist on Claude Pro Directory. Browse our collection of 150+ AI agents, MCP servers, rules, commands, hooks, and configurations instead.`,
+    description:
+      'Page not found. Explore our comprehensive collection of 150+ AI agents, MCP servers, rules, commands, hooks, statuslines, and configurations for Claude AI.',
     keywords: ['404', 'page not found', 'claude directory'],
     openGraph: {
       type: 'website' as const,

@@ -479,13 +479,15 @@ export function createStorageEvent(
   key: string | null,
   oldValue: string | null,
   newValue: string | null,
-  storageArea: Storage = localStorage
+  _storageArea: Storage = localStorage
 ): StorageEvent {
+  // Note: storageArea is readonly and cannot be set in StorageEvent constructor
+  // It's automatically set by the browser. We keep the parameter for API compatibility
+  // but prefix with _ to indicate it's intentionally unused in the test environment.
   return new StorageEvent('storage', {
     key,
     oldValue,
     newValue,
-    storageArea,
     url: window.location.href,
   });
 }

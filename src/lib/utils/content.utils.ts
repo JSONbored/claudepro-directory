@@ -76,6 +76,22 @@ export function formatViewCount(count: number): string {
 }
 
 /**
+ * Formats copy/usage count with 'k' suffix for thousands
+ * @param count - Copy count number
+ * @returns Formatted string (e.g., "1.2k used")
+ *
+ * @example
+ * formatCopyCount(1234) // "1.2k used"
+ * formatCopyCount(500) // "500 used"
+ */
+export function formatCopyCount(count: number): string {
+  if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}k used`;
+  }
+  return `${count} used`;
+}
+
+/**
  * Generates display title with proper formatting
  * Handles acronyms and special cases (API, MCP, AI, etc.)
  *
