@@ -962,7 +962,8 @@
                         "rules",
                         "commands",
                         "hooks",
-                        "statuslines"
+                        "statuslines",
+                        "collections"
                       ]
                     },
                     "description": "Array of content types to warm cache for (omit for all types)",

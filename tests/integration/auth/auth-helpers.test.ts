@@ -13,8 +13,8 @@
  * @see src/lib/auth/auth-helpers.ts
  */
 
-import { describe, expect, test, beforeEach, vi } from 'vitest';
 import type { User } from '@supabase/supabase-js';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import * as authHelpers from '@/src/lib/auth/auth-helpers';
 import { createClient } from '@/src/lib/supabase/server';
 
@@ -296,9 +296,9 @@ describe('Authentication Helpers - Unit Tests', () => {
         error: null,
       });
 
-      await expect(
-        authHelpers.requireResourceOwnership(mockUser.id, 'bookmark')
-      ).rejects.toThrow('You must be signed in to modify this bookmark');
+      await expect(authHelpers.requireResourceOwnership(mockUser.id, 'bookmark')).rejects.toThrow(
+        'You must be signed in to modify this bookmark'
+      );
     });
 
     test('should include resource type in error message', async () => {
@@ -309,9 +309,9 @@ describe('Authentication Helpers - Unit Tests', () => {
 
       const differentUserId = '87654321-4321-4321-4321-210987654321';
 
-      await expect(
-        authHelpers.requireResourceOwnership(differentUserId, 'review')
-      ).rejects.toThrow('You are not authorized to modify this review');
+      await expect(authHelpers.requireResourceOwnership(differentUserId, 'review')).rejects.toThrow(
+        'You are not authorized to modify this review'
+      );
     });
   });
 

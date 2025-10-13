@@ -33,7 +33,14 @@ import { DuplicateWarning } from './duplicate-warning';
 import { ExamplesArrayInput } from './examples-array-input';
 import { TemplateSelector } from './template-selector';
 
-type ContentType = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines';
+type ContentType =
+  | 'agents'
+  | 'mcp'
+  | 'rules'
+  | 'commands'
+  | 'hooks'
+  | 'statuslines'
+  | 'collections';
 
 export function SubmitFormClient() {
   const [contentType, setContentType] = useState<ContentType>('agents');
@@ -325,6 +332,7 @@ export function SubmitFormClient() {
                   <option value="commands">Command</option>
                   <option value="hooks">Hook</option>
                   <option value="statuslines">Statusline</option>
+                  <option value="collections">Collection</option>
                 </select>
               </div>
 

@@ -870,6 +870,17 @@ export const BADGE_COLORS = {
   },
 
   /**
+   * Collection type badge colors
+   * Used in: Collection cards, collection detail pages
+   */
+  collectionType: {
+    'starter-kit': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    workflow: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    'advanced-system': 'bg-red-500/10 text-red-400 border-red-500/20',
+    'use-case': 'bg-green-500/10 text-green-400 border-green-500/20',
+  },
+
+  /**
    * Changelog category badge colors
    * Used in: Changelog cards, changelog pages
    */
@@ -935,6 +946,7 @@ export const BADGE_COLORS = {
  */
 export type JobType = keyof typeof BADGE_COLORS.jobType;
 export type DifficultyLevel = keyof typeof BADGE_COLORS.difficulty;
+export type CollectionType = keyof typeof BADGE_COLORS.collectionType;
 export type ChangelogCategory = keyof typeof BADGE_COLORS.changelogCategory;
 export type StatusType = keyof typeof BADGE_COLORS.status;
 export type CategoryType = keyof typeof BADGE_COLORS.category;

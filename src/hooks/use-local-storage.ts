@@ -282,7 +282,7 @@ export function useLocalStorage<T>(
       }
     };
 
-    // Wrap event listener in try/catch for SecurityError
+    // Add storage event listener
     try {
       window.addEventListener('storage', handleStorageChange);
     } catch (err) {
@@ -291,7 +291,6 @@ export function useLocalStorage<T>(
         component: 'useLocalStorage',
         action: 'addEventListener',
         key,
-        errorType: errorObj.name === 'SecurityError' ? 'SECURITY_ERROR' : 'UNKNOWN',
       });
       setError(errorObj);
     }

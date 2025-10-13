@@ -68,7 +68,15 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  return generatePageMetadata('/changelog/:slug', { params: { slug } });
+
+  // Load changelog entry for metadata generation
+  const entry = await getChangelogEntryBySlug(slug);
+
+  return generatePageMetadata('/changelog/:slug', {
+    params: { slug },
+    item: entry || undefined,
+    slug,
+  });
 }
 
 /**

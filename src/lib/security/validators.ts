@@ -180,7 +180,7 @@ export const apiSchemas = {
     .object({
       q: baseSchemas.searchQuery,
       category: z
-        .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'])
+        .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'])
         .optional()
         .describe('Filter search results by content category'),
       page: baseSchemas.page,
@@ -200,7 +200,9 @@ export const apiSchemas = {
   cacheWarmParams: z
     .object({
       types: z
-        .array(z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines']))
+        .array(
+          z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'])
+        )
         .optional()
         .describe('Array of content types to warm cache for (omit for all types)'),
       force: z

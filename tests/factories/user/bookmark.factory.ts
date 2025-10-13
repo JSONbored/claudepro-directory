@@ -51,9 +51,10 @@ export const bookmarkFactory = Factory.define<Bookmark>(() => {
       probability: 0.3,
     }),
     created_at: createdAt,
-    updated_at: faker.helpers.maybe(
-      () => faker.date.between({ from: createdAt, to: new Date() }).toISOString(),
-      { probability: 0.2 }
-    ) || createdAt,
+    updated_at:
+      faker.helpers.maybe(
+        () => faker.date.between({ from: createdAt, to: new Date() }).toISOString(),
+        { probability: 0.2 }
+      ) || createdAt,
   };
 });

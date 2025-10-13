@@ -111,7 +111,15 @@ export async function generateStaticParams() {
  */
 export async function generateMetadata({ params }: { params: Promise<{ category: string }> }) {
   const { category } = await params;
-  return generatePageMetadata('/:category', { params: { category } });
+
+  // Load category config for metadata generation
+  const categoryConfig = getCategoryConfig(category);
+
+  return generatePageMetadata('/:category', {
+    params: { category },
+    categoryConfig: categoryConfig || undefined,
+    category,
+  });
 }
 
 /**

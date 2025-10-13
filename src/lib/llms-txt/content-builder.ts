@@ -300,7 +300,7 @@ function formatBulletList(title: string, items: string[]): string {
  * Type guard for Installation type
  */
 function isInstallation(value: unknown): value is Installation {
-  if (value === null || value === undefined || typeof value !== 'object') {
+  if (typeof value !== 'object' || value === null) {
     return false;
   }
 

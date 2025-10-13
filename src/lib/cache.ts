@@ -1480,7 +1480,15 @@ export const statsRedis = {
   cleanupOldTrending: () =>
     redis(
       async (c) => {
-        const cats = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'] as const;
+        const cats = [
+          'agents',
+          'mcp',
+          'rules',
+          'commands',
+          'hooks',
+          'statuslines',
+          'collections',
+        ] as const;
         await Promise.all(
           cats.map((cat) =>
             c.zremrangebyscore(
@@ -2373,6 +2381,7 @@ class CacheInvalidationService {
       rules: ['agents', 'commands'],
       commands: ['agents', 'rules'],
       hooks: ['mcp', 'commands'],
+      collections: ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'],
     };
 
     return relationships[category] || [];

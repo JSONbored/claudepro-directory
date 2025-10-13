@@ -297,12 +297,13 @@ describe('useLocalStorage', () => {
 
       // Simulate storage event from another tab
       act(() => {
-        const storageEvent = new StorageEvent('storage', {
-          key: 'sync-key',
-          newValue: JSON.stringify('updated-from-other-tab'),
-          oldValue: JSON.stringify('initial'),
-        });
-        window.dispatchEvent(storageEvent);
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: 'sync-key',
+            newValue: JSON.stringify('updated-from-other-tab'),
+            oldValue: JSON.stringify('initial'),
+          })
+        );
       });
 
       expect(result.current.value).toBe('updated-from-other-tab');
@@ -320,12 +321,13 @@ describe('useLocalStorage', () => {
 
       // Simulate storage event with null (value removed)
       act(() => {
-        const storageEvent = new StorageEvent('storage', {
-          key: 'sync-key',
-          newValue: null,
-          oldValue: JSON.stringify('value'),
-        });
-        window.dispatchEvent(storageEvent);
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: 'sync-key',
+            newValue: null,
+            oldValue: JSON.stringify('value'),
+          })
+        );
       });
 
       expect(result.current.value).toBe('default');
@@ -340,11 +342,12 @@ describe('useLocalStorage', () => {
       );
 
       act(() => {
-        const storageEvent = new StorageEvent('storage', {
-          key: 'key-b',
-          newValue: JSON.stringify('value-b'),
-        });
-        window.dispatchEvent(storageEvent);
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: 'key-b',
+            newValue: JSON.stringify('value-b'),
+          })
+        );
       });
 
       expect(result.current.value).toBe('value-a');
@@ -359,11 +362,12 @@ describe('useLocalStorage', () => {
       );
 
       act(() => {
-        const storageEvent = new StorageEvent('storage', {
-          key: 'no-sync-key',
-          newValue: JSON.stringify('should-not-sync'),
-        });
-        window.dispatchEvent(storageEvent);
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: 'no-sync-key',
+            newValue: JSON.stringify('should-not-sync'),
+          })
+        );
       });
 
       expect(result.current.value).toBe('initial');
@@ -443,11 +447,12 @@ describe('useLocalStorage', () => {
       );
 
       act(() => {
-        const storageEvent = new StorageEvent('storage', {
-          key: 'sync-error-key',
-          newValue: 'invalid-json{',
-        });
-        window.dispatchEvent(storageEvent);
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: 'sync-error-key',
+            newValue: 'invalid-json{',
+          })
+        );
       });
 
       expect(result.current.error).toBeInstanceOf(Error);

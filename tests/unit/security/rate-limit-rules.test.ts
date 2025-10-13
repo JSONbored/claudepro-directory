@@ -16,13 +16,13 @@
 import { describe, expect, test } from 'vitest';
 import {
   classifyEndpoint,
+  EXACT_ROUTE_CONFIG,
   getRateLimiterKey,
   getRouteDescription,
   isLLMsTxtRoute,
-  validateRateLimitConfig,
-  EXACT_ROUTE_CONFIG,
-  ROUTE_PATTERNS,
   LLMSTXT_PATTERNS,
+  ROUTE_PATTERNS,
+  validateRateLimitConfig,
 } from '@/src/lib/middleware/rate-limit-rules';
 
 describe('Rate Limit Rules - Configuration Validation', () => {

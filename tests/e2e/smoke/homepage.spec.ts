@@ -14,14 +14,14 @@
  * @group smoke
  */
 
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import {
-  navigateToHomepage,
+  expectFastLoad,
+  expectNoA11yViolations,
   expectPageTitle,
   expectPageURL,
   expectVisible,
-  expectNoA11yViolations,
-  expectFastLoad,
+  navigateToHomepage,
   performSearch,
 } from '../helpers/test-helpers';
 
@@ -83,15 +83,13 @@ test.describe('Homepage - Smoke Tests', () => {
     await page.keyboard.press(process.platform === 'darwin' ? 'Meta+KeyK' : 'Control+KeyK');
 
     // Verify command palette opened
-    const commandPalette = page.locator('[role="dialog"]').or(
-      page.locator('[role="combobox"]')
-    );
+    const commandPalette = page.locator('[role="dialog"]').or(page.locator('[role="combobox"]'));
     await expectVisible(commandPalette);
 
     // Verify search input is focused
-    const searchInput = commandPalette.locator('input[type="search"]').or(
-      commandPalette.locator('[role="combobox"]')
-    );
+    const searchInput = commandPalette
+      .locator('input[type="search"]')
+      .or(commandPalette.locator('[role="combobox"]'));
     await expectVisible(searchInput);
 
     // Close command palette
@@ -109,9 +107,8 @@ test.describe('Homepage - Smoke Tests', () => {
 
     // Verify search results or content loaded
     await page.waitForLoadState('networkidle');
-    const hasResults = await page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).count() > 0;
+    const hasResults =
+      (await page.locator('[data-content-item]').or(page.locator('article')).count()) > 0;
 
     // Should have content displayed
     expect(hasResults).toBeTruthy();
@@ -128,11 +125,9 @@ test.describe('Homepage - Smoke Tests', () => {
       await expectVisible(featuredSection);
 
       // Should have content cards
-      const cards = page.locator('[data-content-item]').or(
-        page.locator('article').or(
-          page.locator('[role="article"]')
-        )
-      );
+      const cards = page
+        .locator('[data-content-item]')
+        .or(page.locator('article').or(page.locator('[role="article"]')));
 
       expect(await cards.count()).toBeGreaterThan(0);
     }
@@ -168,7 +163,9 @@ test.describe('Homepage - Smoke Tests', () => {
 
     // Check Open Graph tags
     const ogTitle = await page.locator('meta[property="og:title"]').getAttribute('content');
-    const ogDescription = await page.locator('meta[property="og:description"]').getAttribute('content');
+    const ogDescription = await page
+      .locator('meta[property="og:description"]')
+      .getAttribute('content');
     const ogImage = await page.locator('meta[property="og:image"]').getAttribute('content');
 
     expect(ogTitle).toBeTruthy();

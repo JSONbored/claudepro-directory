@@ -13,8 +13,8 @@
  * @see src/app/auth/callback/route.ts
  */
 
-import { describe, expect, test, beforeEach, vi } from 'vitest';
 import { NextRequest, NextResponse } from 'next/server';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { GET } from '@/src/app/auth/callback/route';
 import { createClient } from '@/src/lib/supabase/server';
 
@@ -55,7 +55,7 @@ describe('Auth Callback Route - Integration Tests', () => {
 
       const request = new NextRequest('http://localhost:3000/auth/callback?code=auth_code_123');
 
-      const response = await GET(request);
+      await GET(request);
 
       expect(mockSupabase.auth.exchangeCodeForSession).toHaveBeenCalledWith('auth_code_123');
       expect(NextResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/');
@@ -71,7 +71,7 @@ describe('Auth Callback Route - Integration Tests', () => {
         'http://localhost:3000/auth/callback?code=auth_code_123&next=/dashboard'
       );
 
-      const response = await GET(request);
+      await GET(request);
 
       expect(mockSupabase.auth.exchangeCodeForSession).toHaveBeenCalledWith('auth_code_123');
       expect(NextResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/dashboard');
@@ -88,7 +88,7 @@ describe('Auth Callback Route - Integration Tests', () => {
         `http://localhost:3000/auth/callback?code=auth_code_123&next=${nextUrl}`
       );
 
-      const response = await GET(request);
+      await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith(
         'http://localhost:3000/agents?sort=trending'
@@ -105,7 +105,7 @@ describe('Auth Callback Route - Integration Tests', () => {
 
       const request = new NextRequest('http://localhost:3000/auth/callback?code=invalid_code');
 
-      const response = await GET(request);
+      await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith(
         'http://localhost:3000/auth/auth-code-error'
@@ -115,7 +115,7 @@ describe('Auth Callback Route - Integration Tests', () => {
     test('should redirect to error page when no code provided', async () => {
       const request = new NextRequest('http://localhost:3000/auth/callback');
 
-      const response = await GET(request);
+      await GET(request);
 
       expect(mockSupabase.auth.exchangeCodeForSession).not.toHaveBeenCalled();
       expect(NextResponse.redirect).toHaveBeenCalledWith(
@@ -126,7 +126,7 @@ describe('Auth Callback Route - Integration Tests', () => {
     test('should redirect to error page when code is empty string', async () => {
       const request = new NextRequest('http://localhost:3000/auth/callback?code=');
 
-      const response = await GET(request);
+      await GET(request);
 
       expect(mockSupabase.auth.exchangeCodeForSession).not.toHaveBeenCalled();
       expect(NextResponse.redirect).toHaveBeenCalledWith(
@@ -156,7 +156,7 @@ describe('Auth Callback Route - Integration Tests', () => {
         },
       });
 
-      const response = await GET(request);
+      await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith('https://claudepro.directory/');
     });
@@ -178,11 +178,9 @@ describe('Auth Callback Route - Integration Tests', () => {
         }
       );
 
-      const response = await GET(request);
+      await GET(request);
 
-      expect(NextResponse.redirect).toHaveBeenCalledWith(
-        'https://claudepro.directory/collections'
-      );
+      expect(NextResponse.redirect).toHaveBeenCalledWith('https://claudepro.directory/collections');
     });
 
     test('should fallback to origin when no x-forwarded-host in production', async () => {
@@ -195,7 +193,7 @@ describe('Auth Callback Route - Integration Tests', () => {
 
       const request = new NextRequest('http://localhost:3000/auth/callback?code=auth_code_123');
 
-      const response = await GET(request);
+      await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/');
     });
@@ -220,7 +218,7 @@ describe('Auth Callback Route - Integration Tests', () => {
 
       const request = new NextRequest('http://localhost:3000/auth/callback?code=auth_code_123');
 
-      const response = await GET(request);
+      await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/');
     });
@@ -237,7 +235,7 @@ describe('Auth Callback Route - Integration Tests', () => {
         },
       });
 
-      const response = await GET(request);
+      await GET(request);
 
       // In development, should use origin, not x-forwarded-host
       expect(NextResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/');
@@ -265,7 +263,7 @@ describe('Auth Callback Route - Integration Tests', () => {
           `http://localhost:3000/auth/callback?code=auth_code_123&next=${encodeURIComponent(nextUrl)}`
         );
 
-        const response = await GET(request);
+        await GET(request);
 
         // Should always prepend origin (localhost in dev)
         expect(NextResponse.redirect).toHaveBeenCalledWith(`http://localhost:3000${nextUrl}`);
@@ -292,7 +290,7 @@ describe('Auth Callback Route - Integration Tests', () => {
           `http://localhost:3000/auth/callback?code=auth_code_123&next=${encodeURIComponent(nextUrl)}`
         );
 
-        const response = await GET(request);
+        await GET(request);
 
         // Should still prepend origin, making it relative to our domain
         const redirectCall = (NextResponse.redirect as ReturnType<typeof vi.fn>).mock.calls[0][0];
@@ -329,7 +327,7 @@ describe('Auth Callback Route - Integration Tests', () => {
     test('should maintain origin in error page redirect', async () => {
       const request = new NextRequest('https://claudepro.directory/auth/callback');
 
-      const response = await GET(request);
+      await GET(request);
 
       expect(NextResponse.redirect).toHaveBeenCalledWith(
         'https://claudepro.directory/auth/auth-code-error'
@@ -344,7 +342,7 @@ describe('Auth Callback Route - Integration Tests', () => {
 
       const request = new NextRequest('http://localhost:3000/auth/callback?code=bad_code');
 
-      const response = await GET(request);
+      await GET(request);
 
       const redirectUrl = (NextResponse.redirect as ReturnType<typeof vi.fn>).mock.calls[0][0];
       // Error redirect should not contain error message or code

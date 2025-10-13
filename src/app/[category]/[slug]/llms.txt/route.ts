@@ -18,6 +18,10 @@ import { handleApiError } from '@/src/lib/error-handler';
 import { buildRichContent, type ContentItem } from '@/src/lib/llms-txt/content-builder';
 import { generateLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
+import type {
+  CollectionContent,
+  CollectionItemReference,
+} from '@/src/lib/schemas/content/collection.schema';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 
 /**
@@ -130,6 +134,116 @@ export async function GET(
       });
     }
 
+    // Collections require special handling with embedded items
+    if (category === 'collections') {
+      const collection = fullItem as CollectionContent;
+
+      // Build detailed content including all embedded items (NO TRUNCATION)
+      let detailedContent = '';
+
+      if (collection.items && collection.items.length > 0) {
+        detailedContent += 'INCLUDED ITEMS\n--------------\n\n';
+
+        // Group items by category
+        const itemsByCategory = collection.items.reduce(
+          (acc: Record<string, CollectionItemReference[]>, item: CollectionItemReference) => {
+            const itemCategory = item.category || 'other';
+            if (!acc[itemCategory]) acc[itemCategory] = [];
+            acc[itemCategory].push(item);
+            return acc;
+          },
+          {} as Record<string, CollectionItemReference[]>
+        );
+
+        // Fetch actual item details and build full content (NO TRUNCATION)
+        for (const [itemCategory, items] of Object.entries(itemsByCategory)) {
+          detailedContent += `${itemCategory.toUpperCase()}:\n`;
+          for (const itemRef of items as CollectionItemReference[]) {
+            // Fetch the actual item to get title and description
+            try {
+              const actualItem = await getContentBySlug(itemRef.category, itemRef.slug);
+              if (actualItem) {
+                detailedContent += `• ${actualItem.title || actualItem.name || itemRef.slug}\n`;
+                // Include FULL description - no truncation for AI consumption
+                if (actualItem.description) {
+                  detailedContent += `  ${actualItem.description}\n`;
+                }
+                if (itemRef.reason) {
+                  detailedContent += `  Reason: ${itemRef.reason}\n`;
+                }
+              } else {
+                // Fallback if item not found
+                detailedContent += `• ${itemRef.slug}\n`;
+                if (itemRef.reason) {
+                  detailedContent += `  ${itemRef.reason}\n`;
+                }
+              }
+            } catch (error) {
+              // If item fetch fails, use fallback
+              requestLogger.warn('Failed to fetch collection item details', {
+                category: itemRef.category,
+                slug: itemRef.slug,
+                error: error instanceof Error ? error.message : String(error),
+              });
+              detailedContent += `• ${itemRef.slug}\n`;
+              if (itemRef.reason) {
+                detailedContent += `  ${itemRef.reason}\n`;
+              }
+            }
+          }
+          detailedContent += '\n';
+        }
+      }
+
+      // Add metadata sections (safely handle optional properties)
+      if (collection.prerequisites && collection.prerequisites.length > 0) {
+        detailedContent += '\nPREREQUISITES\n-------------\n';
+        detailedContent += collection.prerequisites.map((p: string) => `• ${p}`).join('\n');
+        detailedContent += '\n\n';
+      }
+
+      // Transform to LLMsTxtItem format for collections
+      const llmsItem: LLMsTxtItem = {
+        slug: collection.slug,
+        title: String(collection.title),
+        description: collection.description,
+        content: detailedContent, // Full detailed content with all items (unlimited length)
+        category: 'collections',
+        tags: collection.tags || [],
+        author: collection.author || undefined,
+        dateAdded: collection.dateAdded || undefined,
+        url: `${APP_CONFIG.url}/collections/${slug}`,
+      };
+
+      // Generate llms.txt content with FULL content included
+      const llmsTxt = await generateLLMsTxt(llmsItem, {
+        includeMetadata: true,
+        includeDescription: true,
+        includeTags: true,
+        includeUrl: true,
+        includeContent: true, // Include full detailed content
+        sanitize: true,
+      });
+
+      requestLogger.info('Collection llms.txt generated successfully', {
+        slug,
+        contentLength: llmsTxt.length,
+        itemsCount: collection.items?.length || 0,
+      });
+
+      // Return plain text response
+      return new NextResponse(llmsTxt, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'public, max-age=600, s-maxage=600, stale-while-revalidate=3600',
+          'X-Content-Type-Options': 'nosniff',
+          'X-Robots-Tag': 'index, follow',
+        },
+      });
+    }
+
+    // Default handling for all other categories
     // Build rich content from ALL structured fields (features, installation, config, etc.)
     const richContent = buildRichContent(fullItem as ContentItem);
 

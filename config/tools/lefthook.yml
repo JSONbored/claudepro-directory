@@ -101,7 +101,17 @@ pre-push:
         npm run build
       fail_text: "❌ Build failed. Fix errors before pushing."
 
-    # 3. Security audit (moderate+ severity only, not overly strict)
+    # 3. Metadata validation for ALL pages (optional, skippable with LEFTHOOK_EXCLUDE)
+    # Validates every page in sitemap for proper SEO metadata
+    # Automatically uses PORT env var from your dev server
+    metadata-validation:
+      run: |
+        echo "🔍 Validating metadata for all sitemap pages..."
+        echo "   (Skip with: LEFTHOOK_EXCLUDE=metadata-validation git push)"
+        npm run test:e2e:metadata || echo "⚠️  Metadata validation failed (not blocking - fix before production deploy)"
+      fail_text: "⚠️  Metadata validation has failures (not blocking)."
+
+    # 4. Security audit (moderate+ severity only, not overly strict)
     security:
       run: |
         echo "🔒 Running security audit..."

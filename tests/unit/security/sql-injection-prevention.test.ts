@@ -49,9 +49,7 @@ describe('SQL Injection Prevention - Input Validation', () => {
       const result = slugSchema.safeParse(malicious);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toContain(
-          'Slug can only contain letters, numbers'
-        );
+        expect(result.error.issues[0].message).toContain('Slug can only contain letters, numbers');
       }
     });
 

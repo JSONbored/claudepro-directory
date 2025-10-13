@@ -19,7 +19,7 @@
  * - No test data pollution in production services
  */
 
-import { http, HttpResponse, delay } from 'msw';
+import { delay, HttpResponse, http } from 'msw';
 
 /**
  * External service handlers
@@ -33,8 +33,6 @@ export const externalHandlers = [
     await delay(100);
 
     const { table } = params;
-    const url = new URL(request.url);
-    const select = url.searchParams.get('select');
 
     // Mock response based on table
     const mockData: Record<string, unknown[]> = {
@@ -176,11 +174,8 @@ export const externalHandlers = [
 
     // Validate API key
     const apiKey = request.headers.get('authorization');
-    if (!apiKey || !apiKey.startsWith('Bearer re_')) {
-      return HttpResponse.json(
-        { error: 'Invalid API key' },
-        { status: 401 }
-      );
+    if (!(apiKey && apiKey.startsWith('Bearer re_'))) {
+      return HttpResponse.json({ error: 'Invalid API key' }, { status: 401 });
     }
 
     return HttpResponse.json(
@@ -230,7 +225,7 @@ export const externalHandlers = [
     return HttpResponse.json({
       login: username,
       id: 789012,
-      avatar_url: `https://avatars.githubusercontent.com/u/789012?v=4`,
+      avatar_url: 'https://avatars.githubusercontent.com/u/789012?v=4',
       html_url: `https://github.com/${username}`,
       name: 'Test User',
       bio: 'Software developer and open source contributor',
@@ -296,7 +291,8 @@ export const externalErrorHandlers = {
     return HttpResponse.json(
       {
         message: 'API rate limit exceeded',
-        documentation_url: 'https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting',
+        documentation_url:
+          'https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting',
       },
       {
         status: 403,

@@ -664,41 +664,6 @@ export const METADATA_REGISTRY = {
   },
 
   /**
-   * Collections List - Tier 2
-   * Curated content discovery
-   */
-  '/collections': {
-    title: buildPageTitle('Claude Configuration Collections 2025'),
-    description:
-      'Curated Claude AI collections for October 2025. Hand-picked MCP servers, agents, and workflows organized by use case, expertise level, and development needs.',
-    keywords: [
-      'claude collections',
-      'curated ai tools 2025',
-      'mcp server collections',
-      'claude workflows',
-    ],
-    openGraph: {
-      type: 'website' as const,
-    },
-    twitter: {
-      card: 'summary_large_image' as const,
-    },
-    structuredData: {
-      type: 'CollectionPage' as const,
-      breadcrumbs: true,
-      dateModified: true,
-      author: false,
-    },
-    aiOptimization: {
-      includeYear: true,
-      recencySignal: false,
-      useArticleSchema: false,
-      generateFAQSchema: false,
-      wikipediaStyle: false,
-    },
-  },
-
-  /**
    * Guides List - Tier 2
    * Educational content hub
    */
@@ -1248,42 +1213,6 @@ export const METADATA_REGISTRY = {
       useArticleSchema: true,
       generateFAQSchema: false,
       wikipediaStyle: true,
-    },
-  },
-
-  /**
-   * Collection Detail Pages (/collections/:slug)
-   * Curated content collections
-   * Prioritizes seoTitle for <title> tag optimization
-   */
-  '/collections/:slug': {
-    title: (context?: MetadataContext) => {
-      // Prioritize seoTitle for SEO optimization (<60 chars)
-      const seoTitle = (context?.item as { seoTitle?: string })?.seoTitle;
-      const collectionTitle = seoTitle || context?.item?.title || 'Collection';
-      return buildContentTitle(collectionTitle, 'Collections');
-    },
-    description: (context?: MetadataContext) =>
-      context?.item?.description || 'Curated collection of Claude AI tools and configurations.',
-    keywords: ['claude collection', 'curated ai tools 2025', 'claude toolkit'],
-    openGraph: {
-      type: 'website' as const,
-    },
-    twitter: {
-      card: 'summary_large_image' as const,
-    },
-    structuredData: {
-      type: 'CollectionPage' as const,
-      breadcrumbs: true,
-      dateModified: true,
-      author: true,
-    },
-    aiOptimization: {
-      includeYear: true,
-      recencySignal: false,
-      useArticleSchema: false,
-      generateFAQSchema: false,
-      wikipediaStyle: false,
     },
   },
 

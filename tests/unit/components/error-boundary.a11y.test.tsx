@@ -19,16 +19,16 @@
  * @see src/components/shared/error-boundary.tsx
  */
 
-import { describe, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, expect, test, vi } from 'vitest';
+import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import {
   axeTest,
   axeTestInteractive,
   testKeyboardNavigation,
   testScreenReaderCompatibility,
 } from '@/tests/utils/accessibility';
-import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 
 // Component that throws an error for testing
 function ThrowError({ shouldThrow }: { shouldThrow: boolean }) {
@@ -266,7 +266,7 @@ describe('ErrorBoundary - Accessibility', () => {
         </ErrorBoundary>
       );
 
-      const { hasAriaLabels } = testScreenReaderCompatibility(container);
+      testScreenReaderCompatibility(container);
       // Error boundary may not have explicit ARIA labels if using semantic HTML
       // which is acceptable
       expect(container).toBeInTheDocument();

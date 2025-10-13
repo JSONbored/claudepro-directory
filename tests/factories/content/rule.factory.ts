@@ -15,8 +15,8 @@
 import { faker } from '@faker-js/faker';
 import type { RuleContent } from '@/src/lib/schemas/content/rule.schema';
 import {
-  createContentFactory,
   type BaseContentTransientParams,
+  createContentFactory,
 } from '../shared/base-content.factory';
 
 export const ruleFactory = createContentFactory<RuleContent>({

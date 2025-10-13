@@ -89,3 +89,6 @@ tsconfig.tsbuildinfo
 core
 
 manifest.json
+
+# Lefthook creates this in root despite using config/tools/lefthook.yml
+lefthook.yml

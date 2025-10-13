@@ -380,7 +380,10 @@ export function getCookie(name: string): string | null {
  * deleteCookie('token', { path: '/' });
  * ```
  */
-export function deleteCookie(name: string, options: Pick<CookieOptions, 'path' | 'domain'> = {}): void {
+export function deleteCookie(
+  name: string,
+  options: Pick<CookieOptions, 'path' | 'domain'> = {}
+): void {
   setCookie(name, '', {
     ...options,
     expires: new Date(0),
@@ -471,19 +474,17 @@ export function expectCookieValue(name: string, expectedValue: string): void {
  *
  * @example
  * ```ts
- * const event = createStorageEvent('token', null, 'abc123', localStorage);
+ * const event = createStorageEvent('token', null, 'abc123');
  * window.dispatchEvent(event);
  * ```
  */
 export function createStorageEvent(
   key: string | null,
   oldValue: string | null,
-  newValue: string | null,
-  _storageArea: Storage = localStorage
+  newValue: string | null
 ): StorageEvent {
   // Note: storageArea is readonly and cannot be set in StorageEvent constructor
-  // It's automatically set by the browser. We keep the parameter for API compatibility
-  // but prefix with _ to indicate it's intentionally unused in the test environment.
+  // It's automatically set by the browser in real storage events.
   return new StorageEvent('storage', {
     key,
     oldValue,

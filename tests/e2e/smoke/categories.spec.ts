@@ -12,15 +12,15 @@
  * @group smoke
  */
 
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import {
-  navigateToCategory,
+  expectNoA11yViolations,
   expectPageURL,
   expectVisible,
-  expectNoA11yViolations,
+  navigateToCategory,
 } from '../helpers/test-helpers';
 
-const CATEGORIES = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'];
+const CATEGORIES = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'];
 
 test.describe('Category Pages - Smoke Tests', () => {
   // Test each category page
@@ -40,7 +40,10 @@ test.describe('Category Pages - Smoke Tests', () => {
 
       // Verify content grid/list exists
       const contentContainer = page.locator('[data-content-list]').or(
-        page.locator('main').locator('div').filter({ has: page.locator('article') })
+        page
+          .locator('main')
+          .locator('div')
+          .filter({ has: page.locator('article') })
       );
       await expectVisible(contentContainer);
     });
@@ -52,11 +55,9 @@ test.describe('Category Pages - Smoke Tests', () => {
       await page.waitForLoadState('networkidle');
 
       // Find content cards/items
-      const contentItems = page.locator('[data-content-item]').or(
-        page.locator('article').or(
-          page.locator('[role="article"]')
-        )
-      );
+      const contentItems = page
+        .locator('[data-content-item]')
+        .or(page.locator('article').or(page.locator('[role="article"]')));
 
       // Should have at least one content item
       const count = await contentItems.count();
@@ -76,9 +77,7 @@ test.describe('Category Pages - Smoke Tests', () => {
         await filterButton.click();
 
         // Filter panel should open
-        const filterPanel = page.locator('[role="dialog"]').or(
-          page.locator('[data-filter-panel]')
-        );
+        const filterPanel = page.locator('[role="dialog"]').or(page.locator('[data-filter-panel]'));
 
         await expectVisible(filterPanel);
       }
@@ -150,9 +149,10 @@ test.describe('Category Pages - Smoke Tests', () => {
     await page.waitForLoadState('networkidle');
 
     // Count initial items
-    const initialItems = await page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).count();
+    const initialItems = await page
+      .locator('[data-content-item]')
+      .or(page.locator('article'))
+      .count();
 
     // Scroll to bottom
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
@@ -161,11 +161,13 @@ test.describe('Category Pages - Smoke Tests', () => {
     await page.waitForTimeout(2000);
 
     // Check if more items loaded (infinite scroll) or pagination exists
-    const finalItems = await page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).count();
+    const finalItems = await page
+      .locator('[data-content-item]')
+      .or(page.locator('article'))
+      .count();
 
-    const paginationExists = await page.getByRole('button', { name: /next|load more/i })
+    const paginationExists = await page
+      .getByRole('button', { name: /next|load more/i })
       .isVisible({ timeout: 1000 })
       .catch(() => false);
 

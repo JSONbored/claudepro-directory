@@ -62,7 +62,7 @@ export const server = setupServer(...handlers);
  * Export handlers for test-specific overrides
  */
 export { handlers } from './handlers';
-export { contentErrorHandlers } from './handlers/content-handlers';
 export { apiErrorHandlers, cronHandlers } from './handlers/api-handlers';
 export { authErrorHandlers } from './handlers/auth-handlers';
+export { contentErrorHandlers } from './handlers/content-handlers';
 export { externalErrorHandlers } from './handlers/external-handlers';

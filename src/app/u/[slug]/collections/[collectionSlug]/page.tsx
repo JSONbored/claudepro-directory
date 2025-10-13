@@ -22,31 +22,27 @@ interface PublicCollectionPageProps {
   params: Promise<{ slug: string; collectionSlug: string }>;
 }
 
-export async function generateMetadata({ params }: PublicCollectionPageProps): Promise<Metadata> {
-  const { slug, collectionSlug } = await params;
-  return generatePageMetadata('/u/:slug/collections/:collectionSlug', {
-    params: { slug, collectionSlug },
-  });
-}
-
-export default async function PublicCollectionPage({ params }: PublicCollectionPageProps) {
-  const { slug, collectionSlug } = await params;
+/**
+ * Fetch public user collection data
+ *
+ * Shared data loader for both metadata generation and page rendering.
+ * Next.js 15 automatically deduplicates this during the same render cycle.
+ *
+ * @param slug - User profile slug
+ * @param collectionSlug - Collection slug
+ * @returns Collection data or null if not found
+ */
+async function getPublicCollection(slug: string, collectionSlug: string) {
   const supabase = await createAdminClient();
 
-  // Get current user (if logged in) for ownership check
-  const currentUserClient = await createClient();
-  const {
-    data: { user: currentUser },
-  } = await currentUserClient.auth.getUser();
-
-  // Get profile owner (single query optimization - fetch all needed fields at once)
+  // Fetch profile user
   const { data: profileUser } = await supabase.from('users').select('*').eq('slug', slug).single();
 
   if (!profileUser) {
-    notFound();
+    return null;
   }
 
-  // Get collection
+  // Fetch public collection
   const { data: collection } = await supabase
     .from('user_collections')
     .select('*')
@@ -55,7 +51,55 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
     .eq('is_public', true)
     .single();
 
+  return collection;
+}
+
+export async function generateMetadata({ params }: PublicCollectionPageProps): Promise<Metadata> {
+  const { slug, collectionSlug } = await params;
+
+  // Load collection data (automatically deduplicated by Next.js)
+  const collection = await getPublicCollection(slug, collectionSlug);
+
+  // Transform to metadata context item
+  // Converts null to undefined for TypeScript compatibility
+  const collectionItem = collection
+    ? {
+        name: collection.name,
+        description: collection.description ?? undefined,
+        dateAdded: collection.created_at,
+        lastModified: collection.updated_at,
+      }
+    : undefined;
+
+  return generatePageMetadata('/u/:slug/collections/:collectionSlug', {
+    params: { slug, collectionSlug },
+    item: collectionItem,
+    slug,
+    collectionSlug,
+  });
+}
+
+export default async function PublicCollectionPage({ params }: PublicCollectionPageProps) {
+  const { slug, collectionSlug } = await params;
+
+  // Get current user (if logged in) for ownership check
+  const currentUserClient = await createClient();
+  const {
+    data: { user: currentUser },
+  } = await currentUserClient.auth.getUser();
+
+  // Load collection data (automatically deduplicated by Next.js with generateMetadata call)
+  const collection = await getPublicCollection(slug, collectionSlug);
+
   if (!collection) {
+    notFound();
+  }
+
+  // Get profile owner for display
+  const supabase = await createAdminClient();
+  const { data: profileUser } = await supabase.from('users').select('*').eq('slug', slug).single();
+
+  if (!profileUser) {
     notFound();
   }
 

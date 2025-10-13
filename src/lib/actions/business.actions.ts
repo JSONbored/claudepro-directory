@@ -337,8 +337,16 @@ export const getRecentMerged = rateLimitedAction
           'commands',
           'hooks',
           'statuslines',
+          'collections',
         ].includes(item.content_type)
-          ? (item.content_type as 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines')
+          ? (item.content_type as
+              | 'agents'
+              | 'mcp'
+              | 'rules'
+              | 'commands'
+              | 'hooks'
+              | 'statuslines'
+              | 'collections')
           : 'agents';
 
         return {

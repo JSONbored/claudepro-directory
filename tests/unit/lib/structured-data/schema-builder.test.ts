@@ -38,33 +38,33 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { APP_CONFIG } from '@/src/lib/constants';
 import {
+  type AggregateRatingConfig,
+  buildAggregateRatingSchema,
   buildBreadcrumb,
+  buildCollectionPageSchema,
+  buildCourseSchema,
+  buildCreativeWork,
+  buildFAQPage,
+  buildHowTo,
+  buildJobPostingSchema,
+  buildReviewSchema,
   buildSoftwareApplication,
   buildSoftwareSourceCode,
-  buildHowTo,
-  buildCreativeWork,
-  buildWebPageSpeakable,
-  buildFAQPage,
-  buildReviewSchema,
-  buildAggregateRatingSchema,
   buildVideoObjectSchema,
-  buildCourseSchema,
-  buildJobPostingSchema,
-  buildCollectionPageSchema,
-  type SoftwareApplicationConfig,
-  type SoftwareSourceCodeConfig,
-  type HowToConfig,
+  buildWebPageSpeakable,
+  type CollectionPageConfig,
+  type CourseConfig,
   type CreativeWorkConfig,
   type FAQItem,
-  type ReviewConfig,
-  type AggregateRatingConfig,
-  type VideoObjectConfig,
-  type CourseConfig,
+  type HowToConfig,
   type JobPostingConfig,
-  type CollectionPageConfig,
+  type ReviewConfig,
+  type SoftwareApplicationConfig,
+  type SoftwareSourceCodeConfig,
+  type VideoObjectConfig,
 } from '@/src/lib/structured-data/schema-builder';
-import { APP_CONFIG } from '@/src/lib/constants';
 
 const BASE_URL = APP_CONFIG.url;
 const SCHEMA_CONTEXT = 'https://schema.org';
@@ -596,7 +596,13 @@ describe('buildHowTo()', () => {
         description: 'Setup guide for filesystem MCP server',
         steps: [
           { position: 1, name: 'Install MCP', text: 'Install the MCP server package' },
-          { position: 2, name: 'Configure', text: 'Add configuration', code: '{}', programmingLanguage: 'json' },
+          {
+            position: 2,
+            name: 'Configure',
+            text: 'Add configuration',
+            code: '{}',
+            programmingLanguage: 'json',
+          },
           { position: 3, name: 'Test Connection', text: 'Verify the server is working' },
         ],
       };
@@ -828,7 +834,12 @@ describe('buildFAQPage()', () => {
         },
       ];
 
-      const schema = buildFAQPage('filesystem-server', 'mcp', 'Filesystem MCP Server', mcpTroubleshooting);
+      const schema = buildFAQPage(
+        'filesystem-server',
+        'mcp',
+        'Filesystem MCP Server',
+        mcpTroubleshooting
+      );
 
       expect(schema.mainEntity).toHaveLength(3);
       expect(schema['@id']).toContain('/mcp/filesystem-server#faq');

@@ -135,7 +135,7 @@ self.addEventListener("fetch", (event) => {
   } else if (
     CONTENT_ROUTES.some((route) => url.pathname.startsWith(route)) ||
     url.pathname.match(
-      /\/(agents|mcp|rules|commands|hooks|statuslines|guides)\/[^/]+$/,
+      /\/(agents|mcp|rules|commands|hooks|statuslines|collections|guides)\/[^/]+$/,
     )
   ) {
     // Content pages: Stale while revalidate for fresh content

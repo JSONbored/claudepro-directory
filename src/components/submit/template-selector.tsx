@@ -186,9 +186,17 @@ const TEMPLATES = {
   ] satisfies CommandTemplate[],
   hooks: [] satisfies HookTemplate[],
   statuslines: [] satisfies StatuslineTemplate[],
+  collections: [],
 } as const;
 
-type ContentType = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines';
+type ContentType =
+  | 'agents'
+  | 'mcp'
+  | 'rules'
+  | 'commands'
+  | 'hooks'
+  | 'statuslines'
+  | 'collections';
 
 interface TemplateSelectorProps {
   contentType: ContentType;

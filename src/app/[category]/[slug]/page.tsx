@@ -63,6 +63,7 @@ import { ViewTracker } from '@/src/components/shared/view-tracker';
 import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
 import { UnifiedStructuredData } from '@/src/components/structured-data/unified-structured-data';
 import { UnifiedDetailPage } from '@/src/components/unified-detail-page';
+import { CollectionDetailView } from '@/src/components/unified-detail-page/collection-detail-view';
 import { statsRedis } from '@/src/lib/cache';
 import {
   getCategoryConfig,
@@ -77,6 +78,7 @@ import {
   getRelatedContent,
 } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
+import type { CollectionContent } from '@/src/lib/schemas/content/collection.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { transformForDetailPage } from '@/src/lib/utils/content.utils';
 
@@ -160,7 +162,18 @@ export async function generateMetadata({
   params: Promise<{ category: string; slug: string }>;
 }) {
   const { category, slug } = await params;
-  return generatePageMetadata('/:category/:slug', { params: { category, slug } });
+
+  // Load item and category config for metadata generation
+  const itemMeta = await getContentBySlug(category, slug);
+  const config = getCategoryConfig(category);
+
+  return generatePageMetadata('/:category/:slug', {
+    params: { category, slug },
+    item: itemMeta || undefined,
+    categoryConfig: config || undefined,
+    category,
+    slug,
+  });
 }
 
 /**
@@ -254,6 +267,42 @@ export default async function DetailPage({
     relatedItemsData as Parameters<typeof transformForDetailPage>[1]
   );
 
+  // Conditional rendering: Collections use specialized CollectionDetailView
+  if (category === 'collections') {
+    return (
+      <>
+        <ViewTracker
+          category={category as 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides'}
+          slug={slug}
+        />
+        <PageViewTracker category={category} slug={slug} />
+        {
+          await UnifiedStructuredData({
+            item: itemData as Parameters<typeof UnifiedStructuredData>[0]['item'],
+          })
+        }
+        {
+          await (
+            <BreadcrumbSchema
+              items={[
+                {
+                  name: config.title || category,
+                  url: `${APP_CONFIG.url}/${category}`,
+                },
+                {
+                  name: item.title || slug,
+                  url: `${APP_CONFIG.url}/${category}/${slug}`,
+                },
+              ]}
+            />
+          )
+        }
+        <CollectionDetailView collection={itemData as CollectionContent} />
+      </>
+    );
+  }
+
+  // Default rendering: All other categories use UnifiedDetailPage
   return (
     <>
       <ViewTracker

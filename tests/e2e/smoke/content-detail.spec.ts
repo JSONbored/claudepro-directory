@@ -14,13 +14,11 @@
  * @group smoke
  */
 
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import {
-  navigateToCategory,
-  expectPageURL,
-  expectVisible,
-  expectText,
   expectNoA11yViolations,
+  expectVisible,
+  navigateToCategory,
   waitForNetworkIdle,
 } from '../helpers/test-helpers';
 
@@ -30,9 +28,7 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
     await navigateToCategory(page, 'agents');
 
     // Click on first agent
-    const firstAgent = page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).first();
+    const firstAgent = page.locator('[data-content-item]').or(page.locator('article')).first();
     await firstAgent.click();
 
     // Should navigate to detail page
@@ -51,9 +47,7 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
     await navigateToCategory(page, 'mcp');
 
     // Click on first MCP server
-    const firstMcp = page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).first();
+    const firstMcp = page.locator('[data-content-item]').or(page.locator('article')).first();
     await firstMcp.click();
 
     // Should navigate to detail page
@@ -69,29 +63,23 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
     await navigateToCategory(page, 'agents');
 
     // Navigate to first item
-    const firstItem = page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).first();
+    const firstItem = page.locator('[data-content-item]').or(page.locator('article')).first();
     await firstItem.click();
 
     await page.waitForURL(/\/agents\/.+/);
     await waitForNetworkIdle(page);
 
-    // Should have metadata section
-    const metadata = page.locator('[data-metadata]').or(
-      page.locator('aside').or(
-        page.locator('[class*="metadata"]')
-      )
-    );
-
     // Check for common metadata fields
-    const hasAuthor = await page.getByText(/author|by|created by/i)
+    const hasAuthor = await page
+      .getByText(/author|by|created by/i)
       .isVisible({ timeout: 2000 })
       .catch(() => false);
-    const hasDate = await page.locator('time')
+    const hasDate = await page
+      .locator('time')
       .isVisible({ timeout: 2000 })
       .catch(() => false);
-    const hasCategory = await page.getByText(/category|type/i)
+    const hasCategory = await page
+      .getByText(/category|type/i)
       .isVisible({ timeout: 2000 })
       .catch(() => false);
 
@@ -103,18 +91,14 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
     await navigateToCategory(page, 'commands');
 
     // Navigate to first command
-    const firstItem = page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).first();
+    const firstItem = page.locator('[data-content-item]').or(page.locator('article')).first();
     await firstItem.click();
 
     await page.waitForURL(/\/commands\/.+/);
     await waitForNetworkIdle(page);
 
     // Should have description/content
-    const description = page.locator('[data-description]').or(
-      page.locator('main p').first()
-    );
+    const description = page.locator('[data-description]').or(page.locator('main p').first());
 
     if (await description.isVisible({ timeout: 2000 }).catch(() => false)) {
       const text = await description.textContent();
@@ -127,18 +111,14 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
     await navigateToCategory(page, 'commands');
 
     // Navigate to first command
-    const firstItem = page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).first();
+    const firstItem = page.locator('[data-content-item]').or(page.locator('article')).first();
     await firstItem.click();
 
     await page.waitForURL(/\/commands\/.+/);
     await waitForNetworkIdle(page);
 
     // Look for code blocks
-    const codeBlock = page.locator('pre code').or(
-      page.locator('[data-code]')
-    );
+    const codeBlock = page.locator('pre code').or(page.locator('[data-code]'));
 
     if (await codeBlock.isVisible({ timeout: 2000 }).catch(() => false)) {
       await expectVisible(codeBlock);
@@ -151,9 +131,7 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
     await navigateToCategory(page, 'agents');
 
     // Navigate to detail page
-    const firstItem = page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).first();
+    const firstItem = page.locator('[data-content-item]').or(page.locator('article')).first();
     await firstItem.click();
 
     await page.waitForURL(/\/agents\/.+/);
@@ -174,9 +152,7 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
     await navigateToCategory(page, 'mcp');
 
     // Navigate to detail page
-    const firstItem = page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).first();
+    const firstItem = page.locator('[data-content-item]').or(page.locator('article')).first();
     await firstItem.click();
 
     await page.waitForURL(/\/mcp\/.+/);
@@ -195,22 +171,18 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
     await navigateToCategory(page, 'agents');
 
     // Navigate to detail page
-    const firstItem = page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).first();
+    const firstItem = page.locator('[data-content-item]').or(page.locator('article')).first();
     await firstItem.click();
 
     await page.waitForURL(/\/agents\/.+/);
     await waitForNetworkIdle(page);
 
     // Look for tags
-    const tags = page.locator('[data-tag]').or(
-      page.locator('[class*="tag"]').or(
-        page.locator('[class*="badge"]')
-      )
-    );
+    const tags = page
+      .locator('[data-tag]')
+      .or(page.locator('[class*="tag"]').or(page.locator('[class*="badge"]')));
 
-    if (await tags.count() > 0) {
+    if ((await tags.count()) > 0) {
       await expectVisible(tags.first());
     }
   });
@@ -219,9 +191,7 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
     await navigateToCategory(page, 'agents');
 
     // Navigate to detail page
-    const firstItem = page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).first();
+    const firstItem = page.locator('[data-content-item]').or(page.locator('article')).first();
     await firstItem.click();
 
     await page.waitForURL(/\/agents\/.+/);
@@ -234,11 +204,11 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
       await expectVisible(relatedSection);
 
       // Should have related items
-      const relatedItems = page.locator('[data-related-item]').or(
-        page.locator('[data-content-item]')
-      );
+      const relatedItems = page
+        .locator('[data-related-item]')
+        .or(page.locator('[data-content-item]'));
 
-      if (await relatedItems.count() > 0) {
+      if ((await relatedItems.count()) > 0) {
         expect(await relatedItems.count()).toBeGreaterThan(0);
       }
     }
@@ -248,20 +218,16 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
     await navigateToCategory(page, 'rules');
 
     // Navigate to detail page
-    const firstItem = page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).first();
+    const firstItem = page.locator('[data-content-item]').or(page.locator('article')).first();
     await firstItem.click();
 
     await page.waitForURL(/\/rules\/.+/);
     await waitForNetworkIdle(page);
 
     // Look for breadcrumbs
-    const breadcrumb = page.locator('[aria-label*="breadcrumb"]').or(
-      page.locator('[data-breadcrumb]').or(
-        page.locator('nav ol')
-      )
-    );
+    const breadcrumb = page
+      .locator('[aria-label*="breadcrumb"]')
+      .or(page.locator('[data-breadcrumb]').or(page.locator('nav ol')));
 
     if (await breadcrumb.isVisible({ timeout: 2000 }).catch(() => false)) {
       await expectVisible(breadcrumb);
@@ -276,9 +242,7 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
     await navigateToCategory(page, 'agents');
 
     // Navigate to detail page
-    const firstItem = page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).first();
+    const firstItem = page.locator('[data-content-item]').or(page.locator('article')).first();
     await firstItem.click();
 
     await page.waitForURL(/\/agents\/.+/);
@@ -290,13 +254,11 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
     expect(title.length).toBeGreaterThan(10);
 
     // Check meta description
-    const metaDescription = await page.locator('meta[name="description"]')
-      .getAttribute('content');
+    const metaDescription = await page.locator('meta[name="description"]').getAttribute('content');
     expect(metaDescription).toBeTruthy();
 
     // Check Open Graph
-    const ogTitle = await page.locator('meta[property="og:title"]')
-      .getAttribute('content');
+    const ogTitle = await page.locator('meta[property="og:title"]').getAttribute('content');
     expect(ogTitle).toBeTruthy();
   });
 
@@ -307,8 +269,12 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
     await waitForNetworkIdle(page);
 
     // Should show 404 or redirect
-    const is404 = page.url().includes('404') ||
-                  await page.getByText(/not found|404/i).isVisible({ timeout: 2000 }).catch(() => false);
+    const is404 =
+      page.url().includes('404') ||
+      (await page
+        .getByText(/not found|404/i)
+        .isVisible({ timeout: 2000 })
+        .catch(() => false));
 
     expect(is404).toBeTruthy();
   });
@@ -317,9 +283,7 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
     await navigateToCategory(page, 'agents');
 
     // Navigate to detail page
-    const firstItem = page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).first();
+    const firstItem = page.locator('[data-content-item]').or(page.locator('article')).first();
     await firstItem.click();
 
     await page.waitForURL(/\/agents\/.+/);
@@ -333,9 +297,7 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
     await navigateToCategory(page, 'mcp');
 
     // Navigate to MCP server detail
-    const firstItem = page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).first();
+    const firstItem = page.locator('[data-content-item]').or(page.locator('article')).first();
     await firstItem.click();
 
     await page.waitForURL(/\/mcp\/.+/);
@@ -353,9 +315,7 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
     await navigateToCategory(page, 'agents');
 
     // Navigate to detail page
-    const firstItem = page.locator('[data-content-item]').or(
-      page.locator('article')
-    ).first();
+    const firstItem = page.locator('[data-content-item]').or(page.locator('article')).first();
     await firstItem.click();
 
     await page.waitForURL(/\/agents\/.+/);
@@ -366,6 +326,93 @@ test.describe('Content Detail Pages - Smoke Tests', () => {
 
     if (await reviewSection.isVisible({ timeout: 2000 }).catch(() => false)) {
       await expectVisible(reviewSection);
+    }
+  });
+
+  test('should load collection detail page with embedded items', async ({ page }) => {
+    await navigateToCategory(page, 'collections');
+
+    // Click on first collection
+    const firstCollection = page.locator('[data-content-item]').or(page.locator('article')).first();
+    await firstCollection.click();
+
+    // Should navigate to detail page
+    await page.waitForURL(/\/collections\/.+/);
+    await waitForNetworkIdle(page);
+
+    // Verify page structure
+    await expectVisible(page.locator('main'));
+
+    // Should have heading
+    const heading = page.getByRole('heading', { level: 1 });
+    await expectVisible(heading);
+
+    // Should show "What's Included" section with embedded items
+    const includedSection = page.getByText(/what's included/i);
+    if (await includedSection.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await expectVisible(includedSection);
+
+      // Should have embedded content cards
+      const embeddedCards = page.locator('[data-content-item]').or(page.locator('article'));
+      const count = await embeddedCards.count();
+      expect(count).toBeGreaterThan(0);
+    }
+  });
+
+  test('should display collection metadata (difficulty, setup time)', async ({ page }) => {
+    await navigateToCategory(page, 'collections');
+
+    // Navigate to first collection
+    const firstItem = page.locator('[data-content-item]').or(page.locator('article')).first();
+    await firstItem.click();
+
+    await page.waitForURL(/\/collections\/.+/);
+    await waitForNetworkIdle(page);
+
+    // Look for difficulty badge/indicator
+    const difficultyIndicator = page.getByText(/beginner|intermediate|advanced|difficulty/i);
+    if (await difficultyIndicator.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await expectVisible(difficultyIndicator);
+    }
+
+    // Look for estimated setup time
+    const setupTime = page.getByText(/setup time|estimated time|minutes|hours/i);
+    if (await setupTime.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await expectVisible(setupTime);
+    }
+  });
+
+  test('should display collection prerequisites', async ({ page }) => {
+    await navigateToCategory(page, 'collections');
+
+    // Navigate to first collection
+    const firstItem = page.locator('[data-content-item]').or(page.locator('article')).first();
+    await firstItem.click();
+
+    await page.waitForURL(/\/collections\/.+/);
+    await waitForNetworkIdle(page);
+
+    // Look for prerequisites section
+    const prerequisitesSection = page.getByText(/prerequisites|requirements/i);
+    if (await prerequisitesSection.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await expectVisible(prerequisitesSection);
+    }
+  });
+
+  test('should display collection compatibility info', async ({ page }) => {
+    await navigateToCategory(page, 'collections');
+
+    // Navigate to first collection
+    const firstItem = page.locator('[data-content-item]').or(page.locator('article')).first();
+    await firstItem.click();
+
+    await page.waitForURL(/\/collections\/.+/);
+    await waitForNetworkIdle(page);
+
+    // Look for compatibility section
+    const compatibilitySection = page.getByText(/compatibility|claude desktop|claude code/i);
+    if (await compatibilitySection.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await expectVisible(compatibilitySection);
     }
   });
 });
