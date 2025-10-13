@@ -27,12 +27,15 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChangelogContent } from '@/src/components/changelog/changelog-content';
 import { ViewTracker } from '@/src/components/shared/view-tracker';
+import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-schema';
 import { ChangelogArticleStructuredData } from '@/src/components/structured-data/changelog-structured-data';
+import { Separator } from '@/src/components/ui/separator';
 import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
+import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
-import { generateContentMetadata } from '@/src/lib/seo/metadata-generator';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 
 // ISR - revalidate every 10 minutes
 export const revalidate = 600;
@@ -64,38 +67,8 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  try {
-    const { slug } = await params;
-    const entry = await getChangelogEntryBySlug(slug);
-
-    if (!entry) {
-      return {
-        title: 'Changelog Entry Not Found',
-        description: 'The requested changelog entry could not be found.',
-      };
-    }
-
-    // Use tldr as description if available, otherwise truncate content
-    const description =
-      entry.tldr ||
-      (entry.content.length > 160 ? `${entry.content.slice(0, 157).trim()}...` : entry.content);
-
-    return await generateContentMetadata('changelog', slug, {
-      title: entry.title,
-      description,
-      dateAdded: entry.date,
-      author: 'Claude Pro Directory',
-    });
-  } catch (error) {
-    logger.error(
-      'Failed to generate changelog entry metadata',
-      error instanceof Error ? error : new Error(String(error))
-    );
-    return {
-      title: 'Changelog - Claude Pro Directory',
-      description: 'Platform update and release notes.',
-    };
-  }
+  const { slug } = await params;
+  return generatePageMetadata('/changelog/:slug', { params: { slug } });
 }
 
 /**
@@ -125,10 +98,28 @@ export default async function ChangelogEntryPage({
         {/* Structured Data - TechArticle Schema */}
         <ChangelogArticleStructuredData entry={entry} />
 
+        {/* Breadcrumb Schema - SEO optimization */}
+        {
+          await (
+            <BreadcrumbSchema
+              items={[
+                {
+                  name: 'Changelog',
+                  url: `${APP_CONFIG.url}/changelog`,
+                },
+                {
+                  name: entry.title,
+                  url: `${APP_CONFIG.url}/changelog/${entry.slug}`,
+                },
+              ]}
+            />
+          )
+        }
+
         <article className="container max-w-4xl py-8 space-y-8">
           {/* Navigation */}
           <Link
-            href="/changelog"
+            href={ROUTES.CHANGELOG}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -136,7 +127,7 @@ export default async function ChangelogEntryPage({
           </Link>
 
           {/* Header */}
-          <header className="space-y-4 border-b pb-6">
+          <header className="space-y-4 pb-6">
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
               <Calendar className="h-4 w-4" />
               <time dateTime={entry.date}>{formatChangelogDate(entry.date)}</time>
@@ -156,6 +147,8 @@ export default async function ChangelogEntryPage({
             </div>
           </header>
 
+          <Separator className="my-6" />
+
           {/* Content */}
           <ChangelogContent entry={entry} />
         </article>
@@ -172,7 +165,7 @@ export default async function ChangelogEntryPage({
       <div className="container max-w-4xl py-8">
         <div className="space-y-4">
           <Link
-            href="/changelog"
+            href={ROUTES.CHANGELOG}
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />

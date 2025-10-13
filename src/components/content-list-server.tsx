@@ -4,6 +4,7 @@ import { ContentSearchClient } from '@/src/components/content-search-client';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
+import { ROUTES } from '@/src/lib/constants';
 import { ExternalLink, getIconByName } from '@/src/lib/icons';
 import type {
   ContentListServerProps,
@@ -73,7 +74,7 @@ function ContentHeroSection<T extends UnifiedContentItem>({
 
           <Button variant="outline" size="sm" asChild>
             <Link
-              href="/submit"
+              href={ROUTES.SUBMIT}
               className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
               aria-label={`Submit a new ${title.slice(0, -1).toLowerCase()}`}
             >
@@ -123,21 +124,27 @@ export function ContentListServer<T extends UnifiedContentItem>({
         className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}
         aria-label={`${title} content and search`}
       >
-        <div className="space-y-8">
-          {/* Email CTA - Minimal variant */}
-          <InlineEmailCTA variant="minimal" context="category-page" category={type} />
+        {/* Search Component with Suspense boundary */}
+        <Suspense fallback={<ContentSearchSkeleton />}>
+          <ContentSearchClient
+            items={items}
+            type={type}
+            searchPlaceholder={searchPlaceholder}
+            title={title}
+            icon={icon}
+          />
+        </Suspense>
+      </section>
 
-          {/* Search Component with Suspense boundary */}
-          <Suspense fallback={<ContentSearchSkeleton />}>
-            <ContentSearchClient
-              items={items}
-              type={type}
-              searchPlaceholder={searchPlaceholder}
-              title={title}
-              icon={icon}
-            />
-          </Suspense>
-        </div>
+      {/* Email CTA - Footer section (matching homepage pattern) */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <InlineEmailCTA
+          variant="hero"
+          context="category-page"
+          category={type}
+          headline={'Join 1,000+ Claude Power Users'}
+          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+        />
       </section>
     </div>
   );

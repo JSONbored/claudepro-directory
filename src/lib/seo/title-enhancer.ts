@@ -100,6 +100,13 @@ function slugToTitle(slug: string): string {
 }
 
 /**
+ * Get current year for AI search optimization
+ */
+function getCurrentYear(): string {
+  return new Date().getFullYear().toString();
+}
+
+/**
  * Enhancement Strategies (in priority order)
  */
 const strategies: EnhancementStrategy[] = [
@@ -118,6 +125,54 @@ const strategies: EnhancementStrategy[] = [
       return null;
     },
     minRequired: 11, // " for Claude" = 11 chars
+  },
+
+  // Strategy: Add year (AI search optimization)
+  {
+    name: 'with-year',
+    apply: (item, available) => {
+      // Get base title - convert slug to human-readable if no title exists
+      const rawTitle = item.title || item.name || item.slug;
+      const baseTitle = item.title || item.name ? rawTitle : slugToTitle(item.slug);
+
+      const year = getCurrentYear();
+      const addition = ` ${year}`;
+
+      // Don't add year if already contains it
+      if (baseTitle.includes(year)) {
+        return null;
+      }
+
+      if (addition.length <= available) {
+        return `${baseTitle} ${year}`;
+      }
+      return null;
+    },
+    minRequired: 5, // " 2025" = 5 chars
+  },
+
+  // Strategy: Add "for Claude" + year (maximum AI optimization)
+  {
+    name: 'for-claude-year',
+    apply: (item, available) => {
+      // Get base title - convert slug to human-readable if no title exists
+      const rawTitle = item.title || item.name || item.slug;
+      const baseTitle = item.title || item.name ? rawTitle : slugToTitle(item.slug);
+
+      const year = getCurrentYear();
+      const addition = ` for Claude ${year}`;
+
+      // Don't add year if already contains it
+      if (baseTitle.includes(year)) {
+        return null;
+      }
+
+      if (addition.length <= available) {
+        return `${baseTitle} for Claude ${year}`;
+      }
+      return null;
+    },
+    minRequired: 16, // " for Claude 2025" = 16 chars
   },
 ];
 

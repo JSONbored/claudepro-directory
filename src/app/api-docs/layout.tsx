@@ -24,7 +24,7 @@ import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { buildPageTitle } from '@/src/lib/seo/title-builder';
+import { METADATA_DEFAULTS } from '@/src/lib/seo/metadata-registry';
 
 // Dynamic imports for Fumadocs components (only loads on /api-docs routes for better performance)
 const DocsLayout = dynamic(
@@ -32,7 +32,17 @@ const DocsLayout = dynamic(
     import('fumadocs-ui/layouts/docs').then((mod) => ({
       default: mod.DocsLayout,
     })),
-  { ssr: true }
+  {
+    ssr: true,
+    loading: () => (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-muted-foreground text-sm">Loading documentation...</p>
+        </div>
+      </div>
+    ),
+  }
 );
 
 const RootProvider = dynamic(
@@ -40,7 +50,10 @@ const RootProvider = dynamic(
     import('fumadocs-ui/provider').then((mod) => ({
       default: mod.RootProvider,
     })),
-  { ssr: true }
+  {
+    ssr: true,
+    loading: () => null, // RootProvider wraps DocsLayout, use DocsLayout skeleton
+  }
 );
 
 /**
@@ -56,8 +69,8 @@ const RootProvider = dynamic(
  */
 export const metadata: Metadata = {
   title: {
-    template: buildPageTitle({ tier: 'section', title: '%s' }),
-    default: buildPageTitle({ tier: 'section', title: 'API Documentation' }),
+    template: `%s${METADATA_DEFAULTS.separator}${METADATA_DEFAULTS.siteName}`,
+    default: `API Documentation${METADATA_DEFAULTS.separator}${METADATA_DEFAULTS.siteName}`,
   },
   description:
     'Comprehensive REST API documentation for ClaudePro Directory. Browse and search 8 endpoints for content discovery, analytics, and caching with full request/response examples.',

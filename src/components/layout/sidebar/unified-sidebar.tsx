@@ -1,19 +1,23 @@
 'use client';
 
 /**
- * Unified Sidebar - REFACTORED with modular cards
+ * Unified Sidebar - Configuration-driven with inline SidebarCard usage
  *
- * Reduced from 486 lines to 420 lines (66 lines reduction) by extracting:
- * - CategoryNavigationCard (26 lines → extracted component)
- * - TrendingGuidesCard (34 lines → extracted component)
- * - RecentGuidesCard (23 lines → extracted component)
+ * CONSOLIDATION: Uses SidebarCard directly with inline configuration
+ * - TrendingGuidesCard → Inline SidebarCard with trending logic
+ * - RecentGuidesCard → Inline SidebarCard with recent logic
+ * - CategoryNavigationCard → Modular component (keeps router logic)
  *
- * @see components/unified-detail-page/sidebar - Extracted modular components
+ * Performance: Optimal tree-shaking, minimal client bundle
+ * Pattern: Configuration-driven architecture over wrapper components
+ *
+ * @see components/shared/sidebar-card.tsx - Base sidebar card component
  */
 
 import Link from 'next/link';
 import { memo, useEffect, useState } from 'react';
 import { z } from 'zod';
+import { SidebarCard } from '@/src/components/shared/sidebar-card';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
@@ -25,22 +29,23 @@ import {
   TooltipTrigger,
 } from '@/src/components/ui/tooltip';
 import { CategoryNavigationCard } from '@/src/components/unified-detail-page/sidebar/category-navigation-card';
-import { RecentGuidesCard } from '@/src/components/unified-detail-page/sidebar/recent-guides-card';
-import { TrendingGuidesCard } from '@/src/components/unified-detail-page/sidebar/trending-guides-card';
+// Removed logger import - client components should not use server-side logger
+// Dynamic imports for server-side functions
+import { statsRedis } from '@/src/lib/cache';
+import { ROUTES } from '@/src/lib/constants';
 import {
   BookOpen,
+  Clock,
   FileText,
   Filter,
   Layers,
   Search,
   Sparkles,
+  TrendingUp,
   Users,
   Workflow,
   Zap,
 } from '@/src/lib/icons';
-// Removed logger import - client components should not use server-side logger
-// Dynamic imports for server-side functions
-import { statsRedis } from '@/src/lib/redis';
 import { viewCountService } from '@/src/lib/services/view-count.service';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { shallowEqual, slugToTitle } from '@/src/lib/utils';
@@ -285,6 +290,7 @@ function UnifiedSidebarComponent({
                       type="button"
                       onClick={() => setSearchQuery('')}
                       className="ml-1 hover:text-destructive"
+                      aria-label="Clear search query"
                     >
                       ×
                     </button>
@@ -294,8 +300,47 @@ function UnifiedSidebarComponent({
             </CardContent>
           </Card>
 
-          {/* Trending Section - Using extracted TrendingGuidesCard */}
-          <TrendingGuidesCard guides={trendingGuides} isLoading={isLoadingTrending} />
+          {/* Trending Section - Inline SidebarCard */}
+          {(trendingGuides.length > 0 || isLoadingTrending) && (
+            <SidebarCard
+              title={
+                <>
+                  <TrendingUp className="h-3 w-3 text-primary" />
+                  <span>Trending Now</span>
+                </>
+              }
+              titleClassName={`${UI_CLASSES.TEXT_XS} font-medium ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-1.5`}
+              className="border-muted/40 shadow-sm"
+              headerClassName={`${UI_CLASSES.PB_2} pt-3 ${UI_CLASSES.PX_3}`}
+              contentClassName={`pb-3 ${UI_CLASSES.PX_3}`}
+            >
+              <div className={UI_CLASSES.SPACE_Y_TIGHT_PLUS}>
+                {isLoadingTrending ? (
+                  <div className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                    Loading trending guides...
+                  </div>
+                ) : (
+                  trendingGuides.map((guide, index) => (
+                    <Link
+                      key={guide.slug}
+                      href={guide.slug}
+                      className={`${UI_CLASSES.GROUP} ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_BETWEEN} ${UI_CLASSES.TEXT_XS} ${UI_CLASSES.HOVER_BG_MUTED_50} rounded px-1.5 ${UI_CLASSES.PY_1} ${UI_CLASSES.TRANSITION_COLORS}`}
+                    >
+                      <span
+                        className={`text-muted-foreground group-hover:text-foreground truncate ${UI_CLASSES.FLEX_1}`}
+                      >
+                        <span className="text-muted-foreground/60 mr-1.5">{index + 1}.</span>
+                        {guide.title}
+                      </span>
+                      <Badge variant="secondary" className="text-2xs h-4 px-1 bg-muted/50">
+                        {guide.views}
+                      </Badge>
+                    </Link>
+                  ))
+                )}
+              </div>
+            </SidebarCard>
+          )}
 
           {/* Content-specific sections */}
           {mode === 'content' && validatedContentData && (
@@ -365,7 +410,7 @@ function UnifiedSidebarComponent({
                       ))}
                       {validatedRelatedGuides.length > 3 && (
                         <Link
-                          href="/guides"
+                          href={ROUTES.GUIDES}
                           className={`text-2xs text-primary hover:underline inline-flex ${UI_CLASSES.ITEMS_CENTER} gap-0.5 mt-1`}
                         >
                           View all ({validatedRelatedGuides.length})
@@ -378,8 +423,34 @@ function UnifiedSidebarComponent({
             </>
           )}
 
-          {/* Recent Section - Using extracted RecentGuidesCard */}
-          <RecentGuidesCard guides={recentGuides} />
+          {/* Recent Section - Inline SidebarCard */}
+          {recentGuides.length > 0 && (
+            <SidebarCard
+              title={
+                <>
+                  <Clock className="h-3 w-3 text-muted-foreground" />
+                  <span>Recent Guides</span>
+                </>
+              }
+              titleClassName={`${UI_CLASSES.TEXT_XS} font-medium ${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} gap-1.5`}
+              className="border-muted/40 shadow-sm"
+              headerClassName={`${UI_CLASSES.PB_2} pt-3 ${UI_CLASSES.PX_3}`}
+              contentClassName={`pb-3 ${UI_CLASSES.PX_3}`}
+            >
+              <div className={UI_CLASSES.SPACE_Y_TIGHT_PLUS}>
+                {recentGuides.map((guide) => (
+                  <Link key={guide.slug} href={guide.slug} className={UI_CLASSES.GROUP}>
+                    <div
+                      className={`text-3xs text-muted-foreground ${UI_CLASSES.GROUP_HOVER_TEXT_PRIMARY} ${UI_CLASSES.TRANSITION_COLORS} py-0.5`}
+                    >
+                      <div className="truncate">{guide.title}</div>
+                      <div className="text-2xs text-muted-foreground/60">{guide.date}</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </SidebarCard>
+          )}
 
           {/* Getting Started - Show when no trending/recent data */}
           {trendingGuides.length === 0 && recentGuides.length === 0 && (
@@ -421,13 +492,13 @@ function UnifiedSidebarComponent({
           <div className={`${UI_CLASSES.PX_2} pt-1`}>
             <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} text-2xs`}>
               <Link
-                href="/guides"
+                href={ROUTES.GUIDES}
                 className={`text-muted-foreground ${UI_CLASSES.HOVER_TEXT_PRIMARY} ${UI_CLASSES.TRANSITION_COLORS}`}
               >
                 ← All Guides
               </Link>
               <Link
-                href="/"
+                href={ROUTES.HOME}
                 className={`text-muted-foreground ${UI_CLASSES.HOVER_TEXT_PRIMARY} ${UI_CLASSES.TRANSITION_COLORS}`}
               >
                 Browse Directory →

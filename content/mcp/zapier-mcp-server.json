@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "zapier": {
           "transport": "http",
           "url": "https://mcp.zapier.com/YOUR_GENERATED_URL"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "zapier": {
           "transport": "http",
           "url": "https://mcp.zapier.com/YOUR_GENERATED_URL"
@@ -80,10 +80,30 @@
     }
   ],
   "examples": [
-    "Trigger the new customer onboarding Zap",
-    "Send Slack notification when deal closes",
-    "Add form submission to Google Sheets",
-    "Create Trello card from email"
+    {
+      "title": "Trigger the new customer onboarding Zap",
+      "code": "Ask Claude: \"Trigger the new customer onboarding Zap\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Send Slack notification when deal closes",
+      "code": "Ask Claude: \"Send Slack notification when deal closes\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Add form submission to Google Sheets",
+      "code": "Ask Claude: \"Add form submission to Google Sheets\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Create Trello card from email",
+      "code": "Ask Claude: \"Create Trello card from email\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "trigger"],

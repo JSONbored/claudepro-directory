@@ -38,6 +38,7 @@ import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-it
 import type { CollectionItemReference } from '@/src/lib/schemas/content/collection.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { batchMap } from '@/src/lib/utils/batch.utils';
 
 interface ItemWithData extends CollectionItemReference {
   data: UnifiedContentItem;
@@ -98,28 +99,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const collection = await getCollectionFullContent(slug);
-
-  if (!collection) {
-    return {
-      title: 'Collection Not Found',
-      description: 'The requested collection could not be found.',
-    };
-  }
-
-  // Use centralized metadata system with CollectionPage schema
-  // Collections use special structured data for better discovery
-  return await generatePageMetadata('/collections/:slug', {
-    params: { slug },
-    item: {
-      title: collection.title || collection.slug,
-      description: collection.description,
-      tags: collection.tags,
-      author: collection.author,
-      dateAdded: collection.dateAdded,
-      lastModified: collection.dateAdded,
-    },
-  });
+  return generatePageMetadata('/collections/:slug', { params: { slug } });
 }
 
 /**
@@ -146,8 +126,9 @@ export default async function CollectionDetailPage({
   });
 
   // Load all referenced items with full content
-  const itemsWithContent = await Promise.all(
-    collection.items.map(async (itemRef: CollectionItemReference): Promise<ItemWithData | null> => {
+  const itemsWithContent = await batchMap(
+    collection.items,
+    async (itemRef: CollectionItemReference): Promise<ItemWithData | null> => {
       try {
         const item = await getContentBySlug(itemRef.category as ContentCategory, itemRef.slug);
         return item ? { ...itemRef, data: item } : null;
@@ -158,7 +139,7 @@ export default async function CollectionDetailPage({
         });
         return null;
       }
-    })
+    }
   );
 
   // Filter out failed loads

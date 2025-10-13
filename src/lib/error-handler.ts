@@ -1,13 +1,21 @@
 /**
- * Centralized Error Handling System
+ * Centralized Error & Response Handling System
  *
- * Production-grade error handling for all Zod validation errors and general errors.
- * Provides consistent error formatting, logging, and user-friendly responses.
+ * Production-grade error handling + standardized API responses.
+ * Consolidates error formatting, success responses, and caching logic.
  * Designed with security-first approach for open-source production codebase.
+ *
+ * **Consolidation Benefits:**
+ * - Single source of truth for ALL API responses (errors + success)
+ * - Consistent cache headers across all endpoints
+ * - Tree-shakeable named exports
+ * - Type-safe response construction
+ * - Eliminates response duplication across 8+ API routes
  */
 
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { APP_CONFIG } from '@/src/lib/constants';
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
 import { createRequestId, type RequestId } from '@/src/lib/schemas/branded-types.schema';
@@ -433,3 +441,107 @@ export const createErrorBoundaryFallback = (
 
   return errorResponse;
 };
+
+// ============================================
+// SUCCESS RESPONSE BUILDERS
+// ============================================
+
+/**
+ * Cache control options for success responses
+ */
+export interface CacheOptions {
+  /** Max age in seconds for CDN cache */
+  sMaxAge?: number;
+  /** Stale-while-revalidate in seconds */
+  staleWhileRevalidate?: number;
+  /** Whether response is from cache */
+  cacheHit?: boolean;
+  /** Additional cache headers */
+  additionalHeaders?: Record<string, string>;
+}
+
+/**
+ * Default cache settings (4 hours / 24 hours)
+ */
+const DEFAULT_CACHE: Required<Omit<CacheOptions, 'cacheHit' | 'additionalHeaders'>> = {
+  sMaxAge: 14400, // 4 hours
+  staleWhileRevalidate: 86400, // 24 hours
+};
+
+/**
+ * Build successful API response with consistent structure
+ * Tree-shakeable named export
+ *
+ * @param data - Response data
+ * @param options - Cache and metadata options
+ * @returns NextResponse with standardized structure
+ */
+export function buildSuccessResponse<T>(
+  data: T,
+  options: CacheOptions = {}
+): NextResponse<{ data: T; timestamp: string; count?: number }> {
+  const {
+    sMaxAge = DEFAULT_CACHE.sMaxAge,
+    staleWhileRevalidate = DEFAULT_CACHE.staleWhileRevalidate,
+    cacheHit = false,
+    additionalHeaders = {},
+  } = options;
+
+  const response = {
+    data,
+    timestamp: new Date().toISOString(),
+    ...(Array.isArray(data) && { count: data.length }),
+  };
+
+  return NextResponse.json(response, {
+    headers: {
+      'Cache-Control': `public, s-maxage=${sMaxAge}, stale-while-revalidate=${staleWhileRevalidate}`,
+      'X-Cache': cacheHit ? 'HIT' : 'MISS',
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      ...additionalHeaders,
+    },
+  });
+}
+
+/**
+ * Build paginated response with metadata
+ * Tree-shakeable named export
+ */
+export function buildPaginatedResponse<T>(
+  items: T[],
+  total: number,
+  page: number,
+  limit: number,
+  cacheOptions: CacheOptions = {}
+): NextResponse {
+  const totalPages = Math.ceil(total / limit);
+
+  return buildSuccessResponse(items, {
+    ...cacheOptions,
+    additionalHeaders: {
+      'X-Total-Count': total.toString(),
+      'X-Page': page.toString(),
+      'X-Per-Page': limit.toString(),
+      'X-Total-Pages': totalPages.toString(),
+      ...cacheOptions.additionalHeaders,
+    },
+  });
+}
+
+/**
+ * Transform content items with type and URL
+ * Standardized transformation used across multiple endpoints
+ * Tree-shakeable named export
+ */
+export function transformContentItems<T extends { slug: string }>(
+  content: readonly T[] | T[],
+  type: string,
+  category: string
+): (T & { type: string; url: string })[] {
+  return content.map((item) => ({
+    ...item,
+    type,
+    url: `${APP_CONFIG.url}/${category}/${item.slug}`,
+  }));
+}

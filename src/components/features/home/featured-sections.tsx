@@ -11,9 +11,10 @@
 
 import Link from 'next/link';
 import { type FC, memo, useMemo } from 'react';
-import { LazyConfigCard } from '@/src/components/shared/lazy-config-card';
+import { ConfigCard } from '@/src/components/features/content/config-card';
 import { Button } from '@/src/components/ui/button';
 import { CATEGORY_CONFIGS, HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
+import { ROUTES } from '@/src/lib/constants';
 import { Briefcase, ExternalLink } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -50,7 +51,7 @@ const FeaturedSection: FC<FeaturedSectionProps> = memo(
         </div>
         <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
           {featuredItems.map((item) => (
-            <LazyConfigCard
+            <ConfigCard
               key={item.slug}
               item={item}
               variant="default"
@@ -101,7 +102,7 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories }) =>
       <div>
         <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.MB_8}`}>
           <h2 className={`text-2xl ${UI_CLASSES.FONT_BOLD}`}>Featured Jobs</h2>
-          <Link href="/jobs" className={UI_CLASSES.LINK_ACCENT_UNDERLINE}>
+          <Link href={ROUTES.JOBS} className={UI_CLASSES.LINK_ACCENT_UNDERLINE}>
             View all <ExternalLink className="h-4 w-4" />
           </Link>
         </div>
@@ -116,7 +117,7 @@ const FeaturedSectionsComponent: FC<FeaturedSectionsProps> = ({ categories }) =>
             Discover opportunities with companies building the future of AI
           </p>
           <Button asChild>
-            <Link href="/jobs">Browse Job Opportunities</Link>
+            <Link href={ROUTES.JOBS}>Browse Job Opportunities</Link>
           </Button>
         </div>
       </div>

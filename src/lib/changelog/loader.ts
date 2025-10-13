@@ -22,8 +22,8 @@
  * - Type-safe return values
  */
 
+import { contentCache } from '@/src/lib/cache';
 import { logger } from '@/src/lib/logger';
-import { contentCache } from '@/src/lib/redis';
 import type { ChangelogEntry, ParsedChangelog } from '@/src/lib/schemas/changelog.schema';
 import {
   getAllChangelogEntries as parseAllEntries,

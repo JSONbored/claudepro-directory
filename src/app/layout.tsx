@@ -6,6 +6,7 @@ import { connection } from 'next/server';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { Toaster } from 'sonner';
+import { AnnouncementBanner } from '@/src/components/layout/announcement-banner';
 import { Footer } from '@/src/components/layout/footer';
 import { Navigation } from '@/src/components/layout/navigation';
 import { PostCopyEmailProvider } from '@/src/components/providers/post-copy-email-provider';
@@ -48,18 +49,12 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       ...homeMetadata.openGraph,
       locale: 'en_US',
-      images: [
-        {
-          url: '/opengraph-image',
-          width: 1200,
-          height: 630,
-          alt: `${APP_CONFIG.name} - Community Configurations`,
-        },
-      ],
+      // OG images now generated via unified /api/og endpoint (included in homeMetadata)
     },
     twitter: {
       ...homeMetadata.twitter,
       creator: '@JSONbored',
+      // Twitter images now generated via unified /api/og endpoint (included in homeMetadata)
     },
     alternates: {
       ...homeMetadata.alternates,
@@ -103,7 +98,7 @@ export async function generateMetadata(): Promise<Metadata> {
         },
       ],
     },
-    manifest: '/manifest.webmanifest',
+    manifest: '/manifest',
   };
 }
 
@@ -123,8 +118,8 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} font-sans`}>
       <head>
-        {/* PWA Manifest */}
-        <link rel="manifest" href="/manifest.webmanifest" />
+        {/* PWA Manifest - Next.js generates at /manifest from src/app/manifest.ts */}
+        <link rel="manifest" href="/manifest" />
 
         {/* iOS Safari PWA Support */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -170,6 +165,7 @@ export default async function RootLayout({
                 Skip to main content
               </a>
               <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background flex flex-col`}>
+                <AnnouncementBanner />
                 <Navigation />
                 {/* biome-ignore lint/correctness/useUniqueElementIds: Static ID required for skip navigation accessibility */}
                 <main id="main-content" className="flex-1">

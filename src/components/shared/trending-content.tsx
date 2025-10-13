@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { memo, useId } from 'react';
 import { ConfigCard } from '@/src/components/features/content/config-card';
 import { Badge } from '@/src/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/ui/tabs';
@@ -8,7 +8,15 @@ import { Clock, Star, TrendingUp } from '@/src/lib/icons';
 import type { TrendingContentProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export function TrendingContent({ trending, popular, recent }: TrendingContentProps) {
+/**
+ * Trending Content Component
+ *
+ * Performance Optimizations:
+ * - Memoized to prevent unnecessary re-renders when parent state changes
+ * - Only re-renders when trending/popular/recent data actually changes
+ * - Renders 10-20+ ConfigCard items per tab (expensive DOM operations)
+ */
+function TrendingContentComponent({ trending, popular, recent }: TrendingContentProps) {
   // Generate unique IDs for headings
   const trendingHeadingId = useId();
   const popularHeadingId = useId();
@@ -45,7 +53,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
       >
         <div>
           <h2 id={trendingHeadingId} className={`text-2xl ${UI_CLASSES.FONT_BOLD} mb-4`}>
-            🔥 Trending This Week
+            Trending This Week
           </h2>
           <ul className={UI_CLASSES.GRID_RESPONSIVE_LIST}>
             {trending.length === 0 ? (
@@ -67,7 +75,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
                     </Badge>
                   )}
                   <ConfigCard
-                    item={item}
+                    item={{ ...item, position: index } as UnifiedContentItem}
                     variant="default"
                     showCategory={true}
                     showActions={false}
@@ -87,7 +95,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
       >
         <div>
           <h2 id={popularHeadingId} className={`text-2xl ${UI_CLASSES.FONT_BOLD} mb-4`}>
-            ⭐ Most Popular
+            Most Popular
           </h2>
           <ul className={UI_CLASSES.GRID_RESPONSIVE_LIST}>
             {popular.length === 0 ? (
@@ -97,10 +105,10 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
                 </p>
               </li>
             ) : (
-              popular.map((item) => (
+              popular.map((item, index) => (
                 <li key={item.slug}>
                   <ConfigCard
-                    item={item}
+                    item={{ ...item, position: index } as UnifiedContentItem}
                     variant="default"
                     showCategory={true}
                     showActions={false}
@@ -120,7 +128,7 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
       >
         <div>
           <h2 id={recentHeadingId} className={`text-2xl ${UI_CLASSES.FONT_BOLD} mb-4`}>
-            🆕 Recently Added
+            Recently Added
           </h2>
           <ul className={UI_CLASSES.GRID_RESPONSIVE_LIST}>
             {recent.length === 0 ? (
@@ -130,10 +138,10 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
                 </p>
               </li>
             ) : (
-              recent.map((item) => (
+              recent.map((item, index) => (
                 <li key={item.slug}>
                   <ConfigCard
-                    item={item}
+                    item={{ ...item, position: index } as UnifiedContentItem}
                     variant="default"
                     showCategory={true}
                     showActions={false}
@@ -147,3 +155,6 @@ export function TrendingContent({ trending, popular, recent }: TrendingContentPr
     </Tabs>
   );
 }
+
+// Export memoized component
+export const TrendingContent = memo(TrendingContentComponent);

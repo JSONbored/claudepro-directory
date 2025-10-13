@@ -51,7 +51,7 @@ export function generateSlug(date: string, title: string): string {
     .replace(/\s+/g, '-') // Replace spaces with hyphens
     .replace(/-+/g, '-') // Replace multiple hyphens with single
     .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
-    .slice(0, 50); // Truncate to 50 chars for reasonable URLs
+    .slice(0, 100); // Truncate to 100 chars for reasonable URLs (increased from 50)
 
   return `${date}-${titleSlug}`;
 }

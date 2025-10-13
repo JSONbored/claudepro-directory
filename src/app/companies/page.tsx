@@ -1,6 +1,6 @@
-import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -10,14 +10,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { ROUTES } from '@/src/lib/constants';
 import { Building, ExternalLink, Plus, Star } from '@/src/lib/icons';
+import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata: Metadata = {
-  title: 'Companies Using Claude - ClaudePro Directory',
-  description: 'Discover companies building with Claude and Cursor',
-};
+export const metadata = await generatePageMetadata('/companies');
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -57,7 +56,7 @@ export default async function CompaniesPage() {
             </div>
 
             <Button variant="outline" asChild>
-              <Link href="/account/companies">
+              <Link href={ROUTES.ACCOUNT_COMPANIES}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Your Company
               </Link>
@@ -77,7 +76,7 @@ export default async function CompaniesPage() {
                 Be the first company to join the directory!
               </p>
               <Button asChild>
-                <Link href="/account/companies">
+                <Link href={ROUTES.ACCOUNT_COMPANIES}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Your Company
                 </Link>
@@ -85,7 +84,7 @@ export default async function CompaniesPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className={'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}>
+          <div className={UI_CLASSES.GRID_RESPONSIVE_3}>
             {companies.map((company) => (
               <Card key={company.id} className={UI_CLASSES.CARD_GRADIENT_HOVER}>
                 {company.featured && (
@@ -151,6 +150,16 @@ export default async function CompaniesPage() {
             ))}
           </div>
         )}
+      </section>
+
+      {/* Email CTA - Footer section (matching homepage pattern) */}
+      <section className={`container ${UI_CLASSES.MX_AUTO} px-4 py-12`}>
+        <InlineEmailCTA
+          variant="hero"
+          context="companies-page"
+          headline="Join 1,000+ Claude Power Users"
+          description="Get weekly updates on new tools, guides, and community highlights. No spam, unsubscribe anytime."
+        />
       </section>
     </div>
   );

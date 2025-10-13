@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
 import type { MDXFrontmatter } from '@/src/lib/schemas/markdown.schema';
+import { getSharedHighlighter } from './shiki-singleton';
 
 // MDX node schema for type safety
 const mdxNodeChildSchema = z.object({
@@ -110,9 +111,11 @@ const shikiOptions = {
   ],
 };
 
-// Rehype Pretty Code configuration
+// Rehype Pretty Code configuration with Shiki singleton
 const rehypePrettyCodeOptions = {
   ...shikiOptions,
+  // CRITICAL: Provide shared highlighter instance to prevent multiple Shiki instances
+  getHighlighter: getSharedHighlighter,
   onVisitLine(node: MDXNode) {
     // Prevent lines from collapsing in `display: grid` mode, and
     // allow empty lines to be copy/pasted

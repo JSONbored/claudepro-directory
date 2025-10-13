@@ -31,7 +31,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "git": {
           "command": "npx",
           "args": ["-y", "@modelcontextprotocol/server-git"]
@@ -39,7 +39,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "git": {
           "command": "npx",
           "args": ["-y", "@modelcontextprotocol/server-git"]
@@ -83,11 +83,36 @@
     }
   ],
   "examples": [
-    "Show me the recent commit history",
-    "What branches exist in this repository?",
-    "Find commits mentioning bug fix",
-    "What changed in the last 5 commits?",
-    "Compare this file between two commits"
+    {
+      "title": "Show me the recent commit history",
+      "code": "Ask Claude: \"Show me the recent commit history\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "What branches exist in this repository?",
+      "code": "Ask Claude: \"What branches exist in this repository?\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Find commits mentioning bug fix",
+      "code": "Ask Claude: \"Find commits mentioning bug fix\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "What changed in the last 5 commits?",
+      "code": "Ask Claude: \"What changed in the last 5 commits?\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Compare this file between two commits",
+      "code": "Ask Claude: \"Compare this file between two commits\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": false,
   "permissions": ["git", "filesystem"],

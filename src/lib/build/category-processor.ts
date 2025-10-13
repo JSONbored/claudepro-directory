@@ -29,6 +29,7 @@ import {
 import { logger } from '@/src/lib/logger';
 import { generateSlugFromFilename } from '@/src/lib/schemas/content-generation.schema';
 import { slugToTitle } from '@/src/lib/utils';
+import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
 
 /**
  * Build cache interface for incremental builds
@@ -166,7 +167,7 @@ async function processContentFile<T extends ContentType>(
 
   try {
     // Read file metadata for caching
-    const [content, fileStats] = await Promise.all([readFile(filePath, 'utf-8'), stat(filePath)]);
+    const [content, fileStats] = await batchFetch([readFile(filePath, 'utf-8'), stat(filePath)]);
 
     // Security: File size validation (prevent DoS)
     if (content.length > 1024 * 1024) {
@@ -215,6 +216,52 @@ async function processContentFile<T extends ContentType>(
 
     // Validate with category-specific schema
     const validatedContent = config.schema.parse(parsedData) as T;
+
+    // SEO Title Length Validation: Warn if seoTitle missing and title will be truncated
+    if (validatedContent && typeof validatedContent === 'object' && 'title' in validatedContent) {
+      const contentItem = validatedContent as {
+        title?: string;
+        seoTitle?: string;
+        category?: string;
+      };
+      const title = contentItem.title;
+      const seoTitle = contentItem.seoTitle;
+      const category = config.id;
+
+      // Calculate max title length for this category (based on metadata-registry.ts pattern)
+      const SITE_NAME = 'Claude Pro Directory'; // 20 chars
+      const SEPARATOR = ' - '; // 3 chars
+      const CATEGORY_NAMES: Record<string, string> = {
+        agents: 'AI Agents',
+        mcp: 'MCP',
+        rules: 'Rules',
+        commands: 'Commands',
+        hooks: 'Hooks',
+        statuslines: 'Statuslines',
+        guides: 'Guides',
+        collections: 'Collections',
+      };
+
+      const categoryDisplay = CATEGORY_NAMES[category] || category;
+      const overhead =
+        SEPARATOR.length + categoryDisplay.length + SEPARATOR.length + SITE_NAME.length;
+      const maxContentLength = 60 - overhead;
+
+      // Warn if title exceeds max length and seoTitle is missing
+      if (title && title.length > maxContentLength && !seoTitle) {
+        logger.warn(
+          `⚠️  Title truncation: "${file}" has ${title.length}-char title (max ${maxContentLength} for ${category}). Consider adding seoTitle field.`,
+          {
+            file,
+            category,
+            titleLength: title.length,
+            maxLength: maxContentLength,
+            overhead,
+            recommendation: 'Add seoTitle field to frontmatter for optimal SEO',
+          }
+        );
+      }
+    }
 
     return {
       success: true,
@@ -283,8 +330,8 @@ async function processCategoryFiles<T extends ContentType>(
 
   for (let i = 0; i < jsonFiles.length; i += batchSize) {
     const batch = jsonFiles.slice(i, i + batchSize);
-    const batchResults = await Promise.all(
-      batch.map((file) => processContentFile<T>(file, contentDir, config, cache))
+    const batchResults = await batchMap(batch, (file) =>
+      processContentFile<T>(file, contentDir, config, cache)
     );
     results.push(...batchResults);
 
@@ -331,7 +378,9 @@ export async function buildCategory(
     const failed = results.filter((r) => !r.success);
 
     // Extract valid content and metadata
-    const validContent = successful.map((r) => r.content!);
+    const validContent = successful
+      .map((r) => r.content)
+      .filter((c): c is NonNullable<typeof c> => c !== null);
     const metadata = validContent.map((content) => extractMetadata(content, config));
 
     // Calculate metrics
@@ -359,7 +408,7 @@ export async function buildCategory(
       items: validContent,
       metadata,
       metrics,
-      errors: failed.map((r) => r.error!),
+      errors: failed.map((r) => r.error).filter((e): e is Error => e !== null),
     };
   } catch (error) {
     logger.error(

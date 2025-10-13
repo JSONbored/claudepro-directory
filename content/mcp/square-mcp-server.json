@@ -30,7 +30,7 @@
   },
   "configuration": {
     "claudeDesktop": {
-      "mcpServers": {
+      "mcp": {
         "square": {
           "transport": "sse",
           "url": "https://mcp.squareup.com/sse"
@@ -38,7 +38,7 @@
       }
     },
     "claudeCode": {
-      "mcpServers": {
+      "mcp": {
         "square": {
           "transport": "sse",
           "url": "https://mcp.squareup.com/sse"
@@ -76,10 +76,30 @@
     }
   ],
   "examples": [
-    "Process a $50 payment",
-    "Check inventory for SKU-123",
-    "Create order for customer",
-    "Generate today's sales report"
+    {
+      "title": "Process a $50 payment",
+      "code": "Ask Claude: \"Process a $50 payment\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Check inventory for SKU-123",
+      "code": "Ask Claude: \"Check inventory for SKU-123\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Create order for customer",
+      "code": "Ask Claude: \"Create order for customer\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    },
+    {
+      "title": "Generate today's sales report",
+      "code": "Ask Claude: \"Generate today's sales report\"",
+      "language": "plaintext",
+      "description": "Common usage pattern for this MCP server"
+    }
   ],
   "requiresAuth": true,
   "permissions": ["read", "write", "payments"],

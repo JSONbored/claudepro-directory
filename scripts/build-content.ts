@@ -26,14 +26,13 @@ import {
   saveBuildCache,
   writeBuildOutput,
 } from '../src/lib/build/category-processor.js';
+import { onBuildComplete } from '../src/lib/cache.js';
 import {
   BUILD_CATEGORY_CONFIGS,
   type BuildCategoryId,
   getAllBuildCategoryConfigs,
 } from '../src/lib/config/build-category-config.js';
 import { logger } from '../src/lib/logger.js';
-import { onBuildComplete } from '../src/lib/related-content/cache-invalidation.js';
-import { contentIndexer } from '../src/lib/related-content/indexer.js';
 import type { ContentStats } from '../src/lib/schemas/content/content-types.js';
 
 // Paths
@@ -290,15 +289,9 @@ async function main(): Promise<void> {
     const indexContent = generateIndexFile(contentStats as ContentStats);
     await writeBuildOutput(indexPath, indexContent);
 
-    logger.info('\n📊 Building content index...');
-    const contentIndex = await contentIndexer.buildIndex();
-    logger.success(`✓ Built content index with ${contentIndex.items.length} items`);
-
-    // Save the main index
-    await contentIndexer.saveIndex(contentIndex);
-
-    // Save split index files for lazy loading
-    await contentIndexer.saveSplitIndex(contentIndex);
+    // Content index generation removed - we now use metadata loaders directly
+    // This eliminates 676 KB of redundant generated files (596 KB + 80 KB split files)
+    logger.info('\n✅ Content metadata generation complete (using lazy loaders)');
 
     // Save updated cache
     const newCache = {

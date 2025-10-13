@@ -83,7 +83,18 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
 
           <Card className="bg-muted/30">
             <CardContent className="pt-6">
-              {!isComplete ? (
+              {isComplete ? (
+                <div className={UI_CLASSES.SPACE_Y_4}>
+                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                    <CheckCircle className="h-5 w-5" />
+                    <p className={UI_CLASSES.FONT_MEDIUM}>Solution Found:</p>
+                  </div>
+                  <p className="text-muted-foreground">{currentStepData?.solution}</p>
+                  <Button onClick={reset} variant="outline">
+                    Start Over
+                  </Button>
+                </div>
+              ) : (
                 <div className={UI_CLASSES.SPACE_Y_4}>
                   <p className={`text-lg ${UI_CLASSES.FONT_MEDIUM}`}>{currentStepData?.question}</p>
                   <div className={UI_CLASSES.FLEX_GAP_4}>
@@ -94,17 +105,6 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
                       No
                     </Button>
                   </div>
-                </div>
-              ) : (
-                <div className={UI_CLASSES.SPACE_Y_4}>
-                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                    <CheckCircle className="h-5 w-5" />
-                    <p className={UI_CLASSES.FONT_MEDIUM}>Solution Found:</p>
-                  </div>
-                  <p className="text-muted-foreground">{currentStepData?.solution}</p>
-                  <Button onClick={reset} variant="outline">
-                    Start Over
-                  </Button>
                 </div>
               )}
             </CardContent>

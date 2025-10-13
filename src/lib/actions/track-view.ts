@@ -2,9 +2,11 @@
 
 import { z } from 'zod';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { statsRedis } from '@/src/lib/redis';
+import { statsRedis } from '@/src/lib/cache';
+import { logger } from '@/src/lib/logger';
 import { nonEmptyString } from '@/src/lib/schemas/primitives/base-strings';
 import { contentCategorySchema } from '@/src/lib/schemas/shared.schema';
+import { createClient } from '@/src/lib/supabase/server';
 
 /**
  * Tracking parameters schema for view and copy events
@@ -17,7 +19,7 @@ const trackingParamsSchema = z.object({
       /^[a-zA-Z0-9-_/]+$/,
       'Slug can only contain letters, numbers, hyphens, underscores, and forward slashes'
     )
-    .transform((val) => val.toLowerCase().trim()),
+    .transform((val: string) => val.toLowerCase().trim()),
 });
 
 /**
@@ -43,7 +45,8 @@ export const trackView = rateLimitedAction
     category: 'analytics',
   })
   .schema(trackingParamsSchema)
-  .action(async ({ parsedInput: { category, slug } }) => {
+  .action(async ({ parsedInput }: { parsedInput: z.infer<typeof trackingParamsSchema> }) => {
+    const { category, slug } = parsedInput;
     if (!statsRedis.isEnabled()) {
       return {
         success: false,
@@ -52,6 +55,32 @@ export const trackView = rateLimitedAction
     }
 
     const viewCount = await statsRedis.incrementView(category, slug);
+
+    // Track interaction for personalization (non-blocking)
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      supabase
+        .from('user_interactions')
+        .insert({
+          user_id: user.id,
+          content_type: category,
+          content_slug: slug,
+          interaction_type: 'view',
+          metadata: {},
+        })
+        .then(({ error }: { error: unknown }) => {
+          if (error) {
+            logger.warn('Failed to track view interaction', undefined, {
+              category,
+              slug,
+            });
+          }
+        });
+    }
 
     return {
       success: true,
@@ -82,7 +111,8 @@ export const trackCopy = rateLimitedAction
     category: 'analytics',
   })
   .schema(trackingParamsSchema)
-  .action(async ({ parsedInput: { category, slug } }) => {
+  .action(async ({ parsedInput }: { parsedInput: z.infer<typeof trackingParamsSchema> }) => {
+    const { category, slug } = parsedInput;
     if (!statsRedis.isEnabled()) {
       return {
         success: false,
@@ -91,6 +121,32 @@ export const trackCopy = rateLimitedAction
     }
 
     await statsRedis.trackCopy(category, slug);
+
+    // Track interaction for personalization (non-blocking)
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      supabase
+        .from('user_interactions')
+        .insert({
+          user_id: user.id,
+          content_type: category,
+          content_slug: slug,
+          interaction_type: 'copy',
+          metadata: {},
+        })
+        .then(({ error }: { error: unknown }) => {
+          if (error) {
+            logger.warn('Failed to track copy interaction', undefined, {
+              category,
+              slug,
+            });
+          }
+        });
+    }
 
     return {
       success: true,

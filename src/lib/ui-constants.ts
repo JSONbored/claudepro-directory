@@ -30,7 +30,8 @@ export const UI_CLASSES = {
    */
   GRID_RESPONSIVE_2: 'grid gap-4 md:grid-cols-2',
   GRID_RESPONSIVE_2_GAP_8: 'grid gap-8 md:grid-cols-2',
-  GRID_RESPONSIVE_3: 'grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+  GRID_RESPONSIVE_3:
+    'grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-start auto-rows-fr',
   GRID_RESPONSIVE_3_GAP_8: 'grid gap-8 lg:grid-cols-3',
   GRID_RESPONSIVE_3_NO_LG: 'grid gap-6 md:grid-cols-3',
   GRID_RESPONSIVE_3_TIGHT: 'grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
@@ -117,11 +118,13 @@ export const UI_CLASSES = {
   /**
    * Flexbox Layouts - Common patterns
    */
-  FLEX_ITEMS_CENTER_GAP_2: 'flex items-center gap-2',
-  FLEX_GAP_2: 'flex gap-2',
-  FLEX_ITEMS_START_GAP_3: 'flex items-start gap-3',
-  FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN: 'flex items-center justify-between',
   FLEX_ITEMS_CENTER_GAP_1: 'flex items-center gap-1',
+  FLEX_ITEMS_CENTER_GAP_2: 'flex items-center gap-2',
+  FLEX_ITEMS_CENTER_GAP_3: 'flex items-center gap-3',
+  FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN: 'flex items-center justify-between',
+  FLEX_ITEMS_START_GAP_3: 'flex items-start gap-3',
+  FLEX_ITEMS_START_JUSTIFY_BETWEEN: 'flex items-start justify-between',
+  FLEX_GAP_2: 'flex gap-2',
   FLEX_GAP_3: 'flex gap-3',
   FLEX_GAP_4: 'flex gap-4',
   FLEX_WRAP_GAP_1: 'flex flex-wrap gap-1',
@@ -730,7 +733,7 @@ export const UI_CLASSES = {
   /**
    * Touch Targets (Mobile-optimized)
    */
-  TOUCH_TARGET_48: 'min-w-[48px] min-h-[48px]',
+  TOUCH_TARGET_48: 'min-w-[48px] min-h-[44px]',
   TOUCH_TARGET_44: 'min-w-[44px] min-h-[44px]',
 } as const;
 
@@ -738,3 +741,202 @@ export const UI_CLASSES = {
  * Type-safe UI class constant keys
  */
 export type UIClassKey = keyof typeof UI_CLASSES;
+
+/**
+ * Content Card Behavior Configuration
+ *
+ * Defines which UI elements to show/hide for different content types.
+ * This eliminates the need for separate card components per content type.
+ *
+ * Tree-shakeable: Only the configuration is imported, not additional components.
+ * Type-safe: Enforces valid content types at compile time.
+ *
+ * @example
+ * ```typescript
+ * const behavior = CARD_BEHAVIORS[item.category] || CARD_BEHAVIORS.default;
+ * if (behavior.showCopyButton) {
+ *   // Render copy button
+ * }
+ * ```
+ */
+export const CARD_BEHAVIORS = {
+  /**
+   * Default behavior for configuration items
+   * (agents, mcp, commands, rules, hooks, statuslines)
+   */
+  default: {
+    showCopyButton: true,
+    showViewCount: true,
+    showCopyCount: true,
+    showRating: true,
+    showFeaturedBadge: true,
+  },
+
+  /**
+   * Guide content behavior (tutorials, workflows, etc.)
+   * Guides are educational content, not copyable configurations
+   */
+  guides: {
+    showCopyButton: false, // Guides aren't copyable
+    showViewCount: true,
+    showCopyCount: false, // Guides don't track copies
+    showRating: true,
+    showFeaturedBadge: true,
+  },
+  tutorials: {
+    showCopyButton: false,
+    showViewCount: true,
+    showCopyCount: false,
+    showRating: true,
+    showFeaturedBadge: true,
+  },
+  workflows: {
+    showCopyButton: false,
+    showViewCount: true,
+    showCopyCount: false,
+    showRating: true,
+    showFeaturedBadge: true,
+  },
+  comparisons: {
+    showCopyButton: false,
+    showViewCount: true,
+    showCopyCount: false,
+    showRating: true,
+    showFeaturedBadge: true,
+  },
+  'use-cases': {
+    showCopyButton: false,
+    showViewCount: true,
+    showCopyCount: false,
+    showRating: true,
+    showFeaturedBadge: true,
+  },
+  troubleshooting: {
+    showCopyButton: false,
+    showViewCount: true,
+    showCopyCount: false,
+    showRating: true,
+    showFeaturedBadge: true,
+  },
+
+  /**
+   * Collection behavior
+   * Collections group multiple items, show engagement metrics
+   */
+  collections: {
+    showCopyButton: true,
+    showViewCount: true,
+    showCopyCount: true,
+    showRating: false, // Collections don't have ratings (yet)
+    showFeaturedBadge: false, // Collections have their own type badges
+  },
+} as const;
+
+/**
+ * Type-safe card behavior keys
+ */
+export type CardBehaviorKey = keyof typeof CARD_BEHAVIORS;
+
+/**
+ * Badge Color Constants
+ * Centralized color schemes for badges to eliminate inline color definitions
+ * SHA-2101: Part of consolidation effort to reduce duplication
+ *
+ * Usage: Replace inline badge color objects with these constants
+ * Before: const colors = { 'full-time': 'bg-green-500/10...' }
+ * After: className={BADGE_COLORS.jobType['full-time']}
+ */
+export const BADGE_COLORS = {
+  /**
+   * Job type badge colors
+   * Used in: JobCard, job detail pages, job listings
+   */
+  jobType: {
+    'full-time': 'bg-green-500/10 text-green-400 border-green-500/20',
+    'part-time': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    contract: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+    freelance: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    remote: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  },
+
+  /**
+   * Difficulty level badge colors
+   * Used in: Collection cards, guide pages, content filters
+   */
+  difficulty: {
+    beginner: 'bg-green-500/10 text-green-400 border-green-500/20',
+    intermediate: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    advanced: 'bg-red-500/10 text-red-400 border-red-500/20',
+  },
+
+  /**
+   * Changelog category badge colors
+   * Used in: Changelog cards, changelog pages
+   */
+  changelogCategory: {
+    Added: 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20',
+    Changed: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
+    Deprecated: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20',
+    Removed: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20',
+    Fixed: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20',
+    Security: 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20',
+  },
+
+  /**
+   * Generic status badge colors
+   * Used in: Various status indicators throughout the app
+   */
+  status: {
+    success: 'bg-green-500/10 text-green-400 border-green-500/20',
+    warning: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    error: 'bg-red-500/10 text-red-400 border-red-500/20',
+    info: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  },
+
+  /**
+   * Content category badge colors (SHA-3146)
+   * Used in: DetailSidebar category badges
+   */
+  category: {
+    agents: 'bg-purple-500/20 text-purple-500 border-purple-500/30',
+    mcp: 'bg-green-500/20 text-green-500 border-green-500/30',
+    commands: 'bg-orange-500/20 text-orange-500 border-orange-500/30',
+    hooks: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
+    rules: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
+    collections: 'bg-purple-500/20 text-purple-500 border-purple-500/30',
+    default: 'bg-primary/20 text-primary border-primary/30',
+  },
+
+  /**
+   * Submission status badge colors (SHA-3146)
+   * Used in: User submissions page, submission tracking
+   */
+  submissionStatus: {
+    pending: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    approved: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    merged: 'bg-green-500/10 text-green-400 border-green-500/20',
+    rejected: 'bg-red-500/10 text-red-400 border-red-500/20',
+  },
+
+  /**
+   * Job posting status badge colors (SHA-3146)
+   * Used in: Job dashboard, job analytics, job listings
+   */
+  jobStatus: {
+    active: 'bg-green-500/10 text-green-400 border-green-500/20',
+    draft: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    paused: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+    expired: 'bg-red-500/10 text-red-400 border-red-500/20',
+  },
+} as const;
+
+/**
+ * Type-safe badge color keys
+ */
+export type JobType = keyof typeof BADGE_COLORS.jobType;
+export type DifficultyLevel = keyof typeof BADGE_COLORS.difficulty;
+export type ChangelogCategory = keyof typeof BADGE_COLORS.changelogCategory;
+export type StatusType = keyof typeof BADGE_COLORS.status;
+export type CategoryType = keyof typeof BADGE_COLORS.category;
+export type SubmissionStatusType = keyof typeof BADGE_COLORS.submissionStatus;
+export type JobStatusType = keyof typeof BADGE_COLORS.jobStatus;
