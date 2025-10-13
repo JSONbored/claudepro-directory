@@ -248,3 +248,27 @@ export async function getRelatedContent(
 
   return allContent.filter((item) => item.slug !== currentSlug).slice(0, limit);
 }
+
+/**
+ * Get total count of all configurations across all categories
+ * Used for dynamic SEO metadata (e.g., "147+ configs")
+ *
+ * @returns Total count of all content items
+ */
+export async function getTotalContentCount(): Promise<number> {
+  const categories = ['agents', 'mcp', 'commands', 'rules', 'hooks', 'statuslines'];
+
+  try {
+    const counts = await Promise.all(
+      categories.map(async (category) => {
+        const content = await getContentByCategory(category);
+        return content.length;
+      })
+    );
+
+    return counts.reduce((sum, count) => sum + count, 0);
+  } catch (error) {
+    logger.error('Failed to get total content count', error as Error);
+    return 147; // Fallback to reasonable estimate
+  }
+}

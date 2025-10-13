@@ -14,8 +14,8 @@ if (process.env.ANALYZE === 'true') {
   try {
     const bundleAnalyzer = (await import('@next/bundle-analyzer')).default;
     withBundleAnalyzer = bundleAnalyzer({ enabled: true });
-  } catch (e) {
-    console.warn('⚠️  @next/bundle-analyzer not available - skipping bundle analysis');
+  } catch {
+    // @next/bundle-analyzer not available - skipping bundle analysis
   }
 }
 

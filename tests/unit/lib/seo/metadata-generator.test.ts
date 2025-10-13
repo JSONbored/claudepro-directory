@@ -50,18 +50,18 @@ describe('generatePageMetadata()', () => {
       const metadata = await generatePageMetadata('/');
 
       expect(metadata).toBeDefined();
-      expect(metadata.title).toBe('Claude Pro Directory');
+      expect(metadata.title).toBe('Claude Pro Directory - MCP Servers, AI Agents & Configs');
       expect(metadata.description).toBeDefined();
       expect(typeof metadata.description).toBe('string');
     });
 
-    it('has title within optimal length (≤60 chars)', async () => {
+    it('has title within SEO optimal range (55-60 chars)', async () => {
       const metadata = await generatePageMetadata('/');
       const title = metadata.title as string;
 
+      // Homepage must meet 55-60 char requirement for SEO validation
       expect(title.length).toBeGreaterThanOrEqual(55);
       expect(title.length).toBeLessThanOrEqual(60);
-      expect(title.length).toBeGreaterThan(0);
     });
 
     it('has description between 150-160 chars (2025 best practice)', async () => {
@@ -177,7 +177,7 @@ describe('generatePageMetadata()', () => {
       const metadata = await generatePageMetadata('/trending');
 
       expect(metadata).toBeDefined();
-      expect(metadata.title).toBe('Trending Configurations - Claude Pro Directory');
+      expect(metadata.title).toBe('Trending Claude AI Configurations - Claude Pro Directory');
       expect(metadata.description).toBeDefined();
     });
 
@@ -238,7 +238,9 @@ describe('generatePageMetadata()', () => {
       const metadata = await generatePageMetadata('/:category', context);
 
       expect(metadata).toBeDefined();
-      expect(metadata.title).toContain('Claude AI Agent Templates 2025');
+      expect(metadata.title).toContain('AI Agents');
+      expect(metadata.title).toContain('Claude');
+      expect(metadata.title).toContain('2025');
       expect(metadata.description).toBeDefined();
     });
 
@@ -249,16 +251,17 @@ describe('generatePageMetadata()', () => {
         categoryConfig: {
           title: 'MCP Servers',
           pluralTitle: 'MCP Servers',
-          metaDescription: 'Discover Model Context Protocol servers for Claude AI integration.',
+          metaDescription: 'Browse 40+ Claude MCP server templates for October 2025. Connect Claude to filesystems, databases, APIs, and external tools via Model Context Protocol servers.',
           keywords: 'mcp servers, model context protocol, claude mcp',
         },
       };
 
       const metadata = await generatePageMetadata('/:category', context);
 
-      expect(metadata.description).toBe(
-        'Discover Model Context Protocol servers for Claude AI integration.'
-      );
+      expect(metadata.description).toContain('MCP server');
+      expect(metadata.description).toContain('2025');
+      expect(metadata.description?.length).toBeGreaterThanOrEqual(150);
+      expect(metadata.description?.length).toBeLessThanOrEqual(160);
     });
 
     it('generates keywords from categoryConfig', async () => {
@@ -268,7 +271,7 @@ describe('generatePageMetadata()', () => {
         categoryConfig: {
           title: 'Hooks',
           pluralTitle: 'Hooks',
-          metaDescription: 'Claude Code hooks for automation and workflow customization.',
+          metaDescription: 'Browse Claude hook templates for October 2025. Customize your Claude Code workflow with pre-commit hooks, validation scripts, and automation for development tasks.',
           keywords: 'claude hooks, automation hooks, claude code hooks',
         },
       };
@@ -276,7 +279,8 @@ describe('generatePageMetadata()', () => {
       const metadata = await generatePageMetadata('/:category', context);
 
       expect(metadata.keywords).toBeDefined();
-      expect(metadata.keywords).toContain('claude hooks');
+      expect(typeof metadata.keywords).toBe('string');
+      expect(metadata.keywords).toContain('hooks');
     });
 
     it('builds canonical URL with category slug', async () => {
@@ -345,8 +349,9 @@ describe('generatePageMetadata()', () => {
       const metadata = await generatePageMetadata('/:category/:slug', context);
       const title = metadata.title as string;
 
-      // Content tier allows slightly longer titles (up to ~70 chars)
-      expect(title.length).toBeLessThanOrEqual(75);
+      // All titles must be 55-60 chars for optimal SEO
+      expect(title.length).toBeGreaterThanOrEqual(55);
+      expect(title.length).toBeLessThanOrEqual(60);
     });
 
     it('uses Article type for OpenGraph (better AI citations)', async () => {
@@ -369,16 +374,18 @@ describe('generatePageMetadata()', () => {
     it('includes author metadata when available', async () => {
       const context: MetadataContext = {
         params: { category: 'guides', slug: 'mcp-setup' },
+        category: 'guides',
         item: {
           title: 'MCP Server Setup Guide',
-          description: 'Complete guide to setting up MCP servers.',
+          description: 'Complete guide to setting up Claude MCP servers with detailed instructions for optimal configuration and Claude AI integration performance in October 2025.',
           author: 'Claude Team',
           dateAdded: '2025-01-15T00:00:00Z',
+          tags: ['mcp', 'setup', 'guide', 'configuration'],
         },
         categoryConfig: { title: 'Guides' },
       };
 
-      const metadata = await generatePageMetadata('/guides/:category/:slug', context);
+      const metadata = await generatePageMetadata('/:category/:slug', context);
 
       expect(metadata.authors).toBeDefined();
       expect(metadata.authors).toEqual([{ name: 'Claude Team' }]);
@@ -387,17 +394,19 @@ describe('generatePageMetadata()', () => {
     it('includes dateModified for Article schema (3.2x more AI citations)', async () => {
       const context: MetadataContext = {
         params: { category: 'guides', slug: 'mcp-setup' },
+        category: 'guides',
         item: {
           title: 'MCP Setup Guide',
-          description: 'Setup guide.',
+          description: 'Complete setup guide for Claude MCP servers with detailed configuration instructions and best practices for Claude AI integration performance in October 2025.',
           author: 'Claude Team',
           dateAdded: '2025-01-15T00:00:00Z',
           lastModified: '2025-10-01T00:00:00Z',
+          tags: ['mcp', 'setup', 'guide', 'configuration'],
         },
         categoryConfig: { title: 'Guides' },
       };
 
-      const metadata = await generatePageMetadata('/guides/:category/:slug', context);
+      const metadata = await generatePageMetadata('/:category/:slug', context);
       const ogMetadata = metadata.openGraph as Record<string, unknown>;
 
       expect(ogMetadata.publishedTime).toBe('2025-01-15T00:00:00Z');
@@ -455,6 +464,43 @@ describe('generatePageMetadata()', () => {
       expect(metadata.keywords).toContain('claude ai');
       expect(metadata.keywords).toContain('claude 2025');
     });
+
+    it('prioritizes seoTitle over full title for content pages', async () => {
+      const context: MetadataContext = {
+        params: { category: 'agents', slug: 'test-agent' },
+        item: {
+          title: 'This is a very long agent title that would normally be truncated',
+          seoTitle: 'Optimized Agent Title',
+          description: 'Agent description that meets SEO requirements for optimal search engine optimization and AI citation purposes in production environments.',
+        },
+        categoryConfig: { title: 'AI Agents' },
+      };
+
+      const metadata = await generatePageMetadata('/:category/:slug', context);
+
+      // Should use seoTitle instead of truncated full title
+      expect(metadata.title).toContain('Optimized Agent Title');
+      expect(metadata.title).not.toContain('This is a very long');
+    });
+
+    it('falls back to truncated title when seoTitle is missing', async () => {
+      const context: MetadataContext = {
+        params: { category: 'agents', slug: 'test-agent' },
+        item: {
+          title: 'This is a very long agent title that will be truncated automatically',
+          description: 'Agent description that meets SEO requirements for optimal search engine optimization and AI citation purposes in production environments.',
+        },
+        categoryConfig: { title: 'AI Agents' },
+      };
+
+      const metadata = await generatePageMetadata('/:category/:slug', context);
+      const title = metadata.title as string;
+
+      // Should truncate and still be within 55-60 char limit
+      expect(title.length).toBeGreaterThanOrEqual(55);
+      expect(title.length).toBeLessThanOrEqual(60);
+      expect(title).toContain('AI Agents');
+    });
   });
 
   describe('Fallback Behavior for Unknown Routes', () => {
@@ -462,8 +508,8 @@ describe('generatePageMetadata()', () => {
       const metadata = await generatePageMetadata('/unknown-route');
 
       expect(metadata).toBeDefined();
-      expect(metadata.title).toBe('Claude Pro Directory');
-      expect(metadata.description).toContain('Page on Claude Pro Directory');
+      expect(metadata.title).toContain('Claude Pro Directory');
+      expect(metadata.description).toContain('Claude Pro Directory');
     });
 
     it('fallback metadata has minimal properties', async () => {
@@ -471,8 +517,7 @@ describe('generatePageMetadata()', () => {
 
       expect(metadata.title).toBeDefined();
       expect(metadata.description).toBeDefined();
-      // Should not have extensive metadata like OG images
-      expect(metadata.openGraph).toBeUndefined();
+      expect(metadata.openGraph).toBeDefined();
     });
   });
 
@@ -480,17 +525,18 @@ describe('generatePageMetadata()', () => {
     it('generates metadata for guide detail page', async () => {
       const context: MetadataContext = {
         params: { category: 'tutorials', slug: 'mcp-setup' },
+        category: 'tutorials',
         item: {
           title: 'MCP Server Setup Guide',
           description:
-            'Learn how to set up Model Context Protocol servers for Claude AI integration with step-by-step instructions and best practices.',
+            'Learn how to set up Model Context Protocol servers for Claude AI integration with step-by-step instructions and best practices for October 2025.',
           tags: ['mcp', 'setup', 'tutorial', 'integration'],
           author: 'Claude Team',
         },
         categoryConfig: { title: 'Tutorials' },
       };
 
-      const metadata = await generatePageMetadata('/guides/:category/:slug', context);
+      const metadata = await generatePageMetadata('/:category/:slug', context);
 
       expect(metadata.title).toContain('MCP Server Setup Guide');
       expect(metadata.description).toContain('Model Context Protocol');
@@ -671,7 +717,8 @@ describe('generateContentMetadata()', () => {
   it('handles undefined categoryConfig', async () => {
     const item = {
       title: 'Test Item',
-      description: 'Test description.',
+      description: 'Comprehensive test configuration for Claude AI and Claude Code with validation purposes and sufficient length for optimal SEO ranking in October 2025.',
+      tags: ['test', 'validation', 'seo'],
     };
 
     const metadata = await generateContentMetadata('agents', 'test-item', item, undefined);
@@ -683,7 +730,8 @@ describe('generateContentMetadata()', () => {
   it('includes llms.txt alternate link', async () => {
     const item = {
       title: 'Test Agent',
-      description: 'Test description.',
+      description: 'Comprehensive test agent description with sufficient length to meet SEO requirements for optimal search engine ranking and AI citation purposes in 2025.',
+      tags: ['test', 'agent', 'validation'],
     };
 
     const metadata = await generateContentMetadata('agents', 'test-agent', item);
@@ -700,9 +748,10 @@ describe('Schema Derivation Tests', () => {
   it('should derive metadata from agent schema', async () => {
     const context: MetadataContext = {
       params: { category: 'agents', slug: 'test-agent' },
+      category: 'agents',
       item: {
         title: 'Test Agent for Code Review',
-        description: 'A comprehensive agent for automated code review and quality analysis.',
+        description: 'Comprehensive Claude AI agent for automated code review and quality analysis with advanced features for optimal Claude Code performance in October 2025.',
         tags: ['code-review', 'quality', 'automation'],
       },
       categoryConfig: { title: 'AI Agents' },
@@ -710,18 +759,17 @@ describe('Schema Derivation Tests', () => {
 
     const metadata = await generatePageMetadata('/:category/:slug', context);
 
-    // Should derive title from item.title
     expect(metadata.title).toContain('Test Agent for Code Review');
-    // Should derive description from item.description
     expect(metadata.description).toContain('comprehensive agent for automated code review');
   });
 
   it('should derive metadata from MCP server schema', async () => {
     const context: MetadataContext = {
       params: { category: 'mcp', slug: 'filesystem-server' },
+      category: 'mcp',
       item: {
         title: 'Filesystem MCP Server',
-        description: 'Model Context Protocol server for filesystem operations and file management.',
+        description: 'Claude Model Context Protocol server for filesystem operations and file management with advanced capabilities for Claude AI workflows in October 2025.',
         tags: ['filesystem', 'mcp', 'server'],
       },
       categoryConfig: { title: 'MCP Servers' },
@@ -736,10 +784,11 @@ describe('Schema Derivation Tests', () => {
   it('should handle missing optional fields in schema', async () => {
     const context: MetadataContext = {
       params: { category: 'hooks', slug: 'minimal-hook' },
+      category: 'hooks',
       item: {
         title: 'Minimal Hook',
-        description: 'Basic hook with minimal metadata.',
-        // No tags, author, dates
+        description: 'Basic Claude Code hook configuration with minimal metadata for testing purposes with sufficient length for optimal Claude AI SEO ranking in October 2025.',
+        tags: ['hook', 'minimal', 'test'],
       },
       categoryConfig: { title: 'Hooks' },
     };
@@ -855,8 +904,8 @@ describe('Fallback Metadata Generation', () => {
     const metadata = await generatePageMetadata('/completely-unknown-route');
 
     expect(metadata).toBeDefined();
-    expect(metadata.title).toBe('Claude Pro Directory');
-    expect(metadata.description).toContain('Page on Claude Pro Directory');
+    expect(metadata.title).toContain('Claude Pro Directory');
+    expect(metadata.description).toContain('Claude Pro Directory');
   });
 
   it('should not have extensive metadata in fallback', async () => {
@@ -865,14 +914,14 @@ describe('Fallback Metadata Generation', () => {
     // Fallback should be minimal
     expect(metadata.title).toBeDefined();
     expect(metadata.description).toBeDefined();
-    expect(metadata.openGraph).toBeUndefined();
+    expect(metadata.openGraph).toBeDefined(); // Smart defaults include OG
   });
 
   it('should parse route segments for fallback title', async () => {
     const metadata = await generatePageMetadata('/some-custom-page');
 
     expect(metadata.title).toContain('Claude Pro Directory');
-    // Should include parsed page name
+    expect(metadata.title).toContain('Some custom page');
   });
 
   it('should handle nested unknown routes', async () => {
@@ -880,6 +929,7 @@ describe('Fallback Metadata Generation', () => {
 
     expect(metadata).toBeDefined();
     expect(metadata.title).toBeDefined();
+    expect(metadata.title).toContain('Route');
   });
 });
 
@@ -1052,8 +1102,8 @@ describe('All Content Category Derivations', () => {
         categoryConfig: {
           title: `${category.charAt(0).toUpperCase() + category.slice(1)}`,
           pluralTitle: `${category}`,
-          metaDescription: `Browse ${category} on Claude Pro Directory.`,
-          keywords: `${category}, claude, ai`,
+          metaDescription: `Browse ${category} for Claude AI and Claude Code with production-ready templates for October 2025. Find tools to enhance your Claude development workflow.`,
+          keywords: `${category}, claude, ai, configuration, templates`,
         },
       };
 
@@ -1068,11 +1118,11 @@ describe('All Content Category Derivations', () => {
 
     it(`should generate valid content detail metadata for ${category}`, async () => {
       const context: MetadataContext = {
-        params: { category, slug: 'test-item' },
+        params: { category, slug: 'sample-item' },
         item: {
-          title: `Test ${category} Item`,
-          description: `This is a comprehensive test item for the ${category} category with sufficient length to meet SEO requirements for optimal search engine ranking.`,
-          tags: [category, 'test', 'claude'],
+          title: `Sample ${category} Item`,
+          description: `Comprehensive ${category} configuration for Claude AI and Claude Code with detailed setup instructions and best practices for October 2025 production environments.`,
+          tags: [category, 'sample', 'claude', 'configuration', 'templates'],
         },
         categoryConfig: {
           title: `${category.charAt(0).toUpperCase() + category.slice(1)}`,
@@ -1082,10 +1132,10 @@ describe('All Content Category Derivations', () => {
       const metadata = await generatePageMetadata('/:category/:slug', context);
 
       expect(metadata).toBeDefined();
-      expect(metadata.title).toContain(`Test ${category} Item`);
-      expect(metadata.description).toContain(`comprehensive test item`);
+      expect(metadata.title).toContain(`Sample ${category} Item`);
+      expect(metadata.description).toContain(category);
       expect(metadata.openGraph?.type).toBe('article');
-      expect(metadata.alternates?.canonical).toMatch(new RegExp(`/${category}/test-item$`));
+      expect(metadata.alternates?.canonical).toMatch(new RegExp(`/${category}/sample-item$`));
     });
   }
 

@@ -19,14 +19,13 @@ import { APP_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import { generateOGImageUrl, OG_IMAGE_DIMENSIONS } from '@/src/lib/og/url-generator';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
-import type { MetadataContext, RouteMetadata } from '@/src/lib/seo/metadata-registry';
+import type { MetadataContext, RouteMetadata, TitleConfig } from '@/src/lib/seo/metadata-registry';
 import {
   applyAIOptimization,
   METADATA_DEFAULTS,
   METADATA_REGISTRY,
 } from '@/src/lib/seo/metadata-registry';
 import { deriveMetadataFromSchema } from '@/src/lib/seo/schema-metadata-adapter';
-import { buildPageTitle } from '@/src/lib/seo/title-builder';
 
 // ============================================
 // VALIDATION HELPERS
@@ -44,31 +43,26 @@ function validateMetadata(
   try {
     const validated = validatedMetadataSchema.parse(rawMetadata);
 
-    // Log validation success in development
-    if (process.env.NODE_ENV === 'development') {
-      logger.info(`✅ Metadata validated for route: ${route}`, {
-        titleLength: validated.title.length,
-        descLength: validated.description.length,
-        keywordCount: validated.keywords?.length || 0,
-      });
-    }
+    // Log validation success using dedicated metadata monitoring
+    logger.metadataValidation(route, true, {
+      titleLength: validated.title.length,
+      descLength: validated.description.length,
+      keywordCount: validated.keywords?.length || 0,
+    });
 
     return validated;
   } catch (error) {
     if (error instanceof z.ZodError) {
       // Format validation errors for logging
-      const errorSummary = error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
+      const errors = error.issues.map((e) => `${e.path.join('.')}: ${e.message}`);
 
-      logger.error(
-        `❌ METADATA VALIDATION FAILED for route: ${route}`,
-        `Validation errors: ${errorSummary}`,
-        { route }
-      );
+      // Log validation failure using dedicated metadata monitoring
+      logger.metadataValidation(route, false, { errors });
 
       // In development: throw to catch issues immediately
       if (process.env.NODE_ENV === 'development') {
         throw new Error(
-          `Metadata validation failed for ${route}:\n${error.issues.map((e) => `- ${e.path.join('.')}: ${e.message}`).join('\n')}`
+          `Metadata validation failed for ${route}:\n${errors.map((e) => `- ${e}`).join('\n')}`
         );
       }
 
@@ -83,16 +77,21 @@ function validateMetadata(
  * Generate fallback metadata for production safety
  * Used when validation fails to ensure pages always have metadata
  */
-function generateFallbackMetadata(route: string): Metadata {
+function generateFallbackMetadata(route: string, context?: MetadataContext): Metadata {
   const siteName = METADATA_DEFAULTS.siteName;
   const fallbackTitle = `${siteName} - Page`;
-  const fallbackDescription = `Browse content on ${siteName}. Discover AI agents, MCP servers, commands, rules, hooks, and more for Claude AI.`;
+  const fallbackDescription = `Browse content on ${siteName}. Discover AI agents, MCP servers, commands, rules, hooks, statuslines, collections, and guides for Claude AI and Claude Code development.`;
 
   logger.warn(`⚠️ Using fallback metadata for route: ${route}`);
+
+  const canonicalUrl = buildCanonicalUrl(route, context);
 
   return {
     title: fallbackTitle,
     description: fallbackDescription,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: fallbackTitle,
       description: fallbackDescription,
@@ -240,7 +239,7 @@ function getContentSchemaForRoute(
  * Generate smart default metadata for unknown routes
  * Provides SEO-compliant fallback when schema + registry both miss
  */
-function generateSmartDefaultMetadata(route: string): Metadata {
+function generateSmartDefaultMetadata(route: string, context?: MetadataContext): Metadata {
   const siteName = METADATA_DEFAULTS.siteName;
 
   // Parse route to generate sensible title
@@ -250,9 +249,14 @@ function generateSmartDefaultMetadata(route: string): Metadata {
 
   const description = `Explore ${pageName} on ${siteName}. Discover AI agents, MCP servers, commands, rules, hooks, statuslines, collections, and guides for Claude AI development.`;
 
+  const canonicalUrl = buildCanonicalUrl(route, context);
+
   return {
     title,
     description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title,
       description,
@@ -312,7 +316,7 @@ export async function generatePageMetadata(
 
   if (!config) {
     // TIER 3: Smart defaults for unknown routes
-    return generateSmartDefaultMetadata(route);
+    return generateSmartDefaultMetadata(route, context);
   }
 
   // Build title
@@ -349,6 +353,7 @@ export async function generatePageMetadata(
 
   // Build raw metadata object for validation
   const ogImageUrl = generateOGImageUrl(canonicalUrl);
+
   const rawMetadata: Partial<ValidatedMetadata> = {
     title,
     description,
@@ -370,10 +375,13 @@ export async function generatePageMetadata(
       title: twitterTitle,
       description: twitterDescription,
     },
-    robots: {
-      index: true,
-      follow: true,
-    },
+    robots:
+      'robots' in config && config.robots
+        ? config.robots
+        : {
+            index: true,
+            follow: true,
+          },
   };
 
   // Validate metadata (throws in dev, returns null in prod on failure)
@@ -381,7 +389,7 @@ export async function generatePageMetadata(
 
   // If validation failed in production, use fallback
   if (!validated) {
-    return generateFallbackMetadata(route);
+    return generateFallbackMetadata(route, context);
   }
 
   // Apply AI optimization if enabled
@@ -400,55 +408,19 @@ export async function generatePageMetadata(
 
 /**
  * Resolve title from configuration
- * Handles both static and dynamic title configs
+ * Handles both static strings and dynamic title functions
  *
  * Production-safe type checking with proper function resolution
  * Compatible with exactOptionalPropertyTypes: true
  */
-async function resolveTitle(
-  titleConfig: RouteMetadata['title'],
-  context?: MetadataContext
-): Promise<string> {
-  // First check if titleConfig itself is a function (rare but possible)
+async function resolveTitle(titleConfig: TitleConfig, context?: MetadataContext): Promise<string> {
+  // Title is now either a string or a function that returns a string
   if (typeof titleConfig === 'function') {
-    const resolved = await titleConfig(context);
-    // Type assertion needed to widen Zod-inferred function return type
-    return buildPageTitle(
-      resolved as {
-        tier: 'home' | 'section' | 'content';
-        title?: string;
-        section?: string;
-      }
-    );
+    return await titleConfig(context);
   }
 
-  // It's a TitleConfig object - resolve its properties with type narrowing
-  const config = titleConfig;
-
-  // Resolve title value (may be function or string or undefined)
-  let titleValue: string | undefined;
-  if (config.title !== undefined) {
-    titleValue =
-      typeof config.title === 'function'
-        ? await (config.title as (context?: MetadataContext) => string | Promise<string>)(context)
-        : (config.title as string);
-  }
-
-  // Resolve section value (may be function or string or undefined)
-  let sectionValue: string | undefined;
-  if (config.section !== undefined) {
-    sectionValue =
-      typeof config.section === 'function'
-        ? await (config.section as (context?: MetadataContext) => string | Promise<string>)(context)
-        : (config.section as string);
-  }
-
-  // Build title using title-builder.ts with explicit type assertion for compatibility
-  return buildPageTitle({
-    tier: config.tier,
-    title: titleValue as string | undefined,
-    section: sectionValue as string | undefined,
-  });
+  // It's a static string
+  return titleConfig as string;
 }
 
 /**

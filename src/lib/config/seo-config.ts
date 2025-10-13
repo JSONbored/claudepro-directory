@@ -3,11 +3,19 @@
  * Centralized SEO constants for title optimization and metadata validation
  *
  * October 2025 Standards:
- * - Title: 10-60 chars (Google), ≤65 chars (Bing)
- * - Description: 50-160 chars (AI engines prefer concise)
+ * - Title: 55-60 chars (Google optimal)
+ * - Description: 150-160 chars (AI engines prefer concise)
  * - Keywords: 3-10 keywords, max 30 chars each
  * - Canonical: HTTPS, no trailing slash (except homepage)
  * - AI Optimization: Year mentions, freshness signals
+ *
+ * Title Generation Architecture:
+ * All page titles generated via metadata-registry.ts helpers:
+ * - buildPageTitle(): Static pages (homepage, trending, etc.)
+ * - buildContentTitle(): Content pages with smart truncation
+ * - smartTruncate(): Word-boundary-aware title truncation
+ *
+ * @see src/lib/seo/metadata-registry.ts
  */
 
 import { z } from 'zod';

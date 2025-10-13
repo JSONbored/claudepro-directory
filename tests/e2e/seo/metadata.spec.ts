@@ -12,7 +12,7 @@
  * - Tests AI citation optimization (ChatGPT, Perplexity, Claude)
  *
  * **Test Coverage:**
- * - Meta title length (≤60 chars optimal, ≤65 chars acceptable)
+ * - Meta title length (55-60 chars for optimal SEO)
  * - Meta description length (150-160 chars for desktop, 120 for mobile)
  * - Open Graph metadata (title, description, image, type, url)
  * - Twitter Card metadata (card type, title, description, image)

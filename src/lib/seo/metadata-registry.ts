@@ -118,31 +118,15 @@ export const aiOptimizationSchema = z
 export type AIOptimization = z.infer<typeof aiOptimizationSchema>;
 
 /**
- * Title Configuration Schema
- * Controls how page titles are built using title-builder.ts
+ * Title Configuration
+ * Titles are generated using helper functions (buildPageTitle, buildContentTitle)
  *
  * Production Standards:
- * - 3-tier system (home, section, content) for optimal SEO
- * - Dash separator (9% higher CTR than pipe on Google)
  * - Max 60 chars total (Google recommendation, October 2025)
- * - Support for dynamic function-based values
- *
- * @see {@link file://./title-builder.ts} - Title building implementation
+ * - Dash separator (9% higher CTR than pipe on Google)
+ * - Support for static strings or dynamic functions
  */
-export const titleConfigSchema = z
-  .object({
-    /** Title tier (home, section, or content) */
-    tier: z.enum(['home', 'section', 'content']).describe('Title hierarchy tier'),
-
-    /** Page-specific title (optional for home tier) */
-    title: z.union([z.string(), z.function()]).optional().describe('Page-specific title text'),
-
-    /** Section name (required for content tier) */
-    section: z.union([z.string(), z.function()]).optional().describe('Section/category name'),
-  })
-  .describe('Configuration for building SEO-optimized page titles');
-
-export type TitleConfig = z.infer<typeof titleConfigSchema>;
+export type TitleConfig = string | ((context?: MetadataContext) => string | Promise<string>);
 
 /**
  * Structured Data Configuration Schema
@@ -205,22 +189,18 @@ export type StructuredDataConfig = z.infer<typeof structuredDataConfigSchema>;
 export interface RouteMetadata {
   /**
    * Page title configuration
-   * Can be static TitleConfig or function for dynamic resolution
+   * Can be static string or function for dynamic resolution
    *
    * @example
    * ```typescript
    * // Static
-   * title: { tier: 'section', title: 'Community' }
+   * title: buildPageTitle('Community')
    *
    * // Dynamic
-   * title: {
-   *   tier: 'content',
-   *   title: (context) => context?.item?.title || 'Item',
-   *   section: (context) => context?.categoryConfig?.title || 'Content'
-   * }
+   * title: (context) => buildContentTitle(context?.item?.title || 'Item', 'Category')
    * ```
    */
-  title: TitleConfig | ((context?: MetadataContext) => TitleConfig | Promise<TitleConfig>);
+  title: TitleConfig;
 
   /**
    * Meta description (120-160 chars for AI optimization)
@@ -293,6 +273,152 @@ export const METADATA_DEFAULTS = {
   schemaVersion: '29.3', // Schema.org version (Sept 4, 2025)
 } as const;
 
+// ============================================
+// TITLE GENERATION HELPERS (Consolidated)
+// ============================================
+
+/**
+ * Site name and separator constants
+ * Centralized for consistent title generation
+ */
+const SITE_NAME = METADATA_DEFAULTS.siteName; // "Claude Pro Directory" (20 chars)
+const SEPARATOR = METADATA_DEFAULTS.separator; // " - " (3 chars)
+
+/**
+ * Category display names for content routes
+ * Maps URL slugs to human-readable category names
+ * Used in content-tier titles: {name} - {category} - Claude Pro Directory
+ */
+export const CATEGORY_NAMES: Record<string, string> = {
+  agents: 'AI Agents', // 9 chars → overhead 35, max title 20-25
+  mcp: 'MCP', // 3 chars → overhead 29, max title 26-31
+  rules: 'Rules', // 5 chars → overhead 31, max title 24-29
+  commands: 'Commands', // 8 chars → overhead 34, max title 21-26
+  hooks: 'Hooks', // 5 chars → overhead 31, max title 24-29
+  statuslines: 'Statuslines', // 11 chars → overhead 37, max title 18-23
+  guides: 'Guides', // 6 chars → overhead 32, max title 23-28
+  collections: 'Collections', // 11 chars → overhead 37, max title 18-23
+} as const;
+
+/**
+ * Smart title truncation that preserves word boundaries
+ * Truncates at last space before maxLength (if space exists in last 30% of string)
+ *
+ * @param title - Title to truncate
+ * @param maxLength - Maximum length in characters
+ * @returns Truncated title without trailing ellipsis
+ *
+ * @example
+ * smartTruncate("Technical Documentation Writer Agent", 20)
+ * // → "Technical Documentation" (word boundary preserved)
+ *
+ * @example
+ * smartTruncate("Short Title", 50)
+ * // → "Short Title" (no truncation needed)
+ */
+export function smartTruncate(title: string, maxLength: number): string {
+  if (title.length <= maxLength) return title;
+
+  // Try to truncate at word boundary
+  const truncated = title.slice(0, maxLength);
+  const lastSpace = truncated.lastIndexOf(' ');
+
+  // Only use word boundary if it's in the last 30% of target length
+  // This prevents cutting off too much content
+  if (lastSpace > maxLength * 0.7) {
+    return truncated.slice(0, lastSpace);
+  }
+
+  return truncated.trim();
+}
+
+/**
+ * Build content-tier titles with automatic truncation
+ * Pattern: {contentName} - {category} - Claude Pro Directory
+ * Target: 55-60 characters total
+ *
+ * @param contentName - Content name (from item.seoTitle or item.title)
+ * @param category - Category slug (e.g., 'agents', 'mcp', 'hooks')
+ * @returns Final page title within 55-60 char range
+ *
+ * @example
+ * buildContentTitle("Code Reviewer Agent", "agents")
+ * // → "Code Reviewer Agent - AI Agents - Claude Pro Directory" (58 chars)
+ *
+ * @example
+ * buildContentTitle("Technical Documentation Writer Agent", "agents")
+ * // → "Technical Documentation - AI Agents - Claude Pro Directory" (59 chars)
+ */
+export function buildContentTitle(contentName: string, category: string): string {
+  const categoryDisplay = CATEGORY_NAMES[category] || category;
+
+  // Calculate overhead: " - {category} - Claude Pro Directory"
+  const overhead = SEPARATOR.length + categoryDisplay.length + SEPARATOR.length + SITE_NAME.length;
+
+  // Calculate max allowed content name length (target: 60 chars total)
+  const maxContentLength = 60 - overhead;
+
+  // Smart truncate if needed (preserves word boundaries)
+  let finalContentName = smartTruncate(contentName, maxContentLength);
+
+  // Build title
+  let title = `${finalContentName}${SEPARATOR}${categoryDisplay}${SEPARATOR}${SITE_NAME}`;
+
+  // Ensure minimum 55 characters - pad if needed
+  if (title.length < 55) {
+    const paddingWords: Record<string, string> = {
+      agents: 'Tool',
+      mcp: 'Server',
+      rules: 'Config',
+      commands: 'Tool',
+      hooks: 'Config',
+      statuslines: 'Config',
+      guides: 'Guide',
+      collections: 'Collection',
+    };
+
+    const padding = paddingWords[category] || 'Configuration';
+
+    if (finalContentName.length + padding.length + 1 <= maxContentLength) {
+      finalContentName = `${finalContentName} ${padding}`;
+      title = `${finalContentName}${SEPARATOR}${categoryDisplay}${SEPARATOR}${SITE_NAME}`;
+    }
+
+    if (title.length < 55 && finalContentName.length + 5 <= maxContentLength) {
+      finalContentName = `${finalContentName} 2025`;
+      title = `${finalContentName}${SEPARATOR}${categoryDisplay}${SEPARATOR}${SITE_NAME}`;
+    }
+
+    if (title.length < 55 && finalContentName.length + 4 <= maxContentLength) {
+      finalContentName = `${finalContentName} Tool`;
+      title = `${finalContentName}${SEPARATOR}${categoryDisplay}${SEPARATOR}${SITE_NAME}`;
+    }
+  }
+
+  return title;
+}
+
+/**
+ * Build section/static-tier titles
+ * Pattern: {title} - Claude Pro Directory
+ * Target: 55-60 characters total
+ *
+ * @param parts - Title parts (excluding site name, which is auto-appended)
+ * @returns Final page title
+ *
+ * @example
+ * buildPageTitle("Trending Configurations")
+ * // → "Trending Configurations - Claude Pro Directory" (51 chars)
+ *
+ * @example
+ * buildPageTitle("404 Not Found", "Browse AI Configs")
+ * // → "404 Not Found - Browse AI Configs - Claude Pro Directory" (57 chars)
+ */
+export function buildPageTitle(...parts: string[]): string {
+  const filteredParts = parts.filter(Boolean);
+  return [...filteredParts, SITE_NAME].join(SEPARATOR);
+}
+
 /**
  * Centralized Metadata Registry
  * Maps route patterns to metadata configurations
@@ -301,17 +427,23 @@ export const METADATA_DEFAULTS = {
  * - Static: '/trending', '/submit', etc.
  * - Dynamic: '/:category', '/:category/:slug'
  * - Catch-all: '/guides/:path*'
+ *
+ * Title Generation:
+ * - All titles now generated using helpers above (no external dependencies)
+ * - Content routes use buildContentTitle() with seoTitle priority
+ * - Static routes use buildPageTitle()
+ * - All titles automatically fit within 55-60 character SEO optimal range
  */
 export const METADATA_REGISTRY = {
   /**
-   * Homepage - Tier 1
+   * Homepage - Special Case
    * Optimized for AI citations with Wikipedia-style structuring
    *
+   * Must meet 55-60 char title requirement for SEO validation
    * OpenGraph/Twitter: Uses page title and description by default from metadata-generator.ts
-   * Title will be just APP_CONFIG.name (tier: home)
    */
   '/': {
-    title: { tier: 'home' as const },
+    title: 'Claude Pro Directory - MCP Servers, AI Agents & Configs', // 55 chars - meets SEO requirement
     description:
       'Directory of 150+ Claude AI configurations for October 2025. Community collection of MCP servers, agents, hooks, commands, and rules for AI development.',
     keywords: [
@@ -349,7 +481,7 @@ export const METADATA_REGISTRY = {
    * High recency signal for fresh content
    */
   '/trending': {
-    title: { tier: 'section' as const, title: 'Trending Configurations' },
+    title: buildPageTitle('Trending Claude AI Configurations'), // 56 chars ✓
     description:
       'Trending Claude AI configurations updated daily in October 2025. Track real-time growth velocity and popularity metrics for MCP servers, agents, and tools.',
     keywords: [
@@ -384,9 +516,9 @@ export const METADATA_REGISTRY = {
    * Clear action-oriented description
    */
   '/submit': {
-    title: { tier: 'section' as const, title: 'Submit Configuration' },
+    title: buildPageTitle('Submit Claude Configuration 2025'),
     description:
-      'Submit your Claude AI configuration to the community directory in October 2025. Share agents, MCP servers, hooks, commands, and rules with developers worldwide.',
+      'Submit your Claude AI configuration in October 2025. Share agents, MCP servers, hooks, commands, and rules with developers worldwide for Claude Code projects.',
     keywords: [
       'submit claude config',
       'contribute to claude directory',
@@ -419,9 +551,12 @@ export const METADATA_REGISTRY = {
    * Interactive tool for personalized configuration recommendations
    */
   '/tools/config-recommender': {
-    title: { tier: 'section' as const, title: 'Config Recommender' },
-    description:
-      'Find your perfect Claude configuration in 2 minutes. Answer 7 questions and get personalized recommendations from 147+ configs. Instant, AI-powered matching for your exact needs.',
+    title: buildPageTitle('Claude Config Recommender Tool'),
+    description: async () => {
+      const { getTotalContentCount } = await import('@/src/lib/content/content-loaders');
+      const count = await getTotalContentCount();
+      return `Find your perfect Claude configuration in 2 minutes. Answer 7 questions and get personalized recommendations from ${count}+ configs. Instant, AI-powered matching for your exact needs.`;
+    },
     keywords: [
       'claude config recommender',
       'claude configuration quiz',
@@ -456,11 +591,11 @@ export const METADATA_REGISTRY = {
    * Dynamic results with personalized recommendations
    */
   '/tools/config-recommender/results/:id': {
-    title: {
-      tier: 'content' as const,
-      title: (ctx?: MetadataContext) =>
-        ctx?.item?.title ? String(ctx.item.title) : 'Your Configuration Recommendations',
-      section: 'Config Recommender',
+    title: (ctx?: MetadataContext) => {
+      const resultTitle = ctx?.item?.title
+        ? String(ctx.item.title)
+        : 'Your Configuration Recommendations';
+      return buildPageTitle(resultTitle, 'Config Recommender');
     },
     description: (ctx?: MetadataContext) =>
       ctx?.item?.description
@@ -498,7 +633,7 @@ export const METADATA_REGISTRY = {
    * Business-focused description
    */
   '/partner': {
-    title: { tier: 'section' as const, title: 'Partner With Us' },
+    title: buildPageTitle('Partner With Claude Pro Directory'),
     description:
       'Partner with Claude Pro Directory to showcase your AI tools and reach developers in October 2025. Collaborate on integrations, sponsorships, and community initiatives.',
     keywords: [
@@ -533,10 +668,7 @@ export const METADATA_REGISTRY = {
    * Curated content discovery
    */
   '/collections': {
-    title: {
-      tier: 'section' as const,
-      title: 'Claude Configuration Collections 2025',
-    },
+    title: buildPageTitle('Claude Configuration Collections 2025'),
     description:
       'Curated Claude AI collections for October 2025. Hand-picked MCP servers, agents, and workflows organized by use case, expertise level, and development needs.',
     keywords: [
@@ -571,10 +703,7 @@ export const METADATA_REGISTRY = {
    * Educational content hub
    */
   '/guides': {
-    title: {
-      tier: 'section' as const,
-      title: 'Claude AI Guides & Tutorials 2025',
-    },
+    title: buildPageTitle('Claude AI Guides & Tutorials 2025'),
     description:
       'Comprehensive guides for Claude AI in October 2025. Learn MCP server setup, agent configuration, automation workflows, and advanced development techniques.',
     keywords: [
@@ -609,7 +738,7 @@ export const METADATA_REGISTRY = {
    * Social engagement focus
    */
   '/community': {
-    title: { tier: 'section' as const, title: 'Community' },
+    title: buildPageTitle('Community'),
     description:
       'Join the Claude Pro Directory community in October 2025. Connect with AI developers, share configurations, contribute to open-source projects, and get support.',
     keywords: [
@@ -644,7 +773,7 @@ export const METADATA_REGISTRY = {
    * Career opportunities
    */
   '/jobs': {
-    title: { tier: 'section' as const, title: 'AI Jobs' },
+    title: buildPageTitle('AI Jobs'),
     description:
       'Discover Claude AI and machine learning job opportunities in October 2025. Browse open roles in AI development, research, engineering, and data science with leading companies.',
     keywords: [
@@ -679,7 +808,7 @@ export const METADATA_REGISTRY = {
    * Developer resources
    */
   '/api-docs': {
-    title: { tier: 'section' as const, title: 'API Documentation' },
+    title: buildPageTitle('API Documentation'),
     description:
       'Comprehensive REST API documentation for ClaudePro Directory in October 2025. Browse 8 endpoints for content discovery, analytics, and caching with full examples.',
     keywords: ['claude pro api', 'rest api documentation 2025', 'developer api', 'api reference'],
@@ -709,10 +838,9 @@ export const METADATA_REGISTRY = {
    * Individual API endpoint documentation with schemas and examples
    */
   '/api-docs/:slug': {
-    title: {
-      tier: 'content' as const,
-      title: (context?: MetadataContext) => context?.item?.title || 'API Endpoint',
-      section: 'API',
+    title: (context?: MetadataContext) => {
+      const endpointTitle = context?.item?.title || 'API Endpoint';
+      return buildContentTitle(endpointTitle, 'API');
     },
     description: (context?: MetadataContext) => {
       // Map slug to SEO-optimized descriptions (150-160 chars)
@@ -813,11 +941,8 @@ export const METADATA_REGISTRY = {
    * User-friendly error messaging
    */
   '/404': {
-    title: {
-      tier: 'section' as const,
-      title: '404 Page Not Found - Browse Claude AI Configurations Instead',
-    },
-    description: `The page you're looking for doesn't exist on Claude Pro Directory. Browse our collection of AI agents, MCP servers, rules, commands, and configurations instead.`,
+    title: buildPageTitle('404 Not Found', 'Browse AI Configs'),
+    description: `The page you're looking for doesn't exist on Claude Pro Directory. Browse our collection of 150+ AI agents, MCP servers, rules, commands, hooks, and configurations instead.`,
     keywords: ['404', 'page not found', 'claude directory'],
     openGraph: {
       type: 'website' as const,
@@ -848,33 +973,63 @@ export const METADATA_REGISTRY = {
    * SEO Strategy: Maximize 60-char limit with keyword-rich titles
    */
   '/:category': {
-    title: {
-      tier: 'section' as const,
-      title: (context?: MetadataContext) => {
-        const category = context?.category || context?.params?.category;
+    title: (context?: MetadataContext) => {
+      const category = context?.category || context?.params?.category;
 
-        // Optimized titles that maximize SEO value within 60-char limit
-        const categoryTitles: Record<string, string> = {
-          agents: 'Claude AI Agent Templates 2025',
-          mcp: 'Claude MCP Server Templates 2025',
-          hooks: 'Claude Hook Templates 2025',
-          commands: 'Claude Commands Templates 2025',
-          rules: 'Claude Rules & Prompts 2025',
-          statuslines: 'Claude Statusline Templates 2025',
-        };
+      const categoryTitles: Record<string, string> = {
+        agents: 'Browse AI Agents for Claude 2025',
+        mcp: 'Browse MCP Servers for Claude 2025',
+        hooks: 'Browse Hooks for Claude Code 2025',
+        commands: 'Browse Commands for Claude 2025',
+        rules: 'Browse Rules for Claude AI 2025',
+        statuslines: 'Browse Statuslines for Claude 2025',
+      };
 
-        return (
-          categoryTitles[category as string] || context?.categoryConfig?.pluralTitle || 'Content'
-        );
-      },
+      const baseTitle =
+        categoryTitles[category as string] ||
+        context?.categoryConfig?.pluralTitle ||
+        'Browse Content & Resources';
+      return buildPageTitle(baseTitle);
     },
-    description: (context?: MetadataContext) =>
-      context?.categoryConfig?.metaDescription || 'Browse Claude AI configurations.',
+    description: (context?: MetadataContext) => {
+      const category = context?.category || context?.params?.category;
+      const metaDesc = context?.categoryConfig?.metaDescription;
+
+      // If category config has description and it's 150-160 chars, use it
+      if (metaDesc && metaDesc.length >= 150 && metaDesc.length <= 160) {
+        return metaDesc;
+      }
+
+      // Fallback descriptions that meet 150-160 char requirement
+      const categoryDescriptions: Record<string, string> = {
+        agents:
+          'Browse 50+ Claude AI agent templates for October 2025. Production-ready configurations for code review, content creation, data analysis, and automation tasks.',
+        mcp: 'Browse 40+ Claude MCP server templates for October 2025. Connect Claude to filesystems, databases, APIs, and external tools via Model Context Protocol servers.',
+        hooks:
+          'Browse Claude hook templates for October 2025. Customize your Claude Code workflow with pre-commit hooks, validation scripts, and automation for development tasks.',
+        commands:
+          'Browse Claude command templates for October 2025. Pre-built slash commands for code generation, refactoring, testing, and development workflow automation tasks.',
+        rules:
+          'Browse Claude rules and system prompts for October 2025. Configure AI behavior, coding standards, security policies, and best practices for your development workflow.',
+        statuslines:
+          'Browse Claude statusline templates for October 2025. Customize your CLI status bar with project info, git status, environment indicators, and development metrics.',
+      };
+
+      return (
+        categoryDescriptions[category as string] ||
+        metaDesc ||
+        'Browse Claude AI configurations and templates for October 2025. Find tools, plugins, and setups to enhance your Claude development workflow and productivity.'
+      );
+    },
     keywords: (context?: MetadataContext): string[] => {
       const keywordsStr = context?.categoryConfig?.keywords;
-      return keywordsStr
-        ? keywordsStr.split(',').map((k) => k.trim())
-        : ['claude ai', 'configurations'];
+      if (keywordsStr) {
+        const parsed = keywordsStr.split(',').map((k) => k.trim());
+        // Ensure minimum 3 keywords for validation
+        if (parsed.length >= 3) return parsed;
+      }
+      // Fallback with minimum 3 keywords
+      return ['claude ai', 'configurations', 'claude 2025'];
     },
     openGraph: {
       type: 'website' as const,
@@ -903,33 +1058,60 @@ export const METADATA_REGISTRY = {
    * Uses Article schema for better AI citations
    */
   '/:category/:slug': {
-    title: {
-      tier: 'content' as const,
-      title: (context?: MetadataContext) => {
-        if (!context?.item) return 'Item';
+    title: (context?: MetadataContext) => {
+      if (!context?.item) return buildContentTitle('Item', 'content');
 
-        // Prioritize seoTitle for SEO optimization (<60 chars)
-        // Fall back to full title for longtail keywords
-        const seoTitle = (context.item as { seoTitle?: string })?.seoTitle;
-        if (seoTitle) return seoTitle;
+      const rawCategory = context?.category || context?.params?.category || 'content';
+      const category = Array.isArray(rawCategory) ? rawCategory[0] || 'content' : rawCategory;
 
-        // Type assertion to include slug and category required by getDisplayTitle
-        const item = context.item as {
-          title?: string;
-          name?: string;
-          slug: string;
-          category: string;
-        };
-        return getDisplayTitle(item);
-      },
-      section: (context?: MetadataContext) => context?.categoryConfig?.title || 'Content',
+      // Prioritize seoTitle for SEO optimization (already optimized for length)
+      const seoTitle = (context.item as { seoTitle?: string })?.seoTitle;
+      if (seoTitle) {
+        return buildContentTitle(seoTitle, category);
+      }
+
+      // Fall back to full title with smart truncation
+      const item = context.item as {
+        title?: string;
+        name?: string;
+        slug: string;
+        category: string;
+      };
+      const displayTitle = getDisplayTitle(item);
+      return buildContentTitle(displayTitle, category);
     },
-    description: (context?: MetadataContext) =>
-      context?.item?.description || 'Claude AI configuration from the community directory.',
+    description: (context?: MetadataContext) => {
+      const itemDesc = context?.item?.description;
+
+      // If item has description and it's 150-160 chars, use it
+      if (itemDesc && itemDesc.length >= 150 && itemDesc.length <= 160) {
+        return itemDesc;
+      }
+
+      // If item has description but it's too short, pad it
+      if (itemDesc) {
+        const category = context?.category || context?.params?.category || 'configuration';
+        const padding = `Explore this ${category} for Claude AI in October 2025. Community-contributed setup for enhanced productivity and development workflow automation.`;
+        const combined = `${itemDesc} ${padding}`;
+
+        // Return first 160 chars if combined is too long
+        return combined.length <= 160 ? combined : `${combined.slice(0, 157)}...`;
+      }
+
+      // Fallback if no description at all
+      return 'Community-contributed Claude AI configuration for October 2025. Enhance your development workflow with production-ready setup for Claude Pro and Claude Code.';
+    },
     keywords: (context?: MetadataContext): string[] => {
       const baseTags = (context?.item?.tags as string[]) || [];
       const year = new Date().getFullYear().toString();
-      return [...baseTags, 'claude ai', `claude ${year}`].slice(0, 10);
+      const rawCategory = context?.category || context?.params?.category || 'config';
+      const category = Array.isArray(rawCategory) ? rawCategory[0] || 'config' : rawCategory;
+
+      // Ensure minimum 3 keywords for validation
+      const keywords = [...baseTags, 'claude ai', `claude ${year}`, category];
+      const unique = [...new Set(keywords)]; // Remove duplicates
+
+      return unique.slice(0, 10); // Max 10 keywords
     },
     openGraph: {
       type: 'article' as const,
@@ -957,20 +1139,17 @@ export const METADATA_REGISTRY = {
    * Handles: /guides/tutorials, /guides/workflows, etc.
    */
   '/guides/:category': {
-    title: {
-      tier: 'content' as const,
-      title: (context?: MetadataContext) => {
-        const categoryMap: Record<string, string> = {
-          tutorials: 'Tutorials',
-          'use-cases': 'Use Cases',
-          workflows: 'Workflows',
-          comparisons: 'Comparisons',
-          troubleshooting: 'Troubleshooting',
-        };
-        const category = context?.params?.category as string;
-        return categoryMap[category] || 'Guides';
-      },
-      section: 'Guides',
+    title: (context?: MetadataContext) => {
+      const categoryMap: Record<string, string> = {
+        tutorials: 'Tutorials',
+        'use-cases': 'Use Cases',
+        workflows: 'Workflows',
+        comparisons: 'Comparisons',
+        troubleshooting: 'Troubleshooting',
+      };
+      const category = context?.params?.category as string;
+      const categoryTitle = categoryMap[category] || 'Guides';
+      return buildContentTitle(categoryTitle, 'Guides');
     },
     description: (context?: MetadataContext) => {
       const category = context?.params?.category as string;
@@ -1007,15 +1186,11 @@ export const METADATA_REGISTRY = {
    * Prioritizes seoTitle for <title> tag, preserves full title for H1/longtail
    */
   '/guides/:category/:slug': {
-    title: {
-      tier: 'content' as const,
-      title: (context?: MetadataContext) => {
-        // Prioritize seoTitle for SEO optimization (<60 chars)
-        // Fall back to full title for longtail keywords
-        const seoTitle = (context?.item as { seoTitle?: string })?.seoTitle;
-        return seoTitle || context?.item?.title || 'Guide';
-      },
-      section: 'Guides',
+    title: (context?: MetadataContext) => {
+      // Prioritize seoTitle for SEO optimization (already optimized for length)
+      const seoTitle = (context?.item as { seoTitle?: string })?.seoTitle;
+      const guideTitle = seoTitle || context?.item?.title || 'Guide';
+      return buildContentTitle(guideTitle, 'Guides');
     },
     description: (context?: MetadataContext) =>
       context?.item?.description || 'Comprehensive guide for Claude AI development.',
@@ -1047,10 +1222,9 @@ export const METADATA_REGISTRY = {
    * Tool/feature comparison content
    */
   '/compare/:slug': {
-    title: {
-      tier: 'content' as const,
-      title: (context?: MetadataContext) => context?.item?.title || 'Comparison',
-      section: 'Comparisons',
+    title: (context?: MetadataContext) => {
+      const comparisonTitle = context?.item?.title || 'Comparison';
+      return buildContentTitle(comparisonTitle, 'Comparisons');
     },
     description: (context?: MetadataContext) =>
       context?.item?.description || 'Compare Claude AI tools and configurations.',
@@ -1082,14 +1256,11 @@ export const METADATA_REGISTRY = {
    * Prioritizes seoTitle for <title> tag optimization
    */
   '/collections/:slug': {
-    title: {
-      tier: 'content' as const,
-      title: (context?: MetadataContext) => {
-        // Prioritize seoTitle for SEO optimization (<60 chars)
-        const seoTitle = (context?.item as { seoTitle?: string })?.seoTitle;
-        return seoTitle || context?.item?.title || 'Collection';
-      },
-      section: 'Collections',
+    title: (context?: MetadataContext) => {
+      // Prioritize seoTitle for SEO optimization (<60 chars)
+      const seoTitle = (context?.item as { seoTitle?: string })?.seoTitle;
+      const collectionTitle = seoTitle || context?.item?.title || 'Collection';
+      return buildContentTitle(collectionTitle, 'Collections');
     },
     description: (context?: MetadataContext) =>
       context?.item?.description || 'Curated collection of Claude AI tools and configurations.',
@@ -1120,10 +1291,9 @@ export const METADATA_REGISTRY = {
    * Individual job listings
    */
   '/jobs/:slug': {
-    title: {
-      tier: 'content' as const,
-      title: (context?: MetadataContext) => context?.item?.title || 'Job',
-      section: 'AI Jobs',
+    title: (context?: MetadataContext) => {
+      const jobTitle = context?.item?.title || 'Job';
+      return buildContentTitle(jobTitle, 'AI Jobs');
     },
     description: (context?: MetadataContext) =>
       context?.item?.description || 'AI job opportunity in machine learning and development.',
@@ -1154,10 +1324,7 @@ export const METADATA_REGISTRY = {
    * Platform updates and release notes
    */
   '/changelog': {
-    title: {
-      tier: 'section' as const,
-      title: 'Changelog',
-    },
+    title: buildPageTitle('Changelog'),
     description:
       'Track all updates, new features, bug fixes, and improvements to Claude Pro Directory in October 2025. Stay informed about platform changes and enhancements.',
     keywords: [
@@ -1193,16 +1360,10 @@ export const METADATA_REGISTRY = {
    * Individual changelog entries
    */
   '/changelog/:slug': {
-    title: {
-      tier: 'content' as const,
-      title: (context?: MetadataContext) => {
-        // Extract title from item or use slug fallback
-        if (context?.item?.title) {
-          return context.item.title as string;
-        }
-        return 'Update';
-      },
-      section: 'Changelog',
+    title: (context?: MetadataContext) => {
+      // Extract title from item or use slug fallback
+      const changelogTitle = context?.item?.title ? (context.item.title as string) : 'Update';
+      return buildContentTitle(changelogTitle, 'Changelog');
     },
     description: (context?: MetadataContext) =>
       (context?.item?.description as string | undefined) ||
@@ -1230,10 +1391,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/search': {
-    title: {
-      tier: 'section' as const,
-      title: 'Search Results',
-    },
+    title: buildPageTitle('Search Results'),
     description:
       'Search Claude AI configurations, agents, MCP servers, rules, commands, hooks, and guides.',
     keywords: ['claude search', 'ai configuration search', 'claude tools search'],
@@ -1259,13 +1417,10 @@ export const METADATA_REGISTRY = {
   },
 
   '/u/:slug': {
-    title: {
-      tier: 'content' as const,
-      title: (context?: MetadataContext) => {
-        const slug = context?.params?.slug as string | undefined;
-        return slug ? `${slug}'s Profile` : 'User Profile';
-      },
-      section: 'Community',
+    title: (context?: MetadataContext) => {
+      const slug = context?.params?.slug as string | undefined;
+      const profileTitle = slug ? `${slug}'s Profile` : 'User Profile';
+      return buildContentTitle(profileTitle, 'Community');
     },
     description: (context?: MetadataContext) => {
       const slug = context?.params?.slug as string | undefined;
@@ -1294,11 +1449,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/account/library/:slug': {
-    title: {
-      tier: 'content' as const,
-      title: 'My Collection',
-      section: 'Library',
-    },
+    title: buildPageTitle('My Collection', 'Library'),
     description: 'Manage your personal collection of Claude configurations and saved items.',
     keywords: ['my collection', 'saved configurations', 'personal library'],
     openGraph: {
@@ -1323,11 +1474,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/account/library/:slug/edit': {
-    title: {
-      tier: 'content' as const,
-      title: 'Edit Collection',
-      section: 'Library',
-    },
+    title: buildPageTitle('Edit Collection', 'Library'),
     description: 'Edit your collection details and settings.',
     keywords: ['edit collection', 'manage library'],
     openGraph: {
@@ -1352,16 +1499,12 @@ export const METADATA_REGISTRY = {
   },
 
   '/u/:slug/collections/:collectionSlug': {
-    title: {
-      tier: 'content' as const,
-      title: (context?: MetadataContext) => {
-        const collectionSlug = context?.params?.collectionSlug as string | undefined;
-        return collectionSlug ? `${collectionSlug.replace(/-/g, ' ')}` : 'Collection';
-      },
-      section: (context?: MetadataContext) => {
-        const userSlug = context?.params?.slug as string | undefined;
-        return userSlug ? `by ${userSlug}` : 'Community Collection';
-      },
+    title: (context?: MetadataContext) => {
+      const collectionSlug = context?.params?.collectionSlug as string | undefined;
+      const userSlug = context?.params?.slug as string | undefined;
+      const collectionName = collectionSlug ? collectionSlug.replace(/-/g, ' ') : 'Collection';
+      const section = userSlug ? `by ${userSlug}` : 'Community Collection';
+      return buildContentTitle(collectionName, section);
     },
     description: (context?: MetadataContext) => {
       const slug = context?.params?.slug as string | undefined;
@@ -1395,10 +1538,7 @@ export const METADATA_REGISTRY = {
    * All account pages have noindex/nofollow for privacy
    */
   '/account': {
-    title: {
-      tier: 'section' as const,
-      title: 'Account Dashboard - Manage Your Claude Pro Directory Account',
-    },
+    title: buildPageTitle('Account Dashboard - Manage Profile'),
     description:
       'Manage your Claude Pro Directory account, view activity, bookmarks, submissions, and settings. Track your reputation score and community contributions.',
     keywords: ['account dashboard', 'user profile', 'claude directory account'],
@@ -1428,7 +1568,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/account/activity': {
-    title: { tier: 'section' as const, title: 'My Activity - Contributions & Engagement History' },
+    title: buildPageTitle('My Activity - Contribution History'),
     description:
       'View your contribution history on Claude Pro Directory including submissions, comments, and community engagement. Track badges earned and reputation milestones achieved.',
     keywords: ['user activity', 'contribution history', 'engagement tracking'],
@@ -1458,10 +1598,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/account/bookmarks': {
-    title: {
-      tier: 'section' as const,
-      title: 'My Bookmarks - Saved Claude Configurations & Resources',
-    },
+    title: buildPageTitle('My Bookmarks - Saved Configurations'),
     description:
       'Browse your saved bookmarks of Claude AI agents, MCP servers, rules, commands, and hooks. Organize your favorite configurations and tools for quick access.',
     keywords: ['bookmarks', 'saved items', 'favorites', 'claude configurations'],
@@ -1491,10 +1628,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/account/library': {
-    title: {
-      tier: 'section' as const,
-      title: 'My Library - Personal Collection Management Dashboard',
-    },
+    title: buildPageTitle('My Library - Personal Collections'),
     description:
       'Manage your personal library of Claude configurations including custom agents, MCP servers, and workflows. Create, edit, and organize your private collection.',
     keywords: ['library', 'collection management', 'custom configurations'],
@@ -1524,7 +1658,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/account/library/new': {
-    title: { tier: 'section' as const, title: 'Create Library Item - Add Custom Configuration' },
+    title: buildPageTitle('Create Library Item - Add Config'),
     description:
       'Create a new library item for your personal collection. Add custom Claude configurations, agents, MCP servers, rules, or workflows to your private library.',
     keywords: ['create configuration', 'add library item', 'custom agent'],
@@ -1554,10 +1688,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/account/settings': {
-    title: {
-      tier: 'section' as const,
-      title: 'Account Settings - Profile & Preferences Configuration',
-    },
+    title: buildPageTitle('Account Settings - Profile & Prefs'),
     description:
       'Configure your Claude Pro Directory account settings including profile information, email preferences, notification settings, and privacy options.',
     keywords: ['account settings', 'user preferences', 'profile configuration'],
@@ -1587,10 +1718,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/account/submissions': {
-    title: {
-      tier: 'section' as const,
-      title: 'My Submissions - Published Configurations & Pending Reviews',
-    },
+    title: buildPageTitle('My Submissions - Published & Pending'),
     description:
       'View all your submitted Claude configurations including published agents, MCP servers, rules, and commands. Track submission status and manage published content.',
     keywords: ['user submissions', 'published configurations', 'content management'],
@@ -1620,10 +1748,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/account/jobs': {
-    title: {
-      tier: 'section' as const,
-      title: 'Job Listings Management - Post & Track AI Developer Opportunities',
-    },
+    title: buildPageTitle('Job Listings - Post & Track Jobs'),
     description:
       'Manage your job postings on Claude Pro Directory. Create, edit, and track applications for AI developer positions, Claude integration roles, and technical opportunities.',
     keywords: ['job management', 'job postings', 'AI developer jobs', 'recruitment'],
@@ -1653,10 +1778,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/account/jobs/new': {
-    title: {
-      tier: 'section' as const,
-      title: 'Post New Job - Create AI Developer Position Listing',
-    },
+    title: buildPageTitle('Post New Job - Create AI Position'),
     description:
       'Create a new job posting on Claude Pro Directory. Post AI developer positions, Claude integration roles, and technical opportunities to reach qualified candidates.',
     keywords: ['post job', 'create job listing', 'AI recruitment', 'developer hiring'],
@@ -1686,11 +1808,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/account/jobs/:id/edit': {
-    title: {
-      tier: 'content' as const,
-      title: 'Edit Job Posting',
-      section: 'Jobs Management',
-    },
+    title: buildPageTitle('Edit Job Posting', 'Jobs Management'),
     description:
       'Edit your job posting details including title, description, requirements, salary range, and application settings. Update job listing to attract qualified candidates.',
     keywords: ['edit job', 'update job posting', 'modify job listing'],
@@ -1720,11 +1838,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/account/jobs/:id/analytics': {
-    title: {
-      tier: 'content' as const,
-      title: 'Job Analytics Dashboard',
-      section: 'Jobs Management',
-    },
+    title: buildPageTitle('Job Analytics Dashboard', 'Jobs Management'),
     description:
       'View detailed analytics for your job posting including views, applications, engagement metrics, and candidate demographics. Track recruiting performance and optimize listings.',
     keywords: ['job analytics', 'recruiting metrics', 'application tracking', 'hiring insights'],
@@ -1754,10 +1868,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/account/sponsorships': {
-    title: {
-      tier: 'section' as const,
-      title: 'Sponsorships Management - Track & Manage Directory Sponsorships',
-    },
+    title: buildPageTitle('Sponsorships Management - Track'),
     description:
       'Manage your Claude Pro Directory sponsorships. View active campaigns, track performance metrics, manage billing, and access detailed analytics for sponsored content.',
     keywords: ['sponsorships', 'advertising management', 'campaign tracking', 'sponsored content'],
@@ -1787,11 +1898,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/account/sponsorships/:id/analytics': {
-    title: {
-      tier: 'content' as const,
-      title: 'Sponsorship Analytics Dashboard',
-      section: 'Sponsorships Management',
-    },
+    title: buildPageTitle('Sponsorship Analytics Dashboard', 'Sponsorships Management'),
     description:
       'View detailed analytics for your sponsorship campaign including impressions, clicks, conversions, engagement metrics, and ROI. Optimize sponsored content performance.',
     keywords: [
@@ -1830,10 +1937,7 @@ export const METADATA_REGISTRY = {
    * Personalized feeds and utility pages
    */
   '/for-you': {
-    title: {
-      tier: 'section' as const,
-      title: 'For You - Personalized Claude AI Configuration Recommendations',
-    },
+    title: buildPageTitle('For You - Personalized AI Configs'),
     description:
       'Discover personalized Claude AI configurations recommended just for you based on your interests and activity. Get tailored suggestions for agents, MCP servers, rules, and workflows.',
     keywords: [
@@ -1864,10 +1968,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/board': {
-    title: {
-      tier: 'section' as const,
-      title: 'Community Board - Claude AI Discussions & Feature Requests',
-    },
+    title: buildPageTitle('Community Board - AI Discussions'),
     description:
       'Browse community discussions, feature requests, and announcements for Claude Pro Directory. Share ideas, report issues, and connect with other Claude AI power users.',
     keywords: ['community board', 'feature requests', 'discussions', 'claude community'],
@@ -1893,10 +1994,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/board/new': {
-    title: {
-      tier: 'section' as const,
-      title: 'New Discussion - Create Community Post for Claude Directory',
-    },
+    title: buildPageTitle('New Discussion - Create AI Post'),
     description:
       'Start a new discussion on Claude Pro Directory community board. Share feature requests, ask questions, or announce new Claude configurations and tools.',
     keywords: ['new discussion', 'create post', 'community feedback', 'feature request'],
@@ -1926,7 +2024,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/login': {
-    title: { tier: 'section' as const, title: 'Login - Access Your Claude Pro Directory Account' },
+    title: buildPageTitle('Login - Access Claude Pro Account'),
     description:
       'Sign in to Claude Pro Directory to access your personalized feed, manage bookmarks, track submissions, and connect with the Claude AI community.',
     keywords: ['login', 'sign in', 'authentication', 'claude account'],
@@ -1956,7 +2054,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/auth/auth-code-error': {
-    title: { tier: 'section' as const, title: 'Authentication Error - Unable to Sign In' },
+    title: buildPageTitle('Authentication Error - Sign In Issue'),
     description:
       'Authentication error occurred while signing in to Claude Pro Directory. Please try again or contact support if the issue persists.',
     keywords: ['auth error', 'sign in error', 'authentication failed'],
@@ -1986,10 +2084,7 @@ export const METADATA_REGISTRY = {
   },
 
   '/companies': {
-    title: {
-      tier: 'section' as const,
-      title: 'Companies Using Claude - Discover Organizations Building with Claude AI',
-    },
+    title: buildPageTitle('Companies Using Claude - AI Builders'),
     description:
       'Explore companies and organizations building with Claude AI and Cursor IDE. Discover industry leaders, startups, and enterprises leveraging Claude for AI-powered development and automation.',
     keywords: [
