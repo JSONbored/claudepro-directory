@@ -75,9 +75,9 @@ export function NavigationCommandMenu() {
         {/* Primary Navigation Group */}
         <CommandGroup heading="Primary Navigation">
           <CommandItem onSelect={() => handleSelect('/agents')} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-sm">🤖</span>
-              <div className="flex flex-col items-start">
+              <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>Agents</span>
                 <span className="text-xs text-muted-foreground">AI-powered task automation</span>
               </div>
@@ -117,9 +117,9 @@ export function NavigationCommandMenu() {
           </CommandItem>
 
           <CommandItem onSelect={() => handleSelect('/rules')} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-sm">📋</span>
-              <div className="flex flex-col items-start">
+              <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>Rules</span>
                 <span className="text-xs text-muted-foreground">Project rules and guidelines</span>
               </div>
@@ -127,12 +127,12 @@ export function NavigationCommandMenu() {
           </CommandItem>
 
           <CommandItem onSelect={() => handleSelect('/statuslines')} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-sm">💻</span>
-              <div className="flex flex-col items-start">
+              <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>Statuslines</span>
                 <span className="text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-1">
+                  <span className={UI_CLASSES.INLINE_FLEX_ITEMS_CENTER_GAP_1}>
                     Editor status bar configs
                     <span className="inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
                   </span>
@@ -142,12 +142,12 @@ export function NavigationCommandMenu() {
           </CommandItem>
 
           <CommandItem onSelect={() => handleSelect('/collections')} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-sm">📚</span>
-              <div className="flex flex-col items-start">
+              <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>Collections</span>
                 <span className="text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-1">
+                  <span className={UI_CLASSES.INLINE_FLEX_ITEMS_CENTER_GAP_1}>
                     Curated content bundles
                     <span className="inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
                   </span>
@@ -157,9 +157,9 @@ export function NavigationCommandMenu() {
           </CommandItem>
 
           <CommandItem onSelect={() => handleSelect('/guides')} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-sm">📖</span>
-              <div className="flex flex-col items-start">
+              <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>Guides</span>
                 <span className="text-xs text-muted-foreground">Tutorials and how-tos</span>
               </div>
@@ -172,9 +172,9 @@ export function NavigationCommandMenu() {
         {/* Secondary Navigation Group */}
         <CommandGroup heading="More">
           <CommandItem onSelect={() => handleSelect('/for-you')} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-sm">✨</span>
-              <div className="flex flex-col items-start">
+              <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>For You</span>
                 <span className="text-xs text-muted-foreground">Personalized recommendations</span>
               </div>
@@ -182,9 +182,9 @@ export function NavigationCommandMenu() {
           </CommandItem>
 
           <CommandItem onSelect={() => handleSelect('/trending')} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-sm">📈</span>
-              <div className="flex flex-col items-start">
+              <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>Trending</span>
                 <span className="text-xs text-muted-foreground">Popular configurations</span>
               </div>
@@ -192,9 +192,9 @@ export function NavigationCommandMenu() {
           </CommandItem>
 
           <CommandItem onSelect={() => handleSelect('/board')} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-sm">💬</span>
-              <div className="flex flex-col items-start">
+              <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>Board</span>
                 <span className="text-xs text-muted-foreground">Community board</span>
               </div>
@@ -202,9 +202,9 @@ export function NavigationCommandMenu() {
           </CommandItem>
 
           <CommandItem onSelect={() => handleSelect('/companies')} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-sm">🏢</span>
-              <div className="flex flex-col items-start">
+              <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>Companies</span>
                 <span className="text-xs text-muted-foreground">Browse companies</span>
               </div>
@@ -212,9 +212,9 @@ export function NavigationCommandMenu() {
           </CommandItem>
 
           <CommandItem onSelect={() => handleSelect('/changelog')} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-sm">📝</span>
-              <div className="flex flex-col items-start">
+              <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>Changelog</span>
                 <span className="text-xs text-muted-foreground">Latest updates</span>
               </div>
@@ -222,9 +222,9 @@ export function NavigationCommandMenu() {
           </CommandItem>
 
           <CommandItem onSelect={() => handleSelect('/jobs')} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-sm">💼</span>
-              <div className="flex flex-col items-start">
+              <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>Jobs</span>
                 <span className="text-xs text-muted-foreground">Find opportunities</span>
               </div>
@@ -232,9 +232,9 @@ export function NavigationCommandMenu() {
           </CommandItem>
 
           <CommandItem onSelect={() => handleSelect('/community')} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-sm">👥</span>
-              <div className="flex flex-col items-start">
+              <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>Community</span>
                 <span className="text-xs text-muted-foreground">Join the community</span>
               </div>
@@ -242,9 +242,9 @@ export function NavigationCommandMenu() {
           </CommandItem>
 
           <CommandItem onSelect={() => handleSelect('/partner')} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-sm">🤝</span>
-              <div className="flex flex-col items-start">
+              <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>Partner</span>
                 <span className="text-xs text-muted-foreground">Partner program</span>
               </div>
@@ -257,9 +257,9 @@ export function NavigationCommandMenu() {
         {/* Actions Group */}
         <CommandGroup heading="Actions">
           <CommandItem onSelect={() => handleSelect('/submit')} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-sm">➕</span>
-              <div className="flex flex-col items-start">
+              <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>Submit Config</span>
                 <span className="text-xs text-muted-foreground">Share your configurations</span>
               </div>

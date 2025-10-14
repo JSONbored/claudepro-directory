@@ -119,16 +119,25 @@ export const UI_CLASSES = {
    * Flexbox Layouts - Common patterns
    */
   FLEX_ITEMS_CENTER_GAP_1: 'flex items-center gap-1',
+  FLEX_ITEMS_CENTER_GAP_1_5: 'flex items-center gap-1.5',
   FLEX_ITEMS_CENTER_GAP_2: 'flex items-center gap-2',
   FLEX_ITEMS_CENTER_GAP_3: 'flex items-center gap-3',
+  FLEX_ITEMS_CENTER_GAP_4: 'flex items-center gap-4',
+  FLEX_ITEMS_CENTER_GAP_6: 'flex items-center gap-6',
   FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN: 'flex items-center justify-between',
+  FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2: 'flex items-center justify-center gap-2',
+  FLEX_ITEMS_START_GAP_2: 'flex items-start gap-2',
   FLEX_ITEMS_START_GAP_3: 'flex items-start gap-3',
+  FLEX_ITEMS_START_GAP_4: 'flex items-start gap-4',
   FLEX_ITEMS_START_JUSTIFY_BETWEEN: 'flex items-start justify-between',
+  FLEX_ITEMS_START_JUSTIFY_BETWEEN_GAP_2: 'flex items-start justify-between gap-2',
+  FLEX_ITEMS_END_GAP_2: 'flex items-end gap-2',
   FLEX_GAP_2: 'flex gap-2',
   FLEX_GAP_3: 'flex gap-3',
   FLEX_GAP_4: 'flex gap-4',
   FLEX_WRAP_GAP_1: 'flex flex-wrap gap-1',
   FLEX_WRAP_GAP_2: 'flex flex-wrap gap-2',
+  FLEX_WRAP_GAP_3: 'flex flex-wrap gap-3',
   FLEX_WRAP_GAP_4: 'flex flex-wrap gap-4',
 
   /**
@@ -138,16 +147,36 @@ export const UI_CLASSES = {
   FLEX_ROW: 'flex flex-row',
   FLEX_COL_CENTER: 'flex flex-col items-center',
   FLEX_ROW_CENTER: 'flex flex-row items-center',
+  FLEX_COL_ITEMS_START: 'flex flex-col items-start',
+  FLEX_COL_ITEMS_CENTER_GAP_4: 'flex flex-col items-center gap-4',
+  FLEX_COL_ITEMS_CENTER_JUSTIFY_CENTER: 'flex flex-col items-center justify-center py-12',
+  FLEX_COL_GAP_1: 'flex flex-col gap-1',
+  FLEX_COL_GAP_2: 'flex flex-col gap-2',
+  FLEX_COL_SM_ROW_GAP_2: 'flex flex-col sm:flex-row gap-2 sm:gap-3',
+  FLEX_COL_SM_ROW_GAP_3: 'flex flex-col sm:flex-row gap-3 sm:gap-4',
+  FLEX_COL_SM_ROW_ITEMS_START: 'flex flex-col sm:flex-row items-start gap-3',
+  FLEX_COL_SM_ROW_ITEMS_CENTER_JUSTIFY_BETWEEN:
+    'flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4',
+  FLEX_ROW_ITEMS_CENTER_JUSTIFY_BETWEEN: 'flex flex-row items-center justify-between space-y-0 pb-2',
 
   /**
    * Flexbox - Extended
    */
   FLEX_1: 'flex-1',
+  FLEX_1_MIN_W_0: 'flex-1 min-w-0',
+  FLEX_1_SM_FLEX_INITIAL: 'flex-1 sm:flex-initial',
   FLEX_GROW: 'flex-grow',
   FLEX_SHRINK: 'flex-shrink',
   FLEX_SHRINK_0: 'flex-shrink-0',
+  FLEX_SHRINK_0_MT_0_5: 'flex-shrink-0 mt-0.5',
   FLEX_WRAP: 'flex-wrap',
   FLEX_NOWRAP: 'flex-nowrap',
+
+  /**
+   * Inline Flex Patterns
+   */
+  INLINE_FLEX_ITEMS_CENTER_GAP_1: 'inline-flex items-center gap-1',
+  INLINE_FLEX_ITEMS_CENTER_GAP_2: 'inline-flex items-center gap-2',
 
   /**
    * Layout Alignment - Justify
