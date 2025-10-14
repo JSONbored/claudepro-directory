@@ -299,8 +299,6 @@ describe('useLocalStorage', () => {
       act(() => {
         window.dispatchEvent(
           new StorageEvent('storage', {
-            bubbles: false,
-            cancelable: false,
             key: 'sync-key',
             newValue: JSON.stringify('updated-from-other-tab'),
             oldValue: JSON.stringify('initial'),
@@ -327,8 +325,6 @@ describe('useLocalStorage', () => {
       act(() => {
         window.dispatchEvent(
           new StorageEvent('storage', {
-            bubbles: false,
-            cancelable: false,
             key: 'sync-key',
             newValue: null,
             oldValue: JSON.stringify('value'),
@@ -352,8 +348,6 @@ describe('useLocalStorage', () => {
       act(() => {
         window.dispatchEvent(
           new StorageEvent('storage', {
-            bubbles: false,
-            cancelable: false,
             key: 'key-b',
             newValue: JSON.stringify('value-b'),
             oldValue: null,
@@ -377,8 +371,6 @@ describe('useLocalStorage', () => {
       act(() => {
         window.dispatchEvent(
           new StorageEvent('storage', {
-            bubbles: false,
-            cancelable: false,
             key: 'no-sync-key',
             newValue: JSON.stringify('should-not-sync'),
             oldValue: null,
@@ -467,8 +459,6 @@ describe('useLocalStorage', () => {
       act(() => {
         window.dispatchEvent(
           new StorageEvent('storage', {
-            bubbles: false,
-            cancelable: false,
             key: 'sync-error-key',
             newValue: 'invalid-json{',
             oldValue: null,
