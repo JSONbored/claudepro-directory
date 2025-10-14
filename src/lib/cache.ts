@@ -2224,10 +2224,16 @@ class SearchCache {
     }
   ): Promise<T[]> {
     // Use Fuzzysort adapter with filters
-    return searchWithFilters(items, query, filters, {
-      threshold: options?.threshold || 0.3,
-      limit: options?.limit,
-    });
+    const searchOptions: { threshold?: number; limit?: number } = {};
+    if (options?.threshold !== undefined) {
+      searchOptions.threshold = options.threshold;
+    } else {
+      searchOptions.threshold = 0.3;
+    }
+    if (options?.limit !== undefined) {
+      searchOptions.limit = options.limit;
+    }
+    return searchWithFilters(items, query, filters, searchOptions);
   }
 
   // Invalidate cache for a specific pattern

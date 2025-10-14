@@ -31,6 +31,7 @@ import type {
 } from '@/src/lib/schemas/content/collection.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { batchMap } from '@/src/lib/utils/batch.utils';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * Item with loaded content data

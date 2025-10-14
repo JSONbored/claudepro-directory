@@ -17,6 +17,7 @@
 import { domAnimation, LazyMotion, m, type Transition, useInView } from 'framer-motion';
 import * as React from 'react';
 import { cn } from '@/src/lib/utils';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 const ENTRY_ANIMATION = {
   initial: { rotateX: 90 },

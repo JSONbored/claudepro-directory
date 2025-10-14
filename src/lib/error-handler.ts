@@ -709,13 +709,9 @@ export interface CreateApiRouteOptions<P = any, Q = any, H = any, B = any> {
 }
 
 function isResponse(value: unknown): value is Response | NextResponse {
-  return (
-    !!value &&
-    typeof value === 'object' &&
-    // @ts-ignore - duck typing for Response
-    typeof (value as Response).headers === 'object' &&
-    typeof (value as Response).status === 'number'
-  );
+  if (!value || typeof value !== 'object') return false;
+  const anyVal = value as any;
+  return typeof anyVal.headers === 'object' && typeof anyVal.status === 'number';
 }
 
 function cloneWithHeaders(original: Response, headers: Record<string, string>): Response {
