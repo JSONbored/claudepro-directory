@@ -25,6 +25,7 @@ import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { METADATA_DEFAULTS } from '@/src/lib/seo/metadata-registry';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // Dynamic imports for Fumadocs components (only loads on /api-docs routes for better performance)
 const DocsLayout = dynamic(

@@ -5,6 +5,7 @@ import { Command as CommandPrimitive } from 'cmdk';
 import type * as React from 'react';
 import { Dialog, DialogContent } from '@/src/components/ui/dialog';
 import { Search } from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
 const Command = ({
