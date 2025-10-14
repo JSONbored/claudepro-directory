@@ -113,7 +113,7 @@ const customRender = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>
  * This allows: import { render, screen, waitFor } from '@/tests/utils/test-utils'
  */
 // Re-export only the commonly used utilities to avoid barrel performance issues
-export { screen, waitFor, fireEvent } from '@testing-library/react';
+export { fireEvent, screen, waitFor } from '@testing-library/react';
 
 /**
  * Export custom render as default render

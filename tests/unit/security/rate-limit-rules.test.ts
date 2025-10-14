@@ -294,8 +294,8 @@ describe('Rate Limit Rules - Security Validation', () => {
     expect(() => classifyEndpoint('\\api\\cache')).not.toThrow();
   });
 
-    test('should handle very long paths', () => {
-      const longPath = `/api/${'a'.repeat(1000)}`;
+  test('should handle very long paths', () => {
+    const longPath = `/api/${'a'.repeat(1000)}`;
     expect(() => classifyEndpoint(longPath)).not.toThrow();
   });
 });
