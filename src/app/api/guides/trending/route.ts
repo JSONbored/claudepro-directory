@@ -1,8 +1,7 @@
 import { z } from 'zod';
-import { statsRedis } from '@/src/lib/cache';
-import { CACHE_HEADERS } from '@/src/lib/constants';
+import { contentCache, statsRedis } from '@/src/lib/cache';
+import { CACHE_CONFIG, REVALIDATE_TIMES } from '@/src/lib/constants';
 import { createApiRoute } from '@/src/lib/error-handler';
-import { logger } from '@/src/lib/logger';
 import {
   createCursor,
   createPaginationMeta,
@@ -56,7 +55,34 @@ const { GET } = createApiRoute({
         }
       }
 
-      const fetchLimit = (params.limit || 10) + 1;
+      const limit = params.limit || 10;
+      const fetchLimit = limit + 1;
+
+      // Build normalized cache key (allowed charset only; avoid raw base64 cursor)
+      const cacheKey = `guides/trending:cat:${category}:start:${startIndex}:limit:${limit}`;
+
+      // Try cache first (fast path)
+      try {
+        const cached = await contentCache.getAPIResponse<any>(cacheKey);
+        if (cached) {
+          // Compute lightweight metadata for headers (do not mutate cached body)
+          const totalCount = (await statsRedis.getTrending(category, 100)).length;
+
+          return okRaw(cached, {
+            sMaxAge: REVALIDATE_TIMES.api,
+            staleWhileRevalidate: 86400,
+            cacheHit: true,
+            additionalHeaders: {
+              'X-Total-Count': String(totalCount),
+              'X-Has-More': String(Boolean(cached?.pagination?.hasMore)),
+            },
+          });
+        }
+      } catch (err) {
+        requestLogger.warn('Trending API cache read failed; continuing without cache', undefined, {
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
 
       const allTrendingSlugs = await statsRedis.getTrending(category, 100);
       const paginatedSlugs = allTrendingSlugs.slice(startIndex, startIndex + fetchLimit);
@@ -97,11 +123,20 @@ const { GET } = createApiRoute({
         timestamp: new Date().toISOString(),
       };
 
+      // Write-through cache on miss
+      try {
+        await contentCache.cacheAPIResponse(cacheKey, response, CACHE_CONFIG.ttl.api);
+      } catch (err) {
+        requestLogger.warn('Trending API cache write failed; serving fresh response', undefined, {
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+
       return okRaw(response, {
-        sMaxAge: 3600,
+        sMaxAge: REVALIDATE_TIMES.api,
         staleWhileRevalidate: 86400,
+        cacheHit: false,
         additionalHeaders: {
-          'Cache-Control': CACHE_HEADERS.MEDIUM,
           'X-Total-Count': String(allTrendingSlugs.length),
           'X-Has-More': String(pagination.hasMore),
         },

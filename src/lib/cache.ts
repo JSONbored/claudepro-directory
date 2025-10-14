@@ -1660,6 +1660,22 @@ export const contentCache = {
   getAPIResponse: <T>(endpoint: string) =>
     cache.get<T>(CacheServices.api, `api:${endpoint}`, 'API'),
 
+  // API cache invalidation (targets API cache namespace)
+  invalidateAPIPattern: async (pattern: string): Promise<CacheInvalidationResult> => {
+    try {
+      return await CacheServices.api.invalidatePattern(pattern);
+    } catch {
+      return {
+        pattern,
+        keysScanned: 0,
+        keysDeleted: 0,
+        scanCycles: 1,
+        duration: 0,
+        rateLimited: false,
+      };
+    }
+  },
+
   invalidatePattern: async (pattern: string): Promise<CacheInvalidationResult> => {
     try {
       return await CacheServices.content.invalidatePattern(pattern);
@@ -2344,6 +2360,11 @@ class CacheInvalidationService {
     keys.push(`trending:${category}:*`);
     keys.push(`popular:${category}:*`);
 
+    // Invalidate API-level cached responses that depend on trending data
+    if (category === 'guides') {
+      keys.push('api:guides/trending*');
+    }
+
     // Invalidate any caches that specifically reference this slug
     keys.push(`*:${slug.replace(/\//g, '_')}:*`);
 
@@ -2356,7 +2377,12 @@ class CacheInvalidationService {
   private async invalidateKeys(patterns: string[]): Promise<void> {
     for (const pattern of patterns) {
       try {
-        await contentCache.invalidatePattern(pattern);
+        // Route invalidation to API or content cache namespaces
+        if (pattern.startsWith('api:')) {
+          await contentCache.invalidateAPIPattern(pattern);
+        } else {
+          await contentCache.invalidatePattern(pattern);
+        }
       } catch (error) {
         logger.warn('Failed to invalidate pattern', {
           pattern,
