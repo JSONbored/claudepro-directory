@@ -20,7 +20,6 @@
  * @module app/api/cron/daily-maintenance
  */
 
-import { NextResponse } from 'next/server';
 import { cacheWarmer } from '@/src/lib/cache';
 import { logger } from '@/src/lib/logger';
 import { createApiRoute } from '@/src/lib/error-handler';
@@ -60,7 +59,7 @@ const { GET } = createApiRoute({
   auth: { type: 'cron' },
   response: { envelope: false },
   handlers: {
-    GET: async () => {
+    GET: async ({ okRaw }) => {
     const overallStartTime = performance.now();
     const results: TaskResult[] = [];
 
@@ -248,14 +247,17 @@ const { GET } = createApiRoute({
       ),
     });
 
-      return NextResponse.json({
-        success: failedTasks === 0,
-        total_duration_ms: totalDuration,
-        successful_tasks: successfulTasks,
-        failed_tasks: failedTasks,
-        results,
-        timestamp: new Date().toISOString(),
-      });
+      return okRaw(
+        {
+          success: failedTasks === 0,
+          total_duration_ms: totalDuration,
+          successful_tasks: successfulTasks,
+          failed_tasks: failedTasks,
+          results,
+          timestamp: new Date().toISOString(),
+        },
+        { sMaxAge: 0, staleWhileRevalidate: 0 }
+      );
     },
   },
 });

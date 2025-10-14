@@ -19,7 +19,6 @@
  * @module app/api/cron/weekly-tasks
  */
 
-import { NextResponse } from 'next/server';
 import { WeeklyDigest } from '@/src/emails/templates/weekly-digest';
 import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
@@ -55,7 +54,7 @@ const { GET } = createApiRoute({
   auth: { type: 'cron' },
   response: { envelope: false },
   handlers: {
-    GET: async () => {
+    GET: async ({ okRaw }) => {
     const overallStartTime = performance.now();
     const results: TaskResult[] = [];
 
@@ -330,14 +329,17 @@ const { GET } = createApiRoute({
       ),
     });
 
-      return NextResponse.json({
-        success: failedTasks === 0,
-        total_duration_ms: totalDuration,
-        successful_tasks: successfulTasks,
-        failed_tasks: failedTasks,
-        results,
-        timestamp: new Date().toISOString(),
-      });
+      return okRaw(
+        {
+          success: failedTasks === 0,
+          total_duration_ms: totalDuration,
+          successful_tasks: successfulTasks,
+          failed_tasks: failedTasks,
+          results,
+          timestamp: new Date().toISOString(),
+        },
+        { sMaxAge: 0, staleWhileRevalidate: 0 }
+      );
     },
   },
 });

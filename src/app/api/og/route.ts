@@ -30,7 +30,6 @@
  */
 
 import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { chromium } from 'playwright';
 import { redisClient } from '@/src/lib/cache';
@@ -317,23 +316,26 @@ export async function GET(request: NextRequest) {
 
     // Validate dimensions
     if (width < 100 || width > 2400 || height < 100 || height > 2400) {
-      return NextResponse.json(
+      return apiResponse.okRaw(
         { error: 'Invalid dimensions. Width and height must be between 100 and 2400.' },
-        { status: 400 }
+        { status: 400, sMaxAge: 0, staleWhileRevalidate: 0 }
       );
     }
 
     // Validate path format
     if (!path.startsWith('/')) {
-      return NextResponse.json(
+      return apiResponse.okRaw(
         { error: 'Invalid path. Path must start with forward slash.' },
-        { status: 400 }
+        { status: 400, sMaxAge: 0, staleWhileRevalidate: 0 }
       );
     }
 
     // Security: Prevent path traversal
     if (path.includes('..') || path.includes('//')) {
-      return NextResponse.json({ error: 'Invalid path format.' }, { status: 400 });
+      return apiResponse.okRaw(
+        { error: 'Invalid path format.' },
+        { status: 400, sMaxAge: 0, staleWhileRevalidate: 0 }
+      );
     }
 
     // Generate or retrieve OG image

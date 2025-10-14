@@ -16,7 +16,8 @@
  * - email.delivery_delayed: Monitoring
  */
 
-import { type NextRequest, NextResponse } from 'next/server';
+import { type NextRequest } from 'next/server';
+import { apiResponse } from '@/src/lib/error-handler';
 import { Webhook } from 'svix';
 import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
@@ -113,11 +114,11 @@ export async function POST(request: NextRequest) {
       limit: rateLimitCheck.limit,
       retryAfter: rateLimitCheck.retryAfter,
     });
-    return new Response('Too Many Requests', {
+    return apiResponse.raw(null, {
+      contentType: 'application/json; charset=utf-8',
       status: 429,
-      headers: {
-        'Retry-After': String(rateLimitCheck.retryAfter),
-      },
+      headers: { 'Retry-After': String(rateLimitCheck.retryAfter) },
+      cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
     });
   }
 
@@ -135,10 +136,13 @@ export async function POST(request: NextRequest) {
     );
   });
 
-  // Return success immediately
-  return NextResponse.json({
-    received: true,
-    eventType: event.type,
-    timestamp: new Date().toISOString(),
-  });
+  // Return success immediately (no envelope for webhook acknowledgement)
+  return apiResponse.okRaw(
+    {
+      received: true,
+      eventType: event.type,
+      timestamp: new Date().toISOString(),
+    },
+    { sMaxAge: 0, staleWhileRevalidate: 0 }
+  );
 }

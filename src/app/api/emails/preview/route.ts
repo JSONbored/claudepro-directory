@@ -6,7 +6,7 @@
  * Usage: GET /api/emails/preview?template=newsletter-welcome
  */
 
-import { NextResponse } from 'next/server';
+import { apiResponse } from '@/src/lib/error-handler';
 import {
   NewsletterWelcome,
   type NewsletterWelcomeProps,
@@ -59,11 +59,14 @@ const { GET } = createApiRoute({
 
       const templateName = params.template as TemplateName | undefined;
       if (!templateName) {
-        return NextResponse.json({
-          message: 'Email preview API',
-          availableTemplates: Object.keys(templates),
-          usage: '/api/emails/preview?template=newsletter-welcome',
-        });
+        return apiResponse.okRaw(
+          {
+            message: 'Email preview API',
+            availableTemplates: Object.keys(templates),
+            usage: '/api/emails/preview?template=newsletter-welcome',
+          },
+          { sMaxAge: 0, staleWhileRevalidate: 0 }
+        );
       }
 
       if (!templates[templateName]) {
@@ -98,11 +101,10 @@ const { GET } = createApiRoute({
         });
       }
 
-      return new NextResponse(html, {
-        headers: {
-          'Content-Type': 'text/html; charset=utf-8',
-          'Cache-Control': 'no-store, must-revalidate',
-        },
+      return apiResponse.raw(html, {
+        contentType: 'text/html; charset=utf-8',
+        headers: { 'Cache-Control': 'no-store, must-revalidate' },
+        cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
       });
     },
   },
