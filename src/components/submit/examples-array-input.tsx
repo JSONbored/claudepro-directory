@@ -200,7 +200,7 @@ export function ExamplesArrayInput({
           size="sm"
           onClick={addExample}
           disabled={examples.length >= maxExamples}
-          className="flex items-center gap-2"
+          className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
         >
           <Plus className="h-4 w-4" />
           Add Example

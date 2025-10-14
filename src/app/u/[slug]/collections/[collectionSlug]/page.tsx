@@ -127,7 +127,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
         <div className={UI_CLASSES.SPACE_Y_6}>
           {/* Navigation */}
           <Link href={`/u/${slug}`}>
-            <Button variant="ghost" className="flex items-center gap-2">
+            <Button variant="ghost" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <ArrowLeft className="h-4 w-4" />
               Back to {profileUser.name || slug}'s Profile
             </Button>
@@ -184,7 +184,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                         <div className="text-2xl font-bold text-muted-foreground/50 w-8">
                           {index + 1}
                         </div>
-                        <div className="flex-1">
+                        <div className={UI_CLASSES.FLEX_1}>
                           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                             <Badge variant="outline" className="capitalize">
                               {item.content_type}

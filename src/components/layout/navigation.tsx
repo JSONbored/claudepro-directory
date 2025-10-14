@@ -186,7 +186,7 @@ export const Navigation = () => {
 
                 {/* Desktop Navigation */}
                 <nav
-                  className="hidden lg:flex items-center gap-2 lg:gap-3 xl:gap-4 text-sm xl:text-base"
+                  className={`hidden ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} lg:gap-3 xl:gap-4 text-sm xl:text-base lg:flex`}
                   aria-label="Primary navigation"
                 >
                   {PRIMARY_NAVIGATION.map((link) => (
@@ -197,7 +197,7 @@ export const Navigation = () => {
                       onClick={() => setIsOpen(false)}
                     >
                       {link.isNew ? (
-                        <span className="flex items-center gap-1.5">
+                        <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
                           {link.label}
                           <NewIndicator label={`New: ${link.label}`} />
                         </span>
@@ -469,6 +469,10 @@ export const Navigation = () => {
           </nav>
         </div>
       </header>
+    </>
+  );
+};
+r>
     </>
   );
 };
