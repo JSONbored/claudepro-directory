@@ -294,7 +294,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                           )}
                         </CardHeader>
                         <CardContent>
-                          <div className="flex items-center justify-between text-sm">
+                          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.TEXT_SM}`}>
                             <span className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
                               {collection.item_count}{' '}
                               {collection.item_count === 1 ? 'item' : 'items'}

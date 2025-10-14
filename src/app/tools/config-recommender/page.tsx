@@ -154,7 +154,7 @@ export default function ConfigRecommenderPage() {
         <div className={`${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
           <Card className="bg-accent/5 border-accent/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <BarChart className="h-5 w-5 text-primary" />
                 What You'll Get
               </CardTitle>

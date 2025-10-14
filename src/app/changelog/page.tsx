@@ -87,7 +87,7 @@ export default async function ChangelogPage() {
             </div>
 
             {/* Stats */}
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_6} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
               <div>
                 <span className="font-semibold text-foreground">{entries.length}</span> total
                 updates

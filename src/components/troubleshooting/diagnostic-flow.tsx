@@ -85,7 +85,7 @@ export function DiagnosticFlow(props: DiagnosticFlowProps) {
             <CardContent className="pt-6">
               {isComplete ? (
                 <div className={UI_CLASSES.SPACE_Y_4}>
-                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                  <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-green-600 dark:text-green-400`}>
                     <CheckCircle className="h-5 w-5" />
                     <p className={UI_CLASSES.FONT_MEDIUM}>Solution Found:</p>
                   </div>

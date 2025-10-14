@@ -44,7 +44,7 @@ export default async function LibraryPage() {
 
   return (
     <div className={UI_CLASSES.SPACE_Y_6}>
-      <div className="flex items-center justify-between">
+      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
           <h1 className="text-3xl font-bold mb-2">My Library</h1>
           <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
@@ -52,7 +52,7 @@ export default async function LibraryPage() {
           </p>
         </div>
         <Link href={ROUTES.ACCOUNT_LIBRARY_NEW}>
-          <Button className="flex items-center gap-2">
+          <Button className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <Plus className="h-4 w-4" />
             New Collection
           </Button>
@@ -61,11 +61,11 @@ export default async function LibraryPage() {
 
       <Tabs defaultValue="bookmarks" className={UI_CLASSES.W_FULL}>
         <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="bookmarks" className="flex items-center gap-2">
+          <TabsTrigger value="bookmarks" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <Bookmark className="h-4 w-4" />
             Bookmarks ({bookmarkCount})
           </TabsTrigger>
-          <TabsTrigger value="collections" className="flex items-center gap-2">
+          <TabsTrigger value="collections" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <FolderOpen className="h-4 w-4" />
             Collections ({collectionCount})
           </TabsTrigger>
@@ -135,7 +135,7 @@ export default async function LibraryPage() {
                   together and share them with others.
                 </p>
                 <Link href={ROUTES.ACCOUNT_LIBRARY_NEW}>
-                  <Button className="flex items-center gap-2">
+                  <Button className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                     <Plus className="h-4 w-4" />
                     Create Your First Collection
                   </Button>
@@ -168,7 +168,7 @@ export default async function LibraryPage() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex items-center justify-between">
+                      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                         <p className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
                           {collection.item_count} {collection.item_count === 1 ? 'item' : 'items'}
                         </p>

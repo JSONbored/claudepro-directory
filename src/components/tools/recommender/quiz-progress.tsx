@@ -23,15 +23,15 @@ export function QuizProgress({
   return (
     <div className={UI_CLASSES.SPACE_Y_3}>
       {/* Question counter */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
+        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
           <span className="text-sm font-medium">Progress</span>
           <Badge variant="secondary">
             {currentQuestion} / {totalQuestions}
           </Badge>
         </div>
         {percentComplete === 100 && (
-          <div className="flex items-center gap-2 text-sm text-primary">
+          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_SM} text-primary`}>
             <CheckCircle className="h-4 w-4" />
             <span>Complete!</span>
           </div>
@@ -52,7 +52,7 @@ export function QuizProgress({
       </div>
 
       {/* Step indicators */}
-      <div className="flex items-center justify-between">
+      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((step) => (
           <div
             key={step}

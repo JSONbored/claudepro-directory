@@ -44,7 +44,7 @@ const CommandInput = ({
 }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input> & {
   ref?: React.Ref<React.ElementRef<typeof CommandPrimitive.Input>>;
 }) => (
-  <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
+  <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER} border-b px-3`} cmdk-input-wrapper="">
     <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
     <CommandPrimitive.Input
       ref={ref}

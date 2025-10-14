@@ -42,7 +42,7 @@ export default async function SettingsPage() {
       {/* Profile Information */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <div>
               <CardTitle>Profile Information</CardTitle>
               <CardDescription>Update your public profile details</CardDescription>
@@ -120,7 +120,7 @@ export default async function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {profile.image && (
-            <div className="flex items-center gap-4">
+            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_4}>
               <Image
                 src={profile.image}
                 alt={profile.name || 'Profile'}

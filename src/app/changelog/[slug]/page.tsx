@@ -136,7 +136,7 @@ export default async function ChangelogEntryPage({
 
           {/* Header */}
           <header className="space-y-4 pb-6">
-            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
               <Calendar className="h-4 w-4" />
               <time dateTime={entry.date}>{formatChangelogDate(entry.date)}</time>
             </div>
@@ -144,7 +144,7 @@ export default async function ChangelogEntryPage({
             <h1 className="text-4xl font-bold tracking-tight">{entry.title}</h1>
 
             {/* Canonical URL */}
-            <div className="flex items-center gap-2 text-sm">
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_SM}`}>
               <span className="text-muted-foreground">Permanent link:</span>
               <a
                 href={canonicalUrl}

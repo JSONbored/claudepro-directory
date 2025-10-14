@@ -94,7 +94,7 @@ export function ProductionCodeBlock({
         {filename && (
           <div className={UI_CLASSES.CODE_BLOCK_HEADER}>
             <span className={UI_CLASSES.CODE_BLOCK_FILENAME}>{filename}</span>
-            <div className="flex items-center gap-2">
+            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               {/* Language badge pill */}
               {language && language !== 'text' && (
                 <span className="px-2 py-0.5 text-2xs font-medium uppercase tracking-wider rounded-full bg-accent/10 text-accent border border-accent/20">
@@ -105,7 +105,7 @@ export function ProductionCodeBlock({
               <button
                 type="button"
                 onClick={handleCopy}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-code/30"
+                className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-code/30`}
                 title="Copy code"
               >
                 {isCopied ? (

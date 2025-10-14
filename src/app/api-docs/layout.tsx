@@ -137,7 +137,7 @@ export default function APIDocsLayout({ children }: LayoutProps) {
         nav={{
           // Custom navigation title
           title: (
-            <div className="flex items-center gap-2">
+            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="font-semibold">{APP_CONFIG.name}</span>
               <span className="text-fd-muted-foreground">API</span>
             </div>
