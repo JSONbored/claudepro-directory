@@ -19,6 +19,9 @@ import { APP_CONFIG } from '@/src/lib/constants';
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
 import { createRequestId, type RequestId } from '@/src/lib/schemas/branded-types.schema';
+import { withRateLimit, type RateLimiter } from '@/src/lib/rate-limiter';
+import { verifyCronAuth } from '@/src/lib/middleware/cron-auth';
+import { validation } from '@/src/lib/security/validators';
 import {
   determineErrorType,
   type ErrorContext,
@@ -544,4 +547,221 @@ export function transformContentItems<T extends { slug: string }>(
     type,
     url: `${APP_CONFIG.url}/${category}/${item.slug}`,
   }));
+}
+
+// ============================================
+// STANDARDIZED API ROUTE FACTORY
+// ============================================
+
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+
+type ZodSchemaLike<T> = z.ZodSchema<T>;
+
+export interface RouteValidationSchemas<P = unknown, Q = unknown, H = unknown, B = unknown> {
+  params?: ZodSchemaLike<P>;
+  query?: ZodSchemaLike<Q>;
+  headers?: ZodSchemaLike<H>;
+  body?: ZodSchemaLike<B>;
+}
+
+export interface ApiOkOptions extends CacheOptions {
+  envelope?: boolean; // if false, return raw JSON body (no { data })
+  status?: number; // optional HTTP status override
+}
+
+export interface ApiHandlerContext<
+  P = unknown,
+  Q = unknown,
+  H = unknown,
+  B = unknown
+> {
+  request: NextRequest;
+  params: P;
+  query: Q;
+  headers: H;
+  body: B;
+  logger: ReturnType<typeof logger.forRequest>;
+  ok: <T>(data: T, options?: ApiOkOptions) => NextResponse;
+  okRaw: <T>(data: T, options?: Omit<ApiOkOptions, 'envelope'>) => NextResponse;
+}
+
+type ApiMethodHandler<P = unknown, Q = unknown, H = unknown, B = unknown> = (
+  ctx: ApiHandlerContext<P, Q, H, B>
+) => Promise<Response | NextResponse | unknown>;
+
+export interface CreateApiRouteOptions<P = any, Q = any, H = any, B = any> {
+  validate?: RouteValidationSchemas<P, Q, H, B>;
+  rateLimit?: { limiter?: RateLimiter };
+  auth?: { type?: 'devOnly' | 'cron' };
+  response?: ApiOkOptions;
+  handlers: Partial<Record<HttpMethod, ApiMethodHandler<P, Q, H, B>>>;
+}
+
+function isResponse(value: unknown): value is Response | NextResponse {
+  return (
+    !!value &&
+    typeof value === 'object' &&
+    // @ts-ignore - duck typing for Response
+    typeof (value as Response).headers === 'object' &&
+    typeof (value as Response).status === 'number'
+  );
+}
+
+function cloneWithHeaders(original: Response, headers: Record<string, string>): Response {
+  const newHeaders = new Headers(original.headers);
+  for (const [k, v] of Object.entries(headers)) newHeaders.set(k, v);
+  return new Response(original.body, {
+    status: original.status,
+    statusText: original.statusText,
+    headers: newHeaders,
+  });
+}
+
+/**
+ * Create standardized route handlers for Next.js App Router.
+ * Usage in a route file:
+ *
+ * const { GET, POST } = createApiRoute({ ... });
+ * export { GET, POST };
+ */
+export function createApiRoute<P = any, Q = any, H = any, B = any>(
+  options: CreateApiRouteOptions<P, Q, H, B>
+): Partial<Record<HttpMethod, (request: NextRequest, context?: { params?: unknown }) => Promise<Response>>> {
+  const { validate, rateLimit, auth, response, handlers } = options;
+
+  const wrap = (
+    method: HttpMethod,
+    handler?: ApiMethodHandler<P, Q, H, B>
+  ): ((request: NextRequest, context?: { params?: unknown }) => Promise<Response>) | undefined => {
+    if (!handler) return undefined;
+
+    return async (request: NextRequest, context?: { params?: unknown }) => {
+      const url = new URL(request.url);
+
+      // Resolve params (supports both direct object and Promise as seen in legacy code)
+      const rawParams = context?.params as unknown;
+      const resolvedParams =
+        rawParams && typeof (rawParams as Promise<unknown>)?.then === 'function'
+          ? await (rawParams as Promise<unknown>).catch(() => ({}))
+          : rawParams || {};
+
+      // Request ID
+      const headerRequestId = request.headers.get('x-request-id');
+      const requestId = (headerRequestId as RequestId) || createRequestId();
+
+      // Auth guards
+      if (auth?.type === 'devOnly' && isProduction) {
+        return handleApiError(new Error('Endpoint available only in development'), {
+          route: url.pathname,
+          method,
+          operation: 'dev_only_guard',
+          requestId,
+          logLevel: 'warn',
+        });
+      }
+
+      if (auth?.type === 'cron') {
+        const authError = verifyCronAuth(request);
+        if (authError) return cloneWithHeaders(authError, { 'X-Request-ID': requestId });
+      }
+
+      // Build context with validation
+      try {
+        const queryObj = Object.fromEntries(request.nextUrl.searchParams);
+
+        const parsedParams = validate?.params
+          ? validation.validate(validate.params, resolvedParams, 'route parameters')
+          : (resolvedParams as P);
+        const parsedQuery = validate?.query
+          ? validation.validate(validate.query, queryObj, 'query parameters')
+          : (queryObj as Q);
+        const headersObj = Object.fromEntries(request.headers.entries());
+        const parsedHeaders = validate?.headers
+          ? validation.validate(validate.headers, headersObj, 'request headers')
+          : (headersObj as H);
+
+        let parsedBody: B = {} as B;
+        if (validate?.body) {
+          const contentType = request.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            const json = await request.json().catch(() => ({}));
+            parsedBody = validation.validate(validate.body, json, 'request body') as B;
+          } else if (method !== 'GET' && method !== 'DELETE') {
+            // Non-JSON body - treat as empty and rely on handler if needed
+            parsedBody = validation.validate(validate.body, {}, 'request body') as B;
+          }
+        }
+
+        const requestLogger = logger.forRequest(request);
+
+        const ok = <T>(data: T, opts?: ApiOkOptions) => {
+          const { envelope = true, additionalHeaders = {}, ...cache } = opts || {};
+          if (!envelope) {
+            const headers: Record<string, string> = {
+              'Cache-Control': `public, s-maxage=${cache.sMaxAge ?? 14400}, stale-while-revalidate=${
+                cache.staleWhileRevalidate ?? 86400
+              }`,
+              'X-Cache': cache.cacheHit ? 'HIT' : 'MISS',
+              'X-Content-Type-Options': 'nosniff',
+              'X-Frame-Options': 'DENY',
+              'X-Request-ID': requestId,
+              ...additionalHeaders,
+            };
+            return NextResponse.json(data, { headers, status: opts?.status ?? 200 });
+          }
+          return buildSuccessResponse(data, {
+            ...cache,
+            additionalHeaders: { 'X-Request-ID': requestId, ...additionalHeaders },
+          });
+        };
+
+        const okRaw = <T>(data: T, opts?: Omit<ApiOkOptions, 'envelope'>) => ok<T>(data, { ...opts, envelope: false });
+
+        const ctx: ApiHandlerContext<P, Q, H, B> = {
+          request,
+          params: parsedParams,
+          query: parsedQuery,
+          headers: parsedHeaders,
+          body: parsedBody,
+          logger: requestLogger,
+          ok,
+          okRaw,
+        };
+
+        // Invoke handler with optional rate limiting
+        const invoke = async (): Promise<Response> => {
+          const result = await handler(ctx);
+          if (isResponse(result)) {
+            return cloneWithHeaders(result, { 'X-Request-ID': requestId });
+          }
+          // Default success path uses envelope unless overridden at factory level
+          const useEnvelope = response?.envelope !== false;
+          const res = ok(result as unknown, { ...response, envelope: useEnvelope });
+          return res;
+        };
+
+        if (rateLimit?.limiter) {
+          // withRateLimit will also add X-RateLimit-* headers on success
+          return await withRateLimit(request, rateLimit.limiter, invoke);
+        }
+
+        return await invoke();
+      } catch (error) {
+        return handleApiError(error instanceof Error ? error : new Error(String(error)), {
+          route: url.pathname,
+          method,
+          operation: 'api_route_handler',
+          requestId,
+        });
+      }
+    };
+  };
+
+  return {
+    GET: wrap('GET', handlers.GET),
+    POST: wrap('POST', handlers.POST),
+    PUT: wrap('PUT', handlers.PUT),
+    DELETE: wrap('DELETE', handlers.DELETE),
+    PATCH: wrap('PATCH', handlers.PATCH),
+  } as const;
 }

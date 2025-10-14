@@ -1,11 +1,9 @@
-import { type NextRequest, NextResponse } from 'next/server';
 import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
 import { contentCache } from '@/src/lib/cache';
-import { handleApiError, handleValidationError } from '@/src/lib/error-handler';
+import { createApiRoute } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
-import { rateLimiters, withRateLimit } from '@/src/lib/rate-limiter';
-import { errorInputSchema } from '@/src/lib/schemas/error.schema';
-import { apiSchemas, ValidationError, validation } from '@/src/lib/security/validators';
+import { rateLimiters } from '@/src/lib/rate-limiter';
+import { apiSchemas } from '@/src/lib/security/validators';
 
 export const runtime = 'nodejs';
 
@@ -20,127 +18,75 @@ const contentMap = {
   'collections.json': { getData: () => collections, type: 'collection' },
 } as const;
 
-async function handleGET(
-  request: NextRequest,
-  { params }: { params: Promise<{ contentType: string }> }
-) {
-  const requestLogger = logger.forRequest(request);
+const { GET } = createApiRoute({
+  validate: {
+    params: apiSchemas.contentTypeParams,
+  },
+  rateLimit: { limiter: rateLimiters.api },
+  response: { envelope: false },
+  handlers: {
+    GET: async ({ params, ok, okRaw, request, logger: requestLogger }) => {
+      const { contentType } = params as { contentType: string };
 
-  try {
-    const rawParams = await params;
-
-    // Validate parameters with strict schema
-    const validatedParams = validation.validateParams(
-      apiSchemas.contentTypeParams,
-      rawParams,
-      'content type route parameters'
-    );
-
-    const { contentType } = validatedParams;
-    requestLogger.info('Content type API request started', {
-      contentType,
-      validated: true,
-    });
-
-    // Try to get from cache first
-    const cacheKey = `content-api:${contentType}`;
-    const cachedResponse = await contentCache.getAPIResponse(cacheKey);
-    if (cachedResponse) {
-      requestLogger.info('Serving cached content API response', {
+      requestLogger.info('Content type API request started', {
         contentType,
-        source: 'redis-cache',
-      });
-      return NextResponse.json(cachedResponse, {
-        headers: {
-          'Cache-Control': 'public, s-maxage=14400, stale-while-revalidate=86400',
-          'X-Cache': 'HIT',
-        },
-      });
-    }
-
-    // Check if the content type is valid
-    if (!(contentType in contentMap)) {
-      requestLogger.warn('Invalid content type requested', {
-        contentType,
-        availableTypesCount: Object.keys(contentMap).length,
-        sampleType: Object.keys(contentMap)[0] || '',
+        validated: true,
       });
 
-      return NextResponse.json(
-        {
-          error: 'Content type not found',
-          message: `Available content types: ${Object.keys(contentMap).join(', ')}`,
-          timestamp: new Date().toISOString(),
-        },
-        { status: 404 }
-      );
-    }
-
-    const { getData, type } = contentMap[contentType as keyof typeof contentMap];
-    const data = await getData();
-    const contentCategory = contentType.replace('.json', '');
-
-    const responseData = {
-      [contentCategory]: data.map((item: { slug: string; [key: string]: unknown }) => ({
-        ...item,
-        type,
-        url: `https://claudepro.directory/${contentCategory}/${item.slug}`,
-      })),
-      count: data.length,
-      lastUpdated: new Date().toISOString(),
-    };
-
-    // Cache the response for 1 hour
-    await contentCache.cacheAPIResponse(cacheKey, responseData, 60 * 60);
-
-    requestLogger.info('Content type API request completed successfully', {
-      contentType,
-      count: data.length,
-    });
-
-    return NextResponse.json(responseData, {
-      headers: {
-        'Cache-Control': 'public, s-maxage=14400, stale-while-revalidate=86400',
-        'X-Cache': 'MISS',
-      },
-    });
-  } catch (error: unknown) {
-    // Get content type for error context
-    const rawParams = await params.catch(() => ({ contentType: 'unknown' }));
-    const { contentType: errorContentType } = rawParams;
-
-    // Use centralized error handling for consistent responses
-    if (error instanceof ValidationError) {
-      return handleValidationError(error, {
-        route: '[contentType]',
-        operation: 'get_content',
-        method: 'GET',
-        logContext: {
-          contentType: errorContentType,
-        },
-      });
-    }
-
-    // Handle all other errors with centralized handler
-    const validatedError = errorInputSchema.safeParse(error);
-    return handleApiError(
-      validatedError.success ? validatedError.data : { message: 'API error occurred' },
-      {
-        route: '[contentType]',
-        operation: 'get_content',
-        method: 'GET',
-        logContext: {
-          contentType: errorContentType,
-        },
+      // Try to get from cache first
+      const cacheKey = `content-api:${contentType}`;
+      const cachedResponse = await contentCache.getAPIResponse(cacheKey);
+      if (cachedResponse) {
+        requestLogger.info('Serving cached content API response', {
+          contentType,
+          source: 'redis-cache',
+        });
+        return okRaw(cachedResponse, { sMaxAge: 14400, staleWhileRevalidate: 86400, cacheHit: true });
       }
-    );
-  }
-}
 
-// Apply rate limiting to the GET handler
-export async function GET(
-  request: NextRequest,
-  context: { params: Promise<{ contentType: string }> }
-) {
-  return withRateLimit(request, rateLimiters.api, handleGET, request, context);
-}
+      // Check if the content type is valid
+      if (!(contentType in contentMap)) {
+        requestLogger.warn('Invalid content type requested', {
+          contentType,
+          availableTypesCount: Object.keys(contentMap).length,
+          sampleType: Object.keys(contentMap)[0] || '',
+        });
+
+        return okRaw(
+          {
+            error: 'Content type not found',
+            message: `Available content types: ${Object.keys(contentMap).join(', ')}`,
+            timestamp: new Date().toISOString(),
+          },
+          { sMaxAge: 0, staleWhileRevalidate: 0, status: 404 }
+        );
+      }
+
+      const { getData, type } = contentMap[contentType as keyof typeof contentMap];
+      const data = await getData();
+      const contentCategory = contentType.replace('.json', '');
+
+      const responseData = {
+        [contentCategory]: data.map((item: { slug: string; [key: string]: unknown }) => ({
+          ...item,
+          type,
+          url: `https://claudepro.directory/${contentCategory}/${item.slug}`,
+        })),
+        count: data.length,
+        lastUpdated: new Date().toISOString(),
+      } as Record<string, unknown>;
+
+      // Cache the response for 1 hour
+      await contentCache.cacheAPIResponse(cacheKey, responseData, 60 * 60);
+
+      requestLogger.info('Content type API request completed successfully', {
+        contentType,
+        count: data.length,
+      });
+
+      return okRaw(responseData, { sMaxAge: 14400, staleWhileRevalidate: 86400, cacheHit: false });
+    },
+  },
+});
+
+export { GET };

@@ -23,7 +23,7 @@
 import { NextResponse } from 'next/server';
 import { cacheWarmer } from '@/src/lib/cache';
 import { logger } from '@/src/lib/logger';
-import { withCronAuth } from '@/src/lib/middleware/cron-auth';
+import { createApiRoute } from '@/src/lib/error-handler';
 import { emailSequenceService } from '@/src/lib/services/email-sequence.service';
 import { createClient } from '@/src/lib/supabase/admin-client';
 
@@ -56,8 +56,11 @@ interface TaskResult {
  * @param request - Next.js request object
  * @returns JSON response with all task results
  */
-export async function GET(request: Request) {
-  return withCronAuth(request, async () => {
+const { GET } = createApiRoute({
+  auth: { type: 'cron' },
+  response: { envelope: false },
+  handlers: {
+    GET: async () => {
     const overallStartTime = performance.now();
     const results: TaskResult[] = [];
 
@@ -245,13 +248,16 @@ export async function GET(request: Request) {
       ),
     });
 
-    return NextResponse.json({
-      success: failedTasks === 0,
-      total_duration_ms: totalDuration,
-      successful_tasks: successfulTasks,
-      failed_tasks: failedTasks,
-      results,
-      timestamp: new Date().toISOString(),
-    });
-  });
-}
+      return NextResponse.json({
+        success: failedTasks === 0,
+        total_duration_ms: totalDuration,
+        successful_tasks: successfulTasks,
+        failed_tasks: failedTasks,
+        results,
+        timestamp: new Date().toISOString(),
+      });
+    },
+  },
+});
+
+export { GET };

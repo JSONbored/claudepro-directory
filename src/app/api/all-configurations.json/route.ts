@@ -1,11 +1,11 @@
-import { type NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
 import { contentCache } from '@/src/lib/cache';
 import { APP_CONFIG } from '@/src/lib/constants';
-import { handleApiError } from '@/src/lib/error-handler';
+import { createApiRoute, handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
-import { rateLimiters, withRateLimit } from '@/src/lib/rate-limiter';
+import { rateLimiters } from '@/src/lib/rate-limiter';
 import { apiSchemas, ValidationError } from '@/src/lib/security/validators';
 import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 
@@ -162,16 +162,14 @@ async function* createStreamingResponse(
   }
 }
 
-async function handleGET(request: NextRequest) {
-  const requestLogger = logger.forRequest(request);
-
-  try {
+const { GET } = createApiRoute({
+  validate: { query: streamingQuerySchema },
+  rateLimit: { limiter: rateLimiters.api },
+  response: { envelope: false },
+  handlers: {
+    GET: async ({ query, okRaw, request, logger: requestLogger }) => {
+      const validatedQuery = query as z.infer<typeof streamingQuerySchema>;
     // Parse and validate query parameters with streaming support
-    const url = new URL(request.url);
-    const queryParams = Object.fromEntries(url.searchParams);
-
-    const validatedQuery = streamingQuerySchema.parse(queryParams);
-
     requestLogger.info('All configurations API request started', {
       streaming: validatedQuery.stream,
       format: validatedQuery.format,
@@ -223,7 +221,7 @@ async function handleGET(request: NextRequest) {
         },
       });
 
-      return new Response(stream, { headers: responseHeaders });
+        return new Response(stream, { headers: responseHeaders });
     }
 
     // Try to get from cache first
@@ -233,12 +231,11 @@ async function handleGET(request: NextRequest) {
       requestLogger.info('Serving cached all-configurations response', {
         source: 'redis-cache',
       });
-      return NextResponse.json(cachedResponse, {
-        headers: {
-          'Cache-Control': 'public, s-maxage=14400, stale-while-revalidate=86400',
-          'X-Cache': 'HIT',
-        },
-      });
+        return okRaw(cachedResponse, {
+          sMaxAge: 14400,
+          staleWhileRevalidate: 86400,
+          cacheHit: true,
+        });
     }
     const {
       agents: agentsData,
@@ -308,25 +305,13 @@ async function handleGET(request: NextRequest) {
       totalConfigurations: allConfigurations.statistics.totalConfigurations,
     });
 
-    return NextResponse.json(allConfigurations, {
-      headers: {
-        'Cache-Control': 'public, s-maxage=14400, stale-while-revalidate=86400',
-        'X-Cache': 'MISS',
-      },
-    });
-  } catch (error) {
-    // Use centralized error handler for all errors
-    return handleApiError(error instanceof Error ? error : new Error(String(error)), {
-      route: '/api/all-configurations.json',
-      method: 'GET',
-      operation: 'generate_dataset',
-      logLevel: 'error',
-      includeDetails: error instanceof z.ZodError || error instanceof ValidationError,
-    });
-  }
-}
+      return okRaw(allConfigurations, {
+        sMaxAge: 14400,
+        staleWhileRevalidate: 86400,
+        cacheHit: false,
+      });
+    },
+  },
+});
 
-// Apply rate limiting to the GET handler
-export async function GET(request: NextRequest) {
-  return withRateLimit(request, rateLimiters.api, handleGET, request);
-}
+export { GET };

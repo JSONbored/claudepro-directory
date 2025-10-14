@@ -23,7 +23,7 @@ import { NextResponse } from 'next/server';
 import { WeeklyDigest } from '@/src/emails/templates/weekly-digest';
 import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
-import { withCronAuth } from '@/src/lib/middleware/cron-auth';
+import { createApiRoute } from '@/src/lib/error-handler';
 import { env } from '@/src/lib/schemas/env.schema';
 import { digestService } from '@/src/lib/services/digest.service';
 import { type FeaturedContentItem, featuredService } from '@/src/lib/services/featured.service';
@@ -51,8 +51,11 @@ interface TaskResult {
  * @param request - Next.js request object
  * @returns JSON response with all task results
  */
-export async function GET(request: Request) {
-  return withCronAuth(request, async () => {
+const { GET } = createApiRoute({
+  auth: { type: 'cron' },
+  response: { envelope: false },
+  handlers: {
+    GET: async () => {
     const overallStartTime = performance.now();
     const results: TaskResult[] = [];
 
@@ -327,13 +330,16 @@ export async function GET(request: Request) {
       ),
     });
 
-    return NextResponse.json({
-      success: failedTasks === 0,
-      total_duration_ms: totalDuration,
-      successful_tasks: successfulTasks,
-      failed_tasks: failedTasks,
-      results,
-      timestamp: new Date().toISOString(),
-    });
-  });
-}
+      return NextResponse.json({
+        success: failedTasks === 0,
+        total_duration_ms: totalDuration,
+        successful_tasks: successfulTasks,
+        failed_tasks: failedTasks,
+        results,
+        timestamp: new Date().toISOString(),
+      });
+    },
+  },
+});
+
+export { GET };
