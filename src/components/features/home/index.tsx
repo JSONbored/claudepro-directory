@@ -31,6 +31,7 @@ import { HomepageStatsSkeleton } from '@/src/components/ui/loading-skeleton';
 import { NumberTicker } from '@/src/components/ui/magic/number-ticker';
 import { useSearch } from '@/src/hooks/use-search';
 import { HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
+import { UI_CONFIG } from '@/src/lib/constants';
 import { BookOpen, Layers, Server, Sparkles } from '@/src/lib/icons';
 import type { HomePageClientProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -57,7 +58,7 @@ function HomePageClientComponent({
   const { allConfigs } = initialData;
 
   const [activeTab, setActiveTab] = useState('all');
-  const pageSize = 20;
+  const pageSize = UI_CONFIG.pagination.defaultLimit;
 
   // Don't pre-initialize displayedItems - let useEffect handle it based on filteredResults
   const [displayedItems, setDisplayedItems] = useState<UnifiedContentItem[]>([]);

@@ -11,8 +11,9 @@ import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
+import { Switch } from '@/src/components/ui/switch';
 import { Textarea } from '@/src/components/ui/textarea';
-import { updateProfile } from '@/src/lib/actions/user.actions';
+import { refreshProfileFromOAuth, updateProfile } from '@/src/lib/actions/user.actions';
 import { X } from '@/src/lib/icons';
 import type { ProfileData } from '@/src/lib/schemas/profile.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -39,6 +40,8 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const [work, setWork] = useState(profile.work || '');
   const [website, setWebsite] = useState(profile.website || '');
   const [socialXLink, setSocialXLink] = useState(profile.social_x_link || '');
+  const [isPublic, setIsPublic] = useState<boolean>(profile.public ?? true);
+  const [followEmail, setFollowEmail] = useState<boolean>(profile.follow_email ?? true);
   const [interests, setInterests] = useState<string[]>(() => {
     if (
       Array.isArray(profile.interests) &&
@@ -61,6 +64,8 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         website: website || null,
         social_x_link: socialXLink || null,
         interests,
+        public: isPublic,
+        follow_email: followEmail,
       });
 
       if (result?.data?.success) {
@@ -230,6 +235,41 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         </p>
       </div>
 
+      {/* Privacy & Notifications */}
+      <div className="space-y-4 pt-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <Label>Public profile</Label>
+            <p className="text-xs text-muted-foreground mt-1">Allow others to view your profile</p>
+          </div>
+          <Switch
+            checked={isPublic}
+            onCheckedChange={(checked) => {
+              setIsPublic(!!checked);
+              setHasChanges(true);
+            }}
+            aria-label="Toggle public profile visibility"
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div>
+            <Label>Email on new followers</Label>
+            <p className="text-xs text-muted-foreground mt-1">
+              Send me an email when someone follows me
+            </p>
+          </div>
+          <Switch
+            checked={followEmail}
+            onCheckedChange={(checked) => {
+              setFollowEmail(!!checked);
+              setHasChanges(true);
+            }}
+            aria-label="Toggle follower email notifications"
+          />
+        </div>
+      </div>
+
       {/* Form Actions */}
       <div className="flex gap-3 pt-4">
         <Button type="submit" disabled={isPending || !hasChanges}>
@@ -246,6 +286,8 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
               setWork(profile.work || '');
               setWebsite(profile.website || '');
               setSocialXLink(profile.social_x_link || '');
+              setIsPublic(profile.public ?? true);
+              setFollowEmail(profile.follow_email ?? true);
               setInterests(
                 Array.isArray(profile.interests) &&
                   profile.interests.every((item): item is string => typeof item === 'string')
@@ -260,5 +302,33 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         )}
       </div>
     </form>
+  );
+}
+
+// Small client button to refresh profile data from OAuth provider.
+export function RefreshProfileButton({ providerLabel }: { providerLabel: string }) {
+  const [isPending, startTransition] = useTransition();
+
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      onClick={() =>
+        startTransition(async () => {
+          const result = await refreshProfileFromOAuth();
+          if (result?.data?.success) {
+            toast.success(`Refreshed from ${providerLabel}`);
+          } else if (result?.serverError) {
+            toast.error(result.serverError);
+          } else {
+            toast.error('Failed to refresh profile');
+          }
+        })
+      }
+      disabled={isPending}
+    >
+      {isPending ? 'Refreshing...' : 'Refresh from ' + providerLabel}
+    </Button>
   );
 }

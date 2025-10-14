@@ -6,6 +6,7 @@ import { ConfigCard } from '@/src/components/features/content/config-card';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import { InfiniteScrollContainer } from '@/src/components/shared/infinite-scroll-container';
 import { useLocalSearch } from '@/src/hooks/use-search';
+import { UI_CONFIG } from '@/src/lib/constants';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 const UnifiedSearch = dynamic(
@@ -40,9 +41,11 @@ function ContentSearchClientComponent<T extends UnifiedContentItem>({
   title,
   icon,
 }: ContentSearchClientProps<T>) {
-  const [displayedItems, setDisplayedItems] = useState<T[]>(items.slice(0, 20));
+  const [displayedItems, setDisplayedItems] = useState<T[]>(
+    items.slice(0, UI_CONFIG.pagination.defaultLimit)
+  );
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 20;
+  const pageSize = UI_CONFIG.pagination.defaultLimit;
 
   // Use consolidated search hook
   const { filters, searchResults, filterOptions, handleSearch, handleFiltersChange } =
