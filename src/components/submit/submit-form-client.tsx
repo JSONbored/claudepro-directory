@@ -278,15 +278,17 @@ export function SubmitFormClient() {
       {submissionResult && (
         <Card className={`${UI_CLASSES.MB_6} border-green-500/20 bg-green-500/5`}>
           <CardContent className={`${UI_CLASSES.PT_6}`}>
-            <div className="flex flex-col sm:flex-row items-start gap-3">
-              <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
+            <div className={UI_CLASSES.FLEX_COL_SM_ROW_ITEMS_START}>
+              <CheckCircle
+                className={`h-5 w-5 text-green-500 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+              />
+              <div className={UI_CLASSES.FLEX_1_MIN_W_0}>
                 <p className={UI_CLASSES.FONT_MEDIUM}>Submission Successful! 🎉</p>
                 <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
                   Your configuration has been submitted for review. Pull Request #
                   {submissionResult.prNumber} created on GitHub.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-3">
+                <div className={`${UI_CLASSES.FLEX_COL_SM_ROW_GAP_2} mt-3`}>
                   <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
                     <a href={submissionResult.prUrl} target="_blank" rel="noopener noreferrer">
                       View PR <ExternalLink className="h-3 w-3 ml-1" />
@@ -324,7 +326,7 @@ export function SubmitFormClient() {
                     setName(''); // Reset name when type changes
                   }}
                   required
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className={`${UI_CLASSES.FLEX} h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm`}
                 >
                   <option value="agents">Claude Agent (System Prompt)</option>
                   <option value="mcp">MCP Server</option>
@@ -393,8 +395,10 @@ export function SubmitFormClient() {
 
             <div className="space-y-2">
               <Label htmlFor={githubId}>GitHub Repository (optional)</Label>
-              <div className="flex gap-2">
-                <Github className="h-5 w-5 mt-2.5 text-muted-foreground flex-shrink-0" />
+              <div className={UI_CLASSES.FLEX_GAP_2}>
+                <Github
+                  className={`h-5 w-5 mt-2.5 text-muted-foreground ${UI_CLASSES.FLEX_SHRINK_0}`}
+                />
                 <Input
                   id={githubId}
                   name="github"
@@ -538,7 +542,7 @@ export function SubmitFormClient() {
                       id={hookTypeId}
                       name="hookType"
                       required
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      className={`${UI_CLASSES.FLEX} h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm`}
                     >
                       <option value="pre-tool-use">Pre Tool Use</option>
                       <option value="post-tool-use">Post Tool Use</option>
@@ -578,7 +582,7 @@ export function SubmitFormClient() {
                     <select
                       id={statuslineTypeId}
                       name="statuslineType"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      className={`${UI_CLASSES.FLEX} h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm`}
                     >
                       <option value="custom">Custom</option>
                       <option value="minimal">Minimal</option>
@@ -601,7 +605,7 @@ export function SubmitFormClient() {
                     <select
                       id={positionId}
                       name="position"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      className={`${UI_CLASSES.FLEX} h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm`}
                     >
                       <option value="left">Left</option>
                       <option value="right">Right</option>
@@ -630,7 +634,7 @@ export function SubmitFormClient() {
                       id={serverTypeId}
                       name="serverType"
                       required
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      className={`${UI_CLASSES.FLEX} h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm`}
                     >
                       <option value="stdio">STDIO</option>
                       <option value="sse">SSE</option>
@@ -703,8 +707,12 @@ export function SubmitFormClient() {
             <ExamplesArrayInput name="examples" maxExamples={10} />
 
             {/* Submit Button */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 sm:pt-4">
-              <Button type="submit" disabled={isPending} className="w-full sm:flex-1">
+            <div className={`${UI_CLASSES.FLEX_COL_SM_ROW_GAP_3} pt-2 sm:pt-4`}>
+              <Button
+                type="submit"
+                disabled={isPending}
+                className={`w-full ${UI_CLASSES.FLEX_1_SM_FLEX_INITIAL}`}
+              >
                 {isPending ? (
                   <>
                     <Github className="mr-2 h-4 w-4 animate-pulse" />
@@ -721,9 +729,9 @@ export function SubmitFormClient() {
 
             {/* Info Box */}
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 sm:p-4">
-              <div className="flex gap-2 sm:gap-3">
-                <Github className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
+              <div className={`${UI_CLASSES.FLEX_GAP_2} sm:gap-3`}>
+                <Github className={`h-5 w-5 text-blue-400 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
+                <div className={UI_CLASSES.FLEX_1_MIN_W_0}>
                   <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} text-blue-400`}>
                     How it works
                   </p>

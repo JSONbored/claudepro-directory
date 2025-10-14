@@ -186,7 +186,9 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       </div>
 
       {/* Public Toggle */}
-      <div className="flex items-center gap-3 rounded-lg border p-4">
+      <div
+        className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.ROUNDED_LG} border ${UI_CLASSES.P_4}`}
+      >
         <Checkbox
           id={isPublicId}
           checked={isPublic}
@@ -216,7 +218,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
             {bookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className="flex items-start space-x-3 rounded-md p-2 hover:bg-accent"
+                className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_3} rounded-md ${UI_CLASSES.P_2} ${UI_CLASSES.HOVER_BG_ACCENT}`}
               >
                 <Checkbox
                   id={bookmark.id}
@@ -236,7 +238,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
                 <div className="flex-1">
                   <Label
                     htmlFor={bookmark.id}
-                    className="text-sm font-normal cursor-pointer flex items-center gap-2"
+                    className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_NORMAL} ${UI_CLASSES.CURSOR_POINTER} ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}
                   >
                     <Badge variant="outline" className="text-xs capitalize">
                       {bookmark.content_type}
@@ -266,8 +268,8 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-4 pt-4">
-        <Button type="submit" disabled={isPending} className="flex-1 sm:flex-initial">
+      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_4} pt-4`}>
+        <Button type="submit" disabled={isPending} className={UI_CLASSES.FLEX_1_SM_FLEX_INITIAL}>
           {isPending
             ? mode === 'create'
               ? 'Creating...'

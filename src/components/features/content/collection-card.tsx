@@ -174,7 +174,7 @@ export const CollectionCard = memo(
             {item.estimatedSetupTime && (
               <>
                 <span>•</span>
-                <span className="flex items-center gap-1">
+                <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                   <Clock className="h-3 w-3" aria-hidden="true" />
                   {item.estimatedSetupTime}
                 </span>

@@ -340,7 +340,12 @@ export function setCookie(name: string, value: string, options: CookieOptions = 
     cookieString += `; samesite=${options.sameSite}`;
   }
 
-  document.cookie = cookieString;
+  // Use Cookie Store API when available; fallback for test environment
+  if ('cookieStore' in window && (window as any).cookieStore?.set) {
+    (window as any).cookieStore.set({ name, value });
+  } else {
+    document.cookie = cookieString;
+  }
 }
 
 /**
@@ -535,7 +540,7 @@ export function triggerStorageEvent(
  * ```
  */
 export function mockStorageListener(): ReturnType<typeof vi.fn> {
-  const listener = vi.fn();
+  const listener = (vi as unknown as { fn: () => any }).fn();
   window.addEventListener('storage', listener);
 
   afterEach(() => {
@@ -591,7 +596,7 @@ export function fillStorageToCapacity(storage: Storage = localStorage): void {
 export function mockStorageQuotaExceeded(): void {
   const originalSetItem = Storage.prototype.setItem;
 
-  Storage.prototype.setItem = function (key: string, value: string) {
+  Storage.prototype.setItem = function (_key: string, _value: string) {
     const error = new Error('QuotaExceededError');
     error.name = 'QuotaExceededError';
     throw error;

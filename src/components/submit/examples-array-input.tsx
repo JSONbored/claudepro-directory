@@ -186,7 +186,7 @@ export function ExamplesArrayInput({
       <input type="hidden" name={name} value={examplesJson} />
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
         <div>
           <Label className="text-base font-semibold">Usage Examples (optional)</Label>
           <p className={cn(UI_CLASSES.TEXT_SM, UI_CLASSES.TEXT_MUTED_FOREGROUND, 'mt-1')}>
@@ -200,7 +200,7 @@ export function ExamplesArrayInput({
           size="sm"
           onClick={addExample}
           disabled={examples.length >= maxExamples}
-          className="flex items-center gap-2"
+          className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
         >
           <Plus className="h-4 w-4" />
           Add Example
@@ -233,11 +233,11 @@ export function ExamplesArrayInput({
           return (
             <Card key={example.id} className={cn(!validation.valid && 'border-destructive')}>
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
+                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
                   <button
                     type="button"
                     onClick={() => toggleExpanded(index)}
-                    className="flex items-center gap-2 text-left flex-1 hover:opacity-70 transition-opacity"
+                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-left flex-1 hover:opacity-70 transition-opacity`}
                   >
                     {isExpanded ? (
                       <ChevronUp className="h-4 w-4" />

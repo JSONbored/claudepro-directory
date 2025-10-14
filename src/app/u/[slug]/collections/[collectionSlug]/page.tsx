@@ -127,7 +127,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
         <div className={UI_CLASSES.SPACE_Y_6}>
           {/* Navigation */}
           <Link href={`/u/${slug}`}>
-            <Button variant="ghost" className="flex items-center gap-2">
+            <Button variant="ghost" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <ArrowLeft className="h-4 w-4" />
               Back to {profileUser.name || slug}'s Profile
             </Button>
@@ -135,8 +135,8 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
 
           {/* Header */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.MB_2}`}>
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <h1 className="text-3xl font-bold">{collection.name}</h1>
                 <Badge variant="outline">Public</Badge>
               </div>
@@ -180,11 +180,11 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                 {items.map((item, index) => (
                   <Card key={item.id}>
                     <CardHeader>
-                      <div className="flex items-start gap-4">
+                      <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_4}>
                         <div className="text-2xl font-bold text-muted-foreground/50 w-8">
                           {index + 1}
                         </div>
-                        <div className="flex-1">
+                        <div className={UI_CLASSES.FLEX_1}>
                           <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                             <Badge variant="outline" className="capitalize">
                               {item.content_type}
@@ -202,7 +202,11 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+                          >
                             <ExternalLink className="h-4 w-4" />
                             View
                           </Button>

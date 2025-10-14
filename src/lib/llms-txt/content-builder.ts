@@ -298,24 +298,16 @@ function formatBulletList(title: string, items: string[]): string {
 
 /**
  * Type guard for Installation type
+ * Validates that value is a plain object (not null, array, Date, or RegExp)
  */
 function isInstallation(value: unknown): value is Installation {
-  // Check for null/undefined first
-  if (value === null || value === undefined) {
-    return false;
-  }
-
-  // Check if it's an object type
-  if (typeof value !== 'object') {
-    return false;
-  }
-
-  // Exclude arrays, dates, and regexps
-  if (Array.isArray(value) || value instanceof Date || value instanceof RegExp) {
-    return false;
-  }
-
-  return true;
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    !(value instanceof Date) &&
+    !(value instanceof RegExp)
+  );
 }
 
 /**

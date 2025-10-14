@@ -104,7 +104,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
         <div className={`container ${UI_CLASSES.MX_AUTO} ${UI_CLASSES.PX_4}`}>
           <div className={`flex items-start justify-between ${profile.hero ? '-mt-16' : 'pt-12'}`}>
-            <div className="flex items-start gap-4">
+            <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_4}>
               {profile.image ? (
                 <Image
                   src={profile.image}
@@ -155,7 +155,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   Array.isArray(profile.interests) &&
                   profile.interests.length > 0 &&
                   profile.interests.every((item): item is string => typeof item === 'string') && (
-                    <div className="flex flex-wrap gap-2 mt-4">
+                    <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-4`}>
                       {profile.interests.map((interest) => (
                         <Badge key={interest} variant="secondary">
                           {interest}
@@ -294,7 +294,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                           )}
                         </CardHeader>
                         <CardContent>
-                          <div className="flex items-center justify-between text-sm">
+                          <div
+                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN} ${UI_CLASSES.TEXT_SM}`}
+                          >
                             <span className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
                               {collection.item_count}{' '}
                               {collection.item_count === 1 ? 'item' : 'items'}
