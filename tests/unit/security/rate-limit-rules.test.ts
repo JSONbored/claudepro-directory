@@ -295,7 +295,7 @@ describe('Rate Limit Rules - Security Validation', () => {
   });
 
   test('should handle very long paths', () => {
-    const longPath = '/api/' + 'a'.repeat(1000);
+    const longPath = `/api/${'a'.repeat(1000)}`;
     expect(() => classifyEndpoint(longPath)).not.toThrow();
   });
 });

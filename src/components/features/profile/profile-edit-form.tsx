@@ -11,10 +11,9 @@ import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
 import { Label } from '@/src/components/ui/label';
-import { Textarea } from '@/src/components/ui/textarea';
 import { Switch } from '@/src/components/ui/switch';
-import { updateProfile } from '@/src/lib/actions/user.actions';
-import { refreshProfileFromOAuth } from '@/src/lib/actions/user.actions';
+import { Textarea } from '@/src/components/ui/textarea';
+import { refreshProfileFromOAuth, updateProfile } from '@/src/lib/actions/user.actions';
 import { X } from '@/src/lib/icons';
 import type { ProfileData } from '@/src/lib/schemas/profile.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
@@ -256,7 +255,9 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         <div className="flex items-center justify-between">
           <div>
             <Label>Email on new followers</Label>
-            <p className="text-xs text-muted-foreground mt-1">Send me an email when someone follows me</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Send me an email when someone follows me
+            </p>
           </div>
           <Switch
             checked={followEmail}

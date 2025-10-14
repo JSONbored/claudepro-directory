@@ -120,7 +120,9 @@ export function AnnouncementBanner() {
                 className={`${UI_CLASSES.FLEX_1} border-none bg-transparent shadow-none`}
               >
                 {announcement.tag && (
-                  <AnnouncementTag className={`text-[9px] sm:text-xs ${UI_CLASSES.FLEX_SHRINK_0} font-bold`}>
+                  <AnnouncementTag
+                    className={`text-[9px] sm:text-xs ${UI_CLASSES.FLEX_SHRINK_0} font-bold`}
+                  >
                     {announcement.tag}
                   </AnnouncementTag>
                 )}

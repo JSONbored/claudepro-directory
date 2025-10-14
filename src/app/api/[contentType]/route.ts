@@ -1,7 +1,6 @@
 import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
 import { contentCache } from '@/src/lib/cache';
 import { createApiRoute } from '@/src/lib/error-handler';
-import { logger } from '@/src/lib/logger';
 import { rateLimiters } from '@/src/lib/rate-limiter';
 import { apiSchemas } from '@/src/lib/security/validators';
 
@@ -18,14 +17,14 @@ const contentMap = {
   'collections.json': { getData: () => collections, type: 'collection' },
 } as const;
 
-const { GET } = createApiRoute({
+const route = createApiRoute({
   validate: {
     params: apiSchemas.contentTypeParams,
   },
   rateLimit: { limiter: rateLimiters.api },
   response: { envelope: false },
   handlers: {
-    GET: async ({ params, ok, okRaw, request, logger: requestLogger }) => {
+    GET: async ({ params, okRaw, logger: requestLogger }) => {
       const { contentType } = params as { contentType: string };
 
       requestLogger.info('Content type API request started', {
@@ -41,7 +40,11 @@ const { GET } = createApiRoute({
           contentType,
           source: 'redis-cache',
         });
-        return okRaw(cachedResponse, { sMaxAge: 14400, staleWhileRevalidate: 86400, cacheHit: true });
+        return okRaw(cachedResponse, {
+          sMaxAge: 14400,
+          staleWhileRevalidate: 86400,
+          cacheHit: true,
+        });
       }
 
       // Check if the content type is valid
@@ -89,4 +92,16 @@ const { GET } = createApiRoute({
   },
 });
 
-export { GET };
+// Export a GET that matches Next.js dynamic route signature exactly
+export async function GET(
+  request: Request,
+  context: { params: Promise<{ contentType: string }> }
+): Promise<Response> {
+  // Delegate to standardized handler (createApiRoute)
+  if (!route.GET) {
+    // Should never happen because handler is provided
+    return new Response('Method Not Allowed', { status: 405 });
+  }
+  // Cast to NextRequest for our internal types
+  return route.GET(request as unknown as import('next/server').NextRequest, context as any);
+}

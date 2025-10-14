@@ -279,7 +279,9 @@ export function SubmitFormClient() {
         <Card className={`${UI_CLASSES.MB_6} border-green-500/20 bg-green-500/5`}>
           <CardContent className={`${UI_CLASSES.PT_6}`}>
             <div className={UI_CLASSES.FLEX_COL_SM_ROW_ITEMS_START}>
-              <CheckCircle className={`h-5 w-5 text-green-500 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
+              <CheckCircle
+                className={`h-5 w-5 text-green-500 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+              />
               <div className={UI_CLASSES.FLEX_1_MIN_W_0}>
                 <p className={UI_CLASSES.FONT_MEDIUM}>Submission Successful! 🎉</p>
                 <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND} mt-1`}>
@@ -394,7 +396,9 @@ export function SubmitFormClient() {
             <div className="space-y-2">
               <Label htmlFor={githubId}>GitHub Repository (optional)</Label>
               <div className={UI_CLASSES.FLEX_GAP_2}>
-                <Github className={`h-5 w-5 mt-2.5 text-muted-foreground ${UI_CLASSES.FLEX_SHRINK_0}`} />
+                <Github
+                  className={`h-5 w-5 mt-2.5 text-muted-foreground ${UI_CLASSES.FLEX_SHRINK_0}`}
+                />
                 <Input
                   id={githubId}
                   name="github"
@@ -704,7 +708,11 @@ export function SubmitFormClient() {
 
             {/* Submit Button */}
             <div className={`${UI_CLASSES.FLEX_COL_SM_ROW_GAP_3} pt-2 sm:pt-4`}>
-              <Button type="submit" disabled={isPending} className={`w-full ${UI_CLASSES.FLEX_1_SM_FLEX_INITIAL}`}>
+              <Button
+                type="submit"
+                disabled={isPending}
+                className={`w-full ${UI_CLASSES.FLEX_1_SM_FLEX_INITIAL}`}
+              >
                 {isPending ? (
                   <>
                     <Github className="mr-2 h-4 w-4 animate-pulse" />

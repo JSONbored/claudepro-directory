@@ -14,13 +14,13 @@
  * @module repositories/submission
  */
 
+import { UI_CONFIG } from '@/src/lib/constants';
 import {
   CachedRepository,
   type QueryOptions,
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
 import { createClient } from '@/src/lib/supabase/server';
-import { UI_CONFIG } from '@/src/lib/constants';
 import type { Database } from '@/src/types/database.types';
 
 // =====================================================
@@ -84,7 +84,10 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
         query = query.limit(options.limit);
       }
       if (options?.offset) {
-        const limit = Math.min(options.limit ?? UI_CONFIG.pagination.defaultLimit, UI_CONFIG.pagination.maxLimit);
+        const limit = Math.min(
+          options.limit ?? UI_CONFIG.pagination.defaultLimit,
+          UI_CONFIG.pagination.maxLimit
+        );
         query = query.range(options.offset, options.offset + limit - 1);
       }
 
@@ -284,7 +287,10 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
         query = query.limit(options.limit);
       }
       if (options?.offset) {
-        const limit = Math.min(options.limit ?? UI_CONFIG.pagination.defaultLimit, UI_CONFIG.pagination.maxLimit);
+        const limit = Math.min(
+          options.limit ?? UI_CONFIG.pagination.defaultLimit,
+          UI_CONFIG.pagination.maxLimit
+        );
         query = query.range(options.offset, options.offset + limit - 1);
       }
 
@@ -319,7 +325,10 @@ export class SubmissionRepository extends CachedRepository<Submission, string> {
         query = query.limit(options.limit);
       }
       if (options?.offset) {
-        const limit = Math.min(options.limit ?? UI_CONFIG.pagination.defaultLimit, UI_CONFIG.pagination.maxLimit);
+        const limit = Math.min(
+          options.limit ?? UI_CONFIG.pagination.defaultLimit,
+          UI_CONFIG.pagination.maxLimit
+        );
         query = query.range(options.offset, options.offset + limit - 1);
       }
 

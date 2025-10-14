@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { contentCache, statsRedis } from '@/src/lib/cache';
 import { CACHE_CONFIG, REVALIDATE_TIMES, UI_CONFIG } from '@/src/lib/constants';
 import { createApiRoute } from '@/src/lib/error-handler';
+import { rateLimiters } from '@/src/lib/rate-limiter';
 import {
   createCursor,
   createPaginationMeta,
@@ -9,7 +10,6 @@ import {
   decodeCursor,
 } from '@/src/lib/schemas/primitives/cursor-pagination.schema';
 import { viewCountService } from '@/src/lib/services/view-count.service';
-import { rateLimiters } from '@/src/lib/rate-limiter';
 
 export const runtime = 'nodejs';
 
@@ -24,7 +24,7 @@ const querySchema = z
   .merge(cursorPaginationQuerySchema)
   .describe('Trending guides query parameters with cursor-based pagination');
 
-const { GET } = createApiRoute({
+const route = createApiRoute({
   validate: {
     query: querySchema,
   },
@@ -112,11 +112,8 @@ const { GET } = createApiRoute({
         };
       });
 
-      const pagination = createPaginationMeta(
-        trendingGuides,
-        limit,
-        hasMore,
-        (item) => createCursor(startIndex + trendingGuides.indexOf(item) + 1)
+      const pagination = createPaginationMeta(trendingGuides, limit, hasMore, (item) =>
+        createCursor(startIndex + trendingGuides.indexOf(item) + 1)
       );
 
       const response = {
@@ -148,4 +145,7 @@ const { GET } = createApiRoute({
   },
 });
 
-export { GET };
+export async function GET(request: Request, context: { params: Promise<{}> }): Promise<Response> {
+  if (!route.GET) return new Response('Method Not Allowed', { status: 405 });
+  return route.GET(request as unknown as import('next/server').NextRequest, context as any);
+}

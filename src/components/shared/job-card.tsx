@@ -48,14 +48,18 @@ export const JobCard = memo(({ job }: JobCardProps) => {
                 <CardTitle className={`text-xl ${UI_CLASSES.HOVER_TEXT_ACCENT}`}>
                   <Link href={`/jobs/${job.slug}`}>{job.title}</Link>
                 </CardTitle>
-                <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+                <div
+                  className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
+                >
                   <Building className="h-4 w-4" />
                   <span className={UI_CLASSES.FONT_MEDIUM}>{job.company}</span>
                 </div>
               </div>
             </div>
 
-            <div className={`${UI_CLASSES.FLEX_WRAP_GAP_3} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+            <div
+              className={`${UI_CLASSES.FLEX_WRAP_GAP_3} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
+            >
               <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                 <MapPin className="h-4 w-4" />
                 {job.location}

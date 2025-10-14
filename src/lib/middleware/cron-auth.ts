@@ -32,7 +32,8 @@
  */
 
 import { timingSafeEqual } from 'node:crypto';
-import { type NextRequest, NextResponse } from 'next/server';
+import type { NextRequest, NextResponse } from 'next/server';
+import { apiResponse } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
 /**
@@ -139,20 +140,14 @@ export async function withCronAuth(
 ): Promise<NextResponse> {
   // Verify cron authentication
   if (!verifyCronSecret(request)) {
-    return NextResponse.json(
+    return apiResponse.okRaw(
       {
         success: false,
         error: 'Unauthorized',
         message: 'Invalid or missing cron secret',
         timestamp: new Date().toISOString(),
       },
-      {
-        status: 401,
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-        },
-      }
+      { status: 401, sMaxAge: 0, staleWhileRevalidate: 0 }
     );
   }
 
@@ -171,14 +166,14 @@ export async function withCronAuth(
       }
     );
 
-    return NextResponse.json(
+    return apiResponse.okRaw(
       {
         success: false,
         error: 'Internal Server Error',
         message: 'An unexpected error occurred',
         timestamp: new Date().toISOString(),
       },
-      { status: 500 }
+      { status: 500, sMaxAge: 0, staleWhileRevalidate: 0 }
     );
   }
 }
@@ -205,20 +200,14 @@ export async function withCronAuth(
  */
 export function verifyCronAuth(request: Request | NextRequest): NextResponse | null {
   if (!verifyCronSecret(request)) {
-    return NextResponse.json(
+    return apiResponse.okRaw(
       {
         success: false,
         error: 'Unauthorized',
         message: 'Invalid or missing cron secret',
         timestamp: new Date().toISOString(),
       },
-      {
-        status: 401,
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-        },
-      }
+      { status: 401, sMaxAge: 0, staleWhileRevalidate: 0 }
     );
   }
 

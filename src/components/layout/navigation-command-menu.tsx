@@ -135,7 +135,9 @@ export function NavigationCommandMenu() {
                 <span className="text-xs text-muted-foreground">
                   <span className={UI_CLASSES.INLINE_FLEX_ITEMS_CENTER_GAP_1}>
                     Editor status bar configs
-                    <span className={`${UI_CLASSES.INLINE_FLEX} h-1.5 w-1.5 rounded-full bg-accent`} />
+                    <span
+                      className={`${UI_CLASSES.INLINE_FLEX} h-1.5 w-1.5 rounded-full bg-accent`}
+                    />
                   </span>
                 </span>
               </div>
@@ -150,7 +152,9 @@ export function NavigationCommandMenu() {
                 <span className="text-xs text-muted-foreground">
                   <span className={UI_CLASSES.INLINE_FLEX_ITEMS_CENTER_GAP_1}>
                     Curated content bundles
-                    <span className={`${UI_CLASSES.INLINE_FLEX} h-1.5 w-1.5 rounded-full bg-accent`} />
+                    <span
+                      className={`${UI_CLASSES.INLINE_FLEX} h-1.5 w-1.5 rounded-full bg-accent`}
+                    />
                   </span>
                 </span>
               </div>
