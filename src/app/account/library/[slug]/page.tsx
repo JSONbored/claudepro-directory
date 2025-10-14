@@ -73,7 +73,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
       {/* Header */}
       <div>
         <Link href={ROUTES.ACCOUNT_LIBRARY}>
-          <Button variant="ghost" className="mb-4 flex items-center gap-2">
+          <Button variant="ghost" className={`mb-4 ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}>
             <ArrowLeft className="h-4 w-4" />
             Back to Library
           </Button>
