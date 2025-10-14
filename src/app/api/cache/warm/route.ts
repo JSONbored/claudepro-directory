@@ -74,10 +74,7 @@ export async function POST(request: Request): Promise<Response> {
   return route.POST(request as unknown as import('next/server').NextRequest, { params: {} } as any);
 }
 
-export async function GET(
-  request: Request,
-  context: { params: Promise<{}> }
-): Promise<Response> {
+export async function GET(request: Request, context: { params: Promise<{}> }): Promise<Response> {
   if (!route.GET) return new Response('Method Not Allowed', { status: 405 });
   return route.GET(request as unknown as import('next/server').NextRequest, context as any);
 }

@@ -137,7 +137,9 @@ export default async function ChangelogEntryPage({
 
           {/* Header */}
           <header className="space-y-4 pb-6">
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+            <div
+              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
+            >
               <Calendar className="h-4 w-4" />
               <time dateTime={entry.date}>{formatChangelogDate(entry.date)}</time>
             </div>

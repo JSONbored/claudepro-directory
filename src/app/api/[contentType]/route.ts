@@ -40,7 +40,11 @@ const route = createApiRoute({
           contentType,
           source: 'redis-cache',
         });
-        return okRaw(cachedResponse, { sMaxAge: 14400, staleWhileRevalidate: 86400, cacheHit: true });
+        return okRaw(cachedResponse, {
+          sMaxAge: 14400,
+          staleWhileRevalidate: 86400,
+          cacheHit: true,
+        });
       }
 
       // Check if the content type is valid

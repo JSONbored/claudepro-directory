@@ -18,10 +18,9 @@ import { z } from 'zod';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
-import { createRequestId, type RequestId } from '@/src/lib/schemas/branded-types.schema';
-import { withRateLimit, type RateLimiter } from '@/src/lib/rate-limiter';
 import { verifyCronAuth } from '@/src/lib/middleware/cron-auth';
-import { validation } from '@/src/lib/security/validators';
+import { type RateLimiter, withRateLimit } from '@/src/lib/rate-limiter';
+import { createRequestId, type RequestId } from '@/src/lib/schemas/branded-types.schema';
 import {
   determineErrorType,
   type ErrorContext,
@@ -32,7 +31,7 @@ import {
   validateErrorContext,
   validateErrorInput,
 } from '@/src/lib/schemas/error.schema';
-import { ValidationError } from '@/src/lib/security/validators';
+import { ValidationError, validation } from '@/src/lib/security/validators';
 
 /**
  * HTTP status code mapping for different error types
@@ -562,7 +561,15 @@ function validateOutputIfNeeded(data: unknown, validate?: ZodSchemaUnknown): voi
 }
 
 function okInternal<T>(data: T, options: OkResponseOptions = {}): NextResponse {
-  const { envelope = true, status = 200, additionalHeaders = {}, headers, requestId, validate, ...cache } = options;
+  const {
+    envelope = true,
+    status = 200,
+    additionalHeaders = {},
+    headers,
+    requestId,
+    validate,
+    ...cache
+  } = options;
 
   // Validate outgoing payload if requested (dev-only enforcement)
   try {
@@ -577,7 +584,10 @@ function okInternal<T>(data: T, options: OkResponseOptions = {}): NextResponse {
   }
 
   const cacheHeaders = buildCacheHeaders(cache);
-  const baseHeaders = withBaseHeaders({ ...cacheHeaders, ...additionalHeaders, ...(headers || {}) }, requestId);
+  const baseHeaders = withBaseHeaders(
+    { ...cacheHeaders, ...additionalHeaders, ...(headers || {}) },
+    requestId
+  );
 
   if (!envelope) {
     return NextResponse.json(data, { headers: baseHeaders, status });
@@ -606,7 +616,10 @@ function rawInternal(
 ): NextResponse {
   const { contentType, status = 200, headers, cache, requestId } = options;
   const cacheHeaders = buildCacheHeaders(cache || {});
-  const baseHeaders = withBaseHeaders({ 'Content-Type': contentType, ...cacheHeaders, ...(headers || {}) }, requestId);
+  const baseHeaders = withBaseHeaders(
+    { 'Content-Type': contentType, ...cacheHeaders, ...(headers || {}) },
+    requestId
+  );
   return new NextResponse(body, { status, headers: baseHeaders });
 }
 
@@ -680,12 +693,7 @@ export interface ApiOkOptions extends CacheOptions {
   status?: number; // optional HTTP status override
 }
 
-export interface ApiHandlerContext<
-  P = unknown,
-  Q = unknown,
-  H = unknown,
-  B = unknown
-> {
+export interface ApiHandlerContext<P = unknown, Q = unknown, H = unknown, B = unknown> {
   request: NextRequest;
   params: P;
   query: Q;
@@ -733,7 +741,9 @@ function cloneWithHeaders(original: Response, headers: Record<string, string>): 
  */
 export function createApiRoute<P = any, Q = any, H = any, B = any>(
   options: CreateApiRouteOptions<P, Q, H, B>
-): Partial<Record<HttpMethod, (request: NextRequest, context?: { params?: unknown }) => Promise<Response>>> {
+): Partial<
+  Record<HttpMethod, (request: NextRequest, context?: { params?: unknown }) => Promise<Response>>
+> {
   const { validate, rateLimit, auth, response, handlers } = options;
 
   const wrap = (
@@ -855,7 +865,9 @@ export function createApiRoute<P = any, Q = any, H = any, B = any>(
     };
   };
 
-  const result: Partial<Record<HttpMethod, (request: NextRequest, context?: { params?: unknown }) => Promise<Response>>> = {};
+  const result: Partial<
+    Record<HttpMethod, (request: NextRequest, context?: { params?: unknown }) => Promise<Response>>
+  > = {};
   const getHandler = wrap('GET', handlers.GET);
   if (getHandler) result.GET = getHandler;
   const postHandler = wrap('POST', handlers.POST);

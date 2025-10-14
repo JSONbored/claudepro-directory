@@ -16,10 +16,9 @@
  * - email.delivery_delayed: Monitoring
  */
 
-import { type NextRequest } from 'next/server';
-import { apiResponse } from '@/src/lib/error-handler';
+import type { NextRequest } from 'next/server';
 import { Webhook } from 'svix';
-import { handleApiError } from '@/src/lib/error-handler';
+import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 import { rateLimiters } from '@/src/lib/rate-limiter';
 import { env } from '@/src/lib/schemas/env.schema';

@@ -1,6 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ProfileEditForm, RefreshProfileButton } from '@/src/components/features/profile/profile-edit-form';
+import {
+  ProfileEditForm,
+  RefreshProfileButton,
+} from '@/src/components/features/profile/profile-edit-form';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,
@@ -41,7 +44,9 @@ export default async function SettingsPage() {
     return (
       <div className={UI_CLASSES.SPACE_Y_6}>
         <h1 className="text-3xl font-bold mb-2">Settings</h1>
-        <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>We couldn't load your profile. Please try again.</p>
+        <p className={UI_CLASSES.TEXT_MUTED_FOREGROUND}>
+          We couldn't load your profile. Please try again.
+        </p>
       </div>
     );
   }

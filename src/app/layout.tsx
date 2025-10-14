@@ -1,7 +1,11 @@
 import { Analytics } from '@vercel/analytics/next';
+
 // SpeedInsights optional in dev; import is type-less in some envs
 // Use dynamic import to avoid type resolution error during tsc
-const SpeedInsights = (await import('@vercel/speed-insights/next').catch(() => ({ SpeedInsights: () => null }))).SpeedInsights;
+const SpeedInsights = (
+  await import('@vercel/speed-insights/next').catch(() => ({ SpeedInsights: () => null }))
+).SpeedInsights;
+
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { headers } from 'next/headers';

@@ -5,11 +5,11 @@
 
 // Avoid next/headers in shared library to ensure compatibility in all contexts.
 // Always extract headers from the NextRequest passed into functions.
-import { type NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { apiResponse } from '@/src/lib/error-handler';
 import { redisClient } from '@/src/lib/cache';
 import { ENDPOINT_RATE_LIMITS } from '@/src/lib/config/rate-limits.config';
+import { apiResponse } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 import { createRequestId } from '@/src/lib/schemas/branded-types.schema';
 import {

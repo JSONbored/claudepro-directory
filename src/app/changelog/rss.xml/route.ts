@@ -27,10 +27,10 @@
  */
 
 import type { NextRequest } from 'next/server';
-import { apiResponse } from '@/src/lib/error-handler';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { formatChangelogDateRFC822, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { apiResponse } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
 /**

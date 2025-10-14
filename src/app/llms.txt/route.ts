@@ -6,9 +6,9 @@
  * @see {@link https://llmstxt.org} - LLMs.txt specification
  */
 
-import { type NextRequest } from 'next/server';
-import { apiResponse, handleApiError } from '@/src/lib/error-handler';
+import type { NextRequest } from 'next/server';
 import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
+import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { generateSiteLLMsTxt } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
@@ -129,10 +129,13 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     // Use centralized error handling
     const validatedError = errorInputSchema.safeParse(error);
-    return handleApiError(validatedError.success ? validatedError.data : { message: 'Failed to generate llms.txt' }, {
-      route: '/llms.txt',
-      operation: 'generate_site_llmstxt',
-      method: 'GET',
-    });
+    return handleApiError(
+      validatedError.success ? validatedError.data : { message: 'Failed to generate llms.txt' },
+      {
+        route: '/llms.txt',
+        operation: 'generate_site_llmstxt',
+        method: 'GET',
+      }
+    );
   }
 }
