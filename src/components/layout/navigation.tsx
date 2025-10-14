@@ -236,7 +236,9 @@ export const Navigation = () => {
                                       className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} gap-3 ${UI_CLASSES.W_FULL} cursor-pointer p-3 rounded-lg hover:bg-accent/10 hover:scale-[1.02] transition-all duration-200 group`}
                                     >
                                       {IconComponent && (
-                                        <div className={`${UI_CLASSES.FLEX} h-10 w-10 ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.ROUNDED_LG} ${UI_CLASSES.BG_MUTED} group-hover:bg-accent/20 ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.FLEX_SHRINK_0}`}>
+                                        <div
+                                          className={`${UI_CLASSES.FLEX} h-10 w-10 ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.ROUNDED_LG} ${UI_CLASSES.BG_MUTED} group-hover:bg-accent/20 ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.FLEX_SHRINK_0}`}
+                                        >
                                           <IconComponent
                                             className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors"
                                             aria-hidden="true"
@@ -271,7 +273,9 @@ export const Navigation = () => {
                           href={ROUTES.SUBMIT}
                           className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} gap-3 ${UI_CLASSES.W_FULL} cursor-pointer p-3 rounded-lg bg-accent/5 hover:bg-accent/10 hover:scale-[1.01] transition-all duration-200 group`}
                         >
-                          <div className={`${UI_CLASSES.FLEX} h-10 w-10 ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.ROUNDED_LG} bg-accent/20 group-hover:bg-accent/30 ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.FLEX_SHRINK_0}`}>
+                          <div
+                            className={`${UI_CLASSES.FLEX} h-10 w-10 ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.ROUNDED_LG} bg-accent/20 group-hover:bg-accent/30 ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.FLEX_SHRINK_0}`}
+                          >
                             <svg
                               className="h-5 w-5 text-accent"
                               aria-hidden="true"

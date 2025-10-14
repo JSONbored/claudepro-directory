@@ -30,6 +30,7 @@ import type {
   CollectionItemReference,
 } from '@/src/lib/schemas/content/collection.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchMap } from '@/src/lib/utils/batch.utils';
 
 /**

@@ -162,7 +162,9 @@ export default async function SubmitPage() {
                   <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} truncate`}>
                     {submission.content_name}
                   </p>
-                  <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mt-1 ${UI_CLASSES.FLEX_WRAP}`}>
+                  <div
+                    className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mt-1 ${UI_CLASSES.FLEX_WRAP}`}
+                  >
                     <Badge variant="outline" className="text-xs">
                       {TYPE_LABELS[submission.content_type]}
                     </Badge>

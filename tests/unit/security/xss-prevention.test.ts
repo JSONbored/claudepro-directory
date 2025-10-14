@@ -391,14 +391,14 @@ describe('XSS Prevention - HTML Sanitizer', () => {
 
   describe('Performance and Edge Cases', () => {
     test('should handle very long strings', async () => {
-      const longString = '<p>' + 'a'.repeat(10000) + '</p>';
+      const longString = `<p>${'a'.repeat(10000)}</p>`;
       const sanitized = await DOMPurify.sanitize(longString);
       expect(sanitized).toContain('<p>');
       expect(sanitized.length).toBeGreaterThan(10000);
     });
 
     test('should handle deeply nested tags', async () => {
-      const nested = '<div>'.repeat(100) + 'content' + '</div>'.repeat(100);
+      const nested = `${'<div>'.repeat(100)}content${'</div>'.repeat(100)}`;
       const sanitized = await DOMPurify.sanitize(nested);
       expect(sanitized).toContain('content');
     });

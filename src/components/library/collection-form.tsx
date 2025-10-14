@@ -186,7 +186,9 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       </div>
 
       {/* Public Toggle */}
-      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.ROUNDED_LG} border ${UI_CLASSES.P_4}`}>
+      <div
+        className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.ROUNDED_LG} border ${UI_CLASSES.P_4}`}
+      >
         <Checkbox
           id={isPublicId}
           checked={isPublic}
