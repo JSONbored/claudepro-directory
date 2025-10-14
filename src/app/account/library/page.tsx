@@ -91,8 +91,8 @@ export default async function LibraryPage() {
               {bookmarks.map((bookmark) => (
                 <Card key={bookmark.id}>
                   <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
+                    <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+                      <div className={UI_CLASSES.FLEX_1}>
                         <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                           <Badge variant="outline" className="capitalize">
                             {bookmark.content_type}
@@ -148,8 +148,8 @@ export default async function LibraryPage() {
                 <Card key={collection.id} className={UI_CLASSES.CARD_INTERACTIVE}>
                   <Link href={`/account/library/${collection.slug}`}>
                     <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
+                      <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+                        <div className={UI_CLASSES.FLEX_1}>
                           <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
                             <Layers className="h-4 w-4 text-primary" />
                             {collection.is_public && (

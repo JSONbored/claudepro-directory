@@ -241,10 +241,10 @@ export function CollectionItemManager({
           {items.map((item: CollectionItem, index: number) => (
             <div
               key={item.id}
-              className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors`}
             >
               {/* Order Controls */}
-              <div className="flex flex-col gap-1">
+              <div className={UI_CLASSES.FLEX_COL_GAP_1}>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -288,7 +288,7 @@ export function CollectionItemManager({
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-1">
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                 <Button
                   variant="ghost"
                   size="sm"
