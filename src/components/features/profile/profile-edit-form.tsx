@@ -15,6 +15,7 @@ import { Textarea } from '@/src/components/ui/textarea';
 import { updateProfile } from '@/src/lib/actions/user.actions';
 import { X } from '@/src/lib/icons';
 import type { ProfileData } from '@/src/lib/schemas/profile.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 interface ProfileEditFormProps {
   profile: ProfileData;
@@ -208,7 +209,7 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
 
         {/* Display interests */}
         {interests.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
+          <div className={`${UI_CLASSES.FLEX_WRAP_GAP_2} mt-3`}>
             {interests.map((interest) => (
               <Badge key={interest} variant="secondary" className="gap-1 pr-1">
                 {interest}

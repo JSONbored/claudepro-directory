@@ -137,7 +137,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </p>
 
         {/* Summary Stats */}
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <div className={`${UI_CLASSES.FLEX_WRAP} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.GAP_3}`}>
           <Badge variant="secondary" className="text-sm">
             <TrendingUp className="h-3 w-3 mr-1" />
             {summary.avgMatchScore}% Avg Match
@@ -152,7 +152,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </div>
 
         {/* Actions */}
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <div className={`${UI_CLASSES.FLEX_WRAP} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.GAP_3}`}>
           <Button
             variant="default"
             size="sm"

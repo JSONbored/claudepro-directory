@@ -21,7 +21,7 @@ export default function AuthCodeError() {
     >
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+          <div className={`${UI_CLASSES.MX_AUTO} ${UI_CLASSES.MB_4} ${UI_CLASSES.FLEX} h-12 w-12 ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.ROUNDED_FULL} bg-destructive/10`}>
             <AlertCircle className="h-6 w-6 text-destructive" />
           </div>
           <CardTitle className="text-2xl">Authentication Error</CardTitle>
@@ -29,7 +29,7 @@ export default function AuthCodeError() {
             There was a problem signing you in. This could be due to an invalid or expired link.
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-2">
+        <CardContent className={UI_CLASSES.FLEX_COL_GAP_2}>
           <Button asChild>
             <Link href={ROUTES.LOGIN}>Try Again</Link>
           </Button>

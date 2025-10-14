@@ -115,7 +115,7 @@ export function RollingText({
         {...props}
       >
         <span className="sr-only">{currentWord}</span>
-        <span aria-hidden="true" className="inline-flex">
+        <span aria-hidden="true" className={UI_CLASSES.INLINE_FLEX}>
           {isMounted ? (
             characters.map((item, idx) => (
               <m.span

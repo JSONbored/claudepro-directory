@@ -477,7 +477,7 @@ export function ReviewSection({
 
           {/* Load More Button */}
           {hasMore && (
-            <div className="flex justify-center pt-4">
+            <div className={`${UI_CLASSES.FLEX} ${UI_CLASSES.JUSTIFY_CENTER} pt-4`}>
               <Button
                 variant="outline"
                 onClick={handleLoadMore}

@@ -180,7 +180,7 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                 {items.map((item, index) => (
                   <Card key={item.id}>
                     <CardHeader>
-                      <div className="flex items-start gap-4">
+                      <div className={UI_CLASSES.FLEX_ITEMS_START_GAP_4}>
                         <div className="text-2xl font-bold text-muted-foreground/50 w-8">
                           {index + 1}
                         </div>

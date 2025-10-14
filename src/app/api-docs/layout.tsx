@@ -37,7 +37,7 @@ const DocsLayout = dynamic(
     ssr: true,
     loading: () => (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
+        <div className={UI_CLASSES.FLEX_COL_ITEMS_CENTER_GAP_4}>
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           <p className="text-muted-foreground text-sm">Loading documentation...</p>
         </div>

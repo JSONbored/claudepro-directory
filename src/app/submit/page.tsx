@@ -155,7 +155,7 @@ export default async function SubmitPage() {
             {recentMerged.map((submission) => (
               <div
                 key={submission.id}
-                className={`flex items-start gap-2 pb-3 ${UI_CLASSES.BORDER_B} border-border/50 last:border-0 last:pb-0`}
+                className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} pb-3 ${UI_CLASSES.BORDER_B} border-border/50 last:border-0 last:pb-0`}
               >
                 <CheckCircle className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
@@ -238,7 +238,7 @@ export default async function SubmitPage() {
           >
             <ul className={`${UI_CLASSES.SPACE_Y_2} list-none`}>
               {SUBMISSION_TIPS.map((tip) => (
-                <li key={tip} className="flex items-start gap-2">
+                <li key={tip} className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
                   <span className="text-blue-400 text-xs mt-0.5">•</span>
                   <span className={`${UI_CLASSES.TEXT_XS} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
                     {tip}

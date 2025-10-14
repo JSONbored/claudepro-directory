@@ -64,7 +64,7 @@ function Skeleton({ className, variant, size, width, rounded, ...props }: Skelet
 function LoadingSkeleton() {
   return (
     <div className={`flex ${UI_CLASSES.MIN_H_SCREEN} items-center justify-center`}>
-      <div className="flex flex-col items-center gap-4">
+      <div className={UI_CLASSES.FLEX_COL_ITEMS_CENTER_GAP_4}>
         <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         <p className="text-muted-foreground">Loading...</p>
       </div>
@@ -277,7 +277,7 @@ function HomepageStatsSkeleton({ className, ...props }: React.HTMLAttributes<HTM
   return (
     <div
       className={cn(
-        'flex flex-wrap justify-center gap-4 lg:gap-6 text-xs lg:text-sm animate-pulse',
+        `${UI_CLASSES.FLEX_WRAP} ${UI_CLASSES.JUSTIFY_CENTER} gap-4 lg:gap-6 text-xs lg:text-sm animate-pulse`,
         className
       )}
       {...props}
