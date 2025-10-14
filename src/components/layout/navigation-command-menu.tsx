@@ -12,6 +12,7 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/src/components/ui/command';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 /**
  * NavigationCommandMenu Component
@@ -85,9 +86,9 @@ export function NavigationCommandMenu() {
           </CommandItem>
 
           <CommandItem onSelect={() => handleSelect('/commands')} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-sm">⚡</span>
-              <div className="flex flex-col items-start">
+              <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>Commands</span>
                 <span className="text-xs text-muted-foreground">Slash commands library</span>
               </div>
@@ -95,9 +96,9 @@ export function NavigationCommandMenu() {
           </CommandItem>
 
           <CommandItem onSelect={() => handleSelect('/hooks')} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-sm">🪝</span>
-              <div className="flex flex-col items-start">
+              <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>Hooks</span>
                 <span className="text-xs text-muted-foreground">Event-driven automation</span>
               </div>
@@ -134,7 +135,9 @@ export function NavigationCommandMenu() {
                 <span className="text-xs text-muted-foreground">
                   <span className={UI_CLASSES.INLINE_FLEX_ITEMS_CENTER_GAP_1}>
                     Editor status bar configs
-                    <span className={`${UI_CLASSES.INLINE_FLEX} h-1.5 w-1.5 rounded-full bg-accent`} />
+                    <span
+                      className={`${UI_CLASSES.INLINE_FLEX} h-1.5 w-1.5 rounded-full bg-accent`}
+                    />
                   </span>
                 </span>
               </div>
@@ -149,7 +152,9 @@ export function NavigationCommandMenu() {
                 <span className="text-xs text-muted-foreground">
                   <span className={UI_CLASSES.INLINE_FLEX_ITEMS_CENTER_GAP_1}>
                     Curated content bundles
-                    <span className={`${UI_CLASSES.INLINE_FLEX} h-1.5 w-1.5 rounded-full bg-accent`} />
+                    <span
+                      className={`${UI_CLASSES.INLINE_FLEX} h-1.5 w-1.5 rounded-full bg-accent`}
+                    />
                   </span>
                 </span>
               </div>

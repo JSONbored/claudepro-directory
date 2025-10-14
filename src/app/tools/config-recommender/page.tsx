@@ -99,7 +99,9 @@ export default function ConfigRecommenderPage() {
             <Card>
               <CardHeader>
                 <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
-                  <span className={`${UI_CLASSES.FLEX} items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold`}>
+                  <span
+                    className={`${UI_CLASSES.FLEX} items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold`}
+                  >
                     1
                   </span>
                   Answer Questions
@@ -116,7 +118,9 @@ export default function ConfigRecommenderPage() {
             <Card>
               <CardHeader>
                 <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
-                  <span className={`${UI_CLASSES.FLEX} items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold`}>
+                  <span
+                    className={`${UI_CLASSES.FLEX} items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold`}
+                  >
                     2
                   </span>
                   Instant Analysis
@@ -133,7 +137,9 @@ export default function ConfigRecommenderPage() {
             <Card>
               <CardHeader>
                 <CardTitle className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-lg`}>
-                  <span className={`${UI_CLASSES.FLEX} items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold`}>
+                  <span
+                    className={`${UI_CLASSES.FLEX} items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold`}
+                  >
                     3
                   </span>
                   Get Results
@@ -154,7 +160,7 @@ export default function ConfigRecommenderPage() {
         <div className={`${UI_CLASSES.MAX_W_4XL} ${UI_CLASSES.MX_AUTO}`}>
           <Card className="bg-accent/5 border-accent/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <BarChart className="h-5 w-5 text-primary" />
                 What You'll Get
               </CardTitle>

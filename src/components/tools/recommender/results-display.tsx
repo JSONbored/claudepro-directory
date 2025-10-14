@@ -137,7 +137,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </p>
 
         {/* Summary Stats */}
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <div
+          className={`${UI_CLASSES.FLEX_WRAP} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.GAP_3}`}
+        >
           <Badge variant="secondary" className="text-sm">
             <TrendingUp className="h-3 w-3 mr-1" />
             {summary.avgMatchScore}% Avg Match
@@ -152,7 +154,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         </div>
 
         {/* Actions */}
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <div
+          className={`${UI_CLASSES.FLEX_WRAP} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.GAP_3}`}
+        >
           <Button
             variant="default"
             size="sm"
@@ -405,8 +409,12 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                       renderContent={() => (
                         <>
                           {/* Primary reason for recommendation */}
-                          <div className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} p-3 bg-accent/50 rounded-lg mb-3`}>
-                            <Info className={`h-4 w-4 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
+                          <div
+                            className={`${UI_CLASSES.FLEX_ITEMS_START_GAP_2} p-3 bg-accent/50 rounded-lg mb-3`}
+                          >
+                            <Info
+                              className={`h-4 w-4 text-primary ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+                            />
                             <div>
                               <p className="text-sm font-medium">Why recommended:</p>
                               <p className="text-sm text-muted-foreground">
@@ -429,7 +437,9 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
                       )}
                       renderMetadataBadges={() =>
                         result.viewCount !== undefined ? (
-                          <span className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} text-sm text-muted-foreground`}>
+                          <span
+                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1} text-sm text-muted-foreground`}
+                          >
                             <Eye className="h-3 w-3" />
                             {result.viewCount}
                           </span>

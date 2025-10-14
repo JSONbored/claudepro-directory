@@ -157,7 +157,8 @@ export const UI_CLASSES = {
   FLEX_COL_SM_ROW_ITEMS_START: 'flex flex-col sm:flex-row items-start gap-3',
   FLEX_COL_SM_ROW_ITEMS_CENTER_JUSTIFY_BETWEEN:
     'flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4',
-  FLEX_ROW_ITEMS_CENTER_JUSTIFY_BETWEEN: 'flex flex-row items-center justify-between space-y-0 pb-2',
+  FLEX_ROW_ITEMS_CENTER_JUSTIFY_BETWEEN:
+    'flex flex-row items-center justify-between space-y-0 pb-2',
 
   /**
    * Flexbox - Extended

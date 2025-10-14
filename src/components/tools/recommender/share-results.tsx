@@ -55,7 +55,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <Share2 className="h-5 w-5" />
             Share Your Results
           </DialogTitle>
@@ -66,7 +66,7 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
 
         <div className={UI_CLASSES.SPACE_Y_4}>
           {/* Copy link */}
-          <div className="flex items-center gap-2">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <Input
               readOnly
               value={shareUrl}

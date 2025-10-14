@@ -98,7 +98,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             {shareUrl && (
               <Button
                 variant="outline"
@@ -106,14 +106,14 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
                 onClick={() => {
                   navigator.clipboard.writeText(shareUrl);
                 }}
-                className="flex items-center gap-2"
+                className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
               >
                 <Share2 className="h-4 w-4" />
                 Share
               </Button>
             )}
             <Link href={`/account/library/${slug}/edit`}>
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Edit className="h-4 w-4" />
                 Edit
               </Button>

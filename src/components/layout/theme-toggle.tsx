@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Switch } from '@/src/components/ui/switch';
 import { useViewTransition } from '@/src/hooks/use-view-transition';
 import { Moon, Sun } from '@/src/lib/icons';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 const themeSchema = z.enum(['light', 'dark']);
 
@@ -135,7 +136,7 @@ export function ThemeToggle() {
   if (!theme) return null;
 
   return (
-    <div ref={containerRef} className="flex items-center gap-2">
+    <div ref={containerRef} className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
       <Sun className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
       <Switch
         checked={theme === 'dark'}

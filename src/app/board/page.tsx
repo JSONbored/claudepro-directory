@@ -100,7 +100,7 @@ export default async function BoardPage() {
             {posts.map((post: PopularPost) => (
               <Card key={post.id} className={UI_CLASSES.CARD_GRADIENT_HOVER}>
                 <CardHeader>
-                  <div className="flex items-start justify-between">
+                  <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                     <div className="flex-1">
                       <CardTitle className={UI_CLASSES.TEXT_LG}>
                         <span>{post.title}</span>

@@ -19,6 +19,7 @@
  */
 
 import { z } from 'zod';
+import { UI_CONFIG } from '@/src/lib/constants';
 import { nonNegativeInt, positiveInt } from './base-numbers';
 
 // ============================================================================
@@ -30,8 +31,8 @@ import { nonNegativeInt, positiveInt } from './base-numbers';
  */
 export const CURSOR_PAGINATION_LIMITS = {
   MIN_LIMIT: 1,
-  DEFAULT_LIMIT: 10,
-  MAX_LIMIT: 100,
+  DEFAULT_LIMIT: UI_CONFIG.pagination.defaultLimit,
+  MAX_LIMIT: UI_CONFIG.pagination.maxLimit,
   MAX_CURSOR_LENGTH: 500, // Base64 encoded cursor max length
 } as const;
 

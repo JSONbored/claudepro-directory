@@ -70,7 +70,7 @@ export async function StepByStepGuide(props: StepByStepGuideProps) {
                 className="border-2 border-primary/20 bg-gradient-to-br from-card via-card/80 to-transparent hover:shadow-2xl transition-all duration-300"
               >
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-4" itemProp="name">
+                  <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_4} itemProp="name">
                     <div className={UI_CLASSES.RELATIVE}>
                       <div
                         className={`flex-shrink-0 w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-full flex ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} shadow-lg`}

@@ -14,6 +14,7 @@
  * @module repositories/company
  */
 
+import { UI_CONFIG } from '@/src/lib/constants';
 import {
   CachedRepository,
   type QueryOptions,
@@ -88,7 +89,11 @@ export class CompanyRepository extends CachedRepository<Company, string> {
         query = query.limit(options.limit);
       }
       if (options?.offset) {
-        query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
+        const limit = Math.min(
+          options.limit ?? UI_CONFIG.pagination.defaultLimit,
+          UI_CONFIG.pagination.maxLimit
+        );
+        query = query.range(options.offset, options.offset + limit - 1);
       }
 
       // Apply sorting
@@ -332,7 +337,11 @@ export class CompanyRepository extends CachedRepository<Company, string> {
         query = query.limit(options.limit);
       }
       if (options?.offset) {
-        query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
+        const limit = Math.min(
+          options.limit ?? UI_CONFIG.pagination.defaultLimit,
+          UI_CONFIG.pagination.maxLimit
+        );
+        query = query.range(options.offset, options.offset + limit - 1);
       }
 
       query = query.order(options?.sortBy || 'created_at', {
