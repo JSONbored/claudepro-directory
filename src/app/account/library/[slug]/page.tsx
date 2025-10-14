@@ -79,9 +79,9 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
           </Button>
         </Link>
 
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
+        <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+          <div className={UI_CLASSES.FLEX_1}>
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
               <h1 className="text-3xl font-bold">{collection.name}</h1>
               {collection.is_public && (
                 <Badge variant="outline" className="text-xs">

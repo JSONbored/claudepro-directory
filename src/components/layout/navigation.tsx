@@ -472,7 +472,3 @@ export const Navigation = () => {
     </>
   );
 };
-r>
-    </>
-  );
-};
