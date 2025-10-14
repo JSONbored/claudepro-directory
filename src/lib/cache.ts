@@ -2191,7 +2191,7 @@ class SearchCache {
       // Perform search if not cached using Fuzzysort
       const results = await this.performSearch(items, query, filters, options);
 
-      // Cache results for 1 hour
+      // Cache results for 1 hour (respect max limit)
       await contentCache.cacheAPIResponse(cacheKey, results, 60 * 60);
 
       return results;
@@ -2226,7 +2226,7 @@ class SearchCache {
     // Use Fuzzysort adapter with filters
     return searchWithFilters(items, query, filters, {
       threshold: options?.threshold || 0.3,
-      limit: options?.limit || 100,
+      limit: options?.limit,
     });
   }
 

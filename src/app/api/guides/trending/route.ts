@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { contentCache, statsRedis } from '@/src/lib/cache';
-import { CACHE_CONFIG, REVALIDATE_TIMES } from '@/src/lib/constants';
+import { CACHE_CONFIG, REVALIDATE_TIMES, UI_CONFIG } from '@/src/lib/constants';
 import { createApiRoute } from '@/src/lib/error-handler';
 import {
   createCursor,
@@ -55,7 +55,10 @@ const { GET } = createApiRoute({
         }
       }
 
-      const limit = params.limit || 10;
+      const limit = Math.min(
+        params.limit ?? UI_CONFIG.pagination.defaultLimit,
+        UI_CONFIG.pagination.maxLimit
+      );
       const fetchLimit = limit + 1;
 
       // Build normalized cache key (allowed charset only; avoid raw base64 cursor)
@@ -86,8 +89,8 @@ const { GET } = createApiRoute({
 
       const allTrendingSlugs = await statsRedis.getTrending(category, 100);
       const paginatedSlugs = allTrendingSlugs.slice(startIndex, startIndex + fetchLimit);
-      const hasMore = paginatedSlugs.length > (params.limit || 10);
-      const trendingSlugs = hasMore ? paginatedSlugs.slice(0, params.limit || 10) : paginatedSlugs;
+      const hasMore = paginatedSlugs.length > limit;
+      const trendingSlugs = hasMore ? paginatedSlugs.slice(0, limit) : paginatedSlugs;
 
       const viewCountRequests = trendingSlugs.map((slug) => ({ category, slug }));
       const viewCounts = await viewCountService.getBatchViewCounts(viewCountRequests);
@@ -111,7 +114,7 @@ const { GET } = createApiRoute({
 
       const pagination = createPaginationMeta(
         trendingGuides,
-        params.limit || 10,
+        limit,
         hasMore,
         (item) => createCursor(startIndex + trendingGuides.indexOf(item) + 1)
       );

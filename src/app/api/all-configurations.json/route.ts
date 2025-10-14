@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
 import { contentCache } from '@/src/lib/cache';
-import { APP_CONFIG } from '@/src/lib/constants';
+import { APP_CONFIG, UI_CONFIG } from '@/src/lib/constants';
 import { createApiRoute, handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 import { rateLimiters } from '@/src/lib/rate-limiter';
@@ -23,11 +23,11 @@ const streamingQuerySchema = z
       .enum(['json', 'ndjson'])
       .default('json')
       .describe('Response format: standard JSON or newline-delimited JSON (NDJSON)'),
-    batchSize: z.coerce
+      batchSize: z.coerce
       .number()
-      .min(10)
-      .max(100)
-      .default(50)
+      .min(Math.min(10, UI_CONFIG.pagination.defaultLimit))
+      .max(UI_CONFIG.pagination.maxLimit)
+      .default(Math.min(50, UI_CONFIG.pagination.defaultLimit))
       .describe('Number of items per batch in streaming mode (10-100)'),
   })
   .merge(apiSchemas.paginationQuery.partial());

@@ -21,6 +21,7 @@ import {
   sortByPopularity,
 } from '@/src/lib/content/content-sorting';
 import { logger } from '@/src/lib/logger';
+import { UI_CONFIG } from '@/src/lib/constants';
 import type { ContentItem } from '@/src/lib/schemas/content/content-item-union.schema';
 import type { SearchableItem, SearchFilters } from '@/src/lib/schemas/search.schema';
 
@@ -146,7 +147,7 @@ async function searchWithFuzzysort<T extends SearchableItem>(
     const results = fuzzysort.go(query, prepared, {
       keys: targets,
       threshold,
-      limit: options?.limit || 100,
+      limit: options?.limit ?? UI_CONFIG.pagination.maxLimit,
       all: false,
     });
 

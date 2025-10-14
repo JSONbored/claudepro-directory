@@ -59,7 +59,7 @@ const { POST, GET } = createApiRoute({
     GET: async ({ query, okRaw, logger: requestLogger }) => {
       const status = await cacheWarmer.getStatus();
       requestLogger.info('Cache status request', {
-        limit: (query as { limit?: number })?.limit || 0,
+        limit: (query as { limit?: number })?.limit ?? 0,
         validated: true,
       });
 

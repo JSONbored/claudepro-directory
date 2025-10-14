@@ -20,6 +20,7 @@ import {
   type RepositoryResult,
 } from '@/src/lib/repositories/base.repository';
 import { createClient } from '@/src/lib/supabase/server';
+import { UI_CONFIG } from '@/src/lib/constants';
 import type { Database } from '@/src/types/database.types';
 
 // =====================================================
@@ -99,7 +100,8 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
         query = query.limit(options.limit);
       }
       if (options?.offset) {
-        query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
+        const limit = Math.min(options.limit ?? UI_CONFIG.pagination.defaultLimit, UI_CONFIG.pagination.maxLimit);
+        query = query.range(options.offset, options.offset + limit - 1);
       }
 
       // Apply sorting
@@ -325,7 +327,8 @@ export class ContentSimilarityRepository extends CachedRepository<ContentSimilar
         query = query.limit(options.limit);
       }
       if (options?.offset) {
-        query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
+        const limit = Math.min(options.limit ?? UI_CONFIG.pagination.defaultLimit, UI_CONFIG.pagination.maxLimit);
+        query = query.range(options.offset, options.offset + limit - 1);
       }
 
       query = query.order(options?.sortBy || 'similarity_score', {
