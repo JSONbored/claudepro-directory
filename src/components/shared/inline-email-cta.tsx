@@ -229,9 +229,9 @@ export function InlineEmailCTA({
           className
         )}
       >
-        <CardHeader className="flex-1">
+        <CardHeader className={UI_CLASSES.FLEX_1}>
           <div className="mb-4">
-            <div className="inline-flex p-3 bg-primary/10 rounded-lg">
+            <div className={`${UI_CLASSES.INLINE_FLEX} p-3 bg-primary/10 rounded-lg`}>
               <Mail className="h-6 w-6 text-primary" aria-hidden="true" />
             </div>
           </div>
