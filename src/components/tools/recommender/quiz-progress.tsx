@@ -31,7 +31,9 @@ export function QuizProgress({
           </Badge>
         </div>
         {percentComplete === 100 && (
-          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_SM} text-primary`}>
+          <div
+            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} ${UI_CLASSES.TEXT_SM} text-primary`}
+          >
             <CheckCircle className="h-4 w-4" />
             <span>Complete!</span>
           </div>

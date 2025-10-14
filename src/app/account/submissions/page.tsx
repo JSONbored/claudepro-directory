@@ -178,7 +178,9 @@ export default async function SubmissionsPage() {
       <Card className="border-blue-500/20 bg-blue-500/5">
         <CardContent className="pt-6">
           <div className={UI_CLASSES.FLEX_GAP_3}>
-            <GitPullRequest className={`h-5 w-5 text-blue-400 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`} />
+            <GitPullRequest
+              className={`h-5 w-5 text-blue-400 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+            />
             <div className={UI_CLASSES.FLEX_1}>
               <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} text-blue-400`}>
                 How it works

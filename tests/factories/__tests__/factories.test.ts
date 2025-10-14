@@ -22,8 +22,6 @@ import { hookContentSchema } from '@/src/lib/schemas/content/hook.schema';
 import { mcpContentSchema } from '@/src/lib/schemas/content/mcp.schema';
 import { ruleContentSchema } from '@/src/lib/schemas/content/rule.schema';
 import { statuslineContentSchema } from '@/src/lib/schemas/content/statusline.schema';
-// Content Factories
-import type { AgentFactoryTransientParams } from '../content/agent.factory';
 // User Factories
 import {
   agentFactory,
@@ -37,9 +35,10 @@ import {
   statuslineFactory,
   userFactory,
 } from '@/tests/factories';
-
 // Shared Factories
 import { usageExampleFactory } from '@/tests/factories/shared/usage-example.factory';
+// Content Factories
+import type { AgentFactoryTransientParams } from '../content/agent.factory';
 
 describe('Content Factories', () => {
   describe('agentFactory', () => {

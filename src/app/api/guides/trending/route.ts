@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { statsRedis } from '@/src/lib/cache';
-import { CACHE_HEADERS } from '@/src/lib/constants';
+import { contentCache, statsRedis } from '@/src/lib/cache';
+import { CACHE_CONFIG, REVALIDATE_TIMES, UI_CONFIG } from '@/src/lib/constants';
 import { createApiRoute } from '@/src/lib/error-handler';
-import { logger } from '@/src/lib/logger';
+import { rateLimiters } from '@/src/lib/rate-limiter';
 import {
   createCursor,
   createPaginationMeta,
@@ -10,7 +10,6 @@ import {
   decodeCursor,
 } from '@/src/lib/schemas/primitives/cursor-pagination.schema';
 import { viewCountService } from '@/src/lib/services/view-count.service';
-import { rateLimiters } from '@/src/lib/rate-limiter';
 
 export const runtime = 'nodejs';
 
@@ -25,7 +24,7 @@ const querySchema = z
   .merge(cursorPaginationQuerySchema)
   .describe('Trending guides query parameters with cursor-based pagination');
 
-const { GET } = createApiRoute({
+const route = createApiRoute({
   validate: {
     query: querySchema,
   },
@@ -56,12 +55,42 @@ const { GET } = createApiRoute({
         }
       }
 
-      const fetchLimit = (params.limit || 10) + 1;
+      const limit = Math.min(
+        params.limit ?? UI_CONFIG.pagination.defaultLimit,
+        UI_CONFIG.pagination.maxLimit
+      );
+      const fetchLimit = limit + 1;
+
+      // Build normalized cache key (allowed charset only; avoid raw base64 cursor)
+      const cacheKey = `guides/trending:cat:${category}:start:${startIndex}:limit:${limit}`;
+
+      // Try cache first (fast path)
+      try {
+        const cached = await contentCache.getAPIResponse<any>(cacheKey);
+        if (cached) {
+          // Compute lightweight metadata for headers (do not mutate cached body)
+          const totalCount = (await statsRedis.getTrending(category, 100)).length;
+
+          return okRaw(cached, {
+            sMaxAge: REVALIDATE_TIMES.api,
+            staleWhileRevalidate: 86400,
+            cacheHit: true,
+            additionalHeaders: {
+              'X-Total-Count': String(totalCount),
+              'X-Has-More': String(Boolean(cached?.pagination?.hasMore)),
+            },
+          });
+        }
+      } catch (err) {
+        requestLogger.warn('Trending API cache read failed; continuing without cache', undefined, {
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
 
       const allTrendingSlugs = await statsRedis.getTrending(category, 100);
       const paginatedSlugs = allTrendingSlugs.slice(startIndex, startIndex + fetchLimit);
-      const hasMore = paginatedSlugs.length > (params.limit || 10);
-      const trendingSlugs = hasMore ? paginatedSlugs.slice(0, params.limit || 10) : paginatedSlugs;
+      const hasMore = paginatedSlugs.length > limit;
+      const trendingSlugs = hasMore ? paginatedSlugs.slice(0, limit) : paginatedSlugs;
 
       const viewCountRequests = trendingSlugs.map((slug) => ({ category, slug }));
       const viewCounts = await viewCountService.getBatchViewCounts(viewCountRequests);
@@ -83,11 +112,8 @@ const { GET } = createApiRoute({
         };
       });
 
-      const pagination = createPaginationMeta(
-        trendingGuides,
-        params.limit || 10,
-        hasMore,
-        (item) => createCursor(startIndex + trendingGuides.indexOf(item) + 1)
+      const pagination = createPaginationMeta(trendingGuides, limit, hasMore, (item) =>
+        createCursor(startIndex + trendingGuides.indexOf(item) + 1)
       );
 
       const response = {
@@ -97,11 +123,20 @@ const { GET } = createApiRoute({
         timestamp: new Date().toISOString(),
       };
 
+      // Write-through cache on miss
+      try {
+        await contentCache.cacheAPIResponse(cacheKey, response, CACHE_CONFIG.ttl.api);
+      } catch (err) {
+        requestLogger.warn('Trending API cache write failed; serving fresh response', undefined, {
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+
       return okRaw(response, {
-        sMaxAge: 3600,
+        sMaxAge: REVALIDATE_TIMES.api,
         staleWhileRevalidate: 86400,
+        cacheHit: false,
         additionalHeaders: {
-          'Cache-Control': CACHE_HEADERS.MEDIUM,
           'X-Total-Count': String(allTrendingSlugs.length),
           'X-Has-More': String(pagination.hasMore),
         },
@@ -110,4 +145,7 @@ const { GET } = createApiRoute({
   },
 });
 
-export { GET };
+export async function GET(request: Request, context: { params: Promise<{}> }): Promise<Response> {
+  if (!route.GET) return new Response('Method Not Allowed', { status: 405 });
+  return route.GET(request as unknown as import('next/server').NextRequest, context as any);
+}
