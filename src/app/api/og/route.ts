@@ -31,6 +31,7 @@
 
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { chromium } from 'playwright';
 import { redisClient } from '@/src/lib/cache';
 import { APP_CONFIG } from '@/src/lib/constants';
@@ -338,21 +339,17 @@ export async function GET(request: NextRequest) {
     // Generate or retrieve OG image
     const image = await getOrGenerateOGImage(path, width, height, refresh);
 
-    // Return image with proper headers
-    // Convert Buffer to Uint8Array for NextResponse (fully compatible with BodyInit)
-    return new NextResponse(new Uint8Array(image), {
+    // Return image via unified response builder
+    return apiResponse.raw(new Uint8Array(image), {
+      contentType: 'image/png',
       status: 200,
       headers: {
-        'Content-Type': 'image/png',
         'Content-Length': String(image.length),
-        // CDN caching: 30 days with stale-while-revalidate
-        'Cache-Control': 'public, max-age=2592000, stale-while-revalidate=604800',
-        // ETag for conditional requests
         ETag: `"og-${path}-${width}x${height}"`,
-        // CORS for external embedding
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET',
       },
+      cache: { sMaxAge: 2592000, staleWhileRevalidate: 604800 },
     });
   } catch (error) {
     logger.error(
@@ -363,12 +360,10 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    return NextResponse.json(
-      {
-        error: 'Failed to generate OpenGraph image',
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    );
+    return handleApiError(error instanceof Error ? error : new Error(String(error)), {
+      route: '/api/og',
+      method: 'GET',
+      operation: 'og_generation',
+    });
   }
 }
