@@ -203,14 +203,14 @@ export function InlineEmailCTA({
     return (
       <div
         className={cn(
-          'flex items-center justify-between gap-4 p-4',
+          `${UI_CLASSES.FLEX} items-center justify-between gap-4 p-4`,
           'bg-accent/5 border border-border/50 rounded-lg',
           className
         )}
       >
-        <div className="flex items-center gap-3 flex-1">
-          <Mail className="h-4 w-4 text-primary flex-shrink-0" aria-hidden="true" />
-          <div className="flex-1 min-w-0">
+        <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} flex-1`}>
+          <Mail className={`h-4 w-4 text-primary ${UI_CLASSES.FLEX_SHRINK_0}`} aria-hidden="true" />
+          <div className={UI_CLASSES.FLEX_1_MIN_W_0}>
             <p className="text-sm font-medium truncate">{finalHeadline}</p>
             <p className="text-xs text-muted-foreground truncate">{finalDescription}</p>
           </div>
@@ -225,7 +225,7 @@ export function InlineEmailCTA({
     return (
       <Card
         className={cn(
-          'h-full flex flex-col border-primary/20 bg-gradient-to-br from-primary/5 to-background',
+          `h-full ${UI_CLASSES.FLEX_COL} border-primary/20 bg-gradient-to-br from-primary/5 to-background`,
           className
         )}
       >

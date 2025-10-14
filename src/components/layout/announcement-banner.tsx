@@ -113,14 +113,14 @@ export function AnnouncementBanner() {
           `}
         >
           <div className="px-4 py-2 md:px-6 md:py-2.5">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
+            <div className={UI_CLASSES.FLEX_COL_SM_ROW_ITEMS_CENTER_JUSTIFY_BETWEEN}>
               {/* Announcement Content */}
               <Announcement
                 variant={announcement.variant}
-                className="flex-1 border-none bg-transparent shadow-none"
+                className={`${UI_CLASSES.FLEX_1} border-none bg-transparent shadow-none`}
               >
                 {announcement.tag && (
-                  <AnnouncementTag className="text-[9px] sm:text-xs flex-shrink-0 font-bold">
+                  <AnnouncementTag className={`text-[9px] sm:text-xs ${UI_CLASSES.FLEX_SHRINK_0} font-bold`}>
                     {announcement.tag}
                   </AnnouncementTag>
                 )}
@@ -134,17 +134,17 @@ export function AnnouncementBanner() {
                       <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
                       {IconComponent && (
                         <IconComponent
-                          className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0"
+                          className={`h-3 w-3 sm:h-4 sm:w-4 ${UI_CLASSES.FLEX_SHRINK_0}`}
                           aria-hidden="true"
                         />
                       )}
                     </Link>
                   ) : (
-                    <span className="flex items-center gap-1.5">
+                    <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
                       <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
                       {IconComponent && (
                         <IconComponent
-                          className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0"
+                          className={`h-3 w-3 sm:h-4 sm:w-4 ${UI_CLASSES.FLEX_SHRINK_0}`}
                           aria-hidden="true"
                         />
                       )}

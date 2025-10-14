@@ -105,9 +105,9 @@ export function NavigationCommandMenu() {
           </CommandItem>
 
           <CommandItem onSelect={() => handleSelect('/mcp')} className="cursor-pointer">
-            <span className="flex items-center gap-2">
+            <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="text-sm">🔌</span>
-              <div className="flex flex-col items-start">
+              <div className={UI_CLASSES.FLEX_COL_ITEMS_START}>
                 <span>MCP</span>
                 <span className="text-xs text-muted-foreground">
                   Model Context Protocol servers
@@ -134,7 +134,7 @@ export function NavigationCommandMenu() {
                 <span className="text-xs text-muted-foreground">
                   <span className={UI_CLASSES.INLINE_FLEX_ITEMS_CENTER_GAP_1}>
                     Editor status bar configs
-                    <span className="inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
+                    <span className={`${UI_CLASSES.INLINE_FLEX} h-1.5 w-1.5 rounded-full bg-accent`} />
                   </span>
                 </span>
               </div>
@@ -149,7 +149,7 @@ export function NavigationCommandMenu() {
                 <span className="text-xs text-muted-foreground">
                   <span className={UI_CLASSES.INLINE_FLEX_ITEMS_CENTER_GAP_1}>
                     Curated content bundles
-                    <span className="inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
+                    <span className={`${UI_CLASSES.INLINE_FLEX} h-1.5 w-1.5 rounded-full bg-accent`} />
                   </span>
                 </span>
               </div>
