@@ -1,12 +1,10 @@
-import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
 import { contentCache } from '@/src/lib/cache';
 import { APP_CONFIG, UI_CONFIG } from '@/src/lib/constants';
-import { createApiRoute, handleApiError } from '@/src/lib/error-handler';
-import { logger } from '@/src/lib/logger';
+import { createApiRoute } from '@/src/lib/error-handler';
 import { rateLimiters } from '@/src/lib/rate-limiter';
-import { apiSchemas, ValidationError } from '@/src/lib/security/validators';
+import { apiSchemas } from '@/src/lib/security/validators';
 import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 
 export const runtime = 'nodejs';
@@ -162,12 +160,12 @@ async function* createStreamingResponse(
   }
 }
 
-const { GET } = createApiRoute({
+const route = createApiRoute({
   validate: { query: streamingQuerySchema },
   rateLimit: { limiter: rateLimiters.api },
   response: { envelope: false },
   handlers: {
-    GET: async ({ query, okRaw, request, logger: requestLogger }) => {
+    GET: async ({ query, okRaw, logger: requestLogger }) => {
       const validatedQuery = query as z.infer<typeof streamingQuerySchema>;
     // Parse and validate query parameters with streaming support
     requestLogger.info('All configurations API request started', {
@@ -314,4 +312,10 @@ const { GET } = createApiRoute({
   },
 });
 
-export { GET };
+export async function GET(
+  request: Request,
+  context: { params: Promise<{}> }
+): Promise<Response> {
+  if (!route.GET) return new Response('Method Not Allowed', { status: 405 });
+  return route.GET(request as unknown as import('next/server').NextRequest, context as any);
+}

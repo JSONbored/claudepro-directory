@@ -55,7 +55,7 @@ interface TaskResult {
  * @param request - Next.js request object
  * @returns JSON response with all task results
  */
-const { GET } = createApiRoute({
+const route = createApiRoute({
   auth: { type: 'cron' },
   response: { envelope: false },
   handlers: {
@@ -262,4 +262,10 @@ const { GET } = createApiRoute({
   },
 });
 
-export { GET };
+export async function GET(
+  request: Request,
+  context: { params: Promise<{}> }
+): Promise<Response> {
+  if (!route.GET) return new Response('Method Not Allowed', { status: 405 });
+  return route.GET(request as unknown as import('next/server').NextRequest, context as any);
+}

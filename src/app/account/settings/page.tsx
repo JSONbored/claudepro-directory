@@ -31,7 +31,7 @@ export default async function SettingsPage() {
     const now = new Date().toISOString();
     const { data: inserted } = await supabase
       .from('users')
-      .insert({ id: user.id, email: user.email, created_at: now, updated_at: now })
+      .insert({ id: user.id, email: user.email ?? null, created_at: now, updated_at: now })
       .select()
       .single();
     profile = inserted || null;

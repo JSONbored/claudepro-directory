@@ -9,7 +9,6 @@
 import { type NextRequest } from 'next/server';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
-import { handleApiError } from '@/src/lib/error-handler';
 import { generateSiteLLMsTxt } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';

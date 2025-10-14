@@ -1,12 +1,6 @@
 import { cacheWarmer } from '@/src/lib/cache';
 import { createApiRoute } from '@/src/lib/error-handler';
-import { logger } from '@/src/lib/logger';
-import {
-  apiSchemas,
-  baseSchemas,
-  ValidationError,
-  validation,
-} from '@/src/lib/security/validators';
+import { apiSchemas, baseSchemas, validation } from '@/src/lib/security/validators';
 
 /**
  * API endpoint to manually trigger cache warming
@@ -19,7 +13,7 @@ import {
  *
  * Security: Protected by Arcjet + endpoint-specific rate limiting
  */
-const { POST, GET } = createApiRoute({
+const route = createApiRoute({
   validate: {
     headers: apiSchemas.requestHeaders.partial().pick({ authorization: true }),
     body: apiSchemas.cacheWarmParams.partial(),
@@ -75,7 +69,15 @@ const { POST, GET } = createApiRoute({
   },
 });
 
-/**
- * GET endpoint to check cache warming status
- */
-export { POST, GET };
+export async function POST(request: Request): Promise<Response> {
+  if (!route.POST) return new Response('Method Not Allowed', { status: 405 });
+  return route.POST(request as unknown as import('next/server').NextRequest, { params: {} } as any);
+}
+
+export async function GET(
+  request: Request,
+  context: { params: Promise<{}> }
+): Promise<Response> {
+  if (!route.GET) return new Response('Method Not Allowed', { status: 405 });
+  return route.GET(request as unknown as import('next/server').NextRequest, context as any);
+}
