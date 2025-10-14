@@ -300,10 +300,17 @@ function formatBulletList(title: string, items: string[]): string {
  * Type guard for Installation type
  */
 function isInstallation(value: unknown): value is Installation {
-  if (typeof value !== 'object' || value === null) {
+  // Check for null/undefined first
+  if (value === null || value === undefined) {
     return false;
   }
 
+  // Check if it's an object type
+  if (typeof value !== 'object') {
+    return false;
+  }
+
+  // Exclude arrays, dates, and regexps
   if (Array.isArray(value) || value instanceof Date || value instanceof RegExp) {
     return false;
   }

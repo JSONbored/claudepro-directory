@@ -19,7 +19,9 @@ import { existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { parseChangelog } from '@/src/lib/changelog/parser';
 import { APP_CONFIG, CONTENT_PATHS, MAIN_CONTENT_CATEGORIES } from '@/src/lib/constants';
+import { getJobs } from '@/src/lib/data/jobs';
 import { logger } from '@/src/lib/logger';
+import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 
 /**
  * Sitemap URL interface matching sitemap.xml specification
@@ -117,6 +119,8 @@ export async function generateAllSiteUrls(
     { path: 'submit', priority: 0.6, changefreq: 'weekly' as const },
     { path: 'partner', priority: 0.6, changefreq: 'weekly' as const },
     { path: 'guides', priority: 0.6, changefreq: 'weekly' as const },
+    { path: 'companies', priority: 0.6, changefreq: 'weekly' as const },
+    { path: 'board', priority: 0.5, changefreq: 'daily' as const },
     { path: 'api-docs', priority: 0.9, changefreq: 'weekly' as const }, // High priority for developer docs
     { path: 'changelog', priority: 0.85, changefreq: 'daily' as const }, // High priority for recency signals
   ];
@@ -355,6 +359,115 @@ export async function generateAllSiteUrls(
         priority: 0.75,
       });
     });
+  }
+
+  // ============================================================================
+  // COMPARISON PAGES (SEO Content)
+  // ============================================================================
+
+  if (includeGuides) {
+    const comparisonsDir = join(CONTENT_PATHS.guides, 'comparisons');
+    if (existsSync(comparisonsDir)) {
+      try {
+        const files = readdirSync(comparisonsDir).filter((f) => f.endsWith('.mdx'));
+        files.forEach((file) => {
+          const slug = file.replace('.mdx', '');
+
+          urls.push({
+            loc: `${baseUrl}/compare/${slug}`,
+            lastmod: currentDate,
+            changefreq: 'monthly', // SEO content - stable after publication
+            priority: 0.7, // High priority - valuable comparison content
+          });
+        });
+      } catch {
+        // Directory doesn't exist yet - no comparisons to add
+        logger.debug('Comparisons directory not found, skipping comparison pages', {
+          path: comparisonsDir,
+          type: 'url_generation',
+        });
+      }
+    }
+  }
+
+  // ============================================================================
+  // JOB LISTINGS (Dynamic Content)
+  // ============================================================================
+
+  try {
+    const jobs = await getJobs();
+    jobs.forEach((job) => {
+      urls.push({
+        loc: `${baseUrl}/jobs/${job.slug}`,
+        lastmod: job.postedAt?.split('T')[0] || job.dateAdded,
+        changefreq: 'weekly', // Job listings may update (remote/salary changes)
+        priority: 0.65,
+      });
+    });
+  } catch (error) {
+    logger.warn('Failed to fetch jobs for sitemap generation, skipping job pages', {
+      error: error instanceof Error ? error.message : String(error),
+      type: 'url_generation',
+    });
+  }
+
+  // ============================================================================
+  // PUBLIC USER PROFILES (Community Content)
+  // ============================================================================
+
+  try {
+    const supabase = await createAdminClient();
+    const { data: publicUsers } = await supabase
+      .from('users')
+      .select('slug, updated_at')
+      .eq('public', true);
+
+    (publicUsers || []).forEach((user) => {
+      urls.push({
+        loc: `${baseUrl}/u/${user.slug}`,
+        lastmod: user.updated_at?.split('T')[0] || currentDate,
+        changefreq: 'weekly',
+        priority: 0.5,
+      });
+    });
+  } catch (error) {
+    logger.warn('Failed to fetch public users for sitemap generation, skipping user profiles', {
+      error: error instanceof Error ? error.message : String(error),
+      type: 'url_generation',
+    });
+  }
+
+  // ============================================================================
+  // PUBLIC USER COLLECTIONS (User-Curated Content)
+  // ============================================================================
+
+  try {
+    const supabase = await createAdminClient();
+    const { data: publicCollections } = await supabase
+      .from('user_collections')
+      .select('slug, updated_at, users!inner(slug)')
+      .eq('is_public', true);
+
+    (publicCollections || []).forEach((collection) => {
+      // Type assertion: Supabase join returns nested object
+      const userSlug = (collection.users as { slug: string } | null)?.slug;
+      if (userSlug) {
+        urls.push({
+          loc: `${baseUrl}/u/${userSlug}/collections/${collection.slug}`,
+          lastmod: collection.updated_at?.split('T')[0] || currentDate,
+          changefreq: 'weekly',
+          priority: 0.5,
+        });
+      }
+    });
+  } catch (error) {
+    logger.warn(
+      'Failed to fetch public collections for sitemap generation, skipping user collections',
+      {
+        error: error instanceof Error ? error.message : String(error),
+        type: 'url_generation',
+      }
+    );
   }
 
   return urls;

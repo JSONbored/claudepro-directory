@@ -343,10 +343,10 @@ test.describe('Robots.txt - General Crawler Configuration', () => {
     const apiRoutes = ['/api-docs', '/openapi.json', '/.well-known/api-catalog'];
 
     for (const route of apiRoutes) {
-      // Escape all special regex characters for safe pattern matching
-      const escapedRoute = route.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // Escape backslash first, then all other special regex characters
+      const escapedRoute = route.replace(/\\/g, '\\\\').replace(/[.*+?^${}()|[\]]/g, '\\$&');
       expect(content, `Should allow ${route} for API discovery`).toMatch(
-        new RegExp(`Allow:\\s+${escapedRoute.replace(/\\/g, '\\\\')}`)
+        new RegExp(`Allow:\\s+${escapedRoute}`)
       );
     }
   });
