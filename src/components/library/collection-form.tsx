@@ -266,8 +266,8 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-4 pt-4">
-        <Button type="submit" disabled={isPending} className="flex-1 sm:flex-initial">
+      <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_4} pt-4`}>
+        <Button type="submit" disabled={isPending} className={UI_CLASSES.FLEX_1_SM_FLEX_INITIAL}>
           {isPending
             ? mode === 'create'
               ? 'Creating...'

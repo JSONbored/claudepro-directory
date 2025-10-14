@@ -129,7 +129,7 @@ export function AnnouncementBanner() {
                   {announcement.href ? (
                     <Link
                       href={announcement.href}
-                      className="hover:underline flex items-center gap-1.5 transition-colors duration-200"
+                      className={`hover:underline ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5} transition-colors duration-200`}
                     >
                       <span className="line-clamp-2 sm:line-clamp-1">{announcement.title}</span>
                       {IconComponent && (

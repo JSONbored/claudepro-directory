@@ -125,9 +125,9 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
           <CardContent>
             <ul className="space-y-2">
               {collection.prerequisites.map((prereq: string) => (
-                <li key={prereq} className="flex items-start gap-2">
+                <li key={prereq} className={UI_CLASSES.FLEX_ITEMS_START_GAP_2}>
                   <CheckCircle
-                    className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0"
+                    className={`h-4 w-4 text-muted-foreground ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
                     aria-hidden="true"
                   />
                   <span className="text-sm text-muted-foreground">{prereq}</span>
@@ -200,9 +200,9 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
               {collection.installationOrder.map((slug: string, index: number) => {
                 const item = validItems.find((i: ItemWithData) => i?.slug === slug);
                 return (
-                  <li key={slug} className="flex items-start gap-3">
+                  <li key={slug} className={UI_CLASSES.FLEX_ITEMS_START_GAP_3}>
                     <span
-                      className="flex-shrink-0 flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-primary text-sm font-semibold"
+                      className={`${UI_CLASSES.FLEX_SHRINK_0} ${UI_CLASSES.FLEX} items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-primary text-sm font-semibold`}
                       aria-hidden="true"
                     >
                       {index + 1}
@@ -226,7 +226,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-2">
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 {collection.compatibility.claudeDesktop ? (
                   <CheckCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
                 ) : (
@@ -237,7 +237,7 @@ export async function CollectionDetailView({ collection }: CollectionDetailViewP
                   {collection.compatibility.claudeDesktop ? '(Supported)' : '(Not Supported)'}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 {collection.compatibility.claudeCode ? (
                   <CheckCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
                 ) : (

@@ -154,7 +154,7 @@ export function InlineEmailCTA({
           className
         )}
       >
-        <div className="flex justify-center mb-4">
+        <div className={`${UI_CLASSES.FLEX} justify-center mb-4`}>
           <div className="p-4 bg-primary/10 rounded-full">
             <Mail className="h-8 w-8 text-primary" aria-hidden="true" />
           </div>
