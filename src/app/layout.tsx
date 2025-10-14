@@ -1,4 +1,5 @@
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { headers } from 'next/headers';
@@ -15,7 +16,6 @@ import { FooterNewsletterBar } from '@/src/components/shared/footer-newsletter-b
 import { PerformanceOptimizer } from '@/src/components/shared/performance-optimizer';
 import { StructuredData } from '@/src/components/shared/structured-data';
 import { UmamiScript } from '@/src/components/shared/umami-script';
-import { WebVitals } from '@/src/components/shared/web-vitals';
 import { OrganizationStructuredData } from '@/src/components/structured-data/organization-schema';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -180,7 +180,7 @@ export default async function RootLayout({
         </ThemeProvider>
         <PerformanceOptimizer />
         <Analytics />
-        <WebVitals />
+        <SpeedInsights />
         {/* Umami Analytics - Privacy-focused analytics (production only) */}
         {await UmamiScript()}
         {/* Service Worker Registration for PWA Support */}
