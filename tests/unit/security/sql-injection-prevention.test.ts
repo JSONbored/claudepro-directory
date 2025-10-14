@@ -184,7 +184,7 @@ describe('SQL Injection Prevention - Input Validation', () => {
     });
 
     test('should reject hex-encoded injection', () => {
-      const malicious = 'test' + String.fromCharCode(0x27); // Hex single quote
+      const malicious = `test${String.fromCharCode(0x27)}`; // Hex single quote
       const result = slugSchema.safeParse(malicious);
       expect(result.success).toBe(false);
     });

@@ -783,7 +783,13 @@ export async function executeCronTasks(
     for (const task of order) {
       // Deadline check
       if (Date.now() - startMs > deadlineMs) {
-        results.push({ id: task.id, status: 'skipped', attempts: 0, durationMs: 0, error: 'Deadline exceeded' });
+        results.push({
+          id: task.id,
+          status: 'skipped',
+          attempts: 0,
+          durationMs: 0,
+          error: 'Deadline exceeded',
+        });
         logger.warn('Skipping remaining tasks due to deadline', { operationName, taskId: task.id });
         continue;
       }
@@ -792,7 +798,13 @@ export async function executeCronTasks(
       const deps = task.dependsOn || [];
       const unmet = deps.filter((d) => !done.has(d));
       if (unmet.length > 0) {
-        results.push({ id: task.id, status: 'skipped', attempts: 0, durationMs: 0, error: `Unmet deps: ${unmet.join(',')}` });
+        results.push({
+          id: task.id,
+          status: 'skipped',
+          attempts: 0,
+          durationMs: 0,
+          error: `Unmet deps: ${unmet.join(',')}`,
+        });
         continue;
       }
 
@@ -807,13 +819,27 @@ export async function executeCronTasks(
           logger.info('Cron task start', { operationName, taskId: task.id, attempt: attempt + 1 });
           await withTimeout(task.run(), task.timeoutMs);
           const duration = Date.now() - tStart;
-          results.push({ id: task.id, status: 'success', attempts: attempt + 1, durationMs: duration });
+          results.push({
+            id: task.id,
+            status: 'success',
+            attempts: attempt + 1,
+            durationMs: duration,
+          });
           done.add(task.id);
-          logger.info('Cron task success', { operationName, taskId: task.id, durationMs: duration });
+          logger.info('Cron task success', {
+            operationName,
+            taskId: task.id,
+            durationMs: duration,
+          });
           break;
         } catch (e) {
           lastErr = e instanceof Error ? e : new Error(String(e));
-          logger.warn('Cron task failure', { operationName, taskId: task.id, attempt: attempt + 1, error: lastErr.message });
+          logger.warn('Cron task failure', {
+            operationName,
+            taskId: task.id,
+            attempt: attempt + 1,
+            error: lastErr.message,
+          });
           if (attempt < attempts - 1) {
             await new Promise((r) => setTimeout(r, backoff * (attempt + 1))); // simple linear backoff
           }
@@ -822,7 +848,13 @@ export async function executeCronTasks(
 
       if (!done.has(task.id)) {
         const duration = Date.now() - tStart;
-        results.push({ id: task.id, status: 'failed', attempts, durationMs: duration, error: lastErr?.message || 'Unknown error' });
+        results.push({
+          id: task.id,
+          status: 'failed',
+          attempts,
+          durationMs: duration,
+          error: lastErr?.message || 'Unknown error',
+        });
         // Do not throw; continue to allow other independent tasks to run
       }
     }

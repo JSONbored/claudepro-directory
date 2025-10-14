@@ -30,10 +30,10 @@
  */
 
 import type { NextRequest } from 'next/server';
-import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { chromium } from 'playwright';
 import { redisClient } from '@/src/lib/cache';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
 // Route configuration

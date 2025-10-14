@@ -36,6 +36,7 @@ import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // ISR - revalidate every 10 minutes
 export const revalidate = 600;
@@ -136,7 +137,9 @@ export default async function ChangelogEntryPage({
 
           {/* Header */}
           <header className="space-y-4 pb-6">
-            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}>
+            <div
+              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} ${UI_CLASSES.TEXT_SM} ${UI_CLASSES.TEXT_MUTED_FOREGROUND}`}
+            >
               <Calendar className="h-4 w-4" />
               <time dateTime={entry.date}>{formatChangelogDate(entry.date)}</time>
             </div>

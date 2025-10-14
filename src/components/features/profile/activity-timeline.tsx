@@ -164,7 +164,9 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                               activity.title
                             )}
                           </h3>
-                          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} text-sm text-muted-foreground`}>
+                          <div
+                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} text-sm text-muted-foreground`}
+                          >
                             <span>{activity.vote_count} votes</span>
                             <span>•</span>
                             <span>{activity.comment_count} comments</span>
@@ -208,7 +210,9 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                       <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN_GAP_2}>
                         <div className="flex-1 min-w-0">
                           <h3 className="font-medium text-base mb-1">{activity.content_name}</h3>
-                          <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm text-muted-foreground`}>
+                          <div
+                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm text-muted-foreground`}
+                          >
                             <Badge variant="secondary" className="text-xs">
                               {activity.content_type}
                             </Badge>

@@ -15,8 +15,8 @@
  */
 
 import { z } from 'zod';
-import { logger } from '@/src/lib/logger';
 import { UI_CONFIG } from '@/src/lib/constants';
+import { logger } from '@/src/lib/logger';
 import {
   CachedRepository,
   type QueryOptions,
@@ -112,7 +112,10 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
         query = query.limit(options.limit);
       }
       if (options?.offset) {
-        const limit = Math.min(options.limit ?? UI_CONFIG.pagination.defaultLimit, UI_CONFIG.pagination.maxLimit);
+        const limit = Math.min(
+          options.limit ?? UI_CONFIG.pagination.defaultLimit,
+          UI_CONFIG.pagination.maxLimit
+        );
         query = query.range(options.offset, options.offset + limit - 1);
       }
 
@@ -309,7 +312,10 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
         query = query.limit(options.limit);
       }
       if (options?.offset) {
-        const limit = Math.min(options.limit ?? UI_CONFIG.pagination.defaultLimit, UI_CONFIG.pagination.maxLimit);
+        const limit = Math.min(
+          options.limit ?? UI_CONFIG.pagination.defaultLimit,
+          UI_CONFIG.pagination.maxLimit
+        );
         query = query.range(options.offset, options.offset + limit - 1);
       }
 
@@ -358,7 +364,10 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
         query = query.limit(options.limit);
       }
       if (options?.offset) {
-        const limit = Math.min(options.limit ?? UI_CONFIG.pagination.defaultLimit, UI_CONFIG.pagination.maxLimit);
+        const limit = Math.min(
+          options.limit ?? UI_CONFIG.pagination.defaultLimit,
+          UI_CONFIG.pagination.maxLimit
+        );
         query = query.range(options.offset, options.offset + limit - 1);
       }
 
@@ -399,7 +408,10 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
         query = query.limit(options.limit);
       }
       if (options?.offset) {
-        const limit = Math.min(options.limit ?? UI_CONFIG.pagination.defaultLimit, UI_CONFIG.pagination.maxLimit);
+        const limit = Math.min(
+          options.limit ?? UI_CONFIG.pagination.defaultLimit,
+          UI_CONFIG.pagination.maxLimit
+        );
         query = query.range(options.offset, options.offset + limit - 1);
       }
 
@@ -432,7 +444,10 @@ export class UserInteractionRepository extends CachedRepository<UserInteraction,
         query = query.limit(options.limit);
       }
       if (options?.offset) {
-        const limit = Math.min(options.limit ?? UI_CONFIG.pagination.defaultLimit, UI_CONFIG.pagination.maxLimit);
+        const limit = Math.min(
+          options.limit ?? UI_CONFIG.pagination.defaultLimit,
+          UI_CONFIG.pagination.maxLimit
+        );
         query = query.range(options.offset, options.offset + limit - 1);
       }
 

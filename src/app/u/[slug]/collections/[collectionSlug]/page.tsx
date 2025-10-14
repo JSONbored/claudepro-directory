@@ -202,7 +202,11 @@ export default async function PublicCollectionPage({ params }: PublicCollectionP
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <Button variant="ghost" size="sm" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
+                          >
                             <ExternalLink className="h-4 w-4" />
                             View
                           </Button>

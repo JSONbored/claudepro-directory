@@ -6,14 +6,13 @@
  * Usage: GET /api/emails/preview?template=newsletter-welcome
  */
 
-import { apiResponse } from '@/src/lib/error-handler';
+import { z } from 'zod';
 import {
   NewsletterWelcome,
   type NewsletterWelcomeProps,
 } from '@/src/emails/templates/newsletter-welcome';
 import { renderEmailHtml } from '@/src/emails/utils/render';
-import { createApiRoute, handleApiError } from '@/src/lib/error-handler';
-import { z } from 'zod';
+import { apiResponse, createApiRoute, handleApiError } from '@/src/lib/error-handler';
 
 /**
  * Available email templates for preview
@@ -49,7 +48,7 @@ const querySchema = z.object({
   source: z.string().max(100).optional(),
 });
 
-const { GET } = createApiRoute({
+const route = createApiRoute({
   auth: { type: 'devOnly' },
   validate: { query: querySchema },
   response: { envelope: false },
@@ -87,7 +86,11 @@ const { GET } = createApiRoute({
       const baseProps = sampleProps[templateName];
       const props: NewsletterWelcomeProps = {
         email: params.email || baseProps.email,
-        ...(params.source ? { source: params.source } : baseProps.source ? { source: baseProps.source } : {}),
+        ...(params.source
+          ? { source: params.source }
+          : baseProps.source
+            ? { source: baseProps.source }
+            : {}),
       };
 
       const html = await renderEmailHtml(TemplateComponent(props));
@@ -110,4 +113,7 @@ const { GET } = createApiRoute({
   },
 });
 
-export { GET };
+export async function GET(request: Request, context: { params: Promise<{}> }): Promise<Response> {
+  if (!route.GET) return new Response('Method Not Allowed', { status: 405 });
+  return route.GET(request as unknown as import('next/server').NextRequest, context as any);
+}

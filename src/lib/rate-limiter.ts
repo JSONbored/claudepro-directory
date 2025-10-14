@@ -3,12 +3,13 @@
  * Implements sliding window rate limiting with Redis persistence
  */
 
-import { headers } from 'next/headers';
-import { type NextRequest, NextResponse } from 'next/server';
+// Avoid next/headers in shared library to ensure compatibility in all contexts.
+// Always extract headers from the NextRequest passed into functions.
+import type { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { apiResponse } from '@/src/lib/error-handler';
 import { redisClient } from '@/src/lib/cache';
 import { ENDPOINT_RATE_LIMITS } from '@/src/lib/config/rate-limits.config';
+import { apiResponse } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 import { createRequestId } from '@/src/lib/schemas/branded-types.schema';
 import {
@@ -112,7 +113,7 @@ async function generateKey(request: NextRequest, prefix = 'rate_limit'): Promise
   // 3. X-Real-IP (nginx)
   // 4. Connection remote address
 
-  const headersList = await headers();
+  const headersList = request.headers;
   const rawClientIP =
     headersList.get('cf-connecting-ip') ||
     headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ||
@@ -157,7 +158,7 @@ export class RateLimiter {
   }
 
   private async defaultErrorResponse(request: NextRequest, info: RateLimitInfo): Promise<Response> {
-    const headersList = await headers();
+    const headersList = request.headers;
     const clientIP =
       headersList.get('cf-connecting-ip') || headersList.get('x-forwarded-for') || 'unknown';
 

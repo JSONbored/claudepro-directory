@@ -6,8 +6,8 @@ import { ConfigCard } from '@/src/components/features/content/config-card';
 import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import { InfiniteScrollContainer } from '@/src/components/shared/infinite-scroll-container';
 import { useLocalSearch } from '@/src/hooks/use-search';
-import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { UI_CONFIG } from '@/src/lib/constants';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 const UnifiedSearch = dynamic(
   () =>

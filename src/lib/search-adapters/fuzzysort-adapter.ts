@@ -15,13 +15,13 @@
  * @see https://github.com/farzher/fuzzysort
  */
 
+import { UI_CONFIG } from '@/src/lib/constants';
 import {
   sortAlphabetically,
   sortByNewest,
   sortByPopularity,
 } from '@/src/lib/content/content-sorting';
 import { logger } from '@/src/lib/logger';
-import { UI_CONFIG } from '@/src/lib/constants';
 import type { ContentItem } from '@/src/lib/schemas/content/content-item-union.schema';
 import type { SearchableItem, SearchFilters } from '@/src/lib/schemas/search.schema';
 

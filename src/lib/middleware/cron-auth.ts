@@ -32,7 +32,7 @@
  */
 
 import { timingSafeEqual } from 'node:crypto';
-import { type NextRequest, NextResponse } from 'next/server';
+import type { NextRequest, NextResponse } from 'next/server';
 import { apiResponse } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
