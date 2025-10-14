@@ -6,7 +6,8 @@
  * @see {@link https://llmstxt.org} - LLMs.txt specification
  */
 
-import { type NextRequest, NextResponse } from 'next/server';
+import { type NextRequest } from 'next/server';
+import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
 import { handleApiError } from '@/src/lib/error-handler';
 import { generateSiteLLMsTxt } from '@/src/lib/llms-txt/generator';
@@ -115,15 +116,11 @@ export async function GET(request: NextRequest): Promise<Response> {
       contentLength: llmsTxt.length,
     });
 
-    // Return plain text response
-    return new NextResponse(llmsTxt, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
-        'X-Content-Type-Options': 'nosniff',
-        'X-Robots-Tag': 'index, follow',
-      },
+    // Return plain text response via unified builder
+    return apiResponse.raw(llmsTxt, {
+      contentType: 'text/plain; charset=utf-8',
+      headers: { 'X-Robots-Tag': 'index, follow' },
+      cache: { sMaxAge: 3600, staleWhileRevalidate: 86400 },
     });
   } catch (error: unknown) {
     requestLogger.error(
@@ -133,13 +130,10 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     // Use centralized error handling
     const validatedError = errorInputSchema.safeParse(error);
-    return handleApiError(
-      validatedError.success ? validatedError.data : { message: 'Failed to generate llms.txt' },
-      {
-        route: '/llms.txt',
-        operation: 'generate_site_llmstxt',
-        method: 'GET',
-      }
-    );
+    return handleApiError(validatedError.success ? validatedError.data : { message: 'Failed to generate llms.txt' }, {
+      route: '/llms.txt',
+      operation: 'generate_site_llmstxt',
+      method: 'GET',
+    });
   }
 }

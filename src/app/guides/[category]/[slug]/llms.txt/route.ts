@@ -7,7 +7,8 @@
  */
 
 import fs from 'fs/promises';
-import { type NextRequest, NextResponse } from 'next/server';
+import { type NextRequest } from 'next/server';
+import { apiResponse } from '@/src/lib/error-handler';
 import path from 'path';
 import { z } from 'zod';
 import { contentCache } from '@/src/lib/cache';
@@ -78,11 +79,10 @@ export async function GET(
     if (!(category in PATH_MAP)) {
       requestLogger.warn('Invalid guide category for llms.txt', { category });
 
-      return new NextResponse('Guide category not found', {
+      return apiResponse.raw('Guide category not found', {
+        contentType: 'text/plain; charset=utf-8',
         status: 404,
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-        },
+        cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
       });
     }
 
@@ -106,15 +106,10 @@ export async function GET(
           slug,
         });
 
-        return new NextResponse(cachedContent, {
-          status: 200,
-          headers: {
-            'Content-Type': 'text/plain; charset=utf-8',
-            'Cache-Control': 'public, max-age=600, s-maxage=600, stale-while-revalidate=3600',
-            'X-Content-Type-Options': 'nosniff',
-            'X-Robots-Tag': 'index, follow',
-            'X-Cache': 'HIT',
-          },
+        return apiResponse.raw(cachedContent, {
+          contentType: 'text/plain; charset=utf-8',
+          headers: { 'X-Robots-Tag': 'index, follow', 'X-Cache': 'HIT' },
+          cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
         });
       }
     } catch {
@@ -129,11 +124,10 @@ export async function GET(
         new Error('Category not found in PATH_MAP'),
         { category }
       );
-      return new NextResponse('Internal server error', {
+      return apiResponse.raw('Internal server error', {
+        contentType: 'text/plain; charset=utf-8',
         status: 500,
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-        },
+        cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
       });
     }
     const filePath = path.join(process.cwd(), 'content', 'guides', mappedPath, filename);
@@ -147,11 +141,10 @@ export async function GET(
         filename,
       });
 
-      return new NextResponse('Guide not found', {
+      return apiResponse.raw('Guide not found', {
+        contentType: 'text/plain; charset=utf-8',
         status: 404,
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-        },
+        cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
       });
     }
 
@@ -195,15 +188,10 @@ export async function GET(
     });
 
     // Return plain text response
-    return new NextResponse(llmsTxt, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'public, max-age=600, s-maxage=600, stale-while-revalidate=3600',
-        'X-Content-Type-Options': 'nosniff',
-        'X-Robots-Tag': 'index, follow',
-        'X-Cache': 'MISS',
-      },
+    return apiResponse.raw(llmsTxt, {
+      contentType: 'text/plain; charset=utf-8',
+      headers: { 'X-Robots-Tag': 'index, follow', 'X-Cache': 'MISS' },
+      cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
     });
   } catch (error: unknown) {
     const rawParams = await params.catch(() => ({

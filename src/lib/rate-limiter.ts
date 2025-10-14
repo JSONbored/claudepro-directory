@@ -6,6 +6,7 @@
 import { headers } from 'next/headers';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { apiResponse } from '@/src/lib/error-handler';
 import { redisClient } from '@/src/lib/cache';
 import { ENDPOINT_RATE_LIMITS } from '@/src/lib/config/rate-limits.config';
 import { logger } from '@/src/lib/logger';
@@ -169,7 +170,7 @@ export class RateLimiter {
       resetTime: info.resetTime,
     });
 
-    return NextResponse.json(
+    return apiResponse.okRaw(
       {
         error: 'Rate limit exceeded',
         message: `Too many requests. Limit: ${info.limit} requests per ${this.config.windowSeconds} seconds`,
@@ -179,13 +180,14 @@ export class RateLimiter {
       },
       {
         status: 429,
-        headers: {
+        additionalHeaders: {
           'X-RateLimit-Limit': String(info.limit),
           'X-RateLimit-Remaining': String(info.remaining),
           'X-RateLimit-Reset': String(info.resetTime),
           'Retry-After': String(info.retryAfter),
-          'Content-Type': 'application/json',
         },
+        sMaxAge: 0,
+        staleWhileRevalidate: 0,
       }
     );
   }

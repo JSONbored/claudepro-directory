@@ -27,7 +27,7 @@
  */
 
 import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
+import { apiResponse } from '@/src/lib/error-handler';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { formatChangelogDateISO8601, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
@@ -139,14 +139,10 @@ ${categories.map((cat) => `    <category term="${escapeXml(cat)}" label="${escap
       entriesCount: entries.length,
     });
 
-    // Return Atom XML with proper headers
-    return new NextResponse(atom, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/atom+xml; charset=utf-8',
-        'Cache-Control': 'public, max-age=600, s-maxage=600, stale-while-revalidate=3600',
-        'X-Content-Type-Options': 'nosniff',
-      },
+    // Return Atom XML via unified builder
+    return apiResponse.raw(atom, {
+      contentType: 'application/atom+xml; charset=utf-8',
+      cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
     });
   } catch (error) {
     requestLogger.error(
@@ -164,12 +160,10 @@ ${categories.map((cat) => `    <category term="${escapeXml(cat)}" label="${escap
   <subtitle>Error generating changelog feed. Please try again later.</subtitle>
 </feed>`;
 
-    return new NextResponse(errorAtom, {
+    return apiResponse.raw(errorAtom, {
+      contentType: 'application/atom+xml; charset=utf-8',
       status: 500,
-      headers: {
-        'Content-Type': 'application/atom+xml; charset=utf-8',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-      },
+      cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
     });
   }
 }
