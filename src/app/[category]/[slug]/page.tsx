@@ -272,7 +272,9 @@ export default async function DetailPage({
     return (
       <>
         <ViewTracker
-          category={category as 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides' | 'skills'}
+          category={
+            category as 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides' | 'skills'
+          }
           slug={slug}
         />
         <PageViewTracker category={category} slug={slug} />
@@ -306,7 +308,9 @@ export default async function DetailPage({
   return (
     <>
       <ViewTracker
-        category={category as 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides' | 'skills'}
+        category={
+          category as 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides' | 'skills'
+        }
         slug={slug}
       />
       <PageViewTracker category={category} slug={slug} />

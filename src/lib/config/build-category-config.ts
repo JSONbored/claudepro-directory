@@ -28,11 +28,11 @@ import {
 import { type HookContent, hookContentSchema } from '@/src/lib/schemas/content/hook.schema';
 import { type McpContent, mcpContentSchema } from '@/src/lib/schemas/content/mcp.schema';
 import { type RuleContent, ruleContentSchema } from '@/src/lib/schemas/content/rule.schema';
+import { type SkillContent, skillContentSchema } from '@/src/lib/schemas/content/skill.schema';
 import {
   type StatuslineContent,
   statuslineContentSchema,
 } from '@/src/lib/schemas/content/statusline.schema';
-import { type SkillContent, skillContentSchema } from '@/src/lib/schemas/content/skill.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 
 /**

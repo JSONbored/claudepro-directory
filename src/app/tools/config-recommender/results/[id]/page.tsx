@@ -103,13 +103,31 @@ export default async function ResultsPage({ params, searchParams }: PageProps) {
 
     // Combine all configurations with category tags
     const allConfigs: UnifiedContentItem[] = [
-      ...(agentsData as UnifiedContentItem[]).map((item) => ({ ...item, category: 'agents' as const })),
+      ...(agentsData as UnifiedContentItem[]).map((item) => ({
+        ...item,
+        category: 'agents' as const,
+      })),
       ...(mcpData as UnifiedContentItem[]).map((item) => ({ ...item, category: 'mcp' as const })),
-      ...(rulesData as UnifiedContentItem[]).map((item) => ({ ...item, category: 'rules' as const })),
-      ...(commandsData as UnifiedContentItem[]).map((item) => ({ ...item, category: 'commands' as const })),
-      ...(hooksData as UnifiedContentItem[]).map((item) => ({ ...item, category: 'hooks' as const })),
-      ...(statuslinesData as UnifiedContentItem[]).map((item) => ({ ...item, category: 'statuslines' as const })),
-      ...(collectionsData as UnifiedContentItem[]).map((item) => ({ ...item, category: 'collections' as const })),
+      ...(rulesData as UnifiedContentItem[]).map((item) => ({
+        ...item,
+        category: 'rules' as const,
+      })),
+      ...(commandsData as UnifiedContentItem[]).map((item) => ({
+        ...item,
+        category: 'commands' as const,
+      })),
+      ...(hooksData as UnifiedContentItem[]).map((item) => ({
+        ...item,
+        category: 'hooks' as const,
+      })),
+      ...(statuslinesData as UnifiedContentItem[]).map((item) => ({
+        ...item,
+        category: 'statuslines' as const,
+      })),
+      ...(collectionsData as UnifiedContentItem[]).map((item) => ({
+        ...item,
+        category: 'collections' as const,
+      })),
     ];
 
     // Enrich with view counts from Redis

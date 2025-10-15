@@ -180,7 +180,16 @@ export const apiSchemas = {
     .object({
       q: baseSchemas.searchQuery,
       category: z
-        .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections', 'skills'])
+        .enum([
+          'agents',
+          'mcp',
+          'rules',
+          'commands',
+          'hooks',
+          'statuslines',
+          'collections',
+          'skills',
+        ])
         .optional()
         .describe('Filter search results by content category'),
       page: baseSchemas.page,

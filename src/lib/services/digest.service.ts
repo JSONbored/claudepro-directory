@@ -13,7 +13,16 @@
  * @module lib/services/digest.service
  */
 
-import { agents, collections, commands, hooks, mcp, rules, statuslines, skills } from '@/generated/content';
+import {
+  agents,
+  collections,
+  commands,
+  hooks,
+  mcp,
+  rules,
+  skills,
+  statuslines,
+} from '@/generated/content';
 import type { DigestContentItem, DigestTrendingItem } from '@/src/emails/templates/weekly-digest';
 import { contentCache, statsRedis } from '@/src/lib/cache';
 import { APP_CONFIG } from '@/src/lib/constants';
@@ -65,9 +74,27 @@ class DigestService {
         hooks: hooksData,
         statuslines: statuslinesData,
         collections: collectionsData,
-      } = await batchLoadContent({ agents, mcp, rules, commands, hooks, statuslines, collections, skills });
+      } = await batchLoadContent({
+        agents,
+        mcp,
+        rules,
+        commands,
+        hooks,
+        statuslines,
+        collections,
+        skills,
+      });
 
-      const { skills: skillsData } = await batchLoadContent({ agents, mcp, rules, commands, hooks, statuslines, collections, skills });
+      const { skills: skillsData } = await batchLoadContent({
+        agents,
+        mcp,
+        rules,
+        commands,
+        hooks,
+        statuslines,
+        collections,
+        skills,
+      });
 
       const allContent = [
         ...(agentsData as ContentItem[]).map((item) => ({
@@ -154,9 +181,27 @@ class DigestService {
         hooks: hooksData,
         statuslines: statuslinesData,
         collections: collectionsData,
-      } = await batchLoadContent({ agents, mcp, rules, commands, hooks, statuslines, collections, skills });
+      } = await batchLoadContent({
+        agents,
+        mcp,
+        rules,
+        commands,
+        hooks,
+        statuslines,
+        collections,
+        skills,
+      });
 
-      const { skills: skillsData2 } = await batchLoadContent({ agents, mcp, rules, commands, hooks, statuslines, collections, skills });
+      const { skills: skillsData2 } = await batchLoadContent({
+        agents,
+        mcp,
+        rules,
+        commands,
+        hooks,
+        statuslines,
+        collections,
+        skills,
+      });
 
       const allContent = [
         ...(agentsData as ContentItem[]).map((item) => ({

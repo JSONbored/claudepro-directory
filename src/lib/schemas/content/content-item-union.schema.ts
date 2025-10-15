@@ -17,8 +17,8 @@ import { guideContentSchema } from './guide.schema';
 import { hookContentSchema } from './hook.schema';
 import { mcpContentSchema } from './mcp.schema';
 import { ruleContentSchema } from './rule.schema';
-import { statuslineContentSchema } from './statusline.schema';
 import { skillContentSchema } from './skill.schema';
+import { statuslineContentSchema } from './statusline.schema';
 
 /**
  * Union of all content schemas

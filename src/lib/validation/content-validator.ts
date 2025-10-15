@@ -14,8 +14,8 @@ import { guideContentSchema } from '@/src/lib/schemas/content/guide.schema';
 import { hookContentSchema } from '@/src/lib/schemas/content/hook.schema';
 import { mcpContentSchema } from '@/src/lib/schemas/content/mcp.schema';
 import { ruleContentSchema } from '@/src/lib/schemas/content/rule.schema';
-import { statuslineContentSchema } from '@/src/lib/schemas/content/statusline.schema';
 import { skillContentSchema } from '@/src/lib/schemas/content/skill.schema';
+import { statuslineContentSchema } from '@/src/lib/schemas/content/statusline.schema';
 
 /**
  * Validate content data by category
