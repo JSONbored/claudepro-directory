@@ -1,6 +1,6 @@
 ## What are you submitting?
 
-- [ ] **Content** (agent, MCP, command, hook, rule, statusline, or collection)
+- [ ] **Content** (agent, MCP, command, hook, rule, statusline, collection, or skill)
 - [ ] Code change (bug fix, feature, refactor, etc.)
 
 ---
