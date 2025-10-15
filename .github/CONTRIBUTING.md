@@ -42,14 +42,16 @@ Thank you for your interest in contributing to ClaudePro Directory! This guide w
 
 ## 🎯 Content Types We Accept
 
-| Type            | Description                   | Submit via Issue                                                     | Example Files                                        |
-| --------------- | ----------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------- |
-| **Agents**      | Specialized AI personas       | [Submit Agent](../../issues/new?template=submit_agent.yml)           | [View Examples](../../tree/main/content/agents)      |
-| **Commands**    | Quick automation actions      | [Submit Command](../../issues/new?template=submit_command.yml)       | [View Examples](../../tree/main/content/commands)    |
-| **Hooks**       | Event-driven automation       | [Submit Hook](../../issues/new?template=submit_hook.yml)             | [View Examples](../../tree/main/content/hooks)       |
-| **MCP Servers** | Model Context Protocol        | [Submit MCP](../../issues/new?template=submit_mcp.yml)               | [View Examples](../../tree/main/content/mcp)         |
-| **Rules**       | System prompts                | [Submit Rule](../../issues/new?template=submit_rule.yml)             | [View Examples](../../tree/main/content/rules)       |
-| **Statuslines** | Custom status displays        | [Submit Statusline](../../issues/new?template=submit_statusline.yml) | [View Examples](../../tree/main/content/statuslines) |
+| Type            | Description                           | Submit via Issue                                                     | Example Files                                        |
+| --------------- | ------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------- |
+| **Agents**      | Specialized AI personas               | [Submit Agent](../../issues/new?template=submit_agent.yml)           | [View Examples](../../tree/main/content/agents)      |
+| **MCP Servers** | Model Context Protocol integrations   | [Submit MCP](../../issues/new?template=submit_mcp.yml)               | [View Examples](../../tree/main/content/mcp)         |
+| **Commands**    | Quick automation slash commands       | [Submit Command](../../issues/new?template=submit_command.yml)       | [View Examples](../../tree/main/content/commands)    |
+| **Rules**       | System prompts & behavior guidelines  | [Submit Rule](../../issues/new?template=submit_rule.yml)             | [View Examples](../../tree/main/content/rules)       |
+| **Hooks**       | Event-driven automation scripts       | [Submit Hook](../../issues/new?template=submit_hook.yml)             | [View Examples](../../tree/main/content/hooks)       |
+| **Statuslines** | Custom CLI status displays            | [Submit Statusline](../../issues/new?template=submit_statusline.yml) | [View Examples](../../tree/main/content/statuslines) |
+| **Collections** | Curated bundles of related configs    | [Submit Collection](../../issues/new?template=submit_collection.yml) | [View Examples](../../tree/main/content/collections) |
+| **Skills**      | Task-focused capability guides        | [Submit Skill](../../issues/new?template=submit_skill.yml)           | [View Examples](../../tree/main/content/skills)      |
 | **Collections** | Curated configuration bundles | [Submit Collection](../../issues/new?template=submit_collection.yml) | [View Examples](../../tree/main/content/collections) |
 
 ## 📝 How to Add Content
@@ -61,12 +63,13 @@ Place your JSON file in the appropriate directory:
 ```
 content/
 ├── agents/       # AI agent configurations
-├── commands/     # Automation commands
-├── hooks/        # Event hooks
 ├── mcp/          # MCP server configs
-├── rules/        # System prompts
-├── statuslines/  # Custom status displays
-└── collections/  # Curated configuration bundles
+├── commands/     # Automation slash commands
+├── rules/        # System prompts & behavior guidelines
+├── hooks/        # Event-driven automation scripts
+├── statuslines/  # Custom CLI status displays
+├── collections/  # Curated bundles of related configs
+└── skills/       # Task-focused capability guides (PDF, DOCX, etc.)
 ```
 
 ### 2. Create Your JSON File
@@ -76,12 +79,13 @@ content/
 #### Templates (Copy & Customize)
 
 - **Agent**: [`agents-template-simple.json`](../../blob/main/templates/content/agents-template-simple.json) | [Full template](../../blob/main/templates/content/agents-template.json)
+- **MCP Server**: [`mcp-template-simple.json`](../../blob/main/templates/content/mcp-template-simple.json) | [Full template](../../blob/main/templates/content/mcp-template.json)
 - **Command**: [`commands-template-simple.json`](../../blob/main/templates/content/commands-template-simple.json) | [Full template](../../blob/main/templates/content/commands-template.json)
-- **Hook**: [`hooks-template-simple.json`](../../blob/main/templates/content/hooks-template-simple.json) | [Full template](../../blob/main/templates/content/hooks-template.json)
-- **MCP**: [`mcp-template-simple.json`](../../blob/main/templates/content/mcp-template-simple.json) | [Full template](../../blob/main/templates/content/mcp-template.json)
 - **Rule**: [`rules-template-simple.json`](../../blob/main/templates/content/rules-template-simple.json) | [Full template](../../blob/main/templates/content/rules-template.json)
+- **Hook**: [`hooks-template-simple.json`](../../blob/main/templates/content/hooks-template-simple.json) | [Full template](../../blob/main/templates/content/hooks-template.json)
 - **Statusline**: [`statuslines-template-simple.json`](../../blob/main/templates/content/statuslines-template-simple.json) | [Full template](../../blob/main/templates/content/statuslines-template.json)
 - **Collection**: [`collections-template-simple.json`](../../blob/main/templates/content/collections-template-simple.json) | [Full template](../../blob/main/templates/content/collections-template.json)
+- **Skill**: [`skills-template-simple.json`](../../blob/main/templates/content/skills-template-simple.json) | [Full template](../../blob/main/templates/content/skills-template.json)
 
 #### Real-World Examples
 
