@@ -813,7 +813,8 @@ export const HOMEPAGE_FEATURED_CATEGORIES = [
   'hooks',
   'statuslines',
   'collections',
-] as const satisfies ReadonlyArray<CategoryId>;
+  'skills',
+] as const;
 
 export const HOMEPAGE_TAB_CATEGORIES = [
   'all',
@@ -824,6 +825,7 @@ export const HOMEPAGE_TAB_CATEGORIES = [
   'hooks',
   'statuslines',
   'collections',
+  'skills',
   'community',
 ] as const;
 
