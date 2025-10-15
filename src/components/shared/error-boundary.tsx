@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { createErrorBoundaryFallback } from '@/src/lib/error-handler';
+import { createErrorBoundaryFallback } from '@/src/lib/error-handler/client';
 import { AlertTriangle, Home, RefreshCw } from '@/src/lib/icons';
 import { umamiEventDataSchema } from '@/src/lib/schemas/analytics.schema';
 import type { ErrorBoundaryProps, ErrorFallbackProps } from '@/src/lib/schemas/component.schema';

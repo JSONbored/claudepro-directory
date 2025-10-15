@@ -425,23 +425,9 @@ export const handleValidationError = (
   });
 };
 
-// React component error boundary helper
-export const createErrorBoundaryFallback = (
-  error: Error,
-  errorInfo: { componentStack: string }
-) => {
-  const errorResponse = errorHandler.handleError(error, {
-    operation: 'react_render',
-    logLevel: 'error',
-    includeStack: isDevelopment,
-    logContext: {
-      componentStack: errorInfo.componentStack,
-      errorBoundary: true,
-    },
-  });
-
-  return errorResponse;
-};
+// React component error boundary helper moved to @/src/lib/error-handler/client
+// to avoid bundling server-only code in client components
+// Import from '@/src/lib/error-handler/client' instead
 
 // ============================================
 // SUCCESS RESPONSE BUILDERS
