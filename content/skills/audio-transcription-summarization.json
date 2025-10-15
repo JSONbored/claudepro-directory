@@ -1,0 +1,49 @@
+{
+  "slug": "audio-transcription-summarization",
+  "title": "Audio Transcription and Summarization",
+  "seoTitle": "Audio Transcription + Summarization Skill",
+  "description": "Transcribe audio with Whisper/ffmpeg and produce structured, timestamped summaries and action items.",
+  "category": "skills",
+  "author": "claudepro",
+  "dateAdded": "2025-10-15",
+  "tags": ["audio", "transcription", "whisper", "ffmpeg"],
+  "content": "# Audio Transcription + Summarization\n\nEnd-to-end workflow for local transcription and concise summaries, including diarization basics and timestamped notes.\n\n## Key Operations\n- ffmpeg conversion and normalization\n- Whisper transcription\n- Timestamped notes and summaries\n- Diarization basics\n",
+  "features": [
+    "Local processing via Whisper",
+    "Format conversion with ffmpeg",
+    "Timestamped notes and action items",
+    "Optional speaker labels"
+  ],
+  "useCases": [
+    "Summarize meetings and podcasts",
+    "Generate action items",
+    "Create searchable transcripts"
+  ],
+  "requirements": [
+    "ffmpeg",
+    "Python 3.11+ or whisper.cpp",
+    "openai-whisper (pip) or whisper.cpp binary"
+  ],
+  "examples": [
+    {
+      "title": "Transcribe with Whisper CLI",
+      "language": "bash",
+      "code": "# Convert to mono 16kHz WAV\nffmpeg -i input.mp3 -ar 16000 -ac 1 input.wav\n\n# Python whisper (pip install -U openai-whisper)\nwhisper input.wav --model small --language en --output_format txt"
+    },
+    {
+      "title": "Summarize timestamps (Python)",
+      "language": "python",
+      "code": "from pathlib import Path\n\ntext = Path('input.wav.txt').read_text(encoding='utf-8')\n# Split by timestamps like [00:12:34]\n# ... produce bullet summaries per 5-minute window ...\nprint(text[:500])"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": { "steps": ["Install ffmpeg", "Install whisper via pip or build whisper.cpp"] },
+    "claudeCode": { "steps": ["pip install openai-whisper", "Verify ffmpeg is in PATH"] }
+  },
+  "troubleshooting": [
+    { "issue": "ffmpeg not found", "solution": "Install ffmpeg via your package manager and ensure it is on PATH." },
+    { "issue": "High WER for noisy audio", "solution": "Downmix to mono, apply noise reduction, and use a larger model." }
+  ],
+  "documentationUrl": "https://github.com/openai/whisper",
+  "source": "community"
+}

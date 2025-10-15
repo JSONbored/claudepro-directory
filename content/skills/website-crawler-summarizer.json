@@ -1,0 +1,43 @@
+{
+  "slug": "website-crawler-summarizer",
+  "title": "Website Content Crawler and Summarizer",
+  "seoTitle": "Website Crawler + Summarizer Skill",
+  "description": "Crawl domains respectfully, extract readable content, dedupe, and generate structured summaries.",
+  "category": "skills",
+  "author": "claudepro",
+  "dateAdded": "2025-10-15",
+  "tags": ["crawler", "scraping", "summarization", "readability"],
+  "content": "# Website Crawler + Summarizer\n\nRespect robots, throttle requests, extract main content, and summarize to MD/JSON.\n\n## Key Operations\n- Sitemap or seed-based crawling\n- Readability extraction\n- Deduplication\n- Structured summaries\n",
+  "features": [
+    "Robots-aware crawling",
+    "Boilerplate removal",
+    "Language detection",
+    "JSON/MD export"
+  ],
+  "useCases": [
+    "Competitive intel packs",
+    "Documentation mirrors",
+    "Research briefs"
+  ],
+  "requirements": [
+    "Node.js 18+ or Python 3.11+",
+    "Playwright (optional)",
+    "readability or newspaper3k"
+  ],
+  "examples": [
+    {
+      "title": "Basic fetch + Readability (Node)",
+      "language": "javascript",
+      "code": "import { JSDOM } from 'jsdom';\nimport { Readability } from '@mozilla/readability';\nimport fetch from 'node-fetch';\n\nconst html = await (await fetch('https://example.com')).text();\nconst doc = new JSDOM(html, { url: 'https://example.com' });\nconst article = new Readability(doc.window.document).parse();\nconsole.log(article.title);"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": { "steps": ["Install Node.js 18+", "npm i jsdom @mozilla/readability node-fetch"] },
+    "claudeCode": { "steps": ["Configure rate-limit and user-agent", "Respect robots.txt"] }
+  },
+  "troubleshooting": [
+    { "issue": "Blocked by anti-bot", "solution": "Reduce concurrency, add polite delays, and avoid sensitive endpoints." }
+  ],
+  "documentationUrl": "https://github.com/mozilla/readability",
+  "source": "community"
+}

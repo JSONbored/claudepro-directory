@@ -1,0 +1,51 @@
+{
+  "slug": "csv-excel-data-wrangler",
+  "title": "CSV & Excel Data Wrangler",
+  "seoTitle": "CSV/Excel Data Wrangler Skill",
+  "description": "Clean, filter, join, pivot, and export CSV/XLSX data reliably with reproducible steps.",
+  "category": "skills",
+  "author": "claudepro",
+  "dateAdded": "2025-10-15",
+  "tags": ["csv", "xlsx", "data-cleaning", "pandas", "python"],
+  "content": "# CSV and Excel Data Wrangler\n\nPractical workflows for importing, cleaning, transforming, and exporting tabular data. Focuses on correctness, reproducibility, and handling common edge cases (encodings, types, memory).\n\n## Key Operations\n- Robust import/export (CSV/XLSX/Parquet)\n- Type inference and explicit casting\n- Deduplication and null handling\n- Joins/merges and pivots\n- Efficient sampling and basic EDA\n",
+  "features": [
+    "Import/export with explicit schema control",
+    "Deduplicate and null-safe transformations",
+    "Join/merge/pivot with predictable results",
+    "Encoding-aware IO with UTF-8/UTF-8-SIG handling",
+    "Parquet round-trips for performance"
+  ],
+  "useCases": [
+    "Clean messy CRM exports",
+    "Join sales and marketing datasets",
+    "Generate analyst-ready summary tables"
+  ],
+  "requirements": [
+    "Python 3.11+",
+    "pandas",
+    "openpyxl",
+    "pyarrow (optional for Parquet)"
+  ],
+  "examples": [
+    {
+      "title": "Load, dedupe, and export",
+      "language": "python",
+      "code": "import pandas as pd\n\ncustomers = pd.read_csv('customers.csv', dtype=str)\norders = pd.read_excel('orders.xlsx')\n\n# Normalize and dedupe\ncustomers['email'] = customers['email'].str.strip().str.lower()\ncustomers = customers.drop_duplicates(subset=['email'])\n\n# Join and summarize\ndf = orders.merge(customers, on='customer_id', how='left')\nsales_by_region = df.groupby('region', dropna=False)['total'].sum().reset_index()\n\nsales_by_region.to_excel('sales_by_region.xlsx', index=False)"
+    },
+    {
+      "title": "Explicit types and safe parsing",
+      "language": "python",
+      "code": "import pandas as pd\n\ndtypes = {\n  'id': 'Int64',\n  'price': 'float64',\n  'created_at': 'string'\n}\ndf = pd.read_csv('input.csv', dtype=dtypes, encoding='utf-8-sig')\n\n# Coerce dates after load\ndf['created_at'] = pd.to_datetime(df['created_at'], errors='coerce', utc=True)\n\ndf.to_parquet('output.parquet')"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": { "steps": ["Install Python 3.11+", "pip install pandas openpyxl pyarrow"] },
+    "claudeCode": { "steps": ["pip install pandas openpyxl", "Verify versions: pandas >= 2.0"] }
+  },
+  "troubleshooting": [
+    { "issue": "Weird characters or extra header row", "solution": "Use encoding='utf-8-sig' and header=None with manual names when needed." },
+    { "issue": "MemoryError on large files", "solution": "Use chunksize in read_csv or convert to Parquet and process incrementally." }
+  ],
+  "documentationUrl": "https://pandas.pydata.org/",
+  "source": "community"
+}

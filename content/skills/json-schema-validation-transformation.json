@@ -1,0 +1,42 @@
+{
+  "slug": "json-schema-validation-transformation",
+  "title": "JSON Schema Validation and Transformation",
+  "seoTitle": "JSON Schema Validate + Transform Skill",
+  "description": "Validate JSON with Ajv/Zod and perform safe, lossless schema migrations and transformations.",
+  "category": "skills",
+  "author": "claudepro",
+  "dateAdded": "2025-10-15",
+  "tags": ["json", "schema", "validation", "ajv", "zod"],
+  "content": "# JSON Schema Validate + Transform\n\nValidate inputs and migrate documents safely between versions with deterministic transforms.\n\n## Key Operations\n- Ajv/Zod validation\n- Schema diffs\n- Back/forward-compatible transforms\n- Error reporting\n",
+  "features": [
+    "Strict validation with helpful errors",
+    "Schema-aware migration",
+    "Format and ref handling",
+    "CLI-friendly usage"
+  ],
+  "useCases": [
+    "API payload validation",
+    "Config migration",
+    "Data pipeline guards"
+  ],
+  "requirements": [
+    "Node.js 18+",
+    "ajv or zod"
+  ],
+  "examples": [
+    {
+      "title": "Validate with Ajv",
+      "language": "javascript",
+      "code": "import Ajv from 'ajv';\nconst ajv = new Ajv({ allErrors: true, strict: true });\nconst validate = ajv.compile({ type: 'object', properties: { id: { type: 'string' } }, required: ['id'], additionalProperties: false });\nconsole.log(validate({ id: 'abc' })); // true\nconsole.log(validate({})); // false, see validate.errors"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": { "steps": ["Install Node.js 18+", "npm i ajv zod"] },
+    "claudeCode": { "steps": ["npm i ajv", "Enable strict mode for better guarantees"] }
+  },
+  "troubleshooting": [
+    { "issue": "$ref resolution errors", "solution": "Provide absolute refs or use a loader for multi-file schemas." }
+  ],
+  "documentationUrl": "https://ajv.js.org/",
+  "source": "community"
+}

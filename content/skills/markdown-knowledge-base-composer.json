@@ -1,0 +1,43 @@
+{
+  "slug": "markdown-knowledge-base-composer",
+  "title": "Markdown Knowledge Base Composer",
+  "seoTitle": "Markdown Knowledge Base Composer Skill",
+  "description": "Aggregate Markdown folders into a cohesive knowledge base with TOC, cross-links, and export.",
+  "category": "skills",
+  "author": "claudepro",
+  "dateAdded": "2025-10-15",
+  "tags": ["markdown", "docs", "remark", "node"],
+  "content": "# Markdown KB Composer\n\nCreate a cohesive docs pack from scattered Markdown files: normalize headings, generate TOCs, fix links, and export to HTML/PDF.\n\n## Key Operations\n- Folder merge with frontmatter normalization\n- TOC generation per section\n- Link validation and slug normalization\n- HTML/PDF export via headless renderer\n",
+  "features": [
+    "Heading normalization and slug consistency",
+    "TOC generation across directories",
+    "Cross-link rewriting and validation",
+    "Export to static HTML/PDF"
+  ],
+  "useCases": [
+    "Assemble a product handbook",
+    "Publish internal notes",
+    "Create a client-facing knowledge pack"
+  ],
+  "requirements": [
+    "Node.js 18+",
+    "remark / unified",
+    "Playwright (optional for PDF export)"
+  ],
+  "examples": [
+    {
+      "title": "Build TOC and rewrite links (Node)",
+      "language": "javascript",
+      "code": "import { readFileSync, readdirSync } from 'node:fs';\nimport { join } from 'node:path';\nimport { unified } from 'unified';\nimport remarkParse from 'remark-parse';\nimport remarkStringify from 'remark-stringify';\n\nconst dir = './notes';\nconst files = readdirSync(dir).filter(f => f.endsWith('.md'));\n\nfor (const file of files) {\n  const input = readFileSync(join(dir, file), 'utf8');\n  const tree = unified().use(remarkParse).parse(input);\n  // ... transform headings and links ...\n  const out = unified().use(remarkStringify).stringify(tree);\n  // writeFileSync(join('dist', file), out)\n}"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": { "steps": ["Install Node.js 18+", "npm i remark remark-parse remark-stringify"] },
+    "claudeCode": { "steps": ["npm i remark unified", "Optionally install Playwright for PDF export"] }
+  },
+  "troubleshooting": [
+    { "issue": "Broken links after re-organization", "solution": "Regenerate slugs and run a link validator; ensure relative paths are correct." }
+  ],
+  "documentationUrl": "https://github.com/remarkjs/remark",
+  "source": "community"
+}

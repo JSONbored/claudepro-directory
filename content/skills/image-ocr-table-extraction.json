@@ -1,0 +1,44 @@
+{
+  "slug": "image-ocr-table-extraction",
+  "title": "Image OCR and Table Extraction",
+  "seoTitle": "Image OCR + Table Extraction Skill",
+  "description": "Extract text and tabular data from images/scans using Tesseract and OpenCV with preprocessing.",
+  "category": "skills",
+  "author": "claudepro",
+  "dateAdded": "2025-10-15",
+  "tags": ["ocr", "image", "pytesseract", "opencv", "tables"],
+  "content": "# Image OCR + Table Extraction\n\nReliable OCR pipelines require preprocessing: binarization, deskewing, and layout heuristics. This skill shows practical recipes.\n\n## Key Operations\n- Thresholding and denoising\n- Deskew and rotation fix\n- OCR text extraction\n- Simple table detection\n",
+  "features": [
+    "OpenCV preprocessing recipes",
+    "Pytesseract OCR with language packs",
+    "Export tables to CSV/JSON",
+    "Confidence-aware extraction"
+  ],
+  "useCases": [
+    "Digitize receipts and invoices",
+    "Extract tables from scans",
+    "Searchable archives"
+  ],
+  "requirements": [
+    "Python 3.11+",
+    "opencv-python",
+    "pytesseract",
+    "tesseract-ocr binary with language data"
+  ],
+  "examples": [
+    {
+      "title": "OCR with preprocessing (Python)",
+      "language": "python",
+      "code": "import cv2, pytesseract\nimg = cv2.imread('scan.png', cv2.IMREAD_GRAYSCALE)\nimg = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]\ntext = pytesseract.image_to_string(img, lang='eng')\nprint(text[:300])"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": { "steps": ["Install tesseract-ocr", "pip install opencv-python pytesseract"] },
+    "claudeCode": { "steps": ["Verify TESSDATA_PREFIX", "Install language packs as needed"] }
+  },
+  "troubleshooting": [
+    { "issue": "Garbled output on low-contrast scans", "solution": "Apply adaptive thresholding and increase DPI via resampling before OCR." }
+  ],
+  "documentationUrl": "https://tesseract-ocr.github.io/",
+  "source": "community"
+}
