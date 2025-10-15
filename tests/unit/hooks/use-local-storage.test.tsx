@@ -344,7 +344,7 @@ describe('useLocalStorage', () => {
       );
 
       act(() => {
-        const event = new StorageEvent('storage');
+        const event = new StorageEvent('storage', {});
         Object.assign(event, {
           key: 'key-b',
           newValue: JSON.stringify('value-b'),
