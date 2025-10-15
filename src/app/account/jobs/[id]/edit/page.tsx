@@ -70,11 +70,7 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
           salary: job.salary ?? undefined,
           remote: job.remote ?? false,
           type: job.type as 'full-time' | 'part-time' | 'contract' | 'internship' | 'freelance',
-          workplace: (job.workplace ?? undefined) as
-            | 'On site'
-            | 'Remote'
-            | 'Hybrid'
-            | undefined,
+          workplace: (job.workplace ?? undefined) as 'On site' | 'Remote' | 'Hybrid' | undefined,
           experience: (job.experience ?? undefined) as
             | 'Entry'
             | 'Mid'

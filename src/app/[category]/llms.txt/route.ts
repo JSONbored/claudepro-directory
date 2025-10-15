@@ -8,8 +8,8 @@
 
 import type { NextRequest } from 'next/server';
 import { getCategoryConfig, isValidCategory } from '@/src/lib/config/category-config';
-import { APP_CONFIG } from '@/src/lib/constants';
 import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
+import { APP_CONFIG } from '@/src/lib/constants';
 import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { generateCategoryLLMsTxt, type LLMsTxtItem } from '@/src/lib/llms-txt/generator';

@@ -9,8 +9,8 @@
  */
 
 import type { NextRequest } from 'next/server';
-import { APP_CONFIG } from '@/src/lib/constants';
 import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
+import { APP_CONFIG } from '@/src/lib/constants';
 import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 

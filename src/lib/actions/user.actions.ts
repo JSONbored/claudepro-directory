@@ -64,7 +64,7 @@ export const updateProfile = authedAction
     // This handles the impedance mismatch between form inputs (empty string for clearing)
     // and database representation (null for absent values)
     const updateData: Partial<User> = {};
-    
+
     for (const [key, value] of Object.entries(parsedInput)) {
       if (value !== undefined) {
         // Convert empty strings to null for nullable text fields

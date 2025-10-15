@@ -17,8 +17,8 @@ import {
   skills,
   statuslines,
 } from '@/generated/content';
-import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
+import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { generateSiteLLMsTxt } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';

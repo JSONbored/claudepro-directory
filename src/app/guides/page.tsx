@@ -70,7 +70,12 @@ async function getAllGuides(): Promise<UnifiedContentItem[]> {
             description: frontmatter.description || '',
             slug: filename, // Just the filename, not the full path
             category: 'guides' as ContentCategory, // Always 'guides' for parent category
-            subcategory: category as 'tutorials' | 'comparisons' | 'workflows' | 'use-cases' | 'troubleshooting', // Actual subcategory
+            subcategory: category as
+              | 'tutorials'
+              | 'comparisons'
+              | 'workflows'
+              | 'use-cases'
+              | 'troubleshooting', // Actual subcategory
             author: frontmatter.author || 'ClaudePro Directory',
             tags: [
               category.replace('-', ' '),

@@ -8,8 +8,8 @@
 
 import type { NextRequest } from 'next/server';
 import { isValidCategory, VALID_CATEGORIES } from '@/src/lib/config/category-config';
-import { APP_CONFIG } from '@/src/lib/constants';
 import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
+import { APP_CONFIG } from '@/src/lib/constants';
 import {
   getContentByCategory,
   getContentBySlug,

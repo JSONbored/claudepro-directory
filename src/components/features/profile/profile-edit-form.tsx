@@ -59,10 +59,10 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
     startTransition(async () => {
       const result = await updateProfile({
         name: name || undefined,
-        bio: bio || null,
-        work: work || null,
-        website: website || null,
-        social_x_link: socialXLink || null,
+        bio: bio || undefined,
+        work: work || undefined,
+        website: website || undefined,
+        social_x_link: socialXLink || undefined,
         interests,
         public: isPublic,
         follow_email: followEmail,

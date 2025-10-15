@@ -11,8 +11,8 @@
 import { existsSync, readdirSync } from 'fs';
 import type { NextRequest } from 'next/server';
 import { join } from 'path';
-import { APP_CONFIG, CONTENT_PATHS } from '@/src/lib/constants';
 import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
+import { APP_CONFIG, CONTENT_PATHS } from '@/src/lib/constants';
 import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 

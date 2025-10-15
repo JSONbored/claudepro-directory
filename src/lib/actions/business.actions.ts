@@ -26,7 +26,7 @@ import {
 } from '@/src/lib/github/pr-template';
 import { logger } from '@/src/lib/logger';
 import { type Company, companyRepository } from '@/src/lib/repositories/company.repository';
-import { jobRepository } from '@/src/lib/repositories/job.repository';
+import { type JobUpdate, jobRepository } from '@/src/lib/repositories/job.repository';
 import { sponsoredContentRepository } from '@/src/lib/repositories/sponsored-content.repository';
 import { submissionRepository } from '@/src/lib/repositories/submission.repository';
 import { userRepository } from '@/src/lib/repositories/user.repository';
@@ -689,21 +689,11 @@ export const updateJob = rateLimitedAction
 
     const { id, ...updates } = parsedInput;
 
-    // Transform undefined to null for nullable database fields
-    // This handles the impedance mismatch between TypeScript optional (undefined)
-    // and database nullable (null) with exactOptionalPropertyTypes: true
-    const updateData: Partial<JobUpdate> = {};
-    
-    for (const [key, value] of Object.entries(updates)) {
-      if (value !== undefined) {
-        // Nullable fields: convert undefined to null for database
-        if (['location', 'salary', 'workplace', 'experience', 'contact_email', 'company_logo'].includes(key)) {
-          updateData[key as keyof JobUpdate] = value ?? null;
-        } else {
-          updateData[key as keyof JobUpdate] = value as never;
-        }
-      }
-    }
+    // Filter out undefined values for database update
+    // The repository expects Partial<Job> which handles nullable fields properly
+    const updateData = Object.fromEntries(
+      Object.entries(updates).filter(([_, value]) => value !== undefined)
+    ) as Partial<JobUpdate>;
 
     // Update via repository with ownership verification (includes caching)
     const result = await jobRepository.updateByOwner(id, user.id, updateData);
