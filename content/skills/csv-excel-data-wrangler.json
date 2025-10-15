@@ -20,12 +20,7 @@
     "Join sales and marketing datasets",
     "Generate analyst-ready summary tables"
   ],
-  "requirements": [
-    "Python 3.11+",
-    "pandas",
-    "openpyxl",
-    "pyarrow (optional for Parquet)"
-  ],
+  "requirements": ["Python 3.11+", "pandas", "openpyxl", "pyarrow (optional for Parquet)"],
   "examples": [
     {
       "title": "Load, dedupe, and export",
@@ -43,8 +38,14 @@
     "claudeCode": { "steps": ["pip install pandas openpyxl", "Verify versions: pandas >= 2.0"] }
   },
   "troubleshooting": [
-    { "issue": "Weird characters or extra header row", "solution": "Use encoding='utf-8-sig' and header=None with manual names when needed." },
-    { "issue": "MemoryError on large files", "solution": "Use chunksize in read_csv or convert to Parquet and process incrementally." }
+    {
+      "issue": "Weird characters or extra header row",
+      "solution": "Use encoding='utf-8-sig' and header=None with manual names when needed."
+    },
+    {
+      "issue": "MemoryError on large files",
+      "solution": "Use chunksize in read_csv or convert to Parquet and process incrementally."
+    }
   ],
   "documentationUrl": "https://pandas.pydata.org/",
   "source": "community"

@@ -14,15 +14,8 @@
     "Retry with exponential backoff",
     "Typed responses (TS)"
   ],
-  "useCases": [
-    "ETL from third-party APIs",
-    "Backfills and migrations",
-    "Monitoring scripts"
-  ],
-  "requirements": [
-    "Node.js 18+",
-    "undici or axios"
-  ],
+  "useCases": ["ETL from third-party APIs", "Backfills and migrations", "Monitoring scripts"],
+  "requirements": ["Node.js 18+", "undici or axios"],
   "examples": [
     {
       "title": "Fetch all pages with backoff (TS)",
@@ -35,7 +28,10 @@
     "claudeCode": { "steps": ["Set env vars for tokens", "Use .netrc or keychain where possible"] }
   },
   "troubleshooting": [
-    { "issue": "Rate limits", "solution": "Respect Retry-After headers and implement exponential backoff with jitter." }
+    {
+      "issue": "Rate limits",
+      "solution": "Respect Retry-After headers and implement exponential backoff with jitter."
+    }
   ],
   "documentationUrl": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview",
   "source": "community"

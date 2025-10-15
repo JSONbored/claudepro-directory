@@ -14,15 +14,8 @@
     "Headless export",
     "Reproducible configurations"
   ],
-  "useCases": [
-    "Exploratory analysis",
-    "Executive snapshots",
-    "CI artifact generation"
-  ],
-  "requirements": [
-    "Python 3.11+ or Node.js 18+",
-    "matplotlib/seaborn or vega/vega-lite"
-  ],
+  "useCases": ["Exploratory analysis", "Executive snapshots", "CI artifact generation"],
+  "requirements": ["Python 3.11+ or Node.js 18+", "matplotlib/seaborn or vega/vega-lite"],
   "examples": [
     {
       "title": "Bar chart from CSV (Python)",
@@ -32,10 +25,15 @@
   ],
   "installation": {
     "claudeDesktop": { "steps": ["Install Python 3.11+", "pip install pandas matplotlib seaborn"] },
-    "claudeCode": { "steps": ["For Node: npm i vega vega-lite", "Use headless Chrome for SVG->PNG"] }
+    "claudeCode": {
+      "steps": ["For Node: npm i vega vega-lite", "Use headless Chrome for SVG->PNG"]
+    }
   },
   "troubleshooting": [
-    { "issue": "Fonts missing in headless mode", "solution": "Install system fonts or specify a font path for rendering." }
+    {
+      "issue": "Fonts missing in headless mode",
+      "solution": "Install system fonts or specify a font path for rendering."
+    }
   ],
   "documentationUrl": "https://matplotlib.org/",
   "source": "community"

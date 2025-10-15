@@ -56,18 +56,19 @@ function buildLoaderMap(
   contentModule: typeof import('@/generated/content')
 ): Record<string, () => Promise<UnifiedContentItem[]>> {
   const map: Record<string, () => Promise<UnifiedContentItem[]>> = {};
-  
+
   for (const categoryId of getAllCategoryIds()) {
     // Convert categoryId to loader function name: agents → getAgents
     const capitalizedName =
-      categoryId.charAt(0).toUpperCase() + categoryId.slice(1).replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+      categoryId.charAt(0).toUpperCase() +
+      categoryId.slice(1).replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
     const loaderName = `get${capitalizedName}` as keyof typeof contentModule;
-    
+
     if (loaderName in contentModule) {
       map[categoryId] = contentModule[loaderName] as () => Promise<UnifiedContentItem[]>;
     }
   }
-  
+
   return map;
 }
 
@@ -79,19 +80,22 @@ function buildBySlugMap(
   contentModule: typeof import('@/generated/content')
 ): Record<string, (slug: string) => Promise<UnifiedContentItem | undefined>> {
   const map: Record<string, (slug: string) => Promise<UnifiedContentItem | undefined>> = {};
-  
+
   for (const categoryId of getAllCategoryIds()) {
     // Convert to singular: agents → Agent
     const singular = categoryId.replace(/s$/, '').replace(/Servers$/, 'Server');
     const capitalizedSingular =
-      singular.charAt(0).toUpperCase() + singular.slice(1).replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+      singular.charAt(0).toUpperCase() +
+      singular.slice(1).replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
     const loaderName = `get${capitalizedSingular}BySlug` as keyof typeof contentModule;
-    
+
     if (loaderName in contentModule) {
-      map[categoryId] = contentModule[loaderName] as (slug: string) => Promise<UnifiedContentItem | undefined>;
+      map[categoryId] = contentModule[loaderName] as (
+        slug: string
+      ) => Promise<UnifiedContentItem | undefined>;
     }
   }
-  
+
   return map;
 }
 
@@ -103,19 +107,22 @@ function buildFullContentMap(
   contentModule: typeof import('@/generated/content')
 ): Record<string, (slug: string) => Promise<UnifiedContentItem | null>> {
   const map: Record<string, (slug: string) => Promise<UnifiedContentItem | null>> = {};
-  
+
   for (const categoryId of getAllCategoryIds()) {
     // Convert to singular: agents → Agent
     const singular = categoryId.replace(/s$/, '').replace(/Servers$/, 'Server');
     const capitalizedSingular =
-      singular.charAt(0).toUpperCase() + singular.slice(1).replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+      singular.charAt(0).toUpperCase() +
+      singular.slice(1).replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
     const loaderName = `get${capitalizedSingular}FullContent` as keyof typeof contentModule;
-    
+
     if (loaderName in contentModule) {
-      map[categoryId] = contentModule[loaderName] as (slug: string) => Promise<UnifiedContentItem | null>;
+      map[categoryId] = contentModule[loaderName] as (
+        slug: string
+      ) => Promise<UnifiedContentItem | null>;
     }
   }
-  
+
   return map;
 }
 

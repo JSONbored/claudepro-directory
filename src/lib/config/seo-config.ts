@@ -19,16 +19,15 @@
  */
 
 import { z } from 'zod';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
-
 /**
  * Suffix lengths for each category
  * Format: " - {Category} - Claude Pro Directory"
- * 
+ *
  * Dynamically calculated from unified category registry where possible.
  * Non-registry categories (guides subcategories, jobs, changelog) remain hardcoded.
  */
 import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 
 const SITE_NAME = 'Claude Pro Directory'; // 20 chars
 const SEPARATOR = ' - '; // 3 chars

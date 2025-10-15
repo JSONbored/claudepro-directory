@@ -33,11 +33,16 @@
     }
   ],
   "installation": {
-    "claudeDesktop": { "steps": ["Install tesseract-ocr", "pip install opencv-python pytesseract"] },
+    "claudeDesktop": {
+      "steps": ["Install tesseract-ocr", "pip install opencv-python pytesseract"]
+    },
     "claudeCode": { "steps": ["Verify TESSDATA_PREFIX", "Install language packs as needed"] }
   },
   "troubleshooting": [
-    { "issue": "Garbled output on low-contrast scans", "solution": "Apply adaptive thresholding and increase DPI via resampling before OCR." }
+    {
+      "issue": "Garbled output on low-contrast scans",
+      "solution": "Apply adaptive thresholding and increase DPI via resampling before OCR."
+    }
   ],
   "documentationUrl": "https://tesseract-ocr.github.io/",
   "source": "community"

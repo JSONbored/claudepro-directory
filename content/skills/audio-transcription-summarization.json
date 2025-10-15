@@ -37,12 +37,20 @@
     }
   ],
   "installation": {
-    "claudeDesktop": { "steps": ["Install ffmpeg", "Install whisper via pip or build whisper.cpp"] },
+    "claudeDesktop": {
+      "steps": ["Install ffmpeg", "Install whisper via pip or build whisper.cpp"]
+    },
     "claudeCode": { "steps": ["pip install openai-whisper", "Verify ffmpeg is in PATH"] }
   },
   "troubleshooting": [
-    { "issue": "ffmpeg not found", "solution": "Install ffmpeg via your package manager and ensure it is on PATH." },
-    { "issue": "High WER for noisy audio", "solution": "Downmix to mono, apply noise reduction, and use a larger model." }
+    {
+      "issue": "ffmpeg not found",
+      "solution": "Install ffmpeg via your package manager and ensure it is on PATH."
+    },
+    {
+      "issue": "High WER for noisy audio",
+      "solution": "Downmix to mono, apply noise reduction, and use a larger model."
+    }
   ],
   "documentationUrl": "https://github.com/openai/whisper",
   "source": "community"

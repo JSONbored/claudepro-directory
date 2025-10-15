@@ -16,9 +16,9 @@
  * @module lib/analytics/event-mapper
  */
 
-import { getAllCategoryIds } from '@/src/lib/config/category-config';
 import type { EventName } from '@/src/lib/analytics/events.config';
 import { EVENTS } from '@/src/lib/analytics/events.config';
+import { getAllCategoryIds } from '@/src/lib/config/category-config';
 import type { ContentCategory as SharedContentCategory } from '@/src/lib/schemas/shared.schema';
 
 /**
@@ -54,7 +54,7 @@ function categoryToEventSuffix(categoryId: string): string {
   // Special cases
   if (categoryId === 'statuslines') return 'STATUSLINE';
   if (categoryId === 'mcp') return 'MCP';
-  
+
   // Remove trailing 's' for singular form
   const singular = categoryId.replace(/s$/, '');
   return singular.toUpperCase();
@@ -66,61 +66,62 @@ function categoryToEventSuffix(categoryId: string): string {
  */
 function buildEventMappings(): Record<EventAction, Record<string, EventName>> {
   const categories = getAllCategoryIds();
-  
+
   const contentViewMap: Record<string, EventName> = {};
   const searchMap: Record<string, EventName> = { global: EVENTS.SEARCH_GLOBAL };
   const copyCodeMap: Record<string, EventName> = {};
   const copyMarkdownMap: Record<string, EventName> = {};
   const downloadMarkdownMap: Record<string, EventName> = {};
-  
+
   for (const categoryId of categories) {
     const suffix = categoryToEventSuffix(categoryId);
-    
+
     // Build event constant names following convention
     const contentViewKey = `CONTENT_VIEW_${suffix}` as keyof typeof EVENTS;
     const searchKey = `SEARCH_${categoryId.toUpperCase()}` as keyof typeof EVENTS;
     const copyCodeKey = `COPY_CODE_${suffix}` as keyof typeof EVENTS;
     const copyMarkdownKey = `COPY_MARKDOWN_${suffix}` as keyof typeof EVENTS;
     const downloadMarkdownKey = `DOWNLOAD_MARKDOWN_${suffix}` as keyof typeof EVENTS;
-    
+
     // Map to actual event constants if they exist
     if (contentViewKey in EVENTS) {
       contentViewMap[categoryId] = EVENTS[contentViewKey] as EventName;
       contentViewMap['mcp-servers'] = EVENTS[contentViewKey] as EventName; // Alias
     }
-    
+
     if (searchKey in EVENTS) {
       searchMap[categoryId] = EVENTS[searchKey] as EventName;
       searchMap['mcp-servers'] = EVENTS[searchKey] as EventName; // Alias
     }
-    
+
     if (copyCodeKey in EVENTS) {
       copyCodeMap[categoryId] = EVENTS[copyCodeKey] as EventName;
       copyCodeMap['mcp-servers'] = EVENTS[copyCodeKey] as EventName; // Alias
     }
-    
+
     if (copyMarkdownKey in EVENTS) {
       copyMarkdownMap[categoryId] = EVENTS[copyMarkdownKey] as EventName;
       copyMarkdownMap['mcp-servers'] = EVENTS[copyMarkdownKey] as EventName; // Alias
     }
-    
+
     if (downloadMarkdownKey in EVENTS) {
       downloadMarkdownMap[categoryId] = EVENTS[downloadMarkdownKey] as EventName;
       downloadMarkdownMap['mcp-servers'] = EVENTS[downloadMarkdownKey] as EventName; // Alias
     }
   }
-  
+
   // Add guides event (not in main registry)
   searchMap.guides = EVENTS.SEARCH_GUIDES;
   copyCodeMap.guides = EVENTS.COPY_CODE_GUIDE;
-  
+
   // Skills fallbacks (reuse similar events)
   if (!('skills' in contentViewMap)) contentViewMap.skills = EVENTS.CONTENT_VIEW_RULE;
   if (!('skills' in searchMap)) searchMap.skills = EVENTS.SEARCH_RULES;
   if (!('skills' in copyCodeMap)) copyCodeMap.skills = EVENTS.COPY_CODE_GUIDE;
   if (!('skills' in copyMarkdownMap)) copyMarkdownMap.skills = EVENTS.COPY_MARKDOWN_OTHER;
-  if (!('skills' in downloadMarkdownMap)) downloadMarkdownMap.skills = EVENTS.DOWNLOAD_MARKDOWN_OTHER;
-  
+  if (!('skills' in downloadMarkdownMap))
+    downloadMarkdownMap.skills = EVENTS.DOWNLOAD_MARKDOWN_OTHER;
+
   return {
     content_view: contentViewMap,
     search: searchMap,

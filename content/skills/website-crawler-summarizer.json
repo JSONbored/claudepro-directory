@@ -14,11 +14,7 @@
     "Language detection",
     "JSON/MD export"
   ],
-  "useCases": [
-    "Competitive intel packs",
-    "Documentation mirrors",
-    "Research briefs"
-  ],
+  "useCases": ["Competitive intel packs", "Documentation mirrors", "Research briefs"],
   "requirements": [
     "Node.js 18+ or Python 3.11+",
     "Playwright (optional)",
@@ -32,11 +28,16 @@
     }
   ],
   "installation": {
-    "claudeDesktop": { "steps": ["Install Node.js 18+", "npm i jsdom @mozilla/readability node-fetch"] },
+    "claudeDesktop": {
+      "steps": ["Install Node.js 18+", "npm i jsdom @mozilla/readability node-fetch"]
+    },
     "claudeCode": { "steps": ["Configure rate-limit and user-agent", "Respect robots.txt"] }
   },
   "troubleshooting": [
-    { "issue": "Blocked by anti-bot", "solution": "Reduce concurrency, add polite delays, and avoid sensitive endpoints." }
+    {
+      "issue": "Blocked by anti-bot",
+      "solution": "Reduce concurrency, add polite delays, and avoid sensitive endpoints."
+    }
   ],
   "documentationUrl": "https://github.com/mozilla/readability",
   "source": "community"

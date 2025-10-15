@@ -55,8 +55,8 @@ import {
   skills,
   statuslines,
 } from '@/generated/content';
-import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 import { logger } from '@/src/lib/logger';
+import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 
 /**
  * Configuration

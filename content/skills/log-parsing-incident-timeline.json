@@ -14,16 +14,8 @@
     "Timeline generation",
     "PII/secret redaction"
   ],
-  "useCases": [
-    "Post-incident analysis",
-    "Live debugging",
-    "Compliance reporting"
-  ],
-  "requirements": [
-    "ripgrep (rg)",
-    "jq (optional)",
-    "bash or Python 3.11+"
-  ],
+  "useCases": ["Post-incident analysis", "Live debugging", "Compliance reporting"],
+  "requirements": ["ripgrep (rg)", "jq (optional)", "bash or Python 3.11+"],
   "examples": [
     {
       "title": "Extract errors and build a simple timeline",
@@ -32,11 +24,14 @@
     }
   ],
   "installation": {
-    "claudeDesktop": { "steps": ["Install ripgrep and jq" ] },
+    "claudeDesktop": { "steps": ["Install ripgrep and jq"] },
     "claudeCode": { "steps": ["Ensure logs are locally accessible", "Use rg for fast searches"] }
   },
   "troubleshooting": [
-    { "issue": "No matches due to log format differences", "solution": "Adjust patterns for your log format; test with small samples first." }
+    {
+      "issue": "No matches due to log format differences",
+      "solution": "Adjust patterns for your log format; test with small samples first."
+    }
   ],
   "documentationUrl": "https://github.com/BurntSushi/ripgrep",
   "source": "community"

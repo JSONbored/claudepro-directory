@@ -924,21 +924,18 @@ export const BADGE_COLORS = {
     // Note: Using require() for module-level initialization (import would be hoisted)
     // Type is safe because UNIFIED_CATEGORY_REGISTRY has strict typing
     const { UNIFIED_CATEGORY_REGISTRY } = require('@/src/lib/config/category-config') as {
-      UNIFIED_CATEGORY_REGISTRY: Record<
-        string,
-        { colorScheme: string; [key: string]: unknown }
-      >;
+      UNIFIED_CATEGORY_REGISTRY: Record<string, { colorScheme: string; [key: string]: unknown }>;
     };
     const colors: Record<string, string> = {
       default: 'bg-primary/20 text-primary border-primary/30',
     };
-    
+
     // Auto-generate badge colors from registry colorScheme
     for (const [key, config] of Object.entries(UNIFIED_CATEGORY_REGISTRY)) {
       const color = config.colorScheme.replace('-500', ''); // Extract base color
       colors[key] = `bg-${color}-500/20 text-${color}-500 border-${color}-500/30`;
     }
-    
+
     return colors;
   })(),
 

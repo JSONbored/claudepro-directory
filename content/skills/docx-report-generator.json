@@ -14,16 +14,8 @@
     "Page layout control",
     "Optional PDF export pipeline"
   ],
-  "useCases": [
-    "Invoices and statements",
-    "Client reports",
-    "Batch document generation"
-  ],
-  "requirements": [
-    "Python 3.11+",
-    "docxtpl",
-    "docx2pdf or libreoffice for PDF"
-  ],
+  "useCases": ["Invoices and statements", "Client reports", "Batch document generation"],
+  "requirements": ["Python 3.11+", "docxtpl", "docx2pdf or libreoffice for PDF"],
   "examples": [
     {
       "title": "Render a template (Python)",
@@ -36,7 +28,10 @@
     "claudeCode": { "steps": ["Install docxtpl", "Use libreoffice for reliable PDF export"] }
   },
   "troubleshooting": [
-    { "issue": "Fonts or rendering differ across OS", "solution": "Embed fonts or use a containerized conversion with consistent fonts." }
+    {
+      "issue": "Fonts or rendering differ across OS",
+      "solution": "Embed fonts or use a containerized conversion with consistent fonts."
+    }
   ],
   "documentationUrl": "https://docxtpl.readthedocs.io/",
   "source": "community"

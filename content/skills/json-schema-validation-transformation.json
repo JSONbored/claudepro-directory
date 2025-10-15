@@ -14,15 +14,8 @@
     "Format and ref handling",
     "CLI-friendly usage"
   ],
-  "useCases": [
-    "API payload validation",
-    "Config migration",
-    "Data pipeline guards"
-  ],
-  "requirements": [
-    "Node.js 18+",
-    "ajv or zod"
-  ],
+  "useCases": ["API payload validation", "Config migration", "Data pipeline guards"],
+  "requirements": ["Node.js 18+", "ajv or zod"],
   "examples": [
     {
       "title": "Validate with Ajv",
@@ -35,7 +28,10 @@
     "claudeCode": { "steps": ["npm i ajv", "Enable strict mode for better guarantees"] }
   },
   "troubleshooting": [
-    { "issue": "$ref resolution errors", "solution": "Provide absolute refs or use a loader for multi-file schemas." }
+    {
+      "issue": "$ref resolution errors",
+      "solution": "Provide absolute refs or use a loader for multi-file schemas."
+    }
   ],
   "documentationUrl": "https://ajv.js.org/",
   "source": "community"

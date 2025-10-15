@@ -19,11 +19,7 @@
     "Publish internal notes",
     "Create a client-facing knowledge pack"
   ],
-  "requirements": [
-    "Node.js 18+",
-    "remark / unified",
-    "Playwright (optional for PDF export)"
-  ],
+  "requirements": ["Node.js 18+", "remark / unified", "Playwright (optional for PDF export)"],
   "examples": [
     {
       "title": "Build TOC and rewrite links (Node)",
@@ -32,11 +28,18 @@
     }
   ],
   "installation": {
-    "claudeDesktop": { "steps": ["Install Node.js 18+", "npm i remark remark-parse remark-stringify"] },
-    "claudeCode": { "steps": ["npm i remark unified", "Optionally install Playwright for PDF export"] }
+    "claudeDesktop": {
+      "steps": ["Install Node.js 18+", "npm i remark remark-parse remark-stringify"]
+    },
+    "claudeCode": {
+      "steps": ["npm i remark unified", "Optionally install Playwright for PDF export"]
+    }
   },
   "troubleshooting": [
-    { "issue": "Broken links after re-organization", "solution": "Regenerate slugs and run a link validator; ensure relative paths are correct." }
+    {
+      "issue": "Broken links after re-organization",
+      "solution": "Regenerate slugs and run a link validator; ensure relative paths are correct."
+    }
   ],
   "documentationUrl": "https://github.com/remarkjs/remark",
   "source": "community"
