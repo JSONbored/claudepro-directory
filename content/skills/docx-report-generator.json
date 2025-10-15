@@ -1,0 +1,43 @@
+{
+  "slug": "docx-report-generator",
+  "title": "DOCX Report Generator",
+  "seoTitle": "DOCX Report Generator Skill",
+  "description": "Fill templated DOCX with data to produce reports/invoices, with images and PDF export.",
+  "category": "skills",
+  "author": "claudepro",
+  "dateAdded": "2025-10-15",
+  "tags": ["docx", "reports", "templating", "python"],
+  "content": "# DOCX Report Generator\n\nData-driven document generation with templated DOCX, including images and page control.\n\n## Key Operations\n- Placeholder-based templating\n- Image embedding\n- Page breaks and styles\n- Optional PDF export\n",
+  "features": [
+    "Template placeholders and loops",
+    "Image and table insertion",
+    "Page layout control",
+    "Optional PDF export pipeline"
+  ],
+  "useCases": [
+    "Invoices and statements",
+    "Client reports",
+    "Batch document generation"
+  ],
+  "requirements": [
+    "Python 3.11+",
+    "docxtpl",
+    "docx2pdf or libreoffice for PDF"
+  ],
+  "examples": [
+    {
+      "title": "Render a template (Python)",
+      "language": "python",
+      "code": "from docxtpl import DocxTemplate\n\ndoc = DocxTemplate('template.docx')\ncontext = { 'client': 'Acme', 'items': [{'name': 'Widget', 'price': 9.99}] }\ndoc.render(context)\ndoc.save('invoice.docx')"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": { "steps": ["Install Python 3.11+", "pip install docxtpl"] },
+    "claudeCode": { "steps": ["Install docxtpl", "Use libreoffice for reliable PDF export"] }
+  },
+  "troubleshooting": [
+    { "issue": "Fonts or rendering differ across OS", "solution": "Embed fonts or use a containerized conversion with consistent fonts." }
+  ],
+  "documentationUrl": "https://docxtpl.readthedocs.io/",
+  "source": "community"
+}

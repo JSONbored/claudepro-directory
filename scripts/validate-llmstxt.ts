@@ -91,7 +91,7 @@ async function generateTestRoutes(): Promise<TestRoute[]> {
   ];
 
   // Category routes
-  const categories = ['agents', 'mcp', 'hooks', 'commands', 'rules', 'statuslines'];
+  const categories = ['agents', 'mcp', 'hooks', 'commands', 'rules', 'statuslines', 'skills'];
   for (const category of categories) {
     routes.push({
       path: `/${category}/llms.txt`,

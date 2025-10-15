@@ -186,7 +186,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
       description={config.description}
       icon={config.icon.displayName?.toLowerCase() || 'sparkles'}
       items={items}
-      type={category as 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides'}
+      type={category as 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides' | 'skills'}
       searchPlaceholder={config.listPage.searchPlaceholder}
       badges={badges}
     />

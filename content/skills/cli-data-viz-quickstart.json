@@ -1,0 +1,42 @@
+{
+  "slug": "cli-data-viz-quickstart",
+  "title": "CLI Data Viz Quickstart",
+  "seoTitle": "CLI Data Visualization Quickstart Skill",
+  "description": "Turn CSV/JSON into quick charts from the command line; export PNG/SVG for reports.",
+  "category": "skills",
+  "author": "claudepro",
+  "dateAdded": "2025-10-15",
+  "tags": ["visualization", "charts", "python", "vega"],
+  "content": "# CLI Data Visualization Quickstart\n\nGenerate charts from local data in minutes, suitable for quick analyses and reports.\n\n## Key Operations\n- CSV/JSON ingestion\n- Chart templates\n- Headless rendering\n- PNG/SVG export\n",
+  "features": [
+    "CLI-first workflows",
+    "Common chart templates (bar/line/scatter)",
+    "Headless export",
+    "Reproducible configurations"
+  ],
+  "useCases": [
+    "Exploratory analysis",
+    "Executive snapshots",
+    "CI artifact generation"
+  ],
+  "requirements": [
+    "Python 3.11+ or Node.js 18+",
+    "matplotlib/seaborn or vega/vega-lite"
+  ],
+  "examples": [
+    {
+      "title": "Bar chart from CSV (Python)",
+      "language": "python",
+      "code": "import pandas as pd\nimport matplotlib.pyplot as plt\n\ndf = pd.read_csv('data.csv')\ndf.groupby('category')['value'].sum().plot(kind='bar')\nplt.tight_layout(); plt.savefig('chart.png', dpi=200)"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": { "steps": ["Install Python 3.11+", "pip install pandas matplotlib seaborn"] },
+    "claudeCode": { "steps": ["For Node: npm i vega vega-lite", "Use headless Chrome for SVG->PNG"] }
+  },
+  "troubleshooting": [
+    { "issue": "Fonts missing in headless mode", "solution": "Install system fonts or specify a font path for rendering." }
+  ],
+  "documentationUrl": "https://matplotlib.org/",
+  "source": "community"
+}

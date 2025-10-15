@@ -13,7 +13,16 @@
  * @module lib/services/digest.service
  */
 
-import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
+import {
+  agents,
+  collections,
+  commands,
+  hooks,
+  mcp,
+  rules,
+  skills,
+  statuslines,
+} from '@/generated/content';
 import type { DigestContentItem, DigestTrendingItem } from '@/src/emails/templates/weekly-digest';
 import { contentCache, statsRedis } from '@/src/lib/cache';
 import { APP_CONFIG } from '@/src/lib/constants';
@@ -73,6 +82,18 @@ class DigestService {
         hooks,
         statuslines,
         collections,
+        skills,
+      });
+
+      const { skills: skillsData } = await batchLoadContent({
+        agents,
+        mcp,
+        rules,
+        commands,
+        hooks,
+        statuslines,
+        collections,
+        skills,
       });
 
       const allContent = [
@@ -103,6 +124,10 @@ class DigestService {
         ...(collectionsData as ContentItem[]).map((item) => ({
           ...item,
           category: 'collections' as const,
+        })),
+        ...(skillsData as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'skills' as const,
         })),
       ];
 
@@ -164,6 +189,18 @@ class DigestService {
         hooks,
         statuslines,
         collections,
+        skills,
+      });
+
+      const { skills: skillsData2 } = await batchLoadContent({
+        agents,
+        mcp,
+        rules,
+        commands,
+        hooks,
+        statuslines,
+        collections,
+        skills,
       });
 
       const allContent = [
@@ -194,6 +231,10 @@ class DigestService {
         ...(collectionsData as ContentItem[]).map((item) => ({
           ...item,
           category: 'collections' as const,
+        })),
+        ...(skillsData2 as ContentItem[]).map((item) => ({
+          ...item,
+          category: 'skills' as const,
         })),
       ];
 

@@ -86,6 +86,7 @@ export const ROUTES = {
   STATUSLINES: '/statuslines',
   GUIDES: '/guides',
   COLLECTIONS: '/collections',
+  SKILLS: '/skills',
   JOBS: '/jobs',
 
   // Tools
@@ -121,6 +122,7 @@ const apiConfigSchema = z.object({
     rules: z.string().startsWith('/api/'),
     commands: z.string().startsWith('/api/'),
     hooks: z.string().startsWith('/api/'),
+    skills: z.string().startsWith('/api/'),
     allConfigurations: z.string().startsWith('/api/'),
   }),
 });
@@ -133,6 +135,7 @@ export const API_CONFIG = apiConfigSchema.parse({
     rules: '/api/rules.json',
     commands: '/api/commands.json',
     hooks: '/api/hooks.json',
+    skills: '/api/skills.json',
     allConfigurations: '/api/all-configurations.json',
   },
 });
@@ -175,6 +178,7 @@ export const CONTENT_CATEGORIES = {
   commands: 'commands',
   hooks: 'hooks',
   statuslines: 'statuslines',
+  skills: 'skills',
   // SEO content types (in /seo directory)
   guides: 'guides',
   tutorials: 'tutorials',
@@ -202,6 +206,7 @@ export const MAIN_CONTENT_CATEGORIES = [
   'agents',
   'statuslines',
   'collections',
+  'skills',
 ] as const;
 
 // CONSOLIDATION: Export SEO categories for better organization

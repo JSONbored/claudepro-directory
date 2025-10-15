@@ -1,0 +1,43 @@
+{
+  "slug": "log-parsing-incident-timeline",
+  "title": "Log Parsing and Incident Timeline",
+  "seoTitle": "Log Parsing + Incident Timeline Skill",
+  "description": "Parse web/app/system logs into structured incidents and timelines with anomaly hints.",
+  "category": "skills",
+  "author": "claudepro",
+  "dateAdded": "2025-10-15",
+  "tags": ["logs", "observability", "ripgrep", "bash"],
+  "content": "# Log Parsing + Incident Timeline\n\nTransform raw logs into incident-focused narratives. Extract key events, group by session/request, and surface anomalies.\n\n## Key Operations\n- Pattern extraction and normalization\n- Time bucketing and correlation\n- Outlier and error surfacing\n- Secret redaction\n",
+  "features": [
+    "ripgrep-based fast filtering",
+    "Session/request correlation",
+    "Timeline generation",
+    "PII/secret redaction"
+  ],
+  "useCases": [
+    "Post-incident analysis",
+    "Live debugging",
+    "Compliance reporting"
+  ],
+  "requirements": [
+    "ripgrep (rg)",
+    "jq (optional)",
+    "bash or Python 3.11+"
+  ],
+  "examples": [
+    {
+      "title": "Extract errors and build a simple timeline",
+      "language": "bash",
+      "code": "# Filter 5xx from nginx and sort by time\nrg -n ' 5\\d\\d ' access.log | awk '{print $4, $5, $9, $7}' | sort > timeline.txt\nhead -n 5 timeline.txt"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": { "steps": ["Install ripgrep and jq" ] },
+    "claudeCode": { "steps": ["Ensure logs are locally accessible", "Use rg for fast searches"] }
+  },
+  "troubleshooting": [
+    { "issue": "No matches due to log format differences", "solution": "Adjust patterns for your log format; test with small samples first." }
+  ],
+  "documentationUrl": "https://github.com/BurntSushi/ripgrep",
+  "source": "community"
+}

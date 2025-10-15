@@ -1,4 +1,40 @@
 # Changelog
+## 2025-10-14 - Skills Category Integration (PDF/DOCX/PPTX/XLSX)
+
+### What Changed
+- Added new main category: `Skills` — task-focused capability guides for Claude (document/data workflows).
+
+### Added
+- Full schema + build integration:
+  - New Zod schema `skill.schema.ts` with content-first fields (requirements, examples, installation, troubleshooting).
+  - Integrated into build pipeline, static API generation, content loaders, and unions.
+- SEO and Structured Data:
+  - Metadata registry, derivation rules, and JSON-LD (HowTo/CreativeWork/SourceCode when examples exist).
+  - LLMs.txt inclusion for category and item routes.
+- Routing and UI:
+  - Category configs and content-type configs (sections: Guide, Installation, Examples, Troubleshooting).
+  - Navigation link with “New” indicator (moved from Statuslines/Collections to Skills).
+- APIs and Search:
+  - `/api/skills.json` and search index generation.
+  - Sitemap/URL generator now includes skills.
+- Validation and CI:
+  - Content validator updated for `skills`.
+  - Security validators/regex and content-validation workflow updated.
+  - LLMs.txt validator includes skills routes.
+- Announcements:
+  - New announcement promoting Skills launch.
+
+### Changed
+- Removed “New” badge from Statuslines and Collections; applied to Skills.
+
+### Technical Details
+- Configuration-driven updates to minimize LOC and reuse existing systems:
+  - Build: `BUILD_CATEGORY_CONFIGS` extended; no new build logic.
+  - SEO: `schema-metadata-adapter`, metadata registry, and structured data rules extended.
+  - Sitemap: added `skillsMetadata` to sitemap generator and URL builder.
+  - Security/Validation: enums/regex extended to accept `skills` across validators and CI.
+  - Analytics: category mapping extended (reusing rule/guide buckets for Skills).
+
 
 All notable changes to Claude Pro Directory will be documented in this file.
 

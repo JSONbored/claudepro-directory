@@ -1,27 +1,31 @@
 /**
- * Dynamic Content Loading Utilities
+ * Dynamic Content Loading Utilities - Configuration-Driven
  *
- * Provides unified content loading functions that work across all categories.
- * Replaces individual category-specific loaders with dynamic routing-based loaders.
+ * Modern 2025 architecture: All loader maps auto-generated from unified category registry.
+ * Zero hardcoded category lists - adding a new category requires zero changes here.
  *
  * Features:
- * - Category-agnostic loading (works for agents, mcp, commands, rules, hooks, statuslines)
+ * - Category-agnostic loading (works for all categories in registry)
  * - Lazy loading for performance optimization
  * - Redis caching for optimal performance (4-hour TTL)
  * - Type-safe with proper error handling
  * - Supports both metadata and full content loading
+ * - Auto-generates loader maps from UNIFIED_CATEGORY_REGISTRY
  *
  * Performance:
  * - Cache hit: ~5ms (Redis)
- * - Cache miss: ~50-100ms (file system + JSON parse)
+ * - Cache miss: ~50-100ms (file I/O + JSON parse)
  * - Cache hit rate: Target >85% in production
  *
  * Used by:
  * - app/[category]/page.tsx (list pages)
  * - app/[category]/[slug]/page.tsx (detail pages)
+ *
+ * @see lib/config/category-config.ts - Single source of truth for categories
  */
 
 import { contentCache } from '@/src/lib/cache';
+import { getAllCategoryIds } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 
@@ -34,6 +38,86 @@ const CACHE_TTL = {
   CATEGORY: 14400, // 4 hours
   ITEM: 7200, // 2 hours
 } as const;
+
+/**
+ * ============================================
+ * DYNAMIC LOADER MAP GENERATION
+ * ============================================
+ *
+ * Builds loader maps from unified category registry.
+ * No hardcoded category lists - automatically stays in sync.
+ */
+
+/**
+ * Build loader map for getContentByCategory
+ * Dynamically generates from registry - zero manual maintenance
+ */
+function buildLoaderMap(
+  contentModule: typeof import('@/generated/content')
+): Record<string, () => Promise<UnifiedContentItem[]>> {
+  const map: Record<string, () => Promise<UnifiedContentItem[]>> = {};
+  
+  for (const categoryId of getAllCategoryIds()) {
+    // Convert categoryId to loader function name: agents → getAgents
+    const capitalizedName =
+      categoryId.charAt(0).toUpperCase() + categoryId.slice(1).replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+    const loaderName = `get${capitalizedName}` as keyof typeof contentModule;
+    
+    if (loaderName in contentModule) {
+      map[categoryId] = contentModule[loaderName] as () => Promise<UnifiedContentItem[]>;
+    }
+  }
+  
+  return map;
+}
+
+/**
+ * Build by-slug loader map
+ * Dynamically generates from registry - zero manual maintenance
+ */
+function buildBySlugMap(
+  contentModule: typeof import('@/generated/content')
+): Record<string, (slug: string) => Promise<UnifiedContentItem | undefined>> {
+  const map: Record<string, (slug: string) => Promise<UnifiedContentItem | undefined>> = {};
+  
+  for (const categoryId of getAllCategoryIds()) {
+    // Convert to singular: agents → Agent
+    const singular = categoryId.replace(/s$/, '').replace(/Servers$/, 'Server');
+    const capitalizedSingular =
+      singular.charAt(0).toUpperCase() + singular.slice(1).replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+    const loaderName = `get${capitalizedSingular}BySlug` as keyof typeof contentModule;
+    
+    if (loaderName in contentModule) {
+      map[categoryId] = contentModule[loaderName] as (slug: string) => Promise<UnifiedContentItem | undefined>;
+    }
+  }
+  
+  return map;
+}
+
+/**
+ * Build full content loader map
+ * Dynamically generates from registry - zero manual maintenance
+ */
+function buildFullContentMap(
+  contentModule: typeof import('@/generated/content')
+): Record<string, (slug: string) => Promise<UnifiedContentItem | null>> {
+  const map: Record<string, (slug: string) => Promise<UnifiedContentItem | null>> = {};
+  
+  for (const categoryId of getAllCategoryIds()) {
+    // Convert to singular: agents → Agent
+    const singular = categoryId.replace(/s$/, '').replace(/Servers$/, 'Server');
+    const capitalizedSingular =
+      singular.charAt(0).toUpperCase() + singular.slice(1).replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+    const loaderName = `get${capitalizedSingular}FullContent` as keyof typeof contentModule;
+    
+    if (loaderName in contentModule) {
+      map[categoryId] = contentModule[loaderName] as (slug: string) => Promise<UnifiedContentItem | null>;
+    }
+  }
+  
+  return map;
+}
 
 /**
  * Dynamically load content by category name with Redis caching
@@ -63,16 +147,8 @@ export async function getContentByCategory(category: string): Promise<UnifiedCon
     // Cache miss - load from generated files
     const contentModule = await import('@/generated/content');
 
-    // Map category to loader function
-    const loaderMap: Record<string, () => Promise<UnifiedContentItem[]>> = {
-      agents: contentModule.getAgents,
-      mcp: contentModule.getMcp,
-      commands: contentModule.getCommands,
-      rules: contentModule.getRules,
-      hooks: contentModule.getHooks,
-      statuslines: contentModule.getStatuslines,
-      collections: contentModule.getCollections,
-    };
+    // Dynamically build loader map from registry (zero hardcoded categories)
+    const loaderMap = buildLoaderMap(contentModule);
 
     const loader = loaderMap[category];
     if (!loader) {
@@ -142,16 +218,8 @@ export async function getContentBySlug(
     // Cache miss - load from generated files
     const contentModule = await import('@/generated/content');
 
-    // Map category to slug loader function
-    const bySlugMap: Record<string, (slug: string) => Promise<UnifiedContentItem | undefined>> = {
-      agents: contentModule.getAgentBySlug,
-      mcp: contentModule.getMcpBySlug,
-      commands: contentModule.getCommandBySlug,
-      rules: contentModule.getRuleBySlug,
-      hooks: contentModule.getHookBySlug,
-      statuslines: contentModule.getStatuslineBySlug,
-      collections: contentModule.getCollectionBySlug,
-    };
+    // Dynamically build by-slug loader map from registry (zero hardcoded categories)
+    const bySlugMap = buildBySlugMap(contentModule);
 
     const loader = bySlugMap[category];
     if (!loader) {
@@ -203,19 +271,8 @@ export async function getFullContentBySlug(
   try {
     const contentModule = await import('@/generated/content');
 
-    // Map category to full content loader
-    // Each category returns its specific type (AgentContent, MCPContent, etc.)
-    // which are all compatible with UnifiedContentItem
-    // Each loader can return null if the item is not found
-    const fullContentMap: Record<string, (slug: string) => Promise<UnifiedContentItem | null>> = {
-      agents: contentModule.getAgentFullContent,
-      mcp: contentModule.getMcpFullContent,
-      commands: contentModule.getCommandFullContent,
-      rules: contentModule.getRuleFullContent,
-      hooks: contentModule.getHookFullContent,
-      statuslines: contentModule.getStatuslineFullContent,
-      collections: contentModule.getCollectionFullContent,
-    };
+    // Dynamically build full content loader map from registry (zero hardcoded categories)
+    const fullContentMap = buildFullContentMap(contentModule);
 
     const loader = fullContentMap[category];
     if (!loader) return null;
@@ -252,11 +309,13 @@ export async function getRelatedContent(
 /**
  * Get total count of all configurations across all categories
  * Used for dynamic SEO metadata (e.g., "147+ configs")
+ * Now dynamically derives category list from registry
  *
  * @returns Total count of all content items
  */
 export async function getTotalContentCount(): Promise<number> {
-  const categories = ['agents', 'mcp', 'commands', 'rules', 'hooks', 'statuslines'];
+  // Dynamically get all categories from registry (zero hardcoded lists)
+  const categories = getAllCategoryIds();
 
   try {
     const counts = await Promise.all(

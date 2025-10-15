@@ -23,6 +23,7 @@ import { commandsMetadata } from '@/generated/commands-metadata';
 import { hooksMetadata } from '@/generated/hooks-metadata';
 import { mcpMetadata } from '@/generated/mcp-metadata';
 import { rulesMetadata } from '@/generated/rules-metadata';
+import { skillsMetadata } from '@/generated/skills-metadata';
 import { statuslinesMetadata } from '@/generated/statuslines-metadata';
 import { generateAllSiteUrls } from '@/src/lib/build/url-generator';
 import { APP_CONFIG } from '@/src/lib/constants';
@@ -50,6 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       mcpMetadata,
       rulesMetadata,
       statuslinesMetadata,
+      skillsMetadata,
     },
     {
       baseUrl,

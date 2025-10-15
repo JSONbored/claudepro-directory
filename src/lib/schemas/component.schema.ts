@@ -98,7 +98,16 @@ export interface TrendingContentProps {
  * View tracker props
  */
 const viewTrackerPropsSchema = z.object({
-  category: z.enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'guides', 'changelog']),
+  category: z.enum([
+    'agents',
+    'mcp',
+    'rules',
+    'commands',
+    'hooks',
+    'guides',
+    'changelog',
+    'skills',
+  ]),
   slug: nonEmptyString.max(200),
 });
 
@@ -112,7 +121,7 @@ export type ContentListServerProps<T extends UnifiedContentItem = UnifiedContent
   description: string;
   icon: string;
   items: readonly T[] | T[];
-  type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides';
+  type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides' | 'skills';
   searchPlaceholder?: string;
   badges?: Array<{
     icon?: string | React.ComponentType<{ className?: string }>;
@@ -126,7 +135,7 @@ export type ContentListServerProps<T extends UnifiedContentItem = UnifiedContent
 export type RelatedConfigsProps<T extends UnifiedContentItem = UnifiedContentItem> = {
   configs: T[];
   title?: string;
-  type?: 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks' | 'guides';
+  type?: 'rules' | 'mcp' | 'agents' | 'commands' | 'hooks' | 'guides' | 'skills';
 };
 
 /**
@@ -145,7 +154,7 @@ export type FloatingSearchSidebarProps = {
  */
 export type ContentSearchClientProps<T extends UnifiedContentItem = UnifiedContentItem> = {
   items: readonly T[] | T[];
-  type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides';
+  type: 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'guides' | 'skills';
   searchPlaceholder: string;
   title: string;
   icon: string;

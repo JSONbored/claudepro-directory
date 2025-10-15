@@ -44,6 +44,7 @@
 
 import { z } from 'zod';
 import { statsRedis } from '@/src/lib/cache';
+import { getAllCategoryIds } from '@/src/lib/config/category-config';
 import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
@@ -57,17 +58,10 @@ import {
 } from '@/src/lib/utils/data.utils';
 
 /**
- * Configuration: Content categories
+ * Configuration: Content categories (derived from registry)
+ * Note: Featured service focuses on main content categories (excludes skills for now)
  */
-const CONTENT_CATEGORIES = [
-  'rules',
-  'mcp',
-  'agents',
-  'commands',
-  'hooks',
-  'statuslines',
-  'collections',
-] as const;
+const CONTENT_CATEGORIES = getAllCategoryIds().filter((cat) => cat !== 'skills');
 
 /**
  * Configuration: Score weights for multi-factor algorithm

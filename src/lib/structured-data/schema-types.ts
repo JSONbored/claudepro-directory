@@ -8,6 +8,7 @@ import type { CommandContent } from '@/src/lib/schemas/content/command.schema';
 import type { HookContent } from '@/src/lib/schemas/content/hook.schema';
 import type { McpContent } from '@/src/lib/schemas/content/mcp.schema';
 import type { RuleContent } from '@/src/lib/schemas/content/rule.schema';
+import type { SkillContent } from '@/src/lib/schemas/content/skill.schema';
 import type { StatuslineContent } from '@/src/lib/schemas/content/statusline.schema';
 import {
   buildBreadcrumb,
@@ -31,7 +32,8 @@ export type UnifiedContent =
   | ({ category: 'hooks' } & HookContent)
   | ({ category: 'mcp' } & McpContent)
   | ({ category: 'rules' } & RuleContent)
-  | ({ category: 'statuslines' } & StatuslineContent);
+  | ({ category: 'statuslines' } & StatuslineContent)
+  | ({ category: 'skills' } & SkillContent);
 
 /**
  * Props for unified structured data component
@@ -71,6 +73,12 @@ export function isStatuslineContent(
   item: UnifiedContent
 ): item is StatuslineContent & { category: 'statuslines' } {
   return item.category === 'statuslines';
+}
+
+export function isSkillContent(
+  item: UnifiedContent
+): item is SkillContent & { category: 'skills' } {
+  return item.category === 'skills';
 }
 
 /**
@@ -140,6 +148,15 @@ export const SCHEMA_CONFIGS: Record<UnifiedContent['category'], SchemaGeneration
     generateFAQ: false,
     generateBreadcrumb: true,
     generateSpeakable: false,
+  },
+  skills: {
+    generateApplication: false,
+    generateSourceCode: true,
+    generateHowTo: true,
+    generateCreativeWork: true,
+    generateFAQ: true,
+    generateBreadcrumb: true,
+    generateSpeakable: true,
   },
 };
 
@@ -342,6 +359,30 @@ export const STRUCTURED_DATA_RULES: Record<UnifiedContent['category'], Structure
       creativeWorkDescription: () => 'Statusline display script',
     },
     categoryDisplayName: 'Statuslines',
+  },
+  skills: {
+    schemaTypes: {
+      sourceCode: true,
+      howTo: true,
+      creativeWork: true,
+      faq: true,
+      breadcrumb: true,
+      speakable: true,
+    },
+    extractors: {
+      applicationSubCategory: () => 'Skill Guide',
+      keywords: (item) => [
+        'Claude Skill',
+        'Document Processing',
+        item.category,
+        'Claude',
+        ...(item.tags || []),
+      ],
+      requirements: (item) => (isSkillContent(item) && item.requirements ? item.requirements : []),
+      configuration: () => undefined,
+      creativeWorkDescription: () => 'Skill guide and examples',
+    },
+    categoryDisplayName: 'Skills',
   },
 };
 

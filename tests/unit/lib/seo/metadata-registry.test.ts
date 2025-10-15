@@ -153,8 +153,8 @@ describe('metadata-registry', () => {
         METADATA_DEFAULTS.siteName.length;
       const maxContentLength = 60 - overhead;
 
-      expect(overhead).toBe(29); // " - " (3) + "MCP" (3) + " - " (3) + "Claude Pro Directory" (20)
-      expect(maxContentLength).toBe(31);
+      expect(overhead).toBe(37); // " - " (3) + "MCP Servers" (11) + " - " (3) + "Claude Pro Directory" (20)
+      expect(maxContentLength).toBe(23);
     });
 
     it('should calculate correct overhead for Rules', () => {
@@ -210,7 +210,7 @@ describe('metadata-registry', () => {
     });
 
     it('should calculate correct overhead for Guides', () => {
-      const categoryDisplay = CATEGORY_NAMES.guides;
+      const categoryDisplay = 'Guides'; // SEO category not in main registry
       const overhead =
         METADATA_DEFAULTS.separator.length +
         categoryDisplay.length +

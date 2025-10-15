@@ -14,6 +14,7 @@ import { guideContentSchema } from '@/src/lib/schemas/content/guide.schema';
 import { hookContentSchema } from '@/src/lib/schemas/content/hook.schema';
 import { mcpContentSchema } from '@/src/lib/schemas/content/mcp.schema';
 import { ruleContentSchema } from '@/src/lib/schemas/content/rule.schema';
+import { skillContentSchema } from '@/src/lib/schemas/content/skill.schema';
 import { statuslineContentSchema } from '@/src/lib/schemas/content/statusline.schema';
 
 /**
@@ -42,6 +43,8 @@ export function validateContentByCategory(data: unknown, category: string) {
       return statuslineContentSchema.parse(data);
     case 'collections':
       return collectionContentSchema.parse(data);
+    case 'skills':
+      return skillContentSchema.parse(data);
     default:
       throw new Error(`Unknown content category: ${category}`);
   }

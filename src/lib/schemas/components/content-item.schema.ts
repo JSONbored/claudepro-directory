@@ -32,6 +32,7 @@ export const unifiedContentItemSchema = z
         'rules',
         'commands',
         'hooks',
+        'skills',
         'guides',
         'jobs',
         'statuslines',

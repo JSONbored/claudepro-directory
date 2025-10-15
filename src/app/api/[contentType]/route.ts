@@ -1,4 +1,13 @@
-import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
+import {
+  agents,
+  collections,
+  commands,
+  hooks,
+  mcp,
+  rules,
+  skills,
+  statuslines,
+} from '@/generated/content';
 import { contentCache } from '@/src/lib/cache';
 import { createApiRoute } from '@/src/lib/error-handler';
 import { rateLimiters } from '@/src/lib/rate-limiter';
@@ -15,6 +24,7 @@ const contentMap = {
   'rules.json': { getData: () => rules, type: 'rule' },
   'statuslines.json': { getData: () => statuslines, type: 'statusline' },
   'collections.json': { getData: () => collections, type: 'collection' },
+  'skills.json': { getData: () => skills, type: 'skill' },
 } as const;
 
 const route = createApiRoute({

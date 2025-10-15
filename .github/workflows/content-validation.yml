@@ -95,7 +95,7 @@ jobs:
           fi
 
           # Validate category is valid
-          if [[ ! "$category" =~ ^(agents|mcp|rules|commands|hooks|statuslines|collections|guides|tutorials|comparisons|workflows|use-cases|troubleshooting|categories)$ ]]; then
+          if [[ ! "$category" =~ ^(agents|mcp|rules|commands|hooks|statuslines|collections|skills|guides|tutorials|comparisons|workflows|use-cases|troubleshooting|categories)$ ]]; then
             echo "ERROR: Invalid category '$category' in $file"
             exit 1
           fi
@@ -143,6 +143,9 @@ jobs:
             } else if (file.includes('/guides/')) {
               labels.add('guide');
               contentTypes.add('guide');
+            } else if (file.includes('/skills/')) {
+              labels.add('skill');
+              contentTypes.add('skill');
             }
 
             // Try to read JSON files for category validation
@@ -160,6 +163,7 @@ jobs:
                     'rules': 'rule',
                     'statuslines': 'statusline',
                     'collections': 'collection',
+                    'skills': 'skill',
                     'guides': 'guide'
                   };
 
