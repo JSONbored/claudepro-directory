@@ -16,6 +16,7 @@ import { Button } from '@/src/components/ui/button';
 import { Card, CardContent } from '@/src/components/ui/card';
 import { contentCache, statsRedis } from '@/src/lib/cache';
 import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
+import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { ArrowLeft, BookOpen, Calendar, Eye, FileText, Tag, Users, Zap } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
@@ -23,8 +24,8 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import type { GuideItemWithCategory } from '@/src/lib/utils/content.utils';
 
-// ISR Configuration - Revalidate every 5 minutes for fresh view counts
-export const revalidate = 300;
+// ISR Configuration - Guide detail pages (centralized config)
+export const revalidate = REVALIDATION_TIMES.GUIDES;
 export const dynamicParams = true;
 
 // Validation schema for guide parameters

@@ -31,6 +31,7 @@ import { NextResponse } from 'next/server';
 import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { logger } from '@/src/lib/logger';
 
 /**
@@ -39,10 +40,9 @@ import { logger } from '@/src/lib/logger';
 export const runtime = 'nodejs';
 
 /**
- * ISR revalidation
- * Revalidate every 10 minutes (600 seconds)
+ * ISR revalidation - AI training data (centralized config)
  */
-export const revalidate = 600;
+export const revalidate = REVALIDATION_TIMES.LLMS_TXT;
 
 /**
  * Generate static params for all changelog entries
