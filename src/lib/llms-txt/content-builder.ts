@@ -302,8 +302,8 @@ function formatBulletList(title: string, items: string[]): string {
  */
 function isInstallation(value: unknown): value is Installation {
   return (
-    typeof value === 'object' &&
     value !== null &&
+    typeof value === 'object' &&
     !Array.isArray(value) &&
     !(value instanceof Date) &&
     !(value instanceof RegExp)
