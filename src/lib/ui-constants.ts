@@ -976,28 +976,20 @@ export type JobStatusType = keyof typeof BADGE_COLORS.jobStatus;
 
 /**
  * Static Icon Name Mapping
- * 
+ *
  * Tree-shakeable icon mapping for string-based icon lookups.
  * Only the icons actually used in code will be included in the bundle.
- * 
+ *
  * Purpose: Replace dynamic iconMap that prevented tree-shaking (SHA-BUNDLE-OPT)
  * Location: Centralized in ui-constants.ts following consolidation principles
- * 
+ *
  * Usage:
  * ```typescript
  * import { ICON_NAME_MAP } from '@/src/lib/ui-constants';
  * const IconComponent = ICON_NAME_MAP[iconName] || HelpCircle;
  * ```
  */
-import {
-  BookOpen,
-  Code,
-  HelpCircle,
-  Layers,
-  Sparkles,
-  Terminal,
-  Webhook,
-} from '@/src/lib/icons';
+import { BookOpen, Code, HelpCircle, Layers, Sparkles, Terminal, Webhook } from '@/src/lib/icons';
 
 export const ICON_NAME_MAP = {
   // Category icons (from category-config.ts)

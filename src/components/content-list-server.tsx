@@ -39,7 +39,8 @@ function ContentHeroSection<T extends UnifiedContentItem>({
               aria-hidden="true"
             >
               {(() => {
-                const IconComponent = ICON_NAME_MAP[icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
+                const IconComponent =
+                  ICON_NAME_MAP[icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
                 return <IconComponent className="h-8 w-8 text-primary" />;
               })()}
             </div>
@@ -60,7 +61,8 @@ function ContentHeroSection<T extends UnifiedContentItem>({
                   {badge.icon &&
                     (() => {
                       if (typeof badge.icon === 'string') {
-                        const BadgeIconComponent = ICON_NAME_MAP[badge.icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
+                        const BadgeIconComponent =
+                          ICON_NAME_MAP[badge.icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
                         return <BadgeIconComponent className="h-3 w-3 mr-1" aria-hidden="true" />;
                       }
                       const BadgeIcon = badge.icon;

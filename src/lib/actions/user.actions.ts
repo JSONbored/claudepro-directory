@@ -503,4 +503,3 @@ export const getActivityTimeline = authedAction
 
     return result.data;
   });
-
