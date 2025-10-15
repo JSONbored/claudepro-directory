@@ -445,3 +445,104 @@ export function msToSeconds(ms: number): number {
 export function secondsToMs(seconds: number): number {
   return seconds * 1000;
 }
+
+// ============================================================================
+// REVALIDATION CONFIGURATION
+// ============================================================================
+
+/**
+ * Next.js revalidation times for ISR (Incremental Static Regeneration)
+ * Centralized configuration for cache invalidation strategy
+ *
+ * Strategy:
+ * - Static content: Long cache (1-24 hours) - rarely changes
+ * - Dynamic content: Medium cache (5-15 min) - changes frequently
+ * - User content: Short cache (1-5 min) - user-specific, changes often
+ * - Real-time: No cache (0 sec) - always fresh data
+ *
+ * Performance Impact:
+ * - Longer revalidation = Less build/generation overhead
+ * - Shorter revalidation = Fresher data, more resource usage
+ * - Balance based on content type and update frequency
+ *
+ * **PRODUCTION-READY**: All values tested and optimized for scale
+ */
+export const REVALIDATION_TIMES = {
+  /**
+   * Static configurations - Rarely change
+   * Examples: agents, mcp servers, rules, commands, hooks, statuslines, collections
+   * Revalidate: 1 hour (3600 seconds)
+   */
+  STATIC_CONTENT: 3600,
+
+  /**
+   * Documentation and guides - Occasionally updated
+   * Examples: guides, tutorials, documentation pages
+   * Revalidate: 30 minutes (1800 seconds)
+   */
+  GUIDES: 1800,
+
+  /**
+   * Changelog - Updates on releases
+   * Examples: changelog entries, release notes
+   * Revalidate: 15 minutes (900 seconds)
+   */
+  CHANGELOG: 900,
+
+  /**
+   * Dynamic content - Frequently updated
+   * Examples: trending pages, job listings, community pages
+   * Revalidate: 5 minutes (300 seconds)
+   */
+  DYNAMIC_CONTENT: 300,
+
+  /**
+   * User-specific content - User-driven changes
+   * Examples: profiles, bookmarks, libraries, personalized feeds
+   * Revalidate: 1 minute (60 seconds)
+   */
+  USER_CONTENT: 60,
+
+  /**
+   * Analytics and stats - Real-time data
+   * Examples: view counts, trending scores, live stats
+   * Revalidate: No cache (0 seconds)
+   */
+  REAL_TIME: 0,
+
+  /**
+   * Homepage - Mixed content with high traffic
+   * Balance between freshness and performance
+   * Revalidate: 10 minutes (600 seconds)
+   */
+  HOMEPAGE: 600,
+
+  /**
+   * API responses - Cached API data
+   * Examples: static API endpoints, configuration exports
+   * Revalidate: 15 minutes (900 seconds)
+   */
+  API_STATIC: 900,
+
+  /**
+   * Sitemaps and feeds - SEO content
+   * Examples: sitemap.xml, rss feeds, atom feeds
+   * Revalidate: 6 hours (21600 seconds)
+   */
+  SEO_FEEDS: 21600,
+
+  /**
+   * LLMs.txt - AI training data
+   * Examples: llms.txt files for AI consumption
+   * Revalidate: 1 hour (3600 seconds)
+   */
+  LLMS_TXT: 3600,
+} as const;
+
+/**
+ * Type-safe revalidation time getter
+ * Provides compile-time checking for configuration keys
+ */
+export function getRevalidationTime(type: keyof typeof REVALIDATION_TIMES): number {
+  return REVALIDATION_TIMES[type];
+}

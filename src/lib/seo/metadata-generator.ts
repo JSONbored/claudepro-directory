@@ -85,6 +85,10 @@ function generateFallbackMetadata(route: string, context?: MetadataContext): Met
   logger.warn(`⚠️ Using fallback metadata for route: ${route}`);
 
   const canonicalUrl = buildCanonicalUrl(route, context);
+  // Extract pathname from canonical URL for OG image generation
+  // generateOGImageUrl expects a path (e.g., "/agents") not a full URL
+  const pathForOG = new URL(canonicalUrl).pathname;
+  const ogImageUrl = generateOGImageUrl(pathForOG);
 
   return {
     title: fallbackTitle,
@@ -97,11 +101,28 @@ function generateFallbackMetadata(route: string, context?: MetadataContext): Met
       description: fallbackDescription,
       type: 'website',
       siteName,
+      images: [
+        {
+          url: ogImageUrl,
+          width: OG_IMAGE_DIMENSIONS.width,
+          height: OG_IMAGE_DIMENSIONS.height,
+          alt: fallbackTitle,
+          type: 'image/png',
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: fallbackTitle,
       description: fallbackDescription,
+      images: [
+        {
+          url: ogImageUrl,
+          width: OG_IMAGE_DIMENSIONS.width,
+          height: OG_IMAGE_DIMENSIONS.height,
+          alt: fallbackTitle,
+        },
+      ],
     },
     robots: {
       index: true,
@@ -262,6 +283,9 @@ function generateSmartDefaultMetadata(route: string, context?: MetadataContext):
   const description = `Explore ${pageName} on ${siteName}. Discover AI agents, MCP servers, commands, rules, hooks, statuslines, collections, and guides for Claude AI development.`;
 
   const canonicalUrl = buildCanonicalUrl(route, context);
+  // Extract pathname from canonical URL for OG image generation
+  const pathForOG = new URL(canonicalUrl).pathname;
+  const ogImageUrl = generateOGImageUrl(pathForOG);
 
   return {
     title,
@@ -274,11 +298,28 @@ function generateSmartDefaultMetadata(route: string, context?: MetadataContext):
       description,
       type: 'website',
       siteName,
+      images: [
+        {
+          url: ogImageUrl,
+          width: OG_IMAGE_DIMENSIONS.width,
+          height: OG_IMAGE_DIMENSIONS.height,
+          alt: title,
+          type: 'image/png',
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      images: [
+        {
+          url: ogImageUrl,
+          width: OG_IMAGE_DIMENSIONS.width,
+          height: OG_IMAGE_DIMENSIONS.height,
+          alt: title,
+        },
+      ],
     },
     robots: {
       index: true,
@@ -301,26 +342,26 @@ function generateSmartDefaultMetadata(route: string, context?: MetadataContext):
 /**
  * Generate Next.js Metadata from registry configuration
  *
+ * **PERFORMANCE**: Fully synchronous for optimal build-time optimization
+ * Next.js 15 can statically analyze and optimize synchronous metadata exports
+ *
  * @param route - Route path or pattern (e.g., '/', '/trending', '/:category/:slug')
  * @param context - Optional context for dynamic metadata
  * @returns Next.js Metadata object
  *
  * @example
  * ```typescript
- * // Static route
- * export const metadata = await generatePageMetadata('/trending');
+ * // Static route (no await needed - synchronous)
+ * export const metadata = generatePageMetadata('/trending');
  *
  * // Dynamic route with context
  * export async function generateMetadata({ params }) {
  *   const item = await getContentBySlug(params.category, params.slug);
- *   return await generatePageMetadata('/:category/:slug', { params, item });
+ *   return generatePageMetadata('/:category/:slug', { params, item });
  * }
  * ```
  */
-export async function generatePageMetadata(
-  route: string,
-  context?: MetadataContext
-): Promise<Metadata> {
+export function generatePageMetadata(route: string, context?: MetadataContext): Metadata {
   // TIER 1: Try schema derivation (primary for content detail pages)
   const schemaData = getContentSchemaForRoute(route, context);
   if (schemaData) {
@@ -343,16 +384,20 @@ export async function generatePageMetadata(
   }
 
   // Build title
-  const title = await resolveTitle(config.title, context);
+  const title = resolveTitle(config.title, context);
 
   // Resolve description (may be function or string)
-  const description = await resolveValue(config.description, context);
+  const description = resolveValue(config.description, context);
 
   // Resolve keywords (may be function or array)
-  const keywords = config.keywords ? await resolveValue(config.keywords, context) : undefined;
+  const keywords = config.keywords ? resolveValue(config.keywords, context) : undefined;
 
   // Build canonical URL
   const canonicalUrl = buildCanonicalUrl(route, context);
+
+  // Extract path from canonical URL for OG image generation
+  // generateOGImageUrl expects a path (e.g., "/agents") not a full URL
+  const pathForOG = new URL(canonicalUrl).pathname;
 
   // OpenGraph metadata - all routes now have this defined with proper type widening
   const ogConfig = config.openGraph as {
@@ -375,7 +420,8 @@ export async function generatePageMetadata(
   const twitterCard = twitterConfig.card;
 
   // Build raw metadata object for validation
-  const ogImageUrl = generateOGImageUrl(canonicalUrl);
+  // Use extracted path instead of full canonical URL
+  const ogImageUrl = generateOGImageUrl(pathForOG);
 
   const rawMetadata: Partial<ValidatedMetadata> = {
     title,
@@ -433,13 +479,14 @@ export async function generatePageMetadata(
  * Resolve title from configuration
  * Handles both static strings and dynamic title functions
  *
+ * **PERFORMANCE**: Fully synchronous - no async overhead
  * Production-safe type checking with proper function resolution
  * Compatible with exactOptionalPropertyTypes: true
  */
-async function resolveTitle(titleConfig: TitleConfig, context?: MetadataContext): Promise<string> {
+function resolveTitle(titleConfig: TitleConfig, context?: MetadataContext): string {
   // Title is now either a string or a function that returns a string
   if (typeof titleConfig === 'function') {
-    return await titleConfig(context);
+    return titleConfig(context);
   }
 
   // It's a static string
@@ -448,14 +495,14 @@ async function resolveTitle(titleConfig: TitleConfig, context?: MetadataContext)
 
 /**
  * Resolve a value that may be a function or a direct value
- * Handles async functions and promises
+ * **PERFORMANCE**: Fully synchronous - no async/Promise overhead
  */
-async function resolveValue<T>(
-  value: T | ((context?: MetadataContext) => T | Promise<T>),
+function resolveValue<T>(
+  value: T | ((context?: MetadataContext) => T),
   context?: MetadataContext
-): Promise<T> {
+): T {
   if (typeof value === 'function') {
-    return await (value as (context?: MetadataContext) => T | Promise<T>)(context);
+    return (value as (context?: MetadataContext) => T)(context);
   }
   return value;
 }
@@ -502,12 +549,13 @@ function buildCanonicalUrl(route: string, context?: MetadataContext): string {
  * Helper: Generate metadata for dynamic category pages
  * Convenience function for [category]/page.tsx routes
  *
+ * **PERFORMANCE**: Fully synchronous for optimal build-time optimization
  * Compatible with exactOptionalPropertyTypes: true
  */
-export async function generateCategoryMetadata(
+export function generateCategoryMetadata(
   category: string,
   categoryConfig: MetadataContext['categoryConfig']
-): Promise<Metadata> {
+): Metadata {
   // Explicit context construction with proper undefined handling
   const context: MetadataContext = {
     params: { category },
@@ -521,14 +569,15 @@ export async function generateCategoryMetadata(
  * Helper: Generate metadata for content detail pages
  * Convenience function for [category]/[slug]/page.tsx routes
  *
+ * **PERFORMANCE**: Fully synchronous for optimal build-time optimization
  * Compatible with exactOptionalPropertyTypes: true
  */
-export async function generateContentMetadata(
+export function generateContentMetadata(
   category: string,
   slug: string,
   item: MetadataContext['item'],
   categoryConfig?: MetadataContext['categoryConfig']
-): Promise<Metadata> {
+): Metadata {
   // Explicit context construction with proper undefined handling
   const context: MetadataContext = {
     params: { category, slug },
