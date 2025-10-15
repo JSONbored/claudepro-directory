@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { ROUTES } from '@/src/lib/constants';
+import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { MessageSquare, Plus, TrendingUp, User as UserIcon } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
@@ -19,7 +20,8 @@ import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
 export const metadata = await generatePageMetadata('/board');
 
-export const revalidate = 60; // Revalidate every minute
+// ISR - User-driven content (centralized config)
+export const revalidate = REVALIDATION_TIMES.USER_CONTENT;
 
 // Use the actual return type from the database function
 type PopularPost = {

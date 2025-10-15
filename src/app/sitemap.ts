@@ -72,7 +72,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 }
 
 /**
- * ISR Revalidation
- * Regenerate sitemap every hour to pick up new content
+ * ISR Revalidation - Sitemap for SEO (centralized config)
  */
-export const revalidate = 3600; // 1 hour
+export const revalidate = REVALIDATION_TIMES.SEO_FEEDS;

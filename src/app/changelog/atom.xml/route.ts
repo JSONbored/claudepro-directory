@@ -30,6 +30,7 @@ import type { NextRequest } from 'next/server';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { formatChangelogDateISO8601, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { apiResponse } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
@@ -39,10 +40,9 @@ import { logger } from '@/src/lib/logger';
 export const runtime = 'nodejs';
 
 /**
- * ISR revalidation
- * Revalidate every 10 minutes (600 seconds) for fresh changelog updates
+ * ISR revalidation - Atom feed for SEO (centralized config)
  */
-export const revalidate = 600;
+export const revalidate = REVALIDATION_TIMES.SEO_FEEDS;
 
 /**
  * Maximum number of entries to include in Atom feed

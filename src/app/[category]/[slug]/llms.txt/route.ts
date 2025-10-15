@@ -9,6 +9,7 @@
 import type { NextRequest } from 'next/server';
 import { isValidCategory, VALID_CATEGORIES } from '@/src/lib/config/category-config';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import {
   getContentByCategory,
   getContentBySlug,
@@ -30,10 +31,9 @@ import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 export const runtime = 'nodejs';
 
 /**
- * ISR revalidation
- * Revalidate every 10 minutes (600 seconds) - content updates should propagate quickly
+ * ISR revalidation - AI training data (centralized config)
  */
-export const revalidate = 600;
+export const revalidate = REVALIDATION_TIMES.LLMS_TXT;
 
 /**
  * Generate static params for all category/slug combinations
