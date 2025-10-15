@@ -23,6 +23,7 @@ const Meteors = dynamic(
 );
 
 import { statsRedis } from '@/src/lib/cache';
+import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { featuredService } from '@/src/lib/services/featured.service';
@@ -41,8 +42,8 @@ type ContentMetadataWithCategory =
 
 type EnrichedMetadata = ContentMetadataWithCategory & { viewCount: number; copyCount: number };
 
-// Enable ISR - revalidate every 5 minutes for fresh view counts
-export const revalidate = 300;
+// Enable ISR - Homepage with mixed content (centralized config)
+export const revalidate = REVALIDATION_TIMES.HOMEPAGE;
 
 interface HomePageProps {
   searchParams: Promise<{

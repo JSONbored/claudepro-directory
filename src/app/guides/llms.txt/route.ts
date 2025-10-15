@@ -12,6 +12,7 @@ import { existsSync, readdirSync } from 'fs';
 import type { NextRequest } from 'next/server';
 import { join } from 'path';
 import { APP_CONFIG, CONTENT_PATHS } from '@/src/lib/constants';
+import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
@@ -22,10 +23,9 @@ import { logger } from '@/src/lib/logger';
 export const runtime = 'nodejs';
 
 /**
- * ISR revalidation
- * Revalidate every hour (3600 seconds) - guides change infrequently
+ * ISR revalidation - AI training data (centralized config)
  */
-export const revalidate = 3600;
+export const revalidate = REVALIDATION_TIMES.LLMS_TXT;
 
 const GUIDE_CATEGORIES = [
   {

@@ -49,9 +49,10 @@ export const unifiedContentItemSchema = z
       .describe('Content type category or subcategory for classification and filtering'),
     subcategory: z
       .enum(['tutorials', 'comparisons', 'workflows', 'use-cases', 'troubleshooting'])
-      .nullable()
       .optional()
       .describe('Guide subcategory for nested URL structure (/guides/{subcategory}/{slug})'),
+    // Production note: Using .optional() only (not .nullable()) for clean type semantics
+    // Absence is represented by omitted property, not null value
     author: z.string().describe('Name or identifier of the content creator or contributor'),
     dateAdded: z
       .string()

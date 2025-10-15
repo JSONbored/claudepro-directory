@@ -18,6 +18,7 @@ import {
   statuslines,
 } from '@/generated/content';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
+import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { generateSiteLLMsTxt } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
@@ -30,10 +31,9 @@ import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 export const runtime = 'nodejs';
 
 /**
- * ISR revalidation
- * Revalidate every hour (3600 seconds) - site structure changes infrequently
+ * ISR revalidation - AI training data (centralized config)
  */
-export const revalidate = 3600;
+export const revalidate = REVALIDATION_TIMES.LLMS_TXT;
 
 /**
  * Handle GET request for site-wide llms.txt

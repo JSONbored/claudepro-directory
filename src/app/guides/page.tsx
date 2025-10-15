@@ -11,6 +11,7 @@ import path from 'path';
 import { ContentListServer } from '@/src/components/content-list-server';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { statsRedis } from '@/src/lib/cache';
+import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
@@ -18,8 +19,8 @@ import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-// ISR Configuration - 5 minutes like other category pages
-export const revalidate = 300;
+// ISR Configuration - Guides listing page (centralized config)
+export const revalidate = REVALIDATION_TIMES.GUIDES;
 
 /**
  * Page metadata
