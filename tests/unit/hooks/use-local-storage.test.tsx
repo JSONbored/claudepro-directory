@@ -298,16 +298,12 @@ describe('useLocalStorage', () => {
       // Simulate storage event from another tab
       act(() => {
         window.dispatchEvent(
-          (() => {
-            const event = new StorageEvent('storage');
-            Object.assign(event, {
-              key: 'sync-key',
-              newValue: JSON.stringify('updated-from-other-tab'),
-              oldValue: JSON.stringify('initial'),
-              storageArea: localStorage,
-            });
-            return event;
-          })()
+          new StorageEvent('storage', {
+            key: 'sync-key',
+            newValue: JSON.stringify('updated-from-other-tab'),
+            oldValue: JSON.stringify('initial'),
+            storageArea: localStorage,
+          })
         );
       });
 
@@ -327,16 +323,12 @@ describe('useLocalStorage', () => {
       // Simulate storage event with null (value removed)
       act(() => {
         window.dispatchEvent(
-          (() => {
-            const event = new StorageEvent('storage');
-            Object.assign(event, {
-              key: 'sync-key',
-              newValue: null,
-              oldValue: JSON.stringify('value'),
-              storageArea: localStorage,
-            });
-            return event;
-          })()
+          new StorageEvent('storage', {
+            key: 'sync-key',
+            newValue: null,
+            oldValue: JSON.stringify('value'),
+            storageArea: localStorage,
+          })
         );
       });
 
@@ -353,16 +345,12 @@ describe('useLocalStorage', () => {
 
       act(() => {
         window.dispatchEvent(
-          (() => {
-            const event = new StorageEvent('storage');
-            Object.assign(event, {
-              key: 'key-b',
-              newValue: JSON.stringify('value-b'),
-              oldValue: null,
-              storageArea: localStorage,
-            });
-            return event;
-          })()
+          new StorageEvent('storage', {
+            key: 'key-b',
+            newValue: JSON.stringify('value-b'),
+            oldValue: null,
+            storageArea: localStorage,
+          })
         );
       });
 
@@ -379,16 +367,12 @@ describe('useLocalStorage', () => {
 
       act(() => {
         window.dispatchEvent(
-          (() => {
-            const event = new StorageEvent('storage');
-            Object.assign(event, {
-              key: 'no-sync-key',
-              newValue: JSON.stringify('should-not-sync'),
-              oldValue: null,
-              storageArea: localStorage,
-            });
-            return event;
-          })()
+          new StorageEvent('storage', {
+            key: 'no-sync-key',
+            newValue: JSON.stringify('should-not-sync'),
+            oldValue: null,
+            storageArea: localStorage,
+          })
         );
       });
 
