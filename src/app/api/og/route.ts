@@ -322,10 +322,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Validate path format
+    // Validate path format - must be a path, not a full URL
     if (!path.startsWith('/')) {
       return apiResponse.okRaw(
         { error: 'Invalid path. Path must start with forward slash.' },
+        { status: 400, sMaxAge: 0, staleWhileRevalidate: 0 }
+      );
+    }
+
+    // Critical: Prevent passing full URLs instead of paths
+    // This catches the common mistake of passing "https://domain.com/path" instead of "/path"
+    if (path.includes('://') || path.startsWith('http')) {
+      return apiResponse.okRaw(
+        {
+          error:
+            'Invalid path. Expected a relative path (e.g., "/agents") but received a full URL. Extract pathname before calling this API.',
+        },
         { status: 400, sMaxAge: 0, staleWhileRevalidate: 0 }
       );
     }

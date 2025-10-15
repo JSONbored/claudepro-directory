@@ -85,6 +85,8 @@ function generateFallbackMetadata(route: string, context?: MetadataContext): Met
   logger.warn(`⚠️ Using fallback metadata for route: ${route}`);
 
   const canonicalUrl = buildCanonicalUrl(route, context);
+  const pathForOG = new URL(canonicalUrl).pathname;
+  const ogImageUrl = generateOGImageUrl(pathForOG);
 
   return {
     title: fallbackTitle,
@@ -97,11 +99,28 @@ function generateFallbackMetadata(route: string, context?: MetadataContext): Met
       description: fallbackDescription,
       type: 'website',
       siteName,
+      images: [
+        {
+          url: ogImageUrl,
+          width: OG_IMAGE_DIMENSIONS.width,
+          height: OG_IMAGE_DIMENSIONS.height,
+          alt: fallbackTitle,
+          type: 'image/png',
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: fallbackTitle,
       description: fallbackDescription,
+      images: [
+        {
+          url: ogImageUrl,
+          width: OG_IMAGE_DIMENSIONS.width,
+          height: OG_IMAGE_DIMENSIONS.height,
+          alt: fallbackTitle,
+        },
+      ],
     },
     robots: {
       index: true,
@@ -262,6 +281,8 @@ function generateSmartDefaultMetadata(route: string, context?: MetadataContext):
   const description = `Explore ${pageName} on ${siteName}. Discover AI agents, MCP servers, commands, rules, hooks, statuslines, collections, and guides for Claude AI development.`;
 
   const canonicalUrl = buildCanonicalUrl(route, context);
+  const pathForOG = new URL(canonicalUrl).pathname;
+  const ogImageUrl = generateOGImageUrl(pathForOG);
 
   return {
     title,
@@ -274,11 +295,28 @@ function generateSmartDefaultMetadata(route: string, context?: MetadataContext):
       description,
       type: 'website',
       siteName,
+      images: [
+        {
+          url: ogImageUrl,
+          width: OG_IMAGE_DIMENSIONS.width,
+          height: OG_IMAGE_DIMENSIONS.height,
+          alt: title,
+          type: 'image/png',
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      images: [
+        {
+          url: ogImageUrl,
+          width: OG_IMAGE_DIMENSIONS.width,
+          height: OG_IMAGE_DIMENSIONS.height,
+          alt: title,
+        },
+      ],
     },
     robots: {
       index: true,
@@ -354,6 +392,10 @@ export async function generatePageMetadata(
   // Build canonical URL
   const canonicalUrl = buildCanonicalUrl(route, context);
 
+  // Extract path from canonical URL for OG image generation
+  // generateOGImageUrl expects a path (e.g., "/agents") not a full URL
+  const pathForOG = new URL(canonicalUrl).pathname;
+
   // OpenGraph metadata - all routes now have this defined with proper type widening
   const ogConfig = config.openGraph as {
     title?: string;
@@ -375,7 +417,8 @@ export async function generatePageMetadata(
   const twitterCard = twitterConfig.card;
 
   // Build raw metadata object for validation
-  const ogImageUrl = generateOGImageUrl(canonicalUrl);
+  // Use extracted path instead of full canonical URL
+  const ogImageUrl = generateOGImageUrl(pathForOG);
 
   const rawMetadata: Partial<ValidatedMetadata> = {
     title,
