@@ -87,6 +87,13 @@ export const PRIMARY_NAVIGATION: NavigationLink[] = [
     description: 'AI-powered task automation agents',
   },
   {
+    label: 'Skills',
+    href: '/skills',
+    icon: BookOpen,
+    description: 'Task-focused capability guides (PDF/DOCX/PPTX/XLSX)',
+    isNew: true,
+  },
+  {
     label: 'Commands',
     href: '/commands',
     icon: Zap,
@@ -115,14 +122,12 @@ export const PRIMARY_NAVIGATION: NavigationLink[] = [
     href: '/statuslines',
     icon: Terminal,
     description: 'Customizable editor status bars',
-    isNew: true,
   },
   {
     label: 'Collections',
     href: '/collections',
     icon: Layers,
     description: 'Curated content bundles',
-    isNew: true,
   },
   {
     label: 'Guides',

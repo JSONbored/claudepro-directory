@@ -23,11 +23,19 @@ import { Button } from '@/src/components/ui/button';
 import { TypeBadge } from '@/src/components/ui/config-badge';
 import { BorderBeam } from '@/src/components/ui/magic/border-beam';
 import { SponsoredBadge } from '@/src/components/ui/sponsored-badge';
-import { Award, Copy as CopyIcon, ExternalLink, Eye, Github, Sparkles } from '@/src/lib/icons';
+import {
+  Award,
+  Copy as CopyIcon,
+  ExternalLink,
+  Eye,
+  Github,
+  Layers,
+  Sparkles,
+} from '@/src/lib/icons';
 import type { ConfigCardProps } from '@/src/lib/schemas/component.schema';
-import { CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
+import { BADGE_COLORS, CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
-import { formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
+import { formatCopyCount, formatViewCount, getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 export const ConfigCard = memo(
   ({ item, variant = 'default', showCategory = true, showActions = true }: ConfigCardProps) => {
@@ -54,6 +62,27 @@ export const ConfigCard = memo(
     // Extract rating metadata (if available)
     const ratingData = (item as { _rating?: { average: number; count: number } })._rating;
     const hasRating = ratingData && ratingData.count > 0;
+
+    // Extract collection-specific metadata (tree-shakeable - only loaded for collections)
+    const isCollection = item.category === 'collections';
+    const collectionType = isCollection
+      ? (item as { collectionType?: 'starter-kit' | 'workflow' | 'advanced-system' | 'use-case' })
+          .collectionType
+      : undefined;
+    const collectionDifficulty = isCollection
+      ? (item as { difficulty?: 'beginner' | 'intermediate' | 'advanced' }).difficulty
+      : undefined;
+    const itemCount = isCollection ? (item as { itemCount?: number }).itemCount : undefined;
+
+    // Collection type label mapping (tree-shakeable)
+    const COLLECTION_TYPE_LABELS = isCollection
+      ? {
+          'starter-kit': 'Starter Kit',
+          workflow: 'Workflow',
+          'advanced-system': 'Advanced System',
+          'use-case': 'Use Case',
+        }
+      : undefined;
 
     return (
       <div className="relative">
@@ -94,9 +123,40 @@ export const ConfigCard = memo(
                       | 'rules'
                       | 'commands'
                       | 'guides'
+                      | 'collections'
                   }
                 />
               )}
+
+              {/* Collection-specific badges (tree-shakeable) */}
+              {isCollection && collectionType && COLLECTION_TYPE_LABELS && (
+                <Badge
+                  variant="outline"
+                  className={`${UI_CLASSES.TEXT_XS} ${BADGE_COLORS.collectionType[collectionType]}`}
+                >
+                  <Layers className="h-3 w-3 mr-1" aria-hidden="true" />
+                  {COLLECTION_TYPE_LABELS[collectionType]}
+                </Badge>
+              )}
+
+              {isCollection && collectionDifficulty && (
+                <Badge
+                  variant="outline"
+                  className={`${UI_CLASSES.TEXT_XS} ${BADGE_COLORS.difficulty[collectionDifficulty]}`}
+                >
+                  {collectionDifficulty}
+                </Badge>
+              )}
+
+              {isCollection && itemCount !== undefined && (
+                <Badge
+                  variant="outline"
+                  className={`${UI_CLASSES.TEXT_XS} border-muted-foreground/20 text-muted-foreground`}
+                >
+                  {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                </Badge>
+              )}
+
               {/* Featured badge - weekly algorithm selection */}
               {isFeatured && (
                 <Badge
@@ -142,7 +202,7 @@ export const ConfigCard = memo(
                   onClick={(e) => e.stopPropagation()}
                 >
                   <CopyIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span className="text-xs">{formatViewCount(copyCount)}</span>
+                  <span className="text-xs">{formatCopyCount(copyCount)}</span>
                 </Badge>
               )}
 

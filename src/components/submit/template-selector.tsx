@@ -186,9 +186,17 @@ const TEMPLATES = {
   ] satisfies CommandTemplate[],
   hooks: [] satisfies HookTemplate[],
   statuslines: [] satisfies StatuslineTemplate[],
+  collections: [],
 } as const;
 
-type ContentType = 'agents' | 'mcp' | 'rules' | 'commands' | 'hooks' | 'statuslines';
+type ContentType =
+  | 'agents'
+  | 'mcp'
+  | 'rules'
+  | 'commands'
+  | 'hooks'
+  | 'statuslines'
+  | 'collections';
 
 interface TemplateSelectorProps {
   contentType: ContentType;
@@ -206,7 +214,7 @@ export function TemplateSelector({ contentType, onSelect }: TemplateSelectorProp
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="w-full justify-between" type="button">
-          <span className="flex items-center gap-2">
+          <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <FileText className="h-4 w-4" />
             Use Template
           </span>

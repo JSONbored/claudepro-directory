@@ -18,6 +18,8 @@ import { z } from 'zod';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
+import { verifyCronAuth } from '@/src/lib/middleware/cron-auth';
+import { type RateLimiter, withRateLimit } from '@/src/lib/rate-limiter';
 import { createRequestId, type RequestId } from '@/src/lib/schemas/branded-types.schema';
 import {
   determineErrorType,
@@ -29,7 +31,7 @@ import {
   validateErrorContext,
   validateErrorInput,
 } from '@/src/lib/schemas/error.schema';
-import { ValidationError } from '@/src/lib/security/validators';
+import { ValidationError, validation } from '@/src/lib/security/validators';
 
 /**
  * HTTP status code mapping for different error types
@@ -505,6 +507,131 @@ export function buildSuccessResponse<T>(
 }
 
 /**
+ * Unified API response builder
+ * Provides consistent headers, cache behavior, and optional output validation.
+ * Tree-shakeable named exports via the `response` object.
+ */
+type ZodSchemaUnknown = z.ZodSchema<unknown>;
+
+export interface OkResponseOptions extends ApiOkOptions {
+  /** Additional headers to set on the response */
+  headers?: Record<string, string>;
+  /** Optional Zod schema to validate response payload in development */
+  validate?: ZodSchemaUnknown;
+  /** Request id for correlation (auto-included by route factory) */
+  requestId?: RequestId;
+}
+
+function buildCacheHeaders(options: CacheOptions): Record<string, string> {
+  const {
+    sMaxAge = DEFAULT_CACHE.sMaxAge,
+    staleWhileRevalidate = DEFAULT_CACHE.staleWhileRevalidate,
+    cacheHit = false,
+  } = options;
+
+  return {
+    'Cache-Control': `public, s-maxage=${sMaxAge}, stale-while-revalidate=${staleWhileRevalidate}`,
+    'X-Cache': cacheHit ? 'HIT' : 'MISS',
+  };
+}
+
+function withBaseHeaders(
+  headers: Record<string, string> | undefined,
+  requestId?: RequestId
+): Record<string, string> {
+  return {
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    ...(requestId ? { 'X-Request-ID': String(requestId) } : {}),
+    ...(headers || {}),
+  };
+}
+
+function validateOutputIfNeeded(data: unknown, validate?: ZodSchemaUnknown): void {
+  if (!validate) return;
+  try {
+    // Only enforce strict validation during development to avoid breaking production unexpectedly
+    if (isDevelopment) {
+      validate.parse(data);
+    }
+  } catch (error) {
+    // If validation fails, throw a ZodError to be handled by error utilities
+    throw error;
+  }
+}
+
+function okInternal<T>(data: T, options: OkResponseOptions = {}): NextResponse {
+  const {
+    envelope = true,
+    status = 200,
+    additionalHeaders = {},
+    headers,
+    requestId,
+    validate,
+    ...cache
+  } = options;
+
+  // Validate outgoing payload if requested (dev-only enforcement)
+  try {
+    validateOutputIfNeeded(data, validate);
+  } catch (err) {
+    // Build sanitized error response using centralized handler
+    return handleApiError(err instanceof Error ? err : new Error(String(err)), {
+      customMessage: 'Invalid response payload',
+      logLevel: 'error',
+      requestId,
+    });
+  }
+
+  const cacheHeaders = buildCacheHeaders(cache);
+  const baseHeaders = withBaseHeaders(
+    { ...cacheHeaders, ...additionalHeaders, ...(headers || {}) },
+    requestId
+  );
+
+  if (!envelope) {
+    return NextResponse.json(data, { headers: baseHeaders, status });
+  }
+
+  // Use existing success envelope builder for consistency
+  return buildSuccessResponse(data, {
+    ...cache,
+    additionalHeaders: baseHeaders,
+  });
+}
+
+function okRawInternal<T>(data: T, options?: Omit<OkResponseOptions, 'envelope'>): NextResponse {
+  return okInternal<T>(data, { ...(options || {}), envelope: false });
+}
+
+function rawInternal(
+  body: BodyInit | null,
+  options: {
+    contentType: string;
+    status?: number;
+    headers?: Record<string, string>;
+    cache?: CacheOptions;
+    requestId?: RequestId;
+  }
+): NextResponse {
+  const { contentType, status = 200, headers, cache, requestId } = options;
+  const cacheHeaders = buildCacheHeaders(cache || {});
+  const baseHeaders = withBaseHeaders(
+    { 'Content-Type': contentType, ...cacheHeaders, ...(headers || {}) },
+    requestId
+  );
+  return new NextResponse(body, { status, headers: baseHeaders });
+}
+
+export const apiResponse = {
+  ok: okInternal,
+  okRaw: okRawInternal,
+  paginated: buildPaginatedResponse,
+  raw: rawInternal,
+  error: handleApiError,
+} as const;
+
+/**
  * Build paginated response with metadata
  * Tree-shakeable named export
  */
@@ -544,4 +671,213 @@ export function transformContentItems<T extends { slug: string }>(
     type,
     url: `${APP_CONFIG.url}/${category}/${item.slug}`,
   }));
+}
+
+// ============================================
+// STANDARDIZED API ROUTE FACTORY
+// ============================================
+
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+
+type ZodSchemaLike<T> = z.ZodSchema<T>;
+
+export interface RouteValidationSchemas<P = unknown, Q = unknown, H = unknown, B = unknown> {
+  params?: ZodSchemaLike<P>;
+  query?: ZodSchemaLike<Q>;
+  headers?: ZodSchemaLike<H>;
+  body?: ZodSchemaLike<B>;
+}
+
+export interface ApiOkOptions extends CacheOptions {
+  envelope?: boolean; // if false, return raw JSON body (no { data })
+  status?: number; // optional HTTP status override
+}
+
+export interface ApiHandlerContext<P = unknown, Q = unknown, H = unknown, B = unknown> {
+  request: NextRequest;
+  params: P;
+  query: Q;
+  headers: H;
+  body: B;
+  logger: ReturnType<typeof logger.forRequest>;
+  ok: <T>(data: T, options?: ApiOkOptions) => NextResponse;
+  okRaw: <T>(data: T, options?: Omit<ApiOkOptions, 'envelope'>) => NextResponse;
+}
+
+type ApiMethodHandler<P = unknown, Q = unknown, H = unknown, B = unknown> = (
+  ctx: ApiHandlerContext<P, Q, H, B>
+) => Promise<Response | NextResponse | unknown>;
+
+export interface CreateApiRouteOptions<P = any, Q = any, H = any, B = any> {
+  validate?: RouteValidationSchemas<P, Q, H, B>;
+  rateLimit?: { limiter?: RateLimiter };
+  auth?: { type?: 'devOnly' | 'cron' };
+  response?: ApiOkOptions;
+  handlers: Partial<Record<HttpMethod, ApiMethodHandler<P, Q, H, B>>>;
+}
+
+function isResponse(value: unknown): value is Response | NextResponse {
+  if (!value || typeof value !== 'object') return false;
+  const anyVal = value as any;
+  return typeof anyVal.headers === 'object' && typeof anyVal.status === 'number';
+}
+
+function cloneWithHeaders(original: Response, headers: Record<string, string>): Response {
+  const newHeaders = new Headers(original.headers);
+  for (const [k, v] of Object.entries(headers)) newHeaders.set(k, v);
+  return new Response(original.body, {
+    status: original.status,
+    statusText: original.statusText,
+    headers: newHeaders,
+  });
+}
+
+/**
+ * Create standardized route handlers for Next.js App Router.
+ * Usage in a route file:
+ *
+ * const { GET, POST } = createApiRoute({ ... });
+ * export { GET, POST };
+ */
+export function createApiRoute<P = any, Q = any, H = any, B = any>(
+  options: CreateApiRouteOptions<P, Q, H, B>
+): Partial<
+  Record<HttpMethod, (request: NextRequest, context?: { params?: unknown }) => Promise<Response>>
+> {
+  const { validate, rateLimit, auth, response, handlers } = options;
+
+  const wrap = (
+    method: HttpMethod,
+    handler?: ApiMethodHandler<P, Q, H, B>
+  ): ((request: NextRequest, context?: { params?: unknown }) => Promise<Response>) | undefined => {
+    if (!handler) return undefined;
+
+    return async (request: NextRequest, context?: { params?: unknown }) => {
+      const url = new URL(request.url);
+
+      // Resolve params (supports both direct object and Promise as seen in legacy code)
+      const rawParams = context?.params as unknown;
+      const resolvedParams =
+        rawParams && typeof (rawParams as Promise<unknown>)?.then === 'function'
+          ? await (rawParams as Promise<unknown>).catch(() => ({}))
+          : rawParams || {};
+
+      // Request ID
+      const headerRequestId = request.headers.get('x-request-id');
+      const requestId = (headerRequestId as RequestId) || createRequestId();
+
+      // Auth guards
+      if (auth?.type === 'devOnly' && isProduction) {
+        return handleApiError(new Error('Endpoint available only in development'), {
+          route: url.pathname,
+          method,
+          operation: 'dev_only_guard',
+          requestId,
+          logLevel: 'warn',
+        });
+      }
+
+      if (auth?.type === 'cron') {
+        const authError = verifyCronAuth(request);
+        if (authError) return cloneWithHeaders(authError, { 'X-Request-ID': requestId });
+      }
+
+      // Build context with validation
+      try {
+        const queryObj = Object.fromEntries(request.nextUrl.searchParams);
+
+        const parsedParams = validate?.params
+          ? validation.validate(validate.params, resolvedParams, 'route parameters')
+          : (resolvedParams as P);
+        const parsedQuery = validate?.query
+          ? validation.validate(validate.query, queryObj, 'query parameters')
+          : (queryObj as Q);
+        const headersObj = Object.fromEntries(request.headers.entries());
+        const parsedHeaders = validate?.headers
+          ? validation.validate(validate.headers, headersObj, 'request headers')
+          : (headersObj as H);
+
+        let parsedBody: B = {} as B;
+        if (validate?.body) {
+          const contentType = request.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            const json = await request.json().catch(() => ({}));
+            parsedBody = validation.validate(validate.body, json, 'request body') as B;
+          } else if (method !== 'GET' && method !== 'DELETE') {
+            // Non-JSON body - treat as empty and rely on handler if needed
+            parsedBody = validation.validate(validate.body, {}, 'request body') as B;
+          }
+        }
+
+        const requestLogger = logger.forRequest(request);
+
+        const ok = <T>(data: T, opts?: ApiOkOptions) =>
+          apiResponse.ok<T>(data, {
+            ...(opts || {}),
+            headers: { ...(opts?.additionalHeaders || {}), 'X-Request-ID': requestId },
+            requestId,
+          });
+
+        const okRaw = <T>(data: T, opts?: Omit<ApiOkOptions, 'envelope'>) =>
+          apiResponse.okRaw<T>(data, {
+            ...(opts || {}),
+            headers: { ...(opts?.additionalHeaders || {}), 'X-Request-ID': requestId },
+            requestId,
+          });
+
+        const ctx: ApiHandlerContext<P, Q, H, B> = {
+          request,
+          params: parsedParams,
+          query: parsedQuery,
+          headers: parsedHeaders,
+          body: parsedBody,
+          logger: requestLogger,
+          ok,
+          okRaw,
+        };
+
+        // Invoke handler with optional rate limiting
+        const invoke = async (): Promise<Response> => {
+          const result = await handler(ctx);
+          if (isResponse(result)) {
+            return cloneWithHeaders(result, { 'X-Request-ID': requestId });
+          }
+          // Default success path uses envelope unless overridden at factory level
+          const useEnvelope = response?.envelope !== false;
+          const res = ok(result as unknown, { ...(response ?? {}), envelope: useEnvelope });
+          return res;
+        };
+
+        if (rateLimit?.limiter) {
+          // withRateLimit will also add X-RateLimit-* headers on success
+          return await withRateLimit(request, rateLimit.limiter, invoke);
+        }
+
+        return await invoke();
+      } catch (error) {
+        return handleApiError(error instanceof Error ? error : new Error(String(error)), {
+          route: url.pathname,
+          method,
+          operation: 'api_route_handler',
+          requestId,
+        });
+      }
+    };
+  };
+
+  const result: Partial<
+    Record<HttpMethod, (request: NextRequest, context?: { params?: unknown }) => Promise<Response>>
+  > = {};
+  const getHandler = wrap('GET', handlers.GET);
+  if (getHandler) result.GET = getHandler;
+  const postHandler = wrap('POST', handlers.POST);
+  if (postHandler) result.POST = postHandler;
+  const putHandler = wrap('PUT', handlers.PUT);
+  if (putHandler) result.PUT = putHandler;
+  const deleteHandler = wrap('DELETE', handlers.DELETE);
+  if (deleteHandler) result.DELETE = deleteHandler;
+  const patchHandler = wrap('PATCH', handlers.PATCH);
+  if (patchHandler) result.PATCH = patchHandler;
+
+  return result;
 }

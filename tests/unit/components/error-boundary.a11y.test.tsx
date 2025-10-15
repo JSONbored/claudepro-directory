@@ -19,16 +19,16 @@
  * @see src/components/shared/error-boundary.tsx
  */
 
-import { describe, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, expect, test, vi } from 'vitest';
+import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 import {
   axeTest,
   axeTestInteractive,
   testKeyboardNavigation,
   testScreenReaderCompatibility,
 } from '@/tests/utils/accessibility';
-import { ErrorBoundary } from '@/src/components/shared/error-boundary';
 
 // Component that throws an error for testing
 function ThrowError({ shouldThrow }: { shouldThrow: boolean }) {
@@ -266,7 +266,7 @@ describe('ErrorBoundary - Accessibility', () => {
         </ErrorBoundary>
       );
 
-      const { hasAriaLabels } = testScreenReaderCompatibility(container);
+      testScreenReaderCompatibility(container);
       // Error boundary may not have explicit ARIA labels if using semantic HTML
       // which is acceptable
       expect(container).toBeInTheDocument();
@@ -430,8 +430,7 @@ describe('ErrorBoundary - Accessibility', () => {
         </ErrorBoundary>
       );
 
-      let stackTrace = screen.queryByText(/stack trace/i);
-      expect(stackTrace).not.toBeInTheDocument();
+      expect(screen.queryByText(/stack trace/i)).not.toBeInTheDocument();
 
       // Development mode - show technical details
       process.env.NODE_ENV = 'development';
@@ -441,9 +440,8 @@ describe('ErrorBoundary - Accessibility', () => {
         </ErrorBoundary>
       );
 
-      stackTrace = screen.queryByText(/stack trace/i);
-      // May or may not be visible depending on error
-      // Test passes if component doesn't crash
+      // Stack trace may or may not be visible depending on error
+      // Test passes if component doesn't crash during rerender
 
       process.env.NODE_ENV = originalEnv;
     });

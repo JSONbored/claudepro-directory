@@ -15,7 +15,7 @@ export default function ChangelogLoading() {
       <div className="space-y-4">
         <Skeleton size="sm" width="xs" className="mb-4" />
         <PageHeaderSkeleton />
-        <div className="flex items-center gap-6">
+        <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_6}>
           <Skeleton size="sm" width="lg" />
           <Skeleton size="sm" width="lg" />
         </div>

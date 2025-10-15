@@ -19,13 +19,13 @@ import { join, resolve } from 'node:path';
 import { z } from 'zod';
 import {
   type BuildCategoryConfig,
-  type BuildCategoryId,
   type BuildMetrics,
   type CategoryBuildResult,
   type ContentType,
   extractMetadata,
   getBuildCategoryConfig,
-} from '@/src/lib/config/build-category-config';
+  type BuildCategoryId,
+} from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import { generateSlugFromFilename } from '@/src/lib/schemas/content-generation.schema';
 import { slugToTitle } from '@/src/lib/utils';

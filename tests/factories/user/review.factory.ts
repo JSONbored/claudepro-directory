@@ -70,27 +70,28 @@ export const reviewFactory = Factory.define<Review>(() => {
             'Great quality and well-documented.',
             'Very useful, will use again.',
           ]);
-        } else if (rating === 3) {
+        }
+        if (rating === 3) {
           return faker.helpers.arrayElement([
             'Good but could use some improvements.',
             'Works okay, decent for basic use.',
             'Not bad, but has some limitations.',
           ]);
-        } else {
-          return faker.helpers.arrayElement([
-            'Did not work as expected.',
-            'Had issues getting this to work.',
-            'Needs better documentation.',
-          ]);
         }
+        return faker.helpers.arrayElement([
+          'Did not work as expected.',
+          'Had issues getting this to work.',
+          'Needs better documentation.',
+        ]);
       },
       { probability: 0.7 }
     ),
     helpful_count: faker.number.int({ min: 0, max: 50 }),
     created_at: createdAt,
-    updated_at: faker.helpers.maybe(
-      () => faker.date.between({ from: createdAt, to: new Date() }).toISOString(),
-      { probability: 0.1 }
-    ) || createdAt,
+    updated_at:
+      faker.helpers.maybe(
+        () => faker.date.between({ from: createdAt, to: new Date() }).toISOString(),
+        { probability: 0.1 }
+      ) || createdAt,
   };
 });

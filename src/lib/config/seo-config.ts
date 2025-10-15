@@ -24,29 +24,44 @@ import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 /**
  * Suffix lengths for each category
  * Format: " - {Category} - Claude Pro Directory"
+ * 
+ * Dynamically calculated from unified category registry where possible.
+ * Non-registry categories (guides subcategories, jobs, changelog) remain hardcoded.
  */
-export const SUFFIX_LENGTHS: Record<ContentCategory, number> = {
-  // Core content types
-  agents: 32, // " - Agents - Claude Pro Directory"
-  mcp: 29, // " - Mcp - Claude Pro Directory"
-  rules: 31, // " - Rules - Claude Pro Directory"
-  commands: 34, // " - Commands - Claude Pro Directory"
-  hooks: 31, // " - Hooks - Claude Pro Directory"
-  statuslines: 37, // " - Statuslines - Claude Pro Directory"
-  collections: 37, // " - Collections - Claude Pro Directory"
+import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 
-  // SEO content types
-  guides: 32, // " - Guides - Claude Pro Directory"
-  tutorials: 35, // " - Tutorials - Claude Pro Directory"
-  comparisons: 37, // " - Comparisons - Claude Pro Directory"
-  workflows: 35, // " - Workflows - Claude Pro Directory"
-  'use-cases': 36, // " - Use Cases - Claude Pro Directory"
-  troubleshooting: 41, // " - Troubleshooting - Claude Pro Directory"
-  categories: 36, // " - Categories - Claude Pro Directory"
+const SITE_NAME = 'Claude Pro Directory'; // 20 chars
+const SEPARATOR = ' - '; // 3 chars
+
+// Calculate suffix length: " - {CategoryName} - Claude Pro Directory"
+function calculateSuffixLength(categoryDisplayName: string): number {
+  return SEPARATOR.length + categoryDisplayName.length + SEPARATOR.length + SITE_NAME.length;
+}
+
+// Derive suffix lengths from registry and merge with non-registry categories
+export const SUFFIX_LENGTHS: Record<ContentCategory, number> = {
+  // Core content types (derived from registry)
+  agents: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.agents.pluralTitle),
+  mcp: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.mcp.pluralTitle),
+  rules: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.rules.pluralTitle),
+  commands: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.commands.pluralTitle),
+  hooks: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.hooks.pluralTitle),
+  statuslines: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.statuslines.pluralTitle),
+  collections: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.collections.pluralTitle),
+  skills: calculateSuffixLength(UNIFIED_CATEGORY_REGISTRY.skills.pluralTitle),
+
+  // SEO content types (not in main registry)
+  guides: calculateSuffixLength('Guides'),
+  tutorials: calculateSuffixLength('Tutorials'),
+  comparisons: calculateSuffixLength('Comparisons'),
+  workflows: calculateSuffixLength('Workflows'),
+  'use-cases': calculateSuffixLength('Use Cases'),
+  troubleshooting: calculateSuffixLength('Troubleshooting'),
+  categories: calculateSuffixLength('Categories'),
 
   // Special types
-  jobs: 30, // " - Jobs - Claude Pro Directory"
-  changelog: 35, // " - Changelog - Claude Pro Directory"
+  jobs: calculateSuffixLength('Jobs'),
+  changelog: calculateSuffixLength('Changelog'),
 } as const;
 
 /**
@@ -77,6 +92,7 @@ export const MAX_BASE_TITLE_LENGTH: Record<ContentCategory, number> = {
   hooks: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.hooks, // 29 chars
   statuslines: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.statuslines, // 23 chars
   collections: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.collections, // 23 chars
+  skills: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.skills, // 28 chars
 
   // SEO content types
   guides: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.guides, // 28 chars

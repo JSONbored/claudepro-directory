@@ -25,6 +25,7 @@ import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { METADATA_DEFAULTS } from '@/src/lib/seo/metadata-registry';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // Dynamic imports for Fumadocs components (only loads on /api-docs routes for better performance)
 const DocsLayout = dynamic(
@@ -36,7 +37,7 @@ const DocsLayout = dynamic(
     ssr: true,
     loading: () => (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
+        <div className={UI_CLASSES.FLEX_COL_ITEMS_CENTER_GAP_4}>
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           <p className="text-muted-foreground text-sm">Loading documentation...</p>
         </div>
@@ -137,7 +138,7 @@ export default function APIDocsLayout({ children }: LayoutProps) {
         nav={{
           // Custom navigation title
           title: (
-            <div className="flex items-center gap-2">
+            <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
               <span className="font-semibold">{APP_CONFIG.name}</span>
               <span className="text-fd-muted-foreground">API</span>
             </div>

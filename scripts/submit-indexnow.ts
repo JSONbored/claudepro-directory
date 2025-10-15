@@ -6,7 +6,7 @@
  *   npm run indexnow:submit
  *
  * Features:
- * - Reuses sitemap generation logic for URL collection
+ * - Fetches URLs from production sitemap.xml (always current)
  * - Batch submission (max 10,000 URLs per IndexNow spec)
  * - Error handling and logging
  * - Supports Bing, Yandex, and other IndexNow-compatible search engines
@@ -14,16 +14,7 @@
  * Documentation: https://www.indexnow.org/documentation
  */
 
-// Import directly from metadata files
 import { existsSync } from 'fs';
-import { agentsMetadata } from '../generated/agents-metadata.js';
-import { collectionsMetadata } from '../generated/collections-metadata.js';
-import { commandsMetadata } from '../generated/commands-metadata.js';
-import { hooksMetadata } from '../generated/hooks-metadata.js';
-import { mcpMetadata } from '../generated/mcp-metadata.js';
-import { rulesMetadata } from '../generated/rules-metadata.js';
-import { statuslinesMetadata } from '../generated/statuslines-metadata.js';
-import { extractUrlStrings, generateAllSiteUrls } from '../src/lib/build/url-generator.js';
 import { APP_CONFIG } from '../src/lib/constants';
 import { logger } from '../src/lib/logger.js';
 
@@ -31,32 +22,45 @@ import { logger } from '../src/lib/logger.js';
 const INDEXNOW_API_KEY = '863ad0a5c1124f59a060aa77f0861518';
 const INDEXNOW_API_URL = 'https://api.indexnow.org/IndexNow';
 const baseUrl = APP_CONFIG.url;
+const SITEMAP_URL = `${baseUrl}/sitemap.xml`;
 
 /**
- * Generate all site URLs using centralized URL generator
+ * Fetch and parse URLs from production sitemap.xml
  */
 async function getAllUrls(): Promise<string[]> {
-  const sitemapUrls = await generateAllSiteUrls(
-    {
-      agentsMetadata,
-      collectionsMetadata,
-      commandsMetadata,
-      hooksMetadata,
-      mcpMetadata,
-      rulesMetadata,
-      statuslinesMetadata,
-    },
-    {
-      baseUrl,
-      includeGuides: true,
-      includeChangelog: true,
-      includeLlmsTxt: true,
-      includeTools: true,
-    }
-  );
+  logger.progress(`Fetching sitemap from ${SITEMAP_URL}...`);
 
-  // Extract just the URL strings for IndexNow
-  return extractUrlStrings(sitemapUrls);
+  try {
+    const response = await fetch(SITEMAP_URL);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch sitemap: HTTP ${response.status}`);
+    }
+
+    const sitemapXml = await response.text();
+
+    // Parse <loc> tags from XML sitemap
+    // Simple regex approach - matches <loc>URL</loc>
+    const urlMatches = sitemapXml.matchAll(/<loc>(.*?)<\/loc>/g);
+    const urls: string[] = [];
+
+    for (const match of urlMatches) {
+      const url = match[1];
+      if (url) {
+        urls.push(url);
+      }
+    }
+
+    if (urls.length === 0) {
+      throw new Error('No URLs found in sitemap');
+    }
+
+    return urls;
+  } catch (error) {
+    throw new Error(
+      `Failed to fetch sitemap: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
 }
 
 /**
@@ -143,8 +147,10 @@ async function main() {
     const urls = await getAllUrls();
     logger.success(`✅ Collected ${urls.length} URLs\n`);
 
-    // Verify key file exists
-    const keyFilePath = `/workspace/public/${INDEXNOW_API_KEY}.txt`;
+    // Verify key file exists (relative to script location)
+    const keyFilePath = decodeURIComponent(
+      new URL(`../public/${INDEXNOW_API_KEY}.txt`, import.meta.url).pathname
+    );
     if (!existsSync(keyFilePath)) {
       logger.failure(`❌ Key file not found: ${keyFilePath}`);
       logger.log(`   Create the file with content: ${INDEXNOW_API_KEY}`);

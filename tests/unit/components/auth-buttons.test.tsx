@@ -12,9 +12,9 @@
  * @see src/components/auth/auth-buttons.tsx
  */
 
-import { describe, expect, test, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { AuthButtons, SignOutButton } from '@/src/components/auth/auth-buttons';
 import { createClient } from '@/src/lib/supabase/client';
 

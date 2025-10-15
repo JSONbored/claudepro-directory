@@ -29,7 +29,7 @@
 
 ## 🎯 What is Claude Pro Directory?
 
-**Stop starting from scratch.** A searchable collection of 147+ pre-built Claude configurations with instant setup, task-specific optimization, and weekly community updates.
+**Stop starting from scratch.** A searchable collection of 158+ pre-built Claude configurations with instant setup, task-specific optimization, and weekly community updates.
 
 Whether you need Claude to review code like a senior engineer, write like a professional author, or analyze data like a scientist - find it in seconds, copy, and start using.
 
@@ -59,13 +59,13 @@ See our [Contributing Guide](.github/CONTRIBUTING.md) for detailed instructions.
 
 <div align="center">
 
-|     **[🤖 Agents (10)](https://claudepro.directory/agents)**      | **[⚙️ MCP Servers (39)](https://claudepro.directory/mcp)** |      **[📜 Rules (11)](https://claudepro.directory/rules)**       |
-| :---------------------------------------------------------------: | :--------------------------------------------------------: | :---------------------------------------------------------------: |
-|                      Specialized AI personas                      |               Model Context Protocol servers               |                        Custom instructions                        |
-|   **[🔧 Commands (12)](https://claudepro.directory/commands)**    |   **[🪝 Hooks (60)](https://claudepro.directory/hooks)**   | **[📦 Collections (9)](https://claudepro.directory/collections)** |
-|                           Quick actions                           |                      Event automation                      |                          Curated bundles                          |
-| **[💻 Statuslines (6)](https://claudepro.directory/statuslines)** |  **[📊 Trending](https://claudepro.directory/trending)**   |                                                                   |
-|                      Custom status displays                       |                     Popular this week                      |                                                                   |
+|     **[🤖 Agents (10)](https://claudepro.directory/agents)**      | **[⚙️ MCP Servers (40)](https://claudepro.directory/mcp)** |    **[🔧 Commands (12)](https://claudepro.directory/commands)**    |
+| :---------------------------------------------------------------: | :--------------------------------------------------------: | :----------------------------------------------------------------: |
+|                      Specialized AI personas                      |               Model Context Protocol servers               |                           Quick actions                            |
+|      **[📜 Rules (11)](https://claudepro.directory/rules)**       |   **[🪝 Hooks (60)](https://claudepro.directory/hooks)**   | **[💻 Statuslines (6)](https://claudepro.directory/statuslines)**  |
+|                        Custom instructions                        |                      Event automation                      |                       Custom status displays                       |
+| **[📦 Collections (9)](https://claudepro.directory/collections)** |  **[📚 Skills (10)](https://claudepro.directory/skills)**  |     **[📊 Trending](https://claudepro.directory/trending)**        |
+|                          Curated bundles                          |                 Task-focused capability guides             |                         Popular this week                          |
 
 </div>
 

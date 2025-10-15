@@ -29,7 +29,15 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  return generatePageMetadata('/jobs/:slug', { params: { slug } });
+
+  // Load job data for metadata generation
+  const job = jobs.find((j) => j.slug === slug);
+
+  return generatePageMetadata('/jobs/:slug', {
+    params: { slug },
+    item: job || undefined,
+    slug,
+  });
 }
 
 export async function generateStaticParams() {

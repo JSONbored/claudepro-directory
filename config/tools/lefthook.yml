@@ -19,32 +19,53 @@ pre-commit:
   parallel: true
   follow: true  # Follow symlinks when processing files
   commands:
-    # 1. Code Formatting & Linting (auto-fixes when possible)
-    lint:
+    # 1. Technical Debt Prevention (baseline-driven)
+    # Strategy: Use baseline tracking to prevent regressions
+    # - src/ directory: Must have 0 issues (always enforced)
+    # - tests/ directory: Can't add NEW debt (baseline comparison)
+    # - Allows gradual cleanup without blocking development
+    tech-debt-check:
       glob: "*.{ts,tsx,js,jsx,mjs}"
-      run: npm run lint
-      stage_fixed: true # Auto-stage fixed files
-      fail_text: "❌ Linting failed. Run 'npm run format' to auto-fix."
+      run: |
+        echo "🔍 Technical Debt Check (baseline-driven)"
+        echo ""
 
-    # 2. Type Safety (fast, catches most issues early)
-    type-check:
-      glob: "*.{ts,tsx}"
-      run: npm run type-check
-      fail_text: "❌ TypeScript errors found. Fix them before committing."
+        # Run the baseline checker
+        if config/tools/tech-debt/tracker.sh check; then
+          echo ""
+          echo "✅ Technical debt check passed"
+          echo "   • src/ is clean"
+          echo "   • No new debt in tests/"
+          echo ""
+          echo "💡 Run 'npm run tech-debt:report' to see full report"
+          exit 0
+        else
+          echo ""
+          echo "❌ Technical debt check failed"
+          echo ""
+          echo "Quick fixes:"
+          echo "  • Run 'npm run format' to auto-fix linting issues"
+          echo "  • Run 'npm run tech-debt:report' for detailed analysis"
+          echo ""
+          echo "If you cleaned up debt, update baseline:"
+          echo "  • npm run tech-debt:baseline"
+          exit 1
+        fi
+      fail_text: "❌ Technical debt check failed. Fix issues or update baseline after cleanup."
 
-    # 3. Content Validation (only when content files change)
+    # 2. Content Validation (only when content files change)
     content-validation:
       glob: "content/**/*.json"
       run: npm run validate:content
       fail_text: "❌ Content validation failed. Check your JSON files."
 
-    # 4. SEO Validation (only when MDX content changes)
+    # 3. SEO Validation (only when MDX content changes)
     seo-validation:
       glob: "content/**/*.mdx"
       run: npm run validate:seo
       fail_text: "❌ SEO validation failed. Fix H1 tags, titles, and descriptions."
 
-    # 5. Run tests ONLY for changed files (smart, not strict)
+    # 4. Run tests ONLY for changed files (smart, not strict)
     # Uses lefthook 1.13+ file filtering for better performance
     test-changed:
       glob: "{src,tests}/**/*.{ts,tsx}"
@@ -101,7 +122,17 @@ pre-push:
         npm run build
       fail_text: "❌ Build failed. Fix errors before pushing."
 
-    # 3. Security audit (moderate+ severity only, not overly strict)
+    # 3. Metadata validation for ALL pages (optional, skippable with LEFTHOOK_EXCLUDE)
+    # Validates every page in sitemap for proper SEO metadata
+    # Automatically uses PORT env var from your dev server
+    metadata-validation:
+      run: |
+        echo "🔍 Validating metadata for all sitemap pages..."
+        echo "   (Skip with: LEFTHOOK_EXCLUDE=metadata-validation git push)"
+        npm run test:e2e:metadata || echo "⚠️  Metadata validation failed (not blocking - fix before production deploy)"
+      fail_text: "⚠️  Metadata validation has failures (not blocking)."
+
+    # 4. Security audit (moderate+ severity only, not overly strict)
     security:
       run: |
         echo "🔒 Running security audit..."

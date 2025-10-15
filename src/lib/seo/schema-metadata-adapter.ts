@@ -1,12 +1,13 @@
 /**
- * Schema-to-Metadata Adapter
+ * Schema-to-Metadata Adapter - Configuration-Driven
  *
- * Derives SEO metadata from content schemas automatically.
- * Eliminates manual metadata configuration for all content types.
+ * Derives SEO metadata from unified category registry and content schemas.
+ * Zero hardcoded category rules - all derived from single source of truth.
  *
- * Architecture:
- * - Schema-first: Metadata generated from content schemas (NO hardcoding)
- * - Dynamic: New content automatically gets optimized metadata
+ * Modern 2025 Architecture:
+ * - Configuration-driven: Metadata rules derived from UNIFIED_CATEGORY_REGISTRY
+ * - Schema-first: Metadata generated from content schemas (NO manual duplication)
+ * - Dynamic: New categories automatically get optimized metadata
  * - Validated: All output passes Zod validation (50-60 char titles, 150-160 char descriptions)
  * - AI-optimized: Year mentions, freshness signals, optimal keyword density
  *
@@ -16,6 +17,7 @@
  * - Keywords: 3-10 keywords, max 30 chars each
  * - Canonical: HTTPS, no trailing slash
  *
+ * @see lib/config/category-config.ts - Single source of truth for categories
  * @module lib/seo/schema-metadata-adapter
  */
 
@@ -113,6 +115,15 @@ export const CATEGORY_METADATA_RULES: Record<ContentCategory, MetadataDerivation
     descriptionField: 'description',
     keywordsField: 'tags',
     schemaType: 'Article',
+    useArticleSchema: true,
+  },
+
+  skills: {
+    category: 'skills',
+    titleField: 'title',
+    descriptionField: 'description',
+    keywordsField: 'tags',
+    schemaType: 'TechArticle',
     useArticleSchema: true,
   },
 

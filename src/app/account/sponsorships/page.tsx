@@ -75,7 +75,7 @@ export default async function SponsorshipsPage() {
           return (
             <Card key={sponsorship.id}>
               <CardHeader>
-                <div className="flex items-start justify-between">
+                <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
                   <div className="flex-1">
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                       <SponsoredBadge

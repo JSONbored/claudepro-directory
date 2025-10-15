@@ -14,8 +14,15 @@
  * @see src/app/api/[contentType]/route.ts
  */
 
-import { http, HttpResponse, delay } from 'msw';
-import { mockAgents, mockMcp, mockCommands, mockHooks, mockRules, mockStatuslines } from '../fixtures/content';
+import { delay, HttpResponse, http } from 'msw';
+import {
+  mockAgents,
+  mockCommands,
+  mockHooks,
+  mockMcp,
+  mockRules,
+  mockStatuslines,
+} from '../fixtures/content';
 
 /**
  * Content type mapping (matches API route structure)

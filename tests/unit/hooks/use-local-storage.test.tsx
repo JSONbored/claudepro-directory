@@ -297,13 +297,14 @@ describe('useLocalStorage', () => {
 
       // Simulate storage event from another tab
       act(() => {
-        const storageEvent = new StorageEvent('storage', {
-          key: 'sync-key',
-          newValue: JSON.stringify('updated-from-other-tab'),
-          oldValue: JSON.stringify('initial'),
-          storageArea: localStorage,
-        });
-        window.dispatchEvent(storageEvent);
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: 'sync-key',
+            newValue: JSON.stringify('updated-from-other-tab'),
+            oldValue: JSON.stringify('initial'),
+            storageArea: localStorage,
+          })
+        );
       });
 
       expect(result.current.value).toBe('updated-from-other-tab');
@@ -321,13 +322,14 @@ describe('useLocalStorage', () => {
 
       // Simulate storage event with null (value removed)
       act(() => {
-        const storageEvent = new StorageEvent('storage', {
-          key: 'sync-key',
-          newValue: null,
-          oldValue: JSON.stringify('value'),
-          storageArea: localStorage,
-        });
-        window.dispatchEvent(storageEvent);
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: 'sync-key',
+            newValue: null,
+            oldValue: JSON.stringify('value'),
+            storageArea: localStorage,
+          })
+        );
       });
 
       expect(result.current.value).toBe('default');
@@ -342,12 +344,14 @@ describe('useLocalStorage', () => {
       );
 
       act(() => {
-        const storageEvent = new StorageEvent('storage', {
-          key: 'key-b',
-          newValue: JSON.stringify('value-b'),
-          storageArea: localStorage,
-        });
-        window.dispatchEvent(storageEvent);
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: 'key-b',
+            newValue: JSON.stringify('value-b'),
+            oldValue: null,
+            storageArea: localStorage,
+          })
+        );
       });
 
       expect(result.current.value).toBe('value-a');
@@ -362,12 +366,14 @@ describe('useLocalStorage', () => {
       );
 
       act(() => {
-        const storageEvent = new StorageEvent('storage', {
-          key: 'no-sync-key',
-          newValue: JSON.stringify('should-not-sync'),
-          storageArea: localStorage,
-        });
-        window.dispatchEvent(storageEvent);
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: 'no-sync-key',
+            newValue: JSON.stringify('should-not-sync'),
+            oldValue: null,
+            storageArea: localStorage,
+          })
+        );
       });
 
       expect(result.current.value).toBe('initial');
@@ -447,12 +453,14 @@ describe('useLocalStorage', () => {
       );
 
       act(() => {
-        const storageEvent = new StorageEvent('storage', {
-          key: 'sync-error-key',
-          newValue: 'invalid-json{',
-          storageArea: localStorage,
-        });
-        window.dispatchEvent(storageEvent);
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: 'sync-error-key',
+            newValue: 'invalid-json{',
+            oldValue: null,
+            storageArea: localStorage,
+          })
+        );
       });
 
       expect(result.current.error).toBeInstanceOf(Error);

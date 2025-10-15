@@ -1,0 +1,64 @@
+{
+  "slug": "my-skill",
+  "title": "My Skill Title",
+  "seoTitle": "My Skill Title - Practical Guide",
+  "description": "Brief 1-2 sentence description of what this skill enables and common use cases.",
+  "category": "skills",
+  "author": "Your Name",
+  "dateAdded": "2025-10-15",
+  "tags": ["tag1", "tag2", "tag3"],
+  "content": "# Skill Overview\n\nBrief introduction to the skill.\n\n## Key Capabilities\n- Capability 1\n- Capability 2\n\n## Best Practices\n- Practice 1\n- Practice 2",
+  "requirements": [
+    "Python 3.11+ (or specify your runtime)",
+    "package-name (specify versions if critical)",
+    "tool-name"
+  ],
+  "features": [
+    "Key feature 1",
+    "Key feature 2",
+    "Key feature 3"
+  ],
+  "useCases": [
+    "Use case 1: Specific scenario",
+    "Use case 2: Another scenario",
+    "Use case 3: Final scenario"
+  ],
+  "examples": [
+    {
+      "title": "Example 1: Descriptive Title",
+      "language": "python",
+      "code": "# Your runnable code example here\nprint('Hello World')"
+    },
+    {
+      "title": "Example 2: Another Operation",
+      "language": "python",
+      "code": "# Another example\nresult = process_data(input_data)"
+    }
+  ],
+  "installation": {
+    "claudeDesktop": {
+      "steps": [
+        "Install system dependencies (e.g., apt-get install tool-name)",
+        "Restart Claude Desktop"
+      ]
+    },
+    "claudeCode": {
+      "steps": [
+        "Install packages: pip install package-name",
+        "Verify installation: package-name --version"
+      ]
+    }
+  },
+  "troubleshooting": [
+    {
+      "issue": "Common error message or problem",
+      "solution": "How to fix it - be specific with commands/steps"
+    },
+    {
+      "issue": "Another common issue",
+      "solution": "Solution with exact steps to resolve"
+    }
+  ],
+  "documentationUrl": "https://example.com/docs",
+  "source": "community"
+}

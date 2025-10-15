@@ -592,6 +592,7 @@ export async function getBatchTrendingData(
     hooks: UnifiedContentItem[];
     statuslines?: UnifiedContentItem[];
     collections?: UnifiedContentItem[];
+    skills?: UnifiedContentItem[];
   },
   options?: { includeSponsored?: boolean }
 ) {
@@ -604,6 +605,7 @@ export async function getBatchTrendingData(
     ...contentByCategory.hooks,
     ...(contentByCategory.statuslines || []),
     ...(contentByCategory.collections || []),
+    ...(contentByCategory.skills || []),
   ];
 
   // Run all calculations in parallel (including sponsored fetch)

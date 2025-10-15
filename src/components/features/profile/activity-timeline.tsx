@@ -147,7 +147,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     {activity.type === 'post' && (
-                      <div className="flex items-start justify-between gap-2">
+                      <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN_GAP_2}>
                         <div className="flex-1 min-w-0">
                           <h3 className="font-medium text-base mb-1">
                             {activity.url ? (
@@ -155,7 +155,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                                 href={activity.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="hover:text-primary inline-flex items-center gap-1"
+                                className={`hover:text-primary ${UI_CLASSES.INLINE_FLEX_ITEMS_CENTER_GAP_1}`}
                               >
                                 {activity.title}
                                 <ExternalLink className="h-3 w-3" />
@@ -164,7 +164,9 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                               activity.title
                             )}
                           </h3>
-                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                          <div
+                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} text-sm text-muted-foreground`}
+                          >
                             <span>{activity.vote_count} votes</span>
                             <span>•</span>
                             <span>{activity.comment_count} comments</span>
@@ -177,7 +179,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                     )}
 
                     {activity.type === 'comment' && (
-                      <div className="flex items-start justify-between gap-2">
+                      <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN_GAP_2}>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm text-muted-foreground mb-1">
                             Commented on{' '}
@@ -194,7 +196,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                     )}
 
                     {activity.type === 'vote' && (
-                      <div className="flex items-start justify-between gap-2">
+                      <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN_GAP_2}>
                         <p className="text-sm">
                           Upvoted <span className="font-medium">{activity.post_title}</span>
                         </p>
@@ -205,10 +207,12 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                     )}
 
                     {activity.type === 'submission' && (
-                      <div className="flex items-start justify-between gap-2">
+                      <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN_GAP_2}>
                         <div className="flex-1 min-w-0">
                           <h3 className="font-medium text-base mb-1">{activity.content_name}</h3>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div
+                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} text-sm text-muted-foreground`}
+                          >
                             <Badge variant="secondary" className="text-xs">
                               {activity.content_type}
                             </Badge>
@@ -218,7 +222,7 @@ export function ActivityTimeline({ initialActivities, summary }: ActivityTimelin
                                 href={activity.pr_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 hover:text-primary"
+                                className={`${UI_CLASSES.INLINE_FLEX_ITEMS_CENTER_GAP_1} hover:text-primary`}
                               >
                                 View PR
                                 <ExternalLink className="h-3 w-3" />

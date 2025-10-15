@@ -192,7 +192,7 @@ class RelatedContentService {
     try {
       // Load from metadata loaders (already lazy-loaded and cached)
       const { metadataLoader } = await import('@/src/lib/content/lazy-content-loaders');
-      const { getAllBuildCategoryConfigs } = await import('@/src/lib/config/build-category-config');
+      const { getAllBuildCategoryConfigs } = await import('@/src/lib/config/category-config');
 
       // Get all category metadata keys
       const categoryKeys = getAllBuildCategoryConfigs().map((config) => {
@@ -306,7 +306,15 @@ class RelatedContentService {
       score += scoringItem.priority * 0.1;
 
       // Main categories boost (ensure visibility)
-      const mainCategories = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'];
+      const mainCategories = [
+        'agents',
+        'mcp',
+        'rules',
+        'commands',
+        'hooks',
+        'statuslines',
+        'collections',
+      ];
       if (mainCategories.includes(item.category)) {
         score += 0.2;
       }

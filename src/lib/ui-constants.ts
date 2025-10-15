@@ -119,16 +119,25 @@ export const UI_CLASSES = {
    * Flexbox Layouts - Common patterns
    */
   FLEX_ITEMS_CENTER_GAP_1: 'flex items-center gap-1',
+  FLEX_ITEMS_CENTER_GAP_1_5: 'flex items-center gap-1.5',
   FLEX_ITEMS_CENTER_GAP_2: 'flex items-center gap-2',
   FLEX_ITEMS_CENTER_GAP_3: 'flex items-center gap-3',
+  FLEX_ITEMS_CENTER_GAP_4: 'flex items-center gap-4',
+  FLEX_ITEMS_CENTER_GAP_6: 'flex items-center gap-6',
   FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN: 'flex items-center justify-between',
+  FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2: 'flex items-center justify-center gap-2',
+  FLEX_ITEMS_START_GAP_2: 'flex items-start gap-2',
   FLEX_ITEMS_START_GAP_3: 'flex items-start gap-3',
+  FLEX_ITEMS_START_GAP_4: 'flex items-start gap-4',
   FLEX_ITEMS_START_JUSTIFY_BETWEEN: 'flex items-start justify-between',
+  FLEX_ITEMS_START_JUSTIFY_BETWEEN_GAP_2: 'flex items-start justify-between gap-2',
+  FLEX_ITEMS_END_GAP_2: 'flex items-end gap-2',
   FLEX_GAP_2: 'flex gap-2',
   FLEX_GAP_3: 'flex gap-3',
   FLEX_GAP_4: 'flex gap-4',
   FLEX_WRAP_GAP_1: 'flex flex-wrap gap-1',
   FLEX_WRAP_GAP_2: 'flex flex-wrap gap-2',
+  FLEX_WRAP_GAP_3: 'flex flex-wrap gap-3',
   FLEX_WRAP_GAP_4: 'flex flex-wrap gap-4',
 
   /**
@@ -138,16 +147,37 @@ export const UI_CLASSES = {
   FLEX_ROW: 'flex flex-row',
   FLEX_COL_CENTER: 'flex flex-col items-center',
   FLEX_ROW_CENTER: 'flex flex-row items-center',
+  FLEX_COL_ITEMS_START: 'flex flex-col items-start',
+  FLEX_COL_ITEMS_CENTER_GAP_4: 'flex flex-col items-center gap-4',
+  FLEX_COL_ITEMS_CENTER_JUSTIFY_CENTER: 'flex flex-col items-center justify-center py-12',
+  FLEX_COL_GAP_1: 'flex flex-col gap-1',
+  FLEX_COL_GAP_2: 'flex flex-col gap-2',
+  FLEX_COL_SM_ROW_GAP_2: 'flex flex-col sm:flex-row gap-2 sm:gap-3',
+  FLEX_COL_SM_ROW_GAP_3: 'flex flex-col sm:flex-row gap-3 sm:gap-4',
+  FLEX_COL_SM_ROW_ITEMS_START: 'flex flex-col sm:flex-row items-start gap-3',
+  FLEX_COL_SM_ROW_ITEMS_CENTER_JUSTIFY_BETWEEN:
+    'flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4',
+  FLEX_ROW_ITEMS_CENTER_JUSTIFY_BETWEEN:
+    'flex flex-row items-center justify-between space-y-0 pb-2',
 
   /**
    * Flexbox - Extended
    */
   FLEX_1: 'flex-1',
+  FLEX_1_MIN_W_0: 'flex-1 min-w-0',
+  FLEX_1_SM_FLEX_INITIAL: 'flex-1 sm:flex-initial',
   FLEX_GROW: 'flex-grow',
   FLEX_SHRINK: 'flex-shrink',
   FLEX_SHRINK_0: 'flex-shrink-0',
+  FLEX_SHRINK_0_MT_0_5: 'flex-shrink-0 mt-0.5',
   FLEX_WRAP: 'flex-wrap',
   FLEX_NOWRAP: 'flex-nowrap',
+
+  /**
+   * Inline Flex Patterns
+   */
+  INLINE_FLEX_ITEMS_CENTER_GAP_1: 'inline-flex items-center gap-1',
+  INLINE_FLEX_ITEMS_CENTER_GAP_2: 'inline-flex items-center gap-2',
 
   /**
    * Layout Alignment - Justify
@@ -743,13 +773,17 @@ export const UI_CLASSES = {
 export type UIClassKey = keyof typeof UI_CLASSES;
 
 /**
- * Content Card Behavior Configuration
+ * Content Card Behavior Configuration - Configuration-Driven
  *
- * Defines which UI elements to show/hide for different content types.
- * This eliminates the need for separate card components per content type.
+ * Auto-generates default behaviors for all categories in registry.
+ * Special cases (guides, collections) override as needed.
  *
- * Tree-shakeable: Only the configuration is imported, not additional components.
- * Type-safe: Enforces valid content types at compile time.
+ * Modern 2025 Architecture:
+ * - Configuration-driven: Default behaviors derived from UNIFIED_CATEGORY_REGISTRY
+ * - Tree-shakeable: Only imported configurations included in bundle
+ * - Type-safe: Enforces valid content types at compile time
+ *
+ * @see lib/config/category-config.ts - Single source of truth for categories
  *
  * @example
  * ```typescript
@@ -759,70 +793,47 @@ export type UIClassKey = keyof typeof UI_CLASSES;
  * }
  * ```
  */
+import { getAllCategoryIds } from '@/src/lib/config/category-config';
+
+// Default behavior template for config-based categories
+const DEFAULT_CONFIG_BEHAVIOR = {
+  showCopyButton: true,
+  showViewCount: true,
+  showCopyCount: true,
+  showRating: true,
+  showFeaturedBadge: true,
+} as const;
+
+// Default behavior template for guide-like categories
+const DEFAULT_GUIDE_BEHAVIOR = {
+  showCopyButton: false,
+  showViewCount: true,
+  showCopyCount: false,
+  showRating: true,
+  showFeaturedBadge: true,
+} as const;
+
+// Build behaviors dynamically from registry
+const derivedBehaviors = Object.fromEntries(
+  getAllCategoryIds().map((categoryId) => [categoryId, DEFAULT_CONFIG_BEHAVIOR])
+);
+
 export const CARD_BEHAVIORS = {
-  /**
-   * Default behavior for configuration items
-   * (agents, mcp, commands, rules, hooks, statuslines)
-   */
-  default: {
-    showCopyButton: true,
-    showViewCount: true,
-    showCopyCount: true,
-    showRating: true,
-    showFeaturedBadge: true,
-  },
+  // Default for unknown categories
+  default: DEFAULT_CONFIG_BEHAVIOR,
 
-  /**
-   * Guide content behavior (tutorials, workflows, etc.)
-   * Guides are educational content, not copyable configurations
-   */
-  guides: {
-    showCopyButton: false, // Guides aren't copyable
-    showViewCount: true,
-    showCopyCount: false, // Guides don't track copies
-    showRating: true,
-    showFeaturedBadge: true,
-  },
-  tutorials: {
-    showCopyButton: false,
-    showViewCount: true,
-    showCopyCount: false,
-    showRating: true,
-    showFeaturedBadge: true,
-  },
-  workflows: {
-    showCopyButton: false,
-    showViewCount: true,
-    showCopyCount: false,
-    showRating: true,
-    showFeaturedBadge: true,
-  },
-  comparisons: {
-    showCopyButton: false,
-    showViewCount: true,
-    showCopyCount: false,
-    showRating: true,
-    showFeaturedBadge: true,
-  },
-  'use-cases': {
-    showCopyButton: false,
-    showViewCount: true,
-    showCopyCount: false,
-    showRating: true,
-    showFeaturedBadge: true,
-  },
-  troubleshooting: {
-    showCopyButton: false,
-    showViewCount: true,
-    showCopyCount: false,
-    showRating: true,
-    showFeaturedBadge: true,
-  },
+  // Registry categories (auto-derived)
+  ...derivedBehaviors,
 
-  /**
-   * Collection behavior
-   * Collections group multiple items, show engagement metrics
-   */
+  // Guide categories (educational content - not copyable)
+  guides: DEFAULT_GUIDE_BEHAVIOR,
+  tutorials: DEFAULT_GUIDE_BEHAVIOR,
+  workflows: DEFAULT_GUIDE_BEHAVIOR,
+  comparisons: DEFAULT_GUIDE_BEHAVIOR,
+  'use-cases': DEFAULT_GUIDE_BEHAVIOR,
+  troubleshooting: DEFAULT_GUIDE_BEHAVIOR,
+
+  // Special case overrides
   collections: {
     showCopyButton: true,
     showViewCount: true,
@@ -870,6 +881,17 @@ export const BADGE_COLORS = {
   },
 
   /**
+   * Collection type badge colors
+   * Used in: Collection cards, collection detail pages
+   */
+  collectionType: {
+    'starter-kit': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    workflow: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    'advanced-system': 'bg-red-500/10 text-red-400 border-red-500/20',
+    'use-case': 'bg-green-500/10 text-green-400 border-green-500/20',
+  },
+
+  /**
    * Changelog category badge colors
    * Used in: Changelog cards, changelog pages
    */
@@ -894,18 +916,31 @@ export const BADGE_COLORS = {
   },
 
   /**
-   * Content category badge colors (SHA-3146)
+   * Content category badge colors - Configuration-Driven
+   * Auto-derived from colorScheme in unified category registry
    * Used in: DetailSidebar category badges
    */
-  category: {
-    agents: 'bg-purple-500/20 text-purple-500 border-purple-500/30',
-    mcp: 'bg-green-500/20 text-green-500 border-green-500/30',
-    commands: 'bg-orange-500/20 text-orange-500 border-orange-500/30',
-    hooks: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
-    rules: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
-    collections: 'bg-purple-500/20 text-purple-500 border-purple-500/30',
-    default: 'bg-primary/20 text-primary border-primary/30',
-  },
+  category: (() => {
+    // Note: Using require() for module-level initialization (import would be hoisted)
+    // Type is safe because UNIFIED_CATEGORY_REGISTRY has strict typing
+    const { UNIFIED_CATEGORY_REGISTRY } = require('@/src/lib/config/category-config') as {
+      UNIFIED_CATEGORY_REGISTRY: Record<
+        string,
+        { colorScheme: string; [key: string]: unknown }
+      >;
+    };
+    const colors: Record<string, string> = {
+      default: 'bg-primary/20 text-primary border-primary/30',
+    };
+    
+    // Auto-generate badge colors from registry colorScheme
+    for (const [key, config] of Object.entries(UNIFIED_CATEGORY_REGISTRY)) {
+      const color = config.colorScheme.replace('-500', ''); // Extract base color
+      colors[key] = `bg-${color}-500/20 text-${color}-500 border-${color}-500/30`;
+    }
+    
+    return colors;
+  })(),
 
   /**
    * Submission status badge colors (SHA-3146)
@@ -935,6 +970,7 @@ export const BADGE_COLORS = {
  */
 export type JobType = keyof typeof BADGE_COLORS.jobType;
 export type DifficultyLevel = keyof typeof BADGE_COLORS.difficulty;
+export type CollectionType = keyof typeof BADGE_COLORS.collectionType;
 export type ChangelogCategory = keyof typeof BADGE_COLORS.changelogCategory;
 export type StatusType = keyof typeof BADGE_COLORS.status;
 export type CategoryType = keyof typeof BADGE_COLORS.category;

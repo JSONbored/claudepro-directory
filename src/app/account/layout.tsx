@@ -69,7 +69,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
               ← Back to Directory
             </Link>
           </div>
-          <div className="flex items-center gap-4">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_4}>
             {profile?.slug && (
               <Link href={`/u/${profile.slug}`} className={UI_CLASSES.TEXT_SM}>
                 View Profile

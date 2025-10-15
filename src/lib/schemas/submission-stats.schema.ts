@@ -25,7 +25,7 @@ export const recentMergedSchema = z.object({
   id: z.string().uuid().describe('Submission ID'),
   content_name: nonEmptyString.describe('Name of the submitted content'),
   content_type: z
-    .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'])
+    .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'])
     .describe('Type of content'),
   merged_at: z.string().datetime().describe('When the submission was merged'),
   user: z

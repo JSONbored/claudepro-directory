@@ -42,7 +42,11 @@ export async function waitForCondition(
     errorMessage?: string;
   } = {}
 ): Promise<void> {
-  const { timeout = 5000, interval = 50, errorMessage = 'Condition not met within timeout' } = options;
+  const {
+    timeout = 5000,
+    interval = 50,
+    errorMessage = 'Condition not met within timeout',
+  } = options;
 
   const startTime = Date.now();
 
@@ -78,10 +82,11 @@ export async function waitForValueChange<T>(
 ): Promise<T> {
   const { timeout = 5000, interval = 50 } = options;
 
-  await waitForCondition(
-    () => getValue() !== initialValue,
-    { timeout, interval, errorMessage: 'Value did not change within timeout' }
-  );
+  await waitForCondition(() => getValue() !== initialValue, {
+    timeout,
+    interval,
+    errorMessage: 'Value did not change within timeout',
+  });
 
   return getValue();
 }
@@ -267,9 +272,7 @@ export async function poll<T>(
     await sleep(interval);
   }
 
-  throw new Error(
-    `Polling timeout after ${timeout}ms. Last value: ${JSON.stringify(lastValue)}`
-  );
+  throw new Error(`Polling timeout after ${timeout}ms. Last value: ${JSON.stringify(lastValue)}`);
 }
 
 /**
@@ -388,10 +391,7 @@ export async function runConcurrently<T>(promises: Promise<T>[]): Promise<T[]> {
  * ], 100)
  * ```
  */
-export async function runWithDelay<T>(
-  fns: Array<() => Promise<T>>,
-  delayMs: number
-): Promise<T[]> {
+export async function runWithDelay<T>(fns: Array<() => Promise<T>>, delayMs: number): Promise<T[]> {
   const results: T[] = [];
 
   for (const fn of fns) {

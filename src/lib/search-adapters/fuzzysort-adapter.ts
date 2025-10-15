@@ -15,6 +15,7 @@
  * @see https://github.com/farzher/fuzzysort
  */
 
+import { UI_CONFIG } from '@/src/lib/constants';
 import {
   sortAlphabetically,
   sortByNewest,
@@ -146,7 +147,7 @@ async function searchWithFuzzysort<T extends SearchableItem>(
     const results = fuzzysort.go(query, prepared, {
       keys: targets,
       threshold,
-      limit: options?.limit || 100,
+      limit: options?.limit ?? UI_CONFIG.pagination.maxLimit,
       all: false,
     });
 

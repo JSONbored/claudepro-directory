@@ -84,7 +84,15 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  return generatePageMetadata('/compare/:slug', { params: { slug } });
+
+  // Load comparison data for metadata generation
+  const comparisonData = await getComparisonData(slug);
+
+  return generatePageMetadata('/compare/:slug', {
+    params: { slug },
+    item: comparisonData || undefined,
+    slug,
+  });
 }
 
 export default async function ComparisonPage({ params }: { params: Promise<{ slug: string }> }) {

@@ -13,7 +13,7 @@
  * @see src/app/api/ directory
  */
 
-import { http, HttpResponse, delay } from 'msw';
+import { delay, HttpResponse, http } from 'msw';
 
 /**
  * API route handlers
@@ -66,10 +66,7 @@ export const apiHandlers = [
     // Validate webhook signature (mocked)
     const signature = request.headers.get('svix-signature');
     if (!signature) {
-      return HttpResponse.json(
-        { error: 'Missing webhook signature' },
-        { status: 401 }
-      );
+      return HttpResponse.json({ error: 'Missing webhook signature' }, { status: 401 });
     }
 
     return HttpResponse.json({
@@ -116,10 +113,7 @@ export const cronHandlers = [
     // Check for cron secret
     const authHeader = request.headers.get('authorization');
     if (authHeader !== 'Bearer test-cron-secret') {
-      return HttpResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await delay(500);
@@ -137,10 +131,7 @@ export const cronHandlers = [
   http.get('http://localhost:3000/api/cron/calculate-similarities', async ({ request }) => {
     const authHeader = request.headers.get('authorization');
     if (authHeader !== 'Bearer test-cron-secret') {
-      return HttpResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await delay(1000);
@@ -159,10 +150,7 @@ export const cronHandlers = [
   http.get('http://localhost:3000/api/cron/send-weekly-digest', async ({ request }) => {
     const authHeader = request.headers.get('authorization');
     if (authHeader !== 'Bearer test-cron-secret') {
-      return HttpResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await delay(300);
@@ -194,9 +182,6 @@ export const apiErrorHandlers = {
    * Webhook signature validation failure
    */
   invalidWebhookSignature: http.post('http://localhost:3000/api/webhooks/:service', () => {
-    return HttpResponse.json(
-      { error: 'Invalid webhook signature' },
-      { status: 401 }
-    );
+    return HttpResponse.json({ error: 'Invalid webhook signature' }, { status: 401 });
   }),
 };

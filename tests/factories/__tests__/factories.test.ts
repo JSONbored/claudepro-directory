@@ -22,23 +22,23 @@ import { hookContentSchema } from '@/src/lib/schemas/content/hook.schema';
 import { mcpContentSchema } from '@/src/lib/schemas/content/mcp.schema';
 import { ruleContentSchema } from '@/src/lib/schemas/content/rule.schema';
 import { statuslineContentSchema } from '@/src/lib/schemas/content/statusline.schema';
-
-// Content Factories
+// User Factories
 import {
   agentFactory,
+  bookmarkFactory,
   collectionFactory,
   commandFactory,
   hookFactory,
   mcpFactory,
+  reviewFactory,
   ruleFactory,
   statuslineFactory,
+  userFactory,
 } from '@/tests/factories';
-
-// User Factories
-import { bookmarkFactory, reviewFactory, userFactory } from '@/tests/factories';
-
 // Shared Factories
 import { usageExampleFactory } from '@/tests/factories/shared/usage-example.factory';
+// Content Factories
+import type { AgentFactoryTransientParams } from '../content/agent.factory';
 
 describe('Content Factories', () => {
   describe('agentFactory', () => {
@@ -70,9 +70,12 @@ describe('Content Factories', () => {
     });
 
     test('should support transient parameters for configuration', () => {
-      const agentWithConfig = agentFactory.build({}, {
-        transient: { withConfiguration: true },
-      });
+      const agentWithConfig = agentFactory.build(
+        {},
+        {
+          transient: { withConfiguration: true } as AgentFactoryTransientParams,
+        }
+      );
 
       const result = agentContentSchema.safeParse(agentWithConfig);
       expect(result.success).toBe(true);
@@ -84,9 +87,12 @@ describe('Content Factories', () => {
     });
 
     test('should support transient parameters for installation', () => {
-      const agentWithInstall = agentFactory.build({}, {
-        transient: { withInstallation: true },
-      });
+      const agentWithInstall = agentFactory.build(
+        {},
+        {
+          transient: { withInstallation: true } as AgentFactoryTransientParams,
+        }
+      );
 
       const result = agentContentSchema.safeParse(agentWithInstall);
       expect(result.success).toBe(true);
@@ -291,12 +297,7 @@ describe('User Factories', () => {
       const admin = userFactory.admin().build();
 
       expect(admin.app_metadata.role).toBe('admin');
-      expect(admin.app_metadata.permissions).toEqual([
-        'read',
-        'write',
-        'delete',
-        'manage_users',
-      ]);
+      expect(admin.app_metadata.permissions).toEqual(['read', 'write', 'delete', 'manage_users']);
       expect(admin.user_metadata.username).toBe('admin');
     });
 
@@ -453,9 +454,7 @@ describe('Shared Factories', () => {
       expect(example.title).toBeTruthy();
       expect(example.language).toBeTruthy();
       expect(example.code).toBeTruthy();
-      expect(['typescript', 'javascript', 'json', 'bash', 'python']).toContain(
-        example.language
-      );
+      expect(['typescript', 'javascript', 'json', 'bash', 'python']).toContain(example.language);
     });
 
     test('should generate language-appropriate code', () => {
@@ -464,15 +463,14 @@ describe('Shared Factories', () => {
 
       examples.forEach((example) => {
         expect(example.code.length).toBeGreaterThan(10);
-        expect(['typescript', 'javascript', 'json', 'bash', 'python']).toContain(
-          example.language
-        );
+        expect(['typescript', 'javascript', 'json', 'bash', 'python']).toContain(example.language);
       });
 
       // TypeScript examples should typically have common TS patterns
       const tsExamples = usageExampleFactory.buildList(5);
-      const hasTypicalTsPattern = tsExamples.some(ex =>
-        ex.code.includes('const') || ex.code.includes('import') || ex.code.includes('function')
+      const hasTypicalTsPattern = tsExamples.some(
+        (ex) =>
+          ex.code.includes('const') || ex.code.includes('import') || ex.code.includes('function')
       );
       expect(hasTypicalTsPattern).toBe(true);
     });

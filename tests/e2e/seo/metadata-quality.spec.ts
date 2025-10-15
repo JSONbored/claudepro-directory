@@ -43,13 +43,12 @@
  * @group production-ready
  */
 
-import { test, expect, type Page } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 import {
   getAllCategoryContent,
-  getAllGuides,
-  getAllCollections,
   getAllChangelogs,
-  getAllStaticRoutes,
+  getAllCollections,
+  getAllGuides,
 } from '../helpers/content-loader';
 
 // =============================================================================
@@ -68,13 +67,6 @@ async function getMetaContent(page: Page, name: string): Promise<string | null> 
  */
 async function getOGContent(page: Page, property: string): Promise<string | null> {
   return await page.locator(`meta[property="og:${property}"]`).getAttribute('content');
-}
-
-/**
- * Get Twitter Card meta tag content
- */
-async function getTwitterContent(page: Page, name: string): Promise<string | null> {
-  return await page.locator(`meta[name="twitter:${name}"]`).getAttribute('content');
 }
 
 /**
@@ -126,8 +118,14 @@ async function waitForNetworkIdle(page: Page): Promise<void> {
  */
 function validateTitleLength(title: string, pagePath: string): void {
   expect(title, `${pagePath}: Title must exist`).toBeTruthy();
-  expect(title.length, `${pagePath}: Title too long (${title.length} chars): "${title}"`).toBeLessThanOrEqual(60);
-  expect(title.length, `${pagePath}: Title too short (${title.length} chars)`).toBeGreaterThanOrEqual(55);
+  expect(
+    title.length,
+    `${pagePath}: Title too long (${title.length} chars): "${title}"`
+  ).toBeLessThanOrEqual(60);
+  expect(
+    title.length,
+    `${pagePath}: Title too short (${title.length} chars)`
+  ).toBeGreaterThanOrEqual(55);
 }
 
 /**
@@ -160,7 +158,7 @@ function validateNoPlaceholderText(text: string, fieldName: string, pagePath: st
     /placeholder/i,
     /test content/i,
     /sample text/i,
-    /\[.*\]/,  // [placeholder] pattern
+    /\[.*\]/, // [placeholder] pattern
   ];
 
   for (const pattern of placeholderPatterns) {
@@ -236,7 +234,9 @@ async function validateStructuredData(page: Page, pagePath: string): Promise<voi
   for (const data of structuredData) {
     expect(data['@context'], `${pagePath}: JSON-LD must have @context`).toBeTruthy();
     expect(data['@type'], `${pagePath}: JSON-LD must have @type`).toBeTruthy();
-    expect(data['@context'], `${pagePath}: JSON-LD @context must be schema.org`).toBe('https://schema.org');
+    expect(data['@context'], `${pagePath}: JSON-LD @context must be schema.org`).toBe(
+      'https://schema.org'
+    );
   }
 }
 
@@ -479,7 +479,9 @@ test.describe('Metadata Quality: All Changelog Pages', () => {
 
         // Changelog-specific: Should have Article type for og:type
         const ogType = await getOGContent(page, 'type');
-        expect(ogType, `${changelog.path}: Changelogs should use og:type="article"`).toBe('article');
+        expect(ogType, `${changelog.path}: Changelogs should use og:type="article"`).toBe(
+          'article'
+        );
       });
     }
   }
@@ -498,7 +500,8 @@ test.describe('Metadata Quality: Summary Report', () => {
     const collectionPages = getAllCollections().length; // 9+
     const changelogPages = getAllChangelogs().length; // 30+
 
-    const totalRoutes = staticRoutes + categoryPages + contentPages + guidePages + collectionPages + changelogPages;
+    const totalRoutes =
+      staticRoutes + categoryPages + contentPages + guidePages + collectionPages + changelogPages;
 
     console.log(`
 ╔════════════════════════════════════════════════════════════════════════╗

@@ -32,6 +32,7 @@ export const unifiedContentItemSchema = z
         'rules',
         'commands',
         'hooks',
+        'skills',
         'guides',
         'jobs',
         'statuslines',
@@ -267,6 +268,42 @@ export const unifiedContentItemSchema = z
       .optional()
       .describe('Whether guide includes proper citations and references'),
     relatedGuides: stringArray.optional().describe('Slugs of related or complementary guides'),
+
+    // Collection-specific properties
+    collectionType: z
+      .enum(['starter-kit', 'workflow', 'advanced-system', 'use-case'])
+      .optional()
+      .describe('Type of collection bundle'),
+    items: z
+      .array(
+        z.object({
+          category: z
+            .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'])
+            .describe('Content category of the referenced item'),
+          slug: z.string().describe('URL slug of the referenced item'),
+          reason: z.string().optional().describe('Why this item is included in the collection'),
+        })
+      )
+      .optional()
+      .describe('Array of content items included in the collection'),
+    itemCount: z.number().optional().describe('Total number of items in the collection'),
+    prerequisites: stringArray
+      .optional()
+      .describe('Requirements or setup needed before using the collection'),
+    installationOrder: stringArray
+      .optional()
+      .describe('Recommended order for installing collection items'),
+    estimatedSetupTime: z
+      .string()
+      .optional()
+      .describe('Estimated time to complete collection setup (e.g., "30 minutes")'),
+    compatibility: z
+      .object({
+        claudeDesktop: z.boolean().describe('Whether compatible with Claude Desktop'),
+        claudeCode: z.boolean().describe('Whether compatible with Claude Code'),
+      })
+      .optional()
+      .describe('Platform compatibility information'),
 
     // Component-specific display properties
     type: z

@@ -1,4 +1,40 @@
 # Changelog
+## 2025-10-14 - Skills Category Integration (PDF/DOCX/PPTX/XLSX)
+
+### What Changed
+- Added new main category: `Skills` — task-focused capability guides for Claude (document/data workflows).
+
+### Added
+- Full schema + build integration:
+  - New Zod schema `skill.schema.ts` with content-first fields (requirements, examples, installation, troubleshooting).
+  - Integrated into build pipeline, static API generation, content loaders, and unions.
+- SEO and Structured Data:
+  - Metadata registry, derivation rules, and JSON-LD (HowTo/CreativeWork/SourceCode when examples exist).
+  - LLMs.txt inclusion for category and item routes.
+- Routing and UI:
+  - Category configs and content-type configs (sections: Guide, Installation, Examples, Troubleshooting).
+  - Navigation link with “New” indicator (moved from Statuslines/Collections to Skills).
+- APIs and Search:
+  - `/api/skills.json` and search index generation.
+  - Sitemap/URL generator now includes skills.
+- Validation and CI:
+  - Content validator updated for `skills`.
+  - Security validators/regex and content-validation workflow updated.
+  - LLMs.txt validator includes skills routes.
+- Announcements:
+  - New announcement promoting Skills launch.
+
+### Changed
+- Removed “New” badge from Statuslines and Collections; applied to Skills.
+
+### Technical Details
+- Configuration-driven updates to minimize LOC and reuse existing systems:
+  - Build: `BUILD_CATEGORY_CONFIGS` extended; no new build logic.
+  - SEO: `schema-metadata-adapter`, metadata registry, and structured data rules extended.
+  - Sitemap: added `skillsMetadata` to sitemap generator and URL builder.
+  - Security/Validation: enums/regex extended to accept `skills` across validators and CI.
+  - Analytics: category mapping extended (reusing rule/guide buckets for Skills).
+
 
 All notable changes to Claude Pro Directory will be documented in this file.
 
@@ -8,6 +44,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 **Latest Features:**
 
+- [Collections Category Consolidation](#2025-10-13---collections-category-system-consolidation) - Unified dynamic routing for Collections with full platform integration and enhanced type safety
 - [Theme Toggle Animation & Navigation Polish](#2025-10-11---theme-toggle-animation-and-navigation-polish) - Smooth Circle Blur animation for theme switching, rounded navigation containers, enhanced mega-menu design
 - [Navigation & Announcement System](#2025-10-10---navigation-overhaul-and-announcement-system) - Configuration-driven navigation, ⌘K command palette, site-wide announcements, new indicators, enhanced accessibility
 - [Hero Section Animations](#2025-10-09---hero-section-animations-and-search-enhancements) - Meteor background effect, rolling text animation, enhanced search UI
@@ -43,7 +80,60 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - [Reddit MCP Server](#2025-10-04---reddit-mcp-server-community-contribution) - Browse Reddit from Claude
 
-[View All Updates ↓](#2025-10-13---dependency-updates-and-typescript-safety-improvements)
+[View All Updates ↓](#2025-10-13---collections-category-system-consolidation)
+
+---
+
+## 2025-10-13 - Collections Category System Consolidation
+
+**TL;DR:** Consolidated Collections into the unified dynamic category routing system alongside Agents, MCP Servers, Rules, Commands, Hooks, and Statuslines. Collections now benefit from uniform handling across the entire platform while maintaining all specialized features like nested collections, prerequisites, installation order, and compatibility tracking.
+
+### What Changed
+
+Integrated Collections as a first-class content category within the platform's dynamic routing architecture. Previously, Collections used custom routes (`/collections` and `/collections/[slug]`). Now they follow the same pattern as other main categories (`/[category]` and `/[category]/[slug]`), enabling uniform treatment across search, caching, analytics, and all platform features.
+
+### Changed
+
+- **Dynamic Routing Architecture**
+  - Collections now use `[category]` dynamic routes instead of custom `/collections` routes
+  - Created `CollectionDetailView` component for specialized collection rendering
+  - Enhanced `ConfigCard` to display collection-specific badges (collection type, difficulty, item count)
+  - Added tree-shakeable collection logic that only loads when `category === 'collections'`
+  - Deleted 3 obsolete custom route files (`collections/page.tsx`, `collections/[slug]/page.tsx`, `collections/[slug]/llms.txt/route.ts`)
+
+- **Schema & Type Safety**
+  - Added collection-specific properties to `UnifiedContentItem` schema (collectionType, items, prerequisites, installationOrder, compatibility)
+  - Enabled nested collections support (collections can now reference other collections)
+  - Updated `ContentType` unions across 6 components to include 'collections'
+  - Enhanced submission stats schema to track collection contributions
+
+- **Platform Integration**
+  - **Caching**: Added collections to Redis trending cleanup and cache invalidation logic
+  - **Search**: Added collections to search filtering and API validation schemas
+  - **Related Content**: Collections now receive same visibility boost as other main categories
+  - **Service Worker**: Added collections to offline caching regex patterns
+  - **Submit Form**: Users can now submit collections through the web interface
+  - **Analytics**: Collection submissions tracked in community leaderboards
+
+- **SEO & Metadata**
+  - Removed redundant `/collections` hardcoded routes from metadata registry
+  - Collections now handled by unified `/:category` and `/:category/:slug` metadata patterns
+  - Maintains all SEO optimizations with cleaner, more maintainable architecture
+
+- **Testing & Validation**
+  - Added collections to E2E test coverage (accessibility, SEO, llms.txt generation)
+  - Updated content validation scripts to verify collections discovery
+  - Added collections to sitemap parity tests
+
+### Technical Details
+
+The consolidation involved 27 file modifications across routing, schemas, caching, security, UI components, and tests. All changes follow the codebase's core principles of consolidation, DRY, type safety, and configuration-driven architecture. Collections retain all unique features (CollectionDetailView with embedded items, prerequisites section, installation order, compatibility matrix) while benefiting from uniform platform integration.
+
+**Key architectural improvements:**
+- Reduced code duplication by ~150 lines through route consolidation
+- Eliminated maintenance burden of parallel routing systems
+- Enabled future collection features to automatically work with existing platform capabilities
+- Improved type safety with proper Zod schema integration throughout
 
 ---
 

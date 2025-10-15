@@ -45,7 +45,17 @@ import { dirname, join } from 'node:path';
 import { type Browser, chromium, type Page } from '@playwright/test';
 import sharp from 'sharp';
 import { z } from 'zod';
-import { getAllContentMetadata } from '@/src/lib/content/content-loaders';
+import {
+  agents,
+  collections,
+  commands,
+  hooks,
+  mcp,
+  rules,
+  skills,
+  statuslines,
+} from '@/generated/content';
+import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 import { logger } from '@/src/lib/logger';
 
 /**
@@ -405,8 +415,8 @@ async function discoverRoutes(): Promise<Route[]> {
     { path: '/changelog', priority: 'medium', skipMobile: false }
   );
 
-  // Category pages
-  const categories = ['agents', 'mcp', 'commands', 'rules', 'hooks', 'statuslines'];
+  // Category pages (include Skills)
+  const categories = ['agents', 'mcp', 'commands', 'rules', 'hooks', 'statuslines', 'skills'];
   for (const category of categories) {
     routes.push({
       path: `/${category}`,
@@ -417,11 +427,30 @@ async function discoverRoutes(): Promise<Route[]> {
 
   // Content detail pages (sample from each category)
   try {
-    const allContent = await getAllContentMetadata();
+    const loaded = await batchLoadContent({
+      agents,
+      mcp,
+      commands,
+      rules,
+      hooks,
+      statuslines,
+      collections,
+      skills,
+    });
+
+    const byCategory: Record<string, Array<{ slug: string }>> = {
+      agents: loaded.agents || [],
+      mcp: loaded.mcp || [],
+      commands: loaded.commands || [],
+      rules: loaded.rules || [],
+      hooks: loaded.hooks || [],
+      statuslines: loaded.statuslines || [],
+      skills: loaded.skills || [],
+    };
 
     // Generate OG images for first 5 items per category (sample)
     for (const category of categories) {
-      const categoryItems = allContent[category] || [];
+      const categoryItems = byCategory[category] || [];
       const sample = categoryItems.slice(0, 5);
 
       for (const item of sample) {
@@ -433,7 +462,7 @@ async function discoverRoutes(): Promise<Route[]> {
       }
     }
   } catch (error) {
-    logger.error('Failed to load content metadata', error);
+    logger.error('Failed to load content metadata for OG generation', error);
   }
 
   // Guides (sample)

@@ -21,8 +21,8 @@
 import { cleanup } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
-import { server } from './mocks/server';
 import { toHaveNoViolations } from 'jest-axe';
+import { server } from './mocks/server';
 
 // =============================================================================
 // jest-axe Setup

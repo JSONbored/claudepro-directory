@@ -340,7 +340,12 @@ export function setCookie(name: string, value: string, options: CookieOptions = 
     cookieString += `; samesite=${options.sameSite}`;
   }
 
-  document.cookie = cookieString;
+  // Use Cookie Store API when available; fallback for test environment
+  if ('cookieStore' in window && (window as any).cookieStore?.set) {
+    (window as any).cookieStore.set({ name, value });
+  } else {
+    document.cookie = cookieString;
+  }
 }
 
 /**
@@ -380,7 +385,10 @@ export function getCookie(name: string): string | null {
  * deleteCookie('token', { path: '/' });
  * ```
  */
-export function deleteCookie(name: string, options: Pick<CookieOptions, 'path' | 'domain'> = {}): void {
+export function deleteCookie(
+  name: string,
+  options: Pick<CookieOptions, 'path' | 'domain'> = {}
+): void {
   setCookie(name, '', {
     ...options,
     expires: new Date(0),
@@ -471,21 +479,21 @@ export function expectCookieValue(name: string, expectedValue: string): void {
  *
  * @example
  * ```ts
- * const event = createStorageEvent('token', null, 'abc123', localStorage);
+ * const event = createStorageEvent('token', null, 'abc123');
  * window.dispatchEvent(event);
  * ```
  */
 export function createStorageEvent(
   key: string | null,
   oldValue: string | null,
-  newValue: string | null,
-  storageArea: Storage = localStorage
+  newValue: string | null
 ): StorageEvent {
+  // Note: storageArea is readonly and cannot be set in StorageEvent constructor
+  // It's automatically set by the browser in real storage events.
   return new StorageEvent('storage', {
     key,
     oldValue,
     newValue,
-    storageArea,
     url: window.location.href,
   });
 }
@@ -532,7 +540,7 @@ export function triggerStorageEvent(
  * ```
  */
 export function mockStorageListener(): ReturnType<typeof vi.fn> {
-  const listener = vi.fn();
+  const listener = (vi as unknown as { fn: () => any }).fn();
   window.addEventListener('storage', listener);
 
   afterEach(() => {
@@ -588,7 +596,7 @@ export function fillStorageToCapacity(storage: Storage = localStorage): void {
 export function mockStorageQuotaExceeded(): void {
   const originalSetItem = Storage.prototype.setItem;
 
-  Storage.prototype.setItem = function (key: string, value: string) {
+  Storage.prototype.setItem = function (_key: string, _value: string) {
     const error = new Error('QuotaExceededError');
     error.name = 'QuotaExceededError';
     throw error;

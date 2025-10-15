@@ -23,10 +23,10 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  OG_IMAGE_DIMENSIONS,
   generateOGImageUrl,
   generateOGMetadata,
   generateTwitterMetadata,
+  OG_IMAGE_DIMENSIONS,
 } from '@/src/lib/og/url-generator';
 
 const BASE_URL = 'https://claudepro.directory'; // From APP_CONFIG.url

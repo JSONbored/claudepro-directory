@@ -27,10 +27,10 @@
  */
 
 import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { apiResponse } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
 /**
@@ -131,14 +131,10 @@ Last generated: ${new Date().toISOString()}
       size: Buffer.byteLength(llmsTxt, 'utf8'),
     });
 
-    // Return plain text with proper headers
-    return new NextResponse(llmsTxt, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'public, max-age=600, s-maxage=600, stale-while-revalidate=3600',
-        'X-Content-Type-Options': 'nosniff',
-      },
+    // Return plain text via unified builder
+    return apiResponse.raw(llmsTxt, {
+      contentType: 'text/plain; charset=utf-8',
+      cache: { sMaxAge: 600, staleWhileRevalidate: 3600 },
     });
   } catch (error) {
     requestLogger.error(
@@ -154,12 +150,10 @@ Error generating changelog content. Please try again later.
 URL: ${APP_CONFIG.url}/changelog
 `;
 
-    return new NextResponse(errorText, {
+    return apiResponse.raw(errorText, {
+      contentType: 'text/plain; charset=utf-8',
       status: 500,
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-      },
+      cache: { sMaxAge: 0, staleWhileRevalidate: 0 },
     });
   }
 }

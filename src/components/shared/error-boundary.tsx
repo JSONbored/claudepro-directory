@@ -36,7 +36,7 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
     >
       <Card className={`${UI_CLASSES.MAX_W_2XL} w-full`}>
         <CardHeader>
-          <div className="flex items-center gap-3">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3}>
             <AlertTriangle className="h-8 w-8 text-destructive" aria-hidden="true" />
             <CardTitle as="h1" className="text-2xl">
               Something went wrong

@@ -73,15 +73,15 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
       {/* Header */}
       <div>
         <Link href={ROUTES.ACCOUNT_LIBRARY}>
-          <Button variant="ghost" className="mb-4 flex items-center gap-2">
+          <Button variant="ghost" className={`mb-4 ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}`}>
             <ArrowLeft className="h-4 w-4" />
             Back to Library
           </Button>
         </Link>
 
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
+        <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+          <div className={UI_CLASSES.FLEX_1}>
+            <div className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} mb-2`}>
               <h1 className="text-3xl font-bold">{collection.name}</h1>
               {collection.is_public && (
                 <Badge variant="outline" className="text-xs">
@@ -98,7 +98,7 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             {shareUrl && (
               <Button
                 variant="outline"
@@ -106,14 +106,14 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
                 onClick={() => {
                   navigator.clipboard.writeText(shareUrl);
                 }}
-                className="flex items-center gap-2"
+                className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
               >
                 <Share2 className="h-4 w-4" />
                 Share
               </Button>
             )}
             <Link href={`/account/library/${slug}/edit`}>
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                 <Edit className="h-4 w-4" />
                 Edit
               </Button>

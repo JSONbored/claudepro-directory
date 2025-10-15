@@ -184,7 +184,7 @@ export function QuizForm() {
       {/* Question cards */}
       <Card className="relative overflow-hidden">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
             <span className="text-sm text-muted-foreground">
               Question {currentQuestion} of {TOTAL_QUESTIONS}
             </span>
@@ -540,7 +540,7 @@ export function QuizForm() {
 
           {/* Navigation buttons */}
           <Separator className="my-6" />
-          <div className="flex items-center justify-between">
+          <div className={UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_BETWEEN}>
             <Button
               type="button"
               variant="outline"

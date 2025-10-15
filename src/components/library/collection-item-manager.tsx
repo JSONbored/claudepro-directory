@@ -188,8 +188,8 @@ export function CollectionItemManager({
   return (
     <div className={UI_CLASSES.SPACE_Y_4}>
       {/* Add Item Section */}
-      <div className="flex items-end gap-2 pb-4">
-        <div className="flex-1">
+      <div className={`${UI_CLASSES.FLEX_ITEMS_END_GAP_2} pb-4`}>
+        <div className={UI_CLASSES.FLEX_1}>
           <div className={`${UI_CLASSES.TEXT_SM} font-medium mb-2 block`}>
             Add Bookmark to Collection
           </div>
@@ -205,7 +205,7 @@ export function CollectionItemManager({
               ) : (
                 availableToAdd.map((bookmark) => (
                   <SelectItem key={bookmark.id} value={bookmark.id}>
-                    <div className="flex items-center gap-2">
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                       <Badge variant="outline" className="text-xs capitalize">
                         {bookmark.content_type}
                       </Badge>
@@ -220,7 +220,7 @@ export function CollectionItemManager({
         <Button
           onClick={handleAdd}
           disabled={!selectedBookmarkId || isPending}
-          className="flex items-center gap-2"
+          className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}
         >
           <Plus className="h-4 w-4" />
           Add
@@ -241,10 +241,10 @@ export function CollectionItemManager({
           {items.map((item: CollectionItem, index: number) => (
             <div
               key={item.id}
-              className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+              className={`${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_3} p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors`}
             >
               {/* Order Controls */}
-              <div className="flex flex-col gap-1">
+              <div className={UI_CLASSES.FLEX_COL_GAP_1}>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -273,8 +273,8 @@ export function CollectionItemManager({
               </div>
 
               {/* Content Info */}
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
+              <div className={UI_CLASSES.FLEX_1}>
+                <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                   <Badge variant="outline" className="text-xs capitalize">
                     {item.content_type}
                   </Badge>
@@ -288,7 +288,7 @@ export function CollectionItemManager({
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-1">
+              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                 <Button
                   variant="ghost"
                   size="sm"

@@ -126,10 +126,7 @@ describe('Security Headers Configuration', () => {
     });
 
     test('should allow WebSocket connections for dev tools', () => {
-      const connectSrcDomains = [
-        'wss://*.vercel.app',
-        'wss://*.vercel-scripts.com',
-      ];
+      const connectSrcDomains = ['wss://*.vercel.app', 'wss://*.vercel-scripts.com'];
 
       expect(connectSrcDomains.some((d) => d.startsWith('wss://'))).toBe(true);
     });

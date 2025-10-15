@@ -1,4 +1,13 @@
-import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
+import {
+  agents,
+  collections,
+  commands,
+  hooks,
+  mcp,
+  rules,
+  skills,
+  statuslines,
+} from '@/generated/content';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { TrendingContent } from '@/src/components/shared/trending-content';
 import { Badge } from '@/src/components/ui/badge';
@@ -50,7 +59,17 @@ async function getTrendingData(params: TrendingParams) {
       hooks: hooksData,
       statuslines: statuslinesData,
       collections: collectionsData,
-    } = await batchLoadContent({ rules, mcp, agents, commands, hooks, statuslines, collections });
+      skills: skillsData,
+    } = await batchLoadContent({
+      rules,
+      mcp,
+      agents,
+      commands,
+      hooks,
+      statuslines,
+      collections,
+      skills,
+    });
 
     // Calculate total count
     const totalCount =
@@ -60,7 +79,8 @@ async function getTrendingData(params: TrendingParams) {
       commandsData.length +
       hooksData.length +
       statuslinesData.length +
-      collectionsData.length;
+      collectionsData.length +
+      skillsData.length;
 
     // Use Redis-based trending calculator with sponsored content injection
     const trendingData = await getBatchTrendingData(
@@ -92,6 +112,10 @@ async function getTrendingData(params: TrendingParams) {
         collections: collectionsData.map((item: { [key: string]: unknown }) => ({
           ...item,
           category: 'collections' as const,
+        })),
+        skills: skillsData.map((item: { [key: string]: unknown }) => ({
+          ...item,
+          category: 'skills' as const,
         })),
       },
       { includeSponsored: true } // Enable sponsored content injection

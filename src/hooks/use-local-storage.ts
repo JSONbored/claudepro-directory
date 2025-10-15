@@ -253,11 +253,9 @@ export function useLocalStorage<T>(
         try {
           const newValue = deserialize(e.newValue);
 
-          // Only update state if still mounted
-          if (isMounted) {
-            setValue(newValue);
-            setError(null);
-          }
+          // Update state (isMounted already checked in early return)
+          setValue(newValue);
+          setError(null);
         } catch (err) {
           const errorObj = err instanceof Error ? err : new Error(String(err));
 
@@ -273,23 +271,18 @@ export function useLocalStorage<T>(
             newValue: e.newValue?.substring(0, 100), // Truncate for privacy
           });
 
-          // Only update state if still mounted
-          if (isMounted) {
-            setError(errorObj);
-            // Fallback to default value on parse error
-            setValue(defaultValue as T);
-          }
+          // Update state with error and fallback (isMounted already checked in early return)
+          setError(errorObj);
+          setValue(defaultValue as T);
         }
       } else if (e.newValue === null || e.newValue === '') {
-        // Value was removed or empty in another tab
-        if (isMounted) {
-          setValue(defaultValue as T);
-          setError(null);
-        }
+        // Value was removed or empty in another tab (isMounted already checked in early return)
+        setValue(defaultValue as T);
+        setError(null);
       }
     };
 
-    // Wrap event listener in try/catch for SecurityError
+    // Add storage event listener
     try {
       window.addEventListener('storage', handleStorageChange);
     } catch (err) {
@@ -298,7 +291,6 @@ export function useLocalStorage<T>(
         component: 'useLocalStorage',
         action: 'addEventListener',
         key,
-        errorType: errorObj.name === 'SecurityError' ? 'SECURITY_ERROR' : 'UNKNOWN',
       });
       setError(errorObj);
     }

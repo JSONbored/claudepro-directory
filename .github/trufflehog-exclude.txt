@@ -1,0 +1,27 @@
+# Exclude test files and directories from TruffleHog secret scanning
+# Test files may contain mock credentials, test data, and fixtures
+
+# Test directories
+tests/
+__tests__/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Test fixtures and mocks
+tests/fixtures/
+tests/mocks/
+__mocks__/
+*.mock.ts
+*.mock.tsx
+
+# Test factories
+tests/factories/
+
+# E2E tests
+tests/e2e/
+
+# Coverage and reports
+coverage/
+.nyc_output/

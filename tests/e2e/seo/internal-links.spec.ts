@@ -32,10 +32,10 @@
  * @group links
  */
 
-import { test, expect, type Page, type Locator } from '@playwright/test';
+import { expect, type Locator, type Page, test } from '@playwright/test';
 import {
-  navigateToHomepage,
   navigateToCategory,
+  navigateToHomepage,
   waitForNetworkIdle,
 } from '../helpers/test-helpers';
 
@@ -103,12 +103,14 @@ async function isLinkAccessible(page: Page, url: string): Promise<boolean> {
  * Extract unique URLs from link collection
  */
 function getUniqueUrls(links: LinkInfo[]): string[] {
-  const urlSet = new Set(links.map((link) => {
-    // Remove hash fragments for uniqueness check
-    const url = new URL(link.href);
-    url.hash = '';
-    return url.href;
-  }));
+  const urlSet = new Set(
+    links.map((link) => {
+      // Remove hash fragments for uniqueness check
+      const url = new URL(link.href);
+      url.hash = '';
+      return url.href;
+    })
+  );
   return Array.from(urlSet);
 }
 
@@ -165,14 +167,19 @@ test.describe('Homepage - Internal Links', () => {
   test('should link to all main categories', async ({ page }) => {
     await navigateToHomepage(page);
 
-    const categories = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'];
+    const categories = [
+      'agents',
+      'mcp',
+      'rules',
+      'commands',
+      'hooks',
+      'statuslines',
+      'collections',
+    ];
 
     for (const category of categories) {
       const categoryLink = page.getByRole('link', { name: new RegExp(category, 'i') });
-      expect(
-        await categoryLink.count(),
-        `Should have link to /${category}`
-      ).toBeGreaterThan(0);
+      expect(await categoryLink.count(), `Should have link to /${category}`).toBeGreaterThan(0);
     }
   });
 
@@ -218,9 +225,7 @@ test.describe('Homepage - Internal Links', () => {
       /^link$/i,
     ];
 
-    const badLinks = links.filter((link) =>
-      badPatterns.some((pattern) => pattern.test(link.text))
-    );
+    const badLinks = links.filter((link) => badPatterns.some((pattern) => pattern.test(link.text)));
 
     expect(
       badLinks.length,
@@ -267,9 +272,7 @@ test.describe('Category Pages - Internal Links', () => {
       await navigateToCategory(page, category);
 
       // Find content item links
-      const contentItems = page.locator('[data-content-item] a').or(
-        page.locator('article a')
-      );
+      const contentItems = page.locator('[data-content-item] a').or(page.locator('article a'));
 
       const count = await contentItems.count();
       expect(count, `${category} should have links to content items`).toBeGreaterThan(0);
@@ -302,9 +305,9 @@ test.describe('Content Detail Pages - Internal Links', () => {
     await waitForNetworkIdle(page);
 
     // Look for breadcrumb
-    const breadcrumb = page.locator('[aria-label*="breadcrumb"]').or(
-      page.locator('[data-breadcrumb]')
-    );
+    const breadcrumb = page
+      .locator('[aria-label*="breadcrumb"]')
+      .or(page.locator('[data-breadcrumb]'));
 
     if ((await breadcrumb.count()) > 0) {
       // Should have clickable breadcrumb links
@@ -324,7 +327,6 @@ test.describe('Content Detail Pages - Internal Links', () => {
 
   test('should have working "back to category" links', async ({ page }) => {
     await navigateToCategory(page, 'mcp');
-    const categoryUrl = page.url();
 
     // Click first item
     const firstItem = page.locator('[data-content-item]').or(page.locator('article')).first();
@@ -356,9 +358,9 @@ test.describe('Content Detail Pages - Internal Links', () => {
 
     if ((await relatedSection.count()) > 0) {
       // Should have links to related items
-      const relatedLinks = page.locator('[data-related-item] a').or(
-        page.locator('[data-content-item] a')
-      );
+      const relatedLinks = page
+        .locator('[data-related-item] a')
+        .or(page.locator('[data-content-item] a'));
 
       if ((await relatedLinks.count()) > 0) {
         const href = await relatedLinks.first().getAttribute('href');
@@ -387,9 +389,7 @@ test.describe('Footer Links - All Pages', () => {
       const footer = page.locator('footer');
       const footerLinks = await footer.locator('a').all();
 
-      const hrefs = await Promise.all(
-        footerLinks.map((link) => link.getAttribute('href'))
-      );
+      const hrefs = await Promise.all(footerLinks.map((link) => link.getAttribute('href')));
 
       footerLinksPerPage.push(hrefs.filter((h): h is string => h !== null));
     }
@@ -398,10 +398,9 @@ test.describe('Footer Links - All Pages', () => {
     const firstPageLinks = footerLinksPerPage[0].sort();
     for (let i = 1; i < footerLinksPerPage.length; i++) {
       const currentLinks = footerLinksPerPage[i].sort();
-      expect(
-        currentLinks,
-        `Footer links should be consistent on page ${pagesToCheck[i]}`
-      ).toEqual(firstPageLinks);
+      expect(currentLinks, `Footer links should be consistent on page ${pagesToCheck[i]}`).toEqual(
+        firstPageLinks
+      );
     }
   });
 
@@ -437,10 +436,7 @@ test.describe('Footer Links - All Pages', () => {
       }
     }
 
-    expect(
-      brokenLinks,
-      `Footer has broken links: ${brokenLinks.join(', ')}`
-    ).toHaveLength(0);
+    expect(brokenLinks, `Footer has broken links: ${brokenLinks.join(', ')}`).toHaveLength(0);
   });
 });
 
@@ -461,9 +457,7 @@ test.describe('Navigation Consistency', () => {
       const nav = page.locator('nav').first();
       const navLinks = await nav.locator('a').all();
 
-      const hrefs = await Promise.all(
-        navLinks.map((link) => link.getAttribute('href'))
-      );
+      const hrefs = await Promise.all(navLinks.map((link) => link.getAttribute('href')));
 
       navLinksPerPage.push(hrefs.filter((h): h is string => h !== null));
     }
@@ -475,7 +469,8 @@ test.describe('Navigation Consistency', () => {
 
       // Allow some variation (e.g., mobile menu differences)
       const intersection = currentLinks.filter((link) => firstPageLinks.includes(link));
-      const similarityRatio = intersection.length / Math.max(firstPageLinks.length, currentLinks.length);
+      const similarityRatio =
+        intersection.length / Math.max(firstPageLinks.length, currentLinks.length);
 
       expect(
         similarityRatio,
@@ -489,11 +484,10 @@ test.describe('Navigation Consistency', () => {
 
     // Find logo/brand link (usually first link in header or has specific data attribute)
     const header = page.locator('header');
-    const logoLink = header.getByRole('link').first().or(
-      header.locator('[data-logo]').or(
-        header.locator('a').first()
-      )
-    );
+    const logoLink = header
+      .getByRole('link')
+      .first()
+      .or(header.locator('[data-logo]').or(header.locator('a').first()));
 
     const href = await logoLink.getAttribute('href');
     expect(href, 'Logo should link to homepage').toMatch(/^\/$/);
@@ -509,13 +503,7 @@ test.describe('Link Depth - SEO', () => {
     await navigateToHomepage(page);
 
     // Important pages that should be easily reachable
-    const importantPages = [
-      '/agents',
-      '/mcp',
-      '/trending',
-      '/guides',
-      '/api-docs',
-    ];
+    const importantPages = ['/agents', '/mcp', '/trending', '/guides', '/api-docs'];
 
     for (const targetPage of importantPages) {
       // Check if page is linked directly from homepage (1 click)
@@ -554,10 +542,7 @@ test.describe('Hash/Fragment Links', () => {
           const targetElement = page.locator(`#${targetId}`);
 
           const exists = (await targetElement.count()) > 0;
-          expect(
-            exists,
-            `Hash link ${href} should point to existing element`
-          ).toBe(true);
+          expect(exists, `Hash link ${href} should point to existing element`).toBe(true);
         }
       }
     }
@@ -586,10 +571,7 @@ test.describe('Link Performance', () => {
       if (url !== finalUrl) {
         // Single redirect is acceptable, but not chains
         // We'll just verify we got a 200 OK in the end
-        expect(
-          response?.status(),
-          `${url} should not have broken redirect chain`
-        ).toBe(200);
+        expect(response?.status(), `${url} should not have broken redirect chain`).toBe(200);
       }
     }
   });

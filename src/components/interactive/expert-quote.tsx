@@ -10,6 +10,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
 import { type ExpertQuoteProps, expertQuotePropsSchema } from '@/src/lib/schemas/shared.schema';
+import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export function ExpertQuote(props: ExpertQuoteProps) {
   const validated = expertQuotePropsSchema.parse(props);
@@ -23,7 +24,7 @@ export function ExpertQuote(props: ExpertQuoteProps) {
       <p itemProp="text" className="text-lg italic leading-relaxed mb-4">
         "{quote}"
       </p>
-      <footer className="flex items-center gap-4">
+      <footer className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_4}>
         {imageUrl && (
           <Avatar className="h-12 w-12">
             <AvatarImage src={imageUrl} alt={author} />

@@ -25,7 +25,7 @@ import { Clock, Copy as CopyIcon, Eye, Layers } from '@/src/lib/icons';
 import type { CollectionContent } from '@/src/lib/schemas/content/collection.schema';
 import { BADGE_COLORS, CARD_BEHAVIORS, UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
-import { formatViewCount } from '@/src/lib/utils/content.utils';
+import { formatCopyCount, formatViewCount } from '@/src/lib/utils/content.utils';
 
 /**
  * CollectionCard Props
@@ -137,7 +137,7 @@ export const CollectionCard = memo(
                 onClick={(e) => e.stopPropagation()}
               >
                 <CopyIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                <span className="text-xs">{formatViewCount(copyCount)}</span>
+                <span className="text-xs">{formatCopyCount(copyCount)}</span>
               </Badge>
             )}
           </>
@@ -174,7 +174,7 @@ export const CollectionCard = memo(
             {item.estimatedSetupTime && (
               <>
                 <span>•</span>
-                <span className="flex items-center gap-1">
+                <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1}>
                   <Clock className="h-3 w-3" aria-hidden="true" />
                   {item.estimatedSetupTime}
                 </span>

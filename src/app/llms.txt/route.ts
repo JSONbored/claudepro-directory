@@ -6,9 +6,18 @@
  * @see {@link https://llmstxt.org} - LLMs.txt specification
  */
 
-import { type NextRequest, NextResponse } from 'next/server';
-import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
-import { handleApiError } from '@/src/lib/error-handler';
+import type { NextRequest } from 'next/server';
+import {
+  agents,
+  collections,
+  commands,
+  hooks,
+  mcp,
+  rules,
+  skills,
+  statuslines,
+} from '@/generated/content';
+import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { generateSiteLLMsTxt } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
 import { errorInputSchema } from '@/src/lib/schemas/error.schema';
@@ -57,7 +66,16 @@ export async function GET(request: NextRequest): Promise<Response> {
       agents: agentsItems,
       statuslines: statuslinesItems,
       collections: collectionsItems,
-    } = await batchLoadContent({ mcp, commands, hooks, rules, agents, statuslines, collections });
+    } = await batchLoadContent({
+      mcp,
+      commands,
+      hooks,
+      rules,
+      agents,
+      statuslines,
+      collections,
+      skills,
+    });
 
     const categoryStats = [
       {
@@ -104,6 +122,13 @@ export async function GET(request: NextRequest): Promise<Response> {
         url: '/collections',
         description: 'Curated bundles of related configurations for specific use cases',
       },
+      {
+        name: 'Skills',
+        count: (await skills).length,
+        url: '/skills',
+        description:
+          'Task-focused capability guides with dependencies, examples, and troubleshooting for document/data workflows',
+      },
     ];
 
     // Generate llms.txt content
@@ -115,15 +140,11 @@ export async function GET(request: NextRequest): Promise<Response> {
       contentLength: llmsTxt.length,
     });
 
-    // Return plain text response
-    return new NextResponse(llmsTxt, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
-        'X-Content-Type-Options': 'nosniff',
-        'X-Robots-Tag': 'index, follow',
-      },
+    // Return plain text response via unified builder
+    return apiResponse.raw(llmsTxt, {
+      contentType: 'text/plain; charset=utf-8',
+      headers: { 'X-Robots-Tag': 'index, follow' },
+      cache: { sMaxAge: 3600, staleWhileRevalidate: 86400 },
     });
   } catch (error: unknown) {
     requestLogger.error(

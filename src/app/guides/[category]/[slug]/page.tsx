@@ -256,8 +256,15 @@ export async function generateMetadata({
   params: Promise<{ category: string; slug: string }>;
 }): Promise<Metadata> {
   const { category, slug } = await params;
+
+  // Load guide data for metadata generation
+  const guideData = await getSEOPageData(category, slug);
+
   return generatePageMetadata('/guides/:category/:slug', {
     params: { category, slug },
+    item: guideData || undefined,
+    category,
+    slug,
   });
 }
 

@@ -38,33 +38,33 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { APP_CONFIG } from '@/src/lib/constants';
 import {
+  type AggregateRatingConfig,
+  buildAggregateRatingSchema,
   buildBreadcrumb,
+  buildCollectionPageSchema,
+  buildCourseSchema,
+  buildCreativeWork,
+  buildFAQPage,
+  buildHowTo,
+  buildJobPostingSchema,
+  buildReviewSchema,
   buildSoftwareApplication,
   buildSoftwareSourceCode,
-  buildHowTo,
-  buildCreativeWork,
-  buildWebPageSpeakable,
-  buildFAQPage,
-  buildReviewSchema,
-  buildAggregateRatingSchema,
   buildVideoObjectSchema,
-  buildCourseSchema,
-  buildJobPostingSchema,
-  buildCollectionPageSchema,
-  type SoftwareApplicationConfig,
-  type SoftwareSourceCodeConfig,
-  type HowToConfig,
+  buildWebPageSpeakable,
+  type CollectionPageConfig,
+  type CourseConfig,
   type CreativeWorkConfig,
   type FAQItem,
-  type ReviewConfig,
-  type AggregateRatingConfig,
-  type VideoObjectConfig,
-  type CourseConfig,
+  type HowToConfig,
   type JobPostingConfig,
-  type CollectionPageConfig,
+  type ReviewConfig,
+  type SoftwareApplicationConfig,
+  type SoftwareSourceCodeConfig,
+  type VideoObjectConfig,
 } from '@/src/lib/structured-data/schema-builder';
-import { APP_CONFIG } from '@/src/lib/constants';
 
 const BASE_URL = APP_CONFIG.url;
 const SCHEMA_CONTEXT = 'https://schema.org';
@@ -100,7 +100,7 @@ describe('buildBreadcrumb()', () => {
       ];
 
       const schema = buildBreadcrumb(items);
-      const firstItem = schema.itemListElement[0];
+      const firstItem = schema.itemListElement[0]!;
 
       expect(firstItem['@type']).toBe('ListItem');
       expect(firstItem.position).toBe(1);
@@ -117,23 +117,23 @@ describe('buildBreadcrumb()', () => {
 
       const schema = buildBreadcrumb(items);
 
-      expect(schema.itemListElement[0].position).toBe(1);
-      expect(schema.itemListElement[1].position).toBe(2);
-      expect(schema.itemListElement[2].position).toBe(3);
+      expect(schema.itemListElement[0]!.position).toBe(1);
+      expect(schema.itemListElement[1]!.position).toBe(2);
+      expect(schema.itemListElement[2]!.position).toBe(3);
     });
 
     it('converts relative URLs to absolute URLs', () => {
       const items = [{ name: 'Agents', url: '/agents' }];
       const schema = buildBreadcrumb(items);
 
-      expect(schema.itemListElement[0].item['@id']).toBe(`${BASE_URL}/agents`);
+      expect(schema.itemListElement[0]!.item['@id']).toBe(`${BASE_URL}/agents`);
     });
 
     it('preserves absolute URLs', () => {
       const items = [{ name: 'External', url: 'https://example.com/page' }];
       const schema = buildBreadcrumb(items);
 
-      expect(schema.itemListElement[0].item['@id']).toBe('https://example.com/page');
+      expect(schema.itemListElement[0]!.item['@id']).toBe('https://example.com/page');
     });
   });
 
@@ -148,8 +148,8 @@ describe('buildBreadcrumb()', () => {
       const schema = buildBreadcrumb(items);
 
       expect(schema.itemListElement).toHaveLength(3);
-      expect(schema.itemListElement[2].item.name).toBe('Code Reviewer Agent');
-      expect(schema.itemListElement[2].item['@id']).toBe(`${BASE_URL}/agents/code-reviewer`);
+      expect(schema.itemListElement[2]!.item.name).toBe('Code Reviewer Agent');
+      expect(schema.itemListElement[2]!.item['@id']).toBe(`${BASE_URL}/agents/code-reviewer`);
     });
 
     it('generates breadcrumb for guide page', () => {
@@ -163,7 +163,7 @@ describe('buildBreadcrumb()', () => {
       const schema = buildBreadcrumb(items);
 
       expect(schema.itemListElement).toHaveLength(4);
-      expect(schema.itemListElement[3].position).toBe(4);
+      expect(schema.itemListElement[3]!.position).toBe(4);
     });
   });
 
@@ -173,21 +173,21 @@ describe('buildBreadcrumb()', () => {
       const schema = buildBreadcrumb(items);
 
       expect(schema.itemListElement).toHaveLength(1);
-      expect(schema.itemListElement[0].position).toBe(1);
+      expect(schema.itemListElement[0]!.position).toBe(1);
     });
 
     it('handles special characters in names', () => {
       const items = [{ name: 'MCP & Integration', url: '/mcp' }];
       const schema = buildBreadcrumb(items);
 
-      expect(schema.itemListElement[0].item.name).toBe('MCP & Integration');
+      expect(schema.itemListElement[0]!.item.name).toBe('MCP & Integration');
     });
 
     it('handles URLs with query parameters', () => {
       const items = [{ name: 'Search', url: '/search?q=test' }];
       const schema = buildBreadcrumb(items);
 
-      expect(schema.itemListElement[0].item['@id']).toContain('/search?q=test');
+      expect(schema.itemListElement[0]!.item['@id']).toContain('/search?q=test');
     });
   });
 });
@@ -557,31 +557,31 @@ describe('buildHowTo()', () => {
     it('creates HowToStep for each step', () => {
       const schema = buildHowTo(baseConfig);
 
-      expect(schema.step[0]['@type']).toBe('HowToStep');
-      expect(schema.step[0].position).toBe(1);
-      expect(schema.step[0].name).toBe('Install Agent');
-      expect(schema.step[0].text).toBe('Download and install the code reviewer agent');
+      expect(schema.step[0]!['@type']).toBe('HowToStep');
+      expect(schema.step[0]!.position).toBe(1);
+      expect(schema.step[0]!.name).toBe('Install Agent');
+      expect(schema.step[0]!.text).toBe('Download and install the code reviewer agent');
     });
 
     it('preserves step order with position', () => {
       const schema = buildHowTo(baseConfig);
 
-      expect(schema.step[0].position).toBe(1);
-      expect(schema.step[1].position).toBe(2);
+      expect(schema.step[0]!.position).toBe(1);
+      expect(schema.step[1]!.position).toBe(2);
     });
 
     it('includes SoftwareSourceCode for steps with code', () => {
       const schema = buildHowTo(baseConfig);
-      const stepWithCode = schema.step[1];
+      const stepWithCode = schema.step[1]!;
 
-      expect(stepWithCode.itemListElement['@type']).toBe('SoftwareSourceCode');
-      expect(stepWithCode.itemListElement.text).toBe('{"enabled": true}');
-      expect(stepWithCode.itemListElement.programmingLanguage).toBe('json');
+      expect(stepWithCode.itemListElement!['@type']).toBe('SoftwareSourceCode');
+      expect(stepWithCode.itemListElement!.text).toBe('{"enabled": true}');
+      expect(stepWithCode.itemListElement!.programmingLanguage).toBe('json');
     });
 
     it('omits itemListElement for steps without code', () => {
       const schema = buildHowTo(baseConfig);
-      const stepWithoutCode = schema.step[0];
+      const stepWithoutCode = schema.step[0]!;
 
       expect(stepWithoutCode).not.toHaveProperty('itemListElement');
     });
@@ -596,7 +596,13 @@ describe('buildHowTo()', () => {
         description: 'Setup guide for filesystem MCP server',
         steps: [
           { position: 1, name: 'Install MCP', text: 'Install the MCP server package' },
-          { position: 2, name: 'Configure', text: 'Add configuration', code: '{}', programmingLanguage: 'json' },
+          {
+            position: 2,
+            name: 'Configure',
+            text: 'Add configuration',
+            code: '{}',
+            programmingLanguage: 'json',
+          },
           { position: 3, name: 'Test Connection', text: 'Verify the server is working' },
         ],
       };
@@ -667,8 +673,8 @@ describe('buildCreativeWork()', () => {
     });
 
     it('defaults to Unknown when author not provided', () => {
-      const config = { ...baseConfig, author: undefined };
-      const schema = buildCreativeWork(config);
+      const { author: _, ...configWithoutAuthor } = baseConfig;
+      const schema = buildCreativeWork(configWithoutAuthor);
 
       expect(schema.creator.name).toBe('Unknown');
     });
@@ -788,7 +794,7 @@ describe('buildFAQPage()', () => {
     it('creates Question entities with correct structure', () => {
       const schema = buildFAQPage('test', 'agents', 'Test', baseTroubleshooting);
 
-      const question = schema.mainEntity[0];
+      const question = schema.mainEntity[0]!;
       expect(question['@type']).toBe('Question');
       expect(question.name).toBe('Agent not responding');
       expect(question.acceptedAnswer).toBeDefined();
@@ -797,7 +803,7 @@ describe('buildFAQPage()', () => {
     it('creates Answer entities with correct structure', () => {
       const schema = buildFAQPage('test', 'agents', 'Test', baseTroubleshooting);
 
-      const answer = schema.mainEntity[0].acceptedAnswer;
+      const answer = schema.mainEntity[0]!.acceptedAnswer;
       expect(answer['@type']).toBe('Answer');
       expect(answer.text).toBe('Check your configuration file and restart Claude');
     });
@@ -806,8 +812,8 @@ describe('buildFAQPage()', () => {
       const schema = buildFAQPage('test', 'agents', 'Test', baseTroubleshooting);
 
       expect(schema.mainEntity).toHaveLength(2);
-      expect(schema.mainEntity[0].name).toBe('Agent not responding');
-      expect(schema.mainEntity[1].name).toBe('Installation failed');
+      expect(schema.mainEntity[0]!.name).toBe('Agent not responding');
+      expect(schema.mainEntity[1]!.name).toBe('Installation failed');
     });
   });
 
@@ -828,7 +834,12 @@ describe('buildFAQPage()', () => {
         },
       ];
 
-      const schema = buildFAQPage('filesystem-server', 'mcp', 'Filesystem MCP Server', mcpTroubleshooting);
+      const schema = buildFAQPage(
+        'filesystem-server',
+        'mcp',
+        'Filesystem MCP Server',
+        mcpTroubleshooting
+      );
 
       expect(schema.mainEntity).toHaveLength(3);
       expect(schema['@id']).toContain('/mcp/filesystem-server#faq');
@@ -852,8 +863,8 @@ describe('buildFAQPage()', () => {
 
       const schema = buildFAQPage('test', 'agents', 'Test', troubleshooting);
 
-      expect(schema.mainEntity[0].name).toContain('"Cannot find module"');
-      expect(schema.mainEntity[0].acceptedAnswer.text).toContain('&&');
+      expect(schema.mainEntity[0]!.name).toContain('"Cannot find module"');
+      expect(schema.mainEntity[0]!.acceptedAnswer.text).toContain('&&');
     });
   });
 });
@@ -924,8 +935,8 @@ describe('buildReviewSchema()', () => {
     });
 
     it('generates current date when not provided', () => {
-      const config = { ...baseConfig, datePublished: undefined };
-      const schema = buildReviewSchema(config);
+      const { datePublished: _, ...configWithoutDate } = baseConfig;
+      const schema = buildReviewSchema(configWithoutDate);
 
       expect(schema.datePublished).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     });
@@ -1026,13 +1037,8 @@ describe('buildVideoObjectSchema()', () => {
     });
 
     it('omits optional properties when not provided', () => {
-      const config = {
-        ...baseConfig,
-        duration: undefined,
-        contentUrl: undefined,
-        embedUrl: undefined,
-      };
-      const schema = buildVideoObjectSchema(config);
+      const { duration, contentUrl, embedUrl, ...configWithoutOptionals } = baseConfig;
+      const schema = buildVideoObjectSchema(configWithoutOptionals);
 
       expect(schema).not.toHaveProperty('duration');
       expect(schema).not.toHaveProperty('contentUrl');
@@ -1081,8 +1087,8 @@ describe('buildCourseSchema()', () => {
     });
 
     it('defaults to Professional when not provided', () => {
-      const config = { ...baseConfig, educationalLevel: undefined };
-      const schema = buildCourseSchema(config);
+      const { educationalLevel: _, ...configWithoutLevel } = baseConfig;
+      const schema = buildCourseSchema(configWithoutLevel);
 
       expect(schema.educationalLevel).toBe('Professional');
     });
@@ -1174,11 +1180,11 @@ describe('buildJobPostingSchema()', () => {
     it('creates Place with PostalAddress for on-site jobs', () => {
       const schema = buildJobPostingSchema(baseConfig);
 
-      expect(schema.jobLocation['@type']).toBe('Place');
-      expect(schema.jobLocation.address['@type']).toBe('PostalAddress');
-      expect(schema.jobLocation.address.addressLocality).toBe('San Francisco');
-      expect(schema.jobLocation.address.addressRegion).toBe('CA');
-      expect(schema.jobLocation.address.addressCountry).toBe('USA');
+      expect(schema.jobLocation!['@type']).toBe('Place');
+      expect(schema.jobLocation!.address['@type']).toBe('PostalAddress');
+      expect(schema.jobLocation!.address.addressLocality).toBe('San Francisco');
+      expect(schema.jobLocation!.address.addressRegion).toBe('CA');
+      expect(schema.jobLocation!.address.addressCountry).toBe('USA');
     });
 
     it('creates remote Place for remote jobs', () => {
@@ -1188,8 +1194,8 @@ describe('buildJobPostingSchema()', () => {
       };
       const schema = buildJobPostingSchema(config);
 
-      expect(schema.jobLocation['@type']).toBe('Place');
-      expect(schema.jobLocation.address.addressCountry).toBe('Remote');
+      expect(schema.jobLocation!['@type']).toBe('Place');
+      expect(schema.jobLocation!.address.addressCountry).toBe('Remote');
     });
   });
 
@@ -1197,11 +1203,11 @@ describe('buildJobPostingSchema()', () => {
     it('includes baseSalary as MonetaryAmount', () => {
       const schema = buildJobPostingSchema(baseConfig);
 
-      expect(schema.baseSalary['@type']).toBe('MonetaryAmount');
-      expect(schema.baseSalary.currency).toBe('USD');
-      expect(schema.baseSalary.value['@type']).toBe('QuantitativeValue');
-      expect(schema.baseSalary.value.value).toBe(180000);
-      expect(schema.baseSalary.value.unitText).toBe('YEAR');
+      expect(schema.baseSalary!['@type']).toBe('MonetaryAmount');
+      expect(schema.baseSalary!.currency).toBe('USD');
+      expect(schema.baseSalary!.value['@type']).toBe('QuantitativeValue');
+      expect(schema.baseSalary!.value.value).toBe(180000);
+      expect(schema.baseSalary!.value.unitText).toBe('YEAR');
     });
   });
 });
@@ -1260,8 +1266,8 @@ describe('buildCollectionPageSchema()', () => {
     });
 
     it('defaults to items.length when collectionSize not provided', () => {
-      const config = { ...baseConfig, collectionSize: undefined };
-      const schema = buildCollectionPageSchema(config);
+      const { collectionSize: _, ...configWithoutSize } = baseConfig;
+      const schema = buildCollectionPageSchema(configWithoutSize);
 
       expect(schema.mainEntity.numberOfItems).toBe(3);
     });
@@ -1271,7 +1277,7 @@ describe('buildCollectionPageSchema()', () => {
     it('creates ListItem for each item with correct structure', () => {
       const schema = buildCollectionPageSchema(baseConfig);
 
-      const firstItem = schema.mainEntity.itemListElement[0];
+      const firstItem = schema.mainEntity.itemListElement[0]!;
       expect(firstItem['@type']).toBe('ListItem');
       expect(firstItem.position).toBe(1);
       expect(firstItem.item['@type']).toBe('Thing');
@@ -1281,30 +1287,30 @@ describe('buildCollectionPageSchema()', () => {
     it('converts relative URLs to absolute URLs', () => {
       const schema = buildCollectionPageSchema(baseConfig);
 
-      const firstItem = schema.mainEntity.itemListElement[0];
+      const firstItem = schema.mainEntity.itemListElement[0]!;
       expect(firstItem.item.url).toBe(`${BASE_URL}/mcp/filesystem-server`);
     });
 
     it('preserves absolute URLs', () => {
       const schema = buildCollectionPageSchema(baseConfig);
 
-      const thirdItem = schema.mainEntity.itemListElement[2];
+      const thirdItem = schema.mainEntity.itemListElement[2]!;
       expect(thirdItem.item.url).toBe('https://example.com/api-server');
     });
 
     it('includes description when provided', () => {
       const schema = buildCollectionPageSchema(baseConfig);
 
-      const firstItem = schema.mainEntity.itemListElement[0];
+      const firstItem = schema.mainEntity.itemListElement[0]!;
       expect(firstItem.item.description).toBe('Access local filesystem with MCP');
     });
 
     it('uses 1-based position indexing', () => {
       const schema = buildCollectionPageSchema(baseConfig);
 
-      expect(schema.mainEntity.itemListElement[0].position).toBe(1);
-      expect(schema.mainEntity.itemListElement[1].position).toBe(2);
-      expect(schema.mainEntity.itemListElement[2].position).toBe(3);
+      expect(schema.mainEntity.itemListElement[0]!.position).toBe(1);
+      expect(schema.mainEntity.itemListElement[1]!.position).toBe(2);
+      expect(schema.mainEntity.itemListElement[2]!.position).toBe(3);
     });
   });
 });

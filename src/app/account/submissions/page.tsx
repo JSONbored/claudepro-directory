@@ -92,8 +92,8 @@ export default async function SubmissionsPage() {
           {submissions.map((submission) => (
             <Card key={submission.id}>
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
+                <div className={UI_CLASSES.FLEX_ITEMS_START_JUSTIFY_BETWEEN}>
+                  <div className={UI_CLASSES.FLEX_1}>
                     <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                       {getStatusBadge(submission.status)}
                       <Badge variant="outline" className={UI_CLASSES.TEXT_XS}>
@@ -177,9 +177,11 @@ export default async function SubmissionsPage() {
       {/* Info Card */}
       <Card className="border-blue-500/20 bg-blue-500/5">
         <CardContent className="pt-6">
-          <div className="flex gap-3">
-            <GitPullRequest className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
-            <div className="flex-1">
+          <div className={UI_CLASSES.FLEX_GAP_3}>
+            <GitPullRequest
+              className={`h-5 w-5 text-blue-400 ${UI_CLASSES.FLEX_SHRINK_0_MT_0_5}`}
+            />
+            <div className={UI_CLASSES.FLEX_1}>
               <p className={`${UI_CLASSES.TEXT_SM} ${UI_CLASSES.FONT_MEDIUM} text-blue-400`}>
                 How it works
               </p>

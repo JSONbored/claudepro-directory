@@ -31,7 +31,7 @@ import {
   BUILD_CATEGORY_CONFIGS,
   type BuildCategoryId,
   getAllBuildCategoryConfigs,
-} from '../src/lib/config/build-category-config.js';
+} from '../src/lib/config/category-config.js';
 import { logger } from '../src/lib/logger.js';
 import type { ContentStats } from '../src/lib/schemas/content/content-types.js';
 

@@ -186,7 +186,7 @@ export const Navigation = () => {
 
                 {/* Desktop Navigation */}
                 <nav
-                  className="hidden lg:flex items-center gap-2 lg:gap-3 xl:gap-4 text-sm xl:text-base"
+                  className={`hidden ${UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2} lg:gap-3 xl:gap-4 text-sm xl:text-base lg:flex`}
                   aria-label="Primary navigation"
                 >
                   {PRIMARY_NAVIGATION.map((link) => (
@@ -197,7 +197,7 @@ export const Navigation = () => {
                       onClick={() => setIsOpen(false)}
                     >
                       {link.isNew ? (
-                        <span className="flex items-center gap-1.5">
+                        <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_1_5}>
                           {link.label}
                           <NewIndicator label={`New: ${link.label}`} />
                         </span>
@@ -236,7 +236,9 @@ export const Navigation = () => {
                                       className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} gap-3 ${UI_CLASSES.W_FULL} cursor-pointer p-3 rounded-lg hover:bg-accent/10 hover:scale-[1.02] transition-all duration-200 group`}
                                     >
                                       {IconComponent && (
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted group-hover:bg-accent/20 transition-colors flex-shrink-0">
+                                        <div
+                                          className={`${UI_CLASSES.FLEX} h-10 w-10 ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.ROUNDED_LG} ${UI_CLASSES.BG_MUTED} group-hover:bg-accent/20 ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.FLEX_SHRINK_0}`}
+                                        >
                                           <IconComponent
                                             className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors"
                                             aria-hidden="true"
@@ -271,7 +273,9 @@ export const Navigation = () => {
                           href={ROUTES.SUBMIT}
                           className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_START} gap-3 ${UI_CLASSES.W_FULL} cursor-pointer p-3 rounded-lg bg-accent/5 hover:bg-accent/10 hover:scale-[1.01] transition-all duration-200 group`}
                         >
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20 group-hover:bg-accent/30 transition-colors flex-shrink-0">
+                          <div
+                            className={`${UI_CLASSES.FLEX} h-10 w-10 ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} ${UI_CLASSES.ROUNDED_LG} bg-accent/20 group-hover:bg-accent/30 ${UI_CLASSES.TRANSITION_COLORS} ${UI_CLASSES.FLEX_SHRINK_0}`}
+                          >
                             <svg
                               className="h-5 w-5 text-accent"
                               aria-hidden="true"
@@ -383,7 +387,7 @@ export const Navigation = () => {
                                   className={UI_CLASSES.BUTTON_PRIMARY_LARGE}
                                 >
                                   {link.isNew ? (
-                                    <span className="flex items-center gap-2">
+                                    <span className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                                       {link.label}
                                       <NewIndicator label={`New: ${link.label}`} />
                                     </span>
@@ -431,7 +435,7 @@ export const Navigation = () => {
                           className={`${UI_CLASSES.BORDER_T} border-border/30 ${UI_CLASSES.PT_6} pb-6 ${UI_CLASSES.PX_6}`}
                         >
                           <div
-                            className={`${UI_CLASSES.FLEX} ${UI_CLASSES.ITEMS_CENTER} ${UI_CLASSES.JUSTIFY_CENTER} gap-6`}
+                            className={`${UI_CLASSES.FLEX_ITEMS_CENTER_JUSTIFY_CENTER_GAP_2} gap-6`}
                           >
                             <Button
                               variant="outline"

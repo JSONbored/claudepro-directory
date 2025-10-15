@@ -14,15 +14,12 @@
  * @group smoke
  */
 
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import {
-  navigateToSubmit,
+  expectNoA11yViolations,
   expectPageURL,
   expectVisible,
-  fillField,
-  clickButton,
-  expectNoA11yViolations,
-  waitForNetworkIdle,
+  navigateToSubmit,
 } from '../helpers/test-helpers';
 
 test.describe('Submit Form - Smoke Tests', () => {
@@ -45,22 +42,19 @@ test.describe('Submit Form - Smoke Tests', () => {
     await navigateToSubmit(page);
 
     // Look for common required fields
-    const fields = [
-      /name|title/i,
-      /description/i,
-      /url|link|repository/i,
-      /category|type/i,
-    ];
+    const fields = [/name|title/i, /description/i, /url|link|repository/i, /category|type/i];
 
     for (const fieldPattern of fields) {
-      const field = page.getByLabel(fieldPattern, { exact: false }).or(
-        page.locator(`input[placeholder*="${fieldPattern}"]`).or(
-          page.locator(`textarea[placeholder*="${fieldPattern}"]`)
-        )
-      );
+      const field = page
+        .getByLabel(fieldPattern, { exact: false })
+        .or(
+          page
+            .locator(`input[placeholder*="${fieldPattern}"]`)
+            .or(page.locator(`textarea[placeholder*="${fieldPattern}"]`))
+        );
 
       // At least one field matching each pattern should exist
-      if (await field.count() > 0) {
+      if ((await field.count()) > 0) {
         await expectVisible(field.first());
       }
     }
@@ -78,7 +72,9 @@ test.describe('Submit Form - Smoke Tests', () => {
       // Should show validation errors
       await page.waitForTimeout(1000);
 
-      const errorMessage = page.getByText(/required|field is required|please fill|cannot be empty/i);
+      const errorMessage = page.getByText(
+        /required|field is required|please fill|cannot be empty/i
+      );
       const hasError = await errorMessage.isVisible({ timeout: 2000 }).catch(() => false);
 
       // Either shows error message OR prevents submission
@@ -90,9 +86,10 @@ test.describe('Submit Form - Smoke Tests', () => {
     await navigateToSubmit(page);
 
     // Find URL field
-    const urlField = page.getByLabel(/url|link|repository/i, { exact: false }).or(
-      page.locator('input[type="url"]')
-    ).first();
+    const urlField = page
+      .getByLabel(/url|link|repository/i, { exact: false })
+      .or(page.locator('input[type="url"]'))
+      .first();
 
     if (await urlField.isVisible({ timeout: 2000 }).catch(() => false)) {
       // Enter invalid URL
@@ -115,13 +112,11 @@ test.describe('Submit Form - Smoke Tests', () => {
     await navigateToSubmit(page);
 
     // Find category/type selector
-    const categorySelect = page.getByLabel(/category|type/i, { exact: false }).or(
-      page.locator('[name*="category"]').or(
-        page.locator('[name*="type"]')
-      )
-    );
+    const categorySelect = page
+      .getByLabel(/category|type/i, { exact: false })
+      .or(page.locator('[name*="category"]').or(page.locator('[name*="type"]')));
 
-    if (await categorySelect.count() > 0) {
+    if ((await categorySelect.count()) > 0) {
       const firstSelect = categorySelect.first();
       await expectVisible(firstSelect);
 
@@ -134,20 +129,19 @@ test.describe('Submit Form - Smoke Tests', () => {
     await navigateToSubmit(page);
 
     // Find description field
-    const descriptionField = page.getByLabel(/description/i, { exact: false }).or(
-      page.locator('textarea[name*="description"]')
-    ).first();
+    const descriptionField = page
+      .getByLabel(/description/i, { exact: false })
+      .or(page.locator('textarea[name*="description"]'))
+      .first();
 
     if (await descriptionField.isVisible({ timeout: 2000 }).catch(() => false)) {
       // Type some text
       await descriptionField.fill('This is a test description');
 
       // Look for character counter
-      const counter = page.locator('[data-character-count]').or(
-        page.getByText(/\d+\/\d+/).or(
-          page.getByText(/characters?/)
-        )
-      );
+      const counter = page
+        .locator('[data-character-count]')
+        .or(page.getByText(/\d+\/\d+/).or(page.getByText(/characters?/)));
 
       // May or may not have counter
       const hasCounter = await counter.isVisible({ timeout: 1000 }).catch(() => false);
@@ -161,11 +155,11 @@ test.describe('Submit Form - Smoke Tests', () => {
     await navigateToSubmit(page);
 
     // Look for tags input
-    const tagsInput = page.getByLabel(/tags|labels/i, { exact: false }).or(
-      page.locator('input[name*="tags"]')
-    );
+    const tagsInput = page
+      .getByLabel(/tags|labels/i, { exact: false })
+      .or(page.locator('input[name*="tags"]'));
 
-    if (await tagsInput.count() > 0) {
+    if ((await tagsInput.count()) > 0) {
       const firstTagsInput = tagsInput.first();
       await expectVisible(firstTagsInput);
 
@@ -174,9 +168,7 @@ test.describe('Submit Form - Smoke Tests', () => {
       await firstTagsInput.press('Enter');
 
       // Look for tag badge
-      const tagBadge = page.locator('[data-tag]').or(
-        page.getByText('test-tag')
-      );
+      const tagBadge = page.locator('[data-tag]').or(page.getByText('test-tag'));
 
       // Tag may appear as badge
       const hasTag = await tagBadge.isVisible({ timeout: 2000 }).catch(() => false);
@@ -202,12 +194,11 @@ test.describe('Submit Form - Smoke Tests', () => {
 
     // Look for preview button/section
     const previewButton = page.getByRole('button', { name: /preview/i });
-    const previewSection = page.locator('[data-preview]').or(
-      page.getByText(/preview/i)
-    );
+    const previewSection = page.locator('[data-preview]').or(page.getByText(/preview/i));
 
-    const hasPreview = await previewButton.isVisible({ timeout: 2000 }).catch(() => false) ||
-                       await previewSection.isVisible({ timeout: 2000 }).catch(() => false);
+    const hasPreview =
+      (await previewButton.isVisible({ timeout: 2000 }).catch(() => false)) ||
+      (await previewSection.isVisible({ timeout: 2000 }).catch(() => false));
 
     if (hasPreview) {
       if (await previewButton.isVisible().catch(() => false)) {
@@ -250,9 +241,10 @@ test.describe('Submit Form - Smoke Tests', () => {
     await navigateToSubmit(page);
 
     // Find repository URL field
-    const repoField = page.getByLabel(/repository|github|url/i, { exact: false }).or(
-      page.locator('input[type="url"]')
-    ).first();
+    const repoField = page
+      .getByLabel(/repository|github|url/i, { exact: false })
+      .or(page.locator('input[type="url"]'))
+      .first();
 
     if (await repoField.isVisible({ timeout: 2000 }).catch(() => false)) {
       // Enter non-GitHub URL

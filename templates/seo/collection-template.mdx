@@ -74,6 +74,8 @@ citationReady: true
 # - Authentic user feedback and testimonials
 ---
 
+import { UI_CLASSES } from '@/src/lib/ui-constants';
+
 # [RESEARCH: Collection Theme]: Curated Collection of [RESEARCH: Resource Type]
 
 <TLDRSummary 
@@ -149,9 +151,9 @@ Understanding our selection process ensures you're getting the highest quality [
                     <CardTitle className="text-lg">[RESEARCH: Resource 1 name from actual source]</CardTitle>
                     <CardDescription>[RESEARCH: Resource description from official source]</CardDescription>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
                     <Badge variant="secondary">[RESEARCH: Resource type from classification]</Badge>
-                    <div className="flex items-center">
+                    <div className={UI_CLASSES.FLEX_ITEMS_CENTER}>
                       {/* Star rating based on actual reviews */}
                       <span className="text-yellow-500">★★★★★</span>
                       <span className={`ml-1 ${UI_CLASSES.TEXT_SM_MUTED}`}>[RESEARCH: Rating from reviews]/5</span>

@@ -24,7 +24,7 @@ console.log('📦 Category Content (from generated/*.ts):');
 const allContent = getAllCategoryContent();
 console.log(`   Total: ${allContent.length} pages`);
 
-const categories = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines'];
+const categories = ['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'];
 for (const category of categories) {
   const content = getContentByCategory(category);
   console.log(`   - ${category}: ${content.length} items`);

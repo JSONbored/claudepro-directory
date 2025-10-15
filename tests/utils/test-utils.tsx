@@ -23,9 +23,9 @@
  * @see https://testing-library.com/docs/react-testing-library/setup
  */
 
-import { type ReactElement, type ReactNode } from 'react';
-import { render, type RenderOptions } from '@testing-library/react';
+import { type RenderOptions, render } from '@testing-library/react';
 import { ThemeProvider } from 'next-themes';
+import type { ReactElement, ReactNode } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 // =============================================================================
@@ -112,7 +112,8 @@ const customRender = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>
  * Re-export everything from React Testing Library
  * This allows: import { render, screen, waitFor } from '@/tests/utils/test-utils'
  */
-export * from '@testing-library/react';
+// Re-export only the commonly used utilities to avoid barrel performance issues
+export { fireEvent, screen, waitFor } from '@testing-library/react';
 
 /**
  * Export custom render as default render
@@ -144,7 +145,7 @@ export { userEvent } from '@testing-library/user-event';
  * ```
  */
 export async function waitForLoadingToFinish() {
-  const { findByTestId, queryByTestId } = await import('@testing-library/react');
+  const { queryByTestId } = await import('@testing-library/react');
 
   // Wait for loading indicator to disappear
   const loadingIndicator = queryByTestId(document.body, 'loading');

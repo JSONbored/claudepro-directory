@@ -14,9 +14,9 @@
  * @see config/tools/lighthouserc.cjs
  */
 
-import { describe, expect, test } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { describe, expect, test } from 'vitest';
 
 // Load the Lighthouse CI configuration
 const loadLighthouseConfig = () => {
@@ -74,9 +74,10 @@ describe('Lighthouse CI Configuration', () => {
       ];
 
       for (const path of criticalPaths) {
-        const found = urls.some((url: string) =>
-          url === `http://localhost:3000${path === '/' ? '' : path}` ||
-          url === `http://localhost:3000${path}`
+        const found = urls.some(
+          (url: string) =>
+            url === `http://localhost:3000${path === '/' ? '' : path}` ||
+            url === `http://localhost:3000${path}`
         );
         expect(found).toBe(true);
       }
@@ -108,11 +109,7 @@ describe('Lighthouse CI Configuration', () => {
     test('should enforce critical ARIA rules', () => {
       const { assertions } = config.ci.assert;
 
-      const criticalAriaRules = [
-        'aria-allowed-attr',
-        'aria-required-attr',
-        'aria-valid-attr',
-      ];
+      const criticalAriaRules = ['aria-allowed-attr', 'aria-required-attr', 'aria-valid-attr'];
 
       for (const rule of criticalAriaRules) {
         expect(assertions[rule]).toBe('error');
@@ -201,7 +198,8 @@ describe('Lighthouse CI Configuration', () => {
 
     test('should have lower threshold for performance (80% vs 90%)', () => {
       const performanceScore = config.ci.assert.assertions['categories:performance'][1].minScore;
-      const accessibilityScore = config.ci.assert.assertions['categories:accessibility'][1].minScore;
+      const accessibilityScore =
+        config.ci.assert.assertions['categories:accessibility'][1].minScore;
 
       // Performance can be harder to achieve, so 80% is acceptable
       expect(performanceScore).toBeLessThanOrEqual(accessibilityScore);
@@ -277,7 +275,7 @@ describe('Lighthouse CI Configuration', () => {
       const urlPaths = urls.map((url: string) => new URL(url).pathname);
 
       // User-facing pages
-      expect(urlPaths).toContain('/');  // Homepage
+      expect(urlPaths).toContain('/'); // Homepage
       expect(urlPaths).toContain('/agents');
       expect(urlPaths).toContain('/mcp');
       expect(urlPaths).toContain('/commands');
@@ -295,7 +293,7 @@ describe('Lighthouse CI Configuration', () => {
       const urlPaths = urls.map((url: string) => new URL(url).pathname);
 
       const discoveryPaths = ['/collections', '/trending', '/for-you'];
-      const hasDiscoveryPaths = discoveryPaths.some(path => urlPaths.includes(path));
+      const hasDiscoveryPaths = discoveryPaths.some((path) => urlPaths.includes(path));
 
       expect(hasDiscoveryPaths).toBe(true);
     });
