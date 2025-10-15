@@ -98,17 +98,31 @@ export interface AnnouncementConfig {
  * 3. Most recent start date (if same priority)
  */
 export const announcements: AnnouncementConfig[] = [
+  // New: Skills Launch (priority announcement)
+  {
+    id: 'skills-launch-2025-10',
+    variant: 'default',
+    tag: 'New',
+    title: 'Introducing Skills - Document workflows for Claude (PDF/DOCX/PPTX/XLSX)',
+    href: '/skills',
+    icon: 'ArrowUpRight',
+    startDate: '2025-10-14T00:00:00Z',
+    endDate: '2025-10-28T23:59:59Z',
+    priority: 'high',
+    dismissible: true,
+  },
   // Example: New Category Launch
+  // (Previous launch retained for history; outside active window or demoted if overlapping)
   {
     id: 'statuslines-launch-2025-10',
     variant: 'default',
-    tag: 'New',
-    title: 'Introducing Statuslines - Customize your editor status bar',
+    tag: 'Feature',
+    title: 'Statuslines - Customize your editor status bar',
     href: '/statuslines',
     icon: 'ArrowUpRight',
     startDate: '2025-10-10T00:00:00Z',
     endDate: '2025-10-17T23:59:59Z',
-    priority: 'high',
+    priority: 'medium',
     dismissible: true,
   },
 
@@ -116,13 +130,13 @@ export const announcements: AnnouncementConfig[] = [
   {
     id: 'collections-launch-2025-10',
     variant: 'default',
-    tag: 'New',
-    title: 'Collections are live - Curated bundles of Claude configurations',
+    tag: 'Feature',
+    title: 'Collections - Curated bundles of Claude configurations',
     href: '/collections',
     icon: 'ArrowUpRight',
     startDate: '2025-10-10T00:00:00Z',
     endDate: '2025-10-17T23:59:59Z',
-    priority: 'high',
+    priority: 'medium',
     dismissible: true,
   },
 

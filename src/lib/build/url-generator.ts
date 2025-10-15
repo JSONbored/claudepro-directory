@@ -47,6 +47,7 @@ export interface UrlGeneratorMetadata {
   mcpMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
   rulesMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
   statuslinesMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
+  skillsMetadata: Array<{ slug: string; category: string; dateAdded?: string }>;
 }
 
 /**
@@ -311,6 +312,7 @@ export async function generateAllSiteUrls(
     ...metadata.commandsMetadata,
     ...metadata.hooksMetadata,
     ...metadata.statuslinesMetadata,
+    ...metadata.skillsMetadata,
   ];
 
   // Add non-collection content items

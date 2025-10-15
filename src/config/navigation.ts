@@ -122,14 +122,12 @@ export const PRIMARY_NAVIGATION: NavigationLink[] = [
     href: '/statuslines',
     icon: Terminal,
     description: 'Customizable editor status bars',
-    isNew: true,
   },
   {
     label: 'Collections',
     href: '/collections',
     icon: Layers,
     description: 'Curated content bundles',
-    isNew: true,
   },
   {
     label: 'Guides',

@@ -73,7 +73,7 @@ export const baseSchemas = {
     .string()
     .regex(VALIDATION_PATTERNS.CONTENT_TYPE, 'Invalid content type')
     .describe(
-      'Content category identifier. Valid values: agents, mcp, rules, commands, hooks, statuslines, collections.'
+      'Content category identifier. Valid values: agents, mcp, rules, commands, hooks, statuslines, collections, skills.'
     ),
 
   // Search query with sanitization
@@ -180,7 +180,7 @@ export const apiSchemas = {
     .object({
       q: baseSchemas.searchQuery,
       category: z
-        .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections'])
+        .enum(['agents', 'mcp', 'rules', 'commands', 'hooks', 'statuslines', 'collections', 'skills'])
         .optional()
         .describe('Filter search results by content category'),
       page: baseSchemas.page,
@@ -415,6 +415,7 @@ export const sanitizers = {
       'hooks',
       'statuslines',
       'collections',
+      'skills',
       'tutorials',
       'comparisons',
       'workflows',

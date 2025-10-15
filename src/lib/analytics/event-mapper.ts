@@ -29,6 +29,7 @@ export type ContentCategory =
   | 'hooks'
   | 'statuslines'
   | 'collections'
+  | 'skills'
   | 'guides';
 
 /**
@@ -55,6 +56,7 @@ const EVENT_MAPPINGS: Record<EventAction, Record<string, EventName>> = {
     hooks: EVENTS.CONTENT_VIEW_HOOK,
     statuslines: EVENTS.CONTENT_VIEW_STATUSLINE,
     collections: EVENTS.CONTENT_VIEW_COLLECTION,
+    skills: EVENTS.CONTENT_VIEW_RULE, // reuse rule-style content view (guide-like)
   },
   search: {
     global: EVENTS.SEARCH_GLOBAL,
@@ -67,6 +69,7 @@ const EVENT_MAPPINGS: Record<EventAction, Record<string, EventName>> = {
     statuslines: EVENTS.SEARCH_STATUSLINES,
     collections: EVENTS.SEARCH_COLLECTIONS,
     guides: EVENTS.SEARCH_GUIDES,
+    skills: EVENTS.SEARCH_RULES, // reuse rules search event bucket
   },
   copy_code: {
     agents: EVENTS.COPY_CODE_AGENT,
@@ -77,6 +80,7 @@ const EVENT_MAPPINGS: Record<EventAction, Record<string, EventName>> = {
     hooks: EVENTS.COPY_CODE_HOOK,
     statuslines: EVENTS.COPY_CODE_STATUSLINE,
     guides: EVENTS.COPY_CODE_GUIDE,
+    skills: EVENTS.COPY_CODE_GUIDE,
   },
   copy_markdown: {
     agents: EVENTS.COPY_MARKDOWN_AGENT,
@@ -87,6 +91,7 @@ const EVENT_MAPPINGS: Record<EventAction, Record<string, EventName>> = {
     hooks: EVENTS.COPY_MARKDOWN_HOOK,
     statuslines: EVENTS.COPY_MARKDOWN_STATUSLINE,
     collections: EVENTS.COPY_MARKDOWN_COLLECTION,
+    skills: EVENTS.COPY_MARKDOWN_OTHER,
   },
   download_markdown: {
     agents: EVENTS.DOWNLOAD_MARKDOWN_AGENT,
@@ -97,6 +102,7 @@ const EVENT_MAPPINGS: Record<EventAction, Record<string, EventName>> = {
     hooks: EVENTS.DOWNLOAD_MARKDOWN_HOOK,
     statuslines: EVENTS.DOWNLOAD_MARKDOWN_STATUSLINE,
     collections: EVENTS.DOWNLOAD_MARKDOWN_COLLECTION,
+    skills: EVENTS.DOWNLOAD_MARKDOWN_OTHER,
   },
 };
 
