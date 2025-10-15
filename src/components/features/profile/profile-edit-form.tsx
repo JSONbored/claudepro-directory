@@ -6,7 +6,6 @@
  */
 
 import { useId, useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Input } from '@/src/components/ui/input';
@@ -17,6 +16,7 @@ import { refreshProfileFromOAuth, updateProfile } from '@/src/lib/actions/user.a
 import { X } from '@/src/lib/icons';
 import type { ProfileData } from '@/src/lib/schemas/profile.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface ProfileEditFormProps {
   profile: ProfileData;
@@ -69,10 +69,10 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
       });
 
       if (result?.data?.success) {
-        toast.success('Profile updated successfully');
+        toasts.success.profileUpdated();
         setHasChanges(false);
       } else if (result?.serverError) {
-        toast.error(result.serverError);
+        toasts.error.serverError(result.serverError);
       }
     });
   };
@@ -82,17 +82,17 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
     if (!trimmed) return;
 
     if (interests.length >= 10) {
-      toast.error('Maximum 10 interests allowed');
+      toasts.error.validation('Maximum 10 interests allowed');
       return;
     }
 
     if (interests.includes(trimmed)) {
-      toast.error('Interest already added');
+      toasts.error.validation('Interest already added');
       return;
     }
 
     if (trimmed.length > 30) {
-      toast.error('Interest must be less than 30 characters');
+      toasts.error.validation('Interest must be less than 30 characters');
       return;
     }
 
@@ -318,11 +318,11 @@ export function RefreshProfileButton({ providerLabel }: { providerLabel: string 
         startTransition(async () => {
           const result = await refreshProfileFromOAuth();
           if (result?.data?.success) {
-            toast.success(`Refreshed from ${providerLabel}`);
+            toasts.success.actionCompleted(`Refreshed from ${providerLabel}`);
           } else if (result?.serverError) {
-            toast.error(result.serverError);
+            toasts.error.serverError(result.serverError);
           } else {
-            toast.error('Failed to refresh profile');
+            toasts.error.profileRefreshFailed();
           }
         })
       }

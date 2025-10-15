@@ -15,13 +15,13 @@
 
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { StarRating } from '@/src/components/features/reviews/star-rating';
 import { Button } from '@/src/components/ui/button';
 import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
 import { createReview, updateReview } from '@/src/lib/actions/content.actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface ReviewFormProps {
   contentType: string;
@@ -65,7 +65,7 @@ export function ReviewForm({
 
     if (!isValid) {
       setShowRatingError(true);
-      toast.error('Please select a star rating');
+      toasts.error.validation('Please select a star rating');
       return;
     }
 
@@ -82,7 +82,7 @@ export function ReviewForm({
           });
 
           if (result?.data?.success) {
-            toast.success('Review updated successfully');
+            toasts.success.itemUpdated('Review');
             router.refresh();
             onSuccess?.();
           }
@@ -97,7 +97,7 @@ export function ReviewForm({
           });
 
           if (result?.data?.success) {
-            toast.success('Review submitted successfully');
+            toasts.success.itemCreated('Review');
             setRating(0);
             setReviewText('');
             router.refresh();
@@ -106,16 +106,16 @@ export function ReviewForm({
         }
       } catch (error) {
         if (error instanceof Error && error.message.includes('signed in')) {
-          toast.error('Please sign in to write a review', {
+          toasts.raw.error('Please sign in to write a review', {
             action: {
               label: 'Sign In',
               onClick: () => router.push(`/login?redirect=${window.location.pathname}`),
             },
           });
         } else if (error instanceof Error && error.message.includes('already reviewed')) {
-          toast.error('You have already reviewed this content');
+          toasts.error.validation('You have already reviewed this content');
         } else {
-          toast.error(error instanceof Error ? error.message : 'Failed to submit review');
+          toasts.error.reviewActionFailed('submit');
         }
       }
     });

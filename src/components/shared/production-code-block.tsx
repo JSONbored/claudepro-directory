@@ -17,11 +17,11 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
 import { getCopyCodeEvent } from '@/src/lib/analytics/event-mapper';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { Check, ChevronDown, Copy } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 export interface ProductionCodeBlockProps {
   /** Pre-rendered HTML from Shiki (server-side) */
@@ -65,7 +65,7 @@ export function ProductionCodeBlock({
     try {
       await navigator.clipboard.writeText(code);
       setIsCopied(true);
-      toast.success('Code copied to clipboard!');
+      toasts.success.codeCopied();
       setTimeout(() => setIsCopied(false), 2000);
 
       // Track copy event with content-type-specific analytics
@@ -80,7 +80,7 @@ export function ProductionCodeBlock({
         ...(language && { language }),
       });
     } catch (_err) {
-      toast.error('Failed to copy code');
+      toasts.error.copyFailed('code');
     }
   };
 

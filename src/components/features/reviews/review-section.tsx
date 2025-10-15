@@ -18,7 +18,6 @@
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useId, useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { StarRating } from '@/src/components/features/reviews/star-rating';
 import { BaseCard } from '@/src/components/shared/base-card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
@@ -26,6 +25,7 @@ import { Badge } from '@/src/components/ui/badge';
 import { markReviewHelpful } from '@/src/lib/actions/content.actions';
 import { ThumbsUp } from '@/src/lib/icons';
 import { formatDistanceToNow } from '@/src/lib/utils/data.utils';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 // Lazy load RatingHistogram component with recharts dependency (~100KB)
 // SSR disabled: Charts are visual decorations, not critical for SEO/accessibility
@@ -134,19 +134,19 @@ function ReviewCardItem({
         if (result?.data?.success) {
           setHasVoted(!hasVoted);
           setHelpfulCount((prev) => (hasVoted ? prev - 1 : prev + 1));
-          toast.success(hasVoted ? 'Vote removed' : 'Marked as helpful');
+          toasts.success.actionCompleted(hasVoted ? 'Vote removed' : 'Marked as helpful');
           router.refresh();
         }
       } catch (error) {
         if (error instanceof Error && error.message.includes('signed in')) {
-          toast.error('Please sign in to vote on reviews', {
+          toasts.raw.error('Please sign in to vote on reviews', {
             action: {
               label: 'Sign In',
               onClick: () => router.push(`/login?redirect=${window.location.pathname}`),
             },
           });
         } else {
-          toast.error(error instanceof Error ? error.message : 'Failed to update vote');
+          toasts.error.voteUpdateFailed();
         }
       }
     });
@@ -328,7 +328,7 @@ export function ReviewSection({
           setTotalCount(result.data.total ?? 0);
         }
       } catch {
-        toast.error('Failed to load reviews');
+        toasts.error.loadFailed('reviews');
       } finally {
         setIsLoadingMore(false);
       }
@@ -361,13 +361,13 @@ export function ReviewSection({
         const result = await deleteReview({ review_id: reviewId });
 
         if (result?.data?.success) {
-          toast.success('Review deleted');
+          toasts.success.itemDeleted('Review');
           setReviews((prev) => prev.filter((r) => r.id !== reviewId));
           setTotalCount((prev) => prev - 1);
           router.refresh();
         }
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Failed to delete review');
+        toasts.error.reviewActionFailed('delete');
       }
     });
   };
