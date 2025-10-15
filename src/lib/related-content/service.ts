@@ -192,7 +192,7 @@ class RelatedContentService {
     try {
       // Load from metadata loaders (already lazy-loaded and cached)
       const { metadataLoader } = await import('@/src/lib/content/lazy-content-loaders');
-      const { getAllBuildCategoryConfigs } = await import('@/src/lib/config/build-category-config');
+      const { getAllBuildCategoryConfigs } = await import('@/src/lib/config/category-config');
 
       // Get all category metadata keys
       const categoryKeys = getAllBuildCategoryConfigs().map((config) => {

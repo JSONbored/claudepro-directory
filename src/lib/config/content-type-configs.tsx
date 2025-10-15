@@ -1,15 +1,24 @@
 /**
  * Content Type Configurations
  *
- * Centralized configuration for all content types.
- * Each config defines how that content type should be rendered in detail pages.
+ * Detail page rendering configuration for all content types.
+ * Derives metadata from unified category registry to eliminate duplication.
  *
+ * This file contains ONLY detail-page-specific behavior:
+ * - Primary actions (handlers, icons)
+ * - Section visibility flags
+ * - Generator functions (installation, use cases, troubleshooting)
+ *
+ * All base metadata (typeName, icon, colorScheme) imported from category-config.ts.
+ *
+ * @see lib/config/category-config.ts - Single source of truth for category metadata
  * @see lib/types/content-type-config.ts - Type definitions
  * @see components/unified-detail-page.tsx - Component consumer
  */
 
 import { toast } from 'sonner';
 import { BookOpen, Bot, Layers, Server, Terminal, Webhook } from '@/src/lib/icons';
+import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 import type { ContentTypeConfigRegistry } from '@/src/lib/types/content-type-config';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
@@ -19,9 +28,9 @@ import { copyToClipboard } from '@/src/lib/utils/browser.utils';
  * Agent Configuration
  */
 const agentConfig: ContentTypeConfigRegistry['agents'] = {
-  typeName: 'Agent',
-  icon: Bot,
-  colorScheme: 'purple-500',
+  typeName: UNIFIED_CATEGORY_REGISTRY.agents.title,
+  icon: UNIFIED_CATEGORY_REGISTRY.agents.icon,
+  colorScheme: UNIFIED_CATEGORY_REGISTRY.agents.colorScheme,
 
   primaryAction: {
     label: 'Deploy Agent',
@@ -92,9 +101,9 @@ const agentConfig: ContentTypeConfigRegistry['agents'] = {
   },
 
   metadata: {
-    categoryLabel: 'Agent',
+    categoryLabel: UNIFIED_CATEGORY_REGISTRY.agents.title,
     showGitHubLink: true,
-    githubPathPrefix: 'content/agents',
+    githubPathPrefix: UNIFIED_CATEGORY_REGISTRY.agents.contentLoader,
   },
 };
 
@@ -102,9 +111,9 @@ const agentConfig: ContentTypeConfigRegistry['agents'] = {
  * Command Configuration
  */
 const commandConfig: ContentTypeConfigRegistry['commands'] = {
-  typeName: 'Command',
-  icon: Terminal,
-  colorScheme: 'orange-500',
+  typeName: UNIFIED_CATEGORY_REGISTRY.commands.title,
+  icon: UNIFIED_CATEGORY_REGISTRY.commands.icon,
+  colorScheme: UNIFIED_CATEGORY_REGISTRY.commands.colorScheme,
 
   primaryAction: {
     label: 'Copy Command',
@@ -194,9 +203,9 @@ const commandConfig: ContentTypeConfigRegistry['commands'] = {
   },
 
   metadata: {
-    categoryLabel: 'Command',
+    categoryLabel: UNIFIED_CATEGORY_REGISTRY.commands.title,
     showGitHubLink: true,
-    githubPathPrefix: 'content/commands',
+    githubPathPrefix: `content/${UNIFIED_CATEGORY_REGISTRY.commands.contentLoader}`,
   },
 };
 
@@ -204,9 +213,9 @@ const commandConfig: ContentTypeConfigRegistry['commands'] = {
  * Hook Configuration
  */
 const hookConfig: ContentTypeConfigRegistry['hooks'] = {
-  typeName: 'Hook',
-  icon: Webhook,
-  colorScheme: 'blue-500',
+  typeName: UNIFIED_CATEGORY_REGISTRY.hooks.title,
+  icon: UNIFIED_CATEGORY_REGISTRY.hooks.icon,
+  colorScheme: UNIFIED_CATEGORY_REGISTRY.hooks.colorScheme,
 
   primaryAction: {
     label: 'View on GitHub',
@@ -279,9 +288,9 @@ const hookConfig: ContentTypeConfigRegistry['hooks'] = {
   },
 
   metadata: {
-    categoryLabel: 'Hook',
+    categoryLabel: UNIFIED_CATEGORY_REGISTRY.hooks.title,
     showGitHubLink: true,
-    githubPathPrefix: 'content/hooks',
+    githubPathPrefix: `content/${UNIFIED_CATEGORY_REGISTRY.hooks.contentLoader}`,
   },
 };
 
@@ -289,9 +298,9 @@ const hookConfig: ContentTypeConfigRegistry['hooks'] = {
  * MCP Server Configuration
  */
 const mcpConfig: ContentTypeConfigRegistry['mcp'] = {
-  typeName: 'MCP Server',
-  icon: Server,
-  colorScheme: 'green-500',
+  typeName: UNIFIED_CATEGORY_REGISTRY.mcp.title,
+  icon: UNIFIED_CATEGORY_REGISTRY.mcp.icon,
+  colorScheme: UNIFIED_CATEGORY_REGISTRY.mcp.colorScheme,
 
   primaryAction: {
     label: 'View Configuration',
@@ -363,9 +372,9 @@ const mcpConfig: ContentTypeConfigRegistry['mcp'] = {
   },
 
   metadata: {
-    categoryLabel: 'MCP Server',
+    categoryLabel: UNIFIED_CATEGORY_REGISTRY.mcp.title,
     showGitHubLink: true,
-    githubPathPrefix: 'content/mcp',
+    githubPathPrefix: `content/${UNIFIED_CATEGORY_REGISTRY.mcp.contentLoader}`,
   },
 };
 
@@ -373,9 +382,9 @@ const mcpConfig: ContentTypeConfigRegistry['mcp'] = {
  * Rule Configuration
  */
 const ruleConfig: ContentTypeConfigRegistry['rules'] = {
-  typeName: 'Rule',
-  icon: BookOpen,
-  colorScheme: 'blue-500',
+  typeName: UNIFIED_CATEGORY_REGISTRY.rules.title,
+  icon: UNIFIED_CATEGORY_REGISTRY.rules.icon,
+  colorScheme: UNIFIED_CATEGORY_REGISTRY.rules.colorScheme,
 
   primaryAction: {
     label: 'Use Rule',
@@ -433,9 +442,9 @@ const ruleConfig: ContentTypeConfigRegistry['rules'] = {
   },
 
   metadata: {
-    categoryLabel: 'Rule',
+    categoryLabel: UNIFIED_CATEGORY_REGISTRY.rules.title,
     showGitHubLink: true,
-    githubPathPrefix: 'content/rules',
+    githubPathPrefix: `content/${UNIFIED_CATEGORY_REGISTRY.rules.contentLoader}`,
   },
 };
 
@@ -443,9 +452,9 @@ const ruleConfig: ContentTypeConfigRegistry['rules'] = {
  * Statusline Configuration
  */
 const statuslineConfig: ContentTypeConfigRegistry['statuslines'] = {
-  typeName: 'Statusline',
-  icon: Terminal,
-  colorScheme: 'cyan-500',
+  typeName: UNIFIED_CATEGORY_REGISTRY.statuslines.title,
+  icon: UNIFIED_CATEGORY_REGISTRY.statuslines.icon,
+  colorScheme: UNIFIED_CATEGORY_REGISTRY.statuslines.colorScheme,
 
   primaryAction: {
     label: 'Copy Script',
@@ -553,9 +562,9 @@ const statuslineConfig: ContentTypeConfigRegistry['statuslines'] = {
   },
 
   metadata: {
-    categoryLabel: 'Statusline',
+    categoryLabel: UNIFIED_CATEGORY_REGISTRY.statuslines.title,
     showGitHubLink: true,
-    githubPathPrefix: 'content/statuslines',
+    githubPathPrefix: `content/${UNIFIED_CATEGORY_REGISTRY.statuslines.contentLoader}`,
   },
 };
 
@@ -563,9 +572,9 @@ const statuslineConfig: ContentTypeConfigRegistry['statuslines'] = {
  * Collection Configuration
  */
 const collectionConfig: ContentTypeConfigRegistry['collections'] = {
-  typeName: 'Collection',
-  icon: Layers,
-  colorScheme: 'indigo-500',
+  typeName: UNIFIED_CATEGORY_REGISTRY.collections.title,
+  icon: UNIFIED_CATEGORY_REGISTRY.collections.icon,
+  colorScheme: UNIFIED_CATEGORY_REGISTRY.collections.colorScheme,
 
   primaryAction: {
     label: 'View Collection',
@@ -600,9 +609,9 @@ const collectionConfig: ContentTypeConfigRegistry['collections'] = {
   },
 
   metadata: {
-    categoryLabel: 'Collection',
+    categoryLabel: UNIFIED_CATEGORY_REGISTRY.collections.title,
     showGitHubLink: true,
-    githubPathPrefix: 'content/collections',
+    githubPathPrefix: `content/${UNIFIED_CATEGORY_REGISTRY.collections.contentLoader}`,
   },
 };
 
@@ -610,9 +619,9 @@ const collectionConfig: ContentTypeConfigRegistry['collections'] = {
  * Skill Configuration
  */
 const skillConfig: ContentTypeConfigRegistry['skills'] = {
-  typeName: 'Skill',
-  icon: BookOpen,
-  colorScheme: 'emerald-500',
+  typeName: UNIFIED_CATEGORY_REGISTRY.skills.title,
+  icon: UNIFIED_CATEGORY_REGISTRY.skills.icon,
+  colorScheme: UNIFIED_CATEGORY_REGISTRY.skills.colorScheme,
 
   primaryAction: {
     label: 'Use Skill',
@@ -668,9 +677,9 @@ const skillConfig: ContentTypeConfigRegistry['skills'] = {
   },
 
   metadata: {
-    categoryLabel: 'Skill',
+    categoryLabel: UNIFIED_CATEGORY_REGISTRY.skills.title,
     showGitHubLink: false,
-    githubPathPrefix: 'content/skills',
+    githubPathPrefix: `content/${UNIFIED_CATEGORY_REGISTRY.skills.contentLoader}`,
   },
 };
 

@@ -286,20 +286,14 @@ const SEPARATOR = METADATA_DEFAULTS.separator; // " - " (3 chars)
 
 /**
  * Category display names for content routes
- * Maps URL slugs to human-readable category names
+ * Dynamically derived from unified category registry - zero manual maintenance
  * Used in content-tier titles: {name} - {category} - Claude Pro Directory
  */
-export const CATEGORY_NAMES: Record<string, string> = {
-  agents: 'AI Agents', // 9 chars → overhead 35, max title 20-25
-  mcp: 'MCP', // 3 chars → overhead 29, max title 26-31
-  rules: 'Rules', // 5 chars → overhead 31, max title 24-29
-  commands: 'Commands', // 8 chars → overhead 34, max title 21-26
-  hooks: 'Hooks', // 5 chars → overhead 31, max title 24-29
-  statuslines: 'Statuslines', // 11 chars → overhead 37, max title 18-23
-  guides: 'Guides', // 6 chars → overhead 32, max title 23-28
-  collections: 'Collections', // 11 chars → overhead 37, max title 18-23
-  skills: 'Skills',
-} as const;
+import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
+
+export const CATEGORY_NAMES: Record<string, string> = Object.fromEntries(
+  Object.entries(UNIFIED_CATEGORY_REGISTRY).map(([key, config]) => [key, config.pluralTitle])
+) as Record<string, string>;
 
 /**
  * Smart title truncation that preserves word boundaries

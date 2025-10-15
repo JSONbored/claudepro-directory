@@ -773,13 +773,17 @@ export const UI_CLASSES = {
 export type UIClassKey = keyof typeof UI_CLASSES;
 
 /**
- * Content Card Behavior Configuration
+ * Content Card Behavior Configuration - Configuration-Driven
  *
- * Defines which UI elements to show/hide for different content types.
- * This eliminates the need for separate card components per content type.
+ * Auto-generates default behaviors for all categories in registry.
+ * Special cases (guides, collections) override as needed.
  *
- * Tree-shakeable: Only the configuration is imported, not additional components.
- * Type-safe: Enforces valid content types at compile time.
+ * Modern 2025 Architecture:
+ * - Configuration-driven: Default behaviors derived from UNIFIED_CATEGORY_REGISTRY
+ * - Tree-shakeable: Only imported configurations included in bundle
+ * - Type-safe: Enforces valid content types at compile time
+ *
+ * @see lib/config/category-config.ts - Single source of truth for categories
  *
  * @example
  * ```typescript
@@ -789,70 +793,47 @@ export type UIClassKey = keyof typeof UI_CLASSES;
  * }
  * ```
  */
+import { getAllCategoryIds } from '@/src/lib/config/category-config';
+
+// Default behavior template for config-based categories
+const DEFAULT_CONFIG_BEHAVIOR = {
+  showCopyButton: true,
+  showViewCount: true,
+  showCopyCount: true,
+  showRating: true,
+  showFeaturedBadge: true,
+} as const;
+
+// Default behavior template for guide-like categories
+const DEFAULT_GUIDE_BEHAVIOR = {
+  showCopyButton: false,
+  showViewCount: true,
+  showCopyCount: false,
+  showRating: true,
+  showFeaturedBadge: true,
+} as const;
+
+// Build behaviors dynamically from registry
+const derivedBehaviors = Object.fromEntries(
+  getAllCategoryIds().map((categoryId) => [categoryId, DEFAULT_CONFIG_BEHAVIOR])
+);
+
 export const CARD_BEHAVIORS = {
-  /**
-   * Default behavior for configuration items
-   * (agents, mcp, commands, rules, hooks, statuslines)
-   */
-  default: {
-    showCopyButton: true,
-    showViewCount: true,
-    showCopyCount: true,
-    showRating: true,
-    showFeaturedBadge: true,
-  },
+  // Default for unknown categories
+  default: DEFAULT_CONFIG_BEHAVIOR,
 
-  /**
-   * Guide content behavior (tutorials, workflows, etc.)
-   * Guides are educational content, not copyable configurations
-   */
-  guides: {
-    showCopyButton: false, // Guides aren't copyable
-    showViewCount: true,
-    showCopyCount: false, // Guides don't track copies
-    showRating: true,
-    showFeaturedBadge: true,
-  },
-  tutorials: {
-    showCopyButton: false,
-    showViewCount: true,
-    showCopyCount: false,
-    showRating: true,
-    showFeaturedBadge: true,
-  },
-  workflows: {
-    showCopyButton: false,
-    showViewCount: true,
-    showCopyCount: false,
-    showRating: true,
-    showFeaturedBadge: true,
-  },
-  comparisons: {
-    showCopyButton: false,
-    showViewCount: true,
-    showCopyCount: false,
-    showRating: true,
-    showFeaturedBadge: true,
-  },
-  'use-cases': {
-    showCopyButton: false,
-    showViewCount: true,
-    showCopyCount: false,
-    showRating: true,
-    showFeaturedBadge: true,
-  },
-  troubleshooting: {
-    showCopyButton: false,
-    showViewCount: true,
-    showCopyCount: false,
-    showRating: true,
-    showFeaturedBadge: true,
-  },
+  // Registry categories (auto-derived)
+  ...derivedBehaviors,
 
-  /**
-   * Collection behavior
-   * Collections group multiple items, show engagement metrics
-   */
+  // Guide categories (educational content - not copyable)
+  guides: DEFAULT_GUIDE_BEHAVIOR,
+  tutorials: DEFAULT_GUIDE_BEHAVIOR,
+  workflows: DEFAULT_GUIDE_BEHAVIOR,
+  comparisons: DEFAULT_GUIDE_BEHAVIOR,
+  'use-cases': DEFAULT_GUIDE_BEHAVIOR,
+  troubleshooting: DEFAULT_GUIDE_BEHAVIOR,
+
+  // Special case overrides
   collections: {
     showCopyButton: true,
     showViewCount: true,
@@ -935,18 +916,31 @@ export const BADGE_COLORS = {
   },
 
   /**
-   * Content category badge colors (SHA-3146)
+   * Content category badge colors - Configuration-Driven
+   * Auto-derived from colorScheme in unified category registry
    * Used in: DetailSidebar category badges
    */
-  category: {
-    agents: 'bg-purple-500/20 text-purple-500 border-purple-500/30',
-    mcp: 'bg-green-500/20 text-green-500 border-green-500/30',
-    commands: 'bg-orange-500/20 text-orange-500 border-orange-500/30',
-    hooks: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
-    rules: 'bg-blue-500/20 text-blue-500 border-blue-500/30',
-    collections: 'bg-purple-500/20 text-purple-500 border-purple-500/30',
-    default: 'bg-primary/20 text-primary border-primary/30',
-  },
+  category: (() => {
+    // Note: Using require() for module-level initialization (import would be hoisted)
+    // Type is safe because UNIFIED_CATEGORY_REGISTRY has strict typing
+    const { UNIFIED_CATEGORY_REGISTRY } = require('@/src/lib/config/category-config') as {
+      UNIFIED_CATEGORY_REGISTRY: Record<
+        string,
+        { colorScheme: string; [key: string]: unknown }
+      >;
+    };
+    const colors: Record<string, string> = {
+      default: 'bg-primary/20 text-primary border-primary/30',
+    };
+    
+    // Auto-generate badge colors from registry colorScheme
+    for (const [key, config] of Object.entries(UNIFIED_CATEGORY_REGISTRY)) {
+      const color = config.colorScheme.replace('-500', ''); // Extract base color
+      colors[key] = `bg-${color}-500/20 text-${color}-500 border-${color}-500/30`;
+    }
+    
+    return colors;
+  })(),
 
   /**
    * Submission status badge colors (SHA-3146)

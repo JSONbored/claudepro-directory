@@ -42,7 +42,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
-import { getAllBuildCategoryConfigs } from '../src/lib/config/build-category-config.js';
+import { getAllBuildCategoryConfigs } from '../src/lib/config/category-config.js';
 import { APP_CONFIG, MAIN_CONTENT_CATEGORIES } from '../src/lib/constants';
 import { logger } from '../src/lib/logger.js';
 import {
