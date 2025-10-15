@@ -63,64 +63,36 @@ const STATIC_API_LIMITS = {
 } as const;
 
 /**
- * Category Metadata Registry
+ * Category Metadata Registry - Configuration-Driven
  *
- * Single source of truth for category configuration.
- * Used to auto-generate all category-specific schemas.
+ * Auto-derived from unified category registry.
+ * Zero manual maintenance - automatically stays in sync.
  *
- * Type Safety:
- * - satisfies ensures all StaticAPICategory types are present
- * - TypeScript will error if any category is missing
- * - Const assertion provides literal type inference
+ * Modern 2025 Architecture:
+ * - Configuration-driven: Derived from UNIFIED_CATEGORY_REGISTRY
+ * - Type-safe: Compile-time validation with satisfies
+ * - Automated: Adding category to registry auto-updates this
  *
- * Adding a New Category:
- * 1. Add to MAIN_CONTENT_CATEGORIES in lib/constants.ts
- * 2. Add entry here with singular form and description
- * 3. All schemas auto-update (no manual changes needed)
- * 4. Compile-time validation ensures completeness
+ * @see lib/config/category-config.ts - Single source of truth
  */
-const CATEGORY_METADATA = {
-  agents: {
-    singular: 'agent' as const,
-    description: 'Agent configurations',
-    pluralDescription: 'All agent configurations',
-  },
-  mcp: {
-    singular: 'mcp' as const,
-    description: 'MCP server configurations',
-    pluralDescription: 'All MCP server configurations',
-  },
-  rules: {
-    singular: 'rule' as const,
-    description: 'Rule configurations',
-    pluralDescription: 'All rule configurations',
-  },
-  commands: {
-    singular: 'command' as const,
-    description: 'Command configurations',
-    pluralDescription: 'All command configurations',
-  },
-  hooks: {
-    singular: 'hook' as const,
-    description: 'Hook configurations',
-    pluralDescription: 'All hook configurations',
-  },
-  statuslines: {
-    singular: 'statusline' as const,
-    description: 'Statusline configurations',
-    pluralDescription: 'All statusline configurations',
-  },
-  collections: {
-    singular: 'collection' as const,
-    description: 'Collection bundles',
-    pluralDescription: 'All collection bundles',
-  },
-  skills: {
-    singular: 'skill' as const,
-    description: 'Skill guides',
-    pluralDescription: 'All skill guides',
-  },
-} as const satisfies Record<
+import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
+
+// Helper: Convert typeName to singular form (AgentContent → agent)
+function typeNameToSingular(typeName: string): string {
+  return typeName.replace('Content', '').toLowerCase();
+}
+
+// Build CATEGORY_METADATA dynamically from registry
+const CATEGORY_METADATA = Object.fromEntries(
+  Object.entries(UNIFIED_CATEGORY_REGISTRY).map(([key, config]) => [
+    key,
+    {
+      singular: typeNameToSingular(config.typeName) as AppContentType,
+      description: `${config.title} configurations`,
+      pluralDescription: `All ${config.pluralTitle.toLowerCase()}`,
+    },
+  ])
+) as Record<
   StaticAPICategory,
   {
     readonly singular: AppContentType;

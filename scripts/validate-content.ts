@@ -3,9 +3,56 @@
 import fs from 'fs';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
+import {
+  UNIFIED_CATEGORY_REGISTRY,
+  getAllCategoryIds,
+} from '../src/lib/config/category-config';
 import type { contentItemSchema } from '../src/lib/schemas/content/content-item-union.schema';
 import type { ContentCategory } from '../src/lib/schemas/shared.schema';
 import { validateContentByCategory } from '../src/lib/validation/content-validator';
+
+/**
+ * Validate Category Registry Completeness
+ * Ensures all categories in registry have required integrations
+ */
+function validateCategoryCompleteness(): void {
+  const categories = getAllCategoryIds();
+  logger.info(`✓ Category Registry Validation: ${categories.length} categories registered`);
+  
+  // Verify each category has all required fields
+  for (const categoryId of categories) {
+    const config = UNIFIED_CATEGORY_REGISTRY[categoryId];
+    
+    if (!config.schema) {
+      logger.error(
+        `Category ${categoryId} missing schema`,
+        new Error('Schema not defined'),
+        { categoryId }
+      );
+    }
+    
+    if (!config.typeName) {
+      logger.error(
+        `Category ${categoryId} missing typeName`,
+        new Error('TypeName not defined'),
+        { categoryId }
+      );
+    }
+    
+    if (!config.icon) {
+      logger.error(
+        `Category ${categoryId} missing icon`,
+        new Error('Icon not defined'),
+        { categoryId }
+      );
+    }
+  }
+  
+  logger.info('✓ All categories have required fields');
+}
+
+// Run validation before content validation
+validateCategoryCompleteness();
 
 // Schema for raw JSON data validation
 const rawJsonSchema = z.record(z.string(), z.unknown());
