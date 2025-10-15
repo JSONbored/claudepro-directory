@@ -303,7 +303,6 @@ describe('useLocalStorage', () => {
             newValue: JSON.stringify('updated-from-other-tab'),
             oldValue: JSON.stringify('initial'),
             storageArea: localStorage,
-            url: window.location.href,
           })
         );
       });
@@ -329,7 +328,6 @@ describe('useLocalStorage', () => {
             newValue: null,
             oldValue: JSON.stringify('value'),
             storageArea: localStorage,
-            url: window.location.href,
           })
         );
       });
@@ -352,7 +350,6 @@ describe('useLocalStorage', () => {
             newValue: JSON.stringify('value-b'),
             oldValue: null,
             storageArea: localStorage,
-            url: window.location.href,
           })
         );
       });
@@ -375,7 +372,6 @@ describe('useLocalStorage', () => {
             newValue: JSON.stringify('should-not-sync'),
             oldValue: null,
             storageArea: localStorage,
-            url: window.location.href,
           })
         );
       });
@@ -463,7 +459,6 @@ describe('useLocalStorage', () => {
             newValue: 'invalid-json{',
             oldValue: null,
             storageArea: localStorage,
-            url: window.location.href,
           })
         );
       });
