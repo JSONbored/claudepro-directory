@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import * as RechartsPrimitive from 'recharts';
+import { Legend, ResponsiveContainer, Tooltip } from 'recharts';
 
 import { cn } from '@/src/lib/utils';
 
@@ -43,7 +43,7 @@ const ChartContainer = ({
   ...props
 }: React.ComponentProps<'div'> & {
   config: ChartConfig;
-  children: React.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>['children'];
+  children: React.ComponentProps<typeof ResponsiveContainer>['children'];
   ref?: React.RefObject<HTMLDivElement | null>;
 }) => {
   const uniqueId = React.useId();
@@ -61,7 +61,7 @@ const ChartContainer = ({
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
-        <RechartsPrimitive.ResponsiveContainer>{children}</RechartsPrimitive.ResponsiveContainer>
+        <ResponsiveContainer>{children}</ResponsiveContainer>
       </div>
     </ChartContext.Provider>
   );
@@ -98,7 +98,7 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   );
 };
 
-const ChartTooltip = RechartsPrimitive.Tooltip;
+const ChartTooltip = Tooltip;
 
 type TooltipPayload = Record<string, unknown>;
 
@@ -257,7 +257,7 @@ const ChartTooltipContent = ({
 };
 ChartTooltipContent.displayName = 'ChartTooltip';
 
-const ChartLegend = RechartsPrimitive.Legend;
+const ChartLegend = Legend;
 
 const ChartLegendContent = ({
   className,

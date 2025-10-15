@@ -1,13 +1,18 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { z } from 'zod';
 import { Switch } from '@/src/components/ui/switch';
 import { useViewTransition } from '@/src/hooks/use-view-transition';
 import { Moon, Sun } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-const themeSchema = z.enum(['light', 'dark']);
+/**
+ * Type guard for theme validation
+ * Replaces Zod schema for bundle size optimization
+ */
+function isValidTheme(value: unknown): value is 'light' | 'dark' {
+  return value === 'light' || value === 'dark';
+}
 
 /**
  * Theme Toggle Component with Circle Blur Animation
@@ -30,8 +35,7 @@ export function ThemeToggle() {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
-    const validatedTheme = savedTheme ? themeSchema.safeParse(savedTheme) : null;
-    const saved = validatedTheme?.success ? validatedTheme.data : null;
+    const saved = savedTheme && isValidTheme(savedTheme) ? savedTheme : null;
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const initial = saved || (prefersDark ? 'dark' : 'light');
 
