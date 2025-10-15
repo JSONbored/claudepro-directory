@@ -16,6 +16,7 @@ const configBadgeVariants = cva('text-xs font-medium border transition-colors', 
       statuslines: 'badge-category-statuslines',
       collections: 'badge-category-collections',
       guides: 'badge-category-guides',
+      skills: 'badge-category-skills',
       default: 'bg-gray-500/20 text-gray-500 border-gray-500/30',
     },
     source: {
@@ -51,6 +52,7 @@ export interface ConfigBadgeProps
     | 'statuslines'
     | 'collections'
     | 'guides'
+    | 'skills'
     | 'default';
   source?: 'official' | 'partner' | 'community' | 'verified' | 'experimental' | 'other';
   status?: 'active' | 'trending' | 'new' | 'updated' | 'deprecated';
@@ -102,7 +104,8 @@ export function TypeBadge({
     | 'hooks'
     | 'statuslines'
     | 'collections'
-    | 'guides';
+    | 'guides'
+    | 'skills';
 } & Omit<ConfigBadgeProps, 'type'>) {
   const displayText =
     type === 'mcp'
@@ -119,7 +122,9 @@ export function TypeBadge({
                 ? 'Statusline'
                 : type === 'collections'
                   ? 'Collection'
-                  : 'Guide';
+                  : type === 'skills'
+                    ? 'Skill'
+                    : 'Guide';
 
   return (
     <ConfigBadge type={type} className={className} {...props}>

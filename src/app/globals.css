@@ -223,6 +223,12 @@
   --color-category-guides-border: oklch(58% 0.19 280 / 0.3);
   --color-category-guides-hover: oklch(58% 0.19 280 / 0.6);
 
+  /* Skills - Violet */
+  --color-category-skills: oklch(65% 0.2 310);
+  --color-category-skills-bg: oklch(65% 0.2 310 / 0.2);
+  --color-category-skills-border: oklch(65% 0.2 310 / 0.3);
+  --color-category-skills-hover: oklch(65% 0.2 310 / 0.6);
+
   /* Tutorials - Green (same as agents) */
   --color-category-tutorials: oklch(64% 0.19 145);
   --color-category-tutorials-bg: oklch(64% 0.19 145 / 0.2);
@@ -1175,6 +1181,11 @@
     background-color: var(--color-category-guides-bg);
     color: var(--color-category-guides);
     border-color: var(--color-category-guides-border);
+  }
+  .badge-category-skills {
+    background-color: var(--color-category-skills-bg);
+    color: var(--color-category-skills);
+    border-color: var(--color-category-skills-border);
   }
 
   /* Micro Font Sizes */
