@@ -59,10 +59,22 @@ export const updateProfile = authedAction
   .action(async ({ parsedInput, ctx }) => {
     const { userId } = ctx;
 
-    // Filter out undefined values to avoid exactOptionalPropertyTypes issues
-    const updateData = Object.fromEntries(
-      Object.entries(parsedInput).filter(([_, value]) => value !== undefined)
-    ) as Partial<User>;
+    // Transform data for database storage
+    // Empty strings → null for nullable text fields (bio, work, website, social_x_link)
+    // This handles the impedance mismatch between form inputs (empty string for clearing)
+    // and database representation (null for absent values)
+    const updateData: Partial<User> = {};
+
+    for (const [key, value] of Object.entries(parsedInput)) {
+      if (value !== undefined) {
+        // Convert empty strings to null for nullable text fields
+        if (['bio', 'work', 'website', 'social_x_link'].includes(key) && value === '') {
+          updateData[key as keyof User] = null as never;
+        } else {
+          updateData[key as keyof User] = value as never;
+        }
+      }
+    }
 
     // Update via repository (includes caching and automatic error handling)
     const result = await userRepository.update(userId, updateData);

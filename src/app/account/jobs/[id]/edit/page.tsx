@@ -64,20 +64,21 @@ export default async function EditJobPage({ params }: EditJobPageProps) {
         initialData={{
           title: job.title,
           company: job.company,
-          location: job.location,
+          location: job.location ?? undefined,
           description: job.description,
-          salary: job.salary,
+          salary: job.salary ?? undefined,
           remote: job.remote ?? false,
           type: job.type as 'full-time' | 'part-time' | 'contract' | 'internship' | 'freelance',
-          workplace: job.workplace as 'On site' | 'Remote' | 'Hybrid' | null,
-          experience: job.experience as 'Entry' | 'Mid' | 'Senior' | 'Lead' | 'Executive' | null,
+          workplace: (job.workplace as 'On site' | 'Remote' | 'Hybrid') ?? undefined,
+          experience:
+            (job.experience as 'Entry' | 'Mid' | 'Senior' | 'Lead' | 'Executive') ?? undefined,
           category: job.category,
           tags: Array.isArray(job.tags) ? (job.tags as string[]) : [],
           requirements: Array.isArray(job.requirements) ? (job.requirements as string[]) : [],
           benefits: Array.isArray(job.benefits) ? (job.benefits as string[]) : [],
           link: job.link,
-          contact_email: job.contact_email,
-          company_logo: job.company_logo,
+          contact_email: job.contact_email ?? undefined,
+          company_logo: job.company_logo ?? undefined,
           plan: job.plan as 'featured' | 'standard' | 'premium',
         }}
         onSubmit={handleSubmit}

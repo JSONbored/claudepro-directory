@@ -74,9 +74,9 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
     const jobData: CreateJobInput = {
       title: formData.get('title') as string,
       company: formData.get('company') as string,
-      location: (formData.get('location') as string) || null,
+      location: (formData.get('location') as string) || undefined,
       description: formData.get('description') as string,
-      salary: (formData.get('salary') as string) || null,
+      salary: (formData.get('salary') as string) || undefined,
       remote: formData.get('remote') === 'on',
       type: formData.get('type') as
         | 'full-time'
@@ -84,16 +84,17 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
         | 'contract'
         | 'internship'
         | 'freelance',
-      workplace: (formData.get('workplace') as 'On site' | 'Remote' | 'Hybrid') || null,
+      workplace: (formData.get('workplace') as 'On site' | 'Remote' | 'Hybrid') || undefined,
       experience:
-        (formData.get('experience') as 'Entry' | 'Mid' | 'Senior' | 'Lead' | 'Executive') || null,
+        (formData.get('experience') as 'Entry' | 'Mid' | 'Senior' | 'Lead' | 'Executive') ||
+        undefined,
       category: formData.get('category') as string,
       tags,
       requirements,
       benefits,
       link: formData.get('link') as string,
-      contact_email: (formData.get('contact_email') as string) || null,
-      company_logo: (formData.get('company_logo') as string) || null,
+      contact_email: (formData.get('contact_email') as string) || undefined,
+      company_logo: (formData.get('company_logo') as string) || undefined,
       plan: (formData.get('plan') as 'standard' | 'featured' | 'premium') || 'standard',
     };
 
