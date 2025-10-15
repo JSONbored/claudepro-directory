@@ -337,6 +337,7 @@ export const HOMEPAGE_FEATURED_CATEGORIES = [
   'hooks',
   'statuslines',
   'collections',
+  'skills',
 ] as const;
 
 export const HOMEPAGE_TAB_CATEGORIES = [
@@ -348,6 +349,7 @@ export const HOMEPAGE_TAB_CATEGORIES = [
   'hooks',
   'statuslines',
   'collections',
+  'skills',
   'community',
 ] as const;
 
