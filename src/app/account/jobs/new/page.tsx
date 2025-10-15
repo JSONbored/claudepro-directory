@@ -4,7 +4,7 @@ import { createJob } from '@/src/lib/actions/business.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = await generatePageMetadata('/account/jobs/new');
+export const metadata = generatePageMetadata('/account/jobs/new');
 
 export default function NewJobPage() {
   const handleSubmit = async (data: Parameters<typeof createJob>[0]) => {

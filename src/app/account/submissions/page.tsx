@@ -14,7 +14,7 @@ import { CheckCircle, Clock, ExternalLink, GitPullRequest, Send, XCircle } from 
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { BADGE_COLORS, type SubmissionStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = await generatePageMetadata('/account/submissions');
+export const metadata = generatePageMetadata('/account/submissions');
 
 export default async function SubmissionsPage() {
   const submissions = await getUserSubmissions();

@@ -16,7 +16,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
-export const metadata = await generatePageMetadata('/account/jobs');
+export const metadata = generatePageMetadata('/account/jobs');
 
 export default async function MyJobsPage() {
   const jobs = await getUserJobs();

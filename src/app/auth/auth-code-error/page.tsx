@@ -12,7 +12,7 @@ import { AlertCircle } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = await generatePageMetadata('/auth/auth-code-error');
+export const metadata = generatePageMetadata('/auth/auth-code-error');
 
 export default function AuthCodeError() {
   return (

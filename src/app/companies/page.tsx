@@ -17,7 +17,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient as createAdminClient } from '@/src/lib/supabase/admin-client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = await generatePageMetadata('/companies');
+export const metadata = generatePageMetadata('/companies');
 
 // ISR - Static content (centralized config)
 export const revalidate = REVALIDATION_TIMES.STATIC_CONTENT;

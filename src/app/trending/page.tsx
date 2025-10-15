@@ -25,7 +25,7 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 
 // Generate metadata from centralized registry
-export const metadata = await generatePageMetadata('/trending');
+export const metadata = generatePageMetadata('/trending');
 
 // ISR Configuration - Revalidate every 5 minutes for fresh Redis view counts
 export const revalidate = 300; // 5 minutes - Updates trending data while keeping static content

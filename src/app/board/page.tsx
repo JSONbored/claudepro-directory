@@ -18,7 +18,7 @@ import { createClient as createAdminClient } from '@/src/lib/supabase/admin-clie
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
-export const metadata = await generatePageMetadata('/board');
+export const metadata = generatePageMetadata('/board');
 
 // ISR - User-driven content (centralized config)
 export const revalidate = REVALIDATION_TIMES.USER_CONTENT;
