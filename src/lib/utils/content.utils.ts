@@ -768,7 +768,7 @@ export function isGuideSubcategory(value: unknown): value is GuideSubcategory {
 export function getContentItemUrl(item: {
   category: ContentCategory;
   slug: string;
-  subcategory?: GuideSubcategory;
+  subcategory?: GuideSubcategory | undefined;
 }): string {
   const { category, slug, subcategory } = item;
 
