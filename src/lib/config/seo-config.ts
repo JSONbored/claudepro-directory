@@ -34,6 +34,7 @@ export const SUFFIX_LENGTHS: Record<ContentCategory, number> = {
   hooks: 31, // " - Hooks - Claude Pro Directory"
   statuslines: 37, // " - Statuslines - Claude Pro Directory"
   collections: 37, // " - Collections - Claude Pro Directory"
+  skills: 32, // " - Skills - Claude Pro Directory"
 
   // SEO content types
   guides: 32, // " - Guides - Claude Pro Directory"
@@ -77,6 +78,7 @@ export const MAX_BASE_TITLE_LENGTH: Record<ContentCategory, number> = {
   hooks: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.hooks, // 29 chars
   statuslines: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.statuslines, // 23 chars
   collections: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.collections, // 23 chars
+  skills: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.skills, // 28 chars
 
   // SEO content types
   guides: MAX_TITLE_LENGTH - SUFFIX_LENGTHS.guides, // 28 chars

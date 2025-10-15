@@ -18,6 +18,7 @@ export type ContentStats = {
   guides: number;
   statuslines: number;
   collections: number;
+  skills: number;
 };
 
 /**
