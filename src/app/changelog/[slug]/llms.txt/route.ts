@@ -30,7 +30,7 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
-import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
+import { REVALIDATE_CHANGELOG } from '@/src/lib/config/rate-limits.config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 
@@ -43,7 +43,7 @@ export const runtime = 'nodejs';
  * ISR revalidation
  * Changelog entries update occasionally - revalidate every 15 minutes
  */
-export const revalidate = REVALIDATION_TIMES.CHANGELOG;
+export const revalidate = REVALIDATE_CHANGELOG;
 
 /**
  * Generate static params for all changelog entries

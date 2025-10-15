@@ -364,6 +364,9 @@ function validateEnv(): Env {
  * Performance: Lazy evaluation with memoization
  * Security: Server-only validation never runs client-side
  * This ensures type safety throughout the application
+ *
+ * Note: Not frozen to allow Next.js segment configuration exports to work
+ * Nested config objects (securityConfig, buildConfig) are frozen for security
  */
 export const env = validateEnv();
 
@@ -375,18 +378,20 @@ export const isProduction = env.NODE_ENV === 'production';
 
 /**
  * Security configuration
+ * Production Security: Frozen to prevent runtime mutations
  */
-export const securityConfig = {
+export const securityConfig = Object.freeze({
   arcjetKey: env.ARCJET_KEY,
   rateLimitSecret: env.RATE_LIMIT_SECRET,
   cacheWarmToken: env.CACHE_WARM_AUTH_TOKEN,
   isSecured: !!(env.ARCJET_KEY && env.RATE_LIMIT_SECRET),
-} as const;
+} as const);
 
 /**
  * Build configuration
+ * Production Security: Frozen to prevent runtime mutations
  */
-export const buildConfig = {
+export const buildConfig = Object.freeze({
   version: env.npm_package_version,
   packageName: env.npm_package_name,
-} as const;
+} as const);

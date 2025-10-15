@@ -540,6 +540,22 @@ export const REVALIDATION_TIMES = {
 } as const;
 
 /**
+ * Individual revalidation constants for Next.js segment configuration exports
+ * These are required because Next.js cannot statically analyze member expressions
+ * Use these directly in route files: `export const revalidate = REVALIDATE_STATIC_CONTENT`
+ */
+export const REVALIDATE_STATIC_CONTENT = 3600; // 1 hour
+export const REVALIDATE_GUIDES = 1800; // 30 minutes
+export const REVALIDATE_CHANGELOG = 900; // 15 minutes
+export const REVALIDATE_DYNAMIC_CONTENT = 300; // 5 minutes
+export const REVALIDATE_USER_CONTENT = 60; // 1 minute
+export const REVALIDATE_REAL_TIME = 0; // No cache
+export const REVALIDATE_HOMEPAGE = 600; // 10 minutes
+export const REVALIDATE_API_STATIC = 900; // 15 minutes
+export const REVALIDATE_SEO_FEEDS = 21600; // 6 hours
+export const REVALIDATE_LLMS_TXT = 3600; // 1 hour
+
+/**
  * Type-safe revalidation time getter
  * Provides compile-time checking for configuration keys
  */
