@@ -124,6 +124,7 @@ export const ConfigCard = memo(
                       | 'commands'
                       | 'guides'
                       | 'collections'
+                      | 'skills'
                   }
                 />
               )}
