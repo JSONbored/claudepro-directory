@@ -47,6 +47,11 @@ export const unifiedContentItemSchema = z
         'changelog',
       ])
       .describe('Content type category or subcategory for classification and filtering'),
+    subcategory: z
+      .enum(['tutorials', 'comparisons', 'workflows', 'use-cases', 'troubleshooting'])
+      .nullable()
+      .optional()
+      .describe('Guide subcategory for nested URL structure (/guides/{subcategory}/{slug})'),
     author: z.string().describe('Name or identifier of the content creator or contributor'),
     dateAdded: z
       .string()

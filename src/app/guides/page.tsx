@@ -61,14 +61,15 @@ async function getAllGuides(): Promise<UnifiedContentItem[]> {
           const filename = file.replace('.mdx', '');
 
           // Transform to UnifiedContentItem format
-          // IMPORTANT: Use guide subcategory as category (tutorials, workflows, etc.)
+          // IMPORTANT: Set category='guides' with subcategory field
           // This allows proper URL construction via getContentItemUrl() helper
-          // URLs: /guides/[category]/[slug] where category is the guide subcategory
+          // URLs: /guides/{subcategory}/{slug} where subcategory is tutorials, comparisons, etc.
           guides.push({
             title: frontmatter.title || filename,
             description: frontmatter.description || '',
             slug: filename, // Just the filename, not the full path
-            category: category as ContentCategory, // Use subcategory as category (tutorials, workflows, etc.)
+            category: 'guides' as ContentCategory, // Always 'guides' for parent category
+            subcategory: category as 'tutorials' | 'comparisons' | 'workflows' | 'use-cases' | 'troubleshooting', // Actual subcategory
             author: frontmatter.author || 'ClaudePro Directory',
             tags: [
               category.replace('-', ' '),

@@ -28,13 +28,11 @@ import { transforms } from '@/src/lib/security/validators';
  * Represents valid subcategories for guide content
  */
 export type GuideSubcategory =
-  | 'getting-started'
-  | 'configuration'
-  | 'customization'
-  | 'integration'
-  | 'troubleshooting'
-  | 'best-practices'
-  | 'advanced';
+  | 'tutorials'
+  | 'comparisons'
+  | 'workflows'
+  | 'use-cases'
+  | 'troubleshooting';
 
 // ============================================
 // CONTENT TRANSFORMATIONS
@@ -727,13 +725,11 @@ export function parseFrontmatter(frontmatterString: string): GuideFrontmatter {
  * These get nested under /guides/[category]/[slug]
  */
 const GUIDE_SUBCATEGORIES: GuideSubcategory[] = [
-  'getting-started',
-  'configuration',
-  'customization',
-  'integration',
+  'tutorials',
+  'comparisons',
+  'workflows',
+  'use-cases',
   'troubleshooting',
-  'best-practices',
-  'advanced',
 ];
 
 /**
