@@ -72,6 +72,7 @@ export async function getContentByCategory(category: string): Promise<UnifiedCon
       hooks: contentModule.getHooks,
       statuslines: contentModule.getStatuslines,
       collections: contentModule.getCollections,
+      skills: contentModule.getSkills,
     };
 
     const loader = loaderMap[category];
@@ -151,6 +152,7 @@ export async function getContentBySlug(
       hooks: contentModule.getHookBySlug,
       statuslines: contentModule.getStatuslineBySlug,
       collections: contentModule.getCollectionBySlug,
+      skills: contentModule.getSkillBySlug,
     };
 
     const loader = bySlugMap[category];
@@ -215,6 +217,7 @@ export async function getFullContentBySlug(
       hooks: contentModule.getHookFullContent,
       statuslines: contentModule.getStatuslineFullContent,
       collections: contentModule.getCollectionFullContent,
+      skills: contentModule.getSkillFullContent,
     };
 
     const loader = fullContentMap[category];
@@ -256,7 +259,7 @@ export async function getRelatedContent(
  * @returns Total count of all content items
  */
 export async function getTotalContentCount(): Promise<number> {
-  const categories = ['agents', 'mcp', 'commands', 'rules', 'hooks', 'statuslines'];
+  const categories = ['agents', 'mcp', 'commands', 'rules', 'hooks', 'statuslines', 'skills'];
 
   try {
     const counts = await Promise.all(

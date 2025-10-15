@@ -18,6 +18,7 @@ import { hookContentSchema } from './hook.schema';
 import { mcpContentSchema } from './mcp.schema';
 import { ruleContentSchema } from './rule.schema';
 import { statuslineContentSchema } from './statusline.schema';
+import { skillContentSchema } from './skill.schema';
 
 /**
  * Union of all content schemas
@@ -32,6 +33,7 @@ export const contentItemSchema = z.union([
   guideContentSchema,
   statuslineContentSchema,
   collectionContentSchema,
+  skillContentSchema,
 ]);
 
 export type ContentItem = z.infer<typeof contentItemSchema>;

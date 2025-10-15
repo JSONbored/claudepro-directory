@@ -116,6 +116,15 @@ export const CATEGORY_METADATA_RULES: Record<ContentCategory, MetadataDerivation
     useArticleSchema: true,
   },
 
+  skills: {
+    category: 'skills',
+    titleField: 'title',
+    descriptionField: 'description',
+    keywordsField: 'tags',
+    schemaType: 'TechArticle',
+    useArticleSchema: true,
+  },
+
   // SEO content types
   guides: {
     category: 'guides',

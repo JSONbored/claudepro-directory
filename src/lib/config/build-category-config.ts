@@ -32,6 +32,7 @@ import {
   type StatuslineContent,
   statuslineContentSchema,
 } from '@/src/lib/schemas/content/statusline.schema';
+import { type SkillContent, skillContentSchema } from '@/src/lib/schemas/content/skill.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 
 /**
@@ -45,7 +46,8 @@ export type ContentType =
   | CommandContent
   | RuleContent
   | StatuslineContent
-  | CollectionContent;
+  | CollectionContent
+  | SkillContent;
 
 /**
  * Build-time category configuration
@@ -295,6 +297,35 @@ export const BUILD_CATEGORY_CONFIGS = {
       'collectionType',
       'difficulty',
       'estimatedSetupTime',
+    ] as const,
+    buildConfig: {
+      batchSize: 10,
+      enableCache: true,
+      cacheTTL: 5 * 60 * 1000, // 5 minutes
+    },
+    apiConfig: {
+      generateStaticAPI: true,
+      includeTrending: true,
+      maxItemsPerResponse: 1000,
+    },
+  },
+
+  skills: {
+    id: 'skills',
+    name: 'Skills',
+    schema: skillContentSchema,
+    typeName: 'SkillContent',
+    generateFullContent: true,
+    metadataFields: [
+      'slug',
+      'title',
+      'seoTitle',
+      'description',
+      'author',
+      'tags',
+      'category',
+      'dateAdded',
+      'source',
     ] as const,
     buildConfig: {
       batchSize: 10,

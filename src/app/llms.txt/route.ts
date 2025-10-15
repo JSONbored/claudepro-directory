@@ -7,7 +7,7 @@
  */
 
 import type { NextRequest } from 'next/server';
-import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
+import { agents, collections, commands, hooks, mcp, rules, statuslines, skills } from '@/generated/content';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { generateSiteLLMsTxt } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       agents: agentsItems,
       statuslines: statuslinesItems,
       collections: collectionsItems,
-    } = await batchLoadContent({ mcp, commands, hooks, rules, agents, statuslines, collections });
+    } = await batchLoadContent({ mcp, commands, hooks, rules, agents, statuslines, collections, skills });
 
     const categoryStats = [
       {
@@ -103,6 +103,13 @@ export async function GET(request: NextRequest): Promise<Response> {
         count: collectionsItems.length,
         url: '/collections',
         description: 'Curated bundles of related configurations for specific use cases',
+      },
+      {
+        name: 'Skills',
+        count: (await skills).length,
+        url: '/skills',
+        description:
+          'Task-focused capability guides with dependencies, examples, and troubleshooting for document/data workflows',
       },
     ];
 

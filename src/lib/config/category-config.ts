@@ -284,6 +284,40 @@ export const CATEGORY_CONFIGS: Record<string, CategoryConfig> = {
     urlSlug: 'collections',
     contentLoader: 'collections',
   },
+
+  skills: {
+    title: 'Skill',
+    pluralTitle: 'Skills',
+    description:
+      'Task-focused capability guides for Claude (PDF, DOCX, PPTX, XLSX, and more) with requirements and runnable examples.',
+    icon: BookOpen,
+    keywords: 'Claude skills, document processing, pdf, docx, pptx, xlsx, how-to, examples',
+    metaDescription:
+      'Practical Claude Skills for October 2025: PDF/DOCX/PPTX/XLSX workflows with exact dependencies, copy-pasteable code examples, and troubleshooting.',
+
+    listPage: {
+      searchPlaceholder: 'Search skills...',
+      badges: [
+        { icon: 'book-open', text: (count) => `${count} Skills Available` },
+        { text: 'Environment Ready' },
+        { text: 'Copy & Run' },
+      ],
+    },
+
+    detailPage: {
+      displayConfig: false,
+      configFormat: 'json',
+      sections: [
+        { id: 'content', title: 'Guide', order: 1 },
+        { id: 'installation', title: 'Installation', order: 2 },
+        { id: 'examples', title: 'Examples', order: 3 },
+        { id: 'troubleshooting', title: 'Troubleshooting', order: 4 },
+      ],
+    },
+
+    urlSlug: 'skills',
+    contentLoader: 'skills',
+  },
 };
 
 /**

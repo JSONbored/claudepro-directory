@@ -607,6 +607,74 @@ const collectionConfig: ContentTypeConfigRegistry['collections'] = {
 };
 
 /**
+ * Skill Configuration
+ */
+const skillConfig: ContentTypeConfigRegistry['skills'] = {
+  typeName: 'Skill',
+  icon: BookOpen,
+  colorScheme: 'emerald-500',
+
+  primaryAction: {
+    label: 'Use Skill',
+    icon: <BookOpen className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
+    handler: () => {
+      const contentSection = document.querySelector('[data-section="content"]');
+      contentSection?.scrollIntoView({ behavior: 'smooth' });
+    },
+  },
+
+  sections: {
+    features: true,
+    installation: true,
+    useCases: true,
+    configuration: false,
+    security: false,
+    troubleshooting: true,
+    examples: true,
+  },
+
+  generators: {
+    useCases: (item) => {
+      if ('useCases' in item && Array.isArray(item.useCases) && item.useCases.length > 0) {
+        return item.useCases;
+      }
+      const title = getDisplayTitle({
+        title: item.title,
+        name: item.name,
+        slug: item.slug,
+        category: item.category,
+      });
+      return [
+        `Apply ${title} in real-world workflows`,
+        'Automate tedious document tasks',
+        'Integrate into CI scripts and pipelines',
+      ];
+    },
+    installation: (item) => ({
+      claudeDesktop: {
+        steps: [
+          'Ensure required CLI tools are installed (see requirements below)',
+          'Restart Claude Desktop if new tools were added',
+        ],
+      },
+      claudeCode: {
+        steps: ['Install Python/Node packages as required', 'Verify versions match guide'],
+      },
+      requirements:
+        Array.isArray((item as any).requirements) && (item as any).requirements.length > 0
+          ? ((item as any).requirements as string[])
+          : ['Install dependencies noted in the guide'],
+    }),
+  },
+
+  metadata: {
+    categoryLabel: 'Skill',
+    showGitHubLink: false,
+    githubPathPrefix: 'content/skills',
+  },
+};
+
+/**
  * Content Type Configuration Registry
  *
  * Central registry of all content type configurations.
@@ -620,6 +688,7 @@ const contentTypeConfigs: ContentTypeConfigRegistry = {
   rules: ruleConfig,
   statuslines: statuslineConfig,
   collections: collectionConfig,
+  skills: skillConfig,
   guides: ruleConfig, // Guides use same config as rules for now
 };
 

@@ -44,6 +44,7 @@ export const contentCategorySchema = z
     'commands',
     'hooks',
     'statuslines',
+    'skills',
 
     // SEO content types (in /seo directory)
     'guides',
@@ -70,6 +71,7 @@ export const cacheableCategorySchema = z
     'commands',
     'hooks',
     'statuslines',
+    'skills',
     'guides',
     'collections',
     'jobs',
@@ -85,7 +87,7 @@ export type ContentCategory = z.infer<typeof contentCategorySchema>;
  * Used across: middleware, static-api
  */
 export const appContentTypeSchema = z
-  .enum(['agent', 'mcp', 'hook', 'command', 'rule', 'statusline', 'collection', 'job'])
+  .enum(['agent', 'mcp', 'hook', 'command', 'rule', 'statusline', 'collection', 'job', 'skill'])
   .describe('Application content types for routing and middleware processing');
 
 export type AppContentType = z.infer<typeof appContentTypeSchema>;

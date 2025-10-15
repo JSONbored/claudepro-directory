@@ -115,6 +115,11 @@ const CATEGORY_METADATA = {
     description: 'Collection bundles',
     pluralDescription: 'All collection bundles',
   },
+  skills: {
+    singular: 'skill' as const,
+    description: 'Skill guides',
+    pluralDescription: 'All skill guides',
+  },
 } as const satisfies Record<
   StaticAPICategory,
   {

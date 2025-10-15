@@ -87,6 +87,13 @@ export const PRIMARY_NAVIGATION: NavigationLink[] = [
     description: 'AI-powered task automation agents',
   },
   {
+    label: 'Skills',
+    href: '/skills',
+    icon: BookOpen,
+    description: 'Task-focused capability guides (PDF/DOCX/PPTX/XLSX)',
+    isNew: true,
+  },
+  {
     label: 'Commands',
     href: '/commands',
     icon: Zap,

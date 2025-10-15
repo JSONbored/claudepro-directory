@@ -298,6 +298,7 @@ export const CATEGORY_NAMES: Record<string, string> = {
   statuslines: 'Statuslines', // 11 chars → overhead 37, max title 18-23
   guides: 'Guides', // 6 chars → overhead 32, max title 23-28
   collections: 'Collections', // 11 chars → overhead 37, max title 18-23
+  skills: 'Skills',
 } as const;
 
 /**
@@ -949,6 +950,7 @@ export const METADATA_REGISTRY = {
         commands: 'Browse Commands for Claude 2025',
         rules: 'Browse Rules for Claude AI 2025',
         statuslines: 'Browse Statuslines for Claude 2025',
+        skills: 'Browse Skills for Claude 2025',
       };
 
       const baseTitle =
@@ -979,6 +981,8 @@ export const METADATA_REGISTRY = {
           'Browse Claude rules and system prompts for October 2025. Configure AI behavior, coding standards, security policies, and best practices for your development workflow.',
         statuslines:
           'Browse Claude statusline templates for October 2025. Customize your CLI status bar with project info, git status, environment indicators, and development metrics.',
+        skills:
+          'Browse Claude Skills for October 2025. Practical document and data workflows (PDF, DOCX, PPTX, XLSX) with exact dependencies, code examples, and troubleshooting.',
       };
 
       return (
