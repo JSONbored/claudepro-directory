@@ -15,9 +15,11 @@
  */
 
 import { APP_CONFIG } from '@/src/lib/constants';
+import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 
 export const runtime = 'edge';
-export const revalidate = 86400; // 24 hours
+// ISR - AI training data (centralized config)
+export const revalidate = REVALIDATION_TIMES.LLMS_TXT;
 
 export async function GET() {
   const content = `# Configuration Recommender - ${APP_CONFIG.name}

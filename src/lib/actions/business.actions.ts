@@ -689,10 +689,21 @@ export const updateJob = rateLimitedAction
 
     const { id, ...updates } = parsedInput;
 
-    // Filter out undefined values to avoid exactOptionalPropertyTypes issues
-    const updateData = Object.fromEntries(
-      Object.entries(updates).filter(([_, value]) => value !== undefined)
-    );
+    // Transform undefined to null for nullable database fields
+    // This handles the impedance mismatch between TypeScript optional (undefined)
+    // and database nullable (null) with exactOptionalPropertyTypes: true
+    const updateData: Partial<JobUpdate> = {};
+    
+    for (const [key, value] of Object.entries(updates)) {
+      if (value !== undefined) {
+        // Nullable fields: convert undefined to null for database
+        if (['location', 'salary', 'workplace', 'experience', 'contact_email', 'company_logo'].includes(key)) {
+          updateData[key as keyof JobUpdate] = value ?? null;
+        } else {
+          updateData[key as keyof JobUpdate] = value as never;
+        }
+      }
+    }
 
     // Update via repository with ownership verification (includes caching)
     const result = await jobRepository.updateByOwner(id, user.id, updateData);

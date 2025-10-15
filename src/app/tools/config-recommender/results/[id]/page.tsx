@@ -22,6 +22,7 @@ import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders
 import { ResultsDisplay } from '@/src/components/tools/recommender/results-display';
 import { statsRedis } from '@/src/lib/cache';
 import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
+import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { logger } from '@/src/lib/logger';
 import { generateRecommendations } from '@/src/lib/recommender/algorithm';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
@@ -34,8 +35,8 @@ interface PageProps {
   searchParams: Promise<{ answers?: string }>;
 }
 
-// ISR Configuration - Revalidate every hour
-export const revalidate = 3600;
+// ISR - Static content (centralized config)
+export const revalidate = REVALIDATION_TIMES.STATIC_CONTENT;
 
 /**
  * Generate metadata for SEO and social sharing

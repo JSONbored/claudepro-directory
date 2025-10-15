@@ -10,6 +10,7 @@
 
 import type { NextRequest } from 'next/server';
 import { APP_CONFIG } from '@/src/lib/constants';
+import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
@@ -20,10 +21,9 @@ import { logger } from '@/src/lib/logger';
 export const runtime = 'nodejs';
 
 /**
- * ISR revalidation
- * Revalidate every hour (3600 seconds) - API structure changes infrequently
+ * ISR revalidation - AI training data (centralized config)
  */
-export const revalidate = 3600;
+export const revalidate = REVALIDATION_TIMES.LLMS_TXT;
 
 /**
  * Handle GET request for API documentation llms.txt
