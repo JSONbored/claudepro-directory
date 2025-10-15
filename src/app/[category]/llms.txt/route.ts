@@ -8,6 +8,7 @@
 
 import type { NextRequest } from 'next/server';
 import { getCategoryConfig, isValidCategory } from '@/src/lib/config/category-config';
+import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
@@ -22,9 +23,9 @@ export const runtime = 'nodejs';
 
 /**
  * ISR revalidation
- * Revalidate every 10 minutes (600 seconds) - content changes more frequently than site structure
+ * Content indexes update periodically - revalidate every 10 minutes
  */
-export const revalidate = 600;
+export const revalidate = REVALIDATION_TIMES.HOMEPAGE;
 
 /**
  * Generate static params for all valid categories
