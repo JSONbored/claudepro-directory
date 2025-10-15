@@ -11,7 +11,6 @@ import path from 'path';
 import { ContentListServer } from '@/src/components/content-list-server';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { statsRedis } from '@/src/lib/cache';
-import { REVALIDATE_GUIDES } from '@/src/lib/config/rate-limits.config';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
@@ -23,7 +22,7 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
  * ISR Configuration - Guides listing page
  * Documentation content updates occasionally - revalidate every 30 minutes
  */
-export const revalidate = REVALIDATE_GUIDES;
+export const revalidate = 1800;
 
 /**
  * Page metadata

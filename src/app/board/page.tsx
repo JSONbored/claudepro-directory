@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
-import { REVALIDATE_USER_CONTENT } from '@/src/lib/config/rate-limits.config';
 import { ROUTES } from '@/src/lib/constants';
 import { MessageSquare, Plus, TrendingUp, User as UserIcon } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -20,7 +19,7 @@ import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
 export const metadata = generatePageMetadata('/board');
 
-export const revalidate = REVALIDATE_USER_CONTENT;
+export const revalidate = 60;
 
 // Use the actual return type from the database function
 type PopularPost = {

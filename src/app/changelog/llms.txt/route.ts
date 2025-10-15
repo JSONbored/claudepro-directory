@@ -29,7 +29,6 @@
 import type { NextRequest } from 'next/server';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
-import { REVALIDATE_CHANGELOG } from '@/src/lib/config/rate-limits.config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { apiResponse } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
@@ -43,7 +42,7 @@ export const runtime = 'nodejs';
  * ISR revalidation
  * Changelog updates frequently - revalidate every 15 minutes
  */
-export const revalidate = REVALIDATE_CHANGELOG;
+export const revalidate = 900;
 
 /**
  * Generate llms.txt for changelog index

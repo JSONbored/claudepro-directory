@@ -23,7 +23,6 @@ const Meteors = dynamic(
 );
 
 import { statsRedis } from '@/src/lib/cache';
-import { REVALIDATE_HOMEPAGE } from '@/src/lib/config/rate-limits.config';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { featuredService } from '@/src/lib/services/featured.service';
@@ -47,7 +46,7 @@ type EnrichedMetadata = ContentMetadataWithCategory & { viewCount: number; copyC
  * Revalidate every 10 minutes - balance between freshness and performance
  * Homepage has mixed content with high traffic, optimized for user experience
  */
-export const revalidate = REVALIDATE_HOMEPAGE;
+export const revalidate = 600;
 
 interface HomePageProps {
   searchParams: Promise<{

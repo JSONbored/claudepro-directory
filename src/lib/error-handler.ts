@@ -18,7 +18,6 @@ import { z } from 'zod';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
-import { verifyCronAuth } from '@/src/lib/middleware/cron-auth';
 import { type RateLimiter, withRateLimit } from '@/src/lib/rate-limiter';
 import { createRequestId, type RequestId } from '@/src/lib/schemas/branded-types.schema';
 import {
@@ -778,6 +777,8 @@ export function createApiRoute<P = any, Q = any, H = any, B = any>(
       }
 
       if (auth?.type === 'cron') {
+        // Dynamic import to avoid bundling server-only code in client builds
+        const { verifyCronAuth } = await import('@/src/lib/middleware/cron-auth');
         const authError = verifyCronAuth(request);
         if (authError) return cloneWithHeaders(authError, { 'X-Request-ID': requestId });
       }

@@ -26,7 +26,6 @@ import { rulesMetadata } from '@/generated/rules-metadata';
 import { skillsMetadata } from '@/generated/skills-metadata';
 import { statuslinesMetadata } from '@/generated/statuslines-metadata';
 import { generateAllSiteUrls } from '@/src/lib/build/url-generator';
-import { REVALIDATE_SEO_FEEDS } from '@/src/lib/config/rate-limits.config';
 import { APP_CONFIG } from '@/src/lib/constants';
 
 /**
@@ -76,4 +75,4 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
  * ISR Revalidation
  * Regenerate sitemap every hour to pick up new content
  */
-export const revalidate = REVALIDATE_SEO_FEEDS;
+export const revalidate = 21600;

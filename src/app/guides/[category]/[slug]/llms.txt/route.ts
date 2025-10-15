@@ -11,7 +11,6 @@ import type { NextRequest } from 'next/server';
 import path from 'path';
 import { z } from 'zod';
 import { contentCache } from '@/src/lib/cache';
-import { REVALIDATE_GUIDES } from '@/src/lib/config/rate-limits.config';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
@@ -28,7 +27,7 @@ export const runtime = 'nodejs';
  * ISR revalidation
  * Guide documentation updates occasionally - revalidate every 30 minutes
  */
-export const revalidate = REVALIDATE_GUIDES;
+export const revalidate = 1800;
 
 export const dynamicParams = true;
 

@@ -14,7 +14,6 @@
  * @see https://llmstxt.org - LLMs.txt specification
  */
 
-import { REVALIDATE_SEO_FEEDS } from '@/src/lib/config/rate-limits.config';
 import { APP_CONFIG } from '@/src/lib/constants';
 
 export const runtime = 'edge';
@@ -22,7 +21,7 @@ export const runtime = 'edge';
  * ISR revalidation
  * Tool documentation changes infrequently - revalidate every 6 hours
  */
-export const revalidate = REVALIDATE_SEO_FEEDS;
+export const revalidate = 21600;
 
 export async function GET() {
   const content = `# Configuration Recommender - ${APP_CONFIG.name}

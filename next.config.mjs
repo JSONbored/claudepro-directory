@@ -248,7 +248,7 @@ const nextConfig = {
   },
 
   // Simplified webpack config - let Turbopack handle most optimization
-  webpack: (config, { dev, webpack }) => {
+  webpack: (config, { dev, webpack, isServer }) => {
     // Only keep essential overrides for compatibility
     if (!dev) {
       // Keep template file exclusion (this is useful)
@@ -258,6 +258,17 @@ const nextConfig = {
           contextRegExp: /\/(content|seo\/templates)\//,
         })
       );
+    }
+
+    // Exclude Node.js built-ins from client bundles (server/client boundary fix)
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        'node:crypto': false,
+        'node:zlib': false,
+        crypto: false,
+        zlib: false,
+      };
     }
 
     // Essential alias only

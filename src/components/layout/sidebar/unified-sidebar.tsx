@@ -28,9 +28,6 @@ import {
   TooltipTrigger,
 } from '@/src/components/ui/tooltip';
 import { CategoryNavigationCard } from '@/src/components/unified-detail-page/sidebar/category-navigation-card';
-// Removed logger import - client components should not use server-side logger
-// Dynamic imports for server-side functions
-import { statsRedis } from '@/src/lib/cache';
 import { ROUTES } from '@/src/lib/constants';
 import {
   BookOpen,
@@ -45,7 +42,6 @@ import {
   Workflow,
   Zap,
 } from '@/src/lib/icons';
-import { viewCountService } from '@/src/lib/services/view-count.service';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { shallowEqual, slugToTitle } from '@/src/lib/utils';
 
@@ -147,35 +143,30 @@ function UnifiedSidebarComponent({
     let isMounted = true;
 
     async function fetchTrendingData() {
-      if (!statsRedis.isEnabled()) return;
-
       setIsLoadingTrending(true);
       try {
-        // Get trending guide slugs from Redis
-        const trendingSlugs = await statsRedis.getTrending('guides', 5);
+        // Fetch trending guides from API route (not direct Redis - client-safe)
+        const response = await fetch('/api/guides/trending?category=guides&limit=5');
 
+        if (!response.ok) return; // Silent fail for optional enhancement
         if (!isMounted) return;
 
-        // Fetch real view counts for trending guides
-        const viewCountResults = await viewCountService.getBatchViewCounts(
-          trendingSlugs.map((slug) => ({ category: 'guides', slug }))
+        const data = await response.json();
+
+        // Transform API response to match expected format
+        const trendingData: TrendingGuide[] = (data.data || []).map(
+          (item: { slug: string; title: string; views: number }) => ({
+            title: item.title || `Guide: ${slugToTitle(item.slug)}`,
+            slug: `/guides/${item.slug}`,
+            views: `${item.views?.toLocaleString() || 0} views`,
+          })
         );
 
-        const trendingData: TrendingGuide[] = trendingSlugs.map((slug) => {
-          const viewKey = `guides:${slug}`;
-          const viewData = viewCountResults[viewKey];
-          const viewCount = viewData?.views || 0;
-
-          return {
-            title: `Guide: ${slugToTitle(slug)}`,
-            slug: `/guides/${slug}`,
-            views: `${viewCount.toLocaleString()} views`,
-          };
-        });
-
-        setTrendingGuides(trendingData);
+        if (isMounted) {
+          setTrendingGuides(trendingData);
+        }
       } catch {
-        // client-side error silently handled - no logging to prevent browser console exposure
+        // Client-side error silently handled - no logging to prevent browser console exposure
       } finally {
         if (isMounted) {
           setIsLoadingTrending(false);
@@ -185,7 +176,6 @@ function UnifiedSidebarComponent({
 
     fetchTrendingData().catch(() => {
       // Silent fail - trending data is optional enhancement
-      // Error already logged in fetchTrendingData
     });
 
     return () => {

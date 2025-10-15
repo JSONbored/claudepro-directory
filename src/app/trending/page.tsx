@@ -11,7 +11,6 @@ import {
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { TrendingContent } from '@/src/components/shared/trending-content';
 import { Badge } from '@/src/components/ui/badge';
-import { REVALIDATE_DYNAMIC_CONTENT } from '@/src/lib/config/rate-limits.config';
 import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
@@ -29,7 +28,7 @@ import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 export const metadata = generatePageMetadata('/trending');
 
 // ISR Configuration - Revalidate every 5 minutes for fresh Redis view counts
-export const revalidate = REVALIDATE_DYNAMIC_CONTENT;
+export const revalidate = 300;
 
 /**
  * Load trending data using Redis-based view counts
