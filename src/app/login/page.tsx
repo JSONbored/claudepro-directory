@@ -9,7 +9,7 @@ import {
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = await generatePageMetadata('/login');
+export const metadata = generatePageMetadata('/login');
 
 export default async function LoginPage({
   searchParams,

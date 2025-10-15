@@ -10,7 +10,7 @@ import { createClient } from '@/src/lib/supabase/server';
 import { BADGE_COLORS, type JobStatusType, UI_CLASSES } from '@/src/lib/ui-constants';
 import { formatRelativeDate } from '@/src/lib/utils/data.utils';
 
-export const metadata = await generatePageMetadata('/account/jobs/:id/analytics');
+export const metadata = generatePageMetadata('/account/jobs/:id/analytics');
 
 interface JobAnalyticsPageProps {
   params: Promise<{

@@ -15,7 +15,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = await generatePageMetadata('/account/library');
+export const metadata = generatePageMetadata('/account/library');
 
 export default async function LibraryPage() {
   const supabase = await createClient();

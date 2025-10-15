@@ -8,7 +8,7 @@ import { Github, MessageCircle, MessageSquare, Twitter, Users } from '@/src/lib/
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = await generatePageMetadata('/community');
+export const metadata = generatePageMetadata('/community');
 
 // Enable ISR - revalidate every 24 hours for community page
 

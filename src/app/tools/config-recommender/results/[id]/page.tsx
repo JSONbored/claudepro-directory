@@ -44,7 +44,7 @@ export const revalidate = 3600;
  */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const baseMetadata = await generatePageMetadata('/tools/config-recommender/results/:id', {
+  const baseMetadata = generatePageMetadata('/tools/config-recommender/results/:id', {
     params: { id },
   });
 

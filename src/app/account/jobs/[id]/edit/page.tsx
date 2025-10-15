@@ -5,7 +5,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = await generatePageMetadata('/account/jobs/:id/edit');
+export const metadata = generatePageMetadata('/account/jobs/:id/edit');
 
 interface EditJobPageProps {
   params: Promise<{

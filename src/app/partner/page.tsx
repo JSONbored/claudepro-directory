@@ -27,7 +27,7 @@ import {
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = await generatePageMetadata('/partner');
+export const metadata = generatePageMetadata('/partner');
 
 // Enable ISR - revalidate every 24 hours for static marketing pages
 

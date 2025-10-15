@@ -46,7 +46,7 @@ const inter = Inter({
 
 // Generate homepage metadata from centralized registry
 export async function generateMetadata(): Promise<Metadata> {
-  const homeMetadata = await generatePageMetadata('/');
+  const homeMetadata = generatePageMetadata('/');
 
   return {
     ...homeMetadata,

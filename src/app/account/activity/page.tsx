@@ -12,7 +12,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
 
-export const metadata = await generatePageMetadata('/account/activity');
+export const metadata = generatePageMetadata('/account/activity');
 
 export default async function ActivityPage() {
   // Fetch activity data

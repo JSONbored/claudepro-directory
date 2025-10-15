@@ -5,7 +5,7 @@ import { createPost } from '@/src/lib/actions/content.actions';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = await generatePageMetadata('/board/new');
+export const metadata = generatePageMetadata('/board/new');
 
 export default function NewPostPage() {
   const handleSubmit = async (formData: FormData) => {

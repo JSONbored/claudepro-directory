@@ -17,7 +17,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = await generatePageMetadata('/for-you');
+export const metadata = generatePageMetadata('/for-you');
 
 export default async function ForYouPage() {
   // Check authentication

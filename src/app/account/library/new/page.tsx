@@ -9,7 +9,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { createClient } from '@/src/lib/supabase/server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-export const metadata = await generatePageMetadata('/account/library/new');
+export const metadata = generatePageMetadata('/account/library/new');
 
 export default async function NewCollectionPage() {
   const supabase = await createClient();

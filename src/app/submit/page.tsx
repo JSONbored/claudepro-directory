@@ -43,7 +43,7 @@ function formatTimeAgo(dateString: string): string {
 }
 
 // SEO Metadata - SHA-2961
-export const metadata = await generatePageMetadata('/submit');
+export const metadata = generatePageMetadata('/submit');
 
 /**
  * Submit Page - Server Component
