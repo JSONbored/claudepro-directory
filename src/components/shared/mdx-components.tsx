@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import React from 'react';
-import { z } from 'zod';
 import { useMDXContent } from '@/src/components/providers/mdx-content-provider';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { CheckCircle, Copy, ExternalLink } from '@/src/lib/icons';
@@ -78,8 +77,10 @@ export function CopyableHeading({
   );
 }
 
-// Schema for validating text content extraction
-const textContentSchema = z.string().min(0);
+// Type guard for text content validation (replaces Zod for bundle optimization)
+function ensureString(value: unknown): string {
+  return typeof value === 'string' ? value : String(value);
+}
 
 // Client component for copyable code blocks (MDX/rehype-pretty-code)
 export function CopyableCodeBlock({ children, className, ...props }: MdxElementProps) {
@@ -120,7 +121,7 @@ export function CopyableCodeBlock({ children, className, ...props }: MdxElementP
     };
 
     const rawText = extractTextContent(children);
-    const validatedText = textContentSchema.parse(rawText);
+    const validatedText = ensureString(rawText);
 
     await copy(validatedText);
   };

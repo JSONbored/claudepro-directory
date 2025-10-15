@@ -41,7 +41,6 @@
  */
 
 import { useId, useState } from 'react';
-import { z } from 'zod';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,
@@ -61,7 +60,6 @@ import {
 } from '@/src/components/ui/select';
 import { Textarea } from '@/src/components/ui/textarea';
 import { ChevronDown, ChevronUp, Code, Plus, Trash } from '@/src/lib/icons';
-import { baseUsageExampleSchema } from '@/src/lib/schemas/content/base-content.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { cn } from '@/src/lib/utils';
 
@@ -95,18 +93,38 @@ interface ExamplesArrayInputProps {
 }
 
 /**
- * Validate a single example against the schema
+ * Validate a single example
+ * Replaces Zod validation for bundle size optimization
  */
 function validateExample(example: UsageExample): { valid: boolean; error?: string } {
-  try {
-    baseUsageExampleSchema.parse(example);
-    return { valid: true };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return { valid: false, error: error.issues[0]?.message || 'Invalid example' };
-    }
-    return { valid: false, error: 'Validation failed' };
+  // Validate title
+  if (!example.title || example.title.trim().length === 0) {
+    return { valid: false, error: 'Title is required' };
   }
+  if (example.title.length > 100) {
+    return { valid: false, error: 'Title must be 100 characters or less' };
+  }
+
+  // Validate code
+  if (!example.code || example.code.length === 0) {
+    return { valid: false, error: 'Code is required' };
+  }
+  if (example.code.length > 10000) {
+    return { valid: false, error: 'Code must be 10,000 characters or less' };
+  }
+
+  // Validate language
+  const validLanguages = SUPPORTED_LANGUAGES.map((l) => l.value);
+  if (!validLanguages.includes(example.language)) {
+    return { valid: false, error: 'Invalid language selected' };
+  }
+
+  // Validate description (optional)
+  if (example.description && example.description.length > 500) {
+    return { valid: false, error: 'Description must be 500 characters or less' };
+  }
+
+  return { valid: true };
 }
 
 /**

@@ -20,11 +20,12 @@ const UnifiedSearch = dynamic(
   }
 );
 
-import { getIconByName } from '@/src/lib/icons';
+import { HelpCircle } from '@/src/lib/icons';
 import type {
   ContentSearchClientProps,
   UnifiedContentItem,
 } from '@/src/lib/schemas/component.schema';
+import { ICON_NAME_MAP } from '@/src/lib/ui-constants';
 
 /**
  * Content Search Client Component
@@ -108,7 +109,7 @@ function ContentSearchClientComponent<T extends UnifiedContentItem>({
       ) : (
         <output className={`text-center py-12 ${UI_CLASSES.BLOCK}`}>
           {(() => {
-            const IconComponent = getIconByName(icon);
+            const IconComponent = ICON_NAME_MAP[icon as keyof typeof ICON_NAME_MAP] || HelpCircle;
             return (
               <IconComponent
                 className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50"

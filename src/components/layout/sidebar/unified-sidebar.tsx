@@ -16,7 +16,6 @@
 
 import Link from 'next/link';
 import { memo, useEffect, useState } from 'react';
-import { z } from 'zod';
 import { SidebarCard } from '@/src/components/shared/sidebar-card';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
@@ -50,45 +49,41 @@ import { viewCountService } from '@/src/lib/services/view-count.service';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { shallowEqual, slugToTitle } from '@/src/lib/utils';
 
-// Zod schemas for type safety and validation
-const contentDataSchema = z.object({
-  title: z.string().optional(),
-  description: z.string().optional(),
-  keywords: z.array(z.string()).optional(),
-  dateUpdated: z.string().optional(),
-  category: z.string().optional(),
-  content: z.string().optional(),
-});
+// TypeScript types (replaces Zod schemas for bundle size optimization)
+interface ContentData {
+  title?: string;
+  description?: string;
+  keywords?: string[];
+  dateUpdated?: string;
+  category?: string;
+  content?: string;
+}
 
-const relatedGuideSchema = z.object({
-  title: z.string(),
-  slug: z.string(),
-  category: z.string(),
-});
+interface RelatedGuide {
+  title: string;
+  slug: string;
+  category: string;
+}
 
-const trendingGuideSchema = z.object({
-  title: z.string(),
-  slug: z.string(),
-  views: z.string(),
-});
+interface TrendingGuide {
+  title: string;
+  slug: string;
+  views: string;
+}
+
+interface RecentGuide {
+  title: string;
+  slug: string;
+  date: string;
+}
 
 // Define UnifiedSidebarProps locally
 interface UnifiedSidebarProps {
   mode?: 'category' | 'unified' | 'content';
-  contentData?: z.infer<typeof contentDataSchema>;
-  relatedGuides?: Array<z.infer<typeof relatedGuideSchema>>;
+  contentData?: ContentData;
+  relatedGuides?: RelatedGuide[];
   currentCategory?: string;
 }
-
-const recentGuideSchema = z.object({
-  title: z.string(),
-  slug: z.string(),
-  date: z.string(),
-});
-
-// Infer types from Zod schemas
-type TrendingGuide = z.infer<typeof trendingGuideSchema>;
-type RecentGuide = z.infer<typeof recentGuideSchema>;
 
 const categoryInfo = {
   'use-cases': {
@@ -134,9 +129,9 @@ function UnifiedSidebarComponent({
   relatedGuides = [],
   currentCategory: explicitCategory,
 }: UnifiedSidebarProps) {
-  // Validate props with Zod schemas
-  const validatedContentData = contentData ? contentDataSchema.parse(contentData) : undefined;
-  const validatedRelatedGuides = z.array(relatedGuideSchema).parse(relatedGuides);
+  // Use TypeScript types (no runtime validation needed for props)
+  const validatedContentData = contentData;
+  const validatedRelatedGuides = relatedGuides || [];
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
