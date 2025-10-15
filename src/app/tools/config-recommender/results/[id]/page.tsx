@@ -20,7 +20,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 import { ResultsDisplay } from '@/src/components/tools/recommender/results-display';
-import { statsRedis } from '@/src/lib/cache';
+import { statsRedis } from '@/src/lib/cache.server';
 import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import { generateRecommendations } from '@/src/lib/recommender/algorithm';

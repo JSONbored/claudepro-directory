@@ -14,7 +14,7 @@ import { ViewTracker } from '@/src/components/shared/view-tracker';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent } from '@/src/components/ui/card';
-import { contentCache, statsRedis } from '@/src/lib/cache';
+import { contentCache, statsRedis } from '@/src/lib/cache.server';
 import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { ArrowLeft, BookOpen, Calendar, Eye, FileText, Tag, Users, Zap } from '@/src/lib/icons';

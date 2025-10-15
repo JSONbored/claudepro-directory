@@ -15,9 +15,9 @@
  */
 
 import type { ReactElement } from 'react';
-import { redisClient } from '@/src/lib/cache';
+import { redisClient } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
-import { resendService } from '@/src/lib/services/resend.service';
+import { resendService } from '@/src/lib/services/resend.server';
 
 /**
  * Email sequence state

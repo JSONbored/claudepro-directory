@@ -13,7 +13,7 @@ import {
   contentIndexSchema,
 } from '@/src/lib/schemas/related-content.schema';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
-import { viewCountService } from '@/src/lib/services/view-count.service';
+import { viewCountService } from '@/src/lib/services/view-count.server';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
 
 // Clean, production Zod schemas

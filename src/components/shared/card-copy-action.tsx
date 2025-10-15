@@ -12,10 +12,10 @@
 import { Button } from '@/src/components/ui/button';
 import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture';
 import { trackCopy } from '@/src/lib/actions/track-view';
+import { showCopyError, showCopySuccess } from '@/src/lib/client/browser-utils';
 import { Check, Copy } from '@/src/lib/icons';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
-import { showCopyError, showCopySuccess } from '@/src/lib/utils/browser.utils';
 
 export interface CardCopyActionProps {
   /** Full URL to copy to clipboard */

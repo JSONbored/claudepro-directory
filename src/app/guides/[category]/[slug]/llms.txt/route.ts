@@ -10,7 +10,7 @@ import fs from 'fs/promises';
 import type { NextRequest } from 'next/server';
 import path from 'path';
 import { z } from 'zod';
-import { contentCache } from '@/src/lib/cache';
+import { contentCache } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';

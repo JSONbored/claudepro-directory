@@ -7,7 +7,7 @@
 // Always extract headers from the NextRequest passed into functions.
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { redisClient } from '@/src/lib/cache';
+import { redisClient } from '@/src/lib/cache.server';
 import { ENDPOINT_RATE_LIMITS } from '@/src/lib/config/rate-limits.config';
 import { apiResponse } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';

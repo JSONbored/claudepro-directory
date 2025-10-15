@@ -14,9 +14,9 @@
 
 import { createRequestId } from '@/src/lib/schemas/branded-types.schema';
 import {
+  determineErrorType,
   type ErrorContext,
   type ErrorResponse,
-  determineErrorType,
   validateErrorContext,
 } from '@/src/lib/schemas/error.schema';
 

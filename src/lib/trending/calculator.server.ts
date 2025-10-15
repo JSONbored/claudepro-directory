@@ -30,7 +30,7 @@
  */
 
 import { z } from 'zod';
-import { statsRedis } from '@/src/lib/cache';
+import { statsRedis } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { batchFetch } from '@/src/lib/utils/batch.utils';

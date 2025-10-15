@@ -10,7 +10,7 @@ import type { Metadata } from 'next';
 import path from 'path';
 import { ContentListServer } from '@/src/components/content-list-server';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
-import { statsRedis } from '@/src/lib/cache';
+import { statsRedis } from '@/src/lib/cache.server';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';

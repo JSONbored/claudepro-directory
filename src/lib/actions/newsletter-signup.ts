@@ -2,7 +2,7 @@
 
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { newsletterSignupSchema } from '@/src/lib/schemas/newsletter.schema';
-import { emailOrchestrationService } from '@/src/lib/services/email-orchestration.service';
+import { emailOrchestrationService } from '@/src/lib/services/email-orchestration.server';
 
 /**
  * Newsletter signup server action

@@ -17,12 +17,12 @@
  */
 
 import { toast } from 'sonner';
+import { copyToClipboard } from '@/src/lib/client/browser-utils';
 import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 import { BookOpen, Bot, Layers, Server, Terminal, Webhook } from '@/src/lib/icons';
 import type { ContentTypeConfigRegistry } from '@/src/lib/types/content-type-config';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
-import { copyToClipboard } from '@/src/lib/utils/browser.utils';
 
 /**
  * Agent Configuration

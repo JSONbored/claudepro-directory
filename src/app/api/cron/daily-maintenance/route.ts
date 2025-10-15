@@ -20,10 +20,10 @@
  * @module app/api/cron/daily-maintenance
  */
 
-import { cacheWarmer } from '@/src/lib/cache';
+import { cacheWarmer } from '@/src/lib/cache.server';
 import { createApiRoute } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
-import { emailSequenceService } from '@/src/lib/services/email-sequence.service';
+import { emailSequenceService } from '@/src/lib/services/email-sequence.server';
 import { createClient } from '@/src/lib/supabase/admin-client';
 
 export const runtime = 'nodejs';

@@ -1,4 +1,4 @@
-import { cacheWarmer } from '@/src/lib/cache';
+import { cacheWarmer } from '@/src/lib/cache.server';
 import { createApiRoute } from '@/src/lib/error-handler';
 import { apiSchemas, baseSchemas, validation } from '@/src/lib/security/validators';
 

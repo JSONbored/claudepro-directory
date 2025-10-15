@@ -635,7 +635,7 @@ export async function batchFetchSettled<T extends readonly Promise<unknown>[]>(
 // CRON TASK EXECUTOR (dependency-resolving, ~150 LOC)
 // ============================================
 
-import { redisClient } from '@/src/lib/cache';
+import { redisClient } from '@/src/lib/cache.server';
 
 export interface CronTask {
   id: string;

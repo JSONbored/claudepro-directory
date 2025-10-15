@@ -20,10 +20,10 @@ import type { NextRequest } from 'next/server';
 import { Webhook } from 'svix';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
-import { rateLimiters } from '@/src/lib/rate-limiter';
+import { rateLimiters } from '@/src/lib/rate-limiter.server';
 import { env } from '@/src/lib/schemas/env.schema';
 import { resendWebhookEventSchema } from '@/src/lib/schemas/webhook.schema';
-import { webhookService } from '@/src/lib/services/webhook.service';
+import { webhookService } from '@/src/lib/services/webhook.server';
 
 // Force Node.js runtime (required for Svix crypto operations)
 export const runtime = 'nodejs';

@@ -21,7 +21,7 @@
  */
 
 import { z } from 'zod';
-import type { RateLimiter } from '@/src/lib/rate-limiter';
+import type { RateLimiter } from '@/src/lib/rate-limiter.server';
 
 // ============================================================================
 // TYPE-SAFE SCHEMAS

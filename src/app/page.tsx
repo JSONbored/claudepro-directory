@@ -11,10 +11,18 @@ import type { StatuslineMetadata } from '@/generated/statuslines-metadata';
 import { HomePageClient } from '@/src/components/features/home';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
-import { RollingText } from '@/src/components/ui/magic/rolling-text';
 
-// Lazy load Meteors animation to improve LCP (decorative only, not critical)
-// The component handles client-side rendering internally via useEffect
+// Lazy load animations to improve LCP (40-60 KB saved from initial bundle)
+// RollingText uses Framer Motion and impacts homepage First Load
+const RollingText = dynamic(
+  () =>
+    import('@/src/components/ui/magic/rolling-text').then((mod) => ({ default: mod.RollingText })),
+  {
+    loading: () => <span className="text-accent">enthusiasts</span>, // Fallback text
+  }
+);
+
+// Meteors animation (decorative only, not critical)
 const Meteors = dynamic(
   () => import('@/src/components/ui/magic/meteors').then((mod) => ({ default: mod.Meteors })),
   {
@@ -22,10 +30,10 @@ const Meteors = dynamic(
   }
 );
 
-import { statsRedis } from '@/src/lib/cache';
+import { statsRedis } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
-import { featuredService } from '@/src/lib/services/featured.service';
+import { featuredService } from '@/src/lib/services/featured.server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
 import { transformForHomePage } from '@/src/lib/utils/content.utils';

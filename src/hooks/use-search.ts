@@ -26,6 +26,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { searchWithFilters } from '@/src/lib/client/search';
 import { logger } from '@/src/lib/logger';
 import type {
   FilterState,
@@ -34,7 +35,6 @@ import type {
 } from '@/src/lib/schemas/component.schema';
 import type { ContentItem } from '@/src/lib/schemas/content/content-item-union.schema';
 import type { SearchableItem, SearchFilters } from '@/src/lib/schemas/search.schema';
-import { searchWithFilters } from '@/src/lib/search-adapters/fuzzysort-adapter';
 import { getDisplayTitle } from '@/src/lib/utils';
 import {
   hasActiveFilters,

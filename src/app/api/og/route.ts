@@ -31,7 +31,7 @@
 
 import type { NextRequest } from 'next/server';
 import { chromium } from 'playwright';
-import { redisClient } from '@/src/lib/cache';
+import { redisClient } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';

@@ -11,14 +11,14 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { Button } from '@/src/components/ui/button';
 import { addBookmark, removeBookmark } from '@/src/lib/actions/user.actions';
-import { Bookmark, BookmarkCheck } from '@/src/lib/icons';
-import { logger } from '@/src/lib/logger';
-import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import {
   showAuthRequiredToast,
   showBookmarkError,
   showBookmarkSuccess,
-} from '@/src/lib/utils/browser.utils';
+} from '@/src/lib/client/browser-utils';
+import { Bookmark, BookmarkCheck } from '@/src/lib/icons';
+import { logger } from '@/src/lib/logger';
+import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 
 /**
  * Type guard to validate ContentCategory at runtime

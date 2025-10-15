@@ -24,7 +24,7 @@ import {
   statuslines,
 } from '@/generated/content';
 import type { DigestContentItem, DigestTrendingItem } from '@/src/emails/templates/weekly-digest';
-import { contentCache, statsRedis } from '@/src/lib/cache';
+import { contentCache, statsRedis } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import { batchFetch, batchLoadContent } from '@/src/lib/utils/batch.utils';

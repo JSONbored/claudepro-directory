@@ -64,7 +64,7 @@ import { BreadcrumbSchema } from '@/src/components/structured-data/breadcrumb-sc
 import { UnifiedStructuredData } from '@/src/components/structured-data/unified-structured-data';
 import { UnifiedDetailPage } from '@/src/components/unified-detail-page';
 import { CollectionDetailView } from '@/src/components/unified-detail-page/collection-detail-view';
-import { statsRedis } from '@/src/lib/cache';
+import { statsRedis } from '@/src/lib/cache.server';
 import {
   getCategoryConfig,
   isValidCategory,

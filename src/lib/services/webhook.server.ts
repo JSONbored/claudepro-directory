@@ -4,7 +4,7 @@
  */
 
 import { createHash } from 'node:crypto';
-import { redisClient } from '@/src/lib/cache';
+import { redisClient } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
 import type {
   BounceEvent,
@@ -13,7 +13,7 @@ import type {
   OpenEvent,
   ResendWebhookEvent,
 } from '@/src/lib/schemas/webhook.schema';
-import { emailSequenceService } from './email-sequence.service';
+import { emailSequenceService } from './email-sequence.server';
 
 /**
  * WebhookService

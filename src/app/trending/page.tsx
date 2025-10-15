@@ -20,7 +20,7 @@ import {
   trendingParamsSchema,
 } from '@/src/lib/schemas/search.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { getBatchTrendingData } from '@/src/lib/trending/calculator';
+import { getBatchTrendingData } from '@/src/lib/trending/calculator.server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 

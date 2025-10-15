@@ -24,9 +24,9 @@ import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { createApiRoute } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 import { env } from '@/src/lib/schemas/env.schema';
-import { digestService } from '@/src/lib/services/digest.service';
-import { type FeaturedContentItem, featuredService } from '@/src/lib/services/featured.service';
-import { resendService } from '@/src/lib/services/resend.service';
+import { digestService } from '@/src/lib/services/digest.server';
+import { type FeaturedContentItem, featuredService } from '@/src/lib/services/featured.server';
+import { resendService } from '@/src/lib/services/resend.server';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
 import { getCurrentWeekStart, getWeekEnd } from '@/src/lib/utils/data.utils';
 

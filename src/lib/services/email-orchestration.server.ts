@@ -26,8 +26,8 @@
 import { NewsletterWelcome } from '@/src/emails/templates/newsletter-welcome';
 import { EVENTS, type EventName } from '@/src/lib/analytics/events.config';
 import { logger } from '@/src/lib/logger';
-import { emailSequenceService } from '@/src/lib/services/email-sequence.service';
-import { resendService } from '@/src/lib/services/resend.service';
+import { emailSequenceService } from '@/src/lib/services/email-sequence.server';
+import { resendService } from '@/src/lib/services/resend.server';
 
 /**
  * Email subscription metadata

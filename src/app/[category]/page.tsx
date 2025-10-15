@@ -40,7 +40,7 @@
 
 import { notFound } from 'next/navigation';
 import { ContentListServer } from '@/src/components/content-list-server';
-import { statsRedis } from '@/src/lib/cache';
+import { statsRedis } from '@/src/lib/cache.server';
 import { getCategoryConfig, isValidCategory } from '@/src/lib/config/category-config';
 import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';

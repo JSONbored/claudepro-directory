@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import { agents, collections, commands, hooks, mcp, rules, statuslines } from '@/generated/content';
-import { contentCache } from '@/src/lib/cache';
+import { contentCache } from '@/src/lib/cache.server';
 import { APP_CONFIG, UI_CONFIG } from '@/src/lib/constants';
 import { createApiRoute } from '@/src/lib/error-handler';
-import { rateLimiters } from '@/src/lib/rate-limiter';
+import { rateLimiters } from '@/src/lib/rate-limiter.server';
 import { apiSchemas } from '@/src/lib/security/validators';
 import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 
