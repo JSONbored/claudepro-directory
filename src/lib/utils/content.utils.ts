@@ -805,9 +805,9 @@ export function isGuideSubcategory(value: unknown): value is GuideSubcategory {
  * getContentItemUrl({
  *   category: 'guides',
  *   slug: 'setup',
- *   subcategory: 'getting-started'
+ *   subcategory: 'tutorials'
  * })
- * // Returns: "/guides/getting-started/setup"
+ * // Returns: "/guides/tutorials/setup"
  */
 export function getContentItemUrl(item: {
   category: ContentCategory;

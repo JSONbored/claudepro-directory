@@ -34,8 +34,8 @@ interface PageProps {
   searchParams: Promise<{ answers?: string }>;
 }
 
-// ISR Configuration - Revalidate every hour
-export const revalidate = 3600;
+// ISR - Static content (centralized config)
+export const revalidate = REVALIDATION_TIMES.STATIC_CONTENT;
 
 /**
  * Generate metadata for SEO and social sharing

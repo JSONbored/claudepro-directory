@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/src/components/ui/card';
+import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { ROUTES } from '@/src/lib/constants';
 import { Building, ExternalLink, Plus, Star } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
@@ -18,7 +19,8 @@ import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 export const metadata = generatePageMetadata('/companies');
 
-export const revalidate = 3600; // Revalidate every hour
+// ISR - Static content (centralized config)
+export const revalidate = REVALIDATION_TIMES.STATIC_CONTENT;
 
 export default async function CompaniesPage() {
   const supabase = await createAdminClient();

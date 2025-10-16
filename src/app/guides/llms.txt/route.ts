@@ -11,6 +11,7 @@
 import { existsSync, readdirSync } from 'fs';
 import type { NextRequest } from 'next/server';
 import { join } from 'path';
+import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { APP_CONFIG, CONTENT_PATHS } from '@/src/lib/constants';
 import { handleApiError } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
@@ -25,7 +26,7 @@ export const runtime = 'nodejs';
  * ISR revalidation
  * Guides index changes infrequently - revalidate every hour
  */
-export const revalidate = 3600;
+export const revalidate = REVALIDATION_TIMES.LLMS_TXT;
 
 const GUIDE_CATEGORIES = [
   {

@@ -368,7 +368,7 @@ function validateEnv(): Env {
  * Note: Not frozen to allow Next.js segment configuration exports to work
  * Nested config objects (securityConfig, buildConfig) are frozen for security
  */
-export const env = validateEnv();
+export const env = Object.freeze(validateEnv());
 
 /**
  * Helper functions for common environment checks

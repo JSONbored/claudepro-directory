@@ -17,6 +17,7 @@ import {
   skills,
   statuslines,
 } from '@/generated/content';
+import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
 import { generateSiteLLMsTxt } from '@/src/lib/llms-txt/generator';
 import { logger } from '@/src/lib/logger';
@@ -33,7 +34,7 @@ export const runtime = 'nodejs';
  * ISR revalidation
  * AI training data changes infrequently - revalidate every hour
  */
-export const revalidate = 3600;
+export const revalidate = REVALIDATION_TIMES.LLMS_TXT;
 
 /**
  * Handle GET request for site-wide llms.txt
