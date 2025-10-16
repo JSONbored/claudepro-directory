@@ -32,7 +32,6 @@ import { ChangelogArticleStructuredData } from '@/src/components/structured-data
 import { Separator } from '@/src/components/ui/separator';
 import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
-import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';

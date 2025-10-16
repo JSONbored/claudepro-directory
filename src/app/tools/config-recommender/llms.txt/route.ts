@@ -14,7 +14,6 @@
  * @see https://llmstxt.org - LLMs.txt specification
  */
 
-import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { APP_CONFIG } from '@/src/lib/constants';
 
 export const runtime = 'edge';

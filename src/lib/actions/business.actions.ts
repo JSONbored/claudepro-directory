@@ -26,7 +26,7 @@ import {
 } from '@/src/lib/github/pr-template';
 import { logger } from '@/src/lib/logger';
 import { type Company, companyRepository } from '@/src/lib/repositories/company.repository';
-import { type JobUpdate, jobRepository } from '@/src/lib/repositories/job.repository';
+import { jobRepository } from '@/src/lib/repositories/job.repository';
 import { sponsoredContentRepository } from '@/src/lib/repositories/sponsored-content.repository';
 import { submissionRepository } from '@/src/lib/repositories/submission.repository';
 import { userRepository } from '@/src/lib/repositories/user.repository';
