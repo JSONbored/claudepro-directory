@@ -834,6 +834,46 @@ export type HomepageTabCategory = (typeof HOMEPAGE_TAB_CATEGORIES)[number];
 
 /**
  * ============================================
+ * HOMEPAGE STATS DISPLAY CONFIGURATION
+ * ============================================
+ *
+ * Configuration for dynamic stats display on homepage.
+ * Associates each category with its icon and display text.
+ *
+ * Modern 2025 Architecture:
+ * - Configuration-driven stats rendering
+ * - Zero hardcoded stat displays
+ * - Icons pulled from category config
+ * - Display text auto-generated from pluralTitle
+ */
+
+export interface CategoryStatsConfig {
+  readonly categoryId: CategoryId;
+  readonly icon: LucideIcon;
+  readonly displayText: string;
+  readonly delay: number; // Animation delay in ms
+}
+
+/**
+ * Get stats configuration for homepage display
+ * Dynamically generates from registry with animation stagger
+ *
+ * @returns Array of category stats configurations
+ */
+export function getCategoryStatsConfig(): readonly CategoryStatsConfig[] {
+  return getAllCategoryIds().map((id, index) => {
+    const config = UNIFIED_CATEGORY_REGISTRY[id];
+    return {
+      categoryId: id,
+      icon: config.icon,
+      displayText: config.pluralTitle,
+      delay: index * 100, // Stagger animations by 100ms
+    };
+  });
+}
+
+/**
+ * ============================================
  * RE-EXPORTED TYPES (from old build-category-config.ts)
  * ============================================
  */

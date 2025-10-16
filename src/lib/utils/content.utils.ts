@@ -162,50 +162,40 @@ export function transformForDetailPage(
 }
 
 /**
- * Transform for home page props
+ * Transform for home page props - Configuration-Driven
  * Accepts categorized content arrays and returns transformed versions
  * Handles both full content and metadata-only arrays
  *
- * @param data - Object containing arrays for each content category
- * @returns Object with transformed arrays for each category
+ * Modern 2025 Architecture:
+ * - Dynamic transformation based on UNIFIED_CATEGORY_REGISTRY
+ * - Zero manual updates when adding new categories
+ * - Type-safe with Record<CategoryId, ContentItem[]>
+ *
+ * @param data - Record of category ID to content arrays
+ * @returns Record of category ID to transformed ContentItem arrays
  *
  * @example
  * const transformed = transformForHomePage({
  *   rules: rulesArray,
  *   mcp: mcpArray,
  *   agents: agentsArray,
- *   // ... other categories
+ *   skills: skillsArray, // Auto-included without manual changes
+ *   allConfigs: allConfigsArray
  * });
  */
-export function transformForHomePage(data: {
-  rules: readonly UnifiedContentItem[];
-  mcp: readonly UnifiedContentItem[];
-  agents: readonly UnifiedContentItem[];
-  commands: readonly UnifiedContentItem[];
-  hooks: readonly UnifiedContentItem[];
-  statuslines: readonly UnifiedContentItem[];
-  collections: readonly UnifiedContentItem[];
-  allConfigs: readonly UnifiedContentItem[];
-}): {
-  rules: ContentItem[];
-  mcp: ContentItem[];
-  agents: ContentItem[];
-  commands: ContentItem[];
-  hooks: ContentItem[];
-  statuslines: ContentItem[];
-  collections: ContentItem[];
-  allConfigs: ContentItem[];
-} {
-  return {
-    rules: transformContentArray(data.rules),
-    mcp: transformContentArray(data.mcp),
-    agents: transformContentArray(data.agents),
-    commands: transformContentArray(data.commands),
-    hooks: transformContentArray(data.hooks),
-    statuslines: transformContentArray(data.statuslines),
-    collections: transformContentArray(data.collections),
-    allConfigs: transformContentArray(data.allConfigs),
-  };
+export function transformForHomePage(
+  data: Record<string, readonly UnifiedContentItem[]>
+): Record<string, ContentItem[]> {
+  const transformed: Record<string, ContentItem[]> = {};
+
+  // Transform all categories dynamically
+  for (const [categoryId, items] of Object.entries(data)) {
+    if (Array.isArray(items)) {
+      transformed[categoryId] = transformContentArray(items);
+    }
+  }
+
+  return transformed;
 }
 
 // ============================================
