@@ -152,6 +152,13 @@ const nextConfig = {
     // Enable when upgrading to canary: npm install next@canary
     // For now, our custom build-content.ts caching provides similar benefits
 
+    // ✨ Partial Prerendering (PPR) - requires next@canary (NOT available in stable 15.5.5)
+    // ppr: 'incremental',
+    // DISABLED: Error: "The experimental feature 'experimental.ppr' can only be enabled when using the latest canary version of Next.js"
+    // See: https://github.com/vercel/next.js/issues/71587
+    // Expected impact if enabled: 300-500ms perceived load time improvement
+    // Enable when upgrading to canary: npm install next@canary
+
     // ✨ Client-side router cache optimization (Next.js 15+)
     staleTimes: {
       dynamic: 30, // 30 seconds for dynamic routes

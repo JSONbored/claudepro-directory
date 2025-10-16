@@ -49,7 +49,6 @@ const SearchSectionComponent: FC<SearchSectionProps> = ({
           estimateSize={400}
           overscan={5}
           gap={24}
-          className="min-h-[800px]"
           renderItem={(item: UnifiedContentItem) => (
             <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
           )}

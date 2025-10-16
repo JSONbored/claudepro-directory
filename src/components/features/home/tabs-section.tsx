@@ -79,7 +79,6 @@ const TabsSectionComponent: FC<TabsSectionProps> = ({
                 estimateSize={400}
                 overscan={5}
                 gap={24}
-                className="min-h-[800px]"
                 renderItem={(item: UnifiedContentItem) => (
                   <ConfigCard
                     item={item}

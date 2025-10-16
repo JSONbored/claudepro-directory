@@ -35,16 +35,8 @@ export type GuideSubcategory =
   | 'troubleshooting';
 
 // ============================================
-// CONTENT TRANSFORMATIONS
+// CONTENT UTILITIES
 // ============================================
-
-/**
- * Content item interface for components
- * Represents transformed content ready for display
- */
-export interface ContentItem extends UnifiedContentItem {
-  displayTitle: string;
-}
 
 /**
  * Additional metadata for content items
@@ -93,6 +85,9 @@ export function formatCopyCount(count: number): string {
  * Generates display title with proper formatting
  * Handles acronyms and special cases (API, MCP, AI, etc.)
  *
+ * Used at build time to generate displayTitle field in content schemas.
+ * Eliminates runtime transformation overhead - computed once, cached forever.
+ *
  * @param title - Raw title string
  * @returns Formatted display title
  *
@@ -113,89 +108,6 @@ export function generateDisplayTitle(title: string): string {
       return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
     })
     .join(' ');
-}
-
-/**
- * Transform single content item with display title
- * @param item - Raw content item from schema
- * @returns Transformed content item with display title
- */
-function transformContentItem(item: UnifiedContentItem): ContentItem {
-  return {
-    ...item,
-    displayTitle: generateDisplayTitle(item.title || item.slug),
-  };
-}
-
-/**
- * Transform array of content items
- * @param items - Array of content items
- * @returns Array of transformed content items with display titles
- */
-function transformContentArray(items: readonly UnifiedContentItem[]): ContentItem[] {
-  return items.map(transformContentItem);
-}
-
-/**
- * Transforms UnifiedContentItem for detail page display
- * Includes all metadata and full content
- *
- * @param item - Raw content item from schema
- * @param relatedItems - Optional related items array
- * @returns Transformed content item with display title and related items
- *
- * @example
- * const result = transformForDetailPage(rawItem, relatedItems);
- * // Returns: { item: {..., displayTitle: "API Rate Limiter" }, relatedItems: [...] }
- */
-export function transformForDetailPage(
-  item: UnifiedContentItem,
-  relatedItems: UnifiedContentItem[] = []
-): {
-  item: ContentItem;
-  relatedItems: ContentItem[];
-} {
-  return {
-    item: transformContentItem(item),
-    relatedItems: transformContentArray(relatedItems),
-  };
-}
-
-/**
- * Transform for home page props - Configuration-Driven
- * Accepts categorized content arrays and returns transformed versions
- * Handles both full content and metadata-only arrays
- *
- * Modern 2025 Architecture:
- * - Dynamic transformation based on UNIFIED_CATEGORY_REGISTRY
- * - Zero manual updates when adding new categories
- * - Type-safe with Record<CategoryId, ContentItem[]>
- *
- * @param data - Record of category ID to content arrays
- * @returns Record of category ID to transformed ContentItem arrays
- *
- * @example
- * const transformed = transformForHomePage({
- *   rules: rulesArray,
- *   mcp: mcpArray,
- *   agents: agentsArray,
- *   skills: skillsArray, // Auto-included without manual changes
- *   allConfigs: allConfigsArray
- * });
- */
-export function transformForHomePage(
-  data: Record<string, readonly UnifiedContentItem[]>
-): Record<string, ContentItem[]> {
-  const transformed: Record<string, ContentItem[]> = {};
-
-  // Transform all categories dynamically
-  for (const [categoryId, items] of Object.entries(data)) {
-    if (Array.isArray(items)) {
-      transformed[categoryId] = transformContentArray(items);
-    }
-  }
-
-  return transformed;
 }
 
 // ============================================

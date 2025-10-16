@@ -45,7 +45,6 @@ import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-it
 import { featuredService } from '@/src/lib/services/featured.server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
-import { transformForHomePage } from '@/src/lib/utils/content.utils';
 
 /**
  * Category metadata type - Dynamically derived from registry
@@ -208,14 +207,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const allConfigsMap = new Map(allConfigsWithDuplicates.map((item) => [item.slug, item]));
   const allConfigs = Array.from(allConfigsMap.values()) as UnifiedContentItem[];
 
-  // Build data object for transformation
-  const dataForTransform: Record<string, UnifiedContentItem[]> = {
+  // Build initial data object (no transformation needed - displayTitle computed at build time)
+  const initialData: Record<string, UnifiedContentItem[]> = {
     ...enrichedCategoryData,
     allConfigs,
   };
-
-  // Transform data using dynamic transform function
-  const initialData = transformForHomePage(dataForTransform);
 
   return (
     <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>

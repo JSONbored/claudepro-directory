@@ -23,7 +23,7 @@
  *
  * Components importing EVENTS get ~2KB, NOT ~7KB like the old architecture.
  *
- * Generated: 2025-10-16T06:44:02.239Z
+ * Generated: 2025-10-16T06:59:01.132Z
  *
  * @module lib/analytics/events.constants
  * @generated
@@ -42,15 +42,7 @@
  * Category IDs that have analytics events
  * Auto-generated from UNIFIED_CATEGORY_REGISTRY
  */
-type AnalyticsCategory =
-  | 'agents'
-  | 'mcp'
-  | 'commands'
-  | 'rules'
-  | 'hooks'
-  | 'statuslines'
-  | 'collections'
-  | 'skills';
+type AnalyticsCategory = 'agents' | 'mcp' | 'commands' | 'rules' | 'hooks' | 'statuslines' | 'collections' | 'skills';
 
 /**
  * Additional content types (not in main category registry)
@@ -61,42 +53,29 @@ type AdditionalContentType = 'guide';
  * Category event suffix mapping (for singular forms)
  * Auto-generated transformation rules
  */
-type CategorySuffix<T extends string> = T extends 'agents'
-  ? 'agent'
-  : T extends 'mcp'
-    ? 'mcp'
-    : T extends 'commands'
-      ? 'command'
-      : T extends 'rules'
-        ? 'rule'
-        : T extends 'hooks'
-          ? 'hook'
-          : T extends 'statuslines'
-            ? 'statusline'
-            : T extends 'collections'
-              ? 'collection'
-              : T extends 'skills'
-                ? 'skill'
-                : T extends 'guide'
-                  ? 'guide'
-                  : never;
+type CategorySuffix<T extends string> =
+  T extends 'agents' ? 'agent' :
+  T extends 'mcp' ? 'mcp' :
+  T extends 'commands' ? 'command' :
+  T extends 'rules' ? 'rule' :
+  T extends 'hooks' ? 'hook' :
+  T extends 'statuslines' ? 'statusline' :
+  T extends 'collections' ? 'collection' :
+  T extends 'skills' ? 'skill' :
+  T extends 'guide' ? 'guide' :
+  never;
 
 /**
  * TypeScript template literal types for dynamic event generation
  * These types ensure compile-time validation of all event names
  */
 type ContentViewEvent<T extends AnalyticsCategory> = `content_view_${CategorySuffix<T>}`;
-type RelatedClickEvent<T extends AnalyticsCategory | AdditionalContentType> =
-  `related_click_from_${CategorySuffix<T>}`;
-type RelatedViewEvent<T extends AnalyticsCategory | AdditionalContentType> =
-  `related_view_on_${CategorySuffix<T>}`;
+type RelatedClickEvent<T extends AnalyticsCategory | AdditionalContentType> = `related_click_from_${CategorySuffix<T>}`;
+type RelatedViewEvent<T extends AnalyticsCategory | AdditionalContentType> = `related_view_on_${CategorySuffix<T>}`;
 type SearchEvent<T extends AnalyticsCategory | 'guides'> = `search_${T}`;
-type CopyCodeEvent<T extends AnalyticsCategory | AdditionalContentType> =
-  `copy_code_${CategorySuffix<T>}`;
-type CopyMarkdownEvent<T extends AnalyticsCategory | AdditionalContentType> =
-  `copy_markdown_${CategorySuffix<T>}`;
-type DownloadMarkdownEvent<T extends AnalyticsCategory | AdditionalContentType> =
-  `download_markdown_${CategorySuffix<T>}`;
+type CopyCodeEvent<T extends AnalyticsCategory | AdditionalContentType> = `copy_code_${CategorySuffix<T>}`;
+type CopyMarkdownEvent<T extends AnalyticsCategory | AdditionalContentType> = `copy_markdown_${CategorySuffix<T>}`;
+type DownloadMarkdownEvent<T extends AnalyticsCategory | AdditionalContentType> = `download_markdown_${CategorySuffix<T>}`;
 
 /**
  * ============================================
@@ -128,10 +107,8 @@ export const EVENTS = {
   RELATED_CLICK_FROM_COMMAND: 'related_click_from_command' as RelatedClickEvent<'commands'>,
   RELATED_CLICK_FROM_RULE: 'related_click_from_rule' as RelatedClickEvent<'rules'>,
   RELATED_CLICK_FROM_HOOK: 'related_click_from_hook' as RelatedClickEvent<'hooks'>,
-  RELATED_CLICK_FROM_STATUSLINE:
-    'related_click_from_statusline' as RelatedClickEvent<'statuslines'>,
-  RELATED_CLICK_FROM_COLLECTION:
-    'related_click_from_collection' as RelatedClickEvent<'collections'>,
+  RELATED_CLICK_FROM_STATUSLINE: 'related_click_from_statusline' as RelatedClickEvent<'statuslines'>,
+  RELATED_CLICK_FROM_COLLECTION: 'related_click_from_collection' as RelatedClickEvent<'collections'>,
   RELATED_CLICK_FROM_SKILL: 'related_click_from_skill' as RelatedClickEvent<'skills'>,
   RELATED_CLICK_FROM_GUIDE: 'related_click_from_guide' as RelatedClickEvent<'guide'>,
 
@@ -195,10 +172,8 @@ export const EVENTS = {
   DOWNLOAD_MARKDOWN_COMMAND: 'download_markdown_command' as DownloadMarkdownEvent<'commands'>,
   DOWNLOAD_MARKDOWN_RULE: 'download_markdown_rule' as DownloadMarkdownEvent<'rules'>,
   DOWNLOAD_MARKDOWN_HOOK: 'download_markdown_hook' as DownloadMarkdownEvent<'hooks'>,
-  DOWNLOAD_MARKDOWN_STATUSLINE:
-    'download_markdown_statusline' as DownloadMarkdownEvent<'statuslines'>,
-  DOWNLOAD_MARKDOWN_COLLECTION:
-    'download_markdown_collection' as DownloadMarkdownEvent<'collections'>,
+  DOWNLOAD_MARKDOWN_STATUSLINE: 'download_markdown_statusline' as DownloadMarkdownEvent<'statuslines'>,
+  DOWNLOAD_MARKDOWN_COLLECTION: 'download_markdown_collection' as DownloadMarkdownEvent<'collections'>,
   DOWNLOAD_MARKDOWN_SKILL: 'download_markdown_skill' as DownloadMarkdownEvent<'skills'>,
   DOWNLOAD_MARKDOWN_GUIDE: 'download_markdown_guide' as DownloadMarkdownEvent<'guide'>,
 
@@ -290,15 +265,7 @@ export type EventName = (typeof EVENTS)[keyof typeof EVENTS];
  */
 interface EventConfig {
   description: string;
-  category:
-    | 'CONTENT'
-    | 'JOURNEY'
-    | 'PERFORMANCE'
-    | 'INTERACTION'
-    | 'ERROR'
-    | 'FEATURE'
-    | 'NAVIGATION'
-    | 'PERSONALIZATION';
+  category: 'CONTENT' | 'JOURNEY' | 'PERFORMANCE' | 'INTERACTION' | 'ERROR' | 'FEATURE' | 'NAVIGATION' | 'PERSONALIZATION';
   enabled: boolean;
   sampleRate?: number;
   debugOnly?: boolean;

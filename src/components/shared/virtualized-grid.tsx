@@ -109,10 +109,11 @@ function VirtualizedGridComponent<T>({
   emptyMessage = 'No items found',
   keyExtractor,
 }: VirtualizedGridProps<T>) {
-  // Ref for scrollable container - stable across renders
+  // Ref for the scrollable parent element - stable across renders
   const parentRef = useRef<HTMLDivElement>(null);
 
-  // Initialize virtualizer with production-optimized settings
+  // Initialize virtualizer with production-optimized settings for ELEMENT scrolling
+  // This is the proper pattern from TanStack Virtual docs
   const virtualizer = useVirtualizer({
     count: items.length,
     getScrollElement: () => parentRef.current,
@@ -144,8 +145,10 @@ function VirtualizedGridComponent<T>({
       ref={parentRef}
       className={className}
       style={{
-        height: '100%',
+        height: `${Math.min(virtualizer.getTotalSize(), 2000)}px`,
+        maxHeight: '80vh',
         overflow: 'auto',
+        position: 'relative',
         // Enable hardware acceleration for smooth scrolling
         willChange: 'transform',
       }}

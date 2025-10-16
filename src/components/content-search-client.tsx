@@ -74,7 +74,6 @@ function ContentSearchClientComponent<T extends UnifiedContentItem>({
             estimateSize={400}
             overscan={5}
             gap={24}
-            className="min-h-[800px]"
             renderItem={(item: T) => (
               <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
             )}
