@@ -263,12 +263,9 @@ All changes follow configuration-driven architecture with zero duplication. Skil
 - Tree-shakeable imports minimize bundle size
 - Configuration changes only - no new infrastructure
 
+---
 
-All notable changes to Claude Pro Directory will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-
-## Quick Navigation
+### Quick Navigation
 
 **Latest Features:**
 
@@ -3283,6 +3280,6 @@ Optimized GitHub Actions workflows to skip intensive jobs (CI, security scans, L
 
 ---
 
-## Earlier Updates
+### Earlier Updates
 
 Previous changes were tracked in git commit history. This changelog starts from October 2025.
