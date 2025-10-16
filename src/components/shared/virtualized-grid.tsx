@@ -151,9 +151,13 @@ function WindowVirtualizedGrid<T>({
   const virtualItems = virtualizer.getVirtualItems();
 
   return (
-    <div ref={parentRef} className={className} style={{ position: 'relative', width: '100%' }}>
+    <div ref={parentRef} className={className}>
       <div
-        style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}
+        style={{
+          height: `${virtualizer.getTotalSize()}px`,
+          width: '100%',
+          position: 'relative',
+        }}
       >
         {virtualItems.map((virtualRow) => {
           // Calculate which items belong to this row
@@ -166,12 +170,8 @@ function WindowVirtualizedGrid<T>({
               key={virtualRow.key}
               data-index={virtualRow.index}
               ref={virtualizer.measureElement}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 absolute top-0 left-0 w-full"
               style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
                 gap: `${gap}px`,
                 transform: `translateY(${virtualRow.start - (virtualizer.options.scrollMargin ?? 0)}px)`,
               }}
@@ -180,11 +180,7 @@ function WindowVirtualizedGrid<T>({
                 const itemIndex = startIndex + indexInRow;
                 const key = keyExtractor ? keyExtractor(item, itemIndex) : itemIndex;
 
-                return (
-                  <ErrorBoundary key={key}>
-                    <div>{renderItem(item, itemIndex)}</div>
-                  </ErrorBoundary>
-                );
+                return <ErrorBoundary key={key}>{renderItem(item, itemIndex)}</ErrorBoundary>;
               })}
             </div>
           );
@@ -268,7 +264,11 @@ function ElementVirtualizedGrid<T>({
       }}
     >
       <div
-        style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}
+        style={{
+          height: `${virtualizer.getTotalSize()}px`,
+          width: '100%',
+          position: 'relative',
+        }}
       >
         {virtualItems.map((virtualRow) => {
           // Calculate which items belong to this row
@@ -281,12 +281,8 @@ function ElementVirtualizedGrid<T>({
               key={virtualRow.key}
               data-index={virtualRow.index}
               ref={virtualizer.measureElement}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 absolute top-0 left-0 w-full"
               style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
                 gap: `${gap}px`,
                 transform: `translateY(${virtualRow.start}px)`,
               }}
@@ -295,11 +291,7 @@ function ElementVirtualizedGrid<T>({
                 const itemIndex = startIndex + indexInRow;
                 const key = keyExtractor ? keyExtractor(item, itemIndex) : itemIndex;
 
-                return (
-                  <ErrorBoundary key={key}>
-                    <div>{renderItem(item, itemIndex)}</div>
-                  </ErrorBoundary>
-                );
+                return <ErrorBoundary key={key}>{renderItem(item, itemIndex)}</ErrorBoundary>;
               })}
             </div>
           );
