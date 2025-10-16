@@ -67,6 +67,12 @@ export const unifiedContentItemSchema = z
       .string()
       .optional()
       .describe('Display title for the content item, auto-generated for some types'), // guides, auto-generated for others
+    displayTitle: z
+      .string()
+      .optional()
+      .describe(
+        'Formatted display title with proper acronym capitalization (API, MCP, etc.), auto-generated at build time'
+      ),
     name: z.string().optional().describe('Auto-generated display name derived from slug or title'), // auto-generated display name
     content: z
       .string()

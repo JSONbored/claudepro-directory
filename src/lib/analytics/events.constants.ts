@@ -23,7 +23,7 @@
  *
  * Components importing EVENTS get ~2KB, NOT ~7KB like the old architecture.
  *
- * Generated: 2025-10-16T06:32:07.432Z
+ * Generated: 2025-10-16T06:44:02.239Z
  *
  * @module lib/analytics/events.constants
  * @generated

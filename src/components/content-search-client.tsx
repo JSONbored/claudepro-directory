@@ -76,12 +76,7 @@ function ContentSearchClientComponent<T extends UnifiedContentItem>({
             gap={24}
             className="min-h-[800px]"
             renderItem={(item: T) => (
-              <ConfigCard
-                item={item}
-                variant="default"
-                showCategory={true}
-                showActions={true}
-              />
+              <ConfigCard item={item} variant="default" showCategory={true} showActions={true} />
             )}
             emptyMessage={`No ${title.toLowerCase()} found`}
             keyExtractor={(item: T) => item.slug}

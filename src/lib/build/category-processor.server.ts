@@ -30,6 +30,7 @@ import { logger } from '@/src/lib/logger';
 import { generateSlugFromFilename } from '@/src/lib/schemas/content-generation.schema';
 import { slugToTitle } from '@/src/lib/utils';
 import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
+import { generateDisplayTitle } from '@/src/lib/utils/content.utils';
 
 /**
  * Build cache interface for incremental builds
@@ -212,6 +213,13 @@ async function processContentFile<T extends ContentType>(
       typeof parsedData.slug === 'string'
     ) {
       parsedData.title = slugToTitle(parsedData.slug);
+    }
+
+    // Auto-generate displayTitle from title or slug
+    // This eliminates runtime transformation overhead - computed once at build time
+    if (typeof parsedData.title === 'string' || typeof parsedData.slug === 'string') {
+      const sourceText = (parsedData.title as string) || slugToTitle(parsedData.slug as string);
+      parsedData.displayTitle = generateDisplayTitle(sourceText);
     }
 
     // Validate with category-specific schema

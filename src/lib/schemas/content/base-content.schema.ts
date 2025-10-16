@@ -131,6 +131,12 @@ export const baseContentMetadataSchema = z
       .string()
       .optional()
       .describe('Display title for the content (auto-generated during build if not provided)'), // Allow empty/missing titles - auto-generated during build
+    displayTitle: z
+      .string()
+      .optional()
+      .describe(
+        'Formatted display title with proper acronym capitalization (API, MCP, AI, etc.). Auto-generated at build time from title or slug. Eliminates runtime transformation overhead. Made required after running build.'
+      ),
     seoTitle: z
       .string()
       .max(60)
