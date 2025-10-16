@@ -4,7 +4,9 @@
     "tailwindcss",
     "@biomejs/biome",
     "@asteasolutions/zod-to-openapi",
-    "postcss"
+    "postcss",
+    "ajv",
+    "ajv-formats"
   ],
   "ignoreExportsUsedInFile": true,
   "ignore": [
@@ -18,7 +20,9 @@
     "src/components/ui/sonner.tsx",
     "public/scripts/offline.js",
     "public/scripts/service-worker-init.js",
-    "public/service-worker.js"
+    "public/service-worker.js",
+    "config/tools/progress-reporter.ts",
+    "next-env.d.ts"
   ],
   "ignoreBinaries": ["skott", "madge"],
   "entry": ["src/app/**/*.{ts,tsx}", "src/middleware.ts", "scripts/**/*.ts"],
