@@ -102,16 +102,13 @@ const route = createApiRoute({
   },
 });
 
-// Export a GET that matches Next.js dynamic route signature exactly
+// Export GET handler - directly delegates to createApiRoute standardized handler
 export async function GET(
   request: Request,
   context: { params: Promise<{ contentType: string }> }
 ): Promise<Response> {
-  // Delegate to standardized handler (createApiRoute)
   if (!route.GET) {
-    // Should never happen because handler is provided
     return new Response('Method Not Allowed', { status: 405 });
   }
-  // Cast to NextRequest for our internal types
-  return route.GET(request as unknown as import('next/server').NextRequest, context as any);
+  return route.GET(request, context);
 }

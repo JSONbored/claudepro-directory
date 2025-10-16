@@ -2,16 +2,18 @@
  * Client-Safe Error Handler Utilities
  *
  * This module contains error handling utilities that are safe to use in client components.
- * It does NOT import any server-only code (Redis, node:crypto, node:zlib, etc.).
+ * Uses the production logger which is client-safe and properly structured.
  *
  * **Bundle Optimization:**
- * - Zero server dependencies = no webpack fallback needed
+ * - Client-safe logger with structured output
  * - Lightweight client bundle (< 5KB)
  * - Tree-shakeable exports
  *
  * @see {@link src/lib/error-handler.ts} - Full error handler with server utilities
+ * @see {@link src/lib/logger.ts} - Production logger (client-safe)
  */
 
+import { logger } from '@/src/lib/logger';
 import { createRequestId } from '@/src/lib/schemas/branded-types.schema';
 import {
   determineErrorType,
@@ -22,25 +24,6 @@ import {
 
 // Client-safe environment check - doesn't trigger server env validation
 const isDevelopment = process.env.NODE_ENV === 'development';
-
-/**
- * Minimal logger for client-side error handling
- * Avoids importing the full logger which may have server dependencies
- */
-const clientLogger = {
-  error: (message: string, error: Error, context?: Record<string, unknown>) => {
-    if (isDevelopment) {
-      console.error(`[Error Handler] ${message}`, {
-        error: {
-          name: error.name,
-          message: error.message,
-          stack: error.stack,
-        },
-        context,
-      });
-    }
-  },
-};
 
 /**
  * Handle errors in React Error Boundaries (client-side only)
@@ -100,8 +83,8 @@ export function createErrorBoundaryFallback(
       processingTime: `${(performance.now() - startTime).toFixed(2)}ms`,
     });
 
-    // Log error (client-side console in development)
-    clientLogger.error(
+    // Log error using production logger (client-safe)
+    logger.error(
       `Error Boundary: ${error.name || 'Unknown'}: ${error.message}`,
       error,
       fullContext
@@ -123,7 +106,7 @@ export function createErrorBoundaryFallback(
   } catch (handlerError) {
     // Fallback if error handler itself fails
     const fallbackError = handlerError instanceof Error ? handlerError : new Error('Unknown error');
-    clientLogger.error('Error boundary fallback failed', fallbackError, {
+    logger.error('Error boundary fallback failed', fallbackError, {
       originalError: error.message,
     });
 

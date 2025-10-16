@@ -32,7 +32,7 @@
  */
 
 import { timingSafeEqual } from 'node:crypto';
-import type { NextRequest, NextResponse } from 'next/server';
+import type { NextResponse } from 'next/server';
 import { apiResponse } from '@/src/lib/error-handler';
 import { logger } from '@/src/lib/logger';
 
@@ -45,7 +45,7 @@ import { logger } from '@/src/lib/logger';
  * @param request - Next.js request object
  * @returns true if authentication is valid, false otherwise
  */
-function verifyCronSecret(request: Request | NextRequest): boolean {
+function verifyCronSecret(request: Request): boolean {
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
 
@@ -135,7 +135,7 @@ function verifyCronSecret(request: Request | NextRequest): boolean {
  * ```
  */
 export async function withCronAuth(
-  request: Request | NextRequest,
+  request: Request,
   handler: () => Promise<NextResponse>
 ): Promise<NextResponse> {
   // Verify cron authentication
@@ -198,7 +198,7 @@ export async function withCronAuth(
  * }
  * ```
  */
-export function verifyCronAuth(request: Request | NextRequest): NextResponse | null {
+export function verifyCronAuth(request: Request): NextResponse | null {
   if (!verifyCronSecret(request)) {
     return apiResponse.okRaw(
       {

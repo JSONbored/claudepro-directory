@@ -13,7 +13,7 @@
  * - Eliminates response duplication across 8+ API routes
  */
 
-import { type NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
@@ -372,10 +372,11 @@ export class ErrorHandler {
 
   /**
    * Middleware-friendly error handler for Next.js
+   * Uses standard Request (Next.js 15 middleware compatibility)
    */
   public handleMiddlewareError(
     error: z.infer<typeof errorInputSchema>,
-    request: NextRequest,
+    request: Request,
     config: Partial<ErrorHandlerConfig> = {}
   ): NextResponse {
     const url = new URL(request.url);
@@ -666,6 +667,28 @@ type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
 type ZodSchemaLike<T> = z.ZodSchema<T>;
 
+/**
+ * Next.js 15 App Router route context types
+ * Used for type-safe route handler exports
+ *
+ * Next.js 15 changed from synchronous params to async Promise-based params
+ * https://nextjs.org/docs/app/api-reference/functions/route-segment-config#params
+ */
+export type RouteContext<P = Record<string, never>> = {
+  params: Promise<P>;
+};
+
+export type EmptyRouteContext = RouteContext<Record<string, never>>;
+
+/**
+ * Next.js 15 Route Handler signature
+ * Standard Request (not NextRequest) as per Next.js 15 specification
+ */
+export type NextRouteHandler<P = Record<string, never>> = (
+  request: Request,
+  context: RouteContext<P>
+) => Promise<Response>;
+
 export interface RouteValidationSchemas<P = unknown, Q = unknown, H = unknown, B = unknown> {
   params?: ZodSchemaLike<P>;
   query?: ZodSchemaLike<Q>;
@@ -679,7 +702,7 @@ export interface ApiOkOptions extends CacheOptions {
 }
 
 export interface ApiHandlerContext<P = unknown, Q = unknown, H = unknown, B = unknown> {
-  request: NextRequest;
+  request: Request;
   params: P;
   query: Q;
   headers: H;
@@ -726,26 +749,20 @@ function cloneWithHeaders(original: Response, headers: Record<string, string>): 
  */
 export function createApiRoute<P = any, Q = any, H = any, B = any>(
   options: CreateApiRouteOptions<P, Q, H, B>
-): Partial<
-  Record<HttpMethod, (request: NextRequest, context?: { params?: unknown }) => Promise<Response>>
-> {
+): Partial<Record<HttpMethod, NextRouteHandler<P>>> {
   const { validate, rateLimit, auth, response, handlers } = options;
 
   const wrap = (
     method: HttpMethod,
     handler?: ApiMethodHandler<P, Q, H, B>
-  ): ((request: NextRequest, context?: { params?: unknown }) => Promise<Response>) | undefined => {
+  ): NextRouteHandler<P> | undefined => {
     if (!handler) return undefined;
 
-    return async (request: NextRequest, context?: { params?: unknown }) => {
+    return async (request: Request, context: RouteContext<P>) => {
       const url = new URL(request.url);
 
-      // Resolve params (supports both direct object and Promise as seen in legacy code)
-      const rawParams = context?.params as unknown;
-      const resolvedParams =
-        rawParams && typeof (rawParams as Promise<unknown>)?.then === 'function'
-          ? await (rawParams as Promise<unknown>).catch(() => ({}))
-          : rawParams || {};
+      // Resolve params from Next.js 15 Promise-based context
+      const resolvedParams = await context.params.catch(() => ({}) as P);
 
       // Request ID
       const headerRequestId = request.headers.get('x-request-id');
@@ -771,7 +788,8 @@ export function createApiRoute<P = any, Q = any, H = any, B = any>(
 
       // Build context with validation
       try {
-        const queryObj = Object.fromEntries(request.nextUrl.searchParams);
+        // Use standard URL API (Next.js 15 uses standard Request, not NextRequest)
+        const queryObj = Object.fromEntries(url.searchParams);
 
         const parsedParams = validate?.params
           ? validation.validate(validate.params, resolvedParams, 'route parameters')
@@ -852,9 +870,7 @@ export function createApiRoute<P = any, Q = any, H = any, B = any>(
     };
   };
 
-  const result: Partial<
-    Record<HttpMethod, (request: NextRequest, context?: { params?: unknown }) => Promise<Response>>
-  > = {};
+  const result: Partial<Record<HttpMethod, NextRouteHandler<P>>> = {};
   const getHandler = wrap('GET', handlers.GET);
   if (getHandler) result.GET = getHandler;
   const postHandler = wrap('POST', handlers.POST);

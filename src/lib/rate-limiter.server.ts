@@ -4,8 +4,7 @@
  */
 
 // Avoid next/headers in shared library to ensure compatibility in all contexts.
-// Always extract headers from the NextRequest passed into functions.
-import type { NextRequest } from 'next/server';
+// Always extract headers from the standard Request passed into functions.
 import { z } from 'zod';
 import { redisClient } from '@/src/lib/cache.server';
 import { ENDPOINT_RATE_LIMITS } from '@/src/lib/config/rate-limits.config';
@@ -26,11 +25,11 @@ export interface ExtendedRateLimitConfig extends Omit<MiddlewareRateLimitConfig,
   /** Window duration in seconds (converted from windowMs) */
   windowSeconds: number;
   /** Custom identifier function */
-  keyGenerator?: (request: NextRequest) => Promise<string>;
+  keyGenerator?: (request: Request) => Promise<string>;
   /** Skip rate limiting for certain conditions */
-  skip?: (request: NextRequest) => boolean;
+  skip?: (request: Request) => boolean;
   /** Custom error response */
-  onLimitReached?: (request: NextRequest, limit: RateLimitInfo) => Promise<Response>;
+  onLimitReached?: (request: Request, limit: RateLimitInfo) => Promise<Response>;
 }
 
 /**
@@ -106,7 +105,7 @@ function configToExtended(config: MiddlewareRateLimitConfig): ExtendedRateLimitC
 /**
  * Generate rate limit key for Redis storage with validation
  */
-async function generateKey(request: NextRequest, prefix = 'rate_limit'): Promise<string> {
+async function generateKey(request: Request, prefix = 'rate_limit'): Promise<string> {
   // Priority order for client identification:
   // 1. CF-Connecting-IP (Cloudflare)
   // 2. X-Forwarded-For (proxy)
@@ -157,7 +156,7 @@ export class RateLimiter {
     } as Required<ExtendedRateLimitConfig>;
   }
 
-  private async defaultErrorResponse(request: NextRequest, info: RateLimitInfo): Promise<Response> {
+  private async defaultErrorResponse(request: Request, info: RateLimitInfo): Promise<Response> {
     const headersList = request.headers;
     const clientIP =
       headersList.get('cf-connecting-ip') || headersList.get('x-forwarded-for') || 'unknown';
@@ -196,7 +195,7 @@ export class RateLimiter {
   /**
    * Check and update rate limit for a request
    */
-  async checkLimit(request: NextRequest): Promise<RateLimitResult> {
+  async checkLimit(request: Request): Promise<RateLimitResult> {
     // Skip if configured to do so
     if (this.config.skip(request)) {
       const result = {
@@ -344,7 +343,7 @@ export class RateLimiter {
   /**
    * Middleware function for Next.js API routes
    */
-  async middleware(request: NextRequest): Promise<Response | null> {
+  async middleware(request: Request): Promise<Response | null> {
     const result = await this.checkLimit(request);
 
     if (!result.success) {
@@ -383,7 +382,7 @@ export const rateLimiters = {
  * Utility function to apply rate limiting to API routes
  */
 export async function withRateLimit<T extends unknown[]>(
-  request: NextRequest,
+  request: Request,
   limiter: RateLimiter,
   handler: (...args: T) => Promise<Response>,
   ...args: T

@@ -262,7 +262,10 @@ const route = createApiRoute({
   },
 });
 
-export async function GET(request: Request, context: { params: Promise<{}> }): Promise<Response> {
+export async function GET(
+  request: Request,
+  context: { params: Promise<Record<string, never>> }
+): Promise<Response> {
   if (!route.GET) return new Response('Method Not Allowed', { status: 405 });
-  return route.GET(request as unknown as import('next/server').NextRequest, context as any);
+  return route.GET(request, context);
 }

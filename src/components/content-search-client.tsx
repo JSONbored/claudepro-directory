@@ -66,7 +66,7 @@ function ContentSearchClientComponent<T extends UnifiedContentItem>({
     setCurrentPage(nextPage);
 
     return nextItems;
-  }, [currentPage, filteredItems]);
+  }, [currentPage, filteredItems, pageSize]);
 
   const hasMore = displayedItems.length < filteredItems.length;
 

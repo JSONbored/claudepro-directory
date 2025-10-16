@@ -456,7 +456,7 @@ const collectionConfig: Partial<ContentTypeConfigRegistry['collections']> = {
 const skillConfig: Partial<ContentTypeConfigRegistry['skills']> = {
   // Base properties (typeName, icon, colorScheme) auto-injected by getContentTypeConfig()
 
-  primaryAction: commonActions.useSkill(),
+  primaryAction: commonActions.applySkill(),
 
   sections: {
     features: true,
@@ -488,8 +488,11 @@ const skillConfig: Partial<ContentTypeConfigRegistry['skills']> = {
         steps: ['Install Python/Node packages as required', 'Verify versions match guide'],
       },
       requirements:
-        Array.isArray((item as any).requirements) && (item as any).requirements.length > 0
-          ? ((item as any).requirements as string[])
+        'requirements' in item &&
+        Array.isArray(item.requirements) &&
+        item.requirements.length > 0 &&
+        item.requirements.every((r): r is string => typeof r === 'string')
+          ? item.requirements
           : ['Install dependencies noted in the guide'],
     }),
   },

@@ -328,7 +328,7 @@ export function RefreshProfileButton({ providerLabel }: { providerLabel: string 
       }
       disabled={isPending}
     >
-      {isPending ? 'Refreshing...' : 'Refresh from ' + providerLabel}
+      {isPending ? 'Refreshing...' : `Refresh from ${providerLabel}`}
     </Button>
   );
 }

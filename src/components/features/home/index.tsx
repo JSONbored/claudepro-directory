@@ -131,7 +131,7 @@ function HomePageClientComponent({
     loadingRef.current = false;
 
     setDisplayedItems(filteredResults.slice(0, pageSize) as UnifiedContentItem[]);
-  }, [filteredResults]);
+  }, [filteredResults, pageSize]);
 
   // Load more function for infinite scroll
   // Uses refs to avoid stale closures when filteredResults changes
@@ -179,7 +179,7 @@ function HomePageClientComponent({
     } finally {
       loadingRef.current = false;
     }
-  }, []);
+  }, [pageSize]);
 
   // Memoize hasMore to prevent unnecessary re-renders
   const hasMore = useMemo(() => {

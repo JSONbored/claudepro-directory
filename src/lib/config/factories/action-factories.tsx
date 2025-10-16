@@ -176,9 +176,9 @@ export function createNotificationAction(
  * ```
  */
 export function createGitHubLinkAction(
+  pathTemplate: string,
   label = 'View on GitHub',
-  icon: ReactNode = <Webhook className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
-  pathTemplate: string
+  icon: ReactNode = <Webhook className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />
 ): ActionButtonConfig {
   return {
     label,
@@ -251,9 +251,10 @@ export const commonActions = {
     ),
 
   /**
-   * Use skill action (for skills category)
+   * Apply skill action (for skills category)
+   * Renamed from useSkill to avoid React hook naming convention
    */
-  useSkill: () =>
+  applySkill: () =>
     createScrollAction(
       'Use Skill',
       <BookOpen className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
@@ -265,8 +266,8 @@ export const commonActions = {
    */
   viewHookOnGitHub: () =>
     createGitHubLinkAction(
+      'https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/{slug}.json',
       'View on GitHub',
-      <Webhook className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
-      'https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/{slug}.json'
+      <Webhook className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />
     ),
 } as const;

@@ -366,7 +366,7 @@ export function ReviewSection({
           setTotalCount((prev) => prev - 1);
           router.refresh();
         }
-      } catch (error) {
+      } catch {
         toasts.error.reviewActionFailed('delete');
       }
     });

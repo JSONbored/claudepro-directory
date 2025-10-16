@@ -13,6 +13,26 @@ import { viewCountService } from '@/src/lib/services/view-count.server';
 
 export const runtime = 'nodejs';
 
+// Response type for trending guides API
+type TrendingGuideItem = {
+  slug: string;
+  title: string;
+  url: string;
+  views: number;
+  rank: number;
+};
+
+type TrendingGuidesResponse = {
+  items: TrendingGuideItem[];
+  nextCursor: string | null;
+  hasMore: boolean;
+  meta: {
+    total: number;
+    limit: number;
+    currentPage: number;
+  };
+};
+
 // Query parameters schema with cursor pagination
 const querySchema = z
   .object({
@@ -66,7 +86,7 @@ const route = createApiRoute({
 
       // Try cache first (fast path)
       try {
-        const cached = await contentCache.getAPIResponse<any>(cacheKey);
+        const cached = await contentCache.getAPIResponse<TrendingGuidesResponse>(cacheKey);
         if (cached) {
           // Compute lightweight metadata for headers (do not mutate cached body)
           const totalCount = (await statsRedis.getTrending(category, 100)).length;
@@ -77,7 +97,7 @@ const route = createApiRoute({
             cacheHit: true,
             additionalHeaders: {
               'X-Total-Count': String(totalCount),
-              'X-Has-More': String(Boolean(cached?.pagination?.hasMore)),
+              'X-Has-More': String(cached.hasMore),
             },
           });
         }
@@ -145,7 +165,10 @@ const route = createApiRoute({
   },
 });
 
-export async function GET(request: Request, context: { params: Promise<{}> }): Promise<Response> {
+export async function GET(
+  request: Request,
+  context: { params: Promise<Record<string, never>> }
+): Promise<Response> {
   if (!route.GET) return new Response('Method Not Allowed', { status: 405 });
-  return route.GET(request as unknown as import('next/server').NextRequest, context as any);
+  return route.GET(request, context);
 }
