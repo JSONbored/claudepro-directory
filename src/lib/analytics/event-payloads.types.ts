@@ -26,13 +26,6 @@ import { EVENTS } from './events.constants';
  * Provides autocomplete and compile-time validation for event data.
  */
 export interface EventPayloads {
-  [EVENTS.CONTENT_VIEW]: {
-    category: string;
-    slug: string;
-    page: string;
-    source?: string;
-  };
-
   [EVENTS.CONTENT_VIEW_AGENT]: {
     slug: string;
     page: string;
@@ -75,24 +68,10 @@ export interface EventPayloads {
     source?: string;
   };
 
-  [EVENTS.RELATED_CONTENT_VIEW]: {
-    source_page: string;
-    source_category: string;
-    items_shown: number;
-    algorithm_version: string;
-    cache_hit: boolean;
-    render_time?: number;
-  };
-
-  [EVENTS.RELATED_CONTENT_CLICK]: {
-    source_page: string;
-    target_page: string;
-    source_category: string;
-    target_category: string;
-    position: number;
-    match_score: number;
-    match_type: string;
-    time_to_click?: number;
+  [EVENTS.CONTENT_VIEW_SKILL]: {
+    slug: string;
+    page: string;
+    source?: string;
   };
 
   [EVENTS.RELATED_CONTENT_IMPRESSION]: {
@@ -167,6 +146,14 @@ export interface EventPayloads {
     match_type: string;
   };
 
+  [EVENTS.RELATED_CLICK_FROM_SKILL]: {
+    target_slug: string;
+    target_category: string;
+    position: number;
+    match_score: number;
+    match_type: string;
+  };
+
   // Related Content View Events (segmented) - cleaner payload without redundant source_category
   [EVENTS.RELATED_VIEW_ON_AGENT]: {
     items_shown: number;
@@ -204,6 +191,11 @@ export interface EventPayloads {
   };
 
   [EVENTS.RELATED_VIEW_ON_GUIDE]: {
+    items_shown: number;
+    cache_hit: boolean;
+  };
+
+  [EVENTS.RELATED_VIEW_ON_SKILL]: {
     items_shown: number;
     cache_hit: boolean;
   };
@@ -273,14 +265,6 @@ export interface EventPayloads {
     position?: number;
   };
 
-  [EVENTS.SEARCH_PERFORMED]: {
-    query: string; // Sanitized, no PII
-    results_count: number;
-    category?: string;
-    filters_applied?: string;
-    time_to_results: number;
-  };
-
   [EVENTS.SEARCH_GLOBAL]: {
     query: string;
     results_count: number;
@@ -337,6 +321,13 @@ export interface EventPayloads {
     time_to_results: number;
   };
 
+  [EVENTS.SEARCH_SKILLS]: {
+    query: string;
+    results_count: number;
+    filters_applied: boolean;
+    time_to_results: number;
+  };
+
   [EVENTS.SEARCH_GUIDES]: {
     query: string;
     results_count: number;
@@ -349,13 +340,6 @@ export interface EventPayloads {
     filter_value: string;
     page: string;
     results_count: number;
-  };
-
-  [EVENTS.COPY_CODE]: {
-    content_type: 'code' | 'command' | 'config';
-    content_category: string;
-    content_slug: string;
-    content_length: number;
   };
 
   [EVENTS.COPY_CODE_AGENT]: {
@@ -400,19 +384,16 @@ export interface EventPayloads {
     language?: string;
   };
 
-  [EVENTS.COPY_CODE_OTHER]: {
+  [EVENTS.COPY_CODE_SKILL]: {
     slug: string;
     content_length: number;
     language?: string;
-    page?: string;
   };
 
-  [EVENTS.COPY_MARKDOWN]: {
-    content_category: string;
-    content_slug: string;
-    include_metadata: boolean;
-    include_footer: boolean;
+  [EVENTS.COPY_CODE_COLLECTION]: {
+    slug: string;
     content_length: number;
+    language?: string;
   };
 
   [EVENTS.COPY_MARKDOWN_AGENT]: {
@@ -464,12 +445,18 @@ export interface EventPayloads {
     content_length: number;
   };
 
-  [EVENTS.COPY_MARKDOWN_OTHER]: {
+  [EVENTS.COPY_MARKDOWN_SKILL]: {
     slug: string;
     include_metadata: boolean;
     include_footer: boolean;
     content_length: number;
-    page?: string;
+  };
+
+  [EVENTS.COPY_MARKDOWN_GUIDE]: {
+    slug: string;
+    include_metadata: boolean;
+    include_footer: boolean;
+    content_length: number;
   };
 
   [EVENTS.DOWNLOAD_RESOURCE]: {
@@ -477,13 +464,6 @@ export interface EventPayloads {
     resource_name: string;
     file_size?: number;
     page: string;
-  };
-
-  [EVENTS.DOWNLOAD_MARKDOWN]: {
-    content_category: string;
-    content_slug: string;
-    filename: string;
-    file_size: number;
   };
 
   [EVENTS.DOWNLOAD_MARKDOWN_AGENT]: {
@@ -528,11 +508,16 @@ export interface EventPayloads {
     file_size: number;
   };
 
-  [EVENTS.DOWNLOAD_MARKDOWN_OTHER]: {
+  [EVENTS.DOWNLOAD_MARKDOWN_SKILL]: {
     slug: string;
     filename: string;
     file_size: number;
-    page?: string;
+  };
+
+  [EVENTS.DOWNLOAD_MARKDOWN_GUIDE]: {
+    slug: string;
+    filename: string;
+    file_size: number;
   };
 
   [EVENTS.SHARE_CONTENT]: {
@@ -545,13 +530,6 @@ export interface EventPayloads {
     feedback_type: 'helpful' | 'not_helpful' | 'report_issue';
     page: string;
     category?: string;
-  };
-
-  [EVENTS.EMAIL_CAPTURED]: {
-    trigger_source: 'post_copy' | 'cta' | 'footer' | 'modal';
-    copy_type?: 'llmstxt' | 'markdown' | 'code' | 'link';
-    content_category?: string;
-    content_slug?: string;
   };
 
   [EVENTS.EMAIL_MODAL_SHOWN]: {

@@ -110,17 +110,11 @@ function buildEventMappings(): Record<EventAction, Record<string, EventName>> {
     }
   }
 
-  // Add guides event (not in main registry)
+  // Add guides events (not in main registry)
   searchMap.guides = EVENTS.SEARCH_GUIDES;
   copyCodeMap.guides = EVENTS.COPY_CODE_GUIDE;
-
-  // Skills fallbacks (reuse similar events)
-  if (!('skills' in contentViewMap)) contentViewMap.skills = EVENTS.CONTENT_VIEW_RULE;
-  if (!('skills' in searchMap)) searchMap.skills = EVENTS.SEARCH_RULES;
-  if (!('skills' in copyCodeMap)) copyCodeMap.skills = EVENTS.COPY_CODE_GUIDE;
-  if (!('skills' in copyMarkdownMap)) copyMarkdownMap.skills = EVENTS.COPY_MARKDOWN_OTHER;
-  if (!('skills' in downloadMarkdownMap))
-    downloadMarkdownMap.skills = EVENTS.DOWNLOAD_MARKDOWN_OTHER;
+  copyMarkdownMap.guides = EVENTS.COPY_MARKDOWN_GUIDE;
+  downloadMarkdownMap.guides = EVENTS.DOWNLOAD_MARKDOWN_GUIDE;
 
   return {
     content_view: contentViewMap,
@@ -139,13 +133,14 @@ const EVENT_MAPPINGS: Record<EventAction, Record<string, EventName>> = buildEven
 
 /**
  * Fallback events for when category is not found
+ * Use generic agent events as fallback
  */
 const FALLBACK_EVENTS: Record<EventAction, EventName> = {
-  content_view: EVENTS.CONTENT_VIEW_AGENT, // Default to agent
+  content_view: EVENTS.CONTENT_VIEW_AGENT,
   search: EVENTS.SEARCH_GLOBAL,
-  copy_code: EVENTS.COPY_CODE_OTHER,
-  copy_markdown: EVENTS.COPY_MARKDOWN_OTHER,
-  download_markdown: EVENTS.DOWNLOAD_MARKDOWN_OTHER,
+  copy_code: EVENTS.COPY_CODE_AGENT,
+  copy_markdown: EVENTS.COPY_MARKDOWN_AGENT,
+  download_markdown: EVENTS.DOWNLOAD_MARKDOWN_AGENT,
 };
 
 /**

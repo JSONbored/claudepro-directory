@@ -25,7 +25,7 @@
   },
   "scripts": {
     "dev": "npm run build:content && next dev --turbopack",
-    "build": "npm run build:content && npm run generate:openapi && npm run build:api-docs && next build --turbopack",
+    "build": "npm run generate:events && npm run build:content && npm run generate:openapi && npm run build:api-docs && next build --turbopack",
     "build:analyze": "TURBOPACK_STATS=1 npm run build",
     "build:content": "tsx scripts/build-content.ts",
     "build:api-docs": "tsx scripts/generate-fumadocs-api.ts",
@@ -76,7 +76,8 @@
     "test:all": "npm run test:unit && npm run test:e2e",
     "tech-debt:baseline": "config/tools/tech-debt/tracker.sh baseline",
     "tech-debt:check": "config/tools/tech-debt/tracker.sh check",
-    "tech-debt:report": "config/tools/tech-debt/tracker.sh report"
+    "tech-debt:report": "config/tools/tech-debt/tracker.sh report",
+    "generate:events": "tsx scripts/generate-events.ts"
   },
   "dependencies": {
     "@arcjet/next": "^1.0.0-beta.13",
