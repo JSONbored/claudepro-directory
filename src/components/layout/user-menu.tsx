@@ -15,6 +15,7 @@
  */
 
 import type { User } from '@supabase/supabase-js';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
@@ -110,12 +111,14 @@ export function UserMenu({ className }: UserMenuProps) {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => router.push('/login')}
           className={UI_CLASSES.BUTTON_GHOST_ICON}
           aria-label="Sign in"
+          asChild
         >
-          <UserIcon className="h-4 w-4" />
-          <span className={'hidden lg:inline'}>Sign In</span>
+          <Link href="/login">
+            <UserIcon className="h-4 w-4" />
+            <span className={'hidden lg:inline'}>Sign In</span>
+          </Link>
         </Button>
       </div>
     );
@@ -163,28 +166,25 @@ export function UserMenu({ className }: UserMenuProps) {
           <DropdownMenuSeparator />
 
           {/* Navigation Links */}
-          <DropdownMenuItem
-            onClick={() => router.push('/account/settings')}
-            className="cursor-pointer"
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
+          <DropdownMenuItem asChild>
+            <Link href="/account/settings">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuItem
-            onClick={() => router.push('/account/library')}
-            className="cursor-pointer"
-          >
-            <BookOpen className="mr-2 h-4 w-4" />
-            <span>Library</span>
+          <DropdownMenuItem asChild>
+            <Link href="/account/library">
+              <BookOpen className="mr-2 h-4 w-4" />
+              <span>Library</span>
+            </Link>
           </DropdownMenuItem>
 
-          <DropdownMenuItem
-            onClick={() => router.push('/account/activity')}
-            className="cursor-pointer"
-          >
-            <Activity className="mr-2 h-4 w-4" />
-            <span>Activity</span>
+          <DropdownMenuItem asChild>
+            <Link href="/account/activity">
+              <Activity className="mr-2 h-4 w-4" />
+              <span>Activity</span>
+            </Link>
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />
