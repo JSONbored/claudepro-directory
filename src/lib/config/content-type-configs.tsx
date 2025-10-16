@@ -16,13 +16,12 @@
  * @see components/unified-detail-page.tsx - Component consumer
  */
 
-import { toast } from 'sonner';
-import { copyToClipboard } from '@/src/lib/client/browser-utils';
 import { UNIFIED_CATEGORY_REGISTRY } from '@/src/lib/config/category-config';
 import { BookOpen, Bot, Layers, Server, Terminal, Webhook } from '@/src/lib/icons';
 import type { ContentTypeConfigRegistry } from '@/src/lib/types/content-type-config';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getDisplayTitle } from '@/src/lib/utils';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 /**
  * Agent Configuration
@@ -36,7 +35,7 @@ const agentConfig: ContentTypeConfigRegistry['agents'] = {
     label: 'Deploy Agent',
     icon: <Bot className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
     handler: () => {
-      toast.success('Agent Deployment', {
+      toasts.raw.success('Agent Deployment', {
         description: 'Copy the agent content and follow the installation instructions.',
       });
     },
@@ -121,11 +120,8 @@ const commandConfig: ContentTypeConfigRegistry['commands'] = {
     handler: async (item) => {
       const contentToCopy =
         'content' in item && typeof item.content === 'string' ? item.content : '';
-      await copyToClipboard(contentToCopy, {
-        component: 'command-config',
-        action: 'copy-content',
-      });
-      toast.success('Copied!', {
+      await navigator.clipboard.writeText(contentToCopy);
+      toasts.raw.success('Copied!', {
         description: 'Command content has been copied to your clipboard.',
       });
     },
@@ -390,7 +386,7 @@ const ruleConfig: ContentTypeConfigRegistry['rules'] = {
     label: 'Use Rule',
     icon: <BookOpen className={`h-4 w-4 ${UI_CLASSES.MR_2}`} />,
     handler: () => {
-      toast.success('Rule Integration', {
+      toasts.raw.success('Rule Integration', {
         description: 'Copy the rule content and add it to your Claude configuration.',
       });
     },
@@ -468,11 +464,8 @@ const statuslineConfig: ContentTypeConfigRegistry['statuslines'] = {
         typeof item.configuration.scriptContent === 'string'
           ? item.configuration.scriptContent
           : '';
-      await copyToClipboard(scriptContent, {
-        component: 'statusline-config',
-        action: 'copy-script',
-      });
-      toast.success('Copied!', {
+      await navigator.clipboard.writeText(scriptContent);
+      toasts.raw.success('Copied!', {
         description: 'Statusline script has been copied to your clipboard.',
       });
     },

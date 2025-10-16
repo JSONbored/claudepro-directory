@@ -23,12 +23,12 @@
 'use client';
 
 import { useCallback, useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { subscribeToNewsletter } from '@/src/lib/actions/newsletter-signup';
 import type { EventName } from '@/src/lib/analytics/events.config';
 import { EVENTS } from '@/src/lib/analytics/events.config';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { logger } from '@/src/lib/logger';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 /**
  * Newsletter source types for analytics tracking
@@ -188,7 +188,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
       setError(errorMsg);
 
       if (showToasts) {
-        toast.error(errorMsg);
+        toasts.error.validation(errorMsg);
       }
 
       onError?.(errorMsg);
@@ -205,7 +205,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
       setError(errorMsg);
 
       if (showToasts) {
-        toast.error(errorMsg);
+        toasts.error.invalidInput('email');
       }
 
       onError?.(errorMsg);
@@ -230,7 +230,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
         // Handle success
         if (result?.data?.success) {
           if (showToasts) {
-            toast.success('Welcome!', {
+            toasts.raw.success('Welcome!', {
               description: successMessage,
             });
           }
@@ -258,7 +258,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
           setError(errorMessage);
 
           if (showToasts) {
-            toast.error(errorTitle, {
+            toasts.raw.error(errorTitle, {
               description: errorMessage,
             });
           }
@@ -280,7 +280,7 @@ export function useNewsletter(options: UseNewsletterOptions): UseNewsletterRetur
         setError(errorMessage);
 
         if (showToasts) {
-          toast.error(errorTitle, {
+          toasts.raw.error(errorTitle, {
             description: errorMessage,
           });
         }

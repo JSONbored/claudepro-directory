@@ -8,7 +8,6 @@
  */
 
 import { useId, useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -31,6 +30,7 @@ import { Textarea } from '@/src/components/ui/textarea';
 import { ROUTES } from '@/src/lib/constants';
 import type { CreateJobInput } from '@/src/lib/schemas/content/job.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface JobFormProps {
   initialData?: Partial<CreateJobInput>;
@@ -103,14 +103,14 @@ export function JobForm({ initialData, onSubmit, submitLabel = 'Create Job' }: J
         const result = await onSubmit(jobData);
 
         if (result?.success) {
-          toast.success(
+          toasts.success.actionCompleted(
             result.requiresPayment
               ? 'Job created! Contact us for payment.'
               : 'Job posted successfully!'
           );
         }
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Failed to save job');
+        toasts.error.fromError(error, 'Failed to save job');
       }
     });
   };

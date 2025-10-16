@@ -10,7 +10,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useId, useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import { Checkbox } from '@/src/components/ui/checkbox';
@@ -19,6 +18,7 @@ import { Label } from '@/src/components/ui/label';
 import { Textarea } from '@/src/components/ui/textarea';
 import { createCollection, updateCollection } from '@/src/lib/actions/content.actions';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface Bookmark {
   id: string;
@@ -76,12 +76,12 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
     e.preventDefault();
 
     if (!name.trim()) {
-      toast.error('Collection name is required');
+      toasts.error.validation('Collection name is required');
       return;
     }
 
     if (name.length < 2) {
-      toast.error('Collection name must be at least 2 characters');
+      toasts.error.validation('Collection name must be at least 2 characters');
       return;
     }
 
@@ -99,7 +99,7 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
             if (!result.data.collection) {
               throw new Error('Collection data not returned');
             }
-            toast.success('Collection created successfully!');
+            toasts.success.itemCreated('Collection');
             const collectionSlug = result.data.collection.slug;
             router.push(`/account/library/${collectionSlug}`);
             router.refresh();
@@ -117,13 +117,13 @@ export function CollectionForm({ bookmarks, mode, collection }: CollectionFormPr
             if (!result.data.collection) {
               throw new Error('Collection data not returned');
             }
-            toast.success('Collection updated successfully!');
+            toasts.success.itemUpdated('Collection');
             router.push(`/account/library/${result.data.collection.slug}`);
             router.refresh();
           }
         }
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Failed to save collection');
+        toasts.error.fromError(error, 'Failed to save collection');
       }
     });
   };

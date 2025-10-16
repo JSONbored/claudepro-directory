@@ -27,12 +27,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/src/components/ui/sheet';
-import { toast } from '@/src/components/ui/sonner';
 import { postCopyEmailCaptureAction } from '@/src/lib/actions/email-capture';
 import { EVENTS } from '@/src/lib/analytics/events.config';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import { logger } from '@/src/lib/logger';
 import { cn } from '@/src/lib/utils';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 /**
  * Copy type for tracking context
@@ -124,7 +124,7 @@ export function PostCopyEmailModal({
   const { execute, status } = useAction(postCopyEmailCaptureAction, {
     onSuccess: (result) => {
       if (result.data?.success) {
-        toast.success('Welcome to the newsletter! 🎉', {
+        toasts.raw.success('Welcome to the newsletter! 🎉', {
           description: 'Check your inbox for a welcome email',
           duration: 5000,
         });
@@ -161,7 +161,7 @@ export function PostCopyEmailModal({
         ...(slug && { slug }),
       });
 
-      toast.error('Failed to subscribe', {
+      toasts.raw.error('Failed to subscribe', {
         description: errorMessage,
         duration: 4000,
       });
@@ -175,7 +175,7 @@ export function PostCopyEmailModal({
     e.preventDefault();
 
     if (!email.trim()) {
-      toast.error('Email required', {
+      toasts.raw.error('Email required', {
         description: 'Please enter your email address',
         duration: 3000,
       });

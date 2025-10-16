@@ -11,14 +11,10 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { Button } from '@/src/components/ui/button';
 import { addBookmark, removeBookmark } from '@/src/lib/actions/user.actions';
-import {
-  showAuthRequiredToast,
-  showBookmarkError,
-  showBookmarkSuccess,
-} from '@/src/lib/client/browser-utils';
 import { Bookmark, BookmarkCheck } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 /**
  * Type guard to validate ContentCategory at runtime
@@ -79,7 +75,7 @@ export function BookmarkButton({
           contentSlug,
         }
       );
-      showBookmarkError(new Error(`Invalid content type: ${contentType}`));
+      toasts.error.fromError(new Error(`Invalid content type: ${contentType}`));
       return;
     }
 
@@ -94,7 +90,7 @@ export function BookmarkButton({
 
           if (result?.data?.success) {
             setIsBookmarked(false);
-            showBookmarkSuccess(false);
+            toasts.success.bookmarkRemoved();
           }
         } else {
           // Add bookmark - type is now validated by type guard
@@ -105,7 +101,7 @@ export function BookmarkButton({
 
           if (result?.data?.success) {
             setIsBookmarked(true);
-            showBookmarkSuccess(true);
+            toasts.success.bookmarkAdded();
           }
         }
 
@@ -114,9 +110,18 @@ export function BookmarkButton({
       } catch (error) {
         // Check if it's an auth error
         if (error instanceof Error && error.message.includes('signed in')) {
-          showAuthRequiredToast('Please sign in to bookmark content', window.location.pathname);
+          toasts.raw.error('Please sign in to bookmark content', {
+            action: {
+              label: 'Sign In',
+              onClick: () => {
+                window.location.href = `/login?redirect=${window.location.pathname}`;
+              },
+            },
+          });
         } else {
-          showBookmarkError(error instanceof Error ? error : undefined);
+          toasts.error.fromError(
+            error instanceof Error ? error : new Error('Failed to update bookmark')
+          );
         }
       }
     });
