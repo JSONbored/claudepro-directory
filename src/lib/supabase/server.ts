@@ -59,6 +59,15 @@ export async function createClient() {
       },
       setAll(cookiesToSet) {
         try {
+          // Log cookie setting attempts in production for debugging
+          if (process.env.NODE_ENV === 'production') {
+            logger.info('Setting auth cookies', {
+              context: 'supabase_server_client',
+              cookieCount: cookiesToSet.length,
+              cookieNames: cookiesToSet.map((c) => c.name).join(', '),
+            });
+          }
+
           for (const { name, value, options } of cookiesToSet) {
             // Ensure secure cookie attributes
             cookieStore.set(name, value, {
@@ -68,6 +77,14 @@ export async function createClient() {
               httpOnly: true,
               sameSite: 'lax',
               path: '/',
+            });
+          }
+
+          // Log success in production
+          if (process.env.NODE_ENV === 'production') {
+            logger.info('Auth cookies set successfully', {
+              context: 'supabase_server_client',
+              cookieCount: cookiesToSet.length,
             });
           }
         } catch (error) {
@@ -90,6 +107,7 @@ export async function createClient() {
             logger.error('Failed to set auth cookies in Route Handler', error, {
               context: 'supabase_server_client',
               cookieCount: cookiesToSet.length,
+              errorMessage: error.message,
             });
           }
         }

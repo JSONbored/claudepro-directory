@@ -120,6 +120,9 @@ const noseconeConfig = {
         'https://*.vercel-scripts.com', // Vercel analytics
         'https://vercel.live', // Vercel toolbar
         'https://api.github.com', // GitHub API
+        'https://*.supabase.co', // Supabase Auth API (OAuth callbacks)
+        'https://accounts.google.com', // Google OAuth (if enabled)
+        'https://github.com', // GitHub OAuth
         ...(env.VERCEL_ENV === 'preview'
           ? ([
               'ws://localhost:*',
@@ -398,6 +401,22 @@ export async function middleware(request: NextRequest) {
         },
       }
     );
+  }
+
+  // OAuth callback - apply minimal middleware (security headers only, no rate limiting)
+  // This prevents middleware from interfering with cookie setting during OAuth flow
+  if (pathname.startsWith('/auth/callback')) {
+    const noseconeResponse = await noseconeMiddleware();
+
+    if (isDevelopment) {
+      const duration = performance.now() - startTime;
+      logger.debug('Middleware execution (OAuth callback)', {
+        path: sanitizePathForLogging(pathname),
+        duration: `${duration.toFixed(2)}ms`,
+      });
+    }
+
+    return noseconeResponse;
   }
 
   // Skip Arcjet for Next.js RSC prefetch requests (legitimate browser behavior)
