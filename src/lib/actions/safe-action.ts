@@ -298,6 +298,14 @@ export const authedAction = rateLimitedAction.use(async ({ next, metadata }) => 
     error,
   } = await supabase.auth.getUser();
 
+  logger.info('authedAction getUser result', {
+    hasUser: !!user,
+    userId: user?.id ?? 'none',
+    hasError: !!error,
+    errorMessage: error?.message ?? 'none',
+    actionName: metadata?.actionName ?? 'unknown',
+  });
+
   if (error || !user) {
     // Extract client IP and path for security monitoring
     const headersList = await headers();

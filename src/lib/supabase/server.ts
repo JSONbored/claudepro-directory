@@ -55,7 +55,12 @@ export async function createClient() {
   return createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
-        return cookieStore.getAll();
+        const cookies = cookieStore.getAll();
+        logger.info('Supabase getting cookies', {
+          count: cookies.length,
+          names: cookies.map((c) => c.name).join(', '),
+        });
+        return cookies;
       },
       setAll(cookiesToSet) {
         try {
