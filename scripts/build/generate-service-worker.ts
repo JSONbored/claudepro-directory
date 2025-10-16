@@ -26,14 +26,14 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
-import { getAllCategoryIds } from '../src/lib/config/category-config.js';
-import { SECURITY_CONFIG } from '../src/lib/constants/security.js';
-import { logger } from '../src/lib/logger.js';
-import { ParseStrategy, safeParse } from '../src/lib/utils/data.utils.js';
+import { getAllCategoryIds } from '../../src/lib/config/category-config.js';
+import { SECURITY_CONFIG } from '../../src/lib/constants/security.js';
+import { logger } from '../../src/lib/logger.js';
+import { ParseStrategy, safeParse } from '../../src/lib/utils/data.utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = join(__filename, '..');
-const ROOT_DIR = join(__dirname, '..');
+const ROOT_DIR = join(__dirname, '../..');
 
 /**
  * Service Worker Template

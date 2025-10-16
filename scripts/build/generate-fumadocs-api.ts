@@ -22,7 +22,7 @@
  */
 
 import { generateFiles } from 'fumadocs-openapi';
-import { logger } from '../src/lib/logger.js';
+import { logger } from '../../src/lib/logger.js';
 
 /**
  * Generate API documentation from OpenAPI spec

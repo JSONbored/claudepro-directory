@@ -13,10 +13,10 @@ import { existsSync } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 import { z } from 'zod';
-import { logger } from '../src/lib/logger.js';
-import type { ContentCategory } from '../src/lib/schemas/shared.schema.js';
-import { type ContentItem, enhanceTitle } from '../src/lib/seo/title-enhancer.js';
-import { ParseStrategy, safeParse } from '../src/lib/utils/data.utils.js';
+import { logger } from '../../src/lib/logger.js';
+import type { ContentCategory } from '../../src/lib/schemas/shared.schema.js';
+import { type ContentItem, enhanceTitle } from '../../src/lib/seo/title-enhancer.js';
+import { ParseStrategy, safeParse } from '../../src/lib/utils/data.utils.js';
 
 const DRY_RUN = process.argv.includes('--dry-run');
 

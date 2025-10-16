@@ -15,8 +15,9 @@
  */
 
 import { existsSync } from 'fs';
-import { APP_CONFIG } from '../src/lib/constants';
-import { logger } from '../src/lib/logger.js';
+import { APP_CONFIG } from '../../src/lib/constants';
+
+import { logger } from '../../src/lib/logger.js';
 
 // IndexNow configuration
 const INDEXNOW_API_KEY = '863ad0a5c1124f59a060aa77f0861518';

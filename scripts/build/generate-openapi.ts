@@ -23,15 +23,15 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { logger } from '../src/lib/logger.js';
-import { generateOpenAPISpec, type OpenAPISpec } from '../src/lib/openapi/spec';
+import { logger } from '../../src/lib/logger.js';
+import { generateOpenAPISpec, type OpenAPISpec } from '../../src/lib/openapi/spec';
 
 // Get current directory in ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Paths
-const PUBLIC_DIR = resolve(__dirname, '../public');
+const PUBLIC_DIR = resolve(__dirname, '../../public');
 const OUTPUT_FILE = resolve(PUBLIC_DIR, 'openapi.json');
 
 /**

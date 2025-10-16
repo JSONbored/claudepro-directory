@@ -28,7 +28,10 @@
 import { writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { type CategoryId, UNIFIED_CATEGORY_REGISTRY } from '../src/lib/config/category-config.js';
+import {
+  type CategoryId,
+  UNIFIED_CATEGORY_REGISTRY,
+} from '../../src/lib/config/category-config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -1098,7 +1101,7 @@ function main() {
   console.log(`📦 Found ${categories.length} categories: ${categories.join(', ')}`);
 
   const content = generateUnifiedEventsFile();
-  const outputPath = resolve(__dirname, '../src/lib/analytics/events.constants.ts');
+  const outputPath = resolve(__dirname, '../../src/lib/analytics/events.constants.ts');
 
   writeFileSync(outputPath, content, 'utf-8');
 

@@ -4,10 +4,10 @@ import fs from 'fs';
 import { z } from 'zod';
 import { logger } from '@/src/lib/logger';
 import { ParseStrategy, safeParse } from '@/src/lib/utils/data.utils';
-import { getAllCategoryIds, UNIFIED_CATEGORY_REGISTRY } from '../src/lib/config/category-config';
-import type { contentItemSchema } from '../src/lib/schemas/content/content-item-union.schema';
-import type { ContentCategory } from '../src/lib/schemas/shared.schema';
-import { validateContentByCategory } from '../src/lib/validation/content-validator';
+import { getAllCategoryIds, UNIFIED_CATEGORY_REGISTRY } from '../../src/lib/config/category-config';
+import type { contentItemSchema } from '../../src/lib/schemas/content/content-item-union.schema';
+import type { ContentCategory } from '../../src/lib/schemas/shared.schema';
+import { validateContentByCategory } from '../../src/lib/validation/content-validator';
 
 /**
  * Validate Category Registry Completeness

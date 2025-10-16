@@ -25,19 +25,19 @@ import {
   loadBuildCache,
   saveBuildCache,
   writeBuildOutput,
-} from '../src/lib/build/category-processor.server.js';
-import { onBuildComplete } from '../src/lib/cache.server.js';
+} from '../../src/lib/build/category-processor.server.js';
+import { onBuildComplete } from '../../src/lib/cache.server.js';
 import {
   BUILD_CATEGORY_CONFIGS,
   type BuildCategoryId,
   getAllBuildCategoryConfigs,
-} from '../src/lib/config/category-config.js';
-import { logger } from '../src/lib/logger.js';
-import type { ContentStats } from '../src/lib/schemas/content/content-types.js';
+} from '../../src/lib/config/category-config.js';
+import { logger } from '../../src/lib/logger.js';
+import type { ContentStats } from '../../src/lib/schemas/content/content-types.js';
 
 // Paths
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
-const ROOT_DIR = join(__dirname, '..');
+const ROOT_DIR = join(__dirname, '../..');
 const CONTENT_DIR = join(ROOT_DIR, 'content');
 const GENERATED_DIR = join(ROOT_DIR, 'generated');
 const CACHE_DIR = join(ROOT_DIR, '.next', 'cache', 'build-content');
@@ -170,7 +170,7 @@ function generateIndexFile(contentStats: ContentStats): string {
  */
 
 import { metadataLoader } from '@/src/lib/content/lazy-content-loaders';
-import type { ContentStats } from '../src/lib/schemas/content/content-types';
+import type { ContentStats } from '@/src/lib/schemas/content/content-types';
 
 // Lazy metadata getters
 ${categories

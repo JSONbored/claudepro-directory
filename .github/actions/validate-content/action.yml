@@ -49,7 +49,7 @@ runs:
               # Validate specific files
               for file in $FILES; do
                 echo "Validating $file..."
-                if ! npx tsx scripts/validate-content.ts "$file"; then
+                if ! npx tsx scripts/validation/validate-content.ts "$file"; then
                   FAILED="true"
                 fi
               done
@@ -110,12 +110,12 @@ runs:
               FAILED="true"
             else
               # Source quality gates script
-              if [ -f "scripts/check-quality-gates.sh" ]; then
-                if ! bash scripts/check-quality-gates.sh metadata-report.txt; then
+              if [ -f "scripts/github-actions/check-quality-gates.sh" ]; then
+                if ! bash scripts/github-actions/check-quality-gates.sh metadata-report.txt; then
                   FAILED="true"
                 fi
               else
-                echo "⚠️  Warning: scripts/check-quality-gates.sh not found, skipping quality gates"
+                echo "⚠️  Warning: scripts/github-actions/check-quality-gates.sh not found, skipping quality gates"
               fi
             fi
             ;;

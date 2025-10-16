@@ -42,9 +42,10 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
-import { getAllBuildCategoryConfigs } from '../src/lib/config/category-config.js';
-import { APP_CONFIG, MAIN_CONTENT_CATEGORIES } from '../src/lib/constants';
-import { logger } from '../src/lib/logger.js';
+import { getAllBuildCategoryConfigs } from '../../src/lib/config/category-config.js';
+import { APP_CONFIG, MAIN_CONTENT_CATEGORIES } from '../../src/lib/constants';
+
+import { logger } from '../../src/lib/logger.js';
 import {
   type AllConfigurationsResponse,
   allConfigurationsResponseSchema,
@@ -65,9 +66,9 @@ import {
   staticAPISearchableItemSchema,
   type TransformedContentItem,
   transformedContentItemSchema,
-} from '../src/lib/schemas/api/static-api-response.schema.js';
-import { buildConfig, env } from '../src/lib/schemas/env.schema';
-import { type ContentCategory, contentCategorySchema } from '../src/lib/schemas/shared.schema';
+} from '../../src/lib/schemas/api/static-api-response.schema.js';
+import { buildConfig, env } from '../../src/lib/schemas/env.schema';
+import { type ContentCategory, contentCategorySchema } from '../../src/lib/schemas/shared.schema';
 
 /**
  * Output directory for static APIs

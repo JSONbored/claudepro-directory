@@ -17,7 +17,7 @@
 
 import fs from 'fs/promises';
 import path from 'path';
-import { logger } from '../src/lib/logger.js';
+import { logger } from '../../src/lib/logger.js';
 
 const DEV_SERVER_URL = process.env.DEV_SERVER_URL || 'http://localhost:3000';
 const TIMEOUT_MS = 10000;
