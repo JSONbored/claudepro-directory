@@ -11,7 +11,7 @@ import { unstable_cache } from 'next/cache';
 import { z } from 'zod';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
-import { statsRedis } from '@/src/lib/cache';
+import { statsRedis } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
 import {
   calculateUserAffinities,

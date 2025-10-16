@@ -10,8 +10,7 @@ import fs from 'fs/promises';
 import type { NextRequest } from 'next/server';
 import path from 'path';
 import { z } from 'zod';
-import { contentCache } from '@/src/lib/cache';
-import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
+import { contentCache } from '@/src/lib/cache.server';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { apiResponse, handleApiError } from '@/src/lib/error-handler';
@@ -25,9 +24,10 @@ import { errorInputSchema } from '@/src/lib/schemas/error.schema';
 export const runtime = 'nodejs';
 
 /**
- * ISR revalidation - AI training data (centralized config)
+ * ISR revalidation
+ * Guide documentation updates occasionally - revalidate every 30 minutes
  */
-export const revalidate = REVALIDATION_TIMES.LLMS_TXT;
+export const revalidate = 1800;
 
 export const dynamicParams = true;
 

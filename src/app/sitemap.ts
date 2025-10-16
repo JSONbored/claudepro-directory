@@ -25,8 +25,7 @@ import { mcpMetadata } from '@/generated/mcp-metadata';
 import { rulesMetadata } from '@/generated/rules-metadata';
 import { skillsMetadata } from '@/generated/skills-metadata';
 import { statuslinesMetadata } from '@/generated/statuslines-metadata';
-import { generateAllSiteUrls } from '@/src/lib/build/url-generator';
-import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
+import { generateAllSiteUrls } from '@/src/lib/build/url-generator.server';
 import { APP_CONFIG } from '@/src/lib/constants';
 
 /**
@@ -75,4 +74,4 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 /**
  * ISR Revalidation - Sitemap for SEO (centralized config)
  */
-export const revalidate = REVALIDATION_TIMES.SEO_FEEDS;
+export const revalidate = 21600;

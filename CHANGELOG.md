@@ -1,4 +1,170 @@
 # Changelog
+## 2025-10-16 - Dynamic Category System Architecture
+
+**TL;DR:** Eliminated all hardcoded category references throughout the codebase. Homepage, stats display, data loading, and type systems now derive dynamically from `UNIFIED_CATEGORY_REGISTRY`. Adding new categories (like Skills) requires zero manual updates across the application - everything auto-updates from a single configuration source.
+
+### What Changed
+
+Refactored the entire homepage and content loading architecture from hardcoded category lists to configuration-driven dynamic generation. This architectural improvement means Skills (and any future categories) automatically appear in all homepage sections (Featured, Stats, All/Infinity Scroll) without manual intervention.
+
+### Changed
+
+- **Homepage Data Loading** (`src/app/page.tsx`)
+  - **Before:** 7+ hardcoded category variables (`rulesData`, `mcpData`, `agentsData`, etc.) with manual destructuring
+  - **After:** Dynamic `Record<CategoryId, Metadata[]>` generated from `getAllCategoryIds()`
+  - **Impact:** Skills automatically included in data fetching, enrichment, and transformation pipelines
+  - Reduced LOC: ~100 lines of hardcoded patterns eliminated
+  - Added comprehensive inline documentation explaining Modern 2025 Architecture patterns
+
+- **Homepage Stats Display** (`src/components/features/home/index.tsx`)
+  - **Before:** 7 hardcoded stat counters with manual icon mapping
+  - **After:** Dynamic `map()` over `getCategoryStatsConfig()` from registry
+  - **Impact:** Skills stat counter appears automatically with correct icon and animation timing
+  - Zero manual updates required when adding categories
+  - Maintains staggered animation timing (100ms delays auto-calculated)
+
+- **Lazy Content Loaders** (`src/components/shared/lazy-content-loaders.tsx`)
+  - **Before:** Hardcoded loader object with 7 explicit category entries
+  - **After:** Dynamic `buildLazyContentLoaders()` factory function generating loaders from registry
+  - **Impact:** Skills loader automatically created and tree-shakeable
+  - Future categories require zero changes to this file
+
+- **Content Utilities** (`src/lib/utils/content.utils.ts`)
+  - **Before:** `transformForHomePage()` with hardcoded 8-property object type
+  - **After:** Generic `Record<string, ContentItem[]>` with dynamic transformation
+  - **Impact:** Handles any number of categories without type changes
+  - Simplified from 25 lines of hardcoded transforms to 10 lines of dynamic logic
+
+- **TypeScript Schema** (`src/lib/schemas/components/page-props.schema.ts`)
+  - **Before:** Hardcoded `stats` object with 7 category properties
+  - **After:** `z.record(z.string(), z.number())` for dynamic categories
+  - **Impact:** Skills (and future categories) automatically type-safe
+  - Eliminated TypeScript compiler errors when adding categories
+
+### Added
+
+- **Category Stats Configuration** (`src/lib/config/category-config.ts`)
+  - New `CategoryStatsConfig` interface for homepage stats display
+  - `getCategoryStatsConfig()` function dynamically generates stats config from registry
+  - Auto-derives icons, display text, and animation delays from `UNIFIED_CATEGORY_REGISTRY`
+  - Comprehensive JSDoc documentation on configuration-driven architecture
+
+- **Type System Improvements**
+  - Generic `CategoryMetadata` and `EnrichedMetadata` types replace manual unions
+  - All types now derive from registry instead of hardcoded lists
+  - Future-proof: Works with any category in `UNIFIED_CATEGORY_REGISTRY`
+
+### Technical Details
+
+**Architecture Transformation:**
+
+```typescript
+// OLD PATTERN (Hardcoded - Required manual updates)
+let rulesData = [], mcpData = [], agentsData = [];
+[rulesData, mcpData, agentsData, ...] = await batchFetch([
+  lazyContentLoaders.rules(),
+  lazyContentLoaders.mcp(),
+  // Missing skills - forgot to add!
+]);
+
+// NEW PATTERN (Configuration-Driven - Zero manual updates)
+const categoryIds = getAllCategoryIds(); // From registry
+const loaders = categoryIds.map(id => lazyContentLoaders[id]());
+const results = await batchFetch(loaders);
+// Skills automatically included!
+```
+
+**Files Modified (7 total):**
+1. `src/app/page.tsx` - Dynamic data loading and enrichment
+2. `src/components/features/home/index.tsx` - Dynamic stats display
+3. `src/components/shared/lazy-content-loaders.tsx` - Dynamic loader generation
+4. `src/lib/utils/content.utils.ts` - Generic transformation
+5. `src/lib/schemas/components/page-props.schema.ts` - Dynamic type schemas
+6. `src/lib/config/category-config.ts` - Stats config helper function
+7. `CHANGELOG.md` - This entry
+
+**Key Architectural Benefits:**
+- **Zero Manual Updates:** Adding category to `UNIFIED_CATEGORY_REGISTRY` → Everything auto-updates
+- **Type-Safe:** Full TypeScript inference with generic types
+- **DRY Principle:** Single source of truth (registry) drives everything
+- **Performance:** Maintains tree-shaking and code-splitting
+- **Maintainability:** ~150 lines of hardcoded patterns eliminated
+- **Documentation:** Comprehensive inline comments explaining architecture
+
+**Verification:**
+- ✅ TypeScript: No errors (`npm run type-check`)
+- ✅ Build: Production build successful with proper bundle sizes
+- ✅ Skills: Automatically appears in Featured, Stats (with icon), All section
+- ✅ Future: Any new category in registry will auto-appear across all sections
+
+This completes the consolidation initiative started with `UNIFIED_CATEGORY_REGISTRY`. The platform now has zero hardcoded category references - true configuration-driven architecture.
+
+## 2025-10-14 - Skills Category Integration
+
+**TL;DR:** Added new Skills category for task-focused capability guides covering document/data workflows (PDF, DOCX, PPTX, XLSX). Full platform integration with unified routing, SEO optimization, structured data, and build pipeline support.
+
+### What Changed
+
+Introduced Skills as a first-class content category within the platform's unified architecture. Skills provide step-by-step capability guides for specific tasks (e.g., PDF generation, Excel processing, document conversion) with sections for requirements, installation, examples, and troubleshooting.
+
+### Added
+
+- **Schema & Type System**
+  - Created `skill.schema.ts` with Zod validation for skill-specific fields (requirements, prerequisites, examples, installation steps, troubleshooting)
+  - Integrated Skills into `ContentType` unions across schemas and components
+  - Added Skills to content loaders and batch utilities for tree-shakeable imports
+
+- **Routing & UI**
+  - Skills now use unified `[category]` dynamic routes (`/skills` and `/skills/[slug]`)
+  - Created configuration for skill detail sections (Guide, Installation, Examples, Troubleshooting)
+  - Added Skills navigation link with "New" badge in header and mobile navigation
+  - Enhanced `ConfigCard` to display skill-specific metadata (difficulty, prerequisites count)
+
+- **Build Pipeline**
+  - Integrated Skills into `BUILD_CATEGORY_CONFIGS` for automated build processing
+  - Added Skills to static API generation (`/api/skills.json`)
+  - Skills included in sitemap generation and URL builder
+  - Search index automatically includes Skills content
+
+- **SEO & Structured Data**
+  - Added Skills metadata patterns to centralized registry
+  - Configured JSON-LD structured data (HowTo schema for guides, CreativeWork for examples)
+  - LLMs.txt generation for `/skills/llms.txt` and `/skills/[slug]/llms.txt` routes
+  - Optimized metadata with category-specific title/description derivation
+
+- **Validation & CI**
+  - Extended content validators to recognize `skills` category
+  - Updated security validators and regex patterns across authentication and rate limiting
+  - Added Skills to GitHub Actions content-validation workflow
+  - LLMs.txt E2E tests now verify Skills routes
+
+- **Community Features**
+  - Created announcement promoting Skills category launch
+  - Users can submit Skills through the web interface
+  - Skills tracked in submission analytics and community leaderboards
+
+### Changed
+
+- **Navigation Badges**
+  - Moved "New" indicator from Statuslines and Collections to Skills
+  - Updated navigation configuration to highlight Skills as latest category
+
+- **Analytics Mapping**
+  - Skills analytics reuse existing category buckets for efficient tracking
+  - No new analytics infrastructure required (consolidation principle)
+
+### Technical Details
+
+All changes follow configuration-driven architecture with zero duplication. Skills benefit from existing platform capabilities (trending, caching, related content, offline support) with no custom logic required. Implementation touched 23 files across routing, schemas, build, SEO, validation, and UI - all following DRY principles and reusing established patterns.
+
+**Key architectural benefits:**
+- Zero custom routing logic (uses unified `[category]` routes)
+- Automatic platform feature support (trending, search, caching, analytics)
+- Type-safe throughout with Zod validation
+- Tree-shakeable imports minimize bundle size
+- Configuration changes only - no new infrastructure
+
+
 All notable changes to Claude Pro Directory will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
@@ -7,7 +173,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 **Latest Features:**
 
-- [Skills Category Integration](#2025-10-14---skills-category-integration-pdfdocxpptxxlsx) - New task-focused capability guides category with full platform integration and structured data support
+- [Skills Category Integration](#2025-10-14---skills-category-integration) - Task-focused capability guides for document/data workflows with full platform integration
 - [Collections Category Consolidation](#2025-10-13---collections-category-system-consolidation) - Unified dynamic routing for Collections with full platform integration and enhanced type safety
 - [Theme Toggle Animation & Navigation Polish](#2025-10-11---theme-toggle-animation-and-navigation-polish) - Smooth Circle Blur animation for theme switching, rounded navigation containers, enhanced mega-menu design
 - [Navigation & Announcement System](#2025-10-10---navigation-overhaul-and-announcement-system) - Configuration-driven navigation, ⌘K command palette, site-wide announcements, new indicators, enhanced accessibility

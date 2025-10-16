@@ -126,7 +126,11 @@ export type AIOptimization = z.infer<typeof aiOptimizationSchema>;
  * - Dash separator (9% higher CTR than pipe on Google)
  * - Support for static strings or dynamic functions
  */
-export type TitleConfig = string | ((context?: MetadataContext) => string | Promise<string>);
+/**
+ * **PERFORMANCE**: Synchronous only - no Promise overhead
+ * Next.js 15 can optimize synchronous metadata at build time
+ */
+export type TitleConfig = string | ((context?: MetadataContext) => string);
 
 /**
  * Structured Data Configuration Schema
@@ -206,15 +210,19 @@ export interface RouteMetadata {
    * Meta description (120-160 chars for AI optimization)
    * AI-optimized length based on October 2025 research
    * Can be static string or function for dynamic resolution
+   *
+   * **PERFORMANCE**: Synchronous only - no Promise overhead
    */
-  description: string | ((context?: MetadataContext) => string | Promise<string>);
+  description: string | ((context?: MetadataContext) => string);
 
   /**
    * Keywords array (max 10 for SEO best practice)
    * Optional - only used for specific content types
    * Can be static array or function for dynamic resolution
+   *
+   * **PERFORMANCE**: Synchronous only - no Promise overhead
    */
-  keywords?: string[] | ((context?: MetadataContext) => string[] | Promise<string[]>);
+  keywords?: string[] | ((context?: MetadataContext) => string[]);
 
   /**
    * OpenGraph configuration (REQUIRED for all routes)
@@ -547,11 +555,13 @@ export const METADATA_REGISTRY = {
    */
   '/tools/config-recommender': {
     title: buildPageTitle('Claude Config Recommender Tool'),
-    description: async () => {
-      const { getTotalContentCount } = await import('@/src/lib/content/content-loaders');
-      const count = await getTotalContentCount();
-      return `Find your perfect Claude configuration in 2 minutes. Answer 7 questions and get personalized recommendations from ${count}+ configs. Instant, AI-powered matching for your exact needs.`;
-    },
+    /**
+     * **PERFORMANCE**: Static description for build-time optimization
+     * Using 150+ as the count (stable baseline) instead of dynamic loading
+     * This eliminates async overhead and enables Next.js static analysis
+     */
+    description:
+      'Find your perfect Claude configuration in 2 minutes. Answer 7 questions and get personalized recommendations from 150+ configs. Instant, AI-powered matching for your exact needs.',
     keywords: [
       'claude config recommender',
       'claude configuration quiz',

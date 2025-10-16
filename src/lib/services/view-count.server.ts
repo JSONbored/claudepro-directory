@@ -5,7 +5,7 @@
  */
 
 import { z } from 'zod';
-import { statsRedis } from '@/src/lib/cache';
+import { statsRedis } from '@/src/lib/cache.server';
 import { logger } from '@/src/lib/logger';
 
 // Zod schemas for type safety

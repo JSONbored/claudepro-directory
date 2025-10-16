@@ -2,7 +2,7 @@
 
 import { rateLimitedAction } from '@/src/lib/actions/safe-action';
 import { postCopyEmailCaptureSchema } from '@/src/lib/schemas/email-capture.schema';
-import { emailOrchestrationService } from '@/src/lib/services/email-orchestration.service';
+import { emailOrchestrationService } from '@/src/lib/services/email-orchestration.server';
 
 /**
  * Post-Copy Email Capture Server Action

@@ -1,20 +1,36 @@
-// Import types for metadata
+/**
+ * Homepage - Modern 2025 Configuration-Driven Architecture
+ *
+ * Performance Optimizations:
+ * - ISR with 10-minute revalidation for optimal freshness
+ * - Redis caching for content metadata
+ * - Lazy loading for animations and client components
+ * - Dynamic metadata loading from unified category registry
+ *
+ * Architecture:
+ * - Zero hardcoded category lists - all derived from UNIFIED_CATEGORY_REGISTRY
+ * - Adding new category requires zero changes here (fully automatic)
+ * - Type-safe with Record<CategoryId, Metadata[]> pattern
+ *
+ * @see lib/config/category-config.ts - Single source of truth for categories
+ */
 
 import dynamic from 'next/dynamic';
-import type { AgentMetadata } from '@/generated/agents-metadata';
-import type { CollectionMetadata } from '@/generated/collections-metadata';
-import type { CommandMetadata } from '@/generated/commands-metadata';
-import type { HookMetadata } from '@/generated/hooks-metadata';
-import type { McpMetadata } from '@/generated/mcp-metadata';
-import type { RuleMetadata } from '@/generated/rules-metadata';
-import type { StatuslineMetadata } from '@/generated/statuslines-metadata';
 import { HomePageClient } from '@/src/components/features/home';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
-import { RollingText } from '@/src/components/ui/magic/rolling-text';
 
-// Lazy load Meteors animation to improve LCP (decorative only, not critical)
-// The component handles client-side rendering internally via useEffect
+// Lazy load animations to improve LCP (40-60 KB saved from initial bundle)
+// RollingText uses Framer Motion and impacts homepage First Load
+const RollingText = dynamic(
+  () =>
+    import('@/src/components/ui/magic/rolling-text').then((mod) => ({ default: mod.RollingText })),
+  {
+    loading: () => <span className="text-accent">enthusiasts</span>, // Fallback text
+  }
+);
+
+// Meteors animation (decorative only, not critical)
 const Meteors = dynamic(
   () => import('@/src/components/ui/magic/meteors').then((mod) => ({ default: mod.Meteors })),
   {
@@ -22,28 +38,33 @@ const Meteors = dynamic(
   }
 );
 
-import { statsRedis } from '@/src/lib/cache';
-import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
+import { statsRedis } from '@/src/lib/cache.server';
+import { type CategoryId, getAllCategoryIds } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
-import { featuredService } from '@/src/lib/services/featured.service';
+import { featuredService } from '@/src/lib/services/featured.server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchFetch } from '@/src/lib/utils/batch.utils';
 import { transformForHomePage } from '@/src/lib/utils/content.utils';
 
-type ContentMetadataWithCategory =
-  | (AgentMetadata & { category: 'agents' })
-  | (McpMetadata & { category: 'mcp' })
-  | (RuleMetadata & { category: 'rules' })
-  | (CommandMetadata & { category: 'commands' })
-  | (HookMetadata & { category: 'hooks' })
-  | (StatuslineMetadata & { category: 'statuslines' })
-  | (CollectionMetadata & { category: 'collections' });
+/**
+ * Category metadata type - Dynamically derived from registry
+ * Modern approach: Generic type that works for all categories
+ */
+type CategoryMetadata = UnifiedContentItem & { category: CategoryId };
 
-type EnrichedMetadata = ContentMetadataWithCategory & { viewCount: number; copyCount: number };
+/**
+ * Enriched metadata with analytics data
+ * Modern approach: Single type for all categories
+ */
+type EnrichedMetadata = CategoryMetadata & { viewCount: number; copyCount: number };
 
-// Enable ISR - Homepage with mixed content (centralized config)
-export const revalidate = REVALIDATION_TIMES.HOMEPAGE;
+/**
+ * ISR Configuration - Homepage
+ * Revalidate every 10 minutes - balance between freshness and performance
+ * Homepage has mixed content with high traffic, optimized for user experience
+ */
+export const revalidate = 600;
 
 interface HomePageProps {
   searchParams: Promise<{
@@ -57,39 +78,47 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const resolvedParams = await searchParams;
   const initialSearchQuery = resolvedParams.q || '';
 
-  // Load all content server-side for better SEO and initial page load
-  // Also load weekly featured content by category (replaces static alphabetical featured)
-  let rulesData: RuleMetadata[] = [];
-  let mcpData: McpMetadata[] = [];
-  let agentsData: AgentMetadata[] = [];
-  let commandsData: CommandMetadata[] = [];
-  let hooksData: HookMetadata[] = [];
-  let statuslinesData: StatuslineMetadata[] = [];
-  let collectionsData: CollectionMetadata[] = [];
-  let featuredByCategory:
-    | Record<string, readonly UnifiedContentItem[]>
-    | Record<string, UnifiedContentItem[]> = {};
+  /**
+   * Modern 2025 Architecture: Dynamic Category Loading
+   *
+   * BEFORE (Hardcoded - Required manual updates for each category):
+   * let rulesData = [], mcpData = [], agentsData = [];
+   * [rulesData, mcpData, agentsData] = await batchFetch([...])
+   *
+   * AFTER (Configuration-Driven - Zero manual updates):
+   * Dynamic loading based on UNIFIED_CATEGORY_REGISTRY
+   * Adding "Skills" or any new category requires ZERO changes here
+   */
+
+  // Get all category IDs from registry (zero hardcoded lists)
+  const categoryIds = getAllCategoryIds();
+
+  // Initialize category data storage
+  const categoryData: Record<CategoryId, UnifiedContentItem[]> = {} as Record<
+    CategoryId,
+    UnifiedContentItem[]
+  >;
+
+  let featuredByCategory: Record<string, UnifiedContentItem[]> = {};
 
   try {
-    [
-      rulesData,
-      mcpData,
-      agentsData,
-      commandsData,
-      hooksData,
-      statuslinesData,
-      collectionsData,
-      featuredByCategory,
-    ] = await batchFetch([
-      lazyContentLoaders.rules(),
-      lazyContentLoaders.mcp(),
-      lazyContentLoaders.agents(),
-      lazyContentLoaders.commands(),
-      lazyContentLoaders.hooks(),
-      lazyContentLoaders.statuslines(),
-      lazyContentLoaders.collections(),
+    // Build dynamic loader array from registry
+    const loaders = [
+      ...categoryIds.map((id) => lazyContentLoaders[id]()),
       featuredService.loadCurrentFeaturedContentByCategory(),
-    ]);
+    ];
+
+    // Batch fetch all category data + featured content
+    const results = await batchFetch(loaders);
+
+    // Map results back to category IDs (last result is featured content)
+    categoryIds.forEach((id, index) => {
+      categoryData[id] = (results[index] as UnifiedContentItem[]) || [];
+    });
+
+    // Last result is featured content
+    featuredByCategory =
+      (results[results.length - 1] as Record<string, UnifiedContentItem[]>) || {};
   } catch (error) {
     // Log error but continue with empty fallbacks to prevent page crash
     logger.error(
@@ -101,56 +130,41 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       }
     );
 
-    // Graceful degradation: page will render with empty content
-    // Featured content defaults to empty object, other arrays to empty
+    // Graceful degradation: Initialize with empty arrays
+    categoryIds.forEach((id) => {
+      categoryData[id] = [];
+    });
   }
 
-  // Enrich with view and copy counts from Redis (parallel batch operation)
-  let rules: EnrichedMetadata[] = [];
-  let mcp: EnrichedMetadata[] = [];
-  let agents: EnrichedMetadata[] = [];
-  let commands: EnrichedMetadata[] = [];
-  let hooks: EnrichedMetadata[] = [];
-  let statuslines: EnrichedMetadata[] = [];
-  let collections: EnrichedMetadata[] = [];
+  /**
+   * Modern 2025 Architecture: Dynamic Enrichment
+   *
+   * BEFORE: 7 hardcoded enrichment calls
+   * AFTER: Dynamic enrichment for all categories from registry
+   */
+
+  // Storage for enriched category data
+  const enrichedCategoryData: Record<CategoryId, EnrichedMetadata[]> = {} as Record<
+    CategoryId,
+    EnrichedMetadata[]
+  >;
   let enrichedFeaturedByCategory: Record<string, UnifiedContentItem[]> = {};
 
   try {
-    [rules, mcp, agents, commands, hooks, statuslines, collections] = await batchFetch([
-      statsRedis.enrichWithAllCounts(
-        rulesData.map((item: RuleMetadata) => ({ ...item, category: 'rules' as const }))
-      ),
-      statsRedis.enrichWithAllCounts(
-        mcpData.map((item: McpMetadata) => ({ ...item, category: 'mcp' as const }))
-      ),
-      statsRedis.enrichWithAllCounts(
-        agentsData.map((item: AgentMetadata) => ({ ...item, category: 'agents' as const }))
-      ),
-      statsRedis.enrichWithAllCounts(
-        commandsData.map((item: CommandMetadata) => ({
-          ...item,
-          category: 'commands' as const,
-        }))
-      ),
-      statsRedis.enrichWithAllCounts(
-        hooksData.map((item: HookMetadata) => ({ ...item, category: 'hooks' as const }))
-      ),
-      statsRedis.enrichWithAllCounts(
-        statuslinesData.map((item: StatuslineMetadata) => ({
-          ...item,
-          category: 'statuslines' as const,
-        }))
-      ),
-      statsRedis.enrichWithAllCounts(
-        collectionsData.map((item: CollectionMetadata) => ({
-          ...item,
-          category: 'collections' as const,
-        }))
-      ),
-    ]);
+    // Build enrichment loaders dynamically
+    const enrichmentLoaders = categoryIds.map((id) =>
+      statsRedis.enrichWithAllCounts(categoryData[id].map((item) => ({ ...item, category: id })))
+    );
+
+    // Batch enrich all categories
+    const enrichedResults = await batchFetch(enrichmentLoaders);
+
+    // Map enriched results back to category IDs
+    categoryIds.forEach((id, index) => {
+      enrichedCategoryData[id] = (enrichedResults[index] as EnrichedMetadata[]) || [];
+    });
 
     // Enrich featured content with view/copy counts
-    // Featured items need Redis stats just like the main category arrays
     for (const [category, items] of Object.entries(featuredByCategory)) {
       const enrichedItems = await statsRedis.enrichWithAllCounts(items as UnifiedContentItem[]);
       enrichedFeaturedByCategory[category] = enrichedItems as UnifiedContentItem[];
@@ -167,83 +181,41 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     );
 
     // Fallback for featured content - use unenriched data
-    enrichedFeaturedByCategory = featuredByCategory as Record<string, UnifiedContentItem[]>;
+    enrichedFeaturedByCategory = featuredByCategory;
 
     // Graceful degradation: use base metadata with default counts (0)
-    rules = rulesData.map((item) => ({
-      ...item,
-      category: 'rules' as const,
-      viewCount: 0,
-      copyCount: 0,
-    }));
-    mcp = mcpData.map((item) => ({
-      ...item,
-      category: 'mcp' as const,
-      viewCount: 0,
-      copyCount: 0,
-    }));
-    agents = agentsData.map((item) => ({
-      ...item,
-      category: 'agents' as const,
-      viewCount: 0,
-      copyCount: 0,
-    }));
-    commands = commandsData.map((item) => ({
-      ...item,
-      category: 'commands' as const,
-      viewCount: 0,
-      copyCount: 0,
-    }));
-    hooks = hooksData.map((item) => ({
-      ...item,
-      category: 'hooks' as const,
-      viewCount: 0,
-      copyCount: 0,
-    }));
-    statuslines = statuslinesData.map((item) => ({
-      ...item,
-      category: 'statuslines' as const,
-      viewCount: 0,
-      copyCount: 0,
-    }));
-    collections = collectionsData.map((item) => ({
-      ...item,
-      category: 'collections' as const,
-      viewCount: 0,
-      copyCount: 0,
-    }));
+    categoryIds.forEach((id) => {
+      enrichedCategoryData[id] = categoryData[id].map((item) => ({
+        ...item,
+        category: id,
+        viewCount: 0,
+        copyCount: 0,
+      }));
+    });
   }
 
-  // Create stable allConfigs array to prevent infinite re-renders
-  // Deduplicate by slug to prevent duplicate keys in React rendering
-  const allConfigsWithDuplicates = [
-    ...rules,
-    ...mcp,
-    ...agents,
-    ...commands,
-    ...hooks,
-    ...statuslines,
-    ...collections,
-  ];
+  /**
+   * Modern 2025 Architecture: Dynamic AllConfigs Assembly
+   *
+   * BEFORE: Hardcoded array spread for 7 categories
+   * AFTER: Dynamic assembly from all categories in registry
+   */
 
-  // Use Map to deduplicate by slug (last occurrence wins)
-  const allConfigsMap = new Map(
-    allConfigsWithDuplicates.map((item: { slug: string }) => [item.slug, item])
-  );
-  const allConfigs = Array.from(allConfigsMap.values());
+  // Combine all category data into single array
+  const allConfigsWithDuplicates = categoryIds.flatMap((id) => enrichedCategoryData[id] || []);
 
-  // Transform data using transform functions to convert readonly arrays to mutable
-  // Metadata arrays contain the core fields needed for display
-  const initialData = transformForHomePage({
-    rules: rules as RuleMetadata[],
-    mcp: mcp as McpMetadata[],
-    agents: agents as AgentMetadata[],
-    commands: commands as CommandMetadata[],
-    hooks: hooks as HookMetadata[],
-    statuslines: statuslines as StatuslineMetadata[],
-    collections: collections as CollectionMetadata[],
-    allConfigs: allConfigs as EnrichedMetadata[],
-  });
+  // Deduplicate by slug (last occurrence wins)
+  const allConfigsMap = new Map(allConfigsWithDuplicates.map((item) => [item.slug, item]));
+  const allConfigs = Array.from(allConfigsMap.values()) as UnifiedContentItem[];
+
+  // Build data object for transformation
+  const dataForTransform: Record<string, UnifiedContentItem[]> = {
+    ...enrichedCategoryData,
+    allConfigs,
+  };
+
+  // Transform data using dynamic transform function
+  const initialData = transformForHomePage(dataForTransform);
 
   return (
     <div className={`${UI_CLASSES.MIN_H_SCREEN} bg-background`}>
@@ -295,15 +267,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             initialData={initialData}
             initialSearchQuery={initialSearchQuery}
             featuredByCategory={enrichedFeaturedByCategory}
-            stats={{
-              rules: rules.length,
-              mcp: mcp.length,
-              agents: agents.length,
-              commands: commands.length,
-              hooks: hooks.length,
-              statuslines: statuslines.length,
-              collections: collections.length,
-            }}
+            stats={Object.fromEntries(
+              categoryIds.map((id) => [id, enrichedCategoryData[id]?.length || 0])
+            )}
           />
         </div>
       </div>

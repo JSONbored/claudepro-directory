@@ -8,9 +8,9 @@ import {
   skills,
   statuslines,
 } from '@/generated/content';
-import { contentCache } from '@/src/lib/cache';
+import { contentCache } from '@/src/lib/cache.server';
 import { createApiRoute } from '@/src/lib/error-handler';
-import { rateLimiters } from '@/src/lib/rate-limiter';
+import { rateLimiters } from '@/src/lib/rate-limiter.server';
 import { apiSchemas } from '@/src/lib/security/validators';
 
 export const runtime = 'nodejs';

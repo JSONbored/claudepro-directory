@@ -10,8 +10,7 @@ import type { Metadata } from 'next';
 import path from 'path';
 import { ContentListServer } from '@/src/components/content-list-server';
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
-import { statsRedis } from '@/src/lib/cache';
-import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
+import { statsRedis } from '@/src/lib/cache.server';
 import { parseMDXFrontmatter } from '@/src/lib/content/mdx-config';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
@@ -19,13 +18,16 @@ import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-// ISR Configuration - Guides listing page (centralized config)
-export const revalidate = REVALIDATION_TIMES.GUIDES;
+/**
+ * ISR Configuration - Guides listing page
+ * Documentation content updates occasionally - revalidate every 30 minutes
+ */
+export const revalidate = 1800;
 
 /**
  * Page metadata
  */
-export const metadata: Metadata = await generatePageMetadata('/guides');
+export const metadata: Metadata = generatePageMetadata('/guides');
 
 /**
  * Guide categories

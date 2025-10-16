@@ -1,15 +1,15 @@
 import { z } from 'zod';
-import { contentCache, statsRedis } from '@/src/lib/cache';
+import { contentCache, statsRedis } from '@/src/lib/cache.server';
 import { CACHE_CONFIG, REVALIDATE_TIMES, UI_CONFIG } from '@/src/lib/constants';
 import { createApiRoute } from '@/src/lib/error-handler';
-import { rateLimiters } from '@/src/lib/rate-limiter';
+import { rateLimiters } from '@/src/lib/rate-limiter.server';
 import {
   createCursor,
   createPaginationMeta,
   cursorPaginationQuerySchema,
   decodeCursor,
 } from '@/src/lib/schemas/primitives/cursor-pagination.schema';
-import { viewCountService } from '@/src/lib/services/view-count.service';
+import { viewCountService } from '@/src/lib/services/view-count.server';
 
 export const runtime = 'nodejs';
 

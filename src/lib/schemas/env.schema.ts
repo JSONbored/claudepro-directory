@@ -365,8 +365,8 @@ function validateEnv(): Env {
  * Security: Server-only validation never runs client-side
  * This ensures type safety throughout the application
  *
- * Production Security: Object is frozen to prevent accidental mutations
- * Any attempt to modify env variables at runtime will throw in strict mode
+ * Note: Not frozen to allow Next.js segment configuration exports to work
+ * Nested config objects (securityConfig, buildConfig) are frozen for security
  */
 export const env = Object.freeze(validateEnv());
 

@@ -4,8 +4,8 @@
  * Refactored to use centralized tracker with source-specific events
  */
 
-import type { EventName } from '@/src/lib/analytics/events.config';
-import { EVENTS } from '@/src/lib/analytics/events.config';
+import type { EventName } from '@/src/lib/analytics/events.constants';
+import { EVENTS } from '@/src/lib/analytics/events.constants';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 
 /**
@@ -29,7 +29,7 @@ function getRelatedViewEvent(sourceCategory: string): EventName {
     troubleshooting: EVENTS.RELATED_VIEW_ON_GUIDE,
     docs: EVENTS.RELATED_VIEW_ON_GUIDE,
   };
-  return eventMap[sourceCategory] || EVENTS.RELATED_CONTENT_VIEW; // Fallback to legacy
+  return eventMap[sourceCategory] || EVENTS.RELATED_VIEW_ON_AGENT; // Fallback to agent
 }
 
 /**
@@ -53,7 +53,7 @@ function getRelatedClickEvent(sourceCategory: string): EventName {
     troubleshooting: EVENTS.RELATED_CLICK_FROM_GUIDE,
     docs: EVENTS.RELATED_CLICK_FROM_GUIDE,
   };
-  return eventMap[sourceCategory] || EVENTS.RELATED_CONTENT_CLICK; // Fallback to legacy
+  return eventMap[sourceCategory] || EVENTS.RELATED_CLICK_FROM_AGENT; // Fallback to agent
 }
 
 /**

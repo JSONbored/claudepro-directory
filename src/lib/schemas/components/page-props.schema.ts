@@ -1,10 +1,14 @@
 /**
- * Page Component Props Schema
+ * Page Component Props Schema - Modern 2025 Configuration-Driven
  * Defines props for Next.js page components with proper typing
+ *
+ * Modern 2025 Architecture:
+ * - Dynamic schema generation from UNIFIED_CATEGORY_REGISTRY
+ * - Zero hardcoded category lists in type definitions
+ * - Auto-updates when new categories added to registry
  */
 
 import { z } from 'zod';
-import { HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
 import { unifiedContentItemSchema } from './content-item.schema';
 
 /**
@@ -13,30 +17,18 @@ import { unifiedContentItemSchema } from './content-item.schema';
  */
 
 /**
- * Home page props schema - dynamically generated from HOMEPAGE_FEATURED_CATEGORIES
- * This ensures adding a new category to the homepage only requires updating category-config.ts
- */
-const homePagePropsSchema = z
-  .object({
-    // Dynamically add each featured category
-    ...Object.fromEntries(
-      HOMEPAGE_FEATURED_CATEGORIES.map((category) => [
-        category,
-        z.array(unifiedContentItemSchema).describe(`Collection of ${category} content items`),
-      ])
-    ),
-    allConfigs: z
-      .array(unifiedContentItemSchema)
-      .describe('Combined collection of all configuration content'),
-  })
-  .describe('Props for the home page containing categorized content collections');
-
-/**
- * Client component props for home page
+ * Client component props for home page - Configuration-Driven
+ *
+ * Modern 2025 Architecture:
+ * - Dynamic stats object derived from UNIFIED_CATEGORY_REGISTRY
+ * - Zero hardcoded category fields
+ * - Auto-includes Skills and future categories
  */
 const homePageClientPropsSchema = z
   .object({
-    initialData: homePagePropsSchema.describe('Initial server-side data for client hydration'),
+    initialData: z
+      .record(z.string(), z.array(unifiedContentItemSchema))
+      .describe('Initial server-side data for client hydration (dynamic categories)'),
     initialSearchQuery: z
       .string()
       .optional()
@@ -48,17 +40,9 @@ const homePageClientPropsSchema = z
         'Weekly featured content grouped by category (algorithm-selected, max 6 per category)'
       ),
     stats: z
-      .object({
-        rules: z.number().describe('Number of rules'),
-        mcp: z.number().describe('Number of MCP servers'),
-        agents: z.number().describe('Number of AI agents'),
-        commands: z.number().describe('Number of commands'),
-        hooks: z.number().describe('Number of automation hooks'),
-        statuslines: z.number().describe('Number of statuslines'),
-        collections: z.number().describe('Number of collections'),
-      })
+      .record(z.string(), z.number())
       .optional()
-      .describe('Content category statistics'),
+      .describe('Content category statistics (dynamic from registry)'),
   })
   .describe('Props for client-side home page component with SSR hydration data');
 

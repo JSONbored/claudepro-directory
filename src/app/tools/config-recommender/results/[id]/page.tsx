@@ -20,8 +20,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { lazyContentLoaders } from '@/src/components/shared/lazy-content-loaders';
 import { ResultsDisplay } from '@/src/components/tools/recommender/results-display';
-import { statsRedis } from '@/src/lib/cache';
-import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
+import { statsRedis } from '@/src/lib/cache.server';
 import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { logger } from '@/src/lib/logger';
 import { generateRecommendations } from '@/src/lib/recommender/algorithm';
@@ -36,7 +35,7 @@ interface PageProps {
 }
 
 // ISR - Static content (centralized config)
-export const revalidate = REVALIDATION_TIMES.STATIC_CONTENT;
+export const revalidate = 3600;
 
 /**
  * Generate metadata for SEO and social sharing
@@ -45,7 +44,7 @@ export const revalidate = REVALIDATION_TIMES.STATIC_CONTENT;
  */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const baseMetadata = await generatePageMetadata('/tools/config-recommender/results/:id', {
+  const baseMetadata = generatePageMetadata('/tools/config-recommender/results/:id', {
     params: { id },
   });
 

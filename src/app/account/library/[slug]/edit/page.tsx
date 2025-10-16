@@ -15,7 +15,7 @@ interface EditCollectionPageProps {
 
 export async function generateMetadata({ params }: EditCollectionPageProps): Promise<Metadata> {
   const { slug } = await params;
-  return await generatePageMetadata('/account/library/:slug/edit', { params: { slug } });
+  return generatePageMetadata('/account/library/:slug/edit', { params: { slug } });
 }
 
 export default async function EditCollectionPage({ params }: EditCollectionPageProps) {

@@ -15,7 +15,6 @@
 
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { BaseCard } from '@/src/components/shared/base-card';
 import { BookmarkButton } from '@/src/components/shared/bookmark-button';
 import { Badge } from '@/src/components/ui/badge';
@@ -60,6 +59,7 @@ import {
 import type { RecommendationResponse } from '@/src/lib/schemas/recommender.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { getContentItemUrl } from '@/src/lib/utils/content.utils';
+import { toasts } from '@/src/lib/utils/toast.utils';
 import { ShareResults } from './share-results';
 
 interface ResultsDisplayProps {
@@ -91,7 +91,7 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
         const response = await addBookmarkBatch({ items });
 
         if (response?.data?.success) {
-          toast.success(
+          toasts.raw.success(
             `Saved ${response.data.saved_count} of ${response.data.total_requested} recommendations to your library`,
             {
               description: 'View them in your library',
@@ -104,10 +104,10 @@ export function ResultsDisplay({ recommendations, shareUrl }: ResultsDisplayProp
             }
           );
         } else {
-          toast.error('Failed to save recommendations. Please try again.');
+          toasts.error.saveFailed();
         }
       } catch {
-        toast.error('Failed to save recommendations. Please try again.');
+        toasts.error.saveFailed();
       }
     });
   };

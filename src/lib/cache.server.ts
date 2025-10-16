@@ -2133,12 +2133,12 @@ if (typeof window === 'undefined' && isProduction) {
 // SEARCH CACHE
 // ============================================
 
+import { searchWithFilters } from '@/src/lib/client/search';
 import type {
   SearchableItem,
   SearchCacheKey,
   SearchFilters,
 } from '@/src/lib/schemas/search.schema';
-import { searchWithFilters } from '@/src/lib/search-adapters/fuzzysort-adapter';
 
 // Re-export types
 export type { SearchableItem, SearchFilters, SearchCacheKey };

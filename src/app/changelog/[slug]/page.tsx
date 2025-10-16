@@ -32,15 +32,14 @@ import { ChangelogArticleStructuredData } from '@/src/components/structured-data
 import { Separator } from '@/src/components/ui/separator';
 import { getAllChangelogEntries, getChangelogEntryBySlug } from '@/src/lib/changelog/loader';
 import { formatChangelogDate, getChangelogUrl } from '@/src/lib/changelog/utils';
-import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { APP_CONFIG, ROUTES } from '@/src/lib/constants';
 import { ArrowLeft, Calendar } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-// ISR - Changelog detail pages (centralized config)
-export const revalidate = REVALIDATION_TIMES.CHANGELOG;
+// ISR - revalidate every 10 minutes
+export const revalidate = 900;
 
 /**
  * Generate static params for all changelog entries

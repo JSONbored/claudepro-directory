@@ -6,7 +6,6 @@
  */
 
 import { useState } from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
 import {
   Dialog,
@@ -19,6 +18,7 @@ import { Input } from '@/src/components/ui/input';
 import { Check, Copy, Facebook, Linkedin, Mail, Share2, Twitter } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface ShareResultsProps {
   shareUrl: string;
@@ -33,10 +33,10 @@ export function ShareResults({ shareUrl, resultCount, onClose }: ShareResultsPro
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      toast.success('Link copied to clipboard!');
+      toasts.success.linkCopied();
       setTimeout(() => setCopied(false), 2000);
     } catch (_error) {
-      toast.error('Failed to copy link');
+      toasts.error.copyFailed('link');
     }
   };
 

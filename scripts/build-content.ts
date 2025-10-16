@@ -25,8 +25,8 @@ import {
   loadBuildCache,
   saveBuildCache,
   writeBuildOutput,
-} from '../src/lib/build/category-processor.js';
-import { onBuildComplete } from '../src/lib/cache.js';
+} from '../src/lib/build/category-processor.server.js';
+import { onBuildComplete } from '../src/lib/cache.server.js';
 import {
   BUILD_CATEGORY_CONFIGS,
   type BuildCategoryId,

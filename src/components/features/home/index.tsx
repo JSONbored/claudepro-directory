@@ -30,9 +30,11 @@ import {
 import { HomepageStatsSkeleton } from '@/src/components/ui/loading-skeleton';
 import { NumberTicker } from '@/src/components/ui/magic/number-ticker';
 import { useSearch } from '@/src/hooks/use-search';
-import { HOMEPAGE_FEATURED_CATEGORIES } from '@/src/lib/config/category-config';
+import {
+  getCategoryStatsConfig,
+  HOMEPAGE_FEATURED_CATEGORIES,
+} from '@/src/lib/config/category-config';
 import { UI_CONFIG } from '@/src/lib/constants';
-import { BookOpen, Layers, Server, Sparkles } from '@/src/lib/icons';
 import type { HomePageClientProps, UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
@@ -55,7 +57,7 @@ function HomePageClientComponent({
   featuredByCategory,
   stats,
 }: HomePageClientProps) {
-  const { allConfigs } = initialData;
+  const allConfigs = (initialData.allConfigs || []) as UnifiedContentItem[];
 
   const [activeTab, setActiveTab] = useState('all');
   const pageSize = UI_CONFIG.pagination.defaultLimit;
@@ -97,16 +99,18 @@ function HomePageClientComponent({
 
   // Filter search results by active tab - optimized with Set lookups
   // When not searching, use the full dataset (allConfigs) instead of searchResults
-  const filteredResults = useMemo(() => {
+  const filteredResults = useMemo((): UnifiedContentItem[] => {
     // Use allConfigs when not searching, searchResults when searching
     const dataSource = isSearching ? searchResults : allConfigs;
 
     if (activeTab === 'all' || activeTab === 'community') {
-      return dataSource;
+      return dataSource || [];
     }
 
     const lookupSet = slugLookupMaps[activeTab as keyof typeof slugLookupMaps];
-    return lookupSet ? dataSource.filter((item) => lookupSet.has(item.slug)) : dataSource;
+    return lookupSet
+      ? (dataSource || []).filter((item) => lookupSet.has(item.slug))
+      : dataSource || [];
   }, [searchResults, allConfigs, activeTab, slugLookupMaps, isSearching]);
 
   // Use ref to track filtered results for stable pagination
@@ -215,38 +219,18 @@ function HomePageClientComponent({
           />
 
           {/* Quick Stats - Below Search Bar */}
+          {/* Modern 2025 Architecture: Configuration-Driven Stats Display */}
           {stats ? (
             <div
               className={`flex flex-wrap ${UI_CLASSES.JUSTIFY_CENTER} gap-4 lg:gap-6 text-xs lg:text-sm text-muted-foreground mt-6`}
             >
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <BookOpen className="h-4 w-4" aria-hidden="true" />
-                <NumberTicker value={stats.rules} duration={1500} /> Expert Rules
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Server className="h-4 w-4" aria-hidden="true" />
-                <NumberTicker value={stats.mcp} duration={1500} delay={100} /> MCP Servers
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" aria-hidden="true" />
-                <NumberTicker value={stats.agents} duration={1500} delay={200} /> AI Agents
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" aria-hidden="true" />
-                <NumberTicker value={stats.commands} duration={1500} delay={300} /> Commands
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" aria-hidden="true" />
-                <NumberTicker value={stats.hooks} duration={1500} delay={400} /> Automation Hooks
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Sparkles className="h-4 w-4" aria-hidden="true" />
-                <NumberTicker value={stats.statuslines} duration={1500} delay={500} /> Statuslines
-              </div>
-              <div className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
-                <Layers className="h-4 w-4" aria-hidden="true" />
-                <NumberTicker value={stats.collections} duration={1500} delay={600} /> Collections
-              </div>
+              {getCategoryStatsConfig().map(({ categoryId, icon: Icon, displayText, delay }) => (
+                <div key={categoryId} className={UI_CLASSES.FLEX_ITEMS_CENTER_GAP_2}>
+                  <Icon className="h-4 w-4" aria-hidden="true" />
+                  <NumberTicker value={stats[categoryId] || 0} duration={1500} delay={delay} />{' '}
+                  {displayText}
+                </div>
+              ))}
             </div>
           ) : (
             <HomepageStatsSkeleton className="mt-6" />

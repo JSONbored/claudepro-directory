@@ -18,7 +18,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/src/components/ui/card';
 import { Separator } from '@/src/components/ui/separator';
@@ -37,6 +36,7 @@ import {
   type UseCase,
 } from '@/src/lib/schemas/recommender.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 import { QuestionCard } from './question-card';
 import { QuizProgress } from './quiz-progress';
 
@@ -118,7 +118,7 @@ export function QuizForm() {
   const handleSubmit = async () => {
     // Validate all required fields
     if (!(answers.useCase && answers.experienceLevel && answers.toolPreferences?.length)) {
-      toast.error('Please answer all required questions');
+      toasts.error.requiredFields();
       setCurrentQuestion(1); // Go back to first unanswered question
       return;
     }
@@ -154,7 +154,7 @@ export function QuizForm() {
             throw new Error('Failed to generate recommendations');
           }
         } catch (error) {
-          toast.error('Failed to generate recommendations. Please try again.');
+          toasts.error.actionFailed('generate recommendations');
           logger.error(
             'Quiz submission failed',
             error instanceof Error ? error : new Error(String(error))
@@ -162,7 +162,7 @@ export function QuizForm() {
         }
       });
     } catch (error) {
-      toast.error('Please check your answers and try again');
+      toasts.error.invalidInput();
       logger.error(
         'Quiz validation failed',
         error instanceof Error ? error : new Error(String(error))

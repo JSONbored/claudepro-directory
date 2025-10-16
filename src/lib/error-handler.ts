@@ -18,8 +18,7 @@ import { z } from 'zod';
 import { APP_CONFIG } from '@/src/lib/constants';
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
-import { verifyCronAuth } from '@/src/lib/middleware/cron-auth';
-import { type RateLimiter, withRateLimit } from '@/src/lib/rate-limiter';
+import { type RateLimiter, withRateLimit } from '@/src/lib/rate-limiter.server';
 import { createRequestId, type RequestId } from '@/src/lib/schemas/branded-types.schema';
 import {
   determineErrorType,
@@ -426,23 +425,9 @@ export const handleValidationError = (
   });
 };
 
-// React component error boundary helper
-export const createErrorBoundaryFallback = (
-  error: Error,
-  errorInfo: { componentStack: string }
-) => {
-  const errorResponse = errorHandler.handleError(error, {
-    operation: 'react_render',
-    logLevel: 'error',
-    includeStack: isDevelopment,
-    logContext: {
-      componentStack: errorInfo.componentStack,
-      errorBoundary: true,
-    },
-  });
-
-  return errorResponse;
-};
+// React component error boundary helper moved to @/src/lib/error-handler/client
+// to avoid bundling server-only code in client components
+// Import from '@/src/lib/error-handler/client' instead
 
 // ============================================
 // SUCCESS RESPONSE BUILDERS
@@ -778,6 +763,8 @@ export function createApiRoute<P = any, Q = any, H = any, B = any>(
       }
 
       if (auth?.type === 'cron') {
+        // Dynamic import to avoid bundling server-only code in client builds
+        const { verifyCronAuth } = await import('@/src/lib/middleware/cron-auth.server');
         const authError = verifyCronAuth(request);
         if (authError) return cloneWithHeaders(authError, { 'X-Request-ID': requestId });
       }

@@ -13,7 +13,6 @@
  */
 
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
 import { CopyLLMsButton } from '@/src/components/shared/copy-llms-button';
 import { CopyMarkdownButton } from '@/src/components/shared/copy-markdown-button';
 import { DownloadMarkdownButton } from '@/src/components/shared/download-markdown-button';
@@ -24,6 +23,7 @@ import { useCopyWithEmailCapture } from '@/src/hooks/use-copy-with-email-capture
 import { ArrowLeft, Copy } from '@/src/lib/icons';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 /**
  * Determine copy type based on content item structure
@@ -83,12 +83,12 @@ export function DetailHeaderActions({
       ...(referrer && { referrer }),
     },
     onSuccess: () => {
-      toast.success('Copied!', {
+      toasts.raw.success('Copied!', {
         description: `${typeName} content has been copied to your clipboard.`,
       });
     },
     onError: () => {
-      toast.error('Copy failed', {
+      toasts.raw.error('Copy failed', {
         description: 'Unable to copy content to clipboard.',
       });
     },
@@ -120,7 +120,7 @@ export function DetailHeaderActions({
   // Handle action clicks based on type
   const handleActionClick = (action: SerializableAction) => {
     // Generic toast for all action types
-    toast.success(`${action.label}`, {
+    toasts.raw.success(`${action.label}`, {
       description: `Copy the ${typeName.toLowerCase()} content and follow the installation instructions.`,
     });
   };

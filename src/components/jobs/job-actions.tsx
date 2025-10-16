@@ -9,10 +9,10 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
 import { deleteJob, toggleJobStatus } from '@/src/lib/actions/business.actions';
 import { Pause, Play, Trash } from '@/src/lib/icons';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface JobActionsProps {
   jobId: string;
@@ -35,13 +35,15 @@ export function JobActions({ jobId, currentStatus }: JobActionsProps) {
         });
 
         if (result?.data?.success) {
-          toast.success(newStatus === 'active' ? 'Job listing resumed' : 'Job listing paused');
+          toasts.success.actionCompleted(
+            newStatus === 'active' ? 'Job listing resumed' : 'Job listing paused'
+          );
           router.refresh();
         } else {
-          toast.error('Failed to update job status');
+          toasts.error.actionFailed('update job status');
         }
       } catch (_error) {
-        toast.error('An error occurred');
+        toasts.error.serverError();
       }
     });
   };
@@ -59,14 +61,14 @@ export function JobActions({ jobId, currentStatus }: JobActionsProps) {
         const result = await deleteJob({ id: jobId });
 
         if (result?.data?.success) {
-          toast.success('Job listing deleted');
+          toasts.success.itemDeleted('Job listing');
           router.refresh();
         } else {
-          toast.error('Failed to delete job listing');
+          toasts.error.actionFailed('delete job listing');
           setIsDeleting(false);
         }
       } catch (_error) {
-        toast.error('An error occurred');
+        toasts.error.serverError();
         setIsDeleting(false);
       }
     });

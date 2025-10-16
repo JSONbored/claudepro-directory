@@ -17,7 +17,6 @@
 import type { User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -31,6 +30,7 @@ import {
 import { Activity, BookOpen, LogOut, Settings, User as UserIcon } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface UserMenuProps {
   className?: string;
@@ -81,14 +81,14 @@ export function UserMenu({ className }: UserMenuProps) {
       const { error } = await supabase.auth.signOut();
 
       if (error) {
-        toast.error(`Sign out failed: ${error.message}`);
+        toasts.error.authFailed(`Sign out failed: ${error.message}`);
       } else {
-        toast.success('Signed out successfully');
+        toasts.success.signedOut();
         router.push('/');
         router.refresh();
       }
     } catch {
-      toast.error('An unexpected error occurred');
+      toasts.error.serverError('An unexpected error occurred');
     } finally {
       setSigningOut(false);
     }

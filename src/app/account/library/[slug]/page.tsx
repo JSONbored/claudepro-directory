@@ -23,7 +23,7 @@ interface CollectionPageProps {
 
 export async function generateMetadata({ params }: CollectionPageProps): Promise<Metadata> {
   const { slug } = await params;
-  return await generatePageMetadata('/account/library/:slug', { params: { slug } });
+  return generatePageMetadata('/account/library/:slug', { params: { slug } });
 }
 
 export default async function CollectionDetailPage({ params }: CollectionPageProps) {

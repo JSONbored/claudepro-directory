@@ -8,10 +8,10 @@
  */
 
 import { useState } from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
 import { Chrome, Github, LogOut } from '@/src/lib/icons';
 import { createClient } from '@/src/lib/supabase/client';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface AuthButtonsProps {
   className?: string;
@@ -33,7 +33,7 @@ export function AuthButtons({ className, redirectTo }: AuthButtonsProps) {
     });
 
     if (error) {
-      toast.error(`Sign in failed: ${error.message}`);
+      toasts.error.authFailed(`Sign in failed: ${error.message}`);
       setLoading(null);
     }
     // If successful, user will be redirected to OAuth provider
@@ -84,9 +84,9 @@ export function SignOutButton({ className }: { className?: string }) {
     const { error } = await supabase.auth.signOut();
 
     if (error) {
-      toast.error(`Sign out failed: ${error.message}`);
+      toasts.error.authFailed(`Sign out failed: ${error.message}`);
     } else {
-      toast.success('Signed out successfully');
+      toasts.success.signedOut();
       window.location.href = '/';
     }
 

@@ -43,13 +43,13 @@
  */
 
 import { z } from 'zod';
-import { statsRedis } from '@/src/lib/cache';
+import { statsRedis } from '@/src/lib/cache.server';
 import { getAllCategoryIds } from '@/src/lib/config/category-config';
 import { getContentByCategory } from '@/src/lib/content/content-loaders';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/components/content-item.schema';
 import { createClient } from '@/src/lib/supabase/server';
-import { getBatchTrendingData } from '@/src/lib/trending/calculator';
+import { getBatchTrendingData } from '@/src/lib/trending/calculator.server';
 import { batchFetch, batchMap } from '@/src/lib/utils/batch.utils';
 import {
   getCurrentWeekStart,

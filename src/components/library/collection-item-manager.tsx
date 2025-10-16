@@ -10,7 +10,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { Badge } from '@/src/components/ui/badge';
 import { Button } from '@/src/components/ui/button';
 import {
@@ -29,6 +28,7 @@ import {
 import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash } from '@/src/lib/icons';
 import type { ContentCategory } from '@/src/lib/schemas/shared.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 interface CollectionItem {
   id: string;
@@ -72,7 +72,7 @@ export function CollectionItemManager({
 
   const handleAdd = async () => {
     if (!selectedBookmarkId) {
-      toast.error('Please select a bookmark to add');
+      toasts.error.validation('Please select a bookmark to add');
       return;
     }
 
@@ -89,12 +89,12 @@ export function CollectionItemManager({
         });
 
         if (result?.data?.success) {
-          toast.success('Item added to collection');
+          toasts.success.actionCompleted('Item added to collection');
           setSelectedBookmarkId('');
           router.refresh();
         }
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Failed to add item');
+        toasts.error.fromError(error, 'Failed to add item');
       }
     });
   };
@@ -108,11 +108,11 @@ export function CollectionItemManager({
         });
 
         if (result?.data?.success) {
-          toast.success('Item removed from collection');
+          toasts.success.actionCompleted('Item removed from collection');
           router.refresh();
         }
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Failed to remove item');
+        toasts.error.fromError(error, 'Failed to remove item');
       }
     });
   };
@@ -142,11 +142,11 @@ export function CollectionItemManager({
           collection_id: collectionId,
           items: reorderedItems,
         });
-        toast.success('Items reordered');
+        toasts.success.actionCompleted('Items reordered');
         router.refresh();
       } catch (_error) {
         setItems(items); // Revert on error
-        toast.error('Failed to reorder items');
+        toasts.error.actionFailed('reorder items');
       }
     });
   };
@@ -176,11 +176,11 @@ export function CollectionItemManager({
           collection_id: collectionId,
           items: reorderedItems,
         });
-        toast.success('Items reordered');
+        toasts.success.actionCompleted('Items reordered');
         router.refresh();
       } catch (_error) {
         setItems(items); // Revert on error
-        toast.error('Failed to reorder items');
+        toasts.error.actionFailed('reorder items');
       }
     });
   };

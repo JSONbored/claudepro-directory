@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { ConfigCard } from '@/src/components/features/content/config-card';
-import { EVENTS } from '@/src/lib/analytics/events.config';
+import { EVENTS } from '@/src/lib/analytics/events.constants';
 import { trackEvent } from '@/src/lib/analytics/tracker';
 import type { ForYouFeedResponse } from '@/src/lib/schemas/personalization.schema';
 import { UI_CLASSES } from '@/src/lib/ui-constants';

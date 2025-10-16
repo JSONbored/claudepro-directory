@@ -33,7 +33,7 @@ import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
 // Generate metadata from centralized registry
-export const metadata: Metadata = await generatePageMetadata('/tools/config-recommender');
+export const metadata: Metadata = generatePageMetadata('/tools/config-recommender');
 
 // ISR Configuration - Static page, no revalidation needed
 export const revalidate = false;

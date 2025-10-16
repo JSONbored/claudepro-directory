@@ -20,7 +20,7 @@ import {
   trendingParamsSchema,
 } from '@/src/lib/schemas/search.schema';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
-import { getBatchTrendingData } from '@/src/lib/trending/calculator';
+import { getBatchTrendingData } from '@/src/lib/trending/calculator.server';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 
@@ -28,7 +28,7 @@ import { batchLoadContent } from '@/src/lib/utils/batch.utils';
 export const metadata = generatePageMetadata('/trending');
 
 // ISR Configuration - Revalidate every 5 minutes for fresh Redis view counts
-export const revalidate = 300; // 5 minutes - Updates trending data while keeping static content
+export const revalidate = 300;
 
 /**
  * Load trending data using Redis-based view counts

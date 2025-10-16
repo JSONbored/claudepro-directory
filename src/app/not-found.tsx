@@ -6,6 +6,10 @@ import { Home, Search } from '@/src/lib/icons';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
+/**
+ * **PERFORMANCE**: Synchronous metadata generation
+ * No await needed - generatePageMetadata is now synchronous for optimal Next.js 15 performance
+ */
 export const metadata = generatePageMetadata('/404');
 
 export default function NotFound() {

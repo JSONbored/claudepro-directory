@@ -13,7 +13,6 @@
 
 import Link from 'next/link';
 import { useId, useState, useTransition } from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/button';
 import {
   Card,
@@ -29,6 +28,7 @@ import { submitConfiguration } from '@/src/lib/actions/business.actions';
 import { ROUTES } from '@/src/lib/constants';
 import { CheckCircle, ExternalLink, Github, Send } from '@/src/lib/icons';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
+import { toasts } from '@/src/lib/utils/toast.utils';
 import { DuplicateWarning } from './duplicate-warning';
 import { ExamplesArrayInput } from './examples-array-input';
 import { TemplateSelector } from './template-selector';
@@ -167,9 +167,7 @@ export function SubmitFormClient() {
       if (cmdInput) cmdInput.value = template.commandContent;
     }
 
-    toast.success('Template Applied!', {
-      description: 'Form has been pre-filled. Customize as needed.',
-    });
+    toasts.success.templateApplied();
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -258,16 +256,12 @@ export function SubmitFormClient() {
             slug: result.data.slug,
           });
 
-          toast.success('Submission Created!', {
-            description: `Your ${contentType} has been submitted for review.`,
-          });
+          toasts.success.submissionCreated(contentType);
 
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       } catch (error) {
-        toast.error('Submission Error', {
-          description: error instanceof Error ? error.message : 'Failed to submit',
-        });
+        toasts.error.submissionFailed(error instanceof Error ? error.message : undefined);
       }
     });
   };

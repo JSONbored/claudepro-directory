@@ -28,21 +28,20 @@ import { ChangelogListClient } from '@/src/components/changelog/changelog-list-c
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { ChangelogBlogStructuredData } from '@/src/components/structured-data/changelog-structured-data';
 import { getAllChangelogEntries } from '@/src/lib/changelog/loader';
-import { REVALIDATION_TIMES } from '@/src/lib/config/rate-limits.config';
 import { ArrowLeft } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { generatePageMetadata } from '@/src/lib/seo/metadata-generator';
 import { UI_CLASSES } from '@/src/lib/ui-constants';
 
-// ISR - Changelog listing page (centralized config)
-export const revalidate = REVALIDATION_TIMES.CHANGELOG;
+// ISR - revalidate every 5 minutes for fresh changelog entries
+export const revalidate = 900;
 
 /**
  * Generate metadata for changelog list page
  */
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    return await generatePageMetadata('/changelog');
+    return generatePageMetadata('/changelog');
   } catch (error) {
     logger.error(
       'Failed to generate changelog metadata',

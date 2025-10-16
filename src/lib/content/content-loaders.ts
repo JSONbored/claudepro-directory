@@ -24,7 +24,7 @@
  * @see lib/config/category-config.ts - Single source of truth for categories
  */
 
-import { contentCache } from '@/src/lib/cache';
+import { contentCache } from '@/src/lib/cache.server';
 import { getAllCategoryIds } from '@/src/lib/config/category-config';
 import { logger } from '@/src/lib/logger';
 import type { UnifiedContentItem } from '@/src/lib/schemas/component.schema';

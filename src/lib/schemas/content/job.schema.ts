@@ -71,6 +71,11 @@ export type JobDatabase = z.infer<typeof jobDatabaseSchema>;
 /**
  * Job creation schema (for forms/submissions)
  * Omits auto-generated fields (id, timestamps, etc.)
+ *
+ * Production-grade pattern with exactOptionalPropertyTypes: true
+ * - .optional() = field can be omitted from form submission
+ * - Values are transformed to null before DB insertion (see actions)
+ * - Eliminates ambiguity of .nullable().optional() anti-pattern
  */
 /**
  * Production-grade pattern with exactOptionalPropertyTypes: true

@@ -27,10 +27,10 @@ import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { Button } from '@/src/components/ui/button';
-import { toast } from '@/src/components/ui/sonner';
 import { Check } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import { cn } from '@/src/lib/utils';
+import { toasts } from '@/src/lib/utils/toast.utils';
 
 /**
  * Action type discriminated union
@@ -252,7 +252,7 @@ export function BaseActionButton({
    * Show error toast notification
    */
   const showError = (message: string, description?: string) => {
-    toast.error(message, {
+    toasts.raw.error(message, {
       description,
       duration: 4000,
     });
@@ -262,7 +262,7 @@ export function BaseActionButton({
    * Show success toast notification
    */
   const showSuccess = (message: string, description?: string) => {
-    toast.success(message, {
+    toasts.raw.success(message, {
       description,
       duration: 3000,
     });
@@ -458,11 +458,11 @@ export function BaseActionButtonCustom({
   };
 
   const showError = (message: string, description?: string) => {
-    toast.error(message, { description, duration: 4000 });
+    toasts.raw.error(message, { description, duration: 4000 });
   };
 
   const showSuccess = (message: string, description?: string) => {
-    toast.success(message, { description, duration: 3000 });
+    toasts.raw.success(message, { description, duration: 3000 });
   };
 
   const logError = (message: string, error: Error, context?: Record<string, unknown>) => {

@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { isDevelopment, isProduction } from '@/src/lib/env-client';
 import { logger } from '@/src/lib/logger';
 import { buildRateLimitConfig, isLLMsTxtRoute } from '@/src/lib/middleware/rate-limit-rules';
-import { rateLimiters } from '@/src/lib/rate-limiter';
+import { rateLimiters } from '@/src/lib/rate-limiter.server';
 import { env, securityConfig } from '@/src/lib/schemas/env.schema';
 
 // Force Node.js runtime for middleware (Redis compression requires node:zlib)
