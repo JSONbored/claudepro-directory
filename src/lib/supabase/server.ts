@@ -8,6 +8,7 @@
 
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { logger } from '@/src/lib/logger';
 import type { Database } from '@/src/types/database.types';
 
 export async function createClient() {
@@ -69,9 +70,28 @@ export async function createClient() {
               path: '/',
             });
           }
-        } catch {
-          // The `setAll` method was called from a Server Component.
-          // This can be ignored if you have middleware refreshing user sessions.
+        } catch (error) {
+          // CRITICAL: Only ignore errors from Server Components
+          // In Route Handlers, cookie-setting failures should be logged
+          //
+          // Context: Server Components cannot set cookies (RSC limitation)
+          // but Route Handlers MUST set cookies for auth to work.
+          //
+          // Check if this is a Server Component error (cannot set headers after streaming)
+          // vs a Route Handler error (actual cookie-setting failure)
+          if (error instanceof Error) {
+            // Server Component error: "Cookies can only be modified in a Server Action or Route Handler"
+            if (error.message.includes('Server Action or Route Handler')) {
+              // Expected: Server Component trying to set cookies - middleware will handle
+              return;
+            }
+
+            // Route Handler error: actual cookie-setting failure - log it
+            logger.error('Failed to set auth cookies in Route Handler', error, {
+              context: 'supabase_server_client',
+              cookieCount: cookiesToSet.length,
+            });
+          }
         }
       },
     },

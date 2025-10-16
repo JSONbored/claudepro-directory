@@ -8,6 +8,10 @@
  * 3. GitHub redirects back to this route with code
  * 4. Exchange code for session
  * 5. Redirect to homepage or intended destination
+ *
+ * CRITICAL: Route Handlers in Next.js 15+ require explicit cookie handling
+ * Cookies set via cookies().set() in createClient() are automatically attached
+ * to the response, but we need to ensure the exchange completes before redirect.
  */
 
 import { type NextRequest, NextResponse } from 'next/server';
@@ -35,26 +39,39 @@ export async function GET(request: NextRequest) {
   const next = isValidRedirect ? nextParam : '/';
 
   if (code) {
+    // Create Supabase client - this sets up cookie handlers
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (!error) {
-      // Successful auth - redirect to intended destination
+    // Exchange code for session - this will set auth cookies via the cookie handlers
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (!error && data.session) {
+      // Successful auth - build redirect URL
       const forwardedHost = request.headers.get('x-forwarded-host');
       const isLocalEnv = process.env.NODE_ENV === 'development';
 
+      let redirectUrl: string;
       if (isLocalEnv) {
         // Local development - use localhost
-        return NextResponse.redirect(`${origin}${next}`);
-      }
-
-      if (forwardedHost) {
+        redirectUrl = `${origin}${next}`;
+      } else if (forwardedHost) {
         // Production - use forwarded host
-        return NextResponse.redirect(`https://${forwardedHost}${next}`);
+        redirectUrl = `https://${forwardedHost}${next}`;
+      } else {
+        // Fallback - use origin
+        redirectUrl = `${origin}${next}`;
       }
 
-      // Fallback - use origin
-      return NextResponse.redirect(`${origin}${next}`);
+      // Create redirect response
+      // Next.js 15+ automatically attaches cookies set via cookies().set() to the response
+      const response = NextResponse.redirect(redirectUrl);
+
+      // Explicitly set a cache control header to prevent caching of auth redirects
+      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      response.headers.set('Pragma', 'no-cache');
+      response.headers.set('Expires', '0');
+
+      return response;
     }
   }
 

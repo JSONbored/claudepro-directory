@@ -11,6 +11,7 @@ import {
 import { InlineEmailCTA } from '@/src/components/shared/inline-email-cta';
 import { TrendingContent } from '@/src/components/shared/trending-content';
 import { Badge } from '@/src/components/ui/badge';
+import { statsRedis } from '@/src/lib/cache.server';
 import { Clock, Star, TrendingUp, Users } from '@/src/lib/icons';
 import { logger } from '@/src/lib/logger';
 import type { PagePropsWithSearchParams } from '@/src/lib/schemas/app.schema';
@@ -169,6 +170,13 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
 
   const { trending, popular, recent, totalCount } = await getTrendingData(params);
 
+  // Enrich all tabs with copy counts from Redis (parallel batch operations)
+  const [enrichedTrending, enrichedPopular, enrichedRecent] = await Promise.all([
+    statsRedis.enrichWithAllCounts(trending),
+    statsRedis.enrichWithAllCounts(popular),
+    statsRedis.enrichWithAllCounts(recent),
+  ]);
+
   // This is a server component, so we'll use a static ID
   const pageTitleId = 'trending-page-title';
 
@@ -221,7 +229,11 @@ export default async function TrendingPage({ searchParams }: PagePropsWithSearch
         className={'container mx-auto px-4 py-16'}
         aria-label="Trending configurations content"
       >
-        <TrendingContent trending={trending} popular={popular} recent={recent} />
+        <TrendingContent
+          trending={enrichedTrending}
+          popular={enrichedPopular}
+          recent={enrichedRecent}
+        />
       </section>
 
       {/* Email CTA - Moved to footer section to match homepage pattern */}
