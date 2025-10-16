@@ -125,6 +125,14 @@ const serverEnvSchema = z
       .optional()
       .describe('Secret key for cron job authorization (minimum 32 characters)'),
 
+    // BetterStack Heartbeat Monitoring (optional - for cron job health monitoring)
+    BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE: urlString
+      .optional()
+      .describe('BetterStack heartbeat URL for daily maintenance cron monitoring'),
+    BETTERSTACK_HEARTBEAT_WEEKLY_TASKS: urlString
+      .optional()
+      .describe('BetterStack heartbeat URL for weekly tasks cron monitoring'),
+
     // Email provider (Resend)
     RESEND_API_KEY: nonEmptyString
       .optional()

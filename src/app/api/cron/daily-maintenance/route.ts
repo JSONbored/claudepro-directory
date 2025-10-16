@@ -247,6 +247,31 @@ const route = createApiRoute({
         ),
       });
 
+      // ============================================
+      // BETTERSTACK HEARTBEAT (Success Only)
+      // ============================================
+      // Only send heartbeat on complete success - BetterStack will alert if heartbeat is missing
+      // Non-blocking: Heartbeat failure won't break cron execution
+      if (failedTasks === 0) {
+        const { env } = await import('@/src/lib/schemas/env.schema');
+        const heartbeatUrl = env.BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE;
+
+        if (heartbeatUrl) {
+          try {
+            await fetch(heartbeatUrl, {
+              method: 'GET',
+              signal: AbortSignal.timeout(5000), // 5 second timeout
+            });
+            logger.info('BetterStack heartbeat sent successfully');
+          } catch (error) {
+            // Non-critical: Log warning but don't fail the cron
+            logger.warn('Failed to send BetterStack heartbeat (non-critical)', {
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        }
+      }
+
       return okRaw(
         {
           success: failedTasks === 0,
